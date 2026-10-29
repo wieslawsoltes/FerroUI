@@ -1,22 +1,23 @@
-//! The controls of this crate that only the WinUI theme styles (docs/porting/winui-controls.md,
-//! section 5.1): the WinUI controls FerroUI ports as controls, whose templates are converted from
-//! WinUI into `ferroui-themes-winui`. The Fluent and the Simple themes have no control theme for
-//! them, and their tests check that they have none; the table of section 5.1 lists the same
-//! controls (`winui_only_tests`).
+//! The controls of this crate that only the WinUI theme and the themes derived from it (macOS 26,
+//! Material) style (docs/porting/winui-controls.md, section 5.1): the WinUI controls FerroUI ports
+//! as controls, whose templates are ported from WinUI into `ferroui-themes-winui` and adapted by
+//! the derived themes. The Fluent and the Simple themes have no control theme for them, and their
+//! tests check that they have none; the table of section 5.1 lists the same controls
+//! (`winui_only_tests`).
 
 use crate::{FontIcon, InfoBadge, InfoBar, ProgressRing, SymbolIcon};
 use ferroui_base::TypeInfo;
 
-/// The controls only the WinUI theme styles, each with the reason.
+/// The controls only the WinUI theme and the themes derived from it style, each with the reason.
 pub const WINUI_ONLY_CONTROLS: &[(&TypeInfo, &str)] = &[
-    (FontIcon::TYPE, "WinUI's FontIcon: its text part is in the WinUI theme only"),
-    (SymbolIcon::TYPE, "WinUI's SymbolIcon: its text part is in the WinUI theme only"),
-    (InfoBar::TYPE, "WinUI's InfoBar: its template is converted from InfoBar.xaml into the WinUI theme"),
-    (InfoBadge::TYPE, "WinUI's InfoBadge: its template is converted from InfoBadge_themeresources.xaml into the WinUI theme"),
-    (ProgressRing::TYPE, "WinUI's ProgressRing: its template (arcs for the Lottie player) is in the WinUI theme only"),
+    (FontIcon::TYPE, "WinUI's FontIcon: its text part is in the WinUI-derived themes only"),
+    (SymbolIcon::TYPE, "WinUI's SymbolIcon: its text part is in the WinUI-derived themes only"),
+    (InfoBar::TYPE, "WinUI's InfoBar: its template is converted from InfoBar.xaml into the WinUI theme and its derived themes"),
+    (InfoBadge::TYPE, "WinUI's InfoBadge: its template is converted from InfoBadge_themeresources.xaml into the WinUI theme and its derived themes"),
+    (ProgressRing::TYPE, "WinUI's ProgressRing: its template (arcs for the Lottie player) is in the WinUI-derived themes only"),
 ];
 
-/// Whether only the WinUI theme styles `control`.
+/// Whether only the WinUI theme and the themes derived from it style `control`.
 pub fn is_winui_only(control: &TypeInfo) -> bool {
     WINUI_ONLY_CONTROLS.iter().any(|(candidate, _)| std::ptr::eq(*candidate, control))
 }

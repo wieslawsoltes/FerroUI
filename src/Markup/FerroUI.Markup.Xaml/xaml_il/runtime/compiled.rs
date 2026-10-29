@@ -1002,8 +1002,14 @@ pub fn deferred_content(
     line: i32,
     position: i32,
 ) -> Result<Rc<DeferredContent>, XamlLoadException> {
-    XamlIlRuntimeHelpers::try_deferred_transformation_factory_for(result_type, builder, &service_provider(context))
-        .map_err(|error| at("InvalidOperationException", error.message(), line, position))
+    let content = XamlIlRuntimeHelpers::try_deferred_transformation_factory_for(result_type, builder, &service_provider(context))
+        .map_err(|error| at("InvalidOperationException", error.message(), line, position))?;
+    #[cfg(all(feature = "hot-reload", debug_assertions))]
+    content.set_declaration(crate::reload_templates::Declaration {
+        uri: context.base_uri().map(|uri| uri.absolute_uri().to_owned()),
+        line, column: position, source: None,
+    });
+    Ok(content)
 }
 
 /// The build function of deferred content as generated code writes it: a
@@ -1522,6 +1528,22 @@ pub fn add_handler<Target, EventArgs: ?Sized>(
     let _ = target.upcast_ref::<Interactive>().add_handler_untyped(event, handler, routes, false);
 }
 
+/// Context-aware XAML routed event subscription, preserving development ownership.
+pub fn add_handler_with_context<Target, EventArgs: ?Sized>(
+    context: &Rc<XamlIlContext>, target: &Ref<Target>,
+    event: &ferroui_base::interactivity::RoutedEvent<EventArgs>,
+    handler: ferroui_base::metadata::MarkupDelegate,
+) where Target: ferroui_base::ObjectType + ferroui_base::Upcast<ferroui_base::interactivity::Interactive> {
+    #[cfg(all(feature = "hot-reload", debug_assertions))]
+    {
+        use ferroui_base::interactivity::{Interactive, RoutingStrategies};
+        crate::reload_events::add_handler(context, &target.clone().upcast::<Interactive>(), &event.as_routed_event(), handler,
+            RoutingStrategies::DIRECT | RoutingStrategies::BUBBLE, false);
+    }
+    #[cfg(not(all(feature = "hot-reload", debug_assertions)))]
+    { let _ = context; add_handler(target, event, handler); }
+}
+
 /// `target.Event += handler` for an event that is not a routed event, which metadata
 /// declares with its subscription (`events:`): the subscription the run-time loader
 /// invokes, of the event `event` the metadata `declaring` declares. No typed function
@@ -1570,4 +1592,17 @@ mod tests {
         assert!(!uri_equals("ferres://App/Views/Main.xam", root, "Views/Main.xaml"));
         assert!(!uri_equals("ferres://Other/Views/Main.xaml", root, "Views/Main.xaml"));
     }
+}
+
+/// Generated code retains development keys only in an enabled debug runtime.
+#[inline]
+pub const fn development_keys_enabled() -> bool {
+    cfg!(all(feature = "hot-reload", debug_assertions))
+}
+#[inline]
+pub fn set_development_key(value: &MarkupValue, key: &str) {
+    #[cfg(all(feature = "hot-reload", debug_assertions))]
+    crate::reload_identity::record(value, key);
+    #[cfg(not(all(feature = "hot-reload", debug_assertions)))]
+    let _ = (value, key);
 }

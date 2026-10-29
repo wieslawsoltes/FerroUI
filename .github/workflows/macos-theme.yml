@@ -1,0 +1,199 @@
+name: macOS 26 theme
+
+on:
+  pull_request:
+    paths:
+      - 'src/FerroUI.Themes.MacOS/**'
+      - 'src/FerroUI.Base/platform/**'
+      - 'src/FerroUI.Native/**'
+      - 'native/FerroUI.Native/**'
+      - 'src/tools/MicroCom.CodeGenerator/**'
+      - 'src/FerroUI/Cargo.toml'
+      - 'src/FerroUI/lib.rs'
+      - 'samples/ControlCatalog/**'
+      - 'samples/ControlCatalog.Desktop/**'
+      - 'samples/ControlCatalog.Browser/**'
+      - 'scripts/macos-theme/**'
+      - 'scripts/themes/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '.github/workflows/macos-theme.yml'
+  workflow_dispatch:
+    inputs:
+      build_catalogue:
+        description: 'Also build the desktop catalogue with its optional macOS theme'
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: macos-theme-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  CARGO_PROFILE_DEV_DEBUG: 0
+  CARGO_PROFILE_TEST_DEBUG: 0
+  RUST_BACKTRACE: 1
+
+jobs:
+  contracts:
+    name: Theme, compiled markup, resources and runtime
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Native evidence and source contract regressions
+        run: python3 -m unittest discover -s scripts/macos-theme -p 'test_*.py' -v
+      - name: Theme inventory, include graph and motion audit
+        run: python3 scripts/macos-theme/audit.py
+      - name: Resource keys resolve for Light, Dark and HighContrast
+        run: python3 scripts/themes/resource_keys.py macos
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: macos-theme-linux
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
+      - name: Native build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            pkg-config clang lld libssl-dev libfontconfig1-dev libfreetype6-dev \
+            fonts-dejavu-core libx11-dev libx11-xcb-dev libxi-dev libxrandr-dev \
+            libxcursor-dev libxfixes-dev libxext-dev libxkbcommon-dev libgl1-mesa-dev
+      - name: Native ABI and callback lifetime contract
+        run: |
+          mkdir -p "$RUNNER_TEMP/macos-theme-interop"
+          cargo run --locked -p microcom-codegen -- src/FerroUI.Native/frn.idl \
+            --cpp "$RUNNER_TEMP/macos-theme-interop/ferro-native.h"
+          c++ -std=gnu++11 -Wno-attributes -Wno-unknown-pragmas \
+            -I native/FerroUI.Native/inc -I "$RUNNER_TEMP/macos-theme-interop" \
+            scripts/macos-theme/native-interop-smoke.cpp \
+            -o "$RUNNER_TEMP/macos-theme-interop/native-interop-smoke"
+          "$RUNNER_TEMP/macos-theme-interop/native-interop-smoke"
+      # The complete library suite includes compiled_xaml_is_up_to_date,
+      # build_script_output_is_the_checked_in_reference, runtime loading,
+      # all control themes, layout and accessibility preference contracts.
+      - name: All macOS theme contracts
+        run: cargo test --locked -p ferroui-themes-macos --lib -- --nocapture 2>&1 | tee macos-theme-tests.log
+      - name: Platform preference event lifecycle
+        run: cargo test --locked -p ferroui-base --lib platform::default_platform_settings::tests -- --nocapture 2>&1 | tee macos-theme-platform-tests.log
+      - name: Optional theme integrates into the compiled catalogue
+        run: cargo check --locked -p control-catalog --features macos-theme --lib 2>&1 | tee macos-theme-catalogue-check.log
+      - name: Rendered control states and disabled-state precedence
+        run: cargo test --locked -p control-catalog --features macos-theme,runtime-markup --lib tests::macos_theme_review -- --nocapture 2>&1 | tee macos-theme-render-review.log
+      - name: Build desktop catalogue when requested
+        if: github.event_name == 'workflow_dispatch' && inputs.build_catalogue
+        run: cargo build --locked -p control-catalog-desktop --features macos-theme 2>&1 | tee macos-theme-catalogue-build.log
+      - name: Contract and build evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: macos-theme-contracts
+          path: |
+            macos-theme-tests.log
+            macos-theme-platform-tests.log
+            macos-theme-catalogue-check.log
+            macos-theme-render-review.log
+            macos-theme-catalogue-build.log
+          if-no-files-found: warn
+          retention-days: 14
+
+  native-settings:
+    name: AppKit accessibility settings bridge
+    runs-on: macos-26
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
+    env:
+      CARGO_BUILD_JOBS: 2
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: macos26-platform-settings
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
+      # This compiles the generated Rust/C++ ABI and real Objective-C++ backend.
+      # Mock interfaces also test old-library fallback, live preference changes,
+      # disposal, and notifications queued before the Rust settings are dropped.
+      - name: Native and compatibility preference tests
+        run: cargo test --locked -p ferroui-native --lib native_platform_settings::tests -- --nocapture 2>&1 | tee macos-native-settings-tests.log
+      - name: Native bridge evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: macos26-native-settings
+          path: macos-native-settings-tests.log
+          if-no-files-found: warn
+          retention-days: 14
+
+  native-reference:
+    name: Native AppKit reference evidence (macOS 26)
+    # Explicit GA label, verified against actions/runner-images#13739.
+    # Do not use macos-latest: a later OS changes the reference appearance.
+    runs-on: macos-26
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Verify the reference OS and record toolchain
+        run: |
+          MACOS_THEME_CAPTURE_DIR="$RUNNER_TEMP/macos26-reference"
+          echo "MACOS_THEME_CAPTURE_DIR=$MACOS_THEME_CAPTURE_DIR" >> "$GITHUB_ENV"
+          mkdir -p "$MACOS_THEME_CAPTURE_DIR"
+          macos_theme_version="$(sw_vers -productVersion)"
+          if [[ "${macos_theme_version%%.*}" != "26" ]]; then
+            echo "::error::Expected macOS 26; refusing to publish reference images from $macos_theme_version"
+            exit 1
+          fi
+          sw_vers > "$MACOS_THEME_CAPTURE_DIR/toolchain.txt"
+          xcodebuild -version >> "$MACOS_THEME_CAPTURE_DIR/toolchain.txt"
+          xcrun swift --version >> "$MACOS_THEME_CAPTURE_DIR/toolchain.txt"
+      - name: Compile the native fixture
+        run: |
+          xcrun swiftc -swift-version 5 -target "$(uname -m)-apple-macos26.0" \
+            scripts/macos-theme/capture-native.swift \
+            -o "$RUNNER_TEMP/ferroui-macos26-capture" \
+            2>&1 | tee "$MACOS_THEME_CAPTURE_DIR/compile.log"
+      - name: Capture actual native control metrics and view images
+        run: |
+          "$RUNNER_TEMP/ferroui-macos26-capture" --output "$MACOS_THEME_CAPTURE_DIR" --require-state-coverage \
+            2>&1 | tee "$MACOS_THEME_CAPTURE_DIR/capture.log"
+      # This is evidence collection, not a pixel-diff assertion. View snapshots
+      # may omit WindowServer optics; local --screen-capture is documented in
+      # scripts/macos-theme/README.md and is never granted permissions by CI.
+      - name: Validate observed native state coverage
+        if: ${{ !cancelled() }}
+        run: |
+          python3 scripts/macos-theme/validate_reference.py \
+            "$MACOS_THEME_CAPTURE_DIR/native-reference.json" \
+            --scope state-coverage \
+            --report "$MACOS_THEME_CAPTURE_DIR/reference-validation.json"
+      - name: Publish native reference evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: macos26-native-reference
+          path: ${{ runner.temp }}/macos26-reference
+          if-no-files-found: error
+          retention-days: 14

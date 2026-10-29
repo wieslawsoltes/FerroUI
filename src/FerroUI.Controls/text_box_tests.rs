@@ -2124,6 +2124,31 @@ fn text_box_without_template_is_focused_with_an_input_method() {
 }
 
 #[test]
+fn canceling_preedit_restores_empty_state_without_committing_text() {
+    let _scope = test_scope();
+    let text_box = templated_text_box(None);
+    let _root = host_in_root(&text_box);
+    let client = get_input_method_client(&text_box);
+
+    assert!(text_box.classes().contains(":empty"));
+    client.set_preedit_text_with_cursor(Some("かん"), Some(2));
+    assert!(!text_box.classes().contains(":empty"));
+    assert_eq!(None, text_box.text());
+
+    client.set_preedit_text_with_cursor(None, None);
+    assert!(text_box.classes().contains(":empty"));
+    assert_eq!(None, text_box.text());
+
+    // Canceling composition after existing input must not hide that input.
+    text_box.set_text(Some("hello"));
+    text_box.set_caret_index(5);
+    client.set_preedit_text_with_cursor(Some("世"), Some(1));
+    client.set_preedit_text_with_cursor(Some(""), None);
+    assert!(!text_box.classes().contains(":empty"));
+    assert_eq!(Some("hello"), text_box.text().as_deref());
+}
+
+#[test]
 fn preedit_survives_reentrant_layout_invalidation_from_caret_bounds_changed() {
     let _scope = test_scope();
 

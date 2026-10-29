@@ -482,6 +482,22 @@ impl FerroObject {
 
     // --- styled properties ------------------------------------------------
 
+    /// Starts tracking explicit local/current writes to this property and returns
+    /// its version. Equal-value writes count; style evaluation does not.
+    /// Tracking lives with this object and is available only in development builds.
+    #[cfg(all(debug_assertions, feature = "hot-reload"))]
+    pub fn local_write_version(&self, property: &FerroProperty) -> u64 {
+        self.values.local_write_version(property)
+    }
+
+    /// Tracks explicit local assignments and binding-slot changes. Unlike
+    /// `local_write_version`, SetCurrentValue (for example two-way user input)
+    /// does not transfer assignment ownership.
+    #[cfg(all(debug_assertions, feature = "hot-reload"))]
+    pub fn local_assignment_version(&self, property: &FerroProperty) -> u64 {
+        self.values.local_assignment_version(property)
+    }
+
     /// Clears a property's local value.
     pub fn clear_value<T: PropertyValue>(&self, property: &'static StyledProperty<T>) {
         self.values.clear_value(self, property);
@@ -508,6 +524,14 @@ impl FerroObject {
     /// binding targeting it.
     pub fn is_set(&self, property: &FerroProperty) -> bool {
         self.values.is_set(property)
+    }
+
+    /// Whether a local-value binding targets this property, including direct
+    /// properties and observable bindings. Unlike `is_set`, this does not rely
+    /// on a styled property's effective-value entry. It does not inspect bindings
+    /// at style/template priorities.
+    pub fn has_local_value_binding(&self, property: &FerroProperty) -> bool {
+        self.values.has_local_value_binding(property)
     }
 
     /// Sets a property value with local value priority.

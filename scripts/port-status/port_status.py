@@ -1297,7 +1297,11 @@ def render_project(pr: dict, counts: dict, commit: str) -> str:
     w("| | |")
     w("|---|---|")
     w(f"| Upstream | `{pr['path']}` |")
-    w(f"| FerroUI | `{pr['rust']}` ({'exists' if pr['rustExists'] else 'not created yet'}) |")
+    if pr["rust"] == "-":
+        # a project the port does not have (`"rust": "-"` in the project list): its types are waived
+        w("| FerroUI | none (not ported) |")
+    else:
+        w(f"| FerroUI | `{pr['rust']}` ({'exists' if pr['rustExists'] else 'not created yet'}) |")
     w(f"| Crate | {code(pr['crate']) if not pr['crate'].startswith('(') else pr['crate']} |")
     w(f"| Phase / priority | {pr['phase']} / {pr['priority']} |")
     w(f"| Files | {ratio(counts['files'])} ({pct(*counts['files'])}){', ' + str(counts['na_files']) + ' not applicable' if counts['na_files'] else ''} |")
@@ -2116,7 +2120,7 @@ def library_test_totals(ref: dict) -> list:
     """The totals at the top of the reports of test_gaps.py for the test projects of a library reference:
     [(project path, short, totals or None)]."""
     out = []
-    for short, project in ref["test_projects"] or []:
+    for short, project, *_ in ref["test_projects"] or []:
         path = os.path.join(ref["data"], f"test-gaps-{short}.txt")
         totals = None
         if os.path.exists(path):

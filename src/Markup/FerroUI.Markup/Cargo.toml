@@ -18,6 +18,9 @@ autotests = false
 [lib]
 path = "lib.rs"
 
+[features]
+hot-reload = ["ferroui-base/hot-reload"]
+
 [dependencies]
 ferroui-base.workspace = true
 

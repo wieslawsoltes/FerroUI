@@ -8,31 +8,9 @@ use crate::metadata::{MarkupIndexer, MarkupMethod, MarkupProperty, MarkupType, M
 use crate::{AnyValue, BoxedValue};
 
 /// The metadata of the run-time type of `value` and of its base types, most
-/// derived first: for an object of the class hierarchy the metadata of its
-/// class and base classes, for any other value the registered type the value
-/// is a handle of and the chain of its [`MarkupType::base`].
+/// derived first; see [`markup_types_of`](crate::metadata::markup_types_of).
 pub(crate) fn types_of(value: &dyn AnyValue) -> Vec<&'static MarkupType> {
-    let mut result = Vec::new();
-    if let Some(object) = ValueTypes::as_object(value) {
-        let mut current = Some(object.get_type());
-        while let Some(class) = current {
-            if let Some(markup) = class.markup() {
-                result.push(markup);
-            }
-            current = class.base_type();
-        }
-        return result;
-    }
-    let mut current = MarkupType::find_by_handle(value.value_type_id());
-    while let Some(markup) = current {
-        // A base chain that leads back to itself ends the walk.
-        if result.iter().any(|seen| std::ptr::eq(*seen, markup)) {
-            break;
-        }
-        result.push(markup);
-        current = markup.base_type();
-    }
-    result
+    crate::metadata::markup_types_of(value)
 }
 
 /// The dotted full name of the run-time type of `value` (the `GetType()` of
@@ -47,7 +25,7 @@ pub(crate) fn type_name_of(value: &dyn AnyValue) -> String {
 /// The plain property `name` of the type of `value`, or of the nearest base
 /// type that declares one.
 pub(crate) fn find_property(value: &dyn AnyValue, name: &str) -> Option<&'static MarkupProperty> {
-    types_of(value).into_iter().find_map(|markup| markup.find_property(name))
+    crate::metadata::find_markup_property(value, name)
 }
 
 /// Whether the type of `value` or one of its base types declares a method
@@ -74,10 +52,6 @@ pub(crate) enum MethodLookup {
     Error(String),
 }
 
-fn same_parameters(a: &MarkupMethod, b: &MarkupMethod) -> bool {
-    a.parameters.len() == b.parameters.len() && a.parameters.iter().zip(b.parameters).all(|(a, b)| a() == b())
-}
-
 /// Finds the method named `name` which can be bound to a command.
 ///
 /// Priority:
@@ -96,7 +70,7 @@ pub(crate) fn find_best_command_method(value: &dyn AnyValue, name: &str) -> Meth
             if method.is_static && depth > 0 {
                 continue;
             }
-            if !candidates.iter().any(|(_, known)| same_parameters(known, method)) {
+            if !candidates.iter().any(|(_, known)| crate::metadata::members::same_parameters(known, method)) {
                 candidates.push((markup, method));
             }
         }

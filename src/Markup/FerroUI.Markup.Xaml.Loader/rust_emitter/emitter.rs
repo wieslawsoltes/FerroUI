@@ -38,7 +38,7 @@ use crate::compiler_extensions::transformers::{
     XamlIlNthChildSelector, XamlIlNthChildSelectorType, XamlIlOrSelectorNode, XamlIlPropertyEqualsSelector,
     XamlDirectCallAddHandler, XamlIlSelectorInitialNode, XamlIlSelectorNode, XamlIlStringSelector, XamlIlStringSelectorType, XamlIlTypeSelector,
     XamlIlAndQueryNode, XamlIlHeightQuery, XamlIlOrQueryNode, XamlIlQueryInitialNode, XamlIlQueryNode, XamlIlWidthQuery,
-    XamlSourceInfoValueManipulation,
+    XamlSourceInfoValueManipulation, DevelopmentKeyNode,
 };
 use crate::compiler_extensions::{
     BindingSetter, BindingWithPrioritySetter, SetValueWithPrioritySetter, UnsetValueSetter, XamlIlBindingPathElementNode, XamlIlBindingPathNode,
@@ -1539,6 +1539,10 @@ impl<'a> Emitter<'a> {
         if let Some(n) = node.cast::<EnsureCapacityNode>() {
             return self.ensure_capacity(node, &n, target);
         }
+        if let Some(n) = node.cast::<DevelopmentKeyNode>() {
+            self.line(format!("if rt::development_keys_enabled() {{ rt::set_development_key(&rt::boxed(::core::clone::Clone::clone(&{})), {}); }}", target.expr, rust_string_literal(&n.key)));
+            return Ok(());
+        }
         if let Some(n) = node.cast::<XamlSourceInfoValueManipulation>() {
             // `XamlSourceInfo.SetXamlSourceInfo(target, new XamlSourceInfo(line, position, document))`.
             let info = self.source_info(node, node.line(), node.position(), n.document.as_deref())?;
@@ -1916,7 +1920,7 @@ impl<'a> Emitter<'a> {
                 SetterValues::Checked => return Ok(String::new()),
                 SetterValues::None => return Err(unsupported(node, format!("{property_name}: a setter without its value"))),
             };
-            return Ok(format!("rt::add_handler(&{}, &{event}, {handler});", target.expr));
+            return Ok(format!("rt::add_handler_with_context(&context, &{}, &{event}, {handler});", target.expr));
         }
         if let Some(adder) = any.downcast_ref::<AdderSetter>() {
             return self.adder_statement(node, assignment, adder, target, values);

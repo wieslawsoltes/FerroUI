@@ -26,11 +26,14 @@ desktop = ["dep:ferroui-desktop", "dep:ferroui-skia", "dep:ferroui-harfbuzz", "d
 fluent = ["dep:ferroui-themes-fluent"]
 simple = ["dep:ferroui-themes-simple"]
 winui-theme = ["dep:ferroui-themes-winui"]
+macos-theme = ["dep:ferroui-themes-macos"]
+material-theme = ["dep:ferroui-themes-material"]
 # The XAML run-time library and the run-time loader of markup.
 xaml = ["dep:ferroui-markup-xaml", "dep:ferroui-markup-xaml-loader"]
 # The libraries of controls beside the control set.
 color-picker = ["dep:ferroui-controls-color-picker"]
 charts = ["dep:ferroui-controls-charts"]
+inking = ["dep:ferroui-controls-inking"]
 treedatagrid = ["dep:ferroui-controls-treedatagrid", "dep:ferroui-treedatagrid-core"]
 dialogs = ["dep:ferroui-dialogs"]
 # The developer tools (F12 on a window or an application in debug builds).
@@ -67,10 +70,13 @@ ferroui-harfbuzz = { workspace = true, optional = true }
 ferroui-themes-fluent = { workspace = true, optional = true }
 ferroui-themes-simple = { workspace = true, optional = true }
 ferroui-themes-winui = { workspace = true, optional = true }
+ferroui-themes-macos = { workspace = true, optional = true }
+ferroui-themes-material = { workspace = true, optional = true }
 ferroui-markup-xaml = { workspace = true, optional = true }
 ferroui-markup-xaml-loader = { workspace = true, optional = true, features = ["runtime"] }
 ferroui-controls-color-picker = { workspace = true, optional = true }
 ferroui-controls-charts = { workspace = true, optional = true }
+ferroui-controls-inking = { workspace = true, optional = true }
 ferroui-controls-treedatagrid = { workspace = true, optional = true }
 ferroui-treedatagrid-core = { workspace = true, optional = true }
 ferroui-dialogs = { workspace = true, optional = true }
@@ -107,7 +113,7 @@ required-features = ["desktop", "fluent"]
 # docs.rs documents the default features with the libraries that need no more than the host
 # (docs/release.md, section 7).
 [package.metadata.docs.rs]
-features = ["simple", "winui-theme", "xaml", "color-picker", "charts", "treedatagrid", "dialogs", "diagnostics", "reactive", "dynamic-data", "reactiveui", "headless", "opengl", "metal", "vulkan"]
+features = ["simple", "winui-theme", "xaml", "color-picker", "charts", "inking", "treedatagrid", "dialogs", "diagnostics", "reactive", "dynamic-data", "reactiveui", "headless", "opengl", "metal", "vulkan"]
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]

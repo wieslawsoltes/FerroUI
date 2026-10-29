@@ -1,0 +1,14 @@
+<!--
+  Not ported from a style: FerroUI's ThemeVariantScope is the counterpart of RequestedTheme on an
+  element of WinUI 3, which needs no style. As in a WinUI 3 window, text in the scope takes the
+  primary text colour of its theme (TextFillColorPrimaryBrush of
+  controls/dev/CommonStyles/Common_themeresources_any.xaml in microsoft-ui-xaml,
+  https://github.com/microsoft/microsoft-ui-xaml, commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0).
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <ControlTheme x:Key="{x:Type ThemeVariantScope}" TargetType="ThemeVariantScope">
+    <Setter Property="TextElement.Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+  </ControlTheme>
+</ResourceDictionary>

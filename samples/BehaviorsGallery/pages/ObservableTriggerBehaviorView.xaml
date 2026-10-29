@@ -1,0 +1,30 @@
+<UserControl x:Class="BehaviorsGallery.Views.Pages.ObservableTriggerBehaviorView"
+             xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:BehaviorsGallery.ViewModels"
+             x:DataType="vm:MainWindowViewModel"
+             mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="450">
+  <!-- Ported from Views/ReactiveUI/ObservableTriggerBehaviorView of the reference sample. -->
+  <Design.DataContext>
+    <vm:MainWindowViewModel />
+  </Design.DataContext>
+  <Grid>
+    <TextBlock Name="Text"
+               FontSize="20"
+               HorizontalAlignment="Center"
+               VerticalAlignment="Center">
+      <Interaction.Behaviors>
+        <!-- Deviation (DEVIATIONS.md, Behaviors gallery): no x:TypeArguments="x:Int32" (the trigger of the port is not
+             generic; its value is untyped). -->
+        <ObservableTriggerBehavior x:Name="Observer"
+                                   Observable="{Binding Values}">
+          <ChangePropertyAction TargetObject="Text"
+                                 PropertyName="Text"
+                                 Value="{Binding #Observer.Value, StringFormat={} Value: {0}}" />
+        </ObservableTriggerBehavior>
+      </Interaction.Behaviors>
+    </TextBlock>
+  </Grid>
+</UserControl>

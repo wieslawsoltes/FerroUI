@@ -56,6 +56,8 @@ crate::ferro_thread_local! {
 pub(crate) struct ValueStore {
     /// Value frames ordered from lowest to highest precedence.
     frames: RefCell<Vec<Rc<dyn ValueFrame>>>,
+    #[cfg(all(debug_assertions, feature = "hot-reload"))]
+    local_write_versions: RefCell<Vec<(u32, u64, u64)>>,
     local_value_bindings: RefCell<Vec<(u32, Rc<dyn IDisposable>)>>,
     /// The local value bindings that are binding expressions.
     local_value_expressions: RefCell<Vec<(u32, Rc<dyn BindingExpressionBase>)>>,
@@ -74,6 +76,8 @@ impl ValueStore {
     pub fn new() -> Self {
         Self {
             frames: RefCell::new(Vec::new()),
+            #[cfg(all(debug_assertions, feature = "hot-reload"))]
+            local_write_versions: RefCell::new(Vec::new()),
             local_value_bindings: RefCell::new(Vec::new()),
             local_value_expressions: RefCell::new(Vec::new()),
             effective_values: RefCell::new(Vec::new()),
@@ -82,6 +86,38 @@ impl ValueStore {
             frame_generation: Cell::new(0),
             styling: Cell::new(0),
             inheritance_ancestor: RefCell::new(None),
+        }
+    }
+
+    #[cfg(all(debug_assertions, feature = "hot-reload"))]
+    pub fn local_write_version(&self, property: &FerroProperty) -> u64 {
+        let mut versions = self.local_write_versions.borrow_mut();
+        if let Some((_, version, _)) = versions.iter().find(|(id, _, _)| *id == property.id()) {
+            return *version;
+        }
+        versions.push((property.id(), 0, 0));
+        0
+    }
+
+    #[cfg(all(debug_assertions, feature = "hot-reload"))]
+    pub fn local_assignment_version(&self, property: &FerroProperty) -> u64 {
+        self.local_write_version(property);
+        self.local_write_versions.borrow().iter()
+            .find(|(id, _, _)| *id == property.id()).unwrap().2
+    }
+
+    #[cfg(all(debug_assertions, feature = "hot-reload"))]
+    fn record_local_write(&self, property: &FerroProperty) {
+        if let Some((_, version, assignment)) = self.local_write_versions.borrow_mut().iter_mut().find(|(id, _, _)| *id == property.id()) {
+            *version = version.checked_add(1).expect("local write version overflow");
+            *assignment = assignment.checked_add(1).expect("local assignment version overflow");
+        }
+    }
+
+    #[cfg(all(debug_assertions, feature = "hot-reload"))]
+    fn record_current_write(&self, property: &FerroProperty) {
+        if let Some((_, version, _)) = self.local_write_versions.borrow_mut().iter_mut().find(|(id, _, _)| *id == property.id()) {
+            *version = version.checked_add(1).expect("local write version overflow");
         }
     }
 
@@ -214,6 +250,48 @@ impl ValueStore {
         local()
     }
 
+    #[cfg(all(debug_assertions, feature = "hot-reload"))]
+    pub(crate) fn detach_expression_for_reload(
+        &self,
+        property: &'static FerroProperty,
+        expression: &Rc<dyn BindingExpressionBase>,
+    ) -> bool {
+        let mut expressions = self.local_value_expressions.borrow_mut();
+        let Some(index) = expressions.iter().position(|(id, value)| {
+            *id == property.id() && Rc::ptr_eq(value, expression)
+        }) else {
+            return false;
+        };
+        expressions.remove(index);
+        self.local_value_bindings.borrow_mut().retain(|(id, _)| *id != property.id());
+        self.record_local_write(property);
+        true
+    }
+
+    /// Reinstalls a paused expression whose sink still points at this store.
+    /// It must not be attached or started again: that would recreate subscriptions
+    /// and discard pending user input and validation.
+    #[cfg(all(debug_assertions, feature = "hot-reload"))]
+    pub(crate) fn restore_expression_after_reload(
+        &self,
+        property: &'static FerroProperty,
+        expression: Rc<dyn BindingExpressionBase>,
+    ) {
+        assert!(!self.has_local_value_binding(property));
+        self.set_local_value_binding(property, expression.clone());
+        self.local_value_expressions.borrow_mut().push((property.id(), expression));
+    }
+
+    fn is_current_local_expression(
+        &self,
+        property: &'static FerroProperty,
+        expression: &Rc<dyn BindingExpressionBase>,
+    ) -> bool {
+        self.local_value_expressions.borrow().iter().any(|(id, value)| {
+            *id == property.id() && Rc::ptr_eq(value, expression)
+        })
+    }
+
     /// Called by a binding expression attached to this store when its value
     /// or error state changes.
     pub fn on_expression_changed(
@@ -224,6 +302,13 @@ impl ValueStore {
         has_error_changed: bool,
     ) {
         let property = instance.target_property().expect("the binding expression is attached");
+        // A reload transaction can keep a detached expression subscribed while
+        // another expression owns the slot. Only the current owner may publish.
+        if instance.priority() == BindingPriority::LocalValue
+            && !self.is_current_local_expression(property, instance)
+        {
+            return;
+        }
         let entry: Rc<dyn IValueEntry> = instance.clone();
 
         if property.is_direct() {
@@ -265,6 +350,13 @@ impl ValueStore {
     /// completes.
     pub fn on_expression_completed(&self, owner: &FerroObject, instance: &Rc<dyn BindingExpressionBase>) {
         let property = instance.target_property().expect("the binding expression is attached");
+        // Disposing a retired expression must not clear its replacement's
+        // validation state (nor its value).
+        if instance.priority() == BindingPriority::LocalValue
+            && !self.is_current_local_expression(property, instance)
+        {
+            return;
+        }
 
         if instance.is_data_validation_enabled() {
             owner.on_update_data_validation(property, BindingValueType::UNSET_VALUE, None);
@@ -277,6 +369,8 @@ impl ValueStore {
     }
 
     pub fn clear_value(&self, owner: &FerroObject, property: &'static FerroProperty) {
+        #[cfg(all(debug_assertions, feature = "hot-reload"))]
+        self.record_local_write(property);
         if let Some(effective) = self.get_effective_value(property) {
             if effective.priority() == BindingPriority::LocalValue || effective.is_overriden_current_value() {
                 effective.set_is_overriden_current_value(false);
@@ -317,11 +411,15 @@ impl ValueStore {
     }
 
     pub fn set_current_value<T: PropertyValue>(&self, owner: &FerroObject, property: &'static StyledProperty<T>, value: T) {
+        #[cfg(all(debug_assertions, feature = "hot-reload"))]
+        self.record_current_write(property);
         let effective = self.get_or_add_effective_value(owner, property);
         cast_effective_value::<T>(&*effective).set_current_value_and_raise(owner, value);
     }
 
     pub fn set_local_value<T: PropertyValue>(&self, owner: &FerroObject, property: &'static StyledProperty<T>, value: T) {
+        #[cfg(all(debug_assertions, feature = "hot-reload"))]
+        self.record_local_write(property);
         let effective = self.get_or_add_effective_value(owner, property);
         cast_effective_value::<T>(&*effective).set_local_value_and_raise(owner, value);
     }
@@ -351,6 +449,10 @@ impl ValueStore {
 
     pub fn is_set(&self, property: &FerroProperty) -> bool {
         Self::find(&self.effective_values.borrow(), property.id()).is_some()
+    }
+
+    pub fn has_local_value_binding(&self, property: &FerroProperty) -> bool {
+        self.local_value_bindings.borrow().iter().any(|(id, _)| *id == property.id())
     }
 
     pub fn coerce_value(&self, owner: &FerroObject, property: &'static FerroProperty) {
@@ -1109,6 +1211,8 @@ impl ValueStore {
     }
 
     fn set_local_value_binding(&self, property: &FerroProperty, binding: Rc<dyn IDisposable>) {
+        #[cfg(all(debug_assertions, feature = "hot-reload"))]
+        self.record_local_write(property);
         // The slot is being taken over: a binding expression that held it is
         // no longer the property's local value binding.
         self.local_value_expressions.borrow_mut().retain(|(id, _)| *id != property.id());

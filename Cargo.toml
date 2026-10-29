@@ -1,6 +1,9 @@
 [workspace]
 resolver = "2"
 members = [
+    "samples/HotReload",
+    "src/FerroUI.HotReload",
+    "src/FerroUI.HotPatch",
     "src/FerroUI.System",
     "src/FerroUI.Reactive",
     "src/FerroUI.Reactive.Testing",
@@ -16,6 +19,7 @@ members = [
     "src/FerroUI.View.Macros",
     "src/FerroUI.Controls.ColorPicker",
     "src/FerroUI.Controls.Charts",
+    "src/FerroUI.Controls.Inking",
     "src/TreeDataGrid/FerroUI.TreeDataGrid.Core",
     "src/TreeDataGrid/FerroUI.Controls.TreeDataGrid",
     "src/StaticViewLocator/FerroUI.StaticViewLocator",
@@ -48,9 +52,21 @@ members = [
     "src/FerroUI.Inspect",
     "src/FerroUI.DevTools",
     "src/FerroUI.Mcp",
+    "src/Behaviors/FerroUI.Xaml.Interactivity",
+    "src/Behaviors/FerroUI.Xaml.Behaviors.Animations",
+    "src/Behaviors/FerroUI.Xaml.Interactions",
+    "src/Behaviors/FerroUI.Xaml.Interactions.ReactiveUI",
+    "src/Behaviors/FerroUI.Xaml.Interactions.Custom",
+    "src/Behaviors/FerroUI.Xaml.Behaviors",
+    "src/Behaviors/FerroUI.Xaml.Interactions.Draggable",
+    "src/Behaviors/FerroUI.Xaml.Interactions.DragAndDrop",
+    "src/Behaviors/FerroUI.Xaml.Interactions.Events",
+    "src/Behaviors/FerroUI.Xaml.Interactions.Responsive",
     "src/FerroUI.Themes.Simple",
     "src/FerroUI.Themes.Fluent",
     "src/FerroUI.Themes.WinUI",
+    "src/FerroUI.Themes.MacOS",
+    "src/FerroUI.Themes.Material",
     "src/FerroUI.OpenGL",
     "src/FerroUI.Metal",
     "src/FerroUI.Remote.Protocol",
@@ -135,6 +151,8 @@ members = [
     "samples/ControlGallery.WinUI",
     "samples/WinUIEmbedSample",
     "samples/WinUIThemeGallery",
+    "samples/MaterialThemeGallery",
+    "samples/BehaviorsGallery",
     "samples/SafeAreaDemo",
     "samples/SafeAreaDemo.Desktop",
     "samples/SafeAreaDemo.Android",
@@ -169,6 +187,8 @@ categories = ["gui"]
 # that the crates of a release are only ever resolved together (docs/release.md, "Version scheme").
 # `scripts/release/set-version.sh <version>` writes the version above and these keys.
 [workspace.dependencies]
+ferroui-hot-reload = { version = "=0.4.0", path = "src/FerroUI.HotReload" }
+ferroui-hot-patch = { version = "=0.4.0", path = "src/FerroUI.HotPatch" }
 ferroui-inspect = { version = "=0.4.0", path = "src/FerroUI.Inspect" }
 ferroui-devtools = { version = "=0.4.0", path = "src/FerroUI.DevTools", default-features = false }
 ferroui-mcp = { version = "=0.4.0", path = "src/FerroUI.Mcp" }
@@ -187,6 +207,7 @@ ferroui-view = { version = "=0.4.0", path = "src/FerroUI.View" }
 ferroui-view-macros = { version = "=0.4.0", path = "src/FerroUI.View.Macros" }
 ferroui-controls-color-picker = { version = "=0.4.0", path = "src/FerroUI.Controls.ColorPicker" }
 ferroui-controls-charts = { version = "=0.4.0", path = "src/FerroUI.Controls.Charts" }
+ferroui-controls-inking = { version = "=0.4.0", path = "src/FerroUI.Controls.Inking" }
 ferroui-treedatagrid-core = { version = "=0.4.0", path = "src/TreeDataGrid/FerroUI.TreeDataGrid.Core" }
 ferroui-controls-treedatagrid = { version = "=0.4.0", path = "src/TreeDataGrid/FerroUI.Controls.TreeDataGrid" }
 ferroui-static-view-locator = { version = "=0.4.0", path = "src/StaticViewLocator/FerroUI.StaticViewLocator" }
@@ -225,9 +246,21 @@ ferroui-winui = { version = "=0.4.0", path = "src/Windows/FerroUI.WinUI" }
 ferroui-fonts-inter = { version = "=0.4.0", path = "src/FerroUI.Fonts.Inter" }
 ferroui-dialogs = { version = "=0.4.0", path = "src/FerroUI.Dialogs" }
 ferroui-diagnostics = { version = "=0.4.0", path = "src/FerroUI.Diagnostics" }
+ferroui-xaml-interactivity = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Interactivity" }
+ferroui-xaml-behaviors-animations = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Behaviors.Animations" }
+ferroui-xaml-interactions = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Interactions" }
+ferroui-xaml-interactions-reactiveui = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Interactions.ReactiveUI" }
+ferroui-xaml-interactions-custom = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Interactions.Custom" }
+ferroui-xaml-behaviors = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Behaviors" }
+ferroui-xaml-interactions-draggable = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Interactions.Draggable" }
+ferroui-xaml-interactions-draganddrop = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Interactions.DragAndDrop" }
+ferroui-xaml-interactions-events = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Interactions.Events" }
+ferroui-xaml-interactions-responsive = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Interactions.Responsive" }
 ferroui-themes-simple = { version = "=0.4.0", path = "src/FerroUI.Themes.Simple" }
 ferroui-themes-fluent = { version = "=0.4.0", path = "src/FerroUI.Themes.Fluent" }
 ferroui-themes-winui = { version = "=0.4.0", path = "src/FerroUI.Themes.WinUI" }
+ferroui-themes-macos = { version = "=0.4.0", path = "src/FerroUI.Themes.MacOS" }
+ferroui-themes-material = { version = "=0.4.0", path = "src/FerroUI.Themes.Material" }
 ferroui-opengl = { version = "=0.4.0", path = "src/FerroUI.OpenGL" }
 ferroui-metal = { version = "=0.4.0", path = "src/FerroUI.Metal" }
 ferroui-remote-protocol = { version = "=0.4.0", path = "src/FerroUI.Remote.Protocol" }
@@ -337,6 +370,15 @@ getrandom = { version = "0.4" }
 # thin LTO over the default sixteen code generation units, which generates code on all cores.
 [profile.release]
 lto = "thin"
+
+# Optimised code for running an application locally (`cargo run --profile fast-release -p <app>`):
+# the optimisation level of release, without link-time optimisation across crates. The last step
+# of an executable then links the optimised crates instead of optimising the whole program again,
+# which took most of a release build of a large application. Not for measurements or shipping:
+# the benchmarks are measured with release, and what is shipped is built with dist.
+[profile.fast-release]
+inherits = "release"
+lto = false
 
 # The build that is shipped and measured (`cargo build --profile dist`, `scripts/perf-report.py
 # --profile dist`): whole-program optimisation in one code generation unit. The executables are

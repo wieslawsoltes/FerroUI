@@ -282,6 +282,7 @@ pub use ferroui_build_scan::export::Outcome;
 
 /// The build of the markup of a crate; see the crate documentation.
 pub struct Build {
+    hot_reload: bool,
     manifest_dir: PathBuf,
     out_dir: PathBuf,
     crate_name: String,
@@ -322,6 +323,7 @@ impl Build {
     /// with the `.xamlmeta` files of its direct dependencies.
     pub fn new(manifest_dir: PathBuf, out_dir: PathBuf, package_name: &str, dependencies: Vec<PathBuf>) -> Self {
         Self {
+            hot_reload: false,
             manifest_dir,
             out_dir,
             crate_name: package_name.replace('-', "_"),
@@ -340,6 +342,13 @@ impl Build {
             analyzer_config_files: Vec::new(),
             warnings_as_errors: false,
         }
+    }
+
+    /// Emits source metadata when enabled and the target has debug assertions enabled.
+    /// Requires Cargo 1.93 or newer to detect the target profile configuration.
+    pub fn hot_reload_manifest(mut self, enabled: bool) -> Self {
+        self.hot_reload = enabled;
+        self
     }
 
     /// The type system the documents are compiled against; [`TypeSystem::Runtime`] without
@@ -530,6 +539,11 @@ impl Build {
         report.read_dependencies = started.elapsed();
         report.dependency_files = dependency_files.len();
         report.dependency_models = models.len();
+        let mut manifest_models = if hot_reload_profile::enabled(self.hot_reload) {
+            models.clone()
+        } else {
+            Vec::new()
+        };
         for file in &dependency_files {
             rerun(&mut lines, file);
         }
@@ -609,6 +623,23 @@ impl Build {
             let _ = assembly;
         }
 
+        if hot_reload_profile::enabled(self.hot_reload) {
+            if let Some(model) = &model {
+                let mut own = model.clone();
+                own.name = assembly_name.clone();
+                manifest_models.push(own);
+            }
+            let system = model_host.as_ref().map(|(_, system, _)| system.clone()).unwrap_or_else(|| {
+                #[cfg(feature = "runtime-host")]
+                { ferroui_markup_xaml_loader::runtime::type_system::RuntimeTypeSystem::new() as Rc<dyn IXamlTypeSystem> }
+                #[cfg(not(feature = "runtime-host"))]
+                { ModelTypeSystem::new(manifest_models) as Rc<dyn IXamlTypeSystem> }
+            });
+            match hot_reload_manifest::write(&self.manifest_dir, &self.manifest_dir.join(&self.xaml_root), &self.out_dir, &assembly_name, system) {
+                Ok(path) => lines.push(format!("cargo::rustc-env=FERROUI_HOT_RELOAD_MANIFEST={}", path.display())),
+                Err(error) => errors.push(error),
+            }
+        }
         // 2. The groups.
         for file in &self.analyzer_config_files {
             rerun(&mut lines, file);
@@ -1181,8 +1212,14 @@ mod tests {
     /// Cargo run the script again.
     #[test]
     fn build_without_an_assembly_is_an_error() {
-        let outcome = Build::new(PathBuf::from("/crate"), PathBuf::from("/out"), "my-crate", Vec::new()).compile_xaml().execute();
+        let root = PathBuf::from("/crate");
+        let outcome = Build::new(root.clone(), PathBuf::from("/out"), "my-crate", Vec::new()).compile_xaml().execute();
         assert_eq!(outcome.errors, ["the assembly of the crate is not stated (Build::assembly)"]);
-        assert_eq!(outcome.lines, ["cargo::rerun-if-changed=/crate/build.rs", "cargo::rerun-if-changed=/crate/Cargo.toml"]);
+        assert_eq!(outcome.lines, ["build.rs", "Cargo.toml"].map(|file| {
+            format!("cargo::rerun-if-changed={}", root.join(file).display())
+        }));
     }
 }
+
+mod hot_reload_manifest;
+mod hot_reload_profile;

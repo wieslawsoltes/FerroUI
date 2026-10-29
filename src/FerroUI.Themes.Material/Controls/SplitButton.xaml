@@ -1,0 +1,86 @@
+<!--
+  Material 3 Expressive, AndroidX Compose Material3 1.5.0-beta02,
+  source e4d933c98df7baa7ea2b83eea6e086915961e0ff.
+  Component measurements and interaction states follow the Android Open Source Project
+  token definitions (Apache-2.0; see NOTICE.md). FerroUI template contracts are adapted
+  from the WinUI theme, Copyright (c) Microsoft Corporation, MIT license.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <ControlTheme x:Key="SplitButtonInnerButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+    <Setter Property="MinWidth" Value="48" />
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialSplitLeadingButton" TargetType="Button" BasedOn="{StaticResource SplitButtonInnerButtonStyle}">
+    <Style Selector="^:pressed /template/ Border#MaterialContainer"><Setter Property="CornerRadius" Value="20,12,12,20" /></Style>
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialSplitTrailingButton" TargetType="Button" BasedOn="{StaticResource SplitButtonInnerButtonStyle}">
+    <Style Selector="^:pressed /template/ Border#MaterialContainer"><Setter Property="CornerRadius" Value="12,20,20,12" /></Style>
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialSplitCheckedTrailingButton" TargetType="Button" BasedOn="{StaticResource SplitButtonInnerButtonStyle}">
+    <Style Selector="^:pressed /template/ Border#MaterialContainer"><Setter Property="CornerRadius" Value="20" /></Style>
+    <Style Selector="^ /template/ Border#MaterialStateLayer"><Setter Property="Opacity" Value="0.1" /></Style>
+    <Style Selector="^:pointerover /template/ Border#MaterialStateLayer"><Setter Property="Opacity" Value="0.172" /></Style>
+    <Style Selector="^:focus-visible /template/ Border#MaterialStateLayer"><Setter Property="Opacity" Value="0.19" /></Style>
+    <Style Selector="^:disabled /template/ Border#MaterialStateLayer"><Setter Property="Opacity" Value="0" /></Style>
+  </ControlTheme>
+  <ControlTheme x:Key="SplitButtonStyle" TargetType="SplitButton">
+    <Setter Property="Background" Value="{DynamicResource MaterialPrimaryBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnPrimaryBrush}" />
+    <Setter Property="HorizontalAlignment" Value="Left" /><Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" /><Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontSize" Value="14" /><Setter Property="FontWeight" Value="Medium" />
+    <Setter Property="MinHeight" Value="48" /><Setter Property="Padding" Value="16,8,12,8" />
+    <Setter Property="Focusable" Value="True" /><Setter Property="IsTabStop" Value="True" />
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border BorderBrush="{DynamicResource MaterialSecondaryBrush}"
+                BorderThickness="3" CornerRadius="20" Margin="-3" />
+      </FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid ColumnDefinitions="*,2,48" Background="Transparent">
+          <Button x:Name="PART_PrimaryButton" Theme="{StaticResource MaterialSplitLeadingButton}"
+                  Background="{TemplateBinding Background}" Foreground="{TemplateBinding Foreground}"
+                  Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"
+                  Command="{TemplateBinding Command}" CommandParameter="{TemplateBinding CommandParameter}"
+                  Padding="{TemplateBinding Padding}" CornerRadius="20,4,4,20"
+                  HorizontalAlignment="Stretch" IsTabStop="False" Focusable="False" />
+          <Button x:Name="PART_SecondaryButton" Grid.Column="2" Theme="{StaticResource MaterialSplitTrailingButton}"
+                  Background="{TemplateBinding Background}" Foreground="{TemplateBinding Foreground}"
+                  CornerRadius="4,20,20,4" Padding="13,8" MinWidth="48" HorizontalAlignment="Stretch"
+                  IsTabStop="False" Focusable="False">
+            <Path x:Name="MaterialSplitChevron" Data="M 6,9 L 12,15 L 18,9"
+                  Stroke="{Binding #PART_SecondaryButton.Foreground}" StrokeThickness="2"
+                  Width="12" Height="6" Stretch="Fill" RenderTransformOrigin="50%,50%"
+                  RenderTransform="rotate(0deg)">
+              <Path.Transitions><Transitions><TransformOperationsTransition Property="RenderTransform" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" /></Transitions></Path.Transitions>
+            </Path>
+          </Button>
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:flyout-open /template/ Path#MaterialSplitChevron">
+      <Setter Property="RenderTransform" Value="rotate(180deg)" />
+    </Style>
+    <Style Selector="^:flyout-open /template/ Button#PART_SecondaryButton">
+      <Setter Property="CornerRadius" Value="20" />
+      <Setter Property="Theme" Value="{StaticResource MaterialSplitCheckedTrailingButton}" />
+    </Style>
+    <Style Selector="^:checked">
+      <Setter Property="Background" Value="{DynamicResource MaterialSecondaryContainerBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource MaterialOnSecondaryContainerBrush}" />
+    </Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Background" Value="{DynamicResource MaterialDisabledContainerBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource MaterialDisabledContentBrush}" />
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type SplitButton}" TargetType="SplitButton" BasedOn="{StaticResource SplitButtonStyle}" />
+  <ControlTheme x:Key="SplitButtonCommandBarInnerButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialTextButton}" />
+  <ControlTheme x:Key="SplitButtonCommandBarStyle" TargetType="SplitButton" BasedOn="{StaticResource SplitButtonStyle}">
+    <Setter Property="Background" Value="Transparent" /><Setter Property="Foreground" Value="{DynamicResource MaterialPrimaryBrush}" />
+  </ControlTheme>
+</ResourceDictionary>

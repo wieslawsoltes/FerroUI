@@ -1,0 +1,34 @@
+<Window xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="DataTriggerBehavior003">
+  <!-- Ported from tests/Xaml.Behaviors.Interactions.UnitTests/Core/DataTriggerBehavior003 of Xaml.Behaviors.
+       Adapted: no x:Class (the test loads the window with the run-time loader). -->
+  <StackPanel>
+    <TextBlock Name="TargetTextBlock"
+               Text="">
+      <Interaction.Behaviors>
+        <DataTriggerBehavior Binding="{Binding #TargetSlider.Value}"
+                             ComparisonCondition="LessThan">
+          <DataTriggerBehavior.Value>
+            <x:String>50</x:String>
+          </DataTriggerBehavior.Value>
+          <ChangePropertyAction PropertyName="Text"
+                                Value="Less than 50" />
+        </DataTriggerBehavior>
+        <DataTriggerBehavior Binding="{Binding #TargetSlider.Value}"
+                             ComparisonCondition="GreaterThanOrEqual">
+          <DataTriggerBehavior.Value>
+            <x:String>50</x:String>
+          </DataTriggerBehavior.Value>
+          <ChangePropertyAction PropertyName="Text"
+                                Value="50 or more" />
+        </DataTriggerBehavior>
+      </Interaction.Behaviors>
+    </TextBlock>
+    <Slider Name="TargetSlider"
+            Minimum="0"
+            Maximum="100"
+            SmallChange="25"
+            Value="0" />
+  </StackPanel>
+</Window>

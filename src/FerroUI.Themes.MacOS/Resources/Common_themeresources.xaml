@@ -1,0 +1,55 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/CommonStyles/Common_themeresources.xaml
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+  Copied from the WinUI theme foundation and adapted for macOS 26.
+  Maintained here independently; see docs/porting/macos26-theme.md.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:winui="using:FerroUI.Themes.MacOS"
+                    x:ClassModifier="internal">
+  <ResourceDictionary.ThemeDictionaries>
+    <ResourceDictionary x:Key="Default">
+      <Color x:Key="SystemControlTransparentColor">#00000000</Color>
+      <SolidColorBrush x:Key="SystemControlTransparentBrush" Color="Transparent" />
+      <SolidColorBrush x:Key="SystemControlHighlightListAccentVeryHighBrush" Color="{DynamicResource SystemAccentColor}" Opacity="0.9" />
+      <SolidColorBrush x:Key="SystemControlHighlightListAccentMediumLowBrush" Color="{DynamicResource SystemAccentColor}" Opacity="0.75" />
+      <Thickness x:Key="TextControlBorderThemeThickness">1</Thickness>
+      <Thickness x:Key="TextControlBorderThemeThicknessFocused">1</Thickness>
+      <Thickness x:Key="TextControlThemePadding">6,3</Thickness>
+      <SolidColorBrush x:Key="ApplicationPageBackgroundThemeBrush" Color="{DynamicResource SolidBackgroundFillColorBase}" />
+      <StaticResource x:Key="DefaultTextForegroundThemeBrush" ResourceKey="TextFillColorPrimaryBrush" />
+      <StaticResource x:Key="SystemControlFocusVisualPrimaryBrush" ResourceKey="FocusStrokeColorOuterBrush" />
+      <StaticResource x:Key="SystemControlFocusVisualSecondaryBrush" ResourceKey="FocusStrokeColorInnerBrush" />
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="Light">
+      <Color x:Key="SystemControlTransparentColor">#00000000</Color>
+      <SolidColorBrush x:Key="SystemControlTransparentBrush" Color="Transparent" />
+      <SolidColorBrush x:Key="SystemControlHighlightListAccentVeryHighBrush" Color="{DynamicResource SystemAccentColor}" Opacity="0.9" />
+      <SolidColorBrush x:Key="SystemControlHighlightListAccentMediumLowBrush" Color="{DynamicResource SystemAccentColor}" Opacity="0.75" />
+      <Thickness x:Key="TextControlBorderThemeThickness">1</Thickness>
+      <Thickness x:Key="TextControlBorderThemeThicknessFocused">1</Thickness>
+      <Thickness x:Key="TextControlThemePadding">6,3</Thickness>
+      <SolidColorBrush x:Key="ApplicationPageBackgroundThemeBrush" Color="{DynamicResource SolidBackgroundFillColorBase}" />
+      <StaticResource x:Key="DefaultTextForegroundThemeBrush" ResourceKey="TextFillColorPrimaryBrush" />
+      <StaticResource x:Key="SystemControlFocusVisualPrimaryBrush" ResourceKey="FocusStrokeColorOuterBrush" />
+      <StaticResource x:Key="SystemControlFocusVisualSecondaryBrush" ResourceKey="FocusStrokeColorInnerBrush" />
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="{x:Static winui:MacOSTheme.HighContrast}">
+      <Color x:Key="SystemControlTransparentColor">#00000000</Color>
+      <SolidColorBrush x:Key="SystemControlTransparentBrush" Color="Transparent" />
+      <SolidColorBrush x:Key="SystemControlHighlightListAccentVeryHighBrush" Color="{DynamicResource SystemAccentColor}" Opacity="0.9" />
+      <SolidColorBrush x:Key="SystemControlHighlightListAccentMediumLowBrush" Color="{DynamicResource SystemAccentColor}" Opacity="0.75" />
+      <Thickness x:Key="TextControlBorderThemeThickness">1</Thickness>
+      <Thickness x:Key="TextControlBorderThemeThicknessFocused">1</Thickness>
+      <Thickness x:Key="TextControlThemePadding">6,3</Thickness>
+      <SolidColorBrush x:Key="ApplicationPageBackgroundThemeBrush" Color="{DynamicResource SolidBackgroundFillColorBase}" />
+      <StaticResource x:Key="DefaultTextForegroundThemeBrush" ResourceKey="TextFillColorPrimaryBrush" />
+      <StaticResource x:Key="SystemControlFocusVisualPrimaryBrush" ResourceKey="FocusStrokeColorOuterBrush" />
+      <StaticResource x:Key="SystemControlFocusVisualSecondaryBrush" ResourceKey="FocusStrokeColorInnerBrush" />
+    </ResourceDictionary>
+  </ResourceDictionary.ThemeDictionaries>
+  <Thickness x:Key="DateTimeFlyoutBorderPadding">0</Thickness>
+</ResourceDictionary>

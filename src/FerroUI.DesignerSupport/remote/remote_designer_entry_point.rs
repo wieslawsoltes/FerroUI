@@ -375,12 +375,10 @@ impl RemoteDesignerEntryPoint {
             Self::rebuild_pre_flight();
         }
         if let Some(xaml) = arg.downcast_ref::<UpdateXamlMessage>() {
-            let current_window = CURRENT_WINDOW.with(|slot| slot.borrow_mut().take());
-            if let Some(current_window) = current_window {
+            // Keep the last valid preview alive until a replacement was successfully built.
+            let current_window = CURRENT_WINDOW.with(|slot| slot.borrow().clone());
+            if let Some(current_window) = &current_window {
                 LAST_RENDER_SCALING.set(current_window.render_scaling());
-
-                //Ignore
-                let _ = catch_unwind(AssertUnwindSafe(|| current_window.close()));
             }
             let Some(transport) = TRANSPORT.with(|slot| slot.borrow().clone()) else {
                 return;
@@ -397,6 +395,9 @@ impl RemoteDesignerEntryPoint {
             }));
             let result = match loaded {
                 Ok(Ok(window)) => {
+                    if let Some(previous) = current_window {
+                        let _ = catch_unwind(AssertUnwindSafe(|| previous.close()));
+                    }
                     let handle = window.platform_impl().and_then(|platform_impl| platform_impl.handle());
                     CURRENT_WINDOW.with(|slot| *slot.borrow_mut() = Some(window));
                     UpdateXamlResultMessage {

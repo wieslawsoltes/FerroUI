@@ -1,0 +1,101 @@
+<!--
+  The macOS 26 theme, copied from the FerroUI WinUI 3 theme foundation of microsoft-ui-xaml
+  (https://github.com/microsoft/microsoft-ui-xaml, commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0),
+  generic.xaml with the theme resources of XamlControlsResources merged over it, ported to FerroUI
+  (docs/porting/winui-theme.md). Copyright (c) Microsoft Corporation for the ported documents;
+  licensed under the MIT License (see NOTICE.md of the crate).
+
+  The resources: the accent colour of the system, the system colours, and one document per
+  source document of the theme, in the order of the merge of WinUI. The list between the markers
+  is written by scripts/winui-theme/convert.py.
+-->
+<Styles x:Class="FerroUI.Themes.MacOS.MacOSTheme"
+        xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:accents="using:FerroUI.Themes.MacOS.Accents">
+  <Styles.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <accents:SystemAccentColors />
+
+        <!-- resources:begin (written by scripts/winui-theme/convert.py; do not edit) -->
+        <MergeResourceInclude Source="/Resources/SystemResources.xaml" />
+        <MergeResourceInclude Source="/Resources/Generic.xaml" />
+        <MergeResourceInclude Source="/Resources/Common_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/Common_themeresources_any.xaml" />
+        <MergeResourceInclude Source="/Resources/Deprecated_themeresources_any.xaml" />
+        <MergeResourceInclude Source="/Resources/PasswordBox_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/TextBox_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/MenuFlyout_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/AcrylicBrush_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/RevealBrush_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/Deprecated_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/Hyperlink_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/HyperlinkButton_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/RadioButton_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/AppBarButton_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/AppBarSeparator_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/AppBarToggleButton_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/ListBox_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/ToggleSwitch_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/CommandBar_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/ListViewItem_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/TextBlock_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/TextBlock_themeresources_v2.5.xaml" />
+        <MergeResourceInclude Source="/Resources/FlyoutPresenter_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/Button_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/ToggleButton_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/CornerRadius_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/RepeatButton_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/CalendarDatePicker_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/CalendarView_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/CheckBox_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/ContentDialog_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/DatePicker_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/DateTimePickerFlyout_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/FlipView_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/FlipViewItem_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/ScrollBar_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/ScrollViewer_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/Slider_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/TimePicker_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/ToolTip_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/NavigationView_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/NavigationBackButton_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/RefreshContainer_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/RefreshVisualizer_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/MenuBar_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/TreeView_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/SplitButton_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/DropDownButton_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/TabView_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/AutoSuggestBox_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/ComboBox_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/SplitView_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/ProgressBar_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/NumberBox_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/Expander_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/InfoBar_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/PipsPager_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/SelectorBar_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/TitleBar_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/TabularSurfaces_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/TableView_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/ResizeGripper_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/ThemeShadows.xaml" />
+        <MergeResourceInclude Source="/Resources/Glyphs.xaml" />
+        <!-- resources:end -->
+        <MergeResourceInclude Source="/Resources/MacOSMaterials.xaml" />
+
+        <!-- The labels of the commands of the context flyout of the text controls (not part of the
+             WinUI theme: WinUI takes them from the resources of the framework). -->
+        <MergeResourceInclude Source="/Strings/InvariantResources.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+
+      <!-- Not part of the merged dictionaries: the theme looks it up first when its density style is compact. -->
+      <ResourceInclude x:Key="CompactStyles" Source="/DensityStyles/Compact.xaml" />
+    </ResourceDictionary>
+  </Styles.Resources>
+
+  <StyleInclude Source="/Controls/MacOSControls.xaml" />
+</Styles>

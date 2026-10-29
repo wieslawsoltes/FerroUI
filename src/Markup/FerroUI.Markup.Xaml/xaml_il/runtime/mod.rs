@@ -22,6 +22,8 @@ pub(crate) use xaml_il_parent_stack_provider_wrapper::XamlIlParentStackProviderW
 pub use xaml_il_runtime_helpers::{
     DeferredContent, DeferredContentBuilder, DeferredResult, RuntimePlatformNotRegistered, XamlIlRuntimeHelpers,
 };
+#[cfg(all(feature = "hot-reload", debug_assertions))]
+pub use xaml_il_runtime_helpers::{DeferredContentRebase, DeferredContentReloadScope};
 
 pub use xaml_il_context::{
     FerroXamlIlContextNameScopeField, FrameworkContextServices, IStaticServiceProvider, IXamlIlContextServices, XamlIlContext, XamlIlContextDefinition,

@@ -7,6 +7,24 @@ use mini_mvvm::ViewModelBase;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
+/// Not in the original: the item of the theme variant list (Default, Light, Dark) of the
+/// variant a start option selected (`App::initial_theme_variant`), so the list shows it.
+fn initial_theme_variant_index() -> i32 {
+    use ferroui_base::styling::ThemeVariant;
+    let is_catalog = ferroui_controls::Application::current().is_some_and(|app| app.cast::<crate::App>().is_some());
+    if !is_catalog {
+        return 0;
+    }
+    let variant = crate::App::initial_theme_variant();
+    if variant == ThemeVariant::light() {
+        1
+    } else if variant == ThemeVariant::dark() {
+        2
+    } else {
+        0
+    }
+}
+
 /// The view model of the settings page.
 pub struct SettingsViewModel {
     base: ViewModelBase,
@@ -36,7 +54,7 @@ impl SettingsViewModel {
             base: ViewModelBase::new(),
             window_state: Cell::new(WindowState::Normal),
             selected_decoration_index: Cell::new(0),
-            selected_theme_variant_index: Cell::new(0),
+            selected_theme_variant_index: Cell::new(initial_theme_variant_index()),
             selected_transparency_level_index: Cell::new(0),
             selected_flow_direction_index: Cell::new(0),
             window_states: RefCell::new(BindableList::new([
@@ -101,6 +119,163 @@ impl SettingsViewModel {
     pub fn set_window_states(&self, value: Rc<BindableList<WindowState>>) {
         self.base.raise_and_set_if_changed(&self.window_states, value, "WindowStates");
     }
+    /// These settings are intentionally optional: the standard catalog does not link a second theme.
+    pub fn macos_theme_settings_visible(&self) -> bool {
+        #[cfg(feature = "macos-theme")]
+        {
+            return ferroui_controls::Application::current()
+                .and_then(|application| application.cast::<crate::App>())
+                .is_some_and(|_| crate::App::current_theme() == crate::models::CatalogTheme::MacOS);
+        }
+        #[cfg(not(feature = "macos-theme"))]
+        false
+    }
+
+    pub fn macos_reduce_motion(&self) -> bool {
+        #[cfg(feature = "macos-theme")]
+        if let Some(theme) = crate::App::macos_theme() {
+            return theme.reduce_motion();
+        }
+        false
+    }
+
+    pub fn set_macos_reduce_motion(&self, value: bool) {
+        #[cfg(feature = "macos-theme")]
+        if let Some(theme) = crate::App::macos_theme() {
+            if theme.reduce_motion() != value {
+                theme.set_reduce_motion(value);
+                self.base.raise_property_changed("MacOSReduceMotion");
+            }
+        }
+        #[cfg(not(feature = "macos-theme"))]
+        let _ = value;
+    }
+
+    pub fn macos_reduce_transparency(&self) -> bool {
+        #[cfg(feature = "macos-theme")]
+        if let Some(theme) = crate::App::macos_theme() {
+            return theme.reduce_transparency();
+        }
+        false
+    }
+
+    pub fn set_macos_reduce_transparency(&self, value: bool) {
+        #[cfg(feature = "macos-theme")]
+        if let Some(theme) = crate::App::macos_theme() {
+            if theme.reduce_transparency() != value {
+                theme.set_reduce_transparency(value);
+                self.base.raise_property_changed("MacOSReduceTransparency");
+            }
+        }
+        #[cfg(not(feature = "macos-theme"))]
+        let _ = value;
+    }
+
+    pub fn macos_increase_contrast(&self) -> bool {
+        #[cfg(feature = "macos-theme")]
+        if let Some(theme) = crate::App::macos_theme() {
+            return theme.increase_contrast();
+        }
+        false
+    }
+
+    pub fn set_macos_increase_contrast(&self, value: bool) {
+        #[cfg(feature = "macos-theme")]
+        if let Some(theme) = crate::App::macos_theme() {
+            if theme.increase_contrast() != value {
+                theme.set_increase_contrast(value);
+                self.base.raise_property_changed("MacOSIncreaseContrast");
+            }
+        }
+        #[cfg(not(feature = "macos-theme"))]
+        let _ = value;
+    }
+
+    pub fn macos_window_active(&self) -> bool {
+        #[cfg(feature = "macos-theme")]
+        if let Some(theme) = crate::App::macos_theme() {
+            return theme.window_active();
+        }
+        true
+    }
+
+    pub fn set_macos_window_active(&self, value: bool) {
+        #[cfg(feature = "macos-theme")]
+        if let Some(theme) = crate::App::macos_theme() {
+            if theme.window_active() != value {
+                theme.set_window_active(value);
+                self.base.raise_property_changed("MacOSWindowActive");
+            }
+        }
+        #[cfg(not(feature = "macos-theme"))]
+        let _ = value;
+    }
+
+    pub fn macos_control_size_index(&self) -> i32 {
+        #[cfg(feature = "macos-theme")]
+        if let Some(theme) = crate::App::macos_theme() {
+            use ferroui_themes_macos::ControlSize;
+            return match theme.control_size() {
+                ControlSize::Mini => 0,
+                ControlSize::Small => 1,
+                ControlSize::Regular => 2,
+                ControlSize::Large => 3,
+                ControlSize::ExtraLarge => 4,
+            };
+        }
+        2
+    }
+
+    pub fn set_macos_control_size_index(&self, value: i32) {
+        #[cfg(feature = "macos-theme")]
+        if let Some(theme) = crate::App::macos_theme() {
+            use ferroui_themes_macos::ControlSize;
+            let size = match value {
+                0 => ControlSize::Mini,
+                1 => ControlSize::Small,
+                2 => ControlSize::Regular,
+                3 => ControlSize::Large,
+                4 => ControlSize::ExtraLarge,
+                _ => return,
+            };
+            if theme.control_size() != size {
+                theme.set_control_size(size);
+                self.base.raise_property_changed("MacOSControlSizeIndex");
+            }
+        }
+        #[cfg(not(feature = "macos-theme"))]
+        let _ = value;
+    }
+
+    pub fn macos_accent_index(&self) -> i32 {
+        #[cfg(feature = "macos-theme")]
+        if let Some(theme) = crate::App::macos_theme() {
+            return Self::macos_accents().iter().position(|color| *color == theme.accent_color()).unwrap_or(0) as i32;
+        }
+        0
+    }
+
+    pub fn set_macos_accent_index(&self, value: i32) {
+        #[cfg(feature = "macos-theme")]
+        if let (Some(theme), Some(color)) = (crate::App::macos_theme(), Self::macos_accents().get(value as usize)) {
+            if theme.accent_color() != *color {
+                theme.set_accent_color(*color);
+                self.base.raise_property_changed("MacOSAccentIndex");
+            }
+        }
+        #[cfg(not(feature = "macos-theme"))]
+        let _ = value;
+    }
+
+    #[cfg(feature = "macos-theme")]
+    fn macos_accents() -> [Option<ferroui_base::media::Color>; 9] {
+        use ferroui_base::media::Color;
+        [None, Some(Color::from_rgb(0, 122, 255)), Some(Color::from_rgb(175, 82, 222)),
+         Some(Color::from_rgb(255, 45, 85)), Some(Color::from_rgb(255, 59, 48)),
+         Some(Color::from_rgb(255, 149, 0)), Some(Color::from_rgb(255, 204, 0)),
+         Some(Color::from_rgb(52, 199, 89)), Some(Color::from_rgb(142, 142, 147))]
+    }
+
 }
 
 ferro_markup_type!(class SettingsViewModel {
@@ -108,6 +283,31 @@ ferro_markup_type!(class SettingsViewModel {
     handles: [SettingsViewModel, Rc<SettingsViewModel>, Option<Rc<SettingsViewModel>>],
     constructors: [() => SettingsViewModel::new],
     properties: [
+        MacOSThemeSettingsVisible: bool { get: |this: &Rc<SettingsViewModel>| this.macos_theme_settings_visible() },
+        MacOSReduceMotion: bool {
+            get: |this: &Rc<SettingsViewModel>| this.macos_reduce_motion(),
+            set: |this: &Rc<SettingsViewModel>, value: bool| this.set_macos_reduce_motion(value)
+        },
+        MacOSReduceTransparency: bool {
+            get: |this: &Rc<SettingsViewModel>| this.macos_reduce_transparency(),
+            set: |this: &Rc<SettingsViewModel>, value: bool| this.set_macos_reduce_transparency(value)
+        },
+        MacOSIncreaseContrast: bool {
+            get: |this: &Rc<SettingsViewModel>| this.macos_increase_contrast(),
+            set: |this: &Rc<SettingsViewModel>, value: bool| this.set_macos_increase_contrast(value)
+        },
+        MacOSWindowActive: bool {
+            get: |this: &Rc<SettingsViewModel>| this.macos_window_active(),
+            set: |this: &Rc<SettingsViewModel>, value: bool| this.set_macos_window_active(value)
+        },
+        MacOSControlSizeIndex: i32 {
+            get: |this: &Rc<SettingsViewModel>| this.macos_control_size_index(),
+            set: |this: &Rc<SettingsViewModel>, value: i32| this.set_macos_control_size_index(value)
+        },
+        MacOSAccentIndex: i32 {
+            get: |this: &Rc<SettingsViewModel>| this.macos_accent_index(),
+            set: |this: &Rc<SettingsViewModel>, value: i32| this.set_macos_accent_index(value)
+        },
         WindowState: WindowState {
             get: |this: &Rc<SettingsViewModel>| this.window_state(),
             set: |this: &Rc<SettingsViewModel>, value: WindowState| this.set_window_state(value)

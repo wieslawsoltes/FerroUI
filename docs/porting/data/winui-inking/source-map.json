@@ -1,0 +1,2043 @@
+{
+  "schema_version": 1,
+  "repository": "microsoft/microsoft-ui-xaml",
+  "commit": "7e4b0c2096be402f51cc8f7d203ebf67cff183d0",
+  "upstream_files": 164,
+  "files": [
+    {
+      "path": "controls/dev/InkCanvas/APITests/InkCanvas_APITests.projitems",
+      "sha": "ec65c6366a69b810e52c964dda72739d482c92fb",
+      "size": 744,
+      "category": "build",
+      "status": "not_applicable",
+      "rust_files": [],
+      "notes": "C++/MSBuild project scaffolding is replaced by the existing Cargo crates; no runtime behavior is omitted by this build-file disposition."
+    },
+    {
+      "path": "controls/dev/InkCanvas/APITests/InkCanvas_APITests.shproj",
+      "sha": "3df8496ac7f9b33655966db2772897fb5cd62b82",
+      "size": 1224,
+      "category": "build",
+      "status": "not_applicable",
+      "rust_files": [],
+      "notes": "C++/MSBuild project scaffolding is replaced by the existing Cargo crates; no runtime behavior is omitted by this build-file disposition."
+    },
+    {
+      "path": "controls/dev/InkCanvas/APITests/InkCanvasTests.cs",
+      "sha": "e629c9751b8f50891ec10b40b7c0bbe1056d743b",
+      "size": 17469,
+      "category": "api-tests",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/inking_tests.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "All 12 source API scenarios are mapped to passed Rust assertions, including own/ancestor/ScrollViewer clipping, offscreen state, construction and load/unload/drop callback lifetimes. The Windows test harness is replaced by the existing FerroUI mock-window/dispatcher and real framework peers."
+    },
+    {
+      "path": "controls/dev/InkCanvas/InkCanvas.cpp",
+      "sha": "c71db8d44a9c03cb771df2ea0d3c8535be09d09d",
+      "size": 30260,
+      "category": "control",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_canvas.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "FerroUI Control layout, draw invalidation, routed pointer capture and render backends replace the external Windows composition host. Input, lifetime, clipping and visual-root scenarios pass framework tests. Independent Windows ink-thread latency and native pixels are explicitly outside this framework adaptation."
+    },
+    {
+      "path": "controls/dev/InkCanvas/InkCanvas.h",
+      "sha": "40fb32f2ee89614eaabfe1b9e20d6b4f5bdbea96",
+      "size": 5484,
+      "category": "control",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_canvas.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "FerroUI Control layout, draw invalidation, routed pointer capture and render backends replace the external Windows composition host. Input, lifetime, clipping and visual-root scenarios pass framework tests. Independent Windows ink-thread latency and native pixels are explicitly outside this framework adaptation."
+    },
+    {
+      "path": "controls/dev/InkCanvas/InkCanvas.idl",
+      "sha": "bf2ace84c1fe90352b9b4daca91bcfa1d275b7b0",
+      "size": 8119,
+      "category": "api-contract",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter.rs",
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs",
+        "src/FerroUI.Controls.Inking/ink_input.rs",
+        "src/FerroUI.Controls.Inking/ink_synchronizer.rs",
+        "src/FerroUI.Controls.Inking/ink_canvas.rs"
+      ],
+      "notes": "Every declared public type/member is mapped using exact snapshots, original enum/property names and idiomatic Rust/FerroUI ownership. Native persistence and all three native clipboard operations have passed real Windows fixtures. The container intentionally normalizes pasted selection to the published contract while the native adapter retains observed OS state; the difference is explicit in member records."
+    },
+    {
+      "path": "controls/dev/InkCanvas/InkCanvas.vcxitems",
+      "sha": "0dbfdce1f48cc166c96061af8142032f5bf97f18",
+      "size": 1462,
+      "category": "build",
+      "status": "not_applicable",
+      "rust_files": [],
+      "notes": "C++/MSBuild project scaffolding is replaced by the existing Cargo crates; no runtime behavior is omitted by this build-file disposition."
+    },
+    {
+      "path": "controls/dev/InkCanvas/InkCanvasAutomationPeer.cpp",
+      "sha": "06c82689f9fe07f4768e3ed3fc84ae7c684278b7",
+      "size": 4919,
+      "category": "automation",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_canvas_automation_peer.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "The FerroUI Pane peer computes bounds from the canvas, own/ancestor clips, ScrollViewer viewport and visual root. All matching upstream clipping/offscreen cases pass in ink_parity_tests.rs; Windows out-of-process UIA transport is supplied by the existing backend."
+    },
+    {
+      "path": "controls/dev/InkCanvas/InkCanvasAutomationPeer.h",
+      "sha": "a11c0c4b0590956fd8d5c935c8473c9f877598cc",
+      "size": 826,
+      "category": "automation",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_canvas_automation_peer.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "The FerroUI Pane peer computes bounds from the canvas, own/ancestor clips, ScrollViewer viewport and visual root. All matching upstream clipping/offscreen cases pass in ink_parity_tests.rs; Windows out-of-process UIA transport is supplied by the existing backend."
+    },
+    {
+      "path": "controls/dev/InkCanvas/InkCanvasAutomationPeer.idl",
+      "sha": "f979448d37a2d70dbf93f3055e8ecc0abd724b01",
+      "size": 227,
+      "category": "api-contract",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_canvas_automation_peer.rs"
+      ],
+      "notes": "Exact IDL snapshot is preserved. Every declared type and member has an individual mapping/status in api-map.json; Rust ownership and framework-specific signatures are intentional."
+    },
+    {
+      "path": "controls/dev/InkCanvas/InkPresenter.cpp",
+      "sha": "826d5cbd3f7ab7e5bd1c8f37f4cf745ee0a873e7",
+      "size": 38802,
+      "category": "service",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter.rs",
+        "src/FerroUI.Controls.Inking/ink_input.rs",
+        "src/FerroUI.Controls.Inking/ink_events.rs",
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs",
+        "src/FerroUI.Controls.Inking/ink_synchronizer.rs"
+      ],
+      "notes": "Stable Rust services, property/event snapshots, disposable subscriptions, selection, persistence delegation and custom-drying transactions replace the UI/ink-thread COM proxy. FerroUI owns scheduling, input and rendering. Real native format operations have separate Windows evidence; native clipboard validation remains in its individual service and IDL records."
+    },
+    {
+      "path": "controls/dev/InkCanvas/InkPresenter.h",
+      "sha": "e1191107642e3a69d4fdd639362531da68b38b07",
+      "size": 23310,
+      "category": "service",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter.rs",
+        "src/FerroUI.Controls.Inking/ink_input.rs",
+        "src/FerroUI.Controls.Inking/ink_events.rs",
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs",
+        "src/FerroUI.Controls.Inking/ink_synchronizer.rs"
+      ],
+      "notes": "Stable Rust services, property/event snapshots, disposable subscriptions, selection, persistence delegation and custom-drying transactions replace the UI/ink-thread COM proxy. FerroUI owns scheduling, input and rendering. Real native format operations have separate Windows evidence; native clipboard validation remains in its individual service and IDL records."
+    },
+    {
+      "path": "controls/dev/InkCanvas/InteractionTests/InkCanvas_InteractionTests.projitems",
+      "sha": "845e5ab43834d9625742cf45ab94fe81015235fc",
+      "size": 752,
+      "category": "build",
+      "status": "not_applicable",
+      "rust_files": [],
+      "notes": "C++/MSBuild project scaffolding is replaced by the existing Cargo crates; no runtime behavior is omitted by this build-file disposition."
+    },
+    {
+      "path": "controls/dev/InkCanvas/InteractionTests/InkCanvas_InteractionTests.shproj",
+      "sha": "8210ef7b41ed867f64cf93582c7906c35441eda7",
+      "size": 1232,
+      "category": "build",
+      "status": "not_applicable",
+      "rust_files": [],
+      "notes": "C++/MSBuild project scaffolding is replaced by the existing Cargo crates; no runtime behavior is omitted by this build-file disposition."
+    },
+    {
+      "path": "controls/dev/InkCanvas/InteractionTests/InkCanvasTests.cs",
+      "sha": "7f8ae8952210c8943e914ccf0f9afe16d7e8e159",
+      "size": 1976,
+      "category": "interaction-tests",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "The sole source scenario finds the named canvas and asserts nonzero bounds; it does not inject a pen or compare pixels. The equivalent real FerroUI control-tree/peer assertions pass in ink_parity_tests.rs, adapting the Windows interaction transport."
+    },
+    {
+      "path": "controls/dev/InkCanvas/TestUI/InkCanvas_TestUI.projitems",
+      "sha": "80393ae33ea36dc4cef5ed932f5f97783308fda1",
+      "size": 1002,
+      "category": "build",
+      "status": "not_applicable",
+      "rust_files": [],
+      "notes": "C++/MSBuild project scaffolding is replaced by the existing Cargo crates; no runtime behavior is omitted by this build-file disposition."
+    },
+    {
+      "path": "controls/dev/InkCanvas/TestUI/InkCanvas_TestUI.shproj",
+      "sha": "ce6e5d750f33f2dba97fe0ae4220514062a14122",
+      "size": 1222,
+      "category": "build",
+      "status": "not_applicable",
+      "rust_files": [],
+      "notes": "C++/MSBuild project scaffolding is replaced by the existing Cargo crates; no runtime behavior is omitted by this build-file disposition."
+    },
+    {
+      "path": "controls/dev/InkCanvas/TestUI/InkCanvasPage.xaml",
+      "sha": "2738b9444b512ba55b7a29b2a975bc6d0014795b",
+      "size": 1762,
+      "category": "sample",
+      "status": "adapted",
+      "rust_files": [
+        "samples/ControlCatalog/Pages/InkingPage.xaml",
+        "samples/ControlCatalog/Pages/inking_page.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "The source canvas-plus-toolbar demonstration is combined into the FerroUI ControlCatalog Inking page. The sample explicitly enables mouse/touch in addition to the true pen-only default and adds portable snapshot/clipboard actions. Named-control/bounds behavior is tested in the framework interaction fixture."
+    },
+    {
+      "path": "controls/dev/InkCanvas/TestUI/InkCanvasPage.xaml.cs",
+      "sha": "118d49de9f3c86c7cbe3fc51796d240ba1d03cf9",
+      "size": 636,
+      "category": "sample",
+      "status": "adapted",
+      "rust_files": [
+        "samples/ControlCatalog/Pages/InkingPage.xaml",
+        "samples/ControlCatalog/Pages/inking_page.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "The source canvas-plus-toolbar demonstration is combined into the FerroUI ControlCatalog Inking page. The sample explicitly enables mouse/touch in addition to the true pen-only default and adds portable snapshot/clipboard actions. Named-control/bounds behavior is tested in the framework interaction fixture."
+    },
+    {
+      "path": "controls/dev/InkToolbar/APITests/InkToolbar_APITests.projitems",
+      "sha": "2769ff62aa14779ccc8058a767d79c18354d4714",
+      "size": 746,
+      "category": "build",
+      "status": "not_applicable",
+      "rust_files": [],
+      "notes": "C++/MSBuild project scaffolding is replaced by the existing Cargo crates; no runtime behavior is omitted by this build-file disposition."
+    },
+    {
+      "path": "controls/dev/InkToolbar/APITests/InkToolbar_APITests.shproj",
+      "sha": "2b233e497263abe4d7bbcfa4e644624968c2b036",
+      "size": 1225,
+      "category": "build",
+      "status": "not_applicable",
+      "rust_files": [],
+      "notes": "C++/MSBuild project scaffolding is replaced by the existing Cargo crates; no runtime behavior is omitted by this build-file disposition."
+    },
+    {
+      "path": "controls/dev/InkToolbar/APITests/InkToolbarTests.cs",
+      "sha": "507a09671db4d5ba6bc1314965c48cc607adbdb9",
+      "size": 74505,
+      "category": "api-tests",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_tests.rs",
+        "src/FerroUI.Controls.Inking/theme_tests.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "Every one of the 53 exact source API test methods maps to passed Rust assertions, including the populated stencil blank-icon regression in the real themed toolbar. Source control assertions use existing FerroUI mock-window/dispatcher, real controls and automation providers; all 65 combined canvas/toolbar scenarios are covered."
+    },
+    {
+      "path": "controls/dev/InkToolbar/ButtonManager.cpp",
+      "sha": "7bbec749a08809d47ad84aae928db313f6e139c9",
+      "size": 34550,
+      "category": "support",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
+      ],
+      "notes": "Toolbar orchestration, targets, palettes/resources and erase-all behavior use FerroUI. Public Children retains every application addition while only accepted unique builtin kinds/custom identities join the visual panel and service wiring. Unsupported/duplicate entries retain app state and are not automatically promoted. All four exact registration regressions pass in the full controls run at 7fbffd0; framework diagnostics log rejected additions."
+    },
+    {
+      "path": "controls/dev/InkToolbar/ButtonManager.h",
+      "sha": "acdf7e2919c09c7b310627649b8e8fa19e043d7f",
+      "size": 7620,
+      "category": "support",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
+      ],
+      "notes": "Toolbar orchestration, targets, palettes/resources and erase-all behavior use FerroUI. Public Children retains every application addition while only accepted unique builtin kinds/custom identities join the visual panel and service wiring. Unsupported/duplicate entries retain app state and are not automatically promoted. All four exact registration regressions pass in the full controls run at 7fbffd0; framework diagnostics log rejected additions."
+    },
+    {
+      "path": "controls/dev/InkToolbar/ColorNames.h",
+      "sha": "85755c8bffc755d13703772d4247e26f05b7a25a",
+      "size": 4023,
+      "category": "support",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/color_names.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs"
+      ],
+      "notes": "The 32 quantized source color families and RGB formatting map to the generated localized resource tables and application resource overrides; real color-name/contrast tests exercise the helper."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbar_themeresources.xaml",
+      "sha": "9460b3864f295c104afe01c4158bb2cbb6f0908d",
+      "size": 785,
+      "category": "theme",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/Themes/WinUI/InkToolbarResources.xaml",
+        "src/FerroUI.Controls.Inking/Themes/WinUI/InkToolbar.xaml"
+      ],
+      "notes": "Default, Light and HighContrast brush dictionaries map source resource roles to the dedicated FerroUI templates. Existing framework theme/resource notifications drive live changes. Source vector icons and native pixels are intentional framework rendering adaptations; this resource include does not itself contain animations."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbar.cpp",
+      "sha": "c6b80cd271431f6f8611b51e6a024c3566c1acf1",
+      "size": 68616,
+      "category": "control",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
+      ],
+      "notes": "Toolbar orchestration, targets, palettes/resources and erase-all behavior use FerroUI. Public Children retains every application addition while only accepted unique builtin kinds/custom identities join the visual panel and service wiring. Unsupported/duplicate entries retain app state and are not automatically promoted. All four exact registration regressions pass in the full controls run at 7fbffd0; framework diagnostics log rejected additions."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbar.h",
+      "sha": "e11fcc63f00f5a004c8a3478d33ac413f10df908",
+      "size": 11075,
+      "category": "control",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
+      ],
+      "notes": "Toolbar orchestration, targets, palettes/resources and erase-all behavior use FerroUI. Public Children retains every application addition while only accepted unique builtin kinds/custom identities join the visual panel and service wiring. Unsupported/duplicate entries retain app state and are not automatically promoted. All four exact registration regressions pass in the full controls run at 7fbffd0; framework diagnostics log rejected additions."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbar.idl",
+      "sha": "40d610303b67f970dd49d3cb9af8c1d15b114e55",
+      "size": 11741,
+      "category": "api-contract",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_types.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_configuration.rs"
+      ],
+      "notes": "All declared public types/members have exact snapshots and individual Rust mappings, preserving enum discriminants and XAML property names. Source registration and configuration entrance semantics are implemented and their dedicated regressions pass at 7fbffd0. Native rasterization is replaced by the documented FerroUI rendering adaptation."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbar.vcxitems",
+      "sha": "5ce51dd3b73eff303bd43af17f73d3c22842bba2",
+      "size": 5501,
+      "category": "build",
+      "status": "not_applicable",
+      "rust_files": [],
+      "notes": "C++/MSBuild project scaffolding is replaced by the existing Cargo crates; no runtime behavior is omitted by this build-file disposition."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbar.xaml",
+      "sha": "93364515ba97fcb1c17758c507533d4698e8edfa",
+      "size": 130900,
+      "category": "theme",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/Themes/WinUI/InkToolbar.xaml",
+        "src/FerroUI.Controls.Inking/Themes/WinUI/InkToolbarResources.xaml",
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_configuration.rs",
+        "src/FerroUI.Controls.Inking/theme_tests.rs"
+      ],
+      "notes": "Seventeen typed FerroUI themes plus shared base retain resource roles, template parts, state styles, real configuration controls and a tested portable entrance. Presenter-hosted builtin glyph content uses scoped ordinary descendants and typed button-ancestor bindings; direct-template controls retain template selectors. All 22 theme/resource tests pass, including populated ruler/protractor geometry, live foreground/selected brushes and routed keyboard flyout/arrow states. Symbol-font glyphs and rasterization are documented vector/render adaptations."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarAutomationPeer.cpp",
+      "sha": "c46ff666e1d275f6cd2e58a3e9fa963588b92acf",
+      "size": 798,
+      "category": "automation",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_automation_peer.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "The existing FerroUI peer system exposes the toolbar with semantic ToolBar role instead of the source Pane role. Loaded-tree and tool-provider tests pass; platform UIA transport remains supplied by the framework."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarAutomationPeer.h",
+      "sha": "c245bf19daf43a420365f70b75b961a0e80e6531",
+      "size": 617,
+      "category": "automation",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_automation_peer.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "The existing FerroUI peer system exposes the toolbar with semantic ToolBar role instead of the source Pane role. Loaded-tree and tool-provider tests pass; platform UIA transport remains supplied by the framework."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarAutomationPeer.idl",
+      "sha": "002665c759e179176d3841d9b0d2d24befbeb12c",
+      "size": 1276,
+      "category": "api-contract",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_automation_peer.rs"
+      ],
+      "notes": "Exact IDL snapshot is preserved. Every declared type and member has an individual mapping/status in api-map.json; Rust ownership and framework-specific signatures are intentional."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarBallpointPenButton.h",
+      "sha": "8cb94dfb35462eed51c21859ebe902e135189f45",
+      "size": 1621,
+      "category": "control",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_tests.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "Builtin pen subclasses retain their tool kind, independent palette/index/width state, localized name/tooltip, theme lookup and attribute creation. Source constructor/default/width/brush assertions pass. Highlighter dispatch to its chisel attributes is an intentional source correction; pencil rendering follows the documented portable renderer adaptation."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarCustomPen.h",
+      "sha": "d1c2a7f9b4ed4f35fcba78d77dbfc18b0eb6eb9a",
+      "size": 1318,
+      "category": "control",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
+      ],
+      "notes": "Custom drawing-attribute virtual dispatch uses FerroUI class/trait extension hooks, preserving the public customization contract."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarCustomPenButton.h",
+      "sha": "c75724a0f589b7196646c142dc2066d26a0d3d14",
+      "size": 1499,
+      "category": "control",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_tests.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "FerroUI subclasses retain custom kinds, configurable content and per-instance state. The custom-pen factory uses an idiomatic virtual trait with nullable brush input; null/solid brush and requested-width source cases pass. Custom content presentation uses real framework flyouts."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarCustomToggleButton.h",
+      "sha": "a1dae037e016a1b07016d7eb8a27f50e3afbf224",
+      "size": 656,
+      "category": "control",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_tests.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "FerroUI subclasses retain custom kinds, configurable content and per-instance state. The custom-pen factory uses an idiomatic virtual trait with nullable brush input; null/solid brush and requested-width source cases pass. Custom content presentation uses real framework flyouts."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarCustomToolButton.h",
+      "sha": "a3680f93c0a448d680b3c9543c811b6d682431a8",
+      "size": 950,
+      "category": "control",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_tests.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "FerroUI subclasses retain custom kinds, configurable content and per-instance state. The custom-pen factory uses an idiomatic virtual trait with nullable brush input; null/solid brush and requested-width source cases pass. Custom content presentation uses real framework flyouts."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarEraserButton.cpp",
+      "sha": "bbd60aedc3452e2bc3a990106b10ba4d2e13e52e",
+      "size": 20123,
+      "category": "control",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_tests.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "Eraser kind, IsClearAllVisible, clear-before-notification ordering and restore-last-tool behavior use FerroUI controls/events and pass the source scenarios. Native private precision-eraser choices are hidden in the pinned source and not public IDL members; no unreachable Windows precision UI is claimed."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarEraserButton.h",
+      "sha": "33d52f855ba4751a24a79028afab81f20f184426",
+      "size": 4642,
+      "category": "control",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_tests.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "Eraser kind, IsClearAllVisible, clear-before-notification ordering and restore-last-tool behavior use FerroUI controls/events and pass the source scenarios. Native private precision-eraser choices are hidden in the pinned source and not public IDL members; no unreachable Windows precision UI is claimed."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarEraserButtonInternal.h",
+      "sha": "deffbe93ae76fcff678e1c270734efb83e9d54e9",
+      "size": 450,
+      "category": "control",
+      "status": "not_applicable",
+      "rust_files": [],
+      "notes": "This generated header contains only an empty InkToolbarEraserButtonInternal declaration with an undefined generated C++ template base. It declares no properties, methods or behavior; Rust class/property metadata replaces that scaffolding."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarFlyoutHelper.h",
+      "sha": "69c2138d0cb9fdda1f789b6e5fd9dfdacfe4183a",
+      "size": 2359,
+      "category": "support",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "Existing FerroUI Flyout/PopupFlyoutBase supplies popup lifetime and fit-to-screen behavior. Source Auto/Bottom maps to BottomEdgeAlignedLeft, Top to TopEdgeAlignedLeft, and Left/Right remain explicit independent of toolbar orientation. Every placement mapping passes a real flyout assertion."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarFlyoutItem.cpp",
+      "sha": "3c9da917e97fdf70cae910e837baa8a34385902f",
+      "size": 21874,
+      "category": "control",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_configuration.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "The real FerroUI flyout item preserves Kind, Selected and Checked transitions for Radio/RadioCheck/checkbox/menu roles and synchronizes selection with the owner. Source property-transition and provider-invocation assertions pass; icons/templates are supplied by the dedicated theme."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarFlyoutItem.h",
+      "sha": "fe4dca9f2cca6078f86612fd61cc9b62e4990364",
+      "size": 3870,
+      "category": "control",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_configuration.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "The real FerroUI flyout item preserves Kind, Selected and Checked transitions for Radio/RadioCheck/checkbox/menu roles and synchronizes selection with the owner. Source property-transition and provider-invocation assertions pass; icons/templates are supplied by the dedicated theme."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarFlyoutItemAutomationPeer.h",
+      "sha": "378fe51a6cc9cdd93e52b99ecce6be24c56d4ffa",
+      "size": 4187,
+      "category": "automation",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_automation_peer.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "Invoke and conditional SelectionItem patterns preserve Radio/RadioCheck/checkbox behavior, checked state, invalid removal/multiple selection and disabled errors in passed provider tests. Existing FerroUI provider error types replace native HRESULT distinctions as documented."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarHighlighterButton.h",
+      "sha": "2feb4fb02096f4d9794fa671c2c337947ac012f4",
+      "size": 2582,
+      "category": "control",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_tests.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "Builtin pen subclasses retain their tool kind, independent palette/index/width state, localized name/tooltip, theme lookup and attribute creation. Source constructor/default/width/brush assertions pass. Highlighter dispatch to its chisel attributes is an intentional source correction; pencil rendering follows the documented portable renderer adaptation."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarIsStencilButtonCheckedChangedEventArgs.h",
+      "sha": "1c65791409fd98a279866c485e10a6268ca184cd",
+      "size": 1081,
+      "category": "control",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar.rs"
+      ],
+      "notes": "Replaced by immutable Rust event data containing a FerroUI control reference and stencil enum."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarMenuButton.cpp",
+      "sha": "897fd170d8cbc4ba6a84d538218b76c5eb86949b",
+      "size": 6803,
+      "category": "control",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "FerroUI menu/stencil subclasses expose the complete public properties and stable ruler/protractor services, exclusive guide selection, visible item filtering, selected-state synchronization and native-style first/second activation sequencing. Source property, selection and target assertions pass; menu UIA expand and themed icon evidence remain separate pending records."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarMenuButton.h",
+      "sha": "306be683e11c91be19cba0bf4c912facc863e2be",
+      "size": 3074,
+      "category": "control",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "FerroUI menu/stencil subclasses expose the complete public properties and stable ruler/protractor services, exclusive guide selection, visible item filtering, selected-state synchronization and native-style first/second activation sequencing. Source property, selection and target assertions pass; menu UIA expand and themed icon evidence remain separate pending records."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarMenuButtonAutomationPeer.h",
+      "sha": "75227dd6acd34740a9c78286886b62e166f98ea3",
+      "size": 3771,
+      "category": "automation",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_automation_peer.rs"
+      ],
+      "notes": "FerroUI menu peer exposes dynamic Toggle/ExpandCollapse patterns, localized naming and real popup state. Expand selects the owning stencil before opening; single-stencil cached expand is a no-op. Exact source and active-input/content-guard scenarios pass in CI run39603593237/job119233997583. Native HRESULT-only distinctions use the documented framework provider exception adaptation."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarPenButton.cpp",
+      "sha": "aac5dfa29f4710abdb23602ba989c0086c90cb06",
+      "size": 9854,
+      "category": "control",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_configuration.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_tests.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "Per-pen palette, selection, range/width coercion, localized color descriptions, high-contrast policy and configuration composition use existing FerroUI controls/resources. Passed source cases cover selected brushes, invalid-index retention, bounds and independent tool state; exact source color-description validation remains separately recorded."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarPenButton.h",
+      "sha": "fde8b69f9ce52d0d3e2af77c49e1fd3a7cf76577",
+      "size": 3228,
+      "category": "control",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_configuration.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_tests.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "Per-pen palette, selection, range/width coercion, localized color descriptions, high-contrast policy and configuration composition use existing FerroUI controls/resources. Passed source cases cover selected brushes, invalid-index retention, bounds and independent tool state; exact source color-description validation remains separately recorded."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarPencilButton.h",
+      "sha": "f190a6315818444e99b9339fa7a3e76b898d5488",
+      "size": 1509,
+      "category": "control",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_tests.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "Builtin pen subclasses retain their tool kind, independent palette/index/width state, localized name/tooltip, theme lookup and attribute creation. Source constructor/default/width/brush assertions pass. Highlighter dispatch to its chisel attributes is an intentional source correction; pencil rendering follows the documented portable renderer adaptation."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarPenConfigurationControl.cpp",
+      "sha": "3c0b0916c50751e95d8f92ce3ab05179dda0b762",
+      "size": 36160,
+      "category": "control",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_configuration.rs"
+      ],
+      "notes": "Actual FerroUI palette, slider, localized headings and all 103 source preview samples implement configuration. The source entrance transition maps to framework-clock staggered opacity/translation with existing-transform restoration and weak-owner lifetime cleanup. Progression, cancellation/detach/reattach/completion, drop and pen-flyout release regressions pass at 7fbffd0. Timing and rasterization are documented framework choices."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarPenConfigurationControl.h",
+      "sha": "e61cf3acd80f6a3ed922c6967e8232531b9f34f0",
+      "size": 6439,
+      "category": "control",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_configuration.rs"
+      ],
+      "notes": "Actual FerroUI palette, slider, localized headings and all 103 source preview samples implement configuration. The source entrance transition maps to framework-clock staggered opacity/translation with existing-transform restoration and weak-owner lifetime cleanup. Progression, cancellation/detach/reattach/completion, drop and pen-flyout release regressions pass at 7fbffd0. Timing and rasterization are documented framework choices."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarRulerButton.h",
+      "sha": "5984026db56cd961c0f5484bb24430b2846ffda8",
+      "size": 905,
+      "category": "control",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "The legacy ruler toggle controls the stable presenter ruler, with target synchronization and source checked-state behavior verified in passed framework tests. Guide drawing and manipulation are the documented FerroUI stencil implementation."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarStencilButton.cpp",
+      "sha": "0faaa72a8fb7c8293666370c9fbf1af015b0071e",
+      "size": 19581,
+      "category": "control",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "FerroUI menu/stencil subclasses expose the complete public properties and stable ruler/protractor services, exclusive guide selection, visible item filtering, selected-state synchronization and native-style first/second activation sequencing. Source property, selection and target assertions pass; menu UIA expand and themed icon evidence remain separate pending records."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarStencilButton.h",
+      "sha": "133ed7e5e640f2f62188ba22e975892c8ea03247",
+      "size": 3053,
+      "category": "control",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "FerroUI menu/stencil subclasses expose the complete public properties and stable ruler/protractor services, exclusive guide selection, visible item filtering, selected-state synchronization and native-style first/second activation sequencing. Source property, selection and target assertions pass; menu UIA expand and themed icon evidence remain separate pending records."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarStrokeWidthSlider.cpp",
+      "sha": "c9ea07f3a8015c6240ed58c057c91025fe297437",
+      "size": 1464,
+      "category": "control",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_configuration.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_automation_peer.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "FerroUI Slider retains width/range state and the named accessibility provider. Min/max clamping, value events, source property semantics and public metadata are covered by passed tests. Template drawing uses the dedicated WinUI theme."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarStrokeWidthSlider.h",
+      "sha": "7e2fcfd55108faecc12a7543b83459a2d64e9dd4",
+      "size": 987,
+      "category": "control",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_configuration.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_automation_peer.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "FerroUI Slider retains width/range state and the named accessibility provider. Min/max clamping, value events, source property semantics and public metadata are covered by passed tests. Template drawing uses the dedicated WinUI theme."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarStrokeWidthSlider.idl",
+      "sha": "3cc5b156b0615e1caa2e8f830774abf9e28c581c",
+      "size": 545,
+      "category": "api-contract",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_configuration.rs"
+      ],
+      "notes": "Exact IDL snapshot is preserved. Every declared type and member has an individual mapping/status in api-map.json; Rust ownership and framework-specific signatures are intentional."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarStrokeWidthSliderAutomationPeer.cpp",
+      "sha": "e558fc67789a3be15932c5cd387e41d209462997",
+      "size": 4052,
+      "category": "automation",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_automation_peer.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "RangeValue and text Value providers expose absolute width, clamp to min/max, publish value-change events and respect disabled state. Numeric, clamp and event assertions pass against real FerroUI providers."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarStrokeWidthSliderAutomationPeer.h",
+      "sha": "54f51807a3b2a366745f47158a6dfca66bb8e0f1",
+      "size": 1260,
+      "category": "automation",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_automation_peer.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "RangeValue and text Value providers expose absolute width, clamp to min/max, publish value-change events and respect disabled state. Numeric, clamp and event assertions pass against real FerroUI providers."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarStrokeWidthSliderAutomationPeer.idl",
+      "sha": "1e543b2fa2ff14d23613d483090c5fa25a6efa69",
+      "size": 690,
+      "category": "api-contract",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_automation_peer.rs"
+      ],
+      "notes": "Exact IDL snapshot is preserved. Every declared type and member has an individual mapping/status in api-map.json; Rust ownership and framework-specific signatures are intentional."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarToggleButton.cpp",
+      "sha": "86e596aa13e26d842d75e430164c3b46b0247c30",
+      "size": 2522,
+      "category": "control",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "FerroUI tool/toggle classes retain radio/exclusive selection, checked-state callbacks, tool kinds, custom content and source lookup behavior. Real flyouts and inherited routed/accessibility services replace native helper plumbing. Source construction/property/provider/keyboard scenarios pass; live-input popup gating is an intentional correction of the pinned source subscription omission."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarToggleButton.h",
+      "sha": "21c715eaa2186811ca93c1a52d1cfdabcd85d2e5",
+      "size": 1604,
+      "category": "control",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "FerroUI tool/toggle classes retain radio/exclusive selection, checked-state callbacks, tool kinds, custom content and source lookup behavior. Real flyouts and inherited routed/accessibility services replace native helper plumbing. Source construction/property/provider/keyboard scenarios pass; live-input popup gating is an intentional correction of the pinned source subscription omission."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarToolButton.cpp",
+      "sha": "cbc092b4923639bf8e6a7dfa85d13cb33c46739e",
+      "size": 6512,
+      "category": "control",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "FerroUI tool/toggle classes retain radio/exclusive selection, checked-state callbacks, tool kinds, custom content and source lookup behavior. Real flyouts and inherited routed/accessibility services replace native helper plumbing. Source construction/property/provider/keyboard scenarios pass; live-input popup gating is an intentional correction of the pinned source subscription omission."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarToolButton.h",
+      "sha": "df4334aa35dcd0cf832771d9edd228e7d60b677f",
+      "size": 3158,
+      "category": "control",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "FerroUI tool/toggle classes retain radio/exclusive selection, checked-state callbacks, tool kinds, custom content and source lookup behavior. Real flyouts and inherited routed/accessibility services replace native helper plumbing. Source construction/property/provider/keyboard scenarios pass; live-input popup gating is an intentional correction of the pinned source subscription omission."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarToolButtonAutomationPeer.h",
+      "sha": "20dcbc4bbda900bf8393e3f4986ed75e210b32cc",
+      "size": 5319,
+      "category": "automation",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_automation_peer.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "Pen/eraser/custom tool roles, localized selected names, palette help, selection and expand/collapse use FerroUI providers. Passed source scenarios cover roles, selection and popup state; a later regression additionally checks selecting before live-inking/custom-content gating. Native HRESULT-only distinctions use the documented existing provider error type."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InkToolbarTrace.h",
+      "sha": "eec872820c27bc609bb959ec8f39648268f74658",
+      "size": 6189,
+      "category": "diagnostics",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar.rs",
+        "src/FerroUI.Controls.Inking/ink_point.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_automation_peer.rs"
+      ],
+      "notes": "Rejected duplicate/unsupported public additions emit one existing FerroUI Logger Warning in LogArea::CONTROL; recoverable API failures use InkError or framework provider errors. Windows ETW keywords/event names, OutputDebugString and MUXControlsTestHooks are replaced by framework diagnostics, not reproduced as a native provider."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InteractionTests/InkToolbar_InteractionTests.projitems",
+      "sha": "ac08eb7771cb409dc586261bda1c934a3e32b8b0",
+      "size": 754,
+      "category": "build",
+      "status": "not_applicable",
+      "rust_files": [],
+      "notes": "C++/MSBuild project scaffolding is replaced by the existing Cargo crates; no runtime behavior is omitted by this build-file disposition."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InteractionTests/InkToolbar_InteractionTests.shproj",
+      "sha": "a3b20309a8a1da15da6cffd778636a2cfb4249da",
+      "size": 1233,
+      "category": "build",
+      "status": "not_applicable",
+      "rust_files": [],
+      "notes": "C++/MSBuild project scaffolding is replaced by the existing Cargo crates; no runtime behavior is omitted by this build-file disposition."
+    },
+    {
+      "path": "controls/dev/InkToolbar/InteractionTests/InkToolbarTests.cs",
+      "sha": "4865b0cd7ea6fb906c95f519cdfafd79e7f8d05c",
+      "size": 6341,
+      "category": "interaction-tests",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "All seven source scenarios are retained in tests-map.json. A loaded FerroUI fixture uses actual ComboBox selection events, CheckBox toggle providers, a toolbar/canvas target and an active-tool TextBlock, checking every source configuration and stronger resulting-state assertions. Windows process/UIA harness plumbing is replaced by framework test services."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/af-ZA/Resources.resw",
+      "sha": "4551c633fa7aba3507401eadc7de31c6dd5b96fc",
+      "size": 15048,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/am-ET/Resources.resw",
+      "sha": "9de360bd523936c93b03b13358f8d1b957aa6fb9",
+      "size": 15581,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/ar-SA/Resources.resw",
+      "sha": "f5957f91b13a94cf2005869b7df02481f565940a",
+      "size": 15552,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/as-IN/Resources.resw",
+      "sha": "3487509c5389aaedc4e14561fd61e7555a26fc6e",
+      "size": 16141,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/az-Latn-AZ/Resources.resw",
+      "sha": "6404e2569e13abf9e2e97703054d7d76ddc9b6b8",
+      "size": 15233,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/bg-BG/Resources.resw",
+      "sha": "0d2e2ad2c498f51ff1f041aa7af072300104d57c",
+      "size": 15862,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/bn-IN/Resources.resw",
+      "sha": "c55821e39e06ec1cbefd07b695ca375b70e1a8a7",
+      "size": 16165,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/bs-Latn-BA/Resources.resw",
+      "sha": "0447420398551151bb02063d5cb1e50e5259fa68",
+      "size": 15152,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/ca-Es-VALENCIA/Resources.resw",
+      "sha": "1196433a22895cd41ff5049d325fe30640d32241",
+      "size": 15145,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/ca-ES/Resources.resw",
+      "sha": "72832b4715b0e17414c89857f93946adf18589d3",
+      "size": 15171,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/cs-CZ/Resources.resw",
+      "sha": "ed3833cb3610655afd3f95d7a8da799eb5dcc341",
+      "size": 15271,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/cy-GB/Resources.resw",
+      "sha": "76ee7a10b20929b871a75e052ae0112d6ecad8d2",
+      "size": 15032,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/da-DK/Resources.resw",
+      "sha": "f58b3649b4dbca9f090ef525b733520f887349fb",
+      "size": 15109,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/de-DE/Resources.resw",
+      "sha": "59889664c5fdae8bede08ce5cdf19b54fc83a793",
+      "size": 15114,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/el-GR/Resources.resw",
+      "sha": "ce0b77d3063d9e0c6f8eb9084a1f8980cf52b1f0",
+      "size": 15815,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/en-GB/Resources.resw",
+      "sha": "8fa7f273e2d583e1a34da84e36cb36e1c4a781e6",
+      "size": 15027,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/en-us/Resources.resw",
+      "sha": "db8aa6417fe964a2fa07fb4a7362a44ebc5493b1",
+      "size": 15017,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/es-ES/Resources.resw",
+      "sha": "0d445b5af99d7fcb9d385c764c4a485fabee15cc",
+      "size": 15242,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/es-MX/Resources.resw",
+      "sha": "0d445b5af99d7fcb9d385c764c4a485fabee15cc",
+      "size": 15242,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/et-EE/Resources.resw",
+      "sha": "8185346a53e4e2673809da06b1a0f463f8b423b1",
+      "size": 15107,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/eu-ES/Resources.resw",
+      "sha": "851ce83363acdccda6ef7002e10b8c1f30068dd0",
+      "size": 15219,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/fa-IR/Resources.resw",
+      "sha": "8f6b40065968ba62c60898b57b0ebc6002192a69",
+      "size": 15558,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/fi-FI/Resources.resw",
+      "sha": "62901118be106f51b6ab9eb164c1a34ad9c22d69",
+      "size": 15205,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/fil-PH/Resources.resw",
+      "sha": "ad1fc2e55063cdf6e72a634d30c9c1b963c4f11c",
+      "size": 15098,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/fr-CA/Resources.resw",
+      "sha": "efb3f463220d0628bb6130f72e86379777d375da",
+      "size": 15137,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/fr-FR/Resources.resw",
+      "sha": "19871343db090869a27b72ed3d67efe27c5f4e7b",
+      "size": 15136,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/ga-IE/Resources.resw",
+      "sha": "dcac308aa689211d1c6cbf80a05748057e85eb2e",
+      "size": 15131,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/gd-gb/Resources.resw",
+      "sha": "7115ba554dfa71480434f90af30c56c76738c3ab",
+      "size": 15246,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/gl-ES/Resources.resw",
+      "sha": "45051cc07a4408c9e74c5a03e8ef2751a1bbbd1c",
+      "size": 15181,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/gu-IN/Resources.resw",
+      "sha": "174e945391f223a4ff1327e850d52191bfc000c7",
+      "size": 15986,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/he-IL/Resources.resw",
+      "sha": "0d3348c20e94b424407416e3914fb98686cc317a",
+      "size": 15402,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/hi-IN/Resources.resw",
+      "sha": "065a011c2727ca66642758c71e08b90886b0c68f",
+      "size": 16014,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/hr-HR/Resources.resw",
+      "sha": "6bc97872b41499af50c7e1e8dcc7d64e8d9a6f3c",
+      "size": 15175,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/hu-HU/Resources.resw",
+      "sha": "00a679be9a91b012823d35eb41e9fc5fa3880b53",
+      "size": 15171,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/hy-AM/Resources.resw",
+      "sha": "5817a35659a91d59f6bed30d14f55739e0f1fb18",
+      "size": 15858,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/id-ID/Resources.resw",
+      "sha": "82c59e0cc225f6cb43d96411ea7640988c1fbad0",
+      "size": 15049,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/is-IS/Resources.resw",
+      "sha": "eda57e5c115db38b172329154490520c7e292b5b",
+      "size": 15195,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/it-IT/Resources.resw",
+      "sha": "3351d01e0e2ec9f6c1c9ae616ac6db98880588c6",
+      "size": 15210,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/ja-JP/Resources.resw",
+      "sha": "0b41fc3617930a7419b08f463f8db663eb74b6b0",
+      "size": 15383,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/ka-GE/Resources.resw",
+      "sha": "ffc6911604178272498554314b6d37479cb134ce",
+      "size": 16756,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/kk-KZ/Resources.resw",
+      "sha": "830ba94232d916b41d76b50ccfc5ea502df2ff7a",
+      "size": 15711,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/km-KH/Resources.resw",
+      "sha": "4d1454e61bc15134b58f7849b8116467fe9e037c",
+      "size": 16560,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/kn-IN/Resources.resw",
+      "sha": "49f2f6d34cd6b17bd021b0d63415559fac293edc",
+      "size": 16204,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/ko-KR/Resources.resw",
+      "sha": "41b5a09027e414b06c320c41fba9d6d81eb5b101",
+      "size": 15218,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/kok-IN/Resources.resw",
+      "sha": "d68fbb2a540d8aa666c7fef242094cdd2b6971b4",
+      "size": 16000,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/lb-LU/Resources.resw",
+      "sha": "3163686e01f748b487b964a39b2288c6fa5b3a13",
+      "size": 15077,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/lo-LA/Resources.resw",
+      "sha": "004cffe01cb632e84b1377b0fd8b391aaef988ee",
+      "size": 16130,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/lt-LT/Resources.resw",
+      "sha": "5d213e6e36d70e8028e2af3fc3d0ae2e14a77f19",
+      "size": 15347,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/lv-LV/Resources.resw",
+      "sha": "295c20d180b94059514dfc708e9cb1d20ca93ca3",
+      "size": 15227,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/mi-NZ/Resources.resw",
+      "sha": "4a13c2d5bebb08190553edbb3e0bb8ebcdc6619e",
+      "size": 15160,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/mk-MK/Resources.resw",
+      "sha": "8d3e1689506282c35e8ec8e03749a710789fe694",
+      "size": 15806,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/ml-IN/Resources.resw",
+      "sha": "4982f59668c12b0ed89931ccaccb4d1f02007f39",
+      "size": 16456,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/mr-IN/Resources.resw",
+      "sha": "242733826a1aa7e77ee927595ea594c9a71f561d",
+      "size": 15986,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/ms-MY/Resources.resw",
+      "sha": "f39cd1f57745b1901c5612b17243dc4d5e2b364d",
+      "size": 15081,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/mt-MT/Resources.resw",
+      "sha": "0f48372fd3b1891a33dcfea59a5ae805fd77b5fd",
+      "size": 15150,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/nb-NO/Resources.resw",
+      "sha": "2971fe6ac6e3ca4f63345c7e615a050c799f9ea8",
+      "size": 15080,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/ne-NP/Resources.resw",
+      "sha": "98b9553a789f151c9f4201c8f5f5b1067eafb9c4",
+      "size": 16128,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/nl-NL/Resources.resw",
+      "sha": "4736814792da4631b70782ee72a8ba3ce65eae3e",
+      "size": 15034,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/nn-NO/Resources.resw",
+      "sha": "ed1c4c88720bde905a13a8e0933cb45efff239c0",
+      "size": 15068,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/or-IN/Resources.resw",
+      "sha": "6d6c7f0c8361aa9ed4b851d73793bf5e3830d4f2",
+      "size": 16140,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/pa-IN/Resources.resw",
+      "sha": "e32342481df14b5a9b235b135b6f683a368fc5ce",
+      "size": 15937,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/pl-PL/Resources.resw",
+      "sha": "8e435bcf3c1400b2b3c53480fb32bed87d9b426b",
+      "size": 15233,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/pt-BR/Resources.resw",
+      "sha": "3a19b555b09a528cf53dbeaf19a5ac25005c6c0d",
+      "size": 15133,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/pt-PT/Resources.resw",
+      "sha": "c7d5d8051333ef45c1cb6ffec6469e7db1b1c35d",
+      "size": 15202,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/quz-PE/Resources.resw",
+      "sha": "0c6570cffd950b7ebc10af25746cf07926c2f270",
+      "size": 15155,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/ro-RO/Resources.resw",
+      "sha": "dd4c012ad7ec557e302ebb3a2dc86ae5280f723b",
+      "size": 15177,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/ru-RU/Resources.resw",
+      "sha": "2f8611c3f8b747eb38f35a23527d5decf998ad11",
+      "size": 15951,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/sk-SK/Resources.resw",
+      "sha": "50020b49f2c41122fc074b39302061a01192ae24",
+      "size": 15274,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/sl-SI/Resources.resw",
+      "sha": "7b5bf0640a9a54e79df2f8c3f08c0d32098a030d",
+      "size": 15176,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/sq-AL/Resources.resw",
+      "sha": "8df92440af980bde6b79d347539c8ce75cf978ef",
+      "size": 15266,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/sr-Cyrl-BA/Resources.resw",
+      "sha": "3d9d7da511e8d36d6db4d1844eb41efabf06ef11",
+      "size": 15723,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/sr-Cyrl-RS/Resources.resw",
+      "sha": "45a4eaa0cf9bf02f5a6e156dca50abd738ce81ce",
+      "size": 15702,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/sr-Latn-RS/Resources.resw",
+      "sha": "abf01a021062a8a61c0072d7f89fd13f3a3fef46",
+      "size": 15146,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/sv-SE/Resources.resw",
+      "sha": "ebd300c6aae6277e58a257b5dca3017148c3c8c2",
+      "size": 15147,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/ta-IN/Resources.resw",
+      "sha": "000cfa2dae4afd6d1686ec2e66dcadec6eddd657",
+      "size": 16657,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/te-IN/Resources.resw",
+      "sha": "2d7471864c0dc4a0855a1d8b0d964085064f66c3",
+      "size": 16504,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/th-TH/Resources.resw",
+      "sha": "e26abf70725f6e538ab10e7f9746eeeb5270a3a0",
+      "size": 16041,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/tr-TR/Resources.resw",
+      "sha": "351ecc6a15e159bd829107452d1c01452c2c5bce",
+      "size": 15177,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/tt-RU/Resources.resw",
+      "sha": "2ea73d5f8b47b1099d8b179f00e83b46d5ff099c",
+      "size": 15831,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/ug-CN/Resources.resw",
+      "sha": "d62130f0be5023a509fddd9c8c7f801052c4dd6d",
+      "size": 15678,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/uk-UA/Resources.resw",
+      "sha": "633cd770babdccc58aadb24c98aff66c970782a8",
+      "size": 15955,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/ur-PK/Resources.resw",
+      "sha": "746bd5f246139c96983b151c06ccb32790c91579",
+      "size": 15610,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/uz-Latn-UZ/Resources.resw",
+      "sha": "64b0a9e1981a4b8f37078c70b8ed1f665596d7be",
+      "size": 15266,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/vi-VN/Resources.resw",
+      "sha": "113a5f7f6c52507bcf9387f6f098ed8e7d5f5bbe",
+      "size": 15229,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/zh-CN/Resources.resw",
+      "sha": "250e7a5ba5c006b0da794354a36b5aed896e5637",
+      "size": 15053,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/Strings/zh-TW/Resources.resw",
+      "sha": "afdebd5834feb11bc861d4dc13968e950bb564a5",
+      "size": 15073,
+      "category": "localization",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings_data.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_strings.rs",
+        "scripts/winui-inking/generate-strings.py"
+      ],
+      "notes": "All59 resource keys from this exact SHA-verified culture file are retained in generated Rust tables. CultureInfo fallback and application resource bindings provide labels/tooltips/headings/colors; changing current_ui_culture alone is not an observable framework event for existing controls."
+    },
+    {
+      "path": "controls/dev/InkToolbar/TestUI/InkToolbar_TestUI.projitems",
+      "sha": "9365a444c2e019f4e960150c49dc75dcd2f0596d",
+      "size": 1006,
+      "category": "build",
+      "status": "not_applicable",
+      "rust_files": [],
+      "notes": "C++/MSBuild project scaffolding is replaced by the existing Cargo crates; no runtime behavior is omitted by this build-file disposition."
+    },
+    {
+      "path": "controls/dev/InkToolbar/TestUI/InkToolbar_TestUI.shproj",
+      "sha": "1fac046e854eaf28c3431332711e7f50094fe9dc",
+      "size": 1223,
+      "category": "build",
+      "status": "not_applicable",
+      "rust_files": [],
+      "notes": "C++/MSBuild project scaffolding is replaced by the existing Cargo crates; no runtime behavior is omitted by this build-file disposition."
+    },
+    {
+      "path": "controls/dev/InkToolbar/TestUI/InkToolbarPage.xaml",
+      "sha": "226d3202ce5db042944ef906f439bbf6a16475e6",
+      "size": 4450,
+      "category": "sample",
+      "status": "adapted",
+      "rust_files": [
+        "samples/ControlCatalog/Pages/InkingPage.xaml",
+        "samples/ControlCatalog/Pages/inking_page.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "The demonstration is combined into the ControlCatalog Inking page; the source test-harness selectors/toggles/active-tool label are reproduced as actual FerroUI controls in interaction_page_selectors_and_checkboxes_drive_the_live_toolbar. All four InitialControls values, both orientations, five placements and both guide toggles are exercised. C# code-behind and the Windows test-page infrastructure are replaced by Rust events."
+    },
+    {
+      "path": "controls/dev/InkToolbar/TestUI/InkToolbarPage.xaml.cs",
+      "sha": "38f47d6e90852430cfcc02ca520833262435d093",
+      "size": 3632,
+      "category": "sample",
+      "status": "adapted",
+      "rust_files": [
+        "samples/ControlCatalog/Pages/InkingPage.xaml",
+        "samples/ControlCatalog/Pages/inking_page.rs",
+        "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
+      ],
+      "notes": "The demonstration is combined into the ControlCatalog Inking page; the source test-harness selectors/toggles/active-tool label are reproduced as actual FerroUI controls in interaction_page_selectors_and_checkboxes_drive_the_live_toolbar. All four InitialControls values, both orientations, five placements and both guide toggles are exercised. C# code-behind and the Windows test-page infrastructure are replaced by Rust events."
+    }
+  ]
+}

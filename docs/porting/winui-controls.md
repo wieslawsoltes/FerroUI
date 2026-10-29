@@ -67,19 +67,20 @@ A separate namespace for the controls (`ferroui_controls::winui`, `FerroUI.Contr
 
 ### 5.1 Templates
 
-- Each templated control of this page gets its default template from a control theme of the WinUI theme, converted from the WinUI document at the pin by `scripts/winui-theme/convert.py` into `src/FerroUI.Themes.WinUI/Controls/`, with its resources from the `<Control>_themeresources.xaml` documents. The converted documents are generated files: they are regenerated with the script, never edited by hand, and the differences the conversion makes are recorded in `docs/porting/winui-theme/DEVIATIONS.md`.
+- Each templated control of this page gets its default template from a control theme of the WinUI theme, `src/FerroUI.Themes.WinUI/Controls/<Control>.xaml`, ported by hand from the WinUI document at the pin (`controls/dev/<Control>/<Control>.xaml`) as every control theme of the WinUI theme is: the visual states become pseudo-class selectors, and each difference is a row of `docs/porting/winui-theme/DEVIATIONS.md`. Its resources, the `<Control>_themeresources.xaml` documents, are converted by `scripts/winui-theme/convert.py` into `Resources/`: generated files, regenerated with the script, never edited by hand. A control WinUI draws in code (FontIcon, SymbolIcon, as PathIcon) gets a control theme with the visual its code builds.
 - No template is built in Rust, and no template child is styled from code with resource keys or colour literals. The theme tests require a theme for every templated control registered by the theme's controls; there is no allow-list.
-- **Fluent and Simple have no templates for these controls for now.** In an application with the Fluent or the Simple theme a templated control of this page has no template, and so shows nothing: use the WinUI theme (`WinUITheme`) for applications that use them. Fluent and Simple documents may follow later; this section is updated when they do.
-- The controls only the WinUI theme styles are listed in one place, `ferroui_controls::testing::WINUI_ONLY_CONTROLS` (feature `testing`), with the table below; the theme tests of Fluent and Simple check that these controls have no control theme there (and every other templated control has one), and a test of `ferroui-controls` checks that the table names the same controls.
+- **The themes derived from the WinUI theme style them too.** The macOS 26 theme (`ferroui-themes-macos`, `docs/porting/macos26-theme.md`) and the Material theme (`ferroui-themes-material`, `docs/porting/material-theme.md`) are forked from the WinUI theme and keep a control theme for every control it styles (`scripts/macos-theme/audit.py` checks it for macOS, and `scripts/themes/resource_keys.py` the resource keys of both): each control of this page gets its document in both, adapted the way the theme adapts the other WinUI templates.
+- **Fluent and Simple have no templates for these controls for now.** In an application with the Fluent or the Simple theme a templated control of this page has no template, and so shows nothing: use the WinUI, macOS or Material theme for applications that use them. Fluent and Simple documents may follow later; this section is updated when they do.
+- The controls that only the WinUI theme and the themes derived from it style are listed in one place, `ferroui_controls::testing::WINUI_ONLY_CONTROLS` (feature `testing`; the name says where their templates come from), with the table below; the theme tests of Fluent and Simple check that these controls have no control theme there (and every other templated control has one), and a test of `ferroui-controls` checks that the table names the same controls.
 
 <!-- winui-only:begin -->
-| Control | Why only the WinUI theme | Since |
+| Control | Why only the WinUI, macOS and Material themes | Since |
 |---|---|---|
-| `FontIcon` | WinUI's FontIcon: its text part is in the WinUI theme only | W4 |
-| `SymbolIcon` | WinUI's SymbolIcon: its text part is in the WinUI theme only | W4 |
-| `InfoBar` | WinUI's InfoBar: its template is converted from InfoBar.xaml into the WinUI theme | W5 |
-| `InfoBadge` | WinUI's InfoBadge: its template is converted from InfoBadge_themeresources.xaml into the WinUI theme | W5 |
-| `ProgressRing` | WinUI's ProgressRing: its template (arcs for the Lottie player) is in the WinUI theme only | W5 |
+| `FontIcon` | WinUI's FontIcon: its text part is in the WinUI-derived themes only | W4 |
+| `SymbolIcon` | WinUI's SymbolIcon: its text part is in the WinUI-derived themes only | W4 |
+| `InfoBar` | WinUI's InfoBar: its template is converted from InfoBar.xaml into the WinUI theme and its derived themes | W5 |
+| `InfoBadge` | WinUI's InfoBadge: its template is converted from InfoBadge_themeresources.xaml into the WinUI theme and its derived themes | W5 |
+| `ProgressRing` | WinUI's ProgressRing: its template (arcs for the Lottie player) is in the WinUI-derived themes only | W5 |
 <!-- winui-only:end -->
 - The tables of `winui-theme.md` that say "no FerroUI control" for these controls (NavigationView and its items, RadioButtons, RatingControl; DRP-1, DRP-2, DRP-11, DRP-13, NVP-1 and G-23 of the theme's DEVIATIONS) are updated in the pull request that lands each control; W5 updated them for InfoBar, InfoBadge and ProgressRing.
 

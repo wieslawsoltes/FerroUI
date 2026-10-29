@@ -1,0 +1,40 @@
+<!--
+  Android Material 3 Expressive visual system (AndroidX Material3 1.5.0-beta02,
+  e4d933c98df7baa7ea2b83eea6e086915961e0ff), adapted to FerroUI control contracts.
+  Derived structural templates: FerroUI WinUI theme, Copyright (c) Microsoft
+  Corporation, MIT; retained notices in NOTICE.md. See docs/porting/material-theme.md.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <TabStrip>
+        <TabStripItem>Recent</TabStripItem>
+        <TabStripItem>Shared</TabStripItem>
+        <TabStripItem IsEnabled="False">Disabled</TabStripItem>
+      </TabStrip>
+    </Border>
+  </Design.PreviewWith>
+  <ControlTheme x:Key="DefaultSelectorBarStyle" TargetType="TabStrip">
+    <Setter Property="BorderThickness" Value="0,0,0,1"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource MaterialOutlineVariantBrush}"/>
+    <Setter Property="Background" Value="{DynamicResource MaterialSurfaceBrush}"/>
+    <Setter Property="HorizontalAlignment" Value="Stretch"/>
+    <Setter Property="VerticalAlignment" Value="Top"/>
+    <Setter Property="IsTabStop" Value="False"/>
+    <Setter Property="KeyboardNavigation.TabNavigation" Value="Once"/>
+    <Setter Property="Padding" Value="0"/>
+    <Setter Property="ItemsPanel">
+      <ItemsPanelTemplate>
+        <StackPanel Orientation="Horizontal"/>
+      </ItemsPanelTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border BorderBrush="{TemplateBinding BorderBrush}" BackgroundSizing="InnerBorderEdge" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}" BorderThickness="{TemplateBinding BorderThickness}">
+          <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" Margin="{TemplateBinding Padding}"/>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type TabStrip}" TargetType="TabStrip" BasedOn="{StaticResource DefaultSelectorBarStyle}"/>
+</ResourceDictionary>

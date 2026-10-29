@@ -1,0 +1,93 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/CommonStyles/Deprecated_themeresources_any.xaml
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+  Copied from the WinUI theme foundation and adapted for macOS 26.
+  Maintained here independently; see docs/porting/macos26-theme.md.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:winui="using:FerroUI.Themes.MacOS"
+                    x:ClassModifier="internal">
+  <ResourceDictionary.ThemeDictionaries>
+    <ResourceDictionary x:Key="Default">
+      <SolidColorBrush x:Key="SystemControlTransientBackgroundBrush" Color="#2C2C2C" />
+      <Color x:Key="TextOnAccentFillColorDefault">#FFFFFF</Color>
+      <Color x:Key="TextOnAccentAAFillColorPrimary">#000000</Color>
+      <Color x:Key="TextOnAccentAAFillColorSecondary">#80000000</Color>
+      <Color x:Key="TextOnAccentAAFillColorDisabled">#87FFFFFF</Color>
+      <Color x:Key="ControlAAFillColorDefault">#8BFFFFFF</Color>
+      <Color x:Key="ControlAAFillColorDisabled">#3FFFFFFF</Color>
+      <Color x:Key="AccentAAFillColorDisabled">#28FFFFFF</Color>
+      <Color x:Key="ControlStrokeColorForAAFillOnImage">#6B000000</Color>
+      <Color x:Key="ControlAAStrokeColorDefault">#8BFFFFFF</Color>
+      <Color x:Key="ControlAAStrokeColorDisabled">#28FFFFFF</Color>
+      <SolidColorBrush x:Key="TextOnAccentFillColorDefaultBrush" Color="{DynamicResource TextOnAccentFillColorDefault}" />
+      <SolidColorBrush x:Key="TextOnAccentAAFillColorPrimaryBrush" Color="{DynamicResource TextOnAccentAAFillColorPrimary}" />
+      <SolidColorBrush x:Key="TextOnAccentAAFillColorSecondaryBrush" Color="{DynamicResource TextOnAccentAAFillColorSecondary}" />
+      <SolidColorBrush x:Key="TextOnAccentAAFillColorDisabledBrush" Color="{DynamicResource TextOnAccentAAFillColorDisabled}" />
+      <SolidColorBrush x:Key="ControlAAFillColorDefaultBrush" Color="{DynamicResource ControlAAFillColorDefault}" />
+      <SolidColorBrush x:Key="ControlAAFillColorDisabledBrush" Color="{DynamicResource ControlAAFillColorDisabled}" />
+      <SolidColorBrush x:Key="AccentAAFillColorDefaultBrush" Color="{DynamicResource SystemAccentColor}" />
+      <SolidColorBrush x:Key="AccentAAFillColorSecondaryBrush" Color="{DynamicResource SystemAccentColor}" />
+      <SolidColorBrush x:Key="AccentAAFillColorTertiaryBrush" Color="{DynamicResource SystemAccentColor}" />
+      <SolidColorBrush x:Key="AccentAAFillColorDisabledBrush" Color="{DynamicResource AccentAAFillColorDisabled}" />
+      <SolidColorBrush x:Key="ControlStrokeColorForAAFillOnImageBrush" Color="{DynamicResource ControlStrokeColorForAAFillOnImage}" />
+      <SolidColorBrush x:Key="ControlAAStrokeColorDefaultBrush" Color="{DynamicResource ControlAAStrokeColorDefault}" />
+      <SolidColorBrush x:Key="ControlAAStrokeColorDisabledBrush" Color="{DynamicResource ControlAAStrokeColorDisabled}" />
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="Light">
+      <SolidColorBrush x:Key="SystemControlTransientBackgroundBrush" Color="#FCFCFC" />
+      <Color x:Key="TextOnAccentFillColorDefault">#FFFFFF</Color>
+      <Color x:Key="TextOnAccentAAFillColorPrimary">#FFFFFF</Color>
+      <Color x:Key="TextOnAccentAAFillColorSecondary">#B3FFFFFF</Color>
+      <Color x:Key="TextOnAccentAAFillColorDisabled">#FFFFFF</Color>
+      <Color x:Key="ControlAAFillColorDefault">#72000000</Color>
+      <Color x:Key="ControlAAFillColorDisabled">#51000000</Color>
+      <Color x:Key="AccentAAFillColorDisabled">#37000000</Color>
+      <Color x:Key="ControlStrokeColorForAAFillOnImage">#59FFFFFF</Color>
+      <Color x:Key="ControlAAStrokeColorDefault">#72000000</Color>
+      <Color x:Key="ControlAAStrokeColorDisabled">#37000000</Color>
+      <SolidColorBrush x:Key="TextOnAccentFillColorDefaultBrush" Color="{DynamicResource TextOnAccentFillColorDefault}" />
+      <SolidColorBrush x:Key="TextOnAccentAAFillColorPrimaryBrush" Color="{DynamicResource TextOnAccentAAFillColorPrimary}" />
+      <SolidColorBrush x:Key="TextOnAccentAAFillColorSecondaryBrush" Color="{DynamicResource TextOnAccentAAFillColorSecondary}" />
+      <SolidColorBrush x:Key="TextOnAccentAAFillColorDisabledBrush" Color="{DynamicResource TextOnAccentAAFillColorDisabled}" />
+      <SolidColorBrush x:Key="ControlAAFillColorDefaultBrush" Color="{DynamicResource ControlAAFillColorDefault}" />
+      <SolidColorBrush x:Key="ControlAAFillColorDisabledBrush" Color="{DynamicResource ControlAAFillColorDisabled}" />
+      <SolidColorBrush x:Key="AccentAAFillColorDefaultBrush" Color="{DynamicResource SystemAccentColor}" />
+      <SolidColorBrush x:Key="AccentAAFillColorSecondaryBrush" Color="{DynamicResource SystemAccentColor}" />
+      <SolidColorBrush x:Key="AccentAAFillColorTertiaryBrush" Color="{DynamicResource SystemAccentColor}" />
+      <SolidColorBrush x:Key="AccentAAFillColorDisabledBrush" Color="{DynamicResource AccentAAFillColorDisabled}" />
+      <SolidColorBrush x:Key="ControlStrokeColorForAAFillOnImageBrush" Color="{DynamicResource ControlStrokeColorForAAFillOnImage}" />
+      <SolidColorBrush x:Key="ControlAAStrokeColorDefaultBrush" Color="{DynamicResource ControlAAStrokeColorDefault}" />
+      <SolidColorBrush x:Key="ControlAAStrokeColorDisabledBrush" Color="{DynamicResource ControlAAStrokeColorDisabled}" />
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="{x:Static winui:MacOSTheme.HighContrast}">
+      <SolidColorBrush x:Key="SystemControlTransientBackgroundBrush" Color="#2C2C2C" />
+      <Color x:Key="TextOnAccentFillColorDefault">#FFFFFF</Color>
+      <Color x:Key="TextOnAccentAAFillColorPrimary">#000000</Color>
+      <Color x:Key="TextOnAccentAAFillColorSecondary">#80000000</Color>
+      <Color x:Key="TextOnAccentAAFillColorDisabled">#87FFFFFF</Color>
+      <Color x:Key="ControlAAFillColorDefault">#8BFFFFFF</Color>
+      <Color x:Key="ControlAAFillColorDisabled">#3FFFFFFF</Color>
+      <Color x:Key="AccentAAFillColorDisabled">#28FFFFFF</Color>
+      <Color x:Key="ControlStrokeColorForAAFillOnImage">#6B000000</Color>
+      <Color x:Key="ControlAAStrokeColorDefault">#8BFFFFFF</Color>
+      <Color x:Key="ControlAAStrokeColorDisabled">#28FFFFFF</Color>
+      <SolidColorBrush x:Key="TextOnAccentFillColorDefaultBrush" Color="{DynamicResource TextOnAccentFillColorDefault}" />
+      <SolidColorBrush x:Key="TextOnAccentAAFillColorPrimaryBrush" Color="{DynamicResource TextOnAccentAAFillColorPrimary}" />
+      <SolidColorBrush x:Key="TextOnAccentAAFillColorSecondaryBrush" Color="{DynamicResource TextOnAccentAAFillColorSecondary}" />
+      <SolidColorBrush x:Key="TextOnAccentAAFillColorDisabledBrush" Color="{DynamicResource TextOnAccentAAFillColorDisabled}" />
+      <SolidColorBrush x:Key="ControlAAFillColorDefaultBrush" Color="{DynamicResource ControlAAFillColorDefault}" />
+      <SolidColorBrush x:Key="ControlAAFillColorDisabledBrush" Color="{DynamicResource ControlAAFillColorDisabled}" />
+      <SolidColorBrush x:Key="AccentAAFillColorDefaultBrush" Color="{DynamicResource SystemAccentColor}" />
+      <SolidColorBrush x:Key="AccentAAFillColorSecondaryBrush" Color="{DynamicResource SystemAccentColor}" />
+      <SolidColorBrush x:Key="AccentAAFillColorTertiaryBrush" Color="{DynamicResource SystemAccentColor}" />
+      <SolidColorBrush x:Key="AccentAAFillColorDisabledBrush" Color="{DynamicResource AccentAAFillColorDisabled}" />
+      <SolidColorBrush x:Key="ControlStrokeColorForAAFillOnImageBrush" Color="{DynamicResource ControlStrokeColorForAAFillOnImage}" />
+      <SolidColorBrush x:Key="ControlAAStrokeColorDefaultBrush" Color="{DynamicResource ControlAAStrokeColorDefault}" />
+      <SolidColorBrush x:Key="ControlAAStrokeColorDisabledBrush" Color="{DynamicResource ControlAAStrokeColorDisabled}" />
+    </ResourceDictionary>
+  </ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>

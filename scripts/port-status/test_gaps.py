@@ -45,7 +45,9 @@ Stated reasons (a reference with `stated_reasons = true`)
     `Tests/Linq/Observable/SelectTest.cs` is `tests/linq/observable/select_test.rs` below the first test root (every
     component in snake case); a Rust file that no upstream file maps to that way is taken for the one upstream file
     with its name. A test that is not present by name and has a stated reason is not missing: it is *deferred* when
-    the reason names a later phase (`phase`, `later`), else *waived*. The report lists the stated reasons, and those
+    the reason names a later phase (`phase`, `later`), else *waived*. An entry of `test_projects` may name, as its
+    third element, the directories whose lines apply to that project (its tests are ported in several crates); the
+    first reason found for a test is taken. The report lists the stated reasons, and those
     that name no upstream test of their file (which do not change the exit status).
 
 What is counted
@@ -648,15 +650,22 @@ def stated_reasons(root: str, upstream: dict[str, set[str]]) -> tuple[dict, list
 
 
 def count(upstream: str, project: str, rev: str | None, port: dict, alias_path: str,
-          attribute: re.Pattern = TEST_ATTRIBUTE, stated_root: str | None = None) -> dict:
-    """Counts one project; returns the totals and the text of the report. `stated_root`: the directory of the Rust
-    test files whose `// Not ported:` lines are read (a reference with `stated_reasons`)."""
+          attribute: re.Pattern = TEST_ATTRIBUTE, stated_root: list[str] | None = None) -> dict:
+    """Counts one project; returns the totals and the text of the report. `stated_root`: the directories of the
+    Rust test files whose `// Not ported:` lines are read (a reference with `stated_reasons`)."""
     project_name = project.rsplit("/", 1)[1]
     sources = read_project(upstream, project, rev)
     aliases, waivers = load_rules(alias_path, project_name)
     parsed = {path: upstream_tests(sources[path], attribute) for path in sorted(sources)}
     upstream_names = {path: {method for _, method in pairs} for path, pairs in parsed.items()}
-    stated, stated_stale = stated_reasons(stated_root, upstream_names) if stated_root else ({}, [])
+    stated: dict[str, dict[str, str]] = defaultdict(dict)
+    stated_stale: list[str] = []
+    for root in stated_root or []:
+        found, orphans = stated_reasons(root, upstream_names)
+        for path, tests in found.items():
+            for test, reason in tests.items():
+                stated[path].setdefault(test, reason)
+        stated_stale.extend(orphans)
     stated_waived: list[tuple[str, str, str]] = []
     deferred: list[tuple[str, str, str]] = []
 
@@ -833,11 +842,16 @@ def main() -> int:
     if arguments.aliases == DEFAULT_ALIASES and not framework:
         arguments.aliases = os.path.join(data, "test-aliases.toml")
     attribute = test_attribute(ref["test_attributes"]) if ref is not None and ref["test_attributes"] else TEST_ATTRIBUTE
-    stated_root = roots[0] if ref is not None and ref["stated_reasons"] else None
-    projects = [(path, short) for short, path in ref["test_projects"]] if ref is not None and ref["test_projects"] else PROJECTS
+    stated_root = [roots[0]] if ref is not None and ref["stated_reasons"] else None
+    projects = [(path, short) for short, path, *_ in ref["test_projects"]] if ref is not None and ref["test_projects"] else PROJECTS
+    # A third element of an entry of `test_projects` names the directories whose `// Not ported:` lines apply to
+    # that project (its tests are ported in several crates); by default the first test root.
+    stated_roots = {path: [os.path.join(REPO, d) for d in rest[0]]
+                    for short, path, *rest in (ref["test_projects"] or []) if rest} if ref is not None else {}
 
     def run(project: str) -> dict:
-        return count(arguments.upstream, project, rev, port, arguments.aliases, attribute, stated_root)
+        roots_of = stated_roots.get(project, stated_root) if stated_root else None
+        return count(arguments.upstream, project, rev, port, arguments.aliases, attribute, roots_of)
 
     if arguments.all and stated_root:
         print("| Upstream project | Tests | Missing | Files with missing tests | Waived | Deferred | Aliased | Output |")

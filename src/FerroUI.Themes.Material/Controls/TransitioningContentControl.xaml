@@ -1,0 +1,60 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    dxaml/xcp/dxaml/themes/generic.xaml (the template of the implicit style of ContentControl)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  WinUI has no TransitioningContentControl: a WinUI application animates a change of content
+  with the ContentTransitions of a ContentControl (or of a ContentPresenter), whose template is
+  a ContentPresenter of the content at the padding. FerroUI's TransitioningContentControl runs its
+  PageTransition between two presenters, so this template is that presenter twice, one over the
+  other: PART_ContentPresenter and PART_ContentPresenter2, which the control swaps.
+
+  Translation notes (docs/porting/winui-theme.md, section 4):
+  - The presenters take the padding, the content alignments, the background and the border, as
+    FerroUI's ContentControl does (WinUI's template places the presenter at the padding with the
+    content alignments as its own alignments and draws no background).
+  - The content alignments Left and Top of the implicit style of ContentControl are not set: the
+    control hosts pages and views that fill it (FerroUI's default, Stretch), as WinUI's Frame
+    does.
+  - ContentTransitions (empty by default in WinUI) is FerroUI's PageTransition, which keeps the
+    default of the control (a cross-fade).
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <TransitioningContentControl Content="The content of a transitioning content control." />
+    </Border>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="{x:Type TransitioningContentControl}" TargetType="TransitioningContentControl">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <ContentPresenter x:Name="PART_ContentPresenter"
+                            Background="{TemplateBinding Background}"
+                            BackgroundSizing="{TemplateBinding BackgroundSizing}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Padding="{TemplateBinding Padding}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+          <ContentPresenter x:Name="PART_ContentPresenter2"
+                            Background="{TemplateBinding Background}"
+                            BackgroundSizing="{TemplateBinding BackgroundSizing}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Padding="{TemplateBinding Padding}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

@@ -368,6 +368,12 @@ def read_port_document(crate_root, relative):
     return PortDocument(relative, keys, claims, references, sources)
 
 
+# The WinUI styles that crates of controls outside the theme keep themselves (the theme does not
+# depend on them): the directory of their documents, relative to the repository. They count as
+# ported like the documents of the theme.
+EXTERNAL_PORT_DIRECTORIES = ["src/FerroUI.Controls.Inking/Themes"]
+
+
 def port_documents(repository_root):
     crate_root = os.path.join(repository_root, PORT_CRATE)
     documents = []
@@ -377,4 +383,11 @@ def port_documents(repository_root):
             if name.endswith(".xaml"):
                 relative = os.path.relpath(os.path.join(directory, name), crate_root)
                 documents.append(read_port_document(crate_root, relative))
+    for external in EXTERNAL_PORT_DIRECTORIES:
+        for directory, subdirectories, files in os.walk(os.path.join(repository_root, external)):
+            subdirectories.sort()
+            for name in sorted(files):
+                if name.endswith(".xaml"):
+                    relative = os.path.relpath(os.path.join(directory, name), crate_root)
+                    documents.append(read_port_document(crate_root, relative))
     return documents

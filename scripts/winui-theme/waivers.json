@@ -32,16 +32,6 @@
       "reason": "DesktopAcrylicBackdrop is a system backdrop of a window or popup (Windows composition), not a brush, and MenuFlyoutSystemBackdrop names it; FerroUI's counterpart is the transparency level of a top level, which an application chooses."
     },
     {
-      "document": "controls/dev/InkToolbar/InkToolbar.xaml",
-      "key": "*",
-      "reason": "InkToolbar: no FerroUI control (no inking)."
-    },
-    {
-      "document": "controls/dev/InkToolbar/InkToolbar_themeresources.xaml",
-      "key": "*",
-      "reason": "InkToolbar: no FerroUI control (no inking)."
-    },
-    {
       "document": "controls/dev/CommonStyles/MediaTransportControls_themeresources.xaml",
       "key": "*",
       "reason": "MediaTransportControls: no FerroUI control (no media playback)."

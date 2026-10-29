@@ -211,7 +211,7 @@ impl Styles {
 
         if !self.styles.is_empty() {
             for style in self.styles.snapshot().iter().rev() {
-                if let Some(value) = style.try_get_resource(key, theme) {
+                if let Some(value) = crate::controls::resource_preview::lookup(&**style, key, theme) {
                     return Some(value);
                 }
             }

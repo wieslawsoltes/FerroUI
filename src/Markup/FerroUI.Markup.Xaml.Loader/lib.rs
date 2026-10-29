@@ -25,6 +25,8 @@ pub mod compiler_extensions;
 /// The closed table of runtime library types, shared by the run-time and the build-time type system.
 pub mod core_table;
 pub mod parsers;
+#[cfg(all(debug_assertions, feature = "hot-reload"))]
+pub mod binding_capture;
 
 /// The run-time back end: the run-time type system and the AST interpreter.
 #[cfg(feature = "runtime")]
