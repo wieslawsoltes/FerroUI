@@ -159,8 +159,8 @@
             <Panel>
               <Border x:Name="StateLayer" Background="Transparent" CornerRadius="{TemplateBinding CornerRadius}" IsHitTestVisible="False" />
               <material:MaterialRipple Fill="{TemplateBinding Foreground}" CornerRadius="{TemplateBinding CornerRadius}" ReducedMotion="{DynamicResource MaterialReducedMotion}" />
-              <Path x:Name="Content" Data="M3 6H21V8H3ZM3 11H21V13H3ZM3 16H21V18H3Z" Fill="{TemplateBinding Foreground}" Stretch="None" Width="24" Height="24" Margin="14,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" />
-              <ContentPresenter x:Name="PART_ContentPresenter" Margin="50,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Foreground="{TemplateBinding Foreground}" />
+              <Path x:Name="Content" Data="M3 6H21V8H3ZM3 11H21V13H3ZM3 16H21V18H3Z" Fill="{TemplateBinding Foreground}" Stretch="None" Width="24" Height="24" Margin="8,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" />
+              <ContentPresenter x:Name="PART_ContentPresenter" Margin="44,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Foreground="{TemplateBinding Foreground}" />
             </Panel>
           </Border>
         </Grid>
@@ -184,7 +184,7 @@
                 RowDefinitions="Auto,Auto">
             <Panel x:Name="TogglePaneTopPadding"
                    Height="{Binding TemplateSettings.TopPadding, RelativeSource={RelativeSource TemplatedParent}}" />
-            <Grid x:Name="ButtonHolderGrid" Grid.Row="1" Margin="{DynamicResource NavigationViewButtonHolderGridMargin}">
+            <Grid x:Name="ButtonHolderGrid" Grid.Row="1" ColumnDefinitions="Auto,Auto" Margin="{DynamicResource NavigationViewButtonHolderGridMargin}">
               <Button x:Name="NavigationViewBackButton"
                       Theme="{StaticResource NavigationBackButtonNormalStyle}"
                       Width="{Binding TemplateSettings.SmallerPaneToggleButtonWidth, RelativeSource={RelativeSource TemplatedParent}}"
@@ -395,6 +395,11 @@
     </Setter>
 
     <!-- DisplayModeGroup: Compact and Expanded have no setters. Minimal, MinimalWithBackButton. -->
+    <!-- MinimalWithBackButton: the toggle button beside the back button, not over it (WinUI shows
+         them side by side). -->
+    <Style Selector="^:minimal-with-back-button /template/ Button#TogglePaneButton">
+      <Setter Property="Grid.Column" Value="1" />
+    </Style>
     <Style Selector="^:minimal, ^:minimal-with-back-button">
       <Style Selector="^ /template/ ContentControl#HeaderContent">
         <Setter Property="Margin" Value="{DynamicResource NavigationViewMinimalHeaderMargin}" />
