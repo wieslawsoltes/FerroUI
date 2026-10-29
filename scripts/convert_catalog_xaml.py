@@ -122,9 +122,26 @@ ADDITIONS = [
     ),
 ]
 
+ADDITIONS += [
+    (
+        "TransparentStyles.xaml",
+        b'    <SolidColorBrush x:Key="ExpanderHeaderBackgroundPressed" Color="#66808080" />\n',
+        b"    <!-- Not in upstream: the pane of the NavigationView shell, where upstream's drawer page had its\n"
+        b"         DrawerBackground. -->\n"
+        b'    <SolidColorBrush x:Key="NavigationViewDefaultPaneBackground" Color="Transparent" />\n'
+        b'    <SolidColorBrush x:Key="NavigationViewExpandedPaneBackground" Color="Transparent" />\n',
+        "the shell of the catalog is a NavigationView (MainView.xaml): its pane is transparent",
+    ),
+]
+
 # The lines this project removes from converted documents (after the additions): (path relative to
 # the sample, the lines, why). Each is in the converted text once.
 REMOVALS = [
+    (
+        "TransparentStyles.xaml",
+        b'    <Setter Property="DrawerBackground" Value="Transparent" />\n',
+        "the shell of the catalog is a NavigationView (MainView.xaml), not a drawer page",
+    ),
     (
         "App.xaml",
         b'      <FluentTheme x:Key="FluentTheme" />\n      <SimpleTheme x:Key="SimpleTheme" />\n',
@@ -142,6 +159,23 @@ REMOVALS = [
         b"            <models:CatalogTheme>Simple</models:CatalogTheme>\n"
         b"          </ComboBox.Items>\n",
         "the theme selector of the settings page lists the themes the catalog is built with (ItemsSource)",
+    ),
+]
+
+# The control themes this project removes from converted documents: (path relative to the sample,
+# the key of the control theme, why). The theme is removed from the line before its `<ControlTheme`
+# (a blank line) to its `</ControlTheme>`.
+REMOVED_CONTROL_THEMES = [
+    ("CustomThemes.xaml", "SelectableItemButton", "the entries of upstream's drawer; the shell is a NavigationView"),
+    ("CustomThemes.xaml", "HomeSectionExpander", "the sections of upstream's drawer; the shell is a NavigationView"),
+]
+
+# The converted documents this project replaces with documents of its own: (path relative to the
+# sample, why). `--check` does not compare them with their conversion.
+REPLACED_DOCUMENTS = [
+    (
+        "MainView.xaml",
+        "the shell of the catalog is a NavigationView (docs/porting/winui-controls.md), where upstream's is a drawer page",
     ),
 ]
 
@@ -184,6 +218,15 @@ def add(relative: str, data: bytes) -> bytes:
         if data.count(lines_text) != 1:
             raise SystemExit(f"the lines of a removal from {relative} are not in its conversion once: {lines!r}")
         data = data.replace(lines_text, b"")
+    for path, key, _why in REMOVED_CONTROL_THEMES:
+        if path != relative:
+            continue
+        start = data.find(with_line_ends(f'\n\n  <ControlTheme x:Key="{key}"'.encode()))
+        end_tag = with_line_ends(b"\n  </ControlTheme>")
+        end = data.find(end_tag, start + 1) if start >= 0 else -1
+        if start < 0 or end < 0:
+            raise SystemExit(f"the control theme {key} is not in the conversion of {relative}")
+        data = data[:start] + data[end + len(end_tag) :]
     return data
 
 
@@ -235,6 +278,8 @@ def main() -> int:
         if FORBIDDEN.search(converted) or FORBIDDEN.search(str(destination.relative_to(target)).encode()):
             print(f"upstream name left in {destination}: {FORBIDDEN.findall(converted)[:5]}")
             failed = True
+        if destination.relative_to(target).as_posix() in {path for path, _why in REPLACED_DOCUMENTS}:
+            continue
         if check:
             if not destination.exists():
                 print(f"missing: {destination}")

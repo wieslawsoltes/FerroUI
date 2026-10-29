@@ -118,7 +118,7 @@ fn top_level() -> Option<Ref<TopLevel>> {
 }
 
 /// The state of the view as JSON, for the behaviour tests that drive the
-/// page (`scripts/browser/tests`): whether the drawer is open, the header of
+/// page (`scripts/browser/tests`): whether the pane of the shell is open (`drawerOpen`), the header of
 /// the current page, whether the navigation page of the main view is running
 /// a navigation (it ignores another one until it has finished), the focused
 /// element (its class, and its text when it is a text box) and every visible
@@ -203,7 +203,7 @@ pub fn catalog_state() -> String {
 
     format!(
         "{{\"drawerOpen\":{},\"page\":{},\"navigating\":{navigating},\"focus\":{focus},\"elements\":[{}]}}",
-        view.map_or("null".to_string(), |view| view.is_open().to_string()),
+        view.map_or("null".to_string(), |view| view.navigation_view().is_pane_open().to_string()),
         page.map_or("null".to_string(), |page| json_string(&page)),
         elements.join(","),
     )

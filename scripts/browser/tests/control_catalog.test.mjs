@@ -295,7 +295,7 @@ check("the navigation drawer opens from its toggle button", async (page) => {
     // The first frame of the view shows the drawer open beside the content: the main view closes it
     // for this width when it is loaded, after that frame. The button is clicked once the view has
     // drawn it where the closed drawer leaves it.
-    const toggle = await page.element("the toggle button of the drawer is shown", (e) => e.name === "PART_BackButton" && e.hit);
+    const toggle = await page.element("the toggle button of the pane is shown", (e) => e.name === "TogglePaneButton" && e.hit);
     await page.clickElement(toggle);
     state = await page.until("the drawer is open and shows its entries", (s) => s.drawerOpen === true
         && s.elements.some((e) => e.name === "SearchBox" && inDrawer(e))
@@ -470,7 +470,7 @@ check("a text box focused by touch on a phone leaves the page at scale 1", async
     // resize the page for the keyboard, so that the view is laid out in what the keyboard leaves.
     const viewport = await page.evaluate(`document.querySelector('meta[name="viewport"]').content`);
     assert(/interactive-widget=resizes-content/.test(viewport), `the viewport element of the page is "${viewport}"`);
-    await page.clickElement(await page.element("the toggle button of the drawer is shown", (e) => e.name === "PART_BackButton" && e.hit));
+    await page.clickElement(await page.element("the toggle button of the pane is shown", (e) => e.name === "TogglePaneButton" && e.hit));
     await page.until("the drawer is open", (s) => s.drawerOpen === true);
     await page.clickElement(await page.find("Text", inDrawer));
     await page.until(`the page "Text" is shown`, (s) => s.page === "Text" && !s.navigating && !s.drawerOpen);
