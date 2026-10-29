@@ -209,6 +209,11 @@ jobs:
           SITE: ${{ steps.site.outputs.dir }}
           IGNORE: ${{ inputs.smoke-ignore }}
         run: |
+          # The script comes with the submodule: a submodule older than this workflow has none.
+          if [ ! -f FerroUI/scripts/apps/smoke-site.mjs ]; then
+            echo "::warning::FerroUI/scripts/apps/smoke-site.mjs is missing: update the FerroUI submodule for the smoke run"
+            exit 0
+          fi
           args=()
           while IFS= read -r pattern; do
             [ -n "$pattern" ] && args+=(--ignore "$pattern")
