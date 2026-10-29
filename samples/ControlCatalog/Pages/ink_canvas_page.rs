@@ -1,10 +1,11 @@
-//! Interactive inking sample; works through the same controls on every backend.
+//! Not from upstream: the page of the port's InkCanvas (docs/porting/winui-inking.md), the class of
+//! `Pages/InkCanvasPage.xaml`; works through the same controls on every backend.
 use crate::markup::{content_page_class, xaml_class};
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::Point;
 use ferroui_base::{ferro_class_info, instantiate, Ref};
 use ferroui_controls::{Button, ContentPage, TextBlock, TopLevel};
-use ferroui_controls_inking::{CoreInputDeviceTypes, InkCanvas, InkClipboard, InkToolbar};
+use ferroui_controls_inking::{CoreInputDeviceTypes, InkCanvas, InkClipboard};
 use std::cell::RefCell;
 
 #[derive(Clone, Copy)]
@@ -18,17 +19,17 @@ enum InkAction {
 }
 
 #[repr(C)]
-pub struct InkingPage {
+pub struct InkCanvasPage {
     base: ContentPage,
     snapshot: RefCell<Option<Vec<u8>>>,
 }
-content_page_class!(InkingPage);
-ferro_class_info!(InkingPage {
-    new: InkingPage::new
+content_page_class!(InkCanvasPage);
+ferro_class_info!(InkCanvasPage {
+    new: InkCanvasPage::new
 });
-xaml_class!(InkingPage, "/Pages/InkingPage.xaml");
+xaml_class!(InkCanvasPage, "/Pages/InkCanvasPage.xaml");
 
-impl InkingPage {
+impl InkCanvasPage {
     pub fn construct() -> Self {
         Self {
             base: ContentPage::construct(),
@@ -40,14 +41,11 @@ impl InkingPage {
         this.initialize_component();
         let canvas = this
             .find_control::<InkCanvas>("InkSurface")
-            .expect("InkingPage InkSurface");
+            .expect("InkCanvasPage InkSurface");
         let presenter = canvas.ink_presenter();
         presenter.set_input_device_types(
             CoreInputDeviceTypes::PEN | CoreInputDeviceTypes::MOUSE | CoreInputDeviceTypes::TOUCH,
         );
-        this.find_control::<InkToolbar>("Toolbar")
-            .expect("InkingPage Toolbar")
-            .set_target_ink_canvas(Some(canvas));
         for (name, action) in [
             ("ClearInk", InkAction::Clear),
             ("SaveInk", InkAction::Save),
@@ -58,7 +56,7 @@ impl InkingPage {
         ] {
             let weak = this.downgrade();
             this.find_control::<Button>(name)
-                .expect("InkingPage action")
+                .expect("InkCanvasPage action")
                 .click(move |_, _| {
                     if let Some(this) = weak.upgrade() {
                         this.run_action(action);
