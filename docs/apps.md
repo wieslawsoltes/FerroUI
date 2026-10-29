@@ -145,6 +145,21 @@ The site is written to `target/browser/my-app-browser`; serve that directory wit
 server. `node FerroUI/scripts/apps/smoke-site.mjs target/browser/my-app-browser` runs the smoke test of
 CI against it (Chrome is found on the system, or set `CHROME`).
 
+### Android and iOS hosts
+
+FerroUI's packaging scripts build an application of another workspace in the same way:
+
+```
+FERROUI_ANDROID_WORKSPACE=$PWD FerroUI/scripts/android/apk.sh package --package my-app-android \
+    --label "My App" --application-id org.example.myapp --permission android.permission.INTERNET
+FERROUI_IOS_WORKSPACE=$PWD FerroUI/scripts/ios/bundle.sh --package my-app-ios --bin my-app-ios \
+    --name "My App" --bundle-id org.example.myapp
+```
+
+The Android host is a `cdylib` package (its library is the package name with `-` as `_`), the iOS
+host a binary; the prerequisites are those of the FerroUI scripts (the SDK and NDK of
+`scripts/android/env.sh`, Xcode). CI does not build these packages.
+
 ## 6. CI and GitHub Pages
 
 The application's only workflow calls the reusable workflow of this repository:
