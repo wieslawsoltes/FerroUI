@@ -155,8 +155,13 @@ def make_fixture(directory: Path, source: Path, env: dict) -> None:
                    env=env, stdout=subprocess.DEVNULL, check=True)
 
 
+def changed_outputs(first: dict, second: dict) -> list[str]:
+    """The generated outputs whose hashes differ between two builds."""
+    return sorted(str(key) for key in first.keys() | second.keys() if first.get(key) != second.get(key))
+
+
 def fixture_checks(sources: dict[str, Path], temporary: Path, output: Path, env: dict,
-                   jobs: int | None, report: dict, save) -> None:
+                   jobs: int | None, report: dict, save, accept_output_changes: bool = False) -> None:
     reference_outputs: dict[str, dict] = {}
     for label, source in sources.items():
         directory = temporary / f"fixture-{label}"
@@ -217,7 +222,15 @@ def fixture_checks(sources: dict[str, Path], temporary: Path, output: Path, env:
             if label == "baseline":
                 reference_outputs[phase] = equivalence
             elif equivalence != reference_outputs[phase]:
-                raise RuntimeError(f"fixture {phase}: baseline/candidate generated output, runtime or graph differs")
+                reference = reference_outputs[phase]
+                # An acknowledged output change (label build-output-changes) may change the generated
+                # files; the runtime result (checked against its expected value above) and the graph
+                # still have to be the baseline's.
+                if not (accept_output_changes and equivalence["runtime"] == reference["runtime"]
+                        and equivalence["units"] == reference["units"]):
+                    raise RuntimeError(f"fixture {phase}: baseline/candidate generated output, runtime or graph differs")
+                report.setdefault("fixture_output_changes", {})[phase] = changed_outputs(
+                    reference["generated"], equivalence["generated"])
             previous_generated = record["generated"]
             report["fixture"].append(record)
             save()
@@ -233,6 +246,9 @@ def main() -> int:
     parser.add_argument("--catalog", action="store_true", help="Build the complete desktop catalog instead of the TreeDataGrid library")
     parser.add_argument("--fixture-only", action="store_true", help="Run the real-SampleBuild regression fixture without the larger graph benchmark")
     parser.add_argument("--offline", action="store_true", help="Dependencies are already downloaded; skip the untimed cargo fetch")
+    parser.add_argument("--accept-output-changes", action="store_true",
+                        help="The pull request changes generated output on purpose (label build-output-changes): "
+                             "the generated files may differ from the baseline's and are reported")
     parser.add_argument("--minimum-speedup", type=float, default=0,
                         help="Opt-in acceptance gate for unchanged graph rebuilds only; 0 records the measured ratio")
     args = parser.parse_args()
@@ -281,16 +297,21 @@ def main() -> int:
             temporary = Path(temporary_path).resolve()
             if not args.fixture_only:
                 package = "control-catalog-desktop" if args.catalog else "treedatagrid-demo"
-                reference = None
+                # The graph of every build is the baseline's; the generated files of a revision are its
+                # own first build's, and the baseline's unless an output change is acknowledged.
+                references = {}
                 for label, source in sources.items():
                     target = temporary / f"target-{label}"
                     record = build(source, source, target, output / "graph", label, "populate", package,
                                    env, args.jobs, library=not args.catalog, no_default_features=not args.catalog)
-                    equivalent = (definitions(record), record["generated"])
-                    if reference is None:
-                        reference = equivalent
-                    elif equivalent != reference:
+                    references[label] = (definitions(record), record["generated"])
+                    baseline_reference = references["baseline"]
+                    if references[label][0] != baseline_reference[0]:
                         raise RuntimeError("Baseline/candidate graph units, features, profiles or generated files differ")
+                    if references[label][1] != baseline_reference[1]:
+                        if not args.accept_output_changes:
+                            raise RuntimeError("Baseline/candidate graph units, features, profiles or generated files differ")
+                        report["graph_output_changes"] = changed_outputs(baseline_reference[1], references[label][1])
                     report["population"].append(record)
                     save()
                 for repetition in range(1, args.repetitions + 1):
@@ -301,19 +322,23 @@ def main() -> int:
                         record = build(source, source, temporary / f"target-{label}", output / "graph", label,
                                        f"repeat-{repetition}", package, env, args.jobs,
                                        library=not args.catalog, no_default_features=not args.catalog)
-                        if (definitions(record), record["generated"]) != reference:
+                        if (definitions(record), record["generated"]) != references[label]:
                             raise RuntimeError(f"{label} repeat {repetition}: graph or generated output changed")
                         if label == "candidate" and not record["all_units_fresh"]:
                             raise RuntimeError("Unchanged candidate graph rebuilt; inspect recorded dirty reasons")
                         report["repeats"].append(record)
                         save()
-            fixture_checks(sources, temporary, output, env, args.jobs, report, save)
+            fixture_checks(sources, temporary, output, env, args.jobs, report, save, args.accept_output_changes)
         medians = {label: statistics.median(row["seconds"] for row in report["repeats"] if row["label"] == label)
                    for label in sources} if report["repeats"] else {}
         report["summary"] = {"repeat_median_seconds": medians,
                              "repeat_speedup": medians["baseline"] / medians["candidate"] if medians else None,
                              "initial_population_seconds": {row["label"]: row["seconds"] for row in report["population"]},
-                             "same_graph_features_profiles_and_generated_files": True if medians else None,
+                             "same_graph_features_profiles_and_generated_files": (
+                                 not report.get("graph_output_changes") if medians else None),
+                             "output_changes_acknowledged": args.accept_output_changes,
+                             "graph_output_changes": report.get("graph_output_changes", []),
+                             "fixture_output_changes": report.get("fixture_output_changes", {}),
                              "candidate_unchanged_builds_all_fresh": True,
                              "optional_file_and_source_and_asset_invalidation": True,
                              "fixture_runtime_and_generated_outputs_equal": True}
@@ -334,6 +359,14 @@ def main() -> int:
                  "all rebuilt the affected crate and consumer with the correct runtime output. Every unchanged candidate "
                  "build was fresh. Generated files and runtime results agree with the baseline. Raw Cargo JSON, verbose "
                  "dirty reasons, timings and output hashes are in the artifact.\n")
+        changes = report["summary"]["graph_output_changes"]
+        fixture_changes = report["summary"]["fixture_output_changes"]
+        if changes or fixture_changes:
+            text += ("\n### Output changes acknowledged (`build-output-changes`)\n\n"
+                     "The graph and the runtime results are the baseline's, and every build repeats the generated "
+                     "files of its revision; these generated files differ from the baseline's:\n\n"
+                     + "".join(f"- `{name}`\n" for name in changes[:50])
+                     + "".join(f"- fixture {phase}: {len(names)} files\n" for phase, names in fixture_changes.items()))
         if args.minimum_speedup:
             text += (f"\nRequested unchanged-build threshold: **{args.minimum_speedup:.2f}×**; "
                      f"passed: **{report['summary']['requested_speedup_gate_passed']}**.\n")
