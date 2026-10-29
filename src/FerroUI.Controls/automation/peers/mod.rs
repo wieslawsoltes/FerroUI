@@ -28,6 +28,7 @@ mod expander_automation_peer;
 #[cfg(test)]
 mod foundation_automation_peer_tests;
 mod image_automation_peer;
+mod info_bar_automation_peer;
 mod interop_automation_peer;
 #[cfg(test)]
 mod items_automation_peer_tests;
@@ -51,6 +52,7 @@ mod pips_pager_automation_peer;
 mod popup_automation_peer;
 mod popup_root_automation_peer;
 mod progress_bar_automation_peer;
+mod progress_ring_automation_peer;
 mod radio_button_automation_peer;
 mod range_base_automation_peer;
 mod scroll_bar_automation_peer;
@@ -100,6 +102,7 @@ pub use drawer_page_automation_peer::DrawerPageAutomationPeer;
 pub use embeddable_control_root_automation_peer::EmbeddableControlRootAutomationPeer;
 pub use expander_automation_peer::ExpanderAutomationPeer;
 pub use image_automation_peer::ImageAutomationPeer;
+pub use info_bar_automation_peer::InfoBarAutomationPeer;
 pub use interop_automation_peer::InteropAutomationPeer;
 pub use items_control_automation_peer::{
     ItemsControlAutomationPeer, ItemsControlAutomationPeerImpl, ItemsControlAutomationPeerImplExt,
@@ -118,6 +121,7 @@ pub use pips_pager_automation_peer::PipsPagerAutomationPeer;
 pub use popup_automation_peer::PopupAutomationPeer;
 pub use popup_root_automation_peer::PopupRootAutomationPeer;
 pub use progress_bar_automation_peer::ProgressBarAutomationPeer;
+pub use progress_ring_automation_peer::ProgressRingAutomationPeer;
 pub use radio_button_automation_peer::{
     RadioButtonAutomationPeer, RadioButtonAutomationPeerImpl, RadioButtonAutomationPeerImplExt,
     RadioButtonAutomationPeerVTable,

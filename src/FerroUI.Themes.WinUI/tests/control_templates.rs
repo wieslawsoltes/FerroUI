@@ -233,18 +233,21 @@ control_tests! {
     grid_splitter => "GridSplitter";
     group_box => "GroupBox";
     headered_content_control => "HeaderedContentControl";
+    info_badge => "InfoBadge";
     items_control => "ItemsControl";
     label => "Label";
     path_icon => "PathIcon";
     font_icon => "FontIcon";
     symbol_icon => "SymbolIcon";
     progress_bar => "ProgressBar";
+    progress_ring => "ProgressRing";
     selectable_text_block => "SelectableTextBlock";
     separator => "Separator";
     text_selection_handle => "TextSelectionHandle";
     tool_tip => "ToolTip";
     transitioning_content_control => "TransitioningContentControl";
     // B6: window decorations, notifications, tables and dialogs
+    info_bar => "InfoBar";
     managed_file_chooser => "ManagedFileChooser";
     managed_file_chooser_overwrite_prompt => "ManagedFileChooserOverwritePrompt";
     notification_card => "NotificationCard";
@@ -410,6 +413,75 @@ fn the_icons_draw_in_the_symbol_font_of_the_theme() {
     window.update_layout();
     assert_eq!(custom, text_of(&font_icon).font_family());
     assert_eq!(custom, text_of(&symbol_icon).font_family());
+    window.close();
+}
+
+/// The status controls of WinUI (`Controls/InfoBar.xaml`, `Controls/InfoBadge.xaml`,
+/// `Controls/ProgressRing.xaml`; docs/porting/winui-controls.md, section 10.2): the states the
+/// controls set as pseudo-classes give their parts the looks of WinUI.
+#[test]
+fn the_status_controls_show_their_states() {
+    use ferroui_controls::shapes::Arc;
+    use ferroui_controls::{Button, InfoBadge, InfoBar, InfoBarSeverity, ProgressRing, StackPanel, TextBlock};
+
+    let _app = start_themed_application();
+    let bar = InfoBar::new();
+    bar.set_title("Title");
+    bar.set_message("Message");
+    let badge = InfoBadge::new();
+    let ring = ProgressRing::new();
+    let panel = StackPanel::new();
+    panel.children().add(&bar);
+    panel.children().add(&badge);
+    panel.children().add(&ring);
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(&panel)));
+    window.show();
+    window.update_layout();
+
+    let part = |control: &TemplatedControl, name: &str| {
+        control
+            .get_template_descendants()
+            .into_iter()
+            .find(|element| element.name().as_deref() == Some(name))
+            .unwrap_or_else(|| panic!("the part {name}"))
+    };
+
+    // InfoBar: InfoBarCollapsed until it opens, the severity, the close button.
+    let root = part(&bar, "ContentRoot").cast::<Border>().expect("a border");
+    assert!(!root.is_visible());
+    bar.set_is_open(true);
+    window.update_layout();
+    assert!(root.is_visible());
+    let informational = root.background();
+    assert!(informational.is_some());
+    let icon = part(&bar, "StandardIcon").cast::<TextBlock>().expect("a text block");
+    assert_eq!(Some("\u{F13F}".to_string()), icon.text());
+    bar.set_severity(InfoBarSeverity::Error);
+    assert_eq!(Some("\u{F13D}".to_string()), icon.text());
+    assert!(root.background().is_some());
+    assert_ne!(informational, root.background());
+    let close = part(&bar, "CloseButton").cast::<Button>().expect("a button");
+    assert!(bar.close_button_style().is_some());
+    assert_eq!(bar.close_button_style(), close.theme());
+    assert!(close.is_visible());
+    bar.set_is_closable(false);
+    assert!(!close.is_visible());
+
+    // InfoBadge: a dot, then a number.
+    let value = part(&badge, "ValueTextBlock").cast::<TextBlock>().expect("a text block");
+    assert!(!value.is_visible());
+    badge.set_numeric_value(5);
+    window.update_layout();
+    assert!(value.is_visible());
+    assert_eq!(Some("5".to_string()), value.text());
+
+    // ProgressRing: 32 by 32, the arc in the foreground, hidden while inactive.
+    assert_eq!(32.0, ring.bounds().width);
+    let indicator = part(&ring, "PART_Indicator").cast::<Arc>().expect("an arc");
+    assert_eq!(ring.foreground(), indicator.stroke());
+    ring.set_is_active(false);
+    assert_eq!(0.0, part(&ring, "LayoutRoot").opacity());
     window.close();
 }
 

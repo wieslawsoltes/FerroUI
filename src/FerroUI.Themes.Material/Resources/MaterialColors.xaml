@@ -296,6 +296,54 @@
       <SolidColorBrush x:Key="MaterialSurfaceTintFocusBrush" Color="{DynamicResource MaterialSurfaceTintColor}" Opacity="0.1" />
       <SolidColorBrush x:Key="MaterialSurfaceTintPressedBrush" Color="{DynamicResource MaterialSurfaceTintColor}" Opacity="0.1" />
       <SolidColorBrush x:Key="MaterialSurfaceTintDraggedBrush" Color="{DynamicResource MaterialSurfaceTintColor}" Opacity="0.16" />
+      <Color x:Key="MaterialSuccessColor">#95D68F</Color>
+      <SolidColorBrush x:Key="MaterialSuccessBrush" Color="{DynamicResource MaterialSuccessColor}" />
+      <SolidColorBrush x:Key="MaterialSuccessHoverBrush" Color="{DynamicResource MaterialSuccessColor}" Opacity="0.08" />
+      <SolidColorBrush x:Key="MaterialSuccessFocusBrush" Color="{DynamicResource MaterialSuccessColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialSuccessPressedBrush" Color="{DynamicResource MaterialSuccessColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialSuccessDraggedBrush" Color="{DynamicResource MaterialSuccessColor}" Opacity="0.16" />
+      <Color x:Key="MaterialOnSuccessColor">#00390A</Color>
+      <SolidColorBrush x:Key="MaterialOnSuccessBrush" Color="{DynamicResource MaterialOnSuccessColor}" />
+      <SolidColorBrush x:Key="MaterialOnSuccessHoverBrush" Color="{DynamicResource MaterialOnSuccessColor}" Opacity="0.08" />
+      <SolidColorBrush x:Key="MaterialOnSuccessFocusBrush" Color="{DynamicResource MaterialOnSuccessColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialOnSuccessPressedBrush" Color="{DynamicResource MaterialOnSuccessColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialOnSuccessDraggedBrush" Color="{DynamicResource MaterialOnSuccessColor}" Opacity="0.16" />
+      <Color x:Key="MaterialSuccessContainerColor">#145219</Color>
+      <SolidColorBrush x:Key="MaterialSuccessContainerBrush" Color="{DynamicResource MaterialSuccessContainerColor}" />
+      <SolidColorBrush x:Key="MaterialSuccessContainerHoverBrush" Color="{DynamicResource MaterialSuccessContainerColor}" Opacity="0.08" />
+      <SolidColorBrush x:Key="MaterialSuccessContainerFocusBrush" Color="{DynamicResource MaterialSuccessContainerColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialSuccessContainerPressedBrush" Color="{DynamicResource MaterialSuccessContainerColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialSuccessContainerDraggedBrush" Color="{DynamicResource MaterialSuccessContainerColor}" Opacity="0.16" />
+      <Color x:Key="MaterialOnSuccessContainerColor">#B1F2A9</Color>
+      <SolidColorBrush x:Key="MaterialOnSuccessContainerBrush" Color="{DynamicResource MaterialOnSuccessContainerColor}" />
+      <SolidColorBrush x:Key="MaterialOnSuccessContainerHoverBrush" Color="{DynamicResource MaterialOnSuccessContainerColor}" Opacity="0.08" />
+      <SolidColorBrush x:Key="MaterialOnSuccessContainerFocusBrush" Color="{DynamicResource MaterialOnSuccessContainerColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialOnSuccessContainerPressedBrush" Color="{DynamicResource MaterialOnSuccessContainerColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialOnSuccessContainerDraggedBrush" Color="{DynamicResource MaterialOnSuccessContainerColor}" Opacity="0.16" />
+      <Color x:Key="MaterialWarningColor">#F6BE3B</Color>
+      <SolidColorBrush x:Key="MaterialWarningBrush" Color="{DynamicResource MaterialWarningColor}" />
+      <SolidColorBrush x:Key="MaterialWarningHoverBrush" Color="{DynamicResource MaterialWarningColor}" Opacity="0.08" />
+      <SolidColorBrush x:Key="MaterialWarningFocusBrush" Color="{DynamicResource MaterialWarningColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialWarningPressedBrush" Color="{DynamicResource MaterialWarningColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialWarningDraggedBrush" Color="{DynamicResource MaterialWarningColor}" Opacity="0.16" />
+      <Color x:Key="MaterialOnWarningColor">#402D00</Color>
+      <SolidColorBrush x:Key="MaterialOnWarningBrush" Color="{DynamicResource MaterialOnWarningColor}" />
+      <SolidColorBrush x:Key="MaterialOnWarningHoverBrush" Color="{DynamicResource MaterialOnWarningColor}" Opacity="0.08" />
+      <SolidColorBrush x:Key="MaterialOnWarningFocusBrush" Color="{DynamicResource MaterialOnWarningColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialOnWarningPressedBrush" Color="{DynamicResource MaterialOnWarningColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialOnWarningDraggedBrush" Color="{DynamicResource MaterialOnWarningColor}" Opacity="0.16" />
+      <Color x:Key="MaterialWarningContainerColor">#5C4200</Color>
+      <SolidColorBrush x:Key="MaterialWarningContainerBrush" Color="{DynamicResource MaterialWarningContainerColor}" />
+      <SolidColorBrush x:Key="MaterialWarningContainerHoverBrush" Color="{DynamicResource MaterialWarningContainerColor}" Opacity="0.08" />
+      <SolidColorBrush x:Key="MaterialWarningContainerFocusBrush" Color="{DynamicResource MaterialWarningContainerColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialWarningContainerPressedBrush" Color="{DynamicResource MaterialWarningContainerColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialWarningContainerDraggedBrush" Color="{DynamicResource MaterialWarningContainerColor}" Opacity="0.16" />
+      <Color x:Key="MaterialOnWarningContainerColor">#FFDEA6</Color>
+      <SolidColorBrush x:Key="MaterialOnWarningContainerBrush" Color="{DynamicResource MaterialOnWarningContainerColor}" />
+      <SolidColorBrush x:Key="MaterialOnWarningContainerHoverBrush" Color="{DynamicResource MaterialOnWarningContainerColor}" Opacity="0.08" />
+      <SolidColorBrush x:Key="MaterialOnWarningContainerFocusBrush" Color="{DynamicResource MaterialOnWarningContainerColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialOnWarningContainerPressedBrush" Color="{DynamicResource MaterialOnWarningContainerColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialOnWarningContainerDraggedBrush" Color="{DynamicResource MaterialOnWarningContainerColor}" Opacity="0.16" />
       <SolidColorBrush x:Key="MaterialDisabledContainerBrush" Color="{DynamicResource MaterialOnSurfaceColor}" Opacity="0.1" />
       <SolidColorBrush x:Key="MaterialDisabledContentBrush" Color="{DynamicResource MaterialOnSurfaceVariantColor}" Opacity="0.38" />
       <SolidColorBrush x:Key="MaterialDisabledOnSurfaceBrush" Color="{DynamicResource MaterialOnSurfaceColor}" Opacity="0.38" />
@@ -596,6 +644,54 @@
       <SolidColorBrush x:Key="MaterialSurfaceTintFocusBrush" Color="{DynamicResource MaterialSurfaceTintColor}" Opacity="0.1" />
       <SolidColorBrush x:Key="MaterialSurfaceTintPressedBrush" Color="{DynamicResource MaterialSurfaceTintColor}" Opacity="0.1" />
       <SolidColorBrush x:Key="MaterialSurfaceTintDraggedBrush" Color="{DynamicResource MaterialSurfaceTintColor}" Opacity="0.16" />
+      <Color x:Key="MaterialSuccessColor">#95D68F</Color>
+      <SolidColorBrush x:Key="MaterialSuccessBrush" Color="{DynamicResource MaterialSuccessColor}" />
+      <SolidColorBrush x:Key="MaterialSuccessHoverBrush" Color="{DynamicResource MaterialSuccessColor}" Opacity="0.08" />
+      <SolidColorBrush x:Key="MaterialSuccessFocusBrush" Color="{DynamicResource MaterialSuccessColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialSuccessPressedBrush" Color="{DynamicResource MaterialSuccessColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialSuccessDraggedBrush" Color="{DynamicResource MaterialSuccessColor}" Opacity="0.16" />
+      <Color x:Key="MaterialOnSuccessColor">#00390A</Color>
+      <SolidColorBrush x:Key="MaterialOnSuccessBrush" Color="{DynamicResource MaterialOnSuccessColor}" />
+      <SolidColorBrush x:Key="MaterialOnSuccessHoverBrush" Color="{DynamicResource MaterialOnSuccessColor}" Opacity="0.08" />
+      <SolidColorBrush x:Key="MaterialOnSuccessFocusBrush" Color="{DynamicResource MaterialOnSuccessColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialOnSuccessPressedBrush" Color="{DynamicResource MaterialOnSuccessColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialOnSuccessDraggedBrush" Color="{DynamicResource MaterialOnSuccessColor}" Opacity="0.16" />
+      <Color x:Key="MaterialSuccessContainerColor">#145219</Color>
+      <SolidColorBrush x:Key="MaterialSuccessContainerBrush" Color="{DynamicResource MaterialSuccessContainerColor}" />
+      <SolidColorBrush x:Key="MaterialSuccessContainerHoverBrush" Color="{DynamicResource MaterialSuccessContainerColor}" Opacity="0.08" />
+      <SolidColorBrush x:Key="MaterialSuccessContainerFocusBrush" Color="{DynamicResource MaterialSuccessContainerColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialSuccessContainerPressedBrush" Color="{DynamicResource MaterialSuccessContainerColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialSuccessContainerDraggedBrush" Color="{DynamicResource MaterialSuccessContainerColor}" Opacity="0.16" />
+      <Color x:Key="MaterialOnSuccessContainerColor">#B1F2A9</Color>
+      <SolidColorBrush x:Key="MaterialOnSuccessContainerBrush" Color="{DynamicResource MaterialOnSuccessContainerColor}" />
+      <SolidColorBrush x:Key="MaterialOnSuccessContainerHoverBrush" Color="{DynamicResource MaterialOnSuccessContainerColor}" Opacity="0.08" />
+      <SolidColorBrush x:Key="MaterialOnSuccessContainerFocusBrush" Color="{DynamicResource MaterialOnSuccessContainerColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialOnSuccessContainerPressedBrush" Color="{DynamicResource MaterialOnSuccessContainerColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialOnSuccessContainerDraggedBrush" Color="{DynamicResource MaterialOnSuccessContainerColor}" Opacity="0.16" />
+      <Color x:Key="MaterialWarningColor">#F6BE3B</Color>
+      <SolidColorBrush x:Key="MaterialWarningBrush" Color="{DynamicResource MaterialWarningColor}" />
+      <SolidColorBrush x:Key="MaterialWarningHoverBrush" Color="{DynamicResource MaterialWarningColor}" Opacity="0.08" />
+      <SolidColorBrush x:Key="MaterialWarningFocusBrush" Color="{DynamicResource MaterialWarningColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialWarningPressedBrush" Color="{DynamicResource MaterialWarningColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialWarningDraggedBrush" Color="{DynamicResource MaterialWarningColor}" Opacity="0.16" />
+      <Color x:Key="MaterialOnWarningColor">#402D00</Color>
+      <SolidColorBrush x:Key="MaterialOnWarningBrush" Color="{DynamicResource MaterialOnWarningColor}" />
+      <SolidColorBrush x:Key="MaterialOnWarningHoverBrush" Color="{DynamicResource MaterialOnWarningColor}" Opacity="0.08" />
+      <SolidColorBrush x:Key="MaterialOnWarningFocusBrush" Color="{DynamicResource MaterialOnWarningColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialOnWarningPressedBrush" Color="{DynamicResource MaterialOnWarningColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialOnWarningDraggedBrush" Color="{DynamicResource MaterialOnWarningColor}" Opacity="0.16" />
+      <Color x:Key="MaterialWarningContainerColor">#5C4200</Color>
+      <SolidColorBrush x:Key="MaterialWarningContainerBrush" Color="{DynamicResource MaterialWarningContainerColor}" />
+      <SolidColorBrush x:Key="MaterialWarningContainerHoverBrush" Color="{DynamicResource MaterialWarningContainerColor}" Opacity="0.08" />
+      <SolidColorBrush x:Key="MaterialWarningContainerFocusBrush" Color="{DynamicResource MaterialWarningContainerColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialWarningContainerPressedBrush" Color="{DynamicResource MaterialWarningContainerColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialWarningContainerDraggedBrush" Color="{DynamicResource MaterialWarningContainerColor}" Opacity="0.16" />
+      <Color x:Key="MaterialOnWarningContainerColor">#FFDEA6</Color>
+      <SolidColorBrush x:Key="MaterialOnWarningContainerBrush" Color="{DynamicResource MaterialOnWarningContainerColor}" />
+      <SolidColorBrush x:Key="MaterialOnWarningContainerHoverBrush" Color="{DynamicResource MaterialOnWarningContainerColor}" Opacity="0.08" />
+      <SolidColorBrush x:Key="MaterialOnWarningContainerFocusBrush" Color="{DynamicResource MaterialOnWarningContainerColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialOnWarningContainerPressedBrush" Color="{DynamicResource MaterialOnWarningContainerColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialOnWarningContainerDraggedBrush" Color="{DynamicResource MaterialOnWarningContainerColor}" Opacity="0.16" />
       <SolidColorBrush x:Key="MaterialDisabledContainerBrush" Color="{DynamicResource MaterialOnSurfaceColor}" Opacity="0.1" />
       <SolidColorBrush x:Key="MaterialDisabledContentBrush" Color="{DynamicResource MaterialOnSurfaceVariantColor}" Opacity="0.38" />
       <SolidColorBrush x:Key="MaterialDisabledOnSurfaceBrush" Color="{DynamicResource MaterialOnSurfaceColor}" Opacity="0.38" />
@@ -896,6 +992,54 @@
       <SolidColorBrush x:Key="MaterialSurfaceTintFocusBrush" Color="{DynamicResource MaterialSurfaceTintColor}" Opacity="0.1" />
       <SolidColorBrush x:Key="MaterialSurfaceTintPressedBrush" Color="{DynamicResource MaterialSurfaceTintColor}" Opacity="0.1" />
       <SolidColorBrush x:Key="MaterialSurfaceTintDraggedBrush" Color="{DynamicResource MaterialSurfaceTintColor}" Opacity="0.16" />
+      <Color x:Key="MaterialSuccessColor">#2E6B30</Color>
+      <SolidColorBrush x:Key="MaterialSuccessBrush" Color="{DynamicResource MaterialSuccessColor}" />
+      <SolidColorBrush x:Key="MaterialSuccessHoverBrush" Color="{DynamicResource MaterialSuccessColor}" Opacity="0.08" />
+      <SolidColorBrush x:Key="MaterialSuccessFocusBrush" Color="{DynamicResource MaterialSuccessColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialSuccessPressedBrush" Color="{DynamicResource MaterialSuccessColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialSuccessDraggedBrush" Color="{DynamicResource MaterialSuccessColor}" Opacity="0.16" />
+      <Color x:Key="MaterialOnSuccessColor">#FFFFFF</Color>
+      <SolidColorBrush x:Key="MaterialOnSuccessBrush" Color="{DynamicResource MaterialOnSuccessColor}" />
+      <SolidColorBrush x:Key="MaterialOnSuccessHoverBrush" Color="{DynamicResource MaterialOnSuccessColor}" Opacity="0.08" />
+      <SolidColorBrush x:Key="MaterialOnSuccessFocusBrush" Color="{DynamicResource MaterialOnSuccessColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialOnSuccessPressedBrush" Color="{DynamicResource MaterialOnSuccessColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialOnSuccessDraggedBrush" Color="{DynamicResource MaterialOnSuccessColor}" Opacity="0.16" />
+      <Color x:Key="MaterialSuccessContainerColor">#B1F2A9</Color>
+      <SolidColorBrush x:Key="MaterialSuccessContainerBrush" Color="{DynamicResource MaterialSuccessContainerColor}" />
+      <SolidColorBrush x:Key="MaterialSuccessContainerHoverBrush" Color="{DynamicResource MaterialSuccessContainerColor}" Opacity="0.08" />
+      <SolidColorBrush x:Key="MaterialSuccessContainerFocusBrush" Color="{DynamicResource MaterialSuccessContainerColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialSuccessContainerPressedBrush" Color="{DynamicResource MaterialSuccessContainerColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialSuccessContainerDraggedBrush" Color="{DynamicResource MaterialSuccessContainerColor}" Opacity="0.16" />
+      <Color x:Key="MaterialOnSuccessContainerColor">#002204</Color>
+      <SolidColorBrush x:Key="MaterialOnSuccessContainerBrush" Color="{DynamicResource MaterialOnSuccessContainerColor}" />
+      <SolidColorBrush x:Key="MaterialOnSuccessContainerHoverBrush" Color="{DynamicResource MaterialOnSuccessContainerColor}" Opacity="0.08" />
+      <SolidColorBrush x:Key="MaterialOnSuccessContainerFocusBrush" Color="{DynamicResource MaterialOnSuccessContainerColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialOnSuccessContainerPressedBrush" Color="{DynamicResource MaterialOnSuccessContainerColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialOnSuccessContainerDraggedBrush" Color="{DynamicResource MaterialOnSuccessContainerColor}" Opacity="0.16" />
+      <Color x:Key="MaterialWarningColor">#7A5900</Color>
+      <SolidColorBrush x:Key="MaterialWarningBrush" Color="{DynamicResource MaterialWarningColor}" />
+      <SolidColorBrush x:Key="MaterialWarningHoverBrush" Color="{DynamicResource MaterialWarningColor}" Opacity="0.08" />
+      <SolidColorBrush x:Key="MaterialWarningFocusBrush" Color="{DynamicResource MaterialWarningColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialWarningPressedBrush" Color="{DynamicResource MaterialWarningColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialWarningDraggedBrush" Color="{DynamicResource MaterialWarningColor}" Opacity="0.16" />
+      <Color x:Key="MaterialOnWarningColor">#FFFFFF</Color>
+      <SolidColorBrush x:Key="MaterialOnWarningBrush" Color="{DynamicResource MaterialOnWarningColor}" />
+      <SolidColorBrush x:Key="MaterialOnWarningHoverBrush" Color="{DynamicResource MaterialOnWarningColor}" Opacity="0.08" />
+      <SolidColorBrush x:Key="MaterialOnWarningFocusBrush" Color="{DynamicResource MaterialOnWarningColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialOnWarningPressedBrush" Color="{DynamicResource MaterialOnWarningColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialOnWarningDraggedBrush" Color="{DynamicResource MaterialOnWarningColor}" Opacity="0.16" />
+      <Color x:Key="MaterialWarningContainerColor">#FFDEA6</Color>
+      <SolidColorBrush x:Key="MaterialWarningContainerBrush" Color="{DynamicResource MaterialWarningContainerColor}" />
+      <SolidColorBrush x:Key="MaterialWarningContainerHoverBrush" Color="{DynamicResource MaterialWarningContainerColor}" Opacity="0.08" />
+      <SolidColorBrush x:Key="MaterialWarningContainerFocusBrush" Color="{DynamicResource MaterialWarningContainerColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialWarningContainerPressedBrush" Color="{DynamicResource MaterialWarningContainerColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialWarningContainerDraggedBrush" Color="{DynamicResource MaterialWarningContainerColor}" Opacity="0.16" />
+      <Color x:Key="MaterialOnWarningContainerColor">#261900</Color>
+      <SolidColorBrush x:Key="MaterialOnWarningContainerBrush" Color="{DynamicResource MaterialOnWarningContainerColor}" />
+      <SolidColorBrush x:Key="MaterialOnWarningContainerHoverBrush" Color="{DynamicResource MaterialOnWarningContainerColor}" Opacity="0.08" />
+      <SolidColorBrush x:Key="MaterialOnWarningContainerFocusBrush" Color="{DynamicResource MaterialOnWarningContainerColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialOnWarningContainerPressedBrush" Color="{DynamicResource MaterialOnWarningContainerColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialOnWarningContainerDraggedBrush" Color="{DynamicResource MaterialOnWarningContainerColor}" Opacity="0.16" />
       <SolidColorBrush x:Key="MaterialDisabledContainerBrush" Color="{DynamicResource MaterialOnSurfaceColor}" Opacity="0.1" />
       <SolidColorBrush x:Key="MaterialDisabledContentBrush" Color="{DynamicResource MaterialOnSurfaceVariantColor}" Opacity="0.38" />
       <SolidColorBrush x:Key="MaterialDisabledOnSurfaceBrush" Color="{DynamicResource MaterialOnSurfaceColor}" Opacity="0.38" />

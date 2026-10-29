@@ -115,6 +115,9 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/MaterialDatePicker.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/MaterialTimePicker.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/MaterialChips.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/InfoBar.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/InfoBadge.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/ProgressRing.xaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Styles.Resources>

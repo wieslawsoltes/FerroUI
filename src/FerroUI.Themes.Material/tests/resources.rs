@@ -1,4 +1,4 @@
-use crate::{MaterialColorRole, MaterialColorScheme, MaterialMotionRole, MaterialMotionScheme, MaterialTheme};
+use crate::{MaterialColorRole, MaterialColorScheme, MaterialMotionRole, MaterialMotionScheme, MaterialStatusColor, MaterialTheme};
 use ferroui_base::animation::easings::Easing;
 use ferroui_base::animation::TimeSpan;
 use ferroui_base::controls::ResourceKey;
@@ -115,4 +115,51 @@ fn default_controls_and_material_variants_resolve_compiled_templates() {
         let value = theme.try_get_resource(&ResourceKey::from(key), None).flatten();
         assert!(from_markup_value::<Ref<ControlTheme>>(&value).is_some(), "{key}");
     }
+}
+
+/// The severities of InfoBar and InfoBadge have fills of their own in both variants: Error the error
+/// roles, Success and Warning the status colors the theme adds (Material 3 has no success or
+/// warning roles), Informational the primary role; and the glyph of each severity is drawn in a
+/// color other than that of the circle behind it.
+#[test]
+fn the_severities_have_distinct_fills_and_visible_glyphs() {
+    crate::register_types();
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let theme = MaterialTheme::new();
+    let brush = |key: &str, variant: &ThemeVariant| {
+        let value = theme.try_get_resource(&ResourceKey::from(key), Some(variant)).flatten();
+        from_markup_value::<Rc<dyn IBrush>>(&value)
+            .and_then(|brush| brush.as_solid_color_brush().map(|brush| brush.color()))
+            .unwrap_or_else(|| panic!("the brush {key}"))
+    };
+    for (variant, scheme) in [(ThemeVariant::light(), MaterialColorScheme::expressive_light()), (ThemeVariant::dark(), MaterialColorScheme::dark())] {
+        let severities = ["Informational", "Success", "Warning", "Error"];
+        let backgrounds: Vec<Color> = severities.iter().map(|s| brush(&format!("InfoBar{s}SeverityBackgroundBrush"), &variant)).collect();
+        let circles: Vec<Color> = severities.iter().map(|s| brush(&format!("InfoBar{s}SeverityIconBackground"), &variant)).collect();
+        for i in 0..severities.len() {
+            for j in i + 1..severities.len() {
+                assert_ne!(backgrounds[i], backgrounds[j], "{} and {} in {variant:?}", severities[i], severities[j]);
+                assert_ne!(circles[i], circles[j], "{} and {} in {variant:?}", severities[i], severities[j]);
+            }
+            let glyph = brush(&format!("InfoBar{}SeverityIconForeground", severities[i]), &variant);
+            assert_ne!(glyph, circles[i], "the glyph of {} in {variant:?}", severities[i]);
+        }
+        assert_eq!(backgrounds[3], scheme.color(MaterialColorRole::ErrorContainer));
+        assert_eq!(circles[1], scheme.status_color(MaterialStatusColor::Success));
+        assert_eq!(circles[2], scheme.status_color(MaterialStatusColor::Warning));
+        let badges: Vec<Color> = ["Attention", "Success", "Caution", "Critical"]
+            .iter()
+            .map(|s| brush(&format!("SystemFillColor{s}Brush"), &variant))
+            .chain([brush("SystemFillColorSolidNeutralBrush", &variant)])
+            .collect();
+        for i in 0..badges.len() {
+            for j in i + 1..badges.len() {
+                assert_ne!(badges[i], badges[j], "the InfoBadge fills {i} and {j} in {variant:?}");
+            }
+        }
+    }
+    assert_ne!(
+        MaterialColorScheme::light().status_color(MaterialStatusColor::SuccessContainer),
+        MaterialColorScheme::dark().status_color(MaterialStatusColor::SuccessContainer)
+    );
 }

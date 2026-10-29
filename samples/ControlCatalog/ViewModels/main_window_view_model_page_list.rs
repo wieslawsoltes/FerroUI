@@ -138,8 +138,13 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add("/Pages/AdornerLayerPage.xaml", "AdornerLayer", Icons::SPARKLE, "Overlay visuals on top of other controls");
             s.add("/Pages/DataValidationPage.xaml", "Data Validation", Icons::SHIELD, "Display validation errors from bindings");
             s.add("/Pages/DialogsPage.xaml", "Dialogs", Icons::DIALOG, "File pickers and modal dialog windows");
+            // Not from upstream: InfoBadge and InfoBar of WinUI (docs/porting/winui-controls.md).
+            s.add("/Pages/InfoBadgePage.xaml", "InfoBadge", Icons::DOTS, "A dot, number or icon that draws attention");
+            s.add("/Pages/InfoBarPage.xaml", "InfoBar", Icons::INFO, "Inline app-wide messages by severity");
             s.add("/Pages/NotificationsPage.xaml", "Notifications", Icons::BELL, "Toast-style in-app notifications");
             s.add("/Pages/ProgressBarPage.xaml", "ProgressBar", Icons::PROGRESS, "Determinate and indeterminate progress");
+            // Not from upstream: ProgressRing of WinUI (docs/porting/winui-controls.md).
+            s.add("/Pages/ProgressRingPage.xaml", "ProgressRing", Icons::REFRESH, "Circular indeterminate and determinate progress");
             s.add("/Pages/ToolTipPage.xaml", "ToolTip", Icons::TOOLTIP, "Hover hints for any control");
         }),
         section("Interaction", Icons::KEYBOARD_FLOAT, &mut unavailable, |s| {
