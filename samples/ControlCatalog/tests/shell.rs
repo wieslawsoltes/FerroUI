@@ -1142,4 +1142,42 @@ fn the_shell_stays_usable_with_every_window_decoration() {
             usable(&format!("extended {extended}, decorations {decorations:?}"));
         }
     }
+
+/// A finger that drags up on a page of a phone-sized shell (the minimal pane) scrolls the page, also
+/// where it lands between the cards (the scroll content presenter is hit there, not the grid of the
+/// template of the scroll viewer), as the browser test of the phone does.
+#[test]
+fn a_finger_scrolls_the_page_on_a_phone() {
+    use ferroui_base::input::raw::RawTouchEventArgs;
+    use ferroui_base::input::TouchDevice;
+
+    let shell = Shell::start(400.0, 800.0);
+    assert_eq!(NavigationViewDisplayMode::Minimal, shell.navigation_view().display_mode());
+    let page = shell.page();
+    let scroll_viewer = descendants::<ScrollViewer>(&page).into_iter().next().expect("the scroll viewer of the home page");
+    assert!(scroll_viewer.extent().height > scroll_viewer.viewport().height, "the home page can scroll");
+    let device = TouchDevice::new();
+    let finger = |kind: RawPointerEventType, position: Point, milliseconds: u64| {
+        shell.timestamp.set(shell.timestamp.get() + milliseconds);
+        let input =
+            ferroui_controls::platform::ITopLevelImpl::input(&*shell.window_impl).expect("the window handles input");
+        input(Rc::new(RawTouchEventArgs::new(
+            device.clone() as Rc<dyn IInputDevice>,
+            shell.timestamp.get(),
+            shell.input_root(),
+            kind,
+            position,
+            RawInputModifiers::NONE,
+            1,
+        )));
+        shell.frame();
+    };
+    let (x, y) = (200.0, 650.0);
+    finger(RawPointerEventType::TouchBegin, Point::new(x, y), 1000);
+    for step in 1..=10 {
+        finger(RawPointerEventType::TouchUpdate, Point::new(x, y - 20.0 * f64::from(step)), 30);
+    }
+    let offset = scroll_viewer.offset().y;
+    finger(RawPointerEventType::TouchEnd, Point::new(x, y - 200.0), 300);
+    assert!((offset - 195.0).abs() <= 2.0, "a drag of 200 scrolls the page by 195 (less the start distance), not {offset}");
 }

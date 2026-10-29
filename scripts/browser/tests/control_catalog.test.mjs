@@ -291,14 +291,16 @@ check("the module, the list of the asset files and the start-up files are downlo
 
 check("the navigation drawer opens from its toggle button", async (page) => {
     let state = await page.until("the drawer is closed", (s) => s.drawerOpen === false);
-    assert(!state.elements.some((e) => e.name === "SearchBox" && e.hit), "the search box of the closed drawer can be reached");
+    // The search box of the pane is an AutoSuggestBox; the view reports its text box (the part TextBox).
+    const isSearchBox = (e) => e.type === "TextBox" && e.name === "TextBox";
+    assert(!state.elements.some((e) => isSearchBox(e) && e.hit), "the search box of the closed drawer can be reached");
     // The first frame of the view shows the drawer open beside the content: the main view closes it
     // for this width when it is loaded, after that frame. The button is clicked once the view has
     // drawn it where the closed drawer leaves it.
     const toggle = await page.element("the toggle button of the pane is shown", (e) => e.name === "TogglePaneButton" && e.hit);
     await page.clickElement(toggle);
     state = await page.until("the drawer is open and shows its entries", (s) => s.drawerOpen === true
-        && s.elements.some((e) => e.name === "SearchBox" && inDrawer(e))
+        && s.elements.some((e) => isSearchBox(e) && inDrawer(e))
         && ["Home", "Basic Input", "Text", "Settings"].every((text) => s.elements.some((e) => e.text === text && inDrawer(e))));
     // The drawer covers the content: the home page behind it can no longer be clicked there.
     const covered = state.elements.find((e) => e.text === "Basic Input" && e.x < DRAWER_EDGE && !inDrawer(e));
@@ -472,9 +474,11 @@ check("a text box focused by touch on a phone leaves the page at scale 1", async
     assert(/interactive-widget=resizes-content/.test(viewport), `the viewport element of the page is "${viewport}"`);
     await page.clickElement(await page.element("the toggle button of the pane is shown", (e) => e.name === "TogglePaneButton" && e.hit));
     await page.until("the drawer is open", (s) => s.drawerOpen === true);
+    // A section of the pane opens its page and its list of pages, and the pane stays open (an item
+    // with children does not close it); its page TextBox closes it.
     await page.clickElement(await page.find("Text", inDrawer));
-    await page.until(`the page "Text" is shown`, (s) => s.page === "Text" && !s.navigating && !s.drawerOpen);
-    await page.clickElement(await page.find("TextBox", (e) => e.hit));
+    await page.until(`the page "Text" is shown`, (s) => s.page === "Text" && !s.navigating);
+    await page.clickElement(await page.find("TextBox", inDrawer));
     await page.until(`the page "TextBox" is shown`, (s) => s.page === "TextBox" && !s.navigating);
     await page.clickElement(await page.find("First Look", (e) => e.hit));
     const box = await page.element("the text box of the sample is shown", (e) => e.name === "FirstLookBox" && e.hit);
