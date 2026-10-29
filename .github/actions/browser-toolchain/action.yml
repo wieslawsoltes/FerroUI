@@ -11,6 +11,12 @@ inputs:
   cache-key:
     description: Key of the Rust build cache, so that jobs that build different things keep separate caches.
     required: true
+  ferroui:
+    description: >
+      The directory of the FerroUI repository: "." here, the submodule (FerroUI) in the repository of
+      an application (.github/workflows/app.yml).
+    required: false
+    default: "."
   threads:
     description: >
       "true" for a job that builds with `scripts/build-browser.sh --threads` or `--both`: the toolchain
@@ -24,6 +30,7 @@ runs:
     - name: Pinned versions
       id: pins
       shell: bash
+      working-directory: ${{ inputs.ferroui }}
       run: |
         echo "emsdk=$(sed -n 's/^EMSDK_VERSION="\(.*\)"$/\1/p' scripts/browser/setup.sh)" >> "$GITHUB_OUTPUT"
         echo "rust=$(sed -n 's/^RUST_VERSION="\(.*\)"$/\1/p' scripts/browser/setup.sh)" >> "$GITHUB_OUTPUT"
@@ -51,6 +58,7 @@ runs:
         key: rust-nightly-${{ runner.os }}-${{ runner.arch }}-${{ steps.pins.outputs.nightly }}-rust-src-wasm32-unknown-emscripten
     - name: Install the toolchain (scripts/browser/setup.sh)
       shell: bash
+      working-directory: ${{ inputs.ferroui }}
       run: |
         scripts/browser/setup.sh ${{ inputs.threads == 'true' && '--threads' || '' }} ~/browser-tools
         # The environment of env.sh, for the following steps of the job.
@@ -73,4 +81,4 @@ runs:
       with:
         node-version: 24
         cache: npm
-        cache-dependency-path: src/Browser/FerroUI.Browser/webapp/package-lock.json
+        cache-dependency-path: ${{ inputs.ferroui }}/src/Browser/FerroUI.Browser/webapp/package-lock.json
