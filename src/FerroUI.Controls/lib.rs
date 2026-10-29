@@ -306,6 +306,11 @@ mod info_badge_tests;
 mod info_bar_tests;
 #[cfg(test)]
 mod progress_ring_tests;
+// WinUI's title bar (docs/porting/winui-controls.md).
+mod title_bar;
+pub use title_bar::TitleBar;
+#[cfg(test)]
+mod title_bar_tests;
 // WinUI's input controls (docs/porting/winui-controls.md).
 mod auto_suggest_box;
 mod number_box;
@@ -333,6 +338,35 @@ mod number_box_tests;
 mod radio_buttons_tests;
 #[cfg(test)]
 mod rating_control_tests;
+// WinUI's navigation: Frame, its pages and the navigation model in the namespace
+// FerroUI.Navigation (docs/porting/winui-controls.md, section 7).
+pub mod navigation;
+mod frame;
+mod frame_page;
+pub use frame::{Frame, PageFactory};
+pub use frame_page::{FramePage, FramePageImpl, FramePageImplExt, FramePageVTable};
+// WinUI's NavigationView and its items (docs/porting/winui-controls.md, section 10.4).
+mod navigation_view;
+mod navigation_view_events;
+mod navigation_view_item;
+pub use navigation_view::NavigationView;
+pub use navigation_view_events::{
+    NavigationViewBackButtonVisible, NavigationViewBackRequestedEventArgs, NavigationViewDisplayMode,
+    NavigationViewDisplayModeChangedEventArgs, NavigationViewItemCollapsedEventArgs,
+    NavigationViewItemExpandingEventArgs, NavigationViewItemInvokedEventArgs, NavigationViewPaneClosingEventArgs,
+    NavigationViewPaneDisplayMode, NavigationViewSelectionChangedEventArgs, NavigationViewSelectionFollowsFocus,
+};
+pub use navigation_view_item::{
+    NavigationViewItem, NavigationViewItemBase, NavigationViewItemHeader, NavigationViewItemSeparator,
+};
+#[cfg(test)]
+mod frame_tests;
+#[cfg(test)]
+mod navigation_test_support;
+#[cfg(test)]
+mod navigation_view_item_tests;
+#[cfg(test)]
+mod navigation_view_tests;
 #[cfg(test)]
 mod image_tests;
 #[cfg(test)]

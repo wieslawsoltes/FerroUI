@@ -269,6 +269,12 @@ control_tests! {
     command_bar_toggle_button => "CommandBarToggleButton";
     content_page => "ContentPage";
     drawer_page => "DrawerPage";
+    frame => "Frame";
+    navigation_view => "NavigationView";
+    title_bar => "TitleBar";
+    navigation_view_item => "NavigationViewItem";
+    navigation_view_item_header => "NavigationViewItemHeader";
+    navigation_view_item_separator => "NavigationViewItemSeparator";
     navigation_page => "NavigationPage";
     split_view => "SplitView";
     tab_control => "TabControl";
@@ -544,6 +550,101 @@ fn the_input_controls_get_their_parts_and_resources_from_the_theme() {
     assert_eq!(8.0, background.spacing());
     assert_eq!(5, background.children().count());
     assert_eq!(16.0, background.children().get(0).bounds().width);
+    window.close();
+}
+
+/// The navigation controls of WinUI (`Controls/Frame.xaml`, `Controls/NavigationView.xaml`;
+/// docs/porting/winui-controls.md, section 10.4): a NavigationView with its pane at the left gets
+/// the parts its code looks up, its items are realized in `MenuItemsHost` with the parts of the
+/// item template, the template settings carry the widths of the compact pane length, and a Frame in
+/// its content hosts its content in `PART_ContentPresenter`.
+#[test]
+fn the_navigation_controls_get_their_parts_from_the_theme() {
+    use ferroui_base::BoxedValue;
+    use ferroui_controls::presenters::ContentPresenter;
+    use ferroui_controls::primitives::Popup;
+    use ferroui_controls::{Button, Frame, NavigationView, NavigationViewItem, NavigationViewPaneDisplayMode, SplitView, StackPanel};
+
+    let _app = start_themed_application();
+    let navigation = NavigationView::new();
+    navigation.set_pane_display_mode(NavigationViewPaneDisplayMode::Left);
+    let item = NavigationViewItem::new();
+    item.set_content(Some(Rc::new("Home".to_string()) as BoxedValue));
+    item.menu_items().add(Some(Rc::new("Child".to_string()) as BoxedValue));
+    navigation.menu_items().add(Some(Control::boxed(&item)));
+    let frame = Frame::new();
+    navigation.set_content(Some(Control::boxed(&frame)));
+    let window = Window::new();
+    window.set_width(1200.0);
+    window.set_height(600.0);
+    window.set_content(Some(Control::boxed(&navigation)));
+    window.show();
+    window.update_layout();
+
+    let part = |control: &TemplatedControl, name: &str| {
+        control
+            .get_template_descendants()
+            .into_iter()
+            .find(|element| element.name().as_deref() == Some(name))
+            .unwrap_or_else(|| panic!("the part {name} of {}", control.get_type().name()))
+    };
+    assert!(part(&navigation, "RootSplitView").cast::<SplitView>().is_some());
+    assert!(part(&navigation, "TogglePaneButton").cast::<Button>().is_some());
+    let host = part(&navigation, "MenuItemsHost").cast::<StackPanel>().expect("a stack panel");
+    let item_control: Ref<Control> = item.clone().upcast();
+    assert!(host.children().snapshot().iter().any(|child| *child == item_control));
+    // The settings item is the last footer item.
+    let footer = part(&navigation, "FooterMenuItemsHost").cast::<StackPanel>().expect("a stack panel");
+    assert_eq!(1, footer.children().count());
+    // CompactPaneLength is NavigationViewCompactPaneLength (48); the smaller width is 8 less.
+    assert_eq!(48.0, navigation.compact_pane_length());
+    assert_eq!(40.0, navigation.template_settings().smaller_pane_toggle_button_width());
+    assert!(navigation.classes().contains(":expanded"));
+    assert!(part(&item, "ContentGrid").cast::<Control>().is_some());
+    assert!(part(&item, "ExpandCollapseChevron").cast::<Control>().is_some());
+    assert!(part(&item, "ChildrenFlyout").cast::<Popup>().is_some());
+    assert!(part(&item, "NavigationViewItemMenuItemsHost").cast::<StackPanel>().is_some());
+    // An item with children shows its chevron.
+    assert!(item.classes().contains(":chevron-visible-closed"));
+    assert!(part(&frame, "PART_ContentPresenter").cast::<ContentPresenter>().is_some());
+    window.close();
+}
+
+/// The menu items of a NavigationView whose pane is shorter than they are scroll in
+/// `MenuItemsScrollViewer` (the star row of `ItemsContainerGrid`), above the settings item, as in
+/// WinUI: none of them goes under the footer.
+#[test]
+fn the_menu_items_of_a_short_navigation_view_scroll() {
+    use ferroui_base::{BoxedValue, Vector};
+    use ferroui_controls::{NavigationView, NavigationViewItem, NavigationViewPaneDisplayMode, ScrollViewer};
+
+    let _app = start_themed_application();
+    let navigation = NavigationView::new();
+    navigation.set_pane_display_mode(NavigationViewPaneDisplayMode::Left);
+    for index in 0..12 {
+        let item = NavigationViewItem::new();
+        item.set_content(Some(Rc::new(format!("Item {index}")) as BoxedValue));
+        navigation.menu_items().add(Some(Control::boxed(&item)));
+    }
+    let window = Window::new();
+    window.set_width(800.0);
+    window.set_height(320.0);
+    window.set_content(Some(Control::boxed(&navigation)));
+    window.show();
+    window.update_layout();
+
+    let scroll_viewer = navigation
+        .get_template_descendants()
+        .into_iter()
+        .find(|element| element.name().as_deref() == Some("MenuItemsScrollViewer"))
+        .and_then(|element| element.cast::<ScrollViewer>())
+        .expect("MenuItemsScrollViewer");
+    let (extent, viewport) = (scroll_viewer.extent(), scroll_viewer.viewport());
+    assert!(viewport.height > 0.0, "the menu items have room in the pane: {viewport:?}");
+    assert!(extent.height > viewport.height, "twelve items overflow a pane of 320: {extent:?} in {viewport:?}");
+    scroll_viewer.set_offset(Vector::new(0.0, extent.height));
+    window.update_layout();
+    assert_eq!(scroll_viewer.offset().y, extent.height - viewport.height, "the last item scrolls into view");
     window.close();
 }
 
@@ -843,5 +944,42 @@ fn a_path_icon_in_a_button_is_scaled_into_its_box() {
     assert!(visual.get_visual_descendants().any(|d| d.cast::<ferroui_controls::Viewbox>().is_some()), "the icon has the template of PI-2: {names:?}");
     let path = visual.get_visual_descendants().find_map(|d| d.cast::<Path>()).unwrap_or_else(|| panic!("the path of the icon: {names:?}"));
     assert_eq!(ferroui_base::media::Stretch::Uniform, path.stretch(), "the geometry is scaled");
+    window.close();
+}
+
+/// In a minimal pane with a back button the toggle button sits right beside the back button, as
+/// in WinUI (NVW-17): not over it and without a gap.
+#[test]
+fn the_back_and_toggle_buttons_of_a_minimal_pane_are_adjacent() {
+    use ferroui_base::Point;
+    use ferroui_controls::{Button, NavigationView, NavigationViewBackButtonVisible, NavigationViewPaneDisplayMode};
+
+    let _app = start_themed_application();
+    let navigation = NavigationView::new();
+    navigation.set_pane_display_mode(NavigationViewPaneDisplayMode::LeftMinimal);
+    navigation.set_is_back_button_visible(NavigationViewBackButtonVisible::Visible);
+    let window = Window::new();
+    window.set_width(500.0);
+    window.set_height(400.0);
+    window.set_content(Some(Control::boxed(&navigation)));
+    window.show();
+    window.update_layout();
+
+    let part = |name: &str| {
+        navigation
+            .get_template_descendants()
+            .into_iter()
+            .find(|element| element.name().as_deref() == Some(name))
+            .and_then(|element| element.cast::<Button>())
+            .unwrap_or_else(|| panic!("the part {name}"))
+    };
+    let bounds = |button: &Button| {
+        let origin = button.translate_point(Point::new(0.0, 0.0), &window).expect("in the window");
+        (origin.x, button.bounds().width, button.is_effectively_visible())
+    };
+    let (back, toggle, close) = (bounds(&part("NavigationViewBackButton")), bounds(&part("TogglePaneButton")), bounds(&part("NavigationViewCloseButton")));
+    assert!(back.2 && toggle.2, "both buttons are shown: back {back:?}, toggle {toggle:?}, close {close:?}");
+    let gap = toggle.0 - (back.0 + back.1);
+    assert!((0.0..=8.0).contains(&gap), "the toggle button starts beside the back button: back {back:?}, toggle {toggle:?}, close {close:?}");
     window.close();
 }

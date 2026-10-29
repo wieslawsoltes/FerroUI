@@ -23,9 +23,11 @@ It is merged with a merge commit (never squashed or rebased: that would rewrite 
 pull requests above it contain) and only if its head is still the commit that was checked
 (`--match-head-commit`). The repository deletes the head branch of a merged pull request, and
 GitHub then retargets the pull request above it to the default branch; the script waits for that
-(and retargets it itself if GitHub has not within two minutes). The retarget runs the checks
-again (`edited` with a change of the base in .github/workflows/ci.yml): without `--wait` the
-script stops there and says so; with it, it polls until they end.
+(and retargets it itself if GitHub has not within two minutes), then brings its branch up to date
+with the new base (`gh pr update-branch`, a merge commit), which runs the checks again on a new
+head: the CI does not run for `edited`, since the skipped checks of such a run would replace the
+results of the real one. Without `--wait` the script stops there and says so; with it, it polls
+until they end.
 
 Needs the GitHub CLI (`gh`), signed in with write access to the repository.
 """
@@ -167,12 +169,15 @@ def readiness(repo, pr, default):
 def wait_for_retarget(number, default, seconds=120):
     deadline = time.time() + seconds
     while time.time() < deadline:
-        pr = pull(number)
-        if pr["baseRefName"] == default:
-            return pr
+        if pull(number)["baseRefName"] == default:
+            break
         time.sleep(5)
-    print(f"#{number} was not retargeted by GitHub; retargeting it to {default}")
-    gh("pr", "edit", str(number), "--base", default, parse=False)
+    else:
+        print(f"#{number} was not retargeted by GitHub; retargeting it to {default}")
+        gh("pr", "edit", str(number), "--base", default, parse=False)
+    # The new head runs the checks against the new base.
+    result = subprocess.run(["gh", "pr", "update-branch", str(number)], capture_output=True, text=True)
+    print(f"#{number}: {(result.stdout or result.stderr).strip() or 'branch updated'}")
     return pull(number)
 
 
