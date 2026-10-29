@@ -125,6 +125,7 @@ members = [
     "samples/ViewInterop",
     "samples/ViewGallery",
     "samples/TodoMvc",
+    "samples/Solitaire",
     "samples/ReactiveDemoComponents",
     "samples/MiniMvvm",
     "samples/ControlCatalog",

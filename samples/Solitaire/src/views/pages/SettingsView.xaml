@@ -1,0 +1,15 @@
+<UserControl xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Viewbox Margin="28" MaxWidth="540" StretchDirection="DownOnly">
+    <Border x:Name="Tray" Classes="tray downDeck" Width="450" Background="#E5102419" BorderBrush="#D6B34B" BorderThickness="2" CornerRadius="10" Padding="28">
+      <StackPanel Spacing="18">
+        <TextBlock Text="SETTINGS" Foreground="#FCFC80" FontFamily="fonts:Solitaire#Quentell CF" FontSize="36" HorizontalAlignment="Center" />
+        <TextBlock Text="KLONDIKE · CARDS TO DRAW" Foreground="#D6B34B" FontSize="16" HorizontalAlignment="Center" />
+        <Button x:Name="DrawMode" Classes="casino" HorizontalAlignment="Stretch" />
+        <TextBlock Text="SPIDER · DIFFICULTY" Foreground="#D6B34B" FontSize="16" HorizontalAlignment="Center" />
+        <Button x:Name="Difficulty" Classes="casino" HorizontalAlignment="Stretch" />
+        <TextBlock Text="Changes apply to the next new game." Foreground="#C5DACB" FontSize="15" HorizontalAlignment="Center" />
+        <Button x:Name="Back" Content="Back" Classes="casino" HorizontalAlignment="Stretch" />
+      </StackPanel>
+    </Border>
+  </Viewbox>
+</UserControl>

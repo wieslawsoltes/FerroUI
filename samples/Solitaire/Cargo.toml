@@ -1,0 +1,30 @@
+[package]
+name = "ferro-solitaire"
+version.workspace = true
+edition = "2024"
+rust-version.workspace = true
+license.workspace = true
+publish = false
+description = "Klondike, FreeCell and Spider Solitaire, ported to FerroUI and Rust"
+
+[features]
+default = ["desktop"]
+desktop = ["ui", "ferroui/desktop"]
+ui = ["dep:ferroui", "dep:ferroui-base", "dep:ferroui-controls"]
+headless = ["ui", "ferroui/headless"]
+
+[dependencies]
+ferroui = { path = "../../src/FerroUI", optional = true, default-features = false, features = ["fluent", "xaml"] }
+ferroui-base = { workspace = true, optional = true }
+ferroui-controls = { workspace = true, optional = true }
+rand = "0.9"
+rand_chacha = "0.9"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+dirs = "6"
+tempfile = "3"
+
+[[bin]]
+name = "ferro-solitaire"
+path = "src/main.rs"
+required-features = ["desktop"]

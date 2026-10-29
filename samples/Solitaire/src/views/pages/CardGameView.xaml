@@ -1,0 +1,32 @@
+<UserControl xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <DockPanel Margin="16">
+    <Viewbox DockPanel.Dock="Top" StretchDirection="DownOnly" HorizontalAlignment="Stretch" Margin="0,0,0,8">
+      <Border x:Name="DeckControls" Classes="tray downDeck" Background="#DF102419" BorderBrush="#D6B34B" BorderThickness="2" CornerRadius="10" Padding="8">
+      <StackPanel Orientation="Horizontal" Spacing="10">
+        <Button x:Name="Home" Content="Home" Classes="casino" />
+        <TextBlock x:Name="GameName" Foreground="#FCFC80" FontFamily="fonts:Solitaire#Quentell CF" FontSize="30" Margin="12,0,20,0" VerticalAlignment="Center" />
+        <Button x:Name="NewGame" Content="New game" Classes="casino" />
+        <Button x:Name="Restart" Content="Restart" Classes="casino" />
+        <Button x:Name="Undo" Content="Undo" Classes="casino" />
+        <Button x:Name="Hint" Content="Hint" Classes="casino" />
+        <Button x:Name="AutoMove" Content="Auto move" Classes="casino" />
+        <Button x:Name="Deal" Content="Draw" Classes="casino" />
+      </StackPanel>
+      </Border>
+    </Viewbox>
+    <TextBlock x:Name="Score" DockPanel.Dock="Bottom" Foreground="#E8F0E8" FontSize="17" TextAlignment="Center" Margin="0,8,0,0" />
+    <Panel>
+      <Viewbox Stretch="Uniform" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <Canvas x:Name="CardField" Width="1500" Height="1000" Background="Transparent" />
+      </Viewbox>
+      <Border x:Name="Dialog" IsVisible="False" Background="#F0102419" BorderBrush="#D6B34B" BorderThickness="2" CornerRadius="12" Padding="32" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <StackPanel Spacing="20" Width="380">
+          <TextBlock x:Name="DialogTitle" Foreground="#FCFC80" FontSize="28" TextAlignment="Center" />
+          <TextBlock x:Name="DialogMessage" Foreground="White" TextWrapping="Wrap" FontSize="18" TextAlignment="Center" />
+          <Button x:Name="Confirm" Classes="casino" Content="Continue" HorizontalAlignment="Stretch" />
+          <Button x:Name="Cancel" Classes="casino" Content="Keep playing" HorizontalAlignment="Stretch" />
+        </StackPanel>
+      </Border>
+    </Panel>
+  </DockPanel>
+</UserControl>

@@ -1,0 +1,8 @@
+<DockPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <DockPanel.Background>
+    <RadialGradientBrush GradientOrigin="50%,50%">
+      <GradientStop Color="#16A757" Offset="0" />
+      <GradientStop Color="#116336" Offset="1" />
+    </RadialGradientBrush>
+  </DockPanel.Background>
+</DockPanel>

@@ -1,0 +1,11 @@
+<UserControl xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Viewbox Margin="28" MaxWidth="1000" StretchDirection="DownOnly">
+    <Border x:Name="Tray" Classes="tray downDeck" Width="900" Background="#E5102419" BorderBrush="#D6B34B" BorderThickness="2" CornerRadius="10" Padding="28">
+      <StackPanel Spacing="24">
+        <TextBlock Text="STATISTICS" Foreground="#FCFC80" FontFamily="fonts:Solitaire#Quentell CF" FontSize="40" HorizontalAlignment="Center" />
+        <StackPanel x:Name="GameStatistics" Orientation="Horizontal" Spacing="24" HorizontalAlignment="Center" />
+        <Button x:Name="Back" Content="Back" Classes="casino" Width="240" HorizontalAlignment="Center" />
+      </StackPanel>
+    </Border>
+  </Viewbox>
+</UserControl>

@@ -1,0 +1,24 @@
+<Styles xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Style Selector="Button.casino">
+    <Setter Property="Padding" Value="16,8" />
+    <Setter Property="BorderThickness" Value="2" />
+    <Setter Property="CornerRadius" Value="6" />
+    <Setter Property="Foreground" Value="#17170C" />
+    <Setter Property="FontWeight" Value="Bold" />
+    <Setter Property="FontSize" Value="20" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="Background">
+      <ConicGradientBrush Center="50%,-20%" Angle="270">
+        <GradientStop Offset="0" Color="#FCFC80" />
+        <GradientStop Offset="0.5" Color="#D09C14" />
+        <GradientStop Offset="1" Color="#FCFC80" />
+      </ConicGradientBrush>
+    </Setter>
+    <Setter Property="BorderBrush" Value="#FCFC80" />
+  </Style>
+  <Style Selector="Button.casino:disabled"><Setter Property="Opacity" Value="0.45" /></Style>
+  <Style Selector="Button.casino:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="#FCFC80" />
+    <Setter Property="Foreground" Value="#17170C" />
+  </Style>
+</Styles>
