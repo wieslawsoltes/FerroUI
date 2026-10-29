@@ -106,6 +106,50 @@ jobs:
       - name: Package without building
         run: scripts/release/publish.sh --dry-run --no-verify
 
+  # The areas of the sources a pull request changes. The jobs and steps that test one platform or
+  # one backend alone run on a pull request only when it changes that area (or this workflow); the
+  # nightly run and a run started by hand run all of them. The pull request checks are those of
+  # every change: the conventions, the packages, the macOS tests of the workspace, the Windows
+  # backend, X11 and the browser. To run everything on a branch: gh workflow run ci.yml --ref <branch>
+  changes:
+    if: (github.event.action != 'edited' || github.event.changes.base != null)
+    name: Changed areas
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      windows: ${{ steps.areas.outputs.windows }}
+      vello: ${{ steps.areas.outputs.vello }}
+      browser: ${{ steps.areas.outputs.browser }}
+      ios: ${{ steps.areas.outputs.ios }}
+      android: ${{ steps.areas.outputs.android }}
+      wayland: ${{ steps.areas.outputs.wayland }}
+      linuxfb: ${{ steps.areas.outputs.linuxfb }}
+    steps:
+      - id: areas
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR/files" -q '.[].filename' > files.txt
+          echo "$(wc -l < files.txt) changed files"
+          area() {
+            if grep -qE "^(\.github/workflows/ci\.yml|\.github/actions/|$2)" files.txt; then
+              echo "$1=true" >> "$GITHUB_OUTPUT"; echo "$1: yes"
+            else
+              echo "$1: no"
+            fi
+          }
+          area windows 'src/Windows/|src/FerroUI\.Themes\.WinUI/|samples/(IntegrationTestApp|HelloWorld[^/]*|GpuInterop|WinUIThemeGallery|ControlGallery\.WinUI|WinUIEmbedSample)/|scripts/(windows|winui|winui-theme)/'
+          area vello 'src/Vello/|tests/FerroUI\.RenderBackends\.Comparison/|src/FerroUI\.Themes\.(Fluent|Simple)/|samples/ControlCatalog/ClassicShell/'
+          area browser 'src/Browser/|samples/ControlCatalog\.Browser/|scripts/browser/|scripts/build-browser\.sh'
+          area ios 'src/iOS/|samples/[^/]*\.iOS/|scripts/ios/'
+          area android 'src/Android/|samples/[^/]*\.Android/|scripts/android/'
+          area wayland 'src/FerroUI\.Wayland/|scripts/wayland/'
+          area linuxfb 'src/Linux/|src/FerroUI\.Mcp/|scripts/linuxfb/|scripts/test-mcp\.py'
+
   # Reduced for the time being (2026-10-08), to shorten the wait for a pull request while many are
   # in flight; the job took 22 minutes, 20 of them compiling. What is left out, and how to get it
   # back:
@@ -148,7 +192,8 @@ jobs:
   # The commands are those the macOS job ran.
   macos-features:
     name: Build and test (macOS, the ControlCatalog with classic themes, Vello)
-    if: (github.event.action != 'edited' || github.event.changes.base != null) && (github.event_name != 'push')
+    if: (github.event.action != 'edited' || github.event.changes.base != null) && ((github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') || (github.event_name == 'pull_request' && needs.changes.outputs.vello == 'true'))
+    needs: changes
     runs-on: macos-15
     timeout-minutes: 120
     env:
@@ -197,6 +242,7 @@ jobs:
   windows:
     name: Build, test and smoke run (Windows platform backend)
     if: (github.event.action != 'edited' || github.event.changes.base != null) && (github.event_name != 'push')
+    needs: changes
     runs-on: windows-latest
     timeout-minutes: 120
     env:
@@ -276,7 +322,7 @@ jobs:
       # stopped by the time limit of the step: `timeout` of the shell does not end a process
       # that waits inside its own exit (run 38072903035).
       - name: The process ends after a run through DirectComposition (ten runs)
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && (github.event_name != 'pull_request' || needs.changes.outputs.windows == 'true') }}
         timeout-minutes: 5
         run: |
           exe=target/debug/examples/win32_window.exe
@@ -301,7 +347,7 @@ jobs:
       # And the process ends after such a run, every time (the thread of the mode is in its
       # message loop when the system ends it). Ten runs.
       - name: The process ends after a run through Windows.UI.Composition (ten runs)
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && (github.event_name != 'pull_request' || needs.changes.outputs.windows == 'true') }}
         timeout-minutes: 5
         run: |
           exe=target/debug/examples/win32_window.exe
@@ -362,7 +408,7 @@ jobs:
       # The HelloWorld samples (the XAML one and one per style of ferroui-view, docs/binary-size.md):
       # built, then each shown for two seconds.
       - name: The HelloWorld samples for two seconds each
-        if: ${{ steps.skia.outputs.raster == 'true' }}
+        if: ${{ steps.skia.outputs.raster == 'true' && (github.event_name != 'pull_request' || needs.changes.outputs.windows == 'true') }}
         timeout-minutes: 30
         env:
           FERROUI_SMOKE_EXIT_MS: 2000
@@ -406,7 +452,7 @@ jobs:
       # test harness; it prints every test with its result and the reason of every test it does not
       # run. Not required until it has a green run on the runners.
       - name: Automation tests of the IntegrationTestApp sample
-        if: ${{ steps.skia.outputs.raster == 'true' }}
+        if: ${{ steps.skia.outputs.raster == 'true' && (github.event_name != 'pull_request' || needs.changes.outputs.windows == 'true') }}
         continue-on-error: true
         timeout-minutes: 60
         env:
@@ -424,11 +470,11 @@ jobs:
       # through ANGLE in its smoke mode, which checks that the frames Direct3D draws are in the
       # snapshots of the compositor. The run is informative until it has passed on a runner.
       - name: The GpuInterop sample builds
-        if: ${{ steps.skia.outputs.raster == 'true' }}
+        if: ${{ steps.skia.outputs.raster == 'true' && (github.event_name != 'pull_request' || needs.changes.outputs.windows == 'true') }}
         timeout-minutes: 60
         run: cargo build --locked -p gpu-interop
       - name: The Direct3D 11 demo of the GpuInterop sample (informative)
-        if: ${{ steps.skia.outputs.raster == 'true' }}
+        if: ${{ steps.skia.outputs.raster == 'true' && (github.event_name != 'pull_request' || needs.changes.outputs.windows == 'true') }}
         continue-on-error: true
         timeout-minutes: 10
         env:
@@ -549,7 +595,7 @@ jobs:
       # the runner, with the runtime and the bootstrap library of the step above. Informative
       # until the comparison is calibrated: the pictures and the reports are the result.
       - name: WinUI theme gallery (capture, comparison with native WinUI 3; informative)
-        if: ${{ !cancelled() && steps.skia.outputs.raster == 'true' }}
+        if: ${{ !cancelled() && steps.skia.outputs.raster == 'true' && (github.event_name != 'pull_request' || needs.changes.outputs.windows == 'true') }}
         continue-on-error: true
         timeout-minutes: 45
         shell: pwsh
@@ -586,7 +632,7 @@ jobs:
           }
           if ($capture.ExitCode -ne 0 -or $compare.ExitCode -ne 0) { Write-Output "capture exit $($capture.ExitCode), compare exit $($compare.ExitCode)"; exit 1 }
       - name: Keep the pictures of the WinUI theme gallery
-        if: ${{ always() && steps.skia.outputs.raster == 'true' }}
+        if: ${{ always() && steps.skia.outputs.raster == 'true' && (github.event_name != 'pull_request' || needs.changes.outputs.windows == 'true') }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: winui-theme-gallery-windows
@@ -597,7 +643,7 @@ jobs:
   # for the target and runs there. Informative as a whole until its first green run.
   windows-arm64:
     name: Build, test and smoke run (Windows platform backend, ARM64; informative)
-    if: (github.event.action != 'edited' || github.event.changes.base != null) && (github.event_name != 'push')
+    if: (github.event.action != 'edited' || github.event.changes.base != null) && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
     runs-on: windows-11-arm
     continue-on-error: true
     timeout-minutes: 120
@@ -718,6 +764,7 @@ jobs:
 
   browser:
     if: (github.event.action != 'edited' || github.event.changes.base != null)
+    needs: changes
     name: Check (browser, wasm32-unknown-emscripten)
     runs-on: ubuntu-latest
     timeout-minutes: 150
@@ -759,12 +806,16 @@ jobs:
       - name: Check the catalog host with the CDP bridge
         run: cargo check --locked --target wasm32-unknown-emscripten -p control-catalog-browser --features cdp
       - name: Build the themed view site
+        if: ${{ (github.event_name != 'pull_request' || needs.changes.outputs.browser == 'true') }}
         run: scripts/build-browser.sh themed_view --webapp-prebuilt
       - name: Behaviour tests in headless Chrome
+        if: ${{ (github.event_name != 'pull_request' || needs.changes.outputs.browser == 'true') }}
         run: node scripts/browser/tests/themed_view.test.mjs
       - name: Build the storage view site
+        if: ${{ (github.event_name != 'pull_request' || needs.changes.outputs.browser == 'true') }}
         run: scripts/build-browser.sh storage_view --webapp-prebuilt
       - name: Storage behaviour tests in headless Chrome
+        if: ${{ (github.event_name != 'pull_request' || needs.changes.outputs.browser == 'true') }}
         run: node scripts/browser/tests/storage_view.test.mjs
       - name: Build the ControlCatalog site
         run: scripts/build-browser.sh control-catalog-browser --webapp-prebuilt
@@ -805,7 +856,8 @@ jobs:
   # toolchain a second time (from caches) and nothing else twice: the sites with both modules are
   # composed, by the job below, from the sites the two jobs built.
   browser-threads:
-    if: (github.event.action != 'edited' || github.event.changes.base != null)
+    if: (github.event.action != 'edited' || github.event.changes.base != null) && ((github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') || (github.event_name == 'pull_request' && needs.changes.outputs.browser == 'true'))
+    needs: changes
     name: Check (browser with threads, wasm32-unknown-emscripten)
     runs-on: ubuntu-latest
     timeout-minutes: 150
@@ -871,9 +923,9 @@ jobs:
   # above, which also checks that the files the two builds share are identical, and tested: nothing
   # is compiled in this job.
   browser-site:
-    if: (github.event.action != 'edited' || github.event.changes.base != null)
+    if: (github.event.action != 'edited' || github.event.changes.base != null) && ((github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') || (github.event_name == 'pull_request' && needs.changes.outputs.browser == 'true'))
     name: Check (browser, the site with both modules)
-    needs: [browser, browser-threads]
+    needs: [changes, browser, browser-threads]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -915,7 +967,8 @@ jobs:
   # mode in a simulator is run with scripts/ios/sim-smoke.sh on the development machine.
   ios:
     name: Build and test (iOS, simulator target)
-    if: (github.event.action != 'edited' || github.event.changes.base != null) && (github.event_name != 'push')
+    if: (github.event.action != 'edited' || github.event.changes.base != null) && ((github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') || (github.event_name == 'pull_request' && needs.changes.outputs.ios == 'true'))
+    needs: changes
     runs-on: macos-15
     timeout-minutes: 90
     env:
@@ -1239,7 +1292,8 @@ jobs:
   # EGL (Mesa's software rasterizer), on an output of scale 1 and of scale 2. Not covered: a
   # desktop compositor (Mutter, KWin), a hardware GPU, touch, a compositor restart.
   wayland:
-    if: (github.event.action != 'edited' || github.event.changes.base != null)
+    if: (github.event.action != 'edited' || github.event.changes.base != null) && ((github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') || (github.event_name == 'pull_request' && needs.changes.outputs.wayland == 'true'))
+    needs: changes
     name: Build and test (Linux, Wayland under headless sway)
     runs-on: ubuntu-latest
     timeout-minutes: 90
@@ -1434,7 +1488,7 @@ jobs:
   # workflow (docs/porting/wayland-platform.md, section 12.3). The compositor does not run as
   # root: the run is made by a user of the container.
   wayland-next:
-    if: (github.event.action != 'edited' || github.event.changes.base != null)
+    if: (github.event.action != 'edited' || github.event.changes.base != null) && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
     name: Informational (Linux, Wayland under the sway of Debian 13)
     runs-on: ubuntu-latest
     container: debian:trixie
@@ -1496,7 +1550,8 @@ jobs:
   # (uinput). The step that looks for them says what the kernel of the runner has; what is missing is
   # skipped with a reason. A real board with a panel and a touch screen is not covered by any of this.
   linuxfb:
-    if: (github.event.action != 'edited' || github.event.changes.base != null)
+    if: (github.event.action != 'edited' || github.event.changes.base != null) && ((github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') || (github.event_name == 'pull_request' && needs.changes.outputs.linuxfb == 'true'))
+    needs: changes
     name: Build and test (Linux framebuffer, virtual devices)
     runs-on: ubuntu-latest
     timeout-minutes: 90
@@ -1584,7 +1639,8 @@ jobs:
   # and the package of the smoke application built without Gradle. Nothing runs on a device here:
   # the emulator runs are made on the development machine (scripts/android/emu-smoke.sh).
   android:
-    if: (github.event.action != 'edited' || github.event.changes.base != null)
+    if: (github.event.action != 'edited' || github.event.changes.base != null) && ((github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') || (github.event_name == 'pull_request' && needs.changes.outputs.android == 'true'))
+    needs: changes
     name: Build and package (Android, arm64)
     runs-on: ubuntu-latest
     timeout-minutes: 90
