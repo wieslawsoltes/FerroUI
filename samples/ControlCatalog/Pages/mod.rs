@@ -40,7 +40,8 @@ mod focus_page;
 mod headered_content_page;
 mod home_page;
 mod image_page;
-mod inking_page;
+mod ink_canvas_page;
+mod ink_toolbar_page;
 mod labels_page;
 mod layout_transform_control_page;
 mod list_box_page;
@@ -174,7 +175,8 @@ pub use gestures::{GesturePinchRotationPage, GesturePinchZoomPage, GesturePullPa
 pub use headered_content_page::HeaderedContentPage;
 pub use home_page::HomePage;
 pub use image_page::ImagePage;
-pub use inking_page::InkingPage;
+pub use ink_canvas_page::InkCanvasPage;
+pub use ink_toolbar_page::InkToolbarPage;
 pub use labels_page::LabelsPage;
 pub use layout_transform_control_page::LayoutTransformControlPage;
 pub use list_box_page::ListBoxPage;
@@ -268,7 +270,8 @@ pub(crate) fn register_lists() {
 
 /// The classes of the files directly under `Pages/`.
 const ROOT_TYPES: &[&TypeInfo] = &[
-    InkingPage::TYPE,
+    InkCanvasPage::TYPE,
+    InkToolbarPage::TYPE,
     ScrollViewerPage::TYPE,
     PointersPage::TYPE,
     CompositionPage::TYPE,
@@ -354,7 +357,8 @@ const ROOT_TYPES: &[&TypeInfo] = &[
 ];
 
 const ROOT_CLASSES: &[&XamlClass] = &[
-    &InkingPage::XAML_CLASS,
+    &InkCanvasPage::XAML_CLASS,
+    &InkToolbarPage::XAML_CLASS,
     &ScrollViewerPage::XAML_CLASS,
     &PointersPage::XAML_CLASS,
     &CompositionPage::XAML_CLASS,

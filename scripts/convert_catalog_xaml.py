@@ -149,7 +149,8 @@ REMOVALS = [
 PORT_DOCUMENTS = [
     ("ClassicThemes.xaml", "the Fluent and Simple themes of the original, with the feature classic-themes only"),
     ("Pages/TreeDataGridPage.xaml", "the page of the TreeDataGrid demo of the port"),
-    ("Pages/InkingPage.xaml", "the page of the inking controls of the port"),
+    ("Pages/InkCanvasPage.xaml", "the page of the InkCanvas of the port"),
+    ("Pages/InkToolbarPage.xaml", "the page of the InkToolbar of the port"),
 ]
 
 
