@@ -96,6 +96,11 @@ fn build_template(_control: &Ref<TextBox>, scope: &NameScopeRef) -> Ref<Control>
     presenter.set_name(Some("PART_TextPresenter".to_string()));
     presenter.bind_binding(TextPresenter::text_property().as_property(), &template_binding("Text"));
     presenter.bind_binding(TextPresenter::caret_index_property().as_property(), &template_binding("CaretIndex"));
+    presenter.bind_binding(TextPresenter::text_style_overrides_property().as_property(), &template_binding("TextStyleOverrides"));
+    presenter.bind_binding(
+        TextPresenter::text_paragraph_styles_property().as_property(),
+        &TemplateBinding::new(TextBox::text_paragraph_styles_property().as_property()),
+    );
 
     let scroll_viewer = ScrollViewer::new();
     scroll_viewer.set_name(Some("PART_ScrollViewer".to_string()));
@@ -129,6 +134,8 @@ fn build_themed_template(_control: &Ref<TextBox>, scope: &NameScopeRef) -> Ref<C
         (TextPresenter::selection_end_property().as_property(), TextBox::selection_end_property().as_property()),
         (TextPresenter::password_char_property().as_property(), TextBox::password_char_property().as_property()),
         (TextPresenter::reveal_password_property().as_property(), TextBox::reveal_password_property().as_property()),
+        (TextPresenter::text_style_overrides_property().as_property(), TextBox::text_style_overrides_property().as_property()),
+        (TextPresenter::text_paragraph_styles_property().as_property(), TextBox::text_paragraph_styles_property().as_property()),
     ];
 
     for (target, source) in one_way {
@@ -1354,6 +1361,41 @@ fn two_way_binding_source_echo_does_not_clear_undo_history() {
     assert_eq!(Some("initial edit"), source.bar().as_deref());
 }
 
+#[test]
+fn unchanged_external_text_assignments_preserve_native_redo() {
+    let _scope = test_scope();
+    let target = TextBox::new();
+    target.set_text(Some("original"));
+    target.set_caret_index(8);
+    target.set_selected_text(Some("!"));
+    assert_eq!(target.text().as_deref(), Some("original!"));
+    target.undo();
+    assert_eq!(target.text().as_deref(), Some("original"));
+    assert!(!target.can_undo() && target.can_redo());
+
+    let changes = Rc::new(Cell::new(0));
+    let observed = changes.clone();
+    target.text_changing(move |_, _| observed.set(observed.get() + 1));
+    target.set_text(Some("original"));
+    assert!(!target.can_undo() && target.can_redo(), "An identical public assignment must preserve redo");
+    // This is the setter used by a TwoWay TemplateBinding source echo.
+    target.set_current_value(TextBox::text_property(), Some("original".to_string()));
+    assert!(!target.can_undo() && target.can_redo(), "An identical binding echo must preserve redo");
+    assert_eq!(changes.get(), 0, "Unchanged Text has no change notification to consume a deferred snapshot");
+
+    target.redo();
+    assert_eq!(target.text().as_deref(), Some("original!"));
+    assert!(target.can_undo() && !target.can_redo());
+    target.undo();
+    assert_eq!(target.text().as_deref(), Some("original"));
+    assert!(!target.can_undo() && target.can_redo());
+    assert_eq!(changes.get(), 2);
+
+    target.set_text(Some("replacement"));
+    assert_eq!(target.text().as_deref(), Some("replacement"));
+    assert!(!target.can_undo() && !target.can_redo(), "A different external Text still resets history");
+}
+
 /// Gets the undo and redo stacks of a text box in a state where both were
 /// active.
 fn exercise_undo_redo(tb: &TextBox) {
@@ -2149,6 +2191,133 @@ fn canceling_preedit_restores_empty_state_without_committing_text() {
 }
 
 #[test]
+fn pending_preedit_survives_selection_deletion_before_text_changing() {
+    let _scope = test_scope();
+    let text_box = templated_text_box(Some("hello"));
+    // Attach an already-templated control to exercise the presenter's
+    // selection-deletion callback during the first nonempty preedit update.
+    text_box.apply_template();
+    let _root = host_in_root(&text_box);
+    text_box.set_caret_index(5);
+    text_box.select_all();
+    let client = get_input_method_client(&text_box);
+    let changes = Rc::new(RefCell::new(Vec::new()));
+    let recorded = changes.clone();
+    let weak = text_box.downgrade();
+    text_box.text_changing(move |_, _| {
+        if let Some(text_box) = weak.upgrade() {
+            recorded.borrow_mut().push((text_box.text(), text_box.is_composing_text()));
+        }
+    });
+
+    assert!(!text_box.is_composing_text());
+    client.set_preedit_text_with_cursor(Some("\u{304b}"), Some(1));
+    assert_eq!(Some(""), text_box.text().as_deref());
+    assert!(text_box.is_composing_text());
+    assert_eq!(vec![(Some(String::new()), true)], *changes.borrow());
+    let presenter = text_box.find_descendant_of_type::<TextPresenter>(false).unwrap();
+    assert_eq!(presenter.preedit_text().as_deref(), Some("\u{304b}"));
+    assert_eq!(presenter.preedit_text_cursor_position(), Some(1));
+
+    client.set_preedit_text(None);
+    raise_text_event(&text_box, "\u{304b}");
+    assert!(!text_box.is_composing_text());
+    assert_eq!(
+        vec![(Some(String::new()), true), (Some("hello".to_string()), true), (Some("\u{304b}".to_string()), false)],
+        *changes.borrow()
+    );
+}
+
+#[test]
+fn empty_preedit_is_pending_until_cleared_or_the_client_detaches() {
+    let _scope = test_scope();
+    let text_box = templated_text_box(Some("hello"));
+    let root = host_in_root(&text_box);
+    let client = get_input_method_client(&text_box);
+
+    client.set_preedit_text(Some(""));
+    assert!(text_box.is_composing_text());
+    client.set_preedit_text(None);
+    assert!(!text_box.is_composing_text());
+
+    client.set_preedit_text(Some("\u{304b}"));
+    assert!(text_box.is_composing_text());
+    root.set_child(Button::new());
+    assert!(!text_box.is_composing_text());
+    client.set_preedit_text(Some("late"));
+    assert!(!text_box.is_composing_text());
+}
+
+#[test]
+fn rich_preedit_blur_restores_confirmed_unicode_text_and_selection_before_observers() {
+    use ferroui_base::media::text_formatting::{GenericTextRunProperties, TextRunProperties};
+    use ferroui_base::media::Typeface;
+    use ferroui_base::utilities::ValueSpan;
+    let _scope = test_scope();
+    let _focus = focus_scope();
+    let text = "a東京🦀z";
+    let target = templated_text_box(Some(text));
+    target.set_clear_selection_on_lost_focus(false);
+    let properties: Rc<dyn TextRunProperties> = Rc::new(GenericTextRunProperties::with_font_size(Typeface::default(), 30.0));
+    let styles: crate::presenters::TextStyleOverrides = Rc::from([ValueSpan::new(1, 4, properties)]);
+    target.set_text_style_overrides(Some(styles.clone()));
+    target.apply_template();
+    let other = Button::new();
+    let panel = StackPanel::new();
+    panel.children().add(target.clone());
+    panel.children().add(other.clone());
+    let root = TestRoot::with_child(panel);
+    root.execute_initial_layout_pass();
+    assert!(target.focus());
+    target.set_selection_start(1);
+    target.set_selection_end(5);
+    let observed = Rc::new(RefCell::new(None));
+    let observed_event = observed.clone();
+    let weak = target.downgrade();
+    target.lost_focus(move |_, _| {
+        let target = weak.upgrade().unwrap();
+        *observed_event.borrow_mut() = Some((target.text(), target.is_composing_text(), target.selection_start(), target.selection_end()));
+    });
+    let client = get_input_method_client(&target);
+    client.set_preedit_text(Some("漢"));
+    assert_eq!(target.text().as_deref(), Some("az"));
+    assert!(target.is_composing_text());
+    let presenter = target.find_descendant_of_type::<TextPresenter>(false).unwrap();
+    assert_eq!(presenter.preedit_text().as_deref(), Some("漢"));
+    let first_layout = presenter.text_layout();
+    let first_clause = first_layout.text_lines()[0].text_runs().iter()
+        .find(|run| run.text().to_string_lossy().contains('漢')).cloned().unwrap();
+    assert_eq!(first_clause.properties().unwrap().font_rendering_em_size(), 30.0);
+    // A later update keeps the confirmed selection's character style too.
+    client.set_preedit_text_with_cursor(Some("漢字"), Some(2));
+    let layout = presenter.text_layout();
+    let clause = layout.text_lines()[0].text_runs().iter().find(|run| run.text().to_string_lossy().contains('漢')).cloned().unwrap();
+    assert_eq!(clause.properties().unwrap().font_rendering_em_size(), 30.0);
+    assert!(other.focus());
+    assert_eq!(*observed.borrow(), Some((Some(text.into()), false, 1, 5)));
+    assert!(Rc::ptr_eq(target.text_style_overrides().as_ref().unwrap(), &styles));
+    client.set_preedit_text(Some("late"));
+    assert_eq!(target.text().as_deref(), Some(text));
+    assert!(!target.is_composing_text());
+}
+
+#[test]
+fn pending_preedit_detach_does_not_replace_a_new_host_value() {
+    let _scope = test_scope();
+    let target = templated_text_box(Some("confirmed"));
+    target.apply_template();
+    let root = host_in_root(&target);
+    target.select_all();
+    let client = get_input_method_client(&target);
+    client.set_preedit_text(Some("漢"));
+    assert_eq!(target.text().as_deref(), Some(""));
+    target.set_text(Some("replacement from host"));
+    root.set_child(Button::new());
+    assert_eq!(target.text().as_deref(), Some("replacement from host"));
+    assert!(!target.is_composing_text());
+}
+
+#[test]
 fn preedit_survives_reentrant_layout_invalidation_from_caret_bounds_changed() {
     let _scope = test_scope();
 
@@ -2627,4 +2796,1114 @@ fn hot_keyed_text_box_focus_performed_on_hotkey() {
     ));
 
     assert!(hot_keyed_text_box.is_focused());
+}
+
+#[test]
+fn native_text_change_reports_exact_repeated_text_and_utf16_edits() {
+    let _scope = test_scope();
+    let target = templated_text_box(Some("🦀🦀z"));
+    let _root = host_in_root(&target);
+    let changes = Rc::new(RefCell::new(Vec::new()));
+    let recorded = changes.clone();
+    target.text_changing(move |_, event| { recorded.borrow_mut().push(event.text_change().cloned()); });
+    target.set_selection_start(0);
+    target.set_selection_end(2);
+    target.set_selected_text(None);
+    let change = changes.borrow()[0].clone().unwrap();
+    assert_eq!(change.previous_text(), "🦀🦀z");
+    assert_eq!(change.replaced_range(), 0..2);
+    assert_eq!(change.inserted_length(), 0);
+    assert_eq!(target.text().as_deref(), Some("🦀z"));
+    target.set_caret_index(0);
+    target.clear_selection();
+    raise_text_event(&target, "🦀");
+    let change = changes.borrow()[1].clone().unwrap();
+    assert_eq!(change.previous_text(), "🦀z");
+    assert_eq!(change.replaced_range(), 0..0);
+    assert_eq!(change.inserted_length(), 2);
+    target.clear();
+    let change = changes.borrow()[2].clone().unwrap();
+    assert_eq!(change.replaced_range(), 0..5);
+    target.set_text(Some("external"));
+    assert!(changes.borrow().last().unwrap().is_none());
+}
+
+#[test]
+fn native_text_change_does_not_leak_into_reentrant_external_assignments() {
+    let _scope = test_scope();
+    let target = templated_text_box(Some("A"));
+    let _root = host_in_root(&target);
+    let weak = target.downgrade();
+    let changes = Rc::new(RefCell::new(Vec::new()));
+    let recorded = changes.clone();
+    target.text_changing(move |_, event| {
+        recorded.borrow_mut().push(event.text_change().cloned());
+        if event.text_change().is_some() {
+            let target = weak.upgrade().unwrap();
+            target.set_text(Some("handler replacement"));
+            target.set_caret_index(7);
+            target.set_selection_start(3);
+            target.set_selection_end(7);
+        }
+    });
+    target.set_caret_index(1);
+    raise_text_event(&target, "B");
+    assert_eq!(changes.borrow().len(), 2);
+    assert!(changes.borrow()[0].is_some());
+    assert!(changes.borrow()[1].is_none());
+    let presenter = target.find_descendant_of_type::<TextPresenter>(false).unwrap();
+    assert_eq!(presenter.text(), target.text());
+    assert_eq!(target.text().as_deref(), Some("handler replacement"));
+    assert_eq!((target.caret_index(), target.selection_start(), target.selection_end()), (7, 3, 7));
+}
+
+#[test]
+fn paragraph_first_preedit_preserves_unicode_styles_cancel_commit_and_native_history() {
+    use ferroui_base::media::text_formatting::{GenericTextRunProperties, TextParagraphStyle, TextParagraphStyles, TextRunProperties};
+    use ferroui_base::media::Typeface;
+    use ferroui_base::utilities::ValueSpan;
+    let _scope = test_scope();
+    let original = "A🦀\nA🦀\nA🦀\n";
+    let clause = "A🦀\nA🦀\n";
+    let committed = "A🦀\nA🦀\nA🦀\nA🦀\n";
+    let run = |size| -> Rc<dyn TextRunProperties> {
+        Rc::new(GenericTextRunProperties::with_font_size(Typeface::default(), size))
+    };
+    let paragraphs = |indents: &[f64]| -> TextParagraphStyles {
+        indents.iter().enumerate().map(|(index, indent)| ValueSpan::new(
+            index as i32 * 4, if index + 1 == indents.len() { 0 } else { 4 },
+            TextParagraphStyle { indent: *indent, ..Default::default() },
+        )).collect::<Vec<_>>().into()
+    };
+    let characters: crate::presenters::TextStyleOverrides = Rc::from([
+        ValueSpan::new(0, 4, run(20.0)), ValueSpan::new(4, 4, run(22.0)), ValueSpan::new(8, 4, run(24.0)),
+    ]);
+    let confirmed_paragraphs = paragraphs(&[10.0, 20.0, 30.0, 40.0]);
+    let committed_characters: crate::presenters::TextStyleOverrides = Rc::from([
+        ValueSpan::new(0, 8, run(20.0)), ValueSpan::new(8, 4, run(22.0)), ValueSpan::new(12, 4, run(24.0)),
+    ]);
+    let committed_paragraphs = paragraphs(&[10.0, 10.0, 20.0, 30.0, 40.0]);
+
+    // The browser may publish an empty clause before its first visible one.
+    // Neither route may need a duplicate nonempty update to become visible.
+    for empty_first in [false, true] {
+        let target = templated_text_box(Some(original));
+        target.set_template(create_themed_template());
+        target.set_accepts_return(true);
+        target.set_text_style_overrides(Some(characters.clone()));
+        target.set_text_paragraph_styles(Some(confirmed_paragraphs.clone()));
+        let confirmed_snapshot = Rc::new(original.to_owned());
+        let committed_snapshot = Rc::new(committed.to_owned());
+        target.set_text_undo_state(Some(confirmed_snapshot.clone()));
+        let _root = host_in_root(&target);
+        let presenter = target.find_descendant_of_type::<TextPresenter>(false).unwrap();
+        let client = get_input_method_client(&target);
+        target.set_selection_start(0);
+        target.set_selection_end(4);
+        let committed_changes = Rc::new(RefCell::new(Vec::new()));
+        let observed = committed_changes.clone();
+        let weak = target.downgrade();
+        let after_characters = committed_characters.clone();
+        let after_paragraphs = committed_paragraphs.clone();
+        let after_snapshot = committed_snapshot.clone();
+        target.text_changing(move |_, event| {
+            let target = weak.upgrade().unwrap();
+            if !target.is_composing_text() && !target.is_restoring_text_history() {
+                // An editor rebases confirmed ranges from this exact native
+                // edit, and native history must retain both rich snapshots.
+                let change = event.text_change().cloned().expect("a committed native edit");
+                assert_eq!(target.text().as_deref(), Some(committed));
+                observed.borrow_mut().push(change);
+                target.set_text_style_overrides(Some(after_characters.clone()));
+                target.set_text_paragraph_styles(Some(after_paragraphs.clone()));
+                target.set_text_undo_state(Some(after_snapshot.clone()));
+            }
+        });
+        let assert_snapshot = |expected: &Rc<String>| {
+            let actual = target.text_undo_state().unwrap().downcast::<String>().unwrap();
+            assert!(Rc::ptr_eq(&actual, expected));
+        };
+        let assert_first_clause = || {
+            assert!(target.is_composing_text());
+            assert_eq!(target.text().as_deref(), Some("A🦀\nA🦀\n"));
+            assert_eq!(presenter.preedit_text().as_deref(), Some(clause));
+            assert_eq!(presenter.preedit_text_cursor_position(), Some(3));
+            let layout = presenter.text_layout();
+            assert_eq!(layout.text_lines().len(), 5);
+            assert_eq!((0..5).map(|index| layout.line_origin(index).x).collect::<Vec<_>>(),
+                [10.0, 10.0, 20.0, 30.0, 40.0]);
+            let sizes: Vec<_> = layout.text_lines().iter().take(4).map(|line| {
+                line.text_runs().iter().find(|run| run.text().to_string_lossy().contains('A'))
+                    .unwrap().properties().unwrap().font_rendering_em_size()
+            }).collect();
+            assert_eq!(sizes, [20.0, 20.0, 22.0, 24.0]);
+            assert!(Rc::ptr_eq(target.text_style_overrides().as_ref().unwrap(), &characters));
+            assert!(Rc::ptr_eq(target.text_paragraph_styles().as_ref().unwrap(), &confirmed_paragraphs));
+            assert_snapshot(&confirmed_snapshot);
+        };
+        if empty_first {
+            client.set_preedit_text(Some(""));
+            assert_eq!(target.text().as_deref(), Some(original));
+            assert_eq!((target.selection_start(), target.selection_end()), (0, 4));
+        }
+        client.set_preedit_text_with_cursor(Some(clause), Some(3));
+        assert_first_clause();
+        assert!(!target.can_undo() && !target.can_redo());
+        assert!(committed_changes.borrow().is_empty());
+
+        client.set_preedit_text(None);
+        assert_eq!(presenter.preedit_text(), None);
+        assert_eq!(target.text().as_deref(), Some(original));
+        assert_eq!((target.selection_start(), target.selection_end()), (0, 4));
+        assert!(!target.is_composing_text());
+        assert!(!target.can_undo() && !target.can_redo());
+        assert_snapshot(&confirmed_snapshot);
+
+        client.set_preedit_text_with_cursor(Some(clause), Some(3));
+        assert_first_clause();
+        client.set_preedit_text(None);
+        raise_text_event(&target, clause);
+        assert_eq!(target.text().as_deref(), Some(committed));
+        assert_snapshot(&committed_snapshot);
+        assert_eq!(committed_changes.borrow().len(), 1);
+        let change = committed_changes.borrow()[0].clone();
+        assert_eq!(change.previous_text(), original);
+        assert_eq!(change.replaced_range(), 0..4);
+        assert_eq!(change.inserted_length(), 8);
+        target.undo();
+        assert_eq!(target.text().as_deref(), Some(original));
+        assert!(!target.can_undo() && target.can_redo(), "Only the confirmed replacement enters native history");
+        assert_snapshot(&confirmed_snapshot);
+        assert!(Rc::ptr_eq(target.text_style_overrides().as_ref().unwrap(), &characters));
+        assert!(Rc::ptr_eq(target.text_paragraph_styles().as_ref().unwrap(), &confirmed_paragraphs));
+
+        // A first visible clause followed by cancellation must retain redo.
+        target.set_selection_start(0);
+        target.set_selection_end(4);
+        client.set_preedit_text_with_cursor(Some(clause), Some(3));
+        assert_first_clause();
+        client.set_preedit_text(None);
+        assert!(!target.can_undo() && target.can_redo());
+        target.redo();
+        assert_eq!(target.text().as_deref(), Some(committed));
+        assert!(target.can_undo() && !target.can_redo());
+        assert_snapshot(&committed_snapshot);
+        assert!(Rc::ptr_eq(target.text_style_overrides().as_ref().unwrap(), &committed_characters));
+        assert!(Rc::ptr_eq(target.text_paragraph_styles().as_ref().unwrap(), &committed_paragraphs));
+        assert_eq!(committed_changes.borrow().len(), 1);
+    }
+}
+
+#[test]
+fn first_preedit_respects_reentrant_cancellation_before_publication() {
+    let _scope = test_scope();
+    let target = templated_text_box(Some("a🦀z"));
+    let _root = host_in_root(&target);
+    target.set_selection_start(1);
+    target.set_selection_end(3);
+    let client = get_input_method_client(&target);
+    let callback_client = client.clone();
+    let weak = target.downgrade();
+    target.text_changing(move |_, _| {
+        if weak.upgrade().unwrap().text().as_deref() == Some("az") {
+            callback_client.set_preedit_text(None);
+        }
+    });
+    client.set_preedit_text_with_cursor(Some("obsolete"), Some(4));
+    let presenter = target.find_descendant_of_type::<TextPresenter>(false).unwrap();
+    assert_eq!(target.text().as_deref(), Some("a🦀z"));
+    assert_eq!((target.selection_start(), target.selection_end()), (1, 3));
+    assert!(!target.is_composing_text());
+    assert_eq!(presenter.preedit_text(), None);
+    assert_eq!(presenter.preedit_text_cursor_position(), None);
+    assert!(!target.can_undo() && !target.can_redo());
+}
+
+#[test]
+fn first_preedit_respects_reentrant_detach_before_publication() {
+    let _scope = test_scope();
+    let target = templated_text_box(Some("a🦀z"));
+    let root = host_in_root(&target);
+    let presenter = target.find_descendant_of_type::<TextPresenter>(false).unwrap();
+    target.set_selection_start(1);
+    target.set_selection_end(3);
+    let client = get_input_method_client(&target);
+    let callback_client = client.clone();
+    let weak = target.downgrade();
+    let weak_root = root.downgrade();
+    target.text_changing(move |_, _| {
+        if weak.upgrade().unwrap().text().as_deref() == Some("az") {
+            weak_root.upgrade().unwrap().set_child(Button::new());
+        } else {
+            // The old platform client can reenter while detachment restores
+            // confirmed text. Its late clause must not remove that text again.
+            callback_client.set_preedit_text(Some("late during detach"));
+        }
+    });
+    client.set_preedit_text_with_cursor(Some("obsolete"), Some(4));
+    assert_eq!(target.text().as_deref(), Some("a🦀z"));
+    assert_eq!((target.selection_start(), target.selection_end()), (1, 3));
+    assert!(!target.is_composing_text());
+    assert!(client.text_view_visual().is_none());
+    assert_eq!(presenter.preedit_text(), None);
+    assert_eq!(presenter.preedit_text_cursor_position(), None);
+    client.set_preedit_text(Some("late update"));
+    assert!(!target.is_composing_text());
+    assert_eq!(target.text().as_deref(), Some("a🦀z"));
+    assert!(!target.can_undo() && !target.can_redo());
+}
+
+#[test]
+fn first_preedit_respects_reentrant_template_replacement_before_publication() {
+    let _scope = test_scope();
+    let target = templated_text_box(Some("a🦀z"));
+    let root = host_in_root(&target);
+    let previous = target.find_descendant_of_type::<TextPresenter>(false).unwrap();
+    target.set_selection_start(1);
+    target.set_selection_end(3);
+    let client = get_input_method_client(&target);
+    let replaced = Rc::new(Cell::new(false));
+    let observed = replaced.clone();
+    let weak = target.downgrade();
+    target.text_changing(move |_, _| {
+        let target = weak.upgrade().unwrap();
+        if target.text().as_deref() == Some("az") && !observed.replace(true) {
+            target.set_template(create_themed_template());
+            target.apply_template();
+        }
+    });
+    client.set_preedit_text_with_cursor(Some("obsolete"), Some(4));
+    assert_eq!(target.text().as_deref(), Some("a🦀z"));
+    assert_eq!((target.selection_start(), target.selection_end()), (1, 3));
+    assert!(!target.is_composing_text());
+    assert_eq!(previous.preedit_text(), None);
+    // Applying the outer template immediately installs the named native
+    // owner. Its nested ScrollViewer content joins the visual tree in layout.
+    let current = client.text_view_visual().unwrap().cast::<TextPresenter>().unwrap();
+    assert!(replaced.get() && current != previous);
+    assert_eq!(current.preedit_text(), None);
+    root.execute_initial_layout_pass();
+    assert_eq!(target.find_descendant_of_type::<TextPresenter>(false).as_ref(), Some(&current));
+    client.set_preedit_text_with_cursor(Some("fresh"), Some(2));
+    assert_eq!(target.text().as_deref(), Some("az"));
+    assert_eq!(current.preedit_text().as_deref(), Some("fresh"));
+    assert_eq!(current.preedit_text_cursor_position(), Some(2));
+    client.set_preedit_text(None);
+    assert_eq!(target.text().as_deref(), Some("a🦀z"));
+    assert!(!target.can_undo() && !target.can_redo());
+}
+
+#[test]
+fn first_preedit_respects_reentrant_host_text_before_publication() {
+    let _scope = test_scope();
+    let target = templated_text_box(Some("a🦀z"));
+    let _root = host_in_root(&target);
+    target.set_selection_start(1);
+    target.set_selection_end(3);
+    let weak = target.downgrade();
+    target.text_changing(move |_, _| {
+        let target = weak.upgrade().unwrap();
+        if target.text().as_deref() == Some("az") {
+            target.set_text(Some("host replacement"));
+            target.set_caret_index(6);
+            target.set_selection_start(2);
+            target.set_selection_end(6);
+        }
+    });
+    let client = get_input_method_client(&target);
+    client.set_preedit_text_with_cursor(Some("obsolete"), Some(4));
+    let presenter = target.find_descendant_of_type::<TextPresenter>(false).unwrap();
+    assert_eq!(target.text().as_deref(), Some("host replacement"));
+    assert_eq!((target.caret_index(), target.selection_start(), target.selection_end()), (6, 2, 6));
+    assert_eq!(presenter.preedit_text(), None);
+    assert_eq!(presenter.preedit_text_cursor_position(), None);
+    client.set_preedit_text_with_cursor(Some("later clause"), Some(3));
+    assert_eq!(target.text().as_deref(), Some("host replacement"));
+    assert_eq!((target.caret_index(), target.selection_start(), target.selection_end()), (6, 2, 6));
+    assert_eq!(presenter.preedit_text(), None);
+    assert_eq!(presenter.preedit_text_cursor_position(), None);
+    client.set_preedit_text(None);
+    assert_eq!(target.text().as_deref(), Some("host replacement"));
+    assert_eq!((target.caret_index(), target.selection_start(), target.selection_end()), (6, 2, 6));
+    assert!(!target.is_composing_text());
+}
+
+#[test]
+fn first_preedit_keeps_reentrant_host_text_that_returns_to_the_provisional_value() {
+    let _scope = test_scope();
+    let target = templated_text_box(Some("a🦀z"));
+    let _root = host_in_root(&target);
+    target.set_selection_start(1);
+    target.set_selection_end(3);
+    let replaced = Rc::new(Cell::new(false));
+    let observed = replaced.clone();
+    let weak = target.downgrade();
+    target.text_changing(move |_, _| {
+        let target = weak.upgrade().unwrap();
+        if target.text().as_deref() == Some("az") && !observed.replace(true) {
+            target.set_text(Some("host replacement"));
+            target.set_text(Some("az"));
+            target.set_caret_index(2);
+        }
+    });
+    let presenter = target.find_descendant_of_type::<TextPresenter>(false).unwrap();
+    let client = get_input_method_client(&target);
+    client.set_preedit_text(Some("obsolete"));
+    client.set_preedit_text(Some("later clause"));
+    assert!(replaced.get());
+    assert_eq!(target.text().as_deref(), Some("az"));
+    assert_eq!((target.caret_index(), target.selection_start(), target.selection_end()), (2, 2, 2));
+    assert_eq!(presenter.preedit_text(), None);
+    client.set_preedit_text(None);
+    assert_eq!(target.text().as_deref(), Some("az"), "Equal text is still a newer host edit");
+    assert_eq!((target.caret_index(), target.selection_start(), target.selection_end()), (2, 2, 2));
+    assert!(!target.is_composing_text());
+}
+
+#[test]
+fn preedit_clear_queues_a_new_clause_until_confirmed_selection_is_restored() {
+    let _scope = test_scope();
+    for cancel_queued in [false, true] {
+        let target = templated_text_box(Some("a🦀z"));
+        let _root = host_in_root(&target);
+        target.set_selection_start(1);
+        target.set_selection_end(3);
+        let presenter = target.find_descendant_of_type::<TextPresenter>(false).unwrap();
+        let client = get_input_method_client(&target);
+        client.set_preedit_text_with_cursor(Some("older"), Some(4));
+        assert_eq!(target.text().as_deref(), Some("az"));
+        let callback_client = client.clone();
+        let weak = target.downgrade();
+        let queued = Rc::new(Cell::new(false));
+        let observed = queued.clone();
+        target.text_changing(move |_, _| {
+            let target = weak.upgrade().unwrap();
+            if target.text().as_deref() == Some("a🦀z") && !observed.replace(true) {
+                assert!(target.is_composing_text(), "Confirmed restoration is still provisional");
+                callback_client.set_preedit_text_with_cursor(Some("newer"), Some(2));
+                if cancel_queued {
+                    callback_client.set_preedit_text(None);
+                }
+                // Restoration has assigned Text but has not restored the
+                // original selection yet. The newer clause must wait for it.
+                assert_eq!(target.text().as_deref(), Some("a🦀z"));
+                assert_eq!((target.selection_start(), target.selection_end()), (1, 1));
+            }
+        });
+        client.set_preedit_text(None);
+        assert!(queued.get());
+        if !cancel_queued {
+            assert_eq!(target.text().as_deref(), Some("az"));
+            assert_eq!(presenter.preedit_text().as_deref(), Some("newer"));
+            assert_eq!(presenter.preedit_text_cursor_position(), Some(2));
+            assert!(target.is_composing_text());
+            // This clear needs the newer clause's own confirmed snapshot.
+            client.set_preedit_text(None);
+        }
+        assert_eq!(target.text().as_deref(), Some("a🦀z"));
+        assert_eq!((target.caret_index(), target.selection_start(), target.selection_end()), (0, 1, 3));
+        assert_eq!(presenter.preedit_text(), None);
+        assert!(!target.is_composing_text());
+        assert!(!target.can_undo() && !target.can_redo());
+        if !cancel_queued {
+            raise_text_event(&target, "newer");
+            assert_eq!(target.text().as_deref(), Some("anewerz"));
+            target.undo();
+            assert_eq!(target.text().as_deref(), Some("a🦀z"));
+            assert!(!target.can_undo() && target.can_redo());
+            target.redo();
+            assert_eq!(target.text().as_deref(), Some("anewerz"));
+            assert!(target.can_undo() && !target.can_redo());
+        }
+    }
+}
+
+#[test]
+fn first_preedit_coalesces_newer_clauses_during_provisional_text_changing() {
+    let _scope = test_scope();
+    for latest in ["newer", ""] {
+        let target = templated_text_box(Some("a🦀z"));
+        let _root = host_in_root(&target);
+        target.set_selection_start(1);
+        target.set_selection_end(3);
+        let presenter = target.find_descendant_of_type::<TextPresenter>(false).unwrap();
+        let client = get_input_method_client(&target);
+        let callback_client = client.clone();
+        let weak = target.downgrade();
+        let weak_presenter = presenter.downgrade();
+        let deletions = Rc::new(Cell::new(0));
+        let observed = deletions.clone();
+        target.text_changing(move |_, _| {
+            let target = weak.upgrade().unwrap();
+            if target.text().as_deref() == Some("az") {
+                observed.set(observed.get() + 1);
+                assert!(target.is_composing_text());
+                // The original endpoint is only coerced to 2 here. A nested
+                // preparation would delete z a second time from 1..2.
+                assert_eq!((target.caret_index(), target.selection_start(), target.selection_end()), (0, 1, 2));
+                callback_client.set_preedit_text_with_cursor(Some("intermediate"), Some(5));
+                callback_client.set_preedit_text_with_cursor(Some(latest), Some(0));
+                assert_eq!(target.text().as_deref(), Some("az"));
+                assert_eq!(weak_presenter.upgrade().unwrap().preedit_text(), None);
+            }
+        });
+        client.set_preedit_text_with_cursor(Some("older"), Some(4));
+        assert_eq!(deletions.get(), 1);
+        assert_eq!(target.text().as_deref(), Some("az"));
+        assert_eq!((target.caret_index(), target.selection_start(), target.selection_end()), (1, 1, 1));
+        assert_eq!(presenter.preedit_text().as_deref(), Some(latest));
+        assert_eq!(presenter.preedit_text_cursor_position(), Some(0));
+        assert!(target.is_composing_text());
+        assert!(!target.can_undo() && !target.can_redo());
+        client.set_preedit_text(None);
+        assert_eq!(target.text().as_deref(), Some("a🦀z"));
+        assert_eq!((target.caret_index(), target.selection_start(), target.selection_end()), (0, 1, 3));
+        assert_eq!(presenter.preedit_text(), None);
+        assert!(!target.is_composing_text());
+        assert!(!target.can_undo() && !target.can_redo());
+    }
+}
+
+#[test]
+fn first_preedit_respects_reentrant_host_selection_before_publication_and_clear() {
+    let _scope = test_scope();
+    for caret_only in [false, true] {
+        for newer_clause in [false, true] {
+            let target = templated_text_box(Some("a🦀z"));
+            let _root = host_in_root(&target);
+            target.set_selection_start(1);
+            target.set_selection_end(3);
+            let presenter = target.find_descendant_of_type::<TextPresenter>(false).unwrap();
+            let client = get_input_method_client(&target);
+            let callback_client = client.clone();
+            let weak = target.downgrade();
+            target.text_changing(move |_, _| {
+                let target = weak.upgrade().unwrap();
+                if target.text().as_deref() == Some("az") {
+                    if newer_clause {
+                        callback_client.set_preedit_text_with_cursor(Some("newer"), Some(2));
+                    }
+                    if caret_only {
+                        target.set_caret_index(2);
+                    } else {
+                        target.set_selection_start(0);
+                        target.set_selection_end(1);
+                    }
+                }
+            });
+            client.set_preedit_text_with_cursor(Some("obsolete"), Some(4));
+            let expected = if caret_only { (2, 2, 2) } else { (0, 0, 1) };
+            assert_eq!(target.text().as_deref(), Some("az"));
+            assert_eq!((target.caret_index(), target.selection_start(), target.selection_end()), expected);
+            assert_eq!(presenter.preedit_text(), None);
+            assert_eq!(presenter.preedit_text_cursor_position(), None);
+            assert!(target.is_composing_text());
+            // A later clause from the same composition cannot delete the
+            // host's range a second time or replace its selection decision.
+            client.set_preedit_text_with_cursor(Some("later clause"), Some(3));
+            assert_eq!(target.text().as_deref(), Some("az"));
+            assert_eq!((target.caret_index(), target.selection_start(), target.selection_end()), expected);
+            assert_eq!(presenter.preedit_text(), None);
+            assert_eq!(presenter.preedit_text_cursor_position(), None);
+            // Clear restores confirmed characters. The host has superseded
+            // the old selection, so its chosen document indices stay owned.
+            client.set_preedit_text(None);
+            assert_eq!(target.text().as_deref(), Some("a🦀z"));
+            assert_eq!((target.caret_index(), target.selection_start(), target.selection_end()), expected);
+            assert_eq!(presenter.preedit_text(), None);
+            assert!(!target.is_composing_text());
+            assert!(!target.can_undo() && !target.can_redo());
+            if !caret_only {
+                // An explicit clear ends the aborted composition. A new one
+                // may now replace the host's chosen 0..1 range independently.
+                client.set_preedit_text_with_cursor(Some("fresh"), Some(2));
+                assert_eq!(target.text().as_deref(), Some("🦀z"));
+                assert_eq!(presenter.preedit_text().as_deref(), Some("fresh"));
+                client.set_preedit_text(None);
+                assert_eq!(target.text().as_deref(), Some("a🦀z"));
+                assert_eq!((target.caret_index(), target.selection_start(), target.selection_end()), expected);
+                assert!(!target.can_undo() && !target.can_redo());
+            }
+        }
+    }
+}
+
+#[test]
+fn first_preedit_checks_selection_notification_before_publication() {
+    let _scope = test_scope();
+    for change_selection in [false, true] {
+        let target = templated_text_box(Some("a🦀z"));
+        let _root = host_in_root(&target);
+        target.set_selection_start(1);
+        target.set_selection_end(3);
+        let presenter = target.find_descendant_of_type::<TextPresenter>(false).unwrap();
+        let client = get_input_method_client(&target);
+        let callback_client = client.clone();
+        let weak = target.downgrade();
+        let handled = Rc::new(Cell::new(false));
+        let observed = handled.clone();
+        let subscription = client.selection_changed(Rc::new(move || {
+            let target = weak.upgrade().unwrap();
+            if target.text().as_deref() == Some("az") && !observed.replace(true) {
+                assert!(target.is_composing_text());
+                callback_client.set_preedit_text_with_cursor(Some("newer"), Some(2));
+                if change_selection {
+                    target.set_caret_index(0);
+                }
+            }
+        }));
+        client.set_preedit_text_with_cursor(Some("older"), Some(4));
+        assert!(handled.get());
+        assert_eq!(target.text().as_deref(), Some("az"));
+        if change_selection {
+            assert_eq!(presenter.preedit_text(), None);
+            assert_eq!(presenter.preedit_text_cursor_position(), None);
+            assert_eq!((target.caret_index(), target.selection_start(), target.selection_end()), (0, 0, 0));
+        } else {
+            assert_eq!(presenter.preedit_text().as_deref(), Some("newer"));
+            assert_eq!(presenter.preedit_text_cursor_position(), Some(2));
+        }
+        subscription.dispose();
+        client.set_preedit_text(None);
+        assert_eq!(target.text().as_deref(), Some("a🦀z"));
+        assert_eq!((target.selection_start(), target.selection_end()), if change_selection { (0, 0) } else { (1, 3) });
+        assert!(!target.is_composing_text());
+        assert!(!target.can_undo() && !target.can_redo());
+    }
+}
+
+#[test]
+fn first_preedit_accepts_native_caret_coercion_and_reversed_selection() {
+    let _scope = test_scope();
+    for (text, caret, start, end, provisional, insertion) in [
+        ("a🦀z", 4, 1, 3, "az", 1),
+        ("a🦀z", 0, 3, 1, "az", 1),
+        ("a\rX\nz", 0, 2, 3, "a\r\nz", 3),
+    ] {
+        let target = templated_text_box(Some(text));
+        target.set_accepts_return(true);
+        let _root = host_in_root(&target);
+        target.set_caret_index(caret);
+        target.set_selection_start(start);
+        target.set_selection_end(end);
+        let presenter = target.find_descendant_of_type::<TextPresenter>(false).unwrap();
+        let client = get_input_method_client(&target);
+        client.set_preedit_text_with_cursor(Some("first"), Some(2));
+        assert_eq!(target.text().as_deref(), Some(provisional));
+        assert_eq!((target.caret_index(), target.selection_start(), target.selection_end()), (insertion, insertion, insertion));
+        assert_eq!(presenter.preedit_text().as_deref(), Some("first"), "{text:?}, caret {caret}, range {start}..{end}");
+        assert_eq!(presenter.preedit_text_cursor_position(), Some(2));
+        client.set_preedit_text(None);
+        assert_eq!(target.text().as_deref(), Some(text));
+        assert_eq!((target.caret_index(), target.selection_start(), target.selection_end()), (caret, start, end));
+        assert!(!target.can_undo() && !target.can_redo());
+    }
+}
+
+#[test]
+fn first_preedit_text_synchronization_respects_reentrant_owner_changes() {
+    let _scope = test_scope();
+    for mutation in ["cancel", "host_text", "host_selection", "template", "newer_clause"] {
+        let target = templated_text_box(Some("a🦀z"));
+        let root = host_in_root(&target);
+        target.set_selection_start(1);
+        target.set_selection_end(3);
+        let presenter = target.find_descendant_of_type::<TextPresenter>(false).unwrap();
+        let client = get_input_method_client(&target);
+        let callback_client = client.clone();
+        let observed = Rc::new(Cell::new(false));
+        let handled = observed.clone();
+        let weak = target.downgrade();
+        let subscription = presenter.property_changed(move |e| {
+            if e.property() != TextPresenter::text_property().as_property()
+                || e.get_new_value::<Option<String>>().as_deref() != Some("az") || handled.replace(true) {
+                return;
+            }
+            let target = weak.upgrade().unwrap();
+            assert_eq!(target.text().as_deref(), Some("az"));
+            assert!(target.is_composing_text());
+            match mutation {
+                "cancel" => callback_client.set_preedit_text(None),
+                "host_text" => {
+                    target.set_text(Some("host replacement"));
+                    target.set_caret_index(6);
+                    target.set_selection_start(2);
+                    target.set_selection_end(6);
+                }
+                "host_selection" => target.set_caret_index(2),
+                "template" => {
+                    target.set_template(create_themed_template());
+                    target.apply_template();
+                }
+                "newer_clause" => callback_client.set_preedit_text_with_cursor(Some("newer"), Some(2)),
+                _ => unreachable!(),
+            }
+        });
+        client.set_preedit_text_with_cursor(Some("obsolete"), Some(4));
+        assert!(observed.get(), "{mutation}");
+        let current = client.text_view_visual().unwrap().cast::<TextPresenter>().unwrap();
+        match mutation {
+            "host_text" => {
+                assert_eq!(target.text().as_deref(), Some("host replacement"));
+                assert_eq!((target.caret_index(), target.selection_start(), target.selection_end()), (6, 2, 6));
+                assert_eq!(current.preedit_text(), None);
+                client.set_preedit_text(Some("later clause"));
+                client.set_preedit_text(None);
+                assert_eq!(target.text().as_deref(), Some("host replacement"));
+                assert_eq!((target.caret_index(), target.selection_start(), target.selection_end()), (6, 2, 6));
+            }
+            "host_selection" => {
+                assert_eq!(target.text().as_deref(), Some("az"));
+                assert_eq!((target.caret_index(), target.selection_start(), target.selection_end()), (2, 2, 2));
+                assert_eq!(current.preedit_text(), None);
+                client.set_preedit_text(Some("later clause"));
+                assert_eq!(target.text().as_deref(), Some("az"));
+                client.set_preedit_text(None);
+                assert_eq!(target.text().as_deref(), Some("a🦀z"));
+                assert_eq!((target.caret_index(), target.selection_start(), target.selection_end()), (2, 2, 2));
+            }
+            "newer_clause" => {
+                assert_eq!(target.text().as_deref(), Some("az"));
+                assert_eq!(current.preedit_text().as_deref(), Some("newer"));
+                assert_eq!(current.preedit_text_cursor_position(), Some(2));
+                client.set_preedit_text(None);
+                assert_eq!(target.text().as_deref(), Some("a🦀z"));
+                assert_eq!((target.caret_index(), target.selection_start(), target.selection_end()), (0, 1, 3));
+            }
+            "cancel" | "template" => {
+                assert_eq!(target.text().as_deref(), Some("a🦀z"));
+                assert_eq!((target.caret_index(), target.selection_start(), target.selection_end()), (0, 1, 3));
+                assert_eq!(current.preedit_text(), None);
+                assert_eq!(current.preedit_text_cursor_position(), None);
+                if mutation == "template" {
+                    assert!(current != presenter);
+                    root.execute_initial_layout_pass();
+                    assert_eq!(target.find_descendant_of_type::<TextPresenter>(false).as_ref(), Some(&current));
+                }
+            }
+            _ => unreachable!(),
+        }
+        assert!(!target.is_composing_text(), "{mutation}");
+        assert!(!target.can_undo() && !target.can_redo(), "{mutation}");
+        subscription.dispose();
+    }
+}
+
+#[test]
+fn first_preedit_does_not_overwrite_a_newer_clause_or_its_cursor() {
+    let _scope = test_scope();
+    let target = templated_text_box(Some("a🦀z"));
+    let _root = host_in_root(&target);
+    target.set_selection_start(1);
+    target.set_selection_end(3);
+    let presenter = target.find_descendant_of_type::<TextPresenter>(false).unwrap();
+    let client = get_input_method_client(&target);
+    let callback_client = client.clone();
+    let _subscription = presenter.property_changed(move |event| {
+        if event.property() == TextPresenter::preedit_text_property().as_property()
+            && event.get_new_value::<Option<String>>().as_deref() == Some("older") {
+            callback_client.set_preedit_text_with_cursor(Some("newer"), Some(2));
+        }
+    });
+    client.set_preedit_text_with_cursor(Some("older"), Some(4));
+    assert_eq!(target.text().as_deref(), Some("az"));
+    assert_eq!(presenter.preedit_text().as_deref(), Some("newer"));
+    assert_eq!(presenter.preedit_text_cursor_position(), Some(2));
+    assert!(target.is_composing_text());
+    client.set_preedit_text(None);
+    assert_eq!(target.text().as_deref(), Some("a🦀z"));
+    assert_eq!((target.selection_start(), target.selection_end()), (1, 3));
+    assert!(!target.can_undo() && !target.can_redo());
+}
+
+#[test]
+fn first_preedit_still_clears_on_external_text_or_caret_changes() {
+    let _scope = test_scope();
+    for replace_text in [false, true] {
+        let target = templated_text_box(Some("a🦀z"));
+        let _root = host_in_root(&target);
+        target.set_selection_start(1);
+        target.set_selection_end(3);
+        let presenter = target.find_descendant_of_type::<TextPresenter>(false).unwrap();
+        let client = get_input_method_client(&target);
+        client.set_preedit_text(Some("visible"));
+        assert_eq!(presenter.preedit_text().as_deref(), Some("visible"));
+        if replace_text {
+            target.set_text(Some("external replacement"));
+        } else {
+            target.set_caret_index(0);
+        }
+        assert_eq!(presenter.preedit_text(), None);
+        client.set_preedit_text(None);
+        assert!(!target.is_composing_text());
+        assert_eq!(target.text().as_deref(), Some(if replace_text { "external replacement" } else { "a🦀z" }));
+    }
+}
+
+#[test]
+fn paragraph_ime_cancel_restores_confirmation_and_commit_reports_original_selection() {
+    use ferroui_base::media::text_formatting::{TextParagraphStyle, TextParagraphStyles};
+    use ferroui_base::utilities::ValueSpan;
+    let _scope = test_scope();
+    let target = templated_text_box(Some("A\nA\n"));
+    target.set_accepts_return(true);
+    target.apply_template();
+    let _root = host_in_root(&target);
+    let styles: TextParagraphStyles = Rc::from([
+        ValueSpan::new(0, 2, TextParagraphStyle { indent: 10.0, ..Default::default() }),
+        ValueSpan::new(2, 2, TextParagraphStyle { indent: 20.0, ..Default::default() }),
+    ]);
+    target.set_text_paragraph_styles(Some(styles.clone()));
+    target.set_selection_start(0);
+    target.set_selection_end(2);
+    let client = get_input_method_client(&target);
+    let changes = Rc::new(RefCell::new(Vec::new()));
+    let recorded = changes.clone();
+    let weak = target.downgrade();
+    target.text_changing(move |_, event| {
+        let target = weak.upgrade().unwrap();
+        recorded.borrow_mut().push((target.text(), target.is_composing_text(), event.text_change().cloned()));
+    });
+    client.set_preedit_text(Some("B\n"));
+    assert_eq!(target.text().as_deref(), Some("A\n"));
+    client.set_preedit_text(None);
+    assert_eq!(target.text().as_deref(), Some("A\nA\n"));
+    assert_eq!((target.selection_start(), target.selection_end()), (0, 2));
+    assert!(Rc::ptr_eq(target.text_paragraph_styles().as_ref().unwrap(), &styles));
+    assert!(!target.is_composing_text());
+    assert!(changes.borrow().iter().all(|(_, composing, _)| *composing));
+    client.set_preedit_text(Some("B\n"));
+    client.set_preedit_text(None);
+    raise_text_event(&target, "B\nB\n");
+    let changes = changes.borrow();
+    let (value, composing, change) = changes.last().unwrap();
+    assert_eq!(value.as_deref(), Some("B\nB\nA\n"));
+    assert!(!composing);
+    let change = change.as_ref().unwrap();
+    assert_eq!(change.previous_text(), "A\nA\n");
+    assert_eq!(change.replaced_range(), 0..2);
+    assert_eq!(change.inserted_length(), 4);
+}
+
+#[test]
+fn paragraph_ime_restore_respects_a_synchronous_application_replacement() {
+    use ferroui_base::media::text_formatting::{TextParagraphStyle, TextParagraphStyles};
+    use ferroui_base::utilities::ValueSpan;
+    let _scope = test_scope();
+    let target = templated_text_box(Some("old\nold"));
+    target.apply_template();
+    let _root = host_in_root(&target);
+    let old: TextParagraphStyles = Rc::from([ValueSpan::new(0, 4, TextParagraphStyle { indent: 10.0, ..Default::default() })]);
+    let replacement: TextParagraphStyles = Rc::from([ValueSpan::new(0, 11, TextParagraphStyle { indent: 40.0, ..Default::default() })]);
+    target.set_text_paragraph_styles(Some(old));
+    target.select_all();
+    let client = get_input_method_client(&target);
+    client.set_preedit_text(Some("preedit"));
+    let weak = target.downgrade();
+    let next = replacement.clone();
+    target.text_changing(move |_, _| {
+        let target = weak.upgrade().unwrap();
+        if target.text().as_deref() == Some("old\nold") {
+            target.set_text(Some("replacement"));
+            target.set_text_paragraph_styles(Some(next.clone()));
+            target.set_caret_index(5);
+            target.set_selection_start(2);
+            target.set_selection_end(5);
+        }
+    });
+    client.set_preedit_text(None);
+    assert_eq!(target.text().as_deref(), Some("replacement"));
+    assert_eq!((target.caret_index(), target.selection_start(), target.selection_end()), (5, 2, 5));
+    assert!(Rc::ptr_eq(target.text_paragraph_styles().as_ref().unwrap(), &replacement));
+    assert!(!target.is_composing_text());
+}
+
+#[test]
+fn paragraph_preedit_subscription_tracks_late_template_replacement_and_detach() {
+    use ferroui_base::media::text_formatting::{TextParagraphStyle, TextParagraphStyles};
+    use ferroui_base::utilities::ValueSpan;
+    let _scope = test_scope();
+    let _focus = focus_scope();
+    let original = "A🦀\nB";
+    let target = templated_text_box(Some(original));
+    target.set_accepts_return(true);
+    let styles: TextParagraphStyles = Rc::from([
+        ValueSpan::new(0, 4, TextParagraphStyle { indent: 10.0, ..Default::default() }),
+        ValueSpan::new(4, 1, TextParagraphStyle { indent: 20.0, ..Default::default() }),
+    ]);
+    target.set_text_paragraph_styles(Some(styles.clone()));
+    assert!(target.find_descendant_of_type::<TextPresenter>(false).is_none());
+    // Do not pre-apply the template: first layout after attachment is the
+    // ordinary production path that must install the preedit observer too.
+    let root = host_in_root(&target);
+    let previous = target.find_descendant_of_type::<TextPresenter>(false).unwrap();
+    assert!(Rc::ptr_eq(previous.text_paragraph_styles().as_ref().unwrap(), &styles));
+    let client = get_input_method_client(&target);
+    target.set_selection_start(0);
+    target.set_selection_end(4);
+    client.set_preedit_text(Some("first"));
+    assert_eq!(target.text().as_deref(), Some("B"));
+    assert!(target.is_composing_text());
+    client.set_preedit_text(None);
+    assert_eq!(target.text().as_deref(), Some(original));
+    assert_eq!((target.selection_start(), target.selection_end()), (0, 4));
+    assert!(!target.can_undo() && !target.can_redo());
+
+    target.set_template(create_themed_template());
+    target.apply_template();
+    root.execute_initial_layout_pass();
+    let current = target.find_descendant_of_type::<TextPresenter>(false).unwrap();
+    assert!(current != previous);
+    assert!(Rc::ptr_eq(current.text_paragraph_styles().as_ref().unwrap(), &styles));
+    previous.set_preedit_text(Some("obsolete presenter"));
+    assert_eq!(target.text().as_deref(), Some(original), "The replaced presenter must no longer delete the current selection");
+    assert_eq!((target.selection_start(), target.selection_end()), (0, 4));
+    client.set_preedit_text(Some("second"));
+    assert_eq!(target.text().as_deref(), Some("B"), "The replacement presenter must own preedit selection deletion");
+    assert!(target.is_composing_text());
+
+    root.set_child(Button::new());
+    assert_eq!(target.text().as_deref(), Some(original));
+    assert_eq!((target.selection_start(), target.selection_end()), (0, 4));
+    assert!(!target.is_composing_text());
+    current.set_preedit_text(Some("detached presenter"));
+    client.set_preedit_text(Some("late input method update"));
+    assert_eq!(target.text().as_deref(), Some(original));
+    assert_eq!((target.selection_start(), target.selection_end()), (0, 4));
+    assert!(Rc::ptr_eq(target.text_paragraph_styles().as_ref().unwrap(), &styles));
+    assert!(!target.is_composing_text());
+    assert!(!target.can_undo() && !target.can_redo());
+
+    // Clear only the detached presenter's direct-notification probe above.
+    // The old input client update itself was ignored. Reattachment must use
+    // the same cached presenter; actual focus reconnects its native client.
+    current.set_preedit_text(None);
+    root.set_child(target.clone());
+    root.execute_initial_layout_pass();
+    assert!(target.find_descendant_of_type::<TextPresenter>(false).unwrap() == current);
+    assert!(target.focus());
+    assert!(target.is_focused());
+    let reattached_client = get_input_method_client(&target);
+    assert!(Rc::ptr_eq(&reattached_client, &client));
+    target.set_selection_start(0);
+    target.set_selection_end(4);
+    reattached_client.set_preedit_text(Some("reattached composition"));
+    assert_eq!(target.text().as_deref(), Some("B"));
+    assert!(target.is_composing_text());
+    reattached_client.set_preedit_text(None);
+    assert_eq!(target.text().as_deref(), Some(original));
+    assert_eq!((target.selection_start(), target.selection_end()), (0, 4));
+    assert!(Rc::ptr_eq(target.text_paragraph_styles().as_ref().unwrap(), &styles));
+    assert!(Rc::ptr_eq(current.text_paragraph_styles().as_ref().unwrap(), &styles));
+    assert!(!target.is_composing_text());
+    assert!(!target.can_undo() && !target.can_redo());
+}
+
+#[test]
+fn paragraph_preedit_template_removal_restores_confirmation_without_discarding_redo() {
+    use ferroui_base::media::text_formatting::{GenericTextRunProperties, TextParagraphStyle, TextParagraphStyles, TextRunProperties};
+    use ferroui_base::media::Typeface;
+    use ferroui_base::utilities::ValueSpan;
+    let _scope = test_scope();
+    let original = "A🦀\nB";
+    let target = templated_text_box(Some(original));
+    target.set_accepts_return(true);
+    let paragraphs: TextParagraphStyles = Rc::from([
+        ValueSpan::new(0, 4, TextParagraphStyle { indent: 10.0, ..Default::default() }),
+        ValueSpan::new(4, 1, TextParagraphStyle { indent: 20.0, ..Default::default() }),
+    ]);
+    let properties: Rc<dyn TextRunProperties> = Rc::new(GenericTextRunProperties::with_font_size(Typeface::default(), 24.0));
+    let characters: crate::presenters::TextStyleOverrides = Rc::from([ValueSpan::new(0, 4, properties)]);
+    target.set_text_paragraph_styles(Some(paragraphs.clone()));
+    target.set_text_style_overrides(Some(characters.clone()));
+    let root = host_in_root(&target);
+    let previous = target.find_descendant_of_type::<TextPresenter>(false).unwrap();
+    let client = get_input_method_client(&target);
+    let original_snapshot = Rc::new(original.to_string());
+    let edited_snapshot = Rc::new("A🦀\nB!".to_string());
+    target.set_text_undo_state(Some(original_snapshot.clone()));
+    let assert_snapshot = |expected: &Rc<String>| {
+        let actual = target.text_undo_state().unwrap().downcast::<String>().unwrap();
+        assert!(Rc::ptr_eq(&actual, expected));
+    };
+
+    target.set_caret_index(5);
+    target.set_selected_text(Some("!"));
+    assert_eq!(target.text().as_deref(), Some("A🦀\nB!"));
+    target.set_text_undo_state(Some(edited_snapshot.clone()));
+    target.undo();
+    assert_eq!(target.text().as_deref(), Some(original));
+    assert!(!target.can_undo() && target.can_redo());
+    assert_snapshot(&original_snapshot);
+    target.set_selection_start(0);
+    target.set_selection_end(4);
+    client.set_preedit_text(Some("pending"));
+    assert_eq!(target.text().as_deref(), Some("B"));
+    assert!(target.is_composing_text());
+
+    target.set_template(None);
+    target.apply_template();
+    assert_eq!(target.visual_children_count(), 0);
+    assert!(target.find_descendant_of_type::<TextPresenter>(false).is_none());
+    assert!(client.text_view_visual().is_none());
+    assert_eq!(target.text().as_deref(), Some(original));
+    assert_eq!((target.selection_start(), target.selection_end()), (0, 4));
+    assert!(Rc::ptr_eq(target.text_paragraph_styles().as_ref().unwrap(), &paragraphs));
+    assert!(Rc::ptr_eq(target.text_style_overrides().as_ref().unwrap(), &characters));
+    assert!(!target.is_composing_text());
+    assert!(!target.can_undo() && target.can_redo());
+    assert_snapshot(&original_snapshot);
+    previous.set_preedit_text(Some("obsolete template"));
+    client.set_preedit_text(Some("late client update"));
+    assert_eq!(target.text().as_deref(), Some(original));
+    assert_eq!((target.selection_start(), target.selection_end()), (0, 4));
+    assert!(!target.is_composing_text());
+    assert!(!target.can_undo() && target.can_redo());
+    target.redo();
+    assert_eq!(target.text().as_deref(), Some("A🦀\nB!"));
+    assert!(target.can_undo() && !target.can_redo());
+    assert_snapshot(&edited_snapshot);
+    target.undo();
+    assert_eq!(target.text().as_deref(), Some(original));
+    assert!(!target.can_undo() && target.can_redo());
+    assert_snapshot(&original_snapshot);
+
+    target.set_template(create_themed_template());
+    root.execute_initial_layout_pass();
+    assert!(!target.can_undo() && target.can_redo(), "Installing the new native template must not alter history");
+    assert_snapshot(&original_snapshot);
+    let current = target.find_descendant_of_type::<TextPresenter>(false).unwrap();
+    assert!(current != previous);
+    assert!(Rc::ptr_eq(current.text_paragraph_styles().as_ref().unwrap(), &paragraphs));
+    assert!(Rc::ptr_eq(current.text_style_overrides().as_ref().unwrap(), &characters));
+    target.set_selection_start(0);
+    target.set_selection_end(4);
+    client.set_preedit_text(Some("new template"));
+    assert_eq!(target.text().as_deref(), Some("B"));
+    assert!(!target.can_undo() && target.can_redo(), "The new presenter's provisional deletion is not an edit");
+    client.set_preedit_text(None);
+    assert_eq!(target.text().as_deref(), Some(original));
+    assert_eq!((target.selection_start(), target.selection_end()), (0, 4));
+    assert!(Rc::ptr_eq(target.text_paragraph_styles().as_ref().unwrap(), &paragraphs));
+    assert!(Rc::ptr_eq(target.text_style_overrides().as_ref().unwrap(), &characters));
+    assert!(!target.is_composing_text());
+    assert!(!target.can_undo() && target.can_redo());
+    assert_snapshot(&original_snapshot);
+    // Prove the surviving redo still restores its real text and rich payload;
+    // CanRedo alone is insufficient if an echo changed its stored checkpoint.
+    target.redo();
+    assert_eq!(target.text().as_deref(), Some("A🦀\nB!"));
+    assert!(target.can_undo() && !target.can_redo());
+    assert_snapshot(&edited_snapshot);
+    assert!(Rc::ptr_eq(target.text_paragraph_styles().as_ref().unwrap(), &paragraphs));
+    assert!(Rc::ptr_eq(target.text_style_overrides().as_ref().unwrap(), &characters));
+    target.undo();
+    assert_eq!(target.text().as_deref(), Some(original));
+    assert!(!target.can_undo() && target.can_redo());
+    assert_snapshot(&original_snapshot);
+}
+
+#[test]
+fn paragraph_preedit_template_removal_respects_reentrant_template_installation() {
+    use ferroui_base::media::text_formatting::{TextParagraphStyle, TextParagraphStyles};
+    use ferroui_base::utilities::ValueSpan;
+    let _scope = test_scope();
+    let target = templated_text_box(Some("old"));
+    let paragraphs: TextParagraphStyles = Rc::from([
+        ValueSpan::new(0, 3, TextParagraphStyle { indent: 9.0, ..Default::default() }),
+    ]);
+    target.set_text_paragraph_styles(Some(paragraphs.clone()));
+    let root = host_in_root(&target);
+    let previous = target.find_descendant_of_type::<TextPresenter>(false).unwrap();
+    let client = get_input_method_client(&target);
+    target.select_all();
+    client.set_preedit_text(Some("pending"));
+    assert_eq!(target.text().as_deref(), Some(""));
+
+    let installed = Rc::new(Cell::new(false));
+    let observed = installed.clone();
+    let weak = target.downgrade();
+    target.text_changing(move |_, _| {
+        let target = weak.upgrade().unwrap();
+        if target.template().is_none() && target.text().as_deref() == Some("old")
+            && !observed.replace(true) {
+            target.set_template(create_themed_template());
+            target.apply_template();
+        }
+    });
+    target.set_template(None);
+    target.apply_template();
+    root.execute_initial_layout_pass();
+    assert!(installed.get());
+    let current = target.find_descendant_of_type::<TextPresenter>(false).unwrap();
+    assert!(current != previous);
+    assert!(client.text_view_visual().is_some());
+    assert_eq!(target.text().as_deref(), Some("old"));
+    assert_eq!((target.selection_start(), target.selection_end()), (0, 3));
+    assert!(Rc::ptr_eq(current.text_paragraph_styles().as_ref().unwrap(), &paragraphs));
+    client.set_preedit_text(Some("new presenter"));
+    assert_eq!(target.text().as_deref(), Some(""), "The outer removal must not disconnect the template installed by TextChanging");
+    client.set_preedit_text(None);
+    assert_eq!(target.text().as_deref(), Some("old"));
+    assert_eq!((target.selection_start(), target.selection_end()), (0, 3));
+    assert!(Rc::ptr_eq(target.text_paragraph_styles().as_ref().unwrap(), &paragraphs));
+    assert!(!target.is_composing_text());
+    assert!(!target.can_undo() && !target.can_redo());
+}
+
+#[test]
+fn paragraph_ime_cancellation_does_not_enter_native_history_or_discard_redo() {
+    use ferroui_base::media::text_formatting::{TextParagraphStyle, TextParagraphStyles};
+    use ferroui_base::utilities::ValueSpan;
+    let _scope = test_scope();
+    let target = templated_text_box(Some("A🦀\nB"));
+    target.set_accepts_return(true);
+    target.apply_template();
+    let _root = host_in_root(&target);
+    let styles: TextParagraphStyles = Rc::from([
+        ValueSpan::new(0, 4, TextParagraphStyle { indent: 10.0, ..Default::default() }),
+        ValueSpan::new(4, 1, TextParagraphStyle { indent: 20.0, ..Default::default() }),
+    ]);
+    target.set_text_paragraph_styles(Some(styles.clone()));
+    target.set_text_undo_state(Some(Rc::new("confirmed")));
+    let client = get_input_method_client(&target);
+    target.set_selection_start(0);
+    target.set_selection_end(4);
+    assert!(!target.can_undo());
+    assert!(!target.can_redo());
+
+    client.set_preedit_text(Some("provisional"));
+    assert_eq!(target.text().as_deref(), Some("B"));
+    client.set_preedit_text(None);
+    assert_eq!(target.text().as_deref(), Some("A🦀\nB"));
+    assert!(!target.can_undo(), "Canceled provisional deletion is not a user edit");
+    assert!(!target.can_redo());
+    target.undo();
+    assert_eq!(target.text().as_deref(), Some("A🦀\nB"));
+    assert!(Rc::ptr_eq(target.text_paragraph_styles().as_ref().unwrap(), &styles));
+
+    // A committed replacement has exactly the confirmed source as its undo
+    // checkpoint, even after an earlier canceled composition.
+    client.set_preedit_text(Some("C\n"));
+    client.set_preedit_text(None);
+    raise_text_event(&target, "C\n");
+    assert_eq!(target.text().as_deref(), Some("C\nB"));
+    target.undo();
+    assert_eq!(target.text().as_deref(), Some("A🦀\nB"));
+    assert!(!target.can_undo(), "No provisional text can be revisited by a second undo");
+    assert!(target.can_redo());
+
+    // Cancellation while an older checkpoint is selected cannot erase redo.
+    target.set_selection_start(0);
+    target.set_selection_end(4);
+    client.set_preedit_text(Some("another draft"));
+    client.set_preedit_text(None);
+    assert_eq!(target.text().as_deref(), Some("A🦀\nB"));
+    assert!(!target.can_undo());
+    assert!(target.can_redo());
+    target.redo();
+    assert_eq!(target.text().as_deref(), Some("C\nB"));
+    target.undo();
+    assert_eq!(target.text().as_deref(), Some("A🦀\nB"));
+    assert!(Rc::ptr_eq(target.text_paragraph_styles().as_ref().unwrap(), &styles));
 }

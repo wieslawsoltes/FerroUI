@@ -90,6 +90,7 @@ A separate namespace for the controls (`ferroui_controls::winui`, `FerroUI.Contr
 | `NavigationViewItem` | WinUI's NavigationViewItem: its template is converted from NavigationView.xaml with the item presenter styles into the WinUI theme and its derived themes | W8 |
 | `NavigationViewItemHeader` | WinUI's NavigationViewItemHeader: its template is converted from WinUI's NavigationView.xaml into the WinUI theme and its derived themes | W8 |
 | `NavigationViewItemSeparator` | WinUI's NavigationViewItemSeparator: its template is converted from WinUI's NavigationView.xaml into the WinUI theme and its derived themes | W8 |
+| `TitleBar` | WinUI's TitleBar: its template is converted from WinUI's TitleBar.xaml into the WinUI theme and its derived themes | W8c |
 <!-- winui-only:end -->
 - The tables of `winui-theme.md` that say "no FerroUI control" for these controls (NavigationView and its items, RadioButtons, RatingControl; DRP-1, DRP-2, DRP-11, DRP-13, NVP-1 and G-23 of the theme's DEVIATIONS) are updated in the pull request that lands each control; W5 updated them for InfoBar, InfoBadge and ProgressRing, W6 for RadioButtons and RatingControl, W8 for NavigationView and its items.
 
@@ -101,7 +102,8 @@ WinUI draws `SymbolIcon`, the default `FontIcon` and the glyphs of its templates
 - **The font is not redistributable and is not bundled.** On Windows 10 and 11 the system has it. On macOS, Linux, the browser, iOS and Android an application that uses these glyphs supplies a symbol font with the same code points and sets `SymbolThemeFontFamily` to it in its resources; without one the glyphs are drawn with the fallback font, usually as missing-glyph boxes.
 - The ControlCatalog supplies a font off Windows: its application resources set `SymbolThemeFontFamily` (`samples/ControlCatalog/app.rs`) to `Segoe Fluent Icons, Segoe MDL2 Assets` and then `FerroUI Catalog Symbols` (`samples/ControlCatalog/Assets/Fonts/FerroUICatalogSymbols.ttf`, MIT, written by `scripts/winui-controls/catalog_symbol_font.py` from the outlines of `Resources/Glyphs.xaml` of the WinUI theme and outlines drawn for it). It has 54 glyphs at the code points of Segoe Fluent Icons (`catalog_symbol_font.py --list`), among them the stars of RatingControl (E734, E735), the icons of InfoBar (F136, F13C to F13F), the settings, back, menu and chevron glyphs of NavigationView (E713, E72B, E700, E70D, E70E, E76C), the search glyph of AutoSuggestBox (E721), the spin glyphs of NumberBox (E70D, E70E), the glyphs of InfoBadge (EA38, E8C9, E8FB, E711) and the symbols of the catalog pages (E8FB, E711, E710, E721, E80F, E715, E8B7, E713, E734, E735, E72C, E8C6, E8C8, E77F, E7A7, E7A6, E72D). An application can do the same with its own font. The theme crates bundle no font.
 - Each control has its own page in the ControlCatalog, in the section where it belongs, in the form of the other pages (`samples/ControlCatalog/Pages/<Control>Page.xaml` with its class `<control>_page.rs`, registered in `ViewModels/main_window_view_model_page_list.rs`): IconElement (SymbolIcon, FontIcon, PathIcon) in Media & Graphics; InfoBadge, InfoBar and ProgressRing in Status & Feedback; NumberBox, RadioButtons and RatingControl in Basic Input; AutoSuggestBox in Text; NavigationView in Navigation & Pages, whose left navigation view navigates a Frame (one page per item, back through the journal).
-- **The ControlCatalog shell** is a NavigationView (`samples/ControlCatalog/MainView.xaml`, `main_view.rs`), where upstream's is a drawer page: the sections are top-level items with their pages as child items (selecting a section shows its page of cards and opens it), built from the page list of the view model (`main_window_view_model_page_list.rs`, with its unavailable pages); the search box is the AutoSuggestBox of the pane; the settings page is the settings item; the logo is the pane header; the content is a Frame with a NavigationPage per entry, and the back button pops a pushed sample before it goes back in the journal. `PaneDisplayMode` is `Auto` (Minimal below 640, Compact below 1008, Expanded above). The smoke runs, the tours and the frame benchmarks navigate through the view model as before. Recorded in DEVIATIONS.md (ControlCatalog sample). Each page shows the states of its control in the WinUI, macOS and Material themes.
+- **The ControlCatalog shell** is a NavigationView (`samples/ControlCatalog/MainView.xaml`, `main_view.rs`), where upstream's is a drawer page: the sections are top-level items with their pages as child items (selecting a section shows its page of cards and opens it), built from the page list of the view model (`main_window_view_model_page_list.rs`, with its unavailable pages); the search box is the AutoSuggestBox of the pane; the settings page is the settings item; the logo is the pane header; the content is a Frame with a NavigationPage per entry, and the back button pops a pushed sample before it goes back in the journal. `PaneDisplayMode` is `Auto` (Minimal below 640, Compact below 1008, Expanded above). The smoke runs, the tours and the frame benchmarks navigate through the view model as before. Recorded in DEVIATIONS.md (ControlCatalog sample).
+- **The title bar of the catalog shell (W8c)** is a TitleBar above the navigation view, as WinUI Gallery has it (`MainWindow.xaml` at `14061eea`): the pane toggle button, the logo and the title, the search box (500 wide at most) and the back button while the frame can go back. It is in the title bar of the window while the client area extends into it (the catalog extends it by default, as WinUI Gallery does); the navigation view then hides its own back and toggle buttons and its pane header (the logo is in the title bar). With the classic chrome (the client area not extended, from the Window Customizations page or `FERROUI_SMOKE_EXTEND_CLIENT_AREA=0`) and in full screen the title bar is collapsed and the navigation view has its buttons, the search box and the logo again; where there is no window chrome (mobile, browser) the title bar is a plain top row. Known issue, not of this change: the macOS theme draws the arrows of an overlay scroll bar at the right edge of a page while the bar itself is hidden (seen on main too). Each page shows the states of its control in the WinUI, macOS and Material themes.
 - Glyphs the templates themselves need may be drawn from path outlines in the theme, as `Resources/Glyphs.xaml` of the WinUI theme does for a few glyphs; each such case is recorded in the theme's DEVIATIONS.
 
 ## 6. WinUI additions to upstream-ported controls
@@ -148,6 +150,19 @@ Use the upstream pages for an application written against upstream's model, and 
 - W11 adds a repository-wide gate to `ci.yml`: `cargo semver-checks check-release` of the published crates against 0.4.0 from crates.io, and a snapshot test of the default values of the registered properties (owner, name, value type, default for the owner, default binding mode, inheritance) compared with a checked-in snapshot.
 - The controls of this page override no metadata of other types.
 
+### 5.3 TitleBar and the window (W8c)
+
+WinUI's `TitleBar` (`controls/dev/TitleBar` at the pin) asks `AppWindow` for three things the port maps onto the window chrome of FerroUI:
+
+| WinUI | Port |
+|---|---|
+| `AppWindowTitleBar.LeftInset`, `RightInset` (the caption buttons) | `Window::caption_button_insets`: `IWindowImpl::caption_button_insets` where the system draws the caption buttons over the client area (the traffic lights of macOS at the left, 78 points, in the native backend), and the width of the caption buttons the toolkit draws (`WindowDrawnDecorations::caption_buttons_width`; Windows, Linux) at the right; zero in full screen and while the client area does not extend into the title bar |
+| `InputNonClientPointerSource` drag and passthrough regions | `WindowDecorationProperties` roles: the bar is the `TitleBar` (drag) role, its back and toggle buttons, headers and the enabled templated controls of its content (`IsDragRegion` decides as in WinUI) the `User` role; they take effect while the client area extends into the decorations |
+| `InputActivationListener` | `WindowBase::is_active`: the Deactivated states (`:deactivated`) |
+| `AppWindow.Title` | `Window::title`: a title of the bar is the title of its window, which gets its own title back when the bar no longer sets it |
+
+The template parts and states are WinUI's (theme TTB-1..4). The Fluent and Simple themes have no template for it (5.1); the catalog styles it for them in `ClassicShell/`.
+
 ## 9. Landing plan
 
 Each pull request carries its tests, its `DEVIATIONS.md` rows and a line in `CHANGELOG.md` under "Unreleased"; generated files are regenerated with their scripts. W4 to W10 change the WinUI theme's `compiled_xaml.rs` and the registration of the controls, and start after #269 (Repeater), #283 (Inking) and #313 (hot reload) are merged.
@@ -163,6 +178,7 @@ Each pull request carries its tests, its `DEVIATIONS.md` rows and a line in `CHA
 | W6 | Input: NumberBox, AutoSuggestBox, RadioButtons, RatingControl | W4, W1 | yes: RangeValue of the peers, keyboard, IME |
 | W7 | The opt-in additions of section 6 to NumericUpDown and AutoCompleteBox | W6 | no |
 | W8 | Navigation: Frame, FramePage, the navigation types, NavigationView and its items | W4, W5, W6 | yes: adaptive widths, focus, UIA tree |
+| W8c | TitleBar (owner request) and the title bar of the catalog shell, as WinUI Gallery | W8 | yes: caption buttons, drag regions |
 | W9 | `ferroui-markup-xaml-winui`: the importer, `x:Bind` compatibility, `parse_winui*` | W2, W8 | no |
 | W10 | `samples/WinUIGallery` and its workflow | W4 to W9 | yes: the gallery, fonts, DPI |
 | W11 | The API gate of section 8 | none | no |
@@ -287,3 +303,15 @@ Where #286 differed from WinUI, the port follows WinUI: the text of NumberBox's 
 | A NavigationViewItem that contains itself or an ancestor (a cycle of items). | The child is left out and a warning is logged. | Behaviour (addition) | #286 asserted; a cycle from markup or data must not end the application. |
 | `NavigationViewItemAutomationPeer` reports `PositionInSet`, `SizeOfSet` and `Level`; `NavigationViewAutomationPeer::RaiseSelectionChangedEvent`. | Not reported; the change of the selection is raised as a change of the `Selection` property of the selection pattern. | Missing | No position-in-set members of FerroUI's peers; the selection pattern carries the change. |
 | `PaneToggleButtonStyle` and `MenuItemContainerStyle` are `Style`s. | `Option<Ref<ControlTheme>>`; the container theme is applied to the containers at the style priority. | Representation | FerroUI's styles of controls are control themes. |
+
+### 10.5 TitleBar (W8c)
+
+`src/FerroUI.Controls/title_bar.rs`, `primitives/title_bar_template_settings.rs`, `automation/peers/title_bar_automation_peer.rs`; tests `title_bar_tests.rs` and the catalog shell tests.
+
+| WinUI | Port | Kind | Why |
+|---|---|---|---|
+| The insets, drag regions, activation and title of `AppWindow` (section 5.3). | `Window::caption_button_insets`, `WindowDecorationProperties` roles, `WindowBase::is_active`, `Window::title`. | Representation | FerroUI's window chrome. |
+| `AutoRefreshDragRegions` false: one pass over the content after its first `LayoutUpdated`; true: a pass after each. | The bar finds the interactive elements of its content when the template, the content, the headers or the buttons change, when it joins a window and on `RecomputeDragRegions`; `AutoRefreshDragRegions` is stored but changes nothing yet. | Missing | No `LayoutUpdated` subscription per element; the roles stay on the elements. |
+| `TitleBarTrace` (debug output). | Not ported. | Missing | Diagnostics of the WinUI build. |
+| `TitleBar` passes `RightToLeft` insets swapped. | The same, from `FlowDirection`. | - | - |
+

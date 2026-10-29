@@ -1068,8 +1068,16 @@ fn screenshot_run(directory: PathBuf) {
                 // framework and are part of what is captured. The window
                 // is fitted to its screen after that: with the caption as
                 // client area the window takes the size it asks for again.
-                if std::env::var_os("FERROUI_SMOKE_EXTEND_CLIENT_AREA").is_some_and(|value| !value.is_empty()) {
-                    window.set_extend_client_area_to_decorations_hint(true);
+                // `0` turns the extension off (the catalog extends the client area by default, for
+                // the title bar of its shell): the pictures of the classic chrome.
+                if let Some(value) = std::env::var_os("FERROUI_SMOKE_EXTEND_CLIENT_AREA").filter(|value| !value.is_empty()) {
+                    // Through the view model, so that the Window Customizations page shows it.
+                    match ferroui_base::metadata::from_markup_value::<std::rc::Rc<control_catalog::view_models::MainWindowViewModel>>(
+                        &window.data_context(),
+                    ) {
+                        Some(view_model) => view_model.set_extend_client_area_enabled(value != "0"),
+                        None => window.set_extend_client_area_to_decorations_hint(value != "0"),
+                    }
                     println!(
                         "Screenshots: the client area is extended into the frame: {}",
                         window.is_extended_into_window_decorations()

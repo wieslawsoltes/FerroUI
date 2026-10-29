@@ -1752,6 +1752,19 @@ pub fn time_picker_presenter() -> El<ferroui_controls::TimePickerPresenter> {
     El::new()
 }
 
+pub use ferroui_controls::TitleBar;
+
+impl ViewClass for ferroui_controls::TitleBar {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::TitleBar>::new()
+    }
+}
+
+/// Starts an element of [`TitleBar`](ferroui_controls::TitleBar).
+pub fn title_bar() -> El<ferroui_controls::TitleBar> {
+    El::new()
+}
+
 pub use ferroui_controls::primitives::ToggleButton;
 
 impl ViewClass for ferroui_controls::primitives::ToggleButton {
@@ -8028,6 +8041,74 @@ pub trait TimePickerPresenterProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_controls::TimePickerPresenter>> TimePickerPresenterProps for El<T> {}
 
+/// The properties and routed events of [`TitleBar`](ferroui_controls::TitleBar).
+pub trait TitleBarProps: ElementBuilder {
+    /// Sets [`TitleBar::title_property`](ferroui_controls::TitleBar::title_property).
+    fn title<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::TitleBar>::title_property(), value)
+    }
+
+    /// Sets [`TitleBar::subtitle_property`](ferroui_controls::TitleBar::subtitle_property).
+    fn subtitle<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::TitleBar>::subtitle_property(), value)
+    }
+
+    /// Sets [`TitleBar::icon_source_property`](ferroui_controls::TitleBar::icon_source_property).
+    fn icon_source<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::IconSource>>, M>) -> Self {
+        self.prop(<ferroui_controls::TitleBar>::icon_source_property(), value)
+    }
+
+    /// Sets [`TitleBar::left_header_property`](ferroui_controls::TitleBar::left_header_property).
+    fn left_header<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Control>>, M>) -> Self {
+        self.prop(<ferroui_controls::TitleBar>::left_header_property(), value)
+    }
+
+    /// Sets [`TitleBar::content_property`](ferroui_controls::TitleBar::content_property).
+    fn content<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Control>>, M>) -> Self {
+        self.prop(<ferroui_controls::TitleBar>::content_property(), value)
+    }
+
+    /// Sets [`TitleBar::right_header_property`](ferroui_controls::TitleBar::right_header_property).
+    fn right_header<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Control>>, M>) -> Self {
+        self.prop(<ferroui_controls::TitleBar>::right_header_property(), value)
+    }
+
+    /// Sets [`TitleBar::is_back_button_visible_property`](ferroui_controls::TitleBar::is_back_button_visible_property).
+    fn is_back_button_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::TitleBar>::is_back_button_visible_property(), value)
+    }
+
+    /// Sets [`TitleBar::is_back_button_enabled_property`](ferroui_controls::TitleBar::is_back_button_enabled_property).
+    fn is_back_button_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::TitleBar>::is_back_button_enabled_property(), value)
+    }
+
+    /// Sets [`TitleBar::is_pane_toggle_button_visible_property`](ferroui_controls::TitleBar::is_pane_toggle_button_visible_property).
+    fn is_pane_toggle_button_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::TitleBar>::is_pane_toggle_button_visible_property(), value)
+    }
+
+    /// Sets [`TitleBar::auto_refresh_drag_regions_property`](ferroui_controls::TitleBar::auto_refresh_drag_regions_property).
+    fn auto_refresh_drag_regions<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::TitleBar>::auto_refresh_drag_regions_property(), value)
+    }
+
+    /// Sets [`TitleBar::is_drag_region_property`](ferroui_controls::TitleBar::is_drag_region_property).
+    fn is_drag_region<M>(self, value: impl IntoProp<Option<bool>, M>) -> Self {
+        self.prop(<ferroui_controls::TitleBar>::is_drag_region_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::TitleBar>> TitleBarProps for El<T> {}
+
+/// The properties and routed events of [`TitleBarTemplateSettings`](ferroui_controls::primitives::TitleBarTemplateSettings).
+pub trait TitleBarTemplateSettingsProps: ElementBuilder {
+    /// Sets [`TitleBarTemplateSettings::icon_element_property`](ferroui_controls::primitives::TitleBarTemplateSettings::icon_element_property).
+    fn icon_element<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::IconElement>>, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::TitleBarTemplateSettings>::icon_element_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::primitives::TitleBarTemplateSettings>> TitleBarTemplateSettingsProps for El<T> {}
+
 /// The properties and routed events of [`ToggleButton`](ferroui_controls::primitives::ToggleButton).
 pub trait ToggleButtonProps: ElementBuilder {
     /// Sets [`ToggleButton::is_checked_property`](ferroui_controls::primitives::ToggleButton::is_checked_property).
@@ -9411,6 +9492,11 @@ pub trait AttachedProps: ElementBuilder {
     /// Sets the attached [`TextSearch::text_property`](ferroui_controls::primitives::TextSearch::text_property).
     fn text_search_text<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::TextSearch>::text_property(), value)
+    }
+
+    /// Sets the attached [`TitleBar::is_drag_region_property`](ferroui_controls::TitleBar::is_drag_region_property).
+    fn title_bar_is_drag_region<M>(self, value: impl IntoProp<Option<bool>, M>) -> Self {
+        self.prop(<ferroui_controls::TitleBar>::is_drag_region_property(), value)
     }
 
     /// Sets the attached [`ToolTip::tip_property`](ferroui_controls::ToolTip::tip_property).

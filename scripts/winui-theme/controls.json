@@ -131,7 +131,8 @@
     {"document": "TreeView.xaml", "themes": ["{TreeView}"], "batch": "B3", "winui": "TreeView: DefaultTreeViewStyle (TreeView.xaml, TreeView_themeresources.xaml)."},
     {"document": "TreeViewItem.xaml", "themes": ["{TreeViewItem}"], "batch": "B3", "winui": "TreeViewItem: {TreeViewItem} (TreeView.xaml), MUX_TreeViewItemStyle (TreeViewItem.xaml)."},
     {"document": "Window.xaml", "themes": ["{Window}"], "batch": "F", "winui": "No WinUI style (Window is not a control in WinUI 3): the Mica fallback background and text of a window (SolidBackgroundFillColorBaseBrush, TextFillColorPrimaryBrush, ContentControlThemeFontFamily, ControlContentThemeFontSize)."},
-    {"document": "WindowDrawnDecorations.xaml", "themes": ["{WindowDrawnDecorations}"], "batch": "B6", "winui": "TitleBar: DefaultTitleBarStyle (TitleBar.xaml, TitleBar_themeresources.xaml); WindowCaptionButton (generic.xaml) for the caption buttons."},
+    {"document": "WindowDrawnDecorations.xaml", "themes": ["{WindowDrawnDecorations}"], "batch": "B6", "winui": "TitleBar: DefaultTitleBarStyle (TitleBar.xaml, TitleBar_themeresources.xaml) for the title bar the toolkit draws; WindowCaptionButton (generic.xaml) for the caption buttons."},
+    {"document": "TitleBar.xaml", "themes": ["DefaultTitleBarControlStyle", "{TitleBar}"], "batch": "B6", "winui": "TitleBar: DefaultTitleBarStyle (as DefaultTitleBarControlStyle) and the implicit style (TitleBar.xaml); TitleBarBackButtonStyle and TitleBarPaneToggleButtonStyle are in WindowDrawnDecorations.xaml. A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it."},
     {"document": "WindowNotificationManager.xaml", "themes": ["{WindowNotificationManager}"], "batch": "B6", "winui": "No WinUI control: a host of InfoBar cards (InfoBar_themeresources.xaml)."}
   ],
   "winui": {
@@ -208,7 +209,7 @@
     "Thumb": {"ferroui": "Thumb", "batch": "F", "note": "the default theme of FerroUI's Thumb (the thumbs of ScrollBar and Slider have keyed themes)"},
     "TimePicker": {"ferroui": "TimePicker", "batch": "B4"},
     "TimePickerFlyoutPresenter": {"ferroui": "TimePickerPresenter", "batch": "B4"},
-    "TitleBar": {"ferroui": "WindowDrawnDecorations", "batch": "B6"},
+    "TitleBar": {"ferroui": "TitleBar", "batch": "B6", "note": "WinUI's TitleBar in ferroui-controls; WindowDrawnDecorations draws the title bar of the toolkit with its resources"},
     "ToggleButton": {"ferroui": "ToggleButton", "batch": "F"},
     "ToggleMenuFlyoutItem": {"ferroui": "MenuItem", "batch": "B3"},
     "ToggleSplitButton": {"ferroui": "SplitButton", "batch": "B2", "note": "FerroUI's ToggleSplitButton overrides its style key to SplitButton"},

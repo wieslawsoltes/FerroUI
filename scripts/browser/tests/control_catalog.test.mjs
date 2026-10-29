@@ -72,8 +72,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { SPLASH_PROBE, open, run, assert, sleep, splashFrames } from "../harness.mjs";
 import {
-    DRAWER_EDGE, STATE_TIMEOUT, TOUR, TOUR_SIZE, describe, drive, inContent, inDrawer, navigate, pairs, settled, visit,
-    waitUntilReady
+    DRAWER_EDGE, STATE_TIMEOUT, TITLE_BAR_HEIGHT, TOUR, TOUR_SIZE, describe, drive, inContent, inDrawer, isPaneToggle, navigate,
+    pairs, settled, visit, waitUntilReady
 } from "../catalog-pages.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
@@ -291,16 +291,18 @@ check("the module, the list of the asset files and the start-up files are downlo
 
 check("the navigation drawer opens from its toggle button", async (page) => {
     let state = await page.until("the drawer is closed", (s) => s.drawerOpen === false);
-    // The search box of the pane is an AutoSuggestBox; the view reports its text box (the part TextBox).
+    // The search box is an AutoSuggestBox; the view reports its text box (the part TextBox). It is in
+    // the title bar of the shell, the top row, reached with the drawer closed as well.
     const isSearchBox = (e) => e.type === "TextBox" && e.name === "TextBox";
-    assert(!state.elements.some((e) => isSearchBox(e) && e.hit), "the search box of the closed drawer can be reached");
+    const inTitleBar = (e) => e.hit && e.y + e.height <= TITLE_BAR_HEIGHT;
+    assert(state.elements.some((e) => isSearchBox(e) && inTitleBar(e)), "the search box is not in the title bar of the shell");
     // The first frame of the view shows the drawer open beside the content: the main view closes it
     // for this width when it is loaded, after that frame. The button is clicked once the view has
-    // drawn it where the closed drawer leaves it.
-    const toggle = await page.element("the toggle button of the pane is shown", (e) => e.name === "TogglePaneButton" && e.hit);
+    // drawn it.
+    const toggle = await page.element("the toggle button of the pane is shown", isPaneToggle);
+    assert(inTitleBar(toggle), `the toggle button of the pane is at ${JSON.stringify(toggle)}, not in the title bar of the shell`);
     await page.clickElement(toggle);
     state = await page.until("the drawer is open and shows its entries", (s) => s.drawerOpen === true
-        && s.elements.some((e) => isSearchBox(e) && inDrawer(e))
         && ["Home", "Basic Input", "Text", "Settings"].every((text) => s.elements.some((e) => e.text === text && inDrawer(e))));
     // The drawer covers the content: the home page behind it can no longer be clicked there.
     const covered = state.elements.find((e) => e.text === "Basic Input" && e.x < DRAWER_EDGE && !inDrawer(e));
@@ -472,7 +474,7 @@ check("a text box focused by touch on a phone leaves the page at scale 1", async
     // resize the page for the keyboard, so that the view is laid out in what the keyboard leaves.
     const viewport = await page.evaluate(`document.querySelector('meta[name="viewport"]').content`);
     assert(/interactive-widget=resizes-content/.test(viewport), `the viewport element of the page is "${viewport}"`);
-    await page.clickElement(await page.element("the toggle button of the pane is shown", (e) => e.name === "TogglePaneButton" && e.hit));
+    await page.clickElement(await page.element("the toggle button of the pane is shown", isPaneToggle));
     await page.until("the drawer is open", (s) => s.drawerOpen === true);
     // A section of the pane opens its page and its list of pages, and the pane stays open (an item
     // with children does not close it); its page TextBox closes it.

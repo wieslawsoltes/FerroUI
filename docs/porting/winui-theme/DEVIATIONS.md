@@ -1161,6 +1161,15 @@ The section covers the control themes of `Controls/NavigationView.xaml`: Navigat
 | TSW-10 | (not in the style) `VerticalContentAlignment` | The default of a WinUI control is `Center`. | A setter `VerticalContentAlignment="Center"`. | FerroUI's default is `Stretch`. |
 | TSW-11 | `ManipulationMode="System,TranslateX"`, the `CompositeTransform`s of the knobs, the `Thumb x:Name="SwitchThumb"` | The control drags the knob through a thumb. | Left out. | FerroUI's switch handles the drag on `PART_MovingKnobs`. |
 
+## TitleBar
+
+| ID | WinUI source | What WinUI does | What the port does | Why |
+|---|---|---|---|---|
+| TTB-1 | `controls/dev/TitleBar/TitleBar.xaml` `DefaultTitleBarStyle` visual state groups | `TitleBar.cpp` chooses the states with `GoToState`. | The pseudo-classes the control sets: `:back-button-visible`, `:pane-toggle-button-visible`, `:left-header-visible`, `:icon-visible`, `:title-text-visible`, `:subtitle-text-visible`, `:content-visible`, `:right-header-visible` (Visible), with `:deactivated` (Deactivated), `:expanded-height`, `:compact`, `:negative-inset-spacing`. | G-1. |
+| TTB-2 | `LeftPaddingColumn`, `LeftHeaderPaddingColumn`, `RightPaddingColumn` (named `ColumnDefinition`s) | The control sets the widths of the outer two to the insets of `AppWindowTitleBar`; `NegativeInsetSpacing` sets the middle one. | Borders of those names in Auto columns; the control sets the widths of the outer two to `Window::caption_button_insets`, a style the middle one. | A column definition has no name in FerroUI. |
+| TTB-3 | `x:DeferLoadStrategy="Lazy"` of the parts | The parts are created when their state shows them. | The parts are in the template, hidden until their state shows them. | No deferred loading in FerroUI templates. |
+| TTB-4 | `DefaultTitleBarStyle`, `TitleBarBackButtonStyle`, `TitleBarPaneToggleButtonStyle` (`TitleBar_themeresources.xaml`) | The style of the control and of its buttons. | The style of the control is `DefaultTitleBarControlStyle`; the button styles are the ones of `WindowDrawnDecorations.xaml`, which ports them for the title bar the toolkit draws and has the key `DefaultTitleBarStyle` for that title bar. | One key per document set. |
+
 ## FerroUI controls without a WinUI counterpart
 
 What each FerroUI control the WinUI theme styles, or will style, is built from when WinUI 3 has no
