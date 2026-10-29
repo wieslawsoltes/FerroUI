@@ -1,6 +1,7 @@
 //! Automation peers: the objects that expose elements to UI automation.
 
 mod auto_complete_box_automation_peer;
+mod auto_suggest_box_automation_peer;
 mod automation_peer;
 mod button_automation_peer;
 mod calendar_automation_peer;
@@ -45,6 +46,7 @@ mod native_menu_bar_automation_peer;
 mod native_menu_bar_automation_peer_tests;
 mod navigation_page_automation_peer;
 mod none_automation_peer;
+mod number_box_automation_peer;
 mod numeric_up_down_automation_peer;
 #[cfg(test)]
 mod page_automation_peer_tests;
@@ -54,7 +56,9 @@ mod popup_root_automation_peer;
 mod progress_bar_automation_peer;
 mod progress_ring_automation_peer;
 mod radio_button_automation_peer;
+mod radio_buttons_automation_peer;
 mod range_base_automation_peer;
+mod rating_control_automation_peer;
 mod scroll_bar_automation_peer;
 mod scroll_viewer_automation_peer;
 mod selecting_items_control_automation_peer;
@@ -80,6 +84,7 @@ mod window_automation_peer_tests;
 mod window_base_automation_peer;
 
 pub use auto_complete_box_automation_peer::AutoCompleteBoxAutomationPeer;
+pub use auto_suggest_box_automation_peer::AutoSuggestBoxAutomationPeer;
 pub use automation_peer::{
     AutomationControlType, AutomationLandmarkType, AutomationPeer, AutomationPeerImpl, AutomationPeerImplExt,
     AutomationPeerVTable,
@@ -116,6 +121,7 @@ pub use native_control_host_peer::NativeControlHostPeer;
 pub use native_menu_bar_automation_peer::NativeMenuBarAutomationPeer;
 pub use navigation_page_automation_peer::NavigationPageAutomationPeer;
 pub use none_automation_peer::NoneAutomationPeer;
+pub use number_box_automation_peer::NumberBoxAutomationPeer;
 pub use numeric_up_down_automation_peer::NumericUpDownAutomationPeer;
 pub use pips_pager_automation_peer::PipsPagerAutomationPeer;
 pub use popup_automation_peer::PopupAutomationPeer;
@@ -126,10 +132,12 @@ pub use radio_button_automation_peer::{
     RadioButtonAutomationPeer, RadioButtonAutomationPeerImpl, RadioButtonAutomationPeerImplExt,
     RadioButtonAutomationPeerVTable,
 };
+pub use radio_buttons_automation_peer::RadioButtonsAutomationPeer;
 pub use range_base_automation_peer::{
     RangeBaseAutomationPeer, RangeBaseAutomationPeerImpl, RangeBaseAutomationPeerImplExt,
     RangeBaseAutomationPeerVTable,
 };
+pub use rating_control_automation_peer::RatingControlAutomationPeer;
 pub use scroll_bar_automation_peer::ScrollBarAutomationPeer;
 pub use scroll_viewer_automation_peer::ScrollViewerAutomationPeer;
 pub use selecting_items_control_automation_peer::{

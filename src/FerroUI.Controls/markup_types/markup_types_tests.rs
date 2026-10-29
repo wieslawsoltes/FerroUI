@@ -206,6 +206,13 @@ const DECLARED_NEXT_TO_THE_TYPE: &[&str] = &[
     "InfoBarClosingEventArgs",
     "InfoBarClosedEventArgs",
     "InfoBarOpenedEventArgs",
+    "NumberBoxSpinButtonPlacementMode",
+    "NumberBoxValidationMode",
+    "NumberBoxValueChangedEventArgs",
+    "AutoSuggestionBoxTextChangeReason",
+    "AutoSuggestBoxTextChangedEventArgs",
+    "AutoSuggestBoxSuggestionChosenEventArgs",
+    "AutoSuggestBoxQuerySubmittedEventArgs",
 ];
 
 #[test]

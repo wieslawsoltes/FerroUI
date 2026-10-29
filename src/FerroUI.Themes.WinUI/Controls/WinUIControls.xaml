@@ -89,9 +89,13 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/ToggleSwitch.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/Slider.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/NumericUpDown.xaml" />
+        <!-- An input control of WinUI that FerroUI ports as a control (docs/porting/winui-controls.md). -->
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/NumberBox.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/ButtonSpinner.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/Expander.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/PipsPager.xaml" />
+        <!-- An input control of WinUI that FerroUI ports as a control (docs/porting/winui-controls.md). -->
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/RatingControl.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/RefreshContainer.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/RefreshVisualizer.xaml" />
         <!-- B3: flyouts, menus, lists and selection. -->
@@ -108,6 +112,10 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/TreeViewItem.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/TreeView.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/AutoCompleteBox.xaml" />
+        <!-- An input control of WinUI that FerroUI ports as a control (docs/porting/winui-controls.md). -->
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/AutoSuggestBox.xaml" />
+        <!-- An input control of WinUI that FerroUI ports as a control (docs/porting/winui-controls.md). -->
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/RadioButtons.xaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Styles.Resources>

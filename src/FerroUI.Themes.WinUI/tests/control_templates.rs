@@ -248,6 +248,10 @@ control_tests! {
     transitioning_content_control => "TransitioningContentControl";
     // B6: window decorations, notifications, tables and dialogs
     info_bar => "InfoBar";
+    number_box => "NumberBox";
+    auto_suggest_box => "AutoSuggestBox";
+    radio_buttons => "RadioButtons";
+    rating_control => "RatingControl";
     managed_file_chooser => "ManagedFileChooser";
     managed_file_chooser_overwrite_prompt => "ManagedFileChooserOverwritePrompt";
     notification_card => "NotificationCard";
@@ -482,6 +486,64 @@ fn the_status_controls_show_their_states() {
     assert_eq!(ring.foreground(), indicator.stroke());
     ring.set_is_active(false);
     assert_eq!(0.0, part(&ring, "LayoutRoot").opacity());
+    window.close();
+}
+
+/// The input controls of WinUI (`Controls/NumberBox.xaml`, `Controls/AutoSuggestBox.xaml`,
+/// `Controls/RadioButtons.xaml`, `Controls/RatingControl.xaml`; docs/porting/winui-controls.md,
+/// Input) get the parts their code looks up from the theme, and the resources of their templates:
+/// the spacing of the items panel of RadioButtons and the size and spacing of the items of
+/// RatingControl.
+#[test]
+fn the_input_controls_get_their_parts_and_resources_from_the_theme() {
+    use ferroui_controls::primitives::RadioButtonsPanel;
+    use ferroui_controls::{
+        AutoSuggestBox, NumberBox, NumberBoxSpinButtonPlacementMode, RadioButton, RadioButtons, RatingControl, RepeatButton,
+        StackPanel, TextBox,
+    };
+
+    let _app = start_themed_application();
+    let number_box = NumberBox::new();
+    number_box.set_spin_button_placement_mode(NumberBoxSpinButtonPlacementMode::Inline);
+    number_box.set_numeric_value(3.0);
+    let auto_suggest_box = AutoSuggestBox::new();
+    let radio_buttons = RadioButtons::new();
+    for _ in 0..3 {
+        radio_buttons.items().add(Some(Control::boxed(RadioButton::new())));
+    }
+    radio_buttons.set_max_columns(3);
+    let rating = RatingControl::new();
+    let panel = StackPanel::new();
+    panel.children().add(&number_box);
+    panel.children().add(&auto_suggest_box);
+    panel.children().add(&radio_buttons);
+    panel.children().add(&rating);
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(&panel)));
+    window.show();
+    window.update_layout();
+
+    let part = |control: &TemplatedControl, name: &str| {
+        control
+            .get_template_descendants()
+            .into_iter()
+            .find(|element| element.name().as_deref() == Some(name))
+            .unwrap_or_else(|| panic!("the part {name} of {}", control.get_type().name()))
+    };
+    let input_box = part(&number_box, "InputBox").cast::<TextBox>().expect("a text box");
+    assert_eq!(Some("3"), input_box.text().as_deref());
+    assert!(part(&number_box, "UpSpinButton").cast::<RepeatButton>().expect("a repeat button").is_visible());
+    assert!(part(&auto_suggest_box, "TextBox").cast::<TextBox>().is_some());
+    let items_panel = radio_buttons.items_panel_root().and_then(|panel| panel.cast::<RadioButtonsPanel>()).expect("RadioButtonsPanel");
+    // RadioButtonsColumnSpacing and RadioButtonsRowSpacing.
+    assert_eq!(7.0, items_panel.column_spacing());
+    assert_eq!(8.0, items_panel.row_spacing());
+    let background = part(&rating, "RatingBackgroundStackPanel").cast::<StackPanel>().expect("a stack panel");
+    // RatingControlItemSpacing, and five items of RatingControlFontSizeForRendering drawn at half
+    // their size.
+    assert_eq!(8.0, background.spacing());
+    assert_eq!(5, background.children().count());
+    assert_eq!(16.0, background.children().get(0).bounds().width);
     window.close();
 }
 
