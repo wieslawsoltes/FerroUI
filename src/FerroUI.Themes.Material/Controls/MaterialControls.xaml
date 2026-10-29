@@ -122,6 +122,9 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/AutoSuggestBox.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/RadioButtons.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/RatingControl.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/Frame.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/NavigationView.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/TitleBar.xaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Styles.Resources>

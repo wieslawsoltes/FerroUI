@@ -57,6 +57,13 @@ pub struct App {
     inking_winui: RefCell<Option<Rc<dyn IStyle>>>,
     #[cfg(feature = "classic-themes")]
     tree_data_grid_generic: RefCell<Option<Rc<dyn IStyle>>>,
+    /// Not in the original: the control themes of the NavigationView shell and of its Frame for the
+    /// Fluent and the Simple theme, which have none (`ClassicShell/Fluent.xaml`,
+    /// `ClassicShell/Simple.xaml`).
+    #[cfg(feature = "classic-themes")]
+    classic_shell_fluent: RefCell<Option<Rc<dyn IStyle>>>,
+    #[cfg(feature = "classic-themes")]
+    classic_shell_simple: RefCell<Option<Rc<dyn IStyle>>>,
     dock_menu_item_count: Cell<i32>,
     prev_theme: Cell<CatalogTheme>,
     /// Not in the original: the theme variant the main view requests when it is loaded
@@ -111,6 +118,8 @@ impl ApplicationImpl for App {
             *this.simple_theme.borrow_mut() = from_markup_value::<Ref<SimpleTheme>>(&resource("SimpleTheme"));
             *this.color_picker_simple.borrow_mut() = from_markup_value::<Rc<dyn IStyle>>(&resource("ColorPickerSimple"));
             *this.tree_data_grid_generic.borrow_mut() = from_markup_value::<Rc<dyn IStyle>>(&resource("TreeDataGridGeneric"));
+            *this.classic_shell_fluent.borrow_mut() = from_markup_value::<Rc<dyn IStyle>>(&resource("ClassicShellFluent"));
+            *this.classic_shell_simple.borrow_mut() = from_markup_value::<Rc<dyn IStyle>>(&resource("ClassicShellSimple"));
             this.resources().merged_dictionaries().add(classic_themes.into());
         }
         *this.winui_theme.borrow_mut() = from_markup_value::<Ref<WinUITheme>>(&this.resource("WinUITheme"));
@@ -191,6 +200,10 @@ impl App {
             inking_winui: RefCell::new(None),
             #[cfg(feature = "classic-themes")]
             tree_data_grid_generic: RefCell::new(None),
+            #[cfg(feature = "classic-themes")]
+            classic_shell_fluent: RefCell::new(None),
+            #[cfg(feature = "classic-themes")]
+            classic_shell_simple: RefCell::new(None),
             dock_menu_item_count: Cell::new(0),
             prev_theme: Cell::new(CatalogTheme::WinUI),
             initial_theme_variant: RefCell::new(ThemeVariant::default()),
@@ -406,6 +419,10 @@ impl App {
             // Not in the original: the WinUI styles of the inking controls of the port (the page
             // Inking); the inking controls have no Fluent or Simple styles.
             app.theme_styles_container.add(Style::new());
+            // Not in the original: the control themes of the NavigationView shell and of its Frame
+            // for the Fluent and the Simple theme (ClassicShell/), which have none; the other themes
+            // have their own.
+            app.theme_styles_container.add(Style::new());
         }
 
         // The TreeDataGrid has Fluent styles, whose brushes come from resources the Fluent and the
@@ -426,6 +443,9 @@ impl App {
                 app.theme_styles_container.set(2, Style::new());
                 app.theme_styles_container.set(3, tree_data_grid_fluent());
                 app.theme_styles_container.set(4, Style::new());
+                let classic_shell_fluent =
+                    app.classic_shell_fluent.borrow().clone().expect("the Fluent shell styles of ClassicThemes.xaml");
+                app.theme_styles_container.set(5, classic_shell_fluent);
             }
             #[cfg(feature = "classic-themes")]
             CatalogTheme::Simple => {
@@ -437,6 +457,9 @@ impl App {
                 app.theme_styles_container.set(2, Style::new());
                 app.theme_styles_container.set(3, tree_data_grid_generic());
                 app.theme_styles_container.set(4, Style::new());
+                let classic_shell_simple =
+                    app.classic_shell_simple.borrow().clone().expect("the Simple shell styles of ClassicThemes.xaml");
+                app.theme_styles_container.set(5, classic_shell_simple);
             }
             CatalogTheme::WinUI => {
                 // Not in the original: the WinUI theme of the port (docs/porting/winui-theme.md),
@@ -453,6 +476,7 @@ impl App {
                 app.theme_styles_container.set(3, tree_data_grid_fluent());
                 let inking_winui = app.inking_winui.borrow().clone().expect("the inking WinUI styles of App.xaml");
                 app.theme_styles_container.set(4, inking_winui);
+                app.theme_styles_container.set(5, Style::new());
             }
             #[cfg(feature = "macos-theme")]
             CatalogTheme::MacOS => {
@@ -463,6 +487,7 @@ impl App {
                 app.theme_styles_container.set(1, color_picker_fluent);
                 app.theme_styles_container.set(2, Style::new());
                 app.theme_styles_container.set(3, tree_data_grid_fluent());
+                app.theme_styles_container.set(5, Style::new());
             }
             #[cfg(not(feature = "macos-theme"))]
             CatalogTheme::MacOS => panic!(
@@ -477,6 +502,7 @@ impl App {
                 app.theme_styles_container.set(1, color_picker_fluent);
                 app.theme_styles_container.set(2, Style::new());
                 app.theme_styles_container.set(3, tree_data_grid_fluent());
+                app.theme_styles_container.set(5, Style::new());
             }
             #[cfg(not(feature = "material-theme"))]
             CatalogTheme::Material => panic!(

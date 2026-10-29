@@ -204,6 +204,22 @@ pub trait IVelloSceneSink {
         anti_alias: bool,
     );
 
+    /// Draws one canonical unhinted glyph contour. A concrete renderer may
+    /// reuse the supplied device-tolerance preparation; recording/custom sinks
+    /// keep the original curves by default. The callback is read-only with
+    /// respect to the scene and returns lines plus their translation, or None
+    /// when the bounded run cache declines that contour.
+    fn fill_glyph_outline(
+        &mut self,
+        path: &BezPath,
+        transform: Affine,
+        paint: &VelloScenePaint,
+        anti_alias: bool,
+        _prepare: &dyn Fn(Affine) -> Option<(std::sync::Arc<BezPath>, Affine)>,
+    ) {
+        self.fill(path, Fill::NonZero, transform, paint, BlendMode::default(), anti_alias);
+    }
+
     /// Fills a rectangle. `blend_mode` composes the fill with what is below
     /// it in the innermost layer.
     ///

@@ -101,6 +101,8 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add("/Pages/ContentDemoPage.xaml", "ContentPage", Icons::DOCUMENT, "A page that hosts a single content view");
             s.add("/Pages/DrawerDemoPage.xaml", "DrawerPage", Icons::DRAWER, "A page with a sliding navigation drawer");
             s.add("/Pages/NavigationDemoPage.xaml", "NavigationPage", Icons::NAVIGATION, "Stack-based page navigation");
+            // Not from upstream: NavigationView and Frame of WinUI (docs/porting/winui-controls.md).
+            s.add("/Pages/NavigationViewPage.xaml", "NavigationView", Icons::MENU, "Left, top and compact panes with a Frame");
             s.add("/Pages/SplitViewPage.xaml", "SplitView", Icons::SPLIT, "A collapsible pane beside content");
             s.add("/Pages/TabbedDemoPage.xaml", "TabbedPage", Icons::TAB, "Tab-based page navigation");
             s.add("/Pages/TabControlPage.xaml", "TabControl", Icons::TAB, "Switch between tabbed content views");
@@ -134,8 +136,9 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             // Not from upstream: SymbolIcon and FontIcon of WinUI (docs/porting/winui-controls.md) and PathIcon.
             s.add("/Pages/IconElementPage.xaml", "IconElement", Icons::SPARKLE, "Symbol, font and path icons");
             s.add("/Pages/ImagePage.xaml", "Image", Icons::IMAGE, "Display bitmaps with different stretch modes");
-            // Not from upstream: the page of the port of the inking controls of WinUI.
-            s.add("/Pages/InkingPage.xaml", "Inking", Icons::CANVAS, "Pressure-sensitive ink, pens, eraser and stencil guides");
+            // Not from upstream: the pages of the port of the inking controls of WinUI.
+            s.add("/Pages/InkCanvasPage.xaml", "InkCanvas", Icons::CANVAS, "Pressure-sensitive ink from pen, mouse and touch");
+            s.add("/Pages/InkToolbarPage.xaml", "InkToolbar", Icons::BRUSH, "Pens, eraser and stencil guides for an InkCanvas");
             s.add("/Pages/OpenGlPage.xaml", "OpenGL", Icons::CUBE_3D, "Embed custom OpenGL rendering");
             s.add("/Pages/OpenGl/OpenGlLeasePage.xaml", "OpenGL Lease", Icons::CUBE_3D, "Low-level access to the OpenGL context");
             s.add("/Pages/OpenGl/OpenGlInteropPage.xaml", "OpenGL Interop", Icons::CUBE_3D, "Compositor and OpenGL interop");

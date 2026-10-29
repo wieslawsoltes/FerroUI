@@ -201,11 +201,11 @@
       "category": "sample",
       "status": "adapted",
       "rust_files": [
-        "samples/ControlCatalog/Pages/InkingPage.xaml",
-        "samples/ControlCatalog/Pages/inking_page.rs",
+        "samples/ControlCatalog/Pages/InkCanvasPage.xaml",
+        "samples/ControlCatalog/Pages/ink_canvas_page.rs",
         "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
       ],
-      "notes": "The source canvas-plus-toolbar demonstration is combined into the FerroUI ControlCatalog Inking page. The sample explicitly enables mouse/touch in addition to the true pen-only default and adds portable snapshot/clipboard actions. Named-control/bounds behavior is tested in the framework interaction fixture."
+      "notes": "The source canvas demonstration is the FerroUI ControlCatalog InkCanvas page. The sample explicitly enables mouse/touch in addition to the true pen-only default and adds portable snapshot/clipboard actions. Named-control/bounds behavior is tested in the framework interaction fixture."
     },
     {
       "path": "controls/dev/InkCanvas/TestUI/InkCanvasPage.xaml.cs",
@@ -214,11 +214,11 @@
       "category": "sample",
       "status": "adapted",
       "rust_files": [
-        "samples/ControlCatalog/Pages/InkingPage.xaml",
-        "samples/ControlCatalog/Pages/inking_page.rs",
+        "samples/ControlCatalog/Pages/InkCanvasPage.xaml",
+        "samples/ControlCatalog/Pages/ink_canvas_page.rs",
         "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
       ],
-      "notes": "The source canvas-plus-toolbar demonstration is combined into the FerroUI ControlCatalog Inking page. The sample explicitly enables mouse/touch in addition to the true pen-only default and adds portable snapshot/clipboard actions. Named-control/bounds behavior is tested in the framework interaction fixture."
+      "notes": "The source canvas demonstration is the FerroUI ControlCatalog InkCanvas page. The sample explicitly enables mouse/touch in addition to the true pen-only default and adds portable snapshot/clipboard actions. Named-control/bounds behavior is tested in the framework interaction fixture."
     },
     {
       "path": "controls/dev/InkToolbar/APITests/InkToolbar_APITests.projitems",
@@ -2020,11 +2020,11 @@
       "category": "sample",
       "status": "adapted",
       "rust_files": [
-        "samples/ControlCatalog/Pages/InkingPage.xaml",
-        "samples/ControlCatalog/Pages/inking_page.rs",
+        "samples/ControlCatalog/Pages/InkToolbarPage.xaml",
+        "samples/ControlCatalog/Pages/ink_toolbar_page.rs",
         "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
       ],
-      "notes": "The demonstration is combined into the ControlCatalog Inking page; the source test-harness selectors/toggles/active-tool label are reproduced as actual FerroUI controls in interaction_page_selectors_and_checkboxes_drive_the_live_toolbar. All four InitialControls values, both orientations, five placements and both guide toggles are exercised. C# code-behind and the Windows test-page infrastructure are replaced by Rust events."
+      "notes": "The demonstration is the ControlCatalog InkToolbar page, whose selectors and toggles drive the toolbar live; the source test-harness selectors/toggles/active-tool label are reproduced as actual FerroUI controls in interaction_page_selectors_and_checkboxes_drive_the_live_toolbar. All four InitialControls values, both orientations, five placements and both guide toggles are exercised. C# code-behind and the Windows test-page infrastructure are replaced by Rust events."
     },
     {
       "path": "controls/dev/InkToolbar/TestUI/InkToolbarPage.xaml.cs",
@@ -2033,11 +2033,11 @@
       "category": "sample",
       "status": "adapted",
       "rust_files": [
-        "samples/ControlCatalog/Pages/InkingPage.xaml",
-        "samples/ControlCatalog/Pages/inking_page.rs",
+        "samples/ControlCatalog/Pages/InkToolbarPage.xaml",
+        "samples/ControlCatalog/Pages/ink_toolbar_page.rs",
         "src/FerroUI.Controls.Inking/ink_parity_tests.rs"
       ],
-      "notes": "The demonstration is combined into the ControlCatalog Inking page; the source test-harness selectors/toggles/active-tool label are reproduced as actual FerroUI controls in interaction_page_selectors_and_checkboxes_drive_the_live_toolbar. All four InitialControls values, both orientations, five placements and both guide toggles are exercised. C# code-behind and the Windows test-page infrastructure are replaced by Rust events."
+      "notes": "The demonstration is the ControlCatalog InkToolbar page, whose selectors and toggles drive the toolbar live; the source test-harness selectors/toggles/active-tool label are reproduced as actual FerroUI controls in interaction_page_selectors_and_checkboxes_drive_the_live_toolbar. All four InitialControls values, both orientations, five placements and both guide toggles are exercised. C# code-behind and the Windows test-page infrastructure are replaced by Rust events."
     }
   ]
 }
