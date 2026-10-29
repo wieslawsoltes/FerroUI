@@ -525,7 +525,7 @@ pub use pasting_from_clipboard_event_args::PastingFromClipboardEventArgs;
 pub use selectable_text_block::SelectableTextBlock;
 pub use text_block::{InlinesTextSource, SimpleTextSource, TextBlock, TextBlockImpl, TextBlockImplExt, TextBlockVTable};
 pub use text_changed_event_args::TextChangedEventArgs;
-pub use text_changing_event_args::TextChangingEventArgs;
+pub use text_changing_event_args::{TextBoxTextChange, TextChangingEventArgs};
 pub use text_layout_rounding_placement::TextLayoutRoundingPlacement;
 
 #[cfg(test)]

@@ -9,6 +9,7 @@ use ferroui_base::PixelSize;
 use ferroui_opengl::gl_consts;
 use ferroui_opengl::surfaces::{IGlPlatformSurfaceRenderTarget, IGlPlatformSurfaceRenderingSession};
 use ferroui_opengl::{GetProcAddress, GlInterface, GlProfileType, GlVersion, IGlContext, OpenGlException};
+#[cfg(feature = "skia")]
 use ferroui_skia::gpu::open_gl::IGlSkiaSpecificOptionsFeature;
 use std::any::{Any, TypeId};
 use std::cell::Cell;
@@ -310,6 +311,7 @@ impl IOptionalFeatureProvider for WebGlContext {
             let this: Rc<dyn IGlContext> = self.this.upgrade()?;
             return Some(Rc::new(this));
         }
+        #[cfg(feature = "skia")]
         if feature_type == TypeId::of::<dyn IGlSkiaSpecificOptionsFeature>() {
             let this: Rc<dyn IGlSkiaSpecificOptionsFeature> = self.this.upgrade()?;
             return Some(Rc::new(this));
@@ -395,6 +397,7 @@ impl ferroui_vello::web_gl::IWebGlCanvasFeature for WebGlContext {
     }
 }
 
+#[cfg(feature = "skia")]
 impl IGlSkiaSpecificOptionsFeature for WebGlContext {
     fn use_native_skia_gr_gl_interface(&self) -> bool {
         true
