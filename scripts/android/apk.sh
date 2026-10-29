@@ -26,7 +26,8 @@
 #   FERROUI_ANDROID_WORKSPACE=$PWD FerroUI/scripts/android/apk.sh package --package ember-android \
 #       --label Ember --application-id org.ferroui.ember --permission android.permission.INTERNET
 #
-#   --package NAME           the package (a cdylib; the library is the name with - as _)
+#   --package NAME           the package (a cdylib; the library is the name with - as _); the
+#                            package is <out>/NAME-<abi>-<profile>.apk
 #   --label LABEL            the label of the application (default: the package)
 #   --application-id ID      the application id (default: org.ferroui.<package with - as .>)
 #   --permission NAME        a permission of the manifest (repeatable)
@@ -39,7 +40,7 @@
 set -euo pipefail
 
 usage() {
-    sed -n '2,38p' "$0" | sed 's/^# \{0,1\}//'
+    sed -n '2,39p' "$0" | sed 's/^# \{0,1\}//'
 }
 
 app=""
@@ -49,7 +50,7 @@ out=""
 strip=1
 run_cargo=1
 features=""
-package=""
+host_package=""
 package_label=""
 package_id=""
 package_permissions=()
@@ -57,7 +58,7 @@ while [ $# -gt 0 ]; do
     case "$1" in
         smoke|catalog|safearea|sandbox|ember) app="$1" ;;
         package) app="$1" ;;
-        --package) package="${2:?--package needs a value}"; shift ;;
+        --package) host_package="${2:?--package needs a value}"; shift ;;
         --label) package_label="${2:?--label needs a value}"; shift ;;
         --application-id) package_id="${2:?--application-id needs a value}"; shift ;;
         --permission) package_permissions+=("${2:?--permission needs a value}"); shift ;;
@@ -138,12 +139,14 @@ case "$app" in
         permissions='    <uses-permission android:name="android.permission.INTERNET" />'
         ;;
     package)
-        [ -n "$package" ] || { echo "package needs --package NAME" >&2; exit 2; }
-        cargo_args=(-p "$package" --lib)
-        library="${package//-/_}"
+        [ -n "$host_package" ] || { echo "package needs --package NAME" >&2; exit 2; }
+        cargo_args=(-p "$host_package" --lib)
+        library="${host_package//-/_}"
         library_dir=""
-        application_id="${package_id:-org.ferroui.${package//-/.}}"
-        label="${package_label:-$package}"
+        application_id="${package_id:-org.ferroui.${host_package//-/.}}"
+        label="${package_label:-$host_package}"
+        # The files of the build are named after the package (<package>-<abi>-<profile>.apk).
+        app="$host_package"
         for permission in ${package_permissions[@]+"${package_permissions[@]}"}; do
             [ -n "$permissions" ] && permissions+=$'\n'
             permissions+="    <uses-permission android:name=\"$permission\" />"
