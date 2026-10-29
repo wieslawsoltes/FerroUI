@@ -53964,8 +53964,8 @@
    "key": "InkToolbarButtonFontSize",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -53974,8 +53974,8 @@
    "key": "InkToolbarButtonHeight",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -53984,8 +53984,8 @@
    "key": "InkToolbarButtonWidth",
    "kind": "x:Double",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -53994,8 +53994,8 @@
    "key": "InkToolbarCommonButtonStyle",
    "kind": "Style",
    "target_type": "ToggleButton",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54004,9 +54004,9 @@
    "key": "InkToolbarExtensionGlyphStyle",
    "kind": "Style",
    "target_type": "TextBlock",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "F"
   },
   {
    "document": "controls/dev/InkToolbar/InkToolbar.xaml",
@@ -54014,9 +54014,9 @@
    "key": "InkToolbarFlyoutItemSelectionAccentStyle",
    "kind": "Style",
    "target_type": "Rectangle",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "B3"
   },
   {
    "document": "controls/dev/InkToolbar/InkToolbar.xaml",
@@ -54024,8 +54024,8 @@
    "key": "InkToolbarFlyoutStyle",
    "kind": "Style",
    "target_type": "FlyoutPresenter",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54034,9 +54034,9 @@
    "key": "InkToolbarGlyphFillFontStyle",
    "kind": "Style",
    "target_type": "TextBlock",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "F"
   },
   {
    "document": "controls/dev/InkToolbar/InkToolbar.xaml",
@@ -54044,9 +54044,9 @@
    "key": "InkToolbarGlyphFontStyle",
    "kind": "Style",
    "target_type": "TextBlock",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "F"
   },
   {
    "document": "controls/dev/InkToolbar/InkToolbar.xaml",
@@ -54054,9 +54054,9 @@
    "key": "InkToolbarPenConfigurationControlTextStyle",
    "kind": "Style",
    "target_type": "TextBlock",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
-   "batch": null
+   "status": "pending",
+   "reason": null,
+   "batch": "F"
   },
   {
    "document": "controls/dev/InkToolbar/InkToolbar.xaml",
@@ -54064,8 +54064,8 @@
    "key": "{InkToolbarBallpointPenButton}",
    "kind": "Style",
    "target_type": "InkToolbarBallpointPenButton",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54074,8 +54074,8 @@
    "key": "{InkToolbarCustomPenButton}",
    "kind": "Style",
    "target_type": "InkToolbarCustomPenButton",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54084,8 +54084,8 @@
    "key": "{InkToolbarCustomToggleButton}",
    "kind": "Style",
    "target_type": "InkToolbarCustomToggleButton",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54094,8 +54094,8 @@
    "key": "{InkToolbarCustomToolButton}",
    "kind": "Style",
    "target_type": "InkToolbarCustomToolButton",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54104,8 +54104,8 @@
    "key": "{InkToolbarEraserButton}",
    "kind": "Style",
    "target_type": "InkToolbarEraserButton",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54114,8 +54114,8 @@
    "key": "{InkToolbarFlyoutItem}",
    "kind": "Style",
    "target_type": "InkToolbarFlyoutItem",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54124,8 +54124,8 @@
    "key": "{InkToolbarHighlighterButton}",
    "kind": "Style",
    "target_type": "InkToolbarHighlighterButton",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54134,8 +54134,8 @@
    "key": "{InkToolbarPenConfigurationControl}",
    "kind": "Style",
    "target_type": "InkToolbarPenConfigurationControl",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54144,8 +54144,8 @@
    "key": "{InkToolbarPencilButton}",
    "kind": "Style",
    "target_type": "InkToolbarPencilButton",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54154,8 +54154,8 @@
    "key": "{InkToolbarRulerButton}",
    "kind": "Style",
    "target_type": "InkToolbarRulerButton",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54164,8 +54164,8 @@
    "key": "{InkToolbarStencilButton}",
    "kind": "Style",
    "target_type": "InkToolbarStencilButton",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54174,8 +54174,8 @@
    "key": "{InkToolbar}",
    "kind": "Style",
    "target_type": "InkToolbar",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54184,8 +54184,8 @@
    "key": "InkToolbarAccentColorForegroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54194,8 +54194,8 @@
    "key": "InkToolbarAccentHoverColorForegroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54204,8 +54204,8 @@
    "key": "InkToolbarButtonBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54214,8 +54214,8 @@
    "key": "InkToolbarButtonBackgroundDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54224,8 +54224,8 @@
    "key": "InkToolbarButtonBackgroundPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54234,8 +54234,8 @@
    "key": "InkToolbarButtonBackgroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54244,8 +54244,8 @@
    "key": "InkToolbarButtonBorderBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54254,8 +54254,8 @@
    "key": "InkToolbarButtonBorderBrushDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54264,8 +54264,8 @@
    "key": "InkToolbarButtonBorderBrushPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54274,8 +54274,8 @@
    "key": "InkToolbarButtonBorderBrushPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54284,8 +54284,8 @@
    "key": "InkToolbarButtonBorderThemeThickness",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54294,8 +54294,8 @@
    "key": "InkToolbarButtonForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54304,8 +54304,8 @@
    "key": "InkToolbarButtonForegroundDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54314,8 +54314,8 @@
    "key": "InkToolbarButtonForegroundPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54324,8 +54324,8 @@
    "key": "InkToolbarButtonForegroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54334,8 +54334,8 @@
    "key": "InkToolbarButtonHoverForegroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54344,8 +54344,8 @@
    "key": "InkToolbarButtonPressedBackgroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54354,8 +54354,8 @@
    "key": "InkToolbarButtonPressedForegroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54364,8 +54364,8 @@
    "key": "InkToolbarButtonSelectedBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54374,8 +54374,8 @@
    "key": "InkToolbarButtonSelectedBackgroundDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54384,8 +54384,8 @@
    "key": "InkToolbarButtonSelectedBackgroundPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54394,8 +54394,8 @@
    "key": "InkToolbarButtonSelectedBackgroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54404,8 +54404,8 @@
    "key": "InkToolbarButtonSelectedBorderBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54414,8 +54414,8 @@
    "key": "InkToolbarButtonSelectedBorderBrushDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54424,8 +54424,8 @@
    "key": "InkToolbarButtonSelectedBorderBrushPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54434,8 +54434,8 @@
    "key": "InkToolbarButtonSelectedBorderBrushPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54444,8 +54444,8 @@
    "key": "InkToolbarButtonSelectedForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54454,8 +54454,8 @@
    "key": "InkToolbarButtonSelectedForegroundDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54464,8 +54464,8 @@
    "key": "InkToolbarButtonSelectedForegroundPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54474,8 +54474,8 @@
    "key": "InkToolbarButtonSelectedForegroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54484,8 +54484,8 @@
    "key": "InkToolbarButtonSelectedForegroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54494,8 +54494,8 @@
    "key": "InkToolbarDisabledBackgroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54504,8 +54504,8 @@
    "key": "InkToolbarDisabledForegroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54514,8 +54514,8 @@
    "key": "InkToolbarFlyoutItemBackgroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54524,8 +54524,8 @@
    "key": "InkToolbarFlyoutItemBorderHoverThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54534,8 +54534,8 @@
    "key": "InkToolbarFlyoutItemBorderPressedThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54544,8 +54544,8 @@
    "key": "InkToolbarFlyoutItemBorderSelectedThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54554,8 +54554,8 @@
    "key": "InkToolbarFlyoutItemForegroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54564,8 +54564,8 @@
    "key": "InkToolbarFlyoutItemHoverBackgroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54574,8 +54574,8 @@
    "key": "InkToolbarFlyoutItemHoverForegroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54584,8 +54584,8 @@
    "key": "InkToolbarFlyoutItemHoverSelectedBackgroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54594,8 +54594,8 @@
    "key": "InkToolbarFlyoutItemPressedBackgroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54604,8 +54604,8 @@
    "key": "InkToolbarFlyoutItemPressedForegroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54614,8 +54614,8 @@
    "key": "InkToolbarFlyoutItemPressedSelectedBackgroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54624,8 +54624,8 @@
    "key": "InkToolbarFlyoutItemSelectedBackgroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54634,8 +54634,8 @@
    "key": "InkToolbarFlyoutItemSelectedForegroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54644,8 +54644,8 @@
    "key": "InkToolbarToggleButtonBackgroundChecked",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54654,8 +54654,8 @@
    "key": "InkToolbarToggleButtonBackgroundCheckedDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54664,8 +54664,8 @@
    "key": "InkToolbarToggleButtonBackgroundCheckedPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54674,8 +54674,8 @@
    "key": "InkToolbarToggleButtonBackgroundCheckedPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54684,8 +54684,8 @@
    "key": "InkToolbarToggleButtonBorderBrushChecked",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54694,8 +54694,8 @@
    "key": "InkToolbarToggleButtonBorderBrushCheckedDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54704,8 +54704,8 @@
    "key": "InkToolbarToggleButtonBorderBrushCheckedPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54714,8 +54714,8 @@
    "key": "InkToolbarToggleButtonBorderBrushCheckedPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54724,8 +54724,8 @@
    "key": "InkToolbarToggleButtonForegroundChecked",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54734,8 +54734,8 @@
    "key": "InkToolbarToggleButtonForegroundCheckedDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54744,8 +54744,8 @@
    "key": "InkToolbarToggleButtonForegroundCheckedPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54754,8 +54754,8 @@
    "key": "InkToolbarToggleButtonForegroundCheckedPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54764,8 +54764,8 @@
    "key": "InkToolbarAccentColorForegroundThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54774,8 +54774,8 @@
    "key": "InkToolbarAccentHoverColorForegroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54784,8 +54784,8 @@
    "key": "InkToolbarButtonBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54794,8 +54794,8 @@
    "key": "InkToolbarButtonBackgroundDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54804,8 +54804,8 @@
    "key": "InkToolbarButtonBackgroundPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54814,8 +54814,8 @@
    "key": "InkToolbarButtonBackgroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54824,8 +54824,8 @@
    "key": "InkToolbarButtonBorderBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54834,8 +54834,8 @@
    "key": "InkToolbarButtonBorderBrushDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54844,8 +54844,8 @@
    "key": "InkToolbarButtonBorderBrushPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54854,8 +54854,8 @@
    "key": "InkToolbarButtonBorderBrushPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54864,8 +54864,8 @@
    "key": "InkToolbarButtonBorderThemeThickness",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54874,8 +54874,8 @@
    "key": "InkToolbarButtonForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54884,8 +54884,8 @@
    "key": "InkToolbarButtonForegroundDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54894,8 +54894,8 @@
    "key": "InkToolbarButtonForegroundPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54904,8 +54904,8 @@
    "key": "InkToolbarButtonForegroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54914,8 +54914,8 @@
    "key": "InkToolbarButtonHoverForegroundThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54924,8 +54924,8 @@
    "key": "InkToolbarButtonPressedBackgroundThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54934,8 +54934,8 @@
    "key": "InkToolbarButtonPressedForegroundThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54944,8 +54944,8 @@
    "key": "InkToolbarButtonSelectedBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54954,8 +54954,8 @@
    "key": "InkToolbarButtonSelectedBackgroundDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54964,8 +54964,8 @@
    "key": "InkToolbarButtonSelectedBackgroundPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54974,8 +54974,8 @@
    "key": "InkToolbarButtonSelectedBackgroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54984,8 +54984,8 @@
    "key": "InkToolbarButtonSelectedBackgroundThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -54994,8 +54994,8 @@
    "key": "InkToolbarButtonSelectedBorderBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55004,8 +55004,8 @@
    "key": "InkToolbarButtonSelectedBorderBrushDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55014,8 +55014,8 @@
    "key": "InkToolbarButtonSelectedBorderBrushPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55024,8 +55024,8 @@
    "key": "InkToolbarButtonSelectedBorderBrushPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55034,8 +55034,8 @@
    "key": "InkToolbarButtonSelectedForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55044,8 +55044,8 @@
    "key": "InkToolbarButtonSelectedForegroundDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55054,8 +55054,8 @@
    "key": "InkToolbarButtonSelectedForegroundPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55064,8 +55064,8 @@
    "key": "InkToolbarButtonSelectedForegroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55074,8 +55074,8 @@
    "key": "InkToolbarButtonSelectedForegroundThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55084,8 +55084,8 @@
    "key": "InkToolbarDisabledBackgroundThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55094,8 +55094,8 @@
    "key": "InkToolbarDisabledForegroundThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55104,8 +55104,8 @@
    "key": "InkToolbarFlyoutItemBackgroundThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55114,8 +55114,8 @@
    "key": "InkToolbarFlyoutItemBorderHoverThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55124,8 +55124,8 @@
    "key": "InkToolbarFlyoutItemBorderPressedThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55134,8 +55134,8 @@
    "key": "InkToolbarFlyoutItemBorderSelectedThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55144,8 +55144,8 @@
    "key": "InkToolbarFlyoutItemForegroundThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55154,8 +55154,8 @@
    "key": "InkToolbarFlyoutItemHoverBackgroundThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55164,8 +55164,8 @@
    "key": "InkToolbarFlyoutItemHoverForegroundThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55174,8 +55174,8 @@
    "key": "InkToolbarFlyoutItemHoverSelectedBackgroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55184,8 +55184,8 @@
    "key": "InkToolbarFlyoutItemPressedBackgroundThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55194,8 +55194,8 @@
    "key": "InkToolbarFlyoutItemPressedForegroundThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55204,8 +55204,8 @@
    "key": "InkToolbarFlyoutItemPressedSelectedBackgroundThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55214,8 +55214,8 @@
    "key": "InkToolbarFlyoutItemSelectedBackgroundThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55224,8 +55224,8 @@
    "key": "InkToolbarFlyoutItemSelectedForegroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55234,8 +55234,8 @@
    "key": "InkToolbarToggleButtonBackgroundChecked",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55244,8 +55244,8 @@
    "key": "InkToolbarToggleButtonBackgroundCheckedDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55254,8 +55254,8 @@
    "key": "InkToolbarToggleButtonBackgroundCheckedPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55264,8 +55264,8 @@
    "key": "InkToolbarToggleButtonBackgroundCheckedPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55274,8 +55274,8 @@
    "key": "InkToolbarToggleButtonBorderBrushChecked",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55284,8 +55284,8 @@
    "key": "InkToolbarToggleButtonBorderBrushCheckedDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55294,8 +55294,8 @@
    "key": "InkToolbarToggleButtonBorderBrushCheckedPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55304,8 +55304,8 @@
    "key": "InkToolbarToggleButtonBorderBrushCheckedPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55314,8 +55314,8 @@
    "key": "InkToolbarToggleButtonForegroundChecked",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55324,8 +55324,8 @@
    "key": "InkToolbarToggleButtonForegroundCheckedDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55334,8 +55334,8 @@
    "key": "InkToolbarToggleButtonForegroundCheckedPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55344,8 +55344,8 @@
    "key": "InkToolbarToggleButtonForegroundCheckedPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55354,8 +55354,8 @@
    "key": "InkToolbarAccentColorForegroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55364,8 +55364,8 @@
    "key": "InkToolbarAccentHoverColorForegroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55374,8 +55374,8 @@
    "key": "InkToolbarButtonBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55384,8 +55384,8 @@
    "key": "InkToolbarButtonBackgroundDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55394,8 +55394,8 @@
    "key": "InkToolbarButtonBackgroundPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55404,8 +55404,8 @@
    "key": "InkToolbarButtonBackgroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55414,8 +55414,8 @@
    "key": "InkToolbarButtonBorderBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55424,8 +55424,8 @@
    "key": "InkToolbarButtonBorderBrushDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55434,8 +55434,8 @@
    "key": "InkToolbarButtonBorderBrushPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55444,8 +55444,8 @@
    "key": "InkToolbarButtonBorderBrushPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55454,8 +55454,8 @@
    "key": "InkToolbarButtonBorderThemeThickness",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55464,8 +55464,8 @@
    "key": "InkToolbarButtonForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55474,8 +55474,8 @@
    "key": "InkToolbarButtonForegroundDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55484,8 +55484,8 @@
    "key": "InkToolbarButtonForegroundPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55494,8 +55494,8 @@
    "key": "InkToolbarButtonForegroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55504,8 +55504,8 @@
    "key": "InkToolbarButtonHoverForegroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55514,8 +55514,8 @@
    "key": "InkToolbarButtonPressedBackgroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55524,8 +55524,8 @@
    "key": "InkToolbarButtonPressedForegroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55534,8 +55534,8 @@
    "key": "InkToolbarButtonSelectedBackground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55544,8 +55544,8 @@
    "key": "InkToolbarButtonSelectedBackgroundDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55554,8 +55554,8 @@
    "key": "InkToolbarButtonSelectedBackgroundPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55564,8 +55564,8 @@
    "key": "InkToolbarButtonSelectedBackgroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55574,8 +55574,8 @@
    "key": "InkToolbarButtonSelectedBorderBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55584,8 +55584,8 @@
    "key": "InkToolbarButtonSelectedBorderBrushDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55594,8 +55594,8 @@
    "key": "InkToolbarButtonSelectedBorderBrushPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55604,8 +55604,8 @@
    "key": "InkToolbarButtonSelectedBorderBrushPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55614,8 +55614,8 @@
    "key": "InkToolbarButtonSelectedForeground",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55624,8 +55624,8 @@
    "key": "InkToolbarButtonSelectedForegroundDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55634,8 +55634,8 @@
    "key": "InkToolbarButtonSelectedForegroundPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55644,8 +55644,8 @@
    "key": "InkToolbarButtonSelectedForegroundPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55654,8 +55654,8 @@
    "key": "InkToolbarButtonSelectedForegroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55664,8 +55664,8 @@
    "key": "InkToolbarDisabledBackgroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55674,8 +55674,8 @@
    "key": "InkToolbarDisabledForegroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55684,8 +55684,8 @@
    "key": "InkToolbarFlyoutItemBackgroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55694,8 +55694,8 @@
    "key": "InkToolbarFlyoutItemBorderHoverThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55704,8 +55704,8 @@
    "key": "InkToolbarFlyoutItemBorderPressedThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55714,8 +55714,8 @@
    "key": "InkToolbarFlyoutItemBorderSelectedThemeBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55724,8 +55724,8 @@
    "key": "InkToolbarFlyoutItemForegroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55734,8 +55734,8 @@
    "key": "InkToolbarFlyoutItemHoverBackgroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55744,8 +55744,8 @@
    "key": "InkToolbarFlyoutItemHoverForegroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55754,8 +55754,8 @@
    "key": "InkToolbarFlyoutItemHoverSelectedBackgroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55764,8 +55764,8 @@
    "key": "InkToolbarFlyoutItemPressedBackgroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55774,8 +55774,8 @@
    "key": "InkToolbarFlyoutItemPressedForegroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55784,8 +55784,8 @@
    "key": "InkToolbarFlyoutItemPressedSelectedBackgroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55794,8 +55794,8 @@
    "key": "InkToolbarFlyoutItemSelectedBackgroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55804,8 +55804,8 @@
    "key": "InkToolbarFlyoutItemSelectedForegroundThemeBrush",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55814,8 +55814,8 @@
    "key": "InkToolbarToggleButtonBackgroundChecked",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55824,8 +55824,8 @@
    "key": "InkToolbarToggleButtonBackgroundCheckedDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55834,8 +55834,8 @@
    "key": "InkToolbarToggleButtonBackgroundCheckedPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55844,8 +55844,8 @@
    "key": "InkToolbarToggleButtonBackgroundCheckedPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55854,8 +55854,8 @@
    "key": "InkToolbarToggleButtonBorderBrushChecked",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55864,8 +55864,8 @@
    "key": "InkToolbarToggleButtonBorderBrushCheckedDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55874,8 +55874,8 @@
    "key": "InkToolbarToggleButtonBorderBrushCheckedPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55884,8 +55884,8 @@
    "key": "InkToolbarToggleButtonBorderBrushCheckedPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55894,8 +55894,8 @@
    "key": "InkToolbarToggleButtonForegroundChecked",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55904,8 +55904,8 @@
    "key": "InkToolbarToggleButtonForegroundCheckedDisabled",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55914,8 +55914,8 @@
    "key": "InkToolbarToggleButtonForegroundCheckedPointerOver",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -55924,8 +55924,8 @@
    "key": "InkToolbarToggleButtonForegroundCheckedPressed",
    "kind": "StaticResource",
    "target_type": "",
-   "status": "waived",
-   "reason": "InkToolbar: no FerroUI control (no inking).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -59444,8 +59444,8 @@
    "key": "SystemControlHighlightListMediumRevealListLowBackgroundBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Reveal highlight (RevealBrush, the Reveal styles): deprecated in WinUI 3, where the brushes are plain fallbacks and the Reveal styles are kept for compatibility only; FerroUI has no Reveal lighting. The seven brushes that documents of the theme still name (MenuFlyout, CalendarView, NavigationView) are ported as the plain brushes they are. Two keys of the document are not Reveal resources and are ported: CommandBarMoreButtonMargin and AppBarButtonContentHeight, the last definitions of two values of generic.xaml that the CommandBar and AppBarButton templates name.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -59484,8 +59484,8 @@
    "key": "SystemControlTransparentRevealListLowBorderBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Reveal highlight (RevealBrush, the Reveal styles): deprecated in WinUI 3, where the brushes are plain fallbacks and the Reveal styles are kept for compatibility only; FerroUI has no Reveal lighting. The seven brushes that documents of the theme still name (MenuFlyout, CalendarView, NavigationView) are ported as the plain brushes they are. Two keys of the document are not Reveal resources and are ported: CommandBarMoreButtonMargin and AppBarButtonContentHeight, the last definitions of two values of generic.xaml that the CommandBar and AppBarButton templates name.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -61244,8 +61244,8 @@
    "key": "SystemControlHighlightListMediumRevealListLowBackgroundBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Reveal highlight (RevealBrush, the Reveal styles): deprecated in WinUI 3, where the brushes are plain fallbacks and the Reveal styles are kept for compatibility only; FerroUI has no Reveal lighting. The seven brushes that documents of the theme still name (MenuFlyout, CalendarView, NavigationView) are ported as the plain brushes they are. Two keys of the document are not Reveal resources and are ported: CommandBarMoreButtonMargin and AppBarButtonContentHeight, the last definitions of two values of generic.xaml that the CommandBar and AppBarButton templates name.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -61284,8 +61284,8 @@
    "key": "SystemControlTransparentRevealListLowBorderBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Reveal highlight (RevealBrush, the Reveal styles): deprecated in WinUI 3, where the brushes are plain fallbacks and the Reveal styles are kept for compatibility only; FerroUI has no Reveal lighting. The seven brushes that documents of the theme still name (MenuFlyout, CalendarView, NavigationView) are ported as the plain brushes they are. Two keys of the document are not Reveal resources and are ported: CommandBarMoreButtonMargin and AppBarButtonContentHeight, the last definitions of two values of generic.xaml that the CommandBar and AppBarButton templates name.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -63044,8 +63044,8 @@
    "key": "SystemControlHighlightListMediumRevealListLowBackgroundBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Reveal highlight (RevealBrush, the Reveal styles): deprecated in WinUI 3, where the brushes are plain fallbacks and the Reveal styles are kept for compatibility only; FerroUI has no Reveal lighting. The seven brushes that documents of the theme still name (MenuFlyout, CalendarView, NavigationView) are ported as the plain brushes they are. Two keys of the document are not Reveal resources and are ported: CommandBarMoreButtonMargin and AppBarButtonContentHeight, the last definitions of two values of generic.xaml that the CommandBar and AppBarButton templates name.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -63084,8 +63084,8 @@
    "key": "SystemControlTransparentRevealListLowBorderBrush",
    "kind": "SolidColorBrush",
    "target_type": "",
-   "status": "waived",
-   "reason": "Reveal highlight (RevealBrush, the Reveal styles): deprecated in WinUI 3, where the brushes are plain fallbacks and the Reveal styles are kept for compatibility only; FerroUI has no Reveal lighting. The seven brushes that documents of the theme still name (MenuFlyout, CalendarView, NavigationView) are ported as the plain brushes they are. Two keys of the document are not Reveal resources and are ported: CommandBarMoreButtonMargin and AppBarButtonContentHeight, the last definitions of two values of generic.xaml that the CommandBar and AppBarButton templates name.",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -90205,7 +90205,12 @@
   "Resources/ToggleSwitch_themeresources.xaml",
   "Resources/ToolTip_themeresources.xaml",
   "Resources/TreeView_themeresources.xaml",
-  "Strings/InvariantResources.xaml"
+  "Strings/InvariantResources.xaml",
+  "../FerroUI.Controls.Inking/Themes/WinUI.xaml",
+  "../FerroUI.Controls.Inking/Themes/WinUI/InkToolbar.xaml",
+  "../FerroUI.Controls.Inking/Themes/WinUI/InkToolbarGlyphs.xaml",
+  "../FerroUI.Controls.Inking/Themes/WinUI/InkToolbarResources.xaml",
+  "../FerroUI.Controls.Inking/Themes/WinUI/InkToolbarRevealFallbacks.xaml"
  ],
  "unresolved_references": [],
  "duplicate_keys": [],
@@ -90376,7 +90381,7 @@
    "winui": "CommandBar: DefaultCommandBarStyle, DefaultCommandBarOverflowPresenterStyle (CommandBar_themeresources.xaml); AppBarButton: DefaultAppBarButtonStyle, AppBarButtonOverflowStyle; AppBarToggleButton: DefaultAppBarToggleButtonStyle, AppBarToggleButtonOverflowStyle; AppBarSeparator: DefaultAppBarSeparatorStyle.",
    "status": "ported",
    "deviations": 20,
-   "date": "2026-10-17"
+   "date": "2026-10-22"
   },
   {
    "document": "ContentPage.xaml",
@@ -91105,7 +91110,7 @@
    "key": "re:(?!(SystemControlTransparentRevealBackgroundBrush|SystemControlTransparentRevealBorderBrush|SystemControlHighlightAccentRevealBackgroundBrush|SystemControlHighlightListLowRevealBackgroundBrush|SystemControlHighlightListMediumRevealBackgroundBrush|SystemControlBackgroundTransparentRevealBorderBrush|SystemControlHighlightAltTransparentRevealBorderBrush|CommandBarMoreButtonMargin|AppBarButtonContentHeight)$).*",
    "variant": null,
    "reason": "Reveal highlight (RevealBrush, the Reveal styles): deprecated in WinUI 3, where the brushes are plain fallbacks and the Reveal styles are kept for compatibility only; FerroUI has no Reveal lighting. The seven brushes that documents of the theme still name (MenuFlyout, CalendarView, NavigationView) are ported as the plain brushes they are. Two keys of the document are not Reveal resources and are ported: CommandBarMoreButtonMargin and AppBarButtonContentHeight, the last definitions of two values of generic.xaml that the CommandBar and AppBarButton templates name.",
-   "items": 538
+   "items": 532
   },
   {
    "document": "*",
@@ -91134,20 +91139,6 @@
    "variant": null,
    "reason": "DesktopAcrylicBackdrop is a system backdrop of a window or popup (Windows composition), not a brush, and MenuFlyoutSystemBackdrop names it; FerroUI's counterpart is the transparency level of a top level, which an application chooses.",
    "items": 4
-  },
-  {
-   "document": "controls/dev/InkToolbar/InkToolbar.xaml",
-   "key": "*",
-   "variant": null,
-   "reason": "InkToolbar: no FerroUI control (no inking).",
-   "items": 197
-  },
-  {
-   "document": "controls/dev/InkToolbar/InkToolbar_themeresources.xaml",
-   "key": "*",
-   "variant": null,
-   "reason": "InkToolbar: no FerroUI control (no inking).",
-   "items": 0
   },
   {
    "document": "controls/dev/CommonStyles/MediaTransportControls_themeresources.xaml",

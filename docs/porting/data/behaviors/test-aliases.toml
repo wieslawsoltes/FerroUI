@@ -1,0 +1,33 @@
+# Test aliases and waivers of the Xaml.Behaviors reference (scripts/port-status/references.toml, `behaviors`).
+# See the top of scripts/port-status/test_gaps.py. The tests that are not ported state their reason in the Rust test
+# files (`// Not ported: <Name> - <reason>`), which test_gaps.py reads.
+
+# The names that contain the name of the reference's framework drop it (the port does not name the framework).
+
+[[alias]]
+project = "Xaml.Behaviors.Interactions.UnitTests"
+file = "Core/ChangePropertyActionTests.cs"
+test = "ExecuteReversibly_Does_Not_Apply_To_Direct_Avalonia_Property"
+rust = "execute_reversibly_does_not_apply_to_direct_property"
+reason = "the name of the framework is left out"
+
+[[alias]]
+project = "Xaml.Behaviors.Interactions.UnitTests"
+file = "Custom/ValidationRuleTests.cs"
+test = "ValidationRules_ExposeConfigurationAsAvaloniaProperties"
+rust = "validation_rules_expose_configuration_as_properties"
+reason = "the name of the framework is left out"
+
+[[alias]]
+project = "Xaml.Behaviors.Interactions.UnitTests"
+file = "DragAndDrop/ManagedContextDropBehaviorTests.cs"
+test = "ManagedDataTransferExtensions_Keep_Text_Payload_Compatible_With_Avalonia_Text_APIs"
+rust = "managed_data_transfer_extensions_keep_text_payload_compatible_with_text_apis"
+reason = "the name of the framework is left out"
+
+[[alias]]
+project = "Xaml.Behaviors.Interactions.UnitTests"
+file = "DragAndDrop/ManagedContextDropBehaviorTests.cs"
+test = "ManagedDataTransferExtensions_Keep_ByteArray_Payload_Compatible_With_Avalonia_Byte_APIs"
+rust = "managed_data_transfer_extensions_keep_byte_array_payload_compatible_with_byte_apis"
+reason = "the name of the framework is left out"

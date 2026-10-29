@@ -1,0 +1,201 @@
+<!-- Material 3 Expressive templates using FerroUI controls and bounded MaterialRipple.
+     Reference AndroidX Material3 1.5.0-beta02, e4d933c98df7baa7ea2b83eea6e086915961e0ff.
+     Structural heritage: FerroUI WinUI theme, Microsoft Corporation, MIT; see NOTICE.md. -->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:material="using:FerroUI.Themes.Material" x:ClassModifier="internal">
+  <ControlTheme x:Key="MaterialFilledCard" TargetType="ContentControl">
+    <Setter Property="Background" Value="{DynamicResource MaterialSurfaceContainerHighestBrush}"/>
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceBrush}"/>
+    <Setter Property="CornerRadius" Value="12"/>
+    <Setter Property="Padding" Value="16"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource MaterialOutlineVariantBrush}"/>
+    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+    <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+    <Setter Property="ClipToBounds" Value="False"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}" BoxShadow="{DynamicResource MaterialElevation0BoxShadow}">
+          <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Foreground="{TemplateBinding Foreground}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialElevatedCard" TargetType="ContentControl">
+    <Setter Property="Background" Value="{DynamicResource MaterialSurfaceContainerLowBrush}"/>
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceBrush}"/>
+    <Setter Property="CornerRadius" Value="12"/>
+    <Setter Property="Padding" Value="16"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource MaterialOutlineVariantBrush}"/>
+    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+    <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+    <Setter Property="ClipToBounds" Value="False"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}" BoxShadow="{DynamicResource MaterialElevation1BoxShadow}">
+          <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Foreground="{TemplateBinding Foreground}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialOutlinedCard" TargetType="ContentControl">
+    <Setter Property="Background" Value="{DynamicResource MaterialSurfaceBrush}"/>
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceBrush}"/>
+    <Setter Property="CornerRadius" Value="12"/>
+    <Setter Property="Padding" Value="16"/>
+    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource MaterialOutlineVariantBrush}"/>
+    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+    <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+    <Setter Property="ClipToBounds" Value="False"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}" BoxShadow="{DynamicResource MaterialElevation0BoxShadow}">
+          <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Foreground="{TemplateBinding Foreground}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialDialog" TargetType="GroupBox" BasedOn="{StaticResource {x:Type GroupBox}}">
+    <Setter Property="MinWidth" Value="280"/>
+    <Setter Property="MaxWidth" Value="560"/>
+    <Setter Property="Background" Value="{DynamicResource MaterialSurfaceContainerHighBrush}"/>
+    <Setter Property="CornerRadius" Value="28"/>
+    <Setter Property="Padding" Value="24"/>
+    <Style Selector="^ /template/ ContentPresenter#PART_HeaderPresenter">
+      <Setter Property="FontSize" Value="24"/>
+      <Setter Property="FontWeight" Value="Normal"/>
+      <Setter Property="Margin" Value="0,0,0,16"/>
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialBadge" TargetType="Border">
+    <Setter Property="Background" Value="{DynamicResource MaterialErrorBrush}"/>
+    <Setter Property="CornerRadius" Value="3"/>
+    <Setter Property="Width" Value="6"/>
+    <Setter Property="Height" Value="6"/>
+    <Setter Property="IsHitTestVisible" Value="False"/>
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialBadgeWithLabel" TargetType="ContentControl">
+    <Setter Property="Background" Value="{DynamicResource MaterialErrorBrush}"/>
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnErrorBrush}"/>
+    <Setter Property="MinWidth" Value="16"/>
+    <Setter Property="Height" Value="16"/>
+    <Setter Property="CornerRadius" Value="8"/>
+    <Setter Property="Padding" Value="4,0"/>
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}"/>
+    <Setter Property="FontSize" Value="11"/>
+    <Setter Property="FontWeight" Value="Medium"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Background="{TemplateBinding Background}" Foreground="{TemplateBinding Foreground}" CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialSegmentedButton" TargetType="ToggleButton">
+    <Setter Property="MinHeight" Value="48"/>
+    <Setter Property="MinWidth" Value="48"/>
+    <Setter Property="Padding" Value="12,0"/>
+    <Setter Property="CornerRadius" Value="20"/>
+    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource MaterialOutlineBrush}"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceBrush}"/>
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}"/>
+    <Setter Property="FontSize" Value="14"/>
+    <Setter Property="FontWeight" Value="Medium"/>
+    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    <Setter Property="VerticalContentAlignment" Value="Center"/>
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border BorderBrush="{DynamicResource MaterialSecondaryBrush}" BorderThickness="3" CornerRadius="20" Margin="-2,6"/>
+      </FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Background="Transparent">
+          <Border x:Name="ChipContainer" Height="40" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" VerticalAlignment="Center">
+            <Panel>
+              <Border x:Name="StateLayer" Background="Transparent" CornerRadius="{TemplateBinding CornerRadius}" IsHitTestVisible="False">
+                <Border.Transitions>
+                  <Transitions>
+                    <BrushTransition Property="Background" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}"/>
+                  </Transitions>
+                </Border.Transitions>
+              </Border>
+              <material:MaterialRipple x:Name="Ripple" Fill="{TemplateBinding Foreground}" CornerRadius="{TemplateBinding CornerRadius}" ReducedMotion="{DynamicResource MaterialReducedMotion}"/>
+              <StackPanel Orientation="Horizontal" Spacing="8" Margin="{TemplateBinding Padding}" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Viewbox x:Name="CheckIcon" Width="18" Height="18" IsVisible="False">
+                  <Path FlowDirection="LeftToRight" Data="M9 16.17 4.83 12 3.41 13.41 9 19 21 7 19.59 5.59Z" Width="24" Height="24" Stretch="None" Fill="{TemplateBinding Foreground}"/>
+                </Viewbox>
+                <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Foreground="{TemplateBinding Foreground}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" RecognizesAccessKey="True"/>
+              </StackPanel>
+            </Panel>
+          </Border>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:pointerover /template/ Border#StateLayer">
+      <Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceHoverBrush}"/>
+    </Style>
+    <Style Selector="^:focus-visible /template/ Border#StateLayer">
+      <Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceFocusBrush}"/>
+    </Style>
+    <Style Selector="^:checked">
+      <Setter Property="Background" Value="{DynamicResource MaterialSecondaryContainerBrush}"/>
+      <Setter Property="Foreground" Value="{DynamicResource MaterialOnSecondaryContainerBrush}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource MaterialOutlineBrush}"/>
+      <Style Selector="^ /template/ Viewbox#CheckIcon">
+        <Setter Property="IsVisible" Value="True"/>
+      </Style>
+    </Style>
+    <Style Selector="^:checked:pointerover /template/ Border#StateLayer">
+      <Setter Property="Background" Value="{DynamicResource MaterialOnSecondaryContainerHoverBrush}"/>
+    </Style>
+    <Style Selector="^:checked:focus-visible /template/ Border#StateLayer">
+      <Setter Property="Background" Value="{DynamicResource MaterialOnSecondaryContainerFocusBrush}"/>
+    </Style>
+    <Style Selector="^.leading">
+      <Setter Property="CornerRadius" Value="20,0,0,20"/>
+    </Style>
+    <Style Selector="^.middle">
+      <Setter Property="CornerRadius" Value="0"/>
+      <Setter Property="Margin" Value="-1,0,0,0"/>
+    </Style>
+    <Style Selector="^.trailing">
+      <Setter Property="CornerRadius" Value="0,20,20,0"/>
+      <Setter Property="Margin" Value="-1,0,0,0"/>
+    </Style>
+    <!-- Chip/SegmentedButton defaults apply separate alpha to content, outline and fill. -->
+    <Style Selector="^:disabled">
+      <Setter Property="Foreground" Value="{DynamicResource MaterialDisabledOnSurfaceBrush}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource MaterialSegmentedButtonDisabledOutlineBrush}"/>
+    </Style>
+    <Style Selector="^:disabled /template/ Border#StateLayer">
+      <Setter Property="Background" Value="Transparent"/>
+    </Style>
+      <Style Selector="^:disabled /template/ material|MaterialRipple#Ripple">
+      <Setter Property="IsVisible" Value="False"/>
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialSearchBar" TargetType="TextBox" BasedOn="{StaticResource DefaultTextBoxStyle}">
+    <Setter Property="Background" Value="{DynamicResource MaterialSurfaceContainerHighBrush}"/>
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceBrush}"/>
+    <Setter Property="MinHeight" Value="56"/>
+    <Setter Property="CornerRadius" Value="28"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="Padding" Value="16,12"/>
+    <Setter Property="FontSize" Value="16"/>
+    <Style Selector="^ /template/ Border#BorderElement, ^:pointerover /template/ Border#BorderElement, ^:focus /template/ Border#BorderElement">
+      <Setter Property="Background" Value="{DynamicResource MaterialSurfaceContainerHighBrush}"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="CornerRadius" Value="28"/>
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialBottomSheet" TargetType="GroupBox" BasedOn="{StaticResource {x:Type GroupBox}}">
+    <Setter Property="Background" Value="{DynamicResource MaterialSurfaceContainerLowBrush}"/>
+    <Setter Property="CornerRadius" Value="28,28,0,0"/>
+    <Setter Property="Padding" Value="24"/>
+    <Setter Property="HorizontalAlignment" Value="Stretch"/>
+    <Setter Property="VerticalAlignment" Value="Bottom"/>
+  </ControlTheme>
+</ResourceDictionary>

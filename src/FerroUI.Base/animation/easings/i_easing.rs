@@ -1,5 +1,9 @@
 /// Defines the interface for easing classes.
-pub trait IEasing: 'static {
+///
+/// The `Any` supertrait lets optional transition adapters recognize a physical easing
+/// and retain its parameters across interruptions, while ordinary easings keep the
+/// normalized-progress contract. Every existing `'static` easing also implements `Any`.
+pub trait IEasing: std::any::Any {
     /// Returns the transformed value for a linear progress.
     fn ease(&self, progress: f64) -> f64;
 

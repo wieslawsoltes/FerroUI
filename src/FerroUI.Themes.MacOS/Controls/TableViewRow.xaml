@@ -1,0 +1,143 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/TableView/TableView.xaml (the implicit TableViewRow style)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  The resources are Resources/TableView_themeresources.xaml and
+  Resources/TabularSurfaces_themeresources.xaml (TableView.xaml).
+  Translation notes (docs/porting/winui-theme.md, section 4):
+  - FerroUI's TableViewRow is a ListBoxItem. CommonStates (Normal, PointerOver, Pressed, Disabled,
+    Selected, SelectedPointerOver, SelectedPressed, SelectedDisabled) are the pseudo-classes
+    :pointerover, :pressed, :disabled and :selected and their combinations, in the order of the
+    source.
+  - PART_CellsHost (the TableViewCellsPanel the row fills with the cells of the columns) is
+    FerroUI's PART_CellsPresenter (TableViewCellsPresenter). PART_CellForegroundPresenter, the
+    ContentPresenter that carries the foreground the states set to the text of the cells, is a
+    Panel whose inherited text foreground (TextElement.Foreground) the states set.
+  - The opacity of PART_SelectionIndicator, a LinearDoubleKeyFrame to 1 at 83 ms in the Selected
+    states, is a setter with a transition of 83 ms; the return to 0 animates too.
+  - HighContrastAdjustment, the hierarchy (PART_RowExpanderGutter, PART_RowExpanderIcon,
+    RowExpansionStates, RowExpandabilityStates, RowHierarchyStates) and the focus states of the
+    cells have no counterpart in FerroUI's TableViewRow and are left out. UseSystemFocusVisuals is
+    the default focus adorner.
+  - As the Fluent template of FerroUI, the template honours the corner radius, the padding and the
+    content alignments of the row (the alignment of PART_RootBorder); the CornerRadius setter of the
+    source, which its template ignores, is left out so that the row keeps its square corners.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <ControlTheme x:Key="{x:Type TableViewRow}" TargetType="TableViewRow">
+    <!-- CornerRadius (ControlCornerRadius in the source, which its template does not use) is not
+         set: the template honours the corner radius of the row. -->
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="VerticalContentAlignment" Value="Stretch" />
+    <Setter Property="MinHeight" Value="{DynamicResource TableViewRowMinHeight}" />
+    <Setter Property="Background" Value="{DynamicResource TabularSurfaceRowBackgroundBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource TabularSurfaceGridLineBrush}" />
+    <Setter Property="BorderThickness" Value="0,0,0,1" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <Border x:Name="PART_RootBorder"
+                  Background="{TemplateBinding Background}"
+                  BorderThickness="{TemplateBinding BorderThickness}"
+                  CornerRadius="{TemplateBinding CornerRadius}"
+                  Padding="{TemplateBinding Padding}"
+                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}">
+            <Panel>
+              <!-- The foreground of the row, inherited, unless a state sets another. -->
+              <Panel x:Name="PART_CellForegroundPresenter">
+                <TableViewCellsPresenter x:Name="PART_CellsPresenter"
+                                         HorizontalAlignment="Left" />
+              </Panel>
+              <!-- The selection indicator of Fluent: over the leading edge, shown by the Selected
+                   states. -->
+              <Rectangle x:Name="PART_SelectionIndicator"
+                         Width="3"
+                         Height="16"
+                         RadiusX="1.5"
+                         RadiusY="1.5"
+                         Fill="{DynamicResource TabularSurfaceSelectionIndicatorBrush}"
+                         HorizontalAlignment="Left"
+                         VerticalAlignment="Center"
+                         Margin="2,0,0,0"
+                         IsHitTestVisible="False"
+                         Opacity="0">
+                <Rectangle.Transitions>
+                  <Transitions>
+                    <DoubleTransition Property="Opacity" Duration="{DynamicResource MacOSMotionFastDuration}" />
+                  </Transitions>
+                </Rectangle.Transitions>
+              </Rectangle>
+            </Panel>
+          </Border>
+          <!-- The horizontal grid line of the row. -->
+          <Border x:Name="PART_GridLineBorder"
+                  BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}"
+                  CornerRadius="{TemplateBinding CornerRadius}"
+                  IsHitTestVisible="False" />
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- PointerOver -->
+    <Style Selector="^:pointerover /template/ Border#PART_RootBorder">
+      <Setter Property="Background" Value="{DynamicResource TabularSurfaceRowBackgroundPointerOverBrush}" />
+    </Style>
+    <Style Selector="^:pointerover /template/ Panel#PART_CellForegroundPresenter">
+      <Setter Property="TextElement.Foreground" Value="{DynamicResource TabularSurfaceRowForegroundPointerOverBrush}" />
+    </Style>
+    <!-- Pressed -->
+    <Style Selector="^:pressed /template/ Border#PART_RootBorder">
+      <Setter Property="Background" Value="{DynamicResource TabularSurfaceRowBackgroundPressedBrush}" />
+    </Style>
+    <Style Selector="^:pressed /template/ Panel#PART_CellForegroundPresenter">
+      <Setter Property="TextElement.Foreground" Value="{DynamicResource TabularSurfaceRowForegroundPressedBrush}" />
+    </Style>
+    <!-- Disabled -->
+    <Style Selector="^:disabled /template/ Border#PART_RootBorder">
+      <Setter Property="Background" Value="{DynamicResource TabularSurfaceRowBackgroundDisabledBrush}" />
+    </Style>
+    <Style Selector="^:disabled /template/ Panel#PART_CellForegroundPresenter">
+      <Setter Property="TextElement.Foreground" Value="{DynamicResource TabularSurfaceRowForegroundDisabledBrush}" />
+    </Style>
+    <!-- Selected -->
+    <Style Selector="^:selected /template/ Border#PART_RootBorder">
+      <Setter Property="Background" Value="{DynamicResource TabularSurfaceRowBackgroundSelectedBrush}" />
+    </Style>
+    <Style Selector="^:selected /template/ Panel#PART_CellForegroundPresenter">
+      <Setter Property="TextElement.Foreground" Value="{DynamicResource TabularSurfaceRowForegroundSelectedBrush}" />
+    </Style>
+    <Style Selector="^:selected /template/ Rectangle#PART_SelectionIndicator">
+      <Setter Property="Opacity" Value="1" />
+    </Style>
+    <!-- SelectedPointerOver -->
+    <Style Selector="^:selected:pointerover /template/ Border#PART_RootBorder">
+      <Setter Property="Background" Value="{DynamicResource TabularSurfaceRowBackgroundSelectedPointerOverBrush}" />
+    </Style>
+    <Style Selector="^:selected:pointerover /template/ Panel#PART_CellForegroundPresenter">
+      <Setter Property="TextElement.Foreground" Value="{DynamicResource TabularSurfaceRowForegroundSelectedPointerOverBrush}" />
+    </Style>
+    <!-- SelectedPressed -->
+    <Style Selector="^:selected:pressed /template/ Border#PART_RootBorder">
+      <Setter Property="Background" Value="{DynamicResource TabularSurfaceRowBackgroundSelectedPressedBrush}" />
+    </Style>
+    <Style Selector="^:selected:pressed /template/ Panel#PART_CellForegroundPresenter">
+      <Setter Property="TextElement.Foreground" Value="{DynamicResource TabularSurfaceRowForegroundSelectedPressedBrush}" />
+    </Style>
+    <!-- SelectedDisabled -->
+    <Style Selector="^:selected:disabled /template/ Border#PART_RootBorder">
+      <Setter Property="Background" Value="{DynamicResource TabularSurfaceRowBackgroundDisabledBrush}" />
+    </Style>
+    <Style Selector="^:selected:disabled /template/ Panel#PART_CellForegroundPresenter">
+      <Setter Property="TextElement.Foreground" Value="{DynamicResource TabularSurfaceRowForegroundDisabledBrush}" />
+    </Style>
+    <Style Selector="^:selected:disabled /template/ Rectangle#PART_SelectionIndicator">
+      <Setter Property="Fill" Value="{DynamicResource TabularSurfaceSelectionIndicatorDisabledBrush}" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

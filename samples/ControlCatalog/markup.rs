@@ -248,9 +248,18 @@ mod run_time {
 /// # Panics
 /// Panics if the document fails to load.
 pub fn load_component<T: ObjectType>(this: &Ref<T>, path: &str) {
+    ferroui_markup_xaml::FerroXamlLoader::track_instance(T::TYPE, this);
     let root: BoxedValue = Rc::new(this.clone());
-    if let Err(error) = populate(path, root) {
+    let loaded = match ferroui_markup_xaml::FerroXamlLoader::populate_override(T::TYPE) {
+        Some(populate) => populate(None, &root),
+        None => populate(path, root),
+    };
+    if let Err(error) = loaded {
         panic!("{path}: {}", describe(&error));
+    }
+    #[cfg(all(feature = "hot-reload", debug_assertions))]
+    if let Some(page) = this.cast::<ferroui_controls::ContentPage>() {
+        crate::hot_reload::track(page, T::TYPE, path);
     }
 }
 

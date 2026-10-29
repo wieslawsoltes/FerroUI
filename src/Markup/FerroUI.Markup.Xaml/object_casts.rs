@@ -97,8 +97,8 @@ impl XamlResourceNode {
     /// `IResourceNode.TryGetResource`.
     pub fn try_get_resource(&self, key: &ResourceKey, theme: Option<&ThemeVariant>) -> Option<ResourceValue> {
         match self {
-            XamlResourceNode::Element(element) => IResourceNode::try_get_resource(&**element, key, theme),
-            XamlResourceNode::Node(node) => node.try_get_resource(key, theme),
+            XamlResourceNode::Element(element) => ferroui_base::controls::resource_preview::lookup(&**element, key, theme),
+            XamlResourceNode::Node(node) => ferroui_base::controls::resource_preview::lookup(&**node, key, theme),
         }
     }
 }

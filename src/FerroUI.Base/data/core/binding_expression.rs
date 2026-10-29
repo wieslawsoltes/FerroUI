@@ -470,6 +470,9 @@ impl BindingExpression {
     }
 
     fn write_target_value_to_source(&self) {
+        #[cfg(all(debug_assertions, feature = "hot-reload"))]
+        if self.base.is_reload_paused() { return; }
+
         debug_assert!(matches!(self.mode, BindingMode::TwoWay | BindingMode::OneWayToSource));
         self.stop_delay_timer();
         if let (Some(target), Some(property)) = (self.base.try_get_target(), self.base.target_property()) {
@@ -648,6 +651,10 @@ impl UntypedBindingExpression for BindingExpression {
     }
 
     fn write_value_to_source(&self, value: Option<BoxedValue>) -> bool {
+        #[cfg(all(debug_assertions, feature = "hot-reload"))]
+        if self.base.is_reload_paused() {
+            return false;
+        }
         self.stop_delay_timer();
         let mut value = value;
         let Some(leaf) = self.leaf_node() else { return false };
@@ -709,6 +716,13 @@ impl UntypedBindingExpression for BindingExpression {
             }
         }
         Some(target)
+    }
+
+    #[cfg(all(debug_assertions, feature = "hot-reload"))]
+    fn supports_reload_pause(&self) -> bool {
+        matches!(self.mode, BindingMode::OneWay | BindingMode::TwoWay)
+            && self.delay().is_zero()
+            && self.update_source_trigger() == UpdateSourceTrigger::PropertyChanged
     }
 
     fn start_core(&self) {

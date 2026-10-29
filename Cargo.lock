@@ -253,6 +253,36 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 
 [[package]]
+name = "behaviors-gallery"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-desktop",
+ "ferroui-fonts-inter",
+ "ferroui-markup",
+ "ferroui-markup-xaml",
+ "ferroui-reactive",
+ "ferroui-reactiveui",
+ "ferroui-reactiveui-controls",
+ "ferroui-splat",
+ "ferroui-system",
+ "ferroui-themes-fluent",
+ "ferroui-xaml-behaviors-animations",
+ "ferroui-xaml-interactions",
+ "ferroui-xaml-interactions-custom",
+ "ferroui-xaml-interactions-draganddrop",
+ "ferroui-xaml-interactions-draggable",
+ "ferroui-xaml-interactions-events",
+ "ferroui-xaml-interactions-reactiveui",
+ "ferroui-xaml-interactions-responsive",
+ "ferroui-xaml-interactivity",
+ "sample-build",
+ "sample-support",
+ "sample-testing",
+]
+
+[[package]]
 name = "bindgen"
 version = "0.72.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -498,15 +528,19 @@ dependencies = [
  "ferroui-build",
  "ferroui-controls",
  "ferroui-controls-color-picker",
+ "ferroui-controls-inking",
  "ferroui-controls-treedatagrid",
  "ferroui-dialogs",
  "ferroui-harfbuzz",
+ "ferroui-hot-reload",
  "ferroui-markup",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
  "ferroui-opengl",
  "ferroui-skia",
  "ferroui-themes-fluent",
+ "ferroui-themes-macos",
+ "ferroui-themes-material",
  "ferroui-themes-simple",
  "ferroui-themes-winui",
  "ferroui-vello",
@@ -1047,6 +1081,7 @@ dependencies = [
  "ferroui-controls",
  "ferroui-controls-charts",
  "ferroui-controls-color-picker",
+ "ferroui-controls-inking",
  "ferroui-controls-treedatagrid",
  "ferroui-desktop",
  "ferroui-devtools",
@@ -1068,6 +1103,8 @@ dependencies = [
  "ferroui-splat",
  "ferroui-system",
  "ferroui-themes-fluent",
+ "ferroui-themes-macos",
+ "ferroui-themes-material",
  "ferroui-themes-simple",
  "ferroui-themes-winui",
  "ferroui-treedatagrid-core",
@@ -1146,6 +1183,8 @@ dependencies = [
  "ferroui-build-scan",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
+ "roxmltree 0.20.0",
+ "serde_json",
  "xamlx",
 ]
 
@@ -1191,6 +1230,23 @@ dependencies = [
  "ferroui-markup-xaml-loader",
  "ferroui-themes-fluent",
  "ferroui-themes-simple",
+]
+
+[[package]]
+name = "ferroui-controls-inking"
+version = "0.4.0"
+dependencies = [
+ "bitflags",
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-microcom",
+ "ferroui-themes-winui",
+ "ferroui-win32",
+ "microcom-codegen",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -1381,6 +1437,31 @@ dependencies = [
  "getrandom 0.4.3",
  "jpeg-encoder",
  "png",
+]
+
+[[package]]
+name = "ferroui-hot-patch"
+version = "0.4.0"
+dependencies = [
+ "ferroui-system",
+ "quote",
+ "serde",
+ "serde_json",
+ "subsecond",
+ "syn 2.0.119",
+ "tempfile",
+]
+
+[[package]]
+name = "ferroui-hot-reload"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "roxmltree 0.20.0",
+ "serde_json",
 ]
 
 [[package]]
@@ -1764,6 +1845,32 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-themes-macos"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-dialogs",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+]
+
+[[package]]
+name = "ferroui-themes-material"
+version = "0.4.0"
+dependencies = [
+ "ferroui-android",
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-dialogs",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "material-colors",
+]
+
+[[package]]
 name = "ferroui-themes-simple"
 version = "0.4.0"
 dependencies = [
@@ -1852,6 +1959,7 @@ dependencies = [
  "ferroui-build-scan",
  "ferroui-controls",
  "ferroui-controls-color-picker",
+ "ferroui-controls-inking",
  "ferroui-controls-treedatagrid",
  "ferroui-desktop",
  "ferroui-dialogs",
@@ -1955,6 +2063,137 @@ dependencies = [
  "libc",
  "x11-dl",
  "zbus",
+]
+
+[[package]]
+name = "ferroui-xaml-behaviors"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-xaml-behaviors-animations",
+ "ferroui-xaml-interactions",
+ "ferroui-xaml-interactions-custom",
+ "ferroui-xaml-interactions-draganddrop",
+ "ferroui-xaml-interactions-draggable",
+ "ferroui-xaml-interactions-events",
+ "ferroui-xaml-interactions-reactiveui",
+ "ferroui-xaml-interactions-responsive",
+ "ferroui-xaml-interactivity",
+]
+
+[[package]]
+name = "ferroui-xaml-behaviors-animations"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+]
+
+[[package]]
+name = "ferroui-xaml-interactions"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-xaml-interactions-custom",
+ "ferroui-xaml-interactivity",
+]
+
+[[package]]
+name = "ferroui-xaml-interactions-custom"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-system",
+ "ferroui-themes-fluent",
+ "ferroui-xaml-behaviors-animations",
+ "ferroui-xaml-interactions",
+ "ferroui-xaml-interactivity",
+ "regex",
+]
+
+[[package]]
+name = "ferroui-xaml-interactions-draganddrop"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-system",
+ "ferroui-themes-fluent",
+ "ferroui-xaml-interactivity",
+]
+
+[[package]]
+name = "ferroui-xaml-interactions-draggable"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-system",
+ "ferroui-themes-fluent",
+ "ferroui-xaml-interactivity",
+]
+
+[[package]]
+name = "ferroui-xaml-interactions-events"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-xaml-interactivity",
+]
+
+[[package]]
+name = "ferroui-xaml-interactions-reactiveui"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-reactive",
+ "ferroui-reactiveui",
+ "ferroui-splat",
+ "ferroui-system",
+ "ferroui-xaml-interactivity",
+]
+
+[[package]]
+name = "ferroui-xaml-interactions-responsive"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-xaml-interactivity",
+]
+
+[[package]]
+name = "ferroui-xaml-interactivity"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-markup",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-xaml-interactions",
 ]
 
 [[package]]
@@ -2450,6 +2689,21 @@ name = "hex"
 version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
+
+[[package]]
+name = "hot-reload-demo"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-desktop",
+ "ferroui-hot-patch",
+ "ferroui-hot-reload",
+ "ferroui-markup-xaml",
+ "ferroui-themes-simple",
+ "serde_json",
+]
 
 [[package]]
 name = "html5ever"
@@ -3002,10 +3256,46 @@ dependencies = [
 ]
 
 [[package]]
+name = "material-colors"
+version = "0.4.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e226ffda362d5bc26bb8f730d637a0851eedfb05e35d92108c9d8b48d2e47941"
+dependencies = [
+ "ahash",
+ "indexmap",
+ "libm",
+]
+
+[[package]]
+name = "material-theme-gallery"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-desktop",
+ "ferroui-dialogs",
+ "ferroui-markup",
+ "ferroui-markup-xaml",
+ "ferroui-themes-material",
+ "sample-build",
+ "sample-support",
+ "sample-testing",
+]
+
+[[package]]
 name = "memchr"
 version = "2.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98"
+
+[[package]]
+name = "memfd"
+version = "0.6.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "57804b2c9b69967f1536a56f86297e367a33b19e98852ed624b84551cdbc0d90"
+dependencies = [
+ "rustix",
+]
 
 [[package]]
 name = "memmap2"
@@ -4651,6 +4941,34 @@ dependencies = [
  "phf_shared",
  "proc-macro2",
  "quote",
+]
+
+[[package]]
+name = "subsecond"
+version = "0.7.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d350d5788fa94d560d92269266a50efc77b036bfca6675e420b64df7b3211f37"
+dependencies = [
+ "js-sys",
+ "libc",
+ "libloading",
+ "memfd",
+ "memmap2",
+ "serde",
+ "subsecond-types",
+ "thiserror 2.0.21",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
+]
+
+[[package]]
+name = "subsecond-types"
+version = "0.7.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dcf32d66269b5fbb8558334e8d22b657b2f7af0dd2ef56c231541099a862e464"
+dependencies = [
+ "serde",
 ]
 
 [[package]]

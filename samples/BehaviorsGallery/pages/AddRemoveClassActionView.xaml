@@ -1,0 +1,48 @@
+<UserControl x:Class="BehaviorsGallery.Views.Pages.AddRemoveClassActionView"
+             xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:BehaviorsGallery.ViewModels"
+             x:DataType="vm:MainWindowViewModel"
+             mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="450">
+  <!-- Ported from Views/Pages/AddRemoveClassActionView of the reference sample. -->
+  <Design.DataContext>
+    <vm:MainWindowViewModel />
+  </Design.DataContext>
+  <Grid Background="{DynamicResource GrayBrush}" Margin="5">
+    <StackPanel Name="ResponsiveStackPanel">
+      <StackPanel.Styles>
+        <Style Selector="StackPanel">
+          <Setter Property="Spacing" Value="20" />
+          <Setter Property="Orientation" Value="Horizontal" />
+        </Style>
+        <Style Selector="StackPanel.vertical">
+          <Setter Property="Spacing" Value="10" />
+          <Setter Property="Orientation" Value="Vertical" />
+        </Style>
+      </StackPanel.Styles>
+      <Interaction.Behaviors>
+        <DataTriggerBehavior Binding="{Binding #ResponsiveStackPanel.Bounds.Width}" 
+                                ComparisonCondition="LessThan"
+                                Value="500">
+          <AddClassAction StyledElement="ResponsiveStackPanel" 
+                              ClassName="vertical"
+                              RemoveIfExists="True" />
+        </DataTriggerBehavior>
+        <DataTriggerBehavior Binding="{Binding #ResponsiveStackPanel.Bounds.Width}"
+                                ComparisonCondition="GreaterThanOrEqual" Value="500">
+          <RemoveClassAction StyledElement="ResponsiveStackPanel"
+                                 ClassName="vertical" />
+        </DataTriggerBehavior>
+      </Interaction.Behaviors>
+      <TextBlock Text="Item1" />
+      <TextBlock Text="Item2" />
+      <TextBlock Text="Item3" />
+      <TextBlock Text="Item4" />
+      <TextBlock Text="Item5" />
+      <TextBlock Text="Item7" />
+      <TextBlock Text="Item8" />
+    </StackPanel>
+  </Grid>
+</UserControl>

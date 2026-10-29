@@ -1,0 +1,19 @@
+<ContentControl xmlns="https://github.com/ferroui"
+  xmlns:hr="https://github.com/ferroui/hot-reload"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  mc:Ignorable="hr">
+  <StackPanel Spacing="12" Margin="24">
+    <StackPanel.Resources>
+      <ResourceDictionary>
+        <ResourceDictionary.MergedDictionaries>
+          <ResourceInclude Source="Colors.xaml" />
+        </ResourceDictionary.MergedDictionaries>
+      </ResourceDictionary>
+    </StackPanel.Resources>
+    <TextBlock Text="Edit View.xaml or Colors.xaml while this window is running" FontSize="20"
+      Foreground="{StaticResource Accent}" />
+    <TextBlock Name="CounterStatus" />
+    <Button Content="Increment the stable counter" />
+    <TextBox Name="Draft" hr:Key="draft" />
+  </StackPanel>
+</ContentControl>

@@ -1,0 +1,47 @@
+<!--
+  Android Material 3 Expressive visual system (AndroidX Material3 1.5.0-beta02,
+  e4d933c98df7baa7ea2b83eea6e086915961e0ff), adapted to FerroUI control contracts.
+  Derived structural templates: FerroUI WinUI theme, Copyright (c) Microsoft
+  Corporation, MIT; retained notices in NOTICE.md. See docs/porting/material-theme.md.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <StackPanel Spacing="12">
+        <AutoCompleteBox Width="200" PlaceholderText="Search" />
+        <AutoCompleteBox Width="200" Text="Disabled" IsEnabled="False" />
+      </StackPanel>
+    </Border>
+  </Design.PreviewWith>
+  <ControlTheme x:Key="AutoSuggestBoxDeleteButtonStyle" TargetType="Button" BasedOn="{StaticResource TextBoxDeleteButtonStyle}" />
+  <ControlTheme x:Key="AutoSuggestBoxTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource MaterialFilledTextField}" />
+  <ControlTheme x:Key="DefaultAutoSuggestBoxStyle" TargetType="AutoCompleteBox">
+    <Setter Property="MinHeight" Value="56" />
+    <Setter Property="VerticalAlignment" Value="Stretch" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceBrush}" />
+    <Setter Property="Background" Value="{DynamicResource MaterialSurfaceContainerHighestBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource MaterialOnSurfaceVariantBrush}" />
+    <Setter Property="BorderThickness" Value="0,0,0,1" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontSize" Value="16" />
+    <Setter Property="PlaceholderForeground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}" />
+    <Setter Property="Padding" Value="16,16" />
+    <Setter Property="MaxDropDownHeight" Value="{DynamicResource AutoSuggestListMaxHeight}" />
+    <Setter Property="FocusAdorner" Value="{x:Null}" />
+    <Setter Property="CornerRadius" Value="4,4,0,0" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid x:Name="LayoutRoot">
+          <TextBox x:Name="PART_TextBox" Theme="{StaticResource AutoSuggestBoxTextBoxStyle}" PlaceholderText="{TemplateBinding PlaceholderText}" PlaceholderForeground="{TemplateBinding PlaceholderForeground}" Width="{TemplateBinding Width}" Foreground="{TemplateBinding Foreground}" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" FontSize="{TemplateBinding FontSize}" FontFamily="{TemplateBinding FontFamily}" FontWeight="{TemplateBinding FontWeight}" FontStretch="{TemplateBinding FontStretch}" VerticalContentAlignment="Center" HorizontalContentAlignment="Stretch" ScrollViewer.BringIntoViewOnFocusChange="False" Margin="0" CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}" CaretIndex="{TemplateBinding CaretIndex, Mode=TwoWay}" ClearSelectionOnLostFocus="{TemplateBinding ClearSelectionOnLostFocus}" MaxLength="{TemplateBinding MaxLength}" DataValidationErrors.Errors="{TemplateBinding (DataValidationErrors.Errors)}" InnerLeftContent="{TemplateBinding InnerLeftContent}" InnerRightContent="{TemplateBinding InnerRightContent}" />
+          <Popup x:Name="PART_Popup" WindowManagerAddShadowHint="False" IsLightDismissEnabled="True" PlacementTarget="{TemplateBinding}">
+            <Border x:Name="SuggestionsContainer" BoxShadow="{DynamicResource MaterialElevation2BoxShadow}" Margin="{StaticResource ThemeShadowFlyoutMargin}" MinWidth="{Binding Bounds.Width, RelativeSource={RelativeSource TemplatedParent}}" MaxHeight="{TemplateBinding MaxDropDownHeight}" Padding="0,8" BorderThickness="0" BorderBrush="Transparent" Background="{DynamicResource MaterialSurfaceContainerBrush}" CornerRadius="4">
+              <ListBox x:Name="PART_SelectingItemsControl" ItemTemplate="{TemplateBinding ItemTemplate}" ItemContainerTheme="{StaticResource DefaultListViewItemStyle}" Margin="0" Background="Transparent" BorderThickness="0" ScrollViewer.IsScrollChainingEnabled="False" />
+            </Border>
+          </Popup>
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type AutoCompleteBox}" TargetType="AutoCompleteBox" BasedOn="{StaticResource DefaultAutoSuggestBoxStyle}" />
+</ResourceDictionary>

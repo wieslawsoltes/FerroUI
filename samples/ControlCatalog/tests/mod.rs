@@ -28,6 +28,8 @@ mod gaps_b;
 mod gaps_c;
 mod gaps_d;
 mod frame_benchmark;
+#[cfg(all(debug_assertions, feature = "hot-reload"))]
+mod hot_reload;
 mod interaction_controls;
 mod interaction_tour;
 mod navigation_pages_b;
@@ -44,3 +46,6 @@ mod view_models;
 mod documents {
     include!(concat!(env!("OUT_DIR"), "/document_tests.rs"));
 }
+
+#[cfg(feature = "macos-theme")]
+mod macos_theme_review;

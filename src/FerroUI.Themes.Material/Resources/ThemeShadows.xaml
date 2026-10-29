@@ -1,0 +1,58 @@
+<!--
+  Not ported from a document: the drop shadow WinUI 3 draws in code under the elevated popups
+  (ThemeShadow), as values of FerroUI's BoxShadow. microsoft-ui-xaml
+  (https://github.com/microsoft/microsoft-ui-xaml, commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0)
+  computes the shadow from the Translation.Z of the element (dxaml/xcp/dxaml/lib/ElevationHelper.cpp,
+  ApplyElevationEffect: 32 for a flyout, a menu flyout, the drop-downs of ComboBox and
+  AutoSuggestBox and the date and time picker flyouts, 8 more per level of a submenu, 16 for a
+  tool tip, ToolTip_Partial.cpp) with the recipe of
+  dxaml/xcp/components/graphics/inc/DropShadowRecipe.h (GetDropShadowRecipe; all shadows of WinUI 3
+  are drop shadows, CThemeShadow::IsDropShadowMode):
+    elevation = Translation.Z / 2;
+    up to an elevation of 16 a directional shadow only, blurred by the elevation and moved down by
+    half of it, of the opacity min(elevation / 100 + 0.06, 0.14) in the light theme and 0.26 in the
+    dark one;
+    above 16 also an ambient shadow, blurred by a third of the elevation and moved down by 2, of
+    the opacity 0.15 (light) or 0.37 (dark), the directional one 0.19 (light) or 0.37 (dark);
+    the insets the shadow needs around the element: the largest blur at the sides, the blur less
+    the offset at the top, the blur and the offset at the bottom.
+  A BoxShadow is offset x, offset y, blur, spread and colour; FerroUI's blur radius of a box shadow
+  is the blur radius of the composition drop shadow (a Gaussian of about a third of it). The
+  colours are black with the opacity of the recipe as WinUI rounds it (opacity times 255,
+  truncated). The high contrast dictionary has the values of the dark theme, the theme the high
+  contrast variant inherits. The margins are the insets of the recipe: a popup whose child has a
+  margin is placed by the bounds of the child without it (PopupPositionerParameters.deflate), so
+  the margin is room for the shadow inside the popup without moving the element
+  (docs/porting/winui-theme/DEVIATIONS.md, G-24).
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:winui="using:FerroUI.Themes.Material"
+                    x:ClassModifier="internal">
+  <!-- Translation.Z 32: elevation 16, blur 16, offset 8; insets 16 at the sides, 8 above, 24 below. -->
+  <Thickness x:Key="ThemeShadowFlyoutMargin">16,8,16,24</Thickness>
+  <!-- Translation.Z 40 (a submenu): elevation 20, ambient blur 6.67 and offset 2, directional blur
+       20 and offset 10; insets 20 at the sides, 10 above, 30 below. -->
+  <Thickness x:Key="ThemeShadowSubMenuMargin">20,10,20,30</Thickness>
+  <!-- Translation.Z 16 (a tool tip): elevation 8, blur 8, offset 4; insets 8 at the sides, 4 above,
+       12 below. -->
+  <Thickness x:Key="ThemeShadowToolTipMargin">8,4,8,12</Thickness>
+
+  <ResourceDictionary.ThemeDictionaries>
+    <ResourceDictionary x:Key="Default">
+      <BoxShadows x:Key="ThemeShadowFlyoutBoxShadow">0 8 16 0 #42000000</BoxShadows>
+      <BoxShadows x:Key="ThemeShadowSubMenuBoxShadow">0 2 6.67 0 #5E000000, 0 10 20 0 #5E000000</BoxShadows>
+      <BoxShadows x:Key="ThemeShadowToolTipBoxShadow">0 4 8 0 #42000000</BoxShadows>
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="Light">
+      <BoxShadows x:Key="ThemeShadowFlyoutBoxShadow">0 8 16 0 #23000000</BoxShadows>
+      <BoxShadows x:Key="ThemeShadowSubMenuBoxShadow">0 2 6.67 0 #26000000, 0 10 20 0 #30000000</BoxShadows>
+      <BoxShadows x:Key="ThemeShadowToolTipBoxShadow">0 4 8 0 #23000000</BoxShadows>
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="{x:Static winui:MaterialTheme.HighContrast}">
+      <BoxShadows x:Key="ThemeShadowFlyoutBoxShadow">0 8 16 0 #42000000</BoxShadows>
+      <BoxShadows x:Key="ThemeShadowSubMenuBoxShadow">0 2 6.67 0 #5E000000, 0 10 20 0 #5E000000</BoxShadows>
+      <BoxShadows x:Key="ThemeShadowToolTipBoxShadow">0 4 8 0 #42000000</BoxShadows>
+    </ResourceDictionary>
+  </ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>

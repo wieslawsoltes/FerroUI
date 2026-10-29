@@ -1,0 +1,15 @@
+<!-- Material typography aliases for existing FerroUI/WinUI application markup. -->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:ClassModifier="internal">
+  <ControlTheme x:Key="BaseTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource MaterialBodyLarge}" />
+  <ControlTheme x:Key="CaptionTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource MaterialBodySmall}" />
+  <ControlTheme x:Key="BodyTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource MaterialBodyMedium}" />
+  <ControlTheme x:Key="BodyStrongTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource MaterialBodyMediumEmphasized}" />
+  <ControlTheme x:Key="BodyLargeTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource MaterialBodyLarge}" />
+  <ControlTheme x:Key="BodyLargeStrongTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource MaterialBodyLargeEmphasized}" />
+  <ControlTheme x:Key="SubtitleTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource MaterialTitleMedium}" />
+  <ControlTheme x:Key="TitleTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource MaterialHeadlineSmall}" />
+  <ControlTheme x:Key="TitleLargeTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource MaterialHeadlineLarge}" />
+  <ControlTheme x:Key="DisplayTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource MaterialDisplayLarge}" />
+  <ControlTheme x:Key="HeaderTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource MaterialDisplayMedium}" />
+  <ControlTheme x:Key="SubheaderTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource MaterialHeadlineMedium}" />
+</ResourceDictionary>

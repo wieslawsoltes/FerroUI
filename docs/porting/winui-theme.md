@@ -445,8 +445,9 @@ there, with the code point and the name of the glyph in a comment).
 
 `scripts/winui-theme/waivers.json` lists what the port does not carry, each entry with a
 reason: the Reveal brushes and styles (deprecated; the seven Reveal brushes that other documents
-still name are ported as the plain brushes they are), the controls FerroUI does not have
-(InkToolbar, MediaTransportControls, Pivot, RatingControl, PersonPicture, MapControl,
+still name are ported as the plain brushes they are; the InkToolbar's resources are written to
+the inking crate, `src/FerroUI.Controls.Inking/Themes/WinUI`, which keeps the toolbar's styles), the controls FerroUI does not have
+(MediaTransportControls, Pivot, RatingControl, PersonPicture, MapControl,
 TeachingTip, TwoPaneView, SwipeControl, AnnotatedScrollBar, ItemsView/ItemContainer,
 BreadcrumbBar, PagerControl, RadioButtons, ProgressRing, ImageIcon, ScrollView, CommandBarFlyout,
 RichEditBox, GridView, Hub, SemanticZoom, ListView, ...), the colour picker (styled by

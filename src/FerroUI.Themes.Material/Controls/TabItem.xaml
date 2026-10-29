@@ -1,0 +1,115 @@
+<!-- Material 3 Expressive templates using FerroUI controls and bounded MaterialRipple.
+     Reference AndroidX Material3 1.5.0-beta02, e4d933c98df7baa7ea2b83eea6e086915961e0ff.
+     Structural heritage: FerroUI WinUI theme, Microsoft Corporation, MIT; see NOTICE.md. -->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:material="using:FerroUI.Themes.Material" x:ClassModifier="internal">
+  <ControlTheme x:Key="MaterialPrimaryTabItem" TargetType="TabItem">
+    <Setter Property="MinHeight" Value="48"/>
+    <Setter Property="MinWidth" Value="48"/>
+    <Setter Property="Padding" Value="16,0"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="CornerRadius" Value="0"/>
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}"/>
+    <Setter Property="FontSize" Value="14"/>
+    <Setter Property="FontWeight" Value="Medium"/>
+    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    <Setter Property="VerticalContentAlignment" Value="Center"/>
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border BorderBrush="{DynamicResource MaterialSecondaryBrush}" BorderThickness="3" CornerRadius="4" Margin="-3"/>
+      </FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="LayoutRoot" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}">
+          <Panel>
+            <Border x:Name="StateLayer" Background="Transparent" CornerRadius="{TemplateBinding CornerRadius}" IsHitTestVisible="False">
+              <Border.Transitions>
+                <Transitions>
+                  <BrushTransition Property="Background" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}"/>
+                </Transitions>
+              </Border.Transitions>
+            </Border>
+            <material:MaterialRipple x:Name="Ripple" Fill="{TemplateBinding Foreground}" CornerRadius="{TemplateBinding CornerRadius}" ReducedMotion="{DynamicResource MaterialReducedMotion}"/>
+            <StackPanel x:Name="ContentStack" Spacing="2" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}">
+              <ContentPresenter x:Name="IconControl" Content="{TemplateBinding Icon}" ContentTemplate="{TemplateBinding IconTemplate}" Foreground="{TemplateBinding Foreground}" Width="24" Height="24" HorizontalAlignment="Center" IsVisible="{TemplateBinding Icon, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+              <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Header}" ContentTemplate="{TemplateBinding HeaderTemplate}" Foreground="{TemplateBinding Foreground}" FontSize="{TemplateBinding FontSize}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" RecognizesAccessKey="True"/>
+            </StackPanel>
+            <Border x:Name="SelectionIndicator" Height="3" MinWidth="24" CornerRadius="3,3,0,0" Background="{DynamicResource MaterialPrimaryBrush}" Opacity="0" IsHitTestVisible="False" HorizontalAlignment="Center" VerticalAlignment="Bottom" RenderTransformOrigin="50%,50%" RenderTransform="scaleX(0.5)">
+              <Border.Transitions>
+                <Transitions>
+                  <material:MaterialDoubleTransition Property="Opacity" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}"/>
+                  <TransformOperationsTransition Property="RenderTransform" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}"/>
+                </Transitions>
+              </Border.Transitions>
+            </Border>
+          </Panel>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:selected">
+      <Setter Property="Foreground" Value="{DynamicResource MaterialPrimaryBrush}"/>
+      <Style Selector="^ /template/ Border#SelectionIndicator">
+        <Setter Property="Opacity" Value="1"/>
+        <Setter Property="RenderTransform" Value="scaleX(1)"/>
+      </Style>
+    </Style>
+    <Style Selector="^:pointerover /template/ Border#StateLayer">
+      <Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceHoverBrush}"/>
+    </Style>
+    <Style Selector="^:focus-visible /template/ Border#StateLayer">
+      <Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceFocusBrush}"/>
+    </Style>
+    <Style Selector="^:disabled /template/ Border#StateLayer">
+      <Setter Property="Background" Value="Transparent"/>
+    </Style>
+    <Style Selector="^:disabled /template/ ContentPresenter">
+      <Setter Property="Opacity" Value="0.38"/>
+    </Style>
+    <Style Selector="^.icon-label">
+      <Setter Property="MinHeight" Value="64"/>
+    </Style>
+    <Style Selector="^[TabStripPlacement=Bottom] /template/ Border#SelectionIndicator">
+      <Setter Property="VerticalAlignment" Value="Top"/>
+      <Setter Property="CornerRadius" Value="0,0,3,3"/>
+    </Style>
+    <Style Selector="^[TabStripPlacement=Left]">
+      <Setter Property="MinWidth" Value="96"/>
+      <Setter Property="MinHeight" Value="64"/>
+      <Setter Property="CornerRadius" Value="32"/>
+      <Setter Property="Margin" Value="8,2"/>
+      <Style Selector="^ /template/ Border#SelectionIndicator">
+        <Setter Property="IsVisible" Value="False"/>
+      </Style>
+      <Style Selector="^:selected">
+        <Setter Property="Background" Value="{DynamicResource MaterialSecondaryContainerBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource MaterialOnSecondaryContainerBrush}"/>
+      </Style>
+    </Style>
+    <Style Selector="^[TabStripPlacement=Right]">
+      <Setter Property="MinWidth" Value="96"/>
+      <Setter Property="MinHeight" Value="64"/>
+      <Setter Property="CornerRadius" Value="32"/>
+      <Setter Property="Margin" Value="8,2"/>
+      <Style Selector="^ /template/ Border#SelectionIndicator">
+        <Setter Property="IsVisible" Value="False"/>
+      </Style>
+      <Style Selector="^:selected">
+        <Setter Property="Background" Value="{DynamicResource MaterialSecondaryContainerBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource MaterialOnSecondaryContainerBrush}"/>
+      </Style>
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type TabItem}" TargetType="TabItem" BasedOn="{StaticResource MaterialPrimaryTabItem}"/>
+  <ControlTheme x:Key="MaterialSecondaryTabItem" TargetType="TabItem" BasedOn="{StaticResource MaterialPrimaryTabItem}">
+    <Style Selector="^:selected">
+      <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceBrush}"/>
+    </Style>
+    <Style Selector="^ /template/ Border#SelectionIndicator">
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+      <Setter Property="Height" Value="2"/>
+      <Setter Property="CornerRadius" Value="0"/>
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

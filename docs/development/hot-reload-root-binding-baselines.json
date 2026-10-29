@@ -1,0 +1,193 @@
+{
+  "date": "2026-10-20",
+  "source_sha256": {
+    "samples/ControlCatalog/hot_reload.rs": "ea59f4e33a3ec20ee32ebaf0a125ca450e03133bdf3404339bfbbb258d10ee6f",
+    "samples/ControlCatalog/tests/hot_reload.rs": "ac3ac0227e9c6334e0a590af59d986b1f8d11269c5f831f4a5878ec32100a03c",
+    "scripts/hot-reload/root_binding_probe.py": "0eb12517e429d57c981b472d3bff3eae06ae7fbbab9f30ec3a7a8b71f0720805",
+    "src/FerroUI.Base/data/compiled_binding.rs": "443afd1529eee9d5ca36508363c3536b55580ebe8da1c2f86e7bf9258eef1ab6",
+    "src/FerroUI.Base/data/local_binding_reload.rs": "63d55cec66cde476dfa1d4da14a9d0a0c46593dfb3d4c19ff893a9177d190a8e",
+    "src/FerroUI.Base/ferro_object.rs": "e5d5b9cd0530f20f171db39d5d2d3d7bae2aaa99770debaccceedb0dc60bf859",
+    "src/FerroUI.Base/property_store/value_store.rs": "ba7a7ed1d08da2c8b6c764d264da8cb081c7fae634f79a6f3e6ba903b2db0392",
+    "src/FerroUI.HotReload/component.rs": "95d4315f13dd2f8fd958cc4dbf7b5755c2128e1827b48a54744adadbc0090147",
+    "src/FerroUI.HotReload/lib.rs": "e2523e6b627b09c761cd5c8af50d50175584b18a71825ee402608208996c2a3b",
+    "src/FerroUI.HotReload/panel.rs": "a04e2d2e45ec915e2c9de347b9a06e33c7751de244d031a6ea0714ddd7605090",
+    "src/FerroUI.HotReload/root_binding_tests.rs": "76624e905d28c778ec26c1325c1e7260d00be25cbf46ee716703064d67805727",
+    "src/FerroUI.HotReload/root_properties.rs": "46662d75fc36896513ddd5b2c8586ae13c8302b42da6a175cfe9e418b795f8fe",
+    "src/FerroUI.HotReload/tests.rs": "3dc10404bf28c0633c1801d0540c8a9c1c6dac60b2e3e429f738e2c4faa9b619",
+    "src/Markup/FerroUI.Markup.Xaml.Loader/binding_capture.rs": "197940b7cfc5057b3002da69c0a0c0aaac8053f98b9a1d5e811c36f6a186914a",
+    "src/Markup/FerroUI.Markup.Xaml.Loader/lib.rs": "061cfbacbda8a134243336ef3c3e6762402478be088cc92f0576f799db85db73",
+    "src/Markup/FerroUI.Markup.Xaml.Loader/runtime/framework/setters.rs": "6261b3d2946bc10d21288e0015b44546ec9202b8dafb33ae98b9ef2a20ffff18",
+    "src/Markup/FerroUI.Markup.Xaml.Loader/runtime/interpreter/interpreter.rs": "733460996674d1421b8ec51587858e7a78c9abddb2c594064e7b6a527e4508cd",
+    "src/Markup/FerroUI.Markup.Xaml.Loader/runtime/type_system/object_model.rs": "abae529506e110a420cb38507f11b886bf3befbc4443be23c3ecce4ed5683773"
+  },
+  "platforms": {
+    "macos-arm64": {
+      "rustc": "1.99.1",
+      "isolated_latency_run": false,
+      "observations": [
+        {
+          "application_us": 1980,
+          "batch": 872,
+          "commit_to_render_us": 11438,
+          "documents": [
+            "ferres://controlcatalog/Pages/BorderPage.xaml"
+          ],
+          "preparation_us": 19518,
+          "rendered_unix_ns": "1792493942406711000",
+          "revision": 1,
+          "page": "BorderPage",
+          "save_to_render_us": 213885.0,
+          "atomic_save": false,
+          "case": "literal_setup"
+        },
+        {
+          "application_us": 1912,
+          "batch": 881,
+          "commit_to_render_us": 16409,
+          "documents": [
+            "ferres://controlcatalog/Pages/BorderPage.xaml"
+          ],
+          "preparation_us": 19684,
+          "rendered_unix_ns": "1792493942590084000",
+          "revision": 2,
+          "page": "BorderPage",
+          "save_to_render_us": 155324.0,
+          "atomic_save": false,
+          "case": "literal_to_binding"
+        },
+        {
+          "application_us": 2028,
+          "batch": 882,
+          "commit_to_render_us": 25690,
+          "documents": [
+            "ferres://controlcatalog/Pages/BorderPage.xaml"
+          ],
+          "preparation_us": 19926,
+          "rendered_unix_ns": "1792493942806846000",
+          "revision": 3,
+          "page": "BorderPage",
+          "save_to_render_us": 191059.0,
+          "atomic_save": true,
+          "case": "self_source_change"
+        },
+        {
+          "application_us": 1961,
+          "batch": 883,
+          "commit_to_render_us": 18063,
+          "documents": [
+            "ferres://controlcatalog/Pages/BorderPage.xaml"
+          ],
+          "preparation_us": 19492,
+          "rendered_unix_ns": "1792493943406816000",
+          "revision": 6,
+          "page": "BorderPage",
+          "save_to_render_us": 196182.0,
+          "atomic_save": true,
+          "case": "atomic_recovery"
+        },
+        {
+          "application_us": 1961,
+          "batch": 884,
+          "commit_to_render_us": 28908,
+          "documents": [
+            "ferres://controlcatalog/Pages/BorderPage.xaml"
+          ],
+          "preparation_us": 19154,
+          "rendered_unix_ns": "1792493943623779000",
+          "revision": 7,
+          "page": "BorderPage",
+          "save_to_render_us": 208315.0,
+          "atomic_save": false,
+          "case": "binding_removal"
+        }
+      ]
+    },
+    "linux-arm64-xvfb": {
+      "rustc": "1.93.0",
+      "isolated_latency_run": false,
+      "observations": [
+        {
+          "application_us": 3996,
+          "batch": 776,
+          "commit_to_render_us": 17472,
+          "documents": [
+            "ferres://controlcatalog/Pages/BorderPage.xaml"
+          ],
+          "preparation_us": 26054,
+          "rendered_unix_ns": "1792493985020121908",
+          "revision": 1,
+          "page": "BorderPage",
+          "save_to_render_us": 287361.292,
+          "atomic_save": false,
+          "case": "literal_setup"
+        },
+        {
+          "application_us": 2575,
+          "batch": 785,
+          "commit_to_render_us": 11565,
+          "documents": [
+            "ferres://controlcatalog/Pages/BorderPage.xaml"
+          ],
+          "preparation_us": 24433,
+          "rendered_unix_ns": "1792493985278463821",
+          "revision": 2,
+          "page": "BorderPage",
+          "save_to_render_us": 232190.989,
+          "atomic_save": false,
+          "case": "literal_to_binding"
+        },
+        {
+          "application_us": 2512,
+          "batch": 792,
+          "commit_to_render_us": 13348,
+          "documents": [
+            "ferres://controlcatalog/Pages/BorderPage.xaml"
+          ],
+          "preparation_us": 25225,
+          "rendered_unix_ns": "1792493985505223192",
+          "revision": 3,
+          "page": "BorderPage",
+          "save_to_render_us": 221092.212,
+          "atomic_save": true,
+          "case": "self_source_change"
+        },
+        {
+          "application_us": 2369,
+          "batch": 799,
+          "commit_to_render_us": 10033,
+          "documents": [
+            "ferres://controlcatalog/Pages/BorderPage.xaml"
+          ],
+          "preparation_us": 23579,
+          "rendered_unix_ns": "1792493986284134426",
+          "revision": 6,
+          "page": "BorderPage",
+          "save_to_render_us": 223979.999,
+          "atomic_save": true,
+          "case": "atomic_recovery"
+        },
+        {
+          "application_us": 3569,
+          "batch": 806,
+          "commit_to_render_us": 23029,
+          "documents": [
+            "ferres://controlcatalog/Pages/BorderPage.xaml"
+          ],
+          "preparation_us": 25894,
+          "rendered_unix_ns": "1792493986515831749",
+          "revision": 7,
+          "page": "BorderPage",
+          "save_to_render_us": 222756.043,
+          "atomic_save": false,
+          "case": "binding_removal"
+        }
+      ]
+    }
+  },
+  "notes": [
+    "Functional native acceptance: root/window/model identity, binding replacement, live self-source updates, invalid and unsupported edits preserving last-good state, atomic recovery and removal.",
+    "Concurrent validation builds were permitted during this session; these observations are not isolated latency benchmarks.",
+    "Render completion is not physical display scan-out. No Rust patch latency is measured here.",
+    "Windows execution and latest-revision native Rust-patch validation remain required."
+  ]
+}

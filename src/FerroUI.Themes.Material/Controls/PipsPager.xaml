@@ -1,0 +1,423 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/PipsPager/PipsPager.xaml (the implicit style of PipsPager)
+    controls/dev/PipsPager/PipsPager_themeresources.xaml (PipsPagerNavigationButtonBaseStyle,
+    PipsPagerPreviousPageButtonStyle, PipsPagerNextPageButtonStyle, PipsPagerButtonBaseStyle,
+    PipsPagerSelectedPipButtonStyle, PipsPagerNormalPipButtonStyle; its resources are
+    Resources/PipsPager_themeresources.xaml)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  Translation notes (docs/porting/winui-theme.md, section 4):
+  - Template parts: PreviousPageButton is PART_PreviousButton, NextPageButton PART_NextButton.
+    The pips: WinUI's ScrollViewer PipsPagerScrollViewer holds an ItemsRepeater of Buttons, to
+    which the control applies SelectedPipStyle or NormalPipStyle; FerroUI's PipsPager shows its
+    pips in the ListBox PART_PipsPagerList, whose selected item is the selected page. The list has
+    the keyed theme PipsPagerListStyle (the scroll viewer, PART_ScrollViewer, with hidden bars
+    around the items) and its items the theme PipsPagerPipItemStyle: the template and the states
+    of PipsPagerButtonBaseStyle, with the values of PipsPagerSelectedPipButtonStyle in :selected
+    and of PipsPagerNormalPipButtonStyle otherwise. The pip button styles themselves are ported as
+    keyed Button themes for applications.
+  - PreviousButtonStyle and NextButtonStyle are FerroUI's PreviousButtonTheme and
+    NextButtonTheme (the defaults are PipsPagerPreviousPageButtonStyle and
+    PipsPagerNextPageButtonStyle); SelectedPipStyle and NormalPipStyle have no counterpart.
+  - The glyphs: the templates show their Content (a glyph of the symbol font) in a FontIcon at the
+    FontSize of the button. They are Paths named Content, sized by FontSize, whose geometry the
+    keyed themes set: EDDB (PipsPagerPreviousPageButtonGlyph) and EDDC
+    (PipsPagerNextPageButtonGlyph) for the navigation buttons, EA3B (PipsPagerNormalGlyph,
+    PipsPagerSelectedGlyph) for the pips; the Content setters of the glyph strings are left out.
+    PipsPagerNormalGlyphFontSize (4) and PipsPagerSelectedGlyphFontSize (6) are x:String
+    resources: the values are written.
+  - The Grids RootGrid draw a background, a border and a corner radius: Borders. The pressed
+    navigation button scales its glyph to PipsPagerNavigationButtonScalePressed (0.875; an
+    animation with a frame at 16 ms repeated forever): a RenderTransform of the Border named
+    ScaleTransform after its transform.
+  - The visual states of the pager: PreviousPageButtonHidden and NextPageButtonHidden (the page at
+    the edge, Opacity 0) are :first-page and :last-page; PreviousPageButtonCollapsed and
+    NextPageButtonCollapsed are IsPreviousButtonVisible and IsNextButtonVisible (FerroUI has no
+    VisibleOnPointerHover); the Enabled states are the IsEnabled the control sets on the buttons;
+    HorizontalOrientationView is :horizontal (the navigation buttons turned by -90 degrees, the
+    pips side by side); the OrientationStates of the pips (VerticalOrientation, 24 x 12) are the
+    size of the items in :vertical. The tooltips of the navigation buttons (the automation name,
+    placed by the orientation) are left out.
+  - UseSystemFocusVisuals with FocusVisualMargin="0" is the FocusAdorner.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <StackPanel Spacing="20">
+        <PipsPager NumberOfPages="5" SelectedPageIndex="2" />
+        <PipsPager NumberOfPages="5" SelectedPageIndex="0" Orientation="Vertical" />
+      </StackPanel>
+    </Border>
+  </Design.PreviewWith>
+
+  <!-- WinUI applies the default style of Button beneath these keyed styles
+       (docs/porting/winui-theme.md, section 4.2). -->
+  <ControlTheme x:Key="PipsPagerNavigationButtonBaseStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+    <Setter Property="Background" Value="{DynamicResource PipsPagerNavigationButtonBackground}" />
+    <Setter Property="Foreground" Value="{DynamicResource PipsPagerNavigationButtonForeground}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource PipsPagerNavigationButtonBorderBrush}" />
+    <Setter Property="BorderThickness" Value="{StaticResource PipsPagerNavigationButtonBorderThickness}" />
+    <Setter Property="FontSize" Value="{StaticResource PipsPagerNavigationButtonFontSize}" />
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border Margin="0"
+                BorderThickness="2"
+                BorderBrush="{DynamicResource SystemControlFocusVisualPrimaryBrush}"
+                CornerRadius="{DynamicResource ControlCornerRadius}">
+          <Border BorderThickness="1"
+                  BorderBrush="{DynamicResource SystemControlFocusVisualSecondaryBrush}"
+                  CornerRadius="{DynamicResource ControlCornerRadius}" />
+        </Border>
+      </FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Width" Value="{StaticResource PipsPagerNavigationButtonWidth}" />
+    <Setter Property="Height" Value="{StaticResource PipsPagerNavigationButtonHeight}" />
+    <Setter Property="CornerRadius" Value="{StaticResource ControlCornerRadius}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="RootGrid"
+                Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BackgroundSizing="InnerBorderEdge"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}">
+          <Border x:Name="ScaleTransform" RenderTransformOrigin="50%,50%">
+            <!-- The FontIcon of the glyph in Content, at FontSize. -->
+            <Path x:Name="Content"
+                  Fill="{TemplateBinding Foreground}"
+                  Stretch="Uniform"
+                  Width="{TemplateBinding FontSize}"
+                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+          </Border>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- PointerOver -->
+    <Style Selector="^:pointerover">
+      <Style Selector="^ /template/ Border#RootGrid">
+        <Setter Property="Background" Value="{DynamicResource PipsPagerNavigationButtonBackgroundPointerOver}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource PipsPagerNavigationButtonBorderBrushPointerOver}" />
+      </Style>
+      <Style Selector="^ /template/ Path#Content">
+        <Setter Property="Fill" Value="{DynamicResource PipsPagerNavigationButtonForegroundPointerOver}" />
+      </Style>
+    </Style>
+    <!-- Pressed (PipsPagerNavigationButtonScalePressed, 0.875) -->
+    <Style Selector="^:pressed">
+      <Style Selector="^ /template/ Border#RootGrid">
+        <Setter Property="Background" Value="{DynamicResource PipsPagerNavigationButtonBackgroundPressed}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource PipsPagerNavigationButtonBorderBrushPressed}" />
+      </Style>
+      <Style Selector="^ /template/ Path#Content">
+        <Setter Property="Fill" Value="{DynamicResource PipsPagerNavigationButtonForegroundPressed}" />
+      </Style>
+      <Style Selector="^ /template/ Border#ScaleTransform">
+        <Setter Property="RenderTransform" Value="scale(0.875)" />
+      </Style>
+    </Style>
+    <!-- Disabled -->
+    <Style Selector="^:disabled">
+      <Style Selector="^ /template/ Border#RootGrid">
+        <Setter Property="Background" Value="{DynamicResource PipsPagerNavigationButtonBackgroundDisabled}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource PipsPagerNavigationButtonBorderBrushDisabled}" />
+      </Style>
+      <Style Selector="^ /template/ Path#Content">
+        <Setter Property="Fill" Value="{DynamicResource PipsPagerNavigationButtonForegroundDisabled}" />
+      </Style>
+    </Style>
+  </ControlTheme>
+
+  <!-- Content: PipsPagerPreviousPageButtonGlyph (EDDB). -->
+  <ControlTheme x:Key="PipsPagerPreviousPageButtonStyle" TargetType="Button" BasedOn="{StaticResource PipsPagerNavigationButtonBaseStyle}">
+    <Style Selector="^ /template/ Path#Content">
+      <Setter Property="Data" Value="{StaticResource GlyphGeometryEDDB}" />
+    </Style>
+  </ControlTheme>
+
+  <!-- Content: PipsPagerNextPageButtonGlyph (EDDC). -->
+  <ControlTheme x:Key="PipsPagerNextPageButtonStyle" TargetType="Button" BasedOn="{StaticResource PipsPagerNavigationButtonBaseStyle}">
+    <Style Selector="^ /template/ Path#Content">
+      <Setter Property="Data" Value="{StaticResource GlyphGeometryEDDC}" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="PipsPagerButtonBaseStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+    <Setter Property="Background" Value="{DynamicResource PipsPagerSelectionIndicatorBackground}" />
+    <Setter Property="Foreground" Value="{DynamicResource PipsPagerSelectionIndicatorForeground}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource PipsPagerSelectionIndicatorBorderBrush}" />
+    <Setter Property="BorderThickness" Value="{StaticResource PipsPagerButtonBorderThickness}" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border Margin="0"
+                BorderThickness="2"
+                BorderBrush="{DynamicResource SystemControlFocusVisualPrimaryBrush}"
+                CornerRadius="{DynamicResource ControlCornerRadius}">
+          <Border BorderThickness="1"
+                  BorderBrush="{DynamicResource SystemControlFocusVisualSecondaryBrush}"
+                  CornerRadius="{DynamicResource ControlCornerRadius}" />
+        </Border>
+      </FocusAdornerTemplate>
+    </Setter>
+    <!-- PipsPagerNormalGlyphFontSize -->
+    <Setter Property="FontSize" Value="4" />
+    <Setter Property="CornerRadius" Value="{StaticResource ControlCornerRadius}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="RootGrid"
+                Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BackgroundSizing="InnerBorderEdge"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                Width="{StaticResource PipsPagerHorizontalOrientationButtonWidth}"
+                Height="{StaticResource PipsPagerHorizontalOrientationButtonHeight}"
+                CornerRadius="{TemplateBinding CornerRadius}">
+          <!-- The FontIcon of the glyph EA3B at FontSize. -->
+          <Path x:Name="Content"
+                Data="{StaticResource GlyphGeometryEA3B}"
+                Fill="{TemplateBinding Foreground}"
+                Stretch="Uniform"
+                Width="{TemplateBinding FontSize}"
+                Height="{TemplateBinding FontSize}"
+                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- PointerOver (the glyph at PipsPagerSelectedGlyphFontSize) -->
+    <Style Selector="^:pointerover">
+      <Style Selector="^ /template/ Border#RootGrid">
+        <Setter Property="Background" Value="{DynamicResource PipsPagerSelectionIndicatorBackgroundPointerOver}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource PipsPagerSelectionIndicatorBorderBrushPointerOver}" />
+      </Style>
+      <Style Selector="^ /template/ Path#Content">
+        <Setter Property="Fill" Value="{DynamicResource PipsPagerSelectionIndicatorForegroundPointerOver}" />
+        <Setter Property="Width" Value="6" />
+        <Setter Property="Height" Value="6" />
+      </Style>
+    </Style>
+    <!-- Pressed (the glyph at PipsPagerNormalGlyphFontSize) -->
+    <Style Selector="^:pressed">
+      <Style Selector="^ /template/ Border#RootGrid">
+        <Setter Property="Background" Value="{DynamicResource PipsPagerSelectionIndicatorBackgroundPressed}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource PipsPagerSelectionIndicatorBorderBrushPressed}" />
+      </Style>
+      <Style Selector="^ /template/ Path#Content">
+        <Setter Property="Fill" Value="{DynamicResource PipsPagerSelectionIndicatorForegroundPressed}" />
+        <Setter Property="Width" Value="4" />
+        <Setter Property="Height" Value="4" />
+      </Style>
+    </Style>
+    <!-- Disabled -->
+    <Style Selector="^:disabled">
+      <Style Selector="^ /template/ Border#RootGrid">
+        <Setter Property="Background" Value="{DynamicResource PipsPagerSelectionIndicatorBackgroundDisabled}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource PipsPagerSelectionIndicatorBorderBrushDisabled}" />
+      </Style>
+      <Style Selector="^ /template/ Path#Content">
+        <Setter Property="Fill" Value="{DynamicResource PipsPagerSelectionIndicatorForegroundDisabled}" />
+      </Style>
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="PipsPagerSelectedPipButtonStyle" TargetType="Button" BasedOn="{StaticResource PipsPagerButtonBaseStyle}">
+    <!-- PipsPagerSelectedGlyphFontSize -->
+    <Setter Property="FontSize" Value="6" />
+    <Setter Property="Background" Value="{DynamicResource PipsPagerSelectionIndicatorBackgroundSelected}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource PipsPagerSelectionIndicatorBorderBrushSelected}" />
+    <Setter Property="Foreground" Value="{DynamicResource PipsPagerSelectionIndicatorForegroundSelected}" />
+  </ControlTheme>
+
+  <ControlTheme x:Key="PipsPagerNormalPipButtonStyle" TargetType="Button" BasedOn="{StaticResource PipsPagerButtonBaseStyle}">
+    <!-- PipsPagerNormalGlyphFontSize -->
+    <Setter Property="FontSize" Value="4" />
+  </ControlTheme>
+
+  <!-- The pips of the pager: PipsPagerButtonBaseStyle with PipsPagerSelectedPipButtonStyle in
+       :selected and PipsPagerNormalPipButtonStyle otherwise; the size of RootGrid
+       (PipsPagerHorizontalOrientationButtonWidth/Height) is the size of the item, which the pager
+       turns in :vertical. -->
+  <ControlTheme x:Key="PipsPagerPipItemStyle" TargetType="ListBoxItem">
+    <Setter Property="Background" Value="{DynamicResource PipsPagerSelectionIndicatorBackground}" />
+    <Setter Property="Foreground" Value="{DynamicResource PipsPagerSelectionIndicatorForeground}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource PipsPagerSelectionIndicatorBorderBrush}" />
+    <Setter Property="BorderThickness" Value="{StaticResource PipsPagerButtonBorderThickness}" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border Margin="0"
+                BorderThickness="2"
+                BorderBrush="{DynamicResource SystemControlFocusVisualPrimaryBrush}"
+                CornerRadius="{DynamicResource ControlCornerRadius}">
+          <Border BorderThickness="1"
+                  BorderBrush="{DynamicResource SystemControlFocusVisualSecondaryBrush}"
+                  CornerRadius="{DynamicResource ControlCornerRadius}" />
+        </Border>
+      </FocusAdornerTemplate>
+    </Setter>
+    <!-- PipsPagerNormalGlyphFontSize -->
+    <Setter Property="FontSize" Value="4" />
+    <Setter Property="CornerRadius" Value="{StaticResource ControlCornerRadius}" />
+    <Setter Property="Width" Value="{StaticResource PipsPagerHorizontalOrientationButtonWidth}" />
+    <Setter Property="Height" Value="{StaticResource PipsPagerHorizontalOrientationButtonHeight}" />
+    <Setter Property="MinWidth" Value="0" />
+    <Setter Property="MinHeight" Value="0" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="RootGrid"
+                Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BackgroundSizing="InnerBorderEdge"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}">
+          <Path x:Name="Content"
+                Data="{StaticResource GlyphGeometryEA3B}"
+                Fill="{TemplateBinding Foreground}"
+                Stretch="Uniform"
+                Width="{TemplateBinding FontSize}"
+                Height="{TemplateBinding FontSize}"
+                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- PipsPagerSelectedPipButtonStyle -->
+    <Style Selector="^:selected">
+      <Setter Property="FontSize" Value="6" />
+      <Setter Property="Background" Value="{DynamicResource PipsPagerSelectionIndicatorBackgroundSelected}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource PipsPagerSelectionIndicatorBorderBrushSelected}" />
+      <Setter Property="Foreground" Value="{DynamicResource PipsPagerSelectionIndicatorForegroundSelected}" />
+    </Style>
+    <!-- PointerOver -->
+    <Style Selector="^:pointerover">
+      <Style Selector="^ /template/ Border#RootGrid">
+        <Setter Property="Background" Value="{DynamicResource PipsPagerSelectionIndicatorBackgroundPointerOver}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource PipsPagerSelectionIndicatorBorderBrushPointerOver}" />
+      </Style>
+      <Style Selector="^ /template/ Path#Content">
+        <Setter Property="Fill" Value="{DynamicResource PipsPagerSelectionIndicatorForegroundPointerOver}" />
+        <Setter Property="Width" Value="6" />
+        <Setter Property="Height" Value="6" />
+      </Style>
+    </Style>
+    <!-- Pressed -->
+    <Style Selector="^:pressed">
+      <Style Selector="^ /template/ Border#RootGrid">
+        <Setter Property="Background" Value="{DynamicResource PipsPagerSelectionIndicatorBackgroundPressed}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource PipsPagerSelectionIndicatorBorderBrushPressed}" />
+      </Style>
+      <Style Selector="^ /template/ Path#Content">
+        <Setter Property="Fill" Value="{DynamicResource PipsPagerSelectionIndicatorForegroundPressed}" />
+        <Setter Property="Width" Value="4" />
+        <Setter Property="Height" Value="4" />
+      </Style>
+    </Style>
+    <!-- Disabled -->
+    <Style Selector="^:disabled">
+      <Style Selector="^ /template/ Border#RootGrid">
+        <Setter Property="Background" Value="{DynamicResource PipsPagerSelectionIndicatorBackgroundDisabled}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource PipsPagerSelectionIndicatorBorderBrushDisabled}" />
+      </Style>
+      <Style Selector="^ /template/ Path#Content">
+        <Setter Property="Fill" Value="{DynamicResource PipsPagerSelectionIndicatorForegroundDisabled}" />
+      </Style>
+    </Style>
+  </ControlTheme>
+
+  <!-- PipsPagerScrollViewer and its ItemsRepeater: the list of the pips. -->
+  <ControlTheme x:Key="PipsPagerListStyle" TargetType="ListBox">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <ScrollViewer x:Name="PART_ScrollViewer"
+                      HorizontalScrollBarVisibility="Hidden"
+                      VerticalScrollBarVisibility="Hidden"
+                      IsScrollChainingEnabled="False">
+          <ItemsPresenter x:Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+        </ScrollViewer>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type PipsPager}" TargetType="PipsPager">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="VerticalAlignment" Value="Top" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="PreviousButtonTheme" Value="{StaticResource PipsPagerPreviousPageButtonStyle}" />
+    <Setter Property="NextButtonTheme" Value="{StaticResource PipsPagerNextPageButtonStyle}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <StackPanel x:Name="RootPanel"
+                    Orientation="{TemplateBinding Orientation}"
+                    Background="{TemplateBinding Background}">
+          <Button x:Name="PART_PreviousButton"
+                  Theme="{TemplateBinding PreviousButtonTheme}"
+                  IsVisible="{TemplateBinding IsPreviousButtonVisible}"
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Center"
+                  RenderTransformOrigin="50%,50%" />
+          <ListBox x:Name="PART_PipsPagerList"
+                   Theme="{StaticResource PipsPagerListStyle}"
+                   ItemContainerTheme="{StaticResource PipsPagerPipItemStyle}"
+                   ItemsSource="{Binding TemplateSettings.Pips, RelativeSource={RelativeSource TemplatedParent}}"
+                   SelectedIndex="{Binding SelectedPageIndex, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                   AutoScrollToSelectedItem="False"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center">
+            <ListBox.ItemsPanel>
+              <ItemsPanelTemplate>
+                <!-- The StackLayout of the ItemsRepeater, in the orientation of the pager. -->
+                <StackPanel Orientation="{Binding Orientation, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=PipsPager}}" />
+              </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+          </ListBox>
+          <Button x:Name="PART_NextButton"
+                  Theme="{TemplateBinding NextButtonTheme}"
+                  IsVisible="{TemplateBinding IsNextButtonVisible}"
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Center"
+                  RenderTransformOrigin="50%,50%" />
+        </StackPanel>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- PreviousPageButtonHidden, NextPageButtonHidden -->
+    <Style Selector="^:first-page /template/ Button#PART_PreviousButton">
+      <Setter Property="Opacity" Value="0" />
+    </Style>
+    <Style Selector="^:last-page /template/ Button#PART_NextButton">
+      <Setter Property="Opacity" Value="0" />
+    </Style>
+    <!-- HorizontalOrientationView -->
+    <Style Selector="^:horizontal">
+      <Style Selector="^ /template/ StackPanel#RootPanel">
+        <Setter Property="Orientation" Value="Horizontal" />
+      </Style>
+      <Style Selector="^ /template/ Button#PART_PreviousButton, ^ /template/ Button#PART_NextButton">
+        <Setter Property="RenderTransform" Value="rotate(-90deg)" />
+      </Style>
+    </Style>
+    <!-- VerticalOrientation of the pips -->
+    <Style Selector="^:vertical /template/ ListBox#PART_PipsPagerList ListBoxItem">
+      <Setter Property="Width" Value="{StaticResource PipsPagerVerticalOrientationButtonWidth}" />
+      <Setter Property="Height" Value="{StaticResource PipsPagerVerticalOrientationButtonHeight}" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

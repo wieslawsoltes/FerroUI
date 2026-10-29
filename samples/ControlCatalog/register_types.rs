@@ -78,7 +78,12 @@ pub fn register_types() {
             ferroui_themes_fluent::register_types();
         }
         ferroui_themes_winui::register_types();
+        #[cfg(feature = "macos-theme")]
+        ferroui_themes_macos::register_types();
+        #[cfg(feature = "material-theme")]
+        ferroui_themes_material::register_types();
         ferroui_controls_color_picker::register_types();
+        ferroui_controls_inking::register_types();
         treedatagrid_demo::register_types();
         ferroui_opengl::register_types();
         TypeInfo::register_namespaces(NAMESPACES);

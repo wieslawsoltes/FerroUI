@@ -1,0 +1,83 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/CommonStyles/FlipView_themeresources.xaml (DefaultFlipViewStyle and the implicit
+    style of FlipView; the resources are Resources/FlipView_themeresources.xaml)
+    controls/dev/CommonStyles/FlipViewItem_themeresources.xaml (DefaultFlipViewItemStyle and the
+    implicit style of FlipViewItem; the resources are Resources/FlipViewItem_themeresources.xaml)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  FerroUI's Carousel is WinUI's FlipView: a selector that shows one item at a time.
+
+  Translation notes (docs/porting/winui-theme.md, section 4):
+  - The Grid of the template (background, border, corner radius) is a Border.
+  - The ScrollViewer ScrollingHost is the PART_ScrollViewer FerroUI's Carousel requires, with the
+    ItemsPresenter PART_ItemsPresenter; the padding of the scroll viewer is the margin of the
+    presenter. The items panel is the default panel of FerroUI's Carousel (its virtualizing
+    carousel panel, which lays out and moves the pages), not the VirtualizingStackPanel of the
+    source with its regular snap points, and the snap point types of the scroll viewer are left
+    out with it. BringIntoViewOnFocusChange of the scroll viewer is False (the panel brings the
+    selected page into view).
+  - The previous and next buttons (PreviousButtonHorizontal, NextButtonHorizontal,
+    PreviousButtonVertical, NextButtonVertical with the template-local templates
+    HorizontalPreviousTemplate, ...) are left out: FlipView wires them in code and shows them
+    while the pointer moves over it, and FerroUI's Carousel has no commands a template could bind
+    them to; its pages change with the keyboard, swipes and its Next and Previous methods.
+  - FlipViewItem is the container of an item: the containers of FerroUI's Carousel are content
+    presenters, so DefaultFlipViewItemStyle is a control theme of ContentPresenter that the
+    Carousel sets as its ItemContainerTheme (items that are controls are their own containers and
+    are not themed by it, as in WinUI an item that is a FlipViewItem keeps its own style).
+  - TabNavigation="Once" is KeyboardNavigation.TabNavigation; the rails, the scroll chaining and
+    the deferred scrolling of the scroll viewer are left out.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <Carousel Width="320" Height="120">
+        <TextBlock Text="The first item" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        <TextBlock Text="The second item" HorizontalAlignment="Center" VerticalAlignment="Center" />
+      </Carousel>
+    </Border>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="DefaultFlipViewItemStyle" TargetType="ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource FlipViewItemBackground}" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="VerticalContentAlignment" Value="Stretch" />
+    <Setter Property="KeyboardNavigation.TabNavigation" Value="Local" />
+  </ControlTheme>
+
+  <ControlTheme x:Key="DefaultFlipViewStyle" TargetType="Carousel">
+    <Setter Property="Background" Value="{DynamicResource FlipViewBackground}" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="KeyboardNavigation.TabNavigation" Value="Once" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Hidden" />
+    <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Hidden" />
+    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="ItemContainerTheme" Value="{StaticResource DefaultFlipViewItemStyle}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BackgroundSizing="InnerBorderEdge"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}">
+          <ScrollViewer Name="PART_ScrollViewer"
+                        HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}"
+                        VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}"
+                        BringIntoViewOnFocusChange="False"
+                        IsTabStop="False">
+            <ItemsPresenter Name="PART_ItemsPresenter"
+                            ItemsPanel="{TemplateBinding ItemsPanel}"
+                            Margin="{TemplateBinding Padding}" />
+          </ScrollViewer>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type Carousel}" TargetType="Carousel" BasedOn="{StaticResource DefaultFlipViewStyle}" />
+</ResourceDictionary>

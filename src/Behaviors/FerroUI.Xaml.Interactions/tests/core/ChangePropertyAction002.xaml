@@ -1,0 +1,20 @@
+<Window xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="ChangePropertyAction002">
+  <!-- Ported from tests/Xaml.Behaviors.Interactions.UnitTests/Core/ChangePropertyAction002 of
+       Xaml.Behaviors. Adapted: no x:Class (the test loads the window with the run-time loader). -->
+  <StackPanel>
+    <TextBox Name="TargetTextBox"
+             Text="Initial Text"
+             FontSize="10"/>
+    <Button Name="TargetButton" Content="Button">
+      <Interaction.Behaviors>
+        <EventTriggerBehavior EventName="Click">
+          <ChangePropertyAction TargetObject="TargetTextBox"
+                                PropertyName="(TextBox.FontSize)"
+                                Value="12" />
+        </EventTriggerBehavior>
+      </Interaction.Behaviors>
+    </Button>
+  </StackPanel>
+</Window>

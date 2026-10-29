@@ -1,0 +1,108 @@
+<!-- Material 3 Expressive adaptation of the FerroUI WinUI control contract.
+     Source: AndroidX Material3 1.5.0-beta02, e4d933c98df7baa7ea2b83eea6e086915961e0ff.
+     Original structure: Microsoft Corporation, MIT; see NOTICE.md. -->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:material="using:FerroUI.Themes.Material" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Width="400" Height="300">
+      <NavigationPage />
+    </Border>
+  </Design.PreviewWith>
+  <ControlTheme x:Key="NavigationBackButtonNormalStyle" TargetType="Button">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}" />
+    <Setter Property="Height" Value="48" />
+    <Setter Property="Width" Value="48" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Margin" Value="4,0" />
+    <Setter Property="CornerRadius" Value="20" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border BorderThickness="3" BorderBrush="{DynamicResource MaterialSecondaryBrush}" CornerRadius="20" Margin="-3" />
+      </FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid Background="Transparent" MinWidth="48" MinHeight="48">
+          <Border x:Name="RootGrid" Margin="4" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}" TemplatedControl.IsTemplateFocusTarget="True">
+            <Panel>
+              <Border x:Name="StateLayer" Background="Transparent" CornerRadius="{TemplateBinding CornerRadius}" IsHitTestVisible="False" />
+              <material:MaterialRipple Fill="{TemplateBinding Foreground}" CornerRadius="{TemplateBinding CornerRadius}" ReducedMotion="{DynamicResource MaterialReducedMotion}" />
+              <Path x:Name="Content" Data="M20 11H7.83L13.42 5.41 12 4 4 12 12 20 13.42 18.59 7.83 13H20Z" Fill="{TemplateBinding Foreground}" Stretch="None" Height="24" Width="24" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" IsVisible="{TemplateBinding Content, Converter={x:Static ObjectConverters.IsNull}}" />
+              <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Foreground="{TemplateBinding Foreground}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" RecognizesAccessKey="True" />
+            </Panel>
+          </Border>
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:pointerover /template/ Border#StateLayer">
+      <Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceHoverBrush}" />
+    </Style>
+    <Style Selector="^:focus-visible /template/ Border#StateLayer">
+      <Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceFocusBrush}" />
+    </Style>
+    <Style Selector="^:disabled /template/ Border#StateLayer">
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="^:disabled /template/ Path#Content, ^:disabled /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Opacity" Value="0.38" />
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="NavigationBackButtonSmallStyle" TargetType="Button" BasedOn="{StaticResource NavigationBackButtonNormalStyle}">
+    <Setter Property="Margin" Value="4,2,0,2" />
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type NavigationPage}" TargetType="NavigationPage">
+    <Setter Property="BarHeight" Value="64" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="PageTransition" Value="{DynamicResource MaterialPageTransition}" />
+    <Setter Property="ModalTransition" Value="{DynamicResource MaterialModalTransition}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel ClipToBounds="True">
+          <DockPanel>
+            <Border Name="PART_NavBarSpacer" Height="{TemplateBinding EffectiveBarHeight}" IsVisible="False" DockPanel.Dock="Top" />
+            <ContentPresenter Name="PART_BottomCommandBar" DockPanel.Dock="Bottom" HorizontalContentAlignment="Stretch" Background="{TemplateBinding Background}" Content="{Binding CurrentPage?.(NavigationPage.BottomCommandBar), RelativeSource={RelativeSource TemplatedParent}, FallbackValue={x:Null}}" />
+            <Grid Name="PART_ContentHost" Background="{TemplateBinding Background}" ClipToBounds="True">
+              <ContentPresenter Name="PART_PageBackPresenter" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+              <ContentPresenter Name="PART_PagePresenter" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+            </Grid>
+          </DockPanel>
+          <Border Name="PART_NavigationBar" ZIndex="1" VerticalAlignment="Top" ClipToBounds="True" Height="{TemplateBinding EffectiveBarHeight}">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+              <Button x:Name="PART_BackButton" Grid.Column="0" Theme="{StaticResource NavigationBackButtonNormalStyle}" IsVisible="{TemplateBinding IsBackButtonEffectivelyVisible}" VerticalAlignment="Center" ToolTip.Tip="{x:Null}">
+                <Panel>
+                  <Path x:Name="PART_BackButtonDefaultIcon" Data="M20 11H7.83L13.42 5.41 12 4 4 12 12 20 13.42 18.59 7.83 13H20Z" Fill="{Binding $parent[Button].Foreground}" Width="24" Height="24" Stretch="None" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                  <ContentPresenter x:Name="PART_BackButtonContentPresenter" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                </Panel>
+              </Button>
+              <ContentPresenter Name="PART_Header" Grid.Column="1" FontSize="22" FontWeight="Normal" Foreground="{DynamicResource MaterialOnSurfaceBrush}" Content="{Binding CurrentPage?.Header, RelativeSource={RelativeSource TemplatedParent}, FallbackValue={x:Null}}" ContentTemplate="{Binding CurrentPage?.HeaderTemplate, RelativeSource={RelativeSource TemplatedParent}, FallbackValue={x:Null}}" VerticalAlignment="Center" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Margin="16,0" />
+              <ContentPresenter Name="PART_TopCommandBar" Grid.Column="2" HorizontalAlignment="Right" VerticalContentAlignment="Stretch" Content="{Binding CurrentPage?.(NavigationPage.TopCommandBar), RelativeSource={RelativeSource TemplatedParent}, FallbackValue={x:Null}}">
+                <ContentPresenter.Styles>
+                  <Style Selector="CommandBar">
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="VerticalAlignment" Value="Stretch" />
+                    <Setter Property="DefaultLabelPosition" Value="Collapsed" />
+                  </Style>
+                </ContentPresenter.Styles>
+              </ContentPresenter>
+            </Grid>
+          </Border>
+          <Border Name="PART_NavBarShadow" ZIndex="1" VerticalAlignment="Top" IsVisible="False" Height="1" IsHitTestVisible="False" Background="{DynamicResource MaterialOutlineVariantBrush}" />
+          <ContentPresenter Name="PART_ModalBackPresenter" ZIndex="99" IsVisible="False" Background="{TemplateBinding Background}" />
+          <ContentPresenter Name="PART_ModalPresenter" ZIndex="100" IsVisible="False" Background="{TemplateBinding Background}" />
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^ /template/ Border#PART_NavigationBar">
+      <Setter Property="Background" Value="{DynamicResource MaterialSurfaceBrush}" />
+    </Style>
+    <Style Selector="^:nav-bar-inset /template/ Border#PART_NavBarSpacer">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^:nav-bar-compact /template/ ContentPresenter#PART_TopCommandBar CommandBar">
+      <Setter Property="DefaultLabelPosition" Value="Collapsed" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

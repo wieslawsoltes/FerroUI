@@ -88,6 +88,19 @@ VARIANT_ORDER = ["Default", "Light", "HighContrast"]
 # the resize gripper of its column headers, which an application gets from the tabular library
 # (TabularControlsResources), not from XamlControlsResources. They are converted whole (their keys
 # are not keys of the merged theme), written after the documents of the merge and not tracked.
+# The source documents whose resources belong to another crate of controls, not to the theme: the
+# crate keeps its WinUI styles itself, and the theme does not depend on it. Their resources are
+# written to that crate (source -> (crate, document)) and the theme does not include them; several
+# sources may share one document.
+EXTERNAL_DOCUMENTS = {
+    "controls/dev/InkToolbar/InkToolbar.xaml": ("src/FerroUI.Controls.Inking", "Themes/WinUI/InkToolbarResources.xaml"),
+    "controls/dev/InkToolbar/InkToolbar_themeresources.xaml": ("src/FerroUI.Controls.Inking", "Themes/WinUI/InkToolbarResources.xaml"),
+}
+EXTERNAL_NOTE = (
+    "The resources of a crate of controls outside the WinUI theme, which an application includes "
+    "with the styles of that crate; the theme does not include them."
+)
+
 OUTSIDE_THE_MERGE = [
     "controls/dev/CommonStyles/TabularSurfaces_themeresources.xaml",
     "controls/dev/TableView/TableView_themeresources.xaml",
@@ -383,6 +396,7 @@ def convert(root):
     waivers = w.load_waivers()
     effective_ids = {id(item) for item in theme.effective.values()}
     documents = {}
+    external = {}
     left_out = []
     for source, _layer in theme.documents:
         converted = []
@@ -396,6 +410,11 @@ def convert(root):
                 left_out.append((item, str(error)))
                 continue
             converted.append((item, lines, needed))
+        if source in EXTERNAL_DOCUMENTS:
+            sources, items = external.setdefault(EXTERNAL_DOCUMENTS[source], ([], []))
+            sources.append(source)
+            items.extend(converted)
+            continue
         if converted:
             path = port_path(source)
             if path in documents:
@@ -457,7 +476,10 @@ def convert(root):
     indent = text[line_start:begin]
     includes = "".join(f'{indent}<MergeResourceInclude Source="/{path}" />\n' for path in order)
     documents[THEME_DOCUMENT] = text[: begin + len(INCLUDES_BEGIN)] + "\n" + includes + indent + text[end:]
-    return documents, left_out
+    external_documents = {
+        (crate, path): render(sources, items, EXTERNAL_NOTE) for (crate, path), (sources, items) in external.items()
+    }
+    return documents, external_documents, left_out
 
 
 THEME_DOCUMENT = "WinUITheme.xaml"
@@ -472,11 +494,14 @@ def main():
     parser.add_argument("--report", action="store_true", help="list the items no rule converts")
     arguments = parser.parse_args()
     root = w.reference_root(arguments.reference)
-    documents, left_out = convert(root)
+    documents, external_documents, left_out = convert(root)
 
     stale = []
-    for path, text in sorted(documents.items()):
-        target = os.path.join(CRATE, path)
+    outputs = [(os.path.join(CRATE, path), f"{w.PORT_CRATE}/{path}", text) for path, text in documents.items()]
+    outputs += [
+        (os.path.join(REPOSITORY, crate, path), f"{crate}/{path}", text) for (crate, path), text in external_documents.items()
+    ]
+    for target, path, text in sorted(outputs):
         current = open(target, encoding="utf-8").read() if os.path.exists(target) else None
         if current == text:
             continue
@@ -486,7 +511,7 @@ def main():
             os.makedirs(os.path.dirname(target), exist_ok=True)
             with open(target, "w", encoding="utf-8") as file:
                 file.write(text)
-            print(f"wrote {w.PORT_CRATE}/{path}")
+            print(f"wrote {path}")
     resources = os.path.join(CRATE, "Resources")
     if os.path.isdir(resources):
         generated = {os.path.basename(p) for p in documents if p.startswith("Resources/")}

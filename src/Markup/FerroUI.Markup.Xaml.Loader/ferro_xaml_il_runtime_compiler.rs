@@ -59,13 +59,46 @@ struct TransformedGroup {
 /// spent parsing, transforming, group-transforming and interpreting (standard error).
 const TIMINGS_VARIABLE: &str = "FERROUI_XAML_TIMINGS";
 
-/// The number of groups a thread keeps; the cache is emptied when it is full.
-const MAX_CACHED_GROUPS: usize = 1024;
+/// Bound edit history without flushing frequently used documents. Source bytes
+/// are an admission budget, not a measurement of the transformed AST's heap size.
+const MAX_CACHED_GROUPS: usize = 64;
+const MAX_CACHED_SOURCE_BYTES: usize = 4 * 1024 * 1024;
+
+#[derive(Default)]
+struct GroupCache {
+    entries: std::collections::VecDeque<(String, usize, Rc<TransformedGroup>)>,
+    source_bytes: usize,
+}
+impl GroupCache {
+    fn get(&mut self, key: &str) -> Option<Rc<TransformedGroup>> {
+        let index = self.entries.iter().position(|entry| entry.0 == key)?;
+        let entry = self.entries.remove(index)?;
+        let group = entry.2.clone();
+        self.entries.push_back(entry);
+        Some(group)
+    }
+
+    fn insert(&mut self, key: String, source_bytes: usize, group: Rc<TransformedGroup>) {
+        if source_bytes > MAX_CACHED_SOURCE_BYTES {
+            return;
+        }
+        if let Some(index) = self.entries.iter().position(|entry| entry.0 == key) {
+            self.source_bytes -= self.entries.remove(index).unwrap().1;
+        }
+        while self.entries.len() >= MAX_CACHED_GROUPS
+            || self.source_bytes + source_bytes > MAX_CACHED_SOURCE_BYTES
+        {
+            let (_, bytes, _) = self.entries.pop_front().unwrap();
+            self.source_bytes -= bytes;
+        }
+        self.source_bytes += source_bytes;
+        self.entries.push_back((key, source_bytes, group));
+    }
+}
 
 ferroui_base::ferro_thread_local! {
     /// The transformed groups of this thread by [`group_key`].
-    static GROUPS: RefCell<std::collections::HashMap<String, Rc<TransformedGroup>>> =
-        RefCell::new(std::collections::HashMap::new());
+    static GROUPS: RefCell<GroupCache> = RefCell::new(GroupCache::default());
 }
 
 /// Identifies the result of transforming a group: the parts of the configuration the
@@ -157,6 +190,10 @@ impl FerroXamlIlRuntimeCompiler {
             })?;
             let override_type: Option<Rc<dyn IXamlType>> =
                 document.root_instance.as_ref().map(|root| runtime_type_system.runtime_type_of(root));
+            #[cfg(all(feature = "hot-reload", debug_assertions))]
+            let override_type = document.service_provider.as_ref()
+                .and_then(|provider| ferroui_markup_xaml::reload_events::code_behind(&**provider, &document.root_instance))
+                .map(|root| runtime_type_system.runtime_type_of(&root)).or(override_type);
             sources.push(DocumentSource {
                 xaml,
                 override_type,
@@ -169,7 +206,7 @@ impl FerroXamlIlRuntimeCompiler {
         // interpreted again. A diagnostic handler sees the diagnostics of the transform,
         // so a load with one always transforms.
         let cache_key = configuration.diagnostic_handler.is_none().then(|| group_key(&sources, configuration));
-        let cached = cache_key.as_ref().and_then(|key| GROUPS.with(|groups| groups.borrow().get(key).cloned()));
+        let cached = cache_key.as_ref().and_then(|key| GROUPS.with(|groups| groups.borrow_mut().get(key)));
         let timings = std::env::var_os(TIMINGS_VARIABLE).is_some();
         let was_cached = cached.is_some();
         let interpret_start = std::time::Instant::now();
@@ -181,11 +218,8 @@ impl FerroXamlIlRuntimeCompiler {
                     Rc::new(Self::transform_group(&runtime_type_system, type_system, &sources, configuration)?);
                 if let Some(key) = cache_key {
                     GROUPS.with(|groups| {
-                        let mut groups = groups.borrow_mut();
-                        if groups.len() >= MAX_CACHED_GROUPS {
-                            groups.clear();
-                        }
-                        groups.insert(key, group.clone());
+                        let source_bytes = sources.iter().map(|source| source.xaml.len()).sum();
+                        groups.borrow_mut().insert(key, source_bytes, group.clone());
                     });
                 }
                 group
@@ -220,7 +254,7 @@ impl FerroXamlIlRuntimeCompiler {
 
     /// Removes the transformed documents this thread keeps (see [`Self::load_group`]).
     pub fn clear_cache() {
-        GROUPS.with(|groups| groups.borrow_mut().clear());
+        GROUPS.with(|groups| *groups.borrow_mut() = GroupCache::default());
     }
 
     /// Parses and transforms the documents of a group and prepares their build and
@@ -361,10 +395,14 @@ impl FerroXamlIlRuntimeCompiler {
         throw_exception_if_any_error(&diagnostics.borrow())?;
 
         // The counterpart of compiling each document into its builder type.
-        for (resource, provider) in parsed_documents.iter().zip(&providers) {
+        for ((resource, provider), source) in parsed_documents.iter().zip(&providers).zip(sources) {
             let xaml_document = resource.xaml_document();
             let xaml_document = xaml_document.borrow();
             let runtime_document = interpreter.document(&xaml_document, resource.uri().as_deref())?;
+            #[cfg(all(feature = "hot-reload", debug_assertions))]
+            { *runtime_document.source_text.borrow_mut() = Some(Rc::from(source.xaml.as_str())); }
+            #[cfg(not(all(feature = "hot-reload", debug_assertions)))]
+            let _ = source;
             provider.set_body(DocumentBody {
                 interpreter: interpreter.clone(),
                 root: xaml_document.root()?,
@@ -431,5 +469,80 @@ impl FerroXamlIlRuntimeCompiler {
     /// `GetSafeUriIdentifier(uri)`.
     fn get_safe_uri_identifier(uri: Option<String>) -> Option<String> {
         uri.map(|uri| uri.replace([':', '/', '?', '=', '.'], "_"))
+    }
+}
+
+#[cfg(test)]
+mod cache_tests {
+    use super::*;
+    use ferroui_base::{media::SolidColorBrush, Ref};
+
+    fn group() -> Rc<TransformedGroup> {
+        Rc::new(TransformedGroup { providers: Vec::new(), root_types: Vec::new() })
+    }
+
+    #[test]
+    fn cache_evicts_old_revisions_but_keeps_recently_used_groups() {
+        let mut cache = GroupCache::default();
+        let old = group();
+        let old_weak = Rc::downgrade(&old);
+        cache.insert("old".into(), MAX_CACHED_SOURCE_BYTES / 2, old);
+        let recent = group();
+        cache.insert("recent".into(), MAX_CACHED_SOURCE_BYTES / 2, recent.clone());
+        assert!(Rc::ptr_eq(&cache.get("recent").unwrap(), &recent));
+        cache.insert("new".into(), 1, group());
+        assert!(old_weak.upgrade().is_none());
+        assert!(cache.get("recent").is_some());
+        assert!(cache.get("new").is_some());
+        let oversized = group();
+        let oversized_weak = Rc::downgrade(&oversized);
+        cache.insert("oversized".into(), MAX_CACHED_SOURCE_BYTES + 1, oversized);
+        assert!(oversized_weak.upgrade().is_none());
+        assert_eq!(cache.entries.len(), 2);
+
+        let mut cache = GroupCache::default();
+        for index in 0..MAX_CACHED_GROUPS {
+            cache.insert(index.to_string(), 1, group());
+        }
+        cache.get("0").unwrap();
+        cache.insert("next".into(), 1, group());
+        assert_eq!(cache.entries.len(), MAX_CACHED_GROUPS);
+        assert!(cache.get("0").is_some());
+        assert!(cache.get("1").is_none());
+    }
+
+    #[test]
+    fn cached_documents_build_fresh_objects_and_invalidate_the_whole_group() {
+        FerroXamlIlRuntimeCompiler::clear_cache();
+        let load = |color: &str| {
+            let documents = ["Red", color].into_iter().map(|color| {
+                RuntimeXamlLoaderDocument::from_stream_with_base_uri_and_root_instance(
+                    None, None, Box::new(std::io::Cursor::new(format!(
+                        "<SolidColorBrush xmlns='https://github.com/ferroui' Color='{color}'/>"
+                    ).into_bytes())),
+                )
+            }).collect();
+            FerroXamlIlRuntimeCompiler::load_group(documents, &RuntimeXamlLoaderConfiguration::default())
+        };
+        let first = load("Green").expect("first transform");
+        let brush = ferroui_base::metadata::from_markup_value::<Ref<SolidColorBrush>>(&first[0]).unwrap();
+        let weak = brush.downgrade();
+        let first_group = GROUPS.with(|cache| cache.borrow().entries.back().unwrap().2.clone());
+        let second = load("Green").expect("cached transform");
+        let second_brush = ferroui_base::metadata::from_markup_value::<Ref<SolidColorBrush>>(&second[0]).unwrap();
+        assert!(!brush.ptr_eq(&second_brush));
+        assert!(GROUPS.with(|cache| Rc::ptr_eq(&first_group, &cache.borrow().entries.back().unwrap().2)));
+        drop(brush);
+        drop(first);
+        assert!(weak.upgrade().is_none(), "cached transforms must not retain built objects");
+        let changed = load("Blue").expect("changed dependency text");
+        let previous_color = ferroui_base::metadata::from_markup_value::<Ref<SolidColorBrush>>(&second[1]).unwrap().color();
+        let next_color = ferroui_base::metadata::from_markup_value::<Ref<SolidColorBrush>>(&changed[1]).unwrap().color();
+        assert_ne!(previous_color, next_color);
+        assert!(GROUPS.with(|cache| !Rc::ptr_eq(&first_group, &cache.borrow().entries.back().unwrap().2)));
+        let entries = GROUPS.with(|cache| cache.borrow().entries.len());
+        assert!(load("not-a-color").is_err());
+        assert_eq!(GROUPS.with(|cache| cache.borrow().entries.len()), entries);
+        FerroXamlIlRuntimeCompiler::clear_cache();
     }
 }

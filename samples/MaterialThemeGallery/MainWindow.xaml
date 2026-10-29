@@ -1,0 +1,52 @@
+<Window xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="using:MaterialThemeGallery"
+        x:Class="MaterialThemeGallery.MainWindow"
+        Title="Material theme gallery"
+        Width="1280"
+        Height="900">
+  <!-- The toolbar (the theme variant, the density, the flow direction and the accent colour of
+       the page), the list of the pages, and the selected page in its host. The choices of the
+       toolbar and the list are filled by the class of the document (main_window.rs) from the
+       tables of the gallery, so that the toolbar, the capture mode and the capture host name
+       the same things. -->
+  <DockPanel>
+    <Border DockPanel.Dock="Top"
+            Padding="12,8"
+            BorderThickness="0,0,0,1"
+            BorderBrush="{DynamicResource DividerStrokeColorDefaultBrush}">
+      <StackPanel Orientation="Horizontal" Spacing="20">
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Classes="toolbar-label" Text="Theme" />
+          <ComboBox x:Name="VariantChoice" Classes="toolbar-choice" />
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Classes="toolbar-label" Text="Density" />
+          <ComboBox x:Name="DensityChoice" Classes="toolbar-choice" />
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Classes="toolbar-label" Text="Flow direction" />
+          <ComboBox x:Name="FlowChoice" Classes="toolbar-choice" />
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Classes="toolbar-label" Text="Seed" />
+          <ComboBox x:Name="AccentChoice" Classes="toolbar-choice" />
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Classes="toolbar-label" Text="Motion" />
+          <ComboBox x:Name="MotionChoice" Classes="toolbar-choice" />
+        </StackPanel>
+      </StackPanel>
+    </Border>
+    <Border DockPanel.Dock="Left"
+            Width="220"
+            BorderThickness="0,0,1,0"
+            BorderBrush="{DynamicResource DividerStrokeColorDefaultBrush}">
+      <ListBox x:Name="PageList" />
+    </Border>
+    <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                  VerticalScrollBarVisibility="Auto">
+      <local:CaptureHost x:Name="PageHost" />
+    </ScrollViewer>
+  </DockPanel>
+</Window>

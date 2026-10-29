@@ -44,9 +44,54 @@ REPOSITORY = b"https://github.com/wieslawsoltes/FerroUI"
 
 FORBIDDEN = re.compile(rb"avalonia|\bavn|axaml|avares", re.IGNORECASE)
 
+# The macOS appearance controls are an addition to the upstream settings page.
+MACOS_SETTINGS = b'''
+    <Border Classes="card" IsVisible="{Binding MacOSThemeSettingsVisible}">
+      <StackPanel Spacing="10">
+        <TextBlock Text="macOS 26 Appearance" FontWeight="SemiBold" />
+        <TextBlock Text="Preview the control sizes, accent and accessibility settings across the catalog."
+                   TextWrapping="Wrap" Foreground="{DynamicResource SubtleForeground}" />
+        <Grid ColumnSpacing="10" ColumnDefinitions="*,Auto">
+          <Label>Control Size</Label>
+          <ComboBox x:Name="MacOSControlSize" Grid.Column="1" SelectedIndex="{Binding MacOSControlSizeIndex}">
+            <ComboBoxItem>Mini</ComboBoxItem>
+            <ComboBoxItem>Small</ComboBoxItem>
+            <ComboBoxItem>Regular</ComboBoxItem>
+            <ComboBoxItem>Large</ComboBoxItem>
+            <ComboBoxItem>Extra Large</ComboBoxItem>
+          </ComboBox>
+        </Grid>
+        <Grid ColumnSpacing="10" ColumnDefinitions="*,Auto">
+          <Label>Accent</Label>
+          <ComboBox x:Name="MacOSAccent" Grid.Column="1" SelectedIndex="{Binding MacOSAccentIndex}">
+            <ComboBoxItem>System</ComboBoxItem>
+            <ComboBoxItem>Blue</ComboBoxItem>
+            <ComboBoxItem>Purple</ComboBoxItem>
+            <ComboBoxItem>Pink</ComboBoxItem>
+            <ComboBoxItem>Red</ComboBoxItem>
+            <ComboBoxItem>Orange</ComboBoxItem>
+            <ComboBoxItem>Yellow</ComboBoxItem>
+            <ComboBoxItem>Green</ComboBoxItem>
+            <ComboBoxItem>Graphite</ComboBoxItem>
+          </ComboBox>
+        </Grid>
+        <CheckBox x:Name="MacOSReduceMotion" Content="Reduce Motion" IsChecked="{Binding MacOSReduceMotion}" />
+        <CheckBox x:Name="MacOSReduceTransparency" Content="Reduce Transparency" IsChecked="{Binding MacOSReduceTransparency}" />
+        <CheckBox x:Name="MacOSIncreaseContrast" Content="Increase Contrast" IsChecked="{Binding MacOSIncreaseContrast}" />
+        <CheckBox x:Name="MacOSWindowActive" Content="Active Window" IsChecked="{Binding MacOSWindowActive}" />
+      </StackPanel>
+    </Border>
+'''[1:]
+
 # The lines this project adds to converted documents: (path relative to the sample, anchor line of
 # the converted text, the lines inserted after it, why).
 ADDITIONS = [
+    (
+        "Pages/SettingsPage.xaml",
+        b'                  ToolTip.Tip="Window State"/>\n      </Grid>\n    </Border>\n',
+        MACOS_SETTINGS,
+        "live macOS 26 theme preview settings, visible when the optional macos-theme is selected",
+    ),
     (
         "App.xaml",
         b"      <!-- Styles attached dynamically depending on current theme (simple or fluent) -->\n",
@@ -104,6 +149,7 @@ REMOVALS = [
 PORT_DOCUMENTS = [
     ("ClassicThemes.xaml", "the Fluent and Simple themes of the original, with the feature classic-themes only"),
     ("Pages/TreeDataGridPage.xaml", "the page of the TreeDataGrid demo of the port"),
+    ("Pages/InkingPage.xaml", "the page of the inking controls of the port"),
 ]
 
 

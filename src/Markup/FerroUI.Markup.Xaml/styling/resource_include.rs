@@ -73,6 +73,11 @@ impl ResourceInclude {
         }
 
         self.is_loading.set(true);
+        struct LoadingGuard<'a>(&'a Cell<bool>);
+        impl Drop for LoadingGuard<'_> {
+            fn drop(&mut self) { self.0.set(false); }
+        }
+        let _loading = LoadingGuard(&self.is_loading);
         let Some(source) = self.source() else {
             return Err(XamlLoadException::with_message("ResourceInclude.Source must be set."));
         };
@@ -85,7 +90,6 @@ impl ResourceInclude {
             )));
         };
         *self.loaded.borrow_mut() = Some(loaded.clone());
-        self.is_loading.set(false);
 
         Ok(loaded)
     }
@@ -125,6 +129,17 @@ impl IResourceNode for ResourceInclude {
 }
 
 impl IResourceProvider for ResourceInclude {
+    #[cfg(all(debug_assertions, feature = "hot-reload"))]
+    fn development_source(&self) -> Option<String> {
+        let source = self.source()?;
+        let uri = if source.is_absolute_uri() {
+            source
+        } else {
+            Uri::combine(self.base_uri.as_ref()?, &source)
+        };
+        Some(uri.absolute_uri().to_owned())
+    }
+
     fn owner(&self) -> Option<ResourceHostRef> {
         self.loaded().owner()
     }
