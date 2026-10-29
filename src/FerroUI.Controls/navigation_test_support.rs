@@ -82,12 +82,24 @@ pub(crate) fn start_with_focus() -> UnitTestApplicationScope {
     UnitTestApplication::start(services)
 }
 
-/// The element named `name` of the template of `control`, after the template is applied.
+/// The element named `name` of the template of `control`, after the template is applied: a
+/// visual descendant of the template, or an element of the content of one of its popups (which is
+/// not a visual descendant of the control).
 pub(crate) fn part<T: ObjectType>(control: &TemplatedControl, name: &str) -> Ref<T> {
     control.apply_template();
-    control
-        .get_template_descendants()
+    let descendants = control.get_template_descendants();
+    let popup_content: Vec<Ref<Visual>> = descendants
+        .iter()
+        .filter_map(|element| element.cast::<Popup>())
+        .filter_map(|popup| popup.child())
+        .flat_map(|child| {
+            let child: Ref<Visual> = child.upcast();
+            std::iter::once(child.clone()).chain(child.get_visual_descendants())
+        })
+        .collect();
+    descendants
         .into_iter()
+        .chain(popup_content)
         .find(|element| element.name().as_deref() == Some(name))
         .and_then(|element| element.cast::<T>())
         .unwrap_or_else(|| panic!("the template part {name}"))
@@ -379,4 +391,16 @@ pub(crate) fn show(control: &Control, width: f64, height: f64) -> Scene {
     window.show();
     window.update_layout();
     Scene(window)
+}
+
+/// Whether the default template of `type_` is the one it inherits from `ContentControl` (or none):
+/// no template is built in Rust for the controls of WinUI, their templates are the theme's.
+pub(crate) fn has_no_template_of_its_own(type_: &'static ferroui_base::TypeInfo) -> bool {
+    let property = TemplatedControl::template_property();
+    let base = if crate::ContentControl::TYPE.is_assignable_from(type_) { crate::ContentControl::TYPE } else { TemplatedControl::TYPE };
+    match (property.get_default_value(type_), property.get_default_value(base)) {
+        (None, None) => true,
+        (Some(own), Some(inherited)) => std::ptr::addr_eq(Rc::as_ptr(&own), Rc::as_ptr(&inherited)),
+        _ => false,
+    }
 }

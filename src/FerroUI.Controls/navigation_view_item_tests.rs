@@ -10,7 +10,7 @@ use crate::automation::peers::{AutomationControlType, ControlAutomationPeer};
 use crate::automation::provider::{IExpandCollapseProvider, IInvokeProvider, ISelectionItemProvider};
 use crate::automation::{AutomationProperties, ExpandCollapseState};
 use crate::mouse_test_helper::MouseTestHelper;
-use crate::navigation_test_support::{has_class, part, show, start, start_with_focus, Scene};
+use crate::navigation_test_support::{has_class, has_no_template_of_its_own, part, show, start, start_with_focus, Scene};
 use crate::presenters::ContentPresenter;
 use crate::templates::{FuncControlTemplate, FuncTemplateNameScopeExtensions};
 use crate::testing::TestLogSink;
@@ -22,7 +22,6 @@ use ferroui_base::collections::FerroList;
 use ferroui_base::input::{InputElement, Key, KeyEventArgs, KeyModifiers, NavigationMethod};
 use ferroui_base::logging::LogEventLevel;
 use ferroui_base::media::FlowDirection;
-use ferroui_base::reactive::IDisposable;
 use ferroui_base::{BoxedValue, Ref, StyledElement};
 use std::cell::Cell;
 use std::rc::Rc;
@@ -82,7 +81,7 @@ fn defaults_and_read_only_properties_preserve_source_inheritance_and_per_instanc
     assert!(NavigationViewItemBase::TYPE.is_assignable_from(NavigationViewItem::TYPE));
     assert!(NavigationViewItemBase::TYPE.default_constructor().is_none());
     // No template is built in Rust: the template comes from the theme (here the theme of the tests).
-    assert!(first.template().is_none());
+    assert!(has_no_template_of_its_own(NavigationViewItem::TYPE));
     let _scene = attach(&first);
     assert!(first.template().is_some());
     assert!(first.visual_children_count() > 0);
@@ -499,8 +498,8 @@ fn header_and_separator_are_nonfocusable_items_with_templates_from_the_theme() {
     header.set_content(text("Documents"));
     assert!(!header.focusable());
     assert!(!separator.focusable());
-    assert!(header.template().is_none());
-    assert!(separator.template().is_none());
+    assert!(has_no_template_of_its_own(NavigationViewItemHeader::TYPE));
+    assert!(has_no_template_of_its_own(NavigationViewItemSeparator::TYPE));
     let panel = StackPanel::new();
     panel.children().add(&header);
     panel.children().add(&separator);

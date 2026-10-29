@@ -9,7 +9,7 @@
 
 use crate::automation::peers::ControlAutomationPeer;
 use crate::automation::provider::ISelectionProvider;
-use crate::navigation_test_support::{has_class, part, show, start, start_with_focus, Scene};
+use crate::navigation_test_support::{has_class, has_no_template_of_its_own, part, show, start, start_with_focus, Scene};
 use crate::presenters::ContentPresenter;
 use crate::primitives::{Popup, TemplatedControl};
 use crate::templates::{FuncControlTemplate, FuncDataTemplate};
@@ -22,7 +22,6 @@ use crate::{
 use ferroui_base::collections::FerroList;
 use ferroui_base::input::{FocusChangedEventArgs, InputElement, Key, KeyEventArgs, KeyModifiers, NavigationMethod};
 use ferroui_base::media::FlowDirection;
-use ferroui_base::reactive::IDisposable;
 use ferroui_base::styling::ControlTheme;
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::{BoxedValue, Rect, Ref, Size};
@@ -115,7 +114,7 @@ fn navigation_defaults_and_read_only_collections_are_instance_owned() {
     assert!(settings.left_pane_visibility());
     assert_eq!(settings.open_pane_length(), 320.0);
     // No template is built in Rust.
-    assert!(nav.template().is_none());
+    assert!(has_no_template_of_its_own(NavigationView::TYPE));
     let _scene = attach(&nav, 800.0);
     assert!(nav.visual_children_count() > 0);
     assert!(part::<SplitView>(&nav, "RootSplitView").template().is_some());
