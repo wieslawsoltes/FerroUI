@@ -163,6 +163,11 @@ def comparable_units(items: list[dict], allow_build_tool_optimization: bool) -> 
     return sorted(result, key=lambda item: json.dumps(item, sort_keys=True))
 
 
+def changed_outputs(first: dict, second: dict) -> list[str]:
+    """The generated outputs whose hashes differ between two builds."""
+    return sorted(str(key) for key in first.keys() | second.keys() if first.get(key) != second.get(key))
+
+
 def summarize(records: list[dict], allow_build_tool_optimization: bool = False) -> dict:
     baseline = [row for row in records if row["label"] == "baseline"]
     candidate = [row for row in records if row["label"] == "candidate"]
@@ -182,6 +187,10 @@ def summarize(records: list[dict], allow_build_tool_optimization: bool = False) 
             for row in records),
         "build_tool_optimization_experiment": allow_build_tool_optimization,
         "same_generated_rust_and_metadata": all(row["generated"] == reference_generated for row in records),
+        # Each revision repeats its own generated output (what an acknowledged output change still needs).
+        "generated_deterministic_per_revision": all(row["generated"] == rows[0]["generated"]
+                                                    for rows in (baseline, candidate) for row in rows),
+        "changed_generated_outputs": changed_outputs(reference_generated, candidate[0]["generated"]),
         "generated_files_per_build": sum(map(len, reference_generated.values())),
         "all_units_cold": all(not unit["fresh"] for row in records for unit in row["units"]),
     }
@@ -202,6 +211,9 @@ def main() -> int:
     parser.add_argument("--jobs", type=int)
     parser.add_argument("--candidate-build-tools", action="store_true",
                         help="Explicitly benchmark candidate .cargo/build-tools.toml; only four build-tool opt levels may differ")
+    parser.add_argument("--accept-output-changes", action="store_true",
+                        help="The pull request changes generated output on purpose (label build-output-changes): "
+                             "each revision must repeat its own output, and the changes against the baseline are reported")
     parser.add_argument("--minimum-speedup", type=float, default=0,
                         help="Explicit acceptance gate; 0 records evidence without claiming a target")
     args = parser.parse_args()
@@ -251,13 +263,21 @@ def main() -> int:
                 f"({summary['generated_files_per_build']} files/build).\n\n"
                 "Individual samples, source SHAs, Cargo logs and timing HTML are in the artifact. "
                 "This is a compile measurement; tests and cache replay are separate scenarios.\n")
+        if args.accept_output_changes and summary["changed_generated_outputs"]:
+            changed = summary["changed_generated_outputs"]
+            text += ("\n### Output changes acknowledged (`build-output-changes`)\n\n"
+                     f"Each revision repeats its own generated output: **{summary['generated_deterministic_per_revision']}**. "
+                     f"{len(changed)} generated outputs differ from the baseline:\n\n"
+                     + "".join(f"- `{name}`\n" for name in changed[:50])
+                     + (f"- ... {len(changed) - 50} more\n" if len(changed) > 50 else ""))
         (args.output / "summary.md").write_text(text)
         print(text)
         if os.environ.get("GITHUB_STEP_SUMMARY"):
             with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as handle:
                 handle.write(text)
-        valid = (summary["same_units_features_and_allowed_profiles"] and summary["same_generated_rust_and_metadata"]
-                 and summary["all_units_cold"])
+        same_outputs = summary["same_generated_rust_and_metadata"] or (
+            args.accept_output_changes and summary["generated_deterministic_per_revision"])
+        valid = summary["same_units_features_and_allowed_profiles"] and same_outputs and summary["all_units_cold"]
         if not valid:
             raise RuntimeError("comparison changed compilation units, features, profiles or generated outputs")
         if summary["speedup"] < args.minimum_speedup:

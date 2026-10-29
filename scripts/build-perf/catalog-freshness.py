@@ -407,25 +407,47 @@ def run_probe(assets: Path, destination: Path, source: Path, env: dict, rustc: s
     return result
 
 
-def compare_evidence(reference: dict, candidate: dict) -> dict:
+def compare_evidence(reference: dict, candidate: dict, outputs_reference: dict | None = None) -> dict:
+    """The equivalence of a pair to the first pair: the graph always, the outputs to `outputs_reference`
+    (the first pair of the same revision when output changes are acknowledged), else to `reference`."""
+    outputs = outputs_reference or reference
     result = {
         "same_units_features_profiles": all(definitions(candidate[phase]) == definitions(reference["population"])
                                             for phase in ("population", "repeat")),
-        "same_generated_rust_and_metadata": candidate["outputs"]["generated_rust_and_metadata"] == reference["outputs"]["generated_rust_and_metadata"],
-        "same_first_party_semantic_files": candidate["outputs"]["first_party_semantic_files"] == reference["outputs"]["first_party_semantic_files"],
-        "same_asset_table_bytes": filecmp.cmp(reference["asset_probe"]["binary_file"], candidate["asset_probe"]["binary_file"], shallow=False),
+        "same_generated_rust_and_metadata": candidate["outputs"]["generated_rust_and_metadata"] == outputs["outputs"]["generated_rust_and_metadata"],
+        "same_first_party_semantic_files": candidate["outputs"]["first_party_semantic_files"] == outputs["outputs"]["first_party_semantic_files"],
+        "same_asset_table_bytes": filecmp.cmp(outputs["asset_probe"]["binary_file"], candidate["asset_probe"]["binary_file"], shallow=False),
     }
     return result
 
 
-def summarize(records: list[dict]) -> dict:
+def first_of_revision(records: list[dict], label: str) -> dict:
+    """The first complete pair of a revision."""
+    return next(row for row in records if row["label"] == label and "asset_probe" in row)
+
+
+def output_changes(baseline: dict, candidate: dict) -> dict:
+    """The outputs of the candidate that differ from the baseline's: the changed entries of each kind."""
+    def changed(kind: str) -> list[str]:
+        first, second = baseline["outputs"][kind], candidate["outputs"][kind]
+        return sorted(str(key) for key in first.keys() | second.keys() if first.get(key) != second.get(key))
+    return {"generated_rust_and_metadata": changed("generated_rust_and_metadata"),
+            "first_party_semantic_files": changed("first_party_semantic_files"),
+            "asset_table_bytes_differ": not filecmp.cmp(baseline["asset_probe"]["binary_file"],
+                                                        candidate["asset_probe"]["binary_file"], shallow=False)}
+
+
+def summarize(records: list[dict], accept_output_changes: bool = False) -> dict:
     baseline = [row for row in records if row["label"] == "baseline"]
     candidate = [row for row in records if row["label"] == "candidate"]
     base_times = [row["repeat"]["seconds"] for row in baseline]
     candidate_times = [row["repeat"]["seconds"] for row in candidate]
     reference = records[0]
-    equivalence = [compare_evidence(reference, row) for row in records]
-    return {"baseline_repeat_seconds": base_times, "candidate_repeat_seconds": candidate_times,
+    equivalence = [compare_evidence(reference, row, first_of_revision(records, row["label"]) if accept_output_changes else None)
+                   for row in records]
+    return {"output_changes_acknowledged": accept_output_changes,
+            "output_changes": output_changes(baseline[0], candidate[0]),
+            "baseline_repeat_seconds": base_times, "candidate_repeat_seconds": candidate_times,
             "baseline_repeat_median_seconds": statistics.median(base_times),
             "candidate_repeat_median_seconds": statistics.median(candidate_times),
             "first_repeat_speedup": statistics.median(base_times) / statistics.median(candidate_times),
@@ -446,6 +468,24 @@ def summarize(records: list[dict]) -> dict:
             "additional_first_party_outputs": sorted(set(key for row in records for key in row["outputs"]["additional_first_party_outputs"]))}
 
 
+def acknowledged_changes(summary: dict) -> str:
+    """The section of the summary on the outputs the candidate changes, when they are acknowledged."""
+    if not summary["output_changes_acknowledged"]:
+        return ""
+    changes = summary["output_changes"]
+    generated, semantic = changes["generated_rust_and_metadata"], changes["first_party_semantic_files"]
+    text = ("\n### Output changes acknowledged (`build-output-changes`)\n\n"
+            "The equality of the outputs above is per revision (each sample against the first of its revision); "
+            "the graph is compared across revisions. Against the baseline the candidate changes "
+            f"{len(generated)} generated Rust/metadata entries and {len(semantic)} first-party semantic entries; "
+            f"asset table bytes differ: **{changes['asset_table_bytes_differ']}**.\n\n")
+    for title, names in (("Generated Rust/metadata", generated), ("First-party semantic files", semantic)):
+        if names:
+            text += f"{title}:\n\n" + "".join(f"- `{name}`\n" for name in names[:50])
+            text += f"- ... {len(names) - 50} more\n\n" if len(names) > 50 else "\n"
+    return text
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--baseline", required=True, type=Path)
@@ -458,6 +498,9 @@ def main() -> int:
     parser.add_argument("--offline", action="store_true", help="Skip untimed cargo fetch; timed commands are always offline")
     parser.add_argument("--require-baseline-self-input", action="store_true",
                         help="Require the historical placeholder/App.xaml dirty reason; use with a known isolated baseline")
+    parser.add_argument("--accept-output-changes", action="store_true",
+                        help="The pull request changes generated output on purpose (label build-output-changes): "
+                             "outputs are compared per revision and their changes against the baseline are reported")
     parser.add_argument("--minimum-speedup", type=float, default=0,
                         help="Acceptance gate for first repeats only; requires at least three samples when nonzero")
     args = parser.parse_args()
@@ -570,7 +613,9 @@ def main() -> int:
                 pair["outputs"] = snapshot_outputs(messages, source, target, directory / "generated", metadata[label],
                                                     package_ids[label], helpers)
                 pair["asset_probe"] = run_probe(Path(pair["outputs"]["catalog_assets_rs"]), directory / "asset-probe", source, build_env, rustc)
-                pair["equivalence_to_first_pair"] = compare_evidence(report["records"][0], pair)
+                pair["equivalence_to_first_pair"] = compare_evidence(
+                    report["records"][0], pair,
+                    first_of_revision(report["records"], label) if args.accept_output_changes else None)
                 save()
                 if not all(pair["equivalence_to_first_pair"].values()):
                     raise RuntimeError(f"{label} sample {sample} changed graph, generated output, or full asset table bytes")
@@ -579,7 +624,7 @@ def main() -> int:
             write_json(output / "provenance" / label / "source-files-after.json", files)
             if files != report["sources"][label]["files"] or external_configurations(source, env) != report["sources"][label]["external_configurations"]:
                 raise RuntimeError(f"{label} source/configuration changed during measurement")
-        report["summary"] = summary = summarize(report["records"])
+        report["summary"] = summary = summarize(report["records"], args.accept_output_changes)
         report["source_inputs_unchanged"] = True
         summary["speedup_gate_requested"] = args.minimum_speedup > 0
         summary["attribution"] = (
@@ -608,6 +653,7 @@ def main() -> int:
                 "This measures the first unchanged build after catalog output generation. Population costs, individual repeats, "
                 "cleanup commands, raw Cargo JSON/stderr, timing HTML, generated files and source provenance are in the artifact. "
                 "It does not claim a cold compilation speedup.\n")
+        text += acknowledged_changes(summary)
         (output / "summary.md").write_text(text, encoding="utf-8")
         print(text)
         if os.environ.get("GITHUB_STEP_SUMMARY"):

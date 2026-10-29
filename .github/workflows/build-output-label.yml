@@ -1,0 +1,48 @@
+name: Build output changes label
+
+# The label `build-output-changes` acknowledges that a pull request changes generated output on
+# purpose (docs/build-performance.md, "Intended output changes"). When it is added or removed, the
+# pull_request run of Build performance of the head is run again: that run reads the label when it
+# starts, so its result follows the label. Build performance itself does not run on label events,
+# so another label never starts it, cancels it or leaves a skipped run of it in front of a
+# failure. This workflow runs for every label event (GitHub cannot filter the label in `on:`); for
+# any other label its only job is skipped, and it has no check of its own to hide.
+
+on:
+  pull_request:
+    types: [labeled, unlabeled]
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: build-output-label-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  rerun:
+    name: Run Build performance again for the label
+    if: github.event.label.name == 'build-output-changes'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: The Build performance run of the head, again
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          run="$(gh run list -R "$GITHUB_REPOSITORY" --workflow build-performance.yml --event pull_request \
+            --commit "$SHA" --limit 1 --json databaseId,status -q '.[0] | "\(.databaseId) \(.status)"')"
+          if [ -z "$run" ]; then
+            echo "No Build performance run for $SHA: the pull request does not change its paths."
+            exit 0
+          fi
+          id="${run%% *}"; status="${run#* }"
+          if [ "$status" != completed ]; then
+            # A run that already started reads the label it had then: it is cancelled and run again.
+            gh run cancel "$id" -R "$GITHUB_REPOSITORY" || true
+            until [ "$(gh run view "$id" -R "$GITHUB_REPOSITORY" --json status -q .status)" = completed ]; do sleep 15; done
+          fi
+          gh run rerun "$id" -R "$GITHUB_REPOSITORY"
+          echo "Build performance run $id started again for the label change."
