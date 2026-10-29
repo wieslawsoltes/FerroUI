@@ -1,0 +1,29 @@
+<ContentPage Theme="{StaticResource ScrollPage}" xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Header="WinUI controls"
+             x:Class="ControlCatalog.Pages.WinUIControlsPage">
+  <!-- Not from upstream: the WinUI controls FerroUI ports as controls of ferroui-controls
+       (docs/porting/winui-controls.md). Their templates are in the WinUI theme and the macOS and
+       Material themes derived from it; the Fluent and Simple themes have none, so the controls
+       show nothing there. -->
+  <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+    <StackPanel x:Name="Sections" Orientation="Vertical" Spacing="16" Margin="0,0,0,24">
+      <TextBlock Classes="h2" TextWrapping="Wrap">The WinUI 3 controls of FerroUI, styled by the WinUI, macOS and Material themes</TextBlock>
+
+      <!-- Icons (W4) -->
+      <StackPanel x:Name="Icons" Spacing="8">
+        <TextBlock Classes="h3" Text="Icons" />
+        <TextBlock TextWrapping="Wrap" Text="SymbolIcon and FontIcon draw glyphs of the symbol font of the theme (SymbolThemeFontFamily); off Windows an application supplies the font." />
+        <StackPanel Orientation="Horizontal" Spacing="16">
+          <SymbolIcon Symbol="Accept" />
+          <SymbolIcon Symbol="Setting" />
+          <SymbolIcon Symbol="Mail" />
+          <SymbolIcon Symbol="Favorite" />
+          <FontIcon Glyph="&#xE710;" />
+          <FontIcon Glyph="&#xE72D;" FontSize="28" />
+          <PathIcon Data="M12,2L15,9L22,9L16.5,13.5L18.5,21L12,16.5L5.5,21L7.5,13.5L2,9L9,9Z" />
+        </StackPanel>
+      </StackPanel>
+    </StackPanel>
+  </ScrollViewer>
+</ContentPage>
