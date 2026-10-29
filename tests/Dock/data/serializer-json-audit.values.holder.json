@@ -1,0 +1,17 @@
+{
+  "$id": "1",
+  "Options": {
+    "$id": "2",
+    "IsDockingEnabled": false
+  },
+  "OtherOptions": {
+    "$ref": "2"
+  },
+  "Point": {
+    "X": -0,
+    "Y": "Infinity"
+  },
+  "State": -2147483644,
+  "Mask": -1,
+  "Action": 2147483647
+}

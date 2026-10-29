@@ -1,0 +1,32 @@
+[package]
+name = "ferrodock-model-reactiveui-services-ferro"
+description = "FerroUI framework integration for FerroDock ReactiveUI services"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+build = "build.rs"
+links = "ferrodock_model_reactiveui_services_ferro_xaml"
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferrodock-model-reactiveui-services = { path = "../FerroDock.Model.ReactiveUI.Services", version = "0.1.0" }
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+ferroui-reactiveui-controls.workspace = true
+ferroui-system.workspace = true
+ferroui-reactive.workspace = true
+ferroui-reactiveui.workspace = true
+ferroui-splat.workspace = true
+
+[build-dependencies]
+ferroui-build-scan.workspace = true
+
+[dev-dependencies]
+ferroui-headless.workspace = true
+
+[lints]
+workspace = true

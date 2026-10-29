@@ -1,0 +1,30 @@
+[package]
+name = "ferrodock-settings"
+description = "Native Dock settings and attached docking properties for FerroDock"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+build = "build.rs"
+links = "ferrodock_settings_metadata"
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferrodock-model-ferro = { path = "../FerroDock.Model.Ferro", version = "0.1.0" }
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+ferrodock-model.workspace = true
+
+[build-dependencies]
+ferroui-build-scan.workspace = true
+
+[dev-dependencies]
+ferroui-headless = { workspace = true, features = ["testing"] }
+ferrodock-model-reactiveui = { path = "../FerroDock.Model.ReactiveUI", version = "0.1.0" }
+ferroui-build-scan.workspace = true
+
+[lints]
+workspace = true

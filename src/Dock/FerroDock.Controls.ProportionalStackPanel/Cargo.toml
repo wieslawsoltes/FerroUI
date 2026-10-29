@@ -1,0 +1,29 @@
+[package]
+name = "ferrodock-controls-proportional-stack-panel"
+description = "Proportional layout panel and splitter controls for FerroDock"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+build = "build.rs"
+links = "ferrodock_controls_proportional_stack_panel_xaml"
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+ferroui-markup-xaml.workspace = true
+
+[build-dependencies]
+ferroui-build.workspace = true
+
+[dev-dependencies]
+ferroui-headless = { workspace = true, features = ["testing"] }
+ferrodock-model.workspace = true
+ferrodock-model-reactiveui = { path = "../FerroDock.Model.ReactiveUI", version = "0.1.0" }
+
+[lints]
+workspace = true

@@ -1,0 +1,14 @@
+[package]
+name = "ferrodock-serializer-system-text-json-generators"
+description = "Compile-time semantic passes for the original Dock JSON source generator"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+[lib]
+path = "lib.rs"
+[dev-dependencies]
+serde_json.workspace = true
+[lints]
+workspace = true

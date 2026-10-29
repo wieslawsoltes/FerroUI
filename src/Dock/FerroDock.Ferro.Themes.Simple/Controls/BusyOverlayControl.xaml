@@ -1,0 +1,50 @@
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:o="using:FerroDock.Ferro.Controls.Overlays" x:CompileBindings="True">
+  <ControlTheme x:Key="{x:Type o:BusyOverlayControl}" TargetType="o:BusyOverlayControl" x:DataType="o:BusyOverlayControl">
+    <Setter Property="Template">
+      <ControlTemplate x:DataType="o:BusyOverlayControl">
+        <Grid>
+          <ContentPresenter Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            IsEnabled="{TemplateBinding IsContentEnabled}"
+                            IsHitTestVisible="{TemplateBinding IsContentEnabled}" />
+          <Button Content="Reload"
+                  Command="{TemplateBinding ReloadCommand}"
+                  IsEnabled="{TemplateBinding IsReloadEnabled}"
+                  IsVisible="{TemplateBinding IsReloadVisible}"
+                  HorizontalAlignment="Right"
+                  VerticalAlignment="Bottom"
+                  Margin="{DynamicResource DockOverlayReloadButtonMargin}"
+                  ZIndex="31" />
+          <Border Background="{DynamicResource DockSurfaceWorkbenchBrush}"
+                  Opacity="0.65"
+                  IsVisible="{TemplateBinding IsBusy}"
+                  IsHitTestVisible="{TemplateBinding BlocksInput}"
+                  ZIndex="30">
+            <Border Background="{DynamicResource DockSurfaceEditorBrush}"
+                    BorderBrush="{DynamicResource DockBorderSubtleBrush}"
+                    BorderThickness="1"
+                    CornerRadius="{DynamicResource DockOverlayCardCornerRadius}"
+                    Padding="{DynamicResource DockOverlayCardPadding}"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    BoxShadow="0 6 18 #33000000">
+              <StackPanel Spacing="{DynamicResource DockOverlayCardSpacing}" HorizontalAlignment="Center">
+                <TextBlock Text="{Binding BusyMessage, RelativeSource={RelativeSource TemplatedParent}, TargetNullValue=Loading...}"
+                           FontSize="{DynamicResource DockOverlayMessageFontSize}"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource DockTabForegroundBrush}"
+                           HorizontalAlignment="Center" />
+                <ProgressBar IsIndeterminate="True"
+                             Width="{DynamicResource DockOverlayProgressWidth}"
+                             Height="{DynamicResource DockOverlayProgressHeight}"
+                             IsVisible="{Binding ShowProgress, RelativeSource={RelativeSource TemplatedParent}}" />
+              </StackPanel>
+            </Border>
+          </Border>
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

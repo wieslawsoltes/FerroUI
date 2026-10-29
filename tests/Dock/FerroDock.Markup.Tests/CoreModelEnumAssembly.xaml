@@ -1,0 +1,6 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:core="clr-namespace:FerroDock.Model.Core;assembly=FerroDock.Model">
+ <ContentControl Content="{x:Static core:SplitViewDisplayMode.CompactOverlay}" />
+ <ContentControl Content="{x:Static core:SplitViewPanePlacement.Bottom}" />
+ <ContentControl Content="{x:Static core:Orientation.Vertical}" />
+</StackPanel>

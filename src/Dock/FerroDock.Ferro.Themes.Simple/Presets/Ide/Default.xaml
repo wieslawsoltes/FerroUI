@@ -1,0 +1,47 @@
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="using:System">
+  <StaticResource x:Key="DockSurfaceWorkbenchBrush" ResourceKey="DockThemeBackgroundBrush" />
+  <StaticResource x:Key="DockSurfaceSidebarBrush" ResourceKey="DockThemeBackgroundBrush" />
+  <StaticResource x:Key="DockSurfaceEditorBrush" ResourceKey="DockThemeControlBackgroundBrush" />
+  <StaticResource x:Key="DockSurfacePanelBrush" ResourceKey="DockThemeBackgroundBrush" />
+  <StaticResource x:Key="DockSurfaceHeaderBrush" ResourceKey="DockThemeBorderLowBrush" />
+  <StaticResource x:Key="DockSurfaceHeaderActiveBrush" ResourceKey="DockThemeAccentBrush" />
+
+  <StaticResource x:Key="DockBorderSubtleBrush" ResourceKey="DockThemeBorderLowBrush" />
+  <StaticResource x:Key="DockBorderStrongBrush" ResourceKey="DockThemeBorderLowBrush" />
+  <StaticResource x:Key="DockSeparatorBrush" ResourceKey="DockThemeBorderLowBrush" />
+  <StaticResource x:Key="DockSplitterIdleBrush" ResourceKey="DockThemeBorderLowBrush" />
+  <StaticResource x:Key="DockSplitterHoverBrush" ResourceKey="DockApplicationAccentBrushLow" />
+  <StaticResource x:Key="DockSplitterDragBrush" ResourceKey="DockApplicationAccentBrushMed" />
+
+  <SolidColorBrush x:Key="DockTabBackgroundBrush" Color="#00000000" />
+  <StaticResource x:Key="DockTabHoverBackgroundBrush" ResourceKey="DockApplicationAccentBrushMed" />
+  <StaticResource x:Key="DockTabActiveBackgroundBrush" ResourceKey="DockApplicationAccentBrushLow" />
+  <StaticResource x:Key="DockTabActiveIndicatorBrush" ResourceKey="DockApplicationAccentBrushLow" />
+  <StaticResource x:Key="DockTabForegroundBrush" ResourceKey="DockThemeForegroundBrush" />
+  <StaticResource x:Key="DockTabSelectedForegroundBrush" ResourceKey="DockApplicationAccentBrushMed" />
+  <StaticResource x:Key="DockTabActiveForegroundBrush" ResourceKey="DockApplicationAccentForegroundBrush" />
+  <StaticResource x:Key="DockTabCloseHoverBackgroundBrush" ResourceKey="DockApplicationAccentBrushHigh" />
+  <StaticResource x:Key="DockTargetIndicatorBrush" ResourceKey="DockApplicationAccentBrushIndicator" />
+
+  <StaticResource x:Key="DockChromeButtonForegroundBrush" ResourceKey="DockToolChromeIconBrush" />
+  <StaticResource x:Key="DockChromeButtonHoverBackgroundBrush" ResourceKey="DockThemeControlBackgroundBrush" />
+  <StaticResource x:Key="DockChromeButtonPressedBackgroundBrush" ResourceKey="DockThemeBorderLowBrush" />
+  <StaticResource x:Key="DockChromeButtonDangerHoverBrush" ResourceKey="DockApplicationAccentBrushHigh" />
+  <VisualBrush x:Key="DockChromeGripBrush"
+               SourceRect="0,0,4,5"
+               DestinationRect="0,0,4,5"
+               TileMode="Tile"
+               Stretch="UniformToFill">
+    <VisualBrush.Visual>
+      <Canvas Width="4" Height="5" Background="Transparent">
+        <Rectangle Height="1" Width="1" Fill="#8A8A8A" />
+        <Rectangle Height="1" Width="1" Fill="#8A8A8A" Canvas.Top="2" Canvas.Left="2" />
+        <Rectangle Height="1" Width="1" Fill="#8A8A8A" Canvas.Top="4" />
+      </Canvas>
+    </VisualBrush.Visual>
+  </VisualBrush>
+
+  <sys:Double x:Key="DockCornerRadiusSmall">0</sys:Double>
+</ResourceDictionary>

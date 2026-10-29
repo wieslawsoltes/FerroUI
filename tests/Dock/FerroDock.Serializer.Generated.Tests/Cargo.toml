@@ -1,0 +1,22 @@
+[package]
+name = "ferrodock-serializer-generated-tests"
+description = "Compiled consumer of generated JSON metadata over the original docking models"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+build = "build.rs"
+[lib]
+path = "lib.rs"
+[dependencies]
+ferrodock-model.workspace = true
+ferrodock-model-reactiveui = { path="../../../src/Dock/FerroDock.Model.ReactiveUI",version="0.1.0" }
+ferrodock-serializer-system-text-json = { path="../../../src/Dock/FerroDock.Serializer.SystemTextJson",version="0.1.0" }
+[build-dependencies]
+ferrodock-serializer-system-text-json-generators-rust = { path="../../../src/Dock/FerroDock.Serializer.SystemTextJson.Generators.Rust",version="0.1.0" }
+ferroui-build-scan.workspace = true
+ferrodock-serializer-system-text-json-generators = { path="../../../src/Dock/FerroDock.Serializer.SystemTextJson.Generators",version="0.1.0" }
+serde_json.workspace = true
+[lints]
+workspace = true

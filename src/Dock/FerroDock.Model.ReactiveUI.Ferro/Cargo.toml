@@ -1,0 +1,28 @@
+[package]
+name = "ferrodock-model-reactiveui-ferro"
+description = "FerroUI metadata and construction of the original ReactiveUI docking models"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+build = "build.rs"
+links = "ferrodock_model_reactiveui_ferro_metadata"
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferrodock-model-ferro = { path = "../FerroDock.Model.Ferro", version = "0.1.0" }
+ferrodock-model.workspace = true
+ferrodock-model-reactiveui = { path = "../FerroDock.Model.ReactiveUI", version = "0.1.0" }
+ferrodock-controls-recycling = { path = "../FerroDock.Controls.Recycling", version = "0.1.0" }
+ferroui-base.workspace = true
+ferroui-reactiveui.workspace = true
+ferroui-system.workspace = true
+
+[build-dependencies]
+ferroui-build-scan.workspace = true
+
+[lints]
+workspace = true

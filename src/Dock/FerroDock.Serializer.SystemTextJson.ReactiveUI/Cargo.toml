@@ -1,0 +1,18 @@
+[package]
+name = "ferrodock-serializer-system-text-json-reactiveui"
+description = "Compiled ReactiveUI docking model catalog for FerroDock JSON serialization"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+[lib]
+path = "lib.rs"
+[dependencies]
+ferrodock-model.workspace = true
+ferrodock-model-reactiveui = { path = "../FerroDock.Model.ReactiveUI", version = "0.1.0" }
+ferrodock-serializer-system-text-json = { path = "../FerroDock.Serializer.SystemTextJson", version = "0.1.0" }
+[lints]
+workspace = true
+[dev-dependencies]
+ferroui-reactiveui.workspace = true

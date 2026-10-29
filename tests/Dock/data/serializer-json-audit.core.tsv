@@ -1,0 +1,10 @@
+rect-value-no-reference-id	1
+rect-components-and-signed-zero	1
+policy-null-values-omitted	1
+override-derived-readonly-property-ignored	1
+policy-default-serialization	1
+override-upcast-shared-reference	1
+same-original-override-state	1
+nullable-bounds-are-value-copies	1
+policy-interface-read-has-no-fabricated-constructor	1
+base-first-cannot-recover-derived-class	1

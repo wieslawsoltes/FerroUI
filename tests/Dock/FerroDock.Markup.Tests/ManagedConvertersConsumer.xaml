@@ -1,0 +1,9 @@
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            xmlns:d="using:FerroDock.Ferro.Controls"
+            xmlns:c="using:FerroDock.Ferro.Converters"
+            x:DataType="d:ManagedDockWindowDocument" x:CompileBindings="True">
+  <Border Name="ToolHeader" IsVisible="{Binding Converter={x:Static c:ManagedDockableIsToolWindowConverter.Instance}}" />
+  <Border Name="DocumentHeader" IsVisible="{Binding Converter={x:Static c:ManagedDockableIsToolWindowConverter.Instance}, ConverterParameter=Not}" />
+  <ContentControl Name="ToolDock" Content="{Binding Converter={x:Static c:ManagedDockableToolDockConverter.Instance}}" />
+</StackPanel>

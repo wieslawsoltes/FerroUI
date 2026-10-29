@@ -1,0 +1,31 @@
+[package]
+name = "ferrodock-ferro-themes-browser"
+description = "Source Browser docking resources for FerroDock"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+build = "build.rs"
+links = "ferrodock_ferro_themes_browser_metadata"
+[lib]
+path = "lib.rs"
+[dependencies]
+ferrodock-model-ferro.workspace = true
+ferrodock-ferro-themes-fluent = { path = "../FerroDock.Ferro.Themes.Fluent", version = "0.1.0" }
+ferrodock-controls-deferred-content-control = { path = "../FerroDock.Controls.DeferredContentControl", version = "0.1.0" }
+ferrodock-controls-recycling = { path = "../FerroDock.Controls.Recycling", version = "0.1.0" }
+ferrodock-controls-proportional-stack-panel = { path = "../FerroDock.Controls.ProportionalStackPanel", version = "0.1.0" }
+ferrodock-settings.workspace = true
+ferrodock-model.workspace = true
+ferrodock-ferro = { path = "../FerroDock.Ferro", version = "0.1.0" }
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+ferroui-markup-xaml.workspace = true
+[build-dependencies]
+ferroui-build.workspace = true
+[lints]
+workspace = true
+[dev-dependencies]
+ferroui-headless = { workspace = true, features = ["testing"] }
+ferroui-themes-fluent.workspace = true

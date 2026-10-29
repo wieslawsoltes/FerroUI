@@ -1,5 +1,9 @@
 [workspace]
 resolver = "2"
+# The Dock port (docs/porting/dock): imported, not yet a member. Its crates are built against
+# the published 0.3 packages with the core changes of docs/porting/dock/core-patches; they join
+# the workspace when those changes are made in the crates here.
+exclude = ["src/Dock", "tests/Dock", "samples/Dock"]
 members = [
     "samples/HotReload",
     "src/FerroUI.HotReload",

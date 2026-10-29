@@ -1,0 +1,30 @@
+[package]
+name = "ferrodock-settings-markup-tests"
+description = "Independent compiled markup consumer of FerroDock settings"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+publish = false
+build = "build.rs"
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferrodock-model-ferro.workspace = true
+ferrodock-settings.workspace = true
+ferrodock-model.workspace = true
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+ferroui-markup-xaml.workspace = true
+
+[build-dependencies]
+ferroui-build.workspace = true
+
+[dev-dependencies]
+ferroui-headless = { workspace = true, features = ["testing"] }
+
+[lints]
+workspace = true

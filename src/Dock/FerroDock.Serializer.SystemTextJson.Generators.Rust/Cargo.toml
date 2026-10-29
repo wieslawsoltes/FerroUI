@@ -1,0 +1,20 @@
+[package]
+name = "ferrodock-serializer-system-text-json-generators-rust"
+description = "Build-time binding of shared FerroUI declaration metadata to Dock JSON accessors"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+[lib]
+path = "lib.rs"
+[dependencies]
+ferrodock-serializer-system-text-json-generators = { path = "../FerroDock.Serializer.SystemTextJson.Generators", version = "0.1.0" }
+ferroui-build-scan.workspace = true
+quote = { version = "1", default-features = false }
+proc-macro2 = { version = "1", default-features = false, features = ["span-locations"] }
+syn = { version = "2", default-features = false, features = ["full", "parsing", "printing", "visit"] }
+[dev-dependencies]
+serde_json.workspace = true
+[lints]
+workspace = true

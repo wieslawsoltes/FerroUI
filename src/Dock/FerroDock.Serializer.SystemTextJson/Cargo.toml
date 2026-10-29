@@ -1,0 +1,21 @@
+[package]
+name = "ferrodock-serializer-system-text-json"
+description = "Source SystemTextJson serializer contracts for FerroDock"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+[lib]
+path = "lib.rs"
+[dependencies]
+ferrodock-model.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+ryu.workspace = true
+[lints]
+workspace = true
+
+[dev-dependencies]
+ferroui-system.workspace = true
+ferrodock-model-reactiveui = { path="../FerroDock.Model.ReactiveUI", version="0.1.0" }
