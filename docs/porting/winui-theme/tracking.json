@@ -90727,7 +90727,7 @@
    "winui": "No WinUI style (IconElement has no template): the TextBlock that WinUI's FontIcon builds in code (CFontIcon::ApplyTemplate, icon.cpp), in the font SymbolThemeFontFamily. A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it.",
    "status": "ported",
    "deviations": 3,
-   "date": "2026-10-24"
+   "date": "2026-10-29"
   },
   {
    "document": "SymbolIcon.xaml",
