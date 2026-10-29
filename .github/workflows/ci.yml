@@ -625,10 +625,10 @@ jobs:
       - uses: ./.github/actions/browser-toolchain
         with:
           cache-key: browser-check
-      - name: Script module (type check, lint, bundle, pixel test)
+      - name: Script module (type check, lint, bundle, pixel and text input tests)
         run: |
           node scripts/browser/build-webapp.mjs build
-          (cd src/Browser/FerroUI.Browser/webapp && npm run test:pixels)
+          (cd src/Browser/FerroUI.Browser/webapp && npm run test:pixels && npm run test:input)
       - name: Skia features of the target
         run: |
           # An unsupported feature combination makes the Skia bindings build Skia from source.

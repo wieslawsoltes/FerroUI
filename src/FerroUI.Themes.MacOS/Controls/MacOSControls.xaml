@@ -110,6 +110,9 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/AutoSuggestBox.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/RadioButtons.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/RatingControl.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/Frame.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/NavigationView.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/TitleBar.xaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Styles.Resources>
