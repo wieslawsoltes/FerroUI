@@ -303,7 +303,10 @@
           <Style Selector="^ /template/ Border#LayoutRoot">
             <Setter Property="Background" Value="{DynamicResource NavigationViewButtonBackgroundPointerOver}" />
           </Style>
-          <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter, ^ /template/ TextBlock#Icon">
+          <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Foreground" Value="{DynamicResource NavigationViewButtonForegroundPointerOver}" />
+          </Style>
+          <Style Selector="^ /template/ TextBlock#Icon">
             <Setter Property="Foreground" Value="{DynamicResource NavigationViewButtonForegroundPointerOver}" />
           </Style>
         </Style>
@@ -311,7 +314,10 @@
           <Style Selector="^ /template/ Border#LayoutRoot">
             <Setter Property="Background" Value="{DynamicResource NavigationViewButtonBackgroundPressed}" />
           </Style>
-          <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter, ^ /template/ TextBlock#Icon">
+          <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Foreground" Value="{DynamicResource NavigationViewButtonForegroundPressed}" />
+          </Style>
+          <Style Selector="^ /template/ TextBlock#Icon">
             <Setter Property="Foreground" Value="{DynamicResource NavigationViewButtonForegroundPressed}" />
           </Style>
         </Style>

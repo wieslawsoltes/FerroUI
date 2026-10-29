@@ -14,17 +14,22 @@ use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, BoxedValue, FerroObjectImpl, Ref, StyledElementImpl,
     StyledElementImplExt, TypeInfo, VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs,
 };
+use ferroui_base::Thickness;
 use ferroui_controls::navigation::NavigationMode;
 use ferroui_controls::primitives::TemplatedControlImpl;
 use ferroui_controls::{
     box_item, unbox_item, Application, AutoSuggestBox, AutoSuggestionBoxTextChangeReason, ContentPage, Control,
-    ControlImpl, Frame, FramePage, IconElement, ItemsSource, NavigationPage, NavigationView, NavigationViewItem, Page,
+    ControlImpl, Frame, FramePage, IconElement, ItemsSource, NavigationPage, NavigationView, NavigationViewDisplayMode,
+    NavigationViewItem, Page,
     PageImpl, PathIcon, TopLevel,
 };
 use mini_mvvm::{delay, start_async};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use std::time::Duration;
+
+/// The height of the row of the toggle and back buttons of a minimal pane, above the content.
+const MINIMAL_CONTENT_TOP: f64 = 48.0;
 
 /// The main view of the catalog: a page whose content is a navigation view. Its pane lists the
 /// home page, the sections with their pages and the settings page; its frame shows them, each page
@@ -406,8 +411,10 @@ impl MainView {
         navigation.display_mode_changed(move |_| {
             if let Some(this) = weak.upgrade() {
                 this.view_model().set_is_drawer_opened(this.navigation_view().is_pane_open());
+                this.update_content_margin();
             }
         });
+        self.update_content_margin();
         // The view model shows its pages in the frame.
         let weak = self.to_ref().downgrade();
         view_model.set_page_host(Some(Rc::new(move |item: &Rc<PageItem>, page: Ref<Page>| {
@@ -452,6 +459,14 @@ impl MainView {
                 entry.set_is_expanded(true);
             }
         }
+    }
+
+    /// The minimal pane leaves the toggle and back buttons over the top left of the content (the shell
+    /// shows no header of the navigation view): the frame starts below them.
+    fn update_content_margin(&self) {
+        let minimal = self.navigation_view().display_mode() == NavigationViewDisplayMode::Minimal;
+        let top = if minimal { MINIMAL_CONTENT_TOP } else { 0.0 };
+        self.content_frame().set_margin(Thickness::new(0.0, top, 0.0, 0.0));
     }
 
     fn update_back_button(&self) {

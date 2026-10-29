@@ -4606,7 +4606,7 @@
   },
   "NavigationViewItemBackgroundSelected": {
     "kind": "Brush",
-    "role": "Surface",
+    "role": "SecondaryContainer",
     "opacity": 1
   },
   "NavigationViewItemBackgroundSelectedDisabled": {
@@ -4616,12 +4616,12 @@
   },
   "NavigationViewItemBackgroundSelectedPointerOver": {
     "kind": "Brush",
-    "role": "Surface",
+    "role": "SecondaryContainer",
     "opacity": 1
   },
   "NavigationViewItemBackgroundSelectedPressed": {
     "kind": "Brush",
-    "role": "Surface",
+    "role": "SecondaryContainer",
     "opacity": 1
   },
   "NavigationViewItemBorderBrush": {
@@ -4726,7 +4726,7 @@
   },
   "NavigationViewItemForegroundSelected": {
     "kind": "Brush",
-    "role": "OnPrimary",
+    "role": "OnSecondaryContainer",
     "opacity": 1
   },
   "NavigationViewItemForegroundSelectedDisabled": {
@@ -4736,12 +4736,12 @@
   },
   "NavigationViewItemForegroundSelectedPointerOver": {
     "kind": "Brush",
-    "role": "OnPrimary",
+    "role": "OnSecondaryContainer",
     "opacity": 1
   },
   "NavigationViewItemForegroundSelectedPressed": {
     "kind": "Brush",
-    "role": "OnPrimary",
+    "role": "OnSecondaryContainer",
     "opacity": 1
   },
   "NavigationViewItemHeaderForeground": {
@@ -4761,7 +4761,7 @@
   },
   "NavigationViewSelectionIndicatorForeground": {
     "kind": "Brush",
-    "role": "OnSurface",
+    "role": "Primary",
     "opacity": 1
   },
   "NavigationViewTopPaneBackground": {
@@ -9306,7 +9306,7 @@
   },
   "TopNavigationViewItemForegroundSelected": {
     "kind": "Brush",
-    "role": "OnPrimary",
+    "role": "Primary",
     "opacity": 1
   },
   "TopNavigationViewItemForegroundSelectedPointerOver": {
