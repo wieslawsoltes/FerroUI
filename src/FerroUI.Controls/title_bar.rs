@@ -7,7 +7,7 @@ use crate::chrome::WindowDecorationProperties;
 use crate::primitives::{
     TemplateAppliedEventArgs, TemplatedControl, TemplatedControlImpl, TemplatedControlImplExt, TitleBarTemplateSettings,
 };
-use crate::{Button, ColumnDefinition, Control, ControlImpl, GridLength, IconSource, TopLevel, Window, WindowBase};
+use crate::{Button, Control, ControlImpl, IconSource, TopLevel, Window, WindowBase};
 use ferroui_base::input::{InputElementImpl, WindowDecorationsElementRole};
 use ferroui_base::interactivity::{InteractiveImpl, RoutedEventHandlerToken};
 use ferroui_base::layout::{LayoutableImpl, LayoutableImplExt};
@@ -45,8 +45,8 @@ const PANE_TOGGLE_BUTTON_NAME: &str = "Navigation";
 /// The template parts the title bar looks up.
 #[derive(Default)]
 struct Parts {
-    left_padding: Option<Ref<ColumnDefinition>>,
-    right_padding: Option<Ref<ColumnDefinition>>,
+    left_padding: Option<Ref<Control>>,
+    right_padding: Option<Ref<Control>>,
     back: Option<(Ref<Button>, RoutedEventHandlerToken)>,
     toggle: Option<(Ref<Button>, RoutedEventHandlerToken)>,
     icon: Option<Ref<Control>>,
@@ -68,7 +68,8 @@ struct Parts {
 /// `:deactivated` (the Deactivated states: the window is not active), `:expanded-height`
 /// (HeightGroup: content or a header), `:compact` (DisplayModeGroup: the content no longer fits
 /// beside the title) and `:negative-inset-spacing` (LeftHeaderSpacingGroup). The template parts
-/// are WinUI's: `LeftPaddingColumn`, `RightPaddingColumn`, `PART_BackButton`,
+/// are WinUI's: `LeftPaddingColumn` and `RightPaddingColumn` (borders in FerroUI, a column
+/// definition has no name), `PART_BackButton`,
 /// `PART_PaneToggleButton`, `PART_Icon`, `PART_LeftHeaderPresenter`, `PART_ContentPresenterGrid`,
 /// `PART_ContentPresenter` and `PART_RightHeaderPresenter`. The Fluent and Simple themes have no
 /// template for it (docs/porting/winui-controls.md, section 5.1).
@@ -208,8 +209,8 @@ impl TemplatedControlImpl for TitleBar {
         Self::parent_on_apply_template(this, args);
         let scope = args.name_scope();
         let mut parts = Parts {
-            left_padding: scope.find_as::<ColumnDefinition>("LeftPaddingColumn"),
-            right_padding: scope.find_as::<ColumnDefinition>("RightPaddingColumn"),
+            left_padding: scope.find_as::<Control>("LeftPaddingColumn"),
+            right_padding: scope.find_as::<Control>("RightPaddingColumn"),
             icon: scope.find_as::<Control>("PART_Icon"),
             left_header: scope.find_as::<Control>("PART_LeftHeaderPresenter"),
             content_grid: scope.find_as::<Control>("PART_ContentPresenterGrid"),
@@ -565,9 +566,10 @@ impl TitleBar {
     }
 
     /// TitleBar::UpdatePadding: the padding columns leave the caption buttons free, swapped in a
-    /// right-to-left bar.
+    /// right-to-left bar. Outside a window they keep the widths of the theme.
     fn update_padding(&self) {
-        let insets = self.window().map(|window| window.caption_button_insets()).unwrap_or_default();
+        let Some(window) = self.window() else { return };
+        let insets = window.caption_button_insets();
         let (left, right) = if self.flow_direction() == FlowDirection::RightToLeft {
             (insets.right, insets.left)
         } else {
@@ -575,10 +577,10 @@ impl TitleBar {
         };
         let parts = self.parts.borrow();
         if let Some(column) = &parts.left_padding {
-            column.set_width(GridLength::from_pixels(left));
+            column.set_width(left);
         }
         if let Some(column) = &parts.right_padding {
-            column.set_width(GridLength::from_pixels(right));
+            column.set_width(right);
         }
     }
 

@@ -63,6 +63,7 @@
              InfoBar uses InfoBarCloseButtonStyle of NotificationCard.xaml. -->
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/InfoBar.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/InfoBadge.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/TitleBar.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/ProgressRing.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/WindowNotificationManager.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/TableView.xaml" />
