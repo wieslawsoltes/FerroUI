@@ -156,6 +156,8 @@ mod property_inspector;
 mod preview_stages;
 #[path = "render_prototype_tests.rs"]
 mod prototype;
+#[path = "render_prototype_overlay_tests.rs"]
+mod prototype_overlays;
 
 #[test]
 fn native_workspace_renders_design_manipulation_and_animation() {

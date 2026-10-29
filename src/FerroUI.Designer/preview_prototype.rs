@@ -7,6 +7,8 @@ use std::collections::{BTreeMap, BTreeSet};
 pub const MAX_PREVIEW_PROTOTYPE_FLOWS: usize = 32;
 pub const MAX_PREVIEW_PROTOTYPE_LINKS: usize = 128;
 pub const MAX_PREVIEW_PROTOTYPE_HISTORY: usize = 64;
+pub const MAX_PREVIEW_PROTOTYPE_OVERLAYS: usize = 8;
+pub const MAX_PREVIEW_PROTOTYPE_OVERLAY_OFFSET: i32 = 16_384;
 const MAX_PROTOTYPE_TEXT_BYTES: usize = 524_288;
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -32,16 +34,206 @@ pub struct PreviewPrototypeLink {
     pub action: PreviewPrototypeAction,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+/// Placement in the base screen's logical coordinate space. The native presenter
+/// constrains the resulting visible rectangle to the prototype viewport.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize)]
+#[serde(tag = "kind", rename_all = "snake_case")]
+pub enum PreviewPrototypeOverlayPlacement {
+    #[default]
+    Center,
+    TopLeft,
+    TopCenter,
+    TopRight,
+    CenterLeft,
+    CenterRight,
+    BottomLeft,
+    BottomCenter,
+    BottomRight,
+    Manual {
+        x: i32,
+        y: i32,
+    },
+}
+
+// Serde's internally tagged unit variants ignore trailing fields even when the
+// enum denies unknown fields. Empty struct variants enforce the complete wire
+// shape while keeping the public API's convenient fieldless variants unchanged.
+#[derive(Deserialize)]
 #[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
+enum PrototypeOverlayPlacementWire {
+    Center {},
+    TopLeft {},
+    TopCenter {},
+    TopRight {},
+    CenterLeft {},
+    CenterRight {},
+    BottomLeft {},
+    BottomCenter {},
+    BottomRight {},
+    Manual { x: i32, y: i32 },
+}
+
+impl<'de> Deserialize<'de> for PreviewPrototypeOverlayPlacement {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        Ok(
+            match PrototypeOverlayPlacementWire::deserialize(deserializer)? {
+                PrototypeOverlayPlacementWire::Center {} => Self::Center,
+                PrototypeOverlayPlacementWire::TopLeft {} => Self::TopLeft,
+                PrototypeOverlayPlacementWire::TopCenter {} => Self::TopCenter,
+                PrototypeOverlayPlacementWire::TopRight {} => Self::TopRight,
+                PrototypeOverlayPlacementWire::CenterLeft {} => Self::CenterLeft,
+                PrototypeOverlayPlacementWire::CenterRight {} => Self::CenterRight,
+                PrototypeOverlayPlacementWire::BottomLeft {} => Self::BottomLeft,
+                PrototypeOverlayPlacementWire::BottomCenter {} => Self::BottomCenter,
+                PrototypeOverlayPlacementWire::BottomRight {} => Self::BottomRight,
+                PrototypeOverlayPlacementWire::Manual { x, y } => Self::Manual { x, y },
+            },
+        )
+    }
+}
+
+/// Presentation settings for one overlay entry. Outside dismissal is opt-in;
+/// explicit CloseOverlay and Back remain available regardless of that setting.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct PreviewPrototypeOverlayOptions {
+    pub placement: PreviewPrototypeOverlayPlacement,
+    pub dismiss_on_outside: bool,
+    pub dim_background: bool,
+}
+
+impl Default for PreviewPrototypeOverlayOptions {
+    fn default() -> Self {
+        Self {
+            placement: PreviewPrototypeOverlayPlacement::Center,
+            dismiss_on_outside: false,
+            dim_background: true,
+        }
+    }
+}
+
+impl PreviewPrototypeOverlayOptions {
+    pub fn validate(&self) -> Result<(), String> {
+        if let PreviewPrototypeOverlayPlacement::Manual { x, y } = self.placement {
+            let range =
+                -MAX_PREVIEW_PROTOTYPE_OVERLAY_OFFSET..=MAX_PREVIEW_PROTOTYPE_OVERLAY_OFFSET;
+            if !range.contains(&x) || !range.contains(&y) {
+                return Err(format!(
+                    "Manual prototype overlay coordinates must be within ±{MAX_PREVIEW_PROTOTYPE_OVERLAY_OFFSET} logical units"
+                ));
+            }
+        }
+        Ok(())
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct PreviewPrototypeOverlay {
+    pub stage: PreviewStageId,
+    pub options: PreviewPrototypeOverlayOptions,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
+#[serde(tag = "kind", rename_all = "snake_case")]
 pub enum PreviewPrototypeAction {
-    Navigate { stage: PreviewStageId },
+    Navigate {
+        stage: PreviewStageId,
+    },
     Back,
+    OpenOverlay {
+        stage: PreviewStageId,
+        options: PreviewPrototypeOverlayOptions,
+    },
+    SwapOverlay {
+        stage: PreviewStageId,
+        options: PreviewPrototypeOverlayOptions,
+    },
+    CloseOverlay,
+}
+
+// Live stage IDs and persistent stage indices share the same strict action
+// grammar. Fieldless actions use empty structs for the same reason as placement.
+#[derive(Deserialize)]
+#[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
+enum PrototypeActionWire<T> {
+    Navigate {
+        stage: T,
+    },
+    Back {},
+    OpenOverlay {
+        stage: T,
+        #[serde(default)]
+        options: PreviewPrototypeOverlayOptions,
+    },
+    SwapOverlay {
+        stage: T,
+        #[serde(default)]
+        options: PreviewPrototypeOverlayOptions,
+    },
+    CloseOverlay {},
+}
+
+impl<'de> Deserialize<'de> for PreviewPrototypeAction {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        Ok(
+            match PrototypeActionWire::<PreviewStageId>::deserialize(deserializer)? {
+                PrototypeActionWire::Navigate { stage } => Self::Navigate { stage },
+                PrototypeActionWire::Back {} => Self::Back,
+                PrototypeActionWire::OpenOverlay { stage, options } => {
+                    Self::OpenOverlay { stage, options }
+                }
+                PrototypeActionWire::SwapOverlay { stage, options } => {
+                    Self::SwapOverlay { stage, options }
+                }
+                PrototypeActionWire::CloseOverlay {} => Self::CloseOverlay,
+            },
+        )
+    }
+}
+
+impl PreviewPrototypeAction {
+    pub fn target_stage(&self) -> Option<PreviewStageId> {
+        match *self {
+            Self::Navigate { stage }
+            | Self::OpenOverlay { stage, .. }
+            | Self::SwapOverlay { stage, .. } => Some(stage),
+            Self::Back | Self::CloseOverlay => None,
+        }
+    }
+
+    fn is_overlay(&self) -> bool {
+        matches!(
+            self,
+            Self::OpenOverlay { .. } | Self::SwapOverlay { .. } | Self::CloseOverlay
+        )
+    }
+
+    fn validate(&self) -> Result<(), String> {
+        match self {
+            Self::OpenOverlay { options, .. } | Self::SwapOverlay { options, .. } => {
+                options.validate()
+            }
+            Self::Navigate { .. } | Self::Back | Self::CloseOverlay => Ok(()),
+        }
+    }
+
+    fn text_size(&self) -> usize {
+        if matches!(self, Self::OpenOverlay { .. } | Self::SwapOverlay { .. }) {
+            192
+        } else {
+            64
+        }
+    }
 }
 
 impl PreviewPrototype {
     pub fn is_empty(&self) -> bool {
         self.flows.is_empty() && self.links.is_empty()
+    }
+
+    pub fn has_overlay_actions(&self) -> bool {
+        self.links.iter().any(|link| link.action.is_overlay())
     }
 
     /// Validate the complete graph before installing any of its descriptors.
@@ -64,7 +256,7 @@ impl PreviewPrototype {
                     link.name
                 ));
             }
-            if let PreviewPrototypeAction::Navigate { stage } = link.action {
+            if let Some(stage) = link.action.target_stage() {
                 if !stages.contains(&stage) {
                     return Err(format!(
                         "The destination stage for prototype interaction '{}' no longer exists",
@@ -98,6 +290,7 @@ impl PreviewPrototype {
         for link in &self.links {
             validate_label(&link.name, "Prototype interaction name")?;
             link.trigger.validate()?;
+            link.action.validate()?;
             let key = serde_json::to_string(&link.trigger).map_err(|error| error.to_string())?;
             if !triggers.insert((link.source, key)) {
                 return Err(
@@ -119,16 +312,16 @@ impl PreviewPrototype {
             + self
                 .links
                 .iter()
-                .map(|link| link.name.len() + link.trigger.text_size() + 64)
+                .map(|link| link.name.len() + link.trigger.text_size() + link.action.text_size())
                 .sum::<usize>()
     }
 
-    /// All screens reachable through Navigate edges, including the starting screen.
-    /// Back resolves dynamically from session history and adds no static edge.
+    /// All views reachable through Navigate/Open/Swap edges, including the start.
+    /// Back and CloseOverlay resolve dynamically and add no static edge.
     pub fn reachable(&self, start: PreviewStageId) -> BTreeSet<PreviewStageId> {
         let mut outgoing = BTreeMap::<PreviewStageId, Vec<PreviewStageId>>::new();
         for link in &self.links {
-            if let PreviewPrototypeAction::Navigate { stage } = link.action {
+            if let Some(stage) = link.action.target_stage() {
                 outgoing.entry(link.source).or_default().push(stage);
             }
         }
@@ -146,10 +339,8 @@ impl PreviewPrototype {
 
     pub(crate) fn remove_stage(&mut self, stage: PreviewStageId) {
         self.flows.retain(|flow| flow.start != stage);
-        self.links.retain(|link| {
-            link.source != stage
-                && !matches!(link.action, PreviewPrototypeAction::Navigate { stage: target } if target == stage)
-        });
+        self.links
+            .retain(|link| link.source != stage && link.action.target_stage() != Some(stage));
     }
 }
 
@@ -178,16 +369,56 @@ pub struct PreviewPrototypeLinkManifest {
     pub action: PreviewPrototypeActionManifest,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
+#[serde(tag = "kind", rename_all = "snake_case")]
 pub enum PreviewPrototypeActionManifest {
-    Navigate { stage: usize },
+    Navigate {
+        stage: usize,
+    },
     Back,
+    OpenOverlay {
+        stage: usize,
+        options: PreviewPrototypeOverlayOptions,
+    },
+    SwapOverlay {
+        stage: usize,
+        options: PreviewPrototypeOverlayOptions,
+    },
+    CloseOverlay,
+}
+
+impl<'de> Deserialize<'de> for PreviewPrototypeActionManifest {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        Ok(
+            match PrototypeActionWire::<usize>::deserialize(deserializer)? {
+                PrototypeActionWire::Navigate { stage } => Self::Navigate { stage },
+                PrototypeActionWire::Back {} => Self::Back,
+                PrototypeActionWire::OpenOverlay { stage, options } => {
+                    Self::OpenOverlay { stage, options }
+                }
+                PrototypeActionWire::SwapOverlay { stage, options } => {
+                    Self::SwapOverlay { stage, options }
+                }
+                PrototypeActionWire::CloseOverlay {} => Self::CloseOverlay,
+            },
+        )
+    }
 }
 
 impl PreviewPrototypeManifest {
     pub fn is_empty(&self) -> bool {
         self.flows.is_empty() && self.links.is_empty()
+    }
+
+    pub fn has_overlay_actions(&self) -> bool {
+        self.links.iter().any(|link| {
+            matches!(
+                link.action,
+                PreviewPrototypeActionManifest::OpenOverlay { .. }
+                    | PreviewPrototypeActionManifest::SwapOverlay { .. }
+                    | PreviewPrototypeActionManifest::CloseOverlay
+            )
+        })
     }
 
     pub fn from_prototype(
@@ -226,6 +457,21 @@ impl PreviewPrototypeManifest {
                             }
                         }
                         PreviewPrototypeAction::Back => PreviewPrototypeActionManifest::Back,
+                        PreviewPrototypeAction::OpenOverlay { stage, options } => {
+                            PreviewPrototypeActionManifest::OpenOverlay {
+                                stage: indices[&stage],
+                                options,
+                            }
+                        }
+                        PreviewPrototypeAction::SwapOverlay { stage, options } => {
+                            PreviewPrototypeActionManifest::SwapOverlay {
+                                stage: indices[&stage],
+                                options,
+                            }
+                        }
+                        PreviewPrototypeAction::CloseOverlay => {
+                            PreviewPrototypeActionManifest::CloseOverlay
+                        }
                     },
                 })
                 .collect(),
@@ -282,6 +528,21 @@ impl PreviewPrototypeManifest {
                                 }
                             }
                             PreviewPrototypeActionManifest::Back => PreviewPrototypeAction::Back,
+                            PreviewPrototypeActionManifest::OpenOverlay { stage, options } => {
+                                PreviewPrototypeAction::OpenOverlay {
+                                    stage: reference(stage)?,
+                                    options,
+                                }
+                            }
+                            PreviewPrototypeActionManifest::SwapOverlay { stage, options } => {
+                                PreviewPrototypeAction::SwapOverlay {
+                                    stage: reference(stage)?,
+                                    options,
+                                }
+                            }
+                            PreviewPrototypeActionManifest::CloseOverlay => {
+                                PreviewPrototypeAction::CloseOverlay
+                            }
                         },
                     })
                 })
@@ -299,7 +560,18 @@ impl PreviewPrototypeManifest {
             + self
                 .links
                 .iter()
-                .map(|link| link.name.len() + link.trigger.text_size() + 64)
+                .map(|link| {
+                    let action_size = if matches!(
+                        link.action,
+                        PreviewPrototypeActionManifest::OpenOverlay { .. }
+                            | PreviewPrototypeActionManifest::SwapOverlay { .. }
+                    ) {
+                        192
+                    } else {
+                        64
+                    };
+                    link.name.len() + link.trigger.text_size() + action_size
+                })
                 .sum::<usize>()
     }
 }
@@ -312,8 +584,9 @@ pub struct PreviewPrototypeSession {
     graph: PreviewPrototype,
     flow: String,
     start: PreviewStageId,
-    current: PreviewStageId,
+    screen: PreviewStageId,
     history: Vec<PreviewStageId>,
+    overlays: Vec<PreviewPrototypeOverlay>,
 }
 
 impl PreviewPrototypeSession {
@@ -331,29 +604,48 @@ impl PreviewPrototypeSession {
             graph: graph.clone(),
             flow: flow.name.clone(),
             start: flow.start,
-            current: flow.start,
+            screen: flow.start,
             history: Vec::new(),
+            overlays: Vec::new(),
         })
     }
 
     pub fn flow(&self) -> &str {
         &self.flow
     }
+    /// The only stage that accepts an interaction: the top overlay, or the screen.
     pub fn current(&self) -> PreviewStageId {
-        self.current
+        self.overlays
+            .last()
+            .map_or(self.screen, |overlay| overlay.stage)
+    }
+    /// The base screen beneath any open overlays. History stores these IDs only.
+    pub fn screen(&self) -> PreviewStageId {
+        self.screen
+    }
+    /// Overlay entries in back-to-front order, excluding the base screen.
+    pub fn overlays(&self) -> &[PreviewPrototypeOverlay] {
+        &self.overlays
+    }
+    /// Visible native hosts in back-to-front order. Only current() accepts actions.
+    pub fn active_stages(&self) -> Vec<PreviewStageId> {
+        std::iter::once(self.screen)
+            .chain(self.overlays.iter().map(|overlay| overlay.stage))
+            .collect()
     }
     pub fn history(&self) -> &[PreviewStageId] {
         &self.history
     }
     pub fn can_go_back(&self) -> bool {
-        !self.history.is_empty()
+        !self.overlays.is_empty() || !self.history.is_empty()
     }
 
     /// Restart navigation; the host decides separately whether native views reset.
     pub fn restart(&mut self) -> PreviewStageId {
-        self.current = self.start;
+        self.screen = self.start;
         self.history.clear();
-        self.current
+        self.overlays.clear();
+        self.screen
     }
 
     pub fn activate_link(&mut self, index: usize) -> Result<PreviewStageId, String> {
@@ -367,36 +659,81 @@ impl PreviewPrototypeSession {
     }
 
     pub fn activate(&mut self, link: &PreviewPrototypeLink) -> Result<PreviewStageId, String> {
-        if link.source != self.current || !self.graph.links.contains(link) {
+        if link.source != self.current() || !self.graph.links.contains(link) {
             return Err(
                 "The prototype interaction does not belong to the current accepted screen".into(),
             );
         }
         match link.action {
             PreviewPrototypeAction::Navigate { stage } => {
-                if stage == self.current {
-                    return Ok(self.current);
+                if stage == self.screen {
+                    self.overlays.clear();
+                    return Ok(self.screen);
                 }
                 if self.history.len() >= MAX_PREVIEW_PROTOTYPE_HISTORY {
                     return Err(
                         "Prototype navigation history is full; go back or restart the flow".into(),
                     );
                 }
-                self.history.push(self.current);
-                self.current = stage;
-                Ok(self.current)
+                self.history.push(self.screen);
+                self.screen = stage;
+                self.overlays.clear();
+                Ok(self.screen)
             }
             PreviewPrototypeAction::Back => self.back(),
+            PreviewPrototypeAction::OpenOverlay { stage, options } => {
+                if self.overlays.len() >= MAX_PREVIEW_PROTOTYPE_OVERLAYS {
+                    return Err(format!("A prototype supports at most {MAX_PREVIEW_PROTOTYPE_OVERLAYS} open overlays"));
+                }
+                if stage == self.screen
+                    || self.overlays.iter().any(|overlay| overlay.stage == stage)
+                {
+                    return Err("The prototype overlay stage is already presented".into());
+                }
+                self.overlays
+                    .push(PreviewPrototypeOverlay { stage, options });
+                Ok(stage)
+            }
+            PreviewPrototypeAction::SwapOverlay { stage, options } => {
+                let lower = self
+                    .overlays
+                    .len()
+                    .checked_sub(1)
+                    .ok_or("Open a prototype overlay before swapping it")?;
+                if stage == self.screen
+                    || self.overlays[..lower]
+                        .iter()
+                        .any(|overlay| overlay.stage == stage)
+                {
+                    return Err(
+                        "The replacement prototype overlay stage is already presented".into(),
+                    );
+                }
+                self.overlays[lower] = PreviewPrototypeOverlay { stage, options };
+                Ok(stage)
+            }
+            PreviewPrototypeAction::CloseOverlay => self.close_overlay(),
         }
     }
 
+    /// Close the top overlay first; otherwise return through screen history.
     pub fn back(&mut self) -> Result<PreviewStageId, String> {
+        if !self.overlays.is_empty() {
+            return self.close_overlay();
+        }
         let stage = self
             .history
             .pop()
             .ok_or("This prototype flow has no previous screen")?;
-        self.current = stage;
+        self.screen = stage;
         Ok(stage)
+    }
+
+    pub fn close_overlay(&mut self) -> Result<PreviewStageId, String> {
+        self.overlays
+            .pop()
+            .ok_or("This prototype flow has no open overlay")?;
+        Ok(self.current())
     }
 }
 
@@ -411,3 +748,7 @@ fn validate_label(value: &str, label: &str) -> Result<(), String> {
 #[cfg(test)]
 #[path = "preview_prototype_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "preview_prototype_overlay_tests.rs"]
+mod overlay_tests;

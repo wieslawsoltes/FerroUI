@@ -13,10 +13,14 @@ does not edit the XAML, add an undo entry or create another authoring session. A
 authoring continues through the workspace's existing document transactions.
 
 The [multi-view prototyping guide](prototyping.md) extends these stages with searchable
-cross-document browsing, named flow starts, source-anchored Navigate/Back connections and
-a native player. Prototype runs have independent native input state; saved stage sets
+cross-document browsing, named flow starts, source-anchored screen and overlay connections,
+and a native player. Prototype runs have independent native input state; saved stage sets
 include their portable graph. The [prototype sample](samples/PrototypeFlow.xaml) provides
-Home, Details and Settings screens for a connected journey.
+Home, Details and Settings screens for a connected journey. The
+[overlay sample](samples/PrototypeOverlays.xaml) combines a workspace with three reusable
+template stages for editor, help and confirmation overlays. Open/Swap/Close actions retain
+the views underneath; placement, outside dismissal, dimming and a bounded focus stack are
+defined by the [native overlay contract](prototyping.md#overlay-layout-and-dismissal).
 
 ## Try the workflow
 
@@ -71,6 +75,11 @@ cargo run -p designer-studio -- --file docs/designer/samples/PreviewStages.xaml
 12. Use **Current document** / **All views** and search to find stages. Open **Prototype**
     to define a named flow, add interactions between authored controls and stages, and
     play the connected journey. See [prototyping](prototyping.md) for the complete workflow.
+13. Connect a smaller document or definition stage with **Open overlay** to review a dialog
+    over the retained base screen. Choose **Swap overlay** for another step or **Close
+    overlay** to return. The player supports modal stacks with focus restoration; Back
+    closes the top overlay first. These are FerroUI design-review semantics, not an
+    emulation of iOS sheets, macOS windows or Apple's sheet-internal Back behavior.
 
 The sample also contains **ActionPreviewTemplate**. Add a stage, choose that authored
 definition in **View**, and configure its sample content and sample size. This gives a
@@ -333,10 +342,12 @@ The public components can be embedded independently:
 - `PreviewStageView` renders cards and emits explicit actions. It receives stage controls
   from its host and does not own document or runtime state.
 - `PreviewStageEditor` edits a detached configuration and validates it on Apply.
-- `PreviewStageManifest` validates and serializes a version-2 stage set, including the
-  prototype graph. Version-1 sets load with an empty graph. JSON parsing rejects unknown
-  fields, invalid dimensions, malformed source paths, invalid graph references and
-  manifests larger than 1 MiB.
+- `PreviewStageManifest` validates and serializes a versioned stage set, including its
+  prototype graph. Overlay actions use version 3, Navigate/Back-only graphs use version 2,
+  and an empty graph uses version 1. All three versions load; older versions reject
+  overlay actions. JSON parsing rejects unknown fields, invalid dimensions or overlay
+  coordinates, malformed source paths, invalid graph references and manifests larger
+  than 1 MiB.
 - `PreviewStageMatrix` validates and expands comparison axes into ordinary stage
   configurations within a supplied capacity.
 - `PreviewStageExportOptions` and `PreviewStageImage` describe bounded PNG density and

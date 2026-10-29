@@ -1,7 +1,10 @@
 //! Native responsive stage cards. Editor chrome is confined to headers and toolbars;
 //! application preview roots retain their own styles, themes and input behavior.
 use crate::{PreviewStageId, PreviewStageInfo, PreviewStageMode, PreviewStageStatus};
-use ferroui_base::input::InputElement;
+use ferroui_base::input::{
+    IKeyboardNavigationHandler, InputElement, Key, KeyboardNavigation, KeyboardNavigationHandler,
+    KeyboardNavigationMode,
+};
 use ferroui_base::interactivity::RoutingStrategies;
 use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
 use ferroui_base::media::{FontWeight, SolidColorBrush, TextWrapping};
@@ -131,6 +134,7 @@ struct StageZoom {
 /// controls and immutable descriptions, then handles explicit guarded commands.
 pub struct PreviewStageView {
     root: Ref<Grid>,
+    _keyboard_navigation: Rc<KeyboardNavigationHandler>,
     cards: RefCell<BTreeMap<PreviewStageId, StageCard>>,
     zooms: RefCell<BTreeMap<PreviewStageId, StageZoom>>,
     panel: Ref<WrapPanel>,
@@ -148,6 +152,9 @@ pub struct PreviewStageView {
 impl PreviewStageView {
     pub fn new(palette: &Control) -> Rc<Self> {
         let root = Grid::new();
+        let keyboard_navigation = KeyboardNavigationHandler::new();
+        keyboard_navigation.set_owner(&root.clone().upcast());
+        KeyboardNavigation::set_tab_navigation(&root, KeyboardNavigationMode::Cycle);
         root.set_name(Some("PreviewStageBoard".into()));
         root.set_row_definitions(RowDefinitions::parse("Auto,Auto,*").unwrap());
         let heading = StackPanel::new();
@@ -214,6 +221,7 @@ impl PreviewStageView {
         root.children().add(empty.clone().upcast::<Control>());
         let view = Rc::new(Self {
             root,
+            _keyboard_navigation: keyboard_navigation,
             cards: RefCell::new(BTreeMap::new()),
             zooms: RefCell::new(BTreeMap::new()),
             panel,
@@ -691,7 +699,13 @@ impl PreviewStageView {
         // bubble into the editor's Delete/Undo/selection or authoring commands.
         frame.add_handler_with(
             InputElement::key_down_event(),
-            move |_, event| event.set_handled(true),
+            move |_, event| {
+                // Let the board's native navigation handler move focus between
+                // live controls; its own guard still contains unhandled Tab.
+                if event.key != Key::Tab {
+                    event.set_handled(true);
+                }
+            },
             RoutingStrategies::BUBBLE,
             false,
         );

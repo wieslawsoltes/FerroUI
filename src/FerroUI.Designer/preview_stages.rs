@@ -14,6 +14,7 @@ use ferroui_designer_core::{Ast, Document, Node, NodeId};
 use ferroui_inspect::{Inspector, TreeKind};
 use ferroui_markup_xaml::source_overlay::SourceSnapshot;
 use serde::{Deserialize, Serialize};
+use std::cell::Cell;
 use std::collections::{BTreeMap, BTreeSet};
 use std::rc::Rc;
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -379,8 +380,11 @@ pub type PreviewStageSnapshot = PreviewStageManifest;
 
 impl PreviewStageManifest {
     pub fn validate(&self) -> Result<(), String> {
-        if !matches!(self.version, 1 | 2) {
+        if !matches!(self.version, 1 | 2 | 3) {
             return Err("Unsupported preview-stage manifest version".into());
+        }
+        if self.version < 3 && self.prototype.has_overlay_actions() {
+            return Err("Prototype overlays require preview-stage manifest version 3".into());
         }
         if self.version == 1 && !self.prototype.is_empty() {
             return Err("Prototype interactions require preview-stage manifest version 2".into());
@@ -474,6 +478,7 @@ struct RenderedStage {
     // Drop the scenario's clock/classes while the native graph is still available.
     _scenario: Option<crate::preview_stage_scenarios::StageScenarioGuard>,
     background_subscription: Rc<dyn ferroui_base::reactive::IDisposable>,
+    backing: Ref<Border>,
     preview: RuntimePreview,
     scope: Ref<ThemeVariantScope>,
     document: Document,
@@ -493,6 +498,9 @@ struct Stage {
     id: PreviewStageId,
     configuration: PreviewStageConfiguration,
     control: Ref<StageLayoutHost>,
+    // Isolated player presentation only: never serialized or part of the accepted
+    // source/configuration epoch. Shared with retained and candidate theme handlers.
+    prototype_overlay: Rc<Cell<bool>>,
     epoch: u64,
     status: PreviewStageStatus,
     rendered: Option<RenderedStage>,
@@ -620,6 +628,23 @@ impl PreviewStageBoard {
             .map(|stage| stage.control.clone().upcast())
     }
 
+    /// Let an overlay's native content supply its own shape and translucency.
+    /// Switching between an overlay and a base screen keeps the native graph,
+    /// interaction epochs and live input intact, including a retained failed frame.
+    pub(crate) fn set_prototype_overlay_backing(
+        &mut self,
+        id: PreviewStageId,
+        overlay: bool,
+    ) -> Result<(), String> {
+        let stage = &self.stages[self.index(id)?];
+        if stage.prototype_overlay.replace(overlay) != overlay {
+            if let Some(rendered) = &stage.rendered {
+                apply_stage_backing(&rendered.scope, &rendered.backing, overlay);
+            }
+        }
+        Ok(())
+    }
+
     fn info(&self, stage: &Stage) -> PreviewStageInfo {
         PreviewStageInfo {
             id: stage.id,
@@ -727,6 +752,7 @@ impl PreviewStageBoard {
             id,
             configuration,
             control,
+            prototype_overlay: Rc::new(Cell::new(false)),
             epoch: 1,
             status: PreviewStageStatus::MissingDocument,
             rendered: None,
@@ -890,7 +916,13 @@ impl PreviewStageBoard {
 
     pub fn manifest(&self) -> PreviewStageManifest {
         PreviewStageManifest {
-            version: if self.prototype.is_empty() { 1 } else { 2 },
+            version: if self.prototype.is_empty() {
+                1
+            } else if self.prototype.has_overlay_actions() {
+                3
+            } else {
+                2
+            },
             stages: self
                 .stages
                 .iter()
@@ -1021,15 +1053,13 @@ impl PreviewStageBoard {
         })
     }
 
-    fn resolve_prototype_hotspot_bounds(
+    /// Exact source identity for native keyboard focus routing. This does not
+    /// infer a target from overlapping rectangles or create native controls.
+    pub(crate) fn prototype_hotspot_visual(
         &self,
         id: PreviewStageId,
         anchor: &PreviewSourceAnchor,
-    ) -> Result<ferroui_base::Rect, String> {
-        use ferroui_base::input::InputElement;
-        use ferroui_base::layout::Layoutable;
-        use ferroui_base::Rect;
-
+    ) -> Result<Ref<Visual>, String> {
         let stage = &self.stages[self.index(id)?];
         let rendered = self.current(stage)?;
         let node = anchor.resolve(&rendered.document)?;
@@ -1043,6 +1073,20 @@ impl PreviewStageBoard {
         {
             return Err("Open a definition stage to target an instantiated template part".into());
         }
+        Ok(visual)
+    }
+
+    fn resolve_prototype_hotspot_bounds(
+        &self,
+        id: PreviewStageId,
+        anchor: &PreviewSourceAnchor,
+    ) -> Result<ferroui_base::Rect, String> {
+        use ferroui_base::input::InputElement;
+        use ferroui_base::layout::Layoutable;
+        use ferroui_base::Rect;
+
+        let visual = self.prototype_hotspot_visual(id, anchor)?;
+        let stage = &self.stages[self.index(id)?];
         let host = stage.control.clone().upcast::<Visual>();
         if !host.is_attached_to_visual_tree() {
             return Err(
@@ -1587,22 +1631,10 @@ impl PreviewStageBoard {
         let backing = Border::new();
         backing.set_child(Some(host.clone().upcast()));
         scope.set_child(Some(backing.clone().upcast()));
-        let set_backing = |scope: &ThemeVariantScope, backing: &Border| {
-            backing.set_background(Some(
-                SolidColorBrush::parse(
-                    if scope.actual_theme_variant() == Some(ThemeVariant::dark()) {
-                        "#FF202020"
-                    } else {
-                        "#FFFFFFFF"
-                    },
-                )
-                .unwrap()
-                .into(),
-            ));
-        };
-        set_backing(&scope, &backing);
+        apply_stage_backing(&scope, &backing, stage.prototype_overlay.get());
         let weak_scope = scope.downgrade();
         let weak_backing = backing.downgrade();
+        let prototype_overlay = stage.prototype_overlay.clone();
         let background_subscription = scope.property_changed(move |change| {
             if change.is_effective_value_change()
                 && change.property()
@@ -1610,7 +1642,7 @@ impl PreviewStageBoard {
             {
                 if let (Some(scope), Some(backing)) = (weak_scope.upgrade(), weak_backing.upgrade())
                 {
-                    set_backing(&scope, &backing);
+                    apply_stage_backing(&scope, &backing, prototype_overlay.get());
                 }
             }
         });
@@ -1662,6 +1694,7 @@ impl PreviewStageBoard {
                 Ok(RenderedStage {
                     _scenario: scenario,
                     background_subscription: background_subscription.clone(),
+                    backing: backing.clone(),
                     preview,
                     scope: scope.clone(),
                     document: document.clone(),
@@ -1834,6 +1867,20 @@ fn dependency_stamps(
         .collect()
 }
 
+fn apply_stage_backing(scope: &ThemeVariantScope, backing: &Border, overlay: bool) {
+    backing.set_background((!overlay).then(|| {
+        SolidColorBrush::parse(
+            if scope.actual_theme_variant() == Some(ThemeVariant::dark()) {
+                "#FF202020"
+            } else {
+                "#FFFFFFFF"
+            },
+        )
+        .unwrap()
+        .into()
+    }));
+}
+
 fn apply_environment(scope: &Ref<ThemeVariantScope>, environment: PreviewEnvironment) {
     scope.set_clip_to_bounds(true);
     scope.set_requested_theme_variant(match environment.theme {
@@ -1902,3 +1949,7 @@ fn bounded(value: &str, limit: usize, label: &str, empty: bool) -> Result<(), St
 #[cfg(test)]
 #[path = "preview_stages_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "preview_stage_backing_tests.rs"]
+mod backing_tests;

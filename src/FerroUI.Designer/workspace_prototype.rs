@@ -3,9 +3,9 @@
 use super::*;
 use crate::{
     PreviewPrototype, PreviewPrototypeElementChoice, PreviewPrototypeFlowEditor,
-    PreviewPrototypeLinkEditor, PreviewPrototypePlayerView, PreviewPrototypeSession,
-    PreviewPrototypeView, PreviewPrototypeViewAction, PreviewSourceAnchor, PreviewStageBoard,
-    PreviewStageId,
+    PreviewPrototypeLinkEditor, PreviewPrototypeOverlay, PreviewPrototypePlayerView,
+    PreviewPrototypeSession, PreviewPrototypeView, PreviewPrototypeViewAction, PreviewSourceAnchor,
+    PreviewStageBoard, PreviewStageId,
 };
 use ferroui_base::Rect;
 use ferroui_controls::Flyout;
@@ -13,13 +13,18 @@ use serde::Serialize;
 use std::collections::BTreeMap;
 use std::hash::{Hash, Hasher};
 
+#[path = "workspace_prototype_layout.rs"]
+mod layout;
 #[path = "workspace_prototype_player.rs"]
 mod player;
 
 #[derive(Clone, Debug, PartialEq, Serialize)]
 pub struct PreviewPrototypePlaybackInfo {
     pub flow: String,
+    /// The screen under the modal overlay stack. History contains screens only.
+    pub screen: PreviewStageId,
     pub current: PreviewStageId,
+    pub overlays: Vec<PreviewPrototypeOverlay>,
     pub history: Vec<PreviewStageId>,
     pub epoch: u64,
     pub current_source: bool,
@@ -32,6 +37,7 @@ pub(super) struct RunningPrototype {
     stages: BTreeMap<PreviewStageId, PreviewStageId>,
     source_model: String,
     bounds: BTreeMap<usize, Rect>,
+    layout: Vec<(PreviewStageId, Rect)>,
     diagnostics: Vec<String>,
 }
 
@@ -526,3 +532,7 @@ impl DesignerWorkspace {
 #[cfg(test)]
 #[path = "workspace_prototype_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "workspace_prototype_overlay_tests.rs"]
+mod overlay_tests;

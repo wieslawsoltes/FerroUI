@@ -7,6 +7,9 @@ import re
 import sys
 
 ROOT=pathlib.Path(__file__).resolve().parents[2]
+# Match direct execution of the metadata reader: its sibling helper modules
+# (including rust_paths) live in scripts, not beside this language generator.
+sys.path.insert(0,str(ROOT/"scripts"))
 spec=importlib.util.spec_from_file_location("framework_builders",ROOT/"scripts/generate_view_builders.py")
 framework=importlib.util.module_from_spec(spec)
 spec.loader.exec_module(framework)

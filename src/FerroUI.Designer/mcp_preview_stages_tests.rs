@@ -52,7 +52,7 @@ fn stage_tools_are_workspace_only_and_reject_unbounded_or_mixed_schema_inputs() 
         json!({"action":"remove","stage":1}),
         json!({"action":"remove","stage":1,"expected_model":"0","configuration":config("Extra")}),
         json!({"action":"move","stage":1,"expected_model":"0","index":16}),
-        json!({"action":"restore","expected_model":"0","manifest":{"version":3,"stages":[],"active":null}}),
+        json!({"action":"restore","expected_model":"0","manifest":{"version":4,"stages":[],"active":null}}),
     ] {
         assert!(provider
             .validate("designer_preview_stage", &invalid)

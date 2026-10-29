@@ -381,7 +381,7 @@ fn legacy_manifest_omits_prototype_and_invalid_import_preserves_accepted_board()
     let mut invalid = accepted.clone();
     invalid.version = 1;
     assert!(invalid.to_json().is_err());
-    invalid.version = 3;
+    invalid.version = 4;
     assert!(invalid.validate().is_err());
 }
 

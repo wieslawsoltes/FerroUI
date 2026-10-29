@@ -105,6 +105,7 @@ jobs:
           cargo run --locked -p designer-studio --no-default-features --features headless,mcp -- --headless --file docs/designer/samples/DesignWorkflows.xaml
           cargo run --locked -p designer-studio --no-default-features --features headless,mcp -- --headless --file docs/designer/samples/PreviewStages.xaml
           cargo run --locked -p designer-studio --no-default-features --features headless,mcp -- --headless --file docs/designer/samples/PrototypeFlow.xaml
+          cargo run --locked -p designer-studio --no-default-features --features headless,mcp -- --headless --file docs/designer/samples/PrototypeOverlays.xaml
       - name: Optional facade integration
         run: cargo check --locked -p ferroui --no-default-features --features designer-mcp
       - name: Release preview path without development hot reload

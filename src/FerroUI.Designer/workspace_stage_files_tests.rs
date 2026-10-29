@@ -504,7 +504,7 @@ fn invalid_or_oversized_manifests_leave_accepted_stages_and_source_intact() {
     let authored = Authored::capture(workspace);
     for invalid in [
         "{broken".to_owned(),
-        r#"{"version":3,"stages":[],"active":null}"#.to_owned(),
+        r#"{"version":4,"stages":[],"active":null}"#.to_owned(),
         " ".repeat(1_048_577),
     ] {
         *fixture.file.bytes.borrow_mut() = invalid.into_bytes();

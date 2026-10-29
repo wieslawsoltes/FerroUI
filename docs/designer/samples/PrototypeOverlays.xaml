@@ -1,0 +1,110 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" x:Name="PrototypeOverlayScene"
+             Foreground="#FF202A3D" d:DesignWidth="680" d:DesignHeight="660">
+  <!-- Create a document stage named Workspace (680 x 660), then definition stages
+       for ProjectEditorOverlay (440 x 350), ConfirmationOverlay (320 x 220),
+       and ProjectHelpOverlay (380 x 280). Use ContentControl as the template
+       target, with matching definition preview dimensions. Prototype flow:
+         WorkspaceOpenEditor -> Open overlay: Editor, Center, dimmed
+         WorkspaceOpenHelp   -> Open overlay: Help, Top right, outside dismissal
+         EditorConfirm       -> Open overlay: Confirm, Bottom center, dimmed
+         EditorHelp          -> Swap overlay: Help, Center, dimmed
+         EditorClose         -> Close overlay
+         ConfirmClose        -> Close overlay
+         HelpReturn          -> Swap overlay: Editor, Center, dimmed
+         HelpClose           -> Close overlay
+       Native text and checkbox state survive Close, Back and Swap within one run.
+       Prototype actions are saved with the stage set; this file remains ordinary
+       application XAML with reusable native ControlTemplate resources. -->
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ControlTemplate x:Key="ProjectEditorOverlay" TargetType="ContentControl">
+        <Border Name="EditorCard" Background="#FFFFFFFF" BorderBrush="#FFD9E1EC"
+                BorderThickness="1" CornerRadius="16" Padding="24">
+          <Grid RowDefinitions="Auto,*,Auto" RowSpacing="18">
+            <StackPanel Spacing="7">
+              <TextBlock Text="PROJECT SETTINGS" Foreground="#FF64728A" FontSize="11" FontWeight="SemiBold" />
+              <TextBlock Text="Make this space yours" Foreground="#FF202A3D" FontSize="23" FontWeight="SemiBold" />
+            </StackPanel>
+            <StackPanel Grid.Row="1" Spacing="12">
+              <TextBlock Text="Project name" Foreground="#FF64728A" FontSize="12" />
+              <TextBox Name="EditorName" Text="Desktop workspace" PlaceholderText="Project name" />
+              <CheckBox Name="EditorNotifications" Content="Keep me informed about updates" IsChecked="True" />
+              <TextBlock Text="Review a confirmation without leaving these settings."
+                         Foreground="#FF64728A" TextWrapping="Wrap" FontSize="12" />
+            </StackPanel>
+            <WrapPanel Grid.Row="2" ItemSpacing="8" LineSpacing="8">
+              <Button Name="EditorConfirm" Content="Review changes" Background="#FF2865D7" Foreground="White" Padding="14,9" />
+              <Button Name="EditorHelp" Content="Help" Padding="14,9" />
+              <Button Name="EditorClose" Content="Close" Padding="14,9" />
+            </WrapPanel>
+          </Grid>
+        </Border>
+      </ControlTemplate>
+      <ControlTemplate x:Key="ConfirmationOverlay" TargetType="ContentControl">
+        <Border Name="ConfirmationCard" Background="#FFF0F6FF" BorderBrush="#FFB7CFEE"
+                BorderThickness="1" CornerRadius="16" Padding="22">
+          <Grid RowDefinitions="Auto,*,Auto" RowSpacing="12">
+            <TextBlock Text="Everything in one place" Foreground="#FF202A3D"
+                       FontSize="19" FontWeight="SemiBold" TextWrapping="Wrap" />
+            <TextBlock Grid.Row="1" Text="Your workspace and the settings below remain available when you close this confirmation."
+                       Foreground="#FF51627B" TextWrapping="Wrap" />
+            <Button Grid.Row="2" Name="ConfirmClose" Content="Continue editing" HorizontalAlignment="Stretch"
+                    Background="#FF2865D7" Foreground="White" Padding="14,9" />
+          </Grid>
+        </Border>
+      </ControlTemplate>
+      <ControlTemplate x:Key="ProjectHelpOverlay" TargetType="ContentControl">
+        <Border Name="HelpCard" Background="#FFFFFFFF" BorderBrush="#FFD9E1EC"
+                BorderThickness="1" CornerRadius="16" Padding="24">
+          <Grid RowDefinitions="Auto,*,Auto" RowSpacing="16">
+            <StackPanel Spacing="7">
+              <TextBlock Text="A LITTLE GUIDANCE" Foreground="#FF64728A" FontSize="11" FontWeight="SemiBold" />
+              <TextBlock Text="Your work stays here" Foreground="#FF202A3D" FontSize="22" FontWeight="SemiBold" />
+            </StackPanel>
+            <TextBlock Grid.Row="1" Text="Switch between help and settings without losing the project name you entered. Close this view to return to your workspace."
+                       Foreground="#FF64728A" TextWrapping="Wrap" />
+            <WrapPanel Grid.Row="2" ItemSpacing="8" LineSpacing="8">
+              <Button Name="HelpReturn" Content="Project settings" Padding="14,9" />
+              <Button Name="HelpClose" Content="Close" Padding="14,9" />
+            </WrapPanel>
+          </Grid>
+        </Border>
+      </ControlTemplate>
+    </ResourceDictionary>
+  </UserControl.Resources>
+  <Grid Background="#FFF3F5F9" RowDefinitions="Auto,*,Auto" RowSpacing="26">
+    <StackPanel Margin="32,30,32,0" Spacing="9">
+      <TextBlock Text="TRAIL NOTES / PROJECT" Foreground="#FF64728A" FontSize="11" FontWeight="SemiBold" />
+      <TextBlock Text="A place for the next idea" FontSize="29" FontWeight="SemiBold" TextWrapping="Wrap" />
+      <TextBlock Text="Keep the workspace in view while you refine the details."
+                 Foreground="#FF64728A" TextWrapping="Wrap" />
+    </StackPanel>
+    <Border Grid.Row="1" Margin="32,0" Background="White" BorderBrush="#FFD9E1EC"
+            BorderThickness="1" CornerRadius="16" Padding="24" VerticalAlignment="Top">
+      <StackPanel Spacing="18">
+        <TextBlock Text="Desktop workspace" FontSize="22" FontWeight="SemiBold" />
+        <TextBlock Text="Capture a note, then open the project settings or contextual help."
+                   Foreground="#FF64728A" TextWrapping="Wrap" />
+        <TextBox Name="WorkspaceNote" Text="Review the overlay journey" PlaceholderText="A note for later" />
+        <Border Background="#FFF0F6FF" CornerRadius="10" Padding="18">
+          <StackPanel Spacing="10">
+            <TextBlock Text="Ready for review" FontWeight="SemiBold" />
+            <TextBlock Text="Workspace, settings, help and confirmation share one journey."
+                       Foreground="#FF51627B" TextWrapping="Wrap" FontSize="12" />
+            <ProgressBar Value="72" Maximum="100" Height="6" />
+          </StackPanel>
+        </Border>
+        <WrapPanel ItemSpacing="10" LineSpacing="10">
+          <Button Name="WorkspaceOpenEditor" Content="Project settings" Background="#FF2865D7" Foreground="White" Padding="16,11" />
+          <Button Name="WorkspaceOpenHelp" Content="Quick help" Padding="16,11" />
+        </WrapPanel>
+      </StackPanel>
+    </Border>
+    <TextBlock Grid.Row="2" Margin="32,0,32,26" Text="Four native views · One retained workspace"
+               Foreground="#FF64728A" FontSize="11" TextWrapping="Wrap" />
+  </Grid>
+</UserControl>

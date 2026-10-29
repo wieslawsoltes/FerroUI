@@ -13,10 +13,19 @@ adapters. It does not add a second document model or another rendering stack.
 The [multi-view prototyping review](prototyping.md) adds searchable current-document/all-view
 stage browsing, named flow starts, source-anchored Navigate/Back interactions, a reachable-screen
 connection overview, detached native editors and a native player with its own retained input.
-Version-2 stage sets persist the graph using stage indices that remap to fresh runtime IDs.
+The next addition presents native dialog, sheet and help stages as a bounded modal stack:
+Open, Swap and Close overlay actions, nine placements or manual coordinates, optional
+outside dismissal and dimming, retained lower controls and focus restoration. Back closes
+the top layer before consuming screen history. This is an explicit FerroUI contract,
+rather than a claim of identical Figma or platform-specific sheet navigation.
+Stage sets persist overlay graphs as version 3, legacy Navigate/Back graphs as version 2
+and empty graphs as version 1. Stage indices remap to fresh runtime IDs on load.
 The [prototype sample](samples/PrototypeFlow.xaml) exercises Home, Details and Settings,
 including a shared settings screen that returns to the actual previous screen. Prototype
 navigation remains presentation state and does not author application event handlers.
+The [overlay sample](samples/PrototypeOverlays.xaml) uses a document workspace and three
+reusable template stages to exercise nested confirmation, swapping, explicit close and
+outside dismissal while retaining live text in the lower views.
 
 The [Xcode preview review](xcode-previews.md) adds a native board of independent named
 document and definition stages, size/theme/orientation/direction comparisons, pinning across
@@ -60,6 +69,7 @@ These extend the earlier workflow results below.
 | Preview screenshot export | Xcode canvas screenshot and save sheet | Native RenderTargetBitmap rendering existed only in test captures | Added source-guarded PNG stage capture, native save picker and read-only automation, with pixel/byte bounds and independent raster density |
 | Many-view organization | Figma pages/sections and named flows; Penpot searchable screen destinations | Named stages, document pinning and source tabs | Added stage search, current-document/all-view browsing and a reachable-screen connection overview |
 | Interactive screen prototypes | Figma/Penpot flow starts and hotspots; Android graph/back-stack separation; Xcode unwind navigation | Independent native stage graphs and source anchors, without connected journeys | Added named flows, source-anchored Navigate/Back, detached native editors, independent player graphs with retained input and versioned graph persistence |
+| Dialog and sheet prototypes | Figma/Penpot overlays; WinUI dismissal/focus; Apple modal presentation guidance | Retained native stages and a separate screen-history cursor | Added Open/Swap/Close overlay, bounded modal stacking, nine placements/manual coordinates, outside-dismissal and dimming options, focus restoration, base-frame clipping and v3 persistence; see the [overlay contract and primary references](prototyping.md#research-and-design-choices) |
 | Canvas navigation and framing | Figma pointer-anchored zoom, fit selection and file-local views; Blend wheel zoom and Space panning | Zoom buttons and a centered scroll container; no independent camera or fit-selection command | Added a finite native viewport, wheel-mode choice, middle/Space/hand-tool panning, percentage editing, selection framing and retained tab cameras |
 | Compact command icons | Visual Studio's centered, padded and consistently weighted icon frames | Mixed compact paths and symbol-font glyphs under application command templates | Designer-scoped vector normalization fits complete geometry, reserves padding and follows themed foreground |
 

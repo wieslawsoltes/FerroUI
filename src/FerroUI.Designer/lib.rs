@@ -104,14 +104,17 @@ pub use preview_host::{
 pub use preview_prototype::{
     PreviewPrototype, PreviewPrototypeAction, PreviewPrototypeActionManifest, PreviewPrototypeFlow,
     PreviewPrototypeFlowManifest, PreviewPrototypeLink, PreviewPrototypeLinkManifest,
-    PreviewPrototypeManifest, PreviewPrototypeSession, MAX_PREVIEW_PROTOTYPE_FLOWS,
-    MAX_PREVIEW_PROTOTYPE_HISTORY, MAX_PREVIEW_PROTOTYPE_LINKS,
+    PreviewPrototypeManifest, PreviewPrototypeOverlay, PreviewPrototypeOverlayOptions,
+    PreviewPrototypeOverlayPlacement, PreviewPrototypeSession, MAX_PREVIEW_PROTOTYPE_FLOWS,
+    MAX_PREVIEW_PROTOTYPE_HISTORY, MAX_PREVIEW_PROTOTYPE_LINKS, MAX_PREVIEW_PROTOTYPE_OVERLAYS,
+    MAX_PREVIEW_PROTOTYPE_OVERLAY_OFFSET,
 };
 pub use preview_prototype_editor::{
     PreviewPrototypeElementChoice, PreviewPrototypeFlowEditor, PreviewPrototypeLinkEditor,
 };
 pub use preview_prototype_player::{
-    PreviewPrototypeHotspot, PreviewPrototypePlayerAction, PreviewPrototypePlayerView,
+    PreviewPrototypeHotspot, PreviewPrototypePlayerAction, PreviewPrototypePlayerLayer,
+    PreviewPrototypePlayerView,
 };
 pub use preview_prototype_view::{PreviewPrototypeView, PreviewPrototypeViewAction};
 pub use preview_stages::{

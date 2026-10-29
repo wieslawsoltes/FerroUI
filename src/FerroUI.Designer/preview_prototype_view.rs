@@ -1,6 +1,9 @@
 //! Native overview of named journeys and their shared source-backed screen graph.
 use crate::{PreviewPrototype, PreviewPrototypeAction, PreviewStageId, PreviewStageInfo};
-use ferroui_base::input::{InputElement, InputElementImpl};
+use ferroui_base::input::{
+    IKeyboardNavigationHandler, InputElement, InputElementImpl, KeyboardNavigation,
+    KeyboardNavigationHandler, KeyboardNavigationMode,
+};
 use ferroui_base::interactivity::{InteractiveImpl, RoutingStrategies};
 use ferroui_base::layout::{HorizontalAlignment, LayoutableImpl};
 use ferroui_base::media::{DrawingContext, FontWeight, IPen, Pen, TextWrapping};
@@ -35,6 +38,7 @@ type Action = Rc<dyn Fn(PreviewPrototypeViewAction, u64, Ref<Control>) -> Result
 
 pub struct PreviewPrototypeView {
     root: Ref<Grid>,
+    _keyboard_navigation: Rc<KeyboardNavigationHandler>,
     flow: Ref<ComboBox>,
     reachable: Ref<CheckBox>,
     search: Ref<TextBox>,
@@ -57,6 +61,9 @@ pub struct PreviewPrototypeView {
 impl PreviewPrototypeView {
     pub fn new(_palette: &Control) -> Rc<Self> {
         let root = Grid::new();
+        let keyboard_navigation = KeyboardNavigationHandler::new();
+        keyboard_navigation.set_owner(&root.clone().upcast());
+        KeyboardNavigation::set_tab_navigation(&root, KeyboardNavigationMode::Cycle);
         root.set_name(Some("PreviewPrototypeView".into()));
         root.classes().add("designer-chrome");
         root.set_row_definitions(RowDefinitions::parse("Auto,Auto,*").unwrap());
@@ -133,6 +140,11 @@ impl PreviewPrototypeView {
         map_scroll.set_bring_into_view_on_focus_change(true);
         map_scroll.set_content(Some(Control::boxed(map.clone().upcast::<Control>())));
         body.children().add(map_scroll.clone().upcast::<Control>());
+        let legend =
+            text("Blue connections navigate; purple connections open or replace overlays.");
+        legend.classes().add("designer-muted");
+        legend.set_font_size(11.0);
+        body.children().add(legend.upcast::<Control>());
         let selection = text("All interactions");
         selection.set_name(Some("PrototypeSelection".into()));
         selection.set_font_weight(FontWeight::SemiBold);
@@ -153,6 +165,7 @@ impl PreviewPrototypeView {
         root.children().add(scroll.upcast::<Control>());
         let view = Rc::new(Self {
             root,
+            _keyboard_navigation: keyboard_navigation,
             flow,
             reachable,
             search,
@@ -426,12 +439,13 @@ impl PreviewPrototypeView {
             .links
             .iter()
             .filter_map(|link| {
-                let PreviewPrototypeAction::Navigate { stage } = link.action else {
-                    return None;
-                };
+                let stage = link.action.target_stage()?;
                 let from = positions.get(&link.source)?;
                 let to = positions.get(&stage)?;
-                Some(route(*from, *to))
+                Some((
+                    route(*from, *to),
+                    !matches!(link.action, PreviewPrototypeAction::Navigate { .. }),
+                ))
             })
             .collect::<Vec<_>>();
         let connectors = PrototypeConnectors::new(routes);
@@ -446,6 +460,10 @@ impl PreviewPrototypeView {
                 .count();
             let has_back = prototype.links.iter().any(|link| {
                 link.source == stage.id && matches!(link.action, PreviewPrototypeAction::Back)
+            });
+            let has_close = prototype.links.iter().any(|link| {
+                link.source == stage.id
+                    && matches!(link.action, PreviewPrototypeAction::CloseOverlay)
             });
             let card = Border::new();
             card.set_name(Some(format!("PrototypeScreen{}", stage.id)));
@@ -492,7 +510,7 @@ impl PreviewPrototypeView {
             file.set_font_size(11.0);
             content.children().add(file.upcast::<Control>());
             let detail = text(&format!(
-                "{}{} interaction{}{}",
+                "{}{} interaction{}{}{}",
                 if start == Some(stage.id) {
                     "Start · "
                 } else {
@@ -500,7 +518,8 @@ impl PreviewPrototypeView {
                 },
                 count,
                 if count == 1 { "" } else { "s" },
-                if has_back { " · Back" } else { "" }
+                if has_back { " · Back" } else { "" },
+                if has_close { " · Close overlay" } else { "" }
             ));
             detail.set_font_size(11.0);
             content.children().add(detail.upcast::<Control>());
@@ -573,13 +592,19 @@ impl PreviewPrototypeView {
         let mut link_count = 0;
         for (index, link) in prototype.links.iter().enumerate() {
             let target = match link.action {
-                PreviewPrototypeAction::Navigate { stage } => stage_name(stage),
-                PreviewPrototypeAction::Back => "Back in journey",
+                PreviewPrototypeAction::Navigate { stage } => {
+                    format!("Navigate to {}", stage_name(stage))
+                }
+                PreviewPrototypeAction::OpenOverlay { stage, .. } => {
+                    format!("Open overlay {}", stage_name(stage))
+                }
+                PreviewPrototypeAction::SwapOverlay { stage, .. } => {
+                    format!("Replace overlay with {}", stage_name(stage))
+                }
+                PreviewPrototypeAction::Back => "Back in journey".to_owned(),
+                PreviewPrototypeAction::CloseOverlay => "Close top overlay".to_owned(),
             };
-            let target_uri = match link.action {
-                PreviewPrototypeAction::Navigate { stage } => stage_uri(stage),
-                PreviewPrototypeAction::Back => "",
-            };
+            let target_uri = link.action.target_stage().map_or("", stage_uri);
             if !in_scope(link.source)
                 || self.selected.get().is_some_and(|id| id != link.source)
                 || !matches_query(
@@ -685,7 +710,7 @@ fn depths(
     while let Some(source) = pending.pop_front() {
         let next_depth = depth[&source] + 1;
         for link in prototype.links.iter().filter(|link| link.source == source) {
-            if let PreviewPrototypeAction::Navigate { stage } = link.action {
+            if let Some(stage) = link.action.target_stage() {
                 if let std::collections::btree_map::Entry::Vacant(entry) = depth.entry(stage) {
                     entry.insert(next_depth);
                     pending.push_back(stage);
@@ -728,7 +753,7 @@ fn route(from: Point, to: Point) -> Vec<Point> {
 #[repr(C)]
 struct PrototypeConnectors {
     base: Control,
-    routes: Vec<Vec<Point>>,
+    routes: Vec<(Vec<Point>, bool)>,
 }
 ferro_class!(PrototypeConnectors: Control);
 ferro_class_info!(PrototypeConnectors {
@@ -739,7 +764,7 @@ impl PrototypeConnectors {
     fn empty() -> Ref<Self> {
         Self::new(Vec::new())
     }
-    fn new(routes: Vec<Vec<Point>>) -> Ref<Self> {
+    fn new(routes: Vec<(Vec<Point>, bool)>) -> Ref<Self> {
         let this = instantiate(Self {
             base: Control::construct(),
             routes,
@@ -751,8 +776,9 @@ impl PrototypeConnectors {
 }
 impl VisualImpl for PrototypeConnectors {
     fn render(this: &Self, context: &mut DrawingContext) {
-        let pen: Rc<dyn IPen> = Pen::from_uint32(0xff7099d5, 1.5).into();
-        for route in &this.routes {
+        for (route, overlay) in &this.routes {
+            let pen: Rc<dyn IPen> =
+                Pen::from_uint32(if *overlay { 0xffb49ae8 } else { 0xff7099d5 }, 1.5).into();
             for pair in route.windows(2) {
                 context.draw_line(&pen, pair[0], pair[1]);
             }

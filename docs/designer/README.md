@@ -36,9 +36,12 @@ to compare Loading, Empty, Content and Error screens with actual native theme re
 design-time sample rows.
 The [multi-view prototyping guide](prototyping.md) compares Figma, Penpot, Android Studio,
 Xcode storyboards and historical Qt/SketchFlow workflows. Search stages across documents,
-define named flows and source-anchored Navigate/Back interactions, inspect connections,
-and play a journey with independent native controls. The [prototype sample](samples/PrototypeFlow.xaml)
-provides Home, Details and Settings screens with named controls and retained input.
+define named flows and source-anchored navigation or overlay interactions, inspect
+connections, and play a journey with independent native controls. The
+[prototype sample](samples/PrototypeFlow.xaml) provides Home, Details and Settings screens.
+The [overlay sample](samples/PrototypeOverlays.xaml) adds reusable editor, help and
+confirmation views over a retained workspace, with nested dialogs, swapping and outside
+dismissal. Both preserve native input during a run.
 
 ## Run
 
@@ -51,6 +54,7 @@ cargo run -p designer-studio -- --file docs/designer/samples/DesignWorkflows.xam
 cargo run -p designer-studio -- --file docs/designer/samples/SelectionWorkflows.xaml
 cargo run -p designer-studio -- --file docs/designer/samples/PreviewStages.xaml
 cargo run -p designer-studio -- --file docs/designer/samples/PrototypeFlow.xaml
+cargo run -p designer-studio -- --file docs/designer/samples/PrototypeOverlays.xaml
 cargo run -p designer-studio -- --project /absolute/path/to/solution
 ```
 
@@ -119,10 +123,14 @@ and authored-state choices within the board's capacity. **Save preview image…*
 current accepted native stage as PNG, excluding designer commands and display zoom.
 **Current document** / **All views** and search organize the stage board without changing
 pinning or native state. **Prototype** opens named flows and their reachable-screen
-connections. **Add interaction…** binds an authored control to Navigate or Back; the player
-uses a separate native run so returning to a screen retains that run's text and control
-state. Restart resets navigation, while starting a new Play run creates fresh controls.
-Version-2 stage sets persist the graph with portable stage references. See
+connections. **Add interaction…** binds an authored control to Navigate, Back, Open overlay,
+Swap overlay or Close overlay. The player uses a separate native run so returning to a
+screen or overlay retains that run's text and control state. Modal overlays keep the base
+screen visible, offer nine placements or bounded manual coordinates, and support optional
+outside dismissal and dimming. Back closes the top overlay before navigating screen
+history; Restart clears both while retaining native controls. Starting a new Play run
+creates fresh controls. Stage sets use version 3 for overlay graphs, version 2 for
+Navigate/Back graphs and version 1 for no graph, with portable stage references. See
 [interactive prototypes](prototyping.md) for source guards, keyboard input and automation.
 
 The left dock switches between **Layers**, **Assets**, **Library** and **Project**:

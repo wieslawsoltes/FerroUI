@@ -228,6 +228,25 @@ fn stage_visibility_modes_pinning_and_live_input_preserve_independent_applicatio
     application_button.raise_event(&key);
     assert!(key.handled());
     assert_eq!(workspace.session.borrow().document().source(), SOURCE);
+    assert!(application_button.focus());
+    let mut app_forward = KeyEventArgs::new();
+    app_forward.key = Key::Tab;
+    app_forward.set_routed_event(Some(InputElement::key_down_event()));
+    app_forward.set_source(application_button.clone());
+    application_button.raise_event(&app_forward);
+    assert!(app_forward.handled());
+    assert!(
+        first_input.is_keyboard_focus_within(),
+        "Native Tab must navigate inside the live application stage"
+    );
+    let mut app_backward = KeyEventArgs::new();
+    app_backward.key = Key::Tab;
+    app_backward.key_modifiers = KeyModifiers::SHIFT;
+    app_backward.set_routed_event(Some(InputElement::key_down_event()));
+    app_backward.set_source(first_input.clone());
+    first_input.raise_event(&app_backward);
+    assert!(app_backward.handled());
+    assert!(application_button.is_keyboard_focus_within());
     for name in ["StageScope", "StagePrototype"] {
         let control = named::<Control>(&workspace.preview_stage_view().unwrap().control(), name);
         for (key, modifiers) in [
@@ -250,6 +269,34 @@ fn stage_visibility_modes_pinning_and_live_input_preserve_independent_applicatio
             assert!(!workspace.session.borrow().can_undo());
         }
     }
+    let board = workspace.preview_stage_view().unwrap();
+    let search = named::<TextBox>(&board.control(), "StageSearch");
+    let scope = named::<ComboBox>(&board.control(), "StageScope");
+    assert!(search.focus());
+    let mut forward = KeyEventArgs::new();
+    forward.key = Key::Tab;
+    forward.set_routed_event(Some(InputElement::key_down_event()));
+    forward.set_source(search.clone());
+    search.raise_event(&forward);
+    assert!(forward.handled());
+    assert!(
+        scope.is_keyboard_focus_within(),
+        "Native Tab navigation must move from stage search to scope"
+    );
+    let mut backward = KeyEventArgs::new();
+    backward.key = Key::Tab;
+    backward.key_modifiers = KeyModifiers::SHIFT;
+    backward.set_routed_event(Some(InputElement::key_down_event()));
+    backward.set_source(scope.clone());
+    scope.raise_event(&backward);
+    assert!(backward.handled());
+    assert!(
+        search.is_keyboard_focus_within(),
+        "Native Shift+Tab must return to stage search"
+    );
+    assert_eq!(workspace.session.borrow().document().source(), SOURCE);
+    assert_eq!(workspace.session.borrow().selection(), &[card_node]);
+    assert!(!workspace.session.borrow().can_undo());
     workspace.set_preview_stages_visible(false).unwrap();
     workspace.set_preview_stages_visible(true).unwrap();
     workspace.set_view_mode(super::super::shell::WorkspaceViewMode::Xaml);

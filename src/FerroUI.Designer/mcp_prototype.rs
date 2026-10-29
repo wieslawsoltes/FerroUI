@@ -16,9 +16,28 @@ pub(super) fn graph_schema(indices: bool) -> Value {
     };
     let label = json!({"type":"string","maxLength":128});
     let flow = s::object(json!({"name":label,"start":stage}), &["name", "start"]);
+    let preset = s::object(
+        json!({"kind":{"enum":["center","top_left","top_center","top_right","center_left","center_right","bottom_left","bottom_center","bottom_right"]}}),
+        &["kind"],
+    );
+    let offset = json!({"type":"integer","minimum":-crate::MAX_PREVIEW_PROTOTYPE_OVERLAY_OFFSET,"maximum":crate::MAX_PREVIEW_PROTOTYPE_OVERLAY_OFFSET});
+    let manual = s::object(
+        json!({"kind":{"const":"manual"},"x":offset,"y":offset}),
+        &["kind", "x", "y"],
+    );
+    let options = s::object(
+        json!({
+            "placement":{"oneOf":[preset,manual]},
+            "dismiss_on_outside":{"type":"boolean"},"dim_background":{"type":"boolean"}
+        }),
+        &[],
+    );
     let action = json!({"oneOf":[
         s::object(json!({"kind":{"const":"navigate"},"stage":stage}), &["kind","stage"]),
-        s::object(json!({"kind":{"const":"back"}}), &["kind"])
+        s::object(json!({"kind":{"const":"back"}}), &["kind"]),
+        s::object(json!({"kind":{"const":"open_overlay"},"stage":stage,"options":options}), &["kind","stage"]),
+        s::object(json!({"kind":{"const":"swap_overlay"},"stage":stage,"options":options}), &["kind","stage"]),
+        s::object(json!({"kind":{"const":"close_overlay"}}), &["kind"])
     ]});
     let link = s::object(
         json!({"name":label,"source":stage,"trigger":super::preview_stages::anchor_schema(),"action":action}),
@@ -40,12 +59,13 @@ fn action(name: &str, mut properties: Value, required: &[&str]) -> Value {
 pub(super) fn tools() -> Vec<Value> {
     let mut edit = s::actions(
         "designer_prototype_action",
-        "Edit a local prototype graph or navigate its isolated native player using the model from designer_prototype. set_graph atomically accepts named starts and source-anchored Navigate/Back interactions; it never runs factories or edits XAML. Play creates isolated Live views for reachable stages. Back and restart retain their native input; stop then play creates fresh views. Playing or navigating requires allow_input as well as allow_property_writes; stop requires only allow_property_writes. Source or stage changes invalidate a running journey. No arbitrary scripts, URLs or paths are executed.",
+        "Edit a local prototype graph or navigate its isolated native player using the model from designer_prototype. set_graph atomically accepts named starts and source-anchored Navigate, Back, OpenOverlay, SwapOverlay and CloseOverlay interactions; it never runs factories or edits XAML. Play creates isolated Live views for reachable stages. Modal overlays retain underlying views; Back closes the top overlay before consuming screen history. close_overlay dismisses only the top overlay. Restart clears overlays and history while retaining native state; stop then play creates fresh views. Playing, navigating or closing an overlay requires allow_input as well as allow_property_writes; stop requires only allow_property_writes. Source or stage changes invalidate a running journey. No arbitrary scripts, URLs or paths are executed.",
         vec![
             action("set_graph", json!({"graph":graph_schema(false)}), &["graph"]),
             action("play", json!({"flow":{"type":"string","maxLength":128}}), &["flow"]),
             action("activate", json!({"link":{"type":"integer","minimum":0,"maximum":127}}), &["link"]),
             action("back", json!({}), &[]),
+            action("close_overlay", json!({}), &[]),
             action("restart", json!({}), &[]),
             action("stop", json!({}), &[]),
         ], false,
@@ -96,8 +116,10 @@ pub(super) fn call(
         );
     }
     let action = text(args, "action")?;
-    if matches!(action.as_str(), "play" | "activate" | "back" | "restart")
-        && !permissions.allow_input
+    if matches!(
+        action.as_str(),
+        "play" | "activate" | "back" | "close_overlay" | "restart"
+    ) && !permissions.allow_input
     {
         return Err("Playing or navigating native prototypes requires allow_input".into());
     }
@@ -106,6 +128,7 @@ pub(super) fn call(
         "play" => workspace.start_preview_prototype(&text(args, "flow")?)?,
         "activate" => workspace.activate_preview_prototype_link(integer(args, "link")? as usize)?,
         "back" => workspace.back_preview_prototype()?,
+        "close_overlay" => workspace.close_preview_prototype_overlay()?,
         "restart" => workspace.restart_preview_prototype()?,
         "stop" => workspace.stop_preview_prototype(),
         _ => return Err("Unknown prototype action".into()),

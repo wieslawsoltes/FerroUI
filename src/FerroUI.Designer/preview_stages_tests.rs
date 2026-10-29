@@ -1509,7 +1509,7 @@ fn invalid_configuration_and_manifest_are_atomic_and_imported_ids_never_reuse_re
     assert_eq!(board.manifest(), before);
     assert_eq!(board.epoch(), epoch);
     let mut invalid = before.clone();
-    invalid.version = 3;
+    invalid.version = 4;
     assert!(board.restore_manifest(invalid).is_err());
     assert_eq!(board.manifest(), before);
     let serialized = before.to_json().unwrap();

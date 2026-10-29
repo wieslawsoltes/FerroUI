@@ -89,7 +89,7 @@ fn matrix_schema() -> Value {
 
 fn manifest_schema() -> Value {
     s::object(
-        json!({"version":{"enum":[1,2]},"stages":s::array(configuration_schema(),crate::MAX_PREVIEW_STAGES),
+        json!({"version":{"enum":[1,2,3]},"stages":s::array(configuration_schema(),crate::MAX_PREVIEW_STAGES),
         "active":s::nullable(json!({"type":"integer","minimum":0,"maximum":15})),
         "prototype":super::prototype::graph_schema(true)}),
         &["version", "stages", "active"],

@@ -2,7 +2,8 @@ use super::*;
 use crate::mcp::DesignerMcp;
 use crate::{
     PreviewEnvironment, PreviewPrototype, PreviewPrototypeAction, PreviewPrototypeFlow,
-    PreviewPrototypeLink, PreviewSourceAnchor, PreviewStageConfiguration,
+    PreviewPrototypeLink, PreviewPrototypeOverlayOptions, PreviewPrototypeOverlayPlacement,
+    PreviewSourceAnchor, PreviewStageConfiguration,
 };
 use ferroui_base::Ref;
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
@@ -97,6 +98,19 @@ impl Fixture {
         self.provider
             .call("designer_prototype", &json!({}), permissions(false, false))
             .unwrap()
+    }
+    fn overlay_graph(&self) -> PreviewPrototype {
+        let mut graph = self.graph();
+        graph.links[0].action = PreviewPrototypeAction::OpenOverlay {
+            stage: self.second,
+            options: PreviewPrototypeOverlayOptions {
+                placement: PreviewPrototypeOverlayPlacement::TopRight,
+                dismiss_on_outside: true,
+                dim_background: false,
+            },
+        };
+        graph.links[1].action = PreviewPrototypeAction::CloseOverlay;
+        graph
     }
     fn command(&self, mut args: Value, input: bool) -> Result<Value, String> {
         args["expected_model"] = self.read()["model"].clone();
@@ -282,6 +296,160 @@ fn mcp_manifest_v2_restores_graph_to_fresh_ids_without_authoring_or_starting_pla
         graph.flows[0].start,
         fixture.workspace.preview_stages()[0].id
     );
+    assert_eq!(fixture.workspace.preview_stage_manifest(), manifest);
+    assert!(fixture.workspace.preview_prototype_playback().is_none());
+    assert!(!fixture.workspace.session().borrow().can_undo());
+}
+
+#[test]
+fn overlay_schema_accepts_defaults_and_rejects_ambiguous_or_unbounded_options() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let fixture = Fixture::new();
+    let mut command =
+        json!({"action":"set_graph","expected_model":"0","graph":fixture.overlay_graph()});
+    for action in [
+        json!({"kind":"open_overlay","stage":fixture.second}),
+        json!({"kind":"swap_overlay","stage":fixture.second,"options":{"placement":{"kind":"manual","x":-16384,"y":16384},"dismiss_on_outside":true,"dim_background":false}}),
+        json!({"kind":"close_overlay"}),
+    ] {
+        command["graph"]["links"][0]["action"] = action;
+        fixture
+            .provider
+            .validate("designer_prototype_action", &command)
+            .unwrap();
+    }
+    for action in [
+        json!({"kind":"open_overlay","stage":fixture.second,"options":{"placement":{"kind":"manual","x":16385,"y":0}}}),
+        json!({"kind":"open_overlay","stage":fixture.second,"options":{"placement":{"kind":"center","x":0}}}),
+        json!({"kind":"swap_overlay","stage":fixture.second,"options":{"placement":{"kind":"manual","x":0}}}),
+        json!({"kind":"open_overlay","stage":fixture.second,"options":{"dismiss_on_outside":"yes"}}),
+        json!({"kind":"open_overlay","stage":fixture.second,"options":{"animation":"script"}}),
+        json!({"kind":"close_overlay","stage":fixture.second}),
+    ] {
+        command["graph"]["links"][0]["action"] = action;
+        assert!(
+            fixture
+                .provider
+                .validate("designer_prototype_action", &command)
+                .is_err(),
+            "{command}"
+        );
+    }
+    assert!(fixture
+        .provider
+        .validate(
+            "designer_prototype_action",
+            &json!({"action":"close_overlay","expected_model":"0","stage":fixture.second})
+        )
+        .is_err());
+}
+
+#[test]
+fn overlay_reports_and_close_commands_are_observational_permission_and_model_guarded() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let fixture = Fixture::new();
+    fixture
+        .command(
+            json!({"action":"set_graph","graph":fixture.overlay_graph()}),
+            false,
+        )
+        .unwrap();
+    fixture
+        .command(json!({"action":"play","flow":"Browse"}), true)
+        .unwrap();
+    fixture.window.update_layout();
+    fixture.workspace.refresh(true);
+    fixture.window.update_layout();
+    let before = fixture.read();
+    fixture
+        .command(json!({"action":"activate","link":0}), true)
+        .unwrap();
+    let opened = fixture.read();
+    assert_eq!(opened, fixture.read());
+    assert_eq!(opened["playback"]["screen"], fixture.first);
+    assert_eq!(opened["playback"]["current"], fixture.second);
+    assert_eq!(opened["playback"]["history"], json!([]));
+    assert_eq!(
+        opened["playback"]["overlays"],
+        json!([{
+            "stage":fixture.second,
+            "options":{"placement":{"kind":"top_right"},"dismiss_on_outside":true,"dim_background":false}
+        }])
+    );
+    let close = json!({"action":"close_overlay","expected_model":opened["model"]});
+    for access in [permissions(false, true), permissions(true, false)] {
+        assert!(fixture
+            .provider
+            .call("designer_prototype_action", &close, access)
+            .is_err());
+        assert_eq!(opened, fixture.read());
+    }
+    let stale = json!({"action":"close_overlay","expected_model":before["model"]});
+    assert!(fixture
+        .provider
+        .call("designer_prototype_action", &stale, permissions(true, true))
+        .is_err());
+    assert_eq!(opened, fixture.read());
+    fixture
+        .provider
+        .call("designer_prototype_action", &close, permissions(true, true))
+        .unwrap();
+    let closed = fixture.read();
+    assert_eq!(closed["playback"]["current"], fixture.first);
+    assert_eq!(closed["playback"]["overlays"], json!([]));
+    assert_eq!(closed["playback"]["history"], json!([]));
+    assert!(fixture
+        .command(json!({"action":"close_overlay"}), true)
+        .is_err());
+    assert_eq!(closed, fixture.read());
+    fixture
+        .command(json!({"action":"activate","link":0}), true)
+        .unwrap();
+    fixture.command(json!({"action":"back"}), true).unwrap();
+    assert_eq!(fixture.read()["playback"]["current"], fixture.first);
+    assert_eq!(fixture.read()["playback"]["history"], json!([]));
+    assert!(!fixture.workspace.session().borrow().can_undo());
+    assert_eq!(
+        fixture.workspace.session().borrow().document().source(),
+        SOURCE
+    );
+}
+
+#[test]
+fn mcp_manifest_v3_remaps_overlay_targets_and_options_without_starting_playback() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let fixture = Fixture::new();
+    fixture
+        .command(
+            json!({"action":"set_graph","graph":fixture.overlay_graph()}),
+            false,
+        )
+        .unwrap();
+    let manifest = fixture.workspace.preview_stage_manifest();
+    assert_eq!(manifest.version, 3);
+    let restore = json!({"action":"restore","expected_model":fixture.workspace.preview_stage_model(),"manifest":manifest});
+    fixture
+        .provider
+        .call("designer_preview_stage", &restore, permissions(true, false))
+        .unwrap();
+    let stages = fixture.workspace.preview_stages();
+    let graph = fixture.workspace.preview_prototype();
+    assert_ne!(stages[0].id, fixture.first);
+    assert_ne!(stages[1].id, fixture.second);
+    assert_eq!(graph.links[0].source, stages[0].id);
+    assert_eq!(
+        graph.links[0].action,
+        PreviewPrototypeAction::OpenOverlay {
+            stage: stages[1].id,
+            options: PreviewPrototypeOverlayOptions {
+                placement: PreviewPrototypeOverlayPlacement::TopRight,
+                dismiss_on_outside: true,
+                dim_background: false,
+            }
+        }
+    );
+    assert_eq!(graph.links[1].source, stages[1].id);
+    assert_eq!(graph.links[1].action, PreviewPrototypeAction::CloseOverlay);
     assert_eq!(fixture.workspace.preview_stage_manifest(), manifest);
     assert!(fixture.workspace.preview_prototype_playback().is_none());
     assert!(!fixture.workspace.session().borrow().can_undo());
