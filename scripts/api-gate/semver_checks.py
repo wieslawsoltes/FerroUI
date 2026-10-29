@@ -49,12 +49,13 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # The release the gate compares with, and the commit of its sources. 0.4.0 is not published (no tag,
-# not on crates.io) and main is still at 0.4.0, so the baseline is the commit of main the gate was
-# merged on (the merge of #332, 2026-10-29); the tag v0.4.0 replaces it once the release is
+# not on crates.io) and main is still at 0.4.0, so the baseline is the commit of main the gate is
+# merged onto (the merge of #362, 2026-10-29: main as the gate pull request last took it in; the
+# API of main before it is the API of 0.4.0); the tag v0.4.0 replaces it once the release is
 # published (baseline_rev). Updated by the release that starts the next minor version
 # (docs/release.md, "API stability").
 BASELINE_VERSION = "0.4.0"
-BASELINE_COMMIT = "80e50ba2238ac2548b437122b39b11257fb4c1c9"
+BASELINE_COMMIT = "12db0c25f40b054f99d5573a00ecdcd710fe9a20"
 
 # Lints that are not counted for the virtual tables of the classes (`*VTable` structs written by
 # `ferro_class!`): a new virtual member adds a field to the table and may move the others.
@@ -79,13 +80,20 @@ def is_metadata_struct(crate, item):
     return struct is not None and re.search(r"\b" + struct + r"\.", item) is not None
 
 
+# The colours of a terminal (CI sets CARGO_TERM_COLOR=always): the output is read without them.
+ANSI = re.compile(r"\x1b\[[0-9;]*m")
+
+
 def counted_failures(output, crate=None):
     """The failures of the output of cargo-semver-checks that count: (crate, lint, item)."""
     kind, lint, listing, failures = None, None, False, []
-    for line in output.splitlines():
+    for line in ANSI.sub("", output).splitlines():
         checking = re.search(r"Checking (\S+) v\S+ -> ", line)
         if checking:
-            crate, listing = checking.group(1), False
+            # From rustdoc JSON the crate is `<unknown>`: it stays the crate being checked.
+            if checking.group(1) != "<unknown>":
+                crate = checking.group(1)
+            listing = False
             continue
         header = FAILURE.match(line.strip())
         if header:
@@ -267,9 +275,16 @@ def main(argv):
             "minor",
         ]
         print(f"Checking {name}", flush=True)
-        result = subprocess.run(command, cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        result = subprocess.run(
+            command,
+            cwd=ROOT,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            env={**os.environ, "CARGO_TERM_COLOR": "never"},
+        )
         crate_failures = counted_failures(result.stdout, name)
-        if result.returncode != 0 and not crate_failures and "Summary semver requires" not in result.stdout:
+        if result.returncode != 0 and not crate_failures and "Summary semver requires" not in ANSI.sub("", result.stdout):
             errors.append(name)
         if result.returncode != 0 or crate_failures:
             sys.stdout.write(result.stdout)
