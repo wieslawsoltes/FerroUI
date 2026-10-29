@@ -35,18 +35,29 @@ impl InkToolbarPage {
             .expect("InkToolbarPage Toolbar");
         toolbar.set_target_ink_canvas(Some(canvas));
         let weak = this.downgrade();
-        toolbar.active_tool_changed(move |toolbar| {
-            let Some(this) = weak.upgrade() else {
-                return;
-            };
-            let tool = toolbar
-                .active_tool()
-                .map(|tool| format!("{:?}", tool.tool_kind()))
-                .unwrap_or_else(|| "none".into());
-            if let Some(label) = this.find_control::<TextBlock>("ActiveTool") {
-                label.set_text(Some(&format!("Active tool: {tool}")));
+        toolbar.active_tool_changed(move |_| {
+            if let Some(this) = weak.upgrade() {
+                this.show_active_tool();
+            }
+        });
+        // The toolbar selects its first pen when it is loaded, before the label can follow it.
+        let weak = this.downgrade();
+        this.loaded(move |_, _| {
+            if let Some(this) = weak.upgrade() {
+                this.show_active_tool();
             }
         });
         this
+    }
+
+    fn show_active_tool(&self) {
+        let Some(toolbar) = self.find_control::<InkToolbar>("Toolbar") else { return };
+        let tool = toolbar
+            .active_tool()
+            .map(|tool| format!("{:?}", tool.tool_kind()))
+            .unwrap_or_else(|| "none".into());
+        if let Some(label) = self.find_control::<TextBlock>("ActiveTool") {
+            label.set_text(Some(&format!("Active tool: {tool}")));
+        }
     }
 }
