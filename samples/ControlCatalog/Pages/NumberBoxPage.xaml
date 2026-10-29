@@ -35,14 +35,14 @@
         </ComboBox.ItemsSource>
       </ComboBox>
     </Grid>
-    <NumberBox x:Name="Configurable" Margin="2" Width="300" HorizontalAlignment="Left"
+    <NumberBox x:Name="Configurable" Margin="2" Width="360" HorizontalAlignment="Left"
                Header="Enter a number or an expression (1 + 2 * 3):" PlaceholderText="0"
                Minimum="0" Maximum="100" Value="42" SmallChange="1" LargeChange="10"
                SpinButtonPlacementMode="{Binding #SpinMode.SelectedItem}"
                AcceptsExpression="{Binding #Expression.IsChecked}"
                IsWrapEnabled="{Binding #Wrap.IsChecked}"
                ValidationMode="{Binding #Validation.SelectedItem}"
-               Description="Between 0 and 100; PageUp and PageDown step by 10." />
+               Description="From 0 to 100; PageUp/PageDown step 10." />
     <TextBlock Margin="2" Text="{Binding #Configurable.Value, StringFormat='Value: {0}'}" />
 
     <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">The spin button placements</TextBlock>
