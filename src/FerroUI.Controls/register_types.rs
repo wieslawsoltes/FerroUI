@@ -124,7 +124,7 @@ pub fn register_types() {
     });
 }
 
-const TYPES: &[&TypeInfo] = types![
+pub(crate) const TYPES: &[&TypeInfo] = types![
     // FerroUI
     crate::application::Application,
     // FerroUI.Animation

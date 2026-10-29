@@ -2,8 +2,7 @@
 //!
 //! `cargo-semver-checks` compares the signatures of the public API with the last release; it
 //! cannot see a default value, which lives in the metadata of a property. This test records, for
-//! every styled and attached property of the registered types of the `FerroUI` namespaces (the
-//! classes of the tests, whose module path names a test, left out):
+//! every styled and attached property of the types the two crates register (`register_types`):
 //!
 //! - one line per property: the owner, the name, the value type, the default for the owner, the
 //!   default binding mode, and whether it inherits or is attached;
@@ -60,9 +59,13 @@ fn display(value: &BoxedValue) -> String {
 }
 
 fn public_types() -> Vec<&'static TypeInfo> {
-    let mut types: Vec<&'static TypeInfo> = TypeInfo::registered_types()
-        .into_iter()
-        .filter(|t| t.namespace().starts_with("FerroUI") && !t.module_path().contains("test"))
+    // The types the two crates register, not every registered type: the tests that run beside this
+    // one register the types they use (a platform helper on one host and not on another).
+    let mut types: Vec<&'static TypeInfo> = ferroui_base::registered_type_list()
+        .iter()
+        .chain(crate::register_types::TYPES.iter())
+        .copied()
+        .filter(|t| t.namespace().starts_with("FerroUI"))
         .collect();
     types.sort_by_key(|t| t.full_name());
     types.dedup_by(|a, b| std::ptr::eq(*a, *b));
@@ -71,6 +74,9 @@ fn public_types() -> Vec<&'static TypeInfo> {
 
 /// The lines of the snapshot, keyed by everything before ` = `.
 fn snapshot_lines() -> BTreeMap<String, String> {
+    // The classes are initialised in an application of the tests, with a dispatcher of this
+    // thread, so that nothing they create is bound to the dispatcher another test uses.
+    let _app = crate::testing::UnitTestApplication::start(crate::testing::TestServices::mock_threading_interface());
     crate::register_types();
     let types = public_types();
     for t in types.iter().copied() {
