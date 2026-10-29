@@ -77,6 +77,20 @@ export class FerroDOM {
         nativeHost.style.overflow = "visible";
         nativeHost.style.position = "absolute";
 
+        // Not in the original: the accessibility host, where the automation tree of the view is
+        // mirrored (accessibility.ts). Like the native host it has no size of its own; its elements
+        // are positioned from its corner, the corner of the view. It lies over the canvas and under
+        // the native controls.
+        const accessibilityHost = document.createElement("div");
+        accessibilityHost.id = `accessibilityHost${containerId}`;
+        accessibilityHost.classList.add("ferroui-accessibility-host");
+        accessibilityHost.style.left = "0px";
+        accessibilityHost.style.top = "0px";
+        accessibilityHost.style.width = "0px";
+        accessibilityHost.style.height = "0px";
+        accessibilityHost.style.overflow = "visible";
+        accessibilityHost.style.position = "absolute";
+
         // IME
         const inputElement = document.createElement("input");
         inputElement.id = `inputElement${containerId}`;
@@ -111,10 +125,12 @@ export class FerroDOM {
 
         host.prepend(inputElement);
         host.prepend(nativeHost);
+        host.prepend(accessibilityHost);
 
         return {
             host,
             nativeHost,
+            accessibilityHost,
             inputElement
         };
     }
