@@ -168,6 +168,57 @@ check("a click toggles the check box", async (page) => {
     assert((await page.state()).checked === "Some(false)", "the check box did not toggle");
 });
 
+// The accessibility tree of the view (docs/porting/browser-accessibility.md): built on demand from
+// the automation peers, one element per peer at its bounds, with the ARIA role, name and states, read
+// by screen readers and found by the element picker of the developer tools.
+check("the accessibility tree is built on demand and mirrors the controls of the view", async (page) => {
+    const A11Y = `document.querySelector("#out .ferroui-accessibility-host")`;
+    const element = (selector) => `${A11Y}.querySelector(${JSON.stringify(selector)})`;
+    const attribute = async (selector, name) => await page.evaluate(`(e => e && e.getAttribute(${JSON.stringify(name)}))(${element(selector)})`);
+    // Only the enable button until it is activated: nothing is followed.
+    assert(await page.evaluate(`${A11Y}.children.length === 1 && ${A11Y}.firstElementChild.classList.contains("ferroui-enable-accessibility")`),
+        "the accessibility host has more than the enable button before it is activated");
+    assert(await page.evaluate(`${element(".ferroui-enable-accessibility")}.tabIndex === -1`), "the enable button is in the Tab order");
+    await page.evaluate(`(${element(".ferroui-enable-accessibility")}.click(), true)`);
+    await page.waitFor(`!!${element('[role="button"][aria-label="Button"]')}`, 10000);
+    assert(await page.evaluate(`!${element(".ferroui-enable-accessibility")}`), "the enable button stays after the tree was built");
+    assert(await page.evaluate(`document.getElementById("out").getAttribute("role") === "application"`), "the container is not an application");
+
+    // Roles, names, states and the class of the control.
+    assert(await attribute('[role="button"][aria-label="Button"]', "data-ferroui-type") === "Button", "the button element has not the class of its control");
+    assert(await attribute('[role="checkbox"]', "aria-checked") === "true", "the check box element is not checked");
+    assert(await page.evaluate(`${element('[role="textbox"]')}.textContent === "Text box"`), "the text box element has not the text of the text box");
+    assert(await attribute('[role="slider"]', "aria-valuenow") === "40", "the slider element has not the value of the slider");
+    assert(await attribute('[role="progressbar"]', "aria-valuenow") === "65", "the progress bar element has not its value");
+    assert(await attribute('[role="option"][aria-selected="true"]', "aria-label") === "Second item", "the selected list item is not the second");
+    assert(await page.evaluate(`${element('[role="listbox"]')}.contains(${element('[role="option"]')})`), "the items are not inside the list");
+    const title = await page.evaluate(`Array.from(${A11Y}.querySelectorAll("div")).some(e => !e.getAttribute("role") && e.firstChild && e.firstChild.nodeValue === "Fluent theme")`);
+    assert(title, "the title is not read as text");
+
+    // At the bounds of their controls, transparent, and leaving every pointer to the canvas.
+    assert(await page.evaluate(`(r => r.left <= ${BUTTON[0]} && ${BUTTON[0]} <= r.right && r.top <= ${BUTTON[1]} && ${BUTTON[1]} <= r.bottom)(${element('[role="button"][aria-label="Button"]')}.getBoundingClientRect())`),
+        "the button element is not over the button");
+    assert(await page.evaluate(`getComputedStyle(${element('[role="button"]')}).pointerEvents === "none"`), "the elements take pointer events");
+    await page.click(...BUTTON);
+    assert((await page.state()).clicks === "1", "a click on the canvas over the button element did not reach the button");
+
+    // A screen reader activates an element with a click on it: the peer is invoked or toggled.
+    await page.evaluate(`(${element('[role="button"][aria-label="Button"]')}.click(), true)`);
+    assert((await page.state()).clicks === "2", "the click of the button element did not invoke the button");
+    await page.evaluate(`(${element('[role="checkbox"]')}.click(), true)`);
+    assert((await page.state()).checked === "Some(false)", "the click of the check box element did not toggle it");
+    await page.waitFor(`${element('[role="checkbox"]')}.getAttribute("aria-checked") === "false"`, 5000);
+
+    // The container, which keeps the keyboard focus, names the element of the focused control.
+    await page.click(...TEXT_BOX);
+    await page.waitFor(`document.getElementById("out").getAttribute("aria-activedescendant") === ${element('[role="textbox"]')}.id`, 5000);
+
+    // Turned off: the elements go and the enable button comes back.
+    await page.evaluate(`(themedView.themedViewAccessibility(false), true)`);
+    assert(await page.evaluate(`${A11Y}.children.length === 1 && !!${element(".ferroui-enable-accessibility")}`), "the elements stay after the tree was turned off");
+    assert(await page.evaluate(`!document.getElementById("out").hasAttribute("aria-activedescendant")`), "the focus reference stays after the tree was turned off");
+});
+
 check("the cursor of the page follows the control under the pointer", async (page) => {
     const cursor = () => page.evaluate(`document.getElementById("out").style.cursor`);
     await page.mouseMove(...TEXT_BOX); await sleep(300);
