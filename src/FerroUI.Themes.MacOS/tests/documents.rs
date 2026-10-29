@@ -237,6 +237,8 @@ document_tests! {
     resources_resize_gripper_themeresources => "/Resources/ResizeGripper_themeresources.xaml";
     resources_table_view_themeresources => "/Resources/TableView_themeresources.xaml";
     resources_tabular_surfaces_themeresources => "/Resources/TabularSurfaces_themeresources.xaml";
+    resources_info_badge_themeresources => "/Resources/InfoBadge_themeresources.xaml";
+    resources_progress_ring_themeresources => "/Resources/ProgressRing_themeresources.xaml";
     strings_invariant_resources => "/Strings/InvariantResources.xaml";
     macos_theme => "/MacOSTheme.xaml";
     // B2: buttons, ranges and expanders
@@ -250,6 +252,9 @@ document_tests! {
     controls_slider => "/Controls/Slider.xaml";
     controls_split_button => "/Controls/SplitButton.xaml";
     controls_toggle_switch => "/Controls/ToggleSwitch.xaml";
+    controls_info_bar => "/Controls/InfoBar.xaml";
+    controls_info_badge => "/Controls/InfoBadge.xaml";
+    controls_progress_ring => "/Controls/ProgressRing.xaml";
 }
 
 #[test]

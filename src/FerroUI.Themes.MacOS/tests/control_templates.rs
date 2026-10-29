@@ -236,6 +236,9 @@ control_tests! {
     items_control => "ItemsControl";
     label => "Label";
     path_icon => "PathIcon";
+    progress_ring => "ProgressRing";
+    info_badge => "InfoBadge";
+    info_bar => "InfoBar";
     font_icon => "FontIcon";
     symbol_icon => "SymbolIcon";
     progress_bar => "ProgressBar";

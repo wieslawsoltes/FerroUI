@@ -75,7 +75,7 @@ pub use text_field_layout::{MaterialTextFieldLayout, MaterialTextFieldSlot};
 pub use loading_indicator::{MaterialLoadingIndicator, loading_indeterminate_frame};
 pub use ripple::MaterialRipple;
 pub use progress_indicator::{MaterialProgressIndicator, linear_indeterminate_segments, circular_indeterminate_frame};
-pub use color_scheme::{MaterialColorRole, MaterialColorScheme};
+pub use color_scheme::{MaterialColorRole, MaterialColorScheme, MaterialStatusColor};
 pub use fonts::MaterialAppBuilderExtension;
 pub use motion::{MaterialMotionScheme, MaterialMotionRole, MaterialSpringSpec, MaterialSpringSample, MaterialSpringState, MaterialSpringEasing};
 
