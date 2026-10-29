@@ -134,8 +134,16 @@ jobs:
         with:
           save-if: ${{ github.ref == 'refs/heads/main' }}
           cache-on-failure: true
+      # The test binaries run side by side (scripts/ci/parallel_tests.py): one after another they
+      # took 14.5 of the 55 minutes of the job. The two benchmark crates (their tests run every
+      # benchmark once, almost three minutes) are left out of a pull request; every other run has them.
       - name: Test
-        run: cargo test --workspace --locked --no-fail-fast --lib --tests --exclude ferroui-render-backends-comparison --exclude ferroui-vello
+        env:
+          BENCHMARKS: ${{ github.event_name == 'pull_request' && '--exclude ferroui-benchmarks --exclude ferroui-treedatagrid-benchmarks' || '' }}
+        run: |
+          # shellcheck disable=SC2086
+          python3 scripts/ci/parallel_tests.py --jobs 3 --workspace --locked --lib --tests \
+            --exclude ferroui-render-backends-comparison --exclude ferroui-vello $BENCHMARKS
 
   # The Windows platform backend (docs/porting/win32-platform.md, section 10.3). This job is the
   # only place the backend runs: it is written and checked for the Windows target on other
