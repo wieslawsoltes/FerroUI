@@ -120,6 +120,25 @@ settings, arguments and peer, `InfoBadge` and `ProgressRing`) are ported from th
 directly (`controls/dev/InfoBar`, `controls/dev/InfoBadge` and `controls/dev/ProgressRing`, with
 the animated visuals of `controls/dev/ProgressRing/AnimatedVisuals` and the English texts of their
 `Strings/en-us/Resources.resw`, at the same commit), under the same license.
+`number_box.rs`, `utils/number_expression.rs` and
+`automation/peers/number_box_automation_peer.rs` (WinUI's `NumberBox`, its expression parser and
+its automation peer) are ported from the WinUI project directly (`controls/dev/NumberBox` at the
+same commit), under the same license.
+
+`auto_suggest_box.rs` and `automation/peers/auto_suggest_box_automation_peer.rs` (WinUI's
+`AutoSuggestBox`, its arguments and its automation peer) are ported from the WinUI project
+directly (`dxaml/xcp/dxaml/lib/AutoSuggestBox_Partial.cpp`,
+`AutoSuggestBoxAutomationPeer_Partial.cpp` and the type model
+`dxaml/xcp/tools/XCPTypesAutoGen/Modules/AutoSuggestBox/AutoSuggestBox.cs` at the same commit),
+under the same license.
+
+`radio_buttons.rs`, `primitives/radio_buttons_panel.rs`, `rating_control.rs`,
+`rating_item_info.rs`, `automation/peers/radio_buttons_automation_peer.rs` and
+`automation/peers/rating_control_automation_peer.rs` (WinUI's `RadioButtons` with the layout
+`ColumnMajorUniformToLargestGridLayout`, `RatingControl`, `RatingItemInfo`, `RatingItemFontInfo`,
+`RatingItemImageInfo` and their automation peers) are ported from the WinUI project directly
+(`controls/dev/RadioButtons` and `controls/dev/RatingControl` at the same commit), under the
+same license.
 
 ## Silverlight Toolkit
 

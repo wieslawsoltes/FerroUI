@@ -153,6 +153,10 @@ PORT_DOCUMENTS = [
     ("Pages/InfoBadgePage.xaml", "the page of WinUI's InfoBadge (docs/porting/winui-controls.md)"),
     ("Pages/InfoBarPage.xaml", "the page of WinUI's InfoBar (docs/porting/winui-controls.md)"),
     ("Pages/ProgressRingPage.xaml", "the page of WinUI's ProgressRing (docs/porting/winui-controls.md)"),
+    ("Pages/NumberBoxPage.xaml", "the page of WinUI's NumberBox (docs/porting/winui-controls.md)"),
+    ("Pages/RadioButtonsPage.xaml", "the page of WinUI's RadioButtons (docs/porting/winui-controls.md)"),
+    ("Pages/RatingControlPage.xaml", "the page of WinUI's RatingControl (docs/porting/winui-controls.md)"),
+    ("Pages/AutoSuggestBoxPage.xaml", "the page of WinUI's AutoSuggestBox (docs/porting/winui-controls.md)"),
     ("Pages/IconElementPage.xaml", "the page of the icons of WinUI (SymbolIcon, FontIcon; docs/porting/winui-controls.md)"),
 ]
 

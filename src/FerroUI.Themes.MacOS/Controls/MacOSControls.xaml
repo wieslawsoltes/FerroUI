@@ -106,6 +106,10 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/InfoBar.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/InfoBadge.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/ProgressRing.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/NumberBox.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/AutoSuggestBox.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/RadioButtons.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/RatingControl.xaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Styles.Resources>

@@ -706,6 +706,160 @@
     ]
   },
   {
+    "name": "AutoSuggestBox",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::AutoSuggestBox",
+    "base": "HeaderedItemsControl",
+    "constructible": true,
+    "properties": {
+      "Text": {
+        "name": "Text",
+        "type_name": "String",
+        "documentation": "AutoSuggestBox.Text: String",
+        "values": [],
+        "attached": false
+      },
+      "TextMemberPath": {
+        "name": "TextMemberPath",
+        "type_name": "String",
+        "documentation": "AutoSuggestBox.TextMemberPath: String",
+        "values": [],
+        "attached": false
+      },
+      "PlaceholderText": {
+        "name": "PlaceholderText",
+        "type_name": "String",
+        "documentation": "AutoSuggestBox.PlaceholderText: String",
+        "values": [],
+        "attached": false
+      },
+      "UpdateTextOnSelect": {
+        "name": "UpdateTextOnSelect",
+        "type_name": "bool",
+        "documentation": "AutoSuggestBox.UpdateTextOnSelect: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "IsSuggestionListOpen": {
+        "name": "IsSuggestionListOpen",
+        "type_name": "bool",
+        "documentation": "AutoSuggestBox.IsSuggestionListOpen: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "MaxSuggestionListHeight": {
+        "name": "MaxSuggestionListHeight",
+        "type_name": "f64",
+        "documentation": "AutoSuggestBox.MaxSuggestionListHeight: f64",
+        "values": [],
+        "attached": false
+      },
+      "QueryIcon": {
+        "name": "QueryIcon",
+        "type_name": "Option<Ref<IconElement>>",
+        "documentation": "AutoSuggestBox.QueryIcon: Option<Ref<IconElement>>",
+        "values": [],
+        "attached": false
+      },
+      "Description": {
+        "name": "Description",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "AutoSuggestBox.Description: Option<BoxedValue>",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "AutoSuggestBoxAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::automation::peers::AutoSuggestBoxAutomationPeer",
+    "base": "ControlAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "AutoSuggestBoxQuerySubmittedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::AutoSuggestBoxQuerySubmittedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "QueryText": {
+        "name": "QueryText",
+        "type_name": "String",
+        "documentation": "AutoSuggestBoxQuerySubmittedEventArgs.QueryText: String",
+        "values": []
+      },
+      "ChosenSuggestion": {
+        "name": "ChosenSuggestion",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "AutoSuggestBoxQuerySubmittedEventArgs.ChosenSuggestion: Option<BoxedValue>",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "AutoSuggestBoxSuggestionChosenEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::AutoSuggestBoxSuggestionChosenEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "SelectedItem": {
+        "name": "SelectedItem",
+        "type_name": "BoxedValue",
+        "documentation": "AutoSuggestBoxSuggestionChosenEventArgs.SelectedItem: BoxedValue",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "AutoSuggestBoxTextChangedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::AutoSuggestBoxTextChangedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Reason": {
+        "name": "Reason",
+        "type_name": "AutoSuggestionBoxTextChangeReason",
+        "documentation": "AutoSuggestBoxTextChangedEventArgs.Reason: AutoSuggestionBoxTextChangeReason",
+        "values": [
+          "UserInput",
+          "ProgrammaticChange",
+          "SuggestionChosen"
+        ]
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "AutomationPeer",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::automation::peers::AutomationPeer",
@@ -11567,6 +11721,189 @@
     ]
   },
   {
+    "name": "NumberBox",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::NumberBox",
+    "base": "TemplatedControl",
+    "constructible": true,
+    "properties": {
+      "Minimum": {
+        "name": "Minimum",
+        "type_name": "f64",
+        "documentation": "NumberBox.Minimum: f64",
+        "values": [],
+        "attached": false
+      },
+      "Maximum": {
+        "name": "Maximum",
+        "type_name": "f64",
+        "documentation": "NumberBox.Maximum: f64",
+        "values": [],
+        "attached": false
+      },
+      "Value": {
+        "name": "Value",
+        "type_name": "f64",
+        "documentation": "NumberBox.Value: f64",
+        "values": [],
+        "attached": false
+      },
+      "SmallChange": {
+        "name": "SmallChange",
+        "type_name": "f64",
+        "documentation": "NumberBox.SmallChange: f64",
+        "values": [],
+        "attached": false
+      },
+      "LargeChange": {
+        "name": "LargeChange",
+        "type_name": "f64",
+        "documentation": "NumberBox.LargeChange: f64",
+        "values": [],
+        "attached": false
+      },
+      "Text": {
+        "name": "Text",
+        "type_name": "String",
+        "documentation": "NumberBox.Text: String",
+        "values": [],
+        "attached": false
+      },
+      "Header": {
+        "name": "Header",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "NumberBox.Header: Option<BoxedValue>",
+        "values": [],
+        "attached": false
+      },
+      "HeaderTemplate": {
+        "name": "HeaderTemplate",
+        "type_name": "Option<Rc<dyn IDataTemplate>>",
+        "documentation": "NumberBox.HeaderTemplate: Option<Rc<dyn IDataTemplate>>",
+        "values": [],
+        "attached": false
+      },
+      "PlaceholderText": {
+        "name": "PlaceholderText",
+        "type_name": "String",
+        "documentation": "NumberBox.PlaceholderText: String",
+        "values": [],
+        "attached": false
+      },
+      "TextAlignment": {
+        "name": "TextAlignment",
+        "type_name": "TextAlignment",
+        "documentation": "NumberBox.TextAlignment: TextAlignment",
+        "values": [
+          "Left",
+          "Center",
+          "Right",
+          "Start",
+          "End",
+          "DetectFromContent",
+          "Justify"
+        ],
+        "attached": false
+      },
+      "Description": {
+        "name": "Description",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "NumberBox.Description: Option<BoxedValue>",
+        "values": [],
+        "attached": false
+      },
+      "ValidationMode": {
+        "name": "ValidationMode",
+        "type_name": "NumberBoxValidationMode",
+        "documentation": "NumberBox.ValidationMode: NumberBoxValidationMode",
+        "values": [
+          "InvalidInputOverwritten",
+          "Disabled"
+        ],
+        "attached": false
+      },
+      "SpinButtonPlacementMode": {
+        "name": "SpinButtonPlacementMode",
+        "type_name": "NumberBoxSpinButtonPlacementMode",
+        "documentation": "NumberBox.SpinButtonPlacementMode: NumberBoxSpinButtonPlacementMode",
+        "values": [
+          "Hidden",
+          "Compact",
+          "Inline"
+        ],
+        "attached": false
+      },
+      "IsWrapEnabled": {
+        "name": "IsWrapEnabled",
+        "type_name": "bool",
+        "documentation": "NumberBox.IsWrapEnabled: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "AcceptsExpression": {
+        "name": "AcceptsExpression",
+        "type_name": "bool",
+        "documentation": "NumberBox.AcceptsExpression: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "NumberFormatter": {
+        "name": "NumberFormatter",
+        "type_name": "Rc<dyn INumberBoxNumberFormatter>",
+        "documentation": "NumberBox.NumberFormatter: Rc<dyn INumberBoxNumberFormatter>",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "NumberBoxAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::automation::peers::NumberBoxAutomationPeer",
+    "base": "ControlAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "NumberBoxValueChangedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::NumberBoxValueChangedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "OldValue": {
+        "name": "OldValue",
+        "type_name": "f64",
+        "documentation": "NumberBoxValueChangedEventArgs.OldValue: f64",
+        "values": []
+      },
+      "NewValue": {
+        "name": "NewValue",
+        "type_name": "f64",
+        "documentation": "NumberBoxValueChangedEventArgs.NewValue: f64",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "NumberFormatInfo",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::utilities::NumberFormatInfo",
@@ -13865,6 +14202,65 @@
     ]
   },
   {
+    "name": "RadioButtons",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::RadioButtons",
+    "base": "HeaderedSelectingItemsControl",
+    "constructible": true,
+    "properties": {
+      "MaxColumns": {
+        "name": "MaxColumns",
+        "type_name": "i32",
+        "documentation": "RadioButtons.MaxColumns: i32",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "RadioButtonsAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::automation::peers::RadioButtonsAutomationPeer",
+    "base": "SelectingItemsControlAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "RadioButtonsPanel",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::primitives::RadioButtonsPanel",
+    "base": "Panel",
+    "constructible": true,
+    "properties": {
+      "ColumnSpacing": {
+        "name": "ColumnSpacing",
+        "type_name": "f64",
+        "documentation": "RadioButtonsPanel.ColumnSpacing: f64",
+        "values": [],
+        "attached": false
+      },
+      "RowSpacing": {
+        "name": "RowSpacing",
+        "type_name": "f64",
+        "documentation": "RadioButtonsPanel.RowSpacing: f64",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls.Primitives",
+      "clr-namespace:FerroUI.Controls.Primitives;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "RangeBase",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::primitives::RangeBase",
@@ -13953,6 +14349,215 @@
     "namespace_aliases": [
       "using:FerroUI.Controls.Primitives",
       "clr-namespace:FerroUI.Controls.Primitives;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "RatingControl",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::RatingControl",
+    "base": "TemplatedControl",
+    "constructible": true,
+    "properties": {
+      "Caption": {
+        "name": "Caption",
+        "type_name": "String",
+        "documentation": "RatingControl.Caption: String",
+        "values": [],
+        "attached": false
+      },
+      "InitialSetValue": {
+        "name": "InitialSetValue",
+        "type_name": "i32",
+        "documentation": "RatingControl.InitialSetValue: i32",
+        "values": [],
+        "attached": false
+      },
+      "IsClearEnabled": {
+        "name": "IsClearEnabled",
+        "type_name": "bool",
+        "documentation": "RatingControl.IsClearEnabled: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "IsReadOnly": {
+        "name": "IsReadOnly",
+        "type_name": "bool",
+        "documentation": "RatingControl.IsReadOnly: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "MaxRating": {
+        "name": "MaxRating",
+        "type_name": "i32",
+        "documentation": "RatingControl.MaxRating: i32",
+        "values": [],
+        "attached": false
+      },
+      "PlaceholderValue": {
+        "name": "PlaceholderValue",
+        "type_name": "f64",
+        "documentation": "RatingControl.PlaceholderValue: f64",
+        "values": [],
+        "attached": false
+      },
+      "ItemInfo": {
+        "name": "ItemInfo",
+        "type_name": "Option<Ref<RatingItemInfo>>",
+        "documentation": "RatingControl.ItemInfo: Option<Ref<RatingItemInfo>>",
+        "values": [],
+        "attached": false
+      },
+      "Value": {
+        "name": "Value",
+        "type_name": "f64",
+        "documentation": "RatingControl.Value: f64",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "RatingControlAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::automation::peers::RatingControlAutomationPeer",
+    "base": "ControlAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "RatingItemFontInfo",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::RatingItemFontInfo",
+    "base": "RatingItemInfo",
+    "constructible": true,
+    "properties": {
+      "Glyph": {
+        "name": "Glyph",
+        "type_name": "String",
+        "documentation": "RatingItemFontInfo.Glyph: String",
+        "values": [],
+        "attached": false
+      },
+      "DisabledGlyph": {
+        "name": "DisabledGlyph",
+        "type_name": "String",
+        "documentation": "RatingItemFontInfo.DisabledGlyph: String",
+        "values": [],
+        "attached": false
+      },
+      "PointerOverGlyph": {
+        "name": "PointerOverGlyph",
+        "type_name": "String",
+        "documentation": "RatingItemFontInfo.PointerOverGlyph: String",
+        "values": [],
+        "attached": false
+      },
+      "PointerOverPlaceholderGlyph": {
+        "name": "PointerOverPlaceholderGlyph",
+        "type_name": "String",
+        "documentation": "RatingItemFontInfo.PointerOverPlaceholderGlyph: String",
+        "values": [],
+        "attached": false
+      },
+      "PlaceholderGlyph": {
+        "name": "PlaceholderGlyph",
+        "type_name": "String",
+        "documentation": "RatingItemFontInfo.PlaceholderGlyph: String",
+        "values": [],
+        "attached": false
+      },
+      "UnsetGlyph": {
+        "name": "UnsetGlyph",
+        "type_name": "String",
+        "documentation": "RatingItemFontInfo.UnsetGlyph: String",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "RatingItemImageInfo",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::RatingItemImageInfo",
+    "base": "RatingItemInfo",
+    "constructible": true,
+    "properties": {
+      "Image": {
+        "name": "Image",
+        "type_name": "Option<Rc<dyn IImage>>",
+        "documentation": "RatingItemImageInfo.Image: Option<Rc<dyn IImage>>",
+        "values": [],
+        "attached": false
+      },
+      "DisabledImage": {
+        "name": "DisabledImage",
+        "type_name": "Option<Rc<dyn IImage>>",
+        "documentation": "RatingItemImageInfo.DisabledImage: Option<Rc<dyn IImage>>",
+        "values": [],
+        "attached": false
+      },
+      "PointerOverImage": {
+        "name": "PointerOverImage",
+        "type_name": "Option<Rc<dyn IImage>>",
+        "documentation": "RatingItemImageInfo.PointerOverImage: Option<Rc<dyn IImage>>",
+        "values": [],
+        "attached": false
+      },
+      "PointerOverPlaceholderImage": {
+        "name": "PointerOverPlaceholderImage",
+        "type_name": "Option<Rc<dyn IImage>>",
+        "documentation": "RatingItemImageInfo.PointerOverPlaceholderImage: Option<Rc<dyn IImage>>",
+        "values": [],
+        "attached": false
+      },
+      "PlaceholderImage": {
+        "name": "PlaceholderImage",
+        "type_name": "Option<Rc<dyn IImage>>",
+        "documentation": "RatingItemImageInfo.PlaceholderImage: Option<Rc<dyn IImage>>",
+        "values": [],
+        "attached": false
+      },
+      "UnsetImage": {
+        "name": "UnsetImage",
+        "type_name": "Option<Rc<dyn IImage>>",
+        "documentation": "RatingItemImageInfo.UnsetImage: Option<Rc<dyn IImage>>",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "RatingItemInfo",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::RatingItemInfo",
+    "base": "FerroObject",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
     ]
   },
   {
