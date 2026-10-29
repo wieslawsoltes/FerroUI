@@ -53,6 +53,35 @@
         </RadioButtons>
         <RatingControl Caption="RatingControl" Value="3.5" />
       </StackPanel>
+
+      <!-- Navigation (W8) -->
+      <StackPanel x:Name="Navigation" Spacing="8">
+        <TextBlock Classes="h3" Text="Navigation" />
+        <Border BorderThickness="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" Height="360">
+          <NavigationView PaneDisplayMode="Left" PaneTitle="NavigationView" IsSettingsVisible="True">
+            <NavigationView.MenuItems>
+              <NavigationViewItemHeader Content="Pages" />
+              <NavigationViewItem Content="Home" IsSelected="True">
+                <NavigationViewItem.Icon>
+                  <SymbolIcon Symbol="Home" />
+                </NavigationViewItem.Icon>
+              </NavigationViewItem>
+              <NavigationViewItem Content="Mail">
+                <NavigationViewItem.Icon>
+                  <SymbolIcon Symbol="Mail" />
+                </NavigationViewItem.Icon>
+              </NavigationViewItem>
+              <NavigationViewItemSeparator />
+              <NavigationViewItem Content="Folder">
+                <NavigationViewItem.Icon>
+                  <SymbolIcon Symbol="Folder" />
+                </NavigationViewItem.Icon>
+              </NavigationViewItem>
+            </NavigationView.MenuItems>
+            <Frame />
+          </NavigationView>
+        </Border>
+      </StackPanel>
     </StackPanel>
   </ScrollViewer>
 </ContentPage>
