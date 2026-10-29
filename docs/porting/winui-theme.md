@@ -564,7 +564,8 @@ ports a control updates its state by porting it, not by editing the table.
 | `TreeView.xaml` | `{TreeView}` | TreeView: DefaultTreeViewStyle (TreeView.xaml, TreeView_themeresources.xaml). | B3 | ported |
 | `TreeViewItem.xaml` | `{TreeViewItem}` | TreeViewItem: {TreeViewItem} (TreeView.xaml), MUX_TreeViewItemStyle (TreeViewItem.xaml). | B3 | ported |
 | `Window.xaml` | `{Window}` | No WinUI style (Window is not a control in WinUI 3): the Mica fallback background and text of a window (SolidBackgroundFillColorBaseBrush, TextFillColorPrimaryBrush, ContentControlThemeFontFamily, ControlContentThemeFontSize). | F | ported |
-| `WindowDrawnDecorations.xaml` | `{WindowDrawnDecorations}` | TitleBar: DefaultTitleBarStyle (TitleBar.xaml, TitleBar_themeresources.xaml); WindowCaptionButton (generic.xaml) for the caption buttons. | B6 | ported |
+| `WindowDrawnDecorations.xaml` | `{WindowDrawnDecorations}` | TitleBar: DefaultTitleBarStyle (TitleBar.xaml, TitleBar_themeresources.xaml) for the title bar the toolkit draws; WindowCaptionButton (generic.xaml) for the caption buttons. | B6 | ported |
+| `TitleBar.xaml` | `DefaultTitleBarControlStyle`, `{TitleBar}` | TitleBar: DefaultTitleBarStyle (as DefaultTitleBarControlStyle) and the implicit style (TitleBar.xaml); TitleBarBackButtonStyle and TitleBarPaneToggleButtonStyle are in WindowDrawnDecorations.xaml. A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it. | B6 | ported |
 | `WindowNotificationManager.xaml` | `{WindowNotificationManager}` | No WinUI control: a host of InfoBar cards (InfoBar_themeresources.xaml). | B6 | ported |
 
 #### WinUI styles
@@ -647,7 +648,7 @@ Every target type of a style of the merged WinUI theme, the FerroUI control its 
 | `Thumb` | `Thumb` | F | the default theme of FerroUI's Thumb (the thumbs of ScrollBar and Slider have keyed themes) |
 | `TimePicker` | `TimePicker` | B4 |  |
 | `TimePickerFlyoutPresenter` | `TimePickerPresenter` | B4 |  |
-| `TitleBar` | `WindowDrawnDecorations` | B6 |  |
+| `TitleBar` | `TitleBar` | B6 | WinUI's TitleBar in ferroui-controls; WindowDrawnDecorations draws the title bar of the toolkit with its resources |
 | `ToggleButton` | `ToggleButton` | F |  |
 | `ToggleMenuFlyoutItem` | `MenuItem` | B3 |  |
 | `ToggleSplitButton` | `SplitButton` | B2 | FerroUI's ToggleSplitButton overrides its style key to SplitButton |

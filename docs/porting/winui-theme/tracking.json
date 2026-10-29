@@ -90140,6 +90140,7 @@
   "Controls/ThemeVariantScope.xaml",
   "Controls/Thumb.xaml",
   "Controls/TimePicker.xaml",
+  "Controls/TitleBar.xaml",
   "Controls/ToggleButton.xaml",
   "Controls/ToggleSwitch.xaml",
   "Controls/ToolTip.xaml",
@@ -90682,7 +90683,7 @@
    "batch": "B5",
    "winui": "NavigationView: {NavigationView}, {NavigationViewItem}, {NavigationViewItemHeader}, {NavigationViewItemSeparator} (NavigationView.xaml), MUX_NavigationViewItemPresenterStyleWhenOnLeftPane and MUX_NavigationViewItemPresenterStyleWhenOnTopPane folded into the item, MUX_NavigationViewSettingsItemStyleWhenOnTopPane, NavigationViewPaneSearchButtonStyle (NavigationView_themeresources.xaml), with PaneToggleButtonStyle of DrawerPage.xaml and the back button styles of NavigationPage.xaml. A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it.",
    "status": "ported",
-   "deviations": 32,
+   "deviations": 33,
    "date": "2026-10-29"
   },
   {
@@ -91209,10 +91210,22 @@
     "{WindowDrawnDecorations}"
    ],
    "batch": "B6",
-   "winui": "TitleBar: DefaultTitleBarStyle (TitleBar.xaml, TitleBar_themeresources.xaml); WindowCaptionButton (generic.xaml) for the caption buttons.",
+   "winui": "TitleBar: DefaultTitleBarStyle (TitleBar.xaml, TitleBar_themeresources.xaml) for the title bar the toolkit draws; WindowCaptionButton (generic.xaml) for the caption buttons.",
    "status": "ported",
    "deviations": 15,
    "date": "2026-10-16"
+  },
+  {
+   "document": "TitleBar.xaml",
+   "themes": [
+    "DefaultTitleBarControlStyle",
+    "{TitleBar}"
+   ],
+   "batch": "B6",
+   "winui": "TitleBar: DefaultTitleBarStyle (as DefaultTitleBarControlStyle) and the implicit style (TitleBar.xaml); TitleBarBackButtonStyle and TitleBarPaneToggleButtonStyle are in WindowDrawnDecorations.xaml. A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it.",
+   "status": "ported",
+   "deviations": 4,
+   "date": "not committed"
   },
   {
    "document": "WindowNotificationManager.xaml",
@@ -91657,7 +91670,7 @@
   "DrawerPage": 13,
   "NavigationPage": 7,
   "Frame": 3,
-  "NavigationView": 32,
+  "NavigationView": 33,
   "SplitView": 6,
   "TabControl": 9,
   "TabItem": 13,
@@ -91675,7 +91688,8 @@
   "RefreshVisualizer": 3,
   "Slider": 12,
   "SplitButton": 15,
-  "ToggleSwitch": 11
+  "ToggleSwitch": 11,
+  "TitleBar": 4
  },
  "winui_targets": {
   "AppBarButton": {
@@ -91995,8 +92009,9 @@
    "batch": "B4"
   },
   "TitleBar": {
-   "ferroui": "WindowDrawnDecorations",
-   "batch": "B6"
+   "ferroui": "TitleBar",
+   "batch": "B6",
+   "note": "WinUI's TitleBar in ferroui-controls; WindowDrawnDecorations draws the title bar of the toolkit with its resources"
   },
   "ToggleButton": {
    "ferroui": "ToggleButton",
