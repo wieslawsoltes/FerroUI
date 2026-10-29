@@ -1,0 +1,15 @@
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- Ported from tests/Xaml.Behaviors.Interactions.UnitTests/Core/CallMethodAction002 of
+       Xaml.Behaviors. Adapted: the window is the class of the test (CallMethodAction002 in
+       call_method_action_tests.rs) and this document, loaded with the run-time loader, is its
+       content. -->
+  <Button Name="TargetButton" Content="Button">
+    <Interaction.Behaviors>
+      <EventTriggerBehavior EventName="Click">
+        <CallMethodAction TargetObject="{Binding $parent[Window]}"
+                          MethodName="TestMethod" />
+      </EventTriggerBehavior>
+    </Interaction.Behaviors>
+  </Button>
+</StackPanel>

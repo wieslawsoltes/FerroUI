@@ -177,6 +177,45 @@ Three holders keep an element for a while after it left the tree, here as upstre
 
 ## The WinUI theme of the port
 
+### Optional macOS 26 appearance
+
+The `macos-theme` feature adds the independent `ferroui-themes-macos` theme to the
+Settings theme selector while preserving WinUI as the default. The new theme is copied
+from the compiled WinUI theme's control foundation and adapts its resources and templates.
+
+```sh
+FERROUI_CATALOG_THEME=macos cargo run -p control-catalog-desktop --features macos-theme
+```
+
+The Settings page exposes macOS control size (mini through extra large), accent presets,
+Reduce Motion, Reduce Transparency, Increase Contrast and active-window appearance.
+These settings update the retained theme instance and therefore existing controls.
+Switching to another theme and back preserves the preview configuration.
+
+Browser builds enable `control-catalog-browser/macos-theme` and accept `?Theme=macos`
+or `?Theme=macos26`; an unavailable optional theme logs the missing build feature and
+keeps the default. Browser fonts and backdrop support differ from native macOS.
+
+The theme's implementation and native comparison boundaries are recorded in
+[macOS 26 theme](../../docs/porting/macos26-theme.md). This gallery is a control-coverage
+and interaction test surface; native macOS 26 reference captures remain necessary to
+establish pixel and motion accuracy.
+
+### Optional Android Material 3 Expressive appearance
+
+The `material-theme` feature adds `ferroui-themes-material` beside the macOS theme; the
+catalog loads its bundled Roboto through `App::with_theme_fonts`.
+
+```sh
+FERROUI_CATALOG_THEME=material FERROUI_CATALOG_THEME_VARIANT=dark cargo run -p control-catalog-desktop --features material-theme
+```
+
+The Material-specific components (date and time pickers, docked search, snackbars, sheets,
+app bars, segmented groups) have no catalog pages; the Material theme gallery
+(`samples/MaterialThemeGallery`) shows them.
+
+### Default WinUI and optional classic themes
+
 Not in the original: the catalog has the WinUI 3 theme of the port (`ferroui-themes-winui`,
 docs/porting/winui-theme.md) and starts in it; the original starts in the Fluent theme.
 

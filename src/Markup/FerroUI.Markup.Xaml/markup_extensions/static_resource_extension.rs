@@ -105,6 +105,8 @@ impl StaticResourceExtension {
         if let (Some(target), Some(property)) =
             (target_object.as_ref().and_then(<Ref<Control>>::from_xaml_object), target_property)
         {
+            #[cfg(all(feature = "hot-reload", debug_assertions))]
+            crate::reload_validation::record(&target, key.clone(), theme_variant);
             DelayedBinding::add_value(&target, property.into_property_info(), move |x| {
                 ColorToBrushConverter::convert_to(x.find_resource(&key), target_type)
             })

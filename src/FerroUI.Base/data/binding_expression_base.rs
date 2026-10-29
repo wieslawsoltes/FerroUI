@@ -56,6 +56,26 @@ pub trait BindingExpressionBase: IDisposable + IValueEntry + Any {
         None
     }
 
+    /// Whether this expression can participate in a synchronous reload transaction.
+    #[cfg(all(debug_assertions, feature = "hot-reload"))]
+    #[doc(hidden)]
+    fn can_pause_for_reload(&self) -> bool {
+        false
+    }
+
+    /// Suppresses target publication and target-to-source writes without stopping
+    /// source subscriptions. Returns false for unsupported or already paused bindings.
+    #[cfg(all(debug_assertions, feature = "hot-reload"))]
+    #[doc(hidden)]
+    fn pause_for_reload(&self) -> bool {
+        false
+    }
+
+    /// Publishes source changes received while paused, then resumes ordinary writes.
+    #[cfg(all(debug_assertions, feature = "hot-reload"))]
+    #[doc(hidden)]
+    fn resume_after_reload(&self) {}
+
     fn as_any(&self) -> &dyn Any;
 }
 

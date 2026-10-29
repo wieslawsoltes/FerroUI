@@ -1,0 +1,669 @@
+<!-- macOS 26 adaptation; see docs/porting/macos26-theme.md.
+     Derived from FerroUI WinUI templates and microsoft-ui-xaml commit
+     7e4b0c2096be402f51cc8f7d203ebf67cff183d0. Copyright (c) Microsoft Corporation.
+     Licensed under the MIT License; see NOTICE.md.
+     Acrylic backing is the portable fallback for native Liquid Glass. -->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20" Width="600">
+      <CommandBar>
+        <CommandBar.PrimaryCommands>
+          <CommandBarButton Label="Add">
+            <CommandBarButton.Icon>
+              <PathIcon Data="M11,5H13V11H19V13H13V19H11V13H5V11H11Z"/>
+            </CommandBarButton.Icon>
+          </CommandBarButton>
+          <CommandBarSeparator/>
+          <CommandBarToggleButton Label="Checked" IsChecked="True">
+            <CommandBarToggleButton.Icon>
+              <PathIcon Data="M4,12.5L5.5,11L9.5,15L18.5,6L20,7.5L9.5,18Z"/>
+            </CommandBarToggleButton.Icon>
+          </CommandBarToggleButton>
+        </CommandBar.PrimaryCommands>
+        <CommandBar.SecondaryCommands>
+          <CommandBarButton Label="Settings"/>
+        </CommandBar.SecondaryCommands>
+      </CommandBar>
+    </Border>
+  </Design.PreviewWith>
+  <ControlTheme x:Key="DefaultAppBarButtonStyle" TargetType="CommandBarButton">
+    <Setter Property="Background" Value="{DynamicResource AppBarButtonBackground}"/>
+    <Setter Property="Foreground" Value="{DynamicResource AppBarButtonForeground}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource AppBarButtonBorderBrush}"/>
+    <Setter Property="HorizontalAlignment" Value="Left"/>
+    <Setter Property="VerticalAlignment" Value="Top"/>
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}"/>
+    <Setter Property="FontWeight" Value="Normal"/>
+    <Setter Property="Width" Value="68"/>
+    <Setter Property="CornerRadius" Value="8"/>
+    <Setter Property="BackgroundSizing" Value="InnerBorderEdge"/>
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border Margin="-3" BorderThickness="2" BorderBrush="{DynamicResource SystemControlFocusVisualPrimaryBrush}" CornerRadius="{DynamicResource ControlCornerRadius}">
+          <Border BorderThickness="1" BorderBrush="{DynamicResource SystemControlFocusVisualSecondaryBrush}" CornerRadius="{DynamicResource ControlCornerRadius}"/>
+        </Border>
+      </FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel x:Name="Root" Background="Transparent">
+          <Border x:Name="AppBarButtonInnerBorder" Margin="{DynamicResource AppBarButtonInnerBorderMargin}" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" BackgroundSizing="{TemplateBinding BackgroundSizing}">
+            <Border.Transitions>
+              <Transitions>
+                <BrushTransition Property="Background" Duration="{DynamicResource MacOSMotionFastDuration}"/>
+              </Transitions>
+            </Border.Transitions>
+          </Border>
+          <Grid x:Name="ContentRoot" MinHeight="{DynamicResource AppBarThemeMinHeight}" ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" Background="{TemplateBinding Background}">
+            <Viewbox x:Name="ContentViewbox" Height="{DynamicResource AppBarButtonContentHeight}" Margin="{DynamicResource AppBarButtonContentViewboxCollapsedMargin}" HorizontalAlignment="Stretch">
+              <ContentPresenter x:Name="Content" Content="{TemplateBinding Icon}" Foreground="{TemplateBinding Foreground}">
+                <ContentPresenter.Styles>
+                  <Style Selector="PathIcon">
+                    <Setter Property="Width" Value="NaN"/>
+                    <Setter Property="Height" Value="NaN"/>
+                    <Setter Property="Template" Value="{StaticResource PathIconUnscaledTemplate}"/>
+                  </Style>
+                </ContentPresenter.Styles>
+              </ContentPresenter>
+            </Viewbox>
+            <TextBlock x:Name="TextLabel" Grid.Row="1" Text="{TemplateBinding Label}" Foreground="{TemplateBinding Foreground}" FontSize="{DynamicResource AppBarButtonLabelFontSize}" FontFamily="{TemplateBinding FontFamily}" TextAlignment="Center" TextWrapping="Wrap" Margin="{DynamicResource AppBarButtonTextLabelMargin}"/>
+            <TextBlock x:Name="OverflowTextLabel" Text="{TemplateBinding Label}" Foreground="{TemplateBinding Foreground}" FontSize="{DynamicResource ControlContentThemeFontSize}" FontFamily="{TemplateBinding FontFamily}" TextAlignment="Left" TextWrapping="NoWrap" HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="12,0,12,0" Padding="{DynamicResource AppBarButtonOverflowTextLabelPadding}" IsVisible="False"/>
+          </Grid>
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^[IsCompact=True]">
+      <Style Selector="^ /template/ Border#AppBarButtonInnerBorder">
+        <Setter Property="Margin" Value="{DynamicResource AppBarButtonInnerBorderCompactMargin}"/>
+      </Style>
+      <Style Selector="^ /template/ TextBlock#TextLabel">
+        <Setter Property="IsVisible" Value="False"/>
+      </Style>
+    </Style>
+    <Style Selector="^[LabelPosition=Collapsed]">
+      <Style Selector="^ /template/ Border#AppBarButtonInnerBorder">
+        <Setter Property="Margin" Value="{DynamicResource AppBarButtonInnerBorderMargin}"/>
+      </Style>
+      <Style Selector="^ /template/ Grid#ContentRoot">
+        <Setter Property="MinHeight" Value="{DynamicResource AppBarThemeCompactHeight}"/>
+      </Style>
+      <Style Selector="^ /template/ TextBlock#TextLabel">
+        <Setter Property="IsVisible" Value="False"/>
+      </Style>
+    </Style>
+    <Style Selector="^[LabelPosition=Right]">
+      <Setter Property="Width" Value="NaN"/>
+      <Style Selector="^ /template/ Border#AppBarButtonInnerBorder">
+        <Setter Property="Margin" Value="{DynamicResource AppBarButtonInnerBorderMargin}"/>
+      </Style>
+      <Style Selector="^ /template/ Viewbox#ContentViewbox">
+        <Setter Property="Margin" Value="12,0,0,0"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+      </Style>
+      <Style Selector="^ /template/ Panel#Root">
+        <Setter Property="MinHeight" Value="{DynamicResource AppBarThemeCompactHeight}"/>
+      </Style>
+      <Style Selector="^ /template/ Grid#ContentRoot">
+        <Setter Property="MinHeight" Value="0"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+      </Style>
+      <Style Selector="^ /template/ TextBlock#TextLabel">
+        <Setter Property="IsVisible" Value="True"/>
+        <Setter Property="Grid.Row" Value="0"/>
+        <Setter Property="Grid.Column" Value="1"/>
+        <Setter Property="TextAlignment" Value="Left"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="TextLineBounds" Value="Tight"/>
+        <Setter Property="Margin" Value="8,0,12,0"/>
+      </Style>
+    </Style>
+    <Style Selector="^[IsInOverflow=True]">
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+      <Setter Property="Width" Value="NaN"/>
+      <Style Selector="^ /template/ Grid#ContentRoot">
+        <Setter Property="MinHeight" Value="0"/>
+      </Style>
+      <Style Selector="^ /template/ Border#AppBarButtonInnerBorder">
+        <Setter Property="Margin" Value="{DynamicResource AppBarButtonInnerBorderOverflowMargin}"/>
+      </Style>
+      <Style Selector="^ /template/ Viewbox#ContentViewbox, ^ /template/ TextBlock#TextLabel">
+        <Setter Property="IsVisible" Value="False"/>
+      </Style>
+      <Style Selector="^ /template/ TextBlock#OverflowTextLabel">
+        <Setter Property="IsVisible" Value="True"/>
+      </Style>
+    </Style>
+    <Style Selector="^:pointerover">
+      <Style Selector="^ /template/ Border#AppBarButtonInnerBorder">
+        <Setter Property="Background" Value="{DynamicResource AppBarButtonBackgroundPointerOver}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBarButtonBorderBrushPointerOver}"/>
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#Content">
+        <Setter Property="Foreground" Value="{DynamicResource AppBarButtonForegroundPointerOver}"/>
+      </Style>
+      <Style Selector="^ /template/ TextBlock#TextLabel, ^ /template/ TextBlock#OverflowTextLabel">
+        <Setter Property="Foreground" Value="{DynamicResource AppBarButtonForegroundPointerOver}"/>
+      </Style>
+    </Style>
+    <Style Selector="^:pressed">
+      <Style Selector="^ /template/ Border#AppBarButtonInnerBorder">
+        <Setter Property="Background" Value="{DynamicResource AppBarButtonBackgroundPressed}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBarButtonBorderBrushPressed}"/>
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#Content">
+        <Setter Property="Foreground" Value="{DynamicResource AppBarButtonForegroundPressed}"/>
+      </Style>
+      <Style Selector="^ /template/ TextBlock#TextLabel, ^ /template/ TextBlock#OverflowTextLabel">
+        <Setter Property="Foreground" Value="{DynamicResource AppBarButtonForegroundPressed}"/>
+      </Style>
+    </Style>
+    <Style Selector="^:disabled">
+      <Style Selector="^ /template/ Border#AppBarButtonInnerBorder">
+        <Setter Property="Background" Value="{DynamicResource AppBarButtonBackgroundDisabled}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBarButtonBorderBrushDisabled}"/>
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#Content">
+        <Setter Property="Foreground" Value="{DynamicResource AppBarButtonForegroundDisabled}"/>
+      </Style>
+      <Style Selector="^ /template/ TextBlock#TextLabel, ^ /template/ TextBlock#OverflowTextLabel">
+        <Setter Property="Foreground" Value="{DynamicResource AppBarButtonForegroundDisabled}"/>
+      </Style>
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="AppBarButtonOverflowStyle" TargetType="CommandBarButton" BasedOn="{StaticResource DefaultAppBarButtonStyle}">
+    <Setter Property="HorizontalAlignment" Value="Stretch"/>
+    <Setter Property="Width" Value="NaN"/>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type CommandBarButton}" TargetType="CommandBarButton" BasedOn="{StaticResource DefaultAppBarButtonStyle}"/>
+  <ControlTheme x:Key="DefaultAppBarToggleButtonStyle" TargetType="CommandBarToggleButton">
+    <Setter Property="Background" Value="{DynamicResource AppBarToggleButtonBackground}"/>
+    <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonForeground}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource AppBarToggleButtonBorderBrush}"/>
+    <Setter Property="BorderThickness" Value="{DynamicResource AppBarToggleButtonBorderThemeThickness}"/>
+    <Setter Property="HorizontalAlignment" Value="Left"/>
+    <Setter Property="VerticalAlignment" Value="Top"/>
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}"/>
+    <Setter Property="FontWeight" Value="Normal"/>
+    <Setter Property="Width" Value="68"/>
+    <Setter Property="CornerRadius" Value="8"/>
+    <Setter Property="BackgroundSizing" Value="InnerBorderEdge"/>
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border Margin="-3" BorderThickness="2" BorderBrush="{DynamicResource SystemControlFocusVisualPrimaryBrush}" CornerRadius="{DynamicResource ControlCornerRadius}">
+          <Border BorderThickness="1" BorderBrush="{DynamicResource SystemControlFocusVisualSecondaryBrush}" CornerRadius="{DynamicResource ControlCornerRadius}"/>
+        </Border>
+      </FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel x:Name="Root" Background="Transparent">
+          <Border x:Name="AppBarToggleButtonInnerBorder" Margin="{DynamicResource AppBarButtonInnerBorderMargin}" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" BackgroundSizing="{TemplateBinding BackgroundSizing}">
+            <Border.Transitions>
+              <Transitions>
+                <BrushTransition Property="Background" Duration="{DynamicResource MacOSMotionFastDuration}"/>
+              </Transitions>
+            </Border.Transitions>
+          </Border>
+          <Grid x:Name="ContentRoot" MinHeight="{DynamicResource AppBarThemeMinHeight}" ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" Background="{TemplateBinding Background}">
+            <Path x:Name="OverflowCheckGlyph" Data="{StaticResource GlyphGeometryE73E}" Fill="{DynamicResource AppBarToggleButtonCheckGlyphForeground}" Stretch="Uniform" Width="13" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="{DynamicResource AppBarToggleButtonOverflowCheckMargin}" Opacity="0" IsVisible="False"/>
+            <Viewbox x:Name="ContentViewbox" Height="{DynamicResource AppBarButtonContentHeight}" Margin="{DynamicResource AppBarButtonContentViewboxCollapsedMargin}" HorizontalAlignment="Stretch">
+              <ContentPresenter x:Name="Content" Content="{TemplateBinding Icon}" Foreground="{TemplateBinding Foreground}">
+                <ContentPresenter.Styles>
+                  <Style Selector="PathIcon">
+                    <Setter Property="Width" Value="NaN"/>
+                    <Setter Property="Height" Value="NaN"/>
+                    <Setter Property="Template" Value="{StaticResource PathIconUnscaledTemplate}"/>
+                  </Style>
+                </ContentPresenter.Styles>
+              </ContentPresenter>
+            </Viewbox>
+            <TextBlock x:Name="TextLabel" Grid.Row="1" Text="{TemplateBinding Label}" Foreground="{TemplateBinding Foreground}" FontSize="12" FontFamily="{TemplateBinding FontFamily}" TextAlignment="Center" TextWrapping="Wrap" Margin="{DynamicResource AppBarToggleButtonTextLabelMargin}"/>
+            <TextBlock x:Name="OverflowTextLabel" Text="{TemplateBinding Label}" Foreground="{TemplateBinding Foreground}" FontSize="{DynamicResource ControlContentThemeFontSize}" FontFamily="{TemplateBinding FontFamily}" TextAlignment="Left" TextWrapping="NoWrap" HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="38,0,12,0" Padding="{DynamicResource AppBarToggleButtonOverflowTextLabelPadding}" IsVisible="False"/>
+          </Grid>
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^[IsCompact=True]">
+      <Style Selector="^ /template/ Border#AppBarToggleButtonInnerBorder">
+        <Setter Property="Margin" Value="{DynamicResource AppBarButtonInnerBorderCompactMargin}"/>
+      </Style>
+      <Style Selector="^ /template/ TextBlock#TextLabel">
+        <Setter Property="IsVisible" Value="False"/>
+      </Style>
+    </Style>
+    <Style Selector="^[LabelPosition=Collapsed]">
+      <Style Selector="^ /template/ Border#AppBarToggleButtonInnerBorder">
+        <Setter Property="Margin" Value="{DynamicResource AppBarButtonInnerBorderMargin}"/>
+      </Style>
+      <Style Selector="^ /template/ Grid#ContentRoot">
+        <Setter Property="MinHeight" Value="{DynamicResource AppBarThemeCompactHeight}"/>
+      </Style>
+      <Style Selector="^ /template/ TextBlock#TextLabel">
+        <Setter Property="IsVisible" Value="False"/>
+      </Style>
+    </Style>
+    <Style Selector="^[LabelPosition=Right]">
+      <Setter Property="Width" Value="NaN"/>
+      <Style Selector="^ /template/ Border#AppBarToggleButtonInnerBorder">
+        <Setter Property="Margin" Value="{DynamicResource AppBarButtonInnerBorderMargin}"/>
+      </Style>
+      <Style Selector="^ /template/ Viewbox#ContentViewbox">
+        <Setter Property="Margin" Value="12,0,0,0"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+      </Style>
+      <Style Selector="^ /template/ Panel#Root">
+        <Setter Property="MinHeight" Value="{DynamicResource AppBarThemeCompactHeight}"/>
+      </Style>
+      <Style Selector="^ /template/ Grid#ContentRoot">
+        <Setter Property="MinHeight" Value="0"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+      </Style>
+      <Style Selector="^ /template/ TextBlock#TextLabel">
+        <Setter Property="IsVisible" Value="True"/>
+        <Setter Property="Grid.Row" Value="0"/>
+        <Setter Property="Grid.Column" Value="1"/>
+        <Setter Property="TextAlignment" Value="Left"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="TextLineBounds" Value="Tight"/>
+        <Setter Property="Margin" Value="8,0,12,0"/>
+      </Style>
+    </Style>
+    <Style Selector="^[IsInOverflow=True]">
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+      <Setter Property="Width" Value="NaN"/>
+      <Style Selector="^ /template/ Grid#ContentRoot">
+        <Setter Property="MinHeight" Value="0"/>
+      </Style>
+      <Style Selector="^ /template/ Border#AppBarToggleButtonInnerBorder">
+        <Setter Property="Margin" Value="{DynamicResource AppBarButtonInnerBorderOverflowMargin}"/>
+      </Style>
+      <Style Selector="^ /template/ Viewbox#ContentViewbox, ^ /template/ TextBlock#TextLabel">
+        <Setter Property="IsVisible" Value="False"/>
+      </Style>
+      <Style Selector="^ /template/ Path#OverflowCheckGlyph, ^ /template/ TextBlock#OverflowTextLabel">
+        <Setter Property="IsVisible" Value="True"/>
+      </Style>
+    </Style>
+    <Style Selector="^:pointerover">
+      <Style Selector="^ /template/ Border#AppBarToggleButtonInnerBorder">
+        <Setter Property="Background" Value="{DynamicResource AppBarToggleButtonBackgroundPointerOver}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBarToggleButtonBorderBrushPointerOver}"/>
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#Content">
+        <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonForegroundPointerOver}"/>
+      </Style>
+      <Style Selector="^ /template/ TextBlock#TextLabel">
+        <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonForegroundPointerOver}"/>
+      </Style>
+      <Style Selector="^ /template/ Path#OverflowCheckGlyph">
+        <Setter Property="Fill" Value="{DynamicResource AppBarToggleButtonOverflowLabelForegroundPointerOver}"/>
+      </Style>
+      <Style Selector="^ /template/ TextBlock#OverflowTextLabel">
+        <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonOverflowLabelForegroundPointerOver}"/>
+      </Style>
+    </Style>
+    <Style Selector="^:pressed">
+      <Style Selector="^ /template/ Border#AppBarToggleButtonInnerBorder">
+        <Setter Property="Background" Value="{DynamicResource AppBarToggleButtonBackgroundPressed}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBarToggleButtonBorderBrushPressed}"/>
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#Content">
+        <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonForegroundPressed}"/>
+      </Style>
+      <Style Selector="^ /template/ TextBlock#TextLabel">
+        <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonForegroundPressed}"/>
+      </Style>
+      <Style Selector="^ /template/ Path#OverflowCheckGlyph">
+        <Setter Property="Fill" Value="{DynamicResource AppBarToggleButtonOverflowLabelForegroundPressed}"/>
+      </Style>
+      <Style Selector="^ /template/ TextBlock#OverflowTextLabel">
+        <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonOverflowLabelForegroundPressed}"/>
+      </Style>
+    </Style>
+    <Style Selector="^:disabled">
+      <Style Selector="^ /template/ Border#AppBarToggleButtonInnerBorder">
+        <Setter Property="Background" Value="{DynamicResource AppBarToggleButtonBackgroundDisabled}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBarToggleButtonBorderBrushDisabled}"/>
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#Content">
+        <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonForegroundDisabled}"/>
+      </Style>
+      <Style Selector="^ /template/ TextBlock#TextLabel">
+        <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonForegroundDisabled}"/>
+      </Style>
+      <Style Selector="^ /template/ Path#OverflowCheckGlyph">
+        <Setter Property="Fill" Value="{DynamicResource AppBarToggleButtonOverflowLabelForegroundDisabled}"/>
+      </Style>
+      <Style Selector="^ /template/ TextBlock#OverflowTextLabel">
+        <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonOverflowLabelForegroundDisabled}"/>
+      </Style>
+    </Style>
+    <Style Selector="^:checked">
+      <Style Selector="^ /template/ Border#AppBarToggleButtonInnerBorder">
+        <Setter Property="Background" Value="{DynamicResource AppBarToggleButtonBackgroundChecked}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBarToggleButtonBorderBrushChecked}"/>
+        <Setter Property="BackgroundSizing" Value="OuterBorderEdge"/>
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#Content">
+        <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonForegroundChecked}"/>
+      </Style>
+      <Style Selector="^ /template/ TextBlock#TextLabel">
+        <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonForegroundChecked}"/>
+      </Style>
+      <Style Selector="^ /template/ Path#OverflowCheckGlyph">
+        <Setter Property="Opacity" Value="1"/>
+      </Style>
+    </Style>
+    <Style Selector="^:checked:pointerover">
+      <Style Selector="^ /template/ Border#AppBarToggleButtonInnerBorder">
+        <Setter Property="Background" Value="{DynamicResource AppBarToggleButtonBackgroundCheckedPointerOver}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBarToggleButtonBorderBrushCheckedPointerOver}"/>
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#Content">
+        <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonForegroundCheckedPointerOver}"/>
+      </Style>
+      <Style Selector="^ /template/ TextBlock#TextLabel">
+        <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonForegroundCheckedPointerOver}"/>
+      </Style>
+      <Style Selector="^ /template/ Path#OverflowCheckGlyph">
+        <Setter Property="Fill" Value="{DynamicResource AppBarToggleButtonOverflowLabelForegroundCheckedPointerOver}"/>
+      </Style>
+      <Style Selector="^ /template/ TextBlock#OverflowTextLabel">
+        <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonOverflowLabelForegroundCheckedPointerOver}"/>
+      </Style>
+    </Style>
+    <Style Selector="^:checked:pressed">
+      <Style Selector="^ /template/ Border#AppBarToggleButtonInnerBorder">
+        <Setter Property="Background" Value="{DynamicResource AppBarToggleButtonBackgroundCheckedPressed}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBarToggleButtonBorderBrushCheckedPressed}"/>
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#Content">
+        <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonForegroundCheckedPressed}"/>
+      </Style>
+      <Style Selector="^ /template/ TextBlock#TextLabel">
+        <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonForegroundCheckedPressed}"/>
+      </Style>
+      <Style Selector="^ /template/ Path#OverflowCheckGlyph">
+        <Setter Property="Fill" Value="{DynamicResource AppBarToggleButtonOverflowLabelForegroundCheckedPressed}"/>
+      </Style>
+      <Style Selector="^ /template/ TextBlock#OverflowTextLabel">
+        <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonOverflowLabelForegroundCheckedPressed}"/>
+      </Style>
+    </Style>
+    <Style Selector="^:checked:disabled">
+      <Style Selector="^ /template/ Border#AppBarToggleButtonInnerBorder">
+        <Setter Property="Background" Value="{DynamicResource AppBarToggleButtonBackgroundCheckedDisabled}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBarToggleButtonBorderBrushCheckedDisabled}"/>
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#Content">
+        <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonForegroundCheckedDisabled}"/>
+      </Style>
+      <Style Selector="^ /template/ TextBlock#TextLabel">
+        <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonForegroundCheckedDisabled}"/>
+      </Style>
+      <Style Selector="^ /template/ Path#OverflowCheckGlyph">
+        <Setter Property="Fill" Value="{DynamicResource AppBarToggleButtonOverflowLabelForegroundCheckedDisabled}"/>
+      </Style>
+      <Style Selector="^ /template/ TextBlock#OverflowTextLabel">
+        <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonOverflowLabelForegroundCheckedDisabled}"/>
+      </Style>
+    </Style>
+    <Style Selector="^[IsInOverflow=True]">
+      <Style Selector="^:pointerover">
+        <Style Selector="^ /template/ Border#AppBarToggleButtonInnerBorder">
+          <Setter Property="Background" Value="{DynamicResource AppBarToggleButtonBackgroundHighLightOverlayPointerOver}"/>
+          <Setter Property="BorderBrush" Value="{DynamicResource AppBarToggleButtonBorderBrushPointerOver}"/>
+        </Style>
+        <Style Selector="^ /template/ ContentPresenter#Content">
+          <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonForegroundPointerOver}"/>
+        </Style>
+        <Style Selector="^ /template/ TextBlock#TextLabel">
+          <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonForegroundPointerOver}"/>
+        </Style>
+        <Style Selector="^ /template/ Path#OverflowCheckGlyph">
+          <Setter Property="Fill" Value="{DynamicResource AppBarToggleButtonCheckGlyphForegroundPointerOver}"/>
+        </Style>
+        <Style Selector="^ /template/ TextBlock#OverflowTextLabel">
+          <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonOverflowLabelForegroundPointerOver}"/>
+        </Style>
+      </Style>
+      <Style Selector="^:pressed">
+        <Style Selector="^ /template/ Border#AppBarToggleButtonInnerBorder">
+          <Setter Property="Background" Value="{DynamicResource AppBarToggleButtonBackgroundHighLightOverlayPressed}"/>
+          <Setter Property="BorderBrush" Value="{DynamicResource AppBarToggleButtonBorderBrushPressed}"/>
+        </Style>
+        <Style Selector="^ /template/ ContentPresenter#Content">
+          <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonForegroundPressed}"/>
+        </Style>
+        <Style Selector="^ /template/ TextBlock#TextLabel">
+          <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonForegroundPressed}"/>
+        </Style>
+        <Style Selector="^ /template/ Path#OverflowCheckGlyph">
+          <Setter Property="Fill" Value="{DynamicResource AppBarToggleButtonCheckGlyphForegroundPressed}"/>
+        </Style>
+        <Style Selector="^ /template/ TextBlock#OverflowTextLabel">
+          <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonOverflowLabelForegroundPressed}"/>
+        </Style>
+      </Style>
+      <Style Selector="^:checked:not(CommandBarToggleButton:disabled)">
+        <Style Selector="^ /template/ Border#AppBarToggleButtonInnerBorder">
+          <Setter Property="Background" Value="{TemplateBinding Background}"/>
+          <Setter Property="BackgroundSizing" Value="{TemplateBinding BackgroundSizing}"/>
+          <Setter Property="BorderBrush" Value="{DynamicResource AppBarToggleButtonBorderBrushChecked}"/>
+        </Style>
+        <Style Selector="^ /template/ ContentPresenter#Content">
+          <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonForeground}"/>
+        </Style>
+        <Style Selector="^ /template/ TextBlock#TextLabel, ^ /template/ TextBlock#OverflowTextLabel">
+          <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonForeground}"/>
+        </Style>
+        <Style Selector="^ /template/ Path#OverflowCheckGlyph">
+          <Setter Property="Fill" Value="{DynamicResource AppBarToggleButtonForeground}"/>
+        </Style>
+      </Style>
+      <Style Selector="^:checked:pointerover">
+        <Style Selector="^ /template/ Border#AppBarToggleButtonInnerBorder">
+          <Setter Property="Background" Value="{DynamicResource AppBarToggleButtonBackgroundHighLightOverlayCheckedPointerOver}"/>
+        </Style>
+        <Style Selector="^ /template/ ContentPresenter#Content">
+          <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonOverflowLabelForegroundCheckedPointerOver}"/>
+        </Style>
+        <Style Selector="^ /template/ TextBlock#TextLabel">
+          <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonForegroundCheckedPointerOver}"/>
+        </Style>
+        <Style Selector="^ /template/ Path#OverflowCheckGlyph">
+          <Setter Property="Fill" Value="{DynamicResource AppBarToggleButtonOverflowLabelForegroundCheckedPointerOver}"/>
+        </Style>
+        <Style Selector="^ /template/ TextBlock#OverflowTextLabel">
+          <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonOverflowLabelForegroundCheckedPointerOver}"/>
+        </Style>
+      </Style>
+      <Style Selector="^:checked:pressed">
+        <Style Selector="^ /template/ Border#AppBarToggleButtonInnerBorder">
+          <Setter Property="Background" Value="{DynamicResource AppBarToggleButtonBackgroundHighLightOverlayCheckedPressed}"/>
+          <Setter Property="BorderBrush" Value="{DynamicResource AppBarToggleButtonBorderBrushCheckedPressed}"/>
+        </Style>
+        <Style Selector="^ /template/ ContentPresenter#Content">
+          <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonOverflowLabelForegroundCheckedPressed}"/>
+        </Style>
+        <Style Selector="^ /template/ TextBlock#TextLabel">
+          <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonForegroundCheckedPressed}"/>
+        </Style>
+        <Style Selector="^ /template/ Path#OverflowCheckGlyph">
+          <Setter Property="Fill" Value="{DynamicResource AppBarToggleButtonOverflowLabelForegroundCheckedPressed}"/>
+        </Style>
+        <Style Selector="^ /template/ TextBlock#OverflowTextLabel">
+          <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonOverflowLabelForegroundCheckedPressed}"/>
+        </Style>
+      </Style>
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="AppBarToggleButtonOverflowStyle" TargetType="CommandBarToggleButton" BasedOn="{StaticResource DefaultAppBarToggleButtonStyle}">
+    <Setter Property="HorizontalAlignment" Value="Stretch"/>
+    <Setter Property="Width" Value="NaN"/>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type CommandBarToggleButton}" TargetType="CommandBarToggleButton" BasedOn="{StaticResource DefaultAppBarToggleButtonStyle}"/>
+  <ControlTheme x:Key="DefaultAppBarSeparatorStyle" TargetType="CommandBarSeparator">
+    <Setter Property="Foreground" Value="{DynamicResource AppBarSeparatorForeground}"/>
+    <Setter Property="Padding" Value="{DynamicResource AppBarSeparatorMargin}"/>
+    <Setter Property="IsTabStop" Value="False"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel x:Name="RootGrid">
+          <Rectangle x:Name="SeparatorRectangle" RadiusX="{StaticResource AppBarSeparatorCornerRadius}" RadiusY="{StaticResource AppBarSeparatorCornerRadius}" Width="{StaticResource AppBarSeparatorWidth}" VerticalAlignment="Stretch" Fill="{TemplateBinding Foreground}" Margin="{TemplateBinding Padding}"/>
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^[IsCompact=True] /template/ Panel#RootGrid">
+      <Setter Property="Height" Value="{DynamicResource AppBarThemeCompactHeight}"/>
+      <Setter Property="VerticalAlignment" Value="Top"/>
+    </Style>
+    <Style Selector="^[IsInOverflow=True] /template/ Panel#RootGrid">
+      <Setter Property="Height" Value="NaN"/>
+      <Setter Property="VerticalAlignment" Value="Stretch"/>
+    </Style>
+    <Style Selector="^[IsInOverflow=True] /template/ Rectangle#SeparatorRectangle">
+      <Setter Property="Width" Value="NaN"/>
+      <Setter Property="HorizontalAlignment" Value="Stretch"/>
+      <Setter Property="Height" Value="{StaticResource AppBarOverflowSeparatorHeight}"/>
+      <Setter Property="Margin" Value="{StaticResource AppBarOverflowSeparatorMargin}"/>
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type CommandBarSeparator}" TargetType="CommandBarSeparator" BasedOn="{StaticResource DefaultAppBarSeparatorStyle}"/>
+  <ControlTheme x:Key="EllipsisButton" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+    <Setter Property="Background" Value="{DynamicResource AppBarButtonBackground}"/>
+    <Setter Property="Foreground" Value="{DynamicResource AppBarButtonForeground}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource AppBarButtonBorderBrush}"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="Padding" Value="0"/>
+    <Setter Property="HorizontalAlignment" Value="Stretch"/>
+    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    <Setter Property="VerticalAlignment" Value="Stretch"/>
+    <Setter Property="VerticalContentAlignment" Value="Center"/>
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}"/>
+    <Setter Property="FontWeight" Value="SemiBold"/>
+    <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}"/>
+    <Setter Property="Width" Value="{DynamicResource AppBarExpandButtonThemeWidth}"/>
+    <Setter Property="CornerRadius" Value="8"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel Background="Transparent">
+          <ContentPresenter x:Name="PART_ContentPresenter" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BackgroundSizing="InnerBorderEdge" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Foreground="{TemplateBinding Foreground}" Margin="{StaticResource AppBarEllipsisButtonInnerBorderMargin}" Padding="0" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:pointerover">
+      <Setter Property="Foreground" Value="{DynamicResource AppBarButtonForegroundPointerOver}"/>
+    </Style>
+    <Style Selector="^:pressed">
+      <Setter Property="Foreground" Value="{DynamicResource AppBarButtonForegroundPressed}"/>
+    </Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Foreground" Value="{DynamicResource AppBarButtonForegroundDisabled}"/>
+    </Style>
+    <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource AppBarButtonBackgroundPointerOver}"/>
+      <Setter Property="Foreground" Value="{DynamicResource AppBarButtonForegroundPointerOver}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource AppBarButtonBorderBrushPointerOver}"/>
+    </Style>
+    <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource AppBarButtonBackgroundPressed}"/>
+      <Setter Property="Foreground" Value="{DynamicResource AppBarButtonForegroundPressed}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource AppBarButtonBorderBrushPressed}"/>
+    </Style>
+    <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource AppBarButtonBackgroundDisabled}"/>
+      <Setter Property="Foreground" Value="{DynamicResource AppBarButtonForegroundDisabled}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource AppBarButtonBorderBrushDisabled}"/>
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="DefaultCommandBarOverflowPresenterStyle" TargetType="ItemsControl">
+    <Setter Property="Background" Value="{DynamicResource CommandBarOverflowPresenterBackground}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource CommandBarOverflowPresenterBorderBrush}"/>
+    <Setter Property="Padding" Value="{DynamicResource CommandBarOverflowPresenterBorderPadding}"/>
+    <Setter Property="MaxWidth" Value="{DynamicResource CommandBarOverflowMaxWidth}"/>
+    <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+    <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
+    <Setter Property="KeyboardNavigation.TabNavigation" Value="Once"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource OverlayCornerRadius}"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="LayoutRoot" Background="{TemplateBinding Background}" BackgroundSizing="InnerBorderEdge" Padding="{TemplateBinding Padding}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{DynamicResource CommandBarOverflowPresenterBorderThickness}" CornerRadius="{TemplateBinding CornerRadius}">
+          <ScrollViewer HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}" VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}">
+            <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" Margin="{DynamicResource CommandBarOverflowPresenterMargin}"/>
+          </ScrollViewer>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+  <ControlTheme x:Key="DefaultCommandBarStyle" TargetType="CommandBar">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="Foreground" Value="{DynamicResource CommandBarForeground}"/>
+    <Setter Property="Padding" Value="6"/>
+    <Setter Property="IsTabStop" Value="False"/>
+    <Setter Property="VerticalAlignment" Value="Top"/>
+    <Setter Property="HorizontalAlignment" Value="Stretch"/>
+    <Setter Property="CornerRadius" Value="12"/>
+    <Setter Property="ItemWidthBottom" Value="68"/>
+    <Setter Property="ItemWidthCollapsed" Value="68"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel x:Name="LayoutRoot">
+          <Border x:Name="ContentRoot" VerticalAlignment="Top" MinHeight="{DynamicResource AppBarThemeCompactHeight}" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}" Margin="6">
+            <Panel>
+              <ExperimentalAcrylicBorder Material="{DynamicResource MacOSToolbarGlassMaterial}" IsHitTestVisible="False" CornerRadius="{TemplateBinding CornerRadius}"/>
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*"/>
+                  <ColumnDefinition Width="Auto" MinWidth="{StaticResource AppBarMoreButtonColumnMinWidth}"/>
+                </Grid.ColumnDefinitions>
+                <Grid ColumnDefinitions="*,Auto">
+                  <ContentPresenter x:Name="PART_ContentPresenter" Margin="{TemplateBinding Padding}" Content="{TemplateBinding Content}" Foreground="{TemplateBinding Foreground}" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Left" VerticalContentAlignment="Top"/>
+                  <ItemsControl x:Name="PrimaryItemsControl" Grid.Column="1" HorizontalAlignment="Right" MinHeight="{DynamicResource AppBarThemeCompactHeight}" IsTabStop="False" ItemsSource="{Binding VisiblePrimaryCommands, RelativeSource={RelativeSource TemplatedParent}}">
+                    <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" Spacing="2"/>
+                      </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                  </ItemsControl>
+                </Grid>
+                <Button x:Name="PART_OverflowButton" Grid.Column="1" Theme="{StaticResource EllipsisButton}" Foreground="{TemplateBinding Foreground}" MinHeight="{DynamicResource AppBarThemeCompactHeight}" VerticalAlignment="Top" IsVisible="{TemplateBinding IsOverflowButtonVisible}">
+                  <Path x:Name="EllipsisIcon" Data="{StaticResource GlyphGeometryE712}" Fill="{Binding $parent[Button].Foreground}" Stretch="Uniform" Width="15" Height="{DynamicResource AppBarExpandButtonCircleDiameter}" VerticalAlignment="Center"/>
+                </Button>
+                <Rectangle x:Name="HighContrastBorder" Grid.ColumnSpan="2" IsVisible="False" VerticalAlignment="Stretch" Stroke="{DynamicResource CommandBarHighContrastBorder}" StrokeThickness="1"/>
+                <Border x:Name="OpenBorder" Grid.ColumnSpan="2" IsVisible="False" VerticalAlignment="Stretch" BorderThickness="{DynamicResource CommandBarBorderThicknessOpen}" BorderBrush="{DynamicResource CommandBarBorderBrushOpen}" CornerRadius="{TemplateBinding CornerRadius}"/>
+              </Grid>
+            </Panel>
+          </Border>
+          <Popup x:Name="PART_OverflowPopup" IsOpen="{TemplateBinding IsOpen, Mode=TwoWay}" PlacementTarget="{Binding #ContentRoot}" Placement="BottomEdgeAlignedRight" IsLightDismissEnabled="True" WindowManagerAddShadowHint="False">
+            <Border x:Name="SecondaryItemsControlShadowWrapper" BoxShadow="{DynamicResource MacOSMenuShadow}" Margin="{StaticResource ThemeShadowFlyoutMargin}" CornerRadius="{DynamicResource OverlayCornerRadius}">
+              <ItemsControl x:Name="PART_OverflowPresenter" Theme="{StaticResource DefaultCommandBarOverflowPresenterStyle}" IsTabStop="False" ItemsSource="{Binding OverflowItems, RelativeSource={RelativeSource TemplatedParent}}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <StackPanel/>
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+              </ItemsControl>
+            </Border>
+          </Popup>
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:disabled /template/ Path#EllipsisIcon">
+      <Setter Property="Fill" Value="{DynamicResource CommandBarEllipsisIconForegroundDisabled}"/>
+    </Style>
+    <Style Selector="^[IsOpen=True]">
+      <Style Selector="^ /template/ Border#ContentRoot">
+        <Setter Property="Background" Value="{DynamicResource CommandBarBackgroundOpen}"/>
+        <Setter Property="CornerRadius" Value="{TemplateBinding CornerRadius}"/>
+      </Style>
+      <Style Selector="^ /template/ Border#OpenBorder, ^ /template/ Rectangle#HighContrastBorder">
+        <Setter Property="IsVisible" Value="True"/>
+      </Style>
+      <Style Selector="^ /template/ Button#PART_OverflowButton">
+        <Setter Property="VerticalAlignment" Value="Stretch"/>
+      </Style>
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type CommandBar}" TargetType="CommandBar" BasedOn="{StaticResource DefaultCommandBarStyle}"/>
+</ResourceDictionary>

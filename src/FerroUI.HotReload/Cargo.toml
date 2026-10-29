@@ -1,0 +1,28 @@
+[package]
+name = "ferroui-hot-reload"
+description = "Development-only FerroUI hot-reload support"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+[lib]
+path = "lib.rs"
+[package.metadata.release]
+group = "tools"
+
+[dependencies]
+serde_json = "1"
+ferroui-base = { workspace = true, features = ["hot-reload"] }
+ferroui-controls.workspace = true
+ferroui-markup-xaml = { workspace = true, features = ["hot-reload"] }
+ferroui-markup-xaml-loader = { workspace = true, features = ["hot-reload"] }
+roxmltree.workspace = true
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }

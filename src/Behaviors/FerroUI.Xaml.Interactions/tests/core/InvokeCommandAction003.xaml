@@ -1,0 +1,19 @@
+<Window xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="InvokeCommandAction003">
+  <!-- Ported from tests/Xaml.Behaviors.Interactions.UnitTests/Core/InvokeCommandAction003 of Xaml.Behaviors.
+       Adapted: no x:Class (the test loads the window with the run-time loader); the data context, which the code of the window sets, is set by the test, and so is the input converter. -->
+  <StackPanel>
+    <TextBox Name="TargetTextBox"
+             Text="Initial Text" />
+    <Button Name="TargetButton" Content="Button">
+      <Interaction.Behaviors>
+        <EventTriggerBehavior EventName="Click">
+          <InvokeCommandAction Command="{Binding TestCommand}"
+                               InputConverterParameter="{x:Null}"
+                               InputConverterLanguage="en-US"/>
+        </EventTriggerBehavior>
+      </Interaction.Behaviors>
+    </Button>
+  </StackPanel>
+</Window>

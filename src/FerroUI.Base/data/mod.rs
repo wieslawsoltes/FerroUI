@@ -18,6 +18,8 @@ mod culture_info_ietf_language_tag_converter;
 mod data_validation_exception;
 mod indexer_binding;
 mod indexer_descriptor;
+#[cfg(all(debug_assertions, feature = "hot-reload"))]
+mod local_binding_reload;
 mod multi_binding;
 mod reflection_binding;
 mod relative_source;
@@ -41,6 +43,8 @@ pub use culture_info_ietf_language_tag_converter::CultureInfoIetfLanguageTagConv
 pub use data_validation_exception::{AggregateException, DataValidationException};
 pub use indexer_binding::IndexerBinding;
 pub use indexer_descriptor::IndexerDescriptor;
+#[cfg(all(debug_assertions, feature = "hot-reload"))]
+pub use local_binding_reload::LocalBindingReload;
 pub use multi_binding::MultiBinding;
 pub use reflection_binding::ReflectionBinding;
 pub use relative_source::{RelativeSource, RelativeSourceMode, TreeType};

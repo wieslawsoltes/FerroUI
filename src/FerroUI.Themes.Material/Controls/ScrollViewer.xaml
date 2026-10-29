@@ -1,0 +1,183 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/CommonStyles/ScrollViewer_themeresources.xaml (the styles; its resources are
+    Resources/ScrollViewer_themeresources.xaml)
+    dxaml/xcp/dxaml/themes/generic.xaml (the ControlTemplate ScrollViewerScrollBarlessTemplate)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  Translation notes (docs/porting/winui-theme.md, section 4):
+  - Template parts: ScrollContentPresenter, VerticalScrollBar and HorizontalScrollBar are FerroUI's
+    PART_ContentPresenter, PART_VerticalScrollBar and PART_HorizontalScrollBar. FerroUI's scroll
+    viewer sets the range, value, viewport and visibility of its scroll bars in code, so the
+    bindings of the source (Maximum, Value, ViewportSize, the Computed*ScrollBarVisibility of the
+    Grid around each bar) are not in the template; ScrollViewerScrollBarMargin, the padding of that
+    Grid, is the margin of the bar. The scroll gesture recognizer and the snap point bindings of
+    the presenter are FerroUI's touch scrolling, which WinUI's presenter does in the platform.
+  - ScrollingIndicatorStates: WinUI's scroll viewer shows the mouse indicators (MouseIndicator,
+    the IndicatorMode of its bars) while the pointer moves over it, and goes to NoIndicator, which
+    fades the bars out over ScrollBarOpacityChangeDuration (83 ms), 2 s after the last move
+    (ScrollViewerSeparatorContractDelay); MouseIndicatorFull is a bar under the pointer. Here
+    NoIndicator is the opacity 0 of the scroll bars, MouseIndicator their opacity 1 while the
+    pointer is over the scroll viewer (:pointerover) or a bar is expanded (IsExpanded, which is
+    also the state of AllowAutoHide off), with a transition of 83 ms both ways. The bars hide
+    when the pointer leaves the scroll viewer, without the delay of 2 s, and stay shown while it
+    rests over it (FerroUI tells no pointer moves from rest); TouchIndicator (the panning
+    indicator of touch) has no counterpart, the collapsed bar of MouseIndicator is drawn for any
+    pointer. ScrollBarSeparatorExpanded is the IsExpanded state of the scroll viewer, with the
+    opacity animated over ScrollViewerSeparatorExpandDuration (100 ms) and without the begin
+    delays.
+  - VerticalScrollBarVisibility="Visible" of the source is not set: FerroUI's scroll viewer does
+    not disable a bar whose content does not scroll, so a visible bar would show a thumb of the
+    full length over such content under the pointer; the default Auto of the control shows the
+    same indicators wherever there is something to scroll. The modes of the source that FerroUI's scroll
+    viewer does not have (HorizontalScrollMode, VerticalScrollMode, IsHorizontalRailEnabled,
+    IsVerticalRailEnabled, ZoomMode) are left out.
+  - ScrollViewerScrollBarlessTemplate, a template of the platform theme for the scroll viewers of
+    templates that scroll without scroll bars (the looping lists of the date and time pickers,
+    Pivot, CalendarView), is a keyed ControlTemplate of the same key: a WinUI application writes
+    Template="{StaticResource ScrollViewerScrollBarlessTemplate}" on a ScrollViewer, and so does a
+    FerroUI one. ScrollContentPresenter is PART_ContentPresenter; FerroUI's scroll viewer runs
+    without its optional parts PART_HorizontalScrollBar and PART_VerticalScrollBar (it scrolls by
+    the wheel, the keyboard and its methods). The padding of the scroll viewer is the padding of
+    the presenter, not its margin, and the snap point bindings and the scroll gesture recognizer of
+    the presenter are the ones of DefaultScrollViewerStyle (touch scrolling, which WinUI's
+    presenter does in the platform), as in the default template.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <ScrollViewer Width="200" Height="200" HorizontalScrollBarVisibility="Auto">
+      <StackPanel Spacing="20" Width="210">
+        <TextBlock>Item 1</TextBlock>
+        <TextBlock>Item 2</TextBlock>
+        <TextBlock>Item 3</TextBlock>
+        <TextBlock>Item 4</TextBlock>
+        <TextBlock>Item 5</TextBlock>
+        <TextBlock>Item 6</TextBlock>
+        <TextBlock>Item 7</TextBlock>
+        <TextBlock>Item 8</TextBlock>
+        <TextBlock>Item 9</TextBlock>
+      </StackPanel>
+    </ScrollViewer>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="DefaultScrollViewerStyle" TargetType="ScrollViewer">
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="HorizontalContentAlignment" Value="Left" />
+    <Setter Property="VerticalContentAlignment" Value="Top" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="Root"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}">
+          <Grid Background="{TemplateBinding Background}"
+                ColumnDefinitions="*,Auto"
+                RowDefinitions="*,Auto">
+            <ScrollContentPresenter x:Name="PART_ContentPresenter"
+                                    Grid.RowSpan="2"
+                                    Grid.ColumnSpan="2"
+                                    ContentTemplate="{TemplateBinding ContentTemplate}"
+                                    Padding="{TemplateBinding Padding}"
+                                    HorizontalSnapPointsType="{TemplateBinding HorizontalSnapPointsType}"
+                                    VerticalSnapPointsType="{TemplateBinding VerticalSnapPointsType}"
+                                    HorizontalSnapPointsAlignment="{TemplateBinding HorizontalSnapPointsAlignment}"
+                                    VerticalSnapPointsAlignment="{TemplateBinding VerticalSnapPointsAlignment}"
+                                    ScrollViewer.IsScrollInertiaEnabled="{TemplateBinding IsScrollInertiaEnabled}">
+              <ScrollContentPresenter.GestureRecognizers>
+                <ScrollGestureRecognizer CanHorizontallyScroll="{Binding CanHorizontallyScroll, ElementName=PART_ContentPresenter}"
+                                         CanVerticallyScroll="{Binding CanVerticallyScroll, ElementName=PART_ContentPresenter}"
+                                         IsScrollInertiaEnabled="{Binding (ScrollViewer.IsScrollInertiaEnabled), ElementName=PART_ContentPresenter}"
+                                         Offset="{Binding Offset, ElementName=PART_ContentPresenter}"
+                                         Viewport="{Binding Viewport, ElementName=PART_ContentPresenter}"
+                                         Extent="{Binding Extent, ElementName=PART_ContentPresenter}" />
+              </ScrollContentPresenter.GestureRecognizers>
+            </ScrollContentPresenter>
+            <Grid Grid.RowSpan="2" Grid.ColumnSpan="2" />
+            <!-- Opacity 0: NoIndicator; the opacity animates over ScrollBarOpacityChangeDuration. -->
+            <ScrollBar x:Name="PART_VerticalScrollBar"
+                       Grid.Column="1"
+                       Margin="{DynamicResource ScrollViewerScrollBarMargin}"
+                       IsTabStop="False"
+                       Orientation="Vertical"
+                       HorizontalAlignment="Right"
+                       Opacity="0">
+              <ScrollBar.Transitions>
+                <Transitions>
+                  <DoubleTransition Property="Opacity" Duration="0:0:0.083" />
+                </Transitions>
+              </ScrollBar.Transitions>
+            </ScrollBar>
+            <ScrollBar x:Name="PART_HorizontalScrollBar"
+                       Grid.Row="1"
+                       Margin="{DynamicResource ScrollViewerScrollBarMargin}"
+                       IsTabStop="False"
+                       Orientation="Horizontal"
+                       Opacity="0">
+              <ScrollBar.Transitions>
+                <Transitions>
+                  <DoubleTransition Property="Opacity" Duration="0:0:0.083" />
+                </Transitions>
+              </ScrollBar.Transitions>
+            </ScrollBar>
+            <Border x:Name="ScrollBarSeparator"
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Opacity="0"
+                    Background="{DynamicResource ScrollViewerScrollBarSeparatorBackground}">
+              <Border.Transitions>
+                <Transitions>
+                  <DoubleTransition Property="Opacity" Duration="0:0:0.1" />
+                </Transitions>
+              </Border.Transitions>
+            </Border>
+          </Grid>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- MouseIndicator (ScrollingIndicatorStates): the bars are shown while the pointer is over the
+         scroll viewer or a bar is expanded; NoIndicator otherwise (the opacity 0 of the template). -->
+    <Style Selector="^:pointerover /template/ ScrollBar#PART_VerticalScrollBar, ^:pointerover /template/ ScrollBar#PART_HorizontalScrollBar">
+      <Setter Property="Opacity" Value="1" />
+    </Style>
+    <Style Selector="^[IsExpanded=true] /template/ ScrollBar#PART_VerticalScrollBar, ^[IsExpanded=true] /template/ ScrollBar#PART_HorizontalScrollBar">
+      <Setter Property="Opacity" Value="1" />
+    </Style>
+
+    <!-- ScrollBarSeparatorExpanded -->
+    <Style Selector="^[IsExpanded=true] /template/ Border#ScrollBarSeparator">
+      <Setter Property="Opacity" Value="1" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type ScrollViewer}" TargetType="ScrollViewer" BasedOn="{StaticResource DefaultScrollViewerStyle}" />
+
+  <ControlTemplate x:Key="ScrollViewerScrollBarlessTemplate" TargetType="ScrollViewer">
+    <Grid Background="{TemplateBinding Background}">
+      <ScrollContentPresenter x:Name="PART_ContentPresenter"
+                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                              Padding="{TemplateBinding Padding}"
+                              HorizontalSnapPointsType="{TemplateBinding HorizontalSnapPointsType}"
+                              VerticalSnapPointsType="{TemplateBinding VerticalSnapPointsType}"
+                              HorizontalSnapPointsAlignment="{TemplateBinding HorizontalSnapPointsAlignment}"
+                              VerticalSnapPointsAlignment="{TemplateBinding VerticalSnapPointsAlignment}"
+                              ScrollViewer.IsScrollInertiaEnabled="{TemplateBinding IsScrollInertiaEnabled}">
+        <ScrollContentPresenter.GestureRecognizers>
+          <ScrollGestureRecognizer CanHorizontallyScroll="{Binding CanHorizontallyScroll, ElementName=PART_ContentPresenter}"
+                                   CanVerticallyScroll="{Binding CanVerticallyScroll, ElementName=PART_ContentPresenter}"
+                                   IsScrollInertiaEnabled="{Binding (ScrollViewer.IsScrollInertiaEnabled), ElementName=PART_ContentPresenter}"
+                                   Offset="{Binding Offset, ElementName=PART_ContentPresenter}"
+                                   Viewport="{Binding Viewport, ElementName=PART_ContentPresenter}"
+                                   Extent="{Binding Extent, ElementName=PART_ContentPresenter}" />
+        </ScrollContentPresenter.GestureRecognizers>
+      </ScrollContentPresenter>
+    </Grid>
+  </ControlTemplate>
+</ResourceDictionary>

@@ -165,6 +165,8 @@ impl XamlIlContext {
     }
 
     pub fn set_root_object(&self, value: MarkupValue) {
+        #[cfg(all(feature = "hot-reload", debug_assertions))]
+        crate::reload_events::initialize(self, &value);
         *self.root_object.borrow_mut() = value;
     }
 
@@ -297,6 +299,10 @@ impl XamlIlContext {
     /// The services of the context without the ones of its inner service
     /// provider: what the inner service provider itself is built on.
     pub fn get_service_below_inner(&self, service_type: TypeId) -> Option<Rc<dyn Any>> {
+        #[cfg(all(feature = "hot-reload", debug_assertions))]
+        if let Some(generation) = self.extension::<crate::reload_events::EventGeneration>() {
+            if let Some(value) = service(service_type, || generation) { return Some(value); }
+        }
         if let Some(this) = self.this.upgrade() {
             for own in self.definition.own_services() {
                 if let Some(service) = self.services.get_own_service(&this, own, service_type) {

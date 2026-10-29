@@ -1,0 +1,45 @@
+<UserControl x:Class="BehaviorsGallery.Views.Pages.RoutedEventTriggerBehaviorView"
+             xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:BehaviorsGallery.ViewModels"
+             x:DataType="vm:MainWindowViewModel"
+             mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="450">
+  <!-- Ported from Views/Pages/RoutedEventTriggerBehaviorView of the reference sample. -->
+  <Design.DataContext>
+    <vm:MainWindowViewModel />
+  </Design.DataContext>
+  <Grid RowDefinitions="Auto,*,*">
+    <TextBox Name="TextBox" Text="Hello" Grid.Row="0" Margin="5" />
+    <Button Name="ChangeProperty" Content="Change Property" Grid.Row="1" Margin="5,0,5,5">
+      <Interaction.Behaviors>
+        <RoutedEventTriggerBehavior RoutedEvent="{x:Static Button.ClickEvent}" 
+                                        RoutingStrategies="Bubble"
+                                        SourceInteractive="ChangeProperty">
+          <ChangePropertyAction TargetObject="TextBox" PropertyName="Text" Value="World" />
+        </RoutedEventTriggerBehavior>
+      </Interaction.Behaviors>
+    </Button>
+    <Rectangle Name="Rectangle" 
+               Grid.Row="2" Margin="5"
+               Fill="{DynamicResource BlueBrush}"
+               Stroke="{DynamicResource GrayBrush}"
+               StrokeThickness="5">
+      <Interaction.Behaviors>
+        <RoutedEventTriggerBehavior RoutedEvent="{x:Static InputElement.PointerPressedEvent}" 
+                                        RoutingStrategies="Tunnel">
+          <ChangePropertyAction TargetObject="Rectangle" 
+                                   PropertyName="Fill"
+                                   Value="{DynamicResource YellowBrush}" />
+        </RoutedEventTriggerBehavior>
+        <RoutedEventTriggerBehavior RoutedEvent="{x:Static InputElement.PointerReleasedEvent}" 
+                                        RoutingStrategies="Tunnel">
+          <ChangePropertyAction TargetObject="Rectangle" 
+                                   PropertyName="Fill"
+                                   Value="{DynamicResource BlueBrush}" />
+        </RoutedEventTriggerBehavior>
+      </Interaction.Behaviors>
+    </Rectangle>
+  </Grid>
+</UserControl>

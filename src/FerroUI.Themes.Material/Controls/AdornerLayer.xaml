@@ -1,0 +1,29 @@
+<!--
+  Not ported from a style: the focus visual of WinUI 3 is drawn by the framework for an element
+  with UseSystemFocusVisuals="True" (microsoft-ui-xaml, https://github.com/microsoft/microsoft-ui-xaml,
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0). It is two rectangles: the outer one of
+  FocusVisualPrimaryThickness (2) in FocusVisualPrimaryBrush, the inner one of
+  FocusVisualSecondaryThickness (1) in FocusVisualSecondaryBrush, whose defaults are the resources
+  SystemControlFocusVisualPrimaryBrush and SystemControlFocusVisualSecondaryBrush
+  (controls/dev/CommonStyles/Common_themeresources.xaml), at FocusVisualMargin (0) around the
+  element and with its corner radius. FerroUI draws focus visuals in the adorner layer: this is
+  the focus adorner of the controls without one of their own; the controls with a
+  FocusVisualMargin set their FocusAdorner (docs/porting/winui-theme.md, section 4.6).
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <ControlTheme x:Key="{x:Type AdornerLayer}" TargetType="AdornerLayer">
+    <Setter Property="DefaultFocusAdorner">
+      <FocusAdornerTemplate>
+        <Border BorderThickness="2"
+                BorderBrush="{DynamicResource SystemControlFocusVisualPrimaryBrush}"
+                CornerRadius="{DynamicResource ControlCornerRadius}">
+          <Border BorderThickness="1"
+                  BorderBrush="{DynamicResource SystemControlFocusVisualSecondaryBrush}"
+                  CornerRadius="{DynamicResource ControlCornerRadius}" />
+        </Border>
+      </FocusAdornerTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

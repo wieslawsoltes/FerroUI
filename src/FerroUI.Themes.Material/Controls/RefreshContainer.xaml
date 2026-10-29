@@ -1,0 +1,43 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/PullToRefresh/RefreshContainer/RefreshContainer.xaml (the styles; the resources
+    of controls/dev/PullToRefresh/RefreshContainer/RefreshContainer_themeresources.xaml are
+    Resources/RefreshContainer_themeresources.xaml)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  Translation notes (docs/porting/winui-theme.md, section 4): ContentPresenter is
+  PART_ContentPresenter and RefreshVisualizerPresenter PART_RefreshVisualizerPresenter, the parts
+  of FerroUI's RefreshContainer (the control puts its visualizer into the presenter grid). The
+  FerroUI contract: the content presenter also takes the ContentTemplate, the padding, the border
+  and the content alignments of the control, as in the Fluent theme.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <ControlTheme x:Key="DefaultRefreshContainerStyle" TargetType="RefreshContainer">
+    <Setter Property="Foreground" Value="{DynamicResource RefreshContainerForegroundBrush}" />
+    <Setter Property="Background" Value="{DynamicResource RefreshContainerBackgroundBrush}" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid x:Name="Root" Background="{TemplateBinding Background}">
+          <ContentPresenter x:Name="PART_ContentPresenter"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Padding="{TemplateBinding Padding}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BackgroundSizing="InnerBorderEdge"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                            Background="Transparent" />
+          <Grid x:Name="PART_RefreshVisualizerPresenter" />
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type RefreshContainer}" TargetType="RefreshContainer" BasedOn="{StaticResource DefaultRefreshContainerStyle}" />
+</ResourceDictionary>

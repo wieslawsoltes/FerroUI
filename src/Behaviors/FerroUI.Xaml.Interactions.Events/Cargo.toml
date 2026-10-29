@@ -1,0 +1,41 @@
+[package]
+name = "ferroui-xaml-interactions-events"
+description = "Behaviors and triggers of the input events of FerroUI: a trigger and an abstract behavior per pointer, key, focus, gesture, text input and drag-and-drop routed event"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+build = "build.rs"
+# The build script exports the type model of the crate (its behaviors and triggers, for markup);
+# Cargo hands the path of the file to the build scripts of the crates that depend on this one
+# (docs/porting/xaml.md, 9.5.13 and 9.6.3).
+links = "ferroui_xaml_interactions_events_xaml"
+
+# Unit tests live next to the code (the `tests/` module of the library), not as integration test
+# targets.
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base = { workspace = true }
+ferroui-xaml-interactivity = { workspace = true }
+
+[build-dependencies]
+ferroui-build-scan = { workspace = true }
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "controls"

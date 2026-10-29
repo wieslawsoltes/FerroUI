@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "measured_on": "2026-10-20",
+  "scope": "runtime-xaml-application-resource-save-to-compositor-render-completion",
+  "platform": {
+    "os": "macOS",
+    "version": "27.0.1",
+    "architecture": "arm64"
+  },
+  "profile": "debug",
+  "concurrent_builds": false,
+  "source_changes": "Added opt-in target identity/width instrumentation and resource_probe.py; engine unchanged.",
+  "source_sha256": {
+    "samples/ControlCatalog/hot_reload.rs": "03d6e1d799e68816517bcea9e3a3496dbfb630862b9615d66934f792995fff13",
+    "scripts/hot-reload/resource_probe.py": "3dde8e3867565e0fcc22ae72a3ab989d603f3079aaa3988cb819eafd8d4e8247"
+  },
+  "watch_interval_ms": 60,
+  "limitations": [
+    "Six observations, not percentile estimates or a latency guarantee.",
+    "First resource edit follows page tracking and may include startup layout work.",
+    "Render completion is not physical display scan-out.",
+    "Static child-resource consumption tested; this does not prove every root resource assignment or deferred template."
+  ],
+  "measurements": [
+    {
+      "application_us": 45821,
+      "batch": 872,
+      "commit_to_render_us": 49048,
+      "documents": [
+        "ferres://controlcatalog/CustomThemes.xaml"
+      ],
+      "preparation_us": 127551,
+      "rendered_unix_ns": "1792487867273515000",
+      "revision": 1,
+      "page": "CustomThemes",
+      "save_to_render_us": 379896.0,
+      "atomic_save": false
+    },
+    {
+      "application_us": 1903,
+      "batch": 874,
+      "commit_to_render_us": 19778,
+      "documents": [
+        "ferres://controlcatalog/Pages/BorderPage.xaml"
+      ],
+      "preparation_us": 20993,
+      "rendered_unix_ns": "1792487867454313000",
+      "revision": 2,
+      "page": "BorderPage",
+      "save_to_render_us": 176607.0,
+      "atomic_save": false
+    },
+    {
+      "application_us": 16431,
+      "batch": 875,
+      "commit_to_render_us": 29442,
+      "documents": [
+        "ferres://controlcatalog/CustomThemes.xaml"
+      ],
+      "preparation_us": 120770,
+      "rendered_unix_ns": "1792487867788163000",
+      "revision": 3,
+      "page": "CustomThemes",
+      "save_to_render_us": 306721.0,
+      "atomic_save": true
+    },
+    {
+      "application_us": 16148,
+      "batch": 876,
+      "commit_to_render_us": 18172,
+      "documents": [
+        "ferres://controlcatalog/CustomThemes.xaml"
+      ],
+      "preparation_us": 121758,
+      "rendered_unix_ns": "1792487868338074000",
+      "revision": 5,
+      "page": "CustomThemes",
+      "save_to_render_us": 326299.0,
+      "atomic_save": true
+    },
+    {
+      "application_us": 2799,
+      "batch": 877,
+      "commit_to_render_us": 29132,
+      "documents": [
+        "ferres://controlcatalog/Pages/BorderPage.xaml"
+      ],
+      "preparation_us": 15023,
+      "rendered_unix_ns": "1792487868554532000",
+      "revision": 6,
+      "page": "BorderPage",
+      "save_to_render_us": 187308.0,
+      "atomic_save": false
+    },
+    {
+      "application_us": 18703,
+      "batch": 878,
+      "commit_to_render_us": 30441,
+      "documents": [
+        "ferres://controlcatalog/CustomThemes.xaml"
+      ],
+      "preparation_us": 42545,
+      "rendered_unix_ns": "1792487868805058000",
+      "revision": 7,
+      "page": "CustomThemes",
+      "save_to_render_us": 226732.0,
+      "atomic_save": false
+    }
+  ],
+  "result": "PASS: native resource reload PID 77347: static consumer updated, missing key retained last-good view, atomic recovery preserved root/window/model",
+  "compiler": "rustc 1.99.1 (58cf8f9c3 2026-10-13)"
+}

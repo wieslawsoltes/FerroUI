@@ -275,18 +275,7 @@ impl VisualImpl for TextBox {
                 presenter.set_show_selection_highlight(true);
             }
 
-            let weak = this.to_ref().downgrade();
-            let subscription = presenter.property_changed(move |e| {
-                if let Some(this) = weak.upgrade() {
-                    this.presenter_property_changed(e);
-                }
-            });
-
-            let previous = this.presenter_property_changed.borrow_mut().replace(subscription);
-
-            if let Some(previous) = previous {
-                previous.dispose();
-            }
+            this.subscribe_to_presenter_changes();
         }
     }
 
@@ -1055,6 +1044,13 @@ impl TemplatedControlImpl for TextBox {
         *this.scroll_viewer.borrow_mut() = scroll_viewer;
 
         this.im_client.set_presenter(Some(&presenter), Some(&this.to_ref()));
+
+        // Templates normally arrive after visual attachment. Subscribe here as
+        // well as on attachment, and release the previous template's presenter.
+        if this.is_attached_to_visual_tree() {
+            this.subscribe_to_presenter_changes();
+        }
+        this.update_pseudoclasses();
 
         if this.is_focused() {
             presenter.show_caret();
@@ -2084,17 +2080,33 @@ impl TextBox {
         })
     }
 
+    fn subscribe_to_presenter_changes(&self) {
+        if let Some(previous) = self.presenter_property_changed.borrow_mut().take() {
+            previous.dispose();
+        }
+        if let Some(presenter) = self.presenter() {
+            let weak = self.to_ref().downgrade();
+            let subscription = presenter.property_changed(move |e| {
+                if let Some(this) = weak.upgrade() {
+                    this.presenter_property_changed(e);
+                }
+            });
+            *self.presenter_property_changed.borrow_mut() = Some(subscription);
+        }
+    }
+
     fn presenter_property_changed(&self, e: &FerroPropertyChangedEventArgs<'_>) {
         if e.property() == TextPresenter::preedit_text_property().as_property() {
             let (old_value, new_value) = e.get_old_and_new_value::<Option<String>>();
 
-            if old_value.is_none_or(|old_value| old_value.is_empty())
-                && new_value.is_some_and(|new_value| !new_value.is_empty())
-            {
-                self.pseudo_classes().set(":empty", false);
-
+            let has_preedit = new_value.is_some_and(|new_value| !new_value.is_empty());
+            if old_value.is_none_or(|old_value| old_value.is_empty()) && has_preedit {
                 self.delete_selection();
             }
+            // Composition is visible input even before it is committed. Recompute
+            // after selection changes, which may cancel the composition reentrantly,
+            // and when preedit is cleared so a canceled empty edit becomes empty again.
+            self.update_pseudoclasses();
         }
     }
 
@@ -2864,7 +2876,10 @@ impl TextBox {
     }
 
     fn update_pseudoclasses(&self) {
-        self.pseudo_classes().set(":empty", self.text().is_none_or(|text| text.is_empty()));
+        let has_preedit = self.presenter().is_some_and(|presenter| {
+            presenter.preedit_text().is_some_and(|preedit| !preedit.is_empty())
+        });
+        self.pseudo_classes().set(":empty", !has_preedit && self.text().is_none_or(|text| text.is_empty()));
         self.pseudo_classes().set(":touch-mode", self.is_in_touch_mode.get());
     }
 

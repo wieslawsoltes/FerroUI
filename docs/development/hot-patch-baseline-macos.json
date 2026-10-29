@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "measured_on": "2026-10-19",
+  "platform": {
+    "os": "macOS",
+    "version": "27.0.1",
+    "architecture": "arm64"
+  },
+  "profile": "debug-fat-binary",
+  "patch_ordinal": 1,
+  "limitations": [
+    "One patch observation, not a latency guarantee or percentile estimate.",
+    "Initial application build excluded.",
+    "Source capture included; watcher polling and debounce excluded because the acceptance probe invokes the supervisor directly.",
+    "Compiler invocation includes dx launch, Rust compilation/linking and captured input/output transport.",
+    "Application acknowledgement includes protocol transport and UI dispatch.",
+    "Compositor completion is not physical display scan-out."
+  ],
+  "measurements": [
+    {
+      "scope": "combined-rust-xaml-save-to-render",
+      "source_capture_us": 607977.542,
+      "patch_timing": {
+        "stages_us": {
+          "input_preparation_us": 80230.291,
+          "admission_us": 91518.084,
+          "staging_us": 3765.5,
+          "compiler_invocation_us": 1284435.541,
+          "source_revalidation_us": 675829.75,
+          "artifact_decode_us": 240.834,
+          "application_ack_us": 285326.125
+        },
+        "update_to_ack_us": 2421349.208
+      },
+      "frame": {
+        "application_us": 187523,
+        "batch": 13,
+        "commit_to_render_us": 33765,
+        "documents": [
+          "ferres://hot_reload_demo/Colors.xaml",
+          "ferres://hot_reload_demo/View.xaml"
+        ],
+        "preparation_us": 5501,
+        "rendered_unix_ns": "1792424998962422000",
+        "revision": 7
+      },
+      "save_to_render_us": 3056987.0,
+      "watch_debounce_included": false,
+      "compiler": "rust-1.93.0-dx-0.7.10"
+    }
+  ]
+}

@@ -1,0 +1,2242 @@
+{
+ "upstreamCommit": "45387e325362a7351eb4ec579b55571258edc2c2",
+ "inScope": {
+  "files": [
+   543,
+   563,
+   20
+  ],
+  "types": [
+   532,
+   552,
+   20
+  ],
+  "members": [
+   2264,
+   2278,
+   14
+  ]
+ },
+ "allProjects": {
+  "membersPresent": 2264,
+  "members": 2278,
+  "membersNotApplicable": 0,
+  "membersOutOfScope": 0
+ },
+ "projects": [
+  {
+   "name": "Xaml.Behaviors",
+   "path": "src/Xaml.Behaviors",
+   "rust": "src/Behaviors/FerroUI.Xaml.Behaviors",
+   "scope": "in",
+   "detail": "full",
+   "files": [
+    0,
+    0,
+    0
+   ],
+   "types": [
+    0,
+    0,
+    0
+   ],
+   "members": [
+    0,
+    0,
+    0
+   ],
+   "interfaces": [
+    0,
+    0
+   ],
+   "propertyRegistrations": [
+    0,
+    0
+   ],
+   "routedEvents": [
+    0,
+    0
+   ],
+   "notApplicableFiles": 1,
+   "matchKinds": {},
+   "presentFiles": {},
+   "rustOnly": []
+  },
+  {
+   "name": "Xaml.Behaviors.Animations",
+   "path": "src/Xaml.Behaviors.Animations",
+   "rust": "src/Behaviors/FerroUI.Xaml.Behaviors.Animations",
+   "scope": "in",
+   "detail": "full",
+   "files": [
+    21,
+    21,
+    0
+   ],
+   "types": [
+    19,
+    19,
+    0
+   ],
+   "members": [
+    171,
+    171,
+    0
+   ],
+   "interfaces": [
+    1,
+    1
+   ],
+   "propertyRegistrations": [
+    1,
+    1
+   ],
+   "routedEvents": [
+    0,
+    0
+   ],
+   "notApplicableFiles": 1,
+   "matchKinds": {
+    "fn": 169,
+    "overload fn": 2
+   },
+   "presentFiles": {
+    "Animations/AnimationFactory.cs": [
+     "animations/animation_factory.rs"
+    ],
+    "Animations/AnimationRunner.cs": [
+     "animations/animation_runner.rs"
+    ],
+    "Animations/FluidMoveAnimation.cs": [
+     "animations/fluid_move_animation.rs"
+    ],
+    "Animations/IAnimationBuilder.cs": [
+     "animations/i_animation_builder.rs"
+    ],
+    "Composition/AttentionAnimations.cs": [
+     "composition/attention_animations.rs"
+    ],
+    "Composition/CompositionAnimationDefinition.cs": [
+     "composition/composition_animation_definition.rs"
+    ],
+    "Composition/CompositionAnimationHelpers.cs": [
+     "composition/composition_animation_helpers.rs"
+    ],
+    "Composition/EntranceAnimations.cs": [
+     "composition/entrance_animations.rs"
+    ],
+    "Composition/ExitAnimations.cs": [
+     "composition/exit_animations.rs"
+    ],
+    "Composition/FadeAnimation.cs": [
+     "composition/fade_animation.rs"
+    ],
+    "Composition/FramerMotionAnimations.cs": [
+     "composition/framer_motion_animations.rs"
+    ],
+    "Composition/OrbitAnimation.cs": [
+     "composition/orbit_animation.rs"
+    ],
+    "Composition/ParallaxAnimation.cs": [
+     "composition/parallax_animation.rs"
+    ],
+    "Composition/RotateAnimation.cs": [
+     "composition/rotate_animation.rs"
+    ],
+    "Composition/ScaleAnimation.cs": [
+     "composition/scale_animation.rs"
+    ],
+    "Composition/SelectingItemsControlBehavior.cs": [
+     "composition/selecting_items_control_behavior.rs"
+    ],
+    "Composition/SelectionIndicatorAnimation.cs": [
+     "composition/selection_indicator_animation.rs"
+    ],
+    "Composition/SlidingAnimation.cs": [
+     "composition/sliding_animation.rs"
+    ],
+    "Composition/SpecialAnimations.cs": [
+     "composition/special_animations.rs"
+    ],
+    "Composition/TiltAnimation.cs": [
+     "composition/tilt_animation.rs"
+    ],
+    "Transitions/TransitionOperations.cs": [
+     "transitions/transition_operations.rs"
+    ]
+   },
+   "rustOnly": [
+    "argument_out_of_range.rs",
+    "markup_types/composition.rs",
+    "register_types.rs",
+    "rust_paths.rs"
+   ]
+  },
+  {
+   "name": "Xaml.Behaviors.Interactions",
+   "path": "src/Xaml.Behaviors.Interactions",
+   "rust": "src/Behaviors/FerroUI.Xaml.Interactions",
+   "scope": "in",
+   "detail": "full",
+   "files": [
+    52,
+    52,
+    0
+   ],
+   "types": [
+    50,
+    50,
+    0
+   ],
+   "members": [
+    272,
+    272,
+    0
+   ],
+   "interfaces": [
+    0,
+    0
+   ],
+   "propertyRegistrations": [
+    75,
+    75
+   ],
+   "routedEvents": [
+    0,
+    0
+   ],
+   "notApplicableFiles": 1,
+   "matchKinds": {
+    "alias fn": 2,
+    "fn": 267,
+    "overload fn": 1,
+    "variant": 2
+   },
+   "presentFiles": {
+    "Clipboard/ClearClipboardAction.cs": [
+     "clipboard/clear_clipboard_action.rs"
+    ],
+    "Clipboard/GetClipboardDataAction.cs": [
+     "clipboard/get_clipboard_data_action.rs"
+    ],
+    "Clipboard/GetClipboardFormatsAction.cs": [
+     "clipboard/get_clipboard_formats_action.rs"
+    ],
+    "Clipboard/GetClipboardTextAction.cs": [
+     "clipboard/get_clipboard_text_action.rs"
+    ],
+    "Clipboard/SetClipboardDataObjectAction.cs": [
+     "clipboard/set_clipboard_data_object_action.rs"
+    ],
+    "Clipboard/SetClipboardTextAction.cs": [
+     "clipboard/set_clipboard_text_action.rs"
+    ],
+    "Core/AsyncActionGroup.cs": [
+     "core/async_action_group.rs"
+    ],
+    "Core/CallMethodAction.cs": [
+     "core/call_method_action.rs"
+    ],
+    "Core/ChangePropertyAction.cs": [
+     "core/change_property_action.rs"
+    ],
+    "Core/DataTrigger.cs": [
+     "core/data_trigger.rs"
+    ],
+    "Core/DataTriggerBehavior.cs": [
+     "core/data_trigger_behavior.rs"
+    ],
+    "Core/DebounceAction.cs": [
+     "core/debounce_action.rs"
+    ],
+    "Core/DelayAction.cs": [
+     "core/delay_action.rs"
+    ],
+    "Core/EventTrigger.cs": [
+     "core/event_trigger.rs"
+    ],
+    "Core/EventTriggerBehavior.cs": [
+     "core/event_trigger_behavior.rs"
+    ],
+    "Core/InvokeCommandAction.cs": [
+     "core/invoke_command_action.rs"
+    ],
+    "Core/MultiDataTrigger.cs": [
+     "core/multi_data_trigger.rs"
+    ],
+    "Core/MultiDataTriggerBehavior.cs": [
+     "core/multi_data_trigger_behavior.rs"
+    ],
+    "Core/ObservableStreamBehavior.cs": [
+     "core/observable_stream_behavior.rs"
+    ],
+    "Core/ReversibleActionExecution.cs": [
+     "core/reversible_action_execution.rs"
+    ],
+    "Core/TaskCompletedTrigger.cs": [
+     "core/task_completed_trigger.rs"
+    ],
+    "Core/ThrottleAction.cs": [
+     "core/throttle_action.rs"
+    ],
+    "Core/TimerTrigger.cs": [
+     "core/timer_trigger.rs"
+    ],
+    "FileSystem/CreateDirectoryAction.cs": [
+     "file_system/create_directory_action.rs"
+    ],
+    "FileSystem/DeleteDirectoryAction.cs": [
+     "file_system/delete_directory_action.rs"
+    ],
+    "FileSystem/DeleteFileAction.cs": [
+     "file_system/delete_file_action.rs"
+    ],
+    "FileSystem/FileSystemWatcherTrigger.cs": [
+     "file_system/file_system_watcher_trigger.rs"
+    ],
+    "FileSystem/WriteTextToFileAction.cs": [
+     "file_system/write_text_to_file_action.rs"
+    ],
+    "Network/HttpRequestAction.cs": [
+     "network/http_request_action.rs"
+    ],
+    "Network/NetworkInformationTrigger.cs": [
+     "network/network_information_trigger.rs"
+    ],
+    "StorageProvider/Button/ButtonOpenFilePickerBehavior.cs": [
+     "storage_provider/button/button_open_file_picker_behavior.rs"
+    ],
+    "StorageProvider/Button/ButtonOpenFolderPickerBehavior.cs": [
+     "storage_provider/button/button_open_folder_picker_behavior.rs"
+    ],
+    "StorageProvider/Button/ButtonSaveFilePickerBehavior.cs": [
+     "storage_provider/button/button_save_file_picker_behavior.rs"
+    ],
+    "StorageProvider/Converters/StorageFileToReadStreamConverter.cs": [
+     "storage_provider/converters/storage_file_to_read_stream_converter.rs"
+    ],
+    "StorageProvider/Converters/StorageFileToWriteStreamConverter.cs": [
+     "storage_provider/converters/storage_file_to_write_stream_converter.rs"
+    ],
+    "StorageProvider/Converters/StorageItemToPathConverter.cs": [
+     "storage_provider/converters/storage_item_to_path_converter.rs"
+    ],
+    "StorageProvider/Core/FilePickerEventArgs.cs": [
+     "storage_provider/core/file_picker_event_args.rs"
+    ],
+    "StorageProvider/Core/FolderPickerEventArgs.cs": [
+     "storage_provider/core/folder_picker_event_args.rs"
+    ],
+    "StorageProvider/Core/PickerActionBase.cs": [
+     "storage_provider/core/picker_action_base.rs"
+    ],
+    "StorageProvider/Core/PickerBehaviorBase.cs": [
+     "storage_provider/core/picker_behavior_base.rs"
+    ],
+    "StorageProvider/Core/PickerSuggestedStartLocationHelper.cs": [
+     "storage_provider/core/picker_suggested_start_location_helper.rs"
+    ],
+    "StorageProvider/Core/SaveFilePickerEventArgs.cs": [
+     "storage_provider/core/save_file_picker_event_args.rs"
+    ],
+    "StorageProvider/MenuItem/MenuItemOpenFilePickerBehavior.cs": [
+     "storage_provider/menu_item/menu_item_open_file_picker_behavior.rs"
+    ],
+    "StorageProvider/MenuItem/MenuItemOpenFolderPickerBehavior.cs": [
+     "storage_provider/menu_item/menu_item_open_folder_picker_behavior.rs"
+    ],
+    "StorageProvider/MenuItem/MenuItemSaveFilePickerBehavior.cs": [
+     "storage_provider/menu_item/menu_item_save_file_picker_behavior.rs"
+    ],
+    "StorageProvider/OpenFilePickerAction.cs": [
+     "storage_provider/open_file_picker_action.rs"
+    ],
+    "StorageProvider/OpenFilePickerBehaviorBase.cs": [
+     "storage_provider/open_file_picker_behavior_base.rs"
+    ],
+    "StorageProvider/OpenFolderPickerAction.cs": [
+     "storage_provider/open_folder_picker_action.rs"
+    ],
+    "StorageProvider/OpenFolderPickerBehaviorBase.cs": [
+     "storage_provider/open_folder_picker_behavior_base.rs"
+    ],
+    "StorageProvider/SaveFilePickerAction.cs": [
+     "storage_provider/save_file_picker_action.rs"
+    ],
+    "StorageProvider/SaveFilePickerBehaviorBase.cs": [
+     "storage_provider/save_file_picker_behavior_base.rs"
+    ],
+    "StorageProvider/Utilities/FileFilterParser.cs": [
+     "storage_provider/utilities/file_filter_parser.rs"
+    ]
+   },
+   "rustOnly": [
+    "action_task.rs",
+    "background.rs",
+    "markup_types/converters.rs",
+    "markup_types/enums.rs",
+    "platform_handles.rs",
+    "register_types.rs",
+    "rust_paths.rs"
+   ]
+  },
+  {
+   "name": "Xaml.Behaviors.Interactions.Custom",
+   "path": "src/Xaml.Behaviors.Interactions.Custom",
+   "rust": "src/Behaviors/FerroUI.Xaml.Interactions.Custom",
+   "scope": "in",
+   "detail": "full",
+   "files": [
+    331,
+    331,
+    0
+   ],
+   "types": [
+    335,
+    335,
+    0
+   ],
+   "members": [
+    1191,
+    1191,
+    0
+   ],
+   "interfaces": [
+    6,
+    6
+   ],
+   "propertyRegistrations": [
+    344,
+    344
+   ],
+   "routedEvents": [
+    0,
+    0
+   ],
+   "notApplicableFiles": 1,
+   "matchKinds": {
+    "alias fn": 7,
+    "fn": 1156,
+    "overload fn": 6,
+    "variant": 22
+   },
+   "presentFiles": {
+    "Actions/AddClassAction.cs": [
+     "actions/add_class_action.rs"
+    ],
+    "Actions/CallMethodAsyncAction.cs": [
+     "actions/call_method_async_action.rs"
+    ],
+    "Actions/ChangeAvaloniaPropertyAction.cs": [
+     "actions/change_ferro_property_action.rs"
+    ],
+    "Actions/DelayedShowControlAction.cs": [
+     "actions/delayed_show_control_action.rs"
+    ],
+    "Actions/FocusControlAction.cs": [
+     "actions/focus_control_action.rs"
+    ],
+    "Actions/FocusNextElementAction.cs": [
+     "actions/focus_next_element_action.rs"
+    ],
+    "Actions/HideControlAction.cs": [
+     "actions/hide_control_action.rs"
+    ],
+    "Actions/HideFlyoutAction.cs": [
+     "actions/hide_flyout_action.rs"
+    ],
+    "Actions/HidePopupAction.cs": [
+     "actions/hide_popup_action.rs"
+    ],
+    "Actions/LaunchUriAction.cs": [
+     "actions/launch_uri_action.rs"
+    ],
+    "Actions/PopupAction.cs": [
+     "actions/popup_action.rs"
+    ],
+    "Actions/RemoveClassAction.cs": [
+     "actions/remove_class_action.rs"
+    ],
+    "Actions/RemoveElementAction.cs": [
+     "actions/remove_element_action.rs"
+    ],
+    "Actions/ScreenshotAction.cs": [
+     "actions/screenshot_action.rs"
+    ],
+    "Actions/ScrollToControlAction.cs": [
+     "actions/scroll_to_control_action.rs"
+    ],
+    "Actions/SetEnabledAction.cs": [
+     "actions/set_enabled_action.rs"
+    ],
+    "Actions/SetThemeVariantAction.cs": [
+     "actions/set_theme_variant_action.rs"
+    ],
+    "Actions/ShowContextMenuAction.cs": [
+     "actions/show_context_menu_action.rs"
+    ],
+    "Actions/ShowControlAction.cs": [
+     "actions/show_control_action.rs"
+    ],
+    "Actions/ShowFlyoutAction.cs": [
+     "actions/show_flyout_action.rs"
+    ],
+    "Actions/ShowPopupAction.cs": [
+     "actions/show_popup_action.rs"
+    ],
+    "Actions/ToggleClassAction.cs": [
+     "actions/toggle_class_action.rs"
+    ],
+    "Animations/AnimateOnAttachedBehavior.cs": [
+     "animations/animate_on_attached_behavior.rs"
+    ],
+    "Animations/AnimationCompletedTrigger.cs": [
+     "animations/animation_completed_trigger.rs"
+    ],
+    "Animations/BeginAnimationAction.cs": [
+     "animations/begin_animation_action.rs"
+    ],
+    "Animations/FadeInBehavior.cs": [
+     "animations/fade_in_behavior.rs"
+    ],
+    "Animations/PlayAnimationBehavior.cs": [
+     "animations/play_animation_behavior.rs"
+    ],
+    "Animations/RunAnimationTrigger.cs": [
+     "animations/run_animation_trigger.rs"
+    ],
+    "Animations/StartAnimationAction.cs": [
+     "animations/start_animation_action.rs"
+    ],
+    "Animations/StartBuiltAnimationAction.cs": [
+     "animations/start_built_animation_action.rs"
+    ],
+    "AutoCompleteBox/AutoCompleteBoxOpenDropDownOnFocusBehavior.cs": [
+     "auto_complete_box/auto_complete_box_open_drop_down_on_focus_behavior.rs"
+    ],
+    "AutoCompleteBox/AutoCompleteBoxSelectionChangedTrigger.cs": [
+     "auto_complete_box/auto_complete_box_selection_changed_trigger.rs"
+    ],
+    "AutoCompleteBox/ClearAutoCompleteBoxSelectionAction.cs": [
+     "auto_complete_box/clear_auto_complete_box_selection_action.rs"
+    ],
+    "AutoCompleteBox/FocusAutoCompleteBoxTextBoxBehavior.cs": [
+     "auto_complete_box/focus_auto_complete_box_text_box_behavior.rs"
+    ],
+    "Automation/Actions/ScreenReaderAnnounceAction.cs": [
+     "automation/actions/screen_reader_announce_action.rs"
+    ],
+    "Automation/Actions/SetAutomationIdAction.cs": [
+     "automation/actions/set_automation_id_action.rs"
+    ],
+    "Automation/Behaviors/AutomationNameBehavior.cs": [
+     "automation/behaviors/automation_name_behavior.rs"
+    ],
+    "Automation/Triggers/AutomationNameChangedTrigger.cs": [
+     "automation/triggers/automation_name_changed_trigger.rs"
+    ],
+    "Behaviors/AutoScrollToBottomBehavior.cs": [
+     "behaviors/auto_scroll_to_bottom_behavior.rs"
+    ],
+    "Button/ButtonClickEventTriggerBehavior.cs": [
+     "button/button_click_event_trigger_behavior.rs"
+    ],
+    "Button/ButtonExecuteCommandOnKeyDownBehavior.cs": [
+     "button/button_execute_command_on_key_down_behavior.rs"
+    ],
+    "Button/ButtonHideFlyoutBehavior.cs": [
+     "button/button_hide_flyout_behavior.rs"
+    ],
+    "Button/ButtonHideFlyoutOnClickBehavior.cs": [
+     "button/button_hide_flyout_on_click_behavior.rs"
+    ],
+    "Button/ButtonHidePopupOnClickBehavior.cs": [
+     "button/button_hide_popup_on_click_behavior.rs"
+    ],
+    "Button/InvokeButtonClickAction.cs": [
+     "button/invoke_button_click_action.rs"
+    ],
+    "Carousel/CarouselKeyNavigationBehavior.cs": [
+     "carousel/carousel_key_navigation_behavior.rs"
+    ],
+    "Carousel/CarouselNextAction.cs": [
+     "carousel/carousel_next_action.rs"
+    ],
+    "Carousel/CarouselPreviousAction.cs": [
+     "carousel/carousel_previous_action.rs"
+    ],
+    "Carousel/CarouselSelectionChangedTrigger.cs": [
+     "carousel/carousel_selection_changed_trigger.rs"
+    ],
+    "Collections/AddRangeAction.cs": [
+     "collections/add_range_action.rs"
+    ],
+    "Collections/ClearCollectionAction.cs": [
+     "collections/clear_collection_action.rs"
+    ],
+    "Collections/CollectionChangedBehavior.cs": [
+     "collections/collection_changed_behavior.rs"
+    ],
+    "Collections/CollectionChangedTrigger.cs": [
+     "collections/collection_changed_trigger.rs"
+    ],
+    "Collections/RemoveRangeAction.cs": [
+     "collections/remove_range_action.rs"
+    ],
+    "Composition/OrbitEffectBehavior.cs": [
+     "composition/orbit_effect_behavior.rs"
+    ],
+    "Composition/ParallaxBehavior.cs": [
+     "composition/parallax_behavior.rs"
+    ],
+    "Composition/TiltEffectBehavior.cs": [
+     "composition/tilt_effect_behavior.rs"
+    ],
+    "ContextDialogs/ContextDialogBehavior.cs": [
+     "context_dialogs/context_dialog_behavior.rs"
+    ],
+    "ContextDialogs/ContextDialogClosedTrigger.cs": [
+     "context_dialogs/context_dialog_closed_trigger.rs"
+    ],
+    "ContextDialogs/ContextDialogOpenedTrigger.cs": [
+     "context_dialogs/context_dialog_opened_trigger.rs"
+    ],
+    "ContextDialogs/HideContextDialogAction.cs": [
+     "context_dialogs/hide_context_dialog_action.rs"
+    ],
+    "ContextDialogs/ShowContextDialogAction.cs": [
+     "context_dialogs/show_context_dialog_action.rs"
+    ],
+    "Control/BindPointerOverBehavior.cs": [
+     "control/bind_pointer_over_behavior.rs"
+    ],
+    "Control/BindTagToVisualRootDataContextBehavior.cs": [
+     "control/bind_tag_to_visual_root_data_context_behavior.rs"
+    ],
+    "Control/BoundsObserverBehavior.cs": [
+     "control/bounds_observer_behavior.rs"
+    ],
+    "Control/DelayedLoadBehavior.cs": [
+     "control/delayed_load_behavior.rs"
+    ],
+    "Control/DragControlBehavior.cs": [
+     "control/drag_control_behavior.rs"
+    ],
+    "Control/HideAttachedFlyoutBehavior.cs": [
+     "control/hide_attached_flyout_behavior.rs"
+    ],
+    "Control/HideOnKeyPressedBehavior.cs": [
+     "control/hide_on_key_pressed_behavior.rs"
+    ],
+    "Control/HideOnLostFocusBehavior.cs": [
+     "control/hide_on_lost_focus_behavior.rs"
+    ],
+    "Control/InlineEditBehavior.cs": [
+     "control/inline_edit_behavior.rs"
+    ],
+    "Control/ShowPointerPositionBehavior.cs": [
+     "control/show_pointer_position_behavior.rs"
+    ],
+    "Converters/PointerEventArgsConverter.cs": [
+     "converters/pointer_event_args_converter.rs"
+    ],
+    "Core/ActualThemeVariantChangedBehavior.cs": [
+     "core/actual_theme_variant_changed_behavior.rs"
+    ],
+    "Core/ActualThemeVariantChangedTrigger.cs": [
+     "core/actual_theme_variant_changed_trigger.rs"
+    ],
+    "Core/AsyncLoadBehavior.cs": [
+     "core/async_load_behavior.rs"
+    ],
+    "Core/AttachedToLogicalTreeBehavior.cs": [
+     "core/attached_to_logical_tree_behavior.rs"
+    ],
+    "Core/AttachedToLogicalTreeTrigger.cs": [
+     "core/attached_to_logical_tree_trigger.rs"
+    ],
+    "Core/AttachedToLogicalTreeTriggerBase.cs": [
+     "core/attached_to_logical_tree_trigger_base.rs"
+    ],
+    "Core/AttachedToVisualTreeBehavior.cs": [
+     "core/attached_to_visual_tree_behavior.rs"
+    ],
+    "Core/AttachedToVisualTreeTrigger.cs": [
+     "core/attached_to_visual_tree_trigger.rs"
+    ],
+    "Core/AttachedToVisualTreeTriggerBase.cs": [
+     "core/attached_to_visual_tree_trigger_base.rs"
+    ],
+    "Core/BindingBehavior.cs": [
+     "core/binding_behavior.rs"
+    ],
+    "Core/BindingTriggerBehavior.cs": [
+     "core/binding_trigger_behavior.rs"
+    ],
+    "Core/DataContextChangedBehavior.cs": [
+     "core/data_context_changed_behavior.rs"
+    ],
+    "Core/DataContextChangedTrigger.cs": [
+     "core/data_context_changed_trigger.rs"
+    ],
+    "Core/DelayedLoadTrigger.cs": [
+     "core/delayed_load_trigger.rs"
+    ],
+    "Core/DetachedFromLogicalTreeTrigger.cs": [
+     "core/detached_from_logical_tree_trigger.rs"
+    ],
+    "Core/DetachedFromVisualTreeTrigger.cs": [
+     "core/detached_from_visual_tree_trigger.rs"
+    ],
+    "Core/IfElseTrigger.cs": [
+     "core/if_else_trigger.rs"
+    ],
+    "Core/InitializedBehavior.cs": [
+     "core/initialized_behavior.rs"
+    ],
+    "Core/InitializedTrigger.cs": [
+     "core/initialized_trigger.rs"
+    ],
+    "Core/LaunchUriOrFileAction.cs": [
+     "core/launch_uri_or_file_action.rs"
+    ],
+    "Core/LoadedBehavior.cs": [
+     "core/loaded_behavior.rs"
+    ],
+    "Core/LoadedTrigger.cs": [
+     "core/loaded_trigger.rs"
+    ],
+    "Core/ObservableTriggerBehavior.cs": [
+     "core/observable_trigger_behavior.rs"
+    ],
+    "Core/PropertyChangedTrigger.cs": [
+     "core/property_changed_trigger.rs"
+    ],
+    "Core/ResourcesChangedBehavior.cs": [
+     "core/resources_changed_behavior.rs"
+    ],
+    "Core/ResourcesChangedTrigger.cs": [
+     "core/resources_changed_trigger.rs"
+    ],
+    "Core/RoutedEventTrigger.cs": [
+     "core/routed_event_trigger.rs"
+    ],
+    "Core/RoutedEventTriggerBase.cs": [
+     "core/routed_event_trigger_base.rs"
+    ],
+    "Core/RoutedEventTriggerBaseOfT.cs": [
+     "core/routed_event_trigger_base_of_t.rs"
+    ],
+    "Core/RoutedEventTriggerBehavior.cs": [
+     "core/routed_event_trigger_behavior.rs"
+    ],
+    "Core/SizeChangedTrigger.cs": [
+     "core/size_changed_trigger.rs"
+    ],
+    "Core/UnloadedTrigger.cs": [
+     "core/unloaded_trigger.rs"
+    ],
+    "Core/ValueChangedTriggerBehavior.cs": [
+     "core/value_changed_trigger_behavior.rs"
+    ],
+    "Cursor/Contract/ICursorProvider.cs": [
+     "cursor/contract/i_cursor_provider.rs"
+    ],
+    "Cursor/PointerOverCursorBehavior.cs": [
+     "cursor/pointer_over_cursor_behavior.rs"
+    ],
+    "Cursor/SetCursorAction.cs": [
+     "cursor/set_cursor_action.rs"
+    ],
+    "Cursor/SetCursorBehavior.cs": [
+     "cursor/set_cursor_behavior.rs"
+    ],
+    "Cursor/SetCursorFromProviderAction.cs": [
+     "cursor/set_cursor_from_provider_action.rs"
+    ],
+    "Cursor/SetCursorFromProviderBehavior.cs": [
+     "cursor/set_cursor_from_provider_behavior.rs"
+    ],
+    "Debugging/BreakAction.cs": [
+     "debugging/break_action.rs"
+    ],
+    "Debugging/LogAction.cs": [
+     "debugging/log_action.rs"
+    ],
+    "Debugging/VisualDebugAdorner.cs": [
+     "debugging/visual_debug_adorner.rs"
+    ],
+    "Debugging/VisualDebugBehavior.cs": [
+     "debugging/visual_debug_behavior.rs"
+    ],
+    "Dialog/DialogClosedTrigger.cs": [
+     "dialog/dialog_closed_trigger.rs"
+    ],
+    "Dialog/DialogOpenedTrigger.cs": [
+     "dialog/dialog_opened_trigger.rs"
+    ],
+    "Dialog/ShowDialogAction.cs": [
+     "dialog/show_dialog_action.rs"
+    ],
+    "ExecuteCommand/Core/ExecuteCommandBehaviorBase.cs": [
+     "execute_command/core/execute_command_behavior_base.rs"
+    ],
+    "ExecuteCommand/Core/ExecuteCommandOnKeyBehaviorBase.cs": [
+     "execute_command/core/execute_command_on_key_behavior_base.rs"
+    ],
+    "ExecuteCommand/Core/ExecuteCommandRoutedEventBehaviorBase.cs": [
+     "execute_command/core/execute_command_routed_event_behavior_base.rs"
+    ],
+    "ExecuteCommand/ExecuteCommandOnActivatedBehavior.cs": [
+     "execute_command/execute_command_on_activated_behavior.rs"
+    ],
+    "ExecuteCommand/ExecuteCommandOnDoubleTappedBehavior.cs": [
+     "execute_command/execute_command_on_double_tapped_behavior.rs"
+    ],
+    "ExecuteCommand/ExecuteCommandOnGotFocusBehavior.cs": [
+     "execute_command/execute_command_on_got_focus_behavior.rs"
+    ],
+    "ExecuteCommand/ExecuteCommandOnHoldingBehavior.cs": [
+     "execute_command/execute_command_on_holding_behavior.rs"
+    ],
+    "ExecuteCommand/ExecuteCommandOnKeyDownBehavior.cs": [
+     "execute_command/execute_command_on_key_down_behavior.rs"
+    ],
+    "ExecuteCommand/ExecuteCommandOnKeyUpBehavior.cs": [
+     "execute_command/execute_command_on_key_up_behavior.rs"
+    ],
+    "ExecuteCommand/ExecuteCommandOnLostFocusBehavior.cs": [
+     "execute_command/execute_command_on_lost_focus_behavior.rs"
+    ],
+    "ExecuteCommand/ExecuteCommandOnPinchBehavior.cs": [
+     "execute_command/execute_command_on_pinch_behavior.rs"
+    ],
+    "ExecuteCommand/ExecuteCommandOnPinchEndedBehavior.cs": [
+     "execute_command/execute_command_on_pinch_ended_behavior.rs"
+    ],
+    "ExecuteCommand/ExecuteCommandOnPointerCaptureLostBehavior.cs": [
+     "execute_command/execute_command_on_pointer_capture_lost_behavior.rs"
+    ],
+    "ExecuteCommand/ExecuteCommandOnPointerEnteredBehavior.cs": [
+     "execute_command/execute_command_on_pointer_entered_behavior.rs"
+    ],
+    "ExecuteCommand/ExecuteCommandOnPointerExitedBehavior.cs": [
+     "execute_command/execute_command_on_pointer_exited_behavior.rs"
+    ],
+    "ExecuteCommand/ExecuteCommandOnPointerMovedBehavior.cs": [
+     "execute_command/execute_command_on_pointer_moved_behavior.rs"
+    ],
+    "ExecuteCommand/ExecuteCommandOnPointerPressedBehavior.cs": [
+     "execute_command/execute_command_on_pointer_pressed_behavior.rs"
+    ],
+    "ExecuteCommand/ExecuteCommandOnPointerReleasedBehavior.cs": [
+     "execute_command/execute_command_on_pointer_released_behavior.rs"
+    ],
+    "ExecuteCommand/ExecuteCommandOnPointerTouchPadGestureMagnifyBehavior.cs": [
+     "execute_command/execute_command_on_pointer_touch_pad_gesture_magnify_behavior.rs"
+    ],
+    "ExecuteCommand/ExecuteCommandOnPointerTouchPadGestureRotateBehavior.cs": [
+     "execute_command/execute_command_on_pointer_touch_pad_gesture_rotate_behavior.rs"
+    ],
+    "ExecuteCommand/ExecuteCommandOnPointerTouchPadGestureSwipeBehavior.cs": [
+     "execute_command/execute_command_on_pointer_touch_pad_gesture_swipe_behavior.rs"
+    ],
+    "ExecuteCommand/ExecuteCommandOnPointerWheelChangedBehavior.cs": [
+     "execute_command/execute_command_on_pointer_wheel_changed_behavior.rs"
+    ],
+    "ExecuteCommand/ExecuteCommandOnPullGestureBehavior.cs": [
+     "execute_command/execute_command_on_pull_gesture_behavior.rs"
+    ],
+    "ExecuteCommand/ExecuteCommandOnPullGestureEndedBehavior.cs": [
+     "execute_command/execute_command_on_pull_gesture_ended_behavior.rs"
+    ],
+    "ExecuteCommand/ExecuteCommandOnRightTappedBehavior.cs": [
+     "execute_command/execute_command_on_right_tapped_behavior.rs"
+    ],
+    "ExecuteCommand/ExecuteCommandOnScrollGestureBehavior.cs": [
+     "execute_command/execute_command_on_scroll_gesture_behavior.rs"
+    ],
+    "ExecuteCommand/ExecuteCommandOnScrollGestureEndedBehavior.cs": [
+     "execute_command/execute_command_on_scroll_gesture_ended_behavior.rs"
+    ],
+    "ExecuteCommand/ExecuteCommandOnScrollGestureInertiaStartingBehavior.cs": [
+     "execute_command/execute_command_on_scroll_gesture_inertia_starting_behavior.rs"
+    ],
+    "ExecuteCommand/ExecuteCommandOnTappedBehavior.cs": [
+     "execute_command/execute_command_on_tapped_behavior.rs"
+    ],
+    "ExecuteCommand/ExecuteCommandOnTextInputBehavior.cs": [
+     "execute_command/execute_command_on_text_input_behavior.rs"
+    ],
+    "ExecuteCommand/ExecuteCommandOnTextInputMethodClientRequestedBehavior.cs": [
+     "execute_command/execute_command_on_text_input_method_client_requested_behavior.rs"
+    ],
+    "FileUpload/ButtonUploadFileBehavior.cs": [
+     "file_upload/button_upload_file_behavior.rs"
+    ],
+    "FileUpload/UploadCompletedTrigger.cs": [
+     "file_upload/upload_completed_trigger.rs"
+    ],
+    "FileUpload/UploadFileAction.cs": [
+     "file_upload/upload_file_action.rs"
+    ],
+    "FileUpload/UploadFileBehaviorBase.cs": [
+     "file_upload/upload_file_behavior_base.rs"
+    ],
+    "Focus/AutoFocusBehavior.cs": [
+     "focus/auto_focus_behavior.rs"
+    ],
+    "Focus/FocusBehavior.cs": [
+     "focus/focus_behavior.rs"
+    ],
+    "Focus/FocusBehaviorBase.cs": [
+     "focus/focus_behavior_base.rs"
+    ],
+    "Focus/FocusControlBehavior.cs": [
+     "focus/focus_control_behavior.rs"
+    ],
+    "Focus/FocusNavigationHelper.cs": [
+     "focus/focus_navigation_helper.rs"
+    ],
+    "Focus/FocusOnAttachedBehavior.cs": [
+     "focus/focus_on_attached_behavior.rs"
+    ],
+    "Focus/FocusOnAttachedToVisualTreeBehavior.cs": [
+     "focus/focus_on_attached_to_visual_tree_behavior.rs"
+    ],
+    "Focus/FocusOnPointerMovedBehavior.cs": [
+     "focus/focus_on_pointer_moved_behavior.rs"
+    ],
+    "Focus/FocusOnPointerPressedBehavior.cs": [
+     "focus/focus_on_pointer_pressed_behavior.rs"
+    ],
+    "Focus/FocusOnVisibleBehavior.cs": [
+     "focus/focus_on_visible_behavior.rs"
+    ],
+    "Focus/FocusSelectedItemBehavior.cs": [
+     "focus/focus_selected_item_behavior.rs"
+    ],
+    "Focus/FocusTrapBehavior.cs": [
+     "focus/focus_trap_behavior.rs"
+    ],
+    "Gestures/DoubleTappedGestureTrigger.cs": [
+     "gestures/double_tapped_gesture_trigger.rs"
+    ],
+    "Gestures/HoldingGestureTrigger.cs": [
+     "gestures/holding_gesture_trigger.rs"
+    ],
+    "Gestures/PinchEndedGestureTrigger.cs": [
+     "gestures/pinch_ended_gesture_trigger.rs"
+    ],
+    "Gestures/PinchGestureTrigger.cs": [
+     "gestures/pinch_gesture_trigger.rs"
+    ],
+    "Gestures/PointerTouchPadGestureMagnifyGestureTrigger.cs": [
+     "gestures/pointer_touch_pad_gesture_magnify_gesture_trigger.rs"
+    ],
+    "Gestures/PointerTouchPadGestureRotateGestureTrigger.cs": [
+     "gestures/pointer_touch_pad_gesture_rotate_gesture_trigger.rs"
+    ],
+    "Gestures/PointerTouchPadGestureSwipeGestureTrigger.cs": [
+     "gestures/pointer_touch_pad_gesture_swipe_gesture_trigger.rs"
+    ],
+    "Gestures/PullGestureEndedGestureTrigger.cs": [
+     "gestures/pull_gesture_ended_gesture_trigger.rs"
+    ],
+    "Gestures/PullGestureGestureTrigger.cs": [
+     "gestures/pull_gesture_gesture_trigger.rs"
+    ],
+    "Gestures/RightTappedGestureTrigger.cs": [
+     "gestures/right_tapped_gesture_trigger.rs"
+    ],
+    "Gestures/ScrollGestureEndedGestureTrigger.cs": [
+     "gestures/scroll_gesture_ended_gesture_trigger.rs"
+    ],
+    "Gestures/ScrollGestureGestureTrigger.cs": [
+     "gestures/scroll_gesture_gesture_trigger.rs"
+    ],
+    "Gestures/ScrollGestureInertiaStartingGestureTrigger.cs": [
+     "gestures/scroll_gesture_inertia_starting_gesture_trigger.rs"
+    ],
+    "Gestures/TappedGestureTrigger.cs": [
+     "gestures/tapped_gesture_trigger.rs"
+    ],
+    "Icon/PathIconDataBehavior.cs": [
+     "icon/path_icon_data_behavior.rs"
+    ],
+    "Icon/PathIconDataChangedTrigger.cs": [
+     "icon/path_icon_data_changed_trigger.rs"
+    ],
+    "Icon/SetPathIconDataAction.cs": [
+     "icon/set_path_icon_data_action.rs"
+    ],
+    "Input/GlobalHotkeyBehavior.cs": [
+     "input/global_hotkey_behavior.rs"
+    ],
+    "Input/InactivityTrigger.cs": [
+     "input/inactivity_trigger.rs"
+    ],
+    "Input/LoseFocusOnEnterBehavior.cs": [
+     "input/lose_focus_on_enter_behavior.rs"
+    ],
+    "Input/SelectAllOnFocusBehavior.cs": [
+     "input/select_all_on_focus_behavior.rs"
+    ],
+    "InputElement/Actions/CapturePointerAction.cs": [
+     "input_element/actions/capture_pointer_action.rs"
+    ],
+    "InputElement/Actions/ReleasePointerCaptureAction.cs": [
+     "input_element/actions/release_pointer_capture_action.rs"
+    ],
+    "InputElement/Triggers/ClickEventTrigger.cs": [
+     "input_element/triggers/click_event_trigger.rs"
+    ],
+    "InputElement/Triggers/DoubleTappedTrigger.cs": [
+     "input_element/triggers/double_tapped_trigger.rs"
+    ],
+    "InputElement/Triggers/GotFocusTrigger.cs": [
+     "input_element/triggers/got_focus_trigger.rs"
+    ],
+    "InputElement/Triggers/HoldingTrigger.cs": [
+     "input_element/triggers/holding_trigger.rs"
+    ],
+    "InputElement/Triggers/KeyDownTrigger.cs": [
+     "input_element/triggers/key_down_trigger.rs"
+    ],
+    "InputElement/Triggers/KeyGestureTrigger.cs": [
+     "input_element/triggers/key_gesture_trigger.rs"
+    ],
+    "InputElement/Triggers/KeyTrigger.cs": [
+     "input_element/triggers/key_trigger.rs"
+    ],
+    "InputElement/Triggers/KeyUpTrigger.cs": [
+     "input_element/triggers/key_up_trigger.rs"
+    ],
+    "InputElement/Triggers/LostFocusTrigger.cs": [
+     "input_element/triggers/lost_focus_trigger.rs"
+    ],
+    "InputElement/Triggers/PointerCaptureLostTrigger.cs": [
+     "input_element/triggers/pointer_capture_lost_trigger.rs"
+    ],
+    "InputElement/Triggers/PointerEnteredTrigger.cs": [
+     "input_element/triggers/pointer_entered_trigger.rs"
+    ],
+    "InputElement/Triggers/PointerExitedTrigger.cs": [
+     "input_element/triggers/pointer_exited_trigger.rs"
+    ],
+    "InputElement/Triggers/PointerMovedTrigger.cs": [
+     "input_element/triggers/pointer_moved_trigger.rs"
+    ],
+    "InputElement/Triggers/PointerPressedTrigger.cs": [
+     "input_element/triggers/pointer_pressed_trigger.rs"
+    ],
+    "InputElement/Triggers/PointerReleasedTrigger.cs": [
+     "input_element/triggers/pointer_released_trigger.rs"
+    ],
+    "InputElement/Triggers/PointerWheelChangedTrigger.cs": [
+     "input_element/triggers/pointer_wheel_changed_trigger.rs"
+    ],
+    "InputElement/Triggers/TappedTrigger.cs": [
+     "input_element/triggers/tapped_trigger.rs"
+    ],
+    "InputElement/Triggers/TextInputMethodClientRequestedTrigger.cs": [
+     "input_element/triggers/text_input_method_client_requested_trigger.rs"
+    ],
+    "InputElement/Triggers/TextInputTrigger.cs": [
+     "input_element/triggers/text_input_trigger.rs"
+    ],
+    "ItemsControl/AddItemToItemsControlAction.cs": [
+     "items_control/add_item_to_items_control_action.rs"
+    ],
+    "ItemsControl/ClearItemsControlAction.cs": [
+     "items_control/clear_items_control_action.rs"
+    ],
+    "ItemsControl/InsertItemToItemsControlAction.cs": [
+     "items_control/insert_item_to_items_control_action.rs"
+    ],
+    "ItemsControl/ItemNudgeDropBehavior.cs": [
+     "items_control/item_nudge_drop_behavior.rs"
+    ],
+    "ItemsControl/ItemsControlContainerClearingTrigger.cs": [
+     "items_control/items_control_container_clearing_trigger.rs"
+    ],
+    "ItemsControl/ItemsControlContainerEventsBehavior.cs": [
+     "items_control/items_control_container_events_behavior.rs"
+    ],
+    "ItemsControl/ItemsControlContainerIndexChangedTrigger.cs": [
+     "items_control/items_control_container_index_changed_trigger.rs"
+    ],
+    "ItemsControl/ItemsControlContainerPreparedTrigger.cs": [
+     "items_control/items_control_container_prepared_trigger.rs"
+    ],
+    "ItemsControl/ItemsControlPreparingContainerTrigger.cs": [
+     "items_control/items_control_preparing_container_trigger.rs"
+    ],
+    "ItemsControl/MoveItemInItemsControlAction.cs": [
+     "items_control/move_item_in_items_control_action.rs"
+    ],
+    "ItemsControl/RemoveItemAtAction.cs": [
+     "items_control/remove_item_at_action.rs"
+    ],
+    "ItemsControl/RemoveItemInItemsControlAction.cs": [
+     "items_control/remove_item_in_items_control_action.rs"
+    ],
+    "ItemsControl/ScrollToItemBehavior.cs": [
+     "items_control/scroll_to_item_behavior.rs"
+    ],
+    "ItemsControl/ScrollToItemIndexBehavior.cs": [
+     "items_control/scroll_to_item_index_behavior.rs"
+    ],
+    "Layout/FluidMoveBehavior.cs": [
+     "layout/fluid_move_behavior.rs"
+    ],
+    "Layout/MoveElementToPanelAction.cs": [
+     "layout/move_element_to_panel_action.rs"
+    ],
+    "ListBox/ListBoxSelectAllBehavior.cs": [
+     "list_box/list_box_select_all_behavior.rs"
+    ],
+    "ListBox/ListBoxUnselectAllBehavior.cs": [
+     "list_box/list_box_unselect_all_behavior.rs"
+    ],
+    "ListBox/RemoveItemInListBoxAction.cs": [
+     "list_box/remove_item_in_list_box_action.rs"
+    ],
+    "ListBoxItem/SelectListBoxItemOnPointerMovedBehavior.cs": [
+     "list_box_item/select_list_box_item_on_pointer_moved_behavior.rs"
+    ],
+    "Logic/Case.cs": [
+     "logic/case.rs"
+    ],
+    "Logic/ConditionalAction.cs": [
+     "logic/conditional_action.rs"
+    ],
+    "Logic/ConditionalBehavior.cs": [
+     "logic/conditional_behavior.rs"
+    ],
+    "Logic/SwitchCaseAction.cs": [
+     "logic/switch_case_action.rs"
+    ],
+    "Logic/SwitchCaseBehavior.cs": [
+     "logic/switch_case_behavior.rs"
+    ],
+    "Multimedia/ConsoleBeepAction.cs": [
+     "multimedia/console_beep_action.rs"
+    ],
+    "Notifications/CloseNotificationAction.cs": [
+     "notifications/close_notification_action.rs"
+    ],
+    "Notifications/NotificationManagerBehavior.cs": [
+     "notifications/notification_manager_behavior.rs"
+    ],
+    "Notifications/ShowErrorNotificationAction.cs": [
+     "notifications/show_error_notification_action.rs"
+    ],
+    "Notifications/ShowInformationNotificationAction.cs": [
+     "notifications/show_information_notification_action.rs"
+    ],
+    "Notifications/ShowNotificationAction.cs": [
+     "notifications/show_notification_action.rs"
+    ],
+    "Notifications/ShowSuccessNotificationAction.cs": [
+     "notifications/show_success_notification_action.rs"
+    ],
+    "Notifications/ShowWarningNotificationAction.cs": [
+     "notifications/show_warning_notification_action.rs"
+    ],
+    "Popup/PopupClosedTrigger.cs": [
+     "popup/popup_closed_trigger.rs"
+    ],
+    "Popup/PopupOpenedTrigger.cs": [
+     "popup/popup_opened_trigger.rs"
+    ],
+    "Properties/AnimationTypeForwards.cs": [
+     "properties/animation_type_forwards.rs"
+    ],
+    "RenderTarget/Contract/IRenderTargetBitmapRenderHost.cs": [
+     "render_target/contract/i_render_target_bitmap_render_host.rs"
+    ],
+    "RenderTarget/Contract/IRenderTargetBitmapRenderer.cs": [
+     "render_target/contract/i_render_target_bitmap_renderer.rs"
+    ],
+    "RenderTarget/Contract/IRenderTargetBitmapSimpleRenderer.cs": [
+     "render_target/contract/i_render_target_bitmap_simple_renderer.rs"
+    ],
+    "RenderTarget/RenderRenderTargetBitmapAction.cs": [
+     "render_target/render_render_target_bitmap_action.rs"
+    ],
+    "RenderTarget/RenderTargetBitmapBehavior.cs": [
+     "render_target/render_target_bitmap_behavior.rs"
+    ],
+    "RenderTarget/RenderTargetBitmapTrigger.cs": [
+     "render_target/render_target_bitmap_trigger.rs"
+    ],
+    "RenderTarget/StaticRenderTargetBitmapBehavior.cs": [
+     "render_target/static_render_target_bitmap_behavior.rs"
+    ],
+    "Screen/ActiveScreenBehavior.cs": [
+     "screen/active_screen_behavior.rs"
+    ],
+    "Screen/RequestScreenDetailsAction.cs": [
+     "screen/request_screen_details_action.rs"
+    ],
+    "Screen/ScreensChangedTrigger.cs": [
+     "screen/screens_changed_trigger.rs"
+    ],
+    "ScrollViewer/HorizontalScrollViewerBehavior.cs": [
+     "scroll_viewer/horizontal_scroll_viewer_behavior.rs"
+    ],
+    "ScrollViewer/ScrollChangedTrigger.cs": [
+     "scroll_viewer/scroll_changed_trigger.rs"
+    ],
+    "ScrollViewer/ScrollToOffsetAction.cs": [
+     "scroll_viewer/scroll_to_offset_action.rs"
+    ],
+    "ScrollViewer/ScrollViewerOffsetBehavior.cs": [
+     "scroll_viewer/scroll_viewer_offset_behavior.rs"
+    ],
+    "ScrollViewer/ViewportBehavior.cs": [
+     "scroll_viewer/viewport_behavior.rs"
+    ],
+    "SelectingItemsControl/SelectingItemsControlEventsBehavior.cs": [
+     "selecting_items_control/selecting_items_control_events_behavior.rs"
+    ],
+    "SelectingItemsControl/SelectingItemsControlSearchBehavior.cs": [
+     "selecting_items_control/selecting_items_control_search_behavior.rs"
+    ],
+    "Show/ShowBehaviorBase.cs": [
+     "show/show_behavior_base.rs"
+    ],
+    "Show/ShowOnDoubleTappedBehavior.cs": [
+     "show/show_on_double_tapped_behavior.rs"
+    ],
+    "Show/ShowOnKeyDownBehavior.cs": [
+     "show/show_on_key_down_behavior.rs"
+    ],
+    "Show/ShowOnTappedBehavior.cs": [
+     "show/show_on_tapped_behavior.rs"
+    ],
+    "SplitView/SplitViewPaneClosedTrigger.cs": [
+     "split_view/split_view_pane_closed_trigger.rs"
+    ],
+    "SplitView/SplitViewPaneClosingTrigger.cs": [
+     "split_view/split_view_pane_closing_trigger.rs"
+    ],
+    "SplitView/SplitViewPaneOpenedTrigger.cs": [
+     "split_view/split_view_pane_opened_trigger.rs"
+    ],
+    "SplitView/SplitViewPaneOpeningTrigger.cs": [
+     "split_view/split_view_pane_opening_trigger.rs"
+    ],
+    "SplitView/SplitViewStateBehavior.cs": [
+     "split_view/split_view_state_behavior.rs"
+    ],
+    "SplitView/SplitViewStateSetter.cs": [
+     "split_view/split_view_state_setter.rs"
+    ],
+    "SplitView/SplitViewTogglePaneAction.cs": [
+     "split_view/split_view_toggle_pane_action.rs"
+    ],
+    "System/ClipboardMonitorBehavior.cs": [
+     "system/clipboard_monitor_behavior.rs"
+    ],
+    "System/NetworkStatusTrigger.cs": [
+     "system/network_status_trigger.rs"
+    ],
+    "TabControl/TabControlKeyNavigationBehavior.cs": [
+     "tab_control/tab_control_key_navigation_behavior.rs"
+    ],
+    "TabControl/TabControlNextAction.cs": [
+     "tab_control/tab_control_next_action.rs"
+    ],
+    "TabControl/TabControlPreviousAction.cs": [
+     "tab_control/tab_control_previous_action.rs"
+    ],
+    "TabControl/TabControlSelectionChangedTrigger.cs": [
+     "tab_control/tab_control_selection_changed_trigger.rs"
+    ],
+    "TextBox/AutoSelectBehavior.cs": [
+     "text_box/auto_select_behavior.rs"
+    ],
+    "TextBox/TextBoxSelectAllOnGotFocusBehavior.cs": [
+     "text_box/text_box_select_all_on_got_focus_behavior.rs"
+    ],
+    "TextBox/TextBoxSelectAllTextBehavior.cs": [
+     "text_box/text_box_select_all_text_behavior.rs"
+    ],
+    "ThemeVariant/ThemeVariantBehavior.cs": [
+     "theme_variant/theme_variant_behavior.rs"
+    ],
+    "ThemeVariant/ThemeVariantTrigger.cs": [
+     "theme_variant/theme_variant_trigger.rs"
+    ],
+    "ToolTips/HideToolTipAction.cs": [
+     "tool_tips/hide_tool_tip_action.rs"
+    ],
+    "ToolTips/SetToolTipTipAction.cs": [
+     "tool_tips/set_tool_tip_tip_action.rs"
+    ],
+    "ToolTips/ShowToolTipAction.cs": [
+     "tool_tips/show_tool_tip_action.rs"
+    ],
+    "ToolTips/ToolTipClosingTrigger.cs": [
+     "tool_tips/tool_tip_closing_trigger.rs"
+    ],
+    "ToolTips/ToolTipOpeningTrigger.cs": [
+     "tool_tips/tool_tip_opening_trigger.rs"
+    ],
+    "Transitions/AddTransitionAction.cs": [
+     "transitions/add_transition_action.rs"
+    ],
+    "Transitions/ClearTransitionsAction.cs": [
+     "transitions/clear_transitions_action.rs"
+    ],
+    "Transitions/RemoveTransitionAction.cs": [
+     "transitions/remove_transition_action.rs"
+    ],
+    "Transitions/TransitionsBehavior.cs": [
+     "transitions/transitions_behavior.rs"
+    ],
+    "Transitions/TransitionsChangedTrigger.cs": [
+     "transitions/transitions_changed_trigger.rs"
+    ],
+    "TreeView/ApplyTreeViewFilterAction.cs": [
+     "tree_view/apply_tree_view_filter_action.rs"
+    ],
+    "TreeView/TreeViewFilterBehavior.cs": [
+     "tree_view/tree_view_filter_behavior.rs"
+    ],
+    "TreeView/TreeViewFilterHelper.cs": [
+     "tree_view/tree_view_filter_helper.rs"
+    ],
+    "TreeView/TreeViewFilterTextChangedTrigger.cs": [
+     "tree_view/tree_view_filter_text_changed_trigger.rs"
+    ],
+    "TreeViewItem/ToggleIsExpandedOnDoubleTappedBehavior.cs": [
+     "tree_view_item/toggle_is_expanded_on_double_tapped_behavior.rs"
+    ],
+    "Validation/ComboBoxValidationBehavior.cs": [
+     "validation/combo_box_validation_behavior.rs"
+    ],
+    "Validation/Contract/IValidationRule.cs": [
+     "validation/contract/i_validation_rule.rs"
+    ],
+    "Validation/DatePickerValidationBehavior.cs": [
+     "validation/date_picker_validation_behavior.rs"
+    ],
+    "Validation/NumericUpDownValidationBehavior.cs": [
+     "validation/numeric_up_down_validation_behavior.rs"
+    ],
+    "Validation/PropertyValidationBehavior.cs": [
+     "validation/property_validation_behavior.rs"
+    ],
+    "Validation/Rules/MaxValueValidationRule.cs": [
+     "validation/rules/max_value_validation_rule.rs"
+    ],
+    "Validation/Rules/MinLengthValidationRule.cs": [
+     "validation/rules/min_length_validation_rule.rs"
+    ],
+    "Validation/Rules/MinValueValidationRule.cs": [
+     "validation/rules/min_value_validation_rule.rs"
+    ],
+    "Validation/Rules/NotNullValidationRule.cs": [
+     "validation/rules/not_null_validation_rule.rs"
+    ],
+    "Validation/Rules/RangeValidationRule.cs": [
+     "validation/rules/range_validation_rule.rs"
+    ],
+    "Validation/Rules/RegexValidationRule.cs": [
+     "validation/rules/regex_validation_rule.rs"
+    ],
+    "Validation/Rules/RequiredDateValidationRule.cs": [
+     "validation/rules/required_date_validation_rule.rs"
+    ],
+    "Validation/Rules/RequiredDecimalValidationRule.cs": [
+     "validation/rules/required_decimal_validation_rule.rs"
+    ],
+    "Validation/Rules/RequiredTextValidationRule.cs": [
+     "validation/rules/required_text_validation_rule.rs"
+    ],
+    "Validation/SliderValidationBehavior.cs": [
+     "validation/slider_validation_behavior.rs"
+    ],
+    "Validation/TextBoxValidationBehavior.cs": [
+     "validation/text_box_validation_behavior.rs"
+    ],
+    "ViewModel/IncrementViewModelPropertyAction.cs": [
+     "view_model/increment_view_model_property_action.rs"
+    ],
+    "ViewModel/SetViewModelPropertyAction.cs": [
+     "view_model/set_view_model_property_action.rs"
+    ],
+    "ViewModel/SetViewModelPropertyOnLoadBehavior.cs": [
+     "view_model/set_view_model_property_on_load_behavior.rs"
+    ],
+    "ViewModel/ToggleViewModelBooleanAction.cs": [
+     "view_model/toggle_view_model_boolean_action.rs"
+    ],
+    "ViewModel/ViewModelPropertyChangedTrigger.cs": [
+     "view_model/view_model_property_changed_trigger.rs"
+    ],
+    "Window/CenterWindowBehavior.cs": [
+     "window/center_window_behavior.rs"
+    ],
+    "Window/CloseWindowAction.cs": [
+     "window/close_window_action.rs"
+    ],
+    "Window/ShowWindowAction.cs": [
+     "window/show_window_action.rs"
+    ],
+    "Window/WindowAction.cs": [
+     "window/window_action.rs"
+    ],
+    "Window/WindowDragMoveBehavior.cs": [
+     "window/window_drag_move_behavior.rs"
+    ],
+    "Window/WindowStateTrigger.cs": [
+     "window/window_state_trigger.rs"
+    ],
+    "WriteableBitmap/Contract/IWriteableBitmapRenderer.cs": [
+     "writeable_bitmap/contract/i_writeable_bitmap_renderer.rs"
+    ],
+    "WriteableBitmap/WriteableBitmapBehavior.cs": [
+     "writeable_bitmap/writeable_bitmap_behavior.rs"
+    ],
+    "WriteableBitmap/WriteableBitmapRenderAction.cs": [
+     "writeable_bitmap/writeable_bitmap_render_action.rs"
+    ],
+    "WriteableBitmap/WriteableBitmapRenderBehavior.cs": [
+     "writeable_bitmap/writeable_bitmap_render_behavior.rs"
+    ],
+    "WriteableBitmap/WriteableBitmapTimerTrigger.cs": [
+     "writeable_bitmap/writeable_bitmap_timer_trigger.rs"
+    ],
+    "WriteableBitmap/WriteableBitmapTrigger.cs": [
+     "writeable_bitmap/writeable_bitmap_trigger.rs"
+    ]
+   },
+   "rustOnly": [
+    "animations/animation_builder_ref.rs",
+    "part_a.rs",
+    "part_b.rs",
+    "part_c.rs",
+    "part_d.rs",
+    "register_types.rs",
+    "screen/screens_ref.rs",
+    "writeable_bitmap/writeable_bitmap_ref.rs"
+   ]
+  },
+  {
+   "name": "Xaml.Behaviors.Interactions.DragAndDrop",
+   "path": "src/Xaml.Behaviors.Interactions.DragAndDrop",
+   "rust": "src/Behaviors/FerroUI.Xaml.Interactions.DragAndDrop",
+   "scope": "in",
+   "detail": "full",
+   "files": [
+    29,
+    29,
+    0
+   ],
+   "types": [
+    28,
+    28,
+    0
+   ],
+   "members": [
+    193,
+    193,
+    0
+   ],
+   "interfaces": [
+    2,
+    2
+   ],
+   "propertyRegistrations": [
+    39,
+    39
+   ],
+   "routedEvents": [
+    0,
+    0
+   ],
+   "notApplicableFiles": 1,
+   "matchKinds": {
+    "field": 6,
+    "fn": 181,
+    "overload fn": 6
+   },
+   "presentFiles": {
+    "AddPreviewFilesAction.cs": [
+     "add_preview_files_action.rs"
+    ],
+    "Behaviors/BaseTreeViewDropHandler.cs": [
+     "behaviors/base_tree_view_drop_handler.rs"
+    ],
+    "ContentControlFilesDropBehavior.cs": [
+     "content_control_files_drop_behavior.rs"
+    ],
+    "ContextDragBehavior.cs": [
+     "context_drag_behavior.rs"
+    ],
+    "ContextDragBehaviorBase.cs": [
+     "context_drag_behavior_base.rs"
+    ],
+    "ContextDragWithDirectionBehavior.cs": [
+     "context_drag_with_direction_behavior.rs"
+    ],
+    "ContextDropBehavior.cs": [
+     "context_drop_behavior.rs"
+    ],
+    "ContextDropBehaviorBase.cs": [
+     "context_drop_behavior_base.rs"
+    ],
+    "Contract/IDragHandler.cs": [
+     "contract/i_drag_handler.rs"
+    ],
+    "Contract/IDropHandler.cs": [
+     "contract/i_drop_handler.rs"
+    ],
+    "DragAndDropEventsBehavior.cs": [
+     "drag_and_drop_events_behavior.rs"
+    ],
+    "DragDropCommandsBehavior.cs": [
+     "drag_drop_commands_behavior.rs"
+    ],
+    "DragDropContextStore.cs": [
+     "drag_drop_context_store.rs"
+    ],
+    "DropBehaviorBase.cs": [
+     "drop_behavior_base.rs"
+    ],
+    "DropHandlerBase.cs": [
+     "drop_handler_base.rs"
+    ],
+    "FilesDropBehavior.cs": [
+     "files_drop_behavior.rs"
+    ],
+    "FilesPreviewBehavior.cs": [
+     "files_preview_behavior.rs"
+    ],
+    "ManagedDragDrop/DragPreviewService.cs": [
+     "managed_drag_drop/drag_preview_service.rs"
+    ],
+    "ManagedDragDrop/DragPreviewWindow.cs": [
+     "managed_drag_drop/drag_preview_window.rs"
+    ],
+    "ManagedDragDrop/ManagedContextDragBehavior.cs": [
+     "managed_drag_drop/managed_context_drag_behavior.rs"
+    ],
+    "ManagedDragDrop/ManagedContextDropBehavior.cs": [
+     "managed_drag_drop/managed_context_drop_behavior.rs"
+    ],
+    "ManagedDragDrop/ManagedDataTransfer.cs": [
+     "managed_drag_drop/managed_data_transfer.rs"
+    ],
+    "ManagedDragDrop/ManagedDataTransferExtensions.cs": [
+     "managed_drag_drop/managed_data_transfer_extensions.rs"
+    ],
+    "ManagedDragDrop/ManagedDragDropService.cs": [
+     "managed_drag_drop/managed_drag_drop_service.rs"
+    ],
+    "PanelDragBehavior.cs": [
+     "panel_drag_behavior.rs"
+    ],
+    "PanelDropBehavior.cs": [
+     "panel_drop_behavior.rs"
+    ],
+    "TextDropBehavior.cs": [
+     "text_drop_behavior.rs"
+    ],
+    "TypedDragBehavior.cs": [
+     "typed_drag_behavior.rs"
+    ],
+    "TypedDragBehaviorBase.cs": [
+     "typed_drag_behavior_base.rs"
+    ]
+   },
+   "rustOnly": [
+    "assets.rs",
+    "register_types.rs",
+    "routed_handlers.rs",
+    "rust_paths.rs",
+    "values.rs"
+   ]
+  },
+  {
+   "name": "Xaml.Behaviors.Interactions.DragAndDrop.DataGrid",
+   "path": "src/Xaml.Behaviors.Interactions.DragAndDrop.DataGrid",
+   "rust": "-",
+   "scope": "in",
+   "detail": "full",
+   "files": [
+    0,
+    1,
+    1
+   ],
+   "types": [
+    0,
+    1,
+    1
+   ],
+   "members": [
+    0,
+    6,
+    6
+   ],
+   "interfaces": [
+    0,
+    0
+   ],
+   "propertyRegistrations": [
+    0,
+    0
+   ],
+   "routedEvents": [
+    0,
+    0
+   ],
+   "notApplicableFiles": 0,
+   "matchKinds": {},
+   "presentFiles": {},
+   "rustOnly": []
+  },
+  {
+   "name": "Xaml.Behaviors.Interactions.Draggable",
+   "path": "src/Xaml.Behaviors.Interactions.Draggable",
+   "rust": "src/Behaviors/FerroUI.Xaml.Interactions.Draggable",
+   "scope": "in",
+   "detail": "full",
+   "files": [
+    8,
+    8,
+    0
+   ],
+   "types": [
+    8,
+    8,
+    0
+   ],
+   "members": [
+    41,
+    41,
+    0
+   ],
+   "interfaces": [
+    0,
+    0
+   ],
+   "propertyRegistrations": [
+    13,
+    13
+   ],
+   "routedEvents": [
+    0,
+    0
+   ],
+   "notApplicableFiles": 1,
+   "matchKinds": {
+    "fn": 41
+   },
+   "presentFiles": {
+    "AutoScrollDuringDragBehavior.cs": [
+     "auto_scroll_during_drag_behavior.rs"
+    ],
+    "CanvasDragBehavior.cs": [
+     "canvas_drag_behavior.rs"
+    ],
+    "GridDragBehavior.cs": [
+     "grid_drag_behavior.rs"
+    ],
+    "ItemDragBehavior.cs": [
+     "item_drag_behavior.rs"
+    ],
+    "ListReorderDragBehavior.cs": [
+     "list_reorder_drag_behavior.rs"
+    ],
+    "MouseDragElementBehavior.cs": [
+     "mouse_drag_element_behavior.rs"
+    ],
+    "MultiMouseDragElementBehavior.cs": [
+     "multi_mouse_drag_element_behavior.rs"
+    ],
+    "SelectionAdorner.cs": [
+     "selection_adorner.rs"
+    ]
+   },
+   "rustOnly": [
+    "assets.rs",
+    "register_types.rs",
+    "routed_handlers.rs",
+    "rust_paths.rs"
+   ]
+  },
+  {
+   "name": "Xaml.Behaviors.Interactions.Events",
+   "path": "src/Xaml.Behaviors.Interactions.Events",
+   "rust": "src/Behaviors/FerroUI.Xaml.Interactions.Events",
+   "scope": "in",
+   "detail": "full",
+   "files": [
+    42,
+    42,
+    0
+   ],
+   "types": [
+    42,
+    42,
+    0
+   ],
+   "members": [
+    105,
+    105,
+    0
+   ],
+   "interfaces": [
+    0,
+    0
+   ],
+   "propertyRegistrations": [
+    0,
+    0
+   ],
+   "routedEvents": [
+    0,
+    0
+   ],
+   "notApplicableFiles": 1,
+   "matchKinds": {
+    "fn": 105
+   },
+   "presentFiles": {
+    "DoubleTappedEventBehavior.cs": [
+     "double_tapped_event_behavior.rs"
+    ],
+    "DoubleTappedEventTrigger.cs": [
+     "double_tapped_event_trigger.rs"
+    ],
+    "DragEnterEventTrigger.cs": [
+     "drag_enter_event_trigger.rs"
+    ],
+    "DragLeaveEventTrigger.cs": [
+     "drag_leave_event_trigger.rs"
+    ],
+    "DragOverEventTrigger.cs": [
+     "drag_over_event_trigger.rs"
+    ],
+    "DropEventTrigger.cs": [
+     "drop_event_trigger.rs"
+    ],
+    "GotFocusEventBehavior.cs": [
+     "got_focus_event_behavior.rs"
+    ],
+    "GotFocusEventTrigger.cs": [
+     "got_focus_event_trigger.rs"
+    ],
+    "KeyDownEventBehavior.cs": [
+     "key_down_event_behavior.rs"
+    ],
+    "KeyDownEventTrigger.cs": [
+     "key_down_event_trigger.rs"
+    ],
+    "KeyUpEventBehavior.cs": [
+     "key_up_event_behavior.rs"
+    ],
+    "KeyUpEventTrigger.cs": [
+     "key_up_event_trigger.rs"
+    ],
+    "LostFocusEventBehavior.cs": [
+     "lost_focus_event_behavior.rs"
+    ],
+    "LostFocusEventTrigger.cs": [
+     "lost_focus_event_trigger.rs"
+    ],
+    "PointerCaptureLostEventBehavior.cs": [
+     "pointer_capture_lost_event_behavior.rs"
+    ],
+    "PointerCaptureLostEventTrigger.cs": [
+     "pointer_capture_lost_event_trigger.rs"
+    ],
+    "PointerEnteredEventBehavior.cs": [
+     "pointer_entered_event_behavior.rs"
+    ],
+    "PointerEnteredEventTrigger.cs": [
+     "pointer_entered_event_trigger.rs"
+    ],
+    "PointerEventsBehavior.cs": [
+     "pointer_events_behavior.rs"
+    ],
+    "PointerEventsTrigger.cs": [
+     "pointer_events_trigger.rs"
+    ],
+    "PointerExitedEventBehavior.cs": [
+     "pointer_exited_event_behavior.rs"
+    ],
+    "PointerExitedEventTrigger.cs": [
+     "pointer_exited_event_trigger.rs"
+    ],
+    "PointerMovedEventBehavior.cs": [
+     "pointer_moved_event_behavior.rs"
+    ],
+    "PointerMovedEventTrigger.cs": [
+     "pointer_moved_event_trigger.rs"
+    ],
+    "PointerPressedEventBehavior.cs": [
+     "pointer_pressed_event_behavior.rs"
+    ],
+    "PointerPressedEventTrigger.cs": [
+     "pointer_pressed_event_trigger.rs"
+    ],
+    "PointerReleasedEventBehavior.cs": [
+     "pointer_released_event_behavior.rs"
+    ],
+    "PointerReleasedEventTrigger.cs": [
+     "pointer_released_event_trigger.rs"
+    ],
+    "PointerWheelChangedEventBehavior.cs": [
+     "pointer_wheel_changed_event_behavior.rs"
+    ],
+    "PointerWheelChangedEventTrigger.cs": [
+     "pointer_wheel_changed_event_trigger.rs"
+    ],
+    "RightTappedEventBehavior.cs": [
+     "right_tapped_event_behavior.rs"
+    ],
+    "RightTappedEventTrigger.cs": [
+     "right_tapped_event_trigger.rs"
+    ],
+    "ScrollGestureEndedEventBehavior.cs": [
+     "scroll_gesture_ended_event_behavior.rs"
+    ],
+    "ScrollGestureEndedEventTrigger.cs": [
+     "scroll_gesture_ended_event_trigger.rs"
+    ],
+    "ScrollGestureEventBehavior.cs": [
+     "scroll_gesture_event_behavior.rs"
+    ],
+    "ScrollGestureEventTrigger.cs": [
+     "scroll_gesture_event_trigger.rs"
+    ],
+    "TappedEventBehavior.cs": [
+     "tapped_event_behavior.rs"
+    ],
+    "TappedEventTrigger.cs": [
+     "tapped_event_trigger.rs"
+    ],
+    "TextInputEventBehavior.cs": [
+     "text_input_event_behavior.rs"
+    ],
+    "TextInputEventTrigger.cs": [
+     "text_input_event_trigger.rs"
+    ],
+    "TextInputMethodClientRequestedEventBehavior.cs": [
+     "text_input_method_client_requested_event_behavior.rs"
+    ],
+    "TextInputMethodClientRequestedEventTrigger.cs": [
+     "text_input_method_client_requested_event_trigger.rs"
+    ]
+   },
+   "rustOnly": [
+    "register_types.rs",
+    "rust_paths.rs"
+   ]
+  },
+  {
+   "name": "Xaml.Behaviors.Interactions.ReactiveUI",
+   "path": "src/Xaml.Behaviors.Interactions.ReactiveUI",
+   "rust": "src/Behaviors/FerroUI.Xaml.Interactions.ReactiveUI",
+   "scope": "in",
+   "detail": "full",
+   "files": [
+    7,
+    7,
+    0
+   ],
+   "types": [
+    7,
+    7,
+    0
+   ],
+   "members": [
+    28,
+    28,
+    0
+   ],
+   "interfaces": [
+    0,
+    0
+   ],
+   "propertyRegistrations": [
+    9,
+    9
+   ],
+   "routedEvents": [
+    0,
+    0
+   ],
+   "notApplicableFiles": 1,
+   "matchKinds": {
+    "fn": 28
+   },
+   "presentFiles": {
+    "ClearNavigationStackAction.cs": [
+     "clear_navigation_stack_action.rs"
+    ],
+    "InteractionTriggerBehavior.cs": [
+     "interaction_trigger_behavior.rs"
+    ],
+    "NavigateAction.cs": [
+     "navigate_action.rs"
+    ],
+    "NavigateAndReset.cs": [
+     "navigate_and_reset.rs"
+    ],
+    "NavigateBackAction.cs": [
+     "navigate_back_action.rs"
+    ],
+    "NavigateToAction.cs": [
+     "navigate_to_action.rs"
+    ],
+    "NavigateToAndResetAction.cs": [
+     "navigate_to_and_reset_action.rs"
+    ]
+   },
+   "rustOnly": [
+    "register_types.rs",
+    "rust_paths.rs",
+    "view_model_parameter.rs"
+   ]
+  },
+  {
+   "name": "Xaml.Behaviors.Interactions.Responsive",
+   "path": "src/Xaml.Behaviors.Interactions.Responsive",
+   "rust": "src/Behaviors/FerroUI.Xaml.Interactions.Responsive",
+   "scope": "in",
+   "detail": "full",
+   "files": [
+    4,
+    4,
+    0
+   ],
+   "types": [
+    4,
+    4,
+    0
+   ],
+   "members": [
+    52,
+    52,
+    0
+   ],
+   "interfaces": [
+    0,
+    0
+   ],
+   "propertyRegistrations": [
+    24,
+    24
+   ],
+   "routedEvents": [
+    0,
+    0
+   ],
+   "notApplicableFiles": 1,
+   "matchKinds": {
+    "fn": 52
+   },
+   "presentFiles": {
+    "AdaptiveBehavior.cs": [
+     "adaptive_behavior.rs"
+    ],
+    "AdaptiveClassSetter.cs": [
+     "adaptive_class_setter.rs"
+    ],
+    "AspectRatioBehavior.cs": [
+     "aspect_ratio_behavior.rs"
+    ],
+    "AspectRatioClassSetter.cs": [
+     "aspect_ratio_class_setter.rs"
+    ]
+   },
+   "rustOnly": [
+    "register_types.rs",
+    "rust_paths.rs"
+   ]
+  },
+  {
+   "name": "Xaml.Behaviors.Interactions.Scripting",
+   "path": "src/Xaml.Behaviors.Interactions.Scripting",
+   "rust": "-",
+   "scope": "in",
+   "detail": "full",
+   "files": [
+    0,
+    2,
+    2
+   ],
+   "types": [
+    0,
+    2,
+    2
+   ],
+   "members": [
+    0,
+    7,
+    7
+   ],
+   "interfaces": [
+    0,
+    0
+   ],
+   "propertyRegistrations": [
+    0,
+    1
+   ],
+   "routedEvents": [
+    0,
+    0
+   ],
+   "notApplicableFiles": 1,
+   "matchKinds": {},
+   "presentFiles": {},
+   "rustOnly": []
+  },
+  {
+   "name": "Xaml.Behaviors.Interactivity",
+   "path": "src/Xaml.Behaviors.Interactivity",
+   "rust": "src/Behaviors/FerroUI.Xaml.Interactivity",
+   "scope": "in",
+   "detail": "full",
+   "files": [
+    49,
+    49,
+    0
+   ],
+   "types": [
+    39,
+    39,
+    0
+   ],
+   "members": [
+    211,
+    211,
+    0
+   ],
+   "interfaces": [
+    6,
+    6
+   ],
+   "propertyRegistrations": [
+    32,
+    32
+   ],
+   "routedEvents": [
+    0,
+    0
+   ],
+   "notApplicableFiles": 2,
+   "matchKinds": {
+    "alias fn": 5,
+    "fn": 194,
+    "overload fn": 6,
+    "variant": 6
+   },
+   "presentFiles": {
+    "Actions/InvokeCommandActionBase.cs": [
+     "actions/invoke_command_action_base.rs"
+    ],
+    "AvaloniaObject/Action.cs": [
+     "ferro_object/action.rs"
+    ],
+    "AvaloniaObject/Behavior.cs": [
+     "ferro_object/behavior.rs"
+    ],
+    "AvaloniaObject/BehaviorOfT.cs": [
+     "ferro_object/behavior_of_t.rs"
+    ],
+    "AvaloniaObject/Trigger.cs": [
+     "ferro_object/trigger.rs"
+    ],
+    "AvaloniaObject/TriggerOfT.cs": [
+     "ferro_object/trigger_of_t.rs"
+    ],
+    "AvaloniaObjectBehaviorsExtensions.cs": [
+     "ferro_object_behaviors_extensions.rs"
+    ],
+    "Behaviors/DisposingBehavior.cs": [
+     "behaviors/disposing_behavior.rs"
+    ],
+    "Behaviors/InteractiveBehaviorBase.cs": [
+     "behaviors/interactive_behavior_base.rs"
+    ],
+    "Behaviors/InvokeCommandBehaviorBase.cs": [
+     "behaviors/invoke_command_behavior_base.rs"
+    ],
+    "Collections/ActionCollection.cs": [
+     "collections/action_collection.rs"
+    ],
+    "Collections/BehaviorCollection.cs": [
+     "collections/behavior_collection.rs"
+    ],
+    "Contract/ComparisonConditionType.cs": [
+     "contract/comparison_condition_type.rs"
+    ],
+    "Contract/IAction.cs": [
+     "contract/i_action.rs"
+    ],
+    "Contract/IBehavior.cs": [
+     "contract/i_behavior.rs"
+    ],
+    "Contract/IBehaviorEventsHandler.cs": [
+     "contract/i_behavior_events_handler.rs"
+    ],
+    "Contract/IReversibleAction.cs": [
+     "contract/i_reversible_action.rs"
+    ],
+    "Contract/ITrigger.cs": [
+     "contract/i_trigger.rs"
+    ],
+    "Core/Condition.cs": [
+     "core/condition.rs"
+    ],
+    "Core/ConditionCollection.cs": [
+     "core/condition_collection.rs"
+    ],
+    "DisposableAction.cs": [
+     "disposable_action.rs"
+    ],
+    "Events/AddEventHandlerRegistry.cs": [
+     "events/add_event_handler_registry.rs"
+    ],
+    "Events/Contract/IAddEventHandler.cs": [
+     "events/contract/i_add_event_handler.rs"
+    ],
+    "Events/Handlers/ButtonClickEventHandler.cs": [
+     "events/handlers/button_click_event_handler.rs"
+    ],
+    "Events/Handlers/FlyoutEventHandler.cs": [
+     "events/handlers/flyout_event_handler.rs"
+    ],
+    "Events/Handlers/FuncEventHandler.cs": [
+     "events/handlers/func_event_handler.rs"
+    ],
+    "Events/Handlers/MenuItemClickEventHandler.cs": [
+     "events/handlers/menu_item_click_event_handler.rs"
+    ],
+    "Helpers/CommandCanExecuteIsEnabledBinder.cs": [
+     "helpers/command_can_execute_is_enabled_binder.rs"
+    ],
+    "Helpers/CommandCanExecuteObserver.cs": [
+     "helpers/command_can_execute_observer.rs"
+    ],
+    "Helpers/ComparisonConditionTypeHelper.cs": [
+     "helpers/comparison_condition_type_helper.rs"
+    ],
+    "Helpers/MethodHelper.cs": [
+     "helpers/method_helper.rs"
+    ],
+    "Helpers/ParseHelper.cs": [
+     "helpers/parse_helper.rs"
+    ],
+    "Helpers/PropertyHelper.cs": [
+     "helpers/property_helper.rs"
+    ],
+    "Helpers/ReversiblePropertyChange.cs": [
+     "helpers/reversible_property_change.rs"
+    ],
+    "Helpers/TemplatedParentHelper.cs": [
+     "helpers/templated_parent_helper.rs"
+    ],
+    "Helpers/TypeConverterHelper.cs": [
+     "helpers/type_converter_helper.rs"
+    ],
+    "Interaction.cs": [
+     "interaction.rs"
+    ],
+    "StyledElement/StyledElementAction.cs": [
+     "styled_element/styled_element_action.rs"
+    ],
+    "StyledElement/StyledElementBehavior.cs": [
+     "styled_element/styled_element_behavior.rs"
+    ],
+    "StyledElement/StyledElementBehaviorOfT.cs": [
+     "styled_element/styled_element_behavior_of_t.rs"
+    ],
+    "StyledElement/StyledElementTrigger.cs": [
+     "styled_element/styled_element_trigger.rs"
+    ],
+    "StyledElement/StyledElementTriggerOfT.cs": [
+     "styled_element/styled_element_trigger_of_t.rs"
+    ],
+    "Templates/ActionCollectionTemplate.cs": [
+     "templates/action_collection_template.rs"
+    ],
+    "Templates/BehaviorCollectionTemplate.cs": [
+     "templates/behavior_collection_template.rs"
+    ],
+    "Templates/NotificationTemplate.cs": [
+     "templates/notification_template.rs"
+    ],
+    "Templates/ObjectTemplate.cs": [
+     "templates/object_template.rs"
+    ],
+    "Triggers/DisposingTrigger.cs": [
+     "triggers/disposing_trigger.rs"
+    ],
+    "Triggers/EventTriggerBase.cs": [
+     "triggers/event_trigger_base.rs"
+    ],
+    "Triggers/InteractiveTriggerBase.cs": [
+     "triggers/interactive_trigger_base.rs"
+    ]
+   },
+   "rustOnly": [
+    "helpers/member_lookup.rs",
+    "markup_types/collections.rs",
+    "markup_types/enums.rs",
+    "markup_types/interaction.rs",
+    "register_types.rs",
+    "rust_paths.rs"
+   ]
+  },
+  {
+   "name": "Xaml.Behaviors.SourceGenerators",
+   "path": "src/Xaml.Behaviors.SourceGenerators",
+   "rust": "-",
+   "scope": "in",
+   "detail": "full",
+   "files": [
+    0,
+    17,
+    17
+   ],
+   "types": [
+    0,
+    17,
+    17
+   ],
+   "members": [
+    0,
+    1,
+    1
+   ],
+   "interfaces": [
+    0,
+    0
+   ],
+   "propertyRegistrations": [
+    0,
+    0
+   ],
+   "routedEvents": [
+    0,
+    0
+   ],
+   "notApplicableFiles": 1,
+   "matchKinds": {},
+   "presentFiles": {},
+   "rustOnly": []
+  }
+ ],
+ "unusedPathOverrides": [],
+ "unusedWaivers": []
+}

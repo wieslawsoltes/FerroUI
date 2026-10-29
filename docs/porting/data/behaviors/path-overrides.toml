@@ -1,0 +1,124 @@
+# Path overrides of the Xaml.Behaviors reference (scripts/port-status/references.toml, `behaviors`).
+# See scripts/port-status/README.md, "Files you edit".
+#
+# The generic classes of the reference that sit beside a non-generic class of the same name (`Behavior<T>` beside
+# `Behavior`) are the classes `<Name>OfT` of the port, in the file of the reference's `<Name>OfT.cs`: FerroUI classes
+# are not generic, the class stores the expected type of its associated object and checks it on attach
+# (docs/porting/behaviors.md, section 3). Without the rename the scanner would take the non-generic class.
+
+[[map]]
+project = "Xaml.Behaviors.Interactivity"
+upstream = ["AvaloniaObject/BehaviorOfT.cs"]
+kind = "renamed"
+rust = ["ferro_object/behavior_of_t.rs"]
+types = { Behavior = "BehaviorOfT" }
+reason = "`Behavior<T>` is the non-generic class `BehaviorOfT`, which checks the type of the associated object on attach"
+
+[[map]]
+project = "Xaml.Behaviors.Interactivity"
+upstream = ["AvaloniaObject/TriggerOfT.cs"]
+kind = "renamed"
+rust = ["ferro_object/trigger_of_t.rs"]
+types = { Trigger = "TriggerOfT" }
+reason = "`Trigger<T>` is the non-generic class `TriggerOfT`, which checks the type of the associated object on attach"
+
+[[map]]
+project = "Xaml.Behaviors.Interactivity"
+upstream = ["StyledElement/StyledElementBehaviorOfT.cs"]
+kind = "renamed"
+rust = ["styled_element/styled_element_behavior_of_t.rs"]
+types = { StyledElementBehavior = "StyledElementBehaviorOfT" }
+reason = "`StyledElementBehavior<T>` is the non-generic class `StyledElementBehaviorOfT`, which checks the type of the associated object on attach"
+
+[[map]]
+project = "Xaml.Behaviors.Interactivity"
+upstream = ["StyledElement/StyledElementTriggerOfT.cs"]
+kind = "renamed"
+rust = ["styled_element/styled_element_trigger_of_t.rs"]
+types = { StyledElementTrigger = "StyledElementTriggerOfT" }
+reason = "`StyledElementTrigger<T>` is the non-generic class `StyledElementTriggerOfT`, which checks the type of the associated object on attach"
+
+[[map]]
+project = "Xaml.Behaviors.Interactions.Custom"
+upstream = ["Core/RoutedEventTriggerBaseOfT.cs"]
+kind = "renamed"
+rust = ["core/routed_event_trigger_base_of_t.rs"]
+types = { RoutedEventTriggerBase = "RoutedEventTriggerBaseOfT" }
+reason = "`RoutedEventTriggerBase<T>` is the non-generic class `RoutedEventTriggerBaseOfT`, whose handler takes the routed event arguments as `&dyn IRoutedEventArgs`"
+
+# The abstract class `BaseTreeViewDropHandler` is a trait; its overrides of `DropHandlerBase` are the blanket
+# implementation `impl<H: BaseTreeViewDropHandler> DropHandlerBase for H` of the same file, whose members count for it.
+[[map]]
+project = "Xaml.Behaviors.Interactions.DragAndDrop"
+upstream = ["Behaviors/BaseTreeViewDropHandler.cs"]
+kind = "renamed"
+rust = ["behaviors/base_tree_view_drop_handler.rs"]
+types = { BaseTreeViewDropHandler = ["BaseTreeViewDropHandler", "H"] }
+reason = "the abstract class is a trait; its overrides are the blanket implementation of `DropHandlerBase` for every type that implements it"
+
+# A polyfill of the compiler (`init` accessors on .NET Standard 2.0) in the waived source generator.
+[[map]]
+project = "Xaml.Behaviors.SourceGenerators"
+upstream = ["IsExternalInit.cs"]
+kind = "not-applicable"
+reason = "a polyfill of the C# compiler for `init` accessors on .NET Standard 2.0 in the waived source generator"
+
+# ---------------------------------------------------------------------------------------------------------------
+# Rust sources without an upstream file
+# ---------------------------------------------------------------------------------------------------------------
+
+[[rust_only]]
+path = "src/Behaviors/*/register_types.rs"
+reason = "the type table of the crate for markup: its namespaces and classes (the `XmlnsDefinition`s of the reference's `Properties/AssemblyInfo.cs`)"
+
+[[rust_only]]
+path = "src/Behaviors/*/rust_paths.rs"
+reason = "the public Rust paths of the registered types, which the Rust emitter of the markup compiler reads"
+
+[[rust_only]]
+path = "src/Behaviors/*/markup_types/*.rs"
+reason = "the markup metadata of the types of the crate (collections, enumerations, converters, attached accessors), which the reference gets from reflection"
+
+[[rust_only]]
+path = "src/Behaviors/*/assets.rs"
+reason = "the styles document of the crate (`Styles.xaml`, the reference's `Styles.axaml`) as an embedded asset"
+
+[[rust_only]]
+path = "src/Behaviors/*/routed_handlers.rs"
+reason = "the routed event handlers a behavior adds and removes again: the reference removes a handler by its delegate"
+
+[[rust_only]]
+path = "src/Behaviors/FerroUI.Xaml.Interactions.Custom/part_[abcd].rs"
+reason = "the four parts of the crate, which declare the folders of the reference as modules and own their classes, Rust paths and markup types"
+
+[[rust_only]]
+path = "src/Behaviors/FerroUI.Xaml.Interactions.Custom/*/*_ref.rs"
+reason = "handles of an animation builder, the screens and a writeable bitmap that compare with `==`, as a property value must"
+
+[[rust_only]]
+path = "src/Behaviors/FerroUI.Xaml.Behaviors.Animations/argument_out_of_range.rs"
+reason = "the guards `ArgumentOutOfRangeException.ThrowIfLessThan` and `ThrowIfGreaterThan` of the .NET runtime that the reference calls"
+
+[[rust_only]]
+path = "src/Behaviors/FerroUI.Xaml.Interactions.DragAndDrop/values.rs"
+reason = "the untyped values the behaviors pass to handlers, actions and commands (the `object` arguments of the reference)"
+
+[[rust_only]]
+path = "src/Behaviors/FerroUI.Xaml.Interactions.ReactiveUI/view_model_parameter.rs"
+reason = "the parameter of an action as a routable view model, in place of the casts of C# (`parameter as IRoutableViewModel`)"
+
+[[rust_only]]
+path = "src/Behaviors/FerroUI.Xaml.Interactions/action_task.rs"
+reason = "the task of the asynchronous actions (`System.Threading.Tasks.Task` of the reference)"
+
+[[rust_only]]
+path = "src/Behaviors/FerroUI.Xaml.Interactions/background.rs"
+reason = "the delivery of the results of background threads (file system watcher, network trigger, HTTP request) on the thread of the user interface"
+
+[[rust_only]]
+path = "src/Behaviors/FerroUI.Xaml.Interactions/platform_handles.rs"
+reason = "handles of the platform services that the actions hold in properties and pass to commands, which compare with `==`"
+
+[[rust_only]]
+path = "src/Behaviors/FerroUI.Xaml.Interactivity/helpers/member_lookup.rs"
+reason = "the lookups of members by name in the markup metadata that replace the reflection of the reference (docs/porting/behaviors.md, section 3)"

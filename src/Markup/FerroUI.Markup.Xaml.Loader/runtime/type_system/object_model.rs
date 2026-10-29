@@ -186,6 +186,19 @@ fn project_ferro_object(system: &RuntimeTypeSystem, type_: &Rc<RuntimeType>, mem
                     let target = object(arguments)?;
                     let property = argument::<&'static FerroProperty>(arguments, 1)?;
                     let binding = argument::<Rc<dyn BindingBase>>(arguments, 2)?;
+                    #[cfg(all(debug_assertions, feature = "hot-reload"))]
+                    if crate::binding_capture::defer(&target, property, &binding) {
+                        // Do not invoke arbitrary custom factories before the
+                        // reload adapter has admitted the captured description.
+                        if binding.as_any().is_some_and(|value| {
+                            value.is::<ferroui_base::data::ReflectionBinding>()
+                                || value.is::<ferroui_base::data::CompiledBinding>()
+                        }) {
+                            let expression = binding.create_instance(&target, Some(property), None);
+                            return Ok(Some(Rc::new(expression) as ferroui_base::BoxedValue));
+                        }
+                        return Ok(None);
+                    }
                     let expression = target.bind_binding(property, &*binding);
                     Ok(Some(Rc::new(expression) as ferroui_base::BoxedValue))
                 }),

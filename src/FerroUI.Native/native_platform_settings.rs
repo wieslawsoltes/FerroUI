@@ -48,6 +48,7 @@ fn to_color_values(theme: FrnPlatformThemeVariant, accent_color: u32) -> Platfor
 pub struct NativePlatformSettings {
     base: DefaultPlatformSettings,
     platform_settings: ComPtr<IFrnPlatformSettings>,
+    accessibility_settings: Option<ComPtr<IFrnAccessibilitySettings>>,
     color_values: Cell<Option<PlatformColorValues>>,
     last_language: RefCell<Option<String>>,
 }
@@ -70,6 +71,23 @@ struct LanguageChangeCallback {
     settings: Weak<NativePlatformSettings>,
 }
 
+struct AccessibilityChangeCallback {
+    settings: Weak<NativePlatformSettings>,
+}
+
+impl IFrnActionCallbackImpl for AccessibilityChangeCallback {
+    fn run(&self) {
+        crate::callback_base::guard((), || {
+            if let Some(settings) = self.settings.upgrade() {
+                // Increase Contrast can change the appearance together with
+                // motion/transparency, even when the color callback is absent.
+                settings.on_color_values_changed();
+                settings.base.on_accessibility_settings_changed();
+            }
+        })
+    }
+}
+
 impl IFrnActionCallbackImpl for LanguageChangeCallback {
     fn run(&self) {
         crate::callback_base::guard((), || {
@@ -82,9 +100,11 @@ impl IFrnActionCallbackImpl for LanguageChangeCallback {
 
 impl NativePlatformSettings {
     pub fn new(platform_settings: ComPtr<IFrnPlatformSettings>) -> Rc<NativePlatformSettings> {
+        let accessibility_settings = platform_settings.cast::<IFrnAccessibilitySettings>().ok();
         let this = Rc::new(NativePlatformSettings {
             base: DefaultPlatformSettings::new(),
             platform_settings,
+            accessibility_settings,
             color_values: Cell::new(None),
             last_language: RefCell::new(None),
         });
@@ -93,6 +113,11 @@ impl NativePlatformSettings {
         let language_change =
             IFrnActionCallback::from_impl(LanguageChangeCallback { settings: Rc::downgrade(&this) });
         this.platform_settings.register_language_change(Some(&language_change));
+        if let Some(settings) = &this.accessibility_settings {
+            let callback =
+                IFrnActionCallback::from_impl(AccessibilityChangeCallback { settings: Rc::downgrade(&this) });
+            settings.register_accessibility_change(Some(&callback));
+        }
         this
     }
 
@@ -127,6 +152,14 @@ impl NativePlatformSettings {
     }
 }
 
+impl Drop for NativePlatformSettings {
+    fn drop(&mut self) {
+        if let Some(settings) = &self.accessibility_settings {
+            settings.register_accessibility_change(None);
+        }
+    }
+}
+
 impl IPlatformSettings for NativePlatformSettings {
     fn get_tap_size(&self, type_: PointerType) -> Size {
         self.base.get_tap_size(type_)
@@ -146,6 +179,18 @@ impl IPlatformSettings for NativePlatformSettings {
 
     fn hotkey_configuration(&self) -> Rc<PlatformHotkeyConfiguration> {
         self.base.hotkey_configuration()
+    }
+
+    fn animations_enabled(&self) -> bool {
+        self.accessibility_settings.as_ref().is_none_or(|settings| !settings.get_reduce_motion())
+    }
+
+    fn transparency_enabled(&self) -> bool {
+        self.accessibility_settings.as_ref().is_none_or(|settings| !settings.get_reduce_transparency())
+    }
+
+    fn accessibility_settings_changed(&self, handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
+        self.base.accessibility_settings_changed(handler)
     }
 
     fn preferred_application_language(&self) -> String {
@@ -180,6 +225,104 @@ impl IPlatformSettings for NativePlatformSettings {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use ferroui_microcom::{make_com_with, HResult, InterfaceEntry};
+
+    #[derive(Default)]
+    struct AccessibilityState {
+        reduce_motion: Cell<bool>,
+        reduce_transparency: Cell<bool>,
+        callback: RefCell<Option<ComPtr<IFrnActionCallback>>>,
+    }
+
+    struct FakePlatformSettings {
+        accessibility: Rc<AccessibilityState>,
+    }
+
+    impl IFrnPlatformSettingsImpl for FakePlatformSettings {
+        fn get_platform_theme(&self) -> FrnPlatformThemeVariant {
+            FrnPlatformThemeVariant::Light
+        }
+
+        fn get_accent_color(&self) -> u32 {
+            0xFF007AFF
+        }
+
+        fn register_colors_change(&self, _callback: Option<&IFrnActionCallback>) {}
+
+        fn get_preferred_language(&self) -> Result<Option<ComPtr<IFrnString>>, HResult> {
+            Ok(None)
+        }
+
+        fn register_language_change(&self, _callback: Option<&IFrnActionCallback>) {}
+    }
+
+    impl IFrnAccessibilitySettingsImpl for FakePlatformSettings {
+        fn get_reduce_motion(&self) -> bool {
+            self.accessibility.reduce_motion.get()
+        }
+
+        fn get_reduce_transparency(&self) -> bool {
+            self.accessibility.reduce_transparency.get()
+        }
+
+        fn register_accessibility_change(&self, callback: Option<&IFrnActionCallback>) {
+            *self.accessibility.callback.borrow_mut() = callback.map(ComPtr::from_ref);
+        }
+    }
+
+    #[test]
+    fn old_native_settings_without_the_extension_preserve_default_behavior() {
+        let state = Rc::new(AccessibilityState::default());
+        state.reduce_motion.set(true);
+        state.reduce_transparency.set(true);
+        // The implementation is exposed through only the original interface,
+        // exactly as an older native library answers QueryInterface.
+        let native = IFrnPlatformSettings::from_impl(FakePlatformSettings { accessibility: state.clone() });
+        let settings = NativePlatformSettings::new(native);
+        assert!(settings.accessibility_settings.is_none());
+        assert!(settings.animations_enabled());
+        assert!(settings.transparency_enabled());
+        assert!(state.callback.borrow().is_none());
+    }
+
+    #[test]
+    fn accessibility_extension_reads_changes_and_releases_its_subscription() {
+        let state = Rc::new(AccessibilityState::default());
+        let native = make_com_with::<IFrnPlatformSettings, _, 1>(
+            FakePlatformSettings { accessibility: state.clone() },
+            [InterfaceEntry::of::<IFrnAccessibilitySettings>()],
+        );
+        let settings = NativePlatformSettings::new(native);
+        assert!(settings.animations_enabled());
+        assert!(settings.transparency_enabled());
+        let seen = Rc::new(RefCell::new(Vec::new()));
+        let subscription = {
+            let seen = seen.clone();
+            let settings_weak = Rc::downgrade(&settings);
+            settings.accessibility_settings_changed(Rc::new(move || {
+                if let Some(settings) = settings_weak.upgrade() {
+                    seen.borrow_mut().push((settings.animations_enabled(), settings.transparency_enabled()));
+                }
+            }))
+        };
+        let callback = state.callback.borrow().clone().expect("native notification callback");
+        state.reduce_motion.set(true);
+        callback.run();
+        state.reduce_motion.set(false);
+        state.reduce_transparency.set(true);
+        callback.run();
+        assert_eq!(*seen.borrow(), [(false, true), (true, false)]);
+
+        subscription.dispose();
+        callback.run();
+        assert_eq!(seen.borrow().len(), 2);
+        drop(settings);
+        assert!(state.callback.borrow().is_none(), "drop unregisters the native notification observer");
+        // A notification already queued by the platform holds only a weak
+        // reference to the disposed Rust adapter.
+        callback.run();
+        assert_eq!(seen.borrow().len(), 2);
+    }
 
     #[test]
     fn themes() {
@@ -218,5 +361,8 @@ mod tests {
         assert_eq!(settings.get_color_values(), settings.get_color_values());
         assert_eq!(settings.preferred_application_language(), settings.preferred_application_language());
         assert_eq!(settings.get_double_tap_time(PointerType::Mouse), Duration::from_millis(500));
+        let accessibility = settings.accessibility_settings.as_ref().expect("current native accessibility interface");
+        assert_eq!(settings.animations_enabled(), !accessibility.get_reduce_motion());
+        assert_eq!(settings.transparency_enabled(), !accessibility.get_reduce_transparency());
     }
 }

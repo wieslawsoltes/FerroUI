@@ -1,0 +1,259 @@
+<!--
+  macOS 26 control theme adapted from FerroUI's compiled WinUI foundation.
+  Foundation: microsoft-ui-xaml 7e4b0c2096be402f51cc8f7d203ebf67cff183d0.
+  Copyright (c) Microsoft Corporation. MIT License; see NOTICE.md.
+  Geometry and timing are calibrated theme values, pending native capture.
+  FerroUI template parts, keyboard handling, editing and popup contracts are preserved.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20" Width="200">
+      <StackPanel Spacing="20">
+        <ListBoxItem Theme="{StaticResource DateTimePickerLoopingSelectorItemStyle}" Classes="DayItem">12</ListBoxItem>
+        <ListBoxItem Theme="{StaticResource DateTimePickerLoopingSelectorItemStyle}" Classes="MonthItem">October</ListBoxItem>
+        <Button Theme="{StaticResource DateTimePickerFlyoutButtonStyle}" Content="Button" />
+        <RepeatButton Theme="{StaticResource DateTimePickerLoopingSelectorUpButtonStyle}" IsVisible="True" />
+        <RepeatButton Theme="{StaticResource DateTimePickerLoopingSelectorDownButtonStyle}" IsVisible="True" />
+      </StackPanel>
+    </Border>
+  </Design.PreviewWith>
+
+  <!-- The accept and dismiss buttons of the flyout presenters. -->
+  <ControlTheme x:Key="DateTimePickerFlyoutButtonStyle" TargetType="Button">
+    <!-- The defaults of a WinUI 3 control, which its style leaves unset and its template binds
+         (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27). -->
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Background" Value="{DynamicResource DateTimePickerFlyoutButtonBackground}" />
+    <Setter Property="Foreground" Value="{DynamicResource ButtonForeground}" />
+    <Setter Property="BackgroundSizing" Value="InnerBorderEdge" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource MacOSControlCornerRadius}" />
+    <!-- UseSystemFocusVisuals with FocusVisualMargin="0". -->
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border IsHitTestVisible="False" Margin="-3" BorderThickness="3"
+                BorderBrush="{DynamicResource MacOSFocusBrush}"
+                CornerRadius="{DynamicResource MacOSControlCornerRadius}" />
+      </FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel Background="{TemplateBinding Background}">
+          <ContentPresenter x:Name="PART_ContentPresenter"
+                            Background="{TemplateBinding Background}"
+                            BackgroundSizing="{TemplateBinding BackgroundSizing}"
+                            BorderBrush="{DynamicResource DateTimePickerFlyoutButtonBorderBrush}"
+                            BorderThickness="{DynamicResource DateTimeFlyoutButtonBorderThickness}"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Padding="{TemplateBinding Padding}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                            CornerRadius="{TemplateBinding CornerRadius}">
+            <ContentPresenter.Transitions>
+              <Transitions>
+                <BrushTransition Property="Background" Duration="{DynamicResource MacOSMotionFastDuration}" />
+              </Transitions>
+            </ContentPresenter.Transitions>
+          </ContentPresenter>
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- PointerOver -->
+    <Style Selector="^:pointerover">
+      <Setter Property="Foreground" Value="{DynamicResource DateTimePickerFlyoutButtonForegroundPointerOver}" />
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource DateTimePickerFlyoutButtonBackgroundPointerOver}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource DateTimePickerFlyoutButtonBorderBrushPointerOver}" />
+        <Setter Property="Foreground" Value="{DynamicResource DateTimePickerFlyoutButtonForegroundPointerOver}" />
+      </Style>
+    </Style>
+    <!-- Pressed -->
+    <Style Selector="^:pressed">
+      <Setter Property="Foreground" Value="{DynamicResource DateTimePickerFlyoutButtonForegroundPressed}" />
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource DateTimePickerFlyoutButtonBackgroundPressed}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource DateTimePickerFlyoutButtonBorderBrushPressed}" />
+        <Setter Property="Foreground" Value="{DynamicResource DateTimePickerFlyoutButtonForegroundPressed}" />
+      </Style>
+    </Style>
+  </ControlTheme>
+
+  <!-- The up and down buttons of a looping list. -->
+  <ControlTheme x:Key="DateTimePickerFlyoutLoopingSelectorNavigationButtonStyle" TargetType="Button">
+    <!-- The defaults of a WinUI 3 control, which its style leaves unset and its template binds
+         (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27). -->
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Foreground" Value="{DynamicResource LoopingSelectorUpDownButtonForeground}" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel Background="{TemplateBinding Background}">
+          <Border x:Name="RootBorder"
+                  BackgroundSizing="{TemplateBinding BackgroundSizing}"
+                  Padding="{TemplateBinding Padding}">
+            <ContentPresenter x:Name="PART_ContentPresenter"
+                              Foreground="{TemplateBinding Foreground}"
+                              Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                              RenderTransformOrigin="50%,50%" />
+          </Border>
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- PointerOver -->
+    <Style Selector="^:pointerover">
+      <Style Selector="^ /template/ Border#RootBorder">
+        <Setter Property="Background" Value="{DynamicResource LoopingSelectorUpDownButtonBackgroundPointerOver}" />
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource LoopingSelectorUpDownButtonForegroundPointerOver}" />
+      </Style>
+    </Style>
+    <!-- Pressed -->
+    <Style Selector="^:pressed">
+      <Style Selector="^ /template/ Border#RootBorder">
+        <Setter Property="Background" Value="{DynamicResource LoopingSelectorUpDownButtonBackgroundPressed}" />
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource LoopingSelectorUpDownButtonForegroundPressed}" />
+        <!-- LoopingSelectorUpDownButtonScalePressed (0.875). -->
+        <Setter Property="RenderTransform" Value="scale(0.96)" />
+      </Style>
+    </Style>
+  </ControlTheme>
+
+  <!-- UpButton of the template of DefaultLoopingSelectorStyle. -->
+  <ControlTheme x:Key="DateTimePickerLoopingSelectorUpButtonStyle" TargetType="RepeatButton" BasedOn="{StaticResource DateTimePickerFlyoutLoopingSelectorNavigationButtonStyle}">
+    <Setter Property="Height" Value="{DynamicResource LoopingSelectorUpDownButtonHeight}" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Margin" Value="{DynamicResource LoopingSelectorUpDownButtonMargin}" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="VerticalAlignment" Value="Top" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Background" Value="{DynamicResource LoopingSelectorUpDownButtonBackground}" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="Focusable" Value="False" />
+    <Setter Property="IsVisible" Value="False" />
+    <Setter Property="Content">
+      <Template>
+        <!-- EDDB at 8 px. -->
+        <Panel Width="8" Height="8">
+          <Path Data="{StaticResource GlyphGeometryEDDB}"
+                Fill="{Binding $parent[RepeatButton].Foreground}"
+                Stretch="Uniform"
+                Width="8"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center" />
+        </Panel>
+      </Template>
+    </Setter>
+  </ControlTheme>
+
+  <!-- DownButton of the template of DefaultLoopingSelectorStyle. -->
+  <ControlTheme x:Key="DateTimePickerLoopingSelectorDownButtonStyle" TargetType="RepeatButton" BasedOn="{StaticResource DateTimePickerFlyoutLoopingSelectorNavigationButtonStyle}">
+    <Setter Property="Height" Value="{DynamicResource LoopingSelectorUpDownButtonHeight}" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Margin" Value="{DynamicResource LoopingSelectorUpDownButtonMargin}" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="VerticalAlignment" Value="Bottom" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Background" Value="{DynamicResource LoopingSelectorUpDownButtonBackground}" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="Focusable" Value="False" />
+    <Setter Property="IsVisible" Value="False" />
+    <Setter Property="Content">
+      <Template>
+        <!-- EDDC at 8 px. -->
+        <Panel Width="8" Height="8">
+          <Path Data="{StaticResource GlyphGeometryEDDC}"
+                Fill="{Binding $parent[RepeatButton].Foreground}"
+                Stretch="Uniform"
+                Width="8"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center" />
+        </Panel>
+      </Template>
+    </Setter>
+  </ControlTheme>
+
+  <!-- The implicit style of LoopingSelectorItem, for the items of the date and time picker presenters. -->
+  <ControlTheme x:Key="DateTimePickerLoopingSelectorItemStyle" TargetType="ListBoxItem">
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="VerticalAlignment" Value="Stretch" />
+    <Setter Property="Foreground" Value="{DynamicResource LoopingSelectorItemForeground}" />
+    <!-- The ItemTemplate of DefaultLoopingSelectorStyle: a TextBlock in ContentControlThemeFontFamily. -->
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Padding" Value="{StaticResource DatePickerFlyoutPresenterItemPadding}" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="CornerRadius" Value="{DynamicResource MacOSControlCornerRadius}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="Root"
+                Background="Transparent"
+                Margin="{StaticResource LoopingSelectorItemMargin}"
+                CornerRadius="{TemplateBinding CornerRadius}">
+          <ContentPresenter x:Name="PART_ContentPresenter"
+                            Foreground="{TemplateBinding Foreground}"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Padding="{TemplateBinding Padding}"
+                            Margin="2,0,2,0"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- The padding and alignment the presenters give each column. -->
+    <Style Selector="^.MonthItem">
+      <Setter Property="Padding" Value="{StaticResource DatePickerFlyoutPresenterMonthPadding}" />
+      <Setter Property="HorizontalContentAlignment" Value="Left" />
+    </Style>
+    <Style Selector="^.HourItem, ^.MinuteItem, ^.SecondItem, ^.TimePeriodItem">
+      <Setter Property="Padding" Value="{StaticResource TimePickerFlyoutPresenterItemPadding}" />
+    </Style>
+
+    <!-- PointerOver -->
+    <Style Selector="^:pointerover">
+      <Style Selector="^ /template/ Border#Root">
+        <Setter Property="Background" Value="{DynamicResource LoopingSelectorItemBackgroundPointerOver}" />
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource LoopingSelectorItemForegroundPointerOver}" />
+      </Style>
+    </Style>
+    <!-- Pressed -->
+    <Style Selector="^:pressed">
+      <Style Selector="^ /template/ Border#Root">
+        <Setter Property="Background" Value="{DynamicResource LoopingSelectorItemBackgroundPressed}" />
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource LoopingSelectorItemForegroundPressed}" />
+      </Style>
+    </Style>
+    <!-- Selected: the item under the highlight, in the colour of MonochromaticOverlayPresenter. -->
+    <Style Selector="^:selected">
+      <Style Selector="^ /template/ Border#Root">
+        <Setter Property="Background" Value="Transparent" />
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource TextOnAccentAAFillColorPrimaryBrush}" />
+      </Style>
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

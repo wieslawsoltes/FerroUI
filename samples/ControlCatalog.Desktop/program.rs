@@ -8,14 +8,21 @@
 //! FERROUI_SMOKE_SCREENSHOTS=target/screenshots cargo run -p control-catalog-desktop
 //! FERROUI_CATALOG_THEME=fluent cargo run -p control-catalog-desktop --features classic-themes
 //! FERROUI_CATALOG_THEME=simple cargo run -p control-catalog-desktop --features classic-themes
+//! FERROUI_CATALOG_THEME=macos cargo run -p control-catalog-desktop --features macos-theme
+//! FERROUI_CATALOG_THEME=material cargo run -p control-catalog-desktop --features material-theme
+//! FERROUI_CATALOG_THEME_VARIANT=dark cargo run -p control-catalog-desktop
 //! FERROUI_CATALOG_WAYLAND=0 cargo run -p control-catalog-desktop
 //! ```
 //!
 //! `FERROUI_CATALOG_THEME` selects the theme the catalog starts with: `winui`, the WinUI theme
 //! of the port (docs/porting/winui-theme.md) and the default of the port, and, with the feature
 //! `classic-themes` (off by default, docs/binary-size.md), `fluent` (the default of the original)
-//! or `simple`; the settings page switches between the themes the catalog is built with. Not in
-//! the original.
+//! or `simple`; `macos` selects macOS 26 when built with `macos-theme`, and `material` Android
+//! Material 3 Expressive when built with `material-theme`. The settings page switches
+//! between the themes the catalog is built with. `FERROUI_CATALOG_THEME_VARIANT` (`light`, `dark`,
+//! `highcontrast`) selects the theme variant instead of the platform's, and
+//! `FERROUI_CATALOG_MACOS_INCREASE_CONTRAST=1` the Increase Contrast setting of the macOS theme.
+//! Not in the original.
 //!
 //! On Linux the catalog uses the Wayland backend when a compositor can be
 //! reached, with the backend of the platform detection (X11) as its
@@ -157,7 +164,7 @@ fn main() -> std::process::ExitCode {
 
 /// The application builder of the catalog.
 pub fn build_ferro_app() -> AppBuilder {
-    let builder = smoke_platform_options(AppBuilder::configure::<App>()).use_platform_detect();
+    let builder = App::with_theme_fonts(smoke_platform_options(AppBuilder::configure::<App>()).use_platform_detect());
     #[cfg(target_os = "linux")]
     let builder = use_wayland_of_the_environment(builder);
     #[cfg(feature = "vello")]
@@ -169,6 +176,7 @@ pub fn build_ferro_app() -> AppBuilder {
                 embed_sample_gtk::EmbedSampleGtk::default(),
             )));
             select_theme_of_the_environment();
+            select_theme_variant_of_the_environment();
             smoke_run();
             #[cfg(feature = "cdp")]
             start_cdp();
@@ -211,13 +219,49 @@ fn select_theme_of_the_environment() {
         None | Some("") | Some("winui") => return,
         Some("fluent") => CatalogTheme::Fluent,
         Some("simple") => CatalogTheme::Simple,
-        Some(other) => panic!("FERROUI_CATALOG_THEME: unknown theme {other:?} (fluent, simple, winui)"),
+        Some("macos") | Some("macos26") => CatalogTheme::MacOS,
+        Some("material") => CatalogTheme::Material,
+        Some(other) => panic!("FERROUI_CATALOG_THEME: unknown theme {other:?} (fluent, simple, winui, macos, material)"),
     };
     if !App::themes().contains(&theme) {
-        panic!("FERROUI_CATALOG_THEME: the theme {theme:?} needs the feature `classic-themes` of control-catalog-desktop");
+        panic!(
+            "FERROUI_CATALOG_THEME: the theme {theme:?} needs the feature `{}` of control-catalog-desktop",
+            theme.build_feature()
+        );
     }
     println!("ControlCatalog: the theme {theme:?}");
     App::select_initial_catalog_theme(theme);
+}
+
+/// The theme variant asked for with `FERROUI_CATALOG_THEME_VARIANT` (`default`, following the
+/// platform, `light`, `dark`, or `highcontrast`, the high-contrast variant of the WinUI or macOS
+/// theme), requested by the main view when it is loaded. With the macOS theme,
+/// `FERROUI_CATALOG_MACOS_INCREASE_CONTRAST=1` turns on its Increase Contrast setting, which keeps
+/// the light or dark appearance. Not in the original.
+fn select_theme_variant_of_the_environment() {
+    use ferroui_base::styling::ThemeVariant;
+
+    let variant = match std::env::var("FERROUI_CATALOG_THEME_VARIANT").ok().as_deref().map(str::to_ascii_lowercase).as_deref() {
+        None | Some("") | Some("default") => return select_macos_increase_contrast_of_the_environment(),
+        Some("light") => ThemeVariant::light(),
+        Some("dark") => ThemeVariant::dark(),
+        Some("highcontrast") => App::high_contrast_variant(),
+        Some(other) => panic!("FERROUI_CATALOG_THEME_VARIANT: unknown variant {other:?} (default, light, dark, highcontrast)"),
+    };
+    println!("ControlCatalog: the theme variant {:?}", variant.key());
+    App::select_initial_theme_variant(variant);
+    select_macos_increase_contrast_of_the_environment();
+}
+
+/// `FERROUI_CATALOG_MACOS_INCREASE_CONTRAST=1`: the Increase Contrast setting of the macOS theme.
+fn select_macos_increase_contrast_of_the_environment() {
+    #[cfg(feature = "macos-theme")]
+    if std::env::var_os("FERROUI_CATALOG_MACOS_INCREASE_CONTRAST").is_some_and(|value| !value.is_empty() && value != "0") {
+        if let Some(theme) = App::macos_theme() {
+            println!("ControlCatalog: macOS Increase Contrast");
+            theme.set_increase_contrast(true);
+        }
+    }
 }
 
 /// The Wayland backend with the backend of the platform detection as its fallback, as the

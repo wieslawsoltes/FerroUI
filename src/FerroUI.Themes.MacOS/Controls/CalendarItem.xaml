@@ -1,0 +1,345 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/CommonStyles/CalendarView_themeresources.xaml (the template of
+    DefaultCalendarViewStyle and its template-local styles WeekDayNameStyle,
+    HeaderNavigationButtonStyle and NavigationButtonStyle; its resources are
+    Resources/CalendarView_themeresources.xaml)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  Translation notes (docs/porting/winui-theme.md, section 4):
+  - FerroUI's CalendarItem is the body of a Calendar: the header button, the previous and next
+    buttons and the views. The template is the one of DefaultCalendarViewStyle: the root Border,
+    the header grid, the separator line, and the views.
+  - Template parts: HeaderButton, PreviousButton and NextButton are PART_HeaderButton,
+    PART_PreviousButton and PART_NextButton. WinUI's views are scroll viewers of CalendarPanels
+    that the control fills (MonthViewScrollViewer, YearViewScrollViewer, DecadeViewScrollViewer);
+    FerroUI's CalendarItem fills two grids: PART_MonthView (the day names in its first row, six
+    weeks of day buttons below) and PART_YearView (the months, or the years of a decade, in three
+    rows of four). The year view has four rows as WinUI's has: FerroUI fills three of them, so the
+    items are as large as WinUI's. PART_ElementWeekNumberLabels (the week numbers FerroUI's
+    calendar shows when IsWeekNumberVisible is set) has no WinUI counterpart; it uses the size of
+    the day names (CaptionTextBlockStyle) and the secondary text colour.
+  - The template-local styles are keyed control themes: WeekDayNameStyle is
+    CalendarItemWeekDayNameStyle (of TextBlock, the DayTitleTemplate of the item uses it),
+    HeaderNavigationButtonStyle is CalendarItemHeaderNavigationButtonStyle and
+    NavigationButtonStyle is CalendarItemNavigationButtonStyle. Their ContentPresenter "Text" is
+    PART_ContentPresenter.
+  - The glyphs of the navigation buttons (EDDB CaretUpSolid8 for PreviousButton, EDDC
+    CaretDownSolid8 for NextButton, at CalendarViewNavigationButtonFontSize) are the geometries
+    GlyphGeometryEDDB and GlyphGeometryEDDC, 8 px wide in a box of 8 px, the line of the glyph.
+  - The Disabled state sets the foreground of the seven day names: the names are the text blocks
+    the item creates from its DayTitleTemplate in PART_MonthView, which inherit the text foreground
+    of the grid; the state is FerroUI's :calendardisabled.
+  - HeaderButtonStates (the header fades in over 167 ms when the view changes) and the
+    transitions of DisplayModeStates (the scale and opacity animations between the month, year and
+    decade views) are not ported: FerroUI's item switches the views by their visibility, without a
+    state to animate from. The Grid.Clip of the views (TemplateSettings.ClipRect) is ClipToBounds.
+  - The HeaderBackground of FerroUI's item (null by default) is the background of the header grid.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <Calendar IsWeekNumberVisible="True" />
+    </Border>
+  </Design.PreviewWith>
+
+  <!-- WeekDayNameStyle of the template of DefaultCalendarViewStyle. -->
+  <ControlTheme x:Key="CalendarItemWeekDayNameStyle" TargetType="TextBlock" BasedOn="{StaticResource CaptionTextBlockStyle}">
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="FontWeight" Value="{DynamicResource CalendarViewWeekDayFontWeight}" />
+    <!-- CalendarViewWeekDayMargin (1); the bottom margin adds the 2 px between the day names and
+         the days of the source (the top margin of MonthViewScrollViewer). With the 16 px line of
+         the 12 px caption the row of the day names is the 2 + 42 of WinUI's, and the views are
+         the 300 px of WinUI's. -->
+    <Setter Property="Margin" Value="1,1,1,3" />
+    <!-- CalendarViewWeekDayPadding (12) above and below only: in WinUI the columns of the day
+         names are the 42 px of the day items (40 and a margin of 1), and a name with its padding
+         of 12 at both sides (44 px for "We") does not widen them; in FerroUI's grid it would widen
+         every column, and the calendar by 5 px. The names are centred, so the horizontal padding
+         does not move them. -->
+    <Setter Property="Padding" Value="0,12" />
+  </ControlTheme>
+
+  <!-- HeaderNavigationButtonStyle of the template of DefaultCalendarViewStyle. -->
+  <ControlTheme x:Key="CalendarItemHeaderNavigationButtonStyle" TargetType="Button">
+    <!-- The defaults of a WinUI 3 control, which its style leaves unset and its template binds
+         (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27). -->
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="VerticalAlignment" Value="Stretch" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontSize" Value="{DynamicResource CalendarViewHeaderNavigationButtonFontSize}" />
+    <Setter Property="FontWeight" Value="{DynamicResource CalendarViewHeaderNavigationFontWeight}" />
+    <Setter Property="Background" Value="{DynamicResource CalendarViewNavigationButtonBackground}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource ButtonBorderThemeThickness}" />
+    <Setter Property="Margin" Value="{DynamicResource CalendarViewHeaderNavigationButtonMargin}" />
+    <Setter Property="Padding" Value="{DynamicResource CalendarViewHeaderNavigationButtonPadding}" />
+    <Setter Property="BackgroundSizing" Value="InnerBorderEdge" />
+    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <!-- UseSystemFocusVisuals with FocusVisualMargin="{StaticResource CalendarViewNavigationButtonFocusVisualMargin}" (-2). -->
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border Margin="-2"
+                BorderThickness="2"
+                BorderBrush="{DynamicResource SystemControlFocusVisualPrimaryBrush}"
+                CornerRadius="{DynamicResource ControlCornerRadius}">
+          <Border BorderThickness="1"
+                  BorderBrush="{DynamicResource SystemControlFocusVisualSecondaryBrush}"
+                  CornerRadius="{DynamicResource ControlCornerRadius}" />
+        </Border>
+      </FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <ContentPresenter x:Name="PART_ContentPresenter"
+                          Foreground="{TemplateBinding Foreground}"
+                          Background="{TemplateBinding Background}"
+                          BackgroundSizing="{TemplateBinding BackgroundSizing}"
+                          BorderBrush="{DynamicResource CalendarViewNavigationButtonBorderBrush}"
+                          BorderThickness="{TemplateBinding BorderThickness}"
+                          Content="{TemplateBinding Content}"
+                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                          Padding="{TemplateBinding Padding}"
+                          HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                          VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                          CornerRadius="{TemplateBinding CornerRadius}" />
+      </ControlTemplate>
+    </Setter>
+
+    <!-- PointerOver -->
+    <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource CalendarViewNavigationButtonBackgroundPointerOver}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource CalendarViewNavigationButtonBorderBrushPointerOver}" />
+      <Setter Property="Foreground" Value="{DynamicResource CalendarViewHeaderNavigationButtonForegroundPointerOver}" />
+    </Style>
+    <!-- Pressed -->
+    <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource CalendarViewNavigationButtonBackgroundPressed}" />
+      <Setter Property="Foreground" Value="{DynamicResource CalendarViewHeaderNavigationButtonForegroundPressed}" />
+    </Style>
+    <!-- Disabled -->
+    <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Foreground" Value="{DynamicResource CalendarViewHeaderNavigationButtonForegroundDisabled}" />
+    </Style>
+  </ControlTheme>
+
+  <!-- NavigationButtonStyle of the template of DefaultCalendarViewStyle. -->
+  <ControlTheme x:Key="CalendarItemNavigationButtonStyle" TargetType="Button">
+    <!-- The defaults of a WinUI 3 control, which its style leaves unset and its template binds
+         (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27). -->
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="VerticalAlignment" Value="Stretch" />
+    <Setter Property="Background" Value="{DynamicResource CalendarViewNavigationButtonBackground}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource ButtonBorderThemeThickness}" />
+    <Setter Property="Padding" Value="{DynamicResource CalendarViewNavigationButtonPadding}" />
+    <Setter Property="BackgroundSizing" Value="InnerBorderEdge" />
+    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="IsTabStop" Value="True" />
+    <!-- UseSystemFocusVisuals with FocusVisualMargin="{StaticResource CalendarViewNavigationButtonFocusVisualMargin}" (-2). -->
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border Margin="-2"
+                BorderThickness="2"
+                BorderBrush="{DynamicResource SystemControlFocusVisualPrimaryBrush}"
+                CornerRadius="{DynamicResource ControlCornerRadius}">
+          <Border BorderThickness="1"
+                  BorderBrush="{DynamicResource SystemControlFocusVisualSecondaryBrush}"
+                  CornerRadius="{DynamicResource ControlCornerRadius}" />
+        </Border>
+      </FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <ContentPresenter x:Name="PART_ContentPresenter"
+                          Background="{TemplateBinding Background}"
+                          BackgroundSizing="{TemplateBinding BackgroundSizing}"
+                          BorderBrush="{DynamicResource CalendarViewNavigationButtonBorderBrush}"
+                          BorderThickness="{TemplateBinding BorderThickness}"
+                          Content="{TemplateBinding Content}"
+                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                          Padding="{TemplateBinding Padding}"
+                          HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                          VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                          CornerRadius="{TemplateBinding CornerRadius}" />
+      </ControlTemplate>
+    </Setter>
+
+    <!-- The states also set the Foreground of the button itself, which the glyph paths of its
+         content take (a path does not inherit the foreground of the content presenter as the
+         glyph of a FontIcon does), over the foreground the CalendarItem template binds. -->
+    <!-- PointerOver -->
+    <Style Selector="^:pointerover">
+      <Setter Property="Foreground" Value="{DynamicResource CalendarViewNavigationButtonForegroundPointerOver}" />
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource CalendarViewNavigationButtonBackgroundPointerOver}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource CalendarViewNavigationButtonBorderBrushPointerOver}" />
+        <Setter Property="Foreground" Value="{DynamicResource CalendarViewNavigationButtonForegroundPointerOver}" />
+      </Style>
+    </Style>
+    <!-- Pressed -->
+    <Style Selector="^:pressed">
+      <Setter Property="Foreground" Value="{DynamicResource CalendarViewNavigationButtonForegroundPressed}" />
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource CalendarViewNavigationButtonBackgroundPressed}" />
+        <Setter Property="Foreground" Value="{DynamicResource CalendarViewNavigationButtonForegroundPressed}" />
+      </Style>
+    </Style>
+    <!-- Disabled -->
+    <Style Selector="^:disabled">
+      <Setter Property="Foreground" Value="{DynamicResource CalendarViewNavigationButtonForegroundDisabled}" />
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource CalendarViewNavigationButtonForegroundDisabled}" />
+      </Style>
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type CalendarItem}" TargetType="CalendarItem">
+    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="DayTitleTemplate">
+      <Template x:DataType="x:String">
+        <TextBlock Text="{Binding}" Theme="{StaticResource CalendarItemWeekDayNameStyle}" />
+      </Template>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="RootBorder"
+                Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BackgroundSizing="InnerBorderEdge"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}">
+          <Grid RowDefinitions="Auto,Auto,*">
+            <Grid ColumnDefinitions="*,Auto,Auto" Background="{TemplateBinding HeaderBackground}">
+              <Button x:Name="PART_HeaderButton"
+                      Theme="{StaticResource CalendarItemHeaderNavigationButtonStyle}"
+                      Foreground="{TemplateBinding Foreground}"
+                      HorizontalContentAlignment="Left" />
+              <Button x:Name="PART_PreviousButton"
+                      Grid.Column="1"
+                      Theme="{StaticResource CalendarItemNavigationButtonStyle}"
+                      Foreground="{TemplateBinding Foreground}"
+                      Margin="{DynamicResource CalendarViewNavigationPreviousButtonMargin}"
+                      HorizontalContentAlignment="Center">
+                <!-- EDDB at CalendarViewNavigationButtonFontSize (8). -->
+                <Panel Width="8" Height="8">
+                  <Path Data="{StaticResource GlyphGeometryEDDB}"
+                        Fill="{Binding $parent[Button].Foreground}"
+                        Stretch="Uniform"
+                        Width="8"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center" />
+                </Panel>
+              </Button>
+              <Button x:Name="PART_NextButton"
+                      Grid.Column="2"
+                      Theme="{StaticResource CalendarItemNavigationButtonStyle}"
+                      Foreground="{TemplateBinding Foreground}"
+                      Margin="{DynamicResource CalendarViewNavigationNextButtonMargin}"
+                      HorizontalContentAlignment="Center">
+                <!-- EDDC at CalendarViewNavigationButtonFontSize (8). -->
+                <Panel Width="8" Height="8">
+                  <Path Data="{StaticResource GlyphGeometryEDDC}"
+                        Fill="{Binding $parent[Button].Foreground}"
+                        Stretch="Uniform"
+                        Width="8"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center" />
+                </Panel>
+              </Button>
+            </Grid>
+            <Border Grid.Row="1" Height="1" Background="{TemplateBinding BorderBrush}" />
+            <!-- The views: 300 px high, the height of the month view of the source (2 + 42 + 2 + 6 x 42 + 2),
+                 so that the year view keeps the size of the calendar. -->
+            <Grid x:Name="Views"
+                  Grid.Row="2"
+                  ColumnDefinitions="Auto,*"
+                  MinHeight="300"
+                  ClipToBounds="True"
+                  Grid.IsSharedSizeScope="True">
+              <Grid x:Name="PART_ElementWeekNumberLabels"
+                    Grid.Column="0"
+                    Margin="2,2,0,2"
+                    IsVisible="False">
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto" SharedSizeGroup="CalendarItemDayNameRow" />
+                  <RowDefinition Height="Auto" SharedSizeGroup="CalendarItemWeekRow" />
+                  <RowDefinition Height="Auto" SharedSizeGroup="CalendarItemWeekRow" />
+                  <RowDefinition Height="Auto" SharedSizeGroup="CalendarItemWeekRow" />
+                  <RowDefinition Height="Auto" SharedSizeGroup="CalendarItemWeekRow" />
+                  <RowDefinition Height="Auto" SharedSizeGroup="CalendarItemWeekRow" />
+                  <RowDefinition Height="Auto" SharedSizeGroup="CalendarItemWeekRow" />
+                </Grid.RowDefinitions>
+              </Grid>
+              <Grid x:Name="PART_MonthView"
+                    Grid.Column="1"
+                    Margin="2"
+                    HorizontalAlignment="Center"
+                    IsVisible="False">
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto" SharedSizeGroup="CalendarItemDayNameRow" />
+                  <RowDefinition Height="Auto" SharedSizeGroup="CalendarItemWeekRow" />
+                  <RowDefinition Height="Auto" SharedSizeGroup="CalendarItemWeekRow" />
+                  <RowDefinition Height="Auto" SharedSizeGroup="CalendarItemWeekRow" />
+                  <RowDefinition Height="Auto" SharedSizeGroup="CalendarItemWeekRow" />
+                  <RowDefinition Height="Auto" SharedSizeGroup="CalendarItemWeekRow" />
+                  <RowDefinition Height="Auto" SharedSizeGroup="CalendarItemWeekRow" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+              </Grid>
+              <Grid x:Name="PART_YearView"
+                    Grid.ColumnSpan="2"
+                    Margin="2"
+                    IsVisible="False">
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="*" />
+                  <RowDefinition Height="*" />
+                  <RowDefinition Height="*" />
+                  <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+              </Grid>
+            </Grid>
+          </Grid>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- The foreground of the day names (WeekDay1..WeekDay7, TemplateBinding CalendarItemForeground). -->
+    <Style Selector="^ /template/ Grid#PART_MonthView">
+      <Setter Property="TextElement.Foreground" Value="{DynamicResource CalendarViewCalendarItemForeground}" />
+    </Style>
+    <!-- Disabled -->
+    <Style Selector="^:calendardisabled /template/ Grid#PART_MonthView">
+      <Setter Property="TextElement.Foreground" Value="{DynamicResource CalendarViewWeekDayForegroundDisabled}" />
+    </Style>
+
+    <!-- The week numbers (FerroUI only). -->
+    <Style Selector="^:hasweeknumbers /template/ Grid#PART_ElementWeekNumberLabels ContentControl">
+      <Setter Property="FontSize" Value="{StaticResource CaptionTextBlockFontSize}" />
+      <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+      <Setter Property="Padding" Value="8,0,8,0" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

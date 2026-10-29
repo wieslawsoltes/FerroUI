@@ -175,7 +175,9 @@ impl MainView {
         self.update_adaptive_layout();
 
         if let Some(app) = Application::current() {
-            app.set_requested_theme_variant(Some(ThemeVariant::default()));
+            // Not in the original: a start option can select another variant than Default.
+            let variant = app.cast::<crate::App>().map_or_else(ThemeVariant::default, |_| crate::App::initial_theme_variant());
+            app.set_requested_theme_variant(Some(variant));
         }
     }
 

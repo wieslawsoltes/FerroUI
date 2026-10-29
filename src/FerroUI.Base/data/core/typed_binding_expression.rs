@@ -271,6 +271,10 @@ pub struct TypedBindingExpression<TSource: PartialEq + 'static, TValue: Property
     is_running: Cell<bool>,
     produce_value: Cell<bool>,
     writing_value_to_target: Cell<bool>,
+    #[cfg(all(debug_assertions, feature = "hot-reload"))]
+    reload_paused: Cell<bool>,
+    #[cfg(all(debug_assertions, feature = "hot-reload"))]
+    reload_pending: Cell<bool>,
     sink: RefCell<Option<SinkRef>>,
     frame: RefCell<Option<Weak<ImmediateValueFrame>>>,
     source: RefCell<Option<Weak<TSource>>>,
@@ -299,6 +303,10 @@ impl<TSource: PartialEq + 'static, TValue: PropertyValue> TypedBindingExpression
             is_running: Cell::new(false),
             produce_value: Cell::new(true),
             writing_value_to_target: Cell::new(false),
+            #[cfg(all(debug_assertions, feature = "hot-reload"))]
+            reload_paused: Cell::new(false),
+            #[cfg(all(debug_assertions, feature = "hot-reload"))]
+            reload_pending: Cell::new(false),
             sink: RefCell::new(None),
             frame: RefCell::new(None),
             source: RefCell::new(None),
@@ -420,6 +428,10 @@ impl<TSource: PartialEq + 'static, TValue: PropertyValue> TypedBindingExpression
     }
 
     fn write_value_to_source(&self, value: TValue) {
+        #[cfg(all(debug_assertions, feature = "hot-reload"))]
+        if self.reload_paused.get() {
+            return;
+        }
         if self.target_property.get().is_some() && self.try_get_target().is_some() {
             if let Some(source) = self.try_get_source() {
                 self.property_info.set_on(&source, value);
@@ -464,15 +476,29 @@ impl<TSource: PartialEq + 'static, TValue: PropertyValue> TypedBindingExpression
 
     fn publish_value(&self) {
         crate::perf_count!(BindingValuesPublished);
+        #[cfg(all(debug_assertions, feature = "hot-reload"))]
+        if self.reload_paused.get() {
+            self.reload_pending.set(true);
+            return;
+        }
+        self.publish_value_now();
+    }
+
+    fn publish_value_now(&self) {
         // Flag that the source value is being pushed to the target so that
         // the resulting change notification isn't echoed straight back to the
         // source in two-way mode.
         let sink = self.sink.borrow().clone();
         let (Some(sink), Some(this)) = (sink, self.this.upgrade()) else { return };
         let this: Rc<dyn BindingExpressionBase> = this;
-        self.writing_value_to_target.set(true);
+        struct Restore<'a>(&'a Cell<bool>, bool);
+        impl Drop for Restore<'_> {
+            fn drop(&mut self) {
+                self.0.set(self.1);
+            }
+        }
+        let _restore = Restore(&self.writing_value_to_target, self.writing_value_to_target.replace(true));
         sink.on_changed(&this, true, false);
-        self.writing_value_to_target.set(false);
     }
 
     fn on_target_property_changed(&self, e: &crate::FerroPropertyChangedEventArgs<'_>) {
@@ -608,6 +634,33 @@ impl<TSource: PartialEq + 'static, TValue: PropertyValue> BindingExpressionBase
 
     fn is_data_validation_enabled(&self) -> bool {
         false
+    }
+
+    #[cfg(all(debug_assertions, feature = "hot-reload"))]
+    fn can_pause_for_reload(&self) -> bool {
+        matches!(self.mode, BindingMode::OneWay | BindingMode::TwoWay)
+    }
+
+    #[cfg(all(debug_assertions, feature = "hot-reload"))]
+    fn pause_for_reload(&self) -> bool {
+        self.can_pause_for_reload() && !self.reload_paused.replace(true)
+    }
+
+    #[cfg(all(debug_assertions, feature = "hot-reload"))]
+    fn resume_after_reload(&self) {
+        if !self.reload_paused.get() {
+            return;
+        }
+        struct Resume<'a>(&'a Cell<bool>);
+        impl Drop for Resume<'_> {
+            fn drop(&mut self) {
+                self.0.set(false);
+            }
+        }
+        let _resume = Resume(&self.reload_paused);
+        while self.reload_pending.replace(false) {
+            self.publish_value_now();
+        }
     }
 
     fn attach(
