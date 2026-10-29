@@ -376,6 +376,15 @@ cp "$CRATE/dist/ferroui.js" "$CRATE/dist/ferroui.js.map" "$CRATE/dist/storage.js
 # site, next to the host page.
 cp "$CRATE/dist/ferroui-sw.js" "$CRATE/dist/ferroui-sw.js.map" "$OUT"/
 cp "$BUILT/$APPLICATION.js" "$BUILT/$WASM" "$OUT"/
+# The JavaScript modules of `#[wasm_bindgen(inline_js = ..)]` and `module = ..`, which the script of
+# the module imports from snippets/ next to it. wasm-bindgen writes them beside the linker output,
+# in deps/ (cargo copies the module to the profile directory but not its snippets).
+for SNIPPETS in "$BUILT/deps/snippets" "$BUILT/snippets"; do
+  if [ -d "$SNIPPETS" ]; then
+    mkdir -p "$OUT/snippets"
+    cp -R "$SNIPPETS"/. "$OUT/snippets"/
+  fi
+done
 # The loader, through which a host page imports the script of the module: in a site with one module
 # it imports that one; scripts/browser/combine-site.mjs makes a site with both, where it chooses.
 cp "$ROOT/scripts/browser/threads/ferroui-loader.js" "$OUT"/
