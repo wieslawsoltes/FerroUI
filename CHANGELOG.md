@@ -70,6 +70,7 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ### Fixed
 
+- **Browser: the element picker of the developer tools finds the view**: the host of the native controls of a view no longer covers the view (it has no size; its controls overflow it at their places), so the picker of Chrome's and the other browsers' developer tools selects the canvas or a native control at a point instead of the host everywhere.
 - Automation on Windows (from #286, W1): UI Automation reads the real `SmallChange` and `LargeChange` of a range value provider (a slider, a scroll bar, a progress bar) where it read 1 for both, and `RangeValuePatternIdentifiers` has `small_change_property` and `large_change_property` (WinUI's identifiers), which the Windows backend maps to `UIA_RangeValueSmallChangePropertyId` and `UIA_RangeValueLargeChangePropertyId`.
 - Gestures: a canceled hold timer is disposed at once, so a detached control is no longer kept alive until the long-press deadline. `TextBox` keeps `:empty` off while an input method composes and subscribes to a presenter that arrives after attachment. Transitions can carry per-target interruption state (`Animatable::take_transition_interruption_state`), used for spring velocity.
 - Native COM interface IDs now materialize all eight distinct `Data4` bytes; the old macro repeated its second byte and could prevent Rust from discovering native extension interfaces. A generated-header smoke test checks UUIDs, shared identity, reference counts and callback lifetime.
