@@ -80,7 +80,7 @@ jobs:
       - name: Upstream project name stays out of the sources
         run: |
           # Only docs/, scripts/ and NOTICE.md files may name it, as in FerroUI.
-          found="$(git ls-files -z | grep -zv -E '^(FerroUI|docs|scripts)/|(^|/)NOTICE\.md$' \
+          found="$(git ls-files -z | grep -zv -E '^(FerroUI|docs|scripts)(/|$)|(^|/)NOTICE\.md$' \
             | xargs -0 -r grep -Ili -E 'avalonia|axaml|avares|\bavn' -- || true)"
           if [ -n "$found" ]; then
             echo "$found"
