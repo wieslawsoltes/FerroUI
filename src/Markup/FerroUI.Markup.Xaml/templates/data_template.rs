@@ -26,7 +26,11 @@ pub(crate) fn is_instance_of_type(data_type: ValueType, data: Option<&BoxedValue
     let Some(data) = data else { return false };
     let actual = ValueType::of_value(&**data);
     if ValueTypes::is_assignable(actual, data_type) {
-        return true;
+        // A registered interface downcast is conditional on the actual object.
+        // Its presence alone does not make every source handle an instance.
+        if ValueTypes::try_cast(data, data_type).is_some() {
+            return true;
+        }
     }
 
     // Plain (non-class) types: the type of the data, the types it derives
