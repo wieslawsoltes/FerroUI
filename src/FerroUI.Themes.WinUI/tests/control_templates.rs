@@ -945,3 +945,40 @@ fn a_path_icon_in_a_button_is_scaled_into_its_box() {
     assert_eq!(ferroui_base::media::Stretch::Uniform, path.stretch(), "the geometry is scaled");
     window.close();
 }
+
+/// In a minimal pane with a back button the toggle button sits right beside the back button, as
+/// in WinUI (NVW-17): not over it and without a gap.
+#[test]
+fn the_back_and_toggle_buttons_of_a_minimal_pane_are_adjacent() {
+    use ferroui_base::Point;
+    use ferroui_controls::{Button, NavigationView, NavigationViewBackButtonVisible, NavigationViewPaneDisplayMode};
+
+    let _app = start_themed_application();
+    let navigation = NavigationView::new();
+    navigation.set_pane_display_mode(NavigationViewPaneDisplayMode::LeftMinimal);
+    navigation.set_is_back_button_visible(NavigationViewBackButtonVisible::Visible);
+    let window = Window::new();
+    window.set_width(500.0);
+    window.set_height(400.0);
+    window.set_content(Some(Control::boxed(&navigation)));
+    window.show();
+    window.update_layout();
+
+    let part = |name: &str| {
+        navigation
+            .get_template_descendants()
+            .into_iter()
+            .find(|element| element.name().as_deref() == Some(name))
+            .and_then(|element| element.cast::<Button>())
+            .unwrap_or_else(|| panic!("the part {name}"))
+    };
+    let bounds = |button: &Button| {
+        let origin = button.translate_point(Point::new(0.0, 0.0), &window).expect("in the window");
+        (origin.x, button.bounds().width, button.is_effectively_visible())
+    };
+    let (back, toggle, close) = (bounds(&part("NavigationViewBackButton")), bounds(&part("TogglePaneButton")), bounds(&part("NavigationViewCloseButton")));
+    assert!(back.2 && toggle.2, "both buttons are shown: back {back:?}, toggle {toggle:?}, close {close:?}");
+    let gap = toggle.0 - (back.0 + back.1);
+    assert!((0.0..=8.0).contains(&gap), "the toggle button starts beside the back button: back {back:?}, toggle {toggle:?}, close {close:?}");
+    window.close();
+}

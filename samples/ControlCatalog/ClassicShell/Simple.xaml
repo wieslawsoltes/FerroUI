@@ -457,7 +457,7 @@
                     RowDefinitions="Auto,Auto">
                 <Panel x:Name="TogglePaneTopPadding"
                        Height="{Binding TemplateSettings.TopPadding, RelativeSource={RelativeSource TemplatedParent}}" />
-                <Grid x:Name="ButtonHolderGrid" Grid.Row="1" ColumnDefinitions="Auto,Auto" Margin="{DynamicResource NavigationViewButtonHolderGridMargin}">
+                <Grid x:Name="ButtonHolderGrid" Grid.Row="1" ColumnDefinitions="Auto,*" Margin="{DynamicResource NavigationViewButtonHolderGridMargin}">
                   <Button x:Name="NavigationViewBackButton"
                           Theme="{StaticResource NavigationBackButtonNormalStyle}"
                           Width="{Binding TemplateSettings.SmallerPaneToggleButtonWidth, RelativeSource={RelativeSource TemplatedParent}}"
@@ -471,7 +471,6 @@
                           ToolTip.Tip="Close Navigation" />
                   <Button x:Name="TogglePaneButton"
                           Theme="{TemplateBinding PaneToggleButtonStyle}"
-                          HorizontalAlignment="Center"
                           IsVisible="{Binding TemplateSettings.PaneToggleButtonVisibility, RelativeSource={RelativeSource TemplatedParent}}"
                           VerticalAlignment="Top"
                           MinWidth="{Binding TemplateSettings.SmallerPaneToggleButtonWidth, RelativeSource={RelativeSource TemplatedParent}}">
@@ -668,10 +667,15 @@
         </Setter>
 
         <!-- DisplayModeGroup: Compact and Expanded have no setters. Minimal, MinimalWithBackButton. -->
-        <!-- MinimalWithBackButton: the toggle button beside the back button, not over it (WinUI shows
+        <!-- Minimal: the toggle button (or the pane title) beside the back or close button, not over it
              them side by side). -->
-        <Style Selector="^:minimal-with-back-button /template/ Button#TogglePaneButton">
+        <!-- Centred in its column; a style, so that MinimalWithBackButton can align it left. -->
+        <Style Selector="^ /template/ Button#TogglePaneButton">
+          <Setter Property="HorizontalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="^:minimal /template/ Button#TogglePaneButton, ^:minimal-with-back-button /template/ Button#TogglePaneButton, ^:minimal /template/ Grid#PaneTitleHolder, ^:minimal-with-back-button /template/ Grid#PaneTitleHolder">
           <Setter Property="Grid.Column" Value="1" />
+          <Setter Property="HorizontalAlignment" Value="Left" />
         </Style>
         <Style Selector="^:minimal, ^:minimal-with-back-button">
           <Style Selector="^ /template/ ContentControl#HeaderContent">

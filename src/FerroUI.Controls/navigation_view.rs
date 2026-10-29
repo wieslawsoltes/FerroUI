@@ -1425,14 +1425,11 @@ impl NavigationView {
         // UpdateTitleBarPadding: the toggle button (or the pane title holder) below the back button,
         // or beside it in the overlay mode.
         let title_holder_visible = !self.update_pane_title_parents(&parts, top);
-        let thickness = if show_back {
-            if self.is_overlay() {
-                Thickness::new(BACK_BUTTON_WIDTH, 0.0, 0.0, 0.0)
-            } else {
-                Thickness::new(0.0, BACK_BUTTON_HEIGHT, 0.0, 0.0)
-            }
-        } else if show_close && self.is_overlay() {
-            Thickness::new(BACK_BUTTON_WIDTH, 0.0, 0.0, 0.0)
+        // In the overlay mode the themes of the port place the toggle button (and the pane title
+        // holder) in the second column of ButtonHolderGrid, beside the back or close button whatever
+        // its width (NVW-17), where WinUI moves them right by c_backButtonWidth.
+        let thickness = if show_back && !self.is_overlay() {
+            Thickness::new(0.0, BACK_BUTTON_HEIGHT, 0.0, 0.0)
         } else {
             Thickness::new(0.0, 0.0, 0.0, 0.0)
         };
