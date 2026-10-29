@@ -357,7 +357,9 @@ impl PreviewPrototypePlayerView {
         can_back: bool,
         epoch: u64,
     ) -> Result<(), String> {
-        self.update_layers_core(frame_size, layers, title, hotspots, can_back, epoch, true)
+        self.update_layers_core(frame_size, layers, title, hotspots, can_back, epoch)?;
+        self.finish_focus_update();
+        Ok(())
     }
 
     /// Attach and measure native layers while their final hotspots are settling.
@@ -371,7 +373,7 @@ impl PreviewPrototypePlayerView {
         can_back: bool,
         epoch: u64,
     ) -> Result<(), String> {
-        self.update_layers_core(frame_size, layers, title, hotspots, can_back, epoch, false)
+        self.update_layers_core(frame_size, layers, title, hotspots, can_back, epoch)
     }
 
     fn update_layers_core(
@@ -382,7 +384,6 @@ impl PreviewPrototypePlayerView {
         hotspots: &[PreviewPrototypeHotspot],
         can_back: bool,
         epoch: u64,
-        finalize_focus: bool,
     ) -> Result<(), String> {
         if !frame_size.width.is_finite()
             || !frame_size.height.is_finite()
@@ -492,7 +493,7 @@ impl PreviewPrototypePlayerView {
                 current
                     .plane
                     .children()
-                    .remove(&self.hotspots.clone().upcast::<Control>());
+                    .remove(self.hotspots.clone().upcast::<Control>());
             }
         }
         let removed = self.layers.borrow_mut().split_off(common);
@@ -500,7 +501,7 @@ impl PreviewPrototypePlayerView {
             layer.retired.set(true);
             self.content
                 .children()
-                .remove(&layer.container.clone().upcast::<Control>());
+                .remove(layer.container.clone().upcast::<Control>());
             layer.native.children().remove(&layer.host);
         }
         for descriptor in layers.iter().skip(common) {
@@ -556,7 +557,6 @@ impl PreviewPrototypePlayerView {
         }
         *self.host.borrow_mut() = Some(top.host.clone());
         if !rebuild_hotspots {
-            self.finish_focus_update(finalize_focus);
             return Ok(());
         }
         self.layers
@@ -567,12 +567,11 @@ impl PreviewPrototypePlayerView {
             .children()
             .add(self.hotspots.clone().upcast::<Control>());
         self.rebuild_hotspots(hotspots, epoch);
-        self.finish_focus_update(finalize_focus);
         Ok(())
     }
 
-    fn finish_focus_update(&self, finalize: bool) {
-        if finalize && self.focus_pending.replace(false) && self.root.is_attached_to_visual_tree() {
+    fn finish_focus_update(&self) {
+        if self.focus_pending.replace(false) && self.root.is_attached_to_visual_tree() {
             self.root.update_layout();
             self.restore_active_focus();
         }
@@ -1048,10 +1047,10 @@ impl PreviewPrototypePlayerView {
             layer
                 .plane
                 .children()
-                .remove(&self.hotspots.clone().upcast::<Control>());
+                .remove(self.hotspots.clone().upcast::<Control>());
             self.content
                 .children()
-                .remove(&layer.container.clone().upcast::<Control>());
+                .remove(layer.container.clone().upcast::<Control>());
             layer.native.children().remove(&layer.host);
         }
         self.hotspots.children().clear();

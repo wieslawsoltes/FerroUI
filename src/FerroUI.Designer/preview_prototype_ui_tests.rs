@@ -612,9 +612,9 @@ fn prototype_overlay_keeps_underlying_controls_and_blocks_input_until_focus_is_r
     };
     view.update_layers(
         size,
-        &[base_layer.clone()],
+        std::slice::from_ref(&base_layer),
         "Flow · Base",
-        &[base_hotspot.clone()],
+        std::slice::from_ref(&base_hotspot),
         false,
         1,
     )
@@ -641,7 +641,7 @@ fn prototype_overlay_keeps_underlying_controls_and_blocks_input_until_focus_is_r
         size,
         &[base_layer.clone(), overlay.clone()],
         "Flow · Dialog",
-        &[close.clone()],
+        std::slice::from_ref(&close),
         true,
         2,
     )
@@ -702,7 +702,7 @@ fn prototype_overlay_keeps_underlying_controls_and_blocks_input_until_focus_is_r
     let captured_release = PointerReleasedEventArgs::new(
         base_action.to_ref(),
         pointer.clone(),
-        &*window,
+        &window,
         Point::new(10.0, 10.0),
         4,
         PointerPointProperties::new(
@@ -849,7 +849,7 @@ fn prototype_nested_overlays_retain_planes_restore_hotspot_focus_and_reject_dupl
         size,
         &[a.clone(), b.clone()],
         "Outer",
-        &[opener.clone()],
+        std::slice::from_ref(&opener),
         true,
         1,
     )
@@ -955,7 +955,7 @@ fn prototype_overlay_focus_survives_native_preparation_and_rebuilt_source_hotspo
         size,
         &[a.clone(), b.clone()],
         "Outer",
-        &[opener.clone()],
+        std::slice::from_ref(&opener),
         true,
         1,
     )
@@ -975,7 +975,7 @@ fn prototype_overlay_focus_survives_native_preparation_and_rebuilt_source_hotspo
         size,
         &[a.clone(), b.clone()],
         "Outer",
-        &[opener.clone()],
+        std::slice::from_ref(&opener),
         true,
         3,
     )
@@ -1056,7 +1056,7 @@ fn prototype_overlay_focus_survives_native_preparation_and_rebuilt_source_hotspo
             size,
             &[a.clone(), b.clone()],
             "Outer",
-            &[opener.clone()],
+            std::slice::from_ref(&opener),
             true,
             epoch + 3,
         )
@@ -1093,15 +1093,22 @@ fn prototype_overlay_close_falls_back_from_a_filtered_command_to_its_hotspot() {
         name: "Open dialog".into(),
         bounds: Rect::new(20.0, 200.0, 100.0, 35.0),
     };
-    view.update_layers(size, &[a.clone()], "Base", &[opener.clone()], false, 1)
-        .unwrap();
+    view.update_layers(
+        size,
+        std::slice::from_ref(&a),
+        "Base",
+        std::slice::from_ref(&opener),
+        false,
+        1,
+    )
+    .unwrap();
     let window = window(view.control());
     assert!(named::<Button>(&view.control(), "PrototypeActivate7").focus());
     view.update_layers(size, &[a.clone(), b.clone()], "Dialog", &[], true, 2)
         .unwrap();
     assert!(dialog_input.is_focused());
     named::<TextBox>(&view.control(), "PrototypePlayerSearch").set_text(Some("unmatched"));
-    view.update_layers(size, &[a.clone()], "Base", &[opener], false, 3)
+    view.update_layers(size, std::slice::from_ref(&a), "Base", &[opener], false, 3)
         .unwrap();
     assert!(!named::<Button>(&view.control(), "PrototypeActivate7").is_visible());
     assert!(named::<Button>(&view.control(), "PrototypeHotspot7").is_focused());

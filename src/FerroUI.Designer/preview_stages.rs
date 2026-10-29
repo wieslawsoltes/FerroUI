@@ -380,7 +380,7 @@ pub type PreviewStageSnapshot = PreviewStageManifest;
 
 impl PreviewStageManifest {
     pub fn validate(&self) -> Result<(), String> {
-        if !matches!(self.version, 1 | 2 | 3) {
+        if !matches!(self.version, 1..=3) {
             return Err("Unsupported preview-stage manifest version".into());
         }
         if self.version < 3 && self.prototype.has_overlay_actions() {
