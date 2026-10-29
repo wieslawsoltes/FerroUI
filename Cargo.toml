@@ -161,13 +161,6 @@ members = [
     "samples/PlatformSanityChecks",
     "samples/SingleProjectSandbox",
     "samples/GpuInterop",
-    "samples/Ember.Core",
-    "samples/Ember.Content",
-    "samples/Ember",
-    "samples/Ember.Desktop",
-    "samples/Ember.Browser",
-    "samples/Ember.Android",
-    "samples/Ember.iOS",
 ]
 
 [workspace.package]
