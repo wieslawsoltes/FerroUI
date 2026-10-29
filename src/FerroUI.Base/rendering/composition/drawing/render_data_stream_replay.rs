@@ -128,14 +128,13 @@ impl IRenderDataVisitor for ReplayVisitor<'_> {
     }
 
     fn on_push_compositing_layer(&mut self, blend: BitmapBlendingMode, opacity: f64, bounds: Rect) -> ReplayScope {
-        // Public recording only accepts this opcode for a capable backend.
-        // A manually built stream replayed on a different backend must fail
-        // explicitly instead of silently painting a different composition.
-        assert!(
-            self.context.try_push_compositing_layer(blend, opacity, bounds),
-            "The replay backend does not support the recorded compositing layer"
-        );
-        ReplayScope::new(ReplayScopeKind::CompositingLayer, true)
+        // Recording accepts this opcode only for a backend with compositing layers. A stream
+        // replayed into a context without them is drawn with the opacity of the layer and
+        // without its blend, as a frame is never left unpainted.
+        if self.context.try_push_compositing_layer(blend, opacity, bounds) {
+            return ReplayScope::new(ReplayScopeKind::CompositingLayer, true);
+        }
+        self.on_push_opacity(opacity)
     }
 
     fn on_push_opacity_mask(&mut self, brush: Option<&dyn IBrush>, bounds: Rect) -> ReplayScope {

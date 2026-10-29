@@ -299,13 +299,15 @@ fn compositing_layer_recording_declines_unsupported_backend_without_a_scope() {
 }
 
 #[test]
-#[should_panic(expected = "The replay backend does not support the recorded compositing layer")]
-fn compositing_layer_replay_on_another_unsupported_backend_fails_explicitly() {
+fn compositing_layer_replay_on_an_unsupported_backend_falls_back_to_its_opacity() {
     let mut stream = RenderDataStream::new();
     stream.push_compositing_layer(BitmapBlendingMode::Multiply, 0.5, Rect::new(0.0, 0.0, 2.0, 2.0));
     stream.draw_rectangle(b(&brush()), None, None, rect(0.0, 0.0, 2.0, 2.0), &BoxShadows::default());
     stream.pop();
-    replay(&stream);
+    let entries = replay(&stream);
+    assert_eq!(entries.first().map(String::as_str), Some("PushOpacity 0.5"));
+    assert_eq!(entries.last().map(String::as_str), Some("PopOpacity"));
+    assert!(entries.iter().all(|entry| !entry.contains("CompositingLayer")));
 }
 
 #[test]

@@ -9,6 +9,10 @@ use ferroui_controls::AppBuilder;
 use ferroui_harfbuzz::HarfBuzzApplicationExtensions;
 #[cfg(feature = "skia")]
 use ferroui_skia::SkiaApplicationExtensions;
+
+// A module draws with Skia, Vello or both; one of the two has to be built in.
+#[cfg(not(any(feature = "skia", feature = "vello")))]
+compile_error!("ferroui-browser needs a render backend: the feature `skia` (a default) or `vello`");
 use std::rc::Rc;
 
 /// How a view is rendered.

@@ -71,9 +71,13 @@ impl DrawingImpl for DrawingGroup {
 
         let s_transform =
             context.push_transform(this.transform().map(|transform| transform.value()).unwrap_or(Matrix::IDENTITY));
+        // A group recorded for a backend with compositing layers can be drawn into a context
+        // without them (another backend, a recording of its own): the content is then drawn with
+        // the opacity of the layer and without its blend, rather than not at all.
         let s_compositing = match this.compositing_layer.get() {
-            Some((blend, opacity, bounds)) => context.try_push_compositing_layer(blend, opacity, bounds)
-                .expect("The replay backend does not support the recorded compositing layer"),
+            Some((blend, opacity, bounds)) => context
+                .try_push_compositing_layer(blend, opacity, bounds)
+                .unwrap_or_else(|| context.push_opacity(opacity)),
             None => PushedState::NONE,
         };
         let s_opacity = context.push_opacity(this.opacity());
