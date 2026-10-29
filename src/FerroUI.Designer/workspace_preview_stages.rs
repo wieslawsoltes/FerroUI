@@ -266,6 +266,9 @@ impl DesignerWorkspace {
     pub fn set_preview_stages_visible(self: &Rc<Self>, visible: bool) -> Result<(), String> {
         self.cancel_canvas_navigation();
         self.cancel_canvas_guide_drag();
+        if !visible {
+            self.close_preview_prototype();
+        }
         if visible {
             self.ensure_preview_stage_view();
             self.sync_preview_stage_sources()?;
@@ -344,7 +347,7 @@ impl DesignerWorkspace {
         *self.preview_stages.view.borrow_mut() = Some(view);
     }
 
-    fn sync_preview_stage_sources(&self) -> Result<(), String> {
+    pub(super) fn sync_preview_stage_sources(&self) -> Result<(), String> {
         let active = self.session.borrow().document_uri().to_owned();
         let sources = self.preview_stage_sources();
         let (options, epoch) = self.preview_stage_host_options();
@@ -375,11 +378,9 @@ impl DesignerWorkspace {
                 let board = self.preview_stages.board.borrow();
                 (board.stages(), board.active())
             };
-            let visible = all
-                .iter()
-                .filter(|stage| stage.configuration.pinned || stage.configuration.source_uri == uri)
-                .cloned()
-                .collect::<Vec<_>>();
+            // Keep every accepted card mounted. The view applies its local search
+            // and source-scope filters without retiring native input or zoom state.
+            let visible = all.clone();
             let hosts = {
                 let board = self.preview_stages.board.borrow();
                 visible
@@ -412,13 +413,7 @@ impl DesignerWorkspace {
                     let board = self.preview_stages.board.borrow();
                     (board.stages(), board.active())
                 };
-                let visible = all
-                    .iter()
-                    .filter(|stage| {
-                        stage.configuration.pinned || stage.configuration.source_uri == uri
-                    })
-                    .cloned()
-                    .collect::<Vec<_>>();
+                let visible = all.clone();
                 view.update(&visible, &hosts, active, &uri, all.len());
             }
             let epoch = self.preview_stage_epoch();
@@ -447,6 +442,7 @@ impl DesignerWorkspace {
             Ok(())
         })();
         self.preview_stages.refreshing.set(false);
+        self.refresh_preview_prototype();
         if let Err(error) = result {
             if let Some(view) = self.preview_stages.view.borrow().as_ref() {
                 view.show_error(&error);
@@ -475,6 +471,11 @@ impl DesignerWorkspace {
     ) -> Result<(), String> {
         self.sync_preview_stage_sources()?;
         match action {
+            PreviewStageAction::Prototype => self.set_preview_prototype_visible(true),
+            PreviewStageAction::AddInteraction { stage, epoch } => {
+                self.accepted_preview_stage(stage, epoch)?;
+                self.show_preview_prototype_link_editor(None, Some(stage), anchor)
+            }
             PreviewStageAction::Add => self.show_preview_stage_editor(None, anchor),
             PreviewStageAction::Edit { stage, epoch } => {
                 self.accepted_preview_stage(stage, epoch)?;

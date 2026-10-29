@@ -459,6 +459,7 @@ fn load_picker_restores_fresh_stage_ids_and_keeps_missing_source_as_a_reference(
     let retired = fixture.ids();
     let authored = Authored::capture(workspace);
     let manifest = PreviewStageManifest {
+        prototype: Default::default(),
         version: 1,
         stages: vec![
             configuration("Restored open document", SOURCE_URI),
@@ -503,7 +504,7 @@ fn invalid_or_oversized_manifests_leave_accepted_stages_and_source_intact() {
     let authored = Authored::capture(workspace);
     for invalid in [
         "{broken".to_owned(),
-        r#"{"version":2,"stages":[],"active":null}"#.to_owned(),
+        r#"{"version":3,"stages":[],"active":null}"#.to_owned(),
         " ".repeat(1_048_577),
     ] {
         *fixture.file.bytes.borrow_mut() = invalid.into_bytes();
@@ -523,6 +524,7 @@ fn delayed_picker_or_read_cannot_replace_newer_board_or_pending_source() {
         let fixture = Fixture::new();
         let workspace = &fixture.workspace;
         fixture.set_manifest(&PreviewStageManifest {
+            prototype: Default::default(),
             version: 1,
             stages: vec![configuration("From delayed file", SOURCE_URI)],
             active: Some(0),
@@ -567,6 +569,7 @@ fn loading_an_empty_collection_keeps_the_board_empty() {
     workspace.set_preview_stages_visible(true).unwrap();
     let authored = Authored::capture(workspace);
     let empty = PreviewStageManifest {
+        prototype: Default::default(),
         version: 1,
         stages: Vec::new(),
         active: None,

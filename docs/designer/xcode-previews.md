@@ -12,6 +12,12 @@ preview factories. Its configurations are presentation state: adding or changing
 does not edit the XAML, add an undo entry or create another authoring session. Actual
 authoring continues through the workspace's existing document transactions.
 
+The [multi-view prototyping guide](prototyping.md) extends these stages with searchable
+cross-document browsing, named flow starts, source-anchored Navigate/Back connections and
+a native player. Prototype runs have independent native input state; saved stage sets
+include their portable graph. The [prototype sample](samples/PrototypeFlow.xaml) provides
+Home, Details and Settings screens for a connected journey.
+
 ## Try the workflow
 
 ![Native desktop, phone, tablet and template stages](images/designer-preview-stages.png)
@@ -62,6 +68,9 @@ cargo run -p designer-studio -- --file docs/designer/samples/PreviewStages.xaml
     zoom control to inspect the same layout at a different display scale.
 11. Choose **… → Save preview image…** to save that stage's accepted native frame as a PNG.
     The image contains the application preview, without the card's designer commands.
+12. Use **Current document** / **All views** and search to find stages. Open **Prototype**
+    to define a named flow, add interactions between authored controls and stages, and
+    play the connected journey. See [prototyping](prototyping.md) for the complete workflow.
 
 The sample also contains **ActionPreviewTemplate**. Add a stage, choose that authored
 definition in **View**, and configure its sample content and sample size. This gives a
@@ -324,9 +333,10 @@ The public components can be embedded independently:
 - `PreviewStageView` renders cards and emits explicit actions. It receives stage controls
   from its host and does not own document or runtime state.
 - `PreviewStageEditor` edits a detached configuration and validates it on Apply.
-- `PreviewStageManifest` validates and serializes a version-1 stage set. JSON parsing
-  rejects unknown fields, invalid dimensions, malformed source paths and manifests
-  larger than 1 MiB.
+- `PreviewStageManifest` validates and serializes a version-2 stage set, including the
+  prototype graph. Version-1 sets load with an empty graph. JSON parsing rejects unknown
+  fields, invalid dimensions, malformed source paths, invalid graph references and
+  manifests larger than 1 MiB.
 - `PreviewStageMatrix` validates and expands comparison axes into ordinary stage
   configurations within a supplied capacity.
 - `PreviewStageExportOptions` and `PreviewStageImage` describe bounded PNG density and

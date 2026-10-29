@@ -83,6 +83,7 @@ pub struct DesignerWorkspace {
     shell: shell::WorkspaceShell,
     preview_environment: RefCell<preview_environment::PreviewEnvironmentUi>,
     preview_stages: preview_stages::PreviewStagesUi,
+    prototype: prototype::PrototypeUi,
 }
 
 impl DesignerWorkspace {
@@ -161,6 +162,7 @@ impl DesignerWorkspace {
             shell: shell::WorkspaceShell::default(),
             preview_environment: RefCell::new(Default::default()),
             preview_stages: preview_stages::PreviewStagesUi::default(),
+            prototype: prototype::PrototypeUi::default(),
         });
         this.connect();
         this.connect_inspectors();
@@ -903,6 +905,9 @@ pub(crate) mod preview_stages;
 mod stage_sources;
 #[path = "workspace_stage_files.rs"]
 mod stage_files;
+#[path = "workspace_prototype.rs"]
+pub(crate) mod prototype;
+pub use prototype::PreviewPrototypePlaybackInfo;
 #[path = "workspace_project.rs"]
 mod project;
 #[path = "workspace_sharing.rs"]

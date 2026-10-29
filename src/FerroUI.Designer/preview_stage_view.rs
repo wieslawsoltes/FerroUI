@@ -9,8 +9,8 @@ use ferroui_base::{Point, Ref, Thickness, WeakRef};
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::primitives::ScrollBarVisibility;
 use ferroui_controls::{
-    Border, Button, ColumnDefinitions, Control, Grid, MenuFlyout, MenuItem, RowDefinitions,
-    ScrollViewer, StackPanel, TextBlock, ToolTip, WrapPanel,
+    Border, Button, ColumnDefinitions, ComboBox, Control, Grid, MenuFlyout, MenuItem,
+    RowDefinitions, ScrollViewer, StackPanel, TextBlock, TextBox, ToolTip, WrapPanel,
 };
 use std::cell::{Cell, RefCell};
 use std::collections::{BTreeMap, BTreeSet};
@@ -37,6 +37,7 @@ pub enum PreviewStageAction {
     Add,
     Compare(PreviewStageComparison),
     CompareMatrix,
+    Prototype,
     RefreshAll,
     Save,
     Load,
@@ -96,6 +97,10 @@ pub enum PreviewStageAction {
         stage: PreviewStageId,
         epoch: u64,
     },
+    AddInteraction {
+        stage: PreviewStageId,
+        epoch: u64,
+    },
 }
 
 type ActionHandler = Rc<dyn Fn(PreviewStageAction, Ref<Control>) -> Result<(), String>>;
@@ -132,6 +137,10 @@ pub struct PreviewStageView {
     empty: Ref<TextBlock>,
     summary: Ref<TextBlock>,
     error: Ref<TextBlock>,
+    search: Ref<TextBox>,
+    scope: Ref<ComboBox>,
+    descriptions: RefCell<Vec<PreviewStageInfo>>,
+    current_uri: RefCell<String>,
     palette: WeakRef<Control>,
     action: RefCell<Option<ActionHandler>>,
 }
@@ -156,6 +165,25 @@ impl PreviewStageView {
         commands.set_item_spacing(5.0);
         commands.set_line_spacing(5.0);
         heading.children().add(commands.clone().upcast::<Control>());
+        let filters = WrapPanel::new();
+        filters.set_item_spacing(8.0);
+        filters.set_line_spacing(6.0);
+        let search = TextBox::new();
+        search.set_name(Some("StageSearch".into()));
+        search.set_width(260.0);
+        search.set_placeholder_text(Some("Search stage names and source files"));
+        AutomationProperties::set_name(&search, Some("Search preview stages"));
+        filters.children().add(search.clone().upcast::<Control>());
+        let scope = ComboBox::new();
+        scope.set_name(Some("StageScope".into()));
+        scope.set_width(232.0);
+        AutomationProperties::set_name(&scope, Some("Preview stage document scope"));
+        for label in ["Current document and pinned", "All views"] {
+            scope.items().add(Some(Rc::new(label.to_owned())));
+        }
+        scope.set_selected_index(0);
+        filters.children().add(scope.clone().upcast::<Control>());
+        heading.children().add(filters.upcast::<Control>());
         root.children().add(heading.upcast::<Control>());
         let error = text("");
         error.classes().add("designer-error");
@@ -192,11 +220,20 @@ impl PreviewStageView {
             empty,
             summary,
             error,
+            search,
+            scope,
+            descriptions: RefCell::new(Vec::new()),
+            current_uri: RefCell::new(String::new()),
             palette: palette.to_ref().downgrade(),
             action: RefCell::new(None),
         });
         for (label, name, action) in [
             ("Add stage", "StageAdd", PreviewStageAction::Add),
+            (
+                "Prototype…",
+                "StagePrototype",
+                PreviewStageAction::Prototype,
+            ),
             (
                 "Compare matrix…",
                 "StageCompareMatrix",
@@ -250,6 +287,26 @@ impl PreviewStageView {
                 view.resize_cards(event.new_size().width);
             }
         });
+        let weak = Rc::downgrade(&view);
+        view.search.text_changing(move |_, _| {
+            if let Some(view) = weak.upgrade() {
+                view.apply_filter();
+            }
+        });
+        let weak = Rc::downgrade(&view);
+        view.scope.selection_changed(move |_, _| {
+            if let Some(view) = weak.upgrade() {
+                view.apply_filter();
+            }
+        });
+        // Keep both card and toolbar shortcuts inside the preview workspace.
+        // Native TextBoxes, pickers and live application controls handle first.
+        view.root.add_handler_with(
+            InputElement::key_down_event(),
+            move |_, event| event.set_handled(true),
+            RoutingStrategies::BUBBLE,
+            false,
+        );
         view
     }
 
@@ -265,6 +322,75 @@ impl PreviewStageView {
     pub fn show_error(&self, message: &str) {
         self.error.set_text(Some(message));
         self.error.set_is_visible(!message.is_empty());
+    }
+
+    /// Filtering changes presentation only; accepted roots stay attached and retain
+    /// their native input, scroll state and card zoom while temporarily hidden.
+    pub fn set_query(&self, query: &str) {
+        self.search.set_text(Some(query));
+    }
+
+    pub fn set_all_views(&self, all: bool) {
+        self.scope.set_selected_index(i32::from(all));
+    }
+
+    pub fn visible_stage_ids(&self) -> Vec<PreviewStageId> {
+        let cards = self.cards.borrow();
+        self.descriptions
+            .borrow()
+            .iter()
+            .filter_map(|info| {
+                cards
+                    .get(&info.id)
+                    .filter(|card| card.root.is_visible())
+                    .map(|_| info.id)
+            })
+            .collect()
+    }
+
+    fn apply_filter(&self) {
+        let query = self.search.text().unwrap_or_default().to_lowercase();
+        let terms = query.split_whitespace().collect::<Vec<_>>();
+        let all = self.scope.selected_index() == 1;
+        let uri = self.current_uri.borrow();
+        let descriptions = self.descriptions.borrow();
+        let cards = self.cards.borrow();
+        let mut count = 0;
+        for info in descriptions.iter() {
+            let Some(card) = cards.get(&info.id) else {
+                continue;
+            };
+            let matches =
+                (all || info.configuration.pinned || info.configuration.source_uri == *uri)
+                    && terms.iter().all(|term| {
+                        format!(
+                            "{} {}",
+                            info.configuration.name, info.configuration.source_uri
+                        )
+                        .to_lowercase()
+                        .contains(term)
+                    });
+            if !matches && card.root.is_visible() {
+                card.presentation.cancel_interaction();
+                card.options.hide();
+                if card.root.is_keyboard_focus_within() {
+                    self.search.focus();
+                }
+            }
+            card.root.set_is_visible(matches);
+            count += usize::from(matches);
+        }
+        self.empty.set_is_visible(count == 0);
+        self.empty.set_text(Some(if query.trim().is_empty() {
+            "No stages match this document scope. Choose All views, add a stage, or pin a stage across document tabs."
+        } else {
+            "No stages match this search. Change the search or choose All views."
+        }));
+        self.summary.set_text(Some(&format!(
+            "{} · {count} visible of {} stages · sizes use logical units",
+            if all { "All views" } else { short_uri(&uri) },
+            descriptions.len()
+        )));
     }
 
     /// Cancel detached corner-grip drafts before hiding or moving the board.
@@ -310,8 +436,10 @@ impl PreviewStageView {
         hosts: &BTreeMap<PreviewStageId, Ref<Control>>,
         active: Option<PreviewStageId>,
         current_uri: &str,
-        total: usize,
+        _total: usize,
     ) {
+        *self.descriptions.borrow_mut() = stages.to_vec();
+        *self.current_uri.borrow_mut() = current_uri.to_owned();
         let desired = stages.iter().map(|info| info.id).collect::<BTreeSet<_>>();
         self.zooms
             .borrow_mut()
@@ -358,15 +486,10 @@ impl PreviewStageView {
                 self.panel.children().insert(index, control);
             }
         }
-        self.empty.set_is_visible(stages.is_empty());
-        self.summary.set_text(Some(&format!(
-            "{} · {} visible of {total} stages · sizes use logical units",
-            short_uri(current_uri),
-            stages.len()
-        )));
         let focus = restore_focus
             .and_then(|id| cards.get(&id).map(|card| card.presentation.grip.control()));
         drop(cards);
+        self.apply_filter();
         if let Some(focus) = focus {
             focus.focus();
         }
@@ -622,6 +745,13 @@ impl PreviewStageView {
             (
                 "Save preview image…",
                 PreviewStageAction::Export {
+                    stage: info.id,
+                    epoch: info.epoch,
+                },
+            ),
+            (
+                "Add interaction…",
+                PreviewStageAction::AddInteraction {
                     stage: info.id,
                     epoch: info.epoch,
                 },

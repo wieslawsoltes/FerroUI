@@ -1,11 +1,22 @@
 # Designer workflow comparison and implementation
 
 This review compares the XAML-relevant workflows in Visual Studio/Blend, Figma,
-Qt Widgets Designer and Xcode previews against the native FerroUI designer. The implementation extends the
+Qt Widgets Designer and Xcode previews against the native FerroUI designer. The
+[multi-view prototyping review](prototyping.md) also covers Penpot, Android Studio,
+Xcode storyboards and explicitly historical Qt Design Studio/SketchFlow references.
+The implementation extends the
 existing session, source-preserving AST, native preview, property factory chain and layout
 adapters. It does not add a second document model or another rendering stack.
 
 ## Findings
+
+The [multi-view prototyping review](prototyping.md) adds searchable current-document/all-view
+stage browsing, named flow starts, source-anchored Navigate/Back interactions, a reachable-screen
+connection overview, detached native editors and a native player with its own retained input.
+Version-2 stage sets persist the graph using stage indices that remap to fresh runtime IDs.
+The [prototype sample](samples/PrototypeFlow.xaml) exercises Home, Details and Settings,
+including a shared settings screen that returns to the actual previous screen. Prototype
+navigation remains presentation state and does not author application event handlers.
 
 The [Xcode preview review](xcode-previews.md) adds a native board of independent named
 document and definition stages, size/theme/orientation/direction comparisons, pinning across
@@ -47,6 +58,8 @@ These extend the earlier workflow results below.
 | Preview layout and resizing | Xcode size-that-fits traits and arbitrarily resizable canvas | Fixed-size stages with an environment editor | Added native finite-proposal fitting on either axis, direct resize drafts, measured size reporting and per-card display zoom while retaining Live control graphs |
 | Preview argument combinations | Xcode parameterized argument groups | One-axis environment comparisons and manually selected native states | Added bounded combinations of size, theme, direction, design-data and authored state axes, with complete validation before stage creation |
 | Preview screenshot export | Xcode canvas screenshot and save sheet | Native RenderTargetBitmap rendering existed only in test captures | Added source-guarded PNG stage capture, native save picker and read-only automation, with pixel/byte bounds and independent raster density |
+| Many-view organization | Figma pages/sections and named flows; Penpot searchable screen destinations | Named stages, document pinning and source tabs | Added stage search, current-document/all-view browsing and a reachable-screen connection overview |
+| Interactive screen prototypes | Figma/Penpot flow starts and hotspots; Android graph/back-stack separation; Xcode unwind navigation | Independent native stage graphs and source anchors, without connected journeys | Added named flows, source-anchored Navigate/Back, detached native editors, independent player graphs with retained input and versioned graph persistence |
 | Canvas navigation and framing | Figma pointer-anchored zoom, fit selection and file-local views; Blend wheel zoom and Space panning | Zoom buttons and a centered scroll container; no independent camera or fit-selection command | Added a finite native viewport, wheel-mode choice, middle/Space/hand-tool panning, percentage editing, selection framing and retained tab cameras |
 | Compact command icons | Visual Studio's centered, padded and consistently weighted icon frames | Mixed compact paths and symbol-font glyphs under application command templates | Designer-scoped vector normalization fits complete geometry, reserves padding and follows themed foreground |
 

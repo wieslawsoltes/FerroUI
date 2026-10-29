@@ -95,10 +95,6 @@ fn named<T: ferroui_base::ObjectType>(root: &Control, name: &str) -> Ref<T> {
         .and_then(|control| control.cast::<T>())
         .unwrap_or_else(|| panic!("Missing stage UI control {name}"))
 }
-fn has_named(root: &Control, name: &str) -> bool {
-    root.get_logical_descendants()
-        .any(|control| control.name().as_deref() == Some(name))
-}
 fn native<T: ferroui_base::ObjectType>(host: &Control, name: &str) -> Ref<T> {
     host.get_visual_descendants()
         .filter_map(|visual| visual.cast::<Control>())
@@ -232,6 +228,28 @@ fn stage_visibility_modes_pinning_and_live_input_preserve_independent_applicatio
     application_button.raise_event(&key);
     assert!(key.handled());
     assert_eq!(workspace.session.borrow().document().source(), SOURCE);
+    for name in ["StageScope", "StagePrototype"] {
+        let control = named::<Control>(&workspace.preview_stage_view().unwrap().control(), name);
+        for (key, modifiers) in [
+            (Key::Delete, KeyModifiers::NONE),
+            (Key::Z, KeyModifiers::CONTROL),
+        ] {
+            let mut event = KeyEventArgs::new();
+            event.key = key;
+            event.key_modifiers = modifiers;
+            event.set_routed_event(Some(InputElement::key_down_event()));
+            event.set_source(control.to_ref());
+            control.raise_event(&event);
+            assert!(event.handled());
+            assert_eq!(
+                workspace.session.borrow().document().source(),
+                SOURCE,
+                "Stage toolbar keys must not edit the selected XAML control"
+            );
+            assert_eq!(workspace.session.borrow().selection(), &[card_node]);
+            assert!(!workspace.session.borrow().can_undo());
+        }
+    }
     workspace.set_preview_stages_visible(false).unwrap();
     workspace.set_preview_stages_visible(true).unwrap();
     workspace.set_view_mode(super::super::shell::WorkspaceViewMode::Xaml);
@@ -264,14 +282,16 @@ fn stage_visibility_modes_pinning_and_live_input_preserve_independent_applicatio
         .unwrap();
     f.layout();
     let view = workspace.preview_stage_view().unwrap();
-    assert!(has_named(&view.control(), &format!("PreviewStage{first}")));
-    assert!(!has_named(
-        &view.control(),
-        &format!("PreviewStage{second}")
-    ));
+    assert!(named::<Control>(&view.control(), &format!("PreviewStage{first}")).is_visible());
+    assert!(!named::<Control>(&view.control(), &format!("PreviewStage{second}")).is_visible());
     workspace.activate_document(URI).unwrap();
     f.layout();
-    assert!(has_named(&view.control(), &format!("PreviewStage{second}")));
+    assert!(named::<Control>(&view.control(), &format!("PreviewStage{second}")).is_visible());
+    assert_eq!(
+        native::<TextBox>(&workspace.preview_stage_control(second).unwrap(), "Input"),
+        second_input,
+        "Document filtering must retain the same native input control"
+    );
     assert_eq!(
         first_input.text().as_deref(),
         Some("Only the first native instance changed")

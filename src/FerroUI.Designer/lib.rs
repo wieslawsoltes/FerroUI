@@ -31,6 +31,12 @@ mod layer_state;
 mod layout_helper_renderer;
 mod preview_environment;
 mod preview_host;
+mod preview_prototype;
+mod preview_prototype_editor;
+mod preview_prototype_player;
+mod preview_prototype_view;
+#[cfg(test)]
+mod preview_prototype_ui_tests;
 mod preview_stages;
 mod preview_stage_export;
 mod preview_stage_matrix;
@@ -95,6 +101,19 @@ pub use preview_environment::{
 pub use preview_host::{
     PreviewFactory, PreviewHostOptions, PreviewRequest, ResourcePreviewFactory,
 };
+pub use preview_prototype::{
+    PreviewPrototype, PreviewPrototypeAction, PreviewPrototypeActionManifest, PreviewPrototypeFlow,
+    PreviewPrototypeFlowManifest, PreviewPrototypeLink, PreviewPrototypeLinkManifest,
+    PreviewPrototypeManifest, PreviewPrototypeSession, MAX_PREVIEW_PROTOTYPE_FLOWS,
+    MAX_PREVIEW_PROTOTYPE_HISTORY, MAX_PREVIEW_PROTOTYPE_LINKS,
+};
+pub use preview_prototype_editor::{
+    PreviewPrototypeElementChoice, PreviewPrototypeFlowEditor, PreviewPrototypeLinkEditor,
+};
+pub use preview_prototype_player::{
+    PreviewPrototypeHotspot, PreviewPrototypePlayerAction, PreviewPrototypePlayerView,
+};
+pub use preview_prototype_view::{PreviewPrototypeView, PreviewPrototypeViewAction};
 pub use preview_stages::{
     MAX_PREVIEW_STAGES, PreviewSourceAnchor, PreviewSourceSegment, PreviewStageBoard,
     PreviewStageConfiguration, PreviewStageId, PreviewStageInfo, PreviewStageManifest,
@@ -136,7 +155,7 @@ pub use viewport::{CanvasViewport, CanvasWheelMode};
 pub use workspace::shell::{NavigationPane, WorkspaceViewMode};
 pub use workspace::{
     CanvasLayerChoice, CanvasSelectionSnapshot, DesignerDefinitionAsset, DesignerWorkspace,
-    OutlineCommand, OutlineMode,
+    OutlineCommand, OutlineMode, PreviewPrototypePlaybackInfo,
 };
 
 /// The self-contained example opened by Designer Studio and usable by hosts.

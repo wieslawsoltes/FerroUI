@@ -26,6 +26,8 @@ mod design_workflows;
 mod design_workflows_tests;
 #[path = "mcp_preview_stages.rs"]
 mod preview_stages;
+#[path = "mcp_prototype.rs"]
+mod prototype;
 #[path = "mcp_schema.rs"]
 mod schema;
 #[path = "mcp_selection_workflows.rs"]
@@ -256,6 +258,7 @@ impl UiToolProvider for DesignerMcp {
         if self.workspace.is_some() {
             tools.extend(workspace_tools::tools());
             tools.extend(preview_stages::tools());
+            tools.extend(prototype::tools());
         }
         tools
     }
@@ -273,6 +276,7 @@ impl UiToolProvider for DesignerMcp {
             || design_workflows::handles(name)
             || selection_workflows::handles(name)
             || preview_stages::handles(name)
+            || prototype::handles(name)
         {
             return schema::validate(&definition["inputSchema"], args);
         }
@@ -431,7 +435,7 @@ impl UiToolProvider for DesignerMcp {
             return Err("Designer authoring requires allow_property_writes".into());
         }
         let owner = self.session()?;
-        if preview_stages::handles(name) {
+        if preview_stages::handles(name) || prototype::handles(name) {
             let workspace = self
                 .workspace
                 .as_ref()
@@ -444,7 +448,11 @@ impl UiToolProvider for DesignerMcp {
                     .try_borrow_mut()
                     .map_err(|_| "Designer is already processing a transaction")?,
             );
-            return preview_stages::call(&workspace, name, args, permissions);
+            return if prototype::handles(name) {
+                prototype::call(&workspace, name, args, permissions)
+            } else {
+                preview_stages::call(&workspace, name, args, permissions)
+            };
         }
         if selection_workflows::handles(name)
             || (name == "designer_layer" && args["action"] == "select_matching_type")

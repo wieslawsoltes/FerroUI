@@ -3,7 +3,7 @@
 use crate::runtime::RuntimePreview;
 use crate::{
     DefinitionPreviewOptions, PreviewEnvironment, PreviewFlowDirection, PreviewHostOptions,
-    PreviewStatus, PreviewTheme, RuntimeNode,
+    PreviewPrototype, PreviewPrototypeManifest, PreviewStatus, PreviewTheme, RuntimeNode,
 };
 use ferroui_base::media::{FlowDirection, SolidColorBrush};
 use ferroui_base::styling::ThemeVariant;
@@ -145,7 +145,7 @@ impl PreviewSourceAnchor {
         Ok(())
     }
 
-    fn text_size(&self) -> usize {
+    pub(crate) fn text_size(&self) -> usize {
         self.path
             .iter()
             .map(|segment| {
@@ -371,14 +371,19 @@ pub struct PreviewStageManifest {
     pub version: u32,
     pub stages: Vec<PreviewStageConfiguration>,
     pub active: Option<usize>,
+    #[serde(default, skip_serializing_if = "PreviewPrototypeManifest::is_empty")]
+    pub prototype: PreviewPrototypeManifest,
 }
 
 pub type PreviewStageSnapshot = PreviewStageManifest;
 
 impl PreviewStageManifest {
     pub fn validate(&self) -> Result<(), String> {
-        if self.version != 1 {
+        if !matches!(self.version, 1 | 2) {
             return Err("Unsupported preview-stage manifest version".into());
+        }
+        if self.version == 1 && !self.prototype.is_empty() {
+            return Err("Prototype interactions require preview-stage manifest version 2".into());
         }
         if self.stages.len() > MAX_PREVIEW_STAGES {
             return Err(format!(
@@ -391,11 +396,13 @@ impl PreviewStageManifest {
         for config in &self.stages {
             config.validate()?;
         }
+        self.prototype.validate(self.stages.len())?;
         if self
             .stages
             .iter()
             .map(PreviewStageConfiguration::text_size)
             .sum::<usize>()
+            + self.prototype.text_size()
             > MAX_MANIFEST_BYTES
         {
             return Err("Preview-stage manifest text exceeds 1 MiB".into());
@@ -542,6 +549,7 @@ impl SourceStamp {
 /// document buffers. It never owns document history or performs authored mutations.
 pub struct PreviewStageBoard {
     stages: Vec<Stage>,
+    prototype: PreviewPrototype,
     active: Option<PreviewStageId>,
     active_uri: String,
     sources: BTreeMap<String, PreviewStageSource>,
@@ -561,6 +569,7 @@ impl PreviewStageBoard {
     pub fn new() -> Self {
         Self {
             stages: Vec::new(),
+            prototype: PreviewPrototype::default(),
             active: None,
             active_uri: String::new(),
             sources: BTreeMap::new(),
@@ -576,6 +585,21 @@ impl PreviewStageBoard {
     }
     pub fn active(&self) -> Option<PreviewStageId> {
         self.active
+    }
+
+    pub fn prototype(&self) -> PreviewPrototype {
+        self.prototype.clone()
+    }
+
+    /// Replace local interaction descriptors without rebuilding native stages or
+    /// mutating authored source. Rejected graphs leave the accepted board intact.
+    pub fn set_prototype(&mut self, prototype: PreviewPrototype) -> Result<(), String> {
+        prototype.validate(&self.stages.iter().map(|stage| stage.id).collect::<Vec<_>>())?;
+        if self.prototype != prototype {
+            self.prototype = prototype;
+            self.bump();
+        }
+        Ok(())
     }
 
     pub fn stages(&self) -> Vec<PreviewStageInfo> {
@@ -777,6 +801,7 @@ impl PreviewStageBoard {
     pub fn remove(&mut self, id: PreviewStageId) -> Result<(), String> {
         let index = self.index(id)?;
         let stage = self.stages.remove(index);
+        self.prototype.remove_stage(id);
         stage.control.children().clear();
         if self.active == Some(id) {
             self.active = self
@@ -865,7 +890,7 @@ impl PreviewStageBoard {
 
     pub fn manifest(&self) -> PreviewStageManifest {
         PreviewStageManifest {
-            version: 1,
+            version: if self.prototype.is_empty() { 1 } else { 2 },
             stages: self
                 .stages
                 .iter()
@@ -874,6 +899,11 @@ impl PreviewStageBoard {
             active: self
                 .active
                 .and_then(|id| self.stages.iter().position(|stage| stage.id == id)),
+            prototype: PreviewPrototypeManifest::from_prototype(
+                &self.prototype,
+                &self.stages.iter().map(|stage| stage.id).collect::<Vec<_>>(),
+            )
+            .expect("Accepted prototype graph references existing preview stages"),
         }
     }
 
@@ -894,6 +924,13 @@ impl PreviewStageBoard {
         for configuration in manifest.stages {
             candidate.add(configuration)?;
         }
+        candidate.prototype = manifest.prototype.restore(
+            &candidate
+                .stages
+                .iter()
+                .map(|stage| stage.id)
+                .collect::<Vec<_>>(),
+        )?;
         candidate.active = manifest
             .active
             .and_then(|index| candidate.stages.get(index).map(|stage| stage.id));
@@ -965,6 +1002,118 @@ impl PreviewStageBoard {
             }
             nodes
         }))
+    }
+
+    /// Resolve one authored hotspot against the exact accepted native graph. The
+    /// returned axis-aligned rectangle uses stage logical coordinates and is clipped
+    /// to the stage viewport and native ancestor clips. Call again immediately before
+    /// activation: native scrolling and layout can move a target without source edits.
+    pub fn prototype_hotspot_bounds(
+        &self,
+        id: PreviewStageId,
+        anchor: &PreviewSourceAnchor,
+    ) -> Result<ferroui_base::Rect, String> {
+        std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            self.resolve_prototype_hotspot_bounds(id, anchor)
+        }))
+        .unwrap_or_else(|_| {
+            Err("The prototype hotspot's native geometry could not be inspected".into())
+        })
+    }
+
+    fn resolve_prototype_hotspot_bounds(
+        &self,
+        id: PreviewStageId,
+        anchor: &PreviewSourceAnchor,
+    ) -> Result<ferroui_base::Rect, String> {
+        use ferroui_base::input::InputElement;
+        use ferroui_base::layout::Layoutable;
+        use ferroui_base::Rect;
+
+        let stage = &self.stages[self.index(id)?];
+        let rendered = self.current(stage)?;
+        let node = anchor.resolve(&rendered.document)?;
+        let visual = rendered
+            .preview
+            .unique_scenario_visual(node)
+            .map_err(|_| "The prototype hotspot has multiple native instances; open a definition stage to target one instance".to_owned())?
+            .ok_or("The prototype hotspot has no realized native visual")?;
+        if matches!(stage.configuration.target, PreviewStageTarget::Document)
+            && visual.templated_parent().is_some()
+        {
+            return Err("Open a definition stage to target an instantiated template part".into());
+        }
+        let host = stage.control.clone().upcast::<Visual>();
+        if !host.is_attached_to_visual_tree() {
+            return Err(
+                "Attach the prototype stage to a native view before resolving its hotspots".into(),
+            );
+        }
+        let to_host = visual
+            .transform_to_visual(&host)
+            .ok_or("The prototype hotspot is detached from its stage")?;
+        let mut bounds = Rect::from_size(visual.bounds().size()).transform_to_aabb(to_host);
+        let valid_rect = |rect: Rect| {
+            [
+                rect.x,
+                rect.y,
+                rect.width,
+                rect.height,
+                rect.right(),
+                rect.bottom(),
+            ]
+            .into_iter()
+            .all(f64::is_finite)
+                && rect.width > 0.0
+                && rect.height > 0.0
+        };
+        if !valid_rect(bounds) {
+            return Err("The prototype hotspot has no finite visible area".into());
+        }
+        let mut current = Some(visual);
+        while let Some(ancestor) = current {
+            if !ancestor.is_effectively_visible()
+                || ancestor.is_render_suppressed()
+                || !ancestor.opacity().is_finite()
+                || ancestor.opacity() <= 0.0
+                || ancestor
+                    .cast::<InputElement>()
+                    .is_some_and(|input| !input.is_effectively_enabled())
+            {
+                return Err("The prototype hotspot is hidden or disabled".into());
+            }
+            if ancestor
+                .cast::<Layoutable>()
+                .is_some_and(|layout| !layout.is_measure_valid() || !layout.is_arrange_valid())
+            {
+                return Err("Wait for the prototype hotspot's native layout to settle".into());
+            }
+            let transform = ancestor
+                .transform_to_visual(&host)
+                .ok_or("The prototype hotspot is detached from its stage")?;
+            if ancestor == host || ancestor.clip_to_bounds() {
+                let clip = Rect::from_size(ancestor.bounds().size()).transform_to_aabb(transform);
+                if !valid_rect(clip) {
+                    return Err("The prototype hotspot's clip has no finite visible area".into());
+                }
+                bounds = bounds.intersect(clip);
+            }
+            if let Some(clip) = ancestor.clip() {
+                let clip = clip.bounds().transform_to_aabb(transform);
+                if !valid_rect(clip) {
+                    return Err("The prototype hotspot's clip has no finite visible area".into());
+                }
+                bounds = bounds.intersect(clip);
+            }
+            if !valid_rect(bounds) {
+                return Err("The prototype hotspot is outside the visible stage viewport".into());
+            }
+            if ancestor == host {
+                return Ok(bounds);
+            }
+            current = ancestor.visual_parent();
+        }
+        Err("The prototype hotspot no longer belongs to this stage".into())
     }
 
     /// Validate a supplied current buffer without synchronizing, constructing or
@@ -1057,25 +1206,39 @@ impl PreviewStageBoard {
     /// Refresh identities after native attachment or template/item realization.
     /// This neither reloads source nor resets a stage's temporary interaction state.
     pub fn refresh_runtime_mappings(&mut self) {
-        for stage in &mut self.stages {
-            if !matches!(stage.status, PreviewStageStatus::Ready { .. }) {
-                continue;
-            }
-            if let Some(rendered) = &mut stage.rendered {
-                let Some(source) = self.sources.get(&stage.configuration.source_uri) else {
-                    continue;
-                };
-                if !source.pending
-                    && source.document.is_valid()
-                    && source.document.revision() == rendered.document.revision()
-                    && Arc::ptr_eq(
-                        &source.document.ast_snapshot(),
-                        &rendered.document.ast_snapshot(),
-                    )
-                    && rendered_dependencies_current(rendered, &self.source_catalog)
-                {
-                    rendered.preview.rebuild_map(&rendered.document);
-                }
+        for index in 0..self.stages.len() {
+            self.refresh_mapping(index);
+        }
+    }
+
+    /// Refresh only the presented screen. Prototype playback can retain many
+    /// screens without traversing every hidden graph on each native layout tick.
+    /// The same accepted-source/dependency checks apply as the whole-board update.
+    pub fn refresh_runtime_mapping(&mut self, id: PreviewStageId) -> Result<(), String> {
+        let index = self.index(id)?;
+        self.refresh_mapping(index);
+        Ok(())
+    }
+
+    fn refresh_mapping(&mut self, index: usize) {
+        let stage = &mut self.stages[index];
+        if !matches!(stage.status, PreviewStageStatus::Ready { .. }) {
+            return;
+        }
+        if let Some(rendered) = &mut stage.rendered {
+            let Some(source) = self.sources.get(&stage.configuration.source_uri) else {
+                return;
+            };
+            if !source.pending
+                && source.document.is_valid()
+                && source.document.revision() == rendered.document.revision()
+                && Arc::ptr_eq(
+                    &source.document.ast_snapshot(),
+                    &rendered.document.ast_snapshot(),
+                )
+                && rendered_dependencies_current(rendered, &self.source_catalog)
+            {
+                rendered.preview.rebuild_map(&rendered.document);
             }
         }
     }

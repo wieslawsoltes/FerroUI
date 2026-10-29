@@ -379,6 +379,7 @@ fn old_manifests_default_to_fixed_layout_and_new_policies_round_trip() {
             version: 1,
             stages: vec![configuration],
             active: Some(0),
+            prototype: Default::default(),
         };
         assert_eq!(
             PreviewStageManifest::from_json(&manifest.to_json().unwrap()).unwrap(),
@@ -1508,7 +1509,7 @@ fn invalid_configuration_and_manifest_are_atomic_and_imported_ids_never_reuse_re
     assert_eq!(board.manifest(), before);
     assert_eq!(board.epoch(), epoch);
     let mut invalid = before.clone();
-    invalid.version = 2;
+    invalid.version = 3;
     assert!(board.restore_manifest(invalid).is_err());
     assert_eq!(board.manifest(), before);
     let serialized = before.to_json().unwrap();

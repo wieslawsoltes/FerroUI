@@ -34,6 +34,11 @@ per-card zoom, bounded comparison matrices and native PNG export extend the same
 Open the [preview-stage sample](samples/PreviewStages.xaml)
 to compare Loading, Empty, Content and Error screens with actual native theme resources and
 design-time sample rows.
+The [multi-view prototyping guide](prototyping.md) compares Figma, Penpot, Android Studio,
+Xcode storyboards and historical Qt/SketchFlow workflows. Search stages across documents,
+define named flows and source-anchored Navigate/Back interactions, inspect connections,
+and play a journey with independent native controls. The [prototype sample](samples/PrototypeFlow.xaml)
+provides Home, Details and Settings screens with named controls and retained input.
 
 ## Run
 
@@ -45,6 +50,7 @@ cargo run -p designer-studio -- --file /absolute/path/to/MainWindow.xaml
 cargo run -p designer-studio -- --file docs/designer/samples/DesignWorkflows.xaml
 cargo run -p designer-studio -- --file docs/designer/samples/SelectionWorkflows.xaml
 cargo run -p designer-studio -- --file docs/designer/samples/PreviewStages.xaml
+cargo run -p designer-studio -- --file docs/designer/samples/PrototypeFlow.xaml
 cargo run -p designer-studio -- --project /absolute/path/to/solution
 ```
 
@@ -111,6 +117,13 @@ grip applies fixed logical dimensions while preserving Live control state; card 
 changes only display scale. **Compare matrix** combines size, theme, direction, design-data
 and authored-state choices within the board's capacity. **Save preview image…** saves the
 current accepted native stage as PNG, excluding designer commands and display zoom.
+**Current document** / **All views** and search organize the stage board without changing
+pinning or native state. **Prototype** opens named flows and their reachable-screen
+connections. **Add interaction…** binds an authored control to Navigate or Back; the player
+uses a separate native run so returning to a screen retains that run's text and control
+state. Restart resets navigation, while starting a new Play run creates fresh controls.
+Version-2 stage sets persist the graph with portable stage references. See
+[interactive prototypes](prototyping.md) for source guards, keyboard input and automation.
 
 The left dock switches between **Layers**, **Assets**, **Library** and **Project**:
 

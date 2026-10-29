@@ -33,7 +33,7 @@ fn environment_schema() -> Value {
     )
 }
 
-fn anchor_schema() -> Value {
+pub(super) fn anchor_schema() -> Value {
     let segment = s::object(
         json!({"namespace":bounded_string(4096),"type_name":bounded_string(512),
         "name":s::nullable(bounded_string(512)),"key":s::nullable(bounded_string(512))}),
@@ -89,8 +89,9 @@ fn matrix_schema() -> Value {
 
 fn manifest_schema() -> Value {
     s::object(
-        json!({"version":{"const":1},"stages":s::array(configuration_schema(),crate::MAX_PREVIEW_STAGES),
-        "active":s::nullable(json!({"type":"integer","minimum":0,"maximum":15}))}),
+        json!({"version":{"enum":[1,2]},"stages":s::array(configuration_schema(),crate::MAX_PREVIEW_STAGES),
+        "active":s::nullable(json!({"type":"integer","minimum":0,"maximum":15})),
+        "prototype":super::prototype::graph_schema(true)}),
         &["version", "stages", "active"],
     )
 }
