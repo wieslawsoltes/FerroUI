@@ -17,10 +17,10 @@
       <TextBlock Grid.Row="2" VerticalAlignment="Center" Margin="2">MaxRating:</TextBlock>
       <Slider Grid.Row="2" Grid.Column="1" x:Name="Max" Minimum="1" Maximum="10" Value="5" IsSnapToTickEnabled="True" TickFrequency="1" Margin="2" />
     </Grid>
-    <RatingControl x:Name="Configurable" Margin="2" HorizontalAlignment="Left" Caption="Your rating"
+    <RatingControl x:Name="Configurable" Margin="2" HorizontalAlignment="Left" Caption="Your rating" Value="3"
                    IsClearEnabled="{Binding #Clearable.IsChecked}" IsReadOnly="{Binding #ReadOnly.IsChecked}"
                    MaxRating="{Binding #Max.Value}" />
-    <TextBlock Margin="2" Text="{Binding #Configurable.Value, StringFormat='Value: {0}'}" />
+    <TextBlock Margin="2" Text="{Binding #Configurable.Value, StringFormat='Value: {0} (-1 when not rated)'}" />
 
     <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">Placeholder and read-only</TextBlock>
     <StackPanel Margin="2" Spacing="8">
