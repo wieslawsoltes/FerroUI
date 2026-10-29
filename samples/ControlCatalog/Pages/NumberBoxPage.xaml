@@ -1,5 +1,6 @@
 <ContentPage Theme="{StaticResource ScrollPage}" xmlns="https://github.com/ferroui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:generic="clr-namespace:System.Collections.Generic;assembly=netstandard"
              Header="NumberBox"
              x:Class="ControlCatalog.Pages.NumberBoxPage">
   <!-- Not from upstream: WinUI's NumberBox (docs/porting/winui-controls.md); NumericUpDown is the
@@ -12,9 +13,13 @@
     <Grid Margin="2" ColumnDefinitions="Auto,200" RowDefinitions="Auto,Auto,Auto,Auto">
       <TextBlock Grid.Row="0" VerticalAlignment="Center" Margin="2">SpinButtonPlacementMode:</TextBlock>
       <ComboBox Grid.Row="0" Grid.Column="1" x:Name="SpinMode" SelectedIndex="2" Margin="2">
-        <NumberBoxSpinButtonPlacementMode>Hidden</NumberBoxSpinButtonPlacementMode>
-        <NumberBoxSpinButtonPlacementMode>Compact</NumberBoxSpinButtonPlacementMode>
-        <NumberBoxSpinButtonPlacementMode>Inline</NumberBoxSpinButtonPlacementMode>
+        <ComboBox.ItemsSource>
+          <generic:List x:TypeArguments="NumberBoxSpinButtonPlacementMode">
+            <NumberBoxSpinButtonPlacementMode>Hidden</NumberBoxSpinButtonPlacementMode>
+            <NumberBoxSpinButtonPlacementMode>Compact</NumberBoxSpinButtonPlacementMode>
+            <NumberBoxSpinButtonPlacementMode>Inline</NumberBoxSpinButtonPlacementMode>
+          </generic:List>
+        </ComboBox.ItemsSource>
       </ComboBox>
       <TextBlock Grid.Row="1" VerticalAlignment="Center" Margin="2">AcceptsExpression:</TextBlock>
       <CheckBox Grid.Row="1" Grid.Column="1" x:Name="Expression" IsChecked="True" Margin="2" />
@@ -22,8 +27,12 @@
       <CheckBox Grid.Row="2" Grid.Column="1" x:Name="Wrap" Margin="2" />
       <TextBlock Grid.Row="3" VerticalAlignment="Center" Margin="2">ValidationMode:</TextBlock>
       <ComboBox Grid.Row="3" Grid.Column="1" x:Name="Validation" SelectedIndex="0" Margin="2">
-        <NumberBoxValidationMode>InvalidInputOverwritten</NumberBoxValidationMode>
-        <NumberBoxValidationMode>Disabled</NumberBoxValidationMode>
+        <ComboBox.ItemsSource>
+          <generic:List x:TypeArguments="NumberBoxValidationMode">
+            <NumberBoxValidationMode>InvalidInputOverwritten</NumberBoxValidationMode>
+            <NumberBoxValidationMode>Disabled</NumberBoxValidationMode>
+          </generic:List>
+        </ComboBox.ItemsSource>
       </ComboBox>
     </Grid>
     <NumberBox x:Name="Configurable" Margin="2" Width="300" HorizontalAlignment="Left"
