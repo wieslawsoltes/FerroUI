@@ -97,6 +97,7 @@ macro_rules! document_tests {
 document_tests! {
     controls_adorner_layer => "/Controls/AdornerLayer.xaml";
     controls_auto_complete_box => "/Controls/AutoCompleteBox.xaml";
+    controls_auto_suggest_box => "/Controls/AutoSuggestBox.xaml";
     controls_button => "/Controls/Button.xaml";
     controls_calendar => "/Controls/Calendar.xaml";
     controls_calendar_button => "/Controls/CalendarButton.xaml";
@@ -131,6 +132,7 @@ document_tests! {
     controls_popup_root => "/Controls/PopupRoot.xaml";
     controls_progress_bar => "/Controls/ProgressBar.xaml";
     controls_radio_button => "/Controls/RadioButton.xaml";
+    controls_radio_buttons => "/Controls/RadioButtons.xaml";
     controls_repeat_button => "/Controls/RepeatButton.xaml";
     controls_scroll_bar => "/Controls/ScrollBar.xaml";
     controls_scroll_viewer => "/Controls/ScrollViewer.xaml";
@@ -205,6 +207,8 @@ document_tests! {
     resources_progress_bar_themeresources => "/Resources/ProgressBar_themeresources.xaml";
     resources_progress_ring_themeresources => "/Resources/ProgressRing_themeresources.xaml";
     resources_radio_button_themeresources => "/Resources/RadioButton_themeresources.xaml";
+    resources_radio_buttons_themeresources => "/Resources/RadioButtons_themeresources.xaml";
+    resources_rating_control_themeresources => "/Resources/RatingControl_themeresources.xaml";
     resources_refresh_container_themeresources => "/Resources/RefreshContainer_themeresources.xaml";
     resources_refresh_visualizer_themeresources => "/Resources/RefreshVisualizer_themeresources.xaml";
     resources_repeat_button_themeresources => "/Resources/RepeatButton_themeresources.xaml";
@@ -248,7 +252,9 @@ document_tests! {
     controls_drop_down_button => "/Controls/DropDownButton.xaml";
     controls_expander => "/Controls/Expander.xaml";
     controls_numeric_up_down => "/Controls/NumericUpDown.xaml";
+    controls_number_box => "/Controls/NumberBox.xaml";
     controls_pips_pager => "/Controls/PipsPager.xaml";
+    controls_rating_control => "/Controls/RatingControl.xaml";
     controls_refresh_container => "/Controls/RefreshContainer.xaml";
     controls_refresh_visualizer => "/Controls/RefreshVisualizer.xaml";
     controls_slider => "/Controls/Slider.xaml";

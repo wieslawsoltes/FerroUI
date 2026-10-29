@@ -50,13 +50,20 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add("/Pages/CheckBoxPage.xaml", "CheckBox", Icons::CHECKBOX, "Two- and three-state check boxes");
             s.add("/Pages/ColorPickerPage.xaml", "ColorPicker", Icons::PALETTE, "Pick colors from spectrum and palette views");
             s.add("/Pages/ComboBoxPage.xaml", "ComboBox", Icons::DROPDOWN, "A drop-down list of selectable items");
+            // Not from upstream: NumberBox of WinUI (docs/porting/winui-controls.md).
+            s.add("/Pages/NumberBoxPage.xaml", "NumberBox", Icons::NUMBER, "Numbers and expressions with spin buttons");
             s.add("/Pages/NumericUpDownPage.xaml", "NumericUpDown", Icons::NUMBER, "Numeric input with spinner buttons");
             s.add("/Pages/RadioButtonPage.xaml", "RadioButton", Icons::RADIO, "Mutually exclusive option groups");
+            // Not from upstream: RadioButtons and RatingControl of WinUI (docs/porting/winui-controls.md).
+            s.add("/Pages/RadioButtonsPage.xaml", "RadioButtons", Icons::RADIO, "A group of radio buttons with one selection");
+            s.add("/Pages/RatingControlPage.xaml", "RatingControl", Icons::STAR, "Rate with stars, with placeholder and clearing");
             s.add("/Pages/SliderPage.xaml", "Slider", Icons::TUNE, "Select a value from a continuous range");
             s.add("/Pages/ToggleSwitchPage.xaml", "ToggleSwitch", Icons::TOGGLE, "An on/off switch with a sliding knob");
         }),
         section("Text", Icons::TEXT_BOX, &mut unavailable, |s| {
             s.add("/Pages/AutoCompleteBoxPage.xaml", "AutoCompleteBox", Icons::TEXT_INPUT, "Text input with completion suggestions");
+            // Not from upstream: AutoSuggestBox of WinUI (docs/porting/winui-controls.md).
+            s.add("/Pages/AutoSuggestBoxPage.xaml", "AutoSuggestBox", Icons::TEXT_INPUT, "Text input with suggestions the app filters");
             s.add("/Pages/LabelsPage.xaml", "Label", Icons::TAG, "Captions with access keys for other controls");
             s.add_with_samples(
                 "/Pages/TextBoxPage.xaml",
