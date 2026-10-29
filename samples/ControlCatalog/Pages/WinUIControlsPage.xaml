@@ -33,9 +33,9 @@
         <InfoBar IsOpen="True" Severity="Warning" Title="Warning" Message="Something needs attention." />
         <InfoBar IsOpen="True" Severity="Error" Title="Error" Message="The operation failed." IsClosable="False" />
         <StackPanel Orientation="Horizontal" Spacing="24">
-          <InfoBadge />
-          <InfoBadge Value="7" />
-          <InfoBadge Value="42" />
+          <InfoBadge VerticalAlignment="Center" />
+          <InfoBadge Value="7" VerticalAlignment="Center" />
+          <InfoBadge Value="42" VerticalAlignment="Center" />
           <ProgressRing IsIndeterminate="True" />
           <ProgressRing IsIndeterminate="False" Value="60" />
         </StackPanel>
