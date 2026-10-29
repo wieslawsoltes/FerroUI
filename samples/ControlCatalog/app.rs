@@ -29,6 +29,10 @@ use ferroui_themes_material::MaterialTheme;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
+/// The symbol font of the WinUI controls in the catalog: Segoe Fluent Icons where the system has
+/// it, else the catalog's own font of the same code points.
+const SYMBOL_FONT_FAMILY: &str = "Segoe Fluent Icons, Segoe MDL2 Assets, ferres://ControlCatalog/Assets/Fonts/FerroUICatalogSymbols.ttf#FerroUI Catalog Symbols";
+
 /// The application of the catalog.
 #[repr(C)]
 pub struct App {
@@ -123,6 +127,16 @@ impl ApplicationImpl for App {
         *this.color_picker_fluent.borrow_mut() = from_markup_value::<Rc<dyn IStyle>>(&this.resource("ColorPickerFluent"));
         *this.tree_data_grid_fluent.borrow_mut() = from_markup_value::<Rc<dyn IStyle>>(&this.resource("TreeDataGridFluent"));
         *this.inking_winui.borrow_mut() = from_markup_value::<Rc<dyn IStyle>>(&this.resource("InkingWinUI"));
+
+        // Not in the original: the symbol font of the WinUI controls (SymbolIcon, FontIcon and the
+        // glyphs of InfoBar, RatingControl, NavigationView...; docs/porting/winui-controls.md,
+        // section 5.2). The themes name Segoe Fluent Icons, which only Windows has; the catalog
+        // falls back to its own FerroUI Catalog Symbols, which has the glyphs its pages use at the
+        // same code points (scripts/winui-controls/catalog_symbol_font.py). Resources of the
+        // application come before those of the themes.
+        if let Ok(family) = ferroui_base::media::FontFamily::parse(SYMBOL_FONT_FAMILY) {
+            this.resources().add("SymbolThemeFontFamily", Some(Rc::new(family) as ferroui_base::BoxedValue));
+        }
 
         // The port starts the catalog in its WinUI theme (not in the original, which starts in the
         // Fluent theme); with the feature `classic-themes` the settings page and

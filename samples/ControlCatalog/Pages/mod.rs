@@ -40,8 +40,14 @@ mod focus_page;
 mod headered_content_page;
 mod home_page;
 mod image_page;
+mod icon_element_page;
+mod info_badge_page;
+mod info_bar_page;
+mod auto_suggest_box_page;
+mod number_box_page;
+mod radio_buttons_page;
+mod rating_control_page;
 mod inking_page;
-mod winui_controls_page;
 mod labels_page;
 mod layout_transform_control_page;
 mod list_box_page;
@@ -53,6 +59,7 @@ mod navigation_demo_page;
 mod numeric_up_down_page;
 mod open_gl_page;
 mod platform_info_page;
+mod progress_ring_page;
 mod platform_settings_page;
 mod pointer_canvas;
 mod progress_bar_page;
@@ -175,8 +182,15 @@ pub use gestures::{GesturePinchRotationPage, GesturePinchZoomPage, GesturePullPa
 pub use headered_content_page::HeaderedContentPage;
 pub use home_page::HomePage;
 pub use image_page::ImagePage;
+pub use icon_element_page::IconElementPage;
+pub use info_badge_page::InfoBadgePage;
+pub use info_bar_page::InfoBarPage;
+pub use progress_ring_page::ProgressRingPage;
+pub use auto_suggest_box_page::AutoSuggestBoxPage;
+pub use number_box_page::NumberBoxPage;
+pub use radio_buttons_page::RadioButtonsPage;
+pub use rating_control_page::RatingControlPage;
 pub use inking_page::InkingPage;
-pub use winui_controls_page::WinUIControlsPage;
 pub use labels_page::LabelsPage;
 pub use layout_transform_control_page::LayoutTransformControlPage;
 pub use list_box_page::ListBoxPage;
@@ -271,7 +285,14 @@ pub(crate) fn register_lists() {
 /// The classes of the files directly under `Pages/`.
 const ROOT_TYPES: &[&TypeInfo] = &[
     InkingPage::TYPE,
-    WinUIControlsPage::TYPE,
+    IconElementPage::TYPE,
+    InfoBadgePage::TYPE,
+    InfoBarPage::TYPE,
+    ProgressRingPage::TYPE,
+    AutoSuggestBoxPage::TYPE,
+    NumberBoxPage::TYPE,
+    RadioButtonsPage::TYPE,
+    RatingControlPage::TYPE,
     ScrollViewerPage::TYPE,
     PointersPage::TYPE,
     CompositionPage::TYPE,
@@ -358,7 +379,14 @@ const ROOT_TYPES: &[&TypeInfo] = &[
 
 const ROOT_CLASSES: &[&XamlClass] = &[
     &InkingPage::XAML_CLASS,
-    &WinUIControlsPage::XAML_CLASS,
+    &IconElementPage::XAML_CLASS,
+    &InfoBadgePage::XAML_CLASS,
+    &InfoBarPage::XAML_CLASS,
+    &ProgressRingPage::XAML_CLASS,
+    &AutoSuggestBoxPage::XAML_CLASS,
+    &NumberBoxPage::XAML_CLASS,
+    &RadioButtonsPage::XAML_CLASS,
+    &RatingControlPage::XAML_CLASS,
     &ScrollViewerPage::XAML_CLASS,
     &PointersPage::XAML_CLASS,
     &CompositionPage::XAML_CLASS,
