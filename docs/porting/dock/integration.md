@@ -20,6 +20,14 @@ Relative paths in the sources follow the new layout. The reference programs and 
 read the original C# sources expect a checkout of the original repository beside this one
 (`../Dock`). The vendored package copies are not imported.
 
+## Workspace membership
+
+The Dock crates are members of the workspace (step 2). They take the version of the workspace and
+the ferroui crates of the workspace, keep their own lints in their manifests (unsafe code
+forbidden, missing documentation denied), and are not published (`publish = false`): releases are
+on hold, and publishing the Dock crates with FerroUI is a separate decision. Until it is made,
+`scripts/release/publish.sh`, `crates.py check` and the crates table of the README leave them out.
+
 ## Remaining steps
 
 1. Make the changes of `core-patches/` in the crates of this repository (ferroui-base,
