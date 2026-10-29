@@ -257,9 +257,6 @@ cargo run -p hello-world-component-host
 # The ControlCatalog sample application
 cargo run -p control-catalog-desktop
 
-# Ember, an adaptive Hacker News reader with rich threads and an offline SQLite library
-cargo run -p ember-desktop
-
 # The TreeDataGrid demo (its pages are also the page TreeDataGrid of the ControlCatalog)
 cargo run -p treedatagrid-demo
 
@@ -279,8 +276,6 @@ cargo run -p winui-theme-gallery --bin winui-theme-gallery
 ```
 
 The ControlCatalog runs on the other platforms too: on Linux it takes the Wayland backend when a compositor is reachable, as the original sample does (`FERROUI_CATALOG_WAYLAND=0` keeps X11), on the framebuffer with `--fbdev` or `--drm`, and on the headless platform behind a VNC server with `--vnc`; in the browser through `scripts/build-browser.sh control-catalog-browser`; on iOS through `scripts/ios/sim-catalog.sh` and on Android through `scripts/android/emu-catalog.sh`. The platform documents under [docs/porting](docs/porting) have the details.
-
-[Ember](docs/samples/ember.md) demonstrates an application built on the WinUI 3 theme: responsive touch navigation, custom control templates, selectable rich HTML, virtualized discussions, search, custom themes and durable offline storage. Its browser host uses the same control tree with Fetch and IndexedDB; desktop, Android and iOS hosts use SQLite. See the guide for platform commands and verification status.
 
 Run the tests:
 
