@@ -10,10 +10,16 @@ type `minor` (additions allowed, nothing removed or changed) and the default fea
     semver_checks.py --list     print the baseline and the crates it checks, run nothing
     semver_checks.py --fetch    fetch the baseline into a shallow clone first (CI)
 
-The baseline is the tag of the release (`v0.4.0`) when the repository has it, and otherwise the
-commit that set the workspace to that version: 0.4.0 has no tag and is not on crates.io yet, and
-the sources of a release are that commit. A crate the baseline does not have (one that joined
-after the release) is not checked. The defaults of properties, which no signature shows, are
+The baseline is the tag of the release (`v0.4.0`) when the repository has it, and otherwise
+`BASELINE_COMMIT`. 0.4.0 is not published yet (no tag, not on crates.io) and the workspace on main
+is still at 0.4.0, so the 0.4.0 that will ship is main: the baseline is the commit of main the gate
+was merged on, and it moves to the tag `v0.4.0` once that is published. A crate the baseline does
+not have (one that joined after it) is not checked.
+
+The lints `constructible_struct_adds_field` and `repr_c_plain_struct_fields_reordered` are not
+counted for the virtual tables of the classes (`*VTable` structs, which `ferro_class!` writes):
+they are the dispatch machinery of the class model, every new virtual member adds a field to them,
+and no application constructs one. Every other result counts. The defaults of properties, which no signature shows, are
 guarded by the snapshot test `property_defaults_tests` of `ferroui-controls`.
 
 Only the standard library, `git`, and the `cargo` and `cargo-semver-checks` on PATH.
@@ -21,15 +27,57 @@ Only the standard library, `git`, and the `cargo` and `cargo-semver-checks` on P
 
 import json
 import os
+import re
 import subprocess
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# The release the gate compares with, and the commit of its sources. Updated by the release that
-# starts the next minor version (docs/release.md, "API stability").
+# The release the gate compares with, and the commit of its sources. 0.4.0 is not published (no tag,
+# not on crates.io) and main is still at 0.4.0, so the baseline is the commit of main the gate was
+# merged on (the merge of #332, 2026-10-29); the tag v0.4.0 replaces it once the release is
+# published (baseline_rev). Updated by the release that starts the next minor version
+# (docs/release.md, "API stability").
 BASELINE_VERSION = "0.4.0"
-BASELINE_COMMIT = "2cdce0d4e7750259d252885bde6ffbd27ef5c591"
+BASELINE_COMMIT = "80e50ba2238ac2548b437122b39b11257fb4c1c9"
+
+# Lints that are not counted for the virtual tables of the classes (`*VTable` structs written by
+# `ferro_class!`): a new virtual member adds a field to the table and may move the others.
+VTABLE_LINTS = {"constructible_struct_adds_field", "repr_c_plain_struct_fields_reordered"}
+VTABLE_ITEM = re.compile(r"\b\w+VTable\.")
+FAILURE = re.compile(r"^--- (failure|warning) (\S+):")
+PROGRESS = re.compile(r"^(Building|Built|Parsing|Parsed|Checking|Checked|Finished|Summary|Warning|Compiling|Updating|Downloading|Downloaded|Cloning|Resolving)\b")
+
+
+def counted_failures(output):
+    """The failures of the output of cargo-semver-checks that count: (crate, lint, item)."""
+    crate, kind, lint, listing, failures = None, None, None, False, []
+    for line in output.splitlines():
+        checking = re.search(r"Checking (\S+) v\S+ -> ", line)
+        if checking:
+            crate, listing = checking.group(1), False
+            continue
+        header = FAILURE.match(line.strip())
+        if header:
+            kind, lint, listing = header.group(1), header.group(2), False
+            continue
+        if line.strip() == "Failed in:":
+            listing = True
+            continue
+        if listing:
+            item = line.strip()
+            if not item:
+                listing = False
+                continue
+            if PROGRESS.match(item):
+                # The progress of the next crate, written between the results.
+                continue
+            if kind != "failure":
+                continue
+            if lint in VTABLE_LINTS and VTABLE_ITEM.search(item):
+                continue
+            failures.append((crate, lint, item))
+    return failures
 
 
 def git(*args, check=True):
@@ -109,7 +157,25 @@ def main(argv):
     for name in checked:
         command += ["--package", name]
     sys.stdout.flush()
-    return subprocess.run(command, cwd=ROOT).returncode
+    process = subprocess.Popen(command, cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    output = []
+    for line in process.stdout:
+        sys.stdout.write(line)
+        output.append(line)
+    code = process.wait()
+    output = "".join(output)
+    failures = counted_failures(output)
+    print()
+    if failures:
+        print(f"API gate: {len(failures)} breaking change(s) within {major_minor}:")
+        for crate, lint, item in failures:
+            print(f"  {crate}: {lint}: {item}")
+        return 1
+    if code != 0 and "Summary semver requires" not in output:
+        print(f"API gate: cargo-semver-checks failed (exit {code}) without a semver result")
+        return code
+    print("API gate: no breaking change (the lints of the *VTable structs of the class model are not counted)")
+    return 0
 
 
 if __name__ == "__main__":
