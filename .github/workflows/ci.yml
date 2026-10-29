@@ -6,11 +6,10 @@ on:
     # A change of the documentation alone builds and tests nothing.
     paths-ignore: ['docs/**', '**/*.md']
   pull_request:
-    # `edited` too: a pull request of a stack is retargeted to main when the one below it merges
-    # (docs/stacked-pull-requests.md), and the checks run again against the new base. An edit
-    # that leaves the base alone (the title, the description) runs nothing: every job starts with
-    # the condition `github.event.action != 'edited' || github.event.changes.base != null`.
-    types: [opened, synchronize, reopened, edited]
+    # No `edited`: a run for an edit of the title skipped every job, and the skipped checks of that
+    # run replaced the results of the real run of the same commit (a failure looked like a skip). A
+    # pull request of a stack that is retargeted to main gets a new run from scripts/stack/stack.py,
+    # which brings the branch up to date with its new base (docs/stacked-pull-requests.md).
     paths-ignore: ['docs/**', '**/*.md']
   workflow_dispatch:
     inputs:
@@ -40,10 +39,9 @@ on:
 # job fails (one smoke run) still saves the dependencies it compiled.
 
 concurrency:
-  # An edit that leaves the base alone gets a group of its own, so that it does not cancel the
-  # run of the pull request that is in progress; so does the nightly run, so that it and a run of a
-  # push to main do not cancel each other.
-  group: ci-${{ github.ref }}-${{ (github.event.action == 'edited' && github.event.changes.base == null) && github.run_id || (github.event_name == 'schedule' && 'nightly' || 'run') }}
+  # The nightly run has a group of its own, so that it and a run of a push to main do not cancel
+  # each other.
+  group: ci-${{ github.ref }}-${{ github.event_name == 'schedule' && 'nightly' || 'run' }}
   cancel-in-progress: true
 
 permissions:
@@ -56,7 +54,6 @@ env:
 
 jobs:
   conventions:
-    if: (github.event.action != 'edited' || github.event.changes.base != null)
     name: Source conventions
     runs-on: ubuntu-latest
     steps:
@@ -96,7 +93,6 @@ jobs:
   # README is current. Nothing is compiled and nothing is published: about two minutes, most of it
   # the toolchain and the index.
   packaging:
-    if: (github.event.action != 'edited' || github.event.changes.base != null)
     name: Packages of the published crates
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -112,7 +108,6 @@ jobs:
   # every change: the conventions, the packages, the macOS tests of the workspace, the Windows
   # backend, X11 and the browser. To run everything on a branch: gh workflow run ci.yml --ref <branch>
   changes:
-    if: (github.event.action != 'edited' || github.event.changes.base != null)
     name: Changed areas
     runs-on: ubuntu-latest
     permissions:
@@ -169,7 +164,7 @@ jobs:
   # - It runs in the nightly run of main, which saves its build cache.
   macos:
     name: Build and test (macOS)
-    if: (github.event.action != 'edited' || github.event.changes.base != null) && (github.event_name != 'push')
+    if: (github.event_name != 'push')
     runs-on: macos-15
     timeout-minutes: 180
     env:
@@ -192,7 +187,7 @@ jobs:
   # The commands are those the macOS job ran.
   macos-features:
     name: Build and test (macOS, the ControlCatalog with classic themes, Vello)
-    if: (github.event.action != 'edited' || github.event.changes.base != null) && ((github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') || (github.event_name == 'pull_request' && needs.changes.outputs.vello == 'true'))
+    if: ((github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') || (github.event_name == 'pull_request' && needs.changes.outputs.vello == 'true'))
     needs: changes
     runs-on: macos-15
     timeout-minutes: 120
@@ -241,7 +236,7 @@ jobs:
   #   binaries are published stays informative: it gates them.
   windows:
     name: Build, test and smoke run (Windows platform backend)
-    if: (github.event.action != 'edited' || github.event.changes.base != null) && (github.event_name != 'push')
+    if: (github.event_name != 'push')
     needs: changes
     runs-on: windows-latest
     timeout-minutes: 120
@@ -643,7 +638,7 @@ jobs:
   # for the target and runs there. Informative as a whole until its first green run.
   windows-arm64:
     name: Build, test and smoke run (Windows platform backend, ARM64; informative)
-    if: (github.event.action != 'edited' || github.event.changes.base != null) && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+    if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
     runs-on: windows-11-arm
     continue-on-error: true
     timeout-minutes: 120
@@ -763,7 +758,6 @@ jobs:
           done
 
   browser:
-    if: (github.event.action != 'edited' || github.event.changes.base != null)
     needs: changes
     name: Check (browser, wasm32-unknown-emscripten)
     runs-on: ubuntu-latest
@@ -856,7 +850,7 @@ jobs:
   # toolchain a second time (from caches) and nothing else twice: the sites with both modules are
   # composed, by the job below, from the sites the two jobs built.
   browser-threads:
-    if: (github.event.action != 'edited' || github.event.changes.base != null) && ((github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') || (github.event_name == 'pull_request' && needs.changes.outputs.browser == 'true'))
+    if: ((github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') || (github.event_name == 'pull_request' && needs.changes.outputs.browser == 'true'))
     needs: changes
     name: Check (browser with threads, wasm32-unknown-emscripten)
     runs-on: ubuntu-latest
@@ -923,7 +917,7 @@ jobs:
   # above, which also checks that the files the two builds share are identical, and tested: nothing
   # is compiled in this job.
   browser-site:
-    if: (github.event.action != 'edited' || github.event.changes.base != null) && ((github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') || (github.event_name == 'pull_request' && needs.changes.outputs.browser == 'true'))
+    if: ((github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') || (github.event_name == 'pull_request' && needs.changes.outputs.browser == 'true'))
     name: Check (browser, the site with both modules)
     needs: [changes, browser, browser-threads]
     runs-on: ubuntu-latest
@@ -967,7 +961,7 @@ jobs:
   # mode in a simulator is run with scripts/ios/sim-smoke.sh on the development machine.
   ios:
     name: Build and test (iOS, simulator target)
-    if: (github.event.action != 'edited' || github.event.changes.base != null) && ((github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') || (github.event_name == 'pull_request' && needs.changes.outputs.ios == 'true'))
+    if: ((github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') || (github.event_name == 'pull_request' && needs.changes.outputs.ios == 'true'))
     needs: changes
     runs-on: macos-15
     timeout-minutes: 90
@@ -1018,7 +1012,6 @@ jobs:
   # software rasterizer, with frames read back), under a window manager, and with two monitors
   # (xrandr --setmonitor). No compositing manager: that is not covered here.
   x11:
-    if: (github.event.action != 'edited' || github.event.changes.base != null)
     name: Build and test (Linux, X11 under Xvfb)
     runs-on: ubuntu-latest
     timeout-minutes: 90
@@ -1292,7 +1285,7 @@ jobs:
   # EGL (Mesa's software rasterizer), on an output of scale 1 and of scale 2. Not covered: a
   # desktop compositor (Mutter, KWin), a hardware GPU, touch, a compositor restart.
   wayland:
-    if: (github.event.action != 'edited' || github.event.changes.base != null) && ((github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') || (github.event_name == 'pull_request' && needs.changes.outputs.wayland == 'true'))
+    if: ((github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') || (github.event_name == 'pull_request' && needs.changes.outputs.wayland == 'true'))
     needs: changes
     name: Build and test (Linux, Wayland under headless sway)
     runs-on: ubuntu-latest
@@ -1488,7 +1481,7 @@ jobs:
   # workflow (docs/porting/wayland-platform.md, section 12.3). The compositor does not run as
   # root: the run is made by a user of the container.
   wayland-next:
-    if: (github.event.action != 'edited' || github.event.changes.base != null) && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+    if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
     name: Informational (Linux, Wayland under the sway of Debian 13)
     runs-on: ubuntu-latest
     container: debian:trixie
@@ -1550,7 +1543,7 @@ jobs:
   # (uinput). The step that looks for them says what the kernel of the runner has; what is missing is
   # skipped with a reason. A real board with a panel and a touch screen is not covered by any of this.
   linuxfb:
-    if: (github.event.action != 'edited' || github.event.changes.base != null) && ((github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') || (github.event_name == 'pull_request' && needs.changes.outputs.linuxfb == 'true'))
+    if: ((github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') || (github.event_name == 'pull_request' && needs.changes.outputs.linuxfb == 'true'))
     needs: changes
     name: Build and test (Linux framebuffer, virtual devices)
     runs-on: ubuntu-latest
@@ -1639,7 +1632,7 @@ jobs:
   # and the package of the smoke application built without Gradle. Nothing runs on a device here:
   # the emulator runs are made on the development machine (scripts/android/emu-smoke.sh).
   android:
-    if: (github.event.action != 'edited' || github.event.changes.base != null) && ((github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') || (github.event_name == 'pull_request' && needs.changes.outputs.android == 'true'))
+    if: ((github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') || (github.event_name == 'pull_request' && needs.changes.outputs.android == 'true'))
     needs: changes
     name: Build and package (Android, arm64)
     runs-on: ubuntu-latest
