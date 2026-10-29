@@ -90,8 +90,10 @@ fn all_source_factory_events_expose_the_original_sender_shared_arguments_and_dis
  subscription.dispose();subscription.dispose();invoke(value.clone(),$trigger,&arguments);assert_eq!(seen.borrow().len(),1,concat!("disposed ",$name));
  // Reset through the original protected hook before checking a second tracking transition.
  if $name=="GlobalDockTrackingChanged" { ferrodock_model::FactoryBaseImpl::factory_base(factory.as_ref()).update_global_dock_tracking(None,None,None,DockTrackingChangeReason::Unknown); }
- // Native event-add metadata follows the CLR void add accessor contract.
- assert!((metadata.find_event($name).unwrap().add)(&[Some(value.clone()),Some(Rc::new(handler))]).unwrap().is_none());
+ // Event-add metadata returns the subscription, or null for an event that cannot remove the handler
+ // (MarkupEvent::add); the handler stays subscribed while the subscription is not disposed.
+ let added=(metadata.find_event($name).unwrap().add)(&[Some(value.clone()),Some(Rc::new(handler))]).unwrap();
+ assert!(added.is_none()||ferroui_base::metadata::MarkupEvent::subscription_of(&added).is_some(),$name);
  invoke(value,$trigger,&arguments);assert_eq!(seen.borrow().len(),2,concat!("metadata ",$name));
  }};
  }

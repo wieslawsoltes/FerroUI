@@ -171,7 +171,7 @@ mod tests {
     }
     #[test]
     fn native_storage_streams_roundtrip_and_truncate_with_original_io_errors() {
-        let path = std::path::PathBuf::from("/Volumes/SSD/temp/ferrodock-port")
+        let path = std::env::temp_dir()
             .join(format!("layout-file-storage-{}.json", std::process::id()));
         std::fs::write(&path, b"longer previous layout data").unwrap();
         let file = || BclStorageFile::new(FileSystemInfo::file(&path)) as Rc<dyn IStorageFile>;

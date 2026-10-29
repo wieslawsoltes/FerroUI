@@ -209,9 +209,13 @@ fn locked_command_source_and_foreign_lists_use_fresh_native_contract_ids() {
         .strip_suffix(".0")
         .unwrap();
     let location = command.location.as_ref().unwrap().replace('\\', "/");
-    assert!(location.contains(&format!(
-        "ferroui-reactiveui-{version}/reactive_command/i_command.rs:"
-    )));
+    // The published package, or the crate of the workspace when it is a member.
+    assert!(
+        location.contains(&format!(
+            "ferroui-reactiveui-{version}/reactive_command/i_command.rs:"
+        )) || location.contains("FerroUI.ReactiveUI/reactive_command/i_command.rs:"),
+        "{location}"
+    );
     for (name, arg) in [("IDockable", ids[0]), ("IDockWindow", ids[3])] {
         assert!(
             native

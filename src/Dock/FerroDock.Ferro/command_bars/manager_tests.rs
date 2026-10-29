@@ -456,13 +456,19 @@ fn native_host_peer_and_model_metadata_preserve_original_members_and_event_dispo
         let event = metadata.find_event("CommandBarsChanged").unwrap();
         assert_eq!(event.arguments.len(), 2);
         let result = (event.add)(&[Some(boxed), Some(Rc::new(handler.clone()))]).unwrap();
-        assert!(result.is_none());
         assert_eq!(provider.changed.handler_count(), 1);
         provider.changed.raise(&());
         assert_eq!(calls.get(), 1);
-        // Shared event metadata exposes add only; remove the actual System token.
-        let token = provider.changed.snapshot().iter().next().unwrap().0;
-        provider.changed.remove(token);
+        // The event metadata returns the subscription when the event can remove the handler
+        // (the contract of MarkupEvent::add); otherwise the actual System token is removed.
+        match ferroui_base::metadata::MarkupEvent::subscription_of(&result) {
+            Some(subscription) => subscription.dispose(),
+            None => {
+                let token = provider.changed.snapshot().iter().next().unwrap().0;
+                provider.changed.remove(token);
+            }
+        }
+        assert_eq!(provider.changed.handler_count(), 0);
         let contract: Rc<dyn IDockCommandBarProvider> = provider.clone();
         let subscription = crate::command_bars::model_metadata::subscribe(&contract, handler);
         assert_eq!(provider.changed.handler_count(), 1);
