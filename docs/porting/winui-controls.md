@@ -303,3 +303,15 @@ Where #286 differed from WinUI, the port follows WinUI: the text of NumberBox's 
 | A NavigationViewItem that contains itself or an ancestor (a cycle of items). | The child is left out and a warning is logged. | Behaviour (addition) | #286 asserted; a cycle from markup or data must not end the application. |
 | `NavigationViewItemAutomationPeer` reports `PositionInSet`, `SizeOfSet` and `Level`; `NavigationViewAutomationPeer::RaiseSelectionChangedEvent`. | Not reported; the change of the selection is raised as a change of the `Selection` property of the selection pattern. | Missing | No position-in-set members of FerroUI's peers; the selection pattern carries the change. |
 | `PaneToggleButtonStyle` and `MenuItemContainerStyle` are `Style`s. | `Option<Ref<ControlTheme>>`; the container theme is applied to the containers at the style priority. | Representation | FerroUI's styles of controls are control themes. |
+
+### 10.5 TitleBar (W8c)
+
+`src/FerroUI.Controls/title_bar.rs`, `primitives/title_bar_template_settings.rs`, `automation/peers/title_bar_automation_peer.rs`; tests `title_bar_tests.rs` and the catalog shell tests.
+
+| WinUI | Port | Kind | Why |
+|---|---|---|---|
+| The insets, drag regions, activation and title of `AppWindow` (section 5.3). | `Window::caption_button_insets`, `WindowDecorationProperties` roles, `WindowBase::is_active`, `Window::title`. | Representation | FerroUI's window chrome. |
+| `AutoRefreshDragRegions` false: one pass over the content after its first `LayoutUpdated`; true: a pass after each. | The bar finds the interactive elements of its content when the template, the content, the headers or the buttons change, when it joins a window and on `RecomputeDragRegions`; `AutoRefreshDragRegions` is stored but changes nothing yet. | Missing | No `LayoutUpdated` subscription per element; the roles stay on the elements. |
+| `TitleBarTrace` (debug output). | Not ported. | Missing | Diagnostics of the WinUI build. |
+| `TitleBar` passes `RightToLeft` insets swapped. | The same, from `FlowDirection`. | - | - |
+
