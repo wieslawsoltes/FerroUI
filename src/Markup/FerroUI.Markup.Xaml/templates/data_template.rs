@@ -179,3 +179,37 @@ ferro_markup_type!(class DataTemplate {
             },
     ],
 });
+
+#[cfg(test)]
+mod instance_tests {
+    use super::is_instance_of_type;
+    use ferroui_base::data::core::{ValueType, ValueTypes};
+    use ferroui_base::BoxedValue;
+    use std::rc::Rc;
+
+    /// A source type with a conditional cast to a contract: only some of its
+    /// values implement it (an `IDockable` that is an `IDock` or not).
+    #[derive(Clone, PartialEq)]
+    struct Source {
+        implements: bool,
+    }
+    #[derive(Clone, PartialEq)]
+    struct Contract;
+
+    /// The registration of a conditional cast makes the types assignable; a
+    /// value is an instance of the target only when the cast of that value
+    /// succeeds.
+    #[test]
+    fn a_conditional_cast_matches_only_the_values_it_casts() {
+        ValueTypes::register_boxed_cast::<Source, Contract>(|value| {
+            value.downcast_ref::<Source>().filter(|source| source.implements).map(|_| Contract)
+        });
+        let target = ValueType::of::<Contract>();
+        assert!(ValueTypes::is_assignable(ValueType::of::<Source>(), target));
+        let implementing: BoxedValue = Rc::new(Source { implements: true });
+        let other: BoxedValue = Rc::new(Source { implements: false });
+        assert!(is_instance_of_type(target, Some(&implementing)));
+        assert!(!is_instance_of_type(target, Some(&other)), "the cast of this value fails");
+        assert!(!is_instance_of_type(target, None), "null is an instance of no type");
+    }
+}
