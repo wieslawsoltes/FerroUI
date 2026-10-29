@@ -39,7 +39,7 @@
 set -euo pipefail
 
 usage() {
-    sed -n '2,39p' "$0" | sed 's/^# \{0,1\}//'
+    sed -n '2,38p' "$0" | sed 's/^# \{0,1\}//'
 }
 
 app=""
