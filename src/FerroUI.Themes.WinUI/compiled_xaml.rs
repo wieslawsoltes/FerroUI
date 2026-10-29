@@ -75012,11 +75012,11 @@ pub fn build_controls_winuicontrols_xaml(
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::ScrollBar as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_70) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 495, 4)?;
     // Controls/WinUIControls.xaml(66,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultScrollViewerStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_132, 66, 4)?;
-    // Controls/WinUIControls.xaml(160,4) Content (resource)
-    let deferred_72 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_134, 160, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ScrollViewer as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_72) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 160, 4)?;
-    // Controls/WinUIControls.xaml(162,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "ScrollViewerScrollBarlessTemplate", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_135, 162, 4)?;
+    // Controls/WinUIControls.xaml(161,4) Content (resource)
+    let deferred_72 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_134, 161, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ScrollViewer as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_72) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 161, 4)?;
+    // Controls/WinUIControls.xaml(163,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "ScrollViewerScrollBarlessTemplate", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_135, 163, 4)?;
     // Controls/WinUIControls.xaml(69,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "TextBoxDeleteButtonStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_137, 69, 4)?;
     // Controls/WinUIControls.xaml(119,4) Content (resource)
@@ -90639,10 +90639,10 @@ fn build_controls_winuicontrols_xaml_deferred_132(
     ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_7, rt::to_object(::core::clone::Clone::clone(&control_template_0)));
-    // Controls/WinUIControls.xaml(147,6) Content
-    // Controls/WinUIControls.xaml(147,6) Style
+    // Controls/WinUIControls.xaml(148,6) Content
+    // Controls/WinUIControls.xaml(148,6) Style
     let style_0 = ::ferroui_base::styling::Style::new();
-    // Controls/WinUIControls.xaml(147,6) Selector
+    // Controls/WinUIControls.xaml(148,6) Selector
     let selector_0 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_1 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_0), ":pointerover");
     let selector_2 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_1));
@@ -90655,13 +90655,13 @@ fn build_controls_winuicontrols_xaml_deferred_132(
     let selector_9 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_8), "PART_HorizontalScrollBar");
     let selector_10 = ::ferroui_base::styling::Selectors::or([selector_4, selector_9]);
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_10.clone()));
-    // Controls/WinUIControls.xaml(148,8) Content
+    // Controls/WinUIControls.xaml(149,8) Content
     rt::add_setter(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::opacity_property()), rt::to_object(1.0_f64));
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_0.clone(), 147, 6)?);
-    // Controls/WinUIControls.xaml(150,6) Content
-    // Controls/WinUIControls.xaml(150,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_0.clone(), 148, 6)?);
+    // Controls/WinUIControls.xaml(151,6) Content
+    // Controls/WinUIControls.xaml(151,6) Style
     let style_1 = ::ferroui_base::styling::Style::new();
-    // Controls/WinUIControls.xaml(150,6) Selector
+    // Controls/WinUIControls.xaml(151,6) Selector
     let selector_11 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_12 = ::ferroui_base::styling::Selectors::property_equals_untyped(::core::option::Option::Some(selector_11), rt::property(::ferroui_controls::ScrollViewer::is_expanded_property()), ::std::rc::Rc::new(::core::clone::Clone::clone(&true)));
     let selector_13 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_12));
@@ -90674,22 +90674,22 @@ fn build_controls_winuicontrols_xaml_deferred_132(
     let selector_20 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_19), "PART_HorizontalScrollBar");
     let selector_21 = ::ferroui_base::styling::Selectors::or([selector_15, selector_20]);
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_1, ::core::option::Option::Some(selector_21.clone()));
-    // Controls/WinUIControls.xaml(151,8) Content
+    // Controls/WinUIControls.xaml(152,8) Content
     rt::add_setter(style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::opacity_property()), rt::to_object(1.0_f64));
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 150, 6)?);
-    // Controls/WinUIControls.xaml(155,6) Content
-    // Controls/WinUIControls.xaml(155,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 151, 6)?);
+    // Controls/WinUIControls.xaml(156,6) Content
+    // Controls/WinUIControls.xaml(156,6) Style
     let style_2 = ::ferroui_base::styling::Style::new();
-    // Controls/WinUIControls.xaml(155,6) Selector
+    // Controls/WinUIControls.xaml(156,6) Selector
     let selector_22 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_23 = ::ferroui_base::styling::Selectors::property_equals_untyped(::core::option::Option::Some(selector_22), rt::property(::ferroui_controls::ScrollViewer::is_expanded_property()), ::std::rc::Rc::new(::core::clone::Clone::clone(&true)));
     let selector_24 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_23));
     let selector_25 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_24), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
     let selector_26 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_25), "ScrollBarSeparator");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_2, ::core::option::Option::Some(selector_26.clone()));
-    // Controls/WinUIControls.xaml(156,8) Content
+    // Controls/WinUIControls.xaml(157,8) Content
     rt::add_setter(style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::opacity_property()), rt::to_object(1.0_f64));
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_2.clone(), 155, 6)?);
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_2.clone(), 156, 6)?);
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
 }
@@ -90752,203 +90752,206 @@ fn build_controls_winuicontrols_xaml_deferred_133(
     // Controls/WinUIControls.xaml(83,37) Name
     scroll_content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
     rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&scroll_content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 83, 37)?;
-    // Controls/WinUIControls.xaml(83,14) RowSpan
+    // Controls/WinUIControls.xaml(83,14) Background
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    scroll_content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::row_span_property(), 2_i32, priority_0);
-    // Controls/WinUIControls.xaml(83,14) ColumnSpan
+    scroll_content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_0);
+    // Controls/WinUIControls.xaml(83,14) RowSpan
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    scroll_content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 2_i32, priority_1);
-    // Controls/WinUIControls.xaml(86,37) ContentTemplate
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_template_property(), rt::property(::ferroui_controls::ContentControl::content_template_property()), 86, 37)?;
-    // Controls/WinUIControls.xaml(87,37) Padding
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::padding_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), 87, 37)?;
-    // Controls/WinUIControls.xaml(88,37) HorizontalSnapPointsType
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ScrollContentPresenter::horizontal_snap_points_type_property(), rt::property(::ferroui_controls::ScrollViewer::horizontal_snap_points_type_property()), 88, 37)?;
-    // Controls/WinUIControls.xaml(89,37) VerticalSnapPointsType
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ScrollContentPresenter::vertical_snap_points_type_property(), rt::property(::ferroui_controls::ScrollViewer::vertical_snap_points_type_property()), 89, 37)?;
-    // Controls/WinUIControls.xaml(90,37) HorizontalSnapPointsAlignment
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ScrollContentPresenter::horizontal_snap_points_alignment_property(), rt::property(::ferroui_controls::ScrollViewer::horizontal_snap_points_alignment_property()), 90, 37)?;
-    // Controls/WinUIControls.xaml(91,37) VerticalSnapPointsAlignment
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ScrollContentPresenter::vertical_snap_points_alignment_property(), rt::property(::ferroui_controls::ScrollViewer::vertical_snap_points_alignment_property()), 91, 37)?;
-    // Controls/WinUIControls.xaml(92,37) IsScrollInertiaEnabled
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ScrollViewer::is_scroll_inertia_enabled_property(), rt::property(::ferroui_controls::ScrollViewer::is_scroll_inertia_enabled_property()), 92, 37)?;
-    // Controls/WinUIControls.xaml(94,18) GestureRecognizers
+    scroll_content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::row_span_property(), 2_i32, priority_1);
+    // Controls/WinUIControls.xaml(83,14) ColumnSpan
+    let priority_2 = ::ferroui_base::data::BindingPriority::Template;
+    scroll_content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 2_i32, priority_2);
+    // Controls/WinUIControls.xaml(87,37) ContentTemplate
+    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_template_property(), rt::property(::ferroui_controls::ContentControl::content_template_property()), 87, 37)?;
+    // Controls/WinUIControls.xaml(88,37) Padding
+    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::padding_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), 88, 37)?;
+    // Controls/WinUIControls.xaml(89,37) HorizontalSnapPointsType
+    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ScrollContentPresenter::horizontal_snap_points_type_property(), rt::property(::ferroui_controls::ScrollViewer::horizontal_snap_points_type_property()), 89, 37)?;
+    // Controls/WinUIControls.xaml(90,37) VerticalSnapPointsType
+    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ScrollContentPresenter::vertical_snap_points_type_property(), rt::property(::ferroui_controls::ScrollViewer::vertical_snap_points_type_property()), 90, 37)?;
+    // Controls/WinUIControls.xaml(91,37) HorizontalSnapPointsAlignment
+    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ScrollContentPresenter::horizontal_snap_points_alignment_property(), rt::property(::ferroui_controls::ScrollViewer::horizontal_snap_points_alignment_property()), 91, 37)?;
+    // Controls/WinUIControls.xaml(92,37) VerticalSnapPointsAlignment
+    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ScrollContentPresenter::vertical_snap_points_alignment_property(), rt::property(::ferroui_controls::ScrollViewer::vertical_snap_points_alignment_property()), 92, 37)?;
+    // Controls/WinUIControls.xaml(93,37) IsScrollInertiaEnabled
+    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ScrollViewer::is_scroll_inertia_enabled_property(), rt::property(::ferroui_controls::ScrollViewer::is_scroll_inertia_enabled_property()), 93, 37)?;
+    // Controls/WinUIControls.xaml(95,18) GestureRecognizers
     let gesture_recognizers_collection_0 = ::ferroui_base::input::InputElement::__markup_get_GestureRecognizers(scroll_content_presenter_0.upcast_ref::<::ferroui_base::input::InputElement>());
-    // Controls/WinUIControls.xaml(94,18) ScrollGestureRecognizer
+    // Controls/WinUIControls.xaml(95,18) ScrollGestureRecognizer
     let scroll_gesture_recognizer_0 = ::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::new();
     scroll_gesture_recognizer_0.begin_init();
     context.push_parent(rt::to_value(scroll_gesture_recognizer_0.clone()));
-    // Controls/WinUIControls.xaml(94,42) CanHorizontallyScroll
+    // Controls/WinUIControls.xaml(95,42) CanHorizontallyScroll
     let reflection_binding_extension_0 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("CanHorizontallyScroll"));
-    // Controls/WinUIControls.xaml(94,42) ElementName
-    ::ferroui_base::data::ReflectionBinding::__markup_set_ElementName(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_0), 94, 42)?, ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    let provided_11 = rt::provide_value(&context, rt::property_value(::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::can_horizontally_scroll_property()), &reflection_binding_extension_0, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
-    rt::bind(scroll_gesture_recognizer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::can_horizontally_scroll_property(), provided_11, 94, 42)?;
-    // Controls/WinUIControls.xaml(95,42) CanVerticallyScroll
-    let reflection_binding_extension_1 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("CanVerticallyScroll"));
     // Controls/WinUIControls.xaml(95,42) ElementName
-    ::ferroui_base::data::ReflectionBinding::__markup_set_ElementName(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_1), 95, 42)?, ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    let provided_12 = rt::provide_value(&context, rt::property_value(::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::can_vertically_scroll_property()), &reflection_binding_extension_1, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
-    rt::bind(scroll_gesture_recognizer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::can_vertically_scroll_property(), provided_12, 95, 42)?;
-    // Controls/WinUIControls.xaml(96,42) IsScrollInertiaEnabled
-    let reflection_binding_extension_2 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("(ScrollViewer.IsScrollInertiaEnabled)"));
+    ::ferroui_base::data::ReflectionBinding::__markup_set_ElementName(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_0), 95, 42)?, ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
+    let provided_11 = rt::provide_value(&context, rt::property_value(::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::can_horizontally_scroll_property()), &reflection_binding_extension_0, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    rt::bind(scroll_gesture_recognizer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::can_horizontally_scroll_property(), provided_11, 95, 42)?;
+    // Controls/WinUIControls.xaml(96,42) CanVerticallyScroll
+    let reflection_binding_extension_1 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("CanVerticallyScroll"));
     // Controls/WinUIControls.xaml(96,42) ElementName
-    ::ferroui_base::data::ReflectionBinding::__markup_set_ElementName(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_2), 96, 42)?, ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    let provided_13 = rt::provide_value(&context, rt::property_value(::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::is_scroll_inertia_enabled_property()), &reflection_binding_extension_2, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
-    rt::bind(scroll_gesture_recognizer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::is_scroll_inertia_enabled_property(), provided_13, 96, 42)?;
-    // Controls/WinUIControls.xaml(97,42) Offset
-    let reflection_binding_extension_3 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("Offset"));
+    ::ferroui_base::data::ReflectionBinding::__markup_set_ElementName(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_1), 96, 42)?, ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
+    let provided_12 = rt::provide_value(&context, rt::property_value(::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::can_vertically_scroll_property()), &reflection_binding_extension_1, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    rt::bind(scroll_gesture_recognizer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::can_vertically_scroll_property(), provided_12, 96, 42)?;
+    // Controls/WinUIControls.xaml(97,42) IsScrollInertiaEnabled
+    let reflection_binding_extension_2 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("(ScrollViewer.IsScrollInertiaEnabled)"));
     // Controls/WinUIControls.xaml(97,42) ElementName
-    ::ferroui_base::data::ReflectionBinding::__markup_set_ElementName(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_3), 97, 42)?, ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    let provided_14 = rt::provide_value(&context, rt::property_value(::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::offset_property()), &reflection_binding_extension_3, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
-    rt::bind(scroll_gesture_recognizer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::offset_property(), provided_14, 97, 42)?;
-    // Controls/WinUIControls.xaml(98,42) Viewport
-    let reflection_binding_extension_4 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("Viewport"));
+    ::ferroui_base::data::ReflectionBinding::__markup_set_ElementName(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_2), 97, 42)?, ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
+    let provided_13 = rt::provide_value(&context, rt::property_value(::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::is_scroll_inertia_enabled_property()), &reflection_binding_extension_2, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    rt::bind(scroll_gesture_recognizer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::is_scroll_inertia_enabled_property(), provided_13, 97, 42)?;
+    // Controls/WinUIControls.xaml(98,42) Offset
+    let reflection_binding_extension_3 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("Offset"));
     // Controls/WinUIControls.xaml(98,42) ElementName
-    ::ferroui_base::data::ReflectionBinding::__markup_set_ElementName(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_4), 98, 42)?, ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    let provided_15 = rt::provide_value(&context, rt::property_value(::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::viewport_property()), &reflection_binding_extension_4, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
-    rt::bind(scroll_gesture_recognizer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::viewport_property(), provided_15, 98, 42)?;
-    // Controls/WinUIControls.xaml(99,42) Extent
-    let reflection_binding_extension_5 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("Extent"));
+    ::ferroui_base::data::ReflectionBinding::__markup_set_ElementName(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_3), 98, 42)?, ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
+    let provided_14 = rt::provide_value(&context, rt::property_value(::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::offset_property()), &reflection_binding_extension_3, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    rt::bind(scroll_gesture_recognizer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::offset_property(), provided_14, 98, 42)?;
+    // Controls/WinUIControls.xaml(99,42) Viewport
+    let reflection_binding_extension_4 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("Viewport"));
     // Controls/WinUIControls.xaml(99,42) ElementName
-    ::ferroui_base::data::ReflectionBinding::__markup_set_ElementName(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_5), 99, 42)?, ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
+    ::ferroui_base::data::ReflectionBinding::__markup_set_ElementName(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_4), 99, 42)?, ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
+    let provided_15 = rt::provide_value(&context, rt::property_value(::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::viewport_property()), &reflection_binding_extension_4, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    rt::bind(scroll_gesture_recognizer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::viewport_property(), provided_15, 99, 42)?;
+    // Controls/WinUIControls.xaml(100,42) Extent
+    let reflection_binding_extension_5 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("Extent"));
+    // Controls/WinUIControls.xaml(100,42) ElementName
+    ::ferroui_base::data::ReflectionBinding::__markup_set_ElementName(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_5), 100, 42)?, ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
     let provided_16 = rt::provide_value(&context, rt::property_value(::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::extent_property()), &reflection_binding_extension_5, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
-    rt::bind(scroll_gesture_recognizer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::extent_property(), provided_16, 99, 42)?;
+    rt::bind(scroll_gesture_recognizer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::extent_property(), provided_16, 100, 42)?;
     context.pop_parent();
-    rt::invoked(scroll_gesture_recognizer_0.try_end_init(), 94, 18)?;
+    rt::invoked(scroll_gesture_recognizer_0.try_end_init(), 95, 18)?;
     ::ferroui_base::input::gesture_recognizers::GestureRecognizerCollection::__markup_Add_0(&gesture_recognizers_collection_0, ::core::clone::Clone::clone(&scroll_gesture_recognizer_0).upcast::<::ferroui_base::input::gesture_recognizers::GestureRecognizer>());
     context.pop_parent();
     rt::invoked(scroll_content_presenter_0.try_end_init(), 83, 14)?;
-    // Controls/WinUIControls.xaml(102,14) Children
+    // Controls/WinUIControls.xaml(103,14) Children
     let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/WinUIControls.xaml(102,14) Grid
+    // Controls/WinUIControls.xaml(103,14) Grid
     let grid_1 = ::ferroui_controls::Grid::new();
     grid_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_controls::Control>());
-    // Controls/WinUIControls.xaml(102,14) RowSpan
-    let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    grid_1.set_value_with_priority(::ferroui_controls::Grid::row_span_property(), 2_i32, priority_2);
-    // Controls/WinUIControls.xaml(102,14) ColumnSpan
+    // Controls/WinUIControls.xaml(103,14) RowSpan
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
-    grid_1.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 2_i32, priority_3);
-    rt::invoked(grid_1.try_end_init(), 102, 14)?;
-    // Controls/WinUIControls.xaml(104,14) Children
+    grid_1.set_value_with_priority(::ferroui_controls::Grid::row_span_property(), 2_i32, priority_3);
+    // Controls/WinUIControls.xaml(103,14) ColumnSpan
+    let priority_4 = ::ferroui_base::data::BindingPriority::Template;
+    grid_1.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 2_i32, priority_4);
+    rt::invoked(grid_1.try_end_init(), 103, 14)?;
+    // Controls/WinUIControls.xaml(105,14) Children
     let children_collection_2 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/WinUIControls.xaml(104,14) ScrollBar
+    // Controls/WinUIControls.xaml(105,14) ScrollBar
     let scroll_bar_0 = ::ferroui_controls::primitives::ScrollBar::new();
     scroll_bar_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&scroll_bar_0).upcast::<::ferroui_controls::Control>());
     context.push_parent(rt::to_value(scroll_bar_0.clone()));
-    // Controls/WinUIControls.xaml(104,24) Name
+    // Controls/WinUIControls.xaml(105,24) Name
     scroll_bar_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_VerticalScrollBar")));
-    rt::register_name(name_scope.as_ref(), "PART_VerticalScrollBar", ::core::clone::Clone::clone(&scroll_bar_0).upcast::<::ferroui_base::FerroObject>(), 104, 24)?;
-    // Controls/WinUIControls.xaml(104,14) Column
-    let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    scroll_bar_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_4);
-    // Controls/WinUIControls.xaml(106,24) Margin
-    rt::bind_dynamic_resource(&context, scroll_bar_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "ScrollViewerScrollBarMargin", 106, 24)?;
-    // Controls/WinUIControls.xaml(104,14) IsTabStop
+    rt::register_name(name_scope.as_ref(), "PART_VerticalScrollBar", ::core::clone::Clone::clone(&scroll_bar_0).upcast::<::ferroui_base::FerroObject>(), 105, 24)?;
+    // Controls/WinUIControls.xaml(105,14) Column
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
-    scroll_bar_0.set_value_with_priority(::ferroui_base::input::InputElement::is_tab_stop_property(), ::core::clone::Clone::clone(&false), priority_5);
-    // Controls/WinUIControls.xaml(104,14) Orientation
+    scroll_bar_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_5);
+    // Controls/WinUIControls.xaml(107,24) Margin
+    rt::bind_dynamic_resource(&context, scroll_bar_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "ScrollViewerScrollBarMargin", 107, 24)?;
+    // Controls/WinUIControls.xaml(105,14) IsTabStop
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
-    scroll_bar_0.set_value_with_priority(::ferroui_controls::primitives::ScrollBar::orientation_property(), ::ferroui_base::layout::Orientation::Vertical, priority_6);
-    // Controls/WinUIControls.xaml(104,14) HorizontalAlignment
+    scroll_bar_0.set_value_with_priority(::ferroui_base::input::InputElement::is_tab_stop_property(), ::core::clone::Clone::clone(&false), priority_6);
+    // Controls/WinUIControls.xaml(105,14) Orientation
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
-    scroll_bar_0.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Right, priority_7);
-    // Controls/WinUIControls.xaml(104,14) Opacity
+    scroll_bar_0.set_value_with_priority(::ferroui_controls::primitives::ScrollBar::orientation_property(), ::ferroui_base::layout::Orientation::Vertical, priority_7);
+    // Controls/WinUIControls.xaml(105,14) HorizontalAlignment
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
-    scroll_bar_0.set_value_with_priority(::ferroui_base::Visual::opacity_property(), 0.0_f64, priority_8);
-    // Controls/WinUIControls.xaml(112,18) Transitions
+    scroll_bar_0.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Right, priority_8);
+    // Controls/WinUIControls.xaml(105,14) Opacity
+    let priority_9 = ::ferroui_base::data::BindingPriority::Template;
+    scroll_bar_0.set_value_with_priority(::ferroui_base::Visual::opacity_property(), 0.0_f64, priority_9);
+    // Controls/WinUIControls.xaml(113,18) Transitions
     let transitions_0 = ::ferroui_base::animation::Transitions::__markup_new_0();
-    // Controls/WinUIControls.xaml(113,20) Content
-    // Controls/WinUIControls.xaml(113,20) DoubleTransition
+    // Controls/WinUIControls.xaml(114,20) Content
+    // Controls/WinUIControls.xaml(114,20) DoubleTransition
     let double_transition_0 = ::ferroui_base::animation::DoubleTransition::new();
-    // Controls/WinUIControls.xaml(113,20) Property
+    // Controls/WinUIControls.xaml(114,20) Property
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
-    // Controls/WinUIControls.xaml(113,20) Duration
+    // Controls/WinUIControls.xaml(114,20) Duration
     let value_0 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(830000_i64);
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_0));
-    ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(double_transition_0.clone(), 113, 20)?);
-    let priority_9 = ::ferroui_base::data::BindingPriority::Template;
-    scroll_bar_0.set_value_with_priority(::ferroui_base::animation::Animatable::transitions_property(), rt::cast(::core::clone::Clone::clone(&transitions_0), 113, 20)?, priority_9);
+    ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(double_transition_0.clone(), 114, 20)?);
+    let priority_10 = ::ferroui_base::data::BindingPriority::Template;
+    scroll_bar_0.set_value_with_priority(::ferroui_base::animation::Animatable::transitions_property(), rt::cast(::core::clone::Clone::clone(&transitions_0), 114, 20)?, priority_10);
     context.pop_parent();
-    rt::invoked(scroll_bar_0.try_end_init(), 104, 14)?;
-    // Controls/WinUIControls.xaml(117,14) Children
+    rt::invoked(scroll_bar_0.try_end_init(), 105, 14)?;
+    // Controls/WinUIControls.xaml(118,14) Children
     let children_collection_3 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/WinUIControls.xaml(117,14) ScrollBar
+    // Controls/WinUIControls.xaml(118,14) ScrollBar
     let scroll_bar_1 = ::ferroui_controls::primitives::ScrollBar::new();
     scroll_bar_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&scroll_bar_1).upcast::<::ferroui_controls::Control>());
     context.push_parent(rt::to_value(scroll_bar_1.clone()));
-    // Controls/WinUIControls.xaml(117,24) Name
+    // Controls/WinUIControls.xaml(118,24) Name
     scroll_bar_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HorizontalScrollBar")));
-    rt::register_name(name_scope.as_ref(), "PART_HorizontalScrollBar", ::core::clone::Clone::clone(&scroll_bar_1).upcast::<::ferroui_base::FerroObject>(), 117, 24)?;
-    // Controls/WinUIControls.xaml(117,14) Row
-    let priority_10 = ::ferroui_base::data::BindingPriority::Template;
-    scroll_bar_1.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_10);
-    // Controls/WinUIControls.xaml(119,24) Margin
-    rt::bind_dynamic_resource(&context, scroll_bar_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "ScrollViewerScrollBarMargin", 119, 24)?;
-    // Controls/WinUIControls.xaml(117,14) IsTabStop
+    rt::register_name(name_scope.as_ref(), "PART_HorizontalScrollBar", ::core::clone::Clone::clone(&scroll_bar_1).upcast::<::ferroui_base::FerroObject>(), 118, 24)?;
+    // Controls/WinUIControls.xaml(118,14) Row
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
-    scroll_bar_1.set_value_with_priority(::ferroui_base::input::InputElement::is_tab_stop_property(), ::core::clone::Clone::clone(&false), priority_11);
-    // Controls/WinUIControls.xaml(117,14) Orientation
+    scroll_bar_1.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_11);
+    // Controls/WinUIControls.xaml(120,24) Margin
+    rt::bind_dynamic_resource(&context, scroll_bar_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "ScrollViewerScrollBarMargin", 120, 24)?;
+    // Controls/WinUIControls.xaml(118,14) IsTabStop
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
-    scroll_bar_1.set_value_with_priority(::ferroui_controls::primitives::ScrollBar::orientation_property(), ::ferroui_base::layout::Orientation::Horizontal, priority_12);
-    // Controls/WinUIControls.xaml(117,14) Opacity
+    scroll_bar_1.set_value_with_priority(::ferroui_base::input::InputElement::is_tab_stop_property(), ::core::clone::Clone::clone(&false), priority_12);
+    // Controls/WinUIControls.xaml(118,14) Orientation
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
-    scroll_bar_1.set_value_with_priority(::ferroui_base::Visual::opacity_property(), 0.0_f64, priority_13);
-    // Controls/WinUIControls.xaml(124,18) Transitions
+    scroll_bar_1.set_value_with_priority(::ferroui_controls::primitives::ScrollBar::orientation_property(), ::ferroui_base::layout::Orientation::Horizontal, priority_13);
+    // Controls/WinUIControls.xaml(118,14) Opacity
+    let priority_14 = ::ferroui_base::data::BindingPriority::Template;
+    scroll_bar_1.set_value_with_priority(::ferroui_base::Visual::opacity_property(), 0.0_f64, priority_14);
+    // Controls/WinUIControls.xaml(125,18) Transitions
     let transitions_1 = ::ferroui_base::animation::Transitions::__markup_new_0();
-    // Controls/WinUIControls.xaml(125,20) Content
-    // Controls/WinUIControls.xaml(125,20) DoubleTransition
+    // Controls/WinUIControls.xaml(126,20) Content
+    // Controls/WinUIControls.xaml(126,20) DoubleTransition
     let double_transition_1 = ::ferroui_base::animation::DoubleTransition::new();
-    // Controls/WinUIControls.xaml(125,20) Property
+    // Controls/WinUIControls.xaml(126,20) Property
     double_transition_1.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
-    // Controls/WinUIControls.xaml(125,20) Duration
+    // Controls/WinUIControls.xaml(126,20) Duration
     let value_1 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(830000_i64);
     double_transition_1.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_1));
-    ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_1, rt::cast(double_transition_1.clone(), 125, 20)?);
-    let priority_14 = ::ferroui_base::data::BindingPriority::Template;
-    scroll_bar_1.set_value_with_priority(::ferroui_base::animation::Animatable::transitions_property(), rt::cast(::core::clone::Clone::clone(&transitions_1), 125, 20)?, priority_14);
+    ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_1, rt::cast(double_transition_1.clone(), 126, 20)?);
+    let priority_15 = ::ferroui_base::data::BindingPriority::Template;
+    scroll_bar_1.set_value_with_priority(::ferroui_base::animation::Animatable::transitions_property(), rt::cast(::core::clone::Clone::clone(&transitions_1), 126, 20)?, priority_15);
     context.pop_parent();
-    rt::invoked(scroll_bar_1.try_end_init(), 117, 14)?;
-    // Controls/WinUIControls.xaml(129,14) Children
+    rt::invoked(scroll_bar_1.try_end_init(), 118, 14)?;
+    // Controls/WinUIControls.xaml(130,14) Children
     let children_collection_4 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/WinUIControls.xaml(129,14) Border
+    // Controls/WinUIControls.xaml(130,14) Border
     let border_1 = ::ferroui_controls::Border::new();
     border_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_controls::Control>());
     context.push_parent(rt::to_value(border_1.clone()));
-    // Controls/WinUIControls.xaml(129,21) Name
+    // Controls/WinUIControls.xaml(130,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ScrollBarSeparator")));
-    rt::register_name(name_scope.as_ref(), "ScrollBarSeparator", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 129, 21)?;
-    // Controls/WinUIControls.xaml(129,14) Row
-    let priority_15 = ::ferroui_base::data::BindingPriority::Template;
-    border_1.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_15);
-    // Controls/WinUIControls.xaml(129,14) Column
+    rt::register_name(name_scope.as_ref(), "ScrollBarSeparator", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 130, 21)?;
+    // Controls/WinUIControls.xaml(130,14) Row
     let priority_16 = ::ferroui_base::data::BindingPriority::Template;
-    border_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_16);
-    // Controls/WinUIControls.xaml(129,14) Opacity
+    border_1.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_16);
+    // Controls/WinUIControls.xaml(130,14) Column
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
-    border_1.set_value_with_priority(::ferroui_base::Visual::opacity_property(), 0.0_f64, priority_17);
-    // Controls/WinUIControls.xaml(133,21) Background
-    rt::bind_dynamic_resource(&context, border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "ScrollViewerScrollBarSeparatorBackground", 133, 21)?;
-    // Controls/WinUIControls.xaml(135,18) Transitions
+    border_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_17);
+    // Controls/WinUIControls.xaml(130,14) Opacity
+    let priority_18 = ::ferroui_base::data::BindingPriority::Template;
+    border_1.set_value_with_priority(::ferroui_base::Visual::opacity_property(), 0.0_f64, priority_18);
+    // Controls/WinUIControls.xaml(134,21) Background
+    rt::bind_dynamic_resource(&context, border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "ScrollViewerScrollBarSeparatorBackground", 134, 21)?;
+    // Controls/WinUIControls.xaml(136,18) Transitions
     let transitions_2 = ::ferroui_base::animation::Transitions::__markup_new_0();
-    // Controls/WinUIControls.xaml(136,20) Content
-    // Controls/WinUIControls.xaml(136,20) DoubleTransition
+    // Controls/WinUIControls.xaml(137,20) Content
+    // Controls/WinUIControls.xaml(137,20) DoubleTransition
     let double_transition_2 = ::ferroui_base::animation::DoubleTransition::new();
-    // Controls/WinUIControls.xaml(136,20) Property
+    // Controls/WinUIControls.xaml(137,20) Property
     double_transition_2.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
-    // Controls/WinUIControls.xaml(136,20) Duration
+    // Controls/WinUIControls.xaml(137,20) Duration
     let value_2 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(1000000_i64);
     double_transition_2.set_direct_value(::ferroui_base::animation::TransitionBase::duration_property(), ::core::clone::Clone::clone(&value_2));
-    ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_2, rt::cast(double_transition_2.clone(), 136, 20)?);
-    let priority_18 = ::ferroui_base::data::BindingPriority::Template;
-    border_1.set_value_with_priority(::ferroui_base::animation::Animatable::transitions_property(), rt::cast(::core::clone::Clone::clone(&transitions_2), 136, 20)?, priority_18);
+    ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_2, rt::cast(double_transition_2.clone(), 137, 20)?);
+    let priority_19 = ::ferroui_base::data::BindingPriority::Template;
+    border_1.set_value_with_priority(::ferroui_base::animation::Animatable::transitions_property(), rt::cast(::core::clone::Clone::clone(&transitions_2), 137, 20)?, priority_19);
     context.pop_parent();
-    rt::invoked(border_1.try_end_init(), 129, 14)?;
+    rt::invoked(border_1.try_end_init(), 130, 14)?;
     context.pop_parent();
     rt::invoked(grid_0.try_end_init(), 80, 12)?;
     context.pop_parent();
@@ -90956,126 +90959,129 @@ fn build_controls_winuicontrols_xaml_deferred_133(
     ::core::result::Result::Ok(rt::to_value(border_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/WinUIControls.xaml(160,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/WinUIControls.xaml(161,4)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_134(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
-    // Controls/WinUIControls.xaml(160,4) ControlTheme
+    // Controls/WinUIControls.xaml(161,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
     context.push_parent(rt::to_value(control_theme_0.clone()));
-    // Controls/WinUIControls.xaml(160,4) TargetType
+    // Controls/WinUIControls.xaml(161,4) TargetType
     ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::ScrollViewer as ::ferroui_base::StaticType>::TYPE));
-    // Controls/WinUIControls.xaml(160,73) BasedOn
+    // Controls/WinUIControls.xaml(161,73) BasedOn
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DefaultScrollViewerStyle"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 160, 73)?;
-    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 160, 73)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 160, 73)?);
+    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 161, 73)?;
+    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 161, 73)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 161, 73)?);
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/WinUIControls.xaml(162,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/WinUIControls.xaml(163,4)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_135(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     let control_template_0 = ::ferroui_markup_xaml::templates::ControlTemplate::__markup_new_0();
     context.push_parent(rt::to_value(control_template_0.clone()));
-    // Controls/WinUIControls.xaml(162,4) TargetType
+    // Controls/WinUIControls.xaml(163,4) TargetType
     ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_TargetType(&control_template_0, ::core::option::Option::Some(<::ferroui_controls::ScrollViewer as ::ferroui_base::StaticType>::TYPE));
-    // Controls/WinUIControls.xaml(163,6) Content
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_winuicontrols_xaml_deferred_136, 163, 6)?;
+    // Controls/WinUIControls.xaml(164,6) Content
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_winuicontrols_xaml_deferred_136, 164, 6)?;
     ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(control_template_0))
 }
 
-/// Builds the deferred content at `Controls/WinUIControls.xaml(163,6)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/WinUIControls.xaml(164,6)` (a template or a deferred resource).
 fn build_controls_winuicontrols_xaml_deferred_136(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_WINUICONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
-    // Controls/WinUIControls.xaml(163,6) Grid
+    // Controls/WinUIControls.xaml(164,6) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
     context.set_intermediate_root_object(rt::to_value(grid_0.clone()));
     grid_0.begin_init();
     context.push_parent(rt::to_value(grid_0.clone()));
-    // Controls/WinUIControls.xaml(163,11) Background
-    rt::bind_template_binding(grid_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Panel::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 163, 11)?;
-    // Controls/WinUIControls.xaml(164,8) Children
+    // Controls/WinUIControls.xaml(164,11) Background
+    rt::bind_template_binding(grid_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Panel::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 164, 11)?;
+    // Controls/WinUIControls.xaml(165,8) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/WinUIControls.xaml(164,8) ScrollContentPresenter
+    // Controls/WinUIControls.xaml(165,8) ScrollContentPresenter
     let scroll_content_presenter_0 = ::ferroui_controls::presenters::ScrollContentPresenter::new();
     scroll_content_presenter_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&scroll_content_presenter_0).upcast::<::ferroui_controls::Control>());
     context.push_parent(rt::to_value(scroll_content_presenter_0.clone()));
-    // Controls/WinUIControls.xaml(164,31) Name
+    // Controls/WinUIControls.xaml(165,31) Name
     scroll_content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&scroll_content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 164, 31)?;
-    // Controls/WinUIControls.xaml(165,31) ContentTemplate
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_template_property(), rt::property(::ferroui_controls::ContentControl::content_template_property()), 165, 31)?;
-    // Controls/WinUIControls.xaml(166,31) Padding
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::padding_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), 166, 31)?;
-    // Controls/WinUIControls.xaml(167,31) HorizontalSnapPointsType
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ScrollContentPresenter::horizontal_snap_points_type_property(), rt::property(::ferroui_controls::ScrollViewer::horizontal_snap_points_type_property()), 167, 31)?;
-    // Controls/WinUIControls.xaml(168,31) VerticalSnapPointsType
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ScrollContentPresenter::vertical_snap_points_type_property(), rt::property(::ferroui_controls::ScrollViewer::vertical_snap_points_type_property()), 168, 31)?;
-    // Controls/WinUIControls.xaml(169,31) HorizontalSnapPointsAlignment
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ScrollContentPresenter::horizontal_snap_points_alignment_property(), rt::property(::ferroui_controls::ScrollViewer::horizontal_snap_points_alignment_property()), 169, 31)?;
-    // Controls/WinUIControls.xaml(170,31) VerticalSnapPointsAlignment
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ScrollContentPresenter::vertical_snap_points_alignment_property(), rt::property(::ferroui_controls::ScrollViewer::vertical_snap_points_alignment_property()), 170, 31)?;
-    // Controls/WinUIControls.xaml(171,31) IsScrollInertiaEnabled
-    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ScrollViewer::is_scroll_inertia_enabled_property(), rt::property(::ferroui_controls::ScrollViewer::is_scroll_inertia_enabled_property()), 171, 31)?;
-    // Controls/WinUIControls.xaml(173,12) GestureRecognizers
+    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&scroll_content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 165, 31)?;
+    // Controls/WinUIControls.xaml(165,8) Background
+    let priority_0 = ::ferroui_base::data::BindingPriority::Template;
+    scroll_content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_0);
+    // Controls/WinUIControls.xaml(167,31) ContentTemplate
+    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_template_property(), rt::property(::ferroui_controls::ContentControl::content_template_property()), 167, 31)?;
+    // Controls/WinUIControls.xaml(168,31) Padding
+    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::padding_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), 168, 31)?;
+    // Controls/WinUIControls.xaml(169,31) HorizontalSnapPointsType
+    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ScrollContentPresenter::horizontal_snap_points_type_property(), rt::property(::ferroui_controls::ScrollViewer::horizontal_snap_points_type_property()), 169, 31)?;
+    // Controls/WinUIControls.xaml(170,31) VerticalSnapPointsType
+    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ScrollContentPresenter::vertical_snap_points_type_property(), rt::property(::ferroui_controls::ScrollViewer::vertical_snap_points_type_property()), 170, 31)?;
+    // Controls/WinUIControls.xaml(171,31) HorizontalSnapPointsAlignment
+    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ScrollContentPresenter::horizontal_snap_points_alignment_property(), rt::property(::ferroui_controls::ScrollViewer::horizontal_snap_points_alignment_property()), 171, 31)?;
+    // Controls/WinUIControls.xaml(172,31) VerticalSnapPointsAlignment
+    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ScrollContentPresenter::vertical_snap_points_alignment_property(), rt::property(::ferroui_controls::ScrollViewer::vertical_snap_points_alignment_property()), 172, 31)?;
+    // Controls/WinUIControls.xaml(173,31) IsScrollInertiaEnabled
+    rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ScrollViewer::is_scroll_inertia_enabled_property(), rt::property(::ferroui_controls::ScrollViewer::is_scroll_inertia_enabled_property()), 173, 31)?;
+    // Controls/WinUIControls.xaml(175,12) GestureRecognizers
     let gesture_recognizers_collection_0 = ::ferroui_base::input::InputElement::__markup_get_GestureRecognizers(scroll_content_presenter_0.upcast_ref::<::ferroui_base::input::InputElement>());
-    // Controls/WinUIControls.xaml(173,12) ScrollGestureRecognizer
+    // Controls/WinUIControls.xaml(175,12) ScrollGestureRecognizer
     let scroll_gesture_recognizer_0 = ::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::new();
     scroll_gesture_recognizer_0.begin_init();
     context.push_parent(rt::to_value(scroll_gesture_recognizer_0.clone()));
-    // Controls/WinUIControls.xaml(173,36) CanHorizontallyScroll
+    // Controls/WinUIControls.xaml(175,36) CanHorizontallyScroll
     let reflection_binding_extension_0 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("CanHorizontallyScroll"));
-    // Controls/WinUIControls.xaml(173,36) ElementName
-    ::ferroui_base::data::ReflectionBinding::__markup_set_ElementName(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_0), 173, 36)?, ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    let provided_8 = rt::provide_value(&context, rt::property_value(::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::can_horizontally_scroll_property()), &reflection_binding_extension_0, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
-    rt::bind(scroll_gesture_recognizer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::can_horizontally_scroll_property(), provided_8, 173, 36)?;
-    // Controls/WinUIControls.xaml(174,36) CanVerticallyScroll
-    let reflection_binding_extension_1 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("CanVerticallyScroll"));
-    // Controls/WinUIControls.xaml(174,36) ElementName
-    ::ferroui_base::data::ReflectionBinding::__markup_set_ElementName(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_1), 174, 36)?, ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    let provided_9 = rt::provide_value(&context, rt::property_value(::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::can_vertically_scroll_property()), &reflection_binding_extension_1, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
-    rt::bind(scroll_gesture_recognizer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::can_vertically_scroll_property(), provided_9, 174, 36)?;
-    // Controls/WinUIControls.xaml(175,36) IsScrollInertiaEnabled
-    let reflection_binding_extension_2 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("(ScrollViewer.IsScrollInertiaEnabled)"));
     // Controls/WinUIControls.xaml(175,36) ElementName
-    ::ferroui_base::data::ReflectionBinding::__markup_set_ElementName(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_2), 175, 36)?, ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    let provided_10 = rt::provide_value(&context, rt::property_value(::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::is_scroll_inertia_enabled_property()), &reflection_binding_extension_2, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
-    rt::bind(scroll_gesture_recognizer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::is_scroll_inertia_enabled_property(), provided_10, 175, 36)?;
-    // Controls/WinUIControls.xaml(176,36) Offset
-    let reflection_binding_extension_3 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("Offset"));
+    ::ferroui_base::data::ReflectionBinding::__markup_set_ElementName(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_0), 175, 36)?, ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
+    let provided_8 = rt::provide_value(&context, rt::property_value(::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::can_horizontally_scroll_property()), &reflection_binding_extension_0, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    rt::bind(scroll_gesture_recognizer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::can_horizontally_scroll_property(), provided_8, 175, 36)?;
+    // Controls/WinUIControls.xaml(176,36) CanVerticallyScroll
+    let reflection_binding_extension_1 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("CanVerticallyScroll"));
     // Controls/WinUIControls.xaml(176,36) ElementName
-    ::ferroui_base::data::ReflectionBinding::__markup_set_ElementName(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_3), 176, 36)?, ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    let provided_11 = rt::provide_value(&context, rt::property_value(::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::offset_property()), &reflection_binding_extension_3, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
-    rt::bind(scroll_gesture_recognizer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::offset_property(), provided_11, 176, 36)?;
-    // Controls/WinUIControls.xaml(177,36) Viewport
-    let reflection_binding_extension_4 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("Viewport"));
+    ::ferroui_base::data::ReflectionBinding::__markup_set_ElementName(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_1), 176, 36)?, ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
+    let provided_9 = rt::provide_value(&context, rt::property_value(::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::can_vertically_scroll_property()), &reflection_binding_extension_1, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    rt::bind(scroll_gesture_recognizer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::can_vertically_scroll_property(), provided_9, 176, 36)?;
+    // Controls/WinUIControls.xaml(177,36) IsScrollInertiaEnabled
+    let reflection_binding_extension_2 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("(ScrollViewer.IsScrollInertiaEnabled)"));
     // Controls/WinUIControls.xaml(177,36) ElementName
-    ::ferroui_base::data::ReflectionBinding::__markup_set_ElementName(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_4), 177, 36)?, ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    let provided_12 = rt::provide_value(&context, rt::property_value(::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::viewport_property()), &reflection_binding_extension_4, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
-    rt::bind(scroll_gesture_recognizer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::viewport_property(), provided_12, 177, 36)?;
-    // Controls/WinUIControls.xaml(178,36) Extent
-    let reflection_binding_extension_5 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("Extent"));
+    ::ferroui_base::data::ReflectionBinding::__markup_set_ElementName(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_2), 177, 36)?, ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
+    let provided_10 = rt::provide_value(&context, rt::property_value(::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::is_scroll_inertia_enabled_property()), &reflection_binding_extension_2, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    rt::bind(scroll_gesture_recognizer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::is_scroll_inertia_enabled_property(), provided_10, 177, 36)?;
+    // Controls/WinUIControls.xaml(178,36) Offset
+    let reflection_binding_extension_3 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("Offset"));
     // Controls/WinUIControls.xaml(178,36) ElementName
-    ::ferroui_base::data::ReflectionBinding::__markup_set_ElementName(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_5), 178, 36)?, ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
+    ::ferroui_base::data::ReflectionBinding::__markup_set_ElementName(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_3), 178, 36)?, ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
+    let provided_11 = rt::provide_value(&context, rt::property_value(::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::offset_property()), &reflection_binding_extension_3, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    rt::bind(scroll_gesture_recognizer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::offset_property(), provided_11, 178, 36)?;
+    // Controls/WinUIControls.xaml(179,36) Viewport
+    let reflection_binding_extension_4 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("Viewport"));
+    // Controls/WinUIControls.xaml(179,36) ElementName
+    ::ferroui_base::data::ReflectionBinding::__markup_set_ElementName(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_4), 179, 36)?, ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
+    let provided_12 = rt::provide_value(&context, rt::property_value(::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::viewport_property()), &reflection_binding_extension_4, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
+    rt::bind(scroll_gesture_recognizer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::viewport_property(), provided_12, 179, 36)?;
+    // Controls/WinUIControls.xaml(180,36) Extent
+    let reflection_binding_extension_5 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("Extent"));
+    // Controls/WinUIControls.xaml(180,36) ElementName
+    ::ferroui_base::data::ReflectionBinding::__markup_set_ElementName(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_5), 180, 36)?, ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
     let provided_13 = rt::provide_value(&context, rt::property_value(::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::extent_property()), &reflection_binding_extension_5, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
-    rt::bind(scroll_gesture_recognizer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::extent_property(), provided_13, 178, 36)?;
+    rt::bind(scroll_gesture_recognizer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::extent_property(), provided_13, 180, 36)?;
     context.pop_parent();
-    rt::invoked(scroll_gesture_recognizer_0.try_end_init(), 173, 12)?;
+    rt::invoked(scroll_gesture_recognizer_0.try_end_init(), 175, 12)?;
     ::ferroui_base::input::gesture_recognizers::GestureRecognizerCollection::__markup_Add_0(&gesture_recognizers_collection_0, ::core::clone::Clone::clone(&scroll_gesture_recognizer_0).upcast::<::ferroui_base::input::gesture_recognizers::GestureRecognizer>());
     context.pop_parent();
-    rt::invoked(scroll_content_presenter_0.try_end_init(), 164, 8)?;
+    rt::invoked(scroll_content_presenter_0.try_end_init(), 165, 8)?;
     context.pop_parent();
-    rt::invoked(grid_0.try_end_init(), 163, 6)?;
+    rt::invoked(grid_0.try_end_init(), 164, 6)?;
     ::core::result::Result::Ok(rt::to_value(grid_0.clone()))
 }
 
