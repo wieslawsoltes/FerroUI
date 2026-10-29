@@ -239,6 +239,8 @@ document_tests! {
     resources_tabular_surfaces_themeresources => "/Resources/TabularSurfaces_themeresources.xaml";
     resources_info_badge_themeresources => "/Resources/InfoBadge_themeresources.xaml";
     resources_progress_ring_themeresources => "/Resources/ProgressRing_themeresources.xaml";
+    resources_radio_buttons_themeresources => "/Resources/RadioButtons_themeresources.xaml";
+    resources_rating_control_themeresources => "/Resources/RatingControl_themeresources.xaml";
     strings_invariant_resources => "/Strings/InvariantResources.xaml";
     macos_theme => "/MacOSTheme.xaml";
     // B2: buttons, ranges and expanders
@@ -255,6 +257,10 @@ document_tests! {
     controls_info_bar => "/Controls/InfoBar.xaml";
     controls_info_badge => "/Controls/InfoBadge.xaml";
     controls_progress_ring => "/Controls/ProgressRing.xaml";
+    controls_number_box => "/Controls/NumberBox.xaml";
+    controls_auto_suggest_box => "/Controls/AutoSuggestBox.xaml";
+    controls_radio_buttons => "/Controls/RadioButtons.xaml";
+    controls_rating_control => "/Controls/RatingControl.xaml";
 }
 
 #[test]

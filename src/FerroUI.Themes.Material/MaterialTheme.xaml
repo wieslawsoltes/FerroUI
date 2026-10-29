@@ -77,6 +77,8 @@
         <ResourceInclude Source="/Resources/Glyphs.xaml" />
         <ResourceInclude Source="/Resources/InfoBadge_themeresources.xaml" />
         <ResourceInclude Source="/Resources/ProgressRing_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/RadioButtons_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/RatingControl_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/MaterialColors.xaml" />
         <MergeResourceInclude Source="/Resources/MaterialTypography.xaml" />
         <MergeResourceInclude Source="/Resources/MaterialMetrics.xaml" />

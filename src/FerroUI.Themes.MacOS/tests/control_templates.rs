@@ -236,6 +236,10 @@ control_tests! {
     items_control => "ItemsControl";
     label => "Label";
     path_icon => "PathIcon";
+    rating_control => "RatingControl";
+    radio_buttons => "RadioButtons";
+    auto_suggest_box => "AutoSuggestBox";
+    number_box => "NumberBox";
     progress_ring => "ProgressRing";
     info_badge => "InfoBadge";
     info_bar => "InfoBar";
