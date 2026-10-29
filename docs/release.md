@@ -202,6 +202,19 @@ It rewrites the root manifest, runs `cargo metadata` (which also brings `Cargo.l
 
 A version that was published is never reused. If a release stops half way and cannot be completed (section 8.3), the next attempt is the next preview number.
 
+### 3.1 API stability
+
+Within a minor version the public API of the published crates only grows: `0.4.x` adds members and types and changes or removes none, and neither the default value of a property nor its default binding mode changes. Two checks of the continuous integration enforce it on every pull request that changes more than documentation:
+
+- **Signatures** (job `api-gate` of `ci.yml`, "API gate (cargo-semver-checks)"): `scripts/api-gate/semver_checks.py` runs [cargo-semver-checks](https://github.com/obi1kenobi/cargo-semver-checks) for each published crate against the sources of the release, with the release type `minor`. It does not let cargo-semver-checks build each crate on its own (74 crates, each compiling its dependencies again, took hours): it documents all the published crates as rustdoc JSON in one `cargo doc` for the pull request and one for the baseline (a worktree of the baseline commit), with the features cargo unifies for them, and runs cargo-semver-checks on the two JSON files of each crate. CI caches the documentation of the baseline under the baseline commit and the rustc version (`semver_checks.py --baseline-key`; the nightly run of main saves it for every pull request), and runs the gate only when a pull request changes `src/`, a manifest, `Cargo.lock` or the script. The baseline is the tag of the release, or, while it has none, `BASELINE_COMMIT` of the script. 0.4.0 is not published yet (no tag, not on crates.io) and the workspace on main is still at 0.4.0, so the 0.4.0 that will ship is main: the baseline is the commit of main the gate was merged on (`12db0c25`, 2026-10-29), and it moves to the tag `v0.4.0` once the release is published. A crate the baseline does not have is not checked. The lints `constructible_struct_adds_field` and `repr_c_plain_struct_fields_reordered` are not counted for the `*VTable` structs that `ferro_class!` writes: they are the dispatch machinery of the class model, every new virtual member adds a field to its table, and no application constructs one. `constructible_struct_adds_field` is not counted either for the metadata structs `MarkupType` (ferroui-base) and `TypeModel` (ferroui-build-scan), which are built only through `MarkupType::new` and `TypeModel::new` with the struct update syntax and grow with the compiler metadata of the markup compiler; every other result counts. It runs on macOS, where the whole workspace builds, so the API of a platform crate is the one it has when built for macOS. `semver_checks.py --list` prints the baseline and the crates without running anything.
+- **Defaults of properties** (`property_defaults_tests` of `ferroui-controls`, run by the Linux job of `ci.yml`): the owner, name, value type, default value, default binding mode and inheritance of every styled and attached property of the public types of `ferroui-base` and `ferroui-controls`, and every type whose default or binding mode of a property differs from its base type's, compared with the checked-in `src/FerroUI.Controls/property_defaults.snapshot`. A changed or removed line fails as a break; an added line fails until the snapshot records it, which a pull request that adds properties does by regenerating it:
+
+  ```sh
+  FERROUI_UPDATE_PROPERTY_DEFAULTS=1 cargo test -p ferroui-controls --lib property_defaults
+  ```
+
+A change that has to break the API waits for the next minor version. When a release starts a minor version (`0.5.0`), its pull request sets `BASELINE_VERSION` and `BASELINE_COMMIT` of the script to that release.
+
 ## 4. Metadata
 
 `crates.py check` requires of every published crate: `description`, `license`, `repository`, `readme`, `keywords` (at most five) and `categories`, and the group of the README table. `homepage`, `readme`, `keywords` and `categories` are stated once in `[workspace.package]` and inherited; the build crates, the interop crates and `xamlx` state keywords and categories of their own. The `readme` is the README of the repository: Cargo copies a readme from outside the package directory into the package.
@@ -341,6 +354,7 @@ After the release:
 - [ ] At the first release only: remove the note between the `release-note` markers of the README ("Upcoming"), and the sentence of its status paragraph that says nothing has been published.
 - [ ] Set the date of the entry in `CHANGELOG.md` and point its link at the tag.
 - [ ] Look at the docs.rs badges of the README table after an hour (section 7) and note the failures for the next preview.
+- [ ] After a release that starts a minor version: set the baseline of the API gate to it (`BASELINE_VERSION` and `BASELINE_COMMIT` of `scripts/api-gate/semver_checks.py`, section 3.1).
 - [ ] Set the next version (`scripts/release/set-version.sh 0.1.0-preview.<N+1>` after a preview, the first preview of the next minor version, such as `0.2.0-preview.1`, after a release), so that `main` never carries a version that is on crates.io with other contents.
 
 ## 10. A preview that turns out broken
