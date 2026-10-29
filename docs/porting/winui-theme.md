@@ -447,9 +447,9 @@ there, with the code point and the name of the glyph in a comment).
 reason: the Reveal brushes and styles (deprecated; the seven Reveal brushes that other documents
 still name are ported as the plain brushes they are; the InkToolbar's resources are written to
 the inking crate, `src/FerroUI.Controls.Inking/Themes/WinUI`, which keeps the toolbar's styles), the controls FerroUI does not have
-(MediaTransportControls, Pivot, RatingControl, PersonPicture, MapControl,
+(MediaTransportControls, Pivot, PersonPicture, MapControl,
 TeachingTip, TwoPaneView, SwipeControl, AnnotatedScrollBar, ItemsView/ItemContainer,
-BreadcrumbBar, PagerControl, RadioButtons, ImageIcon, ScrollView, CommandBarFlyout,
+BreadcrumbBar, PagerControl, ImageIcon, ScrollView, CommandBarFlyout,
 RichEditBox, GridView, Hub, SemanticZoom, ListView, ...), the colour picker (styled by
 `ferroui-controls-color-picker`), system backdrops, switches of native chrome
 (`ListViewItemPresenter`, `ThemeShadow`), and the input validation templates that WinUI 3 removed.
@@ -523,6 +523,10 @@ ports a control updates its state by porting it, not by editing the table.
 | `PathIcon.xaml` | `{PathIcon}` | No WinUI style (IconElement has no template): the Path that WinUI's PathIcon builds in code (CPathIcon::ApplyTemplate, icon.cpp), unscaled and filled with the Foreground. | B1 | ported |
 | `FontIcon.xaml` | `{FontIcon}` | No WinUI style (IconElement has no template): the TextBlock that WinUI's FontIcon builds in code (CFontIcon::ApplyTemplate, icon.cpp), in the font SymbolThemeFontFamily. A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it. | B1 | ported |
 | `SymbolIcon.xaml` | `{SymbolIcon}` | No WinUI style (IconElement has no template): the TextBlock that WinUI's SymbolIcon builds in code (CSymbolIcon::ApplyTemplate, icon.cpp), 20 px, in the font SymbolThemeFontFamily. A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it. | B1 | ported |
+| `AutoSuggestBox.xaml` | `{AutoSuggestBox}` | AutoSuggestBox: the implicit style and DefaultAutoSuggestBoxStyle, with AutoSuggestBoxTextBoxStyle, QueryButtonStyle and the resources of AutoSuggestBox_themeresources.xaml (DefaultAutoSuggestBoxStyle and AutoSuggestBoxTextBoxStyle are ported in AutoCompleteBox.xaml). A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it. | B3 | ported |
+| `NumberBox.xaml` | `{NumberBox}` | NumberBox: {NumberBox} (NumberBox.xaml, NumberBox_themeresources.xaml), with NumberBoxTextBoxStyle, NumberBoxSpinButtonStyle and NumberBoxPopupSpinButtonStyle, which NumericUpDown.xaml ports. A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it. | B2 | ported |
+| `RadioButtons.xaml` | `{RadioButtons}` | RadioButtons: DefaultRadioButtonsStyle and the implicit style (RadioButtons.xaml, RadioButtons_themeresources.xaml), the layout ColumnMajorUniformToLargestGridLayout as the items panel RadioButtonsPanel. A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it. | B3 | ported |
+| `RatingControl.xaml` | `{RatingControl}` | RatingControl: {RatingControl} (RatingControl.xaml, RatingControl_themeresources.xaml). A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it. | B2 | ported |
 | `PipsPager.xaml` | `{PipsPager}` | PipsPager: {PipsPager} (PipsPager.xaml), PipsPagerNavigationButtonBaseStyle, PipsPagerPreviousPageButtonStyle, PipsPagerNextPageButtonStyle, PipsPagerButtonBaseStyle, PipsPagerSelectedPipButtonStyle, PipsPagerNormalPipButtonStyle (PipsPager_themeresources.xaml). | B2 | ported |
 | `PopupRoot.xaml` | `{PopupRoot}` | No WinUI style: the text of the window (TextFillColorPrimaryBrush, ContentControlThemeFontFamily, ControlContentThemeFontSize). | F | ported |
 | `ProgressBar.xaml` | `{ProgressBar}` | ProgressBar: {ProgressBar} (ProgressBar.xaml, ProgressBar_themeresources.xaml), DefaultProgressBarStyle (Deprecated_themeresources.xaml). | B1 | ported |
@@ -570,7 +574,7 @@ Every target type of a style of the merged WinUI theme, the FerroUI control its 
 | `AppBarButton` | `CommandBarButton` | B5 |  |
 | `AppBarSeparator` | `CommandBarSeparator` | B5 |  |
 | `AppBarToggleButton` | `CommandBarToggleButton` | B5 |  |
-| `AutoSuggestBox` | `AutoCompleteBox` | B3 |  |
+| `AutoSuggestBox` | `AutoSuggestBox` | B3 | WinUI's AutoSuggestBox in ferroui-controls; AutoCompleteBox is drawn with the keyed DefaultAutoSuggestBoxStyle |
 | `Button` | `Button` | F |  |
 | `ButtonBase` | `Button` | B4 | keyed styles of the date and time picker flyouts and TextBlockButtonStyle |
 | `CalendarDatePicker` | `CalendarDatePicker` | B4 |  |
@@ -610,13 +614,15 @@ Every target type of a style of the merged WinUI theme, the FerroUI control its 
 | `NavigationViewItemHeader` | no FerroUI control | B5 |  |
 | `NavigationViewItemPresenter` | no FerroUI control | B5 | NavigationView has no FerroUI control |
 | `NavigationViewItemSeparator` | no FerroUI control | B5 |  |
-| `NumberBox` | `NumericUpDown` | B2 |  |
+| `NumberBox` | `NumberBox` | B2 | WinUI's NumberBox in ferroui-controls; NumericUpDown is drawn with the styles of NumberBox too |
 | `PasswordBox` | `TextBox` | B3 | FerroUI's TextBox with a PasswordChar; ported as the keyed DefaultPasswordBoxStyle |
 | `PipsPager` | `PipsPager` | B2 |  |
 | `ProgressBar` | `ProgressBar` | B1 |  |
 | `ProgressRing` | `ProgressRing` | B1 |  |
 | `RadioButton` | `RadioButton` | F |  |
+| `RadioButtons` | `RadioButtons` | B3 | WinUI's RadioButtons in ferroui-controls |
 | `RadioMenuFlyoutItem` | `MenuItem` | B3 |  |
+| `RatingControl` | `RatingControl` | B2 | WinUI's RatingControl in ferroui-controls |
 | `Rectangle` | no FerroUI control | B3 | keyed styles of template parts (ComboBoxItemPill, SelectorBarItemPill) |
 | `RefreshContainer` | `RefreshContainer` | B2 |  |
 | `RefreshVisualizer` | `RefreshVisualizer` | B2 |  |
@@ -647,7 +653,7 @@ Every target type of a style of the merged WinUI theme, the FerroUI control its 
 | `TreeView` | `TreeView` | B3 |  |
 | `TreeViewItem` | `TreeViewItem` | B3 |  |
 
-Target types without a FerroUI control (all their styles waived): `AnnotatedScrollBar`, `AppBar`, `AppBarElementContainer`, `BreadcrumbBar`, `BreadcrumbBarItem`, `ColorPicker`, `ColorPickerSlider`, `ColorSpectrum`, `CommandBarFlyoutCommandBar`, `Frame`, `GridView`, `GridViewHeaderItem`, `GridViewItem`, `GroupItem`, `Hub`, `HubSection`, `InkToolbar`, `InkToolbarBallpointPenButton`, `InkToolbarCustomPenButton`, `InkToolbarCustomToggleButton`, `InkToolbarCustomToolButton`, `InkToolbarEraserButton`, `InkToolbarFlyoutItem`, `InkToolbarHighlighterButton`, `InkToolbarPenConfigurationControl`, `InkToolbarPencilButton`, `InkToolbarRulerButton`, `InkToolbarStencilButton`, `ItemContainer`, `ItemsView`, `ListPickerFlyoutPresenter`, `ListView`, `ListViewHeaderItem`, `MapControl`, `MediaPlayerElement`, `MediaTransportControls`, `PagerControl`, `PersonPicture`, `PickerFlyoutPresenter`, `Pivot`, `PivotHeaderItem`, `PivotItem`, `RadioButtons`, `RatingControl`, `RichEditBox`, `RichTextBlock`, `ScrollView`, `SemanticZoom`, `SwipeControl`, `TeachingTip`, `TwoPaneView`.
+Target types without a FerroUI control (all their styles waived): `AnnotatedScrollBar`, `AppBar`, `AppBarElementContainer`, `BreadcrumbBar`, `BreadcrumbBarItem`, `ColorPicker`, `ColorPickerSlider`, `ColorSpectrum`, `CommandBarFlyoutCommandBar`, `Frame`, `GridView`, `GridViewHeaderItem`, `GridViewItem`, `GroupItem`, `Hub`, `HubSection`, `InkToolbar`, `InkToolbarBallpointPenButton`, `InkToolbarCustomPenButton`, `InkToolbarCustomToggleButton`, `InkToolbarCustomToolButton`, `InkToolbarEraserButton`, `InkToolbarFlyoutItem`, `InkToolbarHighlighterButton`, `InkToolbarPenConfigurationControl`, `InkToolbarPencilButton`, `InkToolbarRulerButton`, `InkToolbarStencilButton`, `ItemContainer`, `ItemsView`, `ListPickerFlyoutPresenter`, `ListView`, `ListViewHeaderItem`, `MapControl`, `MediaPlayerElement`, `MediaTransportControls`, `PagerControl`, `PersonPicture`, `PickerFlyoutPresenter`, `Pivot`, `PivotHeaderItem`, `PivotItem`, `RichEditBox`, `RichTextBlock`, `ScrollView`, `SemanticZoom`, `SwipeControl`, `TeachingTip`, `TwoPaneView`.
 
 <!-- mapping:end -->
 

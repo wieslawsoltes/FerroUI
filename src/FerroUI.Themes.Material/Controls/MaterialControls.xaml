@@ -118,6 +118,10 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/InfoBar.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/InfoBadge.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/ProgressRing.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/NumberBox.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/AutoSuggestBox.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/RadioButtons.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/RatingControl.xaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Styles.Resources>

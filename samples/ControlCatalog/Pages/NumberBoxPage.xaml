@@ -1,0 +1,55 @@
+<ContentPage Theme="{StaticResource ScrollPage}" xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:generic="clr-namespace:System.Collections.Generic;assembly=netstandard"
+             Header="NumberBox"
+             x:Class="ControlCatalog.Pages.NumberBoxPage">
+  <!-- Not from upstream: WinUI's NumberBox (docs/porting/winui-controls.md); NumericUpDown is the
+       upstream control of the catalog. Its template is in the WinUI theme and the macOS and
+       Material themes derived from it. -->
+  <StackPanel Orientation="Vertical" Spacing="4" MaxWidth="800">
+    <TextBlock Margin="2" Classes="h2" TextWrapping="Wrap">A NumberBox is a text box for numbers: it can evaluate expressions, step with spin buttons, the arrow keys and PageUp/PageDown, and wrap around its range. Its value is NaN while it is empty.</TextBlock>
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">Options</TextBlock>
+    <Grid Margin="2" ColumnDefinitions="Auto,200" RowDefinitions="Auto,Auto,Auto,Auto">
+      <TextBlock Grid.Row="0" VerticalAlignment="Center" Margin="2">SpinButtonPlacementMode:</TextBlock>
+      <ComboBox Grid.Row="0" Grid.Column="1" x:Name="SpinMode" SelectedIndex="2" Margin="2">
+        <ComboBox.ItemsSource>
+          <generic:List x:TypeArguments="NumberBoxSpinButtonPlacementMode">
+            <NumberBoxSpinButtonPlacementMode>Hidden</NumberBoxSpinButtonPlacementMode>
+            <NumberBoxSpinButtonPlacementMode>Compact</NumberBoxSpinButtonPlacementMode>
+            <NumberBoxSpinButtonPlacementMode>Inline</NumberBoxSpinButtonPlacementMode>
+          </generic:List>
+        </ComboBox.ItemsSource>
+      </ComboBox>
+      <TextBlock Grid.Row="1" VerticalAlignment="Center" Margin="2">AcceptsExpression:</TextBlock>
+      <CheckBox Grid.Row="1" Grid.Column="1" x:Name="Expression" IsChecked="True" Margin="2" />
+      <TextBlock Grid.Row="2" VerticalAlignment="Center" Margin="2">IsWrapEnabled:</TextBlock>
+      <CheckBox Grid.Row="2" Grid.Column="1" x:Name="Wrap" Margin="2" />
+      <TextBlock Grid.Row="3" VerticalAlignment="Center" Margin="2">ValidationMode:</TextBlock>
+      <ComboBox Grid.Row="3" Grid.Column="1" x:Name="Validation" SelectedIndex="0" Margin="2">
+        <ComboBox.ItemsSource>
+          <generic:List x:TypeArguments="NumberBoxValidationMode">
+            <NumberBoxValidationMode>InvalidInputOverwritten</NumberBoxValidationMode>
+            <NumberBoxValidationMode>Disabled</NumberBoxValidationMode>
+          </generic:List>
+        </ComboBox.ItemsSource>
+      </ComboBox>
+    </Grid>
+    <NumberBox x:Name="Configurable" Margin="2" Width="360" HorizontalAlignment="Left"
+               Header="Enter a number or an expression (1 + 2 * 3):" PlaceholderText="0"
+               Minimum="0" Maximum="100" Value="42" SmallChange="1" LargeChange="10"
+               SpinButtonPlacementMode="{Binding #SpinMode.SelectedItem}"
+               AcceptsExpression="{Binding #Expression.IsChecked}"
+               IsWrapEnabled="{Binding #Wrap.IsChecked}"
+               ValidationMode="{Binding #Validation.SelectedItem}"
+               Description="From 0 to 100; PageUp/PageDown step 10." />
+    <TextBlock Margin="2" Text="{Binding #Configurable.Value, StringFormat='Value: {0}'}" />
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">The spin button placements</TextBlock>
+    <StackPanel Margin="2" Orientation="Horizontal" Spacing="16">
+      <NumberBox Width="160" Header="Hidden" Value="1" SpinButtonPlacementMode="Hidden" />
+      <NumberBox Width="160" Header="Compact" Value="2" SpinButtonPlacementMode="Compact" />
+      <NumberBox Width="160" Header="Inline" Value="3" SpinButtonPlacementMode="Inline" />
+    </StackPanel>
+  </StackPanel>
+</ContentPage>
