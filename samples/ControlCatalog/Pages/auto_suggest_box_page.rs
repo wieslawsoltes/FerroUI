@@ -81,7 +81,8 @@ mod tests {
 
     #[test]
     fn the_suggestions_contain_every_typed_word() {
-        assert_eq!(matching_states("new y"), vec!["New York"]);
+        assert_eq!(matching_states("new yo"), vec!["New York"]);
+        assert_eq!(matching_states("NEW"), vec!["New Hampshire", "New Jersey", "New Mexico", "New York"]);
         assert_eq!(matching_states("  "), Vec::<&str>::new());
         assert!(matching_states("carolina").contains(&"South Carolina"));
     }
