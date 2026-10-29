@@ -32,16 +32,6 @@
       "reason": "DesktopAcrylicBackdrop is a system backdrop of a window or popup (Windows composition), not a brush, and MenuFlyoutSystemBackdrop names it; FerroUI's counterpart is the transparency level of a top level, which an application chooses."
     },
     {
-      "document": "controls/dev/InkToolbar/InkToolbar.xaml",
-      "key": "*",
-      "reason": "InkToolbar: no FerroUI control (no inking)."
-    },
-    {
-      "document": "controls/dev/InkToolbar/InkToolbar_themeresources.xaml",
-      "key": "*",
-      "reason": "InkToolbar: no FerroUI control (no inking)."
-    },
-    {
       "document": "controls/dev/CommonStyles/MediaTransportControls_themeresources.xaml",
       "key": "*",
       "reason": "MediaTransportControls: no FerroUI control (no media playback)."
@@ -90,16 +80,6 @@
       "document": "controls/dev/RatingControl/RatingControl_themeresources.xaml",
       "key": "*",
       "reason": "RatingControl: no FerroUI control."
-    },
-    {
-      "document": "controls/dev/InfoBadge/InfoBadge.xaml",
-      "key": "*",
-      "reason": "InfoBadge: no FerroUI control."
-    },
-    {
-      "document": "controls/dev/InfoBadge/InfoBadge_themeresources.xaml",
-      "key": "*",
-      "reason": "InfoBadge: no FerroUI control."
     },
     {
       "document": "controls/dev/PersonPicture/PersonPicture.xaml",
@@ -230,16 +210,6 @@
       "document": "dxaml/xcp/dxaml/themes/generic.xaml",
       "key": "RadioButtonsItemStyle",
       "reason": "RadioButtons (the group control): no FerroUI control."
-    },
-    {
-      "document": "controls/dev/ProgressRing/ProgressRing.xaml",
-      "key": "*",
-      "reason": "ProgressRing: no FerroUI control (its animation is an animated visual, a Lottie composition)."
-    },
-    {
-      "document": "controls/dev/ProgressRing/ProgressRing_themeresources.xaml",
-      "key": "*",
-      "reason": "ProgressRing: no FerroUI control (its animation is an animated visual, a Lottie composition)."
     },
     {
       "document": "controls/dev/ImageIcon/ImageIcon.xaml",

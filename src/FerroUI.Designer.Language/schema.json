@@ -6555,6 +6555,98 @@
     ]
   },
   {
+    "name": "FontIcon",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::FontIcon",
+    "base": "IconElement",
+    "constructible": true,
+    "properties": {
+      "Glyph": {
+        "name": "Glyph",
+        "type_name": "String",
+        "documentation": "FontIcon.Glyph: String",
+        "values": [],
+        "attached": false
+      },
+      "MirroredWhenRightToLeft": {
+        "name": "MirroredWhenRightToLeft",
+        "type_name": "bool",
+        "documentation": "FontIcon.MirroredWhenRightToLeft: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "FontIconSource",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::FontIconSource",
+    "base": "IconSource",
+    "constructible": true,
+    "properties": {
+      "Glyph": {
+        "name": "Glyph",
+        "type_name": "String",
+        "documentation": "FontIconSource.Glyph: String",
+        "values": [],
+        "attached": false
+      },
+      "FontFamily": {
+        "name": "FontFamily",
+        "type_name": "Option<FontFamily>",
+        "documentation": "FontIconSource.FontFamily: Option<FontFamily>",
+        "values": [],
+        "attached": false
+      },
+      "FontSize": {
+        "name": "FontSize",
+        "type_name": "f64",
+        "documentation": "FontIconSource.FontSize: f64",
+        "values": [],
+        "attached": false
+      },
+      "FontStyle": {
+        "name": "FontStyle",
+        "type_name": "FontStyle",
+        "documentation": "FontIconSource.FontStyle: FontStyle",
+        "values": [
+          "Normal",
+          "Italic",
+          "Oblique"
+        ],
+        "attached": false
+      },
+      "FontWeight": {
+        "name": "FontWeight",
+        "type_name": "FontWeight",
+        "documentation": "FontIconSource.FontWeight: FontWeight",
+        "values": [],
+        "attached": false
+      },
+      "MirroredWhenRightToLeft": {
+        "name": "MirroredWhenRightToLeft",
+        "type_name": "bool",
+        "documentation": "FontIconSource.MirroredWhenRightToLeft: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "Geometry",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::media::Geometry",
@@ -7144,6 +7236,26 @@
     ]
   },
   {
+    "name": "IconSource",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::IconSource",
+    "base": "FerroObject",
+    "constructible": false,
+    "properties": {
+      "Foreground": {
+        "name": "Foreground",
+        "type_name": "Option<Rc<dyn IBrush>>",
+        "documentation": "IconSource.Foreground: Option<Rc<dyn IBrush>>",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "Image",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::Image",
@@ -7315,6 +7427,1502 @@
     "namespace_aliases": [
       "using:FerroUI.Controls.Converters",
       "clr-namespace:FerroUI.Controls.Converters;assembly=FerroUI.Controls.TreeDataGrid"
+    ]
+  },
+  {
+    "name": "InfoBadge",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::InfoBadge",
+    "base": "TemplatedControl",
+    "constructible": true,
+    "properties": {
+      "Value": {
+        "name": "Value",
+        "type_name": "i32",
+        "documentation": "InfoBadge.Value: i32",
+        "values": [],
+        "attached": false
+      },
+      "IconSource": {
+        "name": "IconSource",
+        "type_name": "Option<Ref<IconSource>>",
+        "documentation": "InfoBadge.IconSource: Option<Ref<IconSource>>",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "InfoBadgeTemplateSettings",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::primitives::InfoBadgeTemplateSettings",
+    "base": "FerroObject",
+    "constructible": true,
+    "properties": {
+      "InfoBadgeCornerRadius": {
+        "name": "InfoBadgeCornerRadius",
+        "type_name": "CornerRadius",
+        "documentation": "InfoBadgeTemplateSettings.InfoBadgeCornerRadius: CornerRadius",
+        "values": [],
+        "attached": false
+      },
+      "IconElement": {
+        "name": "IconElement",
+        "type_name": "Option<Ref<IconElement>>",
+        "documentation": "InfoBadgeTemplateSettings.IconElement: Option<Ref<IconElement>>",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls.Primitives",
+      "clr-namespace:FerroUI.Controls.Primitives;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "InfoBar",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::InfoBar",
+    "base": "ContentControl",
+    "constructible": true,
+    "properties": {
+      "IsOpen": {
+        "name": "IsOpen",
+        "type_name": "bool",
+        "documentation": "InfoBar.IsOpen: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "Title": {
+        "name": "Title",
+        "type_name": "String",
+        "documentation": "InfoBar.Title: String",
+        "values": [],
+        "attached": false
+      },
+      "Message": {
+        "name": "Message",
+        "type_name": "String",
+        "documentation": "InfoBar.Message: String",
+        "values": [],
+        "attached": false
+      },
+      "Severity": {
+        "name": "Severity",
+        "type_name": "InfoBarSeverity",
+        "documentation": "InfoBar.Severity: InfoBarSeverity",
+        "values": [
+          "Informational",
+          "Success",
+          "Warning",
+          "Error"
+        ],
+        "attached": false
+      },
+      "IconSource": {
+        "name": "IconSource",
+        "type_name": "Option<Ref<IconSource>>",
+        "documentation": "InfoBar.IconSource: Option<Ref<IconSource>>",
+        "values": [],
+        "attached": false
+      },
+      "IsIconVisible": {
+        "name": "IsIconVisible",
+        "type_name": "bool",
+        "documentation": "InfoBar.IsIconVisible: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "IsClosable": {
+        "name": "IsClosable",
+        "type_name": "bool",
+        "documentation": "InfoBar.IsClosable: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "CloseButtonStyle": {
+        "name": "CloseButtonStyle",
+        "type_name": "Option<Ref<ControlTheme>>",
+        "documentation": "InfoBar.CloseButtonStyle: Option<Ref<ControlTheme>>",
+        "values": [],
+        "attached": false
+      },
+      "CloseButtonCommand": {
+        "name": "CloseButtonCommand",
+        "type_name": "Option<Rc<dyn ICommand>>",
+        "documentation": "InfoBar.CloseButtonCommand: Option<Rc<dyn ICommand>>",
+        "values": [],
+        "attached": false
+      },
+      "CloseButtonCommandParameter": {
+        "name": "CloseButtonCommandParameter",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "InfoBar.CloseButtonCommandParameter: Option<BoxedValue>",
+        "values": [],
+        "attached": false
+      },
+      "ActionButton": {
+        "name": "ActionButton",
+        "type_name": "Option<Ref<Button>>",
+        "documentation": "InfoBar.ActionButton: Option<Ref<Button>>",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "InfoBarAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::automation::peers::InfoBarAutomationPeer",
+    "base": "ControlAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "InfoBarClosedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::InfoBarClosedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Reason": {
+        "name": "Reason",
+        "type_name": "InfoBarCloseReason",
+        "documentation": "InfoBarClosedEventArgs.Reason: InfoBarCloseReason",
+        "values": [
+          "CloseButton",
+          "Programmatic"
+        ]
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "InfoBarClosingEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::InfoBarClosingEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Reason": {
+        "name": "Reason",
+        "type_name": "InfoBarCloseReason",
+        "documentation": "InfoBarClosingEventArgs.Reason: InfoBarCloseReason",
+        "values": [
+          "CloseButton",
+          "Programmatic"
+        ]
+      },
+      "Cancel": {
+        "name": "Cancel",
+        "type_name": "bool",
+        "documentation": "InfoBarClosingEventArgs.Cancel: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "InfoBarOpenedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::InfoBarOpenedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "InfoBarPanel",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::primitives::InfoBarPanel",
+    "base": "Panel",
+    "constructible": true,
+    "properties": {
+      "HorizontalOrientationPadding": {
+        "name": "HorizontalOrientationPadding",
+        "type_name": "Thickness",
+        "documentation": "InfoBarPanel.HorizontalOrientationPadding: Thickness",
+        "values": [],
+        "attached": false
+      },
+      "VerticalOrientationPadding": {
+        "name": "VerticalOrientationPadding",
+        "type_name": "Thickness",
+        "documentation": "InfoBarPanel.VerticalOrientationPadding: Thickness",
+        "values": [],
+        "attached": false
+      },
+      "HorizontalOrientationMargin": {
+        "name": "HorizontalOrientationMargin",
+        "type_name": "Thickness",
+        "documentation": "InfoBarPanel.HorizontalOrientationMargin: Thickness",
+        "values": [],
+        "attached": true
+      },
+      "VerticalOrientationMargin": {
+        "name": "VerticalOrientationMargin",
+        "type_name": "Thickness",
+        "documentation": "InfoBarPanel.VerticalOrientationMargin: Thickness",
+        "values": [],
+        "attached": true
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls.Primitives",
+      "clr-namespace:FerroUI.Controls.Primitives;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "InfoBarTemplateSettings",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::primitives::InfoBarTemplateSettings",
+    "base": "FerroObject",
+    "constructible": true,
+    "properties": {
+      "IconElement": {
+        "name": "IconElement",
+        "type_name": "Option<Ref<IconElement>>",
+        "documentation": "InfoBarTemplateSettings.IconElement: Option<Ref<IconElement>>",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls.Primitives",
+      "clr-namespace:FerroUI.Controls.Primitives;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "InkCanvas",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkCanvas",
+    "base": "Control",
+    "constructible": true,
+    "properties": {
+      "InkPresenter": {
+        "name": "InkPresenter",
+        "type_name": "Rc<InkPresenter>",
+        "documentation": "InkCanvas.InkPresenter: Rc<InkPresenter>",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls.Inking"
+    ]
+  },
+  {
+    "name": "InkCanvasAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkCanvasAutomationPeer",
+    "base": "ControlAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls.Inking"
+    ]
+  },
+  {
+    "name": "InkInputConfiguration",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkInputConfiguration",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "IsPrimaryBarrelButtonInputEnabled": {
+        "name": "IsPrimaryBarrelButtonInputEnabled",
+        "type_name": "bool",
+        "documentation": "InkInputConfiguration.IsPrimaryBarrelButtonInputEnabled: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      },
+      "IsEraserInputEnabled": {
+        "name": "IsEraserInputEnabled",
+        "type_name": "bool",
+        "documentation": "InkInputConfiguration.IsEraserInputEnabled: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls.Inking"
+    ]
+  },
+  {
+    "name": "InkInputProcessingConfiguration",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkInputProcessingConfiguration",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Mode": {
+        "name": "Mode",
+        "type_name": "InkInputProcessingMode",
+        "documentation": "InkInputProcessingConfiguration.Mode: InkInputProcessingMode",
+        "values": [
+          "None",
+          "Inking",
+          "Erasing"
+        ]
+      },
+      "RightDragAction": {
+        "name": "RightDragAction",
+        "type_name": "InkInputRightDragAction",
+        "documentation": "InkInputProcessingConfiguration.RightDragAction: InkInputRightDragAction",
+        "values": [
+          "LeaveUnprocessed",
+          "AllowProcessing"
+        ]
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls.Inking"
+    ]
+  },
+  {
+    "name": "InkPointerEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkPointerEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "PointerId": {
+        "name": "PointerId",
+        "type_name": "i32",
+        "documentation": "InkPointerEventArgs.PointerId: i32",
+        "values": []
+      },
+      "DeviceType": {
+        "name": "DeviceType",
+        "type_name": "PointerType",
+        "documentation": "InkPointerEventArgs.DeviceType: PointerType",
+        "values": [
+          "Mouse",
+          "Touch",
+          "Pen"
+        ]
+      },
+      "Point": {
+        "name": "Point",
+        "type_name": "InkPoint",
+        "documentation": "InkPointerEventArgs.Point: InkPoint",
+        "values": []
+      },
+      "Handled": {
+        "name": "Handled",
+        "type_name": "bool",
+        "documentation": "InkPointerEventArgs.Handled: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      },
+      "IsBarrelButtonPressed": {
+        "name": "IsBarrelButtonPressed",
+        "type_name": "bool",
+        "documentation": "InkPointerEventArgs.IsBarrelButtonPressed: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      },
+      "IsEraser": {
+        "name": "IsEraser",
+        "type_name": "bool",
+        "documentation": "InkPointerEventArgs.IsEraser: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      },
+      "IsRightButtonPressed": {
+        "name": "IsRightButtonPressed",
+        "type_name": "bool",
+        "documentation": "InkPointerEventArgs.IsRightButtonPressed: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls.Inking"
+    ]
+  },
+  {
+    "name": "InkPresenter",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkPresenter",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "InputDeviceTypes": {
+        "name": "InputDeviceTypes",
+        "type_name": "CoreInputDeviceTypes",
+        "documentation": "InkPresenter.InputDeviceTypes: CoreInputDeviceTypes",
+        "values": []
+      },
+      "IsInputEnabled": {
+        "name": "IsInputEnabled",
+        "type_name": "bool",
+        "documentation": "InkPresenter.IsInputEnabled: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      },
+      "HighContrastAdjustment": {
+        "name": "HighContrastAdjustment",
+        "type_name": "InkHighContrastAdjustment",
+        "documentation": "InkPresenter.HighContrastAdjustment: InkHighContrastAdjustment",
+        "values": [
+          "UseSystemColorsWhenNecessary",
+          "UseSystemColors",
+          "UseOriginalColors"
+        ]
+      },
+      "StrokeContainer": {
+        "name": "StrokeContainer",
+        "type_name": "Rc<InkStrokeContainer>",
+        "documentation": "InkPresenter.StrokeContainer: Rc<InkStrokeContainer>",
+        "values": []
+      },
+      "InputProcessingConfiguration": {
+        "name": "InputProcessingConfiguration",
+        "type_name": "Rc<InkInputProcessingConfiguration>",
+        "documentation": "InkPresenter.InputProcessingConfiguration: Rc<InkInputProcessingConfiguration>",
+        "values": []
+      },
+      "InputConfiguration": {
+        "name": "InputConfiguration",
+        "type_name": "Rc<InkInputConfiguration>",
+        "documentation": "InkPresenter.InputConfiguration: Rc<InkInputConfiguration>",
+        "values": []
+      },
+      "StrokeInput": {
+        "name": "StrokeInput",
+        "type_name": "Rc<InkStrokeInput>",
+        "documentation": "InkPresenter.StrokeInput: Rc<InkStrokeInput>",
+        "values": []
+      },
+      "UnprocessedInput": {
+        "name": "UnprocessedInput",
+        "type_name": "Rc<InkUnprocessedInput>",
+        "documentation": "InkPresenter.UnprocessedInput: Rc<InkUnprocessedInput>",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls.Inking"
+    ]
+  },
+  {
+    "name": "InkPresenterProtractor",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkPresenterProtractor",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Kind": {
+        "name": "Kind",
+        "type_name": "InkPresenterStencilKind",
+        "documentation": "InkPresenterProtractor.Kind: InkPresenterStencilKind",
+        "values": [
+          "Other",
+          "Ruler",
+          "Protractor"
+        ]
+      },
+      "IsVisible": {
+        "name": "IsVisible",
+        "type_name": "bool",
+        "documentation": "InkPresenterProtractor.IsVisible: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      },
+      "Transform": {
+        "name": "Transform",
+        "type_name": "Matrix",
+        "documentation": "InkPresenterProtractor.Transform: Matrix",
+        "values": []
+      },
+      "Radius": {
+        "name": "Radius",
+        "type_name": "f64",
+        "documentation": "InkPresenterProtractor.Radius: f64",
+        "values": []
+      },
+      "AreTickMarksVisible": {
+        "name": "AreTickMarksVisible",
+        "type_name": "bool",
+        "documentation": "InkPresenterProtractor.AreTickMarksVisible: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      },
+      "AreRaysVisible": {
+        "name": "AreRaysVisible",
+        "type_name": "bool",
+        "documentation": "InkPresenterProtractor.AreRaysVisible: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      },
+      "IsCenterMarkerVisible": {
+        "name": "IsCenterMarkerVisible",
+        "type_name": "bool",
+        "documentation": "InkPresenterProtractor.IsCenterMarkerVisible: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      },
+      "IsAngleReadoutVisible": {
+        "name": "IsAngleReadoutVisible",
+        "type_name": "bool",
+        "documentation": "InkPresenterProtractor.IsAngleReadoutVisible: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      },
+      "IsResizable": {
+        "name": "IsResizable",
+        "type_name": "bool",
+        "documentation": "InkPresenterProtractor.IsResizable: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      },
+      "BackgroundColor": {
+        "name": "BackgroundColor",
+        "type_name": "Color",
+        "documentation": "InkPresenterProtractor.BackgroundColor: Color",
+        "values": []
+      },
+      "ForegroundColor": {
+        "name": "ForegroundColor",
+        "type_name": "Color",
+        "documentation": "InkPresenterProtractor.ForegroundColor: Color",
+        "values": []
+      },
+      "AccentColor": {
+        "name": "AccentColor",
+        "type_name": "Color",
+        "documentation": "InkPresenterProtractor.AccentColor: Color",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls.Inking"
+    ]
+  },
+  {
+    "name": "InkPresenterRuler",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkPresenterRuler",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Kind": {
+        "name": "Kind",
+        "type_name": "InkPresenterStencilKind",
+        "documentation": "InkPresenterRuler.Kind: InkPresenterStencilKind",
+        "values": [
+          "Other",
+          "Ruler",
+          "Protractor"
+        ]
+      },
+      "IsVisible": {
+        "name": "IsVisible",
+        "type_name": "bool",
+        "documentation": "InkPresenterRuler.IsVisible: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      },
+      "Transform": {
+        "name": "Transform",
+        "type_name": "Matrix",
+        "documentation": "InkPresenterRuler.Transform: Matrix",
+        "values": []
+      },
+      "Length": {
+        "name": "Length",
+        "type_name": "f64",
+        "documentation": "InkPresenterRuler.Length: f64",
+        "values": []
+      },
+      "Width": {
+        "name": "Width",
+        "type_name": "f64",
+        "documentation": "InkPresenterRuler.Width: f64",
+        "values": []
+      },
+      "AreTickMarksVisible": {
+        "name": "AreTickMarksVisible",
+        "type_name": "bool",
+        "documentation": "InkPresenterRuler.AreTickMarksVisible: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      },
+      "IsCompassVisible": {
+        "name": "IsCompassVisible",
+        "type_name": "bool",
+        "documentation": "InkPresenterRuler.IsCompassVisible: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      },
+      "BackgroundColor": {
+        "name": "BackgroundColor",
+        "type_name": "Color",
+        "documentation": "InkPresenterRuler.BackgroundColor: Color",
+        "values": []
+      },
+      "ForegroundColor": {
+        "name": "ForegroundColor",
+        "type_name": "Color",
+        "documentation": "InkPresenterRuler.ForegroundColor: Color",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls.Inking"
+    ]
+  },
+  {
+    "name": "InkStroke",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkStroke",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Id": {
+        "name": "Id",
+        "type_name": "u32",
+        "documentation": "InkStroke.Id: u32",
+        "values": []
+      },
+      "DrawingAttributes": {
+        "name": "DrawingAttributes",
+        "type_name": "InkDrawingAttributes",
+        "documentation": "InkStroke.DrawingAttributes: InkDrawingAttributes",
+        "values": []
+      },
+      "Selected": {
+        "name": "Selected",
+        "type_name": "bool",
+        "documentation": "InkStroke.Selected: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      },
+      "BoundingRect": {
+        "name": "BoundingRect",
+        "type_name": "Rect",
+        "documentation": "InkStroke.BoundingRect: Rect",
+        "values": []
+      },
+      "PointTransform": {
+        "name": "PointTransform",
+        "type_name": "Matrix",
+        "documentation": "InkStroke.PointTransform: Matrix",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls.Inking"
+    ]
+  },
+  {
+    "name": "InkStrokeContainer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkStrokeContainer",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "BoundingRect": {
+        "name": "BoundingRect",
+        "type_name": "Rect",
+        "documentation": "InkStrokeContainer.BoundingRect: Rect",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls.Inking"
+    ]
+  },
+  {
+    "name": "InkStrokeInput",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkStrokeInput",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "InkPresenter": {
+        "name": "InkPresenter",
+        "type_name": "Option<Rc<InkPresenter>>",
+        "documentation": "InkStrokeInput.InkPresenter: Option<Rc<InkPresenter>>",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls.Inking"
+    ]
+  },
+  {
+    "name": "InkStrokesCollectedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkStrokesCollectedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Strokes": {
+        "name": "Strokes",
+        "type_name": "Vec<Rc<InkStroke>>",
+        "documentation": "InkStrokesCollectedEventArgs.Strokes: Vec<Rc<InkStroke>>",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls.Inking"
+    ]
+  },
+  {
+    "name": "InkStrokesErasedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkStrokesErasedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Strokes": {
+        "name": "Strokes",
+        "type_name": "Vec<Rc<InkStroke>>",
+        "documentation": "InkStrokesErasedEventArgs.Strokes: Vec<Rc<InkStroke>>",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls.Inking"
+    ]
+  },
+  {
+    "name": "InkSynchronizer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkSynchronizer",
+    "base": null,
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls.Inking"
+    ]
+  },
+  {
+    "name": "InkToolbar",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkToolbar",
+    "base": "StackPanel",
+    "constructible": true,
+    "properties": {
+      "InitialControls": {
+        "name": "InitialControls",
+        "type_name": "InkToolbarInitialControls",
+        "documentation": "InkToolbar.InitialControls: InkToolbarInitialControls",
+        "values": [
+          "All",
+          "None",
+          "PensOnly",
+          "AllExceptPens"
+        ],
+        "attached": false
+      },
+      "ActiveTool": {
+        "name": "ActiveTool",
+        "type_name": "Option<Ref<InkToolbarToolButton>>",
+        "documentation": "InkToolbar.ActiveTool: Option<Ref<InkToolbarToolButton>>",
+        "values": [],
+        "attached": false
+      },
+      "IsRulerButtonChecked": {
+        "name": "IsRulerButtonChecked",
+        "type_name": "bool",
+        "documentation": "InkToolbar.IsRulerButtonChecked: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "TargetInkCanvas": {
+        "name": "TargetInkCanvas",
+        "type_name": "Option<Ref<InkCanvas>>",
+        "documentation": "InkToolbar.TargetInkCanvas: Option<Ref<InkCanvas>>",
+        "values": [],
+        "attached": false
+      },
+      "IsStencilButtonChecked": {
+        "name": "IsStencilButtonChecked",
+        "type_name": "bool",
+        "documentation": "InkToolbar.IsStencilButtonChecked: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "ButtonFlyoutPlacement": {
+        "name": "ButtonFlyoutPlacement",
+        "type_name": "InkToolbarButtonFlyoutPlacement",
+        "documentation": "InkToolbar.ButtonFlyoutPlacement: InkToolbarButtonFlyoutPlacement",
+        "values": [
+          "Auto",
+          "Top",
+          "Bottom",
+          "Left",
+          "Right"
+        ],
+        "attached": false
+      },
+      "Orientation": {
+        "name": "Orientation",
+        "type_name": "Orientation",
+        "documentation": "InkToolbar.Orientation: Orientation",
+        "values": [
+          "Horizontal",
+          "Vertical"
+        ],
+        "attached": false
+      },
+      "TargetInkPresenter": {
+        "name": "TargetInkPresenter",
+        "type_name": "Option<Rc<InkPresenter>>",
+        "documentation": "InkToolbar.TargetInkPresenter: Option<Rc<InkPresenter>>",
+        "values": [],
+        "attached": false
+      },
+      "BorderBrush": {
+        "name": "BorderBrush",
+        "type_name": "Option<Rc<dyn IBrush>>",
+        "documentation": "InkToolbar.BorderBrush: Option<Rc<dyn IBrush>>",
+        "values": [],
+        "attached": false
+      },
+      "BorderThickness": {
+        "name": "BorderThickness",
+        "type_name": "Thickness",
+        "documentation": "InkToolbar.BorderThickness: Thickness",
+        "values": [],
+        "attached": false
+      },
+      "CornerRadius": {
+        "name": "CornerRadius",
+        "type_name": "CornerRadius",
+        "documentation": "InkToolbar.CornerRadius: CornerRadius",
+        "values": [],
+        "attached": false
+      },
+      "BackgroundSizing": {
+        "name": "BackgroundSizing",
+        "type_name": "BackgroundSizing",
+        "documentation": "InkToolbar.BackgroundSizing: BackgroundSizing",
+        "values": [
+          "InnerBorderEdge",
+          "OuterBorderEdge",
+          "CenterBorder"
+        ],
+        "attached": false
+      },
+      "Padding": {
+        "name": "Padding",
+        "type_name": "Thickness",
+        "documentation": "InkToolbar.Padding: Thickness",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls.Inking"
+    ]
+  },
+  {
+    "name": "InkToolbarAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkToolbarAutomationPeer",
+    "base": "ControlAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls.Inking"
+    ]
+  },
+  {
+    "name": "InkToolbarBallpointPenButton",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkToolbarBallpointPenButton",
+    "base": "InkToolbarPenButton",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls.Inking"
+    ]
+  },
+  {
+    "name": "InkToolbarCustomPen",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkToolbarCustomPen",
+    "base": "FerroObject",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls.Inking"
+    ]
+  },
+  {
+    "name": "InkToolbarCustomPenButton",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkToolbarCustomPenButton",
+    "base": "InkToolbarPenButton",
+    "constructible": true,
+    "properties": {
+      "CustomPen": {
+        "name": "CustomPen",
+        "type_name": "Option<Ref<InkToolbarCustomPen>>",
+        "documentation": "InkToolbarCustomPenButton.CustomPen: Option<Ref<InkToolbarCustomPen>>",
+        "values": [],
+        "attached": false
+      },
+      "ConfigurationContent": {
+        "name": "ConfigurationContent",
+        "type_name": "Option<Ref<Control>>",
+        "documentation": "InkToolbarCustomPenButton.ConfigurationContent: Option<Ref<Control>>",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls.Inking"
+    ]
+  },
+  {
+    "name": "InkToolbarCustomToggleButton",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkToolbarCustomToggleButton",
+    "base": "InkToolbarToggleButton",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls.Inking"
+    ]
+  },
+  {
+    "name": "InkToolbarCustomToolButton",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkToolbarCustomToolButton",
+    "base": "InkToolbarToolButton",
+    "constructible": true,
+    "properties": {
+      "ConfigurationContent": {
+        "name": "ConfigurationContent",
+        "type_name": "Option<Ref<Control>>",
+        "documentation": "InkToolbarCustomToolButton.ConfigurationContent: Option<Ref<Control>>",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls.Inking"
+    ]
+  },
+  {
+    "name": "InkToolbarEraserButton",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkToolbarEraserButton",
+    "base": "InkToolbarToolButton",
+    "constructible": true,
+    "properties": {
+      "IsClearAllVisible": {
+        "name": "IsClearAllVisible",
+        "type_name": "bool",
+        "documentation": "InkToolbarEraserButton.IsClearAllVisible: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls.Inking"
+    ]
+  },
+  {
+    "name": "InkToolbarFlyoutItem",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkToolbarFlyoutItem",
+    "base": "ToggleButton",
+    "constructible": true,
+    "properties": {
+      "Kind": {
+        "name": "Kind",
+        "type_name": "InkToolbarFlyoutItemKind",
+        "documentation": "InkToolbarFlyoutItem.Kind: InkToolbarFlyoutItemKind",
+        "values": [
+          "Simple",
+          "Radio",
+          "Check",
+          "RadioCheck"
+        ],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls.Inking"
+    ]
+  },
+  {
+    "name": "InkToolbarFlyoutItemAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkToolbarFlyoutItemAutomationPeer",
+    "base": "ToggleButtonAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls.Inking"
+    ]
+  },
+  {
+    "name": "InkToolbarHighlighterButton",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkToolbarHighlighterButton",
+    "base": "InkToolbarPenButton",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls.Inking"
+    ]
+  },
+  {
+    "name": "InkToolbarIsStencilButtonCheckedChangedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkToolbarIsStencilButtonCheckedChangedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "StencilButton": {
+        "name": "StencilButton",
+        "type_name": "Ref<InkToolbarStencilButton>",
+        "documentation": "InkToolbarIsStencilButtonCheckedChangedEventArgs.StencilButton: Ref<InkToolbarStencilButton>",
+        "values": []
+      },
+      "StencilKind": {
+        "name": "StencilKind",
+        "type_name": "InkToolbarStencilKind",
+        "documentation": "InkToolbarIsStencilButtonCheckedChangedEventArgs.StencilKind: InkToolbarStencilKind",
+        "values": [
+          "Ruler",
+          "Protractor"
+        ]
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls.Inking"
+    ]
+  },
+  {
+    "name": "InkToolbarMenuButton",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkToolbarMenuButton",
+    "base": "ToggleButton",
+    "constructible": true,
+    "properties": {
+      "IsExtensionGlyphShown": {
+        "name": "IsExtensionGlyphShown",
+        "type_name": "bool",
+        "documentation": "InkToolbarMenuButton.IsExtensionGlyphShown: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "MenuKind": {
+        "name": "MenuKind",
+        "type_name": "InkToolbarMenuKind",
+        "documentation": "InkToolbarMenuButton.MenuKind: InkToolbarMenuKind",
+        "values": [
+          "Stencil"
+        ]
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls.Inking"
+    ]
+  },
+  {
+    "name": "InkToolbarMenuButtonAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkToolbarMenuButtonAutomationPeer",
+    "base": "ToggleButtonAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls.Inking"
+    ]
+  },
+  {
+    "name": "InkToolbarPenButton",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkToolbarPenButton",
+    "base": "InkToolbarToolButton",
+    "constructible": true,
+    "properties": {
+      "Palette": {
+        "name": "Palette",
+        "type_name": "FerroList<Rc<dyn IBrush>>",
+        "documentation": "InkToolbarPenButton.Palette: FerroList<Rc<dyn IBrush>>",
+        "values": [],
+        "attached": false
+      },
+      "MinStrokeWidth": {
+        "name": "MinStrokeWidth",
+        "type_name": "f64",
+        "documentation": "InkToolbarPenButton.MinStrokeWidth: f64",
+        "values": [],
+        "attached": false
+      },
+      "MaxStrokeWidth": {
+        "name": "MaxStrokeWidth",
+        "type_name": "f64",
+        "documentation": "InkToolbarPenButton.MaxStrokeWidth: f64",
+        "values": [],
+        "attached": false
+      },
+      "SelectedBrushIndex": {
+        "name": "SelectedBrushIndex",
+        "type_name": "i32",
+        "documentation": "InkToolbarPenButton.SelectedBrushIndex: i32",
+        "values": [],
+        "attached": false
+      },
+      "SelectedStrokeWidth": {
+        "name": "SelectedStrokeWidth",
+        "type_name": "f64",
+        "documentation": "InkToolbarPenButton.SelectedStrokeWidth: f64",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls.Inking"
+    ]
+  },
+  {
+    "name": "InkToolbarPenConfigurationControl",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkToolbarPenConfigurationControl",
+    "base": "StackPanel",
+    "constructible": true,
+    "properties": {
+      "BorderBrush": {
+        "name": "BorderBrush",
+        "type_name": "Option<Rc<dyn IBrush>>",
+        "documentation": "InkToolbarPenConfigurationControl.BorderBrush: Option<Rc<dyn IBrush>>",
+        "values": [],
+        "attached": false
+      },
+      "BorderThickness": {
+        "name": "BorderThickness",
+        "type_name": "Thickness",
+        "documentation": "InkToolbarPenConfigurationControl.BorderThickness: Thickness",
+        "values": [],
+        "attached": false
+      },
+      "CornerRadius": {
+        "name": "CornerRadius",
+        "type_name": "CornerRadius",
+        "documentation": "InkToolbarPenConfigurationControl.CornerRadius: CornerRadius",
+        "values": [],
+        "attached": false
+      },
+      "BackgroundSizing": {
+        "name": "BackgroundSizing",
+        "type_name": "BackgroundSizing",
+        "documentation": "InkToolbarPenConfigurationControl.BackgroundSizing: BackgroundSizing",
+        "values": [
+          "InnerBorderEdge",
+          "OuterBorderEdge",
+          "CenterBorder"
+        ],
+        "attached": false
+      },
+      "Padding": {
+        "name": "Padding",
+        "type_name": "Thickness",
+        "documentation": "InkToolbarPenConfigurationControl.Padding: Thickness",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls.Inking"
+    ]
+  },
+  {
+    "name": "InkToolbarPencilButton",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkToolbarPencilButton",
+    "base": "InkToolbarPenButton",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls.Inking"
+    ]
+  },
+  {
+    "name": "InkToolbarRulerButton",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkToolbarRulerButton",
+    "base": "InkToolbarToggleButton",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls.Inking"
+    ]
+  },
+  {
+    "name": "InkToolbarStencilButton",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkToolbarStencilButton",
+    "base": "InkToolbarMenuButton",
+    "constructible": true,
+    "properties": {
+      "SelectedStencil": {
+        "name": "SelectedStencil",
+        "type_name": "InkToolbarStencilKind",
+        "documentation": "InkToolbarStencilButton.SelectedStencil: InkToolbarStencilKind",
+        "values": [
+          "Ruler",
+          "Protractor"
+        ],
+        "attached": false
+      },
+      "IsRulerItemVisible": {
+        "name": "IsRulerItemVisible",
+        "type_name": "bool",
+        "documentation": "InkToolbarStencilButton.IsRulerItemVisible: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "IsProtractorItemVisible": {
+        "name": "IsProtractorItemVisible",
+        "type_name": "bool",
+        "documentation": "InkToolbarStencilButton.IsProtractorItemVisible: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls.Inking"
+    ]
+  },
+  {
+    "name": "InkToolbarStrokeWidthSlider",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkToolbarStrokeWidthSlider",
+    "base": "Slider",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls.Inking"
+    ]
+  },
+  {
+    "name": "InkToolbarStrokeWidthSliderAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkToolbarStrokeWidthSliderAutomationPeer",
+    "base": "SliderAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls.Inking"
+    ]
+  },
+  {
+    "name": "InkToolbarToggleButton",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkToolbarToggleButton",
+    "base": "CheckBox",
+    "constructible": true,
+    "properties": {
+      "ToggleKind": {
+        "name": "ToggleKind",
+        "type_name": "InkToolbarToggle",
+        "documentation": "InkToolbarToggleButton.ToggleKind: InkToolbarToggle",
+        "values": [
+          "Ruler",
+          "Custom"
+        ]
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls.Inking"
+    ]
+  },
+  {
+    "name": "InkToolbarToolButton",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkToolbarToolButton",
+    "base": "RadioButton",
+    "constructible": true,
+    "properties": {
+      "IsExtensionGlyphShown": {
+        "name": "IsExtensionGlyphShown",
+        "type_name": "bool",
+        "documentation": "InkToolbarToolButton.IsExtensionGlyphShown: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "ToolKind": {
+        "name": "ToolKind",
+        "type_name": "InkToolbarTool",
+        "documentation": "InkToolbarToolButton.ToolKind: InkToolbarTool",
+        "values": [
+          "BallpointPen",
+          "Pencil",
+          "Highlighter",
+          "Eraser",
+          "CustomPen",
+          "CustomTool"
+        ]
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls.Inking"
+    ]
+  },
+  {
+    "name": "InkToolbarToolButtonAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkToolbarToolButtonAutomationPeer",
+    "base": "RadioButtonAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls.Inking"
+    ]
+  },
+  {
+    "name": "InkUnprocessedInput",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls_inking::InkUnprocessedInput",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "InkPresenter": {
+        "name": "InkPresenter",
+        "type_name": "Option<Rc<InkPresenter>>",
+        "documentation": "InkUnprocessedInput.InkPresenter: Option<Rc<InkPresenter>>",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls.Inking"
     ]
   },
   {
@@ -10745,6 +12353,26 @@
     ]
   },
   {
+    "name": "PathIconSource",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::PathIconSource",
+    "base": "IconSource",
+    "constructible": true,
+    "properties": {
+      "Data": {
+        "name": "Data",
+        "type_name": "Option<Ref<Geometry>>",
+        "documentation": "PathIconSource.Data: Option<Ref<Geometry>>",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "PathSegment",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::media::PathSegment",
@@ -11857,6 +13485,84 @@
     "namespace_aliases": [
       "using:FerroUI.Controls",
       "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "ProgressRing",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::ProgressRing",
+    "base": "TemplatedControl",
+    "constructible": true,
+    "properties": {
+      "IsActive": {
+        "name": "IsActive",
+        "type_name": "bool",
+        "documentation": "ProgressRing.IsActive: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "IsIndeterminate": {
+        "name": "IsIndeterminate",
+        "type_name": "bool",
+        "documentation": "ProgressRing.IsIndeterminate: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "Value": {
+        "name": "Value",
+        "type_name": "f64",
+        "documentation": "ProgressRing.Value: f64",
+        "values": [],
+        "attached": false
+      },
+      "Minimum": {
+        "name": "Minimum",
+        "type_name": "f64",
+        "documentation": "ProgressRing.Minimum: f64",
+        "values": [],
+        "attached": false
+      },
+      "Maximum": {
+        "name": "Maximum",
+        "type_name": "f64",
+        "documentation": "ProgressRing.Maximum: f64",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "ProgressRingAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::automation::peers::ProgressRingAutomationPeer",
+    "base": "ControlAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "ProgressRingTemplateSettings",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::primitives::ProgressRingTemplateSettings",
+    "base": "FerroObject",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls.Primitives",
+      "clr-namespace:FerroUI.Controls.Primitives;assembly=FerroUI.Controls"
     ]
   },
   {
@@ -15420,6 +17126,442 @@
     "namespace_aliases": [
       "using:FerroUI.Input.GestureRecognizers",
       "clr-namespace:FerroUI.Input.GestureRecognizers;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "SymbolIcon",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::SymbolIcon",
+    "base": "IconElement",
+    "constructible": true,
+    "properties": {
+      "Symbol": {
+        "name": "Symbol",
+        "type_name": "Symbol",
+        "documentation": "SymbolIcon.Symbol: Symbol",
+        "values": [
+          "Previous",
+          "Next",
+          "Play",
+          "Pause",
+          "Edit",
+          "Save",
+          "Clear",
+          "Delete",
+          "Remove",
+          "Add",
+          "Cancel",
+          "Accept",
+          "More",
+          "Redo",
+          "Undo",
+          "Home",
+          "Up",
+          "Forward",
+          "Back",
+          "Favorite",
+          "Camera",
+          "Setting",
+          "Video",
+          "Sync",
+          "Download",
+          "Mail",
+          "Find",
+          "Help",
+          "Upload",
+          "Emoji",
+          "TwoPage",
+          "LeaveChat",
+          "MailForward",
+          "Clock",
+          "Send",
+          "Crop",
+          "RotateCamera",
+          "People",
+          "OpenPane",
+          "ClosePane",
+          "World",
+          "Flag",
+          "PreviewLink",
+          "Globe",
+          "Trim",
+          "AttachCamera",
+          "ZoomIn",
+          "Bookmarks",
+          "Document",
+          "ProtectedDocument",
+          "Page",
+          "Bullets",
+          "Comment",
+          "MailFilled",
+          "ContactInfo",
+          "HangUp",
+          "ViewAll",
+          "MapPin",
+          "Phone",
+          "VideoChat",
+          "Switch",
+          "Contact",
+          "Rename",
+          "Pin",
+          "MusicInfo",
+          "Go",
+          "Keyboard",
+          "DockLeft",
+          "DockRight",
+          "DockBottom",
+          "Remote",
+          "Refresh",
+          "Rotate",
+          "Shuffle",
+          "List",
+          "Shop",
+          "SelectAll",
+          "Orientation",
+          "Import",
+          "ImportAll",
+          "BrowsePhotos",
+          "WebCam",
+          "Pictures",
+          "SaveLocal",
+          "Caption",
+          "Stop",
+          "ShowResults",
+          "Volume",
+          "Repair",
+          "Message",
+          "Page2",
+          "CalendarDay",
+          "CalendarWeek",
+          "Calendar",
+          "Character",
+          "MailReplyAll",
+          "Read",
+          "Link",
+          "Account",
+          "ShowBcc",
+          "HideBcc",
+          "Cut",
+          "Attach",
+          "Paste",
+          "Filter",
+          "Copy",
+          "Emoji2",
+          "Important",
+          "MailReply",
+          "SlideShow",
+          "Sort",
+          "Manage",
+          "AllApps",
+          "DisconnectDrive",
+          "MapDrive",
+          "NewWindow",
+          "OpenWith",
+          "ContactPresence",
+          "Priority",
+          "GoToToday",
+          "Font",
+          "FontColor",
+          "Contact2",
+          "Folder",
+          "Audio",
+          "Placeholder",
+          "View",
+          "SetLockScreen",
+          "SetTile",
+          "ClosedCaption",
+          "StopSlideShow",
+          "Permissions",
+          "Highlight",
+          "DisableUpdates",
+          "UnFavorite",
+          "UnPin",
+          "OpenLocal",
+          "Mute",
+          "Italic",
+          "Underline",
+          "Bold",
+          "MoveToFolder",
+          "LikeDislike",
+          "Dislike",
+          "Like",
+          "AlignRight",
+          "AlignCenter",
+          "AlignLeft",
+          "Zoom",
+          "ZoomOut",
+          "OpenFile",
+          "OtherUser",
+          "Admin",
+          "Street",
+          "Map",
+          "ClearSelection",
+          "FontDecrease",
+          "FontIncrease",
+          "FontSize",
+          "CellPhone",
+          "ReShare",
+          "Tag",
+          "RepeatOne",
+          "RepeatAll",
+          "OutlineStar",
+          "SolidStar",
+          "Calculator",
+          "Directions",
+          "Target",
+          "Library",
+          "PhoneBook",
+          "Memo",
+          "Microphone",
+          "PostUpdate",
+          "BackToWindow",
+          "FullScreen",
+          "NewFolder",
+          "CalendarReply",
+          "UnSyncFolder",
+          "ReportHacked",
+          "SyncFolder",
+          "BlockContact",
+          "SwitchApps",
+          "AddFriend",
+          "TouchPointer",
+          "GoToStart",
+          "ZeroBars",
+          "OneBar",
+          "TwoBars",
+          "ThreeBars",
+          "FourBars",
+          "Scan",
+          "Preview",
+          "GlobalNavigationButton",
+          "Share",
+          "Print",
+          "XboxOneConsole"
+        ],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "SymbolIconSource",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::SymbolIconSource",
+    "base": "IconSource",
+    "constructible": true,
+    "properties": {
+      "Symbol": {
+        "name": "Symbol",
+        "type_name": "Symbol",
+        "documentation": "SymbolIconSource.Symbol: Symbol",
+        "values": [
+          "Previous",
+          "Next",
+          "Play",
+          "Pause",
+          "Edit",
+          "Save",
+          "Clear",
+          "Delete",
+          "Remove",
+          "Add",
+          "Cancel",
+          "Accept",
+          "More",
+          "Redo",
+          "Undo",
+          "Home",
+          "Up",
+          "Forward",
+          "Back",
+          "Favorite",
+          "Camera",
+          "Setting",
+          "Video",
+          "Sync",
+          "Download",
+          "Mail",
+          "Find",
+          "Help",
+          "Upload",
+          "Emoji",
+          "TwoPage",
+          "LeaveChat",
+          "MailForward",
+          "Clock",
+          "Send",
+          "Crop",
+          "RotateCamera",
+          "People",
+          "OpenPane",
+          "ClosePane",
+          "World",
+          "Flag",
+          "PreviewLink",
+          "Globe",
+          "Trim",
+          "AttachCamera",
+          "ZoomIn",
+          "Bookmarks",
+          "Document",
+          "ProtectedDocument",
+          "Page",
+          "Bullets",
+          "Comment",
+          "MailFilled",
+          "ContactInfo",
+          "HangUp",
+          "ViewAll",
+          "MapPin",
+          "Phone",
+          "VideoChat",
+          "Switch",
+          "Contact",
+          "Rename",
+          "Pin",
+          "MusicInfo",
+          "Go",
+          "Keyboard",
+          "DockLeft",
+          "DockRight",
+          "DockBottom",
+          "Remote",
+          "Refresh",
+          "Rotate",
+          "Shuffle",
+          "List",
+          "Shop",
+          "SelectAll",
+          "Orientation",
+          "Import",
+          "ImportAll",
+          "BrowsePhotos",
+          "WebCam",
+          "Pictures",
+          "SaveLocal",
+          "Caption",
+          "Stop",
+          "ShowResults",
+          "Volume",
+          "Repair",
+          "Message",
+          "Page2",
+          "CalendarDay",
+          "CalendarWeek",
+          "Calendar",
+          "Character",
+          "MailReplyAll",
+          "Read",
+          "Link",
+          "Account",
+          "ShowBcc",
+          "HideBcc",
+          "Cut",
+          "Attach",
+          "Paste",
+          "Filter",
+          "Copy",
+          "Emoji2",
+          "Important",
+          "MailReply",
+          "SlideShow",
+          "Sort",
+          "Manage",
+          "AllApps",
+          "DisconnectDrive",
+          "MapDrive",
+          "NewWindow",
+          "OpenWith",
+          "ContactPresence",
+          "Priority",
+          "GoToToday",
+          "Font",
+          "FontColor",
+          "Contact2",
+          "Folder",
+          "Audio",
+          "Placeholder",
+          "View",
+          "SetLockScreen",
+          "SetTile",
+          "ClosedCaption",
+          "StopSlideShow",
+          "Permissions",
+          "Highlight",
+          "DisableUpdates",
+          "UnFavorite",
+          "UnPin",
+          "OpenLocal",
+          "Mute",
+          "Italic",
+          "Underline",
+          "Bold",
+          "MoveToFolder",
+          "LikeDislike",
+          "Dislike",
+          "Like",
+          "AlignRight",
+          "AlignCenter",
+          "AlignLeft",
+          "Zoom",
+          "ZoomOut",
+          "OpenFile",
+          "OtherUser",
+          "Admin",
+          "Street",
+          "Map",
+          "ClearSelection",
+          "FontDecrease",
+          "FontIncrease",
+          "FontSize",
+          "CellPhone",
+          "ReShare",
+          "Tag",
+          "RepeatOne",
+          "RepeatAll",
+          "OutlineStar",
+          "SolidStar",
+          "Calculator",
+          "Directions",
+          "Target",
+          "Library",
+          "PhoneBook",
+          "Memo",
+          "Microphone",
+          "PostUpdate",
+          "BackToWindow",
+          "FullScreen",
+          "NewFolder",
+          "CalendarReply",
+          "UnSyncFolder",
+          "ReportHacked",
+          "SyncFolder",
+          "BlockContact",
+          "SwitchApps",
+          "AddFriend",
+          "TouchPointer",
+          "GoToStart",
+          "ZeroBars",
+          "OneBar",
+          "TwoBars",
+          "ThreeBars",
+          "FourBars",
+          "Scan",
+          "Preview",
+          "GlobalNavigationButton",
+          "Share",
+          "Print",
+          "XboxOneConsole"
+        ],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
     ]
   },
   {

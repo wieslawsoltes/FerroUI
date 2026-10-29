@@ -29,6 +29,10 @@ use ferroui_themes_material::MaterialTheme;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
+/// The symbol font of the WinUI controls in the catalog: Segoe Fluent Icons where the system has
+/// it, else the catalog's own font of the same code points.
+const SYMBOL_FONT_FAMILY: &str = "Segoe Fluent Icons, Segoe MDL2 Assets, ferres://ControlCatalog/Assets/Fonts/FerroUICatalogSymbols.ttf#FerroUI Catalog Symbols";
+
 /// The application of the catalog.
 #[repr(C)]
 pub struct App {
@@ -49,6 +53,8 @@ pub struct App {
     #[cfg(feature = "classic-themes")]
     color_picker_simple: RefCell<Option<Rc<dyn IStyle>>>,
     tree_data_grid_fluent: RefCell<Option<Rc<dyn IStyle>>>,
+    /// The WinUI styles of the inking controls (`ferroui-controls-inking`), not in the original.
+    inking_winui: RefCell<Option<Rc<dyn IStyle>>>,
     #[cfg(feature = "classic-themes")]
     tree_data_grid_generic: RefCell<Option<Rc<dyn IStyle>>>,
     dock_menu_item_count: Cell<i32>,
@@ -120,6 +126,17 @@ impl ApplicationImpl for App {
         }
         *this.color_picker_fluent.borrow_mut() = from_markup_value::<Rc<dyn IStyle>>(&this.resource("ColorPickerFluent"));
         *this.tree_data_grid_fluent.borrow_mut() = from_markup_value::<Rc<dyn IStyle>>(&this.resource("TreeDataGridFluent"));
+        *this.inking_winui.borrow_mut() = from_markup_value::<Rc<dyn IStyle>>(&this.resource("InkingWinUI"));
+
+        // Not in the original: the symbol font of the WinUI controls (SymbolIcon, FontIcon and the
+        // glyphs of InfoBar, RatingControl, NavigationView...; docs/porting/winui-controls.md,
+        // section 5.2). The themes name Segoe Fluent Icons, which only Windows has; the catalog
+        // falls back to its own FerroUI Catalog Symbols, which has the glyphs its pages use at the
+        // same code points (scripts/winui-controls/catalog_symbol_font.py). Resources of the
+        // application come before those of the themes.
+        if let Ok(family) = ferroui_base::media::FontFamily::parse(SYMBOL_FONT_FAMILY) {
+            this.resources().add("SymbolThemeFontFamily", Some(Rc::new(family) as ferroui_base::BoxedValue));
+        }
 
         // The port starts the catalog in its WinUI theme (not in the original, which starts in the
         // Fluent theme); with the feature `classic-themes` the settings page and
@@ -171,6 +188,7 @@ impl App {
             #[cfg(feature = "classic-themes")]
             color_picker_simple: RefCell::new(None),
             tree_data_grid_fluent: RefCell::new(None),
+            inking_winui: RefCell::new(None),
             #[cfg(feature = "classic-themes")]
             tree_data_grid_generic: RefCell::new(None),
             dock_menu_item_count: Cell::new(0),
@@ -385,6 +403,9 @@ impl App {
             // Not in the original: the styles of the TreeDataGrid of the port (the page of the
             // TreeDataGrid demo).
             app.theme_styles_container.add(Style::new());
+            // Not in the original: the WinUI styles of the inking controls of the port (the page
+            // Inking); the inking controls have no Fluent or Simple styles.
+            app.theme_styles_container.add(Style::new());
         }
 
         // The TreeDataGrid has Fluent styles, whose brushes come from resources the Fluent and the
@@ -404,6 +425,7 @@ impl App {
                 app.theme_styles_container.set(1, color_picker_fluent);
                 app.theme_styles_container.set(2, Style::new());
                 app.theme_styles_container.set(3, tree_data_grid_fluent());
+                app.theme_styles_container.set(4, Style::new());
             }
             #[cfg(feature = "classic-themes")]
             CatalogTheme::Simple => {
@@ -414,6 +436,7 @@ impl App {
                 app.theme_styles_container.set(1, color_picker_simple);
                 app.theme_styles_container.set(2, Style::new());
                 app.theme_styles_container.set(3, tree_data_grid_generic());
+                app.theme_styles_container.set(4, Style::new());
             }
             CatalogTheme::WinUI => {
                 // Not in the original: the WinUI theme of the port (docs/porting/winui-theme.md),
@@ -428,6 +451,8 @@ impl App {
                 app.theme_styles_container.set(1, color_picker_fluent);
                 app.theme_styles_container.set(2, Style::new());
                 app.theme_styles_container.set(3, tree_data_grid_fluent());
+                let inking_winui = app.inking_winui.borrow().clone().expect("the inking WinUI styles of App.xaml");
+                app.theme_styles_container.set(4, inking_winui);
             }
             #[cfg(feature = "macos-theme")]
             CatalogTheme::MacOS => {

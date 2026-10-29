@@ -127,6 +127,8 @@ document_tests! {
     controls_menu_scroll_viewer => "/Controls/MenuScrollViewer.xaml";
     controls_overlay_popup_host => "/Controls/OverlayPopupHost.xaml";
     controls_path_icon => "/Controls/PathIcon.xaml";
+    controls_font_icon => "/Controls/FontIcon.xaml";
+    controls_symbol_icon => "/Controls/SymbolIcon.xaml";
     controls_popup_root => "/Controls/PopupRoot.xaml";
     controls_progress_bar => "/Controls/ProgressBar.xaml";
     controls_radio_button => "/Controls/RadioButton.xaml";
@@ -235,6 +237,8 @@ document_tests! {
     resources_resize_gripper_themeresources => "/Resources/ResizeGripper_themeresources.xaml";
     resources_table_view_themeresources => "/Resources/TableView_themeresources.xaml";
     resources_tabular_surfaces_themeresources => "/Resources/TabularSurfaces_themeresources.xaml";
+    resources_info_badge_themeresources => "/Resources/InfoBadge_themeresources.xaml";
+    resources_progress_ring_themeresources => "/Resources/ProgressRing_themeresources.xaml";
     strings_invariant_resources => "/Strings/InvariantResources.xaml";
     macos_theme => "/MacOSTheme.xaml";
     // B2: buttons, ranges and expanders
@@ -248,6 +252,9 @@ document_tests! {
     controls_slider => "/Controls/Slider.xaml";
     controls_split_button => "/Controls/SplitButton.xaml";
     controls_toggle_switch => "/Controls/ToggleSwitch.xaml";
+    controls_info_bar => "/Controls/InfoBar.xaml";
+    controls_info_badge => "/Controls/InfoBadge.xaml";
+    controls_progress_ring => "/Controls/ProgressRing.xaml";
 }
 
 #[test]

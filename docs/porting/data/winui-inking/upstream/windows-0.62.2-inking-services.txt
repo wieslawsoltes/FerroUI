@@ -1,0 +1,165 @@
+# Selected Windows Ink dependency contract
+# microsoft/windows-rs @ 32c3144490c016fe496a0aed769bce60987a2e9d
+# windows 0.62.2; original source SHA256 d17cd5a203eb1cdf0f777b8fe100333dca54c9340ef572e5259d0b9d415206b7
+# Exact public declaration lines; bodies and private projection helpers omitted.
+
+[InkPoint]
+pub fn Position(&self) -> windows_core::Result<super::super::super::Foundation::Point>
+pub fn Pressure(&self) -> windows_core::Result<f32>
+pub fn TiltX(&self) -> windows_core::Result<f32>
+pub fn TiltY(&self) -> windows_core::Result<f32>
+pub fn Timestamp(&self) -> windows_core::Result<u64>
+pub fn CreateInkPoint(position: super::super::super::Foundation::Point, pressure: f32) -> windows_core::Result<InkPoint>
+pub fn CreateInkPointWithTiltAndTimestamp(position: super::super::super::Foundation::Point, pressure: f32, tiltx: f32, tilty: f32, timestamp: u64) -> windows_core::Result<InkPoint>
+
+[InkDrawingAttributes]
+pub fn new() -> windows_core::Result<Self>
+pub fn Color(&self) -> windows_core::Result<super::super::Color>
+pub fn SetColor(&self, value: super::super::Color) -> windows_core::Result<()>
+pub fn PenTip(&self) -> windows_core::Result<PenTipShape>
+pub fn SetPenTip(&self, value: PenTipShape) -> windows_core::Result<()>
+pub fn Size(&self) -> windows_core::Result<super::super::super::Foundation::Size>
+pub fn SetSize(&self, value: super::super::super::Foundation::Size) -> windows_core::Result<()>
+pub fn IgnorePressure(&self) -> windows_core::Result<bool>
+pub fn SetIgnorePressure(&self, value: bool) -> windows_core::Result<()>
+pub fn FitToCurve(&self) -> windows_core::Result<bool>
+pub fn SetFitToCurve(&self, value: bool) -> windows_core::Result<()>
+pub fn PenTipTransform(&self) -> windows_core::Result<windows_numerics::Matrix3x2>
+pub fn SetPenTipTransform(&self, value: windows_numerics::Matrix3x2) -> windows_core::Result<()>
+pub fn DrawAsHighlighter(&self) -> windows_core::Result<bool>
+pub fn SetDrawAsHighlighter(&self, value: bool) -> windows_core::Result<()>
+pub fn Kind(&self) -> windows_core::Result<InkDrawingAttributesKind>
+pub fn PencilProperties(&self) -> windows_core::Result<InkDrawingAttributesPencilProperties>
+pub fn IgnoreTilt(&self) -> windows_core::Result<bool>
+pub fn SetIgnoreTilt(&self, value: bool) -> windows_core::Result<()>
+pub fn ModelerAttributes(&self) -> windows_core::Result<InkModelerAttributes>
+pub fn CreateForPencil() -> windows_core::Result<InkDrawingAttributes>
+
+[InkDrawingAttributesPencilProperties]
+pub fn Opacity(&self) -> windows_core::Result<f64>
+pub fn SetOpacity(&self, value: f64) -> windows_core::Result<()>
+
+[InkModelerAttributes]
+pub fn PredictionTime(&self) -> windows_core::Result<super::super::super::Foundation::TimeSpan>
+pub fn SetPredictionTime(&self, value: super::super::super::Foundation::TimeSpan) -> windows_core::Result<()>
+pub fn ScalingFactor(&self) -> windows_core::Result<f32>
+pub fn SetScalingFactor(&self, value: f32) -> windows_core::Result<()>
+pub fn UseVelocityBasedPressure(&self) -> windows_core::Result<bool>
+pub fn SetUseVelocityBasedPressure(&self, value: bool) -> windows_core::Result<()>
+
+[InkStroke]
+pub fn DrawingAttributes(&self) -> windows_core::Result<InkDrawingAttributes>
+pub fn SetDrawingAttributes<P0>(&self, value: P0) -> windows_core::Result<()>
+pub fn BoundingRect(&self) -> windows_core::Result<super::super::super::Foundation::Rect>
+pub fn Selected(&self) -> windows_core::Result<bool>
+pub fn SetSelected(&self, value: bool) -> windows_core::Result<()>
+pub fn Recognized(&self) -> windows_core::Result<bool>
+pub fn GetRenderingSegments(&self) -> windows_core::Result<windows_collections::IVectorView<InkStrokeRenderingSegment>>
+pub fn Clone(&self) -> windows_core::Result<InkStroke>
+pub fn PointTransform(&self) -> windows_core::Result<windows_numerics::Matrix3x2>
+pub fn SetPointTransform(&self, value: windows_numerics::Matrix3x2) -> windows_core::Result<()>
+pub fn GetInkPoints(&self) -> windows_core::Result<windows_collections::IVectorView<InkPoint>>
+pub fn Id(&self) -> windows_core::Result<u32>
+pub fn StrokeStartedTime(&self) -> windows_core::Result<super::super::super::Foundation::IReference<super::super::super::Foundation::DateTime>>
+pub fn SetStrokeStartedTime<P0>(&self, value: P0) -> windows_core::Result<()>
+pub fn StrokeDuration(&self) -> windows_core::Result<super::super::super::Foundation::IReference<super::super::super::Foundation::TimeSpan>>
+pub fn SetStrokeDuration<P0>(&self, value: P0) -> windows_core::Result<()>
+pub fn PointerId(&self) -> windows_core::Result<u32>
+
+[InkStrokeRenderingSegment]
+pub fn Position(&self) -> windows_core::Result<super::super::super::Foundation::Point>
+pub fn BezierControlPoint1(&self) -> windows_core::Result<super::super::super::Foundation::Point>
+pub fn BezierControlPoint2(&self) -> windows_core::Result<super::super::super::Foundation::Point>
+pub fn Pressure(&self) -> windows_core::Result<f32>
+pub fn TiltX(&self) -> windows_core::Result<f32>
+pub fn TiltY(&self) -> windows_core::Result<f32>
+pub fn Twist(&self) -> windows_core::Result<f32>
+
+[InkStrokeBuilder]
+pub fn new() -> windows_core::Result<Self>
+pub fn BeginStroke<P0>(&self, pointerpoint: P0) -> windows_core::Result<()>
+pub fn AppendToStroke<P0>(&self, pointerpoint: P0) -> windows_core::Result<super::PointerPoint>
+pub fn EndStroke<P0>(&self, pointerpoint: P0) -> windows_core::Result<InkStroke>
+pub fn CreateStroke<P0>(&self, points: P0) -> windows_core::Result<InkStroke>
+pub fn SetDefaultDrawingAttributes<P0>(&self, drawingattributes: P0) -> windows_core::Result<()>
+pub fn CreateStrokeFromInkPoints<P0>(&self, inkpoints: P0, transform: windows_numerics::Matrix3x2) -> windows_core::Result<InkStroke>
+pub fn CreateStrokeFromInkPoints2<P0, P2, P3>(&self, inkpoints: P0, transform: windows_numerics::Matrix3x2, strokestartedtime: P2, strokeduration: P3) -> windows_core::Result<InkStroke>
+
+[InkStrokeContainer]
+pub fn new() -> windows_core::Result<Self>
+pub fn BoundingRect(&self) -> windows_core::Result<super::super::super::Foundation::Rect>
+pub fn AddStroke<P0>(&self, stroke: P0) -> windows_core::Result<()>
+pub fn DeleteSelected(&self) -> windows_core::Result<super::super::super::Foundation::Rect>
+pub fn MoveSelected(&self, translation: super::super::super::Foundation::Point) -> windows_core::Result<super::super::super::Foundation::Rect>
+pub fn SelectWithPolyLine<P0>(&self, polyline: P0) -> windows_core::Result<super::super::super::Foundation::Rect>
+pub fn SelectWithLine(&self, from: super::super::super::Foundation::Point, to: super::super::super::Foundation::Point) -> windows_core::Result<super::super::super::Foundation::Rect>
+pub fn CopySelectedToClipboard(&self) -> windows_core::Result<()>
+pub fn PasteFromClipboard(&self, position: super::super::super::Foundation::Point) -> windows_core::Result<super::super::super::Foundation::Rect>
+pub fn CanPasteFromClipboard(&self) -> windows_core::Result<bool>
+pub fn LoadAsync<P0>(&self, inputstream: P0) -> windows_core::Result<windows_future::IAsyncActionWithProgress<u64>>
+pub fn SaveAsync<P0>(&self, outputstream: P0) -> windows_core::Result<windows_future::IAsyncOperationWithProgress<u32, u32>>
+pub fn UpdateRecognitionResults<P0>(&self, recognitionresults: P0) -> windows_core::Result<()>
+pub fn GetStrokes(&self) -> windows_core::Result<windows_collections::IVectorView<InkStroke>>
+pub fn GetRecognitionResults(&self) -> windows_core::Result<windows_collections::IVectorView<InkRecognitionResult>>
+pub fn AddStrokes<P0>(&self, strokes: P0) -> windows_core::Result<()>
+pub fn Clear(&self) -> windows_core::Result<()>
+pub fn SaveWithFormatAsync<P0>(&self, outputstream: P0, inkpersistenceformat: InkPersistenceFormat) -> windows_core::Result<windows_future::IAsyncOperationWithProgress<u32, u32>>
+pub fn GetStrokeById(&self, id: u32) -> windows_core::Result<InkStroke>
+
+[InkPresenterRuler]
+pub fn Length(&self) -> windows_core::Result<f64>
+pub fn SetLength(&self, value: f64) -> windows_core::Result<()>
+pub fn Width(&self) -> windows_core::Result<f64>
+pub fn SetWidth(&self, value: f64) -> windows_core::Result<()>
+pub fn AreTickMarksVisible(&self) -> windows_core::Result<bool>
+pub fn SetAreTickMarksVisible(&self, value: bool) -> windows_core::Result<()>
+pub fn IsCompassVisible(&self) -> windows_core::Result<bool>
+pub fn SetIsCompassVisible(&self, value: bool) -> windows_core::Result<()>
+pub fn Create<P0>(inkpresenter: P0) -> windows_core::Result<InkPresenterRuler>
+pub fn Kind(&self) -> windows_core::Result<InkPresenterStencilKind>
+pub fn IsVisible(&self) -> windows_core::Result<bool>
+pub fn SetIsVisible(&self, value: bool) -> windows_core::Result<()>
+pub fn BackgroundColor(&self) -> windows_core::Result<super::super::Color>
+pub fn SetBackgroundColor(&self, value: super::super::Color) -> windows_core::Result<()>
+pub fn ForegroundColor(&self) -> windows_core::Result<super::super::Color>
+pub fn SetForegroundColor(&self, value: super::super::Color) -> windows_core::Result<()>
+pub fn Transform(&self) -> windows_core::Result<windows_numerics::Matrix3x2>
+pub fn SetTransform(&self, value: windows_numerics::Matrix3x2) -> windows_core::Result<()>
+
+[InkPresenterProtractor]
+pub fn AreTickMarksVisible(&self) -> windows_core::Result<bool>
+pub fn SetAreTickMarksVisible(&self, value: bool) -> windows_core::Result<()>
+pub fn AreRaysVisible(&self) -> windows_core::Result<bool>
+pub fn SetAreRaysVisible(&self, value: bool) -> windows_core::Result<()>
+pub fn IsCenterMarkerVisible(&self) -> windows_core::Result<bool>
+pub fn SetIsCenterMarkerVisible(&self, value: bool) -> windows_core::Result<()>
+pub fn IsAngleReadoutVisible(&self) -> windows_core::Result<bool>
+pub fn SetIsAngleReadoutVisible(&self, value: bool) -> windows_core::Result<()>
+pub fn IsResizable(&self) -> windows_core::Result<bool>
+pub fn SetIsResizable(&self, value: bool) -> windows_core::Result<()>
+pub fn Radius(&self) -> windows_core::Result<f64>
+pub fn SetRadius(&self, value: f64) -> windows_core::Result<()>
+pub fn AccentColor(&self) -> windows_core::Result<super::super::Color>
+pub fn SetAccentColor(&self, value: super::super::Color) -> windows_core::Result<()>
+pub fn Create<P0>(inkpresenter: P0) -> windows_core::Result<InkPresenterProtractor>
+pub fn Kind(&self) -> windows_core::Result<InkPresenterStencilKind>
+pub fn IsVisible(&self) -> windows_core::Result<bool>
+pub fn SetIsVisible(&self, value: bool) -> windows_core::Result<()>
+pub fn BackgroundColor(&self) -> windows_core::Result<super::super::Color>
+pub fn SetBackgroundColor(&self, value: super::super::Color) -> windows_core::Result<()>
+pub fn ForegroundColor(&self) -> windows_core::Result<super::super::Color>
+pub fn SetForegroundColor(&self, value: super::super::Color) -> windows_core::Result<()>
+pub fn Transform(&self) -> windows_core::Result<windows_numerics::Matrix3x2>
+pub fn SetTransform(&self, value: windows_numerics::Matrix3x2) -> windows_core::Result<()>
+
+[InkRecognizerContainer]
+pub fn new() -> windows_core::Result<Self>
+pub fn SetDefaultRecognizer<P0>(&self, recognizer: P0) -> windows_core::Result<()>
+pub fn RecognizeAsync<P0>(&self, strokecollection: P0, recognitiontarget: InkRecognitionTarget) -> windows_core::Result<windows_future::IAsyncOperation<windows_collections::IVectorView<InkRecognitionResult>>>
+pub fn GetRecognizers(&self) -> windows_core::Result<windows_collections::IVectorView<InkRecognizer>>
+
+[InkRecognitionResult]
+pub fn BoundingRect(&self) -> windows_core::Result<super::super::super::Foundation::Rect>
+pub fn GetTextCandidates(&self) -> windows_core::Result<windows_collections::IVectorView<windows_core::HSTRING>>
+pub fn GetStrokes(&self) -> windows_core::Result<windows_collections::IVectorView<InkStroke>>
+

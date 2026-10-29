@@ -36,7 +36,8 @@
     ControlFasterAnimationDuration (83 ms) and is then closed (IsClosed), which removes it from
     WindowNotificationManager; InfoBar hides at once. ForegroundSet is the inherited foreground of
     the content. AutomationProperties (LandmarkType, IsDialog) are left out.
-  WinUI: InfoBarCloseButtonSymbol
+  - WinUI's InfoBar itself is the InfoBar control of ferroui-controls, styled by Controls/InfoBar.xaml,
+    which uses InfoBarCloseButtonStyle of this document.
 -->
 <ResourceDictionary xmlns="https://github.com/ferroui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"

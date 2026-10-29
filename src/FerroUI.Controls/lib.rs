@@ -271,6 +271,39 @@ pub use icon_element::IconElement;
 pub use image::Image;
 pub use label::Label;
 pub use path_icon::PathIcon;
+// WinUI's icons (docs/porting/winui-controls.md).
+mod font_icon;
+mod icon_source;
+mod symbol_icon;
+pub use font_icon::FontIcon;
+pub use icon_source::{
+    FontIconSource, IconSource, IconSourceImpl, IconSourceImplExt, IconSourceVTable, PathIconSource, SymbolIconSource,
+};
+pub use symbol_icon::{Symbol, SymbolIcon};
+#[cfg(test)]
+mod font_icon_tests;
+#[cfg(test)]
+mod icon_source_tests;
+#[cfg(test)]
+mod icon_test_support;
+#[cfg(test)]
+mod symbol_icon_tests;
+// WinUI's status controls (docs/porting/winui-controls.md).
+mod info_badge;
+mod info_bar;
+mod progress_ring;
+pub use info_badge::InfoBadge;
+pub use info_bar::{
+    InfoBar, InfoBarCloseReason, InfoBarClosedEventArgs, InfoBarClosingEventArgs, InfoBarOpenedEventArgs,
+    InfoBarSeverity,
+};
+pub use progress_ring::ProgressRing;
+#[cfg(test)]
+mod info_badge_tests;
+#[cfg(test)]
+mod info_bar_tests;
+#[cfg(test)]
+mod progress_ring_tests;
 #[cfg(test)]
 mod image_tests;
 #[cfg(test)]

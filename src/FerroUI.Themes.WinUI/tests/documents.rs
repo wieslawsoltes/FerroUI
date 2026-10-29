@@ -126,6 +126,8 @@ document_tests! {
     controls_menu_scroll_viewer => "/Controls/MenuScrollViewer.xaml";
     controls_overlay_popup_host => "/Controls/OverlayPopupHost.xaml";
     controls_path_icon => "/Controls/PathIcon.xaml";
+    controls_font_icon => "/Controls/FontIcon.xaml";
+    controls_symbol_icon => "/Controls/SymbolIcon.xaml";
     controls_popup_root => "/Controls/PopupRoot.xaml";
     controls_progress_bar => "/Controls/ProgressBar.xaml";
     controls_radio_button => "/Controls/RadioButton.xaml";
@@ -189,6 +191,7 @@ document_tests! {
     resources_glyphs => "/Resources/Glyphs.xaml";
     resources_hyperlink_button_themeresources => "/Resources/HyperlinkButton_themeresources.xaml";
     resources_hyperlink_themeresources => "/Resources/Hyperlink_themeresources.xaml";
+    resources_info_badge_themeresources => "/Resources/InfoBadge_themeresources.xaml";
     resources_info_bar_themeresources => "/Resources/InfoBar_themeresources.xaml";
     resources_list_box_themeresources => "/Resources/ListBox_themeresources.xaml";
     resources_list_view_item_themeresources => "/Resources/ListViewItem_themeresources.xaml";
@@ -200,6 +203,7 @@ document_tests! {
     resources_password_box_themeresources => "/Resources/PasswordBox_themeresources.xaml";
     resources_pips_pager_themeresources => "/Resources/PipsPager_themeresources.xaml";
     resources_progress_bar_themeresources => "/Resources/ProgressBar_themeresources.xaml";
+    resources_progress_ring_themeresources => "/Resources/ProgressRing_themeresources.xaml";
     resources_radio_button_themeresources => "/Resources/RadioButton_themeresources.xaml";
     resources_refresh_container_themeresources => "/Resources/RefreshContainer_themeresources.xaml";
     resources_refresh_visualizer_themeresources => "/Resources/RefreshVisualizer_themeresources.xaml";
@@ -225,6 +229,9 @@ document_tests! {
     resources_tree_view_themeresources => "/Resources/TreeView_themeresources.xaml";
     controls_managed_file_chooser => "/Controls/ManagedFileChooser.xaml";
     controls_notification_card => "/Controls/NotificationCard.xaml";
+    controls_info_bar => "/Controls/InfoBar.xaml";
+    controls_info_badge => "/Controls/InfoBadge.xaml";
+    controls_progress_ring => "/Controls/ProgressRing.xaml";
     controls_table_view => "/Controls/TableView.xaml";
     controls_table_view_cell => "/Controls/TableViewCell.xaml";
     controls_table_view_column_header => "/Controls/TableViewColumnHeader.xaml";

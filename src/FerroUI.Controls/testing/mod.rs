@@ -24,6 +24,8 @@ pub use test_clipboard::{TestClipboardFailure, TestClipboardImpl};
 pub use test_icon_loader::TestIconLoader;
 pub use test_log_sink::{LogCallback, TestLogSink};
 mod test_services_windowing;
+mod winui_only;
+pub use winui_only::{is_winui_only, WINUI_ONLY_CONTROLS};
 mod test_theme;
 pub use test_theme::{add_template_theme, create_test_theme, embeddable_control_root_template, top_level_template};
 pub use test_theme::{

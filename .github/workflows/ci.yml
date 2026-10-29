@@ -76,6 +76,12 @@ jobs:
       # FerroUI.Base and FerroUI.Controls (docs/declarative-ui.md, section 4).
       - name: Generated view builders are up to date
         run: python3 scripts/generate_view_builders.py --check
+      # The scoped names of the generator (two public types of one crate with the same name).
+      - name: Tests of the view builder generator
+        run: python3 scripts/test_generate_view_builders.py
+      # The WinUI source paths keep their Windows spelling on Linux (InkToolbar and InkToolBar).
+      - name: Tests of the WinUI theme scripts
+        run: python3 -m unittest discover -s scripts/winui-theme -p 'test_*.py'
       - name: Browser build reuse and exact compression measurements remain correct
         run: node scripts/browser/tests/build_tooling.test.mjs
       # Thread-local variables are declared with ferroui_base::ferro_thread_local!, which on Android

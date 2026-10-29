@@ -105,6 +105,22 @@ the WinUI project directly (`controls/dev/Repeater` at commit
 `7e4b0c2096be402f51cc8f7d203ebf67cff183d0`, the revision the WinUI theme is
 ported from), under the same license.
 
+`font_icon.rs`, `symbol_icon.rs` and `icon_source.rs` (WinUI's `FontIcon`, `Symbol`,
+`SymbolIcon` and the icon sources) are ported from the WinUI project directly
+(`dxaml/xcp/core/core/elements/icon.cpp`, `dxaml/xcp/dxaml/lib/*IconSource_Partial.cpp` and the
+type model `dxaml/xcp/tools/XCPTypesAutoGen/XamlOM/Model/Microsoft.UI.Xaml.Controls.cs` at the
+same commit), under the same license.
+
+`info_bar.rs`, `info_badge.rs`, `progress_ring.rs`, `primitives/info_bar_panel.rs`,
+`primitives/info_bar_template_settings.rs`, `primitives/info_badge_template_settings.rs`,
+`primitives/progress_ring_template_settings.rs`,
+`automation/peers/info_bar_automation_peer.rs` and
+`automation/peers/progress_ring_automation_peer.rs` (WinUI's `InfoBar` with its panel, template
+settings, arguments and peer, `InfoBadge` and `ProgressRing`) are ported from the WinUI project
+directly (`controls/dev/InfoBar`, `controls/dev/InfoBadge` and `controls/dev/ProgressRing`, with
+the animated visuals of `controls/dev/ProgressRing/AnimatedVisuals` and the English texts of their
+`Strings/en-us/Resources.resw`, at the same commit), under the same license.
+
 ## Silverlight Toolkit
 
 The files under `auto_complete_box/` (`auto_complete_box.rs`,

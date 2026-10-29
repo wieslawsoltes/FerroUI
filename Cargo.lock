@@ -543,6 +543,7 @@ dependencies = [
  "ferroui-build",
  "ferroui-controls",
  "ferroui-controls-color-picker",
+ "ferroui-controls-inking",
  "ferroui-controls-treedatagrid",
  "ferroui-dialogs",
  "ferroui-harfbuzz",
@@ -1129,6 +1130,7 @@ dependencies = [
  "ferroui-controls",
  "ferroui-controls-charts",
  "ferroui-controls-color-picker",
+ "ferroui-controls-inking",
  "ferroui-controls-treedatagrid",
  "ferroui-designer",
  "ferroui-desktop",
@@ -1278,6 +1280,23 @@ dependencies = [
  "ferroui-markup-xaml-loader",
  "ferroui-themes-fluent",
  "ferroui-themes-simple",
+]
+
+[[package]]
+name = "ferroui-controls-inking"
+version = "0.4.0"
+dependencies = [
+ "bitflags",
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-microcom",
+ "ferroui-themes-winui",
+ "ferroui-win32",
+ "microcom-codegen",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -2096,6 +2115,7 @@ dependencies = [
  "ferroui-build-scan",
  "ferroui-controls",
  "ferroui-controls-color-picker",
+ "ferroui-controls-inking",
  "ferroui-controls-treedatagrid",
  "ferroui-desktop",
  "ferroui-dialogs",

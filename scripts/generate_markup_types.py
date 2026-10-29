@@ -87,6 +87,7 @@ RUST_PATH_CRATES = [
     "FerroUI.Base",
     "FerroUI.Controls",
     "FerroUI.Controls.ColorPicker",
+    "FerroUI.Controls.Inking",
     os.path.join("Markup", "FerroUI.Markup.Xaml"),
     "FerroUI.Dialogs",
     "FerroUI.Themes.Simple",

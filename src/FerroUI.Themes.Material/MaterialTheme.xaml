@@ -75,6 +75,8 @@
         <ResourceInclude Source="/Resources/ResizeGripper_themeresources.xaml" />
         <ResourceInclude Source="/Resources/ThemeShadows.xaml" />
         <ResourceInclude Source="/Resources/Glyphs.xaml" />
+        <ResourceInclude Source="/Resources/InfoBadge_themeresources.xaml" />
+        <ResourceInclude Source="/Resources/ProgressRing_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/MaterialColors.xaml" />
         <MergeResourceInclude Source="/Resources/MaterialTypography.xaml" />
         <MergeResourceInclude Source="/Resources/MaterialMetrics.xaml" />

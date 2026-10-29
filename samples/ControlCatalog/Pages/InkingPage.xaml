@@ -1,0 +1,26 @@
+<ContentPage xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="ControlCatalog.Pages.InkingPage"
+             Header="Inking">
+  <Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="12" Margin="20">
+    <StackPanel Spacing="6">
+      <TextBlock Classes="h2" Text="InkCanvas and InkToolbar" />
+      <TextBlock TextWrapping="Wrap" Text="Draw with a pen, mouse or touch. Select a pen again to change color and width. Use the eraser to remove strokes. Drag a stencil with touch or mouse; use two fingers or Shift-drag to rotate it." />
+    </StackPanel>
+    <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+      <InkToolbar x:Name="Toolbar" InitialControls="All" />
+    </ScrollViewer>
+    <Border Grid.Row="2" MinHeight="320" BorderBrush="Gray" BorderThickness="1" Background="White">
+      <InkCanvas x:Name="InkSurface" />
+    </Border>
+    <WrapPanel Grid.Row="3" Orientation="Horizontal" ItemSpacing="10" LineSpacing="10">
+      <Button x:Name="SelectInk" Content="Select all" />
+      <Button x:Name="CopyInk" Content="Copy" />
+      <Button x:Name="PasteInk" Content="Paste" />
+      <Button x:Name="ClearInk" Content="Clear" />
+      <Button x:Name="SaveInk" Content="Save snapshot" />
+      <Button x:Name="RestoreInk" Content="Restore snapshot" />
+      <TextBlock x:Name="InkStatus" VerticalAlignment="Center" Text="Ready" />
+    </WrapPanel>
+  </Grid>
+</ContentPage>
