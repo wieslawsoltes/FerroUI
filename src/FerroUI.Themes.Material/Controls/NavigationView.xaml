@@ -82,6 +82,7 @@
 -->
 <ResourceDictionary xmlns="https://github.com/ferroui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:material="using:FerroUI.Themes.Material"
                     x:ClassModifier="internal">
   <Design.PreviewWith>
     <Border Width="640" Height="400">
@@ -146,8 +147,29 @@
     </Style>
   </ControlTheme>
 
+  <!-- Material: the toggle button of the pane is the back button of the navigation bar
+       (PaneToggleButtonStyle), which hides its glyph when it has content; the toggle button of the
+       navigation view holds the pane title, so the glyph is shown and the title placed beside it,
+       as in WinUI. -->
+  <ControlTheme x:Key="MaterialNavigationViewPaneToggleButtonStyle" TargetType="Button" BasedOn="{StaticResource PaneToggleButtonStyle}">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid Background="Transparent" MinWidth="48" MinHeight="48">
+          <Border x:Name="RootGrid" Margin="4" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}" TemplatedControl.IsTemplateFocusTarget="True">
+            <Panel>
+              <Border x:Name="StateLayer" Background="Transparent" CornerRadius="{TemplateBinding CornerRadius}" IsHitTestVisible="False" />
+              <material:MaterialRipple Fill="{TemplateBinding Foreground}" CornerRadius="{TemplateBinding CornerRadius}" ReducedMotion="{DynamicResource MaterialReducedMotion}" />
+              <Path x:Name="Content" Data="M3 6H21V8H3ZM3 11H21V13H3ZM3 16H21V18H3Z" Fill="{TemplateBinding Foreground}" Stretch="None" Width="24" Height="24" Margin="14,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" />
+              <ContentPresenter x:Name="PART_ContentPresenter" Margin="50,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Foreground="{TemplateBinding Foreground}" />
+            </Panel>
+          </Border>
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
   <ControlTheme x:Key="{x:Type NavigationView}" TargetType="NavigationView">
-    <Setter Property="PaneToggleButtonStyle" Value="{StaticResource PaneToggleButtonStyle}" />
+    <Setter Property="PaneToggleButtonStyle" Value="{StaticResource MaterialNavigationViewPaneToggleButtonStyle}" />
     <Setter Property="IsTabStop" Value="False" />
     <Setter Property="CompactPaneLength" Value="{DynamicResource NavigationViewCompactPaneLength}" />
     <Setter Property="CornerRadius" Value="{DynamicResource OverlayCornerRadius}" />
@@ -470,6 +492,7 @@
     <Style Selector="^:back-button-row-visible /template/ Panel#BackButtonRowSpacer">
       <Setter Property="Height" Value="40" />
     </Style>
+
   </ControlTheme>
 
   <ControlTheme x:Key="{x:Type NavigationViewItem}" TargetType="NavigationViewItem">
