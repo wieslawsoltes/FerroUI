@@ -66,8 +66,15 @@ export class FerroDOM {
         nativeHost.classList.add("ferroui-native-host");
         nativeHost.style.left = "0px";
         nativeHost.style.top = "0px";
-        nativeHost.style.width = "100%";
-        nativeHost.style.height = "100%";
+        // Not in the original, whose host covers the view (100% by 100%): the element picker of the
+        // browser's developer tools then found the host at every point of the view, over the canvas,
+        // and `pointer-events: none` would not help (the picker hit-tests through it). The host has
+        // no size of its own; its native controls are positioned absolutely from its corner, the
+        // corner of the view, and overflow it, so they are where they were and the rest of the view
+        // is the canvas.
+        nativeHost.style.width = "0px";
+        nativeHost.style.height = "0px";
+        nativeHost.style.overflow = "visible";
         nativeHost.style.position = "absolute";
 
         // IME

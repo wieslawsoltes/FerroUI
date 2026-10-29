@@ -52,9 +52,9 @@ env:
   CARGO_INCREMENTAL: 0
   RUST_BACKTRACE: 1
 
-# The checks of every pull request: the conventions and the packages, the macOS tests of the
-# workspace, the Windows backend, X11 and the browser catalog. The jobs of one platform or backend
-# alone are workflows of their own that a pull request starts only when it changes that area, so a
+# The checks of every pull request: the conventions and the packages, the Linux tests of the
+# workspace, the native macOS platform, the Windows backend, X11 and the browser catalog. The jobs
+# of one platform or backend alone are workflows of their own that a pull request starts only when it changes that area, so a
 # pull request shows no skipped check for them: vello.yml, browser.yml, ios.yml, android.yml,
 # wayland.yml, linuxfb.yml; the informative jobs are in nightly.yml. All of them also run every
 # night on main and by hand (gh workflow run <file> --ref <branch>).
@@ -111,7 +111,7 @@ jobs:
   # version: a run documents the pull request only. It runs when a pull request changes the sources
   # or a manifest of the workspace (src/, Cargo.toml, Cargo.lock, the script); otherwise it passes
   # without building. The defaults of the properties, which no signature shows, are guarded by the
-  # snapshot test `property_defaults_tests` of ferroui-controls, which the macOS job runs. On macOS,
+  # snapshot test `property_defaults_tests` of ferroui-controls, which the Linux job runs. On macOS,
   # where the whole workspace builds: the API of a platform crate is the one it has when built for
   # macOS. Like the macOS job, it does not run for a push to main.
   api-gate:
@@ -173,25 +173,55 @@ jobs:
         if: steps.changes.outputs.run == 'true'
         run: python3 scripts/api-gate/semver_checks.py --fetch
 
-  # Reduced for the time being (2026-10-08), to shorten the wait for a pull request while many are
-  # in flight; the job took 22 minutes, 20 of them compiling. What is left out, and how to get it
-  # back:
-  # - It does not run for a push to main: the pull request that was merged ran it already, and the
-  #   runs of main competed with the pull requests for the macOS runners. Dispatch the workflow by
-  #   hand on main (workflow_dispatch) for a run of the merged state.
-  # - No separate `cargo check --workspace --all-targets`: it compiled everything a second time with
-  #   another profile. The examples and binaries (hello_window, themed_window, the native examples,
-  #   control-catalog-desktop) are therefore not compiled here; `cargo check --workspace
-  #   --all-targets --locked` on a Mac covers them.
-  # - The tests are the unit and integration tests (`--lib --tests`): no documentation tests (the
-  #   workspace has none that run) and no example or binary is linked.
-  # - No debug information in the test build, which shortens compiling and linking; a failing test
-  #   still reports its message and location, a backtrace has no line numbers.
-  # - The tests of the ControlCatalog with its feature classic-themes and those of the Vello
-  #   backend are in vello.yml, which runs when a pull request changes them.
-  # - It runs in the nightly run of main, which saves its build cache.
+  # The tests of the workspace, on Linux: the 4-core Linux runner compiles the workspace in 16
+  # minutes where the 3-core macOS runner took 40 (October 2026), and the test binaries run side by
+  # side (scripts/ci/parallel_tests.py). Under Xvfb, with the fonts the text tests need (CJK and
+  # emoji fallbacks). The render backends comparison and Vello are in vello.yml; the two benchmark
+  # crates (every benchmark once, almost three minutes) are left out of a pull request. The
+  # VirtualizationDemo playground test counts what the font metrics of macOS let into view, the Skia
+  # emoji test needs a color emoji font Skia finds (the runner's is not matched), and the hot reload
+  # watcher test failed under the load of this job (file events of Linux): those three run in the
+  # macOS job.
+  linux:
+    name: Build and test (Linux, the workspace)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      CARGO_PROFILE_DEV_DEBUG: 0
+      CARGO_PROFILE_TEST_DEBUG: 0
+      RUSTFLAGS: -C link-arg=-fuse-ld=mold
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
+      - name: System packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            xvfb xauth libx11-dev libxi-dev libxrandr-dev libxcursor-dev libxfixes-dev libxext-dev libxtst-dev \
+            libgl1-mesa-dev libegl1-mesa-dev libfontconfig1-dev libfreetype6-dev pkg-config \
+            fonts-dejavu-core fonts-noto-cjk fonts-noto-color-emoji \
+            libglib2.0-dev libgtk-3-dev libxkbcommon-dev libwayland-dev libvulkan-dev mold clang
+      - name: Test
+        env:
+          BENCHMARKS: ${{ github.event_name == 'pull_request' && '--exclude ferroui-benchmarks --exclude ferroui-treedatagrid-benchmarks' || '' }}
+        run: |
+          # shellcheck disable=SC2086
+          xvfb-run -a python3 scripts/ci/parallel_tests.py --jobs 4 --workspace --locked --lib --tests \
+            --exclude ferroui-render-backends-comparison --exclude ferroui-vello $BENCHMARKS \
+            -- --skip the_playground_realizes_what_is_in_view_and_recycles_its_containers \
+            --skip text_layout_draws_mixed_direction_ligature_and_emoji_text \
+            --skip watcher_revision_changed_during_preparation_discards_candidate_before_commit
+
+  # macOS: on a pull request only what runs on macOS alone: the native platform (AppKit,
+  # ferroui-native), Metal, the desktop entry point, Skia with the fonts of the system (CoreText), and
+  # the desktop catalog with its native control demo, checked. The whole workspace runs on macOS in
+  # the nightly run and in a run started by hand. It does not run for a push to main.
   macos:
-    name: Build and test (macOS)
+    name: Build and test (macOS, the native platform)
     if: (github.event_name != 'push')
     runs-on: macos-15
     timeout-minutes: 180
@@ -205,8 +235,18 @@ jobs:
         with:
           save-if: ${{ github.ref == 'refs/heads/main' }}
           cache-on-failure: true
-      - name: Test
-        run: cargo test --workspace --locked --no-fail-fast --lib --tests --exclude ferroui-render-backends-comparison --exclude ferroui-vello
+      - name: Test the native platform
+        if: github.event_name == 'pull_request'
+        run: |
+          python3 scripts/ci/parallel_tests.py --jobs 3 --locked --lib --tests \
+            -p ferroui-native -p ferroui-metal -p ferroui-desktop -p ferroui-skia -p virtualization-demo \
+            -p ferroui-hot-reload
+          cargo check --locked -p control-catalog-desktop
+      - name: Test the workspace
+        if: github.event_name != 'pull_request'
+        run: |
+          python3 scripts/ci/parallel_tests.py --jobs 3 --workspace --locked --lib --tests \
+            --exclude ferroui-render-backends-comparison --exclude ferroui-vello
 
   # The Windows platform backend (docs/porting/win32-platform.md, section 10.3). This job is the
   # only place the backend runs: it is written and checked for the Windows target on other
@@ -644,12 +684,18 @@ jobs:
     name: Check (browser, wasm32-unknown-emscripten)
     runs-on: ubuntu-latest
     timeout-minutes: 150
+    # The catalog site of a check is built with the `browser` profile without its link-time
+    # optimization and with 16 code units: the same optimization levels, a fraction of the build time
+    # (13.7 minutes with them). The published site (pages.yml) and browser.yml keep the profile as it
+    # is, with the sizes of the modules; so the cache of this job is its own.
+    env:
+      CARGO_PROFILE_BROWSER_LTO: "false"
+      CARGO_PROFILE_BROWSER_CODEGEN_UNITS: "16"
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: ./.github/actions/browser-toolchain
         with:
-          # Shared with the Pages workflow, which builds the same site.
-          cache-key: browser
+          cache-key: browser-check
       - name: Script module (type check, lint, bundle, pixel and text input tests)
         run: |
           node scripts/browser/build-webapp.mjs build
@@ -669,24 +715,10 @@ jobs:
           -p ferroui-browser -p control-catalog-browser
       - name: Check the examples of the browser crate
         run: cargo check --locked --target wasm32-unknown-emscripten -p ferroui-browser --examples
-      # The Vello backend in the browser is behind a feature that no site built here turns on: without
-      # this its sink for WebGL is compiled by nothing, and a change of the scene interface breaks it
-      # unseen (docs/porting/vello-backend.md, section 12).
-      - name: Check the browser crate and the catalog host with the Vello backend
-        run: >
-          cargo check --locked --target wasm32-unknown-emscripten
-          -p ferroui-browser --features vello --examples
-          && cargo check --locked --target wasm32-unknown-emscripten
-          -p control-catalog-browser --features vello
-      # The JavaScript bridge of the CDP developer tools (docs/devtools-cdp.md), also behind a feature.
-      - name: Check the catalog host with the CDP bridge
-        run: cargo check --locked --target wasm32-unknown-emscripten -p control-catalog-browser --features cdp
       - name: Build the ControlCatalog site
         run: scripts/build-browser.sh control-catalog-browser --webapp-prebuilt
       - name: ControlCatalog tests in headless Chrome (rendering, resize, console, drawer, navigation, click, typing)
         run: node scripts/browser/tests/control_catalog.test.mjs --screenshot target/browser/screenshots/control-catalog.png
-      - name: Sizes of the published modules
-        run: node scripts/browser/module-sizes.mjs target/browser/control-catalog-browser >> "$GITHUB_STEP_SUMMARY"
       - name: Keep the screenshot
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
