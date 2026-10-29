@@ -42,6 +42,7 @@ mod home_page;
 mod image_page;
 mod ink_canvas_page;
 mod ink_toolbar_page;
+mod icon_element_page;
 mod labels_page;
 mod layout_transform_control_page;
 mod list_box_page;
@@ -177,6 +178,7 @@ pub use home_page::HomePage;
 pub use image_page::ImagePage;
 pub use ink_canvas_page::InkCanvasPage;
 pub use ink_toolbar_page::InkToolbarPage;
+pub use icon_element_page::IconElementPage;
 pub use labels_page::LabelsPage;
 pub use layout_transform_control_page::LayoutTransformControlPage;
 pub use list_box_page::ListBoxPage;
@@ -272,6 +274,7 @@ pub(crate) fn register_lists() {
 const ROOT_TYPES: &[&TypeInfo] = &[
     InkCanvasPage::TYPE,
     InkToolbarPage::TYPE,
+    IconElementPage::TYPE,
     ScrollViewerPage::TYPE,
     PointersPage::TYPE,
     CompositionPage::TYPE,
@@ -359,6 +362,7 @@ const ROOT_TYPES: &[&TypeInfo] = &[
 const ROOT_CLASSES: &[&XamlClass] = &[
     &InkCanvasPage::XAML_CLASS,
     &InkToolbarPage::XAML_CLASS,
+    &IconElementPage::XAML_CLASS,
     &ScrollViewerPage::XAML_CLASS,
     &PointersPage::XAML_CLASS,
     &CompositionPage::XAML_CLASS,

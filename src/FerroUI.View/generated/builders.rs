@@ -530,6 +530,19 @@ pub fn flyout_presenter() -> El<ferroui_controls::FlyoutPresenter> {
     El::new()
 }
 
+pub use ferroui_controls::FontIcon;
+
+impl ViewClass for ferroui_controls::FontIcon {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::FontIcon>::new()
+    }
+}
+
+/// Starts an element of [`FontIcon`](ferroui_controls::FontIcon).
+pub fn font_icon() -> El<ferroui_controls::FontIcon> {
+    El::new()
+}
+
 pub use ferroui_controls::Grid;
 
 impl ViewClass for ferroui_controls::Grid {
@@ -1229,6 +1242,19 @@ impl ViewClass for ferroui_controls::StackPanel {
 
 /// Starts an element of [`StackPanel`](ferroui_controls::StackPanel).
 pub fn stack_panel() -> El<ferroui_controls::StackPanel> {
+    El::new()
+}
+
+pub use ferroui_controls::SymbolIcon;
+
+impl ViewClass for ferroui_controls::SymbolIcon {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::SymbolIcon>::new()
+    }
+}
+
+/// Starts an element of [`SymbolIcon`](ferroui_controls::SymbolIcon).
+pub fn symbol_icon() -> El<ferroui_controls::SymbolIcon> {
     El::new()
 }
 
@@ -3563,6 +3589,54 @@ pub trait FlyoutBaseProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_controls::primitives::FlyoutBase>> FlyoutBaseProps for El<T> {}
 
+/// The properties and routed events of [`FontIcon`](ferroui_controls::FontIcon).
+pub trait FontIconProps: ElementBuilder {
+    /// Sets [`FontIcon::glyph_property`](ferroui_controls::FontIcon::glyph_property).
+    fn glyph<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::FontIcon>::glyph_property(), value)
+    }
+
+    /// Sets [`FontIcon::mirrored_when_right_to_left_property`](ferroui_controls::FontIcon::mirrored_when_right_to_left_property).
+    fn mirrored_when_right_to_left<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::FontIcon>::mirrored_when_right_to_left_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::FontIcon>> FontIconProps for El<T> {}
+
+/// The properties and routed events of [`FontIconSource`](ferroui_controls::FontIconSource).
+pub trait FontIconSourceProps: ElementBuilder {
+    /// Sets [`FontIconSource::glyph_property`](ferroui_controls::FontIconSource::glyph_property).
+    fn glyph<M>(self, value: impl IntoProp<String, M>) -> Self {
+        self.prop(<ferroui_controls::FontIconSource>::glyph_property(), value)
+    }
+
+    /// Sets [`FontIconSource::font_family_property`](ferroui_controls::FontIconSource::font_family_property).
+    fn font_family<M>(self, value: impl IntoProp<Option<ferroui_base::media::FontFamily>, M>) -> Self {
+        self.prop(<ferroui_controls::FontIconSource>::font_family_property(), value)
+    }
+
+    /// Sets [`FontIconSource::font_size_property`](ferroui_controls::FontIconSource::font_size_property).
+    fn font_size<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::FontIconSource>::font_size_property(), value)
+    }
+
+    /// Sets [`FontIconSource::font_style_property`](ferroui_controls::FontIconSource::font_style_property).
+    fn font_style<M>(self, value: impl IntoProp<ferroui_base::media::FontStyle, M>) -> Self {
+        self.prop(<ferroui_controls::FontIconSource>::font_style_property(), value)
+    }
+
+    /// Sets [`FontIconSource::font_weight_property`](ferroui_controls::FontIconSource::font_weight_property).
+    fn font_weight<M>(self, value: impl IntoProp<ferroui_base::media::FontWeight, M>) -> Self {
+        self.prop(<ferroui_controls::FontIconSource>::font_weight_property(), value)
+    }
+
+    /// Sets [`FontIconSource::mirrored_when_right_to_left_property`](ferroui_controls::FontIconSource::mirrored_when_right_to_left_property).
+    fn mirrored_when_right_to_left<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::FontIconSource>::mirrored_when_right_to_left_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::FontIconSource>> FontIconSourceProps for El<T> {}
+
 /// The properties and routed events of [`Geometry`](ferroui_base::media::Geometry).
 pub trait GeometryProps: ElementBuilder {
     /// Sets [`Geometry::transform_property`](ferroui_base::media::Geometry::transform_property).
@@ -3770,6 +3844,15 @@ pub trait HyperlinkButtonProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::HyperlinkButton>> HyperlinkButtonProps for El<T> {}
+
+/// The properties and routed events of [`IconSource`](ferroui_controls::IconSource).
+pub trait IconSourceProps: ElementBuilder {
+    /// Sets [`IconSource::foreground_property`](ferroui_controls::IconSource::foreground_property).
+    fn foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
+        self.prop(<ferroui_controls::IconSource>::foreground_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::IconSource>> IconSourceProps for El<T> {}
 
 /// The properties and routed events of [`Image`](ferroui_controls::Image).
 pub trait ImageProps: ElementBuilder {
@@ -4791,6 +4874,15 @@ pub trait PathIconProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::PathIcon>> PathIconProps for El<T> {}
+
+/// The properties and routed events of [`PathIconSource`](ferroui_controls::PathIconSource).
+pub trait PathIconSourceProps: ElementBuilder {
+    /// Sets [`PathIconSource::data_property`](ferroui_controls::PathIconSource::data_property).
+    fn data<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::media::Geometry>>, M>) -> Self {
+        self.prop(<ferroui_controls::PathIconSource>::data_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::PathIconSource>> PathIconSourceProps for El<T> {}
 
 /// The properties and routed events of [`PathSegment`](ferroui_base::media::PathSegment).
 pub trait PathSegmentProps: ElementBuilder {
@@ -6171,6 +6263,24 @@ pub trait SwipeGestureRecognizerProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_base::input::gesture_recognizers::SwipeGestureRecognizer>> SwipeGestureRecognizerProps for El<T> {}
+
+/// The properties and routed events of [`SymbolIcon`](ferroui_controls::SymbolIcon).
+pub trait SymbolIconProps: ElementBuilder {
+    /// Sets [`SymbolIcon::symbol_property`](ferroui_controls::SymbolIcon::symbol_property).
+    fn symbol<M>(self, value: impl IntoProp<ferroui_controls::Symbol, M>) -> Self {
+        self.prop(<ferroui_controls::SymbolIcon>::symbol_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::SymbolIcon>> SymbolIconProps for El<T> {}
+
+/// The properties and routed events of [`SymbolIconSource`](ferroui_controls::SymbolIconSource).
+pub trait SymbolIconSourceProps: ElementBuilder {
+    /// Sets [`SymbolIconSource::symbol_property`](ferroui_controls::SymbolIconSource::symbol_property).
+    fn symbol<M>(self, value: impl IntoProp<ferroui_controls::Symbol, M>) -> Self {
+        self.prop(<ferroui_controls::SymbolIconSource>::symbol_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::SymbolIconSource>> SymbolIconSourceProps for El<T> {}
 
 /// The properties and routed events of [`TabControl`](ferroui_controls::TabControl).
 pub trait TabControlProps: ElementBuilder {

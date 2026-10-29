@@ -151,6 +151,7 @@ PORT_DOCUMENTS = [
     ("Pages/TreeDataGridPage.xaml", "the page of the TreeDataGrid demo of the port"),
     ("Pages/InkCanvasPage.xaml", "the page of the InkCanvas of the port"),
     ("Pages/InkToolbarPage.xaml", "the page of the InkToolbar of the port"),
+    ("Pages/IconElementPage.xaml", "the page of the icons of WinUI (SymbolIcon, FontIcon; docs/porting/winui-controls.md)"),
 ]
 
 

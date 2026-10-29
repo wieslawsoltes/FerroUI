@@ -93,9 +93,8 @@ fn every_declaration_of_this_module_is_registered() {
         .filter(|line| line.starts_with("ferro_markup_type!(") || line.starts_with("ferro_markup_enum!("))
         .count();
     let types = declared_types();
-    // `TextLayoutRoundingPlacement` declares its metadata next to the type and is registered
-    // with the values.
-    assert_eq!(types.len(), declared + 1);
+    // The types that declare their metadata next to the type are registered with the values.
+    assert_eq!(types.len(), declared + DECLARED_NEXT_TO_THE_TYPE.len());
 
     for type_ in &types {
         // The collection handle of the items controls is published as the enumerable of
@@ -196,11 +195,17 @@ fn template_parts_name_classes() {
     assert!(parts > 20, "{parts}");
 }
 
+/// The types of this crate that declare their markup metadata next to the type rather than in
+/// this module, and are listed in the `TYPES` of `values.rs`: FerroUI additions, and the WinUI
+/// controls (docs/porting/winui-controls.md).
+const DECLARED_NEXT_TO_THE_TYPE: &[&str] = &["TextLayoutRoundingPlacement", "Symbol"];
+
 #[test]
 fn enumeration_members_are_found_by_name() {
     let enums: Vec<_> = declared_types().into_iter().filter(|t| t.kind == MarkupTypeKind::Enum).collect();
-    // `TextLayoutRoundingPlacement` is declared next to the type.
-    assert_eq!(enums.len(), super::enums::TYPES.len() + 1);
+    // Some enumerations are declared next to the type (DECLARED_NEXT_TO_THE_TYPE).
+    let next_to_the_type = enums.iter().filter(|t| DECLARED_NEXT_TO_THE_TYPE.contains(&t.name)).count();
+    assert_eq!(enums.len(), super::enums::TYPES.len() + next_to_the_type);
     for type_ in enums {
         assert!(!type_.enum_members.is_empty(), "{type_:?}");
         for member in type_.enum_members {

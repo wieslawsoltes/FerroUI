@@ -67,9 +67,18 @@ A separate namespace for the controls (`ferroui_controls::winui`, `FerroUI.Contr
 
 ### 5.1 Templates
 
-- Each templated control of this page gets its default template from a control theme of the WinUI theme, converted from the WinUI document at the pin by `scripts/winui-theme/convert.py` into `src/FerroUI.Themes.WinUI/Controls/`, with its resources from the `<Control>_themeresources.xaml` documents. The converted documents are generated files: they are regenerated with the script, never edited by hand, and the differences the conversion makes are recorded in `docs/porting/winui-theme/DEVIATIONS.md`.
+- Each templated control of this page gets its default template from a control theme of the WinUI theme, `src/FerroUI.Themes.WinUI/Controls/<Control>.xaml`, ported by hand from the WinUI document at the pin (`controls/dev/<Control>/<Control>.xaml`) as every control theme of the WinUI theme is: the visual states become pseudo-class selectors, and each difference is a row of `docs/porting/winui-theme/DEVIATIONS.md`. Its resources, the `<Control>_themeresources.xaml` documents, are converted by `scripts/winui-theme/convert.py` into `Resources/`: generated files, regenerated with the script, never edited by hand. A control WinUI draws in code (FontIcon, SymbolIcon, as PathIcon) gets a control theme with the visual its code builds.
 - No template is built in Rust, and no template child is styled from code with resource keys or colour literals. The theme tests require a theme for every templated control registered by the theme's controls; there is no allow-list.
-- **Fluent and Simple have no templates for these controls for now.** In an application with the Fluent or the Simple theme a templated control of this page has no template, and so shows nothing: use the WinUI theme (`WinUITheme`) for applications that use them. Fluent and Simple documents may follow later; this section is updated when they do.
+- **The themes derived from the WinUI theme style them too.** The macOS 26 theme (`ferroui-themes-macos`, `docs/porting/macos26-theme.md`) and the Material theme (`ferroui-themes-material`, `docs/porting/material-theme.md`) are forked from the WinUI theme and keep a control theme for every control it styles (`scripts/macos-theme/audit.py` checks it for macOS, and `scripts/themes/resource_keys.py` the resource keys of both): each control of this page gets its document in both, adapted the way the theme adapts the other WinUI templates.
+- **Fluent and Simple have no templates for these controls for now.** In an application with the Fluent or the Simple theme a templated control of this page has no template, and so shows nothing: use the WinUI, macOS or Material theme for applications that use them. Fluent and Simple documents may follow later; this section is updated when they do.
+- The controls that only the WinUI theme and the themes derived from it style are listed in one place, `ferroui_controls::testing::WINUI_ONLY_CONTROLS` (feature `testing`; the name says where their templates come from), with the table below; the theme tests of Fluent and Simple check that these controls have no control theme there (and every other templated control has one), and a test of `ferroui-controls` checks that the table names the same controls.
+
+<!-- winui-only:begin -->
+| Control | Why only the WinUI, macOS and Material themes | Since |
+|---|---|---|
+| `FontIcon` | WinUI's FontIcon: its text part is in the WinUI-derived themes only | W4 |
+| `SymbolIcon` | WinUI's SymbolIcon: its text part is in the WinUI-derived themes only | W4 |
+<!-- winui-only:end -->
 - The tables of `winui-theme.md` that say "no FerroUI control" for these controls (NavigationView and its items, RadioButtons, ProgressRing, RatingControl, InfoBadge; DRP-1, DRP-2, DRP-11, DRP-13, NVP-1 and G-23 of the theme's DEVIATIONS) are updated in the pull request that lands each control.
 
 ### 5.2 The symbol font
@@ -78,6 +87,7 @@ WinUI draws `SymbolIcon`, the default `FontIcon` and the glyphs of its templates
 
 - The controls read the font from the `SymbolThemeFontFamily` resource, which the WinUI theme defines with WinUI's value. No font name is hard-coded in the controls.
 - **The font is not redistributable and is not bundled.** On Windows 10 and 11 the system has it. On macOS, Linux, the browser, iOS and Android an application that uses these glyphs supplies a symbol font with the same code points and sets `SymbolThemeFontFamily` to it in its resources; without one the glyphs are drawn with the fallback font, usually as missing-glyph boxes.
+- The ControlCatalog supplies a font off Windows: its application resources set `SymbolThemeFontFamily` (`samples/ControlCatalog/app.rs`) to `Segoe Fluent Icons, Segoe MDL2 Assets` and then `FerroUI Catalog Symbols` (`samples/ControlCatalog/Assets/Fonts/FerroUICatalogSymbols.ttf`, MIT, written by `scripts/winui-controls/catalog_symbol_font.py` from the outlines of `Resources/Glyphs.xaml` of the WinUI theme and outlines drawn for it). It has 54 glyphs at the code points of Segoe Fluent Icons (`catalog_symbol_font.py --list`), among them the stars of RatingControl (E734, E735), the icons of InfoBar (F136, F13C to F13F), the settings, back, menu and chevron glyphs of NavigationView (E713, E72B, E700, E70D, E70E, E76C), the search glyph of AutoSuggestBox (E721), the spin glyphs of NumberBox (E70D, E70E), the glyphs of InfoBadge (EA38, E8C9, E8FB, E711) and the symbols of the catalog pages (E8FB, E711, E710, E721, E80F, E715, E8B7, E713, E734, E735, E72C, E8C6, E8C8, E77F, E7A7, E7A6, E72D). An application can do the same with its own font. The theme crates bundle no font.
 - Glyphs the templates themselves need may be drawn from path outlines in the theme, as `Resources/Glyphs.xaml` of the WinUI theme does for a few glyphs; each such case is recorded in the theme's DEVIATIONS.
 
 ## 6. WinUI additions to upstream-ported controls
@@ -147,6 +157,20 @@ Each pull request carries its tests, its `DEVIATIONS.md` rows and a line in `CHA
 
 ## 10. Deviations
 
-- Differences from WinUI of each control are listed in the section of the control below as it lands (none yet).
+- Differences from WinUI of each control are listed in the section of the control below as it lands.
 - Changes to upstream-ported controls and to core crates are in `DEVIATIONS.md`: "WinUI additions to upstream controls", "Automation peers" and "Windows platform backend" (W1), and the markup section (W2).
 - Differences of the converted templates are in `docs/porting/winui-theme/DEVIATIONS.md`.
+
+### 10.1 Icons (W4)
+
+`src/FerroUI.Controls/font_icon.rs`, `symbol_icon.rs`, `icon_source.rs`; themes `Controls/FontIcon.xaml` and `Controls/SymbolIcon.xaml` of the WinUI theme. Tests: `font_icon_tests`, `symbol_icon_tests`, `icon_source_tests` (`ferroui-controls`), `the_icons_draw_in_the_symbol_font_of_the_theme` (`ferroui-themes-winui`). `Symbol` is checked against WinUI by `scripts/winui-controls/symbol_map.py --check` and the table `docs/porting/data/winui-controls/symbol-glyphs.tsv`.
+
+| WinUI | Port | Kind | Why |
+|---|---|---|---|
+| `FontIcon` and `SymbolIcon` build a TextBlock in code (`CFontIcon::ApplyTemplate`, `CSymbolIcon::ApplyTemplate`). | The TextBlock is the part `PART_Text` of the control theme of the WinUI theme; the control gives it the glyph, the text properties and the foreground. | Representation | FerroUI's `IconElement` is a templated control (upstream). |
+| `SymbolIcon` writes the font `Segoe Fluent Icons` in code; the default font of a `FontIcon` is the system's symbol font. | Both use the theme resource `SymbolThemeFontFamily` (section 5.2). | Behaviour | Owner decision O11: an application can supply a symbol font off Windows. |
+| `FontIcon.IsTextScaleFactorEnabled`, `FontIconSource.IsTextScaleFactorEnabled` | Not ported. | Missing | FerroUI has no text scale factor. |
+| `FontIconSource.FontFamily` is a nullable font family; null leaves the icon's own. | `Option<FontFamily>`, `None` by default; a change to `None` clears the value it had set on the icons. | Representation | Rust has no null font family. |
+| `IconSource::CreateIconElementCore` of the abstract base returns `E_NOTIMPL`, and `CreateIconElement` no element. | `create_icon_element` returns `Option<Ref<IconElement>>`: `None` for the base. | Representation | #286 panicked there; WinUI's base creates no element. |
+| `BitmapIconSource`, `ImageIconSource`, `AnimatedIconSource`, `BitmapIcon`, `ImageIcon`, `AnimatedIcon` | Not ported. | Missing | Not in #286; candidates for later. |
+

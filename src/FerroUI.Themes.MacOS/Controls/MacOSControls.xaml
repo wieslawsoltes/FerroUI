@@ -35,6 +35,9 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/ProgressBar.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/Separator.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/PathIcon.xaml" />
+        <!-- The icons of WinUI that FerroUI ports as controls (docs/porting/winui-controls.md). -->
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/FontIcon.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/SymbolIcon.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/Label.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/ItemsControl.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/HeaderedContentControl.xaml" />
