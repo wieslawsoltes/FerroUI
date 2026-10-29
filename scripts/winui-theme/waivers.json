@@ -19,7 +19,7 @@
     {
       "document": "controls/dev/CommonStyles/Deprecated_themeresources.xaml",
       "key": "re:MUX_NavigationViewItemPresenterStyle.*WithRevealFocus",
-      "reason": "Reveal focus variants of the NavigationView item presenter: deprecated (Reveal focus), and FerroUI has no NavigationView."
+      "reason": "Reveal focus variants of the NavigationView item presenter: deprecated (Reveal focus); the template of NavigationViewItem (Controls/NavigationView.xaml) is drawn after the presenter styles without Reveal focus."
     },
     {
       "document": "*",
@@ -53,8 +53,8 @@
     },
     {
       "document": "dxaml/xcp/dxaml/themes/generic.xaml",
-      "key": "re:\\{(Hub|HubSection|SemanticZoom|ListView|GridView|ListViewHeaderItem|GridViewHeaderItem|GroupItem|Frame|AppBar|AppBarElementContainer|ListPickerFlyoutPresenter|PickerFlyoutPresenter)\\}|GridViewItemExpanded|FlyoutPickerListViewItemContentPresenterStyle|FlyoutPickerTitleTextBlockStyle|ListPickerFlyoutPresenterContentTemplate|BaseRichTextBlockStyle|BodyRichTextBlockStyle|LanguageSwitcherMenuFlyoutItemStyle|LanguageSwitcherMenuFlyoutSettingsRowStyle",
-      "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, Frame, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu)."
+      "key": "re:\\{(Hub|HubSection|SemanticZoom|ListView|GridView|ListViewHeaderItem|GridViewHeaderItem|GroupItem|AppBar|AppBarElementContainer|ListPickerFlyoutPresenter|PickerFlyoutPresenter)\\}|GridViewItemExpanded|FlyoutPickerListViewItemContentPresenterStyle|FlyoutPickerTitleTextBlockStyle|ListPickerFlyoutPresenterContentTemplate|BaseRichTextBlockStyle|BodyRichTextBlockStyle|LanguageSwitcherMenuFlyoutItemStyle|LanguageSwitcherMenuFlyoutSettingsRowStyle",
+      "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu)."
     },
     {
       "document": "dxaml/xcp/dxaml/themes/generic.xaml",
@@ -230,16 +230,6 @@
       "document": "dxaml/xcp/dxaml/themes/generic.xaml",
       "key": "{ContentPresenter}",
       "reason": "The implicit style of ContentPresenter (HorizontalAlignment Left, VerticalAlignment Top): FerroUI's ContentPresenter is not a templated control and has no default control theme; a style of every ContentPresenter would be a global style, which the theme does not have. The templates of the port set the alignments of their presenters, as the templates of WinUI bind them."
-    },
-    {
-      "document": "controls/dev/NavigationView/NavigationView.xaml",
-      "key": "re:\\{NavigationView(Item|ItemHeader|ItemSeparator)?\\}",
-      "reason": "NavigationView: no FerroUI control (batch B5). DrawerPage, TabbedPage and the tabs of TabControl at the left and the right are built from its panes and items (Controls/DrawerPage.xaml, Controls/TabbedPage.xaml, Controls/TabItem.xaml); the styles of NavigationView itself, its items, item headers and separators have no control to style."
-    },
-    {
-      "document": "controls/dev/NavigationView/NavigationView_themeresources.xaml",
-      "key": "re:MUX_NavigationViewItemPresenterStyleWhenOn(LeftPane|TopPane|TopPaneOverflow)|MUX_NavigationViewSettingsItemStyleWhenOnTopPane|NavigationViewOverflowButton(No)?(Label)?StyleWhenPaneOnTop|NavigationViewPaneSearchButtonStyle",
-      "reason": "NavigationView: no FerroUI control (batch B5). The item presenter styles of the left and the top pane are written into the tab themes built from them (Controls/TabItem.xaml for the tabs at the left and the right, TabbedPageTabItemTheme of Controls/TabbedPage.xaml for the top pane); the settings item, the overflow button of the top pane and the search button of the pane have no counterpart in FerroUI's pages."
     },
     {
       "document": "controls/dev/CommonStyles/MenuFlyout_themeresources.xaml",

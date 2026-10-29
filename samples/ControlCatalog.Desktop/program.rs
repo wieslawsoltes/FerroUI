@@ -12,6 +12,7 @@
 //! FERROUI_CATALOG_THEME=material cargo run -p control-catalog-desktop --features material-theme
 //! FERROUI_CATALOG_THEME_VARIANT=dark cargo run -p control-catalog-desktop
 //! FERROUI_CATALOG_WAYLAND=0 cargo run -p control-catalog-desktop
+//! FERROUI_SMOKE_SCREENSHOTS=target/screenshots FERROUI_SMOKE_WINDOW_SIZE=560x800 cargo run -p control-catalog-desktop
 //! ```
 //!
 //! `FERROUI_CATALOG_THEME` selects the theme the catalog starts with: `winui`, the WinUI theme
@@ -1082,6 +1083,17 @@ fn screenshot_run(directory: PathBuf) {
                     window.set_window_decorations(WindowDecorations::BorderOnly);
                     window.set_window_decorations(WindowDecorations::Full);
                     println!("Screenshots: the window asked for less than full decorations once");
+                }
+                // `FERROUI_SMOKE_WINDOW_SIZE=WIDTHxHEIGHT` (not a port): the client size of the
+                // window for the pictures, such as a narrow one for the compact and minimal panes
+                // of the shell.
+                if let Some((width, height)) = std::env::var("FERROUI_SMOKE_WINDOW_SIZE").ok().and_then(|value| {
+                    let (width, height) = value.split_once('x')?;
+                    Some((width.trim().parse::<f64>().ok()?, height.trim().parse::<f64>().ok()?))
+                }) {
+                    window.set_width(width);
+                    window.set_height(height);
+                    println!("Screenshots: the window asked for a client area of {width} by {height}");
                 }
                 fit_window_to_screen(&window);
                 apply_smoke_transparency(&window);

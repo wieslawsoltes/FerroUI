@@ -6801,6 +6801,101 @@
     ]
   },
   {
+    "name": "Frame",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::Frame",
+    "base": "ContentControl",
+    "constructible": true,
+    "properties": {
+      "SourcePageType": {
+        "name": "SourcePageType",
+        "type_name": "Option<&'static TypeInfo>",
+        "documentation": "Frame.SourcePageType: Option<&'static TypeInfo>",
+        "values": [],
+        "attached": false
+      },
+      "CacheSize": {
+        "name": "CacheSize",
+        "type_name": "i32",
+        "documentation": "Frame.CacheSize: i32",
+        "values": [],
+        "attached": false
+      },
+      "IsNavigationStackEnabled": {
+        "name": "IsNavigationStackEnabled",
+        "type_name": "bool",
+        "documentation": "Frame.IsNavigationStackEnabled: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "BackStack": {
+        "name": "BackStack",
+        "type_name": "NavigationStack",
+        "documentation": "Frame.BackStack: NavigationStack",
+        "values": []
+      },
+      "ForwardStack": {
+        "name": "ForwardStack",
+        "type_name": "NavigationStack",
+        "documentation": "Frame.ForwardStack: NavigationStack",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "FrameNavigationOptions",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::navigation::FrameNavigationOptions",
+    "base": null,
+    "constructible": true,
+    "properties": {
+      "IsNavigationStackEnabled": {
+        "name": "IsNavigationStackEnabled",
+        "type_name": "bool",
+        "documentation": "FrameNavigationOptions.IsNavigationStackEnabled: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Navigation",
+      "clr-namespace:FerroUI.Navigation;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "FramePage",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::FramePage",
+    "base": "UserControl",
+    "constructible": true,
+    "properties": {
+      "NavigationCacheMode": {
+        "name": "NavigationCacheMode",
+        "type_name": "NavigationCacheMode",
+        "documentation": "FramePage.NavigationCacheMode: NavigationCacheMode",
+        "values": [
+          "Disabled",
+          "Required",
+          "Enabled"
+        ],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "Geometry",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::media::Geometry",
@@ -11510,6 +11605,127 @@
     ]
   },
   {
+    "name": "NavigatingCancelEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::navigation::NavigatingCancelEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Cancel": {
+        "name": "Cancel",
+        "type_name": "bool",
+        "documentation": "NavigatingCancelEventArgs.Cancel: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      },
+      "NavigationMode": {
+        "name": "NavigationMode",
+        "type_name": "NavigationMode",
+        "documentation": "NavigatingCancelEventArgs.NavigationMode: NavigationMode",
+        "values": [
+          "New",
+          "Back",
+          "Forward",
+          "Refresh"
+        ]
+      },
+      "SourcePageType": {
+        "name": "SourcePageType",
+        "type_name": "&'static TypeInfo",
+        "documentation": "NavigatingCancelEventArgs.SourcePageType: &'static TypeInfo",
+        "values": []
+      },
+      "Parameter": {
+        "name": "Parameter",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "NavigatingCancelEventArgs.Parameter: Option<BoxedValue>",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Navigation",
+      "clr-namespace:FerroUI.Navigation;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "NavigationEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "NavigationEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Content": {
+        "name": "Content",
+        "type_name": "Option<Ref<FramePage>>",
+        "documentation": "NavigationEventArgs.Content: Option<Ref<FramePage>>",
+        "values": []
+      },
+      "NavigationMode": {
+        "name": "NavigationMode",
+        "type_name": "NavigationMode",
+        "documentation": "NavigationEventArgs.NavigationMode: NavigationMode",
+        "values": [
+          "New",
+          "Back",
+          "Forward",
+          "Refresh"
+        ]
+      },
+      "SourcePageType": {
+        "name": "SourcePageType",
+        "type_name": "&'static TypeInfo",
+        "documentation": "NavigationEventArgs.SourcePageType: &'static TypeInfo",
+        "values": []
+      },
+      "Parameter": {
+        "name": "Parameter",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "NavigationEventArgs.Parameter: Option<BoxedValue>",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Navigation",
+      "clr-namespace:FerroUI.Navigation;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "NavigationFailedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::navigation::NavigationFailedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Handled": {
+        "name": "Handled",
+        "type_name": "bool",
+        "documentation": "NavigationFailedEventArgs.Handled: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      },
+      "SourcePageType": {
+        "name": "SourcePageType",
+        "type_name": "&'static TypeInfo",
+        "documentation": "NavigationFailedEventArgs.SourcePageType: &'static TypeInfo",
+        "values": []
+      },
+      "Exception": {
+        "name": "Exception",
+        "type_name": "String",
+        "documentation": "NavigationFailedEventArgs.Exception: String",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Navigation",
+      "clr-namespace:FerroUI.Navigation;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "NavigationPage",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::NavigationPage",
@@ -11655,6 +11871,679 @@
     "namespace_aliases": [
       "using:FerroUI.Automation.Peers",
       "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "NavigationStack",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::navigation::NavigationStack",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Count": {
+        "name": "Count",
+        "type_name": "i32",
+        "documentation": "NavigationStack.Count: i32",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Navigation",
+      "clr-namespace:FerroUI.Navigation;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "NavigationView",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::NavigationView",
+    "base": "ContentControl",
+    "constructible": true,
+    "properties": {
+      "IsPaneOpen": {
+        "name": "IsPaneOpen",
+        "type_name": "bool",
+        "documentation": "NavigationView.IsPaneOpen: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "CompactModeThresholdWidth": {
+        "name": "CompactModeThresholdWidth",
+        "type_name": "f64",
+        "documentation": "NavigationView.CompactModeThresholdWidth: f64",
+        "values": [],
+        "attached": false
+      },
+      "ExpandedModeThresholdWidth": {
+        "name": "ExpandedModeThresholdWidth",
+        "type_name": "f64",
+        "documentation": "NavigationView.ExpandedModeThresholdWidth: f64",
+        "values": [],
+        "attached": false
+      },
+      "IsSettingsVisible": {
+        "name": "IsSettingsVisible",
+        "type_name": "bool",
+        "documentation": "NavigationView.IsSettingsVisible: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "IsPaneToggleButtonVisible": {
+        "name": "IsPaneToggleButtonVisible",
+        "type_name": "bool",
+        "documentation": "NavigationView.IsPaneToggleButtonVisible: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "AlwaysShowHeader": {
+        "name": "AlwaysShowHeader",
+        "type_name": "bool",
+        "documentation": "NavigationView.AlwaysShowHeader: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "CompactPaneLength": {
+        "name": "CompactPaneLength",
+        "type_name": "f64",
+        "documentation": "NavigationView.CompactPaneLength: f64",
+        "values": [],
+        "attached": false
+      },
+      "OpenPaneLength": {
+        "name": "OpenPaneLength",
+        "type_name": "f64",
+        "documentation": "NavigationView.OpenPaneLength: f64",
+        "values": [],
+        "attached": false
+      },
+      "IsPaneVisible": {
+        "name": "IsPaneVisible",
+        "type_name": "bool",
+        "documentation": "NavigationView.IsPaneVisible: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "IsBackEnabled": {
+        "name": "IsBackEnabled",
+        "type_name": "bool",
+        "documentation": "NavigationView.IsBackEnabled: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "IsBackButtonVisible": {
+        "name": "IsBackButtonVisible",
+        "type_name": "NavigationViewBackButtonVisible",
+        "documentation": "NavigationView.IsBackButtonVisible: NavigationViewBackButtonVisible",
+        "values": [
+          "Collapsed",
+          "Visible",
+          "Auto"
+        ],
+        "attached": false
+      },
+      "PaneDisplayMode": {
+        "name": "PaneDisplayMode",
+        "type_name": "NavigationViewPaneDisplayMode",
+        "documentation": "NavigationView.PaneDisplayMode: NavigationViewPaneDisplayMode",
+        "values": [
+          "Auto",
+          "Left",
+          "Top",
+          "LeftCompact",
+          "LeftMinimal"
+        ],
+        "attached": false
+      },
+      "SelectionFollowsFocus": {
+        "name": "SelectionFollowsFocus",
+        "type_name": "NavigationViewSelectionFollowsFocus",
+        "documentation": "NavigationView.SelectionFollowsFocus: NavigationViewSelectionFollowsFocus",
+        "values": [
+          "Disabled",
+          "Enabled"
+        ],
+        "attached": false
+      },
+      "PaneTitle": {
+        "name": "PaneTitle",
+        "type_name": "String",
+        "documentation": "NavigationView.PaneTitle: String",
+        "values": [],
+        "attached": false
+      },
+      "Header": {
+        "name": "Header",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "NavigationView.Header: Option<BoxedValue>",
+        "values": [],
+        "attached": false
+      },
+      "HeaderTemplate": {
+        "name": "HeaderTemplate",
+        "type_name": "Option<Rc<dyn IDataTemplate>>",
+        "documentation": "NavigationView.HeaderTemplate: Option<Rc<dyn IDataTemplate>>",
+        "values": [],
+        "attached": false
+      },
+      "SelectedItem": {
+        "name": "SelectedItem",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "NavigationView.SelectedItem: Option<BoxedValue>",
+        "values": [],
+        "attached": false
+      },
+      "PaneHeader": {
+        "name": "PaneHeader",
+        "type_name": "Option<Ref<Control>>",
+        "documentation": "NavigationView.PaneHeader: Option<Ref<Control>>",
+        "values": [],
+        "attached": false
+      },
+      "PaneFooter": {
+        "name": "PaneFooter",
+        "type_name": "Option<Ref<Control>>",
+        "documentation": "NavigationView.PaneFooter: Option<Ref<Control>>",
+        "values": [],
+        "attached": false
+      },
+      "PaneCustomContent": {
+        "name": "PaneCustomContent",
+        "type_name": "Option<Ref<Control>>",
+        "documentation": "NavigationView.PaneCustomContent: Option<Ref<Control>>",
+        "values": [],
+        "attached": false
+      },
+      "ContentOverlay": {
+        "name": "ContentOverlay",
+        "type_name": "Option<Ref<Control>>",
+        "documentation": "NavigationView.ContentOverlay: Option<Ref<Control>>",
+        "values": [],
+        "attached": false
+      },
+      "AutoSuggestBox": {
+        "name": "AutoSuggestBox",
+        "type_name": "Option<Ref<AutoSuggestBox>>",
+        "documentation": "NavigationView.AutoSuggestBox: Option<Ref<AutoSuggestBox>>",
+        "values": [],
+        "attached": false
+      },
+      "MenuItemsSource": {
+        "name": "MenuItemsSource",
+        "type_name": "Option<ItemsSource>",
+        "documentation": "NavigationView.MenuItemsSource: Option<ItemsSource>",
+        "values": [],
+        "attached": false
+      },
+      "FooterMenuItemsSource": {
+        "name": "FooterMenuItemsSource",
+        "type_name": "Option<ItemsSource>",
+        "documentation": "NavigationView.FooterMenuItemsSource: Option<ItemsSource>",
+        "values": [],
+        "attached": false
+      },
+      "MenuItemTemplate": {
+        "name": "MenuItemTemplate",
+        "type_name": "Option<Rc<dyn IDataTemplate>>",
+        "documentation": "NavigationView.MenuItemTemplate: Option<Rc<dyn IDataTemplate>>",
+        "values": [],
+        "attached": false
+      },
+      "PaneToggleButtonStyle": {
+        "name": "PaneToggleButtonStyle",
+        "type_name": "Option<Ref<ControlTheme>>",
+        "documentation": "NavigationView.PaneToggleButtonStyle: Option<Ref<ControlTheme>>",
+        "values": [],
+        "attached": false
+      },
+      "MenuItemContainerStyle": {
+        "name": "MenuItemContainerStyle",
+        "type_name": "Option<Ref<ControlTheme>>",
+        "documentation": "NavigationView.MenuItemContainerStyle: Option<Ref<ControlTheme>>",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "NavigationViewAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::automation::peers::NavigationViewAutomationPeer",
+    "base": "ControlAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "NavigationViewBackRequestedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::NavigationViewBackRequestedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "NavigationViewDisplayModeChangedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::NavigationViewDisplayModeChangedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "DisplayMode": {
+        "name": "DisplayMode",
+        "type_name": "NavigationViewDisplayMode",
+        "documentation": "NavigationViewDisplayModeChangedEventArgs.DisplayMode: NavigationViewDisplayMode",
+        "values": [
+          "Minimal",
+          "Compact",
+          "Expanded"
+        ]
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "NavigationViewItem",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::NavigationViewItem",
+    "base": "NavigationViewItemBase",
+    "constructible": true,
+    "properties": {
+      "Icon": {
+        "name": "Icon",
+        "type_name": "Option<Ref<IconElement>>",
+        "documentation": "NavigationViewItem.Icon: Option<Ref<IconElement>>",
+        "values": [],
+        "attached": false
+      },
+      "InfoBadge": {
+        "name": "InfoBadge",
+        "type_name": "Option<Ref<InfoBadge>>",
+        "documentation": "NavigationViewItem.InfoBadge: Option<Ref<InfoBadge>>",
+        "values": [],
+        "attached": false
+      },
+      "SelectsOnInvoked": {
+        "name": "SelectsOnInvoked",
+        "type_name": "bool",
+        "documentation": "NavigationViewItem.SelectsOnInvoked: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "IsExpanded": {
+        "name": "IsExpanded",
+        "type_name": "bool",
+        "documentation": "NavigationViewItem.IsExpanded: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "HasUnrealizedChildren": {
+        "name": "HasUnrealizedChildren",
+        "type_name": "bool",
+        "documentation": "NavigationViewItem.HasUnrealizedChildren: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "IsChildSelected": {
+        "name": "IsChildSelected",
+        "type_name": "bool",
+        "documentation": "NavigationViewItem.IsChildSelected: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "MenuItemsSource": {
+        "name": "MenuItemsSource",
+        "type_name": "Option<ItemsSource>",
+        "documentation": "NavigationViewItem.MenuItemsSource: Option<ItemsSource>",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "NavigationViewItemAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::automation::peers::NavigationViewItemAutomationPeer",
+    "base": "ControlAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "NavigationViewItemBase",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::NavigationViewItemBase",
+    "base": "ContentControl",
+    "constructible": false,
+    "properties": {
+      "IsSelected": {
+        "name": "IsSelected",
+        "type_name": "bool",
+        "documentation": "NavigationViewItemBase.IsSelected: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "NavigationViewItemCollapsedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::NavigationViewItemCollapsedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "CollapsedItem": {
+        "name": "CollapsedItem",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "NavigationViewItemCollapsedEventArgs.CollapsedItem: Option<BoxedValue>",
+        "values": []
+      },
+      "CollapsedItemContainer": {
+        "name": "CollapsedItemContainer",
+        "type_name": "Ref<NavigationViewItemBase>",
+        "documentation": "NavigationViewItemCollapsedEventArgs.CollapsedItemContainer: Ref<NavigationViewItemBase>",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "NavigationViewItemExpandingEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::NavigationViewItemExpandingEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "ExpandingItem": {
+        "name": "ExpandingItem",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "NavigationViewItemExpandingEventArgs.ExpandingItem: Option<BoxedValue>",
+        "values": []
+      },
+      "ExpandingItemContainer": {
+        "name": "ExpandingItemContainer",
+        "type_name": "Ref<NavigationViewItemBase>",
+        "documentation": "NavigationViewItemExpandingEventArgs.ExpandingItemContainer: Ref<NavigationViewItemBase>",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "NavigationViewItemHeader",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::NavigationViewItemHeader",
+    "base": "NavigationViewItemBase",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "NavigationViewItemInvokedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::NavigationViewItemInvokedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "InvokedItem": {
+        "name": "InvokedItem",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "NavigationViewItemInvokedEventArgs.InvokedItem: Option<BoxedValue>",
+        "values": []
+      },
+      "InvokedItemContainer": {
+        "name": "InvokedItemContainer",
+        "type_name": "Option<Ref<NavigationViewItemBase>>",
+        "documentation": "NavigationViewItemInvokedEventArgs.InvokedItemContainer: Option<Ref<NavigationViewItemBase>>",
+        "values": []
+      },
+      "IsSettingsInvoked": {
+        "name": "IsSettingsInvoked",
+        "type_name": "bool",
+        "documentation": "NavigationViewItemInvokedEventArgs.IsSettingsInvoked: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "NavigationViewItemSeparator",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::NavigationViewItemSeparator",
+    "base": "NavigationViewItemBase",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "NavigationViewPaneClosingEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::NavigationViewPaneClosingEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Cancel": {
+        "name": "Cancel",
+        "type_name": "bool",
+        "documentation": "NavigationViewPaneClosingEventArgs.Cancel: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "NavigationViewSelectionChangedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::NavigationViewSelectionChangedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "SelectedItem": {
+        "name": "SelectedItem",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "NavigationViewSelectionChangedEventArgs.SelectedItem: Option<BoxedValue>",
+        "values": []
+      },
+      "SelectedItemContainer": {
+        "name": "SelectedItemContainer",
+        "type_name": "Option<Ref<NavigationViewItemBase>>",
+        "documentation": "NavigationViewSelectionChangedEventArgs.SelectedItemContainer: Option<Ref<NavigationViewItemBase>>",
+        "values": []
+      },
+      "IsSettingsSelected": {
+        "name": "IsSettingsSelected",
+        "type_name": "bool",
+        "documentation": "NavigationViewSelectionChangedEventArgs.IsSettingsSelected: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "NavigationViewTemplateSettings",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::primitives::NavigationViewTemplateSettings",
+    "base": "FerroObject",
+    "constructible": true,
+    "properties": {
+      "TopPadding": {
+        "name": "TopPadding",
+        "type_name": "f64",
+        "documentation": "NavigationViewTemplateSettings.TopPadding: f64",
+        "values": [],
+        "attached": false
+      },
+      "OverflowButtonVisibility": {
+        "name": "OverflowButtonVisibility",
+        "type_name": "bool",
+        "documentation": "NavigationViewTemplateSettings.OverflowButtonVisibility: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "PaneToggleButtonVisibility": {
+        "name": "PaneToggleButtonVisibility",
+        "type_name": "bool",
+        "documentation": "NavigationViewTemplateSettings.PaneToggleButtonVisibility: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "BackButtonVisibility": {
+        "name": "BackButtonVisibility",
+        "type_name": "bool",
+        "documentation": "NavigationViewTemplateSettings.BackButtonVisibility: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "TopPaneVisibility": {
+        "name": "TopPaneVisibility",
+        "type_name": "bool",
+        "documentation": "NavigationViewTemplateSettings.TopPaneVisibility: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "LeftPaneVisibility": {
+        "name": "LeftPaneVisibility",
+        "type_name": "bool",
+        "documentation": "NavigationViewTemplateSettings.LeftPaneVisibility: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "SingleSelectionFollowsFocus": {
+        "name": "SingleSelectionFollowsFocus",
+        "type_name": "bool",
+        "documentation": "NavigationViewTemplateSettings.SingleSelectionFollowsFocus: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "PaneToggleButtonWidth": {
+        "name": "PaneToggleButtonWidth",
+        "type_name": "f64",
+        "documentation": "NavigationViewTemplateSettings.PaneToggleButtonWidth: f64",
+        "values": [],
+        "attached": false
+      },
+      "SmallerPaneToggleButtonWidth": {
+        "name": "SmallerPaneToggleButtonWidth",
+        "type_name": "f64",
+        "documentation": "NavigationViewTemplateSettings.SmallerPaneToggleButtonWidth: f64",
+        "values": [],
+        "attached": false
+      },
+      "OpenPaneLength": {
+        "name": "OpenPaneLength",
+        "type_name": "f64",
+        "documentation": "NavigationViewTemplateSettings.OpenPaneLength: f64",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls.Primitives",
+      "clr-namespace:FerroUI.Controls.Primitives;assembly=FerroUI.Controls"
     ]
   },
   {
@@ -12508,6 +13397,31 @@
     "namespace_aliases": [
       "using:FerroUI.Animation",
       "clr-namespace:FerroUI.Animation;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "PageStackEntry",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::navigation::PageStackEntry",
+    "base": "FerroObject",
+    "constructible": false,
+    "properties": {
+      "SourcePageType": {
+        "name": "SourcePageType",
+        "type_name": "&'static TypeInfo",
+        "documentation": "PageStackEntry.SourcePageType: &'static TypeInfo",
+        "values": []
+      },
+      "Parameter": {
+        "name": "Parameter",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "PageStackEntry.Parameter: Option<BoxedValue>",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Navigation",
+      "clr-namespace:FerroUI.Navigation;assembly=FerroUI.Controls"
     ]
   },
   {

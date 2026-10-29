@@ -261,6 +261,8 @@ document_tests! {
     controls_auto_suggest_box => "/Controls/AutoSuggestBox.xaml";
     controls_radio_buttons => "/Controls/RadioButtons.xaml";
     controls_rating_control => "/Controls/RatingControl.xaml";
+    controls_frame => "/Controls/Frame.xaml";
+    controls_navigation_view => "/Controls/NavigationView.xaml";
 }
 
 #[test]

@@ -81,6 +81,7 @@
                 ColumnDefinitions="*,Auto"
                 RowDefinitions="*,Auto">
             <ScrollContentPresenter x:Name="PART_ContentPresenter"
+                                    Background="Transparent"
                                     Grid.RowSpan="2"
                                     Grid.ColumnSpan="2"
                                     ContentTemplate="{TemplateBinding ContentTemplate}"
@@ -162,6 +163,7 @@
   <ControlTemplate x:Key="ScrollViewerScrollBarlessTemplate" TargetType="ScrollViewer">
     <Grid Background="{TemplateBinding Background}">
       <ScrollContentPresenter x:Name="PART_ContentPresenter"
+                              Background="Transparent"
                               ContentTemplate="{TemplateBinding ContentTemplate}"
                               Padding="{TemplateBinding Padding}"
                               HorizontalSnapPointsType="{TemplateBinding HorizontalSnapPointsType}"

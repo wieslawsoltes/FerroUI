@@ -134,6 +134,8 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<NumberBoxSpinButtonPlacementMode>();
     ValueTypes::register_nullable::<NumberBoxValidationMode>();
     ValueTypes::register_nullable::<AutoSuggestionBoxTextChangeReason>();
+    crate::navigation::register_value_types();
+    crate::navigation_view_events::register_value_types();
     // A tick list is the list of numbers it derives from: the same list, so that the
     // members of the list (`Capacity`, `Add`) are reached through the tick list.
     ValueTypes::register_cast::<TickList, MediaCollection<f64>>(|ticks| MediaCollection::from_list(ticks.list().clone()));

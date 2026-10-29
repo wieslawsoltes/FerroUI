@@ -140,6 +140,24 @@ under the same license.
 (`controls/dev/RadioButtons` and `controls/dev/RatingControl` at the same commit), under the
 same license.
 
+`frame.rs`, `frame_page.rs`, `navigation.rs` and `navigation/page_stack_entry.rs` (WinUI's
+`Frame`, `Page` as `FramePage`, and the navigation model of `Microsoft.UI.Xaml.Navigation`: the
+navigation and cache modes, the arguments of the navigation events, `PageStackEntry` and the
+journal) are ported from the WinUI project directly (`dxaml/xcp/dxaml/lib/Frame_Partial.cpp`,
+`Page_Partial.cpp`, `NavigationHistory.cpp`, `NavigationCache.cpp`, `PageStackEntry_Partial.cpp`
+and the type model `dxaml/xcp/tools/XCPTypesAutoGen/XamlOM/Model/Microsoft.UI.Xaml.Navigation.cs`
+at the same commit), under the same license.
+
+`navigation_view.rs`, `navigation_view_events.rs`, `navigation_view_item.rs`,
+`primitives/navigation_view_template_settings.rs`,
+`automation/peers/navigation_view_automation_peer.rs` and
+`automation/peers/navigation_view_item_automation_peer.rs` (WinUI's `NavigationView`, its
+enumerations, arguments and template settings, `NavigationViewItemBase`, `NavigationViewItem`
+with the behaviour of `NavigationViewItemPresenter`, `NavigationViewItemHeader`,
+`NavigationViewItemSeparator` and their automation peers) are ported from the WinUI project
+directly (`controls/dev/NavigationView` with the English texts of its
+`Strings/en-us/Resources.resw`, at the same commit), under the same license.
+
 ## Silverlight Toolkit
 
 The files under `auto_complete_box/` (`auto_complete_box.rs`,
