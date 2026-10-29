@@ -5,7 +5,8 @@
     "build": "node build.js",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "eslint --ext .ts modules",
-    "test:pixels": "node tests/software-blit.test.mjs"
+    "test:pixels": "node tests/software-blit.test.mjs",
+    "test:input": "node tests/text-input.test.mjs"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "5.62.0",

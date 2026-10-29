@@ -461,10 +461,13 @@ source hold callback does not inspect lifecycle state; FerroUI acts only on
 also ignores `DoubleTapped`, since ordinary click handling already processes
 each click.
 
-The ControlCatalog sample is a combined framework page at
-`samples/ControlCatalog/Pages/InkingPage.xaml`. It enables pen/mouse/touch, wires
-the toolbar to the canvas and provides clear, portable snapshot save and restore
-and portable clipboard actions. The source toolbar test-page selectors, guide
+The ControlCatalog has a page per control, after the two WinUI test pages, in
+Media & Graphics. `samples/ControlCatalog/Pages/InkCanvasPage.xaml` enables
+pen/mouse/touch and provides clear, portable snapshot save and restore and
+portable clipboard actions. `samples/ControlCatalog/Pages/InkToolbarPage.xaml`
+wires the toolbar to its canvas; its selectors of `InitialControls`,
+`Orientation` and `ButtonFlyoutPlacement`, the ruler and protractor toggles and
+the active-tool label drive the live toolbar. The source toolbar test-page selectors, guide
 checkboxes and active-tool label are exercised as actual framework controls in
 `interaction_page_selectors_and_checkboxes_drive_the_live_toolbar`; this keeps
 all eight source interaction scenarios with a shared test fixture. Windows
