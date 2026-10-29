@@ -609,6 +609,44 @@ fn the_navigation_controls_get_their_parts_from_the_theme() {
     window.close();
 }
 
+/// The menu items of a NavigationView whose pane is shorter than they are scroll in
+/// `MenuItemsScrollViewer` (the star row of `ItemsContainerGrid`), above the settings item, as in
+/// WinUI: none of them goes under the footer.
+#[test]
+fn the_menu_items_of_a_short_navigation_view_scroll() {
+    use ferroui_base::{BoxedValue, Vector};
+    use ferroui_controls::{NavigationView, NavigationViewItem, NavigationViewPaneDisplayMode, ScrollViewer};
+
+    let _app = start_themed_application();
+    let navigation = NavigationView::new();
+    navigation.set_pane_display_mode(NavigationViewPaneDisplayMode::Left);
+    for index in 0..12 {
+        let item = NavigationViewItem::new();
+        item.set_content(Some(Rc::new(format!("Item {index}")) as BoxedValue));
+        navigation.menu_items().add(Some(Control::boxed(&item)));
+    }
+    let window = Window::new();
+    window.set_width(800.0);
+    window.set_height(320.0);
+    window.set_content(Some(Control::boxed(&navigation)));
+    window.show();
+    window.update_layout();
+
+    let scroll_viewer = navigation
+        .get_template_descendants()
+        .into_iter()
+        .find(|element| element.name().as_deref() == Some("MenuItemsScrollViewer"))
+        .and_then(|element| element.cast::<ScrollViewer>())
+        .expect("MenuItemsScrollViewer");
+    let (extent, viewport) = (scroll_viewer.extent(), scroll_viewer.viewport());
+    assert!(viewport.height > 0.0, "the menu items have room in the pane: {viewport:?}");
+    assert!(extent.height > viewport.height, "twelve items overflow a pane of 320: {extent:?} in {viewport:?}");
+    scroll_viewer.set_offset(Vector::new(0.0, extent.height));
+    window.update_layout();
+    assert_eq!(scroll_viewer.offset().y, extent.height - viewport.height, "the last item scrolls into view");
+    window.close();
+}
+
 /// The keyed template `ScrollViewerScrollBarlessTemplate` (generic.xaml) of `Controls/ScrollViewer.xaml`:
 /// a scroll viewer that an application gives it is built with its content presenter and without the
 /// scroll bars, which FerroUI's scroll viewer takes as optional parts.
