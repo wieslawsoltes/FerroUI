@@ -182,6 +182,12 @@ impl ItemsControlImpl for RadioButtons {
 
     fn on_items_view_collection_changed(this: &Self, args: &ItemsChangedEventArgs<'_>) {
         Self::parent_on_items_view_collection_changed(this, args);
+        // The selection may have moved with the items: its radio button stays the checked one.
+        if let Some(radio) = this.selected_radio_button() {
+            if radio.is_checked() != Some(true) {
+                this.set_container_checked(&radio, true);
+            }
+        }
         this.update_automation_positions();
     }
 }
@@ -241,6 +247,18 @@ impl RadioButtons {
         self.currently_selecting.set(was_selecting);
     }
 
+    /// The radio button of the selected item: the item itself when it is a radio button (its own
+    /// container), else its container. While the items change, the containers keep their old
+    /// indexes, so the item's own radio button is the reliable one.
+    fn selected_radio_button(&self) -> Option<Ref<RadioButton>> {
+        let selected = self.selected_item();
+        selected.as_ref()?;
+        if let Some(radio) = ferroui_base::metadata::from_markup_value::<Ref<RadioButton>>(&selected) {
+            return Some(radio);
+        }
+        self.container_from_item(&selected).and_then(|container| container.cast::<RadioButton>())
+    }
+
     fn container_radio_button(&self, index: i32) -> Option<Ref<RadioButton>> {
         if index < 0 {
             return None;
@@ -251,11 +269,21 @@ impl RadioButtons {
     /// The checked state of the containers after a change of the selection (WinUI's `Select`):
     /// the container of the new selection is checked, and the group manager unchecks the other
     /// containers; without one, the container of the old selection is unchecked here.
+    ///
+    /// The container is the one of the selected item, not the one at the new index: when an
+    /// insertion or a removal before the selection moves it (the index changes, the item does
+    /// not), the containers still have their old indexes while the index changes, and the
+    /// container at the new index is another item's.
     fn update_checked_state(&self, old_index: i32, new_index: i32) {
-        if let Some(radio) = self.container_radio_button(new_index) {
-            self.set_container_checked(&radio, true);
-        } else if let Some(radio) = self.container_radio_button(old_index) {
-            self.set_container_checked(&radio, false);
+        let new_radio = if new_index >= 0 { self.selected_radio_button() } else { None };
+        if let Some(radio) = new_radio {
+            if radio.is_checked() != Some(true) {
+                self.set_container_checked(&radio, true);
+            }
+        } else if new_index < 0 {
+            if let Some(radio) = self.container_radio_button(old_index) {
+                self.set_container_checked(&radio, false);
+            }
         }
     }
 
