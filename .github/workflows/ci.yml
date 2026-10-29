@@ -52,9 +52,9 @@ env:
   CARGO_INCREMENTAL: 0
   RUST_BACKTRACE: 1
 
-# The checks of every pull request: the conventions and the packages, the macOS tests of the
-# workspace, the Windows backend, X11 and the browser catalog. The jobs of one platform or backend
-# alone are workflows of their own that a pull request starts only when it changes that area, so a
+# The checks of every pull request: the conventions and the packages, the Linux tests of the
+# workspace, the native macOS platform, the Windows backend, X11 and the browser catalog. The jobs
+# of one platform or backend alone are workflows of their own that a pull request starts only when it changes that area, so a
 # pull request shows no skipped check for them: vello.yml, browser.yml, ios.yml, android.yml,
 # wayland.yml, linuxfb.yml; the informative jobs are in nightly.yml. All of them also run every
 # night on main and by hand (gh workflow run <file> --ref <branch>).
@@ -102,25 +102,51 @@ jobs:
       - name: Package the published crates without building
         run: scripts/release/publish.sh --dry-run --no-verify
 
-  # Reduced for the time being (2026-10-08), to shorten the wait for a pull request while many are
-  # in flight; the job took 22 minutes, 20 of them compiling. What is left out, and how to get it
-  # back:
-  # - It does not run for a push to main: the pull request that was merged ran it already, and the
-  #   runs of main competed with the pull requests for the macOS runners. Dispatch the workflow by
-  #   hand on main (workflow_dispatch) for a run of the merged state.
-  # - No separate `cargo check --workspace --all-targets`: it compiled everything a second time with
-  #   another profile. The examples and binaries (hello_window, themed_window, the native examples,
-  #   control-catalog-desktop) are therefore not compiled here; `cargo check --workspace
-  #   --all-targets --locked` on a Mac covers them.
-  # - The tests are the unit and integration tests (`--lib --tests`): no documentation tests (the
-  #   workspace has none that run) and no example or binary is linked.
-  # - No debug information in the test build, which shortens compiling and linking; a failing test
-  #   still reports its message and location, a backtrace has no line numbers.
-  # - The tests of the ControlCatalog with its feature classic-themes and those of the Vello
-  #   backend are in vello.yml, which runs when a pull request changes them.
-  # - It runs in the nightly run of main, which saves its build cache.
+  # The tests of the workspace, on Linux: the 4-core Linux runner compiles the workspace in 16
+  # minutes where the 3-core macOS runner took 40 (October 2026), and the test binaries run side by
+  # side (scripts/ci/parallel_tests.py). Under Xvfb, with the fonts the text tests need (CJK and
+  # emoji fallbacks). The render backends comparison and Vello are in vello.yml; the two benchmark
+  # crates (every benchmark once, almost three minutes) are left out of a pull request. The
+  # VirtualizationDemo playground test counts what the font metrics of macOS let into view: it runs
+  # in the macOS job.
+  linux:
+    name: Build and test (Linux, the workspace)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      CARGO_PROFILE_DEV_DEBUG: 0
+      CARGO_PROFILE_TEST_DEBUG: 0
+      RUSTFLAGS: -C link-arg=-fuse-ld=mold
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
+      - name: System packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            xvfb xauth libx11-dev libxi-dev libxrandr-dev libxcursor-dev libxfixes-dev libxext-dev libxtst-dev \
+            libgl1-mesa-dev libegl1-mesa-dev libfontconfig1-dev libfreetype6-dev pkg-config \
+            fonts-dejavu-core fonts-noto-cjk fonts-noto-color-emoji \
+            libglib2.0-dev libgtk-3-dev libxkbcommon-dev libwayland-dev libvulkan-dev mold clang
+      - name: Test
+        env:
+          BENCHMARKS: ${{ github.event_name == 'pull_request' && '--exclude ferroui-benchmarks --exclude ferroui-treedatagrid-benchmarks' || '' }}
+        run: |
+          # shellcheck disable=SC2086
+          xvfb-run -a python3 scripts/ci/parallel_tests.py --jobs 4 --workspace --locked --lib --tests \
+            --exclude ferroui-render-backends-comparison --exclude ferroui-vello $BENCHMARKS \
+            -- --skip the_playground_realizes_what_is_in_view_and_recycles_its_containers
+
+  # macOS: on a pull request only what runs on macOS alone: the native platform (AppKit,
+  # ferroui-native), Metal, the desktop entry point, Skia with the fonts of the system (CoreText), and
+  # the desktop catalog with its native control demo, checked. The whole workspace runs on macOS in
+  # the nightly run and in a run started by hand. It does not run for a push to main.
   macos:
-    name: Build and test (macOS)
+    name: Build and test (macOS, the native platform)
     if: (github.event_name != 'push')
     runs-on: macos-15
     timeout-minutes: 180
@@ -134,16 +160,17 @@ jobs:
         with:
           save-if: ${{ github.ref == 'refs/heads/main' }}
           cache-on-failure: true
-      # The test binaries run side by side (scripts/ci/parallel_tests.py): one after another they
-      # took 14.5 of the 55 minutes of the job. The two benchmark crates (their tests run every
-      # benchmark once, almost three minutes) are left out of a pull request; every other run has them.
-      - name: Test
-        env:
-          BENCHMARKS: ${{ github.event_name == 'pull_request' && '--exclude ferroui-benchmarks --exclude ferroui-treedatagrid-benchmarks' || '' }}
+      - name: Test the native platform
+        if: github.event_name == 'pull_request'
         run: |
-          # shellcheck disable=SC2086
+          python3 scripts/ci/parallel_tests.py --jobs 3 --locked --lib --tests \
+            -p ferroui-native -p ferroui-metal -p ferroui-desktop -p ferroui-skia -p virtualization-demo
+          cargo check --locked -p control-catalog-desktop
+      - name: Test the workspace
+        if: github.event_name != 'pull_request'
+        run: |
           python3 scripts/ci/parallel_tests.py --jobs 3 --workspace --locked --lib --tests \
-            --exclude ferroui-render-backends-comparison --exclude ferroui-vello $BENCHMARKS
+            --exclude ferroui-render-backends-comparison --exclude ferroui-vello
 
   # The Windows platform backend (docs/porting/win32-platform.md, section 10.3). This job is the
   # only place the backend runs: it is written and checked for the Windows target on other
