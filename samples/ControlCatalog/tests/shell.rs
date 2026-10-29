@@ -239,6 +239,22 @@ impl Shell {
         self.frame();
     }
 
+    /// One turn of the mouse wheel at `position` (a notch is a delta of 1), and its frame.
+    fn wheel(&self, position: Point, delta: ferroui_base::Vector) {
+        self.timestamp.set(self.timestamp.get() + 16);
+        let input =
+            ferroui_controls::platform::ITopLevelImpl::input(&*self.window_impl).expect("the window handles input");
+        input(Rc::new(ferroui_base::input::raw::RawMouseWheelEventArgs::new(
+            self.mouse.clone() as Rc<dyn IInputDevice>,
+            self.timestamp.get(),
+            self.input_root(),
+            position,
+            delta,
+            RawInputModifiers::NONE,
+        )));
+        self.frame();
+    }
+
     fn pointer_down(&self, position: Point) {
         self.pointer(RawPointerEventType::LeftButtonDown, position, RawInputModifiers::LEFT_MOUSE_BUTTON);
         self.frame();
@@ -1229,4 +1245,47 @@ fn a_finger_scrolls_the_page_on_a_phone() {
     let offset = scroll_viewer.offset().y;
     finger(RawPointerEventType::TouchEnd, Point::new(x, y - 200.0), 300);
     assert!((offset - 195.0).abs() <= 2.0, "a drag of 200 scrolls the page by 195 (less the start distance), not {offset}");
+}
+
+/// The ItemsRepeater page in the shell of the catalog under the mouse wheel, with the pointer over
+/// an item, as the Windows report of #269 has it: every notch scrolls by 50, down and back up, also
+/// with the pointer moving between the notches.
+#[test]
+fn the_wheel_over_an_item_of_the_repeater_page_scrolls_every_notch() {
+    use ferroui_controls::ScrollViewer;
+    let shell = Shell::start(1100.0, 800.0);
+    let item = shell
+        .view_model
+        .home_sections()
+        .iter()
+        .flat_map(|section| items(section))
+        .find(|item| item.header() == "ItemsRepeater")
+        .expect("the ItemsRepeater page");
+    let page = shell.show(&item);
+    let scroller = descendants::<ScrollViewer>(&page)
+        .into_iter()
+        .find(|viewer| viewer.name().as_deref() == Some("RepeaterScroller"))
+        .expect("the scroll viewer of the repeater");
+    let repeater = descendants::<ferroui_controls_repeater::ItemsRepeater>(&page).into_iter().next().expect("the repeater");
+    let element = repeater.try_get_element(1).expect("a realized item");
+    let bounds = shell.bounds_of(&element);
+    let mut point = bounds.center();
+    assert!(shell.is_hit(&element, point), "the item is under the pointer");
+    shell.pointer_move(point);
+    let mut expected = 0.0;
+    let notches = [-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -0.25, -0.25, -0.25, -0.25, 1.0, 1.0, 1.0];
+    for (notch, delta) in notches.into_iter().enumerate() {
+        shell.wheel(point, ferroui_base::Vector::new(0.0, delta));
+        expected -= delta * 50.0;
+        assert_eq!(
+            scroller.offset().y,
+            expected,
+            "after notch {notch} ({delta}); {} realized items, the extent is {:?}",
+            repeater.realized_elements().len(),
+            scroller.extent(),
+        );
+        // A pixel of movement between the notches.
+        point = Point::new(point.x + if notch % 2 == 0 { 1.0 } else { -1.0 }, point.y);
+        shell.pointer_move(point);
+    }
 }
