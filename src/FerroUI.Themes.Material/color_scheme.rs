@@ -1774,7 +1774,7 @@ fn install_compatibility(scheme: &MaterialColorScheme, dictionary: &Ref<Resource
     { let c = scheme.color(MaterialColorRole::Error); dictionary.set("SystemErrorTextColor", into_markup_value(Color::from_argb((c.a as f64 * 1.0).round() as u8, c.r, c.g, c.b))); }
     { let c = scheme.color(MaterialColorRole::Surface); dictionary.set("SystemFillColorAttentionBackground", into_markup_value(Color::from_argb((c.a as f64 * 1.0).round() as u8, c.r, c.g, c.b))); }
     scheme.add_brush(dictionary, "SystemFillColorAttentionBackgroundBrush", MaterialColorRole::Surface, 1.0);
-    scheme.add_brush(dictionary, "SystemFillColorAttentionBrush", MaterialColorRole::Surface, 1.0);
+    scheme.add_brush(dictionary, "SystemFillColorAttentionBrush", MaterialColorRole::Primary, 1.0);
     { let c = scheme.color(MaterialColorRole::Tertiary); dictionary.set("SystemFillColorCaution", into_markup_value(Color::from_argb((c.a as f64 * 1.0).round() as u8, c.r, c.g, c.b))); }
     { let c = scheme.color(MaterialColorRole::TertiaryContainer); dictionary.set("SystemFillColorCautionBackground", into_markup_value(Color::from_argb((c.a as f64 * 1.0).round() as u8, c.r, c.g, c.b))); }
     scheme.add_brush(dictionary, "SystemFillColorCautionBackgroundBrush", MaterialColorRole::TertiaryContainer, 1.0);
@@ -1783,16 +1783,16 @@ fn install_compatibility(scheme: &MaterialColorScheme, dictionary: &Ref<Resource
     { let c = scheme.color(MaterialColorRole::ErrorContainer); dictionary.set("SystemFillColorCriticalBackground", into_markup_value(Color::from_argb((c.a as f64 * 1.0).round() as u8, c.r, c.g, c.b))); }
     scheme.add_brush(dictionary, "SystemFillColorCriticalBackgroundBrush", MaterialColorRole::ErrorContainer, 1.0);
     scheme.add_brush(dictionary, "SystemFillColorCriticalBrush", MaterialColorRole::Error, 1.0);
-    { let c = scheme.color(MaterialColorRole::Surface); dictionary.set("SystemFillColorNeutral", into_markup_value(Color::from_argb((c.a as f64 * 1.0).round() as u8, c.r, c.g, c.b))); }
+    { let c = scheme.color(MaterialColorRole::OnSurfaceVariant); dictionary.set("SystemFillColorNeutral", into_markup_value(Color::from_argb((c.a as f64 * 1.0).round() as u8, c.r, c.g, c.b))); }
     { let c = scheme.color(MaterialColorRole::Surface); dictionary.set("SystemFillColorNeutralBackground", into_markup_value(Color::from_argb((c.a as f64 * 1.0).round() as u8, c.r, c.g, c.b))); }
     scheme.add_brush(dictionary, "SystemFillColorNeutralBackgroundBrush", MaterialColorRole::Surface, 1.0);
-    scheme.add_brush(dictionary, "SystemFillColorNeutralBrush", MaterialColorRole::Surface, 1.0);
+    scheme.add_brush(dictionary, "SystemFillColorNeutralBrush", MaterialColorRole::OnSurfaceVariant, 1.0);
     { let c = scheme.color(MaterialColorRole::Surface); dictionary.set("SystemFillColorSolidAttentionBackground", into_markup_value(Color::from_argb((c.a as f64 * 1.0).round() as u8, c.r, c.g, c.b))); }
     scheme.add_brush(dictionary, "SystemFillColorSolidAttentionBackgroundBrush", MaterialColorRole::Surface, 1.0);
-    { let c = scheme.color(MaterialColorRole::Surface); dictionary.set("SystemFillColorSolidNeutral", into_markup_value(Color::from_argb((c.a as f64 * 1.0).round() as u8, c.r, c.g, c.b))); }
+    { let c = scheme.color(MaterialColorRole::Outline); dictionary.set("SystemFillColorSolidNeutral", into_markup_value(Color::from_argb((c.a as f64 * 1.0).round() as u8, c.r, c.g, c.b))); }
     { let c = scheme.color(MaterialColorRole::Surface); dictionary.set("SystemFillColorSolidNeutralBackground", into_markup_value(Color::from_argb((c.a as f64 * 1.0).round() as u8, c.r, c.g, c.b))); }
     scheme.add_brush(dictionary, "SystemFillColorSolidNeutralBackgroundBrush", MaterialColorRole::Surface, 1.0);
-    scheme.add_brush(dictionary, "SystemFillColorSolidNeutralBrush", MaterialColorRole::Surface, 1.0);
+    scheme.add_brush(dictionary, "SystemFillColorSolidNeutralBrush", MaterialColorRole::Outline, 1.0);
     { let c = scheme.color(MaterialColorRole::Secondary); dictionary.set("SystemFillColorSuccess", into_markup_value(Color::from_argb((c.a as f64 * 1.0).round() as u8, c.r, c.g, c.b))); }
     { let c = scheme.color(MaterialColorRole::SecondaryContainer); dictionary.set("SystemFillColorSuccessBackground", into_markup_value(Color::from_argb((c.a as f64 * 1.0).round() as u8, c.r, c.g, c.b))); }
     scheme.add_brush(dictionary, "SystemFillColorSuccessBackgroundBrush", MaterialColorRole::SecondaryContainer, 1.0);

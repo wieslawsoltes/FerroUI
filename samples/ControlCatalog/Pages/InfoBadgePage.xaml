@@ -21,7 +21,7 @@
     </StackPanel>
 
     <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">The styles of the severities</TextBlock>
-    <Grid Margin="2" ColumnDefinitions="120,60,60,60" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+    <Grid Margin="2" ColumnDefinitions="120,60,60,60" RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="8">
       <TextBlock Grid.Row="0" Text="Attention" />
       <InfoBadge Grid.Row="0" Grid.Column="1" Theme="{DynamicResource AttentionDotInfoBadgeStyle}" HorizontalAlignment="Left" VerticalAlignment="Center" />
       <InfoBadge Grid.Row="0" Grid.Column="2" Theme="{DynamicResource AttentionValueInfoBadgeStyle}" Value="3" HorizontalAlignment="Left" />

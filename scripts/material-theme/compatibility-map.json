@@ -7281,7 +7281,7 @@
   },
   "SystemFillColorAttentionBrush": {
     "kind": "Brush",
-    "role": "Surface",
+    "role": "Primary",
     "opacity": 1
   },
   "SystemFillColorCaution": {
@@ -7326,7 +7326,7 @@
   },
   "SystemFillColorNeutral": {
     "kind": "Color",
-    "role": "Surface",
+    "role": "OnSurfaceVariant",
     "opacity": 1
   },
   "SystemFillColorNeutralBackground": {
@@ -7341,7 +7341,7 @@
   },
   "SystemFillColorNeutralBrush": {
     "kind": "Brush",
-    "role": "Surface",
+    "role": "OnSurfaceVariant",
     "opacity": 1
   },
   "SystemFillColorSolidAttentionBackground": {
@@ -7356,7 +7356,7 @@
   },
   "SystemFillColorSolidNeutral": {
     "kind": "Color",
-    "role": "Surface",
+    "role": "Outline",
     "opacity": 1
   },
   "SystemFillColorSolidNeutralBackground": {
@@ -7371,7 +7371,7 @@
   },
   "SystemFillColorSolidNeutralBrush": {
     "kind": "Brush",
-    "role": "Surface",
+    "role": "Outline",
     "opacity": 1
   },
   "SystemFillColorSuccess": {
