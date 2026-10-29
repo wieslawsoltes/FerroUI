@@ -589,6 +589,12 @@ check("a native control is attached with its host, follows its bounds and visibi
     // It lies over the canvas: the page hit-tests it at its centre.
     assert(await page.evaluate(`document.elementFromPoint(${x + 60}, ${y + 20}) === document.querySelector("#out .ferroui-native-host").firstElementChild`),
         "the native control is not the element at its centre");
+    // Elsewhere the view is its canvas: the host of the native controls has no area of its own, so
+    // that the element picker of the developer tools does not find it over the whole view.
+    assert(await page.evaluate(`(h => h.offsetWidth === 0 && h.offsetHeight === 0)(document.querySelector("#out .ferroui-native-host"))`),
+        "the host of the native controls has an area of its own");
+    assert(await page.evaluate(`(c => { const r = c.getBoundingClientRect(); return document.elementFromPoint(r.right - 4, r.bottom - 4) === c; })(document.querySelector("#out canvas"))`),
+        "the element at a corner of the view away from the native control is not the canvas");
 
     // Resized and moved with the host.
     await page.evaluate(`(themedView.themedViewNativeHost("size", 200, 60), true)`);

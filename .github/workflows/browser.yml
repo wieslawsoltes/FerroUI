@@ -9,6 +9,9 @@ on:
   pull_request:
     paths:
       - 'src/Browser/**'
+      # The Vello backend and the CDP bridge in the browser: checked here, not by every pull request.
+      - 'src/Vello/**'
+      - 'src/FerroUI.DevTools/**'
       - 'samples/ControlCatalog.Browser/**'
       - 'scripts/browser/**'
       - 'scripts/build-browser.sh'

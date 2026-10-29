@@ -22,6 +22,14 @@
 # once for its two sites when a reusable receipt can cover their shared script inputs;
 # custom external tool configuration falls back to full validation in each child.
 #
+# An application in a repository of its own, with this repository as a submodule: set
+# FERROUI_BROWSER_WORKSPACE to the directory of its cargo workspace. The binary package is looked
+# up and built there (with the cargo configuration of the browser target of this repository, which
+# the workspace includes from its .cargo/config.toml or which is passed with --config), the target
+# directory defaults to its target/, and the site can be written below it. The workspace defines the
+# `browser` profile itself (a profile is not inherited from another workspace):
+# scripts/apps/sync-workspace.py copies it there (docs/apps.md).
+#
 # The module is built with the `browser` profile of the workspace (optimised for size, see
 # docs/porting/browser-platform.md, section 18), or with the `dev` profile with --debug.
 #
@@ -105,7 +113,9 @@ fi
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 CRATE="$ROOT/src/Browser/FerroUI.Browser"
-TARGET_DIR="${CARGO_TARGET_DIR:-$ROOT/target}"
+# The cargo workspace of the application: this repository, or that of FERROUI_BROWSER_WORKSPACE.
+WORKSPACE="$(cd "${FERROUI_BROWSER_WORKSPACE:-$ROOT}" && pwd)"
+TARGET_DIR="${CARGO_TARGET_DIR:-$WORKSPACE/target}"
 # Where cargo builds. The threaded mode has its own directory: its standard library and its flags
 # differ, and sharing the directory would rebuild everything at each change of mode.
 BUILD_DIR="$TARGET_DIR"
@@ -171,7 +181,7 @@ if [ -d "$CRATE/examples/$APPLICATION" ]; then
   CARGO_SELECTION=(-p ferroui-browser --example "$APPLICATION")
 else
   KIND="bin"
-  MANIFEST="$(cd "$ROOT" && cargo metadata --no-deps --format-version 1 --locked | node -e '
+  MANIFEST="$(cd "$WORKSPACE" && cargo metadata --no-deps --format-version 1 --locked | node -e '
     let text = ""; process.stdin.on("data", (chunk) => text += chunk).on("end", () => {
       const found = JSON.parse(text).packages.find((p) => p.name === process.argv[1]
         && p.targets.some((t) => t.kind.includes("bin") && t.name === process.argv[1]));
@@ -198,14 +208,15 @@ abspath() {
 }
 [ -n "$OUT" ] || { echo "the output directory is empty" >&2; exit 2; }
 ROOT_REAL="$(cd "$ROOT" && pwd -P)"
+WORKSPACE_REAL="$(cd "$WORKSPACE" && pwd -P)"
 TARGET_REAL="$(abspath "$TARGET_DIR")"
 OUT_REAL="$(abspath "$OUT")"
 case "$OUT_REAL" in
-  /|"$ROOT_REAL"|"$TARGET_REAL"|"$ROOT_REAL/src"*|"$ROOT_REAL/.git"*)
+  /|"$ROOT_REAL"|"$WORKSPACE_REAL"|"$TARGET_REAL"|"$ROOT_REAL/src"*|"$ROOT_REAL/.git"*|"$WORKSPACE_REAL/.git"*)
     echo "refusing to use $OUT_REAL as the output directory" >&2; exit 2;;
 esac
 case "$OUT_REAL/" in
-  "$ROOT_REAL"/*|"$TARGET_REAL"/*) ;;
+  "$ROOT_REAL"/*|"$WORKSPACE_REAL"/*|"$TARGET_REAL"/*) ;;
   *) echo "the output directory $OUT_REAL is outside the repository and the target directory" >&2; exit 2;;
 esac
 OUT="$OUT_REAL"
@@ -309,7 +320,14 @@ fi
 # The messages of the build name the output directories of the build scripts.
 MESSAGES="$(mktemp)"
 trap 'rm -f -- "$MESSAGES"' EXIT
-(cd "$ROOT" && cargo build --locked --target wasm32-unknown-emscripten "${CARGO_SELECTION[@]}" "${FLAGS[@]}" \
+# Outside this repository cargo finds the configuration of the browser target only when the
+# configuration of the application includes it (docs/apps.md); otherwise it is given here. Given
+# twice, its link arguments would be repeated.
+if [ "$WORKSPACE" != "$ROOT" ] \
+    && ! grep -qsF "${ROOT_REAL#"$WORKSPACE_REAL"/}/.cargo/config.toml" "$WORKSPACE/.cargo/config.toml"; then
+  FLAGS+=(--config "$ROOT/.cargo/config.toml")
+fi
+(cd "$WORKSPACE" && cargo build --locked --target wasm32-unknown-emscripten "${CARGO_SELECTION[@]}" "${FLAGS[@]}" \
   --message-format=json-render-diagnostics > "$MESSAGES")
 
 echo "== site"
@@ -358,6 +376,15 @@ cp "$CRATE/dist/ferroui.js" "$CRATE/dist/ferroui.js.map" "$CRATE/dist/storage.js
 # site, next to the host page.
 cp "$CRATE/dist/ferroui-sw.js" "$CRATE/dist/ferroui-sw.js.map" "$OUT"/
 cp "$BUILT/$APPLICATION.js" "$BUILT/$WASM" "$OUT"/
+# The JavaScript modules of `#[wasm_bindgen(inline_js = ..)]` and `module = ..`, which the script of
+# the module imports from snippets/ next to it. wasm-bindgen writes them beside the linker output,
+# in deps/ (cargo copies the module to the profile directory but not its snippets).
+for SNIPPETS in "$BUILT/deps/snippets" "$BUILT/snippets"; do
+  if [ -d "$SNIPPETS" ]; then
+    mkdir -p "$OUT/snippets"
+    cp -R "$SNIPPETS"/. "$OUT/snippets"/
+  fi
+done
 # The loader, through which a host page imports the script of the module: in a site with one module
 # it imports that one; scripts/browser/combine-site.mjs makes a site with both, where it chooses.
 cp "$ROOT/scripts/browser/threads/ferroui-loader.js" "$OUT"/
