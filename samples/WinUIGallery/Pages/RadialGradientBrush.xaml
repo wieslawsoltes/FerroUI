@@ -1,0 +1,4 @@
+<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <Rectangle Width="300" Height="220" HorizontalAlignment="Left"><Rectangle.Fill><RadialGradientBrush Center="50%,50%" GradientOrigin="35%,35%" RadiusX="50%" RadiusY="50%"><GradientStop Color="White" Offset="0"/><GradientStop Color="DodgerBlue" Offset="0.5"/><GradientStop Color="MidnightBlue" Offset="1"/></RadialGradientBrush></Rectangle.Fill></Rectangle>
+</StackPanel>

@@ -1,0 +1,4 @@
+<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <DropDownButton Content="Email"><DropDownButton.Flyout><MenuFlyout><MenuItem Header="Send"/><MenuItem Header="Reply"/><MenuItem Header="Reply All"/></MenuFlyout></DropDownButton.Flyout></DropDownButton>
+</StackPanel>

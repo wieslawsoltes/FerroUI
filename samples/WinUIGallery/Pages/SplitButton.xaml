@@ -1,0 +1,4 @@
+<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <SplitButton x:Name="Primary" Content="Action"><SplitButton.Flyout><Flyout><StackPanel Spacing="8"><Button Content="Alternative one"/><Button Content="Alternative two"/></StackPanel></Flyout></SplitButton.Flyout></SplitButton><TextBlock x:Name="Output" Text="Primary and secondary actions"/>
+</StackPanel>

@@ -1,0 +1,1601 @@
+{
+  "schema_version": 1,
+  "source_repository": "https://github.com/microsoft/WinUI-Gallery",
+  "source_commit": "14061eeac21c38ae99f302edf3d9136d4f652c4c",
+  "license": "MIT; Copyright (c) Microsoft Corporation. All rights reserved. See NOTICE.md.",
+  "metadata_source": "WinUIGallery/SampleSupport/Data/ControlInfoData.json",
+  "metadata_sha256": "334896cc85905de1afe64bdac7717218dc6f60607c132443312d1e9d37b0e27b",
+  "sample_media_sources": [
+    {
+      "path": "WinUIGallery/Samples/Image/ImagePage.xaml",
+      "sha256": "d0997a310e862aae57c19c8c09fea11c54ea9f91c45003cd84a9fe868d317b0f"
+    },
+    {
+      "path": "WinUIGallery/Samples/Image/ImagePage.xaml.cs",
+      "sha256": "e215e8d6e6ee7ba37f2f6b7a41b86a32bad1e4e680bd07b2d5f6c1824e93fe00"
+    },
+    {
+      "path": "WinUIGallery/Samples/FlipView/FlipViewPage.xaml",
+      "sha256": "cc8876b2483cf607b12930361ae0aedb3513e2f848870282eda7207b2a82eb80"
+    },
+    {
+      "path": "WinUIGallery/Samples/FlipView/FlipViewPage.xaml.cs",
+      "sha256": "acc206e79dc09adedfb3c0c4819019824e400740c1dc137447dced4ef2812a62"
+    },
+    {
+      "path": "WinUIGallery/Samples/ConnectedAnimation/ConnectedAnimationPage.xaml",
+      "sha256": "001900e418d2b94c79981cb97e74543a9d2dafe7e11b07173c4b9fc32a94fdb3"
+    },
+    {
+      "path": "WinUIGallery/Samples/ConnectedAnimation/ConnectedAnimationPage.xaml.cs",
+      "sha256": "0d3c4a3d1e17027b2e6ba7c0566326c107b0a1bebd4831ae0141656b2f72c169"
+    }
+  ],
+  "assembly": "WinUIGallery",
+  "uri_scheme": "ferres",
+  "path_policy": "Original filenames and bytes are preserved. Registered source paths explicitly retain Windows case differences as aliases.",
+  "assets": [
+    {
+      "source": "WinUIGallery/Assets/ControlImages/Accessibility.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/Accessibility.png",
+      "sha256": "573689975955096b13fd94be57d45686a79f5223de13ea4e1efac911f2c0cc46",
+      "size_bytes": 7200,
+      "registered_paths": [
+        "Assets/ControlImages/Accessibility.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/Accessibility.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/Acrylic.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/Acrylic.png",
+      "sha256": "4a69d8ad172f4886ea07018900d73348587635da5b3cf8381a4d7cd09b53a273",
+      "size_bytes": 3624,
+      "registered_paths": [
+        "Assets/ControlImages/Acrylic.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/Acrylic.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/AnimatedIcon.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/AnimatedIcon.png",
+      "sha256": "e923cba9501b72a0aedf1491fb3e0df0a270a369872251cf251dee7b64d917a6",
+      "size_bytes": 5566,
+      "registered_paths": [
+        "Assets/ControlImages/AnimatedIcon.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/AnimatedIcon.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/AnimatedVisualPlayer.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/AnimatedVisualPlayer.png",
+      "sha256": "078024264d55c4973a70a238241733efde70262f1619b9b653c486ec8f0424bf",
+      "size_bytes": 6501,
+      "registered_paths": [
+        "Assets/ControlImages/AnimatedVisualPlayer.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/AnimatedVisualPlayer.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/AnimationInterop.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/AnimationInterop.png",
+      "sha256": "714cedcdf5d79960f1c95c796ef1ca4e97c6cd8b11ab1f60faa4d10fba74d612",
+      "size_bytes": 5078,
+      "registered_paths": [
+        "Assets/ControlImages/AnimationInterop.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/AnimationInterop.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/AnnotatedScrollBar.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/AnnotatedScrollBar.png",
+      "sha256": "729d6174120892fe93d59e518267e75009049a0d4dae0e144d02b88257062f2b",
+      "size_bytes": 4540,
+      "registered_paths": [
+        "Assets/ControlImages/AnnotatedScrollbar.png",
+        "Assets/ControlImages/AnnotatedScrollBar.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/AnnotatedScrollbar.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/AppBarButton.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/AppBarButton.png",
+      "sha256": "399cb2565eb0b5f801f2364e2c9196d306d0719264a5e5de1505dee940270ecd",
+      "size_bytes": 1883,
+      "registered_paths": [
+        "Assets/ControlImages/AppBarButton.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/AppBarButton.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/AppBarSeparator.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/AppBarSeparator.png",
+      "sha256": "e3690b26c434fb496abc827d2763d2cc6951a8212eac49475c996d6aa27220d2",
+      "size_bytes": 4373,
+      "registered_paths": [
+        "Assets/ControlImages/AppBarSeparator.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/AppBarSeparator.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/AppBarToggleButton.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/AppBarToggleButton.png",
+      "sha256": "c841384acb696c0330733029eb71654ed17c33994da1c7b9d55f6204bc5421fa",
+      "size_bytes": 5849,
+      "registered_paths": [
+        "Assets/ControlImages/AppBarToggleButton.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/AppBarToggleButton.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/AppNotification.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/AppNotification.png",
+      "sha256": "58d92caf6311d0ac032fadd3491fe99e20d4dbca2020dc5baa4806a056e9c0f7",
+      "size_bytes": 3167,
+      "registered_paths": [
+        "Assets/ControlImages/AppNotification.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/AppNotification.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/AppWindow.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/AppWindow.png",
+      "sha256": "eb02d125462d90835718ff68890cac77ff2f53882615d53f6e61ceaa82a36336",
+      "size_bytes": 2997,
+      "registered_paths": [
+        "Assets/ControlImages/AppWindow.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/AppWindow.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/AutoSuggestBox.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/AutoSuggestBox.png",
+      "sha256": "73636d8329bc7d0bcdd58057c32f7d49cbe0fd04b908c76f9eb52ed8b3199045",
+      "size_bytes": 4952,
+      "registered_paths": [
+        "Assets/ControlImages/AutoSuggestBox.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/AutoSuggestBox.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/BadgeNotification.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/BadgeNotification.png",
+      "sha256": "d717f0cae6c3df26cc73084b914c12205a8e3f63dad103ebf16ab434791c9226",
+      "size_bytes": 4518,
+      "registered_paths": [
+        "Assets/ControlImages/BadgeNotification.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/BadgeNotification.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/Border.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/Border.png",
+      "sha256": "d414225ba0bd1a81bd6649b9026097eabb9c9a67bcfb325939ced61be604ecb9",
+      "size_bytes": 6590,
+      "registered_paths": [
+        "Assets/ControlImages/Border.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/Border.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/BreadcrumbBar.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/BreadcrumbBar.png",
+      "sha256": "adc73b9914bcda9c142e4ab60056a66e48b66c2b9b8f349f2ff38f46d656d81d",
+      "size_bytes": 4256,
+      "registered_paths": [
+        "Assets/ControlImages/BreadcrumbBar.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/BreadcrumbBar.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/Button.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/Button.png",
+      "sha256": "b63b420d9ff18cb31eaa6e82ef7d9cf3175fe97ebb71b0549fa7956ef7800fc4",
+      "size_bytes": 4240,
+      "registered_paths": [
+        "Assets/ControlImages/Button.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/Button.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/CalendarDatePicker.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/CalendarDatePicker.png",
+      "sha256": "79e9969b9e061c90af68bf33d55e06e91fe7161ff0e2b83ae0a56a05f42a59c8",
+      "size_bytes": 6117,
+      "registered_paths": [
+        "Assets/ControlImages/CalendarDatePicker.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/CalendarDatePicker.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/CalendarView.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/CalendarView.png",
+      "sha256": "0d0c1a8f80cb46869bf740428d751829c6a48f5ee455be1556b639c347710c9c",
+      "size_bytes": 5120,
+      "registered_paths": [
+        "Assets/ControlImages/CalendarView.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/CalendarView.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/Canvas.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/Canvas.png",
+      "sha256": "68c1c467062436415e86fedd97702de9fe37a85ff75483f23cfd91b48fa6de58",
+      "size_bytes": 4699,
+      "registered_paths": [
+        "Assets/ControlImages/Canvas.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/Canvas.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/CaptureElement.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/CaptureElement.png",
+      "sha256": "b0fc23e3dce23ccf3eb34f4e7dd4eb189a0c1cf2bb5ea889f9b5e72b064c7ac0",
+      "size_bytes": 4847,
+      "registered_paths": [
+        "Assets/ControlImages/CaptureElement.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/CaptureElement.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/Chart.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/Chart.png",
+      "sha256": "571a4a6f1672e0827337b988363cb9ba7fcb137c29fc6085ade5e590109a1fd2",
+      "size_bytes": 3974,
+      "registered_paths": [
+        "Assets/ControlImages/Chart.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/Chart.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/Checkbox.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/Checkbox.png",
+      "sha256": "ed3669a4db8bf52cf4ac9a16b103feec88a43886b31ed436c8a6caf3a1fcd462",
+      "size_bytes": 5919,
+      "registered_paths": [
+        "Assets/ControlImages/CheckBox.png",
+        "Assets/ControlImages/Checkbox.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/CheckBox.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/Clipboard.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/Clipboard.png",
+      "sha256": "f1c9a6e709e0f7fcaf048f06074dbd7d2addcdc7576e82efe618632f433ee799",
+      "size_bytes": 6269,
+      "registered_paths": [
+        "Assets/ControlImages/Clipboard.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/Clipboard.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/CodeTagIcon.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/CodeTagIcon.png",
+      "sha256": "a1da91090b4eed07714a3327464c1b3f133848bb78615eb3ed95e3125e97cc33",
+      "size_bytes": 6179,
+      "registered_paths": [
+        "Assets/ControlImages/CodeTagIcon.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/CodeTagIcon.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/ColorPaletteResources.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/ColorPaletteResources.png",
+      "sha256": "36ed0ec3997cf2d54fa0e7dea70b245cab116f2099f10faa4ae3d0b0818188ba",
+      "size_bytes": 4739,
+      "registered_paths": [
+        "Assets/ControlImages/ColorPaletteResources.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/ColorPaletteResources.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/ColorPicker.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/ColorPicker.png",
+      "sha256": "5ca1a0d035248f4017856e99cc73c30a348519763348cad22d3a16a96754e6f6",
+      "size_bytes": 8621,
+      "registered_paths": [
+        "Assets/ControlImages/ColorPicker.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/ColorPicker.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/ComboBox.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/ComboBox.png",
+      "sha256": "3cc896b03cb784183a33c3b3575c373d35f0738d1264e0c6a40a19755ef5b8e4",
+      "size_bytes": 5165,
+      "registered_paths": [
+        "Assets/ControlImages/ComboBox.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/ComboBox.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/CommandBar.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/CommandBar.png",
+      "sha256": "199ada4b3d52a3dfffd947e51084a92af60e9fdd76858e5e9224f22badaabbcb",
+      "size_bytes": 4047,
+      "registered_paths": [
+        "Assets/ControlImages/CommandBar.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/CommandBar.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/CommandBarFlyout.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/CommandBarFlyout.png",
+      "sha256": "2474a5fd0cb873cc4e3b3a9aa654636fbfbf3cb8ea68ad9ab3e5ac00db0d4bab",
+      "size_bytes": 5658,
+      "registered_paths": [
+        "Assets/ControlImages/CommandBarFlyout.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/CommandBarFlyout.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/CompactSizing.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/CompactSizing.png",
+      "sha256": "6be5ba0960cd4e98e3d0ba53bc0d9ac092a46d44a566ff0e9ee24dceb64ff1c0",
+      "size_bytes": 5657,
+      "registered_paths": [
+        "Assets/ControlImages/CompactSizing.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/CompactSizing.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/ConnectedAnimation.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/ConnectedAnimation.png",
+      "sha256": "d42398c4701ad259d7ea17ff41ae5a66b938433e43fca36e5731a23ed4106bb8",
+      "size_bytes": 4882,
+      "registered_paths": [
+        "Assets/ControlImages/ConnectedAnimation.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/ConnectedAnimation.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/ContentDialog.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/ContentDialog.png",
+      "sha256": "2d153b012c510de534bf102177105f293904081668e9bced325286227e66fad5",
+      "size_bytes": 3936,
+      "registered_paths": [
+        "Assets/ControlImages/ContentDialog.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/ContentDialog.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/ContentIsland.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/ContentIsland.png",
+      "sha256": "d634cfd466344b4209a2276a82eba94202c421f37b7fb23ecc7c847bf96ca9df",
+      "size_bytes": 4218,
+      "registered_paths": [
+        "Assets/ControlImages/ContentIsland.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/ContentIsland.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/CustomControls.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/CustomControls.png",
+      "sha256": "b8ecf33335bb5098e2af4578f751afe4d6ec643cc5fc0a012fbf3cc0e72982c0",
+      "size_bytes": 5105,
+      "registered_paths": [
+        "Assets/ControlImages/CustomControls.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/CustomControls.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/DataGrid.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/DataGrid.png",
+      "sha256": "b8acd3f871e80df72fc54f67e539dfd4de39fb00744e0a387c8b22b35c6ee8fb",
+      "size_bytes": 4108,
+      "registered_paths": [
+        "Assets/ControlImages/DataGrid.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/DataGrid.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/DatePicker.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/DatePicker.png",
+      "sha256": "4fa0fe462d1059b390438309f28e64d7818d3796e5b0686994e7ac730bb773d3",
+      "size_bytes": 4565,
+      "registered_paths": [
+        "Assets/ControlImages/DatePicker.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/DatePicker.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/DropDownButton.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/DropDownButton.png",
+      "sha256": "7e8961e15e552e31d260e31c122abf64648228b5104fee29acaa7417cb99ac37",
+      "size_bytes": 4414,
+      "registered_paths": [
+        "Assets/ControlImages/DropDownButton.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/DropDownButton.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/EasingFunction.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/EasingFunction.png",
+      "sha256": "962b5b1d6ced633b53b626fee9f9d22c33f8fd61a08d0c679f3d5bcf97540eb9",
+      "size_bytes": 5286,
+      "registered_paths": [
+        "Assets/ControlImages/EasingFunction.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/EasingFunction.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/Expander.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/Expander.png",
+      "sha256": "1bb445f349529b91e7c9987b9a9545874b4f0f517fc58d65f79bcea460271ab8",
+      "size_bytes": 5008,
+      "registered_paths": [
+        "Assets/ControlImages/Expander.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/Expander.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/FlipView.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/FlipView.png",
+      "sha256": "465016ccf5382d1961ac644c7d22ad7463c59e8b9f7d83f86f16ed207809f549",
+      "size_bytes": 5097,
+      "registered_paths": [
+        "Assets/ControlImages/FlipView.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/FlipView.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/Flyout.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/Flyout.png",
+      "sha256": "40ac5312ad2bdbca0ec698c66ff85861759b2b1bf3b2c8574aaafec89644b96e",
+      "size_bytes": 4407,
+      "registered_paths": [
+        "Assets/ControlImages/Flyout.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/Flyout.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/Grid.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/Grid.png",
+      "sha256": "3b25f39e7493af1d2a69328649b57bca0dec15532f853f162cf35cdbefea7fbc",
+      "size_bytes": 5129,
+      "registered_paths": [
+        "Assets/ControlImages/Grid.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/Grid.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/GridView.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/GridView.png",
+      "sha256": "d2f44f549802365b9f61960c5beb3513c4e29ab73ac5bfa9228a31154b206422",
+      "size_bytes": 3313,
+      "registered_paths": [
+        "Assets/ControlImages/GridView.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/GridView.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/HyperlinkButton.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/HyperlinkButton.png",
+      "sha256": "d8e20146f132d8f8f8358e539f47e33a28b0a1e2821e77f30894ac9c9f6d948b",
+      "size_bytes": 4900,
+      "registered_paths": [
+        "Assets/ControlImages/HyperlinkButton.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/HyperlinkButton.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/IconElement.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/IconElement.png",
+      "sha256": "caa59a8c78c9e2a89cf8ec90de1b7bbaa333ee2d0fe061d3dea7b273dbc124c7",
+      "size_bytes": 6371,
+      "registered_paths": [
+        "Assets/ControlImages/IconElement.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/IconElement.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/Image.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/Image.png",
+      "sha256": "0a511a7e329aa9e9363787e807452b84cdf6adc360216f1857acb602da1f2eb2",
+      "size_bytes": 5082,
+      "registered_paths": [
+        "Assets/ControlImages/Image.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/Image.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/ImplicitTransition.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/ImplicitTransition.png",
+      "sha256": "9c3075ad400f0854ea9a79f398dc6a7e32530b2490e32afaa546427dae2e9411",
+      "size_bytes": 3064,
+      "registered_paths": [
+        "Assets/ControlImages/ImplicitTransition.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/ImplicitTransition.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/InfoBadge.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/InfoBadge.png",
+      "sha256": "449b4d8a803a262ebd40850c7e991d2733b32517e1a9b15a90c0eca222d4c075",
+      "size_bytes": 7375,
+      "registered_paths": [
+        "Assets/ControlImages/InfoBadge.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/InfoBadge.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/InfoBar.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/InfoBar.png",
+      "sha256": "68b331f2dda5b14f0b3c9d6eeeea0de989310c4bef6ecd02ea3c019eef482498",
+      "size_bytes": 4795,
+      "registered_paths": [
+        "Assets/ControlImages/InfoBar.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/InfoBar.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/InkToolbar.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/InkToolbar.png",
+      "sha256": "6b0228674739095beeead2ebb70213da397f4ff4cdcab9a8a17681eb8b167951",
+      "size_bytes": 4589,
+      "registered_paths": [
+        "Assets/ControlImages/InkToolbar.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/InkToolbar.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/ItemsView.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/ItemsView.png",
+      "sha256": "cb6e288bca71ca4f087ae3cf9e5f4bc2ee8ab4acd01246962a25e5c590cbca76",
+      "size_bytes": 4715,
+      "registered_paths": [
+        "Assets/ControlImages/ItemsView.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/ItemsView.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/JumpList.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/JumpList.png",
+      "sha256": "373ff339ba6d8cbb44e43e269470087dc13a52a61c2f72b2e7cd0004ae5b0123",
+      "size_bytes": 5201,
+      "registered_paths": [
+        "Assets/ControlImages/JumpList.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/JumpList.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/LayoutPanel.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/LayoutPanel.png",
+      "sha256": "d9817c978ea097370c37b973d571e24ebede01dfd55db6b7c718c0e60d02bbcc",
+      "size_bytes": 3637,
+      "registered_paths": [
+        "Assets/ControlImages/LayoutPanel.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/LayoutPanel.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/Line.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/Line.png",
+      "sha256": "e6326a3be9238caa8bed865b39389c5a708887d2dc10e0b3e2069aece036bc75",
+      "size_bytes": 5015,
+      "registered_paths": [
+        "Assets/ControlImages/Line.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/Line.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/ListView.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/ListView.png",
+      "sha256": "015f4f86b6c5f56be4b04d6f26b2f3a06f7e33f6f1757fe2519732751b8745cc",
+      "size_bytes": 5506,
+      "registered_paths": [
+        "Assets/ControlImages/ListView.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/ListView.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/MapControl.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/MapControl.png",
+      "sha256": "c623e98aa5da1bba67cfaf207016b69438d456e4281e3b935a11f47647664ce9",
+      "size_bytes": 5901,
+      "registered_paths": [
+        "Assets/ControlImages/MapControl.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/MapControl.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/MediaPlayerElement.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/MediaPlayerElement.png",
+      "sha256": "7803efd958c4ed3f8c2f7864f23ce202bdb86df83036c6d7ce98cb8565ac21a7",
+      "size_bytes": 3886,
+      "registered_paths": [
+        "Assets/ControlImages/MediaPlayerElement.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/MediaPlayerElement.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/MenuBar.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/MenuBar.png",
+      "sha256": "c8b7c4866e6cd35af1ab3ace8aa63fce4de734e8661da2d12d2d114a08f75c75",
+      "size_bytes": 4122,
+      "registered_paths": [
+        "Assets/ControlImages/MenuBar.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/MenuBar.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/MenuFlyout.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/MenuFlyout.png",
+      "sha256": "b76f8a0efbaf4775eba83b70b03141328a60c493bec281a2c6c8d238b93546b8",
+      "size_bytes": 5227,
+      "registered_paths": [
+        "Assets/ControlImages/MenuFlyout.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/MenuFlyout.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/NavigationView.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/NavigationView.png",
+      "sha256": "490dc87faf8a8ba0b9793ce7e7237cc1eac15142ed85a222735e64db481e5eab",
+      "size_bytes": 5022,
+      "registered_paths": [
+        "Assets/ControlImages/NavigationView.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/NavigationView.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/NumberBox.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/NumberBox.png",
+      "sha256": "fc53d55b453f7f0d56222812e8edf3fb3f72247a7ed8a1bf116e18f920665200",
+      "size_bytes": 5857,
+      "registered_paths": [
+        "Assets/ControlImages/NumberBox.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/NumberBox.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/PageTransition.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/PageTransition.png",
+      "sha256": "8911cec3180e1a9335a5a2e02ff84c4bdc3aec7893e29430301412685ba0d46a",
+      "size_bytes": 4561,
+      "registered_paths": [
+        "Assets/ControlImages/PageTransition.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/PageTransition.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/PagerControl.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/PagerControl.png",
+      "sha256": "f0f2bb07ad7feffc2ceab06929e27962959316f46f06166923ce78ce9f3170f7",
+      "size_bytes": 4775,
+      "registered_paths": [
+        "Assets/ControlImages/PagerControl.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/PagerControl.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/ParallaxView.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/ParallaxView.png",
+      "sha256": "2e42d24c5938d23d101c764d2e3d1dd41dfddeb496588e21eb00a8384362f00d",
+      "size_bytes": 3631,
+      "registered_paths": [
+        "Assets/ControlImages/ParallaxView.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/ParallaxView.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/PasswordBox.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/PasswordBox.png",
+      "sha256": "f734a547b966801d34a2e282ec2f0def2d189794124f1373035ce4e542a8944e",
+      "size_bytes": 4861,
+      "registered_paths": [
+        "Assets/ControlImages/PasswordBox.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/PasswordBox.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/PersonPicture.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/PersonPicture.png",
+      "sha256": "5767adfa0573d77737ad54a60d1e0f53237f18f1d5fd1a5ceef95255f03f9bb9",
+      "size_bytes": 6534,
+      "registered_paths": [
+        "Assets/ControlImages/PersonPicture.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/PersonPicture.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/PipsPager.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/PipsPager.png",
+      "sha256": "6f7d415b63e1aceb7d35d02e720645ba3fd08278632c6cf6cc5323a2fedc51f6",
+      "size_bytes": 4829,
+      "registered_paths": [
+        "Assets/ControlImages/PipsPager.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/PipsPager.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/Pivot.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/Pivot.png",
+      "sha256": "d1d76de9ba77c854bac73b05931268219127c7f2afd8958f9e4a407a88e8f90c",
+      "size_bytes": 3374,
+      "registered_paths": [
+        "Assets/ControlImages/Pivot.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/Pivot.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/Popup.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/Popup.png",
+      "sha256": "991c7d5920978b12843a2eebd154bfda4160000f9fbf7f827f03de7dbc841a43",
+      "size_bytes": 3595,
+      "registered_paths": [
+        "Assets/ControlImages/Popup.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/Popup.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/ProgressBar.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/ProgressBar.png",
+      "sha256": "109e2733d62e816ffd288942a194aca5ff020626513b75b46411bbbaa0c54c93",
+      "size_bytes": 2986,
+      "registered_paths": [
+        "Assets/ControlImages/ProgressBar.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/ProgressBar.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/ProgressRing.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/ProgressRing.png",
+      "sha256": "1b283ca16dc37b52dfbeb2a914d1b38a148569a131368cc300ffed41a43381ab",
+      "size_bytes": 4713,
+      "registered_paths": [
+        "Assets/ControlImages/ProgressRing.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/ProgressRing.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/PullToRefresh.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/PullToRefresh.png",
+      "sha256": "427030a03b16935d3526a4442d867d7e9a4e243174bdb0f0385794625fea19e6",
+      "size_bytes": 5290,
+      "registered_paths": [
+        "Assets/ControlImages/PullToRefresh.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/PullToRefresh.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/RadioButton.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/RadioButton.png",
+      "sha256": "66123e2c86e3e30581dcfd39b1a2427b009bae5eda790680cd53282bef25af25",
+      "size_bytes": 6563,
+      "registered_paths": [
+        "Assets/ControlImages/RadioButton.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/RadioButton.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/RatingControl.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/RatingControl.png",
+      "sha256": "8b471f8147381b0dca1063fccf1c4cb68f3ba18de2a0e5220994912b4e023113",
+      "size_bytes": 4969,
+      "registered_paths": [
+        "Assets/ControlImages/RatingControl.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/RatingControl.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/RelativePanel.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/RelativePanel.png",
+      "sha256": "4194fe328dca4b62d72e9881bad6c8e2e628d2185bd3339c8dc7dd48e88d9c2a",
+      "size_bytes": 3256,
+      "registered_paths": [
+        "Assets/ControlImages/RelativePanel.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/RelativePanel.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/RepeatButton.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/RepeatButton.png",
+      "sha256": "dba9882965282e0fca687ff13d511534099a839990d45df9bb2961099b34635d",
+      "size_bytes": 4881,
+      "registered_paths": [
+        "Assets/ControlImages/RepeatButton.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/RepeatButton.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/RichEditBox.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/RichEditBox.png",
+      "sha256": "c79e4e7654c6b6985dae469304d4627f902fa50c46db0d8622321e55679660d9",
+      "size_bytes": 5852,
+      "registered_paths": [
+        "Assets/ControlImages/RichEditBox.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/RichEditBox.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/RichTextBlock.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/RichTextBlock.png",
+      "sha256": "1b44ddf26a404b52494aea4fb20f562004a979c912906615dee38fd35314386b",
+      "size_bytes": 5635,
+      "registered_paths": [
+        "Assets/ControlImages/RichTextBlock.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/RichTextBlock.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/ScratchPad.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/ScratchPad.png",
+      "sha256": "7bbc56f4f4bb37553458049c38b5359592fdaacedf9fd2101243f69281a5a044",
+      "size_bytes": 7663,
+      "registered_paths": [
+        "Assets/ControlImages/ScratchPad.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/ScratchPad.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/ScrollView.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/ScrollView.png",
+      "sha256": "39ea6c68ba379a2bcfa97f1306e7396d0ace2672ead8f3f60b07b7c9e230c0d9",
+      "size_bytes": 5694,
+      "registered_paths": [
+        "Assets/ControlImages/ScrollView.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/ScrollView.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/ScrollViewer.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/ScrollViewer.png",
+      "sha256": "39ea6c68ba379a2bcfa97f1306e7396d0ace2672ead8f3f60b07b7c9e230c0d9",
+      "size_bytes": 5694,
+      "registered_paths": [
+        "Assets/ControlImages/ScrollViewer.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/ScrollViewer.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/SemanticZoom.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/SemanticZoom.png",
+      "sha256": "7d4811bb5f0fc7ee8bfc21054d2a9aed24fe79020d6888fd4348328d445d5ffa",
+      "size_bytes": 4565,
+      "registered_paths": [
+        "Assets/ControlImages/SemanticZoom.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/SemanticZoom.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/Shape.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/Shape.png",
+      "sha256": "fe0b4d6705bc68ec56cb56716c181a3035a1e2b8c8ebadee6c6d055bae8c9e4e",
+      "size_bytes": 5401,
+      "registered_paths": [
+        "Assets/ControlImages/Shape.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/Shape.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/Slider.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/Slider.png",
+      "sha256": "cecf236181df2fd3b729180c9abeb6acb5d71dfeb5e503bc56d39a3bebc0283e",
+      "size_bytes": 2902,
+      "registered_paths": [
+        "Assets/ControlImages/Slider.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/Slider.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/Sound.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/Sound.png",
+      "sha256": "142f236ecd92440ad685176256422bfd977d168df561bd03711e2209aff9a879",
+      "size_bytes": 4488,
+      "registered_paths": [
+        "Assets/ControlImages/Sound.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/Sound.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/SplitButton.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/SplitButton.png",
+      "sha256": "0c63677e75033d7dac31d34e52caa670f904d6bef037d54cc75e0a3c030c16c7",
+      "size_bytes": 4541,
+      "registered_paths": [
+        "Assets/ControlImages/SplitButton.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/SplitButton.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/SplitView.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/SplitView.png",
+      "sha256": "582c896f8b6d8049eb213190da5cb4fa77d9d2031d1ea7f16a7087ed8178ebee",
+      "size_bytes": 4141,
+      "registered_paths": [
+        "Assets/ControlImages/SplitView.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/SplitView.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/StackPanel.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/StackPanel.png",
+      "sha256": "9cd682354bc22ecfee16c6270cb1ddca6269b12378357d3f03b581f801ecfbe6",
+      "size_bytes": 4132,
+      "registered_paths": [
+        "Assets/ControlImages/StackPanel.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/StackPanel.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/StoragePickers.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/StoragePickers.png",
+      "sha256": "9fd31c45c7b4423c23e723a76dab68df8f3481c68a62dbeea9170d340f66c3cf",
+      "size_bytes": 5469,
+      "registered_paths": [
+        "Assets/ControlImages/StoragePickers.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/StoragePickers.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/SwipeControl.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/SwipeControl.png",
+      "sha256": "ceae02f3914b53d2e860f881adc471ca45a74021d7d214add46107fd6d4b6b3f",
+      "size_bytes": 5173,
+      "registered_paths": [
+        "Assets/ControlImages/SwipeControl.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/SwipeControl.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/TabView.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/TabView.png",
+      "sha256": "56c00588e1821bde2dcef0587c7eb2866ab315896c697e2843ac17b82d340c8f",
+      "size_bytes": 4388,
+      "registered_paths": [
+        "Assets/ControlImages/TabView.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/TabView.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/TeachingTip.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/TeachingTip.png",
+      "sha256": "d7d6a1fb77eeac7ffaf818b1881c060caea479045badd008f001fcde0725aeee",
+      "size_bytes": 4221,
+      "registered_paths": [
+        "Assets/ControlImages/TeachingTip.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/TeachingTip.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/TextBlock.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/TextBlock.png",
+      "sha256": "2b835b5c2a347eb6c8eaa68e6a2238ebd7a06ba46304660b453cd6445276e5ab",
+      "size_bytes": 5421,
+      "registered_paths": [
+        "Assets/ControlImages/TextBlock.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/TextBlock.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/TextBox.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/TextBox.png",
+      "sha256": "835f0becba9d6d1eddf41258246719e28fcb5aadb12bfef45de2bb7ddb3e1be4",
+      "size_bytes": 5353,
+      "registered_paths": [
+        "Assets/ControlImages/TextBox.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/TextBox.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/ThemeShadow.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/ThemeShadow.png",
+      "sha256": "c29125f5d45f00285184c0e832cc3d9c6cec705cba9422f4a19a73b0ba09805b",
+      "size_bytes": 3131,
+      "registered_paths": [
+        "Assets/ControlImages/ThemeShadow.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/ThemeShadow.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/ThemeTransition.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/ThemeTransition.png",
+      "sha256": "022dc04241ac3954fe83740613312ac51ceaacbfcea3c489528119f9cbfed9a9",
+      "size_bytes": 3377,
+      "registered_paths": [
+        "Assets/ControlImages/ThemeTransition.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/ThemeTransition.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/TimePicker.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/TimePicker.png",
+      "sha256": "f3fe48f4e2521bfe1768addb763b277245a276e0589209c641a86d21453c55bb",
+      "size_bytes": 4709,
+      "registered_paths": [
+        "Assets/ControlImages/TimePicker.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/TimePicker.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/TitleBar.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/TitleBar.png",
+      "sha256": "2de1dd97224ec56959ff7807496311e9a0796af4ce6720f00bfbcecf1fa7ab11",
+      "size_bytes": 4559,
+      "registered_paths": [
+        "Assets/ControlImages/TitleBar.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/TitleBar.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/ToggleButton.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/ToggleButton.png",
+      "sha256": "3675b31c430a2505e68cdb000c938d47b97886f88b7690a06edd162746f4ceb8",
+      "size_bytes": 3627,
+      "registered_paths": [
+        "Assets/ControlImages/ToggleButton.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/ToggleButton.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/ToggleSplitButton.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/ToggleSplitButton.png",
+      "sha256": "4d8ab88312f7da76dd642b803a0d96ca4680d89c01d0b12b3e3f7489a4a093d7",
+      "size_bytes": 4291,
+      "registered_paths": [
+        "Assets/ControlImages/ToggleSplitButton.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/ToggleSplitButton.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/ToggleSwitch.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/ToggleSwitch.png",
+      "sha256": "db1756654847dfb2c57bb3f1c6fba1caba3f34780a8fbfc7b69a75efb5659552",
+      "size_bytes": 4813,
+      "registered_paths": [
+        "Assets/ControlImages/ToggleSwitch.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/ToggleSwitch.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/ToolTip.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/ToolTip.png",
+      "sha256": "b547953d5b073e01fcd50efdce1b55cb00571935f5d5a387dd91cb3edad80f6d",
+      "size_bytes": 4026,
+      "registered_paths": [
+        "Assets/ControlImages/ToolTip.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/ToolTip.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/TreeView.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/TreeView.png",
+      "sha256": "cfcb565430674d39d8eda9f0deff7d93e292d10d1db683c3fe4a003745e909c8",
+      "size_bytes": 3650,
+      "registered_paths": [
+        "Assets/ControlImages/TreeView.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/TreeView.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/VariableSizedWrapGrid.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/VariableSizedWrapGrid.png",
+      "sha256": "8e8923c8a38e593f780da5a3409c53e6dcad96f3dbde4f737d3ea919b09eac70",
+      "size_bytes": 4403,
+      "registered_paths": [
+        "Assets/ControlImages/VariableSizedWrapGrid.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/VariableSizedWrapGrid.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/Viewbox.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/Viewbox.png",
+      "sha256": "4061fdf243784670f1d5ef1f6416f9668a40c80fc199b7ea79f494ab23b64595",
+      "size_bytes": 5435,
+      "registered_paths": [
+        "Assets/ControlImages/Viewbox.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/Viewbox.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/WebView.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/WebView.png",
+      "sha256": "d381c5da0aed7078073621ad216e0fcf9cefe80da6fea011561a93fce5e1e9a6",
+      "size_bytes": 8376,
+      "registered_paths": [
+        "Assets/ControlImages/WebView.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/WebView.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/Windowing.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/Windowing.png",
+      "sha256": "60ac153191e22954667188abb96ff8af3f777440f606bc6b10ff9dc3a0b1dd28",
+      "size_bytes": 4646,
+      "registered_paths": [
+        "Assets/ControlImages/Windowing.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/Windowing.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/ControlImages/WrapPanel.png",
+      "path": "samples/WinUIGallery/Assets/ControlImages/WrapPanel.png",
+      "sha256": "a0398fa774315d9f5a7c884e1153f8a6dd0b66dca8f9fb5b1001e226805a215d",
+      "size_bytes": 4478,
+      "registered_paths": [
+        "Assets/ControlImages/WrapPanel.png"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/ControlImages/WrapPanel.png"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/LandscapeImage1.jpg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/LandscapeImage1.jpg",
+      "sha256": "e95f378499f06d2ec43b6633b8f81971961d15700f26566096d9b446863fc188",
+      "size_bytes": 84659,
+      "registered_paths": [
+        "Assets/SampleMedia/LandscapeImage1.jpg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/LandscapeImage1.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/LandscapeImage10.jpg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/LandscapeImage10.jpg",
+      "sha256": "a83e0ee6399f80f0172004c233ffe92b3332df82f1015e826de7a9a28386a418",
+      "size_bytes": 189420,
+      "registered_paths": [
+        "Assets/SampleMedia/LandscapeImage10.jpg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/LandscapeImage10.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/LandscapeImage11.jpg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/LandscapeImage11.jpg",
+      "sha256": "ef425fc738141b0b90e432a8e170d1b0ba5461f1e308714cab8baacbc1625970",
+      "size_bytes": 26070,
+      "registered_paths": [
+        "Assets/SampleMedia/LandscapeImage11.jpg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/LandscapeImage11.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/LandscapeImage12.jpg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/LandscapeImage12.jpg",
+      "sha256": "ec739a0ef01e4bd5eba38e77748453e0f1eda09061686b281cfe69c1d8ac4626",
+      "size_bytes": 38555,
+      "registered_paths": [
+        "Assets/SampleMedia/LandscapeImage12.jpg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/LandscapeImage12.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/LandscapeImage13.jpg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/LandscapeImage13.jpg",
+      "sha256": "f0a67632f9868fd790d3790370a435a4fcbbce5619c7389b9aa9dc720a030a14",
+      "size_bytes": 43455,
+      "registered_paths": [
+        "Assets/SampleMedia/LandscapeImage13.jpg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/LandscapeImage13.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/LandscapeImage2.jpg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/LandscapeImage2.jpg",
+      "sha256": "b254e87421c16d866af1e011e4c33d757797ac033c21f1d7a7ba8f2fcf59dc7e",
+      "size_bytes": 67449,
+      "registered_paths": [
+        "Assets/SampleMedia/LandscapeImage2.jpg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/LandscapeImage2.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/LandscapeImage3.jpg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/LandscapeImage3.jpg",
+      "sha256": "8bd801d195e98f7a98794aef74e36d84f6e8d49446925eb4c62e034a9c6bb540",
+      "size_bytes": 83628,
+      "registered_paths": [
+        "Assets/SampleMedia/LandscapeImage3.jpg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/LandscapeImage3.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/LandscapeImage4.jpg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/LandscapeImage4.jpg",
+      "sha256": "974b7459835f9936c1d82a999891ec223ef331e8c0a380935f2a6d49eabc2fc3",
+      "size_bytes": 176812,
+      "registered_paths": [
+        "Assets/SampleMedia/LandscapeImage4.jpg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/LandscapeImage4.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/LandscapeImage5.jpg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/LandscapeImage5.jpg",
+      "sha256": "6e5095b4dfaadbaee1f11de08499c401d9298adc7f688f127aa788959bf7a2c5",
+      "size_bytes": 127560,
+      "registered_paths": [
+        "Assets/SampleMedia/LandscapeImage5.jpg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/LandscapeImage5.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/LandscapeImage6.jpg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/LandscapeImage6.jpg",
+      "sha256": "5b865660a933383b3fe3689db03c846b2f84886d8f7197a70547336d4fdf6431",
+      "size_bytes": 117162,
+      "registered_paths": [
+        "Assets/SampleMedia/LandscapeImage6.jpg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/LandscapeImage6.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/LandscapeImage7.jpg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/LandscapeImage7.jpg",
+      "sha256": "d2afe0d8cfce8ba794987c69cf1085f5c02a2a4bdb4337b860c53649fbfe6e77",
+      "size_bytes": 137565,
+      "registered_paths": [
+        "Assets/SampleMedia/LandscapeImage7.jpg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/LandscapeImage7.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/LandscapeImage8.jpg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/LandscapeImage8.jpg",
+      "sha256": "c581c21ab8523e0a48fa463f1df6b9bbc5007d6b2b4321cbf6e9f5bab5c30b36",
+      "size_bytes": 157194,
+      "registered_paths": [
+        "Assets/SampleMedia/LandscapeImage8.jpg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/LandscapeImage8.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/LandscapeImage9.jpg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/LandscapeImage9.jpg",
+      "sha256": "6ee8e036511b2f61d2d37284f23dab8a7ce7125206f3777d70c7daaa09df814b",
+      "size_bytes": 55405,
+      "registered_paths": [
+        "Assets/SampleMedia/LandscapeImage9.jpg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/LandscapeImage9.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/MirrorPCConsent.svg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/MirrorPCConsent.svg",
+      "sha256": "7aabf9a35b9770f018ad9703a553147600982d3e333f345c760bac34252c09b0",
+      "size_bytes": 28578,
+      "registered_paths": [
+        "Assets/SampleMedia/MirrorPCConsent.svg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/MirrorPCConsent.svg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/animated.gif",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/animated.gif",
+      "sha256": "77ba66bbf56e2e94eb285d00d2f31ee03e57f340c68fb82fb0d49f2ee83b79f9",
+      "size_bytes": 14871,
+      "registered_paths": [
+        "Assets/SampleMedia/animated.gif"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/animated.gif"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/cliff.jpg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/cliff.jpg",
+      "sha256": "89a8ebd17bba8842568bb2647943c3f10a703ecb46cc9046f4165932d5a1139a",
+      "size_bytes": 162111,
+      "registered_paths": [
+        "Assets/SampleMedia/cliff.jpg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/cliff.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/grapes.jpg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/grapes.jpg",
+      "sha256": "b8fb9d46903e1d27b59649537eb31b9a0975765305de9731f9062d2d5de9c4ee",
+      "size_bytes": 125029,
+      "registered_paths": [
+        "Assets/SampleMedia/grapes.jpg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/grapes.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/ninegrid.gif",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/ninegrid.gif",
+      "sha256": "22ee861a1427d37f8c5e1997ae4fc0e7523eaa31483d1133f6763a35c0a56500",
+      "size_bytes": 1419,
+      "registered_paths": [
+        "Assets/SampleMedia/ninegrid.gif"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/ninegrid.gif"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/rainier.jpg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/rainier.jpg",
+      "sha256": "e592c58f29a7cea37e338c364a15d0801e490511c5239a1f99da84f632cc2503",
+      "size_bytes": 736388,
+      "registered_paths": [
+        "Assets/SampleMedia/rainier.jpg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/rainier.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/sunset.jpg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/sunset.jpg",
+      "sha256": "dde8ca43fdedd3d1746cf29c9d1a3d2b428066ea75c5a87f3d6eeddbd1f930aa",
+      "size_bytes": 96309,
+      "registered_paths": [
+        "Assets/SampleMedia/sunset.jpg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/sunset.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/treetops.jpg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/treetops.jpg",
+      "sha256": "c81ff5da7162cc0e80400859207b7a7f08e6322e02ca835e7ed327b1e1b6a0f0",
+      "size_bytes": 61815,
+      "registered_paths": [
+        "Assets/SampleMedia/treetops.jpg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/treetops.jpg"
+      ]
+    },
+    {
+      "source": "WinUIGallery/Assets/SampleMedia/valley.jpg",
+      "path": "samples/WinUIGallery/Assets/SampleMedia/valley.jpg",
+      "sha256": "4ad3c0819ccaa45322319a085c3a3d314c683d26dd53e1378c5210dacbe7432e",
+      "size_bytes": 154556,
+      "registered_paths": [
+        "Assets/SampleMedia/valley.jpg"
+      ],
+      "source_uris": [
+        "ms-appx:///Assets/SampleMedia/valley.jpg"
+      ]
+    }
+  ]
+}

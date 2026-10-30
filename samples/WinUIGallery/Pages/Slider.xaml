@@ -1,0 +1,4 @@
+<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <Slider x:Name="Primary" Width="300" HorizontalAlignment="Left" Minimum="500" Maximum="1000" TickFrequency="10" IsSnapToTickEnabled="True" SmallChange="10" Value="800"/><Slider Width="300" HorizontalAlignment="Left" Value="35"/><TextBlock x:Name="Output" Text="Value: 800"/>
+</StackPanel>

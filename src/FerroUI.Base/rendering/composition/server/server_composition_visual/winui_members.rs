@@ -145,6 +145,48 @@ impl ServerCompositionVisual {
         (0.0, Quaternion::concatenate(rotation, orientation))
     }
 
+    /// Where something at the depth `z` of the space of the visual is drawn,
+    /// relative to the same thing at the depth 0, in that space (phase 7, not
+    /// from upstream: the Z of the offset of a drop shadow).
+    ///
+    /// The renderers project the 3D part of the transform of a visual (its
+    /// `Orientation`, a `RotationAxis` out of the plane, the Z of its
+    /// `Scale`) orthographically onto the plane of the parent. A point at the
+    /// depth `z` is moved by that projection of `(0, 0, z)`: nothing for a
+    /// visual in its plane, along the tilt for a visual turned out of it.
+    /// The result is that move brought back into the space of the visual.
+    ///
+    /// Deviation (winui-composition.md): only the 3D part of the visual's own
+    /// transform is taken; the 3D transforms of its ancestors are already
+    /// flattened, and there is no perspective.
+    pub fn depth_offset(&self, z: f32) -> Vector {
+        if z == 0.0 || !z.is_finite() {
+            return Vector::default();
+        }
+        let (_, orientation) = self.effective_rotation();
+        if orientation == Quaternion::IDENTITY {
+            return Vector::default();
+        }
+        let rotation = crate::numerics::Matrix4x4::create_from_quaternion(orientation);
+        let depth = (z * self.scale().z as f32) as f64;
+        let moved = Vector::new(depth * rotation.m31 as f64, depth * rotation.m32 as f64);
+        if moved == Vector::default() {
+            return moved;
+        }
+        // Back into the space of the visual through the linear part of its
+        // own transform.
+        let own = self.own_transform.get().unwrap_or(Matrix::IDENTITY);
+        let linear = Matrix::new(own.m11, own.m12, own.m21, own.m22, 0.0, 0.0);
+        match linear.try_invert() {
+            Some(inverse) => {
+                let local = crate::Point::new(moved.x, moved.y).transform(inverse);
+                Vector::new(local.x, local.y)
+            }
+            // A visual seen edge-on draws nothing.
+            None => Vector::default(),
+        }
+    }
+
     /// The transform of the visual from its properties, relative to its
     /// parent: what the own-properties pass computes, with the WinUI members
     /// applied (the relative adjustments, the rotation axis, pixel snapping).

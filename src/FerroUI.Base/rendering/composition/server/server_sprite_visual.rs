@@ -15,9 +15,9 @@ use std::time::Duration;
 
 /// Server-side counterpart of a
 /// [`SpriteVisual`](crate::rendering::composition::SpriteVisual): the shadow
-/// of its rectangle (or of its mask, or of the alpha of the brush, see
+/// of its rectangle, of its mask or of the alpha of its brush (see
 /// [`ServerDropShadow::render_under_rect`] and
-/// [`ServerDropShadow::render_with_content`]), then its brush over
+/// [`ServerDropShadow::render_shadow_of`]), then its brush over
 /// `(0, 0, size)`, then its children.
 ///
 /// The visual observes its brush and its shadow, which are render
@@ -111,7 +111,7 @@ impl IServerVisualContent for ServerSpriteVisual {
     fn compute_own_content_bounds(&self, visual: &ServerCompositionVisual) -> Option<LtrbRect> {
         let bounds = ServerSizeDependantVisual::compute_own_content_bounds(visual)?;
         match self.shadow() {
-            Some(shadow) => Some(LtrbRect::from_rect(shadow.bounds(bounds.to_rect()))),
+            Some(shadow) => Some(LtrbRect::from_rect(shadow.bounds_in(Some(visual), bounds.to_rect()))),
             None => Some(bounds),
         }
     }
@@ -132,19 +132,21 @@ impl IServerVisualContent for ServerSpriteVisual {
         }
         let brush = self.brush();
         if let Some(shadow) = self.shadow().filter(|shadow| shadow.is_visible()) {
-            // `InheritFromVisualContent`: the shadow of the alpha of the
-            // brush, drawn with the brush through a drop shadow effect.
             if shadow.inherits_from_visual_content() {
+                // `InheritFromVisualContent`: the shadow of the alpha of the
+                // brush; a sprite without a brush has no content to cast one.
                 if let Some(brush) = &brush {
-                    if shadow.render_with_content(context.canvas(), rect, |canvas| {
+                    let drawn = shadow.render_shadow_of(context.canvas(), Some(visual), rect, |canvas| {
                         paint_composition_brush(canvas, brush, rect)
-                    }) {
-                        return;
+                    });
+                    if !drawn {
+                        shadow.render_under_rect_in(context.canvas(), Some(visual), rect);
                     }
                 }
+            } else {
+                // The shadow of the mask, or of the rectangle.
+                shadow.render_under_rect_in(context.canvas(), Some(visual), rect);
             }
-            // The shadow of the mask, or of the rectangle.
-            shadow.render_under_rect(context.canvas(), rect);
         }
         if let Some(brush) = brush {
             paint_composition_brush(context.canvas(), &brush, rect);

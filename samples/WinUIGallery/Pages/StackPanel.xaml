@@ -1,0 +1,4 @@
+<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <TextBlock Text="Vertical"/><StackPanel Spacing="8" HorizontalAlignment="Left"><Rectangle Fill="Red" Width="160" Height="28"/><Rectangle Fill="Blue" Width="160" Height="28"/><Rectangle Fill="Green" Width="160" Height="28"/></StackPanel><TextBlock Text="Horizontal"/><StackPanel Orientation="Horizontal" Spacing="8"><Rectangle Fill="Red" Width="40" Height="40"/><Rectangle Fill="Blue" Width="40" Height="40"/><Rectangle Fill="Green" Width="40" Height="40"/></StackPanel>
+</StackPanel>
