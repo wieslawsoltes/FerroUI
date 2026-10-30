@@ -640,9 +640,9 @@ fn an_object_without_compiled_markup_is_populated_by_the_runtime_loader_service(
 }
 
 
-#[cfg(all(feature = "hot-reload", debug_assertions))]
+#[cfg(feature = "source-overlays")]
 #[test]
-fn development_overlay_precedes_compiled_and_retains_uri_provider_and_assembly() {
+fn scoped_overlay_precedes_compiled_and_retains_uri_provider_and_assembly_in_every_profile() {
     use crate::source_overlay::with_sources;
     use std::collections::BTreeMap;
     register_types();
@@ -671,6 +671,55 @@ fn development_overlay_precedes_compiled_and_retains_uri_provider_and_assembly()
     with_sources(failed, || assert!(FerroXamlLoader::load(&uri("ferres://overlay.precedence/View.xaml"), None).is_err()));
     assert_eq!(FerroXamlLoader::load(&uri("ferres://overlay.precedence/View.xaml"), None).unwrap().downcast_ref::<String>().unwrap(), "old compiled");
     FerroXamlLoader::unregister_compiled_xaml("overlay.precedence");
+    scope.dispose();
+}
+
+#[cfg(feature = "source-overlays")]
+#[test]
+fn lazy_native_includes_retain_their_explicit_source_snapshot_and_reject_unavailable_buffers() {
+    use crate::source_overlay::SourceSnapshot;
+    use std::collections::{BTreeMap, BTreeSet};
+    register_types();
+    let assets = TestAssetLoader::new();
+    assets.add("ferres://FerroUI.Markup.Xaml/Runtime.xaml", "older asset");
+    let scope = assets.install();
+    let loader = Rc::new(RecordingRuntimeLoader { seen: RefCell::new(Vec::new()) });
+    let service: Rc<dyn IRuntimeXamlLoader> = loader.clone();
+    FerroLocator::current_mutable().bind::<dyn IRuntimeXamlLoader>().to_constant(service);
+    let path = "ferres://ferroui.markup.xaml/Runtime.xaml";
+    let accepted = SourceSnapshot::new(
+        BTreeMap::from([(path.into(), "accepted snapshot".into())]),
+        BTreeMap::new(),
+    );
+    let include = accepted.run(|| {
+        let include = ResourceInclude::new(Some(uri("ferres://FerroUI.Markup.Xaml/Base.xaml")));
+        include.set_source(Some(uri("Runtime.xaml")));
+        include
+    });
+    assert_eq!(accepted.requested_uris(), BTreeSet::from([path.into()]));
+    assert!(loader.seen.borrow().is_empty(), "construction must stay lazy");
+    let newer = SourceSnapshot::new(
+        BTreeMap::from([(path.into(), "newer snapshot".into())]),
+        BTreeMap::new(),
+    );
+    let dictionary = newer.run(|| include.try_loaded()).unwrap();
+    assert_eq!(text(dictionary.try_get_value(&key("text"))), "accepted snapshot");
+    assert!(crate::source_overlay::source(path).is_none());
+    let pending = SourceSnapshot::new(
+        BTreeMap::new(),
+        BTreeMap::from([(path.into(), "Apply the pending included source".into())]),
+    );
+    let unavailable = pending.run(|| {
+        let include = ResourceInclude::new(Some(uri("ferres://FerroUI.Markup.Xaml/Base.xaml")));
+        include.set_source(Some(uri("Runtime.xaml")));
+        include
+    });
+    let error = match unavailable.try_loaded() {
+        Ok(_) => panic!("a pending buffer must not use the old disk asset"),
+        Err(error) => error,
+    };
+    assert_eq!(error.message(), "Apply the pending included source");
+    assert_eq!(loader.seen.borrow().len(), 1);
     scope.dispose();
 }
 
