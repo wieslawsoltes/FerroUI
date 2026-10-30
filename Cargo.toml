@@ -8,6 +8,7 @@ members = [
     "src/FerroUI.Designer.Animation",
     "src/FerroUI.Designer.Collaboration",
     "src/FerroUI.Designer.Collaboration.Host",
+    "src/FerroUI.Designer",
     # The Dock port (docs/porting/dock).
     "samples/Dock/FerroDockReactiveUISample",
     "src/Dock/FerroDock.Controls.DeferredContentControl",
@@ -251,6 +252,7 @@ ferroui-designer-language = { version = "=0.4.0", path = "src/FerroUI.Designer.L
 ferroui-designer-animation = { version = "=0.4.0", path = "src/FerroUI.Designer.Animation" }
 ferroui-designer-collaboration = { version = "=0.4.0", path = "src/FerroUI.Designer.Collaboration" }
 ferroui-designer-collaboration-host = { version = "=0.4.0", path = "src/FerroUI.Designer.Collaboration.Host" }
+ferroui-designer = { version = "=0.4.0", path = "src/FerroUI.Designer" }
 ferroui-hot-reload = { version = "=0.4.0", path = "src/FerroUI.HotReload" }
 ferroui-hot-patch = { version = "=0.4.0", path = "src/FerroUI.HotPatch" }
 ferroui-inspect = { version = "=0.4.0", path = "src/FerroUI.Inspect" }

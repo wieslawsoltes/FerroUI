@@ -1627,6 +1627,39 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-designer"
+version = "0.4.0"
+dependencies = [
+ "base64",
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-controls-color-picker",
+ "ferroui-controls-treedatagrid",
+ "ferroui-designer-animation",
+ "ferroui-designer-collaboration",
+ "ferroui-designer-collaboration-host",
+ "ferroui-designer-core",
+ "ferroui-designer-language",
+ "ferroui-designer-project",
+ "ferroui-designer-tools",
+ "ferroui-harfbuzz",
+ "ferroui-hot-reload",
+ "ferroui-inspect",
+ "ferroui-markup",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-mcp",
+ "ferroui-themes-winui",
+ "ferroui-treedatagrid-core",
+ "ferroui-vello",
+ "ferroui-xaml-interactions",
+ "ferroui-xaml-interactions-custom",
+ "ferroui-xaml-interactivity",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "ferroui-designer-animation"
 version = "0.4.0"
 dependencies = [
