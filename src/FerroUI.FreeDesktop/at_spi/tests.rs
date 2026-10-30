@@ -22,10 +22,17 @@ use ferroui_controls::{Button, CheckBox, Control, StackPanel, TextBox, Window};
 use std::cell::Cell;
 use std::collections::HashMap;
 use std::rc::Rc;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use zbus::zvariant::{OwnedObjectPath, OwnedValue};
 
 const REGISTRY_UNIQUE_NAME: &str = ":1.9";
+
+/// The signal [`Fixture::received`] sends behind the ones of the
+/// application, on its connection.
+const MARKER_PATH: &str = "/org/ferroui/test";
+const MARKER_INTERFACE: &str = "org.ferroui.Test";
+const MARKER_MEMBER: &str = "Marker";
 
 /// The events the double of the registry says are listened to.
 type Listeners = Arc<Mutex<Vec<(String, String)>>>;
@@ -57,6 +64,8 @@ struct Fixture {
     connections: TestConnections,
     calls: Log,
     signals: Log,
+    /// The markers sent, and the ones the collector of the signals saw.
+    markers: (Cell<u64>, Arc<AtomicU64>),
     server: Rc<AtSpiServer>,
 }
 
@@ -76,27 +85,34 @@ impl Fixture {
         });
         connections.start(BUS_NAME_REGISTRY);
 
-        // What the application emits, as the other side receives it.
+        // What the application emits, as the other side receives it. The
+        // stream is made here, before anything is emitted: made on the
+        // thread of the collector, it would miss what came before it.
         let signals: Log = Log::default();
-        let (collector, service) = (signals.clone(), connections.service.clone());
+        let markers_seen = Arc::new(AtomicU64::new(0));
+        let (collector, seen) = (signals.clone(), markers_seen.clone());
         let own_name = connections.client.unique_name().map(|name| name.to_string());
+        let iterator = match &own_name {
+            Some(sender) => zbus::blocking::MessageIterator::for_match_rule(
+                zbus::MatchRule::builder()
+                    .msg_type(zbus::message::Type::Signal)
+                    .sender(sender.as_str())
+                    .unwrap()
+                    .build(),
+                &connections.service,
+                None,
+            )
+            .unwrap(),
+            None => zbus::blocking::MessageIterator::from(&connections.service),
+        };
         std::thread::spawn(move || {
-            let iterator = match &own_name {
-                Some(sender) => zbus::blocking::MessageIterator::for_match_rule(
-                    zbus::MatchRule::builder()
-                        .msg_type(zbus::message::Type::Signal)
-                        .sender(sender.as_str())
-                        .unwrap()
-                        .build(),
-                    &service,
-                    None,
-                )
-                .unwrap(),
-                None => zbus::blocking::MessageIterator::from(&service),
-            };
             for message in iterator.flatten() {
                 let header = message.header();
                 let interface = header.interface().map(|name| name.to_string()).unwrap_or_default();
+                if interface == MARKER_INTERFACE {
+                    seen.fetch_add(1, Ordering::SeqCst);
+                    continue;
+                }
                 if message.message_type() != zbus::message::Type::Signal || !interface.starts_with("org.a11y.atspi.Event")
                 {
                     continue;
@@ -114,7 +130,7 @@ impl Fixture {
 
         let server = AtSpiServer::new();
         server.start_on_connection(connections.client.clone());
-        let fixture = Fixture { connections, calls, signals, server };
+        let fixture = Fixture { connections, calls, signals, markers: (Cell::new(0), markers_seen), server };
         // The tracker asked the registry what is listened to.
         fixture.connections.settle();
         fixture
@@ -172,10 +188,24 @@ impl Fixture {
         None
     }
 
-    /// Runs the dispatcher until the signals the other side received are
-    /// `entries`, and forgets them.
+    /// Every signal the application emitted until now, as the other side
+    /// received it, and forgets them. Behind what is in flight
+    /// ([`TestConnections::settle`]) a marker goes on the connection of the
+    /// application: the signals of one connection arrive in order, so once
+    /// the collector saw the marker it logged everything before it.
+    fn received(&self) -> Vec<String> {
+        self.connections.settle();
+        let sent = self.markers.0.get() + 1;
+        self.markers.0.set(sent);
+        let marker = zbus::Message::signal(MARKER_PATH, MARKER_INTERFACE, MARKER_MEMBER).unwrap().build(&()).unwrap();
+        zbus::blocking::Connection::from(self.connections.client.clone()).send(&marker).unwrap();
+        pump_until(|| self.markers.1.load(Ordering::SeqCst) >= sent);
+        std::mem::take(&mut *self.signals.lock().unwrap())
+    }
+
+    /// The signals the other side received are `entries`; forgets them.
     fn expect_signals(&self, entries: &[&str]) {
-        expect_calls(&self.connections, &self.signals, entries);
+        assert_eq!(self.received(), entries);
     }
 
     fn add_window(&self, window: &Ref<Window>) -> Ref<AutomationPeer> {
@@ -466,8 +496,7 @@ fn dbus_events_follow_the_listeners_of_the_registry() {
     // Removing the window: the root loses a child, and every node of the
     // window is defunct, children before their parents.
     fixture.server.remove_window(&window_peer);
-    fixture.connections.settle();
-    let signals = std::mem::take(&mut *fixture.signals.lock().unwrap());
+    let signals = fixture.received();
     assert!(signals[0].starts_with(&format!("{ROOT_PATH} ChildrenChanged remove 0 (")), "{signals:?}");
     assert!(signals[0].ends_with(&format!("{window})")), "{signals:?}");
     assert!(signals[1..].iter().all(|signal| signal.ends_with(" StateChanged defunct 1 0")), "{signals:?}");
@@ -478,8 +507,7 @@ fn dbus_events_follow_the_listeners_of_the_registry() {
     let window_peer = fixture.add_window_again(&ui.window);
     let deregistered = (REGISTRY_UNIQUE_NAME, "object:state-changed");
     fixture.connections.emit(REGISTRY_PATH, BUS_NAME_REGISTRY, "EventListenerDeregistered", &deregistered);
-    fixture.connections.settle();
-    std::mem::take(&mut *fixture.signals.lock().unwrap());
+    fixture.received();
     ui.check_box.set_is_checked(Some(false));
     fixture.server.remove_window(&window_peer);
     fixture.expect_signals(&[]);
@@ -495,7 +523,7 @@ fn dbus_a_listener_that_was_registered_before_the_start_is_heard() {
     fixture.connections.settle();
     let window = fixture.children(ROOT_PATH)[0].clone();
     // The embedding announced the window as a child of the root.
-    let signals = std::mem::take(&mut *fixture.signals.lock().unwrap());
+    let signals = fixture.received();
     assert_eq!(signals.len(), 1, "{signals:?}");
     assert!(signals[0].starts_with(&format!("{ROOT_PATH} ChildrenChanged add 0 (")), "{signals:?}");
     assert!(signals[0].ends_with(&format!("{window})")), "{signals:?}");
@@ -503,8 +531,7 @@ fn dbus_a_listener_that_was_registered_before_the_start_is_heard() {
     // A node exists once a client asked for it; from then on its changes are told.
     let entry = fixture.find(&window, "entry").unwrap();
     ui.text_box.set_text(Some("changed"));
-    fixture.connections.settle();
-    let signals = std::mem::take(&mut *fixture.signals.lock().unwrap());
+    let signals = fixture.received();
     assert_eq!(signals, vec![format!("{entry} PropertyChange accessible-value 0 changed")]);
     fixture.server.dispose();
 }
