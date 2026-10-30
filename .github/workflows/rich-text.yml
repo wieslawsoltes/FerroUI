@@ -84,7 +84,8 @@ jobs:
         run: cargo check --locked -p ferroui-rich-text-oracle
 
   oracle:
-    name: Msftedit oracle (${{ inputs.runner }})
+    # A plain name: a pull request lists this job as skipped, and an expression in it is not evaluated there.
+    name: Msftedit oracle (on demand)
     if: github.event_name == 'workflow_dispatch'
     runs-on: ${{ inputs.runner }}
     timeout-minutes: 45
