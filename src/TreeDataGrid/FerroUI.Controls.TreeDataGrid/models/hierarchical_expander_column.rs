@@ -253,6 +253,16 @@ impl<M: TreeModel> ICellColumn for HierarchicalExpanderColumn<M> {
             None => panic!("Specified method is not supported."),
         }
     }
+
+    // An expander is decoration around the inner cell. It must retain the inner
+    // column's text-search contract just like the core expander presentation.
+    fn select_value(&self, model: &BoxedValue) -> Option<String> {
+        self.inner.select_value(model)
+    }
+
+    fn is_text_search_enabled(&self) -> bool {
+        self.inner.is_text_search_enabled()
+    }
 }
 
 impl<M: TreeModel> core_models::IColumn for HierarchicalExpanderColumn<M> {
