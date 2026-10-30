@@ -321,6 +321,23 @@ impl Popup {
     fn static_constructor() {
         Self::child_property().changed().add_class_handler::<Popup>(|x, e| x.child_changed(e));
         Self::is_open_property().changed().add_class_handler::<Popup>(|x, e| x.is_open_changed(e));
+        // WinUI: the `Shadow` of a popup is cast by its child (`NeedsDropShadowVisual`).
+        Visual::shadow_property().changed().add_class_handler::<Popup>(|x, _| x.update_child_theme_shadow());
+    }
+
+    /// Hands the `Shadow` of the popup to its child, which casts it (with the elevation of the
+    /// popup, WinUI's `UpdateDropShadowVisual`); the popup itself casts none.
+    fn update_child_theme_shadow(&self) {
+        let has_shadow = self.shadow().is_some();
+        if has_shadow {
+            self.set_theme_shadow_delegated_to_child(true);
+        }
+        if let Some(child) = self.child() {
+            if has_shadow || child.theme_shadow_caster().is_some() {
+                let popup: &Visual = self;
+                child.set_theme_shadow_popup(has_shadow.then_some(popup));
+            }
+        }
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
@@ -1125,11 +1142,18 @@ impl Popup {
 
         if let Some(old_value) = old_value {
             old_value.set_parent(None);
+            if self.shadow().is_some() {
+                old_value.set_theme_shadow_popup(None);
+            }
         }
 
         if let Some(new_value) = new_value {
             new_value.set_parent(self.to_ref());
             self.logical_children().add(new_value.upcast());
+        }
+
+        if self.shadow().is_some() {
+            self.update_child_theme_shadow();
         }
     }
 

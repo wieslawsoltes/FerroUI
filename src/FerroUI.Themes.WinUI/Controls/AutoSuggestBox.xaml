@@ -35,8 +35,8 @@
     header, and DescriptionPresenter.
   - The suggestion list: SuggestionsContainer has the MaxHeight and the Width the control sets
     (UpdateSuggestionListSize), the list the MaxHeight AutoSuggestListMaxHeight. The shadow of the
-    list (ApplyElevationEffect on the popup: a ThemeShadow at a Translation.Z of 32) is the BoxShadow
-    ThemeShadowFlyoutBoxShadow of SuggestionsContainer, with the margin ThemeShadowFlyoutMargin as the
+    list (ApplyElevationEffect on the popup: a ThemeShadow at a Translation.Z of 32) is the
+    same on SuggestionsContainer (the shared WinUIThemeShadow), with the margin ThemeShadowFlyoutMargin as the
     room for it in the popup (Resources/ThemeShadows.xaml; DEVIATIONS.md, G-24). The popup is placed
     under the text box; the placement above it when there is no room below is not ported.
   - Left out, as in AutoCompleteBox.xaml: Orientation (Landscape, Portrait), UseSystemFocusVisuals
@@ -182,7 +182,7 @@
                  PlacementTarget="{Binding #TextBox}"
                  Placement="Bottom">
             <Border x:Name="SuggestionsContainer"
-                    BoxShadow="{DynamicResource ThemeShadowFlyoutBoxShadow}"
+                    Translation="0,0,32" Shadow="{StaticResource WinUIThemeShadow}"
                     Margin="{StaticResource ThemeShadowFlyoutMargin}"
                     Padding="{DynamicResource AutoSuggestListMargin}"
                     BorderThickness="{DynamicResource AutoSuggestListBorderThemeThickness}"

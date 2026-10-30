@@ -12,16 +12,18 @@ use std::rc::{Rc, Weak};
 ///
 /// On a sprite visual the shadow is cast by the rectangle of the visual (a
 /// box shadow of the drawing context), by the alpha of its
-/// [`mask`](Self::mask), or, with the `InheritFromVisualContent`
-/// [`source_policy`](Self::source_policy), by the alpha of the brush of the
-/// visual. On a layer visual it is cast by the composed children, or by the
-/// mask. The shadow of a mask or of the content goes through a drop shadow
-/// effect, when the drawing context has effects.
+/// [`mask`](Self::mask) (any composition brush, such as the brush of
+/// `GetAlphaMask` of a shape, a text block or an image), or, with the
+/// `InheritFromVisualContent` [`source_policy`](Self::source_policy), by the
+/// alpha of the brush of the visual. On a layer visual it is cast by the
+/// composed children, or by the mask. The shadow is drawn under the content
+/// and nothing of it is removed; the Z of the offset moves it as the
+/// renderers project that depth for the visual (a visual turned out of its
+/// plane).
 ///
 /// Deviation (winui-composition.md): without effects in the drawing context
-/// the shadow is the box shadow of the rectangle; a colour or gradient mask
-/// scales the box shadow; the Z of the offset is ignored. WinUI's
-/// `CompositionShadow` base class has no members and is not a separate type.
+/// the shadow is the box shadow of the rectangle. WinUI's `CompositionShadow`
+/// base class has no members and is not a separate type.
 pub struct DropShadow {
     this: Weak<DropShadow>,
     object: CompositionObject,
@@ -85,8 +87,10 @@ impl DropShadow {
         self.props.set_color(self, value)
     }
 
-    /// The offset of the shadow from the visual (WinUI `Vector3`; the Z
-    /// component is not used by the 2D renderers).
+    /// The offset of the shadow from the visual (WinUI `Vector3`). The Z is
+    /// a depth in the space of the visual: it moves the shadow only where
+    /// the visual is turned out of its plane (`Orientation`, `RotationAxis`),
+    /// as the renderers project that visual.
     pub fn offset(&self) -> Vector3D {
         self.props.offset()
     }
