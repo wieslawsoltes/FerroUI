@@ -113,8 +113,23 @@ The changes #243 made on default paths and what the landing pull requests do wit
 ## 8. Evidence and the Msftedit oracle
 
 - #243 committed 1.57 million lines of evidence JSON (per-run observations of the system Msftedit, inventories and maps). None of it lands (D11).
-- What lands: the observation extractor (`scripts/winui-rich-text/`), the case tables it writes (`src/FerroUI.Controls/rich_text/*_native_cases.rs`, included from test modules only, each with the hash of its source), and the oracle that characterises the system Msftedit, moved from `ferroui-win32`'s tests into a tool and run by an on-demand job (R9, R13).
-- Native observations are test oracles for the editor; a case table is regenerated with the extractor, never edited by hand.
+- What lands (R13):
+  - **The oracle**, `src/tools/RichTextOracle` (crate `ferroui-rich-text-oracle`, `publish = false`): #243's `rich_text_tom_oracle_tests.rs`, moved out of `ferroui-win32`'s tests into a Windows program (S15). It creates hidden `RICHEDIT50W` windows of the system `Msftedit.dll`, drives them through the text object model (TOM) and prints one `SYSTEM_MSFTEDIT_*` line per observation: Home/End and directional movement, selection options and `TypeText`, links, range gravity and formatting affinity, the gravity of the live selection, passive ranges across `SetText`. It asserts nothing about FerroUI. On other systems it builds as a program that only says it runs on Windows.
+  - **The observation extractor**, `scripts/winui-rich-text/rich-text-tom-observations.py` (W11). `extract` turns the output of a run into a record (JSON, with the commit, the blob of `probes.rs` and the run), rejecting unknown rows, incomplete probes and contradictory setup. `check-cases` compares the case tables with a record (or directly with an output) and names every entry that differs; `native_cases.py` holds, per table, which observations it replays, and `rust_literals.py` reads the tables without a Rust toolchain.
+  - **The case tables**, `src/FerroUI.Controls/rich_text/*_native_cases.rs` (six files, included from test modules only), the literal observations the editor's tests replay. #243 has no generator for them (they come in six layouts), so the extractor checks them rather than writes them (D11 says "writes"). Their headers name the record of #243 they were taken from and its hash; those records are not in the repository. Every table agrees with #243's last records (Msftedit 6.2.26100.33648 on x64 and 6.2.26100.9278 on ARM64), so one run of the oracle checks all six.
+  - **The workflow** `.github/workflows/rich-text.yml` (S14): on a pull request that changes the oracle, the extractor or a case table, the tests of the extractor and of the reader of the tables, and a `cargo check` of the oracle on Windows when the oracle changed; by hand, the oracle job. The tests of the controls run in `ci.yml` only.
+- **Running the oracle on demand:** `gh workflow run rich-text.yml --ref <branch>` (the input `runner` chooses `windows-latest`, the default, or `windows-11-arm`). The job builds and runs the oracle, extracts the record, checks the case tables against it and keeps `msftedit.log`, `msftedit-record.json`, `check-cases.txt` and the environment as the artifact `msftedit-oracle-<runner>` (30 days). It fails when a table differs from the Msftedit of the runner.
+- **Running it on a Windows machine:**
+
+  ```text
+  cargo run --locked -p ferroui-rich-text-oracle > msftedit.log
+  python scripts/winui-rich-text/rich-text-tom-observations.py extract --log msftedit.log \
+      --commit <commit> --probe-blob <git rev-parse <commit>:src/tools/RichTextOracle/probes.rs> --output msftedit-record.json
+  python scripts/winui-rich-text/rich-text-tom-observations.py check-cases --record msftedit-record.json
+  ```
+
+  Arguments of the oracle name the probes to run (`--help` lists them); `check-cases` needs a run of all of them. `RICH_TEXT_ORACLE_RECORDS=<directory>` makes the extractor's tests also read the records of that directory.
+- **When a table differs:** native observations are test oracles for the editor, so a difference is a change of the system engine (a new Msftedit) or of the oracle. A table changes only to match a record: take the entries `check-cases` names from the record of the run, update the table's header (the run, the engine version, the hash of the record) and rerun the check until it passes; then fix the editor if its tests fail. The record itself stays in the artifact of the run.
 
 ## 9. Landing plan
 
