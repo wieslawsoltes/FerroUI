@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Generate the loader's exact, inheritance-aware WinUI event target table.
 
-This consumes the pinned public API snapshot, works offline, and never treats a
-same-named custom property as an event. Run --check in CI after scan.py --check.
+This consumes the WinUI API inventory `upstream-api.json` that scan.py writes from
+the pinned checkout (to target/winui-gallery-scan by default; it is not committed,
+docs/porting/winui-controls.md, O8), and never treats a same-named custom property
+as an event. Run --check in CI after the scan.
 """
 
 from __future__ import annotations
@@ -13,7 +15,7 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-MODEL = ROOT / "docs/porting/winui-gallery/data/upstream-api.json"
+MODEL = ROOT / "target/winui-gallery-scan/upstream-api.json"
 OUTPUT = ROOT / "src/Markup/FerroUI.Markup.Xaml.WinUI/importer/event_targets.rs"
 PRESENTATION = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 DEFAULT_NAMESPACES = (
@@ -93,14 +95,18 @@ pub(super) fn is_event(namespace: &str, type_name: &str, member: &str) -> bool {
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true")
+    parser.add_argument("--api", type=Path, default=MODEL, help="the upstream-api.json of scan.py")
     args = parser.parse_args()
-    expected = render(MODEL.read_bytes())
+    if not args.api.is_file():
+        parser.exit(1, f"{args.api} is missing: run scripts/winui-gallery/scan.py first\n")
+    raw = args.api.read_bytes()
+    expected = render(raw)
     if args.check:
         if not OUTPUT.exists() or OUTPUT.read_text() != expected:
             parser.exit(1, "WinUI event target table is stale; run scripts/winui-gallery/event_targets.py\n")
     else:
         OUTPUT.write_text(expected)
-    table = rows(json.loads(MODEL.read_bytes()))
+    table = rows(json.loads(raw))
     print(f"WinUI event targets: {len(table)} public types, {sum(len(row[2]) for row in table)} direct events; {'verified' if args.check else 'generated'}")
     return 0
 

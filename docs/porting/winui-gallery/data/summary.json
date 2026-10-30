@@ -1,0 +1,236 @@
+{
+  "behavioral_api_parity": "not-certified",
+  "gallery": {
+    "catalog_examples": 350,
+    "code_files": 242,
+    "csharp_member_accesses_requiring_semantic_binding": 8738,
+    "markup_examples": 355,
+    "markup_features": {
+      "design:DesignHeight": 2,
+      "design:DesignWidth": 2,
+      "design:ExtensionType": 1,
+      "design:Source": 1,
+      "markup:Binding": 44,
+      "markup:StaticResource": 510,
+      "markup:TemplateBinding": 60,
+      "markup:ThemeResource": 728,
+      "markup:d:DesignData": 1,
+      "markup:x:Bind": 776,
+      "mc:Ignorable": 162,
+      "x:Class": 186,
+      "x:DataType": 64,
+      "x:DefaultBindMode": 1,
+      "x:FieldModifier": 2,
+      "x:Key": 313,
+      "x:Load": 2,
+      "x:Name": 1400,
+      "x:Phase": 5,
+      "xml:space": 8
+    },
+    "page_statuses": {
+      "partial": 76,
+      "pending": 50,
+      "ported": 0,
+      "verified": 0
+    },
+    "pages": 126,
+    "snippet_files": 355,
+    "unlisted_control_info_ids": [],
+    "xaml_files": 194,
+    "xaml_parse_diagnostics": []
+  },
+  "limits": [
+    "Lexical source model; preprocessor and SDK contract conditions are not evaluated.",
+    "Public-source includes preview contracts; private contracts are retained separately.",
+    "Not a WinMD ABI, signature compatibility, or behavior certification.",
+    "Rust candidates use namespace tables and inherited member names; signatures and defaults are not proven.",
+    "C# usage is lexical; aliases, receiver types, extension methods and overload resolution are not inferred.",
+    "Ported pages and reviewed test anchors do not count as executed/verified pages."
+  ],
+  "platform_dependencies": [
+    {
+      "namespace": "CommunityToolkit.WinUI.Controls",
+      "status": "requires-platform-or-library-adapter"
+    },
+    {
+      "namespace": "Microsoft.Graphics.Canvas",
+      "status": "requires-platform-or-library-adapter"
+    },
+    {
+      "namespace": "Microsoft.Graphics.Canvas.Geometry",
+      "status": "requires-platform-or-library-adapter"
+    },
+    {
+      "namespace": "Microsoft.Graphics.Canvas.UI.Composition",
+      "status": "requires-platform-or-library-adapter"
+    },
+    {
+      "namespace": "Microsoft.Graphics.DirectX",
+      "status": "requires-platform-or-library-adapter"
+    },
+    {
+      "namespace": "Microsoft.Windows.AppLifecycle",
+      "status": "requires-platform-or-library-adapter"
+    },
+    {
+      "namespace": "Microsoft.Windows.AppNotifications",
+      "status": "requires-platform-or-library-adapter"
+    },
+    {
+      "namespace": "Microsoft.Windows.AppNotifications.Builder",
+      "status": "requires-platform-or-library-adapter"
+    },
+    {
+      "namespace": "Microsoft.Windows.BadgeNotifications",
+      "status": "requires-platform-or-library-adapter"
+    },
+    {
+      "namespace": "Microsoft.Windows.Storage",
+      "status": "requires-platform-or-library-adapter"
+    },
+    {
+      "namespace": "Microsoft.Windows.Storage.Pickers",
+      "status": "requires-platform-or-library-adapter"
+    },
+    {
+      "namespace": "WinRT.Interop",
+      "status": "requires-platform-or-library-adapter"
+    },
+    {
+      "namespace": "Windows.ApplicationModel",
+      "status": "requires-platform-or-library-adapter"
+    },
+    {
+      "namespace": "Windows.ApplicationModel.Activation",
+      "status": "requires-platform-or-library-adapter"
+    },
+    {
+      "namespace": "Windows.ApplicationModel.DataTransfer",
+      "status": "requires-platform-or-library-adapter"
+    },
+    {
+      "namespace": "Windows.Devices.Geolocation",
+      "status": "requires-platform-or-library-adapter"
+    },
+    {
+      "namespace": "Windows.Foundation",
+      "status": "requires-platform-or-library-adapter"
+    },
+    {
+      "namespace": "Windows.Foundation.Metadata",
+      "status": "requires-platform-or-library-adapter"
+    },
+    {
+      "namespace": "Windows.Globalization",
+      "status": "requires-platform-or-library-adapter"
+    },
+    {
+      "namespace": "Windows.Globalization.NumberFormatting",
+      "status": "requires-platform-or-library-adapter"
+    },
+    {
+      "namespace": "Windows.Graphics",
+      "status": "requires-platform-or-library-adapter"
+    },
+    {
+      "namespace": "Windows.Media.Capture",
+      "status": "requires-platform-or-library-adapter"
+    },
+    {
+      "namespace": "Windows.Media.Capture.Frames",
+      "status": "requires-platform-or-library-adapter"
+    },
+    {
+      "namespace": "Windows.Media.Core",
+      "status": "requires-platform-or-library-adapter"
+    },
+    {
+      "namespace": "Windows.Media.MediaProperties",
+      "status": "requires-platform-or-library-adapter"
+    },
+    {
+      "namespace": "Windows.Storage",
+      "status": "requires-platform-or-library-adapter"
+    },
+    {
+      "namespace": "Windows.Storage.FileProperties",
+      "status": "requires-platform-or-library-adapter"
+    },
+    {
+      "namespace": "Windows.Storage.Provider",
+      "status": "requires-platform-or-library-adapter"
+    },
+    {
+      "namespace": "Windows.Storage.Streams",
+      "status": "requires-platform-or-library-adapter"
+    },
+    {
+      "namespace": "Windows.System",
+      "status": "requires-platform-or-library-adapter"
+    },
+    {
+      "namespace": "Windows.UI",
+      "status": "requires-platform-or-library-adapter"
+    },
+    {
+      "namespace": "Windows.UI.Core",
+      "status": "requires-platform-or-library-adapter"
+    },
+    {
+      "namespace": "Windows.UI.Input.Inking",
+      "status": "requires-platform-or-library-adapter"
+    },
+    {
+      "namespace": "Windows.UI.StartScreen",
+      "status": "requires-platform-or-library-adapter"
+    },
+    {
+      "namespace": "Windows.UI.Text",
+      "status": "requires-platform-or-library-adapter"
+    },
+    {
+      "namespace": "Windows.UI.ViewManagement",
+      "status": "requires-platform-or-library-adapter"
+    },
+    {
+      "namespace": "Windows.Win32.Foundation",
+      "status": "requires-platform-or-library-adapter"
+    }
+  ],
+  "schema_version": 1,
+  "upstream": {
+    "enum_values_behavior": {
+      "partial": 0,
+      "unverified": 1406,
+      "verified": 0
+    },
+    "member_candidates": {
+      "missing-source-candidate": 5421,
+      "source-candidate": 2041
+    },
+    "members_behavior": {
+      "partial": 0,
+      "unverified": 7462,
+      "verified": 0
+    },
+    "members_public_source": 7462,
+    "non_enum_members_behavior": {
+      "partial": 0,
+      "unverified": 6056,
+      "verified": 0
+    },
+    "type_candidates": {
+      "missing-source-candidate": 1131,
+      "source-candidate": 414
+    },
+    "types_behavior": {
+      "partial": 0,
+      "unverified": 1545,
+      "verified": 0
+    },
+    "types_private_source": 198,
+    "types_public_source": 1545,
+    "verified_enum_values_by_type": [],
+    "verified_types": []
+  }
+}

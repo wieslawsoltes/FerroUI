@@ -1,0 +1,13 @@
+{
+  "repositories": {
+    "gallery": {
+      "commit": "14061eeac21c38ae99f302edf3d9136d4f652c4c",
+      "url": "https://github.com/microsoft/WinUI-Gallery"
+    },
+    "winui": {
+      "commit": "7e4b0c2096be402f51cc8f7d203ebf67cff183d0",
+      "url": "https://github.com/microsoft/microsoft-ui-xaml"
+    }
+  },
+  "schema_version": 1
+}
