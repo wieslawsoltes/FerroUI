@@ -7,6 +7,8 @@ mod harf_buzz_application_extensions;
 mod harf_buzz_text_shaper;
 #[cfg(test)]
 mod harf_buzz_text_shaper_tests;
+#[cfg(test)]
+mod typography_tests;
 mod harf_buzz_typeface;
 mod hb;
 

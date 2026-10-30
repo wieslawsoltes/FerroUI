@@ -455,7 +455,7 @@ impl<T: PropertyValue> EffectiveValueDyn for EffectiveValue<T> {
         let n = new_value.map(|v| cast_effective_value::<T>(v).value()).unwrap_or_else(default);
         let priority = if new_value.is_some() { BindingPriority::Inherited } else { BindingPriority::Unset };
         if !value_equals(&o, &n) {
-            owner.raise_property_changed(self.property, Some(&o), &n, priority, true);
+            owner.raise_inherited_property_changed(self.property, &o, &n, priority);
         }
     }
 

@@ -214,6 +214,21 @@ const DECLARED_NEXT_TO_THE_TYPE: &[&str] = &[
     "AutoSuggestBoxTextChangedEventArgs",
     "AutoSuggestBoxSuggestionChosenEventArgs",
     "AutoSuggestBoxQuerySubmittedEventArgs",
+    // WinUI rich text (crate::documents::MARKUP_TYPES).
+    "Typography",
+    "BlockCollection",
+    "RichTextDocument",
+    "LineStackingStrategy",
+    "LineSpacingRule",
+    "TextGravity",
+    "UnderlineStyle",
+    "HyperlinkClickEventArgs",
+    "TextRange",
+    "TextRangeCollection",
+    "TextHighlighterCollection",
+    // The rich text views (crate::context_menu_event_args::MARKUP_TYPES).
+    "ContextMenuEventArgs",
+    "RoutedEvent`1",
     // The WinUI materials (winui-materials.md).
     "ApplicationTheme",
     "RevealBrushState",
@@ -305,7 +320,7 @@ fn text_convertible_types_are_parsed_by_type_lookup() {
     for type_ in declared_types() {
         if type_.parse.is_some() {
             let known = ["GridLength", "RowDefinitions", "ColumnDefinitions", "WindowTransparencyLevel",
-                "WindowTransparencyLevelCollection"];
+                "WindowTransparencyLevelCollection", "TextRange"];
             assert!(known.contains(&type_.name), "a sample for {type_:?}");
         }
     }
