@@ -21,7 +21,7 @@ use ferroui_base::input::{
 };
 use ferroui_base::{PixelPoint, Rect, Ref, Visual};
 use std::any::Any;
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::sync::{Arc, Mutex};
@@ -446,6 +446,19 @@ fn record(im: &Rc<DBusTextInputMethodBase>) -> Recorded {
     recorded
 }
 
+/// Runs the dispatcher until the calls the input method queued returned:
+/// the queue runs them in order, so a call queued behind them ends after
+/// them.
+fn finish_queued_calls(im: &Rc<DBusTextInputMethodBase>) {
+    let done = Rc::new(Cell::new(false));
+    let flag = done.clone();
+    im.enqueue(move || async move {
+        flag.set(true);
+        Ok(())
+    });
+    pump_until(|| done.get());
+}
+
 fn caps(caps: IBusCapability) -> String {
     format!("SetCapabilities({})", caps.bits())
 }
@@ -590,6 +603,8 @@ fn ibus_takes_keys_commits_text_and_forwards_keys() {
     // after it is not.
     im.reset();
     bus.expect_calls(&["Reset"]);
+    finish_queued_calls(&im);
+    bus.settle();
     assert_eq!(recorded.commits.borrow().len(), 1);
     bus.emit(IBUS_CONTEXT_PATH, "org.freedesktop.IBus.InputContext", "CommitText", &(ibus_text("後"),));
     bus.settle();

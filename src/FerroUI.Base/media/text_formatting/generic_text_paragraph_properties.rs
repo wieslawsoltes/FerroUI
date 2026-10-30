@@ -134,6 +134,9 @@ impl GenericTextParagraphProperties {
             text_paragraph_properties.indent(),
             text_paragraph_properties.letter_spacing(),
         );
+        // Deviation (DEVIATIONS.md, Text formatting): the copy constructor of
+        // `GenericTextParagraphProperties` does not copy `LineSpacing`; the copy has it.
+        result.line_spacing.set(text_paragraph_properties.line_spacing());
         // Tab layout is opt-in: the copy carries the default tab width and the
         // origin only for a source with tab stops, so a copy of any other
         // paragraph keeps the upstream values.

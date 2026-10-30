@@ -609,3 +609,74 @@ fn font_family_line_metrics_custom_and_generic_defaults_preserve_legacy_boxes_an
     close(line.baseline(), 11.2);
     close(line.height(), 17.2);
 }
+
+#[test]
+fn font_family_line_metrics_wrapped_continuations_are_not_consumed_under_another_policy() {
+    let scope = fallback_scope();
+    scope.shaper().add_ligature("あい");
+    let buffer = ReadOnlyMemory::from_str("xあい");
+    let source = ListTextSource::new(vec![
+        Rc::new(TextCharacters::new(
+            buffer.slice(0, 2),
+            run_properties("Family A", 20.0),
+        )),
+        Rc::new(TextCharacters::new(
+            buffer.slice(2, 1),
+            run_properties("Family B", 20.0),
+        )),
+    ]);
+    let properties = Rc::new(GenericTextParagraphProperties::with_options(
+        run_properties("Family A", 20.0),
+        TextAlignment::Left,
+        TextWrapping::Wrap,
+        f64::NAN,
+        0.0,
+    ));
+    let paragraph: Rc<dyn TextParagraphProperties> = properties.clone();
+    let formatter = <dyn TextFormatter>::current();
+    let first = formatter
+        .format_line(&source, 0, 10.0, &paragraph, None)
+        .unwrap();
+    assert_eq!(first.length(), 1);
+    let previous = first.text_line_break().unwrap();
+    let fork = previous.fork();
+    let calls = scope.shaper().shape_call_count();
+    properties.set_line_metrics_mode(TextLineMetricsMode::FontFamily);
+    let remaining = formatter
+        .format_line(&source, 1, 100.0, &paragraph, Some(&fork))
+        .unwrap();
+    assert_eq!(remaining.length(), 2);
+    assert_eq!(line_text(&*remaining), "あい");
+    close(remaining.height(), 30.0);
+    assert_eq!(scope.shaper().shape_call_count(), calls + 2);
+    assert!(fork.remaining_runs.borrow().is_some());
+    assert!(previous.remaining_runs.borrow().is_some());
+}
+
+#[test]
+fn font_family_line_metrics_forked_continuations_preserve_policy_without_reshaping() {
+    let scope = fallback_scope();
+    let properties = paragraph(
+        run_properties("Family A", 20.0),
+        TextLineMetricsMode::FontFamily,
+        TextLineBounds::Full,
+        TextWrapping::Wrap,
+    );
+    let source = SingleBufferTextSource::new("あいう", run_properties("Family A", 20.0));
+    let formatter = <dyn TextFormatter>::current();
+    let first = formatter
+        .format_line(&source, 0, 10.0, &properties, None)
+        .unwrap();
+    let previous = first.text_line_break().unwrap();
+    let fork = previous.fork();
+    assert_eq!(fork.line_metrics_mode(), TextLineMetricsMode::FontFamily);
+    let calls = scope.shaper().shape_call_count();
+    let next = formatter
+        .format_line(&source, 1, 10.0, &properties, Some(&fork))
+        .unwrap();
+    assert_eq!(scope.shaper().shape_call_count(), calls);
+    close(next.height(), 22.0);
+    assert_eq!(next.length(), 1);
+    assert!(fork.remaining_runs.borrow().is_none());
+    assert!(previous.remaining_runs.borrow().is_some());
+}

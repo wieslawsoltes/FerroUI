@@ -14,9 +14,10 @@ name: Application
 #         test: --workspace
 #         browser-package: my-app-browser
 #
-# Every job runs on ubuntu-latest, the fastest runner: the conventions of FerroUI (no upstream name,
+# Every job runs on ubuntu-latest, the fastest runner, except the optional iOS bundle (macOS): the conventions of FerroUI (no upstream name,
 # ferro_thread_local!, the FerroUI blocks of Cargo.toml up to date with the submodule), the tests
-# under a virtual X server, the browser site, and its deployment to GitHub Pages from main.
+# under a virtual X server, the browser site, optional browser tests of the site (one job per line),
+# optional Android and iOS packages, and the deployment of the site to GitHub Pages from main.
 # The Rust build caches are saved by runs of main only, as in FerroUI (.github/workflows/ci.yml).
 
 on:
@@ -65,6 +66,40 @@ on:
         default: true
       smoke-ignore:
         description: Regular expressions, one per line, of smoke run errors to leave out.
+        type: string
+        default: ''
+      browser-tests:
+        description: >
+          Tests of the built site in a real browser: one job per line, run in parallel after the site
+          is built, each a bash command in the root of the repository with SITE set to the directory
+          of the site (for example `node tests/browser.mjs`, with Playwright from the package.json of
+          the repository). Empty: none.
+        type: string
+        default: ''
+      browser-tests-pull-request:
+        description: >
+          The lines of browser-tests for pull requests, when they differ (for example a shorter set of
+          the slow ones); empty: browser-tests. Pushes, schedules and manual runs take browser-tests.
+        type: string
+        default: ''
+      browser-tests-setup:
+        description: Commands run before each line of browser-tests (bash, in the root of the repository).
+        type: string
+        default: |
+          npm ci
+          npx playwright install --with-deps chromium
+      android:
+        description: >
+          Arguments of `FerroUI/scripts/android/apk.sh package` for the Android package of the
+          application (for example `--package my-app-android --label "My App" --application-id
+          org.example.myapp`). The APK is uploaded as an artifact. Empty: no Android package.
+        type: string
+        default: ''
+      ios:
+        description: >
+          Arguments of `FerroUI/scripts/ios/bundle.sh` for the iOS application bundle for the simulator
+          (for example `--package my-app-ios --bin my-app-ios`). The bundle is uploaded as an artifact.
+          Empty: no iOS bundle.
         type: string
         default: ''
       pages:
@@ -179,7 +214,18 @@ jobs:
     if: inputs.browser-package != ''
     runs-on: ubuntu-latest
     timeout-minutes: 120
+    outputs:
+      tests: ${{ steps.tests.outputs.lines }}
     steps:
+      - name: The lines of browser-tests
+        id: tests
+        env:
+          LINES: >-
+            ${{ github.event_name == 'pull_request' && inputs.browser-tests-pull-request != ''
+            && inputs.browser-tests-pull-request || inputs.browser-tests }}
+        run: |
+          python3 -c 'import json, os; print("lines=" + json.dumps([l.strip() for l in os.environ["LINES"].splitlines() if l.strip()]))' \
+            >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           submodules: true
@@ -233,14 +279,121 @@ jobs:
         with:
           path: ${{ steps.site.outputs.dir }}
 
+  browser-tests:
+    name: Browser tests (${{ matrix.line }})
+    needs: browser
+    if: inputs.browser-tests != '' && needs.browser.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        line: ${{ fromJSON(needs.browser.outputs.tests) }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          submodules: true
+      # The site of the browser job: its GitHub Pages artifact (a tar archive).
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: github-pages
+          path: ${{ runner.temp }}/pages
+      - name: Unpack the site
+        run: |
+          mkdir -p "$RUNNER_TEMP/site"
+          tar -xf "$RUNNER_TEMP/pages/artifact.tar" -C "$RUNNER_TEMP/site"
+          echo "SITE=$RUNNER_TEMP/site" >> "$GITHUB_ENV"
+      - name: Setup
+        if: inputs.browser-tests-setup != ''
+        env:
+          SCRIPT: ${{ inputs.browser-tests-setup }}
+        run: bash -euo pipefail -c "$SCRIPT"
+      - name: Test
+        env:
+          LINE: ${{ matrix.line }}
+        run: bash -euo pipefail -c "$LINE"
+
+  android:
+    name: Android package
+    if: inputs.android != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          submodules: true
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+        with:
+          targets: aarch64-linux-android
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: android
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
+      - name: The pinned packages of the Android SDK (FerroUI/scripts/android/env.sh)
+        run: |
+          version() { sed -n "s/^$1=\"\(.*\)\"/\1/p" FerroUI/scripts/android/env.sh; }
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$ANDROID_HOME" \
+            "ndk;$(version FERROUI_ANDROID_NDK_VERSION)" "build-tools;$(version FERROUI_ANDROID_BUILD_TOOLS_VERSION)" \
+            "platforms;$(version FERROUI_ANDROID_PLATFORM)" > /dev/null
+      - name: Package
+        id: apk
+        env:
+          ARGS: ${{ inputs.android }}
+        run: |
+          eval "args=($ARGS)"
+          FERROUI_ANDROID_WORKSPACE="$GITHUB_WORKSPACE" FerroUI/scripts/android/apk.sh package "${args[@]}" | tee "$RUNNER_TEMP/apk.out"
+          echo "path=$(sed -n 's/^APK: //p' "$RUNNER_TEMP/apk.out" | tail -n 1)" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: android-apk
+          path: ${{ steps.apk.outputs.path }}
+          retention-days: 7
+
+  ios:
+    name: iOS bundle (simulator)
+    if: inputs.ios != ''
+    runs-on: macos-15
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          submodules: true
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+        with:
+          targets: aarch64-apple-ios-sim
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: ios
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
+      - name: Bundle
+        id: bundle
+        env:
+          ARGS: ${{ inputs.ios }}
+        run: |
+          eval "args=($ARGS)"
+          app="$(FERROUI_IOS_WORKSPACE="$GITHUB_WORKSPACE" FerroUI/scripts/ios/bundle.sh "${args[@]}" | tail -n 1)"
+          plutil -p "$app/Info.plist"
+          codesign --verify --verbose "$app"
+          ditto -c -k --keepParent "$app" "$RUNNER_TEMP/ios-app.zip"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ios-app
+          path: ${{ runner.temp }}/ios-app.zip
+          retention-days: 7
+
   deploy:
     name: Deploy to GitHub Pages
     # After every other job passed (the tests may be left out); only main is published.
-    needs: [conventions, test, browser]
+    needs: [conventions, test, browser, browser-tests, android, ios]
     if: >-
       !cancelled() && inputs.pages && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
       && needs.conventions.result == 'success' && needs.browser.result == 'success'
       && (needs.test.result == 'success' || needs.test.result == 'skipped')
+      && (needs.browser-tests.result == 'success' || needs.browser-tests.result == 'skipped')
+      && (needs.android.result == 'success' || needs.android.result == 'skipped')
+      && (needs.ios.result == 'success' || needs.ios.result == 'skipped')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:

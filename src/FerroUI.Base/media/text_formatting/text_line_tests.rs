@@ -397,6 +397,102 @@ fn should_get_character_hit_from_distance() {
 }
 
 #[test]
+fn structural_terminators_preserve_bidi_caret_and_range_geometry() {
+    use crate::media::text_formatting::testing::{
+        advance, format_line, paragraph_properties_with, run_properties, ListTextSource,
+        TextTestScope,
+    };
+    use crate::media::text_formatting::{
+        TextCharacters, TextEndOfLine, TextEndOfParagraph, TextRun,
+    };
+    use crate::media::{CharacterHit, FlowDirection, TextAlignment, TextWrapping};
+    use std::rc::Rc;
+
+    let _scope = TextTestScope::new();
+    let properties = run_properties(12.0);
+    let glyph_width = advance(12.0);
+    for (text, direction) in [
+        ("abcd", FlowDirection::LeftToRight),
+        ("אבגד", FlowDirection::RightToLeft),
+    ] {
+        let paragraph = paragraph_properties_with(
+            &properties,
+            TextWrapping::NoWrap,
+            TextAlignment::Start,
+            direction,
+        );
+        for start in [0, 3] {
+            for marker_length in [1, 2] {
+                let marker: Rc<dyn TextRun> = if marker_length == 1 {
+                    Rc::new(TextEndOfParagraph::new())
+                } else {
+                    Rc::new(TextEndOfLine::with_length(marker_length))
+                };
+                let mut runs: Vec<Rc<dyn TextRun>> = Vec::new();
+                if start != 0 {
+                    runs.push(Rc::new(TextCharacters::from_str("xxx", properties.clone())));
+                }
+                runs.push(Rc::new(TextCharacters::from_str(text, properties.clone())));
+                runs.push(marker);
+                let source = ListTextSource::new(runs);
+                let line = format_line(&source, start, 300.0, &paragraph, None).unwrap();
+                assert_eq!(line.length(), 4 + marker_length);
+                let x_at = |position: i32| {
+                    line.start()
+                        + f64::from(if direction == FlowDirection::RightToLeft {
+                            4 - position
+                        } else {
+                            position
+                        }) * glyph_width
+                };
+                for position in 0..=4 {
+                    let source_index = start + position;
+                    let x = line.get_distance_from_character_hit(CharacterHit::new(source_index));
+                    assert_eq!(
+                        x,
+                        x_at(position),
+                        "{text:?}, start={start}, marker={marker_length}, caret={position}"
+                    );
+                    let hit = line.get_character_hit_from_distance(x);
+                    assert_eq!(
+                        hit.first_character_index() + hit.trailing_length(),
+                        source_index
+                    );
+                    if position < 4 {
+                        let bounds = line.get_text_bounds(source_index, 1);
+                        assert_eq!(bounds.len(), 1);
+                        assert_eq!(
+                            bounds[0].rectangle().left(),
+                            x_at(position).min(x_at(position + 1))
+                        );
+                        assert_eq!(bounds[0].rectangle().width, glyph_width);
+                        assert_eq!(
+                            bounds[0].text_run_bounds()[0].text_source_character_index(),
+                            source_index
+                        );
+                        assert_eq!(bounds[0].text_run_bounds()[0].length(), 1);
+                    }
+                }
+                for position in 4..=4 + marker_length {
+                    assert_eq!(
+                        line.get_distance_from_character_hit(CharacterHit::new(start + position)),
+                        x_at(4)
+                    );
+                }
+                let marker_bounds = line.get_text_bounds(start + 4, marker_length);
+                assert_eq!(marker_bounds.len(), 1);
+                assert_eq!(marker_bounds[0].rectangle().left(), x_at(4));
+                assert_eq!(marker_bounds[0].rectangle().width, 0.0);
+                let selected = line.get_text_bounds(start + 1, 3 + marker_length);
+                assert_eq!(selected.len(), 1);
+                assert_eq!(selected[0].rectangle().left(), x_at(1).min(x_at(4)));
+                assert_eq!(selected[0].rectangle().width, 3.0 * glyph_width);
+            }
+        }
+    }
+}
+
+#[test]
 fn should_collapse_line() {
     let _scope = TextTestScope::new();
 
@@ -1389,4 +1485,48 @@ fn inter_word_justification_fills_the_paragraph_width() {
 
     // Hit testing follows the justified advances.
     assert_eq!(text_line.get_distance_from_character_hit(CharacterHit::new(3)), 24.0);
+}
+
+/// Deviation (DEVIATIONS.md, Text formatting): runs with different font features are
+/// shaped apart (upstream shapes them together with the features of the first run);
+/// runs with equal features, or none, are still shaped together.
+#[test]
+fn runs_with_different_font_features_are_shaped_apart() {
+    use crate::media::text_formatting::testing::{format_line, paragraph_properties, ListTextSource, TextTestScope};
+    use crate::media::text_formatting::{GenericTextRunProperties, TextCharacters, TextRun, TextRunProperties};
+    use crate::media::{BaselineAlignment, FontFeatureCollection, TextWrapping, Typeface};
+    use crate::utilities::ReadOnlyMemory;
+    use std::rc::Rc;
+
+    let scope = TextTestScope::new();
+    let properties = |features: Option<&str>| -> Rc<dyn TextRunProperties> {
+        Rc::new(GenericTextRunProperties::with_all(
+            Typeface::default_typeface(),
+            12.0,
+            None,
+            None,
+            None,
+            BaselineAlignment::Baseline,
+            None,
+            features.map(|features| FontFeatureCollection::parse(features).unwrap()),
+        ))
+    };
+    // The number of shaping calls a line of two contiguous runs takes.
+    let shape_calls = |first: Option<&str>, second: Option<&str>| {
+        let text = ReadOnlyMemory::from_vec("abcd".encode_utf16().collect());
+        let runs: Vec<Rc<dyn TextRun>> = vec![
+            Rc::new(TextCharacters::new(text.slice(0, 2), properties(first))),
+            Rc::new(TextCharacters::new(text.slice(2, 2), properties(second))),
+        ];
+        let source = ListTextSource::new(runs);
+        let paragraph = paragraph_properties(&properties(None), TextWrapping::NoWrap);
+        let before = scope.shaper().shape_call_count();
+        format_line(&source, 0, 1000.0, &paragraph, None).unwrap();
+        scope.shaper().shape_call_count() - before
+    };
+
+    assert_eq!(shape_calls(None, None), 1);
+    assert_eq!(shape_calls(Some("kern=0"), Some("kern=0")), 1);
+    assert_eq!(shape_calls(Some("kern=0"), None), 2);
+    assert_eq!(shape_calls(Some("kern=0"), Some("liga=0")), 2);
 }

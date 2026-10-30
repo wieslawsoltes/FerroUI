@@ -346,6 +346,13 @@ impl TextBlockImpl for SelectableTextBlock {
         );
         paragraph_properties.set_line_spacing(this.line_spacing());
 
+        // Deviation (DEVIATIONS.md, Text block): `SelectableTextBlock.CreateTextLayout` reads
+        // the inline runs for the selection overrides before it creates them, so the
+        // overrides of the first layout after a change use the old runs.
+        if this.has_complex_content() {
+            this.ensure_text_runs();
+        }
+
         let mut text_style_overrides: Option<Vec<ValueSpan<Rc<dyn TextRunProperties>>>> = None;
         let selection_start = this.selection_start();
         let selection_end = this.selection_end();
@@ -392,9 +399,15 @@ impl TextBlockImpl for SelectableTextBlock {
                             overlap_length,
                             selection_properties(
                                 run_properties.map_or_else(|| typeface.clone(), |p| p.typeface().clone()),
-                                match run_properties.and_then(|p| p.font_features()) {
-                                    Some(font_features) => Some(font_features.clone()),
-                                    None => Typography::effective_font_features(this),
+                                match run_properties {
+                                    // With typography in use a run's features are already
+                                    // resolved, a reset to the defaults included: they win.
+                                    Some(properties) if Typography::is_in_use() => properties.font_features().cloned(),
+                                    // Upstream: the run's features, else the block's.
+                                    _ => match run_properties.and_then(|p| p.font_features()) {
+                                        Some(font_features) => Some(font_features.clone()),
+                                        None => Typography::effective_font_features(this),
+                                    },
                                 },
                             ),
                         ));
@@ -415,8 +428,6 @@ impl TextBlockImpl for SelectableTextBlock {
             text_style_overrides.map(Rc::from);
 
         let text_source: Rc<dyn ITextSource> = if this.has_complex_content() {
-            this.ensure_text_runs();
-
             Rc::new(InlinesTextSource::new(this.text_runs().unwrap_or_default(), text_style_overrides))
         } else {
             Rc::new(FormattedTextSource::new(

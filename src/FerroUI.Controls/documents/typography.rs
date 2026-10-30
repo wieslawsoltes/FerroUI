@@ -689,6 +689,11 @@ impl Typography {
         element.set_value(Self::variants_property(), value);
     }
 
+    /// Whether a typography property changed on this thread (see `TYPOGRAPHY_IN_USE`).
+    pub(crate) fn is_in_use() -> bool {
+        TYPOGRAPHY_IN_USE.with(|in_use| in_use.get())
+    }
+
     pub(crate) fn is_property(property: &FerroProperty) -> bool {
         property.owner_type() == Self::TYPE
     }
