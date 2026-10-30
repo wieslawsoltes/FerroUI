@@ -489,6 +489,16 @@ impl<T: PropertyValue> SelectionModel<T> {
     }
 
     pub fn select_all(&self) {
+        // Deviation (DEVIATIONS.md, Selection): upstream selects the range 0..int.MaxValue
+        // when there is no items view yet (`CoerceRange` takes int.MaxValue for the last
+        // index), and the selection changed event then carries 2^31 indexes and items, which
+        // the controls enumerate (`InternalSelectionModel.OnSelectionChanged` copies the
+        // selected items): selecting everything of an unbound list never finishes. With no
+        // items view there is nothing to select.
+        if self.base.items_view().is_none() {
+            return;
+        }
+
         self.select_range(0, i32::MAX);
     }
 

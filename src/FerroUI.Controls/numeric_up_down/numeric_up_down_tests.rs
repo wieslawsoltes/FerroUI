@@ -716,3 +716,121 @@ fn additional_clip_value_to_min_max_clamps_the_value_when_a_bound_changes() {
     control.set_minimum(d("5"));
     assert_eq!(None, control.value());
 }
+
+// ---------------------------------------------------------------------------
+// WinUI additions (DEVIATIONS.md, "WinUI additions to upstream controls"): the
+// default of each keeps upstream, and the WinUI behaviour is opt-in.
+// ---------------------------------------------------------------------------
+
+fn press(control: &Ref<NumericUpDown>, key: Key) -> KeyEventArgs {
+    let mut e = KeyEventArgs::new();
+    e.set_routed_event(Some(InputElement::key_down_event()));
+    e.key = key;
+    control.raise_event(&e);
+    e
+}
+
+#[test]
+fn winui_additions_default_to_upstream() {
+    let _app = start();
+    let control = create_control();
+    assert!(!control.accepts_expression());
+    assert_eq!(None, control.large_change());
+    assert!(!control.is_wrap_enabled());
+
+    // PageUp and PageDown stay unhandled and bubble, as upstream.
+    control.set_numeric_value(Some(d("5")));
+    assert!(!press(&control, Key::PageUp).handled());
+    assert!(!press(&control, Key::PageDown).handled());
+    assert_eq!(Some(d("5")), control.value());
+
+    // A step stops at a bound.
+    control.set_maximum(d("10"));
+    control.set_numeric_value(Some(d("10")));
+    spin(&control, SpinDirection::Increase);
+    assert_eq!(Some(d("10")), control.value());
+
+    // An expression is not a number.
+    let text_box = get_text_box(&control);
+    text_box.set_text(Some("2 + 3"));
+    press_enter(&control);
+    assert_eq!(Some(d("10")), control.value(), "the expression is not evaluated");
+}
+
+#[test]
+fn large_change_steps_page_up_and_page_down() {
+    let _app = start();
+    let control = create_control();
+    control.set_large_change(Some(d("10")));
+    control.set_numeric_value(Some(d("5")));
+    assert!(press(&control, Key::PageUp).handled());
+    assert_eq!(Some(d("15")), control.value());
+    assert!(press(&control, Key::PageDown).handled());
+    press(&control, Key::PageDown);
+    assert_eq!(Some(d("-5")), control.value());
+
+    // The bounds clamp the step, as a spin.
+    control.set_minimum(d("0"));
+    control.set_numeric_value(Some(d("3")));
+    press(&control, Key::PageDown);
+    assert_eq!(Some(d("0")), control.value());
+
+    // A read-only control leaves the keys alone.
+    control.set_is_read_only(true);
+    assert!(!press(&control, Key::PageUp).handled());
+    assert_eq!(Some(d("0")), control.value());
+}
+
+#[test]
+fn is_wrap_enabled_wraps_at_the_bounds() {
+    let _app = start();
+    let control = create_control();
+    control.set_minimum(d("0"));
+    control.set_maximum(d("10"));
+    control.set_increment(d("3"));
+    control.set_is_wrap_enabled(true);
+
+    control.set_numeric_value(Some(d("9")));
+    let spinner = get_spinner(&control);
+    assert!(spinner.valid_spin_direction().contains(ValidSpinDirections::INCREASE));
+    spin(&control, SpinDirection::Increase);
+    assert_eq!(Some(d("0")), control.value(), "past the maximum to the minimum");
+    assert!(spinner.valid_spin_direction().contains(ValidSpinDirections::DECREASE), "the minimum is not the end");
+    spin(&control, SpinDirection::Decrease);
+    assert_eq!(Some(d("10")), control.value(), "below the minimum to the maximum");
+
+    // PageUp wraps too.
+    control.set_large_change(Some(d("5")));
+    control.set_numeric_value(Some(d("8")));
+    press(&control, Key::PageUp);
+    assert_eq!(Some(d("0")), control.value());
+}
+
+#[test]
+fn accepts_expression_evaluates_the_text() {
+    let _app = start();
+    let control = create_control();
+    control.set_accepts_expression(true);
+    let text_box = get_text_box(&control);
+
+    text_box.set_text(Some("2 + 3 * (4 - 1)"));
+    press_enter(&control);
+    assert_eq!(Some(d("11")), control.value());
+
+    // A number is still read as one, and an invalid expression is the error it was.
+    text_box.set_text(Some("7.5"));
+    press_enter(&control);
+    assert_eq!(Some(d("7.5")), control.value());
+    // ("1 +" would be a number: the parsing style allows a trailing sign.)
+    text_box.set_text(Some("2 *"));
+    let e = press_enter(&control);
+    assert!(e.handled(), "an invalid text keeps Enter handled, as upstream");
+    assert_eq!(Some(d("7.5")), control.value());
+
+    // The bounds apply to the result.
+    control.set_clip_value_to_min_max(true);
+    control.set_maximum(d("20"));
+    text_box.set_text(Some("10 * 10"));
+    press_enter(&control);
+    assert_eq!(Some(d("20")), control.value());
+}

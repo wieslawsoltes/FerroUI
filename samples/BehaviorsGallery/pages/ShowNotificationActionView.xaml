@@ -21,10 +21,9 @@
   </StackPanel>
   <Interaction.Behaviors>
     <EventTriggerBehavior EventName="Click" SourceObject="ShowButton">
-      <!-- Deviation (DEVIATIONS.md, Behaviors gallery): the notification of the framework is not
-           declared to markup; the code-behind of the page sets the notification of the action
-           (Title "Hello", Message "Custom notification"). -->
-      <ShowNotificationAction NotificationManager="{Binding #Manager.NotificationManager}" />
+      <ShowNotificationAction NotificationManager="{Binding #Manager.NotificationManager}">
+        <Notification Title="Hello" Message="Custom notification" />
+      </ShowNotificationAction>
     </EventTriggerBehavior>
     <!-- TODO: -->
     <!--<EventTriggerBehavior EventName="Click" SourceObject="CloseButton">

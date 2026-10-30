@@ -90,6 +90,7 @@ RUST_PATH_CRATES = [
     "FerroUI.Controls.Inking",
     "FerroUI.Controls.Repeater",
     os.path.join("Markup", "FerroUI.Markup.Xaml"),
+    os.path.join("Markup", "FerroUI.Markup.Xaml.WinUI"),
     "FerroUI.Dialogs",
     "FerroUI.Themes.Simple",
     "FerroUI.Themes.Fluent",

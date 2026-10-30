@@ -402,6 +402,7 @@ crate::ferro_rust_paths! {
         crate::media::fonts::IFontCollection,
         crate::media::imaging::IBitmap,
         crate::platform::IRuntimePlatform,
+        crate::platform::storage::IStorageProvider,
         crate::styling::IStyle,
         crate::styling::IStyleHost,
         crate::styling::ITemplate,

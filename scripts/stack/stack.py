@@ -282,7 +282,16 @@ def command_land(args):
               f"{', '.join(f'#{n}' for n in upto)} into {default} at once")
         return 0
     if len(chain) > 1:
-        print(gh("stack", "link", *numbers, parse=False).strip())
+        # A stack that already exists on GitHub keeps its merged parts, and `gh stack link` refuses a
+        # list without them ("this would remove #N"): the stack is then linked already, and merging
+        # through it is what is wanted.
+        result = subprocess.run(["gh", "stack", "link", *numbers], capture_output=True, text=True)
+        if result.returncode == 0:
+            print(result.stdout.strip())
+        elif "would remove" in (result.stdout + result.stderr):
+            print("the stack is linked on GitHub already (with its merged parts)")
+        else:
+            raise SystemExit(f"gh stack link {' '.join(numbers)}: {(result.stderr or result.stdout).strip()}")
     print(gh("stack", "merge", str(landed["number"]), "--merge", "--yes", parse=False).strip())
     print(f"landed {', '.join(f'#{n}' for n in upto)}")
     return 0

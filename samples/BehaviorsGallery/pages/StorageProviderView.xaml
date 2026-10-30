@@ -26,13 +26,10 @@
         <MenuItem Header="Open Folders">
           <Interaction.Behaviors>
             <!-- Override StorageProvider -->
-            <!-- Deviation (DEVIATIONS.md, Behaviors gallery): the storage provider of the top level
-                 is not declared to markup, so the binding $parent[TopLevel].StorageProvider is left
-                 out; the behavior uses the storage provider of its top level by default, the same
-                 provider. -->
             <MenuItemOpenFolderPickerBehavior Command="{Binding OpenFoldersCommand}"
                                               Title="Open Folders"
-                                              AllowMultiple="True" />
+                                              AllowMultiple="True"
+                                              StorageProvider="{Binding $parent[TopLevel].StorageProvider}" />
           </Interaction.Behaviors>
         </MenuItem>
         <MenuItem Header="Save File">

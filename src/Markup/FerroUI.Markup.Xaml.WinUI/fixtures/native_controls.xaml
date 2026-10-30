@@ -1,0 +1,53 @@
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <StackPanel.Resources>
+    <FontIconSource x:Key="FontSource" Glyph="A" />
+    <SymbolIconSource x:Key="SymbolSource" Symbol="Accept" />
+    <PathIconSource x:Key="PathSource" Data="M 0,0 L 8,8" />
+    <RatingItemInfo x:Key="RatingInfo" />
+    <RatingItemImageInfo x:Key="RatingImages" />
+    <InfoBarTemplateSettings x:Key="BarSettings" />
+    <InfoBadgeTemplateSettings x:Key="BadgeSettings" />
+    <ProgressRingTemplateSettings x:Key="RingSettings" />
+  </StackPanel.Resources>
+  <ContentPage x:Name="ExistingPage" Tag="{x:Type Page}" />
+  <FramePage x:Name="NativePage" NavigationCacheMode="Required">
+    <TextBlock Text="Native frame page" />
+  </FramePage>
+  <Frame x:Name="NativeFrame" SourcePageType="{x:Type FramePage}" />
+  <NumericUpDown x:Name="ExistingNumeric" Value="4" />
+  <NumberBox x:Name="Number" Value="12" SpinButtonPlacementMode="Inline" />
+  <RadioButtons x:Name="Options" SelectedIndex="1">
+    <RadioButton Content="First" />
+    <RadioButton Content="Second" />
+  </RadioButtons>
+  <FontIcon x:Name="Font" Glyph="B" />
+  <SymbolIcon x:Name="Symbol" Symbol="Accept" />
+  <AutoSuggestBox x:Name="Search" Text="Find">
+    <AutoSuggestBox.QueryIcon>
+      <SymbolIcon Symbol="Find" />
+    </AutoSuggestBox.QueryIcon>
+  </AutoSuggestBox>
+  <InfoBar x:Name="Bar" IsOpen="True" Title="Native controls" />
+  <InfoBadge x:Name="Badge" Value="7" IconSource="{StaticResource FontSource}" />
+  <ProgressRing x:Name="Ring" IsIndeterminate="False" Maximum="200" Value="42" />
+  <RatingControl x:Name="Rating" PlaceholderValue="2.5">
+    <RatingControl.ItemInfo>
+      <RatingItemFontInfo Glyph="C" UnsetGlyph="D" />
+    </RatingControl.ItemInfo>
+  </RatingControl>
+  <InfoBarPanel x:Name="BarPanel">
+    <TextBlock Text="Primitive from the default namespace" />
+  </InfoBarPanel>
+  <NavigationView x:Name="Navigation" PaneDisplayMode="Left">
+    <NavigationView.MenuItems>
+      <NavigationViewItem x:Name="Inbox" Content="Inbox">
+        <NavigationViewItem.Icon>
+          <SymbolIcon Symbol="Mail" />
+        </NavigationViewItem.Icon>
+      </NavigationViewItem>
+      <NavigationViewItemHeader Content="Other" />
+      <NavigationViewItemSeparator />
+    </NavigationView.MenuItems>
+  </NavigationView>
+</StackPanel>
