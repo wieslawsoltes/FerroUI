@@ -19,6 +19,7 @@ use std::rc::{Rc, Weak};
 /// proposed content. Independently accepted callback edits retain their content
 /// and revision when an older operation rejects its stale preparation.
 #[derive(Clone, Debug, PartialEq, Eq)]
+#[non_exhaustive]
 pub enum DocumentError {
     OffsetOutOfRange { offset: usize, length: usize },
     ReversedRange { start: usize, end: usize },
