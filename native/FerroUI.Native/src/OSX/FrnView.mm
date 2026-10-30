@@ -1,7 +1,3 @@
-//
-// Created by Dan Walmsley on 05/05/2022.
-//
-
 #import <AppKit/AppKit.h>
 #import <Carbon/Carbon.h> /* For the TIS functions used to classify the keyboard input source. */
 #include "FrnView.h"

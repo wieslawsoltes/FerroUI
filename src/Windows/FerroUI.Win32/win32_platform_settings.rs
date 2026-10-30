@@ -79,8 +79,8 @@ mod imp {
     use super::*;
     use crate::interop::unmanaged_methods::{get_double_click_time, get_system_metrics, SystemMetric};
     use crate::win_rt::{
-        HStringInterop, IAccessibilitySettings, IGlobalizationPreferencesStatics, IUISettings3, NativeWinRTMethods,
-        UIColorType, WinRTApiInformation,
+        HStringInterop, IAccessibilitySettings, IGlobalizationPreferencesStatics, IUISettings, IUISettings3,
+        NativeWinRTMethods, UIColorType, WinRTApiInformation,
     };
     use ferroui_base::input::platform::PlatformHotkeyConfiguration;
     use ferroui_base::input::PointerType;
@@ -88,7 +88,7 @@ mod imp {
     use ferroui_base::platform::{DefaultPlatformSettings, IPlatformSettings};
     use ferroui_base::reactive::IDisposable;
     use ferroui_base::Size;
-    use ferroui_microcom::HResult;
+    use ferroui_microcom::{ComPtr, HResult, Interface};
     use std::cell::{Cell, OnceCell, RefCell};
     use std::rc::Rc;
     use std::time::Duration;
@@ -114,6 +114,42 @@ mod imp {
         })
     }
 
+    /// The class of the Windows Runtime that reports the settings of the user interface. It is
+    /// the one source of every setting the platform settings read from `UISettings`, each
+    /// through the interface that declares it in `winrt.idl`: the colours (`IUISettings3`) and
+    /// the motion preference (`IUISettings`). A further setting (the advanced effects of
+    /// `IUISettings4`, which WinUI's material policy reads) is read the same way: its interface
+    /// declared once in `winrt.idl`, read with `ui_settings` and `read_ui_setting`.
+    const UI_SETTINGS: &str = "Windows.UI.ViewManagement.UISettings";
+
+    /// A new `UISettings`, through its interface `I`.
+    fn ui_settings<I: Interface>() -> Result<ComPtr<I>, HResult> {
+        NativeWinRTMethods::create_instance::<I>(UI_SETTINGS)
+    }
+
+    /// A setting read through `UISettings` by `read`: `fallback()`, the answer of a system
+    /// without the class, when the class is not present or the read fails. A failure is an
+    /// exception of the Windows Runtime, which nothing catches in WinUI or the reference; here
+    /// it is logged with `message` (whose `{0}` is the error) and the fallback is the answer.
+    fn read_ui_setting<T>(
+        message: &'static str,
+        read: impl FnOnce() -> Result<T, HResult>,
+        fallback: impl FnOnce() -> T,
+    ) -> T {
+        if !ui_settings_supported() {
+            return fallback();
+        }
+        match read() {
+            Ok(value) => value,
+            Err(error) => {
+                if let Some(logger) = Logger::try_get(LogEventLevel::Warning, LogArea::WIN32_PLATFORM) {
+                    logger.log_with_values(None, message, &[&error]);
+                }
+                fallback()
+            }
+        }
+    }
+
     /// The platform settings of the Windows backend.
     ///
     /// The gesture metrics of the mouse come from the system metrics. The
@@ -121,7 +157,8 @@ mod imp {
     /// Windows Runtime (`UISettings`, `AccessibilitySettings`,
     /// `GlobalizationPreferences`) and kept until the platform tells the
     /// settings that the system changed them (`WM_SETTINGCHANGE` of the
-    /// message window).
+    /// message window). The motion preference (`UISettings`) is read each
+    /// time it is asked for.
     pub struct Win32PlatformSettings {
         base: DefaultPlatformSettings,
         color_values: Cell<Option<PlatformColorValues>>,
@@ -159,7 +196,7 @@ mod imp {
         }
 
         fn read_color_values() -> Result<PlatformColorValues, HResult> {
-            let ui_settings = NativeWinRTMethods::create_instance::<IUISettings3>("Windows.UI.ViewManagement.UISettings")?;
+            let ui_settings = ui_settings::<IUISettings3>()?;
             let accent = ui_settings.get_color_value(UIColorType::Accent)?.to_ferro();
             // The shades of the accent, which WinUI reads the same way
             // (SystemThemingInterop::GetSystemVariantAccentColor). A system
@@ -296,6 +333,17 @@ mod imp {
             let language = self.query_preferred_application_language();
             *self.last_language.borrow_mut() = Some(language.clone());
             language
+        }
+
+        fn animations_enabled(&self) -> bool {
+            // Read for each animation and not kept, as WinUI's `SharedHelpers::IsAnimationsEnabled`
+            // does: a change of the setting applies to the next animation. `AnimationsEnabled`
+            // is a WinRT boolean, one byte.
+            read_ui_setting(
+                "Unable to read the animation preference of the system: {0}",
+                || Ok(ui_settings::<IUISettings>()?.animations_enabled()? != 0),
+                || self.base.animations_enabled(),
+            )
         }
 
         fn get_color_values(&self) -> PlatformColorValues {

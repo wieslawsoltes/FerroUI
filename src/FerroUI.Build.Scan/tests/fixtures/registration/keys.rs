@@ -27,6 +27,13 @@ ferro_markup_enum!(flags Modes {
     Every = Modes::EVERY,
     Pointing = Modes::POINTING,
     Computed = Modes::COMPUTED,
+    EmptyExpression = Modes::empty(),
+    AllExpression = Modes::all(),
+    UnionExpression = Modes::KEYBOARD.union(Modes::REMOTE),
+    RetainedExpression = Modes::from_bits_retain(15),
+    TruncatedExpression = Modes::from_bits_truncate(15),
+    UnknownExpression = Modes::compute(),
+    ForeignExpression = Other::empty(),
 });
 
 #[repr(i32)]

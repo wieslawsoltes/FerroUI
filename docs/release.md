@@ -74,6 +74,10 @@ The first preview added the five other names of section 2.2 as placeholders (37 
 
 `ferroui-devtools` (`src/FerroUI.DevTools`, Controls and themes; the opt-in Chrome DevTools Protocol endpoint, docs/devtools-cdp.md) joined the same day. It is built on the `target` module of `ferroui-inspect`, so the core is published before it and it before the facade, where it is the optional feature `devtools`. The native endpoint is its default feature `server`; the browser bridge is the feature `browser`, with the default features off. Its unit tests are in the crate.
 
+`ferroui-controls-charts` (`src/FerroUI.Controls.Charts`, Controls and themes; the port of the public contract of WinUI Charts, docs/porting/winui-charts.md) joined with #282. It is an optional part of the facade (`charts`), and its sample `samples/ChartsDemo` is not published.
+`ferroui-controls-inking` (`src/FerroUI.Controls.Inking`, Controls and themes; the port of the inking controls of WinUI with the WinUI styles of the toolbar, docs/porting/winui-inking.md) joined with #283. It compiles its theme documents in its build script (`links = "ferroui_controls_inking_xaml"`) and depends on the WinUI theme, so it is published after it; it is an optional part of the facade (`inking`).
+`ferroui-controls-repeater` (`src/FerroUI.Controls.Repeater`, Controls and themes; the port of the Repeater of WinUI, docs/porting/winui-repeater/README.md) joined with #269. It is an optional part of the facade (`repeater`).
+
 Every crate was checked in the same way: packaged, and built from its package, by `scripts/release/publish.sh --dry-run` (section 8). `cargo publish --dry-run -p <crate>` cannot be used for this before the first release: it resolves the dependencies of the package in the registry, where the other crates of the workspace are not yet. `cargo package --workspace` (Cargo 1.90 and later) resolves them among the packages it has just assembled instead, which is what the dry run uses, and so every crate got the full check, not only the ones without dependencies in the workspace.
 
 ### 1.2 The crates that are never published
@@ -145,6 +149,9 @@ Two names are not under the `ferroui-` prefix. The owner decided on 2026-10-10 t
   | `winui-theme` | `ferroui-themes-winui` | `themes_winui` | no |
   | `xaml` | `ferroui-markup-xaml` and the run-time loader (`ferroui-markup-xaml-loader` with its feature `runtime`) | `markup_xaml`, `markup_xaml_loader` | no |
   | `color-picker`, `dialogs` | `ferroui-controls-color-picker`, `ferroui-dialogs` | `controls_color_picker`, `dialogs` | no |
+  | `charts` | `ferroui-controls-charts` (WinUI public-contract port) | `controls_charts` | no |
+  | `inking` | `ferroui-controls-inking` (the port of WinUI's inking controls) | `controls_inking` | no |
+  | `repeater` | `ferroui-controls-repeater` (the port of WinUI's Repeater) | `controls_repeater` | no |
   | `devtools` | `ferroui-devtools`, `ferroui-inspect` (opt-in CDP inspection and automation) | `devtools` | no |
   | `diagnostics` | `ferroui-diagnostics` (added for 0.4) | `diagnostics` | no |
   | `treedatagrid` | `ferroui-controls-treedatagrid` and `ferroui-treedatagrid-core` (added for 0.2) | `controls_treedatagrid`, `treedatagrid_core` | no |
@@ -196,6 +203,19 @@ scripts/release/set-version.sh 0.1.0-preview.2
 It rewrites the root manifest, runs `cargo metadata` (which also brings `Cargo.lock` up to date), and fails if a crate does not have the new version or a dependency between crates of the workspace is not pinned to it. The check of the continuous integration fails for the same reasons, so a crate that states its own version or its own requirement is found when it is added.
 
 A version that was published is never reused. If a release stops half way and cannot be completed (section 8.3), the next attempt is the next preview number.
+
+### 3.1 API stability
+
+Within a minor version the public API of the published crates only grows: `0.4.x` adds members and types and changes or removes none, and neither the default value of a property nor its default binding mode changes. Two checks of the continuous integration enforce it on every pull request that changes more than documentation:
+
+- **Signatures** (job `api-gate` of `ci.yml`, "API gate (cargo-semver-checks)"): `scripts/api-gate/semver_checks.py` runs [cargo-semver-checks](https://github.com/obi1kenobi/cargo-semver-checks) for each published crate against the sources of the release, with the release type `minor`. It does not let cargo-semver-checks build each crate on its own (74 crates, each compiling its dependencies again, took hours): it documents all the published crates as rustdoc JSON in one `cargo doc` for the pull request and one for the baseline (a worktree of the baseline commit), with the features cargo unifies for them, and runs cargo-semver-checks on the two JSON files of each crate. CI caches the documentation of the baseline under the baseline commit and the rustc version (`semver_checks.py --baseline-key`; the nightly run of main saves it for every pull request), and runs the gate only when a pull request changes `src/`, a manifest, `Cargo.lock` or the script. The baseline is the tag of the release, or, while it has none, `BASELINE_COMMIT` of the script. 0.4.0 is not published yet (no tag, not on crates.io) and the workspace on main is still at 0.4.0, so the 0.4.0 that will ship is main: the baseline is the commit of main the gate was merged on (`12db0c25`, 2026-10-29), and it moves to the tag `v0.4.0` once the release is published. A crate the baseline does not have is not checked. The lints `constructible_struct_adds_field` and `repr_c_plain_struct_fields_reordered` are not counted for the `*VTable` structs that `ferro_class!` writes: they are the dispatch machinery of the class model, every new virtual member adds a field to its table, and no application constructs one. `constructible_struct_adds_field` is not counted either for the metadata structs `MarkupType` (ferroui-base) and `TypeModel` (ferroui-build-scan), which are built only through `MarkupType::new` and `TypeModel::new` with the struct update syntax and grow with the compiler metadata of the markup compiler; every other result counts. It runs on macOS, where the whole workspace builds, so the API of a platform crate is the one it has when built for macOS. `semver_checks.py --list` prints the baseline and the crates without running anything.
+- **Defaults of properties** (`property_defaults_tests` of `ferroui-controls`, run by the Linux job of `ci.yml`): the owner, name, value type, default value, default binding mode and inheritance of every styled and attached property of the public types of `ferroui-base` and `ferroui-controls`, and every type whose default or binding mode of a property differs from its base type's, compared with the checked-in `src/FerroUI.Controls/property_defaults.snapshot`. A changed or removed line fails as a break; an added line fails until the snapshot records it, which a pull request that adds properties does by regenerating it:
+
+  ```sh
+  FERROUI_UPDATE_PROPERTY_DEFAULTS=1 cargo test -p ferroui-controls --lib property_defaults
+  ```
+
+A change that has to break the API waits for the next minor version. When a release starts a minor version (`0.5.0`), its pull request sets `BASELINE_VERSION` and `BASELINE_COMMIT` of the script to that release.
 
 ## 4. Metadata
 
@@ -336,6 +356,7 @@ After the release:
 - [ ] At the first release only: remove the note between the `release-note` markers of the README ("Upcoming"), and the sentence of its status paragraph that says nothing has been published.
 - [ ] Set the date of the entry in `CHANGELOG.md` and point its link at the tag.
 - [ ] Look at the docs.rs badges of the README table after an hour (section 7) and note the failures for the next preview.
+- [ ] After a release that starts a minor version: set the baseline of the API gate to it (`BASELINE_VERSION` and `BASELINE_COMMIT` of `scripts/api-gate/semver_checks.py`, section 3.1).
 - [ ] Set the next version (`scripts/release/set-version.sh 0.1.0-preview.<N+1>` after a preview, the first preview of the next minor version, such as `0.2.0-preview.1`, after a release), so that `main` never carries a version that is on crates.io with other contents.
 
 ## 10. A preview that turns out broken

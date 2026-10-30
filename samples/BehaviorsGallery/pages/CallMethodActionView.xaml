@@ -1,0 +1,47 @@
+<UserControl x:Class="BehaviorsGallery.Views.Pages.CallMethodActionView"
+             xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:BehaviorsGallery.ViewModels"
+             x:DataType="vm:MainWindowViewModel"
+             mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="450">
+  <!-- Ported from Views/Pages/CallMethodActionView of the reference sample. -->
+  <Design.DataContext>
+    <vm:MainWindowViewModel />
+  </Design.DataContext>
+  <Grid RowDefinitions="*,Auto" ColumnDefinitions="30*,5,30*,5,30*">
+    <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5" 
+            Margin="5"
+            Background="{DynamicResource PinkBrush}" 
+            BorderBrush="{DynamicResource GrayBrush}"
+            BorderThickness="5">
+      <TextBlock Text="{Binding Count}" 
+                 FontSize="100" 
+                 VerticalAlignment="Center" 
+                 HorizontalAlignment="Center"
+                 Foreground="{DynamicResource YellowBrush}" />
+    </Border>
+    <Button x:Name="DecrementButton" Content="Decrement" Grid.Row="1" Grid.Column="0" Margin="5,0,0,5">
+      <Interaction.Behaviors>
+        <EventTriggerBehavior EventName="Click" SourceObject="DecrementButton">
+          <CallMethodAction TargetObject="{Binding}" MethodName="DecrementCount" />
+        </EventTriggerBehavior>
+      </Interaction.Behaviors>
+    </Button>
+    <Button Name="ResetButton" Content="Reset" Grid.Row="1" Grid.Column="2" Margin="0,0,0,5">
+      <Interaction.Behaviors>
+        <EventTriggerBehavior EventName="Click" SourceObject="ResetButton">
+          <ChangePropertyAction TargetObject="{Binding}" PropertyName="Count" Value="0" />
+        </EventTriggerBehavior>
+      </Interaction.Behaviors>
+    </Button>
+    <Button x:Name="IncrementButton" Content="Increment" Grid.Row="1" Grid.Column="4" Margin="0,0,5,5">
+      <Interaction.Behaviors>
+        <EventTriggerBehavior EventName="Click" SourceObject="IncrementButton">
+          <CallMethodAction TargetObject="{Binding}" MethodName="IncrementCount" />
+        </EventTriggerBehavior>
+      </Interaction.Behaviors>
+    </Button>
+  </Grid>
+</UserControl>

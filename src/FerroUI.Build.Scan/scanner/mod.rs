@@ -733,6 +733,15 @@ impl Builder {
                         value = self.source.member_value(declared, &path[1], 0);
                     }
                 }
+                // The flags form also accepts a constant expression directly,
+                // such as `Flags::empty()`, without an intermediate constant.
+                // Evaluate only the known operations of a declared bitflags type;
+                // an arbitrary function with the same name is not a numeric value.
+                if value.is_none() {
+                    if let Some(declared) = &declared {
+                        value = self.source.flags_expression_value(declared, name, &tokens);
+                    }
+                }
             } else {
                 let variant = member.variant.clone().unwrap_or_else(|| member.name.clone());
                 // A variant, or an associated constant of the enumeration that names one

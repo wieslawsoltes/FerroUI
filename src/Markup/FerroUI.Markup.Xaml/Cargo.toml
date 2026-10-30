@@ -26,6 +26,9 @@ autoexamples = false
 path = "lib.rs"
 
 [features]
+hot-reload = ["runtime-populate", "ferroui-base/hot-reload", "ferroui-markup/hot-reload"]
+# Constructor-scoped overrides are only needed when an interpreter is linked.
+runtime-populate = []
 # The performance counters of the base crate, which the counting site of this crate (dynamic
 # resource expressions) counts into.
 perf-counters = ["ferroui-base/perf-counters", "ferroui-controls/perf-counters"]

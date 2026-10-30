@@ -1,0 +1,28 @@
+<Window xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="DataTriggerBehavior002">
+  <!-- Ported from tests/Xaml.Behaviors.Interactions.UnitTests/Core/DataTriggerBehavior002 of Xaml.Behaviors.
+       Adapted: no x:Class (the test loads the window with the run-time loader). -->
+  <StackPanel>
+    <TextBlock Name="TargetTextBlock"
+               Text="">
+      <Interaction.Behaviors>
+        <DataTriggerBehavior Binding="{Binding #TargetCheckBox.IsChecked}"
+                             ComparisonCondition="Equal"
+                             Value="True">
+          <ChangePropertyAction PropertyName="Text"
+                                Value="Checked" />
+        </DataTriggerBehavior>
+        <DataTriggerBehavior Binding="{Binding #TargetCheckBox.IsChecked}"
+                             ComparisonCondition="Equal"
+                             Value="False">
+          <ChangePropertyAction PropertyName="Text"
+                                Value="Unchecked" />
+        </DataTriggerBehavior>
+      </Interaction.Behaviors>
+    </TextBlock>
+    <CheckBox Name="TargetCheckBox"
+              Content="Check"
+              IsChecked="False" />
+  </StackPanel>
+</Window>

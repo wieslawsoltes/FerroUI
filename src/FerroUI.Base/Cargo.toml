@@ -26,6 +26,8 @@ autotests = false
 path = "lib.rs"
 
 [features]
+# Development-only tracking of explicit writes to reload-owned root properties.
+hot-reload = []
 # Exposes the render test doubles in `rendering::testing` to other crates.
 testing = []
 # The typed functions of declared members (`__markup_*`, written by the declaration macros),

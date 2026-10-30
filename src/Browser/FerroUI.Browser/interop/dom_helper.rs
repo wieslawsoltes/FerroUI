@@ -16,6 +16,9 @@ extern "C" {
     #[wasm_bindgen(method, getter, js_name = inputElement)]
     fn input_element_raw(this: &HostContent) -> JsObject;
 
+    #[wasm_bindgen(method, getter, js_name = accessibilityHost)]
+    fn accessibility_host_raw(this: &HostContent) -> JsObject;
+
     #[wasm_bindgen(js_namespace = FerroDOM, js_name = getGlobalThis)]
     pub fn get_global_this() -> JsObject;
 
@@ -43,6 +46,9 @@ extern "C" {
     #[wasm_bindgen(js_namespace = FerroDOM, js_name = getDarkMode)]
     pub fn get_dark_mode(global_this: &JsObject) -> Vec<i32>;
 
+    #[wasm_bindgen(js_namespace = FerroDOM, js_name = getAnimationsEnabled)]
+    pub fn get_animations_enabled(global_this: &JsObject) -> bool;
+
     #[wasm_bindgen(js_namespace = FerroDOM, js_name = getNavigatorLanguage)]
     pub fn get_navigator_language(global_this: &JsObject) -> Option<String>;
 
@@ -68,6 +74,12 @@ impl HostContent {
     /// The hidden input element text input goes through.
     pub fn input_element(&self) -> Option<JsObject> {
         non_null(self.input_element_raw())
+    }
+
+    /// The element the automation tree of the view is mirrored into (not in
+    /// the original).
+    pub fn accessibility_host(&self) -> Option<JsObject> {
+        non_null(self.accessibility_host_raw())
     }
 }
 

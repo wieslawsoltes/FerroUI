@@ -1,7 +1,3 @@
-//
-// Created by Dan Walmsley on 06/05/2022.
-//
-
 #include "WindowInterfaces.h"
 #include "FrnView.h"
 #include "WindowImpl.h"

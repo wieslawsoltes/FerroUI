@@ -1,0 +1,105 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="MaterialThemeGallery.Pages.ContainersPage">
+  <!-- Expander (collapsed, expanded, pointer over, disabled), GroupBox, HeaderedContentControl,
+       Separator, SplitView with its pane open, GridSplitter between two panes, PathIcon,
+       TransitioningContentControl, and ThemeVariantScope with a light and a dark scope. The
+       native counterpart is ContainersPage.winui.xml. -->
+  <StackPanel Margin="24" Spacing="12">
+    <TextBlock Text="Containers" FontSize="28" FontWeight="SemiBold" />
+
+    <Grid ColumnSpacing="24" HorizontalAlignment="Left">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="320" />
+        <ColumnDefinition Width="320" />
+      </Grid.ColumnDefinitions>
+
+      <StackPanel Grid.Column="0" Spacing="12">
+        <TextBlock Text="Expander" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+        <Expander Width="320" Header="Collapsed">
+          <TextBlock Text="The content of the expander." />
+        </Expander>
+        <Expander Width="320" Header="Expanded" IsExpanded="True">
+          <TextBlock Text="The content of the expander." />
+        </Expander>
+        <Expander Width="320" Header="Pointer over" Classes="force-pointerover">
+          <TextBlock Text="The content of the expander." />
+        </Expander>
+        <Expander Width="320" Header="Disabled" IsEnabled="False">
+          <TextBlock Text="The content of the expander." />
+        </Expander>
+
+        <TextBlock Text="GroupBox" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+        <GroupBox Width="320" Header="A group">
+          <TextBlock Text="The content of the group." />
+        </GroupBox>
+
+        <TextBlock Text="HeaderedContentControl" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+        <HeaderedContentControl Width="320" Header="A header" Content="The content under the header." />
+
+        <TextBlock Text="Separator" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+        <Separator Width="320" HorizontalAlignment="Left" />
+
+        <TextBlock Text="TransitioningContentControl" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+        <TransitioningContentControl Content="The content of a transitioning content control." />
+      </StackPanel>
+
+      <StackPanel Grid.Column="1" Spacing="12">
+        <TextBlock Text="SplitView" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+        <SplitView Width="320" Height="120"
+                   IsPaneOpen="True"
+                   DisplayMode="Inline"
+                   OpenPaneLength="120">
+          <SplitView.Pane>
+            <TextBlock Text="The pane" Margin="12" />
+          </SplitView.Pane>
+          <TextBlock Text="The content" Margin="12" />
+        </SplitView>
+
+        <TextBlock Text="GridSplitter" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+        <Grid Width="320" Height="80">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+          </Grid.ColumnDefinitions>
+          <TextBlock Grid.Column="0" Text="Left" VerticalAlignment="Center" HorizontalAlignment="Center" />
+          <GridSplitter Grid.Column="1" ResizeDirection="Columns" />
+          <TextBlock Grid.Column="2" Text="Right" VerticalAlignment="Center" HorizontalAlignment="Center" />
+        </Grid>
+
+        <TextBlock Text="PathIcon" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+        <StackPanel Orientation="Horizontal" Spacing="16">
+          <PathIcon Width="20" Height="20" Data="M11,5H13V11H19V13H13V19H11V13H5V11H11Z" />
+          <PathIcon Width="20" Height="20" Data="M4,12.5L5.5,11L9.5,15L18.5,6L20,7.5L9.5,18Z" />
+          <PathIcon Width="20" Height="20" Data="M5,5H19V19H5Z M7,7V17H17V7Z" />
+          <PathIcon Width="20" Height="20" IsEnabled="False" Data="M5,11H19V13H5Z" />
+        </StackPanel>
+
+        <TextBlock Text="ThemeVariantScope" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <ThemeVariantScope RequestedThemeVariant="Light">
+            <Border Width="156" Padding="12" CornerRadius="4"
+                    Background="{DynamicResource ApplicationPageBackgroundThemeBrush}">
+              <StackPanel Spacing="8">
+                <TextBlock Text="Light scope" />
+                <Button Content="Button" />
+                <CheckBox Content="Checked" IsChecked="True" />
+              </StackPanel>
+            </Border>
+          </ThemeVariantScope>
+          <ThemeVariantScope RequestedThemeVariant="Dark">
+            <Border Width="156" Padding="12" CornerRadius="4"
+                    Background="{DynamicResource ApplicationPageBackgroundThemeBrush}">
+              <StackPanel Spacing="8">
+                <TextBlock Text="Dark scope" />
+                <Button Content="Button" />
+                <CheckBox Content="Checked" IsChecked="True" />
+              </StackPanel>
+            </Border>
+          </ThemeVariantScope>
+        </StackPanel>
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+</UserControl>

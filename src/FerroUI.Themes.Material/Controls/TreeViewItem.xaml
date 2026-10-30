@@ -1,0 +1,73 @@
+<!-- Material list treatment for FerroUI's hierarchical tree control.
+     Structural heritage: FerroUI WinUI, Microsoft Corporation, MIT; see NOTICE.md. -->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:converters="using:FerroUI.Controls.Converters" xmlns:material="using:FerroUI.Themes.Material" x:ClassModifier="internal">
+  <converters:MarginMultiplierConverter x:Key="TreeViewItemIndentationConverter" Left="True" Indent="16"/>
+  <ControlTheme x:Key="TreeViewItemExpandCollapseChevron" TargetType="ToggleButton">
+    <Setter Property="Width" Value="48"/>
+    <Setter Property="Height" Value="48"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}"/>
+    <Setter Property="Focusable" Value="False"/>
+    <Setter Property="CornerRadius" Value="24"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel Background="{TemplateBinding Background}">
+          <Border x:Name="ChevronState" CornerRadius="24" Background="Transparent"/>
+          <material:MaterialRipple Fill="{TemplateBinding Foreground}" CornerRadius="24" ReducedMotion="{DynamicResource MaterialReducedMotion}"/>
+          <Path x:Name="Chevron" Data="M9.29 6.71 10.71 5.29 17.41 12 10.71 18.71 9.29 17.29 14.59 12Z"
+                Fill="{TemplateBinding Foreground}" Stretch="None" Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="rotate(0deg)" RenderTransformOrigin="50%,50%">
+            <Path.Transitions><Transitions><TransformOperationsTransition Property="RenderTransform" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}"/></Transitions></Path.Transitions>
+          </Path>
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:checked /template/ Path#Chevron"><Setter Property="RenderTransform" Value="rotate(90deg)"/></Style>
+    <Style Selector="^:pointerover /template/ Border#ChevronState"><Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceHoverBrush}"/></Style>
+    <Style Selector="^:disabled /template/ Path#Chevron"><Setter Property="Opacity" Value="0.38"/></Style>
+  </ControlTheme>
+  <ControlTheme x:Key="MUX_TreeViewItemStyle" TargetType="TreeViewItem">
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}"/>
+    <Setter Property="FontSize" Value="16"/>
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceBrush}"/>
+    <Setter Property="KeyboardNavigation.TabNavigation" Value="Local"/>
+    <Setter Property="Padding" Value="0,0,16,0"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="MinHeight" Value="48"/>
+    <Setter Property="CornerRadius" Value="0"/>
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate><Border BorderThickness="3" BorderBrush="{DynamicResource MaterialSecondaryBrush}" CornerRadius="4" Margin="-3"/></FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <StackPanel>
+          <Border x:Name="PART_Header" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}" MinHeight="{TemplateBinding MinHeight}" TemplatedControl.IsTemplateFocusTarget="True">
+            <Panel>
+              <Border x:Name="StateLayer" Background="Transparent" CornerRadius="{TemplateBinding CornerRadius}" IsHitTestVisible="False"/>
+              <Border Padding="{TemplateBinding Level, Converter={StaticResource TreeViewItemIndentationConverter}}">
+                <Grid ColumnDefinitions="Auto,*">
+                  <ToggleButton x:Name="ExpandCollapseChevron" Grid.Column="0" Theme="{StaticResource TreeViewItemExpandCollapseChevron}" Foreground="{TemplateBinding Foreground}" IsChecked="{TemplateBinding IsExpanded, Mode=TwoWay}"/>
+                  <ContentPresenter x:Name="PART_HeaderPresenter" Grid.Column="1" Content="{TemplateBinding Header}" ContentTemplate="{TemplateBinding HeaderTemplate}" Foreground="{TemplateBinding Foreground}" HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="{TemplateBinding Padding}" Focusable="False"/>
+                </Grid>
+              </Border>
+            </Panel>
+          </Border>
+          <ItemsPresenter x:Name="PART_ItemsPresenter" IsVisible="{TemplateBinding IsExpanded}" ItemsPanel="{TemplateBinding ItemsPanel}"/>
+        </StackPanel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^ /template/ Border#PART_Header:pointerover Border#StateLayer"><Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceHoverBrush}"/></Style>
+    <Style Selector="^:pressed /template/ Border#PART_Header:pointerover Border#StateLayer"><Setter Property="Background" Value="{DynamicResource MaterialOnSurfacePressedBrush}"/></Style>
+    <Style Selector="^:selected">
+      <Setter Property="Foreground" Value="{DynamicResource MaterialOnSecondaryContainerBrush}"/>
+      <Setter Property="Background" Value="{DynamicResource MaterialSecondaryContainerBrush}"/>
+    </Style>
+    <Style Selector="^:selected /template/ Border#PART_Header:pointerover Border#StateLayer"><Setter Property="Background" Value="{DynamicResource MaterialOnSecondaryContainerHoverBrush}"/></Style>
+    <Style Selector="^:selected:pressed /template/ Border#PART_Header:pointerover Border#StateLayer"><Setter Property="Background" Value="{DynamicResource MaterialOnSecondaryContainerPressedBrush}"/></Style>
+    <Style Selector="^:disabled /template/ Border#PART_Header"><Setter Property="Opacity" Value="0.38"/></Style>
+    <Style Selector="^:disabled /template/ Border#StateLayer"><Setter Property="Background" Value="Transparent"/></Style>
+    <Style Selector="^:empty /template/ ToggleButton#ExpandCollapseChevron"><Setter Property="Opacity" Value="0"/><Setter Property="IsHitTestVisible" Value="False"/></Style>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type TreeViewItem}" TargetType="TreeViewItem" BasedOn="{StaticResource MUX_TreeViewItemStyle}"/>
+</ResourceDictionary>

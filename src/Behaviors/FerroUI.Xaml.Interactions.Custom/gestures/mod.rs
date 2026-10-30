@@ -1,0 +1,32 @@
+//! The triggers of the gestures of an input element (`Gestures/`): taps, holds, pinches, pulls,
+//! scrolls and the gestures of a touch pad.
+
+mod double_tapped_gesture_trigger;
+mod holding_gesture_trigger;
+mod pinch_ended_gesture_trigger;
+mod pinch_gesture_trigger;
+mod pointer_touch_pad_gesture_magnify_gesture_trigger;
+mod pointer_touch_pad_gesture_rotate_gesture_trigger;
+mod pointer_touch_pad_gesture_swipe_gesture_trigger;
+mod pull_gesture_ended_gesture_trigger;
+mod pull_gesture_gesture_trigger;
+mod right_tapped_gesture_trigger;
+mod scroll_gesture_ended_gesture_trigger;
+mod scroll_gesture_gesture_trigger;
+mod scroll_gesture_inertia_starting_gesture_trigger;
+mod tapped_gesture_trigger;
+
+pub use double_tapped_gesture_trigger::DoubleTappedGestureTrigger;
+pub use holding_gesture_trigger::HoldingGestureTrigger;
+pub use pinch_ended_gesture_trigger::PinchEndedGestureTrigger;
+pub use pinch_gesture_trigger::PinchGestureTrigger;
+pub use pointer_touch_pad_gesture_magnify_gesture_trigger::PointerTouchPadGestureMagnifyGestureTrigger;
+pub use pointer_touch_pad_gesture_rotate_gesture_trigger::PointerTouchPadGestureRotateGestureTrigger;
+pub use pointer_touch_pad_gesture_swipe_gesture_trigger::PointerTouchPadGestureSwipeGestureTrigger;
+pub use pull_gesture_ended_gesture_trigger::PullGestureEndedGestureTrigger;
+pub use pull_gesture_gesture_trigger::PullGestureGestureTrigger;
+pub use right_tapped_gesture_trigger::RightTappedGestureTrigger;
+pub use scroll_gesture_ended_gesture_trigger::ScrollGestureEndedGestureTrigger;
+pub use scroll_gesture_gesture_trigger::ScrollGestureGestureTrigger;
+pub use scroll_gesture_inertia_starting_gesture_trigger::ScrollGestureInertiaStartingGestureTrigger;
+pub use tapped_gesture_trigger::TappedGestureTrigger;

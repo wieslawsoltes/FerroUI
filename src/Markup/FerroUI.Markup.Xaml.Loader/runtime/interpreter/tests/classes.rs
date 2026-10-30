@@ -1218,6 +1218,18 @@ ferro_markup_type!(static RtAttachedOwner {
     property_attributes: [Target: [ResolveByName, DependsOn("Other")]],
 });
 
+/// A static type that declares a namespace other than the one registered for
+/// its Rust module (`RtXamlParserTests`): reflection reports the declared one.
+pub(crate) struct RtDeclaredNamespaceOwner;
+
+ferroui_base::ferro_static_type!(RtDeclaredNamespaceOwner);
+
+ferro_markup_type!(static RtDeclaredNamespaceOwner {
+    type_info: RtDeclaredNamespaceOwner,
+    namespace: "RtXamlParserTests.Declared",
+    methods: [static fn Thrice(i32) -> i32 => |x: i32| x * 3],
+});
+
 // --- SpecialPropertiesTests.cs, GenericTypeWithPropertyElement.cs ----------
 
 #[derive(Default)]
@@ -1448,6 +1460,7 @@ pub(crate) fn register() {
         MarkupAssembly::register(&ASSEMBLY);
         ferroui_base::TypeInfo::register_namespaces(&[(module_path!(), "RtXamlParserTests")]);
         ferroui_base::TypeInfo::register(<RtAttachedOwner as ferroui_base::StaticType>::TYPE);
+        ferroui_base::TypeInfo::register(<RtDeclaredNamespaceOwner as ferroui_base::StaticType>::TYPE);
         let types: &[&'static MarkupType] = markup![
             TestList<Rc<SimpleSubClass>>,
             TestList<Rc<ServiceProviderTestsClass>>,
@@ -1510,6 +1523,7 @@ pub(crate) fn register() {
             RtLength,
             RtLengthUnit,
             RtAttachedOwner,
+            RtDeclaredNamespaceOwner,
             InitPropertiesTestClass,
             RootNode,
             TypeArgument,

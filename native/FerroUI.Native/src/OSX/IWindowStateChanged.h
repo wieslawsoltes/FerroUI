@@ -1,7 +1,3 @@
-//
-// Created by Dan Walmsley on 04/05/2022.
-//
-
 #ifndef FERRO_NATIVE_OSX_IWINDOWSTATECHANGED_H
 #define FERRO_NATIVE_OSX_IWINDOWSTATECHANGED_H
 

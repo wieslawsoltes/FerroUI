@@ -1,0 +1,36 @@
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:o="using:FerroDock.Ferro.Controls.Overlays" x:CompileBindings="True">
+  <ControlTheme x:Key="{x:Type o:ConfirmationDialogControl}" TargetType="o:ConfirmationDialogControl" x:DataType="o:ConfirmationDialogControl">
+    <Setter Property="Template">
+      <ControlTemplate x:DataType="o:ConfirmationDialogControl">
+        <Border Background="{DynamicResource DockSurfaceEditorBrush}"
+                BorderBrush="{DynamicResource DockBorderSubtleBrush}"
+                BorderThickness="1"
+                CornerRadius="{DynamicResource DockDialogCornerRadius}"
+                Padding="{DynamicResource DockConfirmationDialogPadding}"
+                MinWidth="{DynamicResource DockDialogMinWidth}"
+                MaxWidth="{DynamicResource DockConfirmationDialogMaxWidth}"
+                BoxShadow="0 6 18 #33000000">
+          <StackPanel Spacing="{DynamicResource DockConfirmationDialogStackSpacing}">
+            <TextBlock Text="{TemplateBinding Title}"
+                       FontSize="{DynamicResource DockDialogTitleFontSize}"
+                       FontWeight="SemiBold"
+                       Foreground="{DynamicResource DockTabForegroundBrush}" />
+            <TextBlock Text="{TemplateBinding Message}"
+                       TextWrapping="Wrap"
+                       Opacity="0.85" />
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        Spacing="{DynamicResource DockConfirmationDialogActionsSpacing}">
+              <Button Content="{TemplateBinding CancelText}"
+                      Command="{TemplateBinding CancelCommand}" />
+              <Button Content="{TemplateBinding ConfirmText}"
+                      Command="{TemplateBinding ConfirmCommand}" />
+            </StackPanel>
+          </StackPanel>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

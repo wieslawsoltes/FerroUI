@@ -1,0 +1,56 @@
+<UserControl x:Class="BehaviorsGallery.Views.Pages.RenderTargetBitmapView"
+             xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:BehaviorsGallery.ViewModels"
+             xmlns:renderers="using:BehaviorsGallery.Renderers"
+             x:DataType="vm:MainWindowViewModel"
+             mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="450">
+  <!-- Ported from Views/Pages/RenderTargetBitmapView of the reference sample. -->
+  <Design.DataContext>
+    <vm:MainWindowViewModel />
+  </Design.DataContext>
+  <StackPanel Spacing="10" Margin="5" HorizontalAlignment="Center">
+    <ToggleSwitch Content="Auto render" IsChecked="{Binding IsRenderTriggerEnabled}" />
+    <Image Width="200" Height="200">
+      <Interaction.Behaviors>
+        <RenderTargetBitmapBehavior x:Name="AnimatedRenderTarget"
+                                    PixelWidth="200" PixelHeight="200">
+          <RenderTargetBitmapBehavior.Renderer>
+            <renderers:RotatingSquareRenderer />
+          </RenderTargetBitmapBehavior.Renderer>
+        </RenderTargetBitmapBehavior>
+        <!-- Deviation (DEVIATIONS.md, Behaviors gallery): markup cannot assign the behavior named
+             AnimatedRenderTarget to the Target of the trigger (a render host); the code-behind
+             sets it. -->
+        <RenderTargetBitmapTrigger x:Name="AnimatedRenderTrigger"
+                                   MillisecondsPerTick="250"
+                                   IsEnabled="{Binding IsRenderTriggerEnabled}">
+          <InvokeCommandAction Command="{Binding UpdateRenderTimestampCommand}" />
+        </RenderTargetBitmapTrigger>
+      </Interaction.Behaviors>
+    </Image>
+    <TextBlock Text="{Binding RenderTriggerMessage}" FontSize="12" />
+    <Image Width="200" Height="200">
+      <Interaction.Behaviors>
+        <StaticRenderTargetBitmapBehavior x:Name="StaticBehavior"
+                                          PixelWidth="200"
+                                          PixelHeight="200">
+          <StaticRenderTargetBitmapBehavior.Renderer>
+            <renderers:SolidSquareRenderer />
+          </StaticRenderTargetBitmapBehavior.Renderer>
+        </StaticRenderTargetBitmapBehavior>
+      </Interaction.Behaviors>
+    </Image>
+    <Button Content="Render Static">
+      <Interaction.Behaviors>
+        <EventTriggerBehavior EventName="Click">
+          <!-- Deviation (DEVIATIONS.md, Behaviors gallery): the code-behind sets the Target
+               (StaticBehavior) of the action, as for the trigger above. -->
+          <RenderRenderTargetBitmapAction x:Name="RenderStaticAction" />
+        </EventTriggerBehavior>
+      </Interaction.Behaviors>
+    </Button>
+  </StackPanel>
+</UserControl>

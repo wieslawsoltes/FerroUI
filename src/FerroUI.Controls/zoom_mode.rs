@@ -10,3 +10,5 @@ pub enum ZoomMode {
     /// The user can zoom (Ctrl and the mouse wheel).
     Enabled = 1,
 }
+
+ferroui_base::ferro_markup_enum!(ZoomMode { Disabled, Enabled }, { namespace: "FerroUI.Controls" });

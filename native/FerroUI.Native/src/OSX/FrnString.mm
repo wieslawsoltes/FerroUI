@@ -2,8 +2,6 @@
 //  FrnString.m
 //  FerroUI.Native.OSX
 //
-//  Created by Dan Walmsley on 07/11/2018.
-//
 
 #include "common.h"
 #include <vector>

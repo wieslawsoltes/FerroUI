@@ -25,6 +25,9 @@ struct TestControl {
     /// When set, the control handles its own keyboard navigation: the flag
     /// tells whether it handles requests and the element is what it returns.
     custom_navigation: RefCell<Option<(bool, Option<Ref<InputElement>>)>>,
+    /// When set, the children the control names in tab order
+    /// (`children_in_tab_focus_order`).
+    tab_focus_order: RefCell<Option<Vec<Ref<InputElement>>>>,
 }
 
 ferro_class!(TestControl: InputElement);
@@ -43,6 +46,10 @@ impl InputElementImpl for TestControl {
 
     fn is_focus_scope(this: &Self) -> bool {
         this.focus_scope
+    }
+
+    fn children_in_tab_focus_order(this: &Self) -> Option<Vec<Ref<InputElement>>> {
+        this.tab_focus_order.borrow().clone()
     }
 
     fn as_custom_keyboard_navigation(this: &Self) -> Option<&dyn ICustomKeyboardNavigation> {
@@ -69,6 +76,7 @@ impl TestControl {
             focus_scope,
             should_enable: Cell::new(true),
             custom_navigation: RefCell::new(None),
+            tab_focus_order: RefCell::new(None),
         })
     }
 
@@ -2006,11 +2014,14 @@ fn hold_should_not_raised_when_pointer_released_before_timer() {
     mouse.down(&tree.border, MouseButton::Left, 1);
     assert!(!raised.get());
 
+    // Cancellation must abort a promoted callback as well as an inactive timer.
+    let timer = single_hold_timer();
+    timer.promote();
+
     mouse.up(&tree.border, MouseButton::Left, None);
     assert!(!raised.get());
-
-    // Verify timer duration, but execute it immediately.
-    let timer = single_hold_timer();
+    assert!(!timer.is_enabled());
+    assert!(crate::threading::Dispatcher::snapshot_timers_for_unit_tests().is_empty());
     force_fire(&timer);
 
     assert!(!raised.get());
@@ -2029,15 +2040,72 @@ fn hold_should_not_raised_when_pointer_is_moved_before_timer() {
 
     mouse.down(&tree.border, MouseButton::Left, 1);
     assert!(!raised.get());
+    let timer = single_hold_timer();
 
     mouse.move_to(&tree.border, HOLD_PRESS + Vector::new(20.0, 20.0));
     assert!(!raised.get());
-
-    // Verify timer duration, but execute it immediately.
-    let timer = single_hold_timer();
+    assert!(!timer.is_enabled());
+    assert!(crate::threading::Dispatcher::snapshot_timers_for_unit_tests().is_empty());
     force_fire(&timer);
 
     assert!(!raised.get());
+}
+
+#[test]
+fn hold_cancellation_releases_detached_event_source_without_waiting_for_timeout() {
+    let _scope = crate::threading::Dispatcher::unit_test_scope();
+
+    for cancel_by_moving in [false, true] {
+        let mouse = MouseTestHelper::new();
+        let tree = hold_tree();
+        let weak = tree.border.downgrade();
+        mouse.down(&tree.border, MouseButton::Left, 1);
+        assert_eq!(crate::threading::Dispatcher::snapshot_timers_for_unit_tests().len(), 1);
+
+        if cancel_by_moving {
+            mouse.move_to(&tree.border, HOLD_PRESS + Vector::new(20.0, 20.0));
+            mouse.pointer.capture(None);
+        } else {
+            mouse.up(&tree.border, MouseButton::Left, None);
+        }
+        assert!(crate::threading::Dispatcher::snapshot_timers_for_unit_tests().is_empty());
+        tree.root.root.remove_child(&tree.border);
+        drop(tree.border);
+
+        // Neither wall time nor dispatcher jobs have advanced. The canceled
+        // event's strong source must already have been released.
+        assert!(weak.upgrade().is_none());
+    }
+}
+
+#[test]
+fn hold_callback_can_start_another_hold_without_cancelling_its_timer() {
+    let _scope = crate::threading::Dispatcher::unit_test_scope();
+    let mouse = MouseTestHelper::new();
+    let next_mouse = Rc::new(MouseTestHelper::new());
+    let tree = hold_tree();
+    let starts = Rc::new(Cell::new(0));
+    let count = starts.clone();
+    let next = next_mouse.clone();
+    let weak = tree.border.downgrade();
+    tree.border.holding(move |_, event| {
+        if event.holding_state() == HoldingState::Started {
+            count.set(count.get() + 1);
+            if count.get() == 1 {
+                next.down(&weak.upgrade().unwrap(), MouseButton::Left, 1);
+            }
+        }
+    });
+
+    mouse.down(&tree.border, MouseButton::Left, 1);
+    force_fire(&single_hold_timer());
+    assert_eq!(starts.get(), 1);
+    force_fire(&single_hold_timer());
+    assert_eq!(starts.get(), 2);
+    assert!(crate::threading::Dispatcher::snapshot_timers_for_unit_tests().is_empty());
+
+    next_mouse.up(&tree.border, MouseButton::Left, None);
+    mouse.pointer.capture(None);
 }
 
 #[test]
@@ -2793,6 +2861,61 @@ fn tab_should_navigate_outside_when_null_returned_as_next() {
     let _root = stack_with(KeyboardNavigationMode::Cycle, &[&target, &next]);
 
     assert_eq!(next_of(&current, Next), Some("outside"));
+}
+
+// --- children in tab focus order ---------------------------------------------------
+
+/// A stack that names `order` as its children in tab order.
+fn ordered_stack(children: &[&Ref<TestControl>], order: &[&Ref<TestControl>]) -> Ref<TestControl> {
+    let result = stack(children);
+    *result.tab_focus_order.borrow_mut() = Some(order.iter().map(|child| element(child)).collect());
+    result
+}
+
+#[test]
+fn tab_follows_the_children_in_tab_focus_order() {
+    let (before, b1, b2, b3, after) = (button("before"), button("b1"), button("b2"), button("b3"), button("after"));
+    let target = ordered_stack(&[&b1, &b2, &b3], &[&b3, &b1, &b2]);
+    let _root = stack_with(KeyboardNavigationMode::Cycle, &[&before, &target, &after]);
+
+    assert_eq!(next_of(&before, Next), Some("b3"));
+    assert_eq!(next_of(&b3, Next), Some("b1"));
+    assert_eq!(next_of(&b1, Next), Some("b2"));
+    assert_eq!(next_of(&b2, Next), Some("after"));
+    assert_eq!(next_of(&after, Previous), Some("b2"));
+    assert_eq!(next_of(&b1, Previous), Some("b3"));
+    assert_eq!(next_of(&b3, Previous), Some("before"));
+}
+
+#[test]
+fn a_child_left_out_of_the_tab_focus_order_is_not_a_tab_stop() {
+    // The recycled element of a virtualizing panel stays a visible, focusable visual child.
+    let (b1, b2, recycled, after) = (button("b1"), button("b2"), button("recycled"), button("after"));
+    let target = ordered_stack(&[&b1, &b2, &recycled], &[&b1, &b2]);
+    let _root = stack_with(KeyboardNavigationMode::Cycle, &[&target, &after]);
+
+    assert_eq!(next_of(&b2, Next), Some("after"));
+    assert_eq!(next_of(&after, Previous), Some("b2"));
+
+    // An element whose tab order names no child has no focusable children.
+    let (first, hidden, last) = (button("first"), button("hidden"), button("last"));
+    let empty = ordered_stack(&[&hidden], &[]);
+    let _root = stack_with(KeyboardNavigationMode::Cycle, &[&first, &empty, &last]);
+
+    assert_eq!(next_of(&first, Next), Some("last"));
+    assert_eq!(next_of(&last, Previous), Some("first"));
+}
+
+#[test]
+fn an_element_with_a_tab_focus_order_leaves_navigation_to_a_custom_handler_around_it() {
+    // A tree view (a custom navigation handler) whose items are shown by a repeater (an element
+    // that names its children in tab order): the tree view still decides where tab goes.
+    let (current, b2, next) = (button("b1"), button("b2"), button("b3"));
+    let items = ordered_stack(&[&current, &b2], &[&current, &b2]);
+    let _tree = custom_stack(&[&items, &next], Some(&next));
+
+    assert!(items.as_custom_keyboard_navigation().is_none());
+    assert_eq!(next_of(&current, Next), Some("b3"));
 }
 
 // --- XY navigation -----------------------------------------------------------------

@@ -6,6 +6,7 @@ mod type_system_projection_tests;
 mod well_known_types_tests;
 
 pub(crate) mod assign_binding_tests;
+pub(crate) mod attached_collection_property_tests;
 mod basic_tests;
 pub(crate) mod binding_tests;
 pub(crate) mod binding_tests_relative_source;

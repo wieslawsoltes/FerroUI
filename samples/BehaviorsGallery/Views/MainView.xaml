@@ -1,0 +1,41 @@
+<UserControl x:Class="BehaviorsGallery.Views.MainView"
+             xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:BehaviorsGallery.ViewModels"
+             x:DataType="vm:MainWindowViewModel"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="700">
+  <!-- Ported from Views/MainView of the reference sample. Deviation (DEVIATIONS.md, Behaviors
+       gallery): the tab items of the pages are not written here; the class of the document
+       (main_view.rs) adds one per entry of the page table (pages/mod.rs), in the order of the
+       reference, and creates the page of a tab when the tab is first selected. -->
+  <UserControl.Styles>
+    <Style Selector="TabItem">
+      <Setter Property="FontSize" Value="16" />
+    </Style>
+  </UserControl.Styles>
+  <DockPanel>
+    <TextBox x:Name="SearchBox"
+             PlaceholderText="Search pages..."
+             Margin="0,0,0,8"
+             DockPanel.Dock="Top">
+      <Interaction.Behaviors>
+        <FocusOnAttachedBehavior />
+      </Interaction.Behaviors>
+    </TextBox>
+    <TextBlock x:Name="NoMatchesText"
+               Text="No pages match the search."
+               Margin="0,0,0,8"
+               IsVisible="False"
+               DockPanel.Dock="Top" />
+    <SingleSelectionTabControl x:Name="PagesTabControl" Classes="sidebar">
+      <Interaction.Behaviors>
+        <SelectingItemsControlSearchBehavior SearchBox="SearchBox"
+                                             NoMatchesControl="NoMatchesText"
+                                             EnableSorting="True"
+                                             SortOrder="Ascending" />
+      </Interaction.Behaviors>
+    </SingleSelectionTabControl>
+  </DockPanel>
+</UserControl>

@@ -56,6 +56,8 @@ pub(crate) struct DynamicResourceExpression {
     base: UntypedBindingExpressionBase,
     resource_key: ResourceKey,
     anchor: Option<HeldAnchor>,
+    #[cfg(all(feature = "hot-reload", debug_assertions))]
+    reload_anchor: RefCell<Option<Option<HeldAnchor>>>,
     /// Held weakly, as the anchor is: the host is most often the element
     /// that owns this expression.
     host: RefCell<Option<WeakResourceHost>>,
@@ -85,11 +87,13 @@ impl DynamicResourceExpression {
         priority: BindingPriority,
     ) -> Rc<Self> {
         ferroui_base::perf_count!(DynamicResourceExpressionsCreated);
-        Rc::new_cyclic(|this: &Weak<DynamicResourceExpression>| Self {
+        let expression = Rc::new_cyclic(|this: &Weak<DynamicResourceExpression>| Self {
             this: this.clone(),
             base: UntypedBindingExpressionBase::new(this.clone(), priority, None, false),
             resource_key,
             anchor,
+            #[cfg(all(feature = "hot-reload", debug_assertions))]
+            reload_anchor: RefCell::new(None),
             host: RefCell::new(None),
             provider: RefCell::new(None),
             override_theme_variant: Cell::new(false),
@@ -97,7 +101,10 @@ impl DynamicResourceExpression {
             theme_variant: RefCell::new(theme_variant),
             owner_changed_subscription: RefCell::new(None),
             host_subscriptions: RefCell::new(Vec::new()),
-        })
+        });
+        #[cfg(all(feature = "hot-reload", debug_assertions))]
+        crate::reload_resources::record(expression.clone());
+        expression
     }
 
     // Read by diagnostics in the managed original; here by the tests.
@@ -106,11 +113,19 @@ impl DynamicResourceExpression {
         &self.resource_key
     }
 
+    fn effective_anchor(&self) -> Option<HeldAnchor> {
+        #[cfg(all(feature = "hot-reload", debug_assertions))]
+        if let Some(anchor) = &*self.reload_anchor.borrow() {
+            return anchor.clone();
+        }
+        self.anchor.clone()
+    }
+
     fn on_start(&self) {
         let host = self.try_get_resource_host();
         if host.is_none() {
             // The target is not an IResourceHost, so we need to find one from the anchor.
-            if let Some(HeldAnchor::Provider(provider)) = &self.anchor {
+            if let Some(HeldAnchor::Provider(provider)) = self.effective_anchor() {
                 self.set_host(provider.owner());
                 *self.provider.borrow_mut() = Some(provider.clone());
                 self.override_theme_variant.set(self.theme_variant.borrow().is_some());
@@ -239,7 +254,7 @@ impl DynamicResourceExpression {
             }
         }
 
-        match &self.anchor {
+        match self.effective_anchor() {
             Some(HeldAnchor::Element(element)) => element.upgrade().map(ResourceHostRef::Element),
             Some(HeldAnchor::Host(host)) => host.upgrade(),
             _ => None,
@@ -285,6 +300,23 @@ impl DynamicResourceExpression {
         let subscriptions = std::mem::take(&mut *self.host_subscriptions.borrow_mut());
         for subscription in subscriptions {
             subscription.dispose();
+        }
+    }
+}
+
+#[cfg(all(feature = "hot-reload", debug_assertions))]
+impl crate::reload_resources::AnchorOwner for DynamicResourceExpression {
+    fn anchor(&self) -> Option<HeldAnchor> {
+        self.effective_anchor()
+    }
+    fn replace_anchor(&self, anchor: Option<HeldAnchor>) {
+        let running = self.base.is_running();
+        if running {
+            self.on_stop();
+        }
+        *self.reload_anchor.borrow_mut() = Some(anchor);
+        if running {
+            self.on_start();
         }
     }
 }

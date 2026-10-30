@@ -1,0 +1,40 @@
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            xmlns:c="using:FerroDock.Ferro.Converters"
+            xmlns:d="using:FerroDock.Ferro.Controls"
+            xmlns:core="using:FerroDock.Model.Core"
+            xmlns:dmc="using:FerroDock.Model.Controls"
+            x:DataType="core:IDockable" x:CompileBindings="True">
+  <d:MdiDocumentWindow Name="Frame" />
+  <Button Name="Capability">
+    <Button.IsVisible>
+      <MultiBinding Converter="{x:Static c:DockCapabilityConverters.CanCloseMultiConverter}">
+        <Binding />
+        <Binding Path="CanClose" />
+        <Binding Path="DockCapabilityOverrides.CanClose" />
+        <Binding Path="((core:IDock)Owner).DockCapabilityPolicy.CanClose" />
+        <Binding Path="Owner.((dmc:IRootDock)Owner).RootDockCapabilityPolicy.CanClose" />
+      </MultiBinding>
+    </Button.IsVisible>
+  </Button>
+  <Button Name="Remove">
+    <Button.IsVisible>
+      <MultiBinding Converter="{x:Static c:CanRemoveDockableConverter.Instance}">
+        <Binding Path="((core:IDock)Owner).CanCloseLastDockable" />
+        <Binding Path="((core:IDock)Owner).VisibleDockables.Count" />
+      </MultiBinding>
+    </Button.IsVisible>
+  </Button>
+  <Button Name="CloseVisibility">
+    <Button.IsVisible>
+      <MultiBinding Converter="{x:Static c:DocumentCloseButtonVisibilityConverter.Instance}">
+        <Binding Path="((dmc:IDocumentDock)Owner).CloseButtonShowMode" />
+        <Binding ElementName="Frame" Path="IsActive" />
+      </MultiBinding>
+    </Button.IsVisible>
+  </Button>
+  <Button Name="Mdi" Command="{Binding Owner.Factory.SetDocumentDockLayoutModeMdi}" CommandParameter="{Binding Owner}" />
+  <Button Name="Tabbed" Command="{Binding Owner.Factory.SetDocumentDockLayoutModeTabbed}" CommandParameter="{Binding Owner}" />
+  <Button Name="Left" Command="{Binding Owner.Factory.SetDocumentDockTabsLayoutLeft}" CommandParameter="{Binding Owner}" />
+  <Button Name="Close" Command="{Binding Owner.Factory.CloseDockable}" CommandParameter="{Binding}" />
+</StackPanel>

@@ -1,0 +1,48 @@
+<!--
+  Not ported from a document: the system colours a WinUI 3 application reads from the operating
+  system (the SystemColor*Color resources, which Windows answers with GetSysColor and the colours
+  of the active contrast theme). microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml,
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0) names them, chiefly in the HighContrast
+  dictionaries of controls/dev/CommonStyles/Common_themeresources_any.xaml and
+  dxaml/xcp/dxaml/themes/generic.xaml, and defines none of them.
+  FerroUI has no system colours, so the theme carries fixed values (docs/porting/winui-theme.md,
+  section 3.4): in the Default (dark) and Light dictionaries the standard colours of Windows, in
+  the HighContrast dictionary the colours of the "High Contrast Black" contrast theme of Windows.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:winui="using:FerroUI.Themes.Material"
+                    x:ClassModifier="internal">
+  <ResourceDictionary.ThemeDictionaries>
+    <ResourceDictionary x:Key="Default">
+      <Color x:Key="SystemColorWindowColor">#FFFFFFFF</Color>
+      <Color x:Key="SystemColorWindowTextColor">#FF000000</Color>
+      <Color x:Key="SystemColorButtonFaceColor">#FFF0F0F0</Color>
+      <Color x:Key="SystemColorButtonTextColor">#FF000000</Color>
+      <Color x:Key="SystemColorHighlightColor">#FF0078D7</Color>
+      <Color x:Key="SystemColorHighlightTextColor">#FFFFFFFF</Color>
+      <Color x:Key="SystemColorHotlightColor">#FF0066CC</Color>
+      <Color x:Key="SystemColorGrayTextColor">#FF6D6D6D</Color>
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="Light">
+      <Color x:Key="SystemColorWindowColor">#FFFFFFFF</Color>
+      <Color x:Key="SystemColorWindowTextColor">#FF000000</Color>
+      <Color x:Key="SystemColorButtonFaceColor">#FFF0F0F0</Color>
+      <Color x:Key="SystemColorButtonTextColor">#FF000000</Color>
+      <Color x:Key="SystemColorHighlightColor">#FF0078D7</Color>
+      <Color x:Key="SystemColorHighlightTextColor">#FFFFFFFF</Color>
+      <Color x:Key="SystemColorHotlightColor">#FF0066CC</Color>
+      <Color x:Key="SystemColorGrayTextColor">#FF6D6D6D</Color>
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="{x:Static winui:MaterialTheme.HighContrast}">
+      <Color x:Key="SystemColorWindowColor">#FF000000</Color>
+      <Color x:Key="SystemColorWindowTextColor">#FFFFFFFF</Color>
+      <Color x:Key="SystemColorButtonFaceColor">#FF000000</Color>
+      <Color x:Key="SystemColorButtonTextColor">#FFFFFFFF</Color>
+      <Color x:Key="SystemColorHighlightColor">#FF1AEBFF</Color>
+      <Color x:Key="SystemColorHighlightTextColor">#FF000000</Color>
+      <Color x:Key="SystemColorHotlightColor">#FFFFFF00</Color>
+      <Color x:Key="SystemColorGrayTextColor">#FF3FF23F</Color>
+    </ResourceDictionary>
+  </ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>

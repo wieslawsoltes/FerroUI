@@ -7,7 +7,7 @@ use super::win_rt_api_information::WinRTApiInformation;
 use super::win_rt_property_value::WinRTPropertyValue;
 use super::{
     IAccessibilitySettings, IApiInformationStatics, IGlobalizationPreferencesStatics, IInspectable, IPropertyValue,
-    IUISettings3, PropertyType, TrustLevel, UIColorType,
+    IUISettings, IUISettings3, PropertyType, TrustLevel, UIColorType,
 };
 use crate::interop::unmanaged_methods::co_task_mem_free;
 use ferroui_microcom::{Guid, Interface};
@@ -72,6 +72,15 @@ fn the_settings_of_the_user_are_read_through_activation() {
         let background = ui_settings.get_color_value(UIColorType::Background).unwrap();
         println!("UISettings: accent {accent:?}, background {background:?}");
         assert_eq!(accent.a, 255);
+
+        let motion = ui_settings.cast::<IUISettings>().unwrap();
+        let enabled = motion.animations_enabled().unwrap();
+        assert!(enabled <= 1, "UISettings returns a WinRT boolean.");
+        let platform = crate::win32_platform_settings::Win32PlatformSettings::new();
+        assert_eq!(
+            ferroui_base::platform::IPlatformSettings::animations_enabled(&*platform),
+            enabled != 0,
+        );
 
         // The six shades of the accent, which the platform settings report
         // (FerroUI addition): opaque, from the darkest to the lightest.

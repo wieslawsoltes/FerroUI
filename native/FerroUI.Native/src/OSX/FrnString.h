@@ -2,8 +2,6 @@
 //  FrnString.h
 //  FerroUI.Native.OSX
 //
-//  Created by Dan Walmsley on 07/11/2018.
-//
 
 #ifndef FrnString_h
 #define FrnString_h

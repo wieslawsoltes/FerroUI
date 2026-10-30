@@ -3,8 +3,12 @@
 //! their static values, as the managed original declares them.
 
 use crate::{
-    AcrylicPlatformCompensationLevels, GridLength, GridUnitType, TextLayoutRoundingPlacement, TickList,
-    WindowTransparencyLevel, WindowTransparencyLevelCollection,
+    AcrylicPlatformCompensationLevels, AutoSuggestBoxQuerySubmittedEventArgs,
+    AutoSuggestBoxSuggestionChosenEventArgs, AutoSuggestBoxTextChangedEventArgs, AutoSuggestionBoxTextChangeReason,
+    GridLength, GridUnitType, InfoBarCloseReason, InfoBarClosedEventArgs, InfoBarClosingEventArgs,
+    InfoBarOpenedEventArgs, InfoBarSeverity, NumberBoxSpinButtonPlacementMode, NumberBoxValidationMode,
+    NumberBoxValueChangedEventArgs, Symbol, TextLayoutRoundingPlacement, TickList, WindowTransparencyLevel,
+    WindowTransparencyLevelCollection,
 };
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::ferro_markup_type;
@@ -97,6 +101,24 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <TickList as MarkupTyped>::MARKUP,
     // Declared next to the type (a FerroUI addition, not in the managed original).
     <TextLayoutRoundingPlacement as MarkupTyped>::MARKUP,
+    // WinUI's Symbol, declared next to the type (docs/porting/winui-controls.md).
+    <Symbol as MarkupTyped>::MARKUP,
+    // The enumerations and the event arguments of WinUI's InfoBar, declared next to the types.
+    <InfoBarSeverity as MarkupTyped>::MARKUP,
+    <InfoBarCloseReason as MarkupTyped>::MARKUP,
+    <InfoBarClosingEventArgs as MarkupTyped>::MARKUP,
+    <InfoBarClosedEventArgs as MarkupTyped>::MARKUP,
+    <InfoBarOpenedEventArgs as MarkupTyped>::MARKUP,
+    // WinUI's input controls, declared next to the types (docs/porting/winui-controls.md).
+    <NumberBoxSpinButtonPlacementMode as MarkupTyped>::MARKUP,
+    <NumberBoxValidationMode as MarkupTyped>::MARKUP,
+    <NumberBoxValueChangedEventArgs as MarkupTyped>::MARKUP,
+    <AutoSuggestionBoxTextChangeReason as MarkupTyped>::MARKUP,
+    <AutoSuggestBoxTextChangedEventArgs as MarkupTyped>::MARKUP,
+    <AutoSuggestBoxSuggestionChosenEventArgs as MarkupTyped>::MARKUP,
+    <AutoSuggestBoxQuerySubmittedEventArgs as MarkupTyped>::MARKUP,
+    // WinUI's ZoomMode of the scroll viewer (docs/porting/winui-composition.md, phase 7).
+    <crate::ZoomMode as MarkupTyped>::MARKUP,
 ];
 
 /// Registers the nullable forms of the value types with the untyped value
@@ -108,6 +130,15 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<AcrylicPlatformCompensationLevels>();
     ValueTypes::register_nullable::<TickList>();
     ValueTypes::register_nullable::<TextLayoutRoundingPlacement>();
+    ValueTypes::register_nullable::<Symbol>();
+    ValueTypes::register_nullable::<InfoBarSeverity>();
+    ValueTypes::register_nullable::<crate::ZoomMode>();
+    ValueTypes::register_nullable::<InfoBarCloseReason>();
+    ValueTypes::register_nullable::<NumberBoxSpinButtonPlacementMode>();
+    ValueTypes::register_nullable::<NumberBoxValidationMode>();
+    ValueTypes::register_nullable::<AutoSuggestionBoxTextChangeReason>();
+    crate::navigation::register_value_types();
+    crate::navigation_view_events::register_value_types();
     // A tick list is the list of numbers it derives from: the same list, so that the
     // members of the list (`Capacity`, `Add`) are reached through the tick list.
     ValueTypes::register_cast::<TickList, MediaCollection<f64>>(|ticks| MediaCollection::from_list(ticks.list().clone()));

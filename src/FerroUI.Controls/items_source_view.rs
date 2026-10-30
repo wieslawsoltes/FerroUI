@@ -1,7 +1,7 @@
 // This source file is adapted from the WinUI project.
 // (https://github.com/microsoft/microsoft-ui-xaml)
 
-use crate::items_source::{unbox_item, ItemsChangedEventArgs, ItemsChangedHandler, ItemsSource};
+use crate::items_source::{unbox_item, IItemsList, ItemsChangedEventArgs, ItemsChangedHandler, ItemsSource};
 use crate::utils::{CollectionChangedEventManager, ICollectionChangedListener};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{BoxedValue, PropertyValue};
@@ -27,6 +27,13 @@ pub struct ItemsSourceView {
     listening: Cell<bool>,
 }
 
+/// A view is a reference: two views are equal when they are the same view.
+impl PartialEq for ItemsSourceView {
+    fn eq(&self, other: &Self) -> bool {
+        std::ptr::eq(self, other)
+    }
+}
+
 impl ItemsSourceView {
     /// Gets an empty [`ItemsSourceView`].
     pub fn empty() -> Rc<ItemsSourceView> {
@@ -39,7 +46,9 @@ impl ItemsSourceView {
     }
 
     /// Initializes a new instance of the view for the specified data source.
-    pub(crate) fn new(source: ItemsSource) -> Rc<Self> {
+    // Deviation (DEVIATIONS.md, Items sources): upstream's constructor is `private protected`;
+    // WinUI's is public, and markup constructs a view (`ItemsSourceView(Object source)`).
+    pub fn new(source: ItemsSource) -> Rc<Self> {
         Rc::new_cyclic(|this| Self {
             this: this.clone(),
             source: RefCell::new(source),
@@ -54,6 +63,45 @@ impl ItemsSourceView {
     #[inline]
     pub fn count(&self) -> usize {
         self.source.borrow().count()
+    }
+
+    /// Gets a value that indicates whether the items source can provide a unique key for
+    /// each item: whether the source implements [`IKeyIndexMapping`](crate::IKeyIndexMapping)
+    /// (WinUI `ItemsSourceView.HasKeyIndexMapping`).
+    // Deviation (DEVIATIONS.md, Items sources): upstream keeps the member internal and always
+    // `false` ("preserved here for ItemsRepeater's usage"); here it is WinUI's.
+    pub fn has_key_index_mapping(&self) -> bool {
+        self.source().list().key_index_mapping().is_some()
+    }
+
+    /// Retrieves the unique key of the item at `index` from the items source
+    /// (WinUI `ItemsSourceView.KeyFromIndex`).
+    ///
+    /// Panics if the source does not implement [`IKeyIndexMapping`](crate::IKeyIndexMapping)
+    /// (WinUI throws `hresult_not_implemented`), or if `index` is not the index of an item.
+    // Deviation (DEVIATIONS.md, Items sources): upstream throws `NotImplementedException`
+    // whatever the source; here it is WinUI's, with the index checked before it is passed on.
+    pub fn key_from_index(&self, index: i32) -> String {
+        let source = self.source();
+        assert!(index >= 0 && (index as usize) < source.count(), "Argument index is invalid.");
+        source
+            .list()
+            .key_index_mapping()
+            .expect("The items source does not implement IKeyIndexMapping.")
+            .key_from_index(index)
+    }
+
+    /// Retrieves the index of the item that has the unique key `key`, or `-1` when no item
+    /// has it (WinUI `ItemsSourceView.IndexFromKey`).
+    ///
+    /// Panics if the source does not implement [`IKeyIndexMapping`](crate::IKeyIndexMapping)
+    /// (WinUI throws `hresult_not_implemented`).
+    pub fn index_from_key(&self, key: &str) -> i32 {
+        self.source()
+            .list()
+            .key_index_mapping()
+            .expect("The items source does not implement IKeyIndexMapping.")
+            .index_from_key(key)
     }
 
     /// Gets the source collection.
@@ -129,12 +177,15 @@ impl ItemsSourceView {
 
     /// Gets or creates an [`ItemsSourceView`] for the specified source.
     ///
-    /// Returns [`empty`](Self::empty) if `items` is `None`, otherwise a new
-    /// view. (A caller that already holds a view uses it as is.)
+    /// Returns [`empty`](Self::empty) if `items` is `None`, the view itself if `items`
+    /// is a view (`ItemsSourceView isv => isv`), otherwise a new view.
     pub fn get_or_create(items: Option<&ItemsSource>) -> Rc<ItemsSourceView> {
         match items {
             None => Self::empty(),
-            Some(items) => Self::new(items.clone()),
+            Some(items) => items
+                .downcast_ref::<Self>()
+                .and_then(|view| view.this.upgrade())
+                .unwrap_or_else(|| Self::new(items.clone())),
         }
     }
 
@@ -219,6 +270,54 @@ impl ItemsSourceView {
     }
 }
 
+/// A view is a list of items itself (upstream `ItemsSourceView : IReadOnlyList<object?>, IList,
+/// INotifyCollectionChanged`): it can be the items source of a control, which then reads the
+/// items and the changes through the view, and [`ItemsSourceView::get_or_create`] returns it as
+/// it is. Its unique keys are those of its source.
+impl IItemsList for ItemsSourceView {
+    fn key_index_mapping(&self) -> Option<&dyn crate::IKeyIndexMapping> {
+        self.has_key_index_mapping().then_some(self as &dyn crate::IKeyIndexMapping)
+    }
+
+    fn count(&self) -> usize {
+        ItemsSourceView::count(self)
+    }
+
+    fn get_at(&self, index: usize) -> Option<BoxedValue> {
+        ItemsSourceView::get_at(self, index)
+    }
+
+    fn index_of(&self, item: &Option<BoxedValue>) -> i32 {
+        ItemsSourceView::index_of(self, item)
+    }
+
+    fn is_notifying(&self) -> bool {
+        self.source().is_notifying()
+    }
+
+    fn add_collection_changed(&self, handler: Rc<ItemsChangedHandler>) -> Option<u64> {
+        self.is_notifying().then(|| ItemsSourceView::add_collection_changed(self, handler))
+    }
+
+    fn remove_collection_changed(&self, token: u64) {
+        ItemsSourceView::remove_collection_changed(self, token);
+    }
+
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}
+
+impl crate::IKeyIndexMapping for ItemsSourceView {
+    fn key_from_index(&self, index: i32) -> String {
+        ItemsSourceView::key_from_index(self, index)
+    }
+
+    fn index_from_key(&self, key: &str) -> i32 {
+        ItemsSourceView::index_from_key(self, key)
+    }
+}
+
 impl ICollectionChangedListener for ItemsSourceView {
     fn pre_changed(&self, e: &ItemsChangedEventArgs<'_>) {
         Self::invoke(&self.pre_collection_changed, e);
@@ -262,7 +361,7 @@ impl<T: PropertyValue> ItemsSourceViewOf<T> {
     }
 
     /// Initializes a new instance of the view for the specified data source.
-    pub(crate) fn new(source: ItemsSource) -> Self {
+    pub fn new(source: ItemsSource) -> Self {
         Self { view: ItemsSourceView::new(source), marker: PhantomData }
     }
 

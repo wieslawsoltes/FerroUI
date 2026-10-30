@@ -1,6 +1,37 @@
 [workspace]
 resolver = "2"
 members = [
+    # The Dock port (docs/porting/dock).
+    "samples/Dock/FerroDockReactiveUISample",
+    "src/Dock/FerroDock.Controls.DeferredContentControl",
+    "src/Dock/FerroDock.Controls.ProportionalStackPanel",
+    "src/Dock/FerroDock.Controls.Recycling",
+    "src/Dock/FerroDock.Controls.Recycling.Model",
+    "src/Dock/FerroDock.Controls.Recycling.Model.Ferro",
+    "src/Dock/FerroDock.Ferro",
+    "src/Dock/FerroDock.Ferro.Diagnostics",
+    "src/Dock/FerroDock.Ferro.Themes.Browser",
+    "src/Dock/FerroDock.Ferro.Themes.Fluent",
+    "src/Dock/FerroDock.Ferro.Themes.Simple",
+    "src/Dock/FerroDock.MarkupExtension",
+    "src/Dock/FerroDock.Model",
+    "src/Dock/FerroDock.Model.Ferro",
+    "src/Dock/FerroDock.Model.ReactiveUI",
+    "src/Dock/FerroDock.Model.ReactiveUI.Ferro",
+    "src/Dock/FerroDock.Model.ReactiveUI.Services",
+    "src/Dock/FerroDock.Model.ReactiveUI.Services.Ferro",
+    "src/Dock/FerroDock.Runtime",
+    "src/Dock/FerroDock.Serializer.SystemTextJson",
+    "src/Dock/FerroDock.Serializer.SystemTextJson.Generators",
+    "src/Dock/FerroDock.Serializer.SystemTextJson.Generators.Rust",
+    "src/Dock/FerroDock.Serializer.SystemTextJson.ReactiveUI",
+    "src/Dock/FerroDock.Settings",
+    "tests/Dock/FerroDock.Markup.Tests",
+    "tests/Dock/FerroDock.Serializer.Generated.Tests",
+    "tests/Dock/FerroDock.Settings.Markup.Tests",
+    "samples/HotReload",
+    "src/FerroUI.HotReload",
+    "src/FerroUI.HotPatch",
     "src/FerroUI.System",
     "src/FerroUI.Reactive",
     "src/FerroUI.Reactive.Testing",
@@ -15,6 +46,9 @@ members = [
     "src/FerroUI.View",
     "src/FerroUI.View.Macros",
     "src/FerroUI.Controls.ColorPicker",
+    "src/FerroUI.Controls.Charts",
+    "src/FerroUI.Controls.Repeater",
+    "src/FerroUI.Controls.Inking",
     "src/TreeDataGrid/FerroUI.TreeDataGrid.Core",
     "src/TreeDataGrid/FerroUI.Controls.TreeDataGrid",
     "src/StaticViewLocator/FerroUI.StaticViewLocator",
@@ -47,9 +81,21 @@ members = [
     "src/FerroUI.Inspect",
     "src/FerroUI.DevTools",
     "src/FerroUI.Mcp",
+    "src/Behaviors/FerroUI.Xaml.Interactivity",
+    "src/Behaviors/FerroUI.Xaml.Behaviors.Animations",
+    "src/Behaviors/FerroUI.Xaml.Interactions",
+    "src/Behaviors/FerroUI.Xaml.Interactions.ReactiveUI",
+    "src/Behaviors/FerroUI.Xaml.Interactions.Custom",
+    "src/Behaviors/FerroUI.Xaml.Behaviors",
+    "src/Behaviors/FerroUI.Xaml.Interactions.Draggable",
+    "src/Behaviors/FerroUI.Xaml.Interactions.DragAndDrop",
+    "src/Behaviors/FerroUI.Xaml.Interactions.Events",
+    "src/Behaviors/FerroUI.Xaml.Interactions.Responsive",
     "src/FerroUI.Themes.Simple",
     "src/FerroUI.Themes.Fluent",
     "src/FerroUI.Themes.WinUI",
+    "src/FerroUI.Themes.MacOS",
+    "src/FerroUI.Themes.Material",
     "src/FerroUI.OpenGL",
     "src/FerroUI.Metal",
     "src/FerroUI.Remote.Protocol",
@@ -77,6 +123,11 @@ members = [
     "tests/FerroUI.IntegrationTests.Win32",
     "tests/FerroUI.DesignerSupport.Tests",
     "tests/FerroUI.StaticViewLocator.Tests",
+    "samples/HelloWorld",
+    "samples/HelloWorld.Builders",
+    "samples/HelloWorld.Macros",
+    "samples/HelloWorld.Hooks",
+    "samples/HelloWorld.ComponentHost",
     "samples/SevenGuis/Model",
     "samples/SevenGuis/Builders/Counter",
     "samples/SevenGuis/Macros/Counter",
@@ -117,6 +168,7 @@ members = [
     "samples/BindingDemo",
     "samples/VirtualizationDemo",
     "samples/TreeDataGridDemo",
+    "samples/ChartsDemo",
     "samples/ReactiveDemo",
     "samples/ReactiveUIExample",
     "samples/StaticViewLocatorDemo",
@@ -128,6 +180,8 @@ members = [
     "samples/ControlGallery.WinUI",
     "samples/WinUIEmbedSample",
     "samples/WinUIThemeGallery",
+    "samples/MaterialThemeGallery",
+    "samples/BehaviorsGallery",
     "samples/SafeAreaDemo",
     "samples/SafeAreaDemo.Desktop",
     "samples/SafeAreaDemo.Android",
@@ -155,6 +209,19 @@ categories = ["gui"]
 # that the crates of a release are only ever resolved together (docs/release.md, "Version scheme").
 # `scripts/release/set-version.sh <version>` writes the version above and these keys.
 [workspace.dependencies]
+# The Dock port (docs/porting/dock): its crates and the dependencies only it has.
+ferrodock-controls-recycling-model = { path = "src/Dock/FerroDock.Controls.Recycling.Model" }
+ferrodock-controls-recycling-model-ferro = { path = "src/Dock/FerroDock.Controls.Recycling.Model.Ferro" }
+ferrodock-model = { path = "src/Dock/FerroDock.Model" }
+ferrodock-model-ferro = { path = "src/Dock/FerroDock.Model.Ferro" }
+ferrodock-runtime = { path = "src/Dock/FerroDock.Runtime" }
+ferrodock-settings = { path = "src/Dock/FerroDock.Settings" }
+ryu = "1.0"
+serde = "1.0"
+serde_json = { version = "1.0", features = ["raw_value"] }
+
+ferroui-hot-reload = { version = "=0.4.0", path = "src/FerroUI.HotReload" }
+ferroui-hot-patch = { version = "=0.4.0", path = "src/FerroUI.HotPatch" }
 ferroui-inspect = { version = "=0.4.0", path = "src/FerroUI.Inspect" }
 ferroui-devtools = { version = "=0.4.0", path = "src/FerroUI.DevTools", default-features = false }
 ferroui-mcp = { version = "=0.4.0", path = "src/FerroUI.Mcp" }
@@ -172,6 +239,9 @@ ferroui-controls = { version = "=0.4.0", path = "src/FerroUI.Controls" }
 ferroui-view = { version = "=0.4.0", path = "src/FerroUI.View" }
 ferroui-view-macros = { version = "=0.4.0", path = "src/FerroUI.View.Macros" }
 ferroui-controls-color-picker = { version = "=0.4.0", path = "src/FerroUI.Controls.ColorPicker" }
+ferroui-controls-charts = { version = "=0.4.0", path = "src/FerroUI.Controls.Charts" }
+ferroui-controls-repeater = { version = "=0.4.0", path = "src/FerroUI.Controls.Repeater" }
+ferroui-controls-inking = { version = "=0.4.0", path = "src/FerroUI.Controls.Inking" }
 ferroui-treedatagrid-core = { version = "=0.4.0", path = "src/TreeDataGrid/FerroUI.TreeDataGrid.Core" }
 ferroui-controls-treedatagrid = { version = "=0.4.0", path = "src/TreeDataGrid/FerroUI.Controls.TreeDataGrid" }
 ferroui-static-view-locator = { version = "=0.4.0", path = "src/StaticViewLocator/FerroUI.StaticViewLocator" }
@@ -210,9 +280,21 @@ ferroui-winui = { version = "=0.4.0", path = "src/Windows/FerroUI.WinUI" }
 ferroui-fonts-inter = { version = "=0.4.0", path = "src/FerroUI.Fonts.Inter" }
 ferroui-dialogs = { version = "=0.4.0", path = "src/FerroUI.Dialogs" }
 ferroui-diagnostics = { version = "=0.4.0", path = "src/FerroUI.Diagnostics" }
+ferroui-xaml-interactivity = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Interactivity" }
+ferroui-xaml-behaviors-animations = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Behaviors.Animations" }
+ferroui-xaml-interactions = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Interactions" }
+ferroui-xaml-interactions-reactiveui = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Interactions.ReactiveUI" }
+ferroui-xaml-interactions-custom = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Interactions.Custom" }
+ferroui-xaml-behaviors = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Behaviors" }
+ferroui-xaml-interactions-draggable = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Interactions.Draggable" }
+ferroui-xaml-interactions-draganddrop = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Interactions.DragAndDrop" }
+ferroui-xaml-interactions-events = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Interactions.Events" }
+ferroui-xaml-interactions-responsive = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Interactions.Responsive" }
 ferroui-themes-simple = { version = "=0.4.0", path = "src/FerroUI.Themes.Simple" }
 ferroui-themes-fluent = { version = "=0.4.0", path = "src/FerroUI.Themes.Fluent" }
 ferroui-themes-winui = { version = "=0.4.0", path = "src/FerroUI.Themes.WinUI" }
+ferroui-themes-macos = { version = "=0.4.0", path = "src/FerroUI.Themes.MacOS" }
+ferroui-themes-material = { version = "=0.4.0", path = "src/FerroUI.Themes.Material" }
 ferroui-opengl = { version = "=0.4.0", path = "src/FerroUI.OpenGL" }
 ferroui-metal = { version = "=0.4.0", path = "src/FerroUI.Metal" }
 ferroui-remote-protocol = { version = "=0.4.0", path = "src/FerroUI.Remote.Protocol" }
@@ -322,6 +404,15 @@ getrandom = { version = "0.4" }
 # thin LTO over the default sixteen code generation units, which generates code on all cores.
 [profile.release]
 lto = "thin"
+
+# Optimised code for running an application locally (`cargo run --profile fast-release -p <app>`):
+# the optimisation level of release, without link-time optimisation across crates. The last step
+# of an executable then links the optimised crates instead of optimising the whole program again,
+# which took most of a release build of a large application. Not for measurements or shipping:
+# the benchmarks are measured with release, and what is shipped is built with dist.
+[profile.fast-release]
+inherits = "release"
+lto = false
 
 # The build that is shipped and measured (`cargo build --profile dist`, `scripts/perf-report.py
 # --profile dist`): whole-program optimisation in one code generation unit. The executables are

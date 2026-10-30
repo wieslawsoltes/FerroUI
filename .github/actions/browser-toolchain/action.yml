@@ -11,6 +11,12 @@ inputs:
   cache-key:
     description: Key of the Rust build cache, so that jobs that build different things keep separate caches.
     required: true
+  ferroui:
+    description: >
+      The directory of the FerroUI repository: "." here, the submodule (FerroUI) in the repository of
+      an application (.github/workflows/app.yml).
+    required: false
+    default: "."
   threads:
     description: >
       "true" for a job that builds with `scripts/build-browser.sh --threads` or `--both`: the toolchain
@@ -24,6 +30,7 @@ runs:
     - name: Pinned versions
       id: pins
       shell: bash
+      working-directory: ${{ inputs.ferroui }}
       run: |
         echo "emsdk=$(sed -n 's/^EMSDK_VERSION="\(.*\)"$/\1/p' scripts/browser/setup.sh)" >> "$GITHUB_OUTPUT"
         echo "rust=$(sed -n 's/^RUST_VERSION="\(.*\)"$/\1/p' scripts/browser/setup.sh)" >> "$GITHUB_OUTPUT"
@@ -51,6 +58,7 @@ runs:
         key: rust-nightly-${{ runner.os }}-${{ runner.arch }}-${{ steps.pins.outputs.nightly }}-rust-src-wasm32-unknown-emscripten
     - name: Install the toolchain (scripts/browser/setup.sh)
       shell: bash
+      working-directory: ${{ inputs.ferroui }}
       run: |
         scripts/browser/setup.sh ${{ inputs.threads == 'true' && '--threads' || '' }} ~/browser-tools
         # The environment of env.sh, for the following steps of the job.
@@ -66,8 +74,11 @@ runs:
         # The build with threads has a standard library and objects of its own (target/threads), made
         # by the nightly: its cache is another one, and a change of the pin starts it anew.
         key: ${{ inputs.cache-key }}${{ inputs.threads == 'true' && format('-threads-{0}', steps.pins.outputs.nightly) || '' }}
+        # Saved by runs of main only, as the other Rust build caches (.github/workflows/ci.yml).
+        save-if: ${{ github.ref == 'refs/heads/main' }}
+        cache-on-failure: true
     - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
       with:
         node-version: 24
         cache: npm
-        cache-dependency-path: src/Browser/FerroUI.Browser/webapp/package-lock.json
+        cache-dependency-path: ${{ inputs.ferroui }}/src/Browser/FerroUI.Browser/webapp/package-lock.json

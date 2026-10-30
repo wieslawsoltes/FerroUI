@@ -164,6 +164,10 @@ impl AutomationNode {
                 (RangeValuePatternIdentifiers::is_read_only_property(), UiaPropertyId::RangeValueIsReadOnly),
                 (RangeValuePatternIdentifiers::maximum_property(), UiaPropertyId::RangeValueMaximum),
                 (RangeValuePatternIdentifiers::minimum_property(), UiaPropertyId::RangeValueMinimum),
+                // Deviation (DEVIATIONS.md, Windows platform backend): the two identifiers
+                // FerroUI adds after WinUI; the map of the reference has neither.
+                (RangeValuePatternIdentifiers::small_change_property(), UiaPropertyId::RangeValueSmallChange),
+                (RangeValuePatternIdentifiers::large_change_property(), UiaPropertyId::RangeValueLargeChange),
                 (RangeValuePatternIdentifiers::value_property(), UiaPropertyId::RangeValueValue),
                 (ScrollPatternIdentifiers::horizontally_scrollable_property(), UiaPropertyId::ScrollHorizontallyScrollable),
                 (ScrollPatternIdentifiers::horizontal_scroll_percent_property(), UiaPropertyId::ScrollHorizontalScrollPercent),
@@ -259,7 +263,10 @@ impl AutomationNode {
     /// The peer of the node with the number `id`, on the UI thread; `None`
     /// when the peer is gone.
     pub(crate) fn peer_of(id: i32) -> Option<Ref<AutomationPeer>> {
-        Self::entry(id)?.peer.upgrade()
+        // A peer whose control is gone is not an element any more: every call of the node
+        // answers `UIA_E_ELEMENTNOTAVAILABLE` (`invoke_sync`), as for a peer that is gone,
+        // instead of reaching the control (DEVIATIONS.md, Automation peers).
+        Self::entry(id)?.peer.upgrade().filter(|peer| peer.is_element_available())
     }
 
     /// The provider of the node with the number `id`, on the UI thread.

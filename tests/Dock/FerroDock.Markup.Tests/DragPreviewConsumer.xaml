@@ -1,0 +1,35 @@
+<!-- Control template is a metadata/binding test fixture; original full preview-control theme remains pending. -->
+<Panel xmlns="https://github.com/ferroui"
+       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+       xmlns:d="using:FerroDock.Ferro.Controls"
+       x:DataType="Panel" x:CompileBindings="True">
+  <Panel.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="ferres://FerroDock.Ferro.Themes.Fluent/Controls/DragPreviewWindow.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </Panel.Resources>
+  <d:DragPreviewControl Name="Preview" Status="Dock" ShowContent="True"
+                        PreviewContentWidth="120" PreviewContentHeight="80">
+    <d:DragPreviewControl.ContentTemplate>
+      <DataTemplate x:DataType="x:Object">
+        <TextBlock Text="Preview heading" />
+      </DataTemplate>
+    </d:DragPreviewControl.ContentTemplate>
+    <d:DragPreviewControl.PreviewContent>
+      <Border Name="ActualPreview" Background="Red" />
+    </d:DragPreviewControl.PreviewContent>
+    <d:DragPreviewControl.Template>
+      <ControlTemplate x:DataType="d:DragPreviewControl">
+        <StackPanel>
+          <TextBlock Name="Status" Text="{TemplateBinding Status}" />
+          <ContentControl Name="ManagedPreview" Content="{TemplateBinding PreviewContent}"
+                          Width="{TemplateBinding PreviewContentWidth}"
+                          Height="{TemplateBinding PreviewContentHeight}"
+                          IsVisible="{TemplateBinding ShowContent}" />
+        </StackPanel>
+      </ControlTemplate>
+    </d:DragPreviewControl.Template>
+  </d:DragPreviewControl>
+</Panel>

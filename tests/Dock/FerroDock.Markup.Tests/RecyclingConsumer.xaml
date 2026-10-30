@@ -1,0 +1,19 @@
+<ContentPresenter xmlns="https://github.com/ferroui"
+                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                  xmlns:r="using:FerroUI.Controls.Recycling"
+                  x:Name="Presenter" x:DataType="ContentPresenter"
+                  x:CompileBindings="True"
+                  r:ControlRecyclingDataTemplate.ControlRecycling="{StaticResource Cache}"
+                  Content="first">
+  <ContentPresenter.Resources>
+    <r:ControlRecycling x:Key="Cache" TryToUseIdAsKey="True" />
+  </ContentPresenter.Resources>
+  <ContentPresenter.DataTemplates>
+    <DataTemplate x:DataType="x:String">
+      <Border Width="10" Height="10" />
+    </DataTemplate>
+  </ContentPresenter.DataTemplates>
+  <ContentPresenter.ContentTemplate>
+    <r:ControlRecyclingDataTemplate Parent="{Binding #Presenter}" />
+  </ContentPresenter.ContentTemplate>
+</ContentPresenter>

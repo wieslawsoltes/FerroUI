@@ -1,0 +1,69 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    dxaml/xcp/dxaml/themes/generic.xaml (the style of Thumb; its resources are
+    Resources/Generic.xaml)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  The visual states PointerOver and Pressed show one of three stacked borders through a zero
+  length animation of their opacity, which is a value here (docs/porting/winui-theme.md,
+  section 4.4). The thumbs of ScrollBar and Slider have keyed themes of their own.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <ControlTheme x:Key="{x:Type Thumb}" TargetType="Thumb">
+    <Setter Property="Background" Value="{DynamicResource ThumbBackground}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="BorderBrush" Value="{DynamicResource ThumbBorderBrush}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid>
+          <Border x:Name="Background"
+                  Background="{TemplateBinding Background}"
+                  BorderBrush="{TemplateBinding BorderBrush}"
+                  BackgroundSizing="InnerBorderEdge"
+                  BorderThickness="{TemplateBinding BorderThickness}"
+                  CornerRadius="{TemplateBinding CornerRadius}" />
+          <Border x:Name="BackgroundPointerOver"
+                  Background="{DynamicResource ThumbBackgroundPointerOver}"
+                  BorderBrush="{DynamicResource ThumbBorderBrushPointerOver}"
+                  BackgroundSizing="InnerBorderEdge"
+                  BorderThickness="{TemplateBinding BorderThickness}"
+                  CornerRadius="{TemplateBinding CornerRadius}"
+                  Opacity="0" />
+          <Border x:Name="BackgroundPressed"
+                  Background="{DynamicResource ThumbBackgroundPressed}"
+                  BorderBrush="{DynamicResource ThumbBorderBrushPressed}"
+                  BackgroundSizing="InnerBorderEdge"
+                  BorderThickness="{TemplateBinding BorderThickness}"
+                  CornerRadius="{TemplateBinding CornerRadius}"
+                  Opacity="0" />
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- PointerOver -->
+    <Style Selector="^:pointerover">
+      <Style Selector="^ /template/ Border#BackgroundPointerOver">
+        <Setter Property="Opacity" Value="1" />
+      </Style>
+      <Style Selector="^ /template/ Border#Background">
+        <Setter Property="Opacity" Value="0" />
+      </Style>
+    </Style>
+    <!-- Pressed (the state replaces PointerOver) -->
+    <Style Selector="^:pressed">
+      <Style Selector="^ /template/ Border#BackgroundPressed">
+        <Setter Property="Opacity" Value="1" />
+      </Style>
+      <Style Selector="^ /template/ Border#BackgroundPointerOver">
+        <Setter Property="Opacity" Value="0" />
+      </Style>
+      <Style Selector="^ /template/ Border#Background">
+        <Setter Property="Opacity" Value="0" />
+      </Style>
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

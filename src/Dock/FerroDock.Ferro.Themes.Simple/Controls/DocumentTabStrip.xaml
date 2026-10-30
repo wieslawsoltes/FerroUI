@@ -1,0 +1,272 @@
+<ResourceDictionary xmlns:fd="using:FerroDock.Ferro.Controls"
+                    xmlns:pc="using:FerroDock.Ferro.Converters"
+                    xmlns:settingsp="using:FerroDock.Settings" xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:dmc="using:FerroDock.Model.Controls"
+                    xmlns:core="using:FerroDock.Model.Core"
+                    xmlns:converters="using:FerroDock.Ferro.Converters"
+                    x:DataType="dmc:IDocumentDock"
+                    x:CompileBindings="True">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <fd:DocumentTabStrip>
+        <fd:DocumentTabStripItem>Item 1</fd:DocumentTabStripItem>
+        <fd:DocumentTabStripItem>Item 2</fd:DocumentTabStripItem>
+        <fd:DocumentTabStripItem IsEnabled="False">Disabled</fd:DocumentTabStripItem>
+      </fd:DocumentTabStrip>
+    </Border>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="ButtonCreateDocument"
+                TargetType="Button"
+                BasedOn="{StaticResource {x:Type Button}}">
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="Width" Value="{DynamicResource DockCreateButtonWidth}" />
+    <Setter Property="Height" Value="{DynamicResource DockCreateButtonHeight}" />
+    <Setter Property="HorizontalAlignment" Value="Right" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Top" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="CornerRadius" Value="{DynamicResource DockDocumentTabCreateButtonCornerRadius}" />
+    <Style Selector="^:pointerover">
+      <Setter Property="Background" Value="{DynamicResource DockTabHoverBackgroundBrush}" />
+    </Style>
+  </ControlTheme>
+
+  <DataTemplate x:Key="DockDefaultDocumentCreateButtonTemplate" x:DataType="dmc:IDocumentDock">
+    <Button Command="{Binding CreateDocument}"
+            Theme="{Binding $parent[fd:DocumentTabStrip].CreateButtonTheme}">
+      <Path x:Name="PART_PathCreate">
+        <Path.Styles>
+          <Style Selector="Path">
+            <Setter Property="Margin" Value="{DynamicResource DockCreateButtonIconMargin}" />
+            <Setter Property="Stretch" Value="Uniform" />
+            <Setter Property="UseLayoutRounding" Value="False" />
+            <Setter Property="Fill" Value="{DynamicResource DockTabForegroundBrush}" />
+            <Setter Property="Data" Value="{DynamicResource DockIconAddDocumentGeometry}" />
+          </Style>
+        </Path.Styles>
+      </Path>
+    </Button>
+  </DataTemplate>
+
+  <ControlTheme x:Key="DocumentCloseButtonTheme"
+                TargetType="Button"
+                BasedOn="{StaticResource {x:Type Button}}">
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="Width" Value="{DynamicResource DockCloseButtonSize}" />
+    <Setter Property="Height" Value="{DynamicResource DockCloseButtonSize}" />
+    <Setter Property="Background" Value="Transparent" />
+    <Style Selector="^:pointerover">
+      <Setter Property="Background" Value="{DynamicResource DockTabCloseHoverBackgroundBrush}" />
+    </Style>
+  </ControlTheme>
+
+  <DataTemplate x:Key="DockDefaultDocumentCloseTemplate" x:DataType="core:IDockable">
+    <Button Command="{Binding Owner.Factory.CloseDockable}"
+            CommandParameter="{Binding}"
+            Theme="{Binding $parent[fd:DocumentTabStrip].CloseButtonTheme}">
+      <Button.IsVisible>
+        <MultiBinding Converter="{x:Static BoolConverters.And}">
+          <MultiBinding Converter="{x:Static converters:DockCapabilityConverters.CanCloseMultiConverter}">
+            <Binding />
+            <Binding Path="CanClose" />
+            <Binding Path="DockCapabilityOverrides.CanClose" />
+            <Binding Path="((core:IDock)Owner).DockCapabilityPolicy.CanClose" />
+          </MultiBinding>
+          <MultiBinding Converter="{x:Static converters:CanRemoveDockableConverter.Instance}">
+            <Binding Path="((core:IDock)Owner).CanCloseLastDockable" FallbackValue="{x:True}" />
+            <Binding Path="((core:IDock)Owner).VisibleDockables.Count" FallbackValue="0" />
+          </MultiBinding>
+          <MultiBinding Converter="{x:Static converters:DocumentCloseButtonVisibilityConverter.Instance}">
+            <Binding Path="((dmc:IDocumentDock)Owner).CloseButtonShowMode" FallbackValue="Always" />
+            <Binding Path="$parent[fd:DocumentTabStripItem].IsSelected" />
+          </MultiBinding>
+        </MultiBinding>
+      </Button.IsVisible>
+
+      <Path x:Name="PART_ClosePath">
+        <Path.Styles>
+          <Style Selector="Path">
+            <Setter Property="Margin" Value="{DynamicResource DockTabContentMargin}" />
+            <Setter Property="Stretch" Value="Uniform" />
+            <Setter Property="UseLayoutRounding" Value="False" />
+            <Setter Property="Data" Value="{DynamicResource DockIconCloseGeometry}" />
+            <Setter Property="Fill" Value="{Binding $parent[fd:DocumentTabStripItem].Foreground}" />
+          </Style>
+        </Path.Styles>
+      </Path>
+    </Button>
+  </DataTemplate>
+
+  <ControlTheme x:Key="{x:Type fd:DocumentTabStrip}" TargetType="fd:DocumentTabStrip">
+
+    <Setter Property="(AutomationProperties.AutomationId)" Value="{Binding Id}" />
+    <Setter Property="(AutomationProperties.Name)" Value="{Binding Title}" />
+
+    <Setter Property="(settingsp:DockProperties.IsDragEnabled)" Value="{Binding CanDrag}" />
+    <Setter Property="(settingsp:DockProperties.IsDropEnabled)" Value="{Binding CanDrop}" />
+
+    <Setter Property="EnableWindowDrag" Value="{Binding EnableWindowDrag}" />
+    <Setter Property="EnableWindowStateToggleOnDoubleTap"
+            Value="{DynamicResource DockDocumentTabStripToggleWindowStateOnDoubleTap}" />
+    <Setter Property="CreateButtonTheme" Value="{DynamicResource ButtonCreateDocument}" />
+    <Setter Property="CreateButtonTemplate" Value="{DynamicResource DockDefaultDocumentCreateButtonTemplate}" />
+    <Setter Property="CloseButtonTheme" Value="{DynamicResource DocumentCloseButtonTheme}" />
+    <Setter Property="CloseTemplate" Value="{DynamicResource DockDefaultDocumentCloseTemplate}" />
+
+    <Setter Property="Background" Value="{DynamicResource DockDocumentTabStripBackgroundBrush}" />
+    <Setter Property="Focusable" Value="False" />
+    <Setter Property="ClipToBounds" Value="False" />
+    <Setter Property="MinHeight" Value="{DynamicResource DockDocumentTabStripMinHeight}" />
+    <Setter Property="ZIndex" Value="1" />
+
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid Background="{TemplateBinding Background}"
+              ClipToBounds="False"
+              RowDefinitions="Auto,*,Auto"
+              ColumnDefinitions="Auto,*,Auto">
+          <ContentPresenter Grid.Row="0"
+                            Grid.Column="0"
+                            Grid.ColumnSpan="3"
+                            Content="{TemplateBinding TopContent}"
+                            ContentTemplate="{TemplateBinding TopContentTemplate}" />
+          <ContentPresenter Grid.Row="1"
+                            Grid.Column="0"
+                            Content="{TemplateBinding LeftContent}"
+                            ContentTemplate="{TemplateBinding LeftContentTemplate}" />
+          <ContentPresenter Grid.Row="1"
+                            Grid.Column="2"
+                            Content="{TemplateBinding RightContent}"
+                            ContentTemplate="{TemplateBinding RightContentTemplate}" />
+          <ContentPresenter Grid.Row="2"
+                            Grid.Column="0"
+                            Grid.ColumnSpan="3"
+                            Content="{TemplateBinding BottomContent}"
+                            ContentTemplate="{TemplateBinding BottomContentTemplate}" />
+
+          <DockPanel Grid.Row="1"
+                     Grid.Column="1"
+                     ClipToBounds="False">
+            <Panel x:Name="PART_LeadingSpacer"
+                   DockPanel.Dock="Left"
+                   Width="{DynamicResource DockDocumentTabStripLeadingSpacerWidth}"
+                   Height="1" />
+            <Panel Name="PART_Panel">
+              <ScrollViewer x:Name="PART_ScrollViewer">
+                <ItemsPresenter x:Name="PART_ItemsPresenter"
+                                ItemsPanel="{TemplateBinding ItemsPanel}" />
+              </ScrollViewer>
+              <Border Name="PART_BorderFill"
+                      settingsp:DockProperties.IsDropArea="True"
+                      settingsp:DockProperties.IsDockTarget="True"
+                      settingsp:DockProperties.ShowDockIndicatorOnly="True"
+                      settingsp:DockProperties.IndicatorDockOperation="Fill">
+                <Border.Margin>
+                  <MultiBinding Converter="{x:Static pc:BorderFillMarginConverter.Instance}">
+                    <Binding Path="#PART_ItemsPresenter.Bounds.Width" />
+                    <Binding Path="#PART_ItemsPresenter.Bounds.Height" />
+                    <Binding Path="#PART_ItemsPresenter.IsVisible" />
+                    <Binding Path="#PART_ItemsPresenter.VerticalAlignment" />
+                    <Binding Path="#PART_ItemsPresenter.HorizontalAlignment" />
+                  </MultiBinding>
+                </Border.Margin>
+              </Border>
+            </Panel>
+            <ContentPresenter x:Name="PART_CreateButtonHost"
+                            Content="{Binding}"
+                            IsVisible="{Binding CanCreateDocument}" />
+            <Panel Name="PART_TrailingFill" />
+          </DockPanel>
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+
+    <Style Selector="^/template/ ContentPresenter#PART_CreateButtonHost">
+      <Setter Property="ContentTemplate">
+        <Binding Path="CreateButtonTemplate"
+                 RelativeSource="{RelativeSource TemplatedParent}" />
+      </Setter>
+    </Style>
+
+    <Style Selector="^[Orientation=Vertical]/template/ ItemsPresenter#PART_ItemsPresenter">
+      <Setter Property="VerticalAlignment" Value="Top" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+    </Style>
+
+    <Style Selector="^[Orientation=Horizontal]/template/ ItemsPresenter#PART_ItemsPresenter">
+      <Setter Property="VerticalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+
+    <Style Selector="^[Orientation=Vertical]/template/ Panel#PART_Panel">
+      <Setter Property="(DockPanel.Dock)" Value="Top" />
+    </Style>
+
+    <Style Selector="^[Orientation=Horizontal]/template/ Panel#PART_Panel">
+      <Setter Property="(DockPanel.Dock)" Value="Left" />
+    </Style>
+
+    <Style Selector="^[Orientation=Vertical]/template/ ContentPresenter#PART_CreateButtonHost">
+      <Setter Property="(DockPanel.Dock)" Value="Bottom" />
+      <Setter Property="Width" Value="NaN" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+    </Style>
+
+    <Style Selector="^[Orientation=Horizontal]/template/ ContentPresenter#PART_CreateButtonHost">
+      <Setter Property="(DockPanel.Dock)" Value="{DynamicResource DockDocumentTabStripHorizontalCreateButtonDock}" />
+      <Setter Property="HorizontalAlignment" Value="{DynamicResource DockDocumentTabStripHorizontalCreateButtonAlignment}" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="Margin" Value="{DynamicResource DockDocumentTabStripHorizontalCreateButtonMargin}" />
+    </Style>
+
+    <Style Selector="^[Orientation=Vertical]">
+      <Setter Property="ItemsPanel">
+        <ItemsPanelTemplate>
+          <UniformGrid Columns="1" VerticalAlignment="Top" ClipToBounds="False" />
+        </ItemsPanelTemplate>
+      </Setter>
+    </Style>
+
+    <Style Selector="^/template/ ScrollViewer#PART_ScrollViewer">
+      <Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
+      <Setter Property="VerticalScrollBarVisibility" Value="Disabled" />
+    </Style>
+
+    <Style Selector="^[Orientation=Vertical]/template/ ScrollViewer#PART_ScrollViewer">
+      <Setter Property="Theme" Value="{DynamicResource DockTabStripScrollViewerHorizontal}" />
+      <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+      <Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
+    </Style>
+
+    <Style Selector="^[Orientation=Horizontal]">
+      <Setter Property="ItemsPanel">
+        <DynamicResource ResourceKey="DockDocumentTabStripHorizontalItemsPanel" />
+      </Setter>
+    </Style>
+
+    <Style Selector="^[Orientation=Horizontal]/template/ ScrollViewer#PART_ScrollViewer">
+      <Setter Property="Theme" Value="{DynamicResource DockTabStripScrollViewerHorizontal}" />
+      <Setter Property="HorizontalScrollBarVisibility" Value="Auto" />
+      <Setter Property="VerticalScrollBarVisibility" Value="Disabled" />
+      <Setter Property="Margin" Value="{DynamicResource DockDocumentTabStripHorizontalScrollViewerMargin}" />
+      <Setter Property="Padding" Value="{DynamicResource DockDocumentTabStripHorizontalScrollViewerPadding}" />
+    </Style>
+
+    <Style Selector="^:not(:create):empty">
+      <Setter Property="IsVisible" Value="{DynamicResource DockDocumentTabStripHideWhenEmpty}" />
+    </Style>
+
+    <Style Selector="^/template/ Border#PART_BorderFill">
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+  </ControlTheme>
+
+</ResourceDictionary>

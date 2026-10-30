@@ -1,0 +1,161 @@
+<!-- Material 3 Expressive templates using FerroUI controls and bounded MaterialRipple.
+     Reference AndroidX Material3 1.5.0-beta02, e4d933c98df7baa7ea2b83eea6e086915961e0ff.
+     Structural heritage: FerroUI WinUI theme, Microsoft Corporation, MIT; see NOTICE.md. -->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:material="using:FerroUI.Themes.Material" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:ClassModifier="internal">
+  <ControlTheme x:Key="TabbedPageTabControlTheme" TargetType="TabControl" BasedOn="{StaticResource DefaultTabViewStyle}">
+    <Setter Property="Background" Value="{DynamicResource MaterialSurfaceContainerBrush}" />
+    <Setter Property="ItemsPanel">
+      <ItemsPanelTemplate>
+        <UniformGrid Rows="1" />
+      </ItemsPanelTemplate>
+    </Setter>
+    <Style Selector="^ /template/ Border#TabContainerGrid">
+      <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style Selector="^[TabStripPlacement=Bottom] /template/ Border#TabContainerGrid">
+      <Setter Property="BorderThickness" Value="0" />
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="TabbedPageTabItemTheme" TargetType="TabItem">
+    <Setter Property="MinWidth" Value="64" />
+    <Setter Property="MinHeight" Value="64" />
+    <Setter Property="Padding" Value="4" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="FontWeight" Value="Medium" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border BorderBrush="{DynamicResource MaterialSecondaryBrush}" BorderThickness="3" CornerRadius="16" />
+      </FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="LayoutRoot" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+          <StackPanel Spacing="4" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Grid x:Name="IconContainer" Width="56" Height="32" TemplatedControl.IsTemplateFocusTarget="True">
+              <Border x:Name="SelectionIndicator" IsVisible="{TemplateBinding IndicatorTemplate, Converter={x:Static ObjectConverters.IsNull}}" CornerRadius="16" Background="{DynamicResource MaterialSecondaryContainerBrush}" RenderTransformOrigin="50%,50%" RenderTransform="scaleX(0)" Opacity="0">
+                <Border.Transitions>
+                  <Transitions>
+                    <BrushTransition Property="Background" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" />
+                    <TransformOperationsTransition Property="RenderTransform" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" />
+                    <material:MaterialDoubleTransition Property="Opacity" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" />
+                  </Transitions>
+                </Border.Transitions>
+              </Border>
+              <Border x:Name="StateLayer" Background="Transparent" CornerRadius="16" IsHitTestVisible="False" />
+              <material:MaterialRipple x:Name="Ripple" Fill="{TemplateBinding Foreground}" CornerRadius="16" ReducedMotion="{DynamicResource MaterialReducedMotion}" />
+              <ContentPresenter x:Name="CustomIndicator" Content="{TemplateBinding DataContext}" ContentTemplate="{TemplateBinding IndicatorTemplate}" IsVisible="{TemplateBinding IndicatorTemplate, Converter={x:Static ObjectConverters.IsNotNull}}" Opacity="0" />
+              <ContentPresenter x:Name="Icon" Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center" Content="{TemplateBinding Icon}" ContentTemplate="{TemplateBinding IconTemplate}" Foreground="{TemplateBinding Foreground}" />
+            </Grid>
+            <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Header}" ContentTemplate="{TemplateBinding HeaderTemplate}" Foreground="{TemplateBinding Foreground}" FontSize="{TemplateBinding FontSize}" FontWeight="{TemplateBinding FontWeight}" HorizontalContentAlignment="Center" RecognizesAccessKey="True" />
+          </StackPanel>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:pointerover /template/ Border#StateLayer">
+      <Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceHoverBrush}" />
+    </Style>
+    <Style Selector="^:focus-visible /template/ Border#StateLayer">
+      <Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceFocusBrush}" />
+    </Style>
+    <Style Selector="^:selected">
+      <Setter Property="Foreground" Value="{DynamicResource MaterialSecondaryBrush}" />
+      <Style Selector="^ /template/ Border#SelectionIndicator">
+        <Setter Property="Background" Value="{DynamicResource MaterialSecondaryContainerBrush}" />
+        <Setter Property="RenderTransform" Value="scaleX(1)" />
+        <Setter Property="Opacity" Value="1" />
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#CustomIndicator"><Setter Property="Opacity" Value="1"/></Style>
+      <Style Selector="^ /template/ ContentPresenter#Icon">
+        <Setter Property="Foreground" Value="{DynamicResource MaterialOnSecondaryContainerBrush}" />
+      </Style>
+      <Style Selector="^ /template/ material|MaterialRipple#Ripple">
+        <Setter Property="Fill" Value="{DynamicResource MaterialOnSecondaryContainerBrush}" />
+      </Style>
+    </Style>
+    <Style Selector="^:selected:pointerover /template/ Border#StateLayer">
+      <Setter Property="Background" Value="{DynamicResource MaterialOnSecondaryContainerHoverBrush}" />
+    </Style>
+    <Style Selector="^:selected:focus-visible /template/ Border#StateLayer">
+      <Setter Property="Background" Value="{DynamicResource MaterialOnSecondaryContainerFocusBrush}" />
+    </Style>
+    <!-- Native navigation keeps the selected pill opaque when the destination is disabled. -->
+    <Style Selector="^:disabled">
+      <Setter Property="Foreground" Value="{DynamicResource MaterialDisabledContentBrush}" />
+    </Style>
+    <Style Selector="^:disabled /template/ ContentPresenter#Icon">
+      <Setter Property="Foreground" Value="{DynamicResource MaterialDisabledContentBrush}" />
+    </Style>
+    <Style Selector="^:disabled /template/ material|MaterialRipple#Ripple">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:disabled /template/ Border#StateLayer">
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="^.tall">
+      <Setter Property="MinHeight" Value="80" />
+    </Style>
+    <Style Selector="^[TabStripPlacement=Left], ^[TabStripPlacement=Right]">
+      <Setter Property="MinWidth" Value="96" />
+      <Setter Property="Margin" Value="0" />
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type TabbedPage}" TargetType="TabbedPage">
+    <Setter Property="Background" Value="{DynamicResource MaterialSurfaceBrush}" />
+    <Setter Property="TabPlacement" Value="Bottom" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel Background="{TemplateBinding Background}">
+          <TabControl x:Name="PART_TabControl" Theme="{StaticResource TabbedPageTabControlTheme}" ItemContainerTheme="{StaticResource TabbedPageTabItemTheme}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialNavigationBar" TargetType="TabControl" BasedOn="{StaticResource TabbedPageTabControlTheme}">
+    <Setter Property="TabStripPlacement" Value="Bottom" />
+    <Setter Property="ItemContainerTheme" Value="{StaticResource TabbedPageTabItemTheme}" />
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialNavigationRail" TargetType="TabControl" BasedOn="{StaticResource TabbedPageTabControlTheme}">
+    <Setter Property="TabStripPlacement" Value="Left" />
+    <Setter Property="ItemContainerTheme" Value="{StaticResource TabbedPageTabItemTheme}" />
+    <Setter Property="Background" Value="{DynamicResource MaterialSurfaceBrush}" />
+    <Setter Property="Padding" Value="0,44,0,0" />
+    <Setter Property="ItemsPanel">
+      <ItemsPanelTemplate>
+        <StackPanel Spacing="4" />
+      </ItemsPanelTemplate>
+    </Setter>
+    <Style Selector="^ /template/ Border#TabContainerGrid">
+      <Setter Property="Width" Value="96" />
+    </Style>
+    <Style Selector="^[TabStripPlacement=Left], ^[TabStripPlacement=Right]">
+      <Setter Property="ItemsPanel">
+        <ItemsPanelTemplate>
+          <StackPanel Spacing="4" />
+        </ItemsPanelTemplate>
+      </Setter>
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialNavigationBarTallItem" TargetType="TabItem" BasedOn="{StaticResource TabbedPageTabItemTheme}">
+    <Setter Property="MinHeight" Value="80" />
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialNavigationBarTall" TargetType="TabControl" BasedOn="{StaticResource MaterialNavigationBar}">
+    <Setter Property="ItemContainerTheme" Value="{StaticResource MaterialNavigationBarTallItem}" />
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialNavigationRailNarrowItem" TargetType="TabItem" BasedOn="{StaticResource TabbedPageTabItemTheme}">
+    <Setter Property="MinWidth" Value="80" />
+    <Style Selector="^[TabStripPlacement=Left], ^[TabStripPlacement=Right]">
+      <Setter Property="MinWidth" Value="80" />
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialNavigationRailNarrow" TargetType="TabControl" BasedOn="{StaticResource MaterialNavigationRail}">
+    <Setter Property="ItemContainerTheme" Value="{StaticResource MaterialNavigationRailNarrowItem}" />
+    <Style Selector="^ /template/ Border#TabContainerGrid">
+      <Setter Property="Width" Value="80" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

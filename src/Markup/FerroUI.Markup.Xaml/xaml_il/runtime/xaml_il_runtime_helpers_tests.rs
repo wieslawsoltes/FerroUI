@@ -23,6 +23,56 @@ fn declaration_context(parents: Vec<BoxedValue>, root: BoxedValue, scope: Option
     }
 }
 
+#[cfg(all(feature = "hot-reload", debug_assertions))]
+#[test]
+fn reload_deferred_context_rebases_weakly_and_restores_nested_scopes_on_unwind() {
+    use crate::FromXamlObject;
+    let candidate = Border::new();
+    let live = Border::new();
+    let provider = declaration_context(vec![boxed(candidate.clone())], boxed(candidate.clone()), None);
+    let builder = || DeferredContentBuilder::new(|sp| {
+        sp.get_required_service::<Rc<dyn IRootObjectProvider>>().root_object()
+    });
+    let build = |content: &Rc<DeferredContent>| {
+        content.build_with(None).result.as_ref().and_then(Ref::<ferroui_base::StyledElement>::from_xaml_object)
+    };
+    let outer = DeferredContentReloadScope::new();
+    let mut inner_content = None;
+    let unwind = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        let _inner = DeferredContentReloadScope::new();
+        inner_content = Some(XamlIlRuntimeHelpers::deferred_transformation_factory_for(
+            ValueType::object(), builder(), &provider,
+        ));
+        panic!("candidate construction failed");
+    }));
+    assert!(unwind.is_err());
+    let content = XamlIlRuntimeHelpers::deferred_transformation_factory_for(
+        ValueType::object(), builder(), &provider,
+    );
+    // Map a different base handle type, as the component adapter does.
+    let mut rebase = outer.prepare_rebase(&[(
+        boxed(candidate.clone().upcast::<ferroui_base::StyledElement>()),
+        boxed(live.clone().upcast::<ferroui_base::StyledElement>()),
+    )]);
+    assert!(build(&content).unwrap().ptr_eq(&candidate));
+    rebase.commit();
+    assert!(build(&content).unwrap().ptr_eq(&live));
+    assert!(build(inner_content.as_ref().unwrap()).unwrap().ptr_eq(&candidate));
+    rebase.rollback();
+    assert!(build(&content).unwrap().ptr_eq(&candidate));
+    rebase.commit();
+    drop(rebase);
+    drop(outer);
+    drop(provider);
+    let retired_candidate = candidate.downgrade();
+    let closed_live = live.downgrade();
+    drop(candidate);
+    drop(live);
+    assert!(retired_candidate.upgrade().is_none());
+    assert!(closed_live.upgrade().is_none());
+    assert!(build(&content).is_none());
+}
+
 fn button_builder() -> DeferredContentBuilder {
     DeferredContentBuilder::new(|sp| {
         let button = Button::new();

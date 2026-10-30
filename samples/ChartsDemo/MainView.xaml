@@ -1,0 +1,98 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:charts="https://github.com/ferroui/charts"
+             MinWidth="760" MinHeight="680">
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <charts:XamlChartsResources />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </UserControl.Resources>
+  <ThemeVariantScope x:Name="ThemeScope" RequestedThemeVariant="Light">
+    <Border Background="{DynamicResource ApplicationPageBackgroundThemeBrush}" Padding="24">
+      <Grid RowDefinitions="Auto,Auto,*,Auto">
+        <StackPanel Margin="0,0,0,16">
+          <TextBlock Text="Charts" FontSize="28" FontWeight="SemiBold"
+                     Foreground="{DynamicResource ChartsControlForegroundBrush}" />
+          <TextBlock Text="Shared live data · calendar axes · native FerroUI drawing"
+                     Foreground="{DynamicResource ChartsControlForegroundBrush}" />
+        </StackPanel>
+        <WrapPanel Grid.Row="1" Margin="0,0,0,12">
+          <Button x:Name="AddPoint" Content="Add sample" Margin="0,0,8,8" />
+          <Button x:Name="ReplaceData" Content="Replace data source" Margin="0,0,8,8" />
+          <Button x:Name="ToggleTheme" Content="Light / dark" Margin="0,0,8,8" />
+          <Button x:Name="ToggleLegend" Content="Show / hide legends" Margin="0,0,8,8" />
+          <Button x:Name="ToggleBars" Content="Rotate bars" Margin="0,0,8,8" />
+        </WrapPanel>
+        <Grid Grid.Row="2" ColumnDefinitions="*,*" RowDefinitions="*,*">
+          <Border Margin="0,0,8,8" Padding="12" CornerRadius="8" BorderThickness="1"
+                  BorderBrush="{DynamicResource ChartsGridLineMajorBrush}">
+            <Grid RowDefinitions="Auto,*">
+              <TextBlock Text="Line · markers and per-point labels" FontWeight="SemiBold"
+                         Foreground="{DynamicResource ChartsControlForegroundBrush}" />
+              <charts:Chart x:Name="LineChart" AutomationProperties.Name="Weekly orders, line" Grid.Row="1" MinHeight="230" ShowLegend="True" LegendTitle="Orders">
+                <charts:Chart.Axes>
+                  <charts:CategoryAxis Label="Period" />
+                  <charts:LinearAxis Label="Orders" GridLines="Major" />
+                </charts:Chart.Axes>
+                <charts:LineSeries Title="Actual" Stroke="#0078D4" StrokeThickness="2.5"
+                                   ShowDataMarkers="True" MarkerShape="Circle" ShowDataLabels="True" />
+                <charts:LineSeries Title="Target" Stroke="#D97706" StrokeDashStyle="Dash"
+                                   ShowDataMarkers="True" MarkerShape="Diamond" />
+              </charts:Chart>
+            </Grid>
+          </Border>
+          <Border Grid.Column="1" Margin="8,0,0,8" Padding="12" CornerRadius="8" BorderThickness="1"
+                  BorderBrush="{DynamicResource ChartsGridLineMajorBrush}">
+            <Grid RowDefinitions="Auto,*">
+              <TextBlock Text="Area · shared Samples with the line chart" FontWeight="SemiBold"
+                         Foreground="{DynamicResource ChartsControlForegroundBrush}" />
+              <charts:Chart x:Name="AreaChart" AutomationProperties.Name="Weekly orders, area" Grid.Row="1" MinHeight="230" ShowLegend="True" LegendTitle="Orders">
+                <charts:Chart.Axes>
+                  <charts:CategoryAxis Label="Period" />
+                  <charts:LinearAxis Label="Orders" GridLines="Major" />
+                </charts:Chart.Axes>
+                <charts:AreaSeries Title="Actual" Fill="#400078D4" Stroke="#0078D4"
+                                   StrokeThickness="2" ShowDataMarkers="True" MarkerShape="Square" />
+                <charts:LineSeries Title="Target" Stroke="#D97706" StrokeDashStyle="DashDot" />
+              </charts:Chart>
+            </Grid>
+          </Border>
+          <Border Grid.Row="1" Margin="0,8,8,0" Padding="12" CornerRadius="8" BorderThickness="1"
+                  BorderBrush="{DynamicResource ChartsGridLineMajorBrush}">
+            <Grid RowDefinitions="Auto,*">
+              <TextBlock Text="Bars · grouped categories and orientation" FontWeight="SemiBold"
+                         Foreground="{DynamicResource ChartsControlForegroundBrush}" />
+              <charts:Chart x:Name="BarChart" AutomationProperties.Name="Grouped bars" Grid.Row="1" MinHeight="230" ShowLegend="True">
+                <charts:Chart.Axes>
+                  <charts:CategoryAxis Label="Period" />
+                  <charts:LinearAxis Label="Orders" GridLines="Major" />
+                </charts:Chart.Axes>
+                <charts:BarSeries Title="Actual" Fill="#0078D4" Orientation="Vertical" />
+                <charts:BarSeries Title="Target" Fill="#D97706" Orientation="Vertical" />
+              </charts:Chart>
+            </Grid>
+          </Border>
+          <Border Grid.Row="1" Grid.Column="1" Margin="8,8,0,0" Padding="12" CornerRadius="8" BorderThickness="1"
+                  BorderBrush="{DynamicResource ChartsGridLineMajorBrush}">
+            <Grid RowDefinitions="Auto,*">
+              <TextBlock Text="Calendar · DateTimeOffset values" FontWeight="SemiBold"
+                         Foreground="{DynamicResource ChartsControlForegroundBrush}" />
+              <charts:Chart x:Name="DateChart" AutomationProperties.Name="Calendar values" Grid.Row="1" MinHeight="230" ShowLegend="True">
+                <charts:Chart.Axes>
+                  <charts:DateTimeAxis Label="Date" IntervalType="Day" LabelFormat="MMM d" />
+                  <charts:LinearAxis Label="Orders" GridLines="Major" />
+                </charts:Chart.Axes>
+                <charts:LineSeries Title="Daily orders" Stroke="#10A36D" StrokeThickness="2.5"
+                                   ShowDataMarkers="True" MarkerShape="Triangle" />
+              </charts:Chart>
+            </Grid>
+          </Border>
+        </Grid>
+        <TextBlock x:Name="Status" Grid.Row="3" Margin="0,16,0,0"
+                   Foreground="{DynamicResource ChartsControlForegroundBrush}" />
+      </Grid>
+    </Border>
+  </ThemeVariantScope>
+</UserControl>

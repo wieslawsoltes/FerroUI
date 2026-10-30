@@ -1,0 +1,187 @@
+{
+  "$id": "1",
+  "PinnedDockDisplayMode": 123,
+  "Window": {
+    "$id": "2",
+    "$type": "Dock.Model.ReactiveUI.Core.DockWindow",
+    "Id": "main",
+    "X": 0,
+    "Y": 0,
+    "Width": 0,
+    "Height": 0,
+    "WindowState": 0,
+    "Topmost": false,
+    "Title": "Main",
+    "OwnerMode": 0,
+    "IsModal": false,
+    "Layout": {
+      "$ref": "1"
+    }
+  },
+  "Windows": {
+    "$id": "3",
+    "$values": [
+      {
+        "$id": "4",
+        "$type": "Dock.Model.ReactiveUI.Core.DockWindow",
+        "Id": "window",
+        "X": 0,
+        "Y": 1E-05,
+        "Width": 1024.25,
+        "Height": 768,
+        "WindowState": 123,
+        "Topmost": true,
+        "Title": "Window",
+        "OwnerMode": -19,
+        "ParentWindow": {
+          "$ref": "2"
+        },
+        "IsModal": true,
+        "ShowInTaskbar": false,
+        "Layout": {
+          "$id": "5",
+          "$type": "Dock.Model.ReactiveUI.Controls.RootDock",
+          "PinnedDockDisplayMode": 0,
+          "FloatingWindowHostMode": 0,
+          "VisibleDockables": {
+            "$id": "6",
+            "$values": []
+          },
+          "Id": "float",
+          "Title": "Floating",
+          "Proportion": "NaN",
+          "Dock": 0,
+          "DockingState": 1,
+          "CollapsedProportion": "NaN",
+          "MinWidth": "NaN",
+          "MaxWidth": "NaN",
+          "MinHeight": "NaN",
+          "MaxHeight": "NaN",
+          "CanClose": true,
+          "CanPin": true,
+          "CanFloat": true,
+          "CanDrag": true,
+          "CanDrop": true,
+          "CanDockAsDocument": true,
+          "AllowedDockOperations": 63,
+          "AllowedDropOperations": 63
+        }
+      },
+      {
+        "$ref": "4"
+      }
+    ]
+  },
+  "FloatingWindowHostMode": -17,
+  "RootDockCapabilityPolicy": {
+    "$id": "7",
+    "CanClose": false,
+    "CanPin": true
+  },
+  "VisibleDockables": {
+    "$id": "8",
+    "$values": [
+      {
+        "$id": "9",
+        "$type": "Dock.Model.ReactiveUI.Controls.DocumentDock",
+        "VisibleDockables": {
+          "$id": "10",
+          "$values": [
+            {
+              "$id": "11",
+              "$type": "Dock.Model.ReactiveUI.Controls.Document",
+              "Id": "doc",
+              "Title": "Document",
+              "Owner": {
+                "$ref": "9"
+              },
+              "Proportion": 0.125,
+              "Dock": 123,
+              "DockingState": 4,
+              "CollapsedProportion": "NaN",
+              "MinWidth": 128.5,
+              "MaxWidth": "Infinity",
+              "MinHeight": -0,
+              "MaxHeight": "NaN",
+              "CanClose": true,
+              "CanPin": true,
+              "PinnedDockDisplayModeOverride": -2147483648,
+              "PinnedBounds": {
+                "X": -0,
+                "Y": 0.125,
+                "Width": 512.5,
+                "Height": 256.25
+              },
+              "CanFloat": true,
+              "CanDrag": true,
+              "CanDrop": true,
+              "CanDockAsDocument": true,
+              "DockCapabilityOverrides": {
+                "$id": "12",
+                "CanClose": true,
+                "CanFloat": false
+              },
+              "AllowedDockOperations": 3,
+              "AllowedDropOperations": -2147483647
+            }
+          ]
+        },
+        "ActiveDockable": {
+          "$ref": "11"
+        },
+        "DefaultDockable": {
+          "$ref": "11"
+        },
+        "DockCapabilityPolicy": {
+          "$ref": "7"
+        },
+        "Id": "docs",
+        "Title": "Documents",
+        "Owner": {
+          "$ref": "1"
+        },
+        "Proportion": "NaN",
+        "Dock": -2147483648,
+        "DockingState": 4,
+        "CollapsedProportion": 0.25,
+        "MinWidth": "NaN",
+        "MaxWidth": "NaN",
+        "MinHeight": "NaN",
+        "MaxHeight": "NaN",
+        "CanClose": true,
+        "CanPin": true,
+        "PinnedDockDisplayModeOverride": 1,
+        "CanFloat": true,
+        "CanDrag": true,
+        "CanDrop": true,
+        "CanDockAsDocument": true,
+        "AllowedDockOperations": 63,
+        "AllowedDropOperations": 63
+      }
+    ]
+  },
+  "ActiveDockable": {
+    "$ref": "9"
+  },
+  "DefaultDockable": {
+    "$ref": "9"
+  },
+  "Id": "root",
+  "Title": "Root",
+  "Proportion": "NaN",
+  "Dock": -19,
+  "DockingState": 1,
+  "CollapsedProportion": "NaN",
+  "MinWidth": "NaN",
+  "MaxWidth": "NaN",
+  "MinHeight": "NaN",
+  "MaxHeight": "NaN",
+  "CanClose": true,
+  "CanPin": true,
+  "CanFloat": true,
+  "CanDrag": true,
+  "CanDrop": true,
+  "CanDockAsDocument": true,
+  "AllowedDockOperations": 63,
+  "AllowedDropOperations": 63
+}

@@ -53,6 +53,7 @@ mod edge_mode;
 mod ellipse_geometry;
 mod fill_rule;
 mod geometry;
+mod geometry_path_data;
 mod geometry_builder;
 mod geometry_collection;
 mod geometry_group;
@@ -136,6 +137,7 @@ pub use edge_mode::EdgeMode;
 pub use ellipse_geometry::EllipseGeometry;
 pub use fill_rule::FillRule;
 pub use geometry::{Geometry, GeometryImpl, GeometryImplExt, GeometryVTable};
+pub use geometry_path_data::{GeometryPath, GeometryPathData, GeometryPathSegment};
 pub use geometry_builder::{GeometryBuilder, RoundedRectKeypoints};
 pub use geometry_collection::GeometryCollection;
 pub use geometry_group::GeometryGroup;
@@ -248,6 +250,7 @@ pub use effects::{
     BlurEffect, DropShadowDirectionEffect, DropShadowEffect, DropShadowEffectBase, Effect, EffectExtensions,
     IBlurEffect, IDirectionDropShadowEffect, IDropShadowEffect, IEffect, IImmutableEffect, IMutableEffect,
     ImmutableBlurEffect, ImmutableDropShadowDirectionEffect, ImmutableDropShadowEffect,
+    ImmutableLuminanceToAlphaEffect,
 };
 pub use experimental_acrylic_material::ExperimentalAcrylicMaterial;
 pub use geometry_drawing::GeometryDrawing;

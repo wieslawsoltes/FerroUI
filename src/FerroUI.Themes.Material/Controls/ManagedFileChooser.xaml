@@ -1,0 +1,543 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/CommonStyles/ContentDialog_themeresources.xaml (DefaultContentDialogStyle and the
+    implicit ContentDialog style, for ManagedFileChooserOverwritePrompt; its resources are
+    Resources/ContentDialog_themeresources.xaml)
+    controls/dev/CommonStyles/ListViewItem_themeresources.xaml (DefaultListViewItemStyle and the
+    chrome of ListViewItemPresenter, dxaml/xcp/core/core/elements/ListViewBaseItemChrome.cpp, for
+    the lists of ManagedFileChooser; the resources are Resources/ListViewItem_themeresources.xaml)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  ManagedFileChooser, the file dialog FerroUI draws itself, has no WinUI counterpart (a WinUI
+  application shows the file picker of the system). Its template is the one FerroUI's control
+  requires (the parts PART_QuickLinks and PART_Files, the bindings of its view model and the layout
+  of src/FerroUI.Themes.Fluent/Controls/ManagedFileChooser.xaml) composed of the WinUI controls of
+  the theme: the quick links and the entries of the folder are lists in the look of WinUI's
+  ListView (the keyed themes ManagedFileChooserListViewStyle and ManagedFileChooserListViewItemStyle,
+  a port of DefaultListViewItemStyle with the chrome ListViewItemPresenter draws: the rounded
+  backplate inset by 4,2, the selection indicator of 3 x 16 at the leading edge), the location and
+  the file name are TextBox, the actions Button, CheckBox and ComboBox; the background is the one of
+  a window (SolidBackgroundFillColorBaseBrush). The icons of the entries are the glyphs of the symbol
+  font E8B7 Folder, E7C3 Page and EDA2 HardDrive, the icons of the up and refresh buttons E74A Up and
+  E72C Refresh (Resources/Glyphs.xaml).
+
+  ManagedFileChooserOverwritePrompt is the question the file chooser asks before it replaces a file:
+  DefaultContentDialogStyle with the content of the question and two buttons, the confirmation as
+  the primary button that is the default button (PrimaryAsDefaultButton, AccentButtonStyle) and the
+  cancellation as the close button (PrimaryAndCloseVisible). Translation notes (docs/porting/
+  winui-theme.md, section 4):
+  - The prompt is shown in a flyout of the file chooser, not as a modal dialog: LayoutRoot, the smoke
+    layer (ContentDialogSmokeFill), the title, the scroll viewer of the content and the secondary
+    button have no counterpart; BackgroundElement is the root of the template, DialogSpace and
+    CommandSpace (Grid elements with a padding or a corner radius) are Border elements.
+  - The DialogShowing transition (the scale from 1.05 to 1 over ControlNormalAnimationDuration with
+    ControlFastOutSlowInKeySpline, the opacity from 0 to 1 over ControlFasterAnimationDuration) is an
+    animation of BackgroundElement when the template is applied; the DialogHidden transition has no
+    counterpart (the flyout closes).
+  - FullDialogSizing, AccentColorBorder, IsPrimaryButtonEnabled and the button styles of the
+    dialog have no counterpart in the prompt.
+  The texts of the two controls are the strings of FerroUI (StringManagedFileChooser*), which an
+  application may replace by its own resources.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:dialogs="using:FerroUI.Dialogs"
+                    xmlns:internal="using:FerroUI.Dialogs.Internal"
+                    xmlns:converters="clr-namespace:FerroUI.Controls.Converters;assembly=FerroUI.Controls"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20" Width="800" Height="500">
+      <dialogs:ManagedFileChooser />
+    </Border>
+  </Design.PreviewWith>
+
+  <!-- The texts of the file chooser (as the invariant strings of the Fluent theme of FerroUI). -->
+  <x:String x:Key="StringManagedFileChooserFileNamePlaceholder">File name</x:String>
+  <x:String x:Key="StringManagedFileChooserShowHiddenFilesText">Show hidden files</x:String>
+  <x:String x:Key="StringManagedFileChooserOkText">OK</x:String>
+  <x:String x:Key="StringManagedFileChooserCancelText">Cancel</x:String>
+  <x:String x:Key="StringManagedFileChooserNameColumn">Name</x:String>
+  <x:String x:Key="StringManagedFileChooserDateModifiedColumn">Date Modified</x:String>
+  <x:String x:Key="StringManagedFileChooserTypeColumn">Type</x:String>
+  <x:String x:Key="StringManagedFileChooserSizeColumn">Size</x:String>
+  <x:String x:Key="StringManagedFileChooserOverwritePromptFileAlreadyExistsText">{0} already exists. Do you want to replace it?</x:String>
+  <x:String x:Key="StringManagedFileChooserOverwritePromptConfirmText">Yes</x:String>
+  <x:String x:Key="StringManagedFileChooserOverwritePromptCancelText">No</x:String>
+
+  <!-- A list of the file chooser in the look of WinUI's ListView: no background, no border, the
+       items scroll vertically. -->
+  <ControlTheme x:Key="ManagedFileChooserListViewStyle" TargetType="ListBox">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+    <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+    <Setter Property="ScrollViewer.IsScrollChainingEnabled" Value="True" />
+    <Setter Property="ScrollViewer.IsScrollInertiaEnabled" Value="True" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="border"
+                ClipToBounds="{TemplateBinding ClipToBounds}"
+                Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BackgroundSizing="InnerBorderEdge"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}">
+          <ScrollViewer x:Name="PART_ScrollViewer"
+                        VerticalSnapPointsType="{TemplateBinding (ScrollViewer.VerticalSnapPointsType)}"
+                        HorizontalSnapPointsType="{TemplateBinding (ScrollViewer.HorizontalSnapPointsType)}"
+                        HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}"
+                        VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}"
+                        IsScrollChainingEnabled="{TemplateBinding (ScrollViewer.IsScrollChainingEnabled)}"
+                        IsScrollInertiaEnabled="{TemplateBinding (ScrollViewer.IsScrollInertiaEnabled)}"
+                        IsDeferredScrollingEnabled="{TemplateBinding (ScrollViewer.IsDeferredScrollingEnabled)}"
+                        AllowAutoHide="{TemplateBinding (ScrollViewer.AllowAutoHide)}"
+                        BringIntoViewOnFocusChange="{TemplateBinding (ScrollViewer.BringIntoViewOnFocusChange)}">
+            <ItemsPresenter x:Name="PART_ItemsPresenter"
+                            ItemsPanel="{TemplateBinding ItemsPanel}"
+                            Margin="{TemplateBinding Padding}" />
+          </ScrollViewer>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
+  <!-- An item of a list of the file chooser: DefaultListViewItemStyle, with the chrome of
+       ListViewItemPresenter (CListViewBaseItemChrome: the backplate inset by 4,2,4,2 with
+       ListViewItemCornerRadius, the selection indicator of 3 x 16 with a left margin of 4, 6 px
+       shorter while pressed, the content at ListViewItemDisabledThemeOpacity when disabled). -->
+  <ControlTheme x:Key="ManagedFileChooserListViewItemStyle" TargetType="ListBoxItem">
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
+    <Setter Property="Background" Value="{DynamicResource ListViewItemBackground}" />
+    <Setter Property="Foreground" Value="{DynamicResource ListViewItemForeground}" />
+    <Setter Property="Padding" Value="16,0,12,0" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="MinWidth" Value="{DynamicResource ListViewItemMinWidth}" />
+    <Setter Property="MinHeight" Value="{DynamicResource ListViewItemMinHeight}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource ListViewItemCornerRadius}" />
+    <!-- FocusVisualMargin="1" with the focus visual brushes of the list view item. -->
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border Margin="1"
+                BorderThickness="2"
+                BorderBrush="{DynamicResource ListViewItemFocusVisualPrimaryBrush}"
+                CornerRadius="{DynamicResource ControlCornerRadius}">
+          <Border BorderThickness="1"
+                  BorderBrush="{DynamicResource ListViewItemFocusVisualSecondaryBrush}"
+                  CornerRadius="{DynamicResource ControlCornerRadius}" />
+        </Border>
+      </FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <Border x:Name="Backplate"
+                  Margin="4,2,4,2"
+                  Background="{TemplateBinding Background}"
+                  BorderBrush="{TemplateBinding BorderBrush}"
+                  BackgroundSizing="InnerBorderEdge"
+                  BorderThickness="{TemplateBinding BorderThickness}"
+                  CornerRadius="{TemplateBinding CornerRadius}" />
+          <ContentPresenter x:Name="PART_ContentPresenter"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Foreground="{TemplateBinding Foreground}"
+                            Padding="{TemplateBinding Padding}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+          <Border x:Name="SelectionIndicator"
+                  Width="3"
+                  Height="16"
+                  Margin="4,0,0,0"
+                  HorizontalAlignment="Left"
+                  VerticalAlignment="Center"
+                  CornerRadius="{DynamicResource ListViewItemSelectionIndicatorCornerRadius}"
+                  Background="{DynamicResource ListViewItemSelectionIndicatorBrush}"
+                  IsVisible="False" />
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- PointerOver -->
+    <Style Selector="^:pointerover">
+      <Setter Property="Foreground" Value="{DynamicResource ListViewItemForegroundPointerOver}" />
+    </Style>
+    <Style Selector="^:pointerover /template/ Border#Backplate">
+      <Setter Property="Background" Value="{DynamicResource ListViewItemBackgroundPointerOver}" />
+    </Style>
+    <!-- Pressed -->
+    <Style Selector="^:pressed">
+      <Setter Property="Foreground" Value="{DynamicResource ListViewItemForegroundPressed}" />
+    </Style>
+    <Style Selector="^:pressed /template/ Border#Backplate">
+      <Setter Property="Background" Value="{DynamicResource ListViewItemBackgroundPressed}" />
+    </Style>
+    <!-- Disabled -->
+    <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Opacity" Value="{DynamicResource ListViewItemDisabledThemeOpacity}" />
+    </Style>
+    <!-- Selected -->
+    <Style Selector="^:selected">
+      <Setter Property="Foreground" Value="{DynamicResource ListViewItemForegroundSelected}" />
+    </Style>
+    <Style Selector="^:selected /template/ Border#Backplate">
+      <Setter Property="Background" Value="{DynamicResource ListViewItemBackgroundSelected}" />
+    </Style>
+    <Style Selector="^:selected /template/ Border#SelectionIndicator">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <!-- SelectedPointerOver -->
+    <Style Selector="^:selected:pointerover">
+      <Setter Property="Foreground" Value="{DynamicResource ListViewItemForegroundSelectedPointerOver}" />
+    </Style>
+    <Style Selector="^:selected:pointerover /template/ Border#Backplate">
+      <Setter Property="Background" Value="{DynamicResource ListViewItemBackgroundSelectedPointerOver}" />
+    </Style>
+    <Style Selector="^:selected:pointerover /template/ Border#SelectionIndicator">
+      <Setter Property="Background" Value="{DynamicResource ListViewItemSelectionIndicatorPointerOverBrush}" />
+    </Style>
+    <!-- SelectedPressed -->
+    <Style Selector="^:selected:pressed">
+      <Setter Property="Foreground" Value="{DynamicResource ListViewItemForegroundSelectedPressed}" />
+    </Style>
+    <Style Selector="^:selected:pressed /template/ Border#Backplate">
+      <Setter Property="Background" Value="{DynamicResource ListViewItemBackgroundSelectedPressed}" />
+    </Style>
+    <Style Selector="^:selected:pressed /template/ Border#SelectionIndicator">
+      <Setter Property="Background" Value="{DynamicResource ListViewItemSelectionIndicatorPressedBrush}" />
+      <Setter Property="Height" Value="10" />
+    </Style>
+    <!-- SelectedDisabled -->
+    <Style Selector="^:selected:disabled /template/ Border#Backplate">
+      <Setter Property="Background" Value="{DynamicResource ListViewItemBackgroundSelectedDisabled}" />
+    </Style>
+    <Style Selector="^:selected:disabled /template/ Border#SelectionIndicator">
+      <Setter Property="Background" Value="{DynamicResource ListViewItemSelectionIndicatorDisabledBrush}" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type dialogs:ManagedFileChooser}" TargetType="dialogs:ManagedFileChooser">
+    <Setter Property="Background" Value="{DynamicResource SolidBackgroundFillColorBaseBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+    <Setter Property="Template"
+            x:DataType="internal:ManagedFileChooserViewModel">
+      <ControlTemplate>
+        <Border Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BackgroundSizing="InnerBorderEdge"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}"
+                Padding="{TemplateBinding Padding}">
+          <DockPanel>
+            <ListBox x:Name="PART_QuickLinks"
+                     DockPanel.Dock="Left"
+                     Width="160"
+                     Theme="{StaticResource ManagedFileChooserListViewStyle}"
+                     ItemContainerTheme="{StaticResource ManagedFileChooserListViewItemStyle}"
+                     ItemsSource="{Binding QuickLinks}"
+                     SelectedIndex="{Binding QuickLinksSelectedIndex}"
+                     Focusable="False">
+              <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="internal:ManagedFileChooserItemViewModel">
+                  <StackPanel Orientation="Horizontal" Spacing="12" Background="Transparent">
+                    <Panel Width="16" Height="16" VerticalAlignment="Center">
+                      <Path Data="{StaticResource GlyphGeometryE8B7}"
+                            Fill="{Binding $parent[ListBoxItem].Foreground}"
+                            Stretch="Uniform"
+                            Width="16"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding IconKey, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Icon_Folder}" />
+                      <Path Data="{StaticResource GlyphGeometryE7C3}"
+                            Fill="{Binding $parent[ListBoxItem].Foreground}"
+                            Stretch="Uniform"
+                            Height="16"
+                            HorizontalAlignment="Center"
+                            IsVisible="{Binding IconKey, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Icon_File}" />
+                      <Path Data="{StaticResource GlyphGeometryEDA2}"
+                            Fill="{Binding $parent[ListBoxItem].Foreground}"
+                            Stretch="Uniform"
+                            Width="16"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding IconKey, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Icon_Volume}" />
+                    </Panel>
+                    <TextBlock Text="{Binding DisplayName}"
+                               VerticalAlignment="Center"
+                               TextTrimming="CharacterEllipsis" />
+                  </StackPanel>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+
+            <!-- The up button, the location and the refresh button. -->
+            <Grid x:Name="NavBar"
+                  DockPanel.Dock="Top"
+                  Margin="12,5,12,5"
+                  ColumnDefinitions="Auto,*,Auto"
+                  ColumnSpacing="8">
+              <Button Grid.Column="0" Command="{Binding GoUp}">
+                <Path Data="{StaticResource GlyphGeometryE74A}"
+                      Fill="{Binding $parent[Button].Foreground}"
+                      Stretch="Uniform"
+                      Width="14" />
+              </Button>
+              <TextBox x:Name="Location" Grid.Column="1" Text="{Binding Location}">
+                <TextBox.KeyBindings>
+                  <KeyBinding Command="{Binding EnterPressed}" Gesture="Enter" />
+                </TextBox.KeyBindings>
+              </TextBox>
+              <Button Grid.Column="2" Command="{Binding Refresh}">
+                <Path Data="{StaticResource GlyphGeometryE72C}"
+                      Fill="{Binding $parent[Button].Foreground}"
+                      Stretch="Uniform"
+                      Width="14" />
+              </Button>
+            </Grid>
+
+            <!-- The file name, the filters, hidden files and the two actions. -->
+            <Grid DockPanel.Dock="Bottom"
+                  Margin="12,0,12,5"
+                  RowDefinitions="Auto,Auto"
+                  RowSpacing="4">
+              <DockPanel Grid.Row="0">
+                <ComboBox DockPanel.Dock="Right"
+                          Margin="8,0,0,0"
+                          IsVisible="{Binding ShowFilters}"
+                          ItemsSource="{Binding Filters}"
+                          SelectedItem="{Binding SelectedFilter}" />
+                <TextBox Text="{Binding FileName}"
+                         PlaceholderText="{DynamicResource StringManagedFileChooserFileNamePlaceholder}"
+                         IsVisible="{Binding !SelectingFolder}" />
+              </DockPanel>
+              <CheckBox Grid.Row="1"
+                        HorizontalAlignment="Left"
+                        IsChecked="{Binding ShowHiddenFiles}"
+                        Content="{DynamicResource StringManagedFileChooserShowHiddenFilesText}" />
+              <StackPanel x:Name="Finalize"
+                          Grid.Row="1"
+                          Orientation="Horizontal"
+                          HorizontalAlignment="Right"
+                          Spacing="4">
+                <Button Command="{Binding Ok}"
+                        MinWidth="80"
+                        HorizontalContentAlignment="Center"
+                        Content="{DynamicResource StringManagedFileChooserOkText}" />
+                <Button Command="{Binding Cancel}"
+                        MinWidth="80"
+                        HorizontalContentAlignment="Center"
+                        Content="{DynamicResource StringManagedFileChooserCancelText}" />
+              </StackPanel>
+            </Grid>
+
+            <!-- The column headers over the entries of the folder; the columns are aligned with the
+                 content of the items (their padding, 16) and share their widths with them. -->
+            <DockPanel Grid.IsSharedSizeScope="True">
+              <Grid DockPanel.Dock="Top" Margin="16,5,0,0" HorizontalAlignment="Stretch">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="28" SharedSizeGroup="Icon" />
+                  <ColumnDefinition Width="275" SharedSizeGroup="Name" />
+                  <ColumnDefinition Width="16" SharedSizeGroup="Splitter" />
+                  <ColumnDefinition Width="200" SharedSizeGroup="Modified" />
+                  <ColumnDefinition Width="16" SharedSizeGroup="Splitter" />
+                  <ColumnDefinition Width="150" SharedSizeGroup="Type" />
+                  <ColumnDefinition Width="16" SharedSizeGroup="Splitter" />
+                  <ColumnDefinition Width="200" SharedSizeGroup="Size" />
+                  <ColumnDefinition Width="16" SharedSizeGroup="Splitter" />
+                </Grid.ColumnDefinitions>
+                <Grid.Styles>
+                  <Style Selector="GridSplitter">
+                    <Setter Property="Background" Value="{DynamicResource DividerStrokeColorDefaultBrush}" />
+                    <Setter Property="Template">
+                      <ControlTemplate>
+                        <Border VerticalAlignment="Stretch" BorderThickness="0" Background="Transparent">
+                          <Rectangle Width="1" VerticalAlignment="Stretch" Fill="{TemplateBinding Background}" />
+                        </Border>
+                      </ControlTemplate>
+                    </Setter>
+                  </Style>
+                </Grid.Styles>
+                <TextBlock Grid.Column="1" Text="{DynamicResource StringManagedFileChooserNameColumn}" />
+                <GridSplitter Grid.Column="2" />
+                <TextBlock Grid.Column="3" Text="{DynamicResource StringManagedFileChooserDateModifiedColumn}" />
+                <GridSplitter Grid.Column="4" />
+                <TextBlock Grid.Column="5" Text="{DynamicResource StringManagedFileChooserTypeColumn}" />
+                <GridSplitter Grid.Column="6" />
+                <TextBlock Grid.Column="7" Text="{DynamicResource StringManagedFileChooserSizeColumn}" />
+                <GridSplitter Grid.Column="8" />
+              </Grid>
+              <ListBox x:Name="PART_Files"
+                       Margin="0,5"
+                       Theme="{StaticResource ManagedFileChooserListViewStyle}"
+                       ItemContainerTheme="{StaticResource ManagedFileChooserListViewItemStyle}"
+                       ItemsSource="{Binding Items}"
+                       SelectionMode="{Binding SelectionMode}"
+                       SelectedItems="{Binding SelectedItems}">
+                <ListBox.ItemTemplate>
+                  <DataTemplate x:DataType="internal:ManagedFileChooserItemViewModel">
+                    <Grid Background="Transparent">
+                      <Grid.ColumnDefinitions>
+                        <ColumnDefinition SharedSizeGroup="Icon" />
+                        <ColumnDefinition SharedSizeGroup="Name" />
+                        <ColumnDefinition SharedSizeGroup="Splitter" />
+                        <ColumnDefinition SharedSizeGroup="Modified" />
+                        <ColumnDefinition SharedSizeGroup="Splitter" />
+                        <ColumnDefinition SharedSizeGroup="Type" />
+                        <ColumnDefinition SharedSizeGroup="Splitter" />
+                        <ColumnDefinition SharedSizeGroup="Size" />
+                        <ColumnDefinition SharedSizeGroup="Splitter" />
+                      </Grid.ColumnDefinitions>
+                      <Panel Width="16" Height="16" HorizontalAlignment="Left" VerticalAlignment="Center">
+                        <Path Data="{StaticResource GlyphGeometryE8B7}"
+                              Fill="{Binding $parent[ListBoxItem].Foreground}"
+                              Stretch="Uniform"
+                              Width="16"
+                              VerticalAlignment="Center"
+                              IsVisible="{Binding IconKey, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Icon_Folder}" />
+                        <Path Data="{StaticResource GlyphGeometryE7C3}"
+                              Fill="{Binding $parent[ListBoxItem].Foreground}"
+                              Stretch="Uniform"
+                              Height="16"
+                              HorizontalAlignment="Center"
+                              IsVisible="{Binding IconKey, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Icon_File}" />
+                        <Path Data="{StaticResource GlyphGeometryEDA2}"
+                              Fill="{Binding $parent[ListBoxItem].Foreground}"
+                              Stretch="Uniform"
+                              Width="16"
+                              VerticalAlignment="Center"
+                              IsVisible="{Binding IconKey, Converter={x:Static ObjectConverters.Equal}, ConverterParameter=Icon_Volume}" />
+                      </Panel>
+                      <TextBlock Grid.Column="1" Text="{Binding DisplayName}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                      <TextBlock Grid.Column="3" Text="{Binding Modified}" VerticalAlignment="Center" />
+                      <TextBlock Grid.Column="5" Text="{Binding Type}" VerticalAlignment="Center" />
+                      <TextBlock Grid.Column="7" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <TextBlock.Text>
+                          <Binding Path="Size">
+                            <Binding.Converter>
+                              <internal:FileSizeStringConverter />
+                            </Binding.Converter>
+                          </Binding>
+                        </TextBlock.Text>
+                      </TextBlock>
+                    </Grid>
+                  </DataTemplate>
+                </ListBox.ItemTemplate>
+              </ListBox>
+            </DockPanel>
+          </DockPanel>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
+  <!-- DefaultContentDialogStyle (ContentDialog_themeresources.xaml), as the overwrite prompt of the
+       file chooser. -->
+  <ControlTheme x:Key="DefaultContentDialogStyle" TargetType="dialogs:ManagedFileChooserOverwritePrompt">
+    <Setter Property="Foreground" Value="{DynamicResource ContentDialogForeground}" />
+    <Setter Property="Background" Value="{DynamicResource ContentDialogBackground}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource ContentDialogBorderWidth}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource ContentDialogBorderBrush}" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="CornerRadius" Value="{DynamicResource OverlayCornerRadius}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="BackgroundElement"
+                Background="{TemplateBinding Background}"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BackgroundSizing="InnerBorderEdge"
+                CornerRadius="{TemplateBinding CornerRadius}"
+                Padding="{TemplateBinding Padding}"
+                MinWidth="{DynamicResource ContentDialogMinWidth}"
+                MaxWidth="{DynamicResource ContentDialogMaxWidth}"
+                MinHeight="{DynamicResource ContentDialogMinHeight}"
+                MaxHeight="{DynamicResource ContentDialogMaxHeight}"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                RenderTransformOrigin="50%,50%">
+          <Border x:Name="DialogSpace"
+                  ClipToBounds="True"
+                  CornerRadius="{DynamicResource OverlayCornerRadius}">
+            <Grid RowDefinitions="*,Auto">
+              <Border Background="{DynamicResource ContentDialogTopOverlay}"
+                      Padding="{DynamicResource ContentDialogPadding}"
+                      BorderThickness="{DynamicResource ContentDialogSeparatorThickness}"
+                      BorderBrush="{DynamicResource ContentDialogSeparatorBorderBrush}"
+                      BackgroundSizing="InnerBorderEdge">
+                <TextBlock x:Name="Content"
+                           FontSize="{StaticResource ControlContentThemeFontSize}"
+                           FontFamily="{StaticResource ContentControlThemeFontFamily}"
+                           Foreground="{TemplateBinding Foreground}"
+                           TextWrapping="Wrap">
+                  <TextBlock.Text>
+                    <MultiBinding>
+                      <MultiBinding.Converter>
+                        <converters:StringFormatConverter />
+                      </MultiBinding.Converter>
+                      <DynamicResource ResourceKey="StringManagedFileChooserOverwritePromptFileAlreadyExistsText" />
+                      <Binding Path="FileName" RelativeSource="{RelativeSource TemplatedParent}" />
+                    </MultiBinding>
+                  </TextBlock.Text>
+                </TextBlock>
+              </Border>
+              <!-- CommandSpace in PrimaryAndCloseVisible: the primary button, the spacing
+                   ContentDialogButtonSpacing (8) and the close button. -->
+              <Border x:Name="CommandSpace"
+                      Grid.Row="1"
+                      HorizontalAlignment="Stretch"
+                      VerticalAlignment="Bottom"
+                      Padding="{DynamicResource ContentDialogPadding}"
+                      Background="{TemplateBinding Background}">
+                <Grid ColumnDefinitions="*,8,*">
+                  <Button x:Name="PrimaryButton"
+                          Grid.Column="0"
+                          Theme="{StaticResource AccentButtonStyle}"
+                          HorizontalAlignment="Stretch"
+                          HorizontalContentAlignment="Center"
+                          IsDefault="True"
+                          Content="{DynamicResource StringManagedFileChooserOverwritePromptConfirmText}"
+                          Command="{Binding Confirm, RelativeSource={RelativeSource TemplatedParent}}" />
+                  <Button x:Name="CloseButton"
+                          Grid.Column="2"
+                          HorizontalAlignment="Stretch"
+                          HorizontalContentAlignment="Center"
+                          IsCancel="True"
+                          Content="{DynamicResource StringManagedFileChooserOverwritePromptCancelText}"
+                          Command="{Binding Cancel, RelativeSource={RelativeSource TemplatedParent}}" />
+                </Grid>
+              </Border>
+            </Grid>
+          </Border>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- The DialogShowing transition: ControlFasterAnimationDuration (83 ms) for the opacity,
+         ControlNormalAnimationDuration (250 ms) with ControlFastOutSlowInKeySpline (0,0,0,1) for the
+         scale. -->
+    <Style Selector="^ /template/ Border#BackgroundElement">
+      <Style.Animations>
+        <Animation Duration="0:0:0.083" FillMode="Forward">
+          <KeyFrame Cue="0%">
+            <Setter Property="Opacity" Value="0" />
+          </KeyFrame>
+          <KeyFrame Cue="100%">
+            <Setter Property="Opacity" Value="1" />
+          </KeyFrame>
+        </Animation>
+        <Animation Duration="0:0:0.25" Easing="0,0,0,1" FillMode="Forward">
+          <KeyFrame Cue="0%">
+            <Setter Property="ScaleTransform.ScaleX" Value="1.05" />
+            <Setter Property="ScaleTransform.ScaleY" Value="1.05" />
+          </KeyFrame>
+          <KeyFrame Cue="100%">
+            <Setter Property="ScaleTransform.ScaleX" Value="1" />
+            <Setter Property="ScaleTransform.ScaleY" Value="1" />
+          </KeyFrame>
+        </Animation>
+      </Style.Animations>
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type dialogs:ManagedFileChooserOverwritePrompt}" TargetType="dialogs:ManagedFileChooserOverwritePrompt" BasedOn="{StaticResource DefaultContentDialogStyle}" />
+</ResourceDictionary>

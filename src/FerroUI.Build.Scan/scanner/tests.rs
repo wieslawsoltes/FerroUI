@@ -1524,6 +1524,13 @@ fn members_that_are_constant_expressions_have_their_values() {
             ("Every", Some(7)),
             ("Pointing", Some(6)),
             ("Computed", None),
+            ("EmptyExpression", Some(0)),
+            ("AllExpression", Some(7)),
+            ("UnionExpression", Some(5)),
+            ("RetainedExpression", Some(15)),
+            ("TruncatedExpression", Some(7)),
+            ("UnknownExpression", None),
+            ("ForeignExpression", None),
         ]),
         "\n{}",
         listing(&scan.diagnostics)
@@ -1545,5 +1552,5 @@ fn members_that_are_constant_expressions_have_their_values() {
         "\n{}",
         listing(&scan.diagnostics)
     );
-    assert_eq!((scan.statistics.enum_members, scan.statistics.enum_members_without_value), (17, 4));
+    assert_eq!((scan.statistics.enum_members, scan.statistics.enum_members_without_value), (24, 6));
 }

@@ -1,0 +1,23 @@
+<Window xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- Ported from tests/Xaml.Behaviors.Interactions.UnitTests/Core/EventTriggerBehavior005 of Xaml.Behaviors.
+       Adapted: no x:Class (the test loads the window with the run-time loader); the data context is set by the test. -->
+
+  <Button x:Name="TargetButton" Content="Open flyout">
+    <Button.Flyout>
+      <Flyout>
+        <Interaction.Behaviors>
+          <EventTriggerBehavior EventName="Opened">
+            <InvokeCommandAction Command="{Binding OpenedCommand}"
+                                 PassEventArgsToCommand="True" />
+          </EventTriggerBehavior>
+          <EventTriggerBehavior EventName="Closed">
+            <InvokeCommandAction Command="{Binding ClosedCommand}"
+                                 PassEventArgsToCommand="True" />
+          </EventTriggerBehavior>
+        </Interaction.Behaviors>
+        <TextBlock Text="Flyout content" />
+      </Flyout>
+    </Button.Flyout>
+  </Button>
+</Window>

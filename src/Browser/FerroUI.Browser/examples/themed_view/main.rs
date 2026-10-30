@@ -45,7 +45,9 @@ use ferroui_base::{
 use ferroui_browser::interop::canvas_helper::{RENDER_TARGET_KIND_SOFTWARE, RENDER_TARGET_KIND_WEB_GL};
 use ferroui_browser::interop::{navigation_helper, thread_proxy};
 use ferroui_browser::rendering::{BrowserSharedRenderLoop, RenderStatistics, RenderWorker};
-use ferroui_browser::{BrowserAppBuilder, BrowserPlatformOptions, BrowserRenderer, BrowserRenderingMode, FerroView};
+use ferroui_browser::{
+    BrowserAccessibility, BrowserAppBuilder, BrowserPlatformOptions, BrowserRenderer, BrowserRenderingMode, FerroView,
+};
 use ferroui_controls::{
     AppBuilder, Application, ApplicationImpl, ApplicationImplExt, Border, Button, CheckBox, Control, ListBox,
     NativeControlHost, NewApplication, ProgressBar, Slider, StackPanel, TextBlock, TextBox, TopLevel,
@@ -266,6 +268,15 @@ fn top_level() -> Option<Ref<TopLevel>> {
 /// What the services of the platform report, as a line of `name=value`
 /// pairs: the screens, the safe area, the drop target and the answers of
 /// the asynchronous services started by the functions below.
+/// Turns the accessibility tree of the view on or off (the checks of
+/// `scripts/browser/tests/themed_view.test.mjs`).
+#[wasm_bindgen(js_name = themedViewAccessibility)]
+pub fn themed_view_accessibility(enabled: bool) {
+    if let Some(tree) = top_level().as_ref().and_then(BrowserAccessibility::of) {
+        tree.set_enabled(enabled);
+    }
+}
+
 #[wasm_bindgen(js_name = themedViewServices)]
 pub fn themed_view_services() -> String {
     let Some(top_level) = top_level() else { return String::new() };

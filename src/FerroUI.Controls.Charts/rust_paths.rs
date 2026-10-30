@@ -1,0 +1,36 @@
+//! Public Rust identities consumed by the XAML compiler's source emitter.
+
+ferroui_base::ferro_rust_paths! {
+    classes: [
+        crate::Chart,
+        crate::Axis,
+        crate::CartesianAxis,
+        crate::CategoryAxis,
+        crate::DateTimeAxis,
+        crate::LinearAxis,
+        crate::CartesianSeries,
+        crate::LineSeries,
+        crate::AreaSeries,
+        crate::BarSeries,
+        crate::Samples,
+        crate::XamlChartsResources,
+        crate::ChartAutomationPeer,
+    ],
+    types: [
+        crate::BarOrientation,
+        crate::CategorySortKey,
+        crate::DateTimeIntervalType,
+        crate::GridLines,
+        crate::MarkerShape,
+        crate::SortOrder,
+        crate::StrokeDashStyle,
+        crate::DataLabelOverride,
+        crate::DataMarkerOverride,
+        crate::ChartSeriesCollection,
+        crate::ChartAxisCollection,
+        crate::ChartDataCollection,
+    ],
+    contracts: [],
+    generics: [],
+    generic_contracts: [],
+}

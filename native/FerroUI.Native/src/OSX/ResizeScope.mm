@@ -1,7 +1,3 @@
-//
-// Created by Dan Walmsley on 04/05/2022.
-//
-
 #import <AppKit/AppKit.h>
 #include "ResizeScope.h"
 #include "FrnView.h"

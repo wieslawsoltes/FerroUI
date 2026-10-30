@@ -1,0 +1,121 @@
+<!--
+  Not ported from a style: WinUI 3 has no input validation. The validation of WinUI 2's preview
+  (IInputValidationControl, the templates DefaultInputValidationErrorTemplate and
+  DefaultCompactErrorIconTemplate of dxaml/xcp/dxaml/themes/generic.xaml) was removed before
+  WinUI 3 was released, and those templates are inert and waived (microsoft-ui-xaml,
+  https://github.com/microsoft/microsoft-ui-xaml, commit
+  7e4b0c2096be402f51cc8f7d203ebf67cff183d0). A WinUI 3 application shows an error of a field
+  with the critical fill of the palette, SystemFillColorCriticalBrush
+  (controls/dev/CommonStyles/Common_themeresources_any.xaml): the border of the field in it and
+  the message under the field, 4 px below, in it.
+
+  The default theme is that: the errors of the owner under its content, in
+  SystemFillColorCriticalBrush, wrapped; the controls that wrap their template in
+  DataValidationErrors (TextBox) draw their border in SystemFillColorCriticalBrush under
+  FerroUI's :error. The keyed theme TooltipDataValidationErrors (FerroUI) shows the errors in a
+  tool tip of an error icon at the right of the content: the error icon of WinUI's InfoBar
+  (controls/dev/InfoBar/InfoBar.xaml, InfoBar_themeresources.xaml), the glyph
+  InfoBarIconBackgroundGlyph (F136) in InfoBarErrorSeverityIconBackground under the glyph
+  InfoBarErrorIconGlyph (F13D) in InfoBarErrorSeverityIconForeground, at InfoBarIconFontSize
+  (16), drawn as the geometries GlyphGeometryF136 and GlyphGeometryF13D.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:collections="using:System.Collections"
+                    x:ClassModifier="internal">
+  <ControlTheme x:Key="{x:Type DataValidationErrors}" TargetType="DataValidationErrors">
+    <Setter Property="Template">
+      <ControlTemplate TargetType="DataValidationErrors">
+        <DockPanel LastChildFill="True">
+          <ContentControl x:Name="InlineDataValidationContentControl"
+                          Margin="0,4,0,0"
+                          Content="{Binding (DataValidationErrors.Errors)}"
+                          ContentTemplate="{TemplateBinding ErrorTemplate}"
+                          DataContext="{TemplateBinding Owner}"
+                          DockPanel.Dock="Bottom"
+                          IsVisible="{Binding (DataValidationErrors.HasErrors)}" />
+          <ContentPresenter x:Name="PART_ContentPresenter"
+                            Padding="{TemplateBinding Padding}"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BackgroundSizing="InnerBorderEdge"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            CornerRadius="{TemplateBinding CornerRadius}" />
+        </DockPanel>
+      </ControlTemplate>
+    </Setter>
+    <Setter Property="ErrorTemplate">
+      <DataTemplate>
+        <ItemsControl x:DataType="DataValidationErrors"
+                      Foreground="{DynamicResource SystemFillColorCriticalBrush}"
+                      ItemsSource="{Binding}">
+          <ItemsControl.Styles>
+            <Style Selector="TextBlock">
+              <Setter Property="TextWrapping" Value="Wrap" />
+            </Style>
+          </ItemsControl.Styles>
+        </ItemsControl>
+      </DataTemplate>
+    </Setter>
+  </ControlTheme>
+
+  <ControlTheme x:Key="TooltipDataValidationErrors" TargetType="DataValidationErrors">
+    <Setter Property="Template">
+      <ControlTemplate TargetType="DataValidationErrors">
+        <DockPanel LastChildFill="True">
+          <ContentControl x:Name="InlineDataValidationContentControl"
+                          Content="{Binding (DataValidationErrors.Errors)}"
+                          ContentTemplate="{TemplateBinding ErrorTemplate}"
+                          DataContext="{TemplateBinding Owner}"
+                          DockPanel.Dock="Right"
+                          IsVisible="{Binding (DataValidationErrors.HasErrors)}" />
+          <ContentPresenter x:Name="PART_ContentPresenter"
+                            Padding="{TemplateBinding Padding}"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BackgroundSizing="InnerBorderEdge"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            CornerRadius="{TemplateBinding CornerRadius}" />
+        </DockPanel>
+      </ControlTemplate>
+    </Setter>
+    <Setter Property="ErrorTemplate">
+      <DataTemplate>
+        <Panel x:Name="InlineErrorIcon"
+               Width="16"
+               Height="16"
+               Margin="8,0"
+               VerticalAlignment="Center"
+               Background="Transparent">
+          <ToolTip.Tip>
+            <ItemsControl ItemsSource="{Binding}" x:DataType="collections:IEnumerable">
+              <ItemsControl.Styles>
+                <Style Selector="TextBlock">
+                  <Setter Property="TextWrapping" Value="Wrap" />
+                </Style>
+              </ItemsControl.Styles>
+            </ItemsControl>
+          </ToolTip.Tip>
+          <!-- IconBackground: InfoBarIconBackgroundGlyph (F136) at InfoBarIconFontSize. -->
+          <Path Width="16"
+                Height="16"
+                Stretch="Uniform"
+                Data="{StaticResource GlyphGeometryF136}"
+                Fill="{DynamicResource InfoBarErrorSeverityIconBackground}" />
+          <!-- StandardIcon: InfoBarErrorIconGlyph (F13D) at InfoBarIconFontSize. -->
+          <Path Width="6"
+                Height="6"
+                Stretch="Uniform"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Data="{StaticResource GlyphGeometryF13D}"
+                Fill="{DynamicResource InfoBarErrorSeverityIconForeground}" />
+        </Panel>
+      </DataTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

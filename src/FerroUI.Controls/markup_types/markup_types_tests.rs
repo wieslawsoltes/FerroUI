@@ -93,9 +93,8 @@ fn every_declaration_of_this_module_is_registered() {
         .filter(|line| line.starts_with("ferro_markup_type!(") || line.starts_with("ferro_markup_enum!("))
         .count();
     let types = declared_types();
-    // `TextLayoutRoundingPlacement` declares its metadata next to the type and is registered
-    // with the values.
-    assert_eq!(types.len(), declared + 1);
+    // The types that declare their metadata next to the type are registered with the values.
+    assert_eq!(types.len(), declared + DECLARED_NEXT_TO_THE_TYPE.len());
 
     for type_ in &types {
         // The collection handle of the items controls is published as the enumerable of
@@ -196,11 +195,33 @@ fn template_parts_name_classes() {
     assert!(parts > 20, "{parts}");
 }
 
+/// The types of this crate that declare their markup metadata next to the type rather than in
+/// this module, and are listed in the `TYPES` of `values.rs`: FerroUI additions, and the WinUI
+/// controls (docs/porting/winui-controls.md).
+const DECLARED_NEXT_TO_THE_TYPE: &[&str] = &[
+    "TextLayoutRoundingPlacement",
+    "Symbol",
+    "InfoBarSeverity",
+    "ZoomMode",
+    "InfoBarCloseReason",
+    "InfoBarClosingEventArgs",
+    "InfoBarClosedEventArgs",
+    "InfoBarOpenedEventArgs",
+    "NumberBoxSpinButtonPlacementMode",
+    "NumberBoxValidationMode",
+    "NumberBoxValueChangedEventArgs",
+    "AutoSuggestionBoxTextChangeReason",
+    "AutoSuggestBoxTextChangedEventArgs",
+    "AutoSuggestBoxSuggestionChosenEventArgs",
+    "AutoSuggestBoxQuerySubmittedEventArgs",
+];
+
 #[test]
 fn enumeration_members_are_found_by_name() {
     let enums: Vec<_> = declared_types().into_iter().filter(|t| t.kind == MarkupTypeKind::Enum).collect();
-    // `TextLayoutRoundingPlacement` is declared next to the type.
-    assert_eq!(enums.len(), super::enums::TYPES.len() + 1);
+    // Some enumerations are declared next to the type (DECLARED_NEXT_TO_THE_TYPE).
+    let next_to_the_type = enums.iter().filter(|t| DECLARED_NEXT_TO_THE_TYPE.contains(&t.name)).count();
+    assert_eq!(enums.len(), super::enums::TYPES.len() + next_to_the_type);
     for type_ in enums {
         assert!(!type_.enum_members.is_empty(), "{type_:?}");
         for member in type_.enum_members {
@@ -793,6 +814,36 @@ fn the_collection_handle_of_items_controls_is_the_enumerable_of_the_runtime_libr
     list.add(boxed("World".to_string()));
     assert_eq!(source.count(), 3);
     assert!(source.downcast_ref::<FerroList<Option<BoxedValue>>>().is_some_and(|shared| *shared == *list));
+}
+
+#[test]
+fn a_view_of_an_items_source_is_constructed_and_read_through_its_metadata() {
+    crate::register_types();
+    let markup = <crate::ItemsSourceView as MarkupTyped>::MARKUP;
+    assert_eq!(markup.full_name(), "FerroUI.Controls.ItemsSourceView");
+    let view = (markup.constructors[0].invoke)(&[boxed(crate::ItemsSource::from_strs(["a", "b"]))]).expect("a view");
+    let count = markup.find_property("Count").expect("Count");
+    assert_eq!(unbox::<i32>(&(count.get.expect("a getter"))(&[view.clone()]).expect("the count")), 2);
+    let get_at = markup.find_methods("GetAt").next().expect("GetAt");
+    assert_eq!(unbox::<String>(&(get_at.invoke)(&[view.clone(), boxed(1i32)]).expect("the item")), "b");
+    // An index that is not the index of an item is an error of the call, not a panic.
+    assert!((get_at.invoke)(&[view.clone(), boxed(2i32)]).is_err());
+    assert!((get_at.invoke)(&[view.clone(), boxed(-1i32)]).is_err());
+    let index_of = markup.find_methods("IndexOf").next().expect("IndexOf");
+    assert_eq!(unbox::<i32>(&(index_of.invoke)(&[view.clone(), text("b")]).expect("the index")), 1);
+    let has_keys = markup.find_property("HasKeyIndexMapping").expect("HasKeyIndexMapping");
+    assert!(!unbox::<bool>(&(has_keys.get.expect("a getter"))(&[view.clone()]).expect("the value")));
+    // A source without unique keys: the key members are errors of the call.
+    let key_from_index = markup.find_methods("KeyFromIndex").next().expect("KeyFromIndex");
+    assert!((key_from_index.invoke)(&[view.clone(), boxed(0i32)]).is_err());
+    let index_from_key = markup.find_methods("IndexFromKey").next().expect("IndexFromKey");
+    assert!((index_from_key.invoke)(&[view.clone(), text("a")]).is_err());
+
+    // A view is an items source itself: the handle is the view, which a control reads through.
+    let source = unbox::<Option<crate::ItemsSource>>(&view).expect("an items source");
+    let view = unbox::<Rc<crate::ItemsSourceView>>(&view);
+    assert!(Rc::ptr_eq(&crate::ItemsSourceView::get_or_create(Some(&source)), &view));
+    assert_eq!(source.count(), 2);
 }
 
 #[test]

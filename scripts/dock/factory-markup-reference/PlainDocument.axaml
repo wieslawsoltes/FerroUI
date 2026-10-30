@@ -1,0 +1,3 @@
+<d:Document xmlns="https://github.com/avaloniaui"
+            xmlns:d="using:Dock.Model.ReactiveUI.Controls"
+            Title="Plain root" />

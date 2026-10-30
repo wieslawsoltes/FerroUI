@@ -82,9 +82,16 @@ fn the_view_model_lists_every_upstream_page_as_available_or_unavailable() {
 
     assert_eq!(11, view_model.home_sections().len());
     let available: usize = view_model.home_sections().iter().map(|s| s.items().map_or(0, |items| items.len())).sum();
-    // The upstream list has 74 entries, and the port adds the pages TreeDataGrid and
-    // Composition (WinUI).
-    assert_eq!(76, available + view_model.unavailable_pages().len());
+    // The upstream list has 74 entries. The native catalog also offers these
+    // pages, each exactly once and available through its page factory.
+    let additional_pages = ["TreeDataGrid", "Composition (WinUI)", "InkCanvas", "InkToolbar", "IconElement", "InfoBadge", "InfoBar", "ProgressRing", "NumberBox", "RadioButtons", "RatingControl", "AutoSuggestBox", "NavigationView", "ItemsRepeater"];
+    assert_eq!(74 + additional_pages.len(), available + view_model.unavailable_pages().len());
+    for header in additional_pages {
+        let matches: usize = view_model.home_sections().iter().map(|section| {
+            section.items().map_or(0, |items| items.iter().filter(|page| page.header() == header).count())
+        }).sum();
+        assert_eq!(matches, 1, "{header} must be available exactly once");
+    }
     for page in view_model.unavailable_pages() {
         assert!(!page.reason.is_empty(), "{} has no reason", page.document);
     }
@@ -160,7 +167,7 @@ fn navigating_to_an_item_replaces_the_page_and_marks_its_section() {
     assert_eq!(1, view_model.navigator().unwrap().stack_depth());
     let section = view_model.home_sections().iter().find(|s| s.title() == item.section()).cloned().unwrap();
     assert!(section.is_current());
-    assert!(section.is_expanded());
+    // The open pane of the shell opens the section too (tests/shell.rs).
     window.close();
 }
 

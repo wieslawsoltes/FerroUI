@@ -6,11 +6,10 @@ on:
     # A change of the documentation alone builds and tests nothing.
     paths-ignore: ['docs/**', '**/*.md']
   pull_request:
-    # `edited` too: a pull request of a stack is retargeted to main when the one below it merges
-    # (docs/stacked-pull-requests.md), and the checks run again against the new base. An edit
-    # that leaves the base alone (the title, the description) runs nothing: every job starts with
-    # the condition `github.event.action != 'edited' || github.event.changes.base != null`.
-    types: [opened, synchronize, reopened, edited]
+    # No `edited`: a run for an edit of the title skipped every job, and the skipped checks of that
+    # run replaced the results of the real run of the same commit (a failure looked like a skip). A
+    # pull request of a stack that is retargeted to main gets a new run from scripts/stack/stack.py,
+    # which brings the branch up to date with its new base (docs/stacked-pull-requests.md).
     paths-ignore: ['docs/**', '**/*.md']
   workflow_dispatch:
     inputs:
@@ -25,11 +24,24 @@ on:
         description: 'WinUI theme comparison: the text settings of a calibration run (FERROUI_WINUI_COMPARE_TEXT_VARIANTS; none when empty)'
         required: false
         default: ''
+  # Every night, a run of main. The macOS, iOS and Windows jobs do not run for a push to main, and
+  # the Rust build caches are saved by runs of main only (see the note on the caches below): this
+  # run saves theirs, for the pull requests to restore. It also tests the merged state.
+  schedule:
+    - cron: '23 2 * * *'
+
+# The Rust build caches (Swatinem/rust-cache: the registry and the compiled dependencies). They are
+# saved by runs of main (a push, the nightly run, a run started by hand), with `save-if`, and a pull
+# request restores the cache of main and saves none. A cache saved by a pull request can be restored
+# by later runs of that pull request alone, and every run of one saved about 5 GB: the repository
+# has 10 GB, so the caches of main were evicted and almost no job found a cache (October 2026: the
+# macOS and the Windows jobs found one in 4 of 24 runs). `cache-on-failure`: a run of main whose
+# job fails (one smoke run) still saves the dependencies it compiled.
 
 concurrency:
-  # An edit that leaves the base alone gets a group of its own, so that it does not cancel the
-  # run of the pull request that is in progress.
-  group: ci-${{ github.ref }}-${{ (github.event.action == 'edited' && github.event.changes.base == null) && github.run_id || 'run' }}
+  # The nightly run has a group of its own, so that it and a run of a push to main do not cancel
+  # each other.
+  group: ci-${{ github.ref }}-${{ github.event_name == 'schedule' && 'nightly' || 'run' }}
   cancel-in-progress: true
 
 permissions:
@@ -40,10 +52,16 @@ env:
   CARGO_INCREMENTAL: 0
   RUST_BACKTRACE: 1
 
+# The checks of every pull request: the conventions and the packages, the Linux tests of the
+# workspace, the native macOS platform, the Windows backend, X11 and the browser catalog. The jobs
+# of one platform or backend alone are workflows of their own that a pull request starts only when it changes that area, so a
+# pull request shows no skipped check for them: vello.yml, browser.yml, ios.yml, android.yml,
+# wayland.yml, linuxfb.yml; the informative jobs are in nightly.yml. All of them also run every
+# night on main and by hand (gh workflow run <file> --ref <branch>).
 jobs:
   conventions:
-    if: (github.event.action != 'edited' || github.event.changes.base != null)
-    name: Source conventions
+    name: Source conventions and packages
+    timeout-minutes: 20
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -62,45 +80,149 @@ jobs:
       # FerroUI.Base and FerroUI.Controls (docs/declarative-ui.md, section 4).
       - name: Generated view builders are up to date
         run: python3 scripts/generate_view_builders.py --check
+      # The scoped names of the generator (two public types of one crate with the same name).
+      - name: Tests of the view builder generator
+        run: python3 scripts/test_generate_view_builders.py
+      # The WinUI source paths keep their Windows spelling on Linux (InkToolbar and InkToolBar).
+      - name: Tests of the WinUI theme scripts
+        run: python3 -m unittest discover -s scripts/winui-theme -p 'test_*.py'
+      - name: Browser build reuse and exact compression measurements remain correct
+        run: node scripts/browser/tests/build_tooling.test.mjs
       # Thread-local variables are declared with ferroui_base::ferro_thread_local!, which on Android
       # is a slot of one table per thread: a thread_local! there takes one of the 128 keys of the C
       # library (docs/porting/android-platform.md, section 5.1). The allow-list is in the script.
       - name: No thread_local! outside of ferro_thread_local!
         run: python3 scripts/android/convert-thread-locals.py --check
+      # The crates that are published stay publishable (docs/release.md): the manifests state what
+      # crates.io needs, the crates of the workspace are pinned to one another at the version of the
+      # workspace, every package is assembled and is below the size limit, and the crate table of the
+      # README is current. Nothing is compiled and nothing is published: about two minutes, most of it
+      # the toolchain and the index.
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - name: Package the published crates without building
+        run: scripts/release/publish.sh --dry-run --no-verify
 
-  # The crates that are published stay publishable (docs/release.md): the manifests state what
-  # crates.io needs, the crates of the workspace are pinned to one another at the version of the
-  # workspace, every package is assembled and is below the size limit, and the crate table of the
-  # README is current. Nothing is compiled and nothing is published: about two minutes, most of it
-  # the toolchain and the index.
-  packaging:
-    if: (github.event.action != 'edited' || github.event.changes.base != null)
-    name: Packages of the published crates
+  # The API gate (docs/release.md, "API stability"): within 0.4 the public API of the published
+  # crates only grows. cargo-semver-checks compares the rustdoc JSON of each published crate with
+  # that of the sources of 0.4.0 (scripts/api-gate/semver_checks.py: the tag, or the commit of the
+  # release while there is no tag), with the release type `minor`. The script documents all the
+  # crates in one `cargo doc` for each side, so the dependencies are checked once and not once per
+  # crate, and the documentation of the baseline is cached under the baseline commit and the rustc
+  # version: a run documents the pull request only. It runs when a pull request changes the sources
+  # or a manifest of the workspace (src/, Cargo.toml, Cargo.lock, the script); otherwise it passes
+  # without building. The defaults of the properties, which no signature shows, are guarded by the
+  # snapshot test `property_defaults_tests` of ferroui-controls, which the Linux job runs. On macOS,
+  # where the whole workspace builds: the API of a platform crate is the one it has when built for
+  # macOS. Like the macOS job, it does not run for a push to main.
+  api-gate:
+    name: API gate (cargo-semver-checks)
+    if: (github.event_name != 'push')
+    runs-on: macos-15
+    timeout-minutes: 45
+    env:
+      CARGO_PROFILE_DEV_DEBUG: 0
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Whether the published sources changed
+        id: changes
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if [ -z "$BASE_SHA" ]; then echo "run=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+          git fetch --no-tags --depth=1 origin "$BASE_SHA"
+          if git diff --name-only "$BASE_SHA" HEAD | grep -qE '^(src/|Cargo\.toml$|Cargo\.lock$|scripts/api-gate/)'; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No published source changed: the gate has nothing to compare."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+        if: steps.changes.outputs.run == 'true'
+      - uses: taiki-e/install-action@1e29709c0ec63babbe8f266397a465f29a825f91 # v2.87.31
+        if: steps.changes.outputs.run == 'true'
+        with:
+          tool: cargo-semver-checks@0.51.0
+      - name: Key of the baseline documentation
+        id: baseline
+        if: steps.changes.outputs.run == 'true'
+        run: echo "key=$(python3 scripts/api-gate/semver_checks.py --baseline-key)" >> "$GITHUB_OUTPUT"
+      # The documentation of the baseline is saved as soon as it is made, also when the gate then
+      # fails; a cache saved by the nightly run of main is seen by every pull request.
+      - uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        id: baseline-cache
+        if: steps.changes.outputs.run == 'true'
+        with:
+          path: target/api-gate/baseline
+          key: ${{ steps.baseline.outputs.key }}
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        if: steps.changes.outputs.run == 'true'
+        with:
+          key: api-gate
+          workspaces: ". -> target/api-gate/target-current"
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
+      - name: Documentation of 0.4.0
+        if: steps.changes.outputs.run == 'true' && steps.baseline-cache.outputs.cache-hit != 'true'
+        run: python3 scripts/api-gate/semver_checks.py --fetch --baseline-only
+      - uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        if: steps.changes.outputs.run == 'true' && steps.baseline-cache.outputs.cache-hit != 'true'
+        with:
+          path: target/api-gate/baseline
+          key: ${{ steps.baseline.outputs.key }}
+      - name: Signatures against 0.4.0
+        if: steps.changes.outputs.run == 'true'
+        run: python3 scripts/api-gate/semver_checks.py --fetch
+
+  # The tests of the workspace, on Linux: the 4-core Linux runner compiles the workspace in 16
+  # minutes where the 3-core macOS runner took 40 (October 2026), and the test binaries run side by
+  # side (scripts/ci/parallel_tests.py). Under Xvfb, with the fonts the text tests need (CJK and
+  # emoji fallbacks). The render backends comparison and Vello are in vello.yml; the two benchmark
+  # crates (every benchmark once, almost three minutes) are left out of a pull request. The
+  # VirtualizationDemo playground test counts what the font metrics of macOS let into view, the Skia
+  # emoji test needs a color emoji font Skia finds (the runner's is not matched), and the hot reload
+  # watcher test failed under the load of this job (file events of Linux): those three run in the
+  # macOS job.
+  linux:
+    name: Build and test (Linux, the workspace)
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 90
+    env:
+      CARGO_PROFILE_DEV_DEBUG: 0
+      CARGO_PROFILE_TEST_DEBUG: 0
+      RUSTFLAGS: -C link-arg=-fuse-ld=mold
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
-      - name: Package without building
-        run: scripts/release/publish.sh --dry-run --no-verify
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
+      - name: System packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            xvfb xauth libx11-dev libxi-dev libxrandr-dev libxcursor-dev libxfixes-dev libxext-dev libxtst-dev \
+            libgl1-mesa-dev libegl1-mesa-dev libfontconfig1-dev libfreetype6-dev pkg-config \
+            fonts-dejavu-core fonts-noto-cjk fonts-noto-color-emoji \
+            libglib2.0-dev libgtk-3-dev libxkbcommon-dev libwayland-dev libvulkan-dev mold clang
+      - name: Test
+        env:
+          BENCHMARKS: ${{ github.event_name == 'pull_request' && '--exclude ferroui-benchmarks --exclude ferroui-treedatagrid-benchmarks' || '' }}
+        run: |
+          # shellcheck disable=SC2086
+          xvfb-run -a python3 scripts/ci/parallel_tests.py --jobs 4 --workspace --locked --lib --tests \
+            --exclude ferroui-render-backends-comparison --exclude ferroui-vello $BENCHMARKS \
+            -- --skip the_playground_realizes_what_is_in_view_and_recycles_its_containers \
+            --skip text_layout_draws_mixed_direction_ligature_and_emoji_text \
+            --skip watcher_revision_changed_during_preparation_discards_candidate_before_commit
 
-  # Reduced for the time being (2026-10-08), to shorten the wait for a pull request while many are
-  # in flight; the job took 22 minutes, 20 of them compiling. What is left out, and how to get it
-  # back:
-  # - It does not run for a push to main: the pull request that was merged ran it already, and the
-  #   runs of main competed with the pull requests for the macOS runners. Dispatch the workflow by
-  #   hand on main (workflow_dispatch) for a run of the merged state.
-  # - No separate `cargo check --workspace --all-targets`: it compiled everything a second time with
-  #   another profile. The examples and binaries (hello_window, themed_window, the native examples,
-  #   control-catalog-desktop) are therefore not compiled here; `cargo check --workspace
-  #   --all-targets --locked` on a Mac covers them.
-  # - The tests are the unit and integration tests (`--lib --tests`): no documentation tests (the
-  #   workspace has none that run) and no example or binary is linked.
-  # - No debug information in the test build, which shortens compiling and linking; a failing test
-  #   still reports its message and location, a backtrace has no line numbers.
+  # macOS: on a pull request only what runs on macOS alone: the native platform (AppKit,
+  # ferroui-native), Metal, the desktop entry point, Skia with the fonts of the system (CoreText), and
+  # the desktop catalog with its native control demo, checked. The whole workspace runs on macOS in
+  # the nightly run and in a run started by hand. It does not run for a push to main.
   macos:
-    name: Build and test (macOS)
-    if: (github.event.action != 'edited' || github.event.changes.base != null) && (github.event_name != 'push')
+    name: Build and test (macOS, the native platform)
+    if: (github.event_name != 'push')
     runs-on: macos-15
     timeout-minutes: 180
     env:
@@ -110,26 +232,21 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
-      - name: Test
-        run: cargo test --workspace --locked --no-fail-fast --lib --tests --exclude ferroui-render-backends-comparison --exclude ferroui-vello
-      # The Simple and Fluent themes of the ControlCatalog are behind its feature `classic-themes`,
-      # off by default (docs/binary-size.md): the tests of the document of the two themes and of
-      # the settings page that switches between the three themes, with the feature.
-      - name: Test (the ControlCatalog with its feature classic-themes)
-        run: cargo test --locked -p control-catalog --features classic-themes --lib -- classic_themes the_settings_page
-      # The tests of the Vello backend and its comparison with the Skia backend, apart from the other tests: on
-      # the runner one scene of a GPU mode now and then comes out wholly different or differs
-      # between two draws (docs/porting/vello-backend.md, section 13). A failure is tried again,
-      # twice at most; a scene that fails three times in a row fails the job.
-      - name: Test (the Vello backend and the render backends compared)
+        with:
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
+      - name: Test the native platform
+        if: github.event_name == 'pull_request'
         run: |
-          for attempt in 1 2 3; do
-            if cargo test --locked -p ferroui-vello -p ferroui-render-backends-comparison --no-fail-fast --lib --tests; then
-              exit 0
-            fi
-            echo "::warning::the tests of the Vello backend or the comparison of the render backends failed in attempt $attempt"
-          done
-          exit 1
+          python3 scripts/ci/parallel_tests.py --jobs 3 --locked --lib --tests \
+            -p ferroui-native -p ferroui-metal -p ferroui-desktop -p ferroui-skia -p virtualization-demo \
+            -p ferroui-hot-reload
+          cargo check --locked -p control-catalog-desktop
+      - name: Test the workspace
+        if: github.event_name != 'pull_request'
+        run: |
+          python3 scripts/ci/parallel_tests.py --jobs 3 --workspace --locked --lib --tests \
+            --exclude ferroui-render-backends-comparison --exclude ferroui-vello
 
   # The Windows platform backend (docs/porting/win32-platform.md, section 10.3). This job is the
   # only place the backend runs: it is written and checked for the Windows target on other
@@ -147,8 +264,11 @@ jobs:
   #   binaries are published stays informative: it gates them.
   windows:
     name: Build, test and smoke run (Windows platform backend)
-    if: (github.event.action != 'edited' || github.event.changes.base != null) && (github.event_name != 'push')
+    if: (github.event_name != 'push')
     runs-on: windows-latest
+    permissions:
+      contents: read
+      pull-requests: read
     timeout-minutes: 120
     env:
       CARGO_PROFILE_DEV_DEBUG: 0
@@ -158,8 +278,27 @@ jobs:
         shell: bash
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      # The long steps that test Windows alone (the ten-run teardown loops, the HelloWorld samples, the
+      # automation tests of the IntegrationTestApp, GpuInterop, the WinUI theme gallery) run on a pull
+      # request only when it changes the Windows sources; every other run runs them.
+      - name: Changed areas
+        id: areas
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR/files" -q '.[].filename' > "$RUNNER_TEMP/files.txt"
+          if grep -qE '^(\.github/workflows/ci\.yml|src/Windows/|src/FerroUI\.Themes\.WinUI/|samples/(IntegrationTestApp|HelloWorld[^/]*|GpuInterop|WinUIThemeGallery|ControlGallery\.WinUI|WinUIEmbedSample)/|scripts/(windows|winui|winui-theme)/)' "$RUNNER_TEMP/files.txt"; then
+            echo "windows=true" >> "$GITHUB_OUTPUT"; echo "the Windows sources changed: every step runs"
+          else
+            echo "the Windows sources did not change: the long Windows-only steps are skipped"
+          fi
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
       # Without the default feature `angle`: the backend with software rendering alone, which is
       # what builds where there is no libclang.
       - name: Build the backend and its example (without ANGLE)
@@ -224,7 +363,7 @@ jobs:
       # stopped by the time limit of the step: `timeout` of the shell does not end a process
       # that waits inside its own exit (run 38072903035).
       - name: The process ends after a run through DirectComposition (ten runs)
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && (github.event_name != 'pull_request' || steps.areas.outputs.windows == 'true') }}
         timeout-minutes: 5
         run: |
           exe=target/debug/examples/win32_window.exe
@@ -249,7 +388,7 @@ jobs:
       # And the process ends after such a run, every time (the thread of the mode is in its
       # message loop when the system ends it). Ten runs.
       - name: The process ends after a run through Windows.UI.Composition (ten runs)
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && (github.event_name != 'pull_request' || steps.areas.outputs.windows == 'true') }}
         timeout-minutes: 5
         run: |
           exe=target/debug/examples/win32_window.exe
@@ -307,6 +446,21 @@ jobs:
         env:
           FERROUI_SMOKE_EXIT_MS: 2000
         run: cargo run --locked -p ferroui-desktop --example hello_window
+      # The HelloWorld samples (the XAML one and one per style of ferroui-view, docs/binary-size.md):
+      # built, then each shown for two seconds.
+      - name: The HelloWorld samples for two seconds each
+        if: ${{ steps.skia.outputs.raster == 'true' && (github.event_name != 'pull_request' || steps.areas.outputs.windows == 'true') }}
+        timeout-minutes: 30
+        env:
+          FERROUI_SMOKE_EXIT_MS: 2000
+        run: |
+          samples="hello-world hello-world-builders hello-world-macros hello-world-hooks hello-world-component-host"
+          cargo build --locked $(printf -- '-p %s ' $samples) --bins
+          result=0
+          for sample in $samples; do
+            ./target/debug/$sample.exe || { echo "::error::$sample ended with an error"; result=1; }
+          done
+          exit $result
       # Upstream's integration tests of the backend (tests/FerroUI.IntegrationTests.Win32): windows
       # of the window class on the desktop of the runner, in every state, with every kind of
       # decorations, their client area and bounds compared with the screen. One binary without
@@ -339,7 +493,7 @@ jobs:
       # test harness; it prints every test with its result and the reason of every test it does not
       # run. Not required until it has a green run on the runners.
       - name: Automation tests of the IntegrationTestApp sample
-        if: ${{ steps.skia.outputs.raster == 'true' }}
+        if: ${{ steps.skia.outputs.raster == 'true' && (github.event_name != 'pull_request' || steps.areas.outputs.windows == 'true') }}
         continue-on-error: true
         timeout-minutes: 60
         env:
@@ -357,11 +511,11 @@ jobs:
       # through ANGLE in its smoke mode, which checks that the frames Direct3D draws are in the
       # snapshots of the compositor. The run is informative until it has passed on a runner.
       - name: The GpuInterop sample builds
-        if: ${{ steps.skia.outputs.raster == 'true' }}
+        if: ${{ steps.skia.outputs.raster == 'true' && (github.event_name != 'pull_request' || steps.areas.outputs.windows == 'true') }}
         timeout-minutes: 60
         run: cargo build --locked -p gpu-interop
       - name: The Direct3D 11 demo of the GpuInterop sample (informative)
-        if: ${{ steps.skia.outputs.raster == 'true' }}
+        if: ${{ steps.skia.outputs.raster == 'true' && (github.event_name != 'pull_request' || steps.areas.outputs.windows == 'true') }}
         continue-on-error: true
         timeout-minutes: 10
         env:
@@ -482,7 +636,7 @@ jobs:
       # the runner, with the runtime and the bootstrap library of the step above. Informative
       # until the comparison is calibrated: the pictures and the reports are the result.
       - name: WinUI theme gallery (capture, comparison with native WinUI 3; informative)
-        if: ${{ !cancelled() && steps.skia.outputs.raster == 'true' }}
+        if: ${{ !cancelled() && steps.skia.outputs.raster == 'true' && (github.event_name != 'pull_request' || steps.areas.outputs.windows == 'true') }}
         continue-on-error: true
         timeout-minutes: 45
         shell: pwsh
@@ -519,155 +673,33 @@ jobs:
           }
           if ($capture.ExitCode -ne 0 -or $compare.ExitCode -ne 0) { Write-Output "capture exit $($capture.ExitCode), compare exit $($compare.ExitCode)"; exit 1 }
       - name: Keep the pictures of the WinUI theme gallery
-        if: ${{ always() && steps.skia.outputs.raster == 'true' }}
+        if: ${{ always() && steps.skia.outputs.raster == 'true' && (github.event_name != 'pull_request' || steps.areas.outputs.windows == 'true') }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: winui-theme-gallery-windows
           path: target/winui-theme
           if-no-files-found: ignore
 
-  # The same backend on Windows for ARM64 (the owner's test machine is one): whether ANGLE builds
-  # for the target and runs there. Informative as a whole until its first green run.
-  windows-arm64:
-    name: Build, test and smoke run (Windows platform backend, ARM64; informative)
-    if: (github.event.action != 'edited' || github.event.changes.base != null) && (github.event_name != 'push')
-    runs-on: windows-11-arm
-    continue-on-error: true
-    timeout-minutes: 120
-    env:
-      CARGO_PROFILE_DEV_DEBUG: 0
-      CARGO_PROFILE_TEST_DEBUG: 0
-    defaults:
-      run:
-        shell: bash
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
-        with:
-          targets: aarch64-pc-windows-msvc
-      - name: The toolchain and LLVM of the image
-        run: |
-          rustc -vV
-          clang --version || true
-          echo "LIBCLANG_PATH=${LIBCLANG_PATH:-unset}"
-      - name: Build the backend and its example (without ANGLE)
-        run: cargo build --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --no-default-features --examples
-      - name: Tests of the backend
-        run: cargo test --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --no-default-features --no-fail-fast
-      - name: Smoke run of a window (software rendering)
-        timeout-minutes: 5
-        run: cargo run --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --no-default-features --example win32_window -- --smoke
-      - name: Smoke run with the OpenGL of the system (WGL), or its fallback
-        timeout-minutes: 5
-        run: cargo run --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --no-default-features --example win32_window -- --smoke --rendering wgl
-      - name: Accessibility, the tree of a window through the client interface of UI Automation
-        if: ${{ !cancelled() }}
-        timeout-minutes: 5
-        run: cargo run --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --no-default-features --example win32_window -- --a11y
-      - name: Build with ANGLE (the time of the mozangle build)
-        if: ${{ !cancelled() }}
-        timeout-minutes: 90
-        run: |
-          start=$(date +%s)
-          cargo build --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --examples
-          echo "::notice::ferroui-win32 with the feature angle built in $(( $(date +%s) - start )) s on $RUNNER_ARCH"
-      - name: Smoke run through ANGLE with the ANGLE probe
-        if: ${{ !cancelled() }}
-        timeout-minutes: 5
-        run: cargo run --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --example win32_window -- --smoke --rendering angle --angle-probe
-      - name: Smoke run through ANGLE, presented through DirectComposition
-        if: ${{ !cancelled() }}
-        timeout-minutes: 5
-        run: cargo run --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --example win32_window -- --smoke --rendering angle --composition dcomp --teardown-trace
-      # The process has to end after the run, every time: in runs 38066650638 and 38067972798 it
-      # did not on this runner, and in run 38071416065 it did not on the ARM64 runner (the values
-      # of the main thread were destroyed after the system had ended the thread that renders:
-      # docs/porting/win32-platform.md, section 11.2). Ten runs. A process that does not end is
-      # stopped by the time limit of the step: `timeout` of the shell does not end a process
-      # that waits inside its own exit (run 38072903035).
-      - name: The process ends after a run through DirectComposition (ten runs)
-        if: ${{ !cancelled() }}
-        timeout-minutes: 5
-        run: |
-          exe=target/aarch64-pc-windows-msvc/debug/examples/win32_window.exe
-          for run in 1 2 3 4 5 6 7 8 9 10; do
-            code=0
-            timeout 60 "$exe" --smoke --rendering angle --composition dcomp > "smoke-$run.log" 2>&1 || code=$?
-            if [ "$code" != 0 ]; then
-              tail -n 40 "smoke-$run.log"
-              echo "::error::run $run ended with the code $code (124: the process did not end in a minute)"
-              exit 1
-            fi
-            echo "run $run: $(tail -n 2 "smoke-$run.log" | tr '\n' ' ')"
-          done
-      # The same run presented through Windows.UI.Composition (the rest of stage 2c): the compositor
-      # of the Windows Runtime on a thread with a dispatcher queue, the tree of the window with
-      # the visuals of the blur effects, a drawing surface of a composition graphics device; of
-      # mica, acrylic blur, blur and transparent the window takes the effect the system has.
-      - name: Smoke run through ANGLE, presented through Windows.UI.Composition
-        if: ${{ !cancelled() }}
-        timeout-minutes: 5
-        run: cargo run --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --example win32_window -- --smoke --rendering angle --composition winui --teardown-trace
-      # And the process ends after such a run, every time (the thread of the mode is in its
-      # message loop when the system ends it). Ten runs.
-      - name: The process ends after a run through Windows.UI.Composition (ten runs)
-        if: ${{ !cancelled() }}
-        timeout-minutes: 5
-        run: |
-          exe=target/aarch64-pc-windows-msvc/debug/examples/win32_window.exe
-          for run in 1 2 3 4 5 6 7 8 9 10; do
-            code=0
-            timeout 60 "$exe" --smoke --rendering angle --composition winui > "smoke-winui-$run.log" 2>&1 || code=$?
-            if [ "$code" != 0 ]; then
-              tail -n 40 "smoke-winui-$run.log"
-              echo "::error::run $run ended with the code $code (124: the process did not end in a minute)"
-              exit 1
-            fi
-            echo "run $run: $(tail -n 2 "smoke-winui-$run.log" | tr '\n' ' ')"
-          done
-      # The same run presented through a DXGI swap chain of the window (the low-latency mode, the
-      # rest of stage 2c): a flip-model swap chain that allows tearing, on the device of ANGLE.
-      # Required since its first green run (38078715201): the software device of the runners
-      # creates such a swap chain.
-      - name: Smoke run through ANGLE, presented through a DXGI swap chain
-        if: ${{ !cancelled() }}
-        timeout-minutes: 5
-        run: cargo run --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --example win32_window -- --smoke --rendering angle --composition dxgi --teardown-trace
-      - name: Skia binaries published for Windows on ARM64
-        if: ${{ !cancelled() }}
-        run: |
-          cargo fetch --locked --target aarch64-pc-windows-msvc
-          info="$(ls "${CARGO_HOME:-$HOME/.cargo}"/registry/src/*/skia-bindings-*/.cargo_vcs_info.json | head -n 1)"
-          version="$(basename "$(dirname "$info")" | sed 's/^skia-bindings-//')"
-          hash="$(grep -o '"sha1": *"[0-9a-f]*"' "$info" | grep -o '[0-9a-f]\{40\}' | cut -c1-20)"
-          echo "skia-bindings $version, commit $hash"
-          for key in jpegd-jpege-pdf ganesh-gl-jpegd-jpege-pdf; do
-            if curl -sfL -r 0-0 -o /dev/null "https://github.com/rust-skia/skia-binaries/releases/download/$version/skia-binaries-$hash-aarch64-pc-windows-msvc-$key.tar.gz"; then
-              echo "::notice::Skia binary published for aarch64-pc-windows-msvc: $key"
-            else
-              echo "::warning::no Skia binary for aarch64-pc-windows-msvc with the features $key"
-            fi
-          done
-
   browser:
-    if: (github.event.action != 'edited' || github.event.changes.base != null)
     name: Check (browser, wasm32-unknown-emscripten)
     runs-on: ubuntu-latest
     timeout-minutes: 150
+    # The catalog site of a check is built with the `browser` profile without its link-time
+    # optimization and with 16 code units: the same optimization levels, a fraction of the build time
+    # (13.7 minutes with them). The published site (pages.yml) and browser.yml keep the profile as it
+    # is, with the sizes of the modules; so the cache of this job is its own.
+    env:
+      CARGO_PROFILE_BROWSER_LTO: "false"
+      CARGO_PROFILE_BROWSER_CODEGEN_UNITS: "16"
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: ./.github/actions/browser-toolchain
         with:
-          # Shared with the Pages workflow, which builds the same site.
-          cache-key: browser
-      - name: Script module (type check, lint, bundle, pixel test)
-        working-directory: src/Browser/FerroUI.Browser/webapp
+          cache-key: browser-check
+      - name: Script module (type check, lint, bundle, pixel and text input tests)
         run: |
-          npm ci --no-audit --no-fund
-          npm run typecheck
-          npm run lint
-          npm run build
-          npm run test:pixels
+          node scripts/browser/build-webapp.mjs build
+          (cd src/Browser/FerroUI.Browser/webapp && npm run test:pixels && npm run test:input)
       - name: Skia features of the target
         run: |
           # An unsupported feature combination makes the Skia bindings build Skia from source.
@@ -683,32 +715,10 @@ jobs:
           -p ferroui-browser -p control-catalog-browser
       - name: Check the examples of the browser crate
         run: cargo check --locked --target wasm32-unknown-emscripten -p ferroui-browser --examples
-      # The Vello backend in the browser is behind a feature that no site built here turns on: without
-      # this its sink for WebGL is compiled by nothing, and a change of the scene interface breaks it
-      # unseen (docs/porting/vello-backend.md, section 12).
-      - name: Check the browser crate and the catalog host with the Vello backend
-        run: >
-          cargo check --locked --target wasm32-unknown-emscripten
-          -p ferroui-browser --features vello --examples
-          && cargo check --locked --target wasm32-unknown-emscripten
-          -p control-catalog-browser --features vello
-      # The JavaScript bridge of the CDP developer tools (docs/devtools-cdp.md), also behind a feature.
-      - name: Check the catalog host with the CDP bridge
-        run: cargo check --locked --target wasm32-unknown-emscripten -p control-catalog-browser --features cdp
-      - name: Build the themed view site
-        run: scripts/build-browser.sh themed_view
-      - name: Behaviour tests in headless Chrome
-        run: node scripts/browser/tests/themed_view.test.mjs
-      - name: Build the storage view site
-        run: scripts/build-browser.sh storage_view
-      - name: Storage behaviour tests in headless Chrome
-        run: node scripts/browser/tests/storage_view.test.mjs
       - name: Build the ControlCatalog site
-        run: scripts/build-browser.sh control-catalog-browser
+        run: scripts/build-browser.sh control-catalog-browser --webapp-prebuilt
       - name: ControlCatalog tests in headless Chrome (rendering, resize, console, drawer, navigation, click, typing)
         run: node scripts/browser/tests/control_catalog.test.mjs --screenshot target/browser/screenshots/control-catalog.png
-      - name: Sizes of the published modules
-        run: node scripts/browser/module-sizes.mjs target/browser/control-catalog-browser >> "$GITHUB_STEP_SUMMARY"
       - name: Keep the screenshot
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -716,155 +726,6 @@ jobs:
           name: control-catalog-browser-screenshot
           path: target/browser/screenshots
           if-no-files-found: ignore
-      # For the job that composes the sites with both modules.
-      - name: Keep the sites built without threads
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: browser-sites
-          path: |
-            target/browser/themed_view
-            target/browser/control-catalog-browser
-          if-no-files-found: error
-          retention-days: 1
-
-  # The build with threads (docs/porting/browser-render-worker.md, "B2.8"): the UI on the thread of
-  # the page, the compositor and Skia on a render thread. A job of its own, beside the one above and
-  # not after it: the build with threads compiles everything a second time (another toolchain, a
-  # standard library of its own, its own target directory), which as further steps of the job above
-  # would about double the wait for a pull request. Run in parallel it costs the installation of the
-  # toolchain a second time (from caches) and nothing else twice: the sites with both modules are
-  # composed, by the job below, from the sites the two jobs built.
-  browser-threads:
-    if: (github.event.action != 'edited' || github.event.changes.base != null)
-    name: Check (browser with threads, wasm32-unknown-emscripten)
-    runs-on: ubuntu-latest
-    timeout-minutes: 150
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: ./.github/actions/browser-toolchain
-        with:
-          # Shared with the Pages workflow, which builds the same sites.
-          cache-key: browser
-          threads: true
-      # Each build below also type checks, lints and bundles the script module, as every build of
-      # a site does.
-      - name: Build the thread spawn site
-        run: scripts/build-browser.sh thread_spawn --threads
-      - name: A spawned thread, and the isolation of the page, in headless Chrome
-        run: node scripts/browser/tests/thread_spawn.test.mjs
-      - name: Build the render worker site
-        run: scripts/build-browser.sh render_worker_clear --threads
-      - name: Frames from a worker without the compositor, in headless Chrome
-        run: node scripts/browser/tests/render_worker_clear.test.mjs
-      - name: Build the themed view site with threads
-        run: scripts/build-browser.sh themed_view --threads
-      - name: Behaviour tests on the render thread and on one thread, in headless Chrome
-        run: node scripts/browser/tests/themed_view.test.mjs target/browser-threads/themed_view
-      - name: Build the storage view site with threads
-        run: scripts/build-browser.sh storage_view --threads
-      - name: Storage behaviour tests with threads, in headless Chrome
-        run: node scripts/browser/tests/storage_view.test.mjs target/browser-threads/storage_view
-      - name: Build the ControlCatalog site with threads
-        run: scripts/build-browser.sh control-catalog-browser --threads
-      - name: ControlCatalog tests on the render thread, in headless Chrome
-        run: node scripts/browser/tests/control_catalog.test.mjs target/browser-threads/control-catalog-browser --screenshot target/browser-threads/screenshots/control-catalog.png
-      - name: Sizes of the modules built with threads
-        run: node scripts/browser/module-sizes.mjs target/browser-threads/control-catalog-browser >> "$GITHUB_STEP_SUMMARY"
-      - name: Keep the screenshot
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: control-catalog-browser-threads-screenshot
-          path: target/browser-threads/screenshots
-          if-no-files-found: ignore
-      - name: Keep the sites built with threads
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: browser-threads-sites
-          path: |
-            target/browser-threads/themed_view
-            target/browser-threads/control-catalog-browser
-          if-no-files-found: error
-          retention-days: 1
-
-  # The site that is published carries both modules, and its host page chooses one before it requests
-  # either (scripts/browser/threads/ferroui-loader.js). Composed here from the sites of the two jobs
-  # above, which also checks that the files the two builds share are identical, and tested: nothing
-  # is compiled in this job.
-  browser-site:
-    if: (github.event.action != 'edited' || github.event.changes.base != null)
-    name: Check (browser, the site with both modules)
-    needs: [browser, browser-threads]
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
-          node-version: 24
-      # An artifact of several paths keeps them below their common directory.
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
-        with:
-          name: browser-sites
-          path: target/browser
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
-        with:
-          name: browser-threads-sites
-          path: target/browser-threads
-      - name: Compose the sites with both modules
-        run: |
-          for application in themed_view control-catalog-browser; do
-            node scripts/browser/combine-site.mjs "target/browser/$application" "target/browser-threads/$application" "target/browser-both/$application"
-          done
-      - name: The loader of the themed view site in headless Chrome (which module, isolation, fallback, requests)
-        run: node scripts/browser/tests/site_loader.test.mjs target/browser-both/themed_view
-      - name: The loader of the ControlCatalog site in headless Chrome
-        run: node scripts/browser/tests/site_loader.test.mjs target/browser-both/control-catalog-browser
-      - name: Sizes of the site with both modules
-        run: node scripts/browser/module-sizes.mjs target/browser-both/control-catalog-browser >> "$GITHUB_STEP_SUMMARY"
-
-  # The iOS platform (docs/porting/ios-platform.md, section 12). The crate and its example are built
-  # for the simulator, the crate is checked for the device target, the tests that need no UIKit run
-  # on the host (the dispatcher among them, on the run loop of a macOS process), and the example is
-  # put into an application bundle with an ad hoc signature. No simulator is booted here: the smoke
-  # mode in a simulator is run with scripts/ios/sim-smoke.sh on the development machine.
-  ios:
-    name: Build and test (iOS, simulator target)
-    if: (github.event.action != 'edited' || github.event.changes.base != null) && (github.event_name != 'push')
-    runs-on: macos-15
-    timeout-minutes: 90
-    env:
-      CARGO_PROFILE_DEV_DEBUG: 0
-      CARGO_PROFILE_TEST_DEBUG: 0
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
-        with:
-          targets: aarch64-apple-ios-sim,aarch64-apple-ios
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
-        with:
-          key: ios
-      - name: Skia features of the target
-        run: |
-          # Graphite on Metal, as on macOS: the feature set a Skia binary is published for. Another
-          # set would make the Skia bindings build Skia from source.
-          features="$(cargo tree --locked -p ferroui-skia -e features,normal --target aarch64-apple-ios-sim | grep -oE 'skia-bindings feature "(gl|ganesh|graphite|metal|vulkan|d3d)"' | sort -u | tr '\n' ' ')"
-          echo "GPU features: '$features'"
-          test "$features" = 'skia-bindings feature "graphite" skia-bindings feature "metal" '
-      - name: Tests of the iOS crate on the host (no UIKit needed)
-        run: cargo test --locked -p ferroui-ios --no-fail-fast
-      - name: Build the crate and the example for the simulator
-        run: cargo build --locked -p ferroui-ios --features example --example ios_view --target aarch64-apple-ios-sim
-      - name: Check the crate and the example for the device
-        run: cargo check --locked -p ferroui-ios --features example --example ios_view --target aarch64-apple-ios
-      - name: The catalog host (the native control demo calls UIKit directly)
-        run: cargo check --locked -p control-catalog-ios --target aarch64-apple-ios-sim
-      - name: The application bundle for the simulator
-        run: |
-          app="$(scripts/ios/bundle.sh --no-build | tail -n 1)"
-          plutil -p "$app/Info.plist"
-          codesign --verify --verbose "$app"
-          bash -n scripts/ios/sim-smoke.sh
 
   # The Linux desktop platform on a real X server (docs/porting/x11-platform.md, section 13). The
   # crate is developed on a Mac, where it is compiled for Linux and its tests run without a server;
@@ -878,7 +739,6 @@ jobs:
   # software rasterizer, with frames read back), under a window manager, and with two monitors
   # (xrandr --setmonitor). No compositing manager: that is not covered here.
   x11:
-    if: (github.event.action != 'edited' || github.event.changes.base != null)
     name: Build and test (Linux, X11 under Xvfb)
     runs-on: ubuntu-latest
     timeout-minutes: 90
@@ -891,6 +751,8 @@ jobs:
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
           key: x11
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
       # The X libraries are opened at run time (nothing links them); Skia links FreeType and
       # Fontconfig, and needs a font to answer for the default family.
       - name: System packages
@@ -1140,405 +1002,3 @@ jobs:
             xrandr --setmonitor FERRO-B 640/169x1024/271+640+0 none
             xrandr --listmonitors
             timeout 300 target/debug/examples/x11_window --smoke --expect-screens=2 --skip=clipboard'
-
-  # The Wayland platform (docs/porting/wayland-platform.md, section 11): the tests of the crate, and
-  # a window on a compositor. The compositor is sway on the headless backend of wlroots with its
-  # software renderer (scripts/wayland/sway-run.sh). The example asks the compositor what it knows
-  # of the window and of the outputs (its IPC), and is its own test client on a second connection:
-  # it reads the composed output (screen copy) and synthesizes pointer and keyboard input (the
-  # virtual pointer and virtual keyboard protocols). Rendered through wl_shm buffers and through
-  # EGL (Mesa's software rasterizer), on an output of scale 1 and of scale 2. Not covered: a
-  # desktop compositor (Mutter, KWin), a hardware GPU, touch, a compositor restart.
-  wayland:
-    if: (github.event.action != 'edited' || github.event.changes.base != null)
-    name: Build and test (Linux, Wayland under headless sway)
-    runs-on: ubuntu-latest
-    timeout-minutes: 90
-    env:
-      CARGO_PROFILE_DEV_DEBUG: 0
-      CARGO_PROFILE_TEST_DEBUG: 0
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
-        with:
-          key: wayland
-      # libwayland-client, libwayland-egl, libEGL and libxkbcommon are opened at run time (nothing
-      # links them); Skia links FreeType and Fontconfig, and needs a font to answer for the default
-      # family. xkb-data has the keymap the virtual keyboard of the example gives the compositor;
-      # wl-clipboard has wl-copy and wl-paste, the other clients of the clipboard phase.
-      - name: System packages
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            sway wl-clipboard libwayland-client0 libwayland-egl1 libxkbcommon0 xkb-data \
-            libegl1 libegl-mesa0 libgl1 libgles2 libgl1-mesa-dri \
-            libfontconfig1-dev libfreetype6-dev fonts-dejavu-core pkg-config
-          sway --version
-      - name: Tests of the Wayland crate (no compositor needed)
-        run: cargo test --locked -p ferroui-wayland --no-fail-fast
-      - name: Build the window example
-        if: ${{ !cancelled() }}
-        run: cargo build --locked -p ferroui-wayland --features example --example wayland_window
-      - name: A window on a compositor, rendered through wl_shm buffers
-        run: |
-          scripts/wayland/sway-run.sh -- \
-            timeout 300 target/debug/examples/wayland_window --smoke
-      - name: The same rendered through EGL
-        if: ${{ !cancelled() }}
-        env:
-          LIBGL_ALWAYS_SOFTWARE: 1
-        run: |
-          scripts/wayland/sway-run.sh -- \
-            timeout 300 target/debug/examples/wayland_window --smoke --mode=egl
-      - name: On an output of scale 2, through wl_shm buffers
-        if: ${{ !cancelled() }}
-        run: |
-          scripts/wayland/sway-run.sh --scale 2 -- \
-            timeout 300 target/debug/examples/wayland_window --smoke --expect-scale=2
-      - name: On an output of scale 2, through EGL
-        if: ${{ !cancelled() }}
-        env:
-          LIBGL_ALWAYS_SOFTWARE: 1
-        run: |
-          scripts/wayland/sway-run.sh --scale 2 -- \
-            timeout 300 target/debug/examples/wayland_window --smoke --mode=egl --expect-scale=2
-      # Fractional scaling: the compositor announces the scale through wp_fractional_scale_v1 and
-      # the buffer is mapped to the logical size through wp_viewport. The mode of the output is one
-      # that 1.5 divides; the resize phase, whose mode it does not divide, is left out.
-      - name: On an output of scale 1.5, through wl_shm buffers
-        if: ${{ !cancelled() }}
-        run: |
-          scripts/wayland/sway-run.sh --size 1200x720 --scale 1.5 -- \
-            timeout 300 target/debug/examples/wayland_window --smoke --expect-scale=1.5 --skip=resize
-      - name: On an output of scale 1.5, through EGL
-        if: ${{ !cancelled() }}
-        env:
-          LIBGL_ALWAYS_SOFTWARE: 1
-        run: |
-          scripts/wayland/sway-run.sh --size 1200x720 --scale 1.5 -- \
-            timeout 300 target/debug/examples/wayland_window --smoke --mode=egl --expect-scale=1.5 --skip=resize
-      # The dmabuf swapchain (use_dmabuf_swapchain, stage 3): the backend allocates its buffers with
-      # GBM on the render node of the compositor's main device and hands them over through
-      # zwp_linux_dmabuf_v1. sway on its software renderer has no DRM device and announces no
-      # zwp_linux_dmabuf_v1, so the backend falls back to a wl_egl_window, as the original does: the
-      # step checks that the run says so and that everything renders through the fallback.
-      - name: The dmabuf swapchain asked for, under the software renderer (the fallback)
-        if: ${{ !cancelled() }}
-        env:
-          LIBGL_ALWAYS_SOFTWARE: 1
-        run: |
-          set -o pipefail
-          scripts/wayland/sway-run.sh -- \
-            timeout 300 target/debug/examples/wayland_window --smoke --mode=dmabuf 2>&1 | tee "$RUNNER_TEMP/dmabuf-fallback.log"
-          grep -q "the backend fell back to a wl_egl_window" "$RUNNER_TEMP/dmabuf-fallback.log"
-          grep -q "zwp_linux_dmabuf_v1 (version 4 or later): rendering through a wl_egl_window" "$RUNNER_TEMP/dmabuf-fallback.log"
-      # Where the runner has a DRM render node (or gets one from the module vgem of the extra modules
-      # of its kernel), the compositor is tried on OpenGL ES over it, which is the only way it
-      # announces zwp_linux_dmabuf_v1; then the smoke mode has to render through the swapchain.
-      # Informational: whether Mesa has a driver for the node of the runner is measured here, not
-      # assumed (docs/porting/wayland-platform.md, section 11).
-      - name: The dmabuf swapchain on a render node, where the runner has one
-        if: ${{ !cancelled() }}
-        continue-on-error: true
-        run: |
-          echo "kernel $(uname -r)"
-          ls -l /dev/dri 2>/dev/null || echo "no /dev/dri"
-          if ! ls /dev/dri/renderD* >/dev/null 2>&1; then
-            sudo apt-get install -y --no-install-recommends kmod "linux-modules-extra-$(uname -r)" \
-              || echo "::notice::no linux-modules-extra package for the kernel of the runner"
-            sudo modprobe vgem || echo "::notice::the module vgem could not be loaded"
-            ls -l /dev/dri 2>/dev/null || true
-          fi
-          node="$(ls /dev/dri/renderD* 2>/dev/null | head -n 1)"
-          if [ -z "$node" ]; then
-            echo "::notice::no DRM render node on this runner: the dmabuf swapchain was exercised through its fallback only"
-            exit 0
-          fi
-          sudo chmod a+rw "$node"
-          set +e
-          scripts/wayland/sway-run.sh --renderer gles2 --render-node "$node" -- \
-            timeout 300 target/debug/examples/wayland_window --smoke --mode=dmabuf > "$RUNNER_TEMP/dmabuf-node.log" 2>&1
-          status=$?
-          cat "$RUNNER_TEMP/dmabuf-node.log"
-          if grep -q "the compositor did not start" "$RUNNER_TEMP/dmabuf-node.log"; then
-            echo "::notice::sway cannot render with OpenGL ES on $node (no driver of Mesa for it): the dmabuf swapchain was exercised through its fallback only"
-            exit 0
-          fi
-          grep "Dmabuf swapchain:" "$RUNNER_TEMP/dmabuf-node.log" | sed 's/^/::notice::/'
-          exit $status
-      # The ControlCatalog on the Wayland backend with a combo box and a menu open: the catalog
-      # says where the compositor put each popup, and the step fails when that is not at the
-      # control the popup belongs to. The pictures the compositor took are an artifact.
-      - name: Build the ControlCatalog
-        if: ${{ !cancelled() }}
-        run: |
-          sudo apt-get install -y --no-install-recommends grim
-          cargo build --locked -p control-catalog-desktop
-      - name: The popups of the ControlCatalog are at their controls
-        if: ${{ !cancelled() }}
-        run: |
-          result=0
-          for popup in combobox menu; do
-            case "$popup" in combobox) page=ComboBox ;; menu) page=Menu ;; esac
-            for scale in 1 1.5 2; do
-              FERROUI_SMOKE_SCREENSHOT_PAGES="$page" CATALOG_POPUP="$popup" \
-                scripts/wayland/sway-run.sh --size 1920x1200 --scale "$scale" -- \
-                sh scripts/wayland/catalog-pictures.sh target/debug/control-catalog-desktop "catalog-pictures/scale-$scale" software 4000 || result=1
-            done
-          done
-          exit $result
-      # The TextBox page of the catalog with the test client of the example as the input method of
-      # the seat: the first text box takes the focus, the input method commits a text and leaves a
-      # preedit, and the step fails unless the catalog says the text box has the text.
-      - name: An input method types into a text box of the ControlCatalog
-        if: ${{ !cancelled() }}
-        run: |
-          result=0
-          for scale in 1 1.5; do
-            FERROUI_SMOKE_SCREENSHOT_PAGES=TextBox CATALOG_POPUP=textbox \
-              CATALOG_INPUT_METHOD=target/debug/examples/wayland_window \
-              CATALOG_INPUT_TEXT="typed by an input method: Zażółć gęślą jaźń" CATALOG_INPUT_PREEDIT="ni hao" \
-              scripts/wayland/sway-run.sh --size 1920x1200 --scale "$scale" -- \
-              sh scripts/wayland/catalog-pictures.sh target/debug/control-catalog-desktop "catalog-pictures/scale-$scale" software 10000 || result=1
-          done
-          exit $result
-      # The catalog asks for no backend: like the original it uses Wayland when a compositor can be
-      # reached (and here nothing else can be: there is no X server).
-      - name: The ControlCatalog uses the Wayland backend without being asked
-        if: ${{ !cancelled() }}
-        run: |
-          scripts/wayland/sway-run.sh --size 1280x800 -- sh -c '
-            FERROUI_SMOKE_EXIT_MS=8000 target/debug/control-catalog-desktop & pid=$!
-            sleep 5
-            views="$(swaymsg -t get_tree | grep -c "control-catalog-desktop")"
-            echo "lines of the tree of the compositor that name the catalog: $views"
-            wait $pid; status=$?
-            echo "the catalog ended with $status"
-            test "$views" -ge 1 && test $status -eq 0'
-      - name: Upload the pictures of the catalog
-        if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: wayland-catalog-pictures
-          path: catalog-pictures
-          if-no-files-found: ignore
-      # Without a compositor the backend does not start, and says why.
-      - name: Without a compositor the probe fails with a message
-        if: ${{ !cancelled() }}
-        run: |
-          set +e
-          out="$(env -u WAYLAND_DISPLAY -u WAYLAND_SOCKET XDG_RUNTIME_DIR=/nonexistent timeout 60 target/debug/examples/wayland_window 2>&1)"
-          status=$?
-          echo "$out"
-          test $status -ne 0
-          echo "$out" | grep -q "Unable to connect to Wayland display"
-
-
-  # The smoke mode under a newer sway than the runner has: the container of a distribution whose
-  # sway is 1.10 or later (version 5 or more of xdg_wm_base, so that a popup is moved with
-  # xdg_popup.reposition where sway 1.9 has it created again; popups of an input method, so that
-  # the textinput phase can compare the cursor rectangle at the compositor). Informational: the
-  # phases were written against sway 1.9, and what differs here is a finding, not a failure of the
-  # workflow (docs/porting/wayland-platform.md, section 12.3). The compositor does not run as
-  # root: the run is made by a user of the container.
-  wayland-next:
-    if: (github.event.action != 'edited' || github.event.changes.base != null)
-    name: Informational (Linux, Wayland under the sway of Debian 13)
-    runs-on: ubuntu-latest
-    container: debian:trixie
-    continue-on-error: true
-    timeout-minutes: 90
-    env:
-      CARGO_PROFILE_DEV_DEBUG: 0
-      CARGO_PROFILE_TEST_DEBUG: 0
-    steps:
-      - name: System packages
-        run: |
-          apt-get update
-          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            ca-certificates curl git build-essential pkg-config python3 util-linux \
-            sway wl-clipboard libwayland-client0 libwayland-egl1 libxkbcommon0 xkb-data \
-            libegl1 libegl-mesa0 libgl1 libgles2 libgl1-mesa-dri \
-            libfontconfig1-dev libfreetype-dev fonts-dejavu-core
-          sway --version
-          useradd -m tester
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
-        with:
-          key: wayland-next
-      - name: Build the window example
-        run: cargo build --locked -p ferroui-wayland --features example --example wayland_window
-      - name: A window on a compositor, rendered through wl_shm buffers
-        if: ${{ !cancelled() }}
-        run: |
-          chmod -R a+rX . 2>/dev/null || true
-          runuser -u tester -- scripts/wayland/sway-run.sh -- \
-            timeout 300 target/debug/examples/wayland_window --smoke
-      - name: On an output of scale 1.5, through wl_shm buffers
-        if: ${{ !cancelled() }}
-        run: |
-          runuser -u tester -- scripts/wayland/sway-run.sh --size 1200x720 --scale 1.5 -- \
-            timeout 300 target/debug/examples/wayland_window --smoke --expect-scale=1.5 --skip=resize
-      - name: The same rendered through EGL
-        if: ${{ !cancelled() }}
-        run: |
-          runuser -u tester -- env LIBGL_ALWAYS_SOFTWARE=1 scripts/wayland/sway-run.sh -- \
-            timeout 300 target/debug/examples/wayland_window --smoke --mode=egl
-      # The dmabuf swapchain asked for: the container has no render node, so the backend falls back
-      # to a wl_egl_window and the run says so.
-      - name: The dmabuf swapchain asked for (the fallback)
-        if: ${{ !cancelled() }}
-        run: |
-          runuser -u tester -- env LIBGL_ALWAYS_SOFTWARE=1 scripts/wayland/sway-run.sh -- \
-            timeout 300 target/debug/examples/wayland_window --smoke --mode=dmabuf
-
-
-  # The Linux framebuffer platform (docs/porting/linux-framebuffer-platform.md, section 10). The crate
-  # is developed on a Mac; this job builds and tests it on Linux (the dispatcher's loop on a real event
-  # poll among the tests) and runs the smoke mode of its example: against a plain file as the
-  # framebuffer always, and against the kernel's virtual devices where the runner has them: a virtual
-  # framebuffer (the module vfb, or the framebuffer emulation of vkms) and virtual input devices
-  # (uinput). The step that looks for them says what the kernel of the runner has; what is missing is
-  # skipped with a reason. A real board with a panel and a touch screen is not covered by any of this.
-  linuxfb:
-    if: (github.event.action != 'edited' || github.event.changes.base != null)
-    name: Build and test (Linux framebuffer, virtual devices)
-    runs-on: ubuntu-latest
-    timeout-minutes: 90
-    env:
-      CARGO_PROFILE_DEV_DEBUG: 0
-      CARGO_PROFILE_TEST_DEBUG: 0
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
-        with:
-          key: linuxfb
-      # Skia links FreeType and Fontconfig, and needs a font to answer for the default family.
-      # The DRM output opens libdrm, libgbm and libEGL at run time; Mesa renders on the card of
-      # vkms in software (its kms_swrast driver, in libgl1-mesa-dri).
-      - name: System packages
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            libfontconfig1-dev libfreetype6-dev fonts-dejavu-core pkg-config kmod libinput10 \
-            libdrm2 libgbm1 libegl1 libegl-mesa0 libgl1-mesa-dri
-      - name: Tests of the crate
-        run: cargo test --locked -p ferroui-linuxframebuffer --no-fail-fast
-      - name: Build the example
-        run: cargo build --locked -p ferroui-linuxframebuffer --features example --example linuxfb_smoke
-      # The modules of a virtual framebuffer and of the virtual KMS driver are not part of the base
-      # kernel package of the runner; the package with the extra modules of the running kernel is
-      # asked for, and its absence is not an error.
-      - name: Virtual devices of the runner's kernel
-        run: |
-          echo "kernel $(uname -r)"
-          sudo apt-get install -y --no-install-recommends "linux-modules-extra-$(uname -r)" \
-            || echo "::notice::no linux-modules-extra package for the kernel of the runner"
-          sudo sh scripts/linuxfb/virtual-devices.sh up "$RUNNER_TEMP/linuxfb-devices" | tee "$RUNNER_TEMP/linuxfb-devices.log"
-          . "$RUNNER_TEMP/linuxfb-devices"
-          if [ -n "$FB_NODE" ]; then echo "::notice::virtual framebuffer device: $FB_NODE ($FB_ID)"; else echo "::notice::no virtual framebuffer device on this runner: the output is exercised against a file only"; fi
-          if [ -n "$DRM_CARD" ]; then echo "::notice::virtual card: $DRM_CARD (vkms): the DRM output runs on it"; else echo "::notice::no virtual card on this runner: the DRM output is covered by its host tests only"; fi
-          if [ -n "$UINPUT" ]; then echo "::notice::uinput is available: the evdev backend reads virtual devices"; else echo "::notice::uinput is not available on this runner: the evdev backend is covered by its host tests only"; fi
-      - name: The smoke runs (a file; the virtual framebuffer, the virtual card and virtual input devices where available)
-        run: |
-          sudo sh scripts/linuxfb/smoke.sh target/debug/examples/linuxfb_smoke "$RUNNER_TEMP/linuxfb-smoke" "$RUNNER_TEMP/linuxfb-devices"
-      # The catalog on the virtual framebuffer: the content of the device per page, as pictures
-      # (the memory of the framebuffer device, read from its node).
-      - name: Build the ControlCatalog
-        run: cargo build --locked -p control-catalog-desktop --features mcp,cdp
-      - name: Inspect and drive the headless ControlCatalog over MCP
-        timeout-minutes: 5
-        run: python3 scripts/test-mcp.py
-      - name: The ControlCatalog on the virtual framebuffer
-        run: |
-          . "$RUNNER_TEMP/linuxfb-devices"
-          if [ -z "$FB_NODE" ]; then
-            echo "::notice::no virtual framebuffer device on this runner: the catalog was not run on the framebuffer platform"
-            exit 0
-          fi
-          sudo sh scripts/linuxfb/catalog-pictures.sh target/debug/control-catalog-desktop "$FB_NODE" "$FB_ID" "$RUNNER_TEMP/linuxfb-smoke/catalog"
-      # The catalog on a KMS output of the virtual card, drawn with OpenGL: the framebuffer the CRTC
-      # scans out per page, as pictures.
-      - name: The ControlCatalog on the virtual card (DRM output)
-        run: |
-          . "$RUNNER_TEMP/linuxfb-devices"
-          if [ -z "$DRM_CARD" ]; then
-            echo "::notice::no virtual card on this runner: the catalog was not run on the DRM output"
-            exit 0
-          fi
-          sudo sh scripts/linuxfb/catalog-pictures.sh target/debug/control-catalog-desktop "$DRM_CARD" vkms "$RUNNER_TEMP/linuxfb-smoke/catalog-drm"
-      - name: A frame of the file framebuffer as a picture
-        if: always()
-        run: |
-          sudo python3 scripts/linuxfb/fb-to-png.py "$RUNNER_TEMP/linuxfb-smoke/fb-bgra.raw" "$RUNNER_TEMP/linuxfb-smoke/fb-bgra.png" 640x400 32 bgra || true
-      - name: Unload the virtual devices
-        if: always()
-        run: sudo sh scripts/linuxfb/virtual-devices.sh down "$RUNNER_TEMP/linuxfb-devices" || true
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        if: always()
-        with:
-          name: linuxfb-smoke
-          path: ${{ runner.temp }}/linuxfb-smoke
-          if-no-files-found: ignore
-
-
-  # The Android platform (docs/porting/android-platform.md, section 12): the tests of what is logic,
-  # and the package of the smoke application built without Gradle. Nothing runs on a device here:
-  # the emulator runs are made on the development machine (scripts/android/emu-smoke.sh).
-  android:
-    if: (github.event.action != 'edited' || github.event.changes.base != null)
-    name: Build and package (Android, arm64)
-    runs-on: ubuntu-latest
-    timeout-minutes: 90
-    env:
-      CARGO_PROFILE_DEV_DEBUG: 0
-      CARGO_PROFILE_TEST_DEBUG: 0
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
-        with:
-          key: android
-      - name: Tests of the Android crate (the logic, on the host)
-        run: cargo test --locked -p ferroui-android --no-fail-fast
-      # The thread-local variables of the framework are slots of one table per thread on Android
-      # (android-platform.md, section 5.1); --cfg ferro_tls_table makes the host build use the table,
-      # so the tests of the base crate run against it.
-      - name: Tests of the base crate against the table of thread-local variables
-        run: RUSTFLAGS="--cfg ferro_tls_table" cargo test --locked -p ferroui-base --lib --no-fail-fast
-      # The image has an Android SDK; what it has of it is printed, and the versions the scripts pin
-      # (scripts/android/env.sh) are installed when they are missing.
-      - name: The Android SDK of the image, and the pinned packages
-        run: |
-          echo "ANDROID_HOME=$ANDROID_HOME"
-          ls "$ANDROID_HOME" "$ANDROID_HOME/ndk" "$ANDROID_HOME/build-tools" "$ANDROID_HOME/platforms" || true
-          java -version
-          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$ANDROID_HOME" \
-            "ndk;28.2.13676358" "build-tools;36.0.0" "platforms;android-36" > /dev/null
-          ls "$ANDROID_HOME/ndk"
-      # The native library is built with the stable toolchain: the framework keeps its thread-local
-      # variables in one table per thread (ferro_thread_local!), so the standard library as it is
-      # distributed for the target is enough (android-platform.md, section 5.1).
-      - name: The Rust target
-        run: rustup target add aarch64-linux-android
-      - name: Skia features of the target
-        run: |
-          # Ganesh on OpenGL, for which a Skia binary is published for the target. The scripts do not
-          # set ANDROID_NDK, so a fall-back to building Skia from source stops at once.
-          features="$(cargo tree --locked -p ferroui-skia -e features,normal --target aarch64-linux-android | grep -oE 'skia-bindings feature "(gl|ganesh|graphite|metal|vulkan|d3d)"' | sort -u | tr '\n' ' ')"
-          echo "GPU features: '$features'"
-          test "$features" = 'skia-bindings feature "ganesh" skia-bindings feature "gl" '
-      - name: The package of the smoke application
-        run: |
-          scripts/android/apk.sh smoke | tee apk.out
-          apk="$(sed -n 's/^APK: //p' apk.out)"
-          . scripts/android/env.sh
-          "$FERROUI_ANDROID_BUILD_TOOLS/aapt2" dump badging "$apk" | head -n 12
-          unzip -l "$apk"
-      - name: The ControlCatalog host compiles for the target
-        run: |
-          . scripts/android/env.sh
-          cargo check --locked -p control-catalog-android --target aarch64-linux-android

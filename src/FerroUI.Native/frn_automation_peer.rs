@@ -122,6 +122,19 @@ impl FrnAutomationPeer {
         })
     }
 
+    /// Native accessibility clients can retain peers after their controls are released.
+    /// Keep a live owner for the callback, or report an unavailable element.
+    fn guard_live<R>(&self, default: R, body: impl FnOnce() -> R) -> R {
+        let _owner = match self.inner.cast::<ControlAutomationPeer>() {
+            Some(peer) => match peer.try_owner() {
+                Some(owner) => Some(owner),
+                None => return default,
+            },
+            None => None,
+        };
+        crate::callback_base::guard(default, body)
+    }
+
     /// The node native code set on the wrapper, if any.
     pub(crate) fn node(&self) -> Option<ComPtr<IFrnAutomationNode>> {
         self.node.borrow().clone()
@@ -251,97 +264,97 @@ impl IFrnAutomationPeerImpl for FrnAutomationPeer {
     }
 
     fn get_accelerator_key(&self) -> Option<ComPtr<IFrnString>> {
-        crate::callback_base::guard(None, || to_frn_string(self.inner.get_accelerator_key().as_deref()))
+        self.guard_live(None, || to_frn_string(self.inner.get_accelerator_key().as_deref()))
     }
 
     fn get_access_key(&self) -> Option<ComPtr<IFrnString>> {
-        crate::callback_base::guard(None, || to_frn_string(self.inner.get_access_key().as_deref()))
+        self.guard_live(None, || to_frn_string(self.inner.get_access_key().as_deref()))
     }
 
     fn get_automation_control_type(&self) -> FrnAutomationControlType {
-        crate::callback_base::guard(FrnAutomationControlType::default(), || {
+        self.guard_live(FrnAutomationControlType::default(), || {
             FrnAutomationControlType(self.inner.get_automation_control_type() as i32)
         })
     }
 
     fn get_automation_id(&self) -> Option<ComPtr<IFrnString>> {
-        crate::callback_base::guard(None, || to_frn_string(self.inner.get_automation_id().as_deref()))
+        self.guard_live(None, || to_frn_string(self.inner.get_automation_id().as_deref()))
     }
 
     fn get_bounding_rectangle(&self) -> FrnRect {
-        crate::callback_base::guard(FrnRect { x: 0.0, y: 0.0, width: 0.0, height: 0.0 }, || {
+        self.guard_live(FrnRect { x: 0.0, y: 0.0, width: 0.0, height: 0.0 }, || {
             to_frn_rect(self.inner.get_bounding_rectangle())
         })
     }
 
     fn get_children(&self) -> Option<ComPtr<IFrnAutomationPeerArray>> {
-        crate::callback_base::guard(None, || {
+        self.guard_live(None, || {
             Some(IFrnAutomationPeerArray::from_impl(FrnAutomationPeerArray::new(&self.inner.get_children())))
         })
     }
 
     fn get_class_name(&self) -> Option<ComPtr<IFrnString>> {
-        crate::callback_base::guard(None, || to_frn_string(Some(&self.inner.get_class_name())))
+        self.guard_live(None, || to_frn_string(Some(&self.inner.get_class_name())))
     }
 
     fn get_labeled_by(&self) -> Option<ComPtr<IFrnAutomationPeer>> {
-        crate::callback_base::guard(None, || Self::wrap_native(self.inner.get_labeled_by()))
+        self.guard_live(None, || Self::wrap_native(self.inner.get_labeled_by()))
     }
 
     fn get_name(&self) -> Option<ComPtr<IFrnString>> {
-        crate::callback_base::guard(None, || to_frn_string(Some(&self.inner.get_name())))
+        self.guard_live(None, || to_frn_string(Some(&self.inner.get_name())))
     }
 
     fn get_parent(&self) -> Option<ComPtr<IFrnAutomationPeer>> {
-        crate::callback_base::guard(None, || Self::wrap_native(self.inner.get_parent()))
+        self.guard_live(None, || Self::wrap_native(self.inner.get_parent()))
     }
 
     fn get_templated_parent(&self) -> Option<ComPtr<IFrnAutomationPeer>> {
-        crate::callback_base::guard(None, || {
+        self.guard_live(None, || {
             let peer = self.inner.cast::<ControlAutomationPeer>()?;
-            let templated_parent = peer.owner().templated_parent()?.cast::<Control>()?;
+            let templated_parent = peer.try_owner()?.templated_parent()?.cast::<Control>()?;
             Self::wrap_native(Some(ControlAutomationPeer::create_peer_for_element(&templated_parent)))
         })
     }
 
     fn get_visual_root(&self) -> Option<ComPtr<IFrnAutomationPeer>> {
-        crate::callback_base::guard(None, || Self::wrap_native(self.inner.get_automation_root()))
+        self.guard_live(None, || Self::wrap_native(self.inner.get_automation_root()))
     }
 
     fn has_keyboard_focus(&self) -> bool {
-        crate::callback_base::guard(false, || self.inner.has_keyboard_focus())
+        self.guard_live(false, || self.inner.has_keyboard_focus())
     }
 
     fn is_content_element(&self) -> bool {
-        crate::callback_base::guard(false, || self.inner.is_content_element())
+        self.guard_live(false, || self.inner.is_content_element())
     }
 
     fn is_control_element(&self) -> bool {
-        crate::callback_base::guard(false, || self.inner.is_control_element())
+        self.guard_live(false, || self.inner.is_control_element())
     }
 
     fn is_enabled(&self) -> bool {
-        crate::callback_base::guard(false, || self.inner.is_enabled())
+        self.guard_live(false, || self.inner.is_enabled())
     }
 
     fn is_keyboard_focusable(&self) -> bool {
-        crate::callback_base::guard(false, || self.inner.is_keyboard_focusable())
+        self.guard_live(false, || self.inner.is_keyboard_focusable())
     }
 
     fn set_focus(&self) {
-        crate::callback_base::guard((), || self.inner.set_focus())
+        self.guard_live((), || self.inner.set_focus())
     }
 
     fn show_context_menu(&self) -> bool {
-        crate::callback_base::guard(false, || self.inner.show_context_menu())
+        self.guard_live(false, || self.inner.show_context_menu())
     }
 
     fn bring_into_view(&self) {
-        crate::callback_base::guard((), || self.inner.bring_into_view())
+        self.guard_live((), || self.inner.bring_into_view())
     }
 
     fn get_root_peer(&self) -> Option<ComPtr<IFrnAutomationPeer>> {
-        crate::callback_base::guard(None, || {
+        self.guard_live(None, || {
             let mut peer = self.inner.clone();
             let mut parent = peer.get_parent();
 
@@ -356,11 +369,11 @@ impl IFrnAutomationPeerImpl for FrnAutomationPeer {
     }
 
     fn is_interop_peer(&self) -> bool {
-        crate::callback_base::guard(false, || self.inner.is::<InteropAutomationPeer>())
+        self.guard_live(false, || self.inner.is::<InteropAutomationPeer>())
     }
 
     fn interop_peer_get_native_control_handle(&self) -> *mut c_void {
-        crate::callback_base::guard(std::ptr::null_mut(), || {
+        self.guard_live(std::ptr::null_mut(), || {
             let peer = self
                 .inner
                 .cast::<InteropAutomationPeer>()
@@ -370,50 +383,50 @@ impl IFrnAutomationPeerImpl for FrnAutomationPeer {
     }
 
     fn is_root_provider(&self) -> bool {
-        crate::callback_base::guard(false, || self.is_provider::<dyn IRootProvider>())
+        self.guard_live(false, || self.is_provider::<dyn IRootProvider>())
     }
 
     fn root_provider_get_window(&self) -> Option<ComPtr<IFrnWindowBase>> {
-        crate::callback_base::guard(None, || {
+        self.guard_live(None, || {
             let platform_impl = self.provider::<dyn IRootProvider>().platform_impl()?;
             window_base_native(&*platform_impl)
         })
     }
 
     fn root_provider_get_focus(&self) -> Option<ComPtr<IFrnAutomationPeer>> {
-        crate::callback_base::guard(None, || Self::wrap_native(self.provider::<dyn IRootProvider>().get_focus()))
+        self.guard_live(None, || Self::wrap_native(self.provider::<dyn IRootProvider>().get_focus()))
     }
 
     fn root_provider_get_peer_from_point(&self, point: FrnPoint) -> Option<ComPtr<IFrnAutomationPeer>> {
-        crate::callback_base::guard(None, || {
+        self.guard_live(None, || {
             let result = self.provider::<dyn IRootProvider>().get_peer_from_point(to_ferro_point(point));
             Self::wrap_native(control_element_for_hit_test(result))
         })
     }
 
     fn is_embedded_root_provider(&self) -> bool {
-        crate::callback_base::guard(false, || self.is_provider::<dyn IEmbeddedRootProvider>())
+        self.guard_live(false, || self.is_provider::<dyn IEmbeddedRootProvider>())
     }
 
     fn embedded_root_provider_get_focus(&self) -> Option<ComPtr<IFrnAutomationPeer>> {
-        crate::callback_base::guard(None, || {
+        self.guard_live(None, || {
             Self::wrap_native(self.provider::<dyn IEmbeddedRootProvider>().get_focus())
         })
     }
 
     fn embedded_root_provider_get_peer_from_point(&self, point: FrnPoint) -> Option<ComPtr<IFrnAutomationPeer>> {
-        crate::callback_base::guard(None, || {
+        self.guard_live(None, || {
             let result = self.provider::<dyn IEmbeddedRootProvider>().get_peer_from_point(to_ferro_point(point));
             Self::wrap_native(control_element_for_hit_test(result))
         })
     }
 
     fn is_expand_collapse_provider(&self) -> bool {
-        crate::callback_base::guard(false, || self.is_provider::<dyn IExpandCollapseProvider>())
+        self.guard_live(false, || self.is_provider::<dyn IExpandCollapseProvider>())
     }
 
     fn expand_collapse_provider_get_is_expanded(&self) -> bool {
-        crate::callback_base::guard(false, || {
+        self.guard_live(false, || {
             matches!(
                 self.provider::<dyn IExpandCollapseProvider>().expand_collapse_state(),
                 ExpandCollapseState::Expanded | ExpandCollapseState::PartiallyExpanded
@@ -422,119 +435,119 @@ impl IFrnAutomationPeerImpl for FrnAutomationPeer {
     }
 
     fn expand_collapse_provider_get_shows_menu(&self) -> bool {
-        crate::callback_base::guard(false, || self.provider::<dyn IExpandCollapseProvider>().shows_menu())
+        self.guard_live(false, || self.provider::<dyn IExpandCollapseProvider>().shows_menu())
     }
 
     fn expand_collapse_provider_expand(&self) {
-        crate::callback_base::guard((), || raise_on_error(self.provider::<dyn IExpandCollapseProvider>().expand()))
+        self.guard_live((), || raise_on_error(self.provider::<dyn IExpandCollapseProvider>().expand()))
     }
 
     fn expand_collapse_provider_collapse(&self) {
-        crate::callback_base::guard((), || raise_on_error(self.provider::<dyn IExpandCollapseProvider>().collapse()))
+        self.guard_live((), || raise_on_error(self.provider::<dyn IExpandCollapseProvider>().collapse()))
     }
 
     fn is_invoke_provider(&self) -> bool {
-        crate::callback_base::guard(false, || self.is_provider::<dyn IInvokeProvider>())
+        self.guard_live(false, || self.is_provider::<dyn IInvokeProvider>())
     }
 
     fn invoke_provider_invoke(&self) {
-        crate::callback_base::guard((), || raise_on_error(self.provider::<dyn IInvokeProvider>().invoke()))
+        self.guard_live((), || raise_on_error(self.provider::<dyn IInvokeProvider>().invoke()))
     }
 
     fn is_range_value_provider(&self) -> bool {
-        crate::callback_base::guard(false, || self.is_provider::<dyn IRangeValueProvider>())
+        self.guard_live(false, || self.is_provider::<dyn IRangeValueProvider>())
     }
 
     fn range_value_provider_get_value(&self) -> f64 {
-        crate::callback_base::guard(0.0, || self.provider::<dyn IRangeValueProvider>().value())
+        self.guard_live(0.0, || self.provider::<dyn IRangeValueProvider>().value())
     }
 
     fn range_value_provider_get_minimum(&self) -> f64 {
-        crate::callback_base::guard(0.0, || self.provider::<dyn IRangeValueProvider>().minimum())
+        self.guard_live(0.0, || self.provider::<dyn IRangeValueProvider>().minimum())
     }
 
     fn range_value_provider_get_maximum(&self) -> f64 {
-        crate::callback_base::guard(0.0, || self.provider::<dyn IRangeValueProvider>().maximum())
+        self.guard_live(0.0, || self.provider::<dyn IRangeValueProvider>().maximum())
     }
 
     fn range_value_provider_get_small_change(&self) -> f64 {
-        crate::callback_base::guard(0.0, || self.provider::<dyn IRangeValueProvider>().small_change())
+        self.guard_live(0.0, || self.provider::<dyn IRangeValueProvider>().small_change())
     }
 
     fn range_value_provider_get_large_change(&self) -> f64 {
-        crate::callback_base::guard(0.0, || self.provider::<dyn IRangeValueProvider>().large_change())
+        self.guard_live(0.0, || self.provider::<dyn IRangeValueProvider>().large_change())
     }
 
     fn range_value_provider_set_value(&self, value: f64) {
-        crate::callback_base::guard((), || {
+        self.guard_live((), || {
             raise_on_error(self.provider::<dyn IRangeValueProvider>().set_value(value))
         })
     }
 
     fn range_value_provider_is_read_only(&self) -> bool {
-        crate::callback_base::guard(false, || self.provider::<dyn IRangeValueProvider>().is_read_only())
+        self.guard_live(false, || self.provider::<dyn IRangeValueProvider>().is_read_only())
     }
 
     fn is_selection_item_provider(&self) -> bool {
-        crate::callback_base::guard(false, || self.is_provider::<dyn ISelectionItemProvider>())
+        self.guard_live(false, || self.is_provider::<dyn ISelectionItemProvider>())
     }
 
     fn selection_item_provider_is_selected(&self) -> bool {
-        crate::callback_base::guard(false, || self.provider::<dyn ISelectionItemProvider>().is_selected())
+        self.guard_live(false, || self.provider::<dyn ISelectionItemProvider>().is_selected())
     }
 
     fn selection_item_provider_select(&self) {
-        crate::callback_base::guard((), || raise_on_error(self.provider::<dyn ISelectionItemProvider>().select()))
+        self.guard_live((), || raise_on_error(self.provider::<dyn ISelectionItemProvider>().select()))
     }
 
     fn selection_item_provider_add_to_selection(&self) {
-        crate::callback_base::guard((), || {
+        self.guard_live((), || {
             raise_on_error(self.provider::<dyn ISelectionItemProvider>().add_to_selection())
         })
     }
 
     fn selection_item_provider_remove_from_selection(&self) {
-        crate::callback_base::guard((), || {
+        self.guard_live((), || {
             raise_on_error(self.provider::<dyn ISelectionItemProvider>().remove_from_selection())
         })
     }
 
     fn scroll_provider_get_horizontal_scroll_bar(&self) -> Option<ComPtr<IFrnAutomationPeer>> {
-        crate::callback_base::guard(None, || {
+        self.guard_live(None, || {
             let scroll_viewer = self.inner.cast::<ScrollViewerAutomationPeer>()?;
             Self::wrap_native(scroll_viewer.get_horizontal_scroll_bar_peer())
         })
     }
 
     fn scroll_provider_get_vertical_scroll_bar(&self) -> Option<ComPtr<IFrnAutomationPeer>> {
-        crate::callback_base::guard(None, || {
+        self.guard_live(None, || {
             let scroll_viewer = self.inner.cast::<ScrollViewerAutomationPeer>()?;
             Self::wrap_native(scroll_viewer.get_vertical_scroll_bar_peer())
         })
     }
 
     fn is_toggle_provider(&self) -> bool {
-        crate::callback_base::guard(false, || self.is_provider::<dyn IToggleProvider>())
+        self.guard_live(false, || self.is_provider::<dyn IToggleProvider>())
     }
 
     fn toggle_provider_get_toggle_state(&self) -> i32 {
-        crate::callback_base::guard(0, || self.provider::<dyn IToggleProvider>().toggle_state() as i32)
+        self.guard_live(0, || self.provider::<dyn IToggleProvider>().toggle_state() as i32)
     }
 
     fn toggle_provider_toggle(&self) {
-        crate::callback_base::guard((), || raise_on_error(self.provider::<dyn IToggleProvider>().toggle()))
+        self.guard_live((), || raise_on_error(self.provider::<dyn IToggleProvider>().toggle()))
     }
 
     fn is_value_provider(&self) -> bool {
-        crate::callback_base::guard(false, || self.is_provider::<dyn IValueProvider>())
+        self.guard_live(false, || self.is_provider::<dyn IValueProvider>())
     }
 
     fn value_provider_get_value(&self) -> Option<ComPtr<IFrnString>> {
-        crate::callback_base::guard(None, || to_frn_string(self.provider::<dyn IValueProvider>().value().as_deref()))
+        self.guard_live(None, || to_frn_string(self.provider::<dyn IValueProvider>().value().as_deref()))
     }
 
     fn value_provider_set_value(&self, value: Option<&CStr>) {
-        crate::callback_base::guard((), || {
+        self.guard_live((), || {
             let value = value.map(|value| value.to_string_lossy().into_owned());
             if let Err(e) = self.provider::<dyn IValueProvider>().set_value(value.as_deref()) {
                 // The value provider reports any error its setter throws in the reference.
@@ -544,29 +557,29 @@ impl IFrnAutomationPeerImpl for FrnAutomationPeer {
     }
 
     fn value_provider_is_read_only(&self) -> bool {
-        crate::callback_base::guard(false, || self.provider::<dyn IValueProvider>().is_read_only())
+        self.guard_live(false, || self.provider::<dyn IValueProvider>().is_read_only())
     }
 
     fn get_help_text(&self) -> Option<ComPtr<IFrnString>> {
-        crate::callback_base::guard(None, || to_frn_string(Some(&self.inner.get_help_text())))
+        self.guard_live(None, || to_frn_string(Some(&self.inner.get_help_text())))
     }
 
     fn get_placeholder_text(&self) -> Option<ComPtr<IFrnString>> {
-        crate::callback_base::guard(None, || to_frn_string(Some(&self.inner.get_placeholder_text())))
+        self.guard_live(None, || to_frn_string(Some(&self.inner.get_placeholder_text())))
     }
 
     fn get_landmark_type(&self) -> FrnLandmarkType {
-        crate::callback_base::guard(FrnLandmarkType::LandmarkNone, || {
+        self.guard_live(FrnLandmarkType::LandmarkNone, || {
             self.inner.get_landmark_type().map_or(FrnLandmarkType::LandmarkNone, |t| FrnLandmarkType(t as i32))
         })
     }
 
     fn get_heading_level(&self) -> i32 {
-        crate::callback_base::guard(0, || self.inner.get_heading_level())
+        self.guard_live(0, || self.inner.get_heading_level())
     }
 
     fn get_live_setting(&self) -> FrnLiveSetting {
-        crate::callback_base::guard(FrnLiveSetting::default(), || FrnLiveSetting(self.inner.get_live_setting() as i32))
+        self.guard_live(FrnLiveSetting::default(), || FrnLiveSetting(self.inner.get_live_setting() as i32))
     }
 }
 
@@ -600,6 +613,29 @@ impl IFrnAutomationPeerArrayImpl for FrnAutomationPeerArray {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn released_control_peers_are_unavailable_without_running_callbacks() {
+        let button = Button::new();
+        let weak = button.downgrade();
+        let peer = FrnAutomationPeer::wrap(Some(ControlAutomationPeer::create_peer_for_element(&button)))
+            .expect("native wrapper");
+        assert!(peer.guard_live(false, || true));
+        drop(button);
+        assert!(weak.upgrade().is_none(), "the native wrapper must not retain a removed control");
+        let called = std::cell::Cell::new(false);
+        assert!(!peer.guard_live(false, || { called.set(true); true }));
+        assert!(!called.get());
+        assert!(peer.get_name().is_none());
+        assert!(peer.get_children().is_none());
+        assert!(peer.get_parent().is_none());
+        assert!(!peer.is_control_element());
+        assert!(!peer.is_enabled());
+        assert!(!peer.is_invoke_provider());
+        peer.set_focus();
+        peer.bring_into_view();
+    }
+
     use crate::frn_string::frn_string_to_string;
     use ferroui_base::threading::Dispatcher;
     use ferroui_controls::automation::AutomationProperties;

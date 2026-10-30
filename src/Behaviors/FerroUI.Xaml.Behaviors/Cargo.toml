@@ -1,0 +1,61 @@
+[package]
+name = "ferroui-xaml-behaviors"
+description = "The behaviors, triggers and actions of FerroUI in one crate: the object model, the classic interactions, the custom behaviors, events, drag and drop, responsive classes and animations, each behind a feature"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+build = "build.rs"
+# The build script exports the type model of the crate, which names the models of the behavior
+# crates it depends on, so markup compiled by a crate that depends on this one alone finds their
+# types (docs/porting/xaml.md, 9.5.13 and 9.6.3).
+links = "ferroui_xaml_behaviors_xaml"
+
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[features]
+# The crates of the reference's bundle (`Xaml.Behaviors`): everything but ReactiveUI.
+default = ["animations", "interactions", "custom", "events", "draggable", "drag-and-drop", "responsive"]
+animations = ["dep:ferroui-xaml-behaviors-animations"]
+interactions = ["dep:ferroui-xaml-interactions"]
+custom = ["dep:ferroui-xaml-interactions-custom"]
+events = ["dep:ferroui-xaml-interactions-events"]
+draggable = ["dep:ferroui-xaml-interactions-draggable"]
+drag-and-drop = ["dep:ferroui-xaml-interactions-draganddrop"]
+responsive = ["dep:ferroui-xaml-interactions-responsive"]
+# The ReactiveUI routing actions and interaction trigger (a package of its own in the reference).
+reactiveui = ["dep:ferroui-xaml-interactions-reactiveui"]
+# The file system and network actions and triggers of the interactions (not for the browser).
+file-system = ["interactions", "ferroui-xaml-interactions?/file-system"]
+network = ["interactions", "ferroui-xaml-interactions?/network"]
+
+[dependencies]
+ferroui-xaml-interactivity = { workspace = true }
+ferroui-xaml-behaviors-animations = { workspace = true, optional = true }
+ferroui-xaml-interactions = { workspace = true, optional = true }
+ferroui-xaml-interactions-custom = { workspace = true, optional = true }
+ferroui-xaml-interactions-events = { workspace = true, optional = true }
+ferroui-xaml-interactions-draggable = { workspace = true, optional = true }
+ferroui-xaml-interactions-draganddrop = { workspace = true, optional = true }
+ferroui-xaml-interactions-responsive = { workspace = true, optional = true }
+ferroui-xaml-interactions-reactiveui = { workspace = true, optional = true }
+
+[build-dependencies]
+ferroui-build-scan = { workspace = true }
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "controls"
+
+[dev-dependencies]
+ferroui-base = { workspace = true }

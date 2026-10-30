@@ -1,0 +1,616 @@
+<!--
+  macOS 26 control theme, adapted from the FerroUI WinUI template foundation.
+  Foundation: microsoft-ui-xaml 7e4b0c2096be402f51cc8f7d203ebf67cff183d0.
+  Copyright (c) Microsoft Corporation. MIT License; see NOTICE.md.
+  macOS geometry and states are theme calibrations against Apple's WWDC25
+  AppKit design guidance; exact native rendering remains a comparison gate.
+  FerroUI template parts, bindings and routed interaction are preserved.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <StackPanel Spacing="20">
+        <SplitButton Content="Split button" />
+        <SplitButton Content="Disabled" IsEnabled="False" />
+        <ToggleSplitButton Content="Toggle split button" />
+        <ToggleSplitButton Content="Checked" IsChecked="True" />
+        <SplitButton Theme="{StaticResource SplitButtonCommandBarStyle}" Content="Command bar" />
+      </StackPanel>
+    </Border>
+  </Design.PreviewWith>
+
+  <!-- The implicit Button style of the Grid.Resources of the template of SplitButtonStyle. -->
+  <ControlTheme x:Key="SplitButtonInnerButtonStyle" TargetType="Button">
+    <!-- The defaults of a WinUI 3 control, which its style leaves unset and its template binds
+         (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27). -->
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Foreground" Value="{DynamicResource SplitButtonForeground}" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="{DynamicResource SplitButtonBorderThemeThickness}" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontWeight" Value="Normal" />
+    <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border IsHitTestVisible="False" Margin="-3" BorderThickness="3"
+                BorderBrush="{DynamicResource MacOSFocusBrush}"
+                CornerRadius="{DynamicResource MacOSControlCornerRadius}" />
+      </FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid x:Name="RootGrid" Background="Transparent">
+          <ContentPresenter x:Name="PART_ContentPresenter"
+                            Foreground="{TemplateBinding Foreground}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Padding="{TemplateBinding Padding}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                            RecognizesAccessKey="True" />
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- PointerOver and Pressed set only the state of an animated icon in the content. -->
+    <!-- Disabled -->
+    <Style Selector="^:disabled">
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource SplitButtonForegroundDisabled}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+      </Style>
+      <Style Selector="^ /template/ Grid#RootGrid">
+        <Setter Property="Background" Value="{DynamicResource SplitButtonBackgroundDisabled}" />
+      </Style>
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="SplitButtonStyle" TargetType="SplitButton">
+    <!-- The defaults of a WinUI 3 control, which its style leaves unset and its template binds
+         (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27). -->
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Background" Value="{DynamicResource SplitButtonBackground}" />
+    <Setter Property="Foreground" Value="{DynamicResource SplitButtonForeground}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource SplitButtonBorderBrush}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource SplitButtonBorderThemeThickness}" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontWeight" Value="Normal" />
+    <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border IsHitTestVisible="False" Margin="-3" BorderThickness="3"
+                BorderBrush="{DynamicResource MacOSFocusBrush}"
+                CornerRadius="{DynamicResource MacOSControlCornerRadius}" />
+      </FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="IsTabStop" Value="True" />
+    <Setter Property="Focusable" Value="True" />
+    <Setter Property="Padding" Value="{DynamicResource MacOSControlPadding}" />
+    <Setter Property="MinHeight" Value="{DynamicResource MacOSControlHeight}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource MacOSControlCornerRadius}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="RootGrid"
+                Background="Transparent"
+                CornerRadius="{TemplateBinding CornerRadius}"
+                ClipToBounds="True">
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <!-- PrimaryButtonColumn (MinWidth SplitButtonPrimaryButtonSize), Separator,
+                   SecondaryButtonColumn (Width SplitButtonSecondaryButtonSize). -->
+              <ColumnDefinition Width="*" MinWidth="35" />
+              <ColumnDefinition Width="1" />
+              <ColumnDefinition Width="24" />
+            </Grid.ColumnDefinitions>
+            <Grid x:Name="PrimaryBackgroundGrid"
+                  Grid.ColumnSpan="2"
+                  Background="{Binding #PART_PrimaryButton.Background}" />
+            <Grid x:Name="DividerBackgroundGrid"
+                  Grid.Column="1"
+                  Width="1"
+                  Background="{DynamicResource SplitButtonBorderBrushDivider}" />
+            <Grid x:Name="SecondaryBackgroundGrid"
+                  Grid.Column="2"
+                  Background="{Binding #PART_SecondaryButton.Background}" />
+            <Button x:Name="PART_PrimaryButton"
+                    Grid.Column="0"
+                    Theme="{StaticResource SplitButtonInnerButtonStyle}"
+                    Foreground="{TemplateBinding Foreground}"
+                    Background="{TemplateBinding Background}"
+                    BorderThickness="0"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    Content="{TemplateBinding Content}"
+                    ContentTemplate="{TemplateBinding ContentTemplate}"
+                    Command="{TemplateBinding Command}"
+                    CommandParameter="{TemplateBinding CommandParameter}"
+                    FontFamily="{TemplateBinding FontFamily}"
+                    FontSize="{TemplateBinding FontSize}"
+                    FontWeight="{TemplateBinding FontWeight}"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                    VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                    Padding="{TemplateBinding Padding}"
+                    IsTabStop="False"
+                    Focusable="False" />
+            <Button x:Name="PART_SecondaryButton"
+                    Grid.Column="2"
+                    Theme="{StaticResource SplitButtonInnerButtonStyle}"
+                    Foreground="{DynamicResource SplitButtonForegroundSecondary}"
+                    Background="{TemplateBinding Background}"
+                    BorderThickness="0"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    HorizontalContentAlignment="Stretch"
+                    VerticalContentAlignment="Stretch"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Padding="0,0,6,0"
+                    IsTabStop="False"
+                    Focusable="False">
+              <!-- The AnimatedIcon (12 x 12) with its fallback glyph E96E at 8 px. -->
+              <Grid Width="12"
+                    Height="12"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Right">
+                <Path Data="{StaticResource GlyphGeometryE96E}"
+                      Fill="{Binding $parent[Button].Foreground}"
+                      Stretch="Uniform"
+                      Width="8"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Center" />
+              </Grid>
+            </Button>
+            <Border x:Name="PrimaryButtonBorder"
+                    Grid.Column="0"
+                    BorderBrush="{Binding #PART_PrimaryButton.BorderBrush}"
+                    BorderThickness="1,1,0,1"
+                    CornerRadius="{TemplateBinding CornerRadius, Converter={StaticResource LeftCornerRadiusFilterConverter}}" />
+            <Border x:Name="SecondaryButtonBorder"
+                    Grid.Column="2"
+                    BorderBrush="{Binding #PART_SecondaryButton.BorderBrush}"
+                    BorderThickness="0,1,1,1"
+                    CornerRadius="{TemplateBinding CornerRadius, Converter={StaticResource RightCornerRadiusFilterConverter}}" />
+          </Grid>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- The values PrimaryPointerOver, PrimaryPressed, SecondaryPointerOver and SecondaryPressed
+         give the half that is not under the pointer. -->
+    <Style Selector="^:pointerover">
+      <Style Selector="^ /template/ Button#PART_PrimaryButton">
+        <Setter Property="Background" Value="{DynamicResource SplitButtonBackground}" />
+      </Style>
+      <Style Selector="^ /template/ Button#PART_SecondaryButton">
+        <Setter Property="Background" Value="{DynamicResource SplitButtonBackground}" />
+      </Style>
+    </Style>
+    <!-- PrimaryPointerOver -->
+    <Style Selector="^ /template/ Button#PART_PrimaryButton:pointerover">
+      <Setter Property="Background" Value="{DynamicResource SplitButtonBackgroundPointerOver}" />
+      <Setter Property="Foreground" Value="{DynamicResource SplitButtonForegroundPointerOver}" />
+    </Style>
+    <!-- PrimaryPressed -->
+    <Style Selector="^ /template/ Button#PART_PrimaryButton:pressed">
+      <Setter Property="Background" Value="{DynamicResource SplitButtonBackgroundPressed}" />
+      <Setter Property="Foreground" Value="{DynamicResource SplitButtonForegroundPressed}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource SplitButtonBorderBrushPressed}" />
+    </Style>
+    <!-- SecondaryPointerOver (its setter of SecondaryButton.BorderBrush, a brush the inner
+         template draws with a thickness of 0, has no effect in WinUI and is left out) -->
+    <Style Selector="^ /template/ Button#PART_SecondaryButton:pointerover">
+      <Setter Property="Background" Value="{DynamicResource SplitButtonBackgroundPointerOver}" />
+      <Setter Property="Foreground" Value="{DynamicResource SplitButtonForegroundPointerOver}" />
+    </Style>
+    <!-- SecondaryPressed -->
+    <Style Selector="^ /template/ Button#PART_SecondaryButton:pressed">
+      <Setter Property="Background" Value="{DynamicResource SplitButtonBackgroundPressed}" />
+      <Setter Property="Foreground" Value="{DynamicResource SplitButtonForegroundSecondaryPressed}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource SplitButtonBorderBrushPressed}" />
+    </Style>
+    <!-- TouchPressed, with SecondaryButtonSpan of SecondaryButtonPlacementStates -->
+    <Style Selector="^:pressed">
+      <Style Selector="^ /template/ Button#PART_PrimaryButton">
+        <Setter Property="Background" Value="{DynamicResource SplitButtonBackgroundPressed}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SplitButtonBorderBrushPressed}" />
+        <Setter Property="Foreground" Value="{DynamicResource SplitButtonForegroundPressed}" />
+      </Style>
+      <Style Selector="^ /template/ Button#PART_SecondaryButton">
+        <Setter Property="Background" Value="{DynamicResource SplitButtonBackgroundPressed}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SplitButtonBorderBrushPressed}" />
+        <Setter Property="Foreground" Value="{DynamicResource SplitButtonForegroundSecondaryPressed}" />
+        <Setter Property="Grid.Column" Value="0" />
+        <Setter Property="Grid.ColumnSpan" Value="3" />
+      </Style>
+    </Style>
+    <!-- FlyoutOpen -->
+    <Style Selector="^:flyout-open">
+      <Style Selector="^ /template/ Button#PART_PrimaryButton">
+        <Setter Property="Background" Value="{DynamicResource SplitButtonBackgroundPressed}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SplitButtonBorderBrushPressed}" />
+        <Setter Property="Foreground" Value="{DynamicResource SplitButtonForegroundPressed}" />
+      </Style>
+      <Style Selector="^ /template/ Button#PART_SecondaryButton">
+        <Setter Property="Background" Value="{DynamicResource SplitButtonBackgroundPressed}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SplitButtonBorderBrushPressed}" />
+        <Setter Property="Foreground" Value="{DynamicResource SplitButtonForegroundSecondaryPressed}" />
+      </Style>
+    </Style>
+    <!-- Checked -->
+    <Style Selector="^:checked">
+      <Style Selector="^ /template/ Button#PART_PrimaryButton">
+        <Setter Property="Background" Value="{DynamicResource SplitButtonBackgroundChecked}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SplitButtonBorderBrushChecked}" />
+        <Setter Property="Foreground" Value="{DynamicResource SplitButtonForegroundChecked}" />
+      </Style>
+      <Style Selector="^ /template/ Button#PART_SecondaryButton">
+        <Setter Property="Background" Value="{DynamicResource SplitButtonBackgroundChecked}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SplitButtonBorderBrushChecked}" />
+        <Setter Property="Foreground" Value="{DynamicResource SplitButtonForegroundChecked}" />
+      </Style>
+      <Style Selector="^ /template/ Grid#DividerBackgroundGrid">
+        <Setter Property="Background" Value="{DynamicResource SplitButtonBorderBrushCheckedDivider}" />
+      </Style>
+    </Style>
+    <!-- CheckedPrimaryPointerOver -->
+    <Style Selector="^:checked /template/ Button#PART_PrimaryButton:pointerover">
+      <Setter Property="Background" Value="{DynamicResource SplitButtonBackgroundCheckedPointerOver}" />
+      <Setter Property="Foreground" Value="{DynamicResource SplitButtonForegroundCheckedPointerOver}" />
+    </Style>
+    <!-- CheckedPrimaryPressed -->
+    <Style Selector="^:checked /template/ Button#PART_PrimaryButton:pressed">
+      <Setter Property="Background" Value="{DynamicResource SplitButtonBackgroundCheckedPressed}" />
+      <Setter Property="Foreground" Value="{DynamicResource SplitButtonForegroundCheckedPressed}" />
+    </Style>
+    <!-- CheckedSecondaryPointerOver -->
+    <Style Selector="^:checked /template/ Button#PART_SecondaryButton:pointerover">
+      <Setter Property="Background" Value="{DynamicResource SplitButtonBackgroundCheckedPointerOver}" />
+      <Setter Property="Foreground" Value="{DynamicResource SplitButtonForegroundCheckedPointerOver}" />
+    </Style>
+    <!-- CheckedSecondaryPressed -->
+    <Style Selector="^:checked /template/ Button#PART_SecondaryButton:pressed">
+      <Setter Property="Background" Value="{DynamicResource SplitButtonBackgroundCheckedPressed}" />
+      <Setter Property="Foreground" Value="{DynamicResource SplitButtonForegroundCheckedPressed}" />
+    </Style>
+    <!-- CheckedTouchPressed -->
+    <Style Selector="^:checked:pressed">
+      <Style Selector="^ /template/ Button#PART_PrimaryButton">
+        <Setter Property="Background" Value="{DynamicResource SplitButtonBackgroundCheckedPressed}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SplitButtonBorderBrushCheckedPressed}" />
+        <Setter Property="Foreground" Value="{DynamicResource SplitButtonForegroundCheckedPressed}" />
+      </Style>
+      <Style Selector="^ /template/ Button#PART_SecondaryButton">
+        <Setter Property="Background" Value="{DynamicResource SplitButtonBackgroundCheckedPressed}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SplitButtonBorderBrushCheckedPressed}" />
+        <Setter Property="Foreground" Value="{DynamicResource SplitButtonForegroundCheckedPressed}" />
+      </Style>
+    </Style>
+    <!-- CheckedFlyoutOpen -->
+    <Style Selector="^:checked:flyout-open">
+      <Style Selector="^ /template/ Button#PART_PrimaryButton">
+        <Setter Property="Background" Value="{DynamicResource SplitButtonBackgroundCheckedPressed}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SplitButtonBorderBrushCheckedPressed}" />
+        <Setter Property="Foreground" Value="{DynamicResource SplitButtonForegroundCheckedPressed}" />
+      </Style>
+      <Style Selector="^ /template/ Button#PART_SecondaryButton">
+        <Setter Property="Background" Value="{DynamicResource SplitButtonBackgroundCheckedPressed}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SplitButtonBorderBrushCheckedPressed}" />
+        <Setter Property="Foreground" Value="{DynamicResource SplitButtonForegroundCheckedPressed}" />
+      </Style>
+    </Style>
+    <!-- Disabled (the state replaces every other state of the group) -->
+    <Style Selector="^:disabled">
+      <Style Selector="^ /template/ Button#PART_PrimaryButton">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SplitButtonBorderBrushDisabled}" />
+        <Setter Property="Foreground" Value="{DynamicResource SplitButtonForegroundDisabled}" />
+      </Style>
+      <Style Selector="^ /template/ Button#PART_SecondaryButton">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SplitButtonBorderBrushDisabled}" />
+        <Setter Property="Foreground" Value="{DynamicResource SplitButtonForegroundDisabled}" />
+      </Style>
+      <Style Selector="^ /template/ Grid#DividerBackgroundGrid">
+        <Setter Property="Background" Value="{DynamicResource SplitButtonBorderBrushDivider}" />
+      </Style>
+      <Style Selector="^ /template/ Border#RootGrid">
+        <Setter Property="Background" Value="Transparent" />
+      </Style>
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type SplitButton}" TargetType="SplitButton" BasedOn="{StaticResource SplitButtonStyle}" />
+
+  <!-- The implicit Button style of the Grid.Resources of the template of
+       SplitButtonCommandBarStyle. -->
+  <ControlTheme x:Key="SplitButtonCommandBarInnerButtonStyle" TargetType="Button">
+    <Setter Property="Foreground" Value="{DynamicResource AppBarButtonForeground}" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontWeight" Value="Normal" />
+    <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border IsHitTestVisible="False" Margin="-3" BorderThickness="3"
+                BorderBrush="{DynamicResource MacOSFocusBrush}"
+                CornerRadius="{DynamicResource MacOSControlCornerRadius}" />
+      </FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid x:Name="RootGrid" Background="Transparent">
+          <ContentPresenter x:Name="PART_ContentPresenter"
+                            Foreground="{TemplateBinding Foreground}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Padding="{TemplateBinding Padding}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                            RecognizesAccessKey="True" />
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- Disabled -->
+    <Style Selector="^:disabled">
+      <Setter Property="Foreground" Value="{DynamicResource AppBarButtonForegroundDisabled}" />
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource AppBarButtonForegroundDisabled}" />
+      </Style>
+      <Style Selector="^ /template/ Grid#RootGrid">
+        <Setter Property="Background" Value="{DynamicResource AppBarButtonBackgroundDisabled}" />
+      </Style>
+    </Style>
+  </ControlTheme>
+
+  <!-- WinUI applies the default style beneath a keyed style; this theme is not based on
+       SplitButtonStyle, whose state styles select the same element names, and writes out the
+       setter of SplitButtonStyle it does not override (BorderThickness). -->
+  <ControlTheme x:Key="SplitButtonCommandBarStyle" TargetType="SplitButton">
+    <!-- The defaults of a WinUI 3 control, which its style leaves unset and its template binds
+         (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27). -->
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Background" Value="{DynamicResource AppBarButtonBackground}" />
+    <Setter Property="Foreground" Value="{DynamicResource AppBarButtonForeground}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource AppBarButtonBorderBrush}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource SplitButtonBorderThemeThickness}" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="VerticalAlignment" Value="Top" />
+    <Setter Property="HorizontalContentAlignment" Value="Right" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontWeight" Value="Normal" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border IsHitTestVisible="False" Margin="-3" BorderThickness="3"
+                BorderBrush="{DynamicResource MacOSFocusBrush}"
+                CornerRadius="{DynamicResource MacOSControlCornerRadius}" />
+      </FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="IsTabStop" Value="True" />
+    <Setter Property="Focusable" Value="True" />
+    <Setter Property="Padding" Value="12,8,4,8" />
+    <Setter Property="MinHeight" Value="{DynamicResource AppBarThemeCompactHeight}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource MacOSControlCornerRadius}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="RootGrid"
+                Background="Transparent"
+                Padding="{DynamicResource AppBarButtonInnerBorderMargin}">
+          <Grid ColumnDefinitions="*,23">
+            <!-- The corner radii of the backgrounds are ControlCornerRadius through the filters
+                 in WinUI; the CornerRadius of the control, which this theme sets to it, here. -->
+            <Border x:Name="PrimaryBackgroundGrid"
+                    Background="{Binding #PART_PrimaryButton.Background}"
+                    CornerRadius="{TemplateBinding CornerRadius, Converter={StaticResource LeftCornerRadiusFilterConverter}}" />
+            <Border x:Name="SecondaryBackgroundGrid"
+                    Grid.Column="1"
+                    Background="{Binding #PART_SecondaryButton.Background}"
+                    CornerRadius="{TemplateBinding CornerRadius, Converter={StaticResource RightCornerRadiusFilterConverter}}" />
+            <Border x:Name="Border"
+                    Grid.ColumnSpan="2"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="{TemplateBinding CornerRadius}" />
+            <Button x:Name="PART_PrimaryButton"
+                    Grid.Column="0"
+                    Theme="{StaticResource SplitButtonCommandBarInnerButtonStyle}"
+                    Foreground="{TemplateBinding Foreground}"
+                    Background="{TemplateBinding Background}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    BorderBrush="Transparent"
+                    Content="{TemplateBinding Content}"
+                    ContentTemplate="{TemplateBinding ContentTemplate}"
+                    Command="{TemplateBinding Command}"
+                    CommandParameter="{TemplateBinding CommandParameter}"
+                    FontFamily="{TemplateBinding FontFamily}"
+                    FontSize="{TemplateBinding FontSize}"
+                    FontWeight="{TemplateBinding FontWeight}"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                    VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                    Padding="{TemplateBinding Padding}"
+                    IsTabStop="False"
+                    Focusable="False" />
+            <Button x:Name="PART_SecondaryButton"
+                    Grid.Column="1"
+                    Theme="{StaticResource SplitButtonCommandBarInnerButtonStyle}"
+                    Foreground="{DynamicResource AppBarButtonForeground}"
+                    Background="{TemplateBinding Background}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    BorderBrush="Transparent"
+                    HorizontalContentAlignment="Stretch"
+                    VerticalContentAlignment="Stretch"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Padding="2,0,8,0"
+                    IsTabStop="False"
+                    Focusable="False">
+              <!-- The TextBlock of the glyph E972 at 8 px with Padding="2,1,2,0". -->
+              <Path Data="{StaticResource GlyphGeometryE972}"
+                    Fill="{Binding $parent[Button].Foreground}"
+                    Stretch="Uniform"
+                    Width="8"
+                    Margin="2,1,2,0"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Right" />
+            </Button>
+          </Grid>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- The values PrimaryPointerOver, PrimaryPressed, SecondaryPointerOver and SecondaryPressed
+         give the half that is not under the pointer. -->
+    <Style Selector="^:pointerover">
+      <Style Selector="^ /template/ Button#PART_PrimaryButton">
+        <Setter Property="Background" Value="{DynamicResource SplitButtonInAppBarUnfocusedPointerOver}" />
+      </Style>
+      <Style Selector="^ /template/ Button#PART_SecondaryButton">
+        <Setter Property="Background" Value="{DynamicResource SplitButtonInAppBarUnfocusedPointerOver}" />
+      </Style>
+    </Style>
+    <!-- PrimaryPointerOver -->
+    <Style Selector="^ /template/ Button#PART_PrimaryButton:pointerover">
+      <Setter Property="Background" Value="{DynamicResource AppBarButtonBackgroundPointerOver}" />
+      <Setter Property="Foreground" Value="{DynamicResource AppBarButtonForegroundPointerOver}" />
+    </Style>
+    <!-- PrimaryPressed -->
+    <Style Selector="^ /template/ Button#PART_PrimaryButton:pressed">
+      <Setter Property="Background" Value="{DynamicResource AppBarButtonBackgroundPressed}" />
+      <Setter Property="Foreground" Value="{DynamicResource AppBarButtonForegroundPressed}" />
+    </Style>
+    <!-- SecondaryPointerOver -->
+    <Style Selector="^ /template/ Button#PART_SecondaryButton:pointerover">
+      <Setter Property="Background" Value="{DynamicResource AppBarButtonBackgroundPointerOver}" />
+      <Setter Property="Foreground" Value="{DynamicResource AppBarButtonForeground}" />
+    </Style>
+    <!-- SecondaryPressed -->
+    <Style Selector="^ /template/ Button#PART_SecondaryButton:pressed">
+      <Setter Property="Background" Value="{DynamicResource AppBarButtonBackgroundPressed}" />
+      <Setter Property="Foreground" Value="{DynamicResource AppBarButtonForegroundPressed}" />
+    </Style>
+    <!-- TouchPressed, with SecondaryButtonSpan of SecondaryButtonPlacementStates -->
+    <Style Selector="^:pressed">
+      <Style Selector="^ /template/ Button#PART_PrimaryButton">
+        <Setter Property="Background" Value="{DynamicResource AppBarButtonBackgroundPressed}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppBarButtonForegroundPressed}" />
+      </Style>
+      <Style Selector="^ /template/ Button#PART_SecondaryButton">
+        <Setter Property="Background" Value="{DynamicResource AppBarButtonBackgroundPressed}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppBarButtonForegroundPressed}" />
+        <Setter Property="Grid.Column" Value="0" />
+        <Setter Property="Grid.ColumnSpan" Value="3" />
+      </Style>
+      <Style Selector="^ /template/ Border#Border">
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBarButtonBorderBrushPressed}" />
+      </Style>
+    </Style>
+    <!-- FlyoutOpen -->
+    <Style Selector="^:flyout-open">
+      <Style Selector="^ /template/ Button#PART_PrimaryButton">
+        <Setter Property="Background" Value="{DynamicResource AppBarButtonBackgroundPressed}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppBarButtonForegroundPressed}" />
+      </Style>
+      <Style Selector="^ /template/ Button#PART_SecondaryButton">
+        <Setter Property="Background" Value="{DynamicResource AppBarButtonBackgroundPressed}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppBarButtonForegroundPressed}" />
+      </Style>
+      <Style Selector="^ /template/ Border#Border">
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBarButtonBorderBrushPressed}" />
+      </Style>
+    </Style>
+    <!-- Checked -->
+    <Style Selector="^:checked">
+      <Style Selector="^ /template/ Button#PART_PrimaryButton">
+        <Setter Property="Background" Value="{DynamicResource AppBarToggleButtonBackgroundChecked}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonForegroundChecked}" />
+      </Style>
+      <Style Selector="^ /template/ Button#PART_SecondaryButton">
+        <Setter Property="Background" Value="{DynamicResource AppBarToggleButtonBackgroundChecked}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonForegroundChecked}" />
+      </Style>
+      <Style Selector="^ /template/ Border#Border">
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBarToggleButtonBorderBrushChecked}" />
+      </Style>
+    </Style>
+    <!-- CheckedPrimaryPointerOver -->
+    <Style Selector="^:checked /template/ Button#PART_PrimaryButton:pointerover">
+      <Setter Property="Background" Value="{DynamicResource AppBarToggleButtonBackgroundCheckedPointerOver}" />
+      <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonForegroundCheckedPointerOver}" />
+    </Style>
+    <!-- CheckedPrimaryPressed -->
+    <Style Selector="^:checked /template/ Button#PART_PrimaryButton:pressed">
+      <Setter Property="Background" Value="{DynamicResource AppBarToggleButtonBackgroundCheckedPressed}" />
+      <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonForegroundCheckedPressed}" />
+    </Style>
+    <!-- CheckedSecondaryPointerOver -->
+    <Style Selector="^:checked /template/ Button#PART_SecondaryButton:pointerover">
+      <Setter Property="Background" Value="{DynamicResource AppBarToggleButtonBackgroundCheckedPointerOver}" />
+      <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonForegroundCheckedPointerOver}" />
+    </Style>
+    <!-- CheckedSecondaryPressed -->
+    <Style Selector="^:checked /template/ Button#PART_SecondaryButton:pressed">
+      <Setter Property="Background" Value="{DynamicResource AppBarToggleButtonBackgroundCheckedPressed}" />
+      <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonForegroundCheckedPressed}" />
+    </Style>
+    <!-- CheckedTouchPressed -->
+    <Style Selector="^:checked:pressed">
+      <Style Selector="^ /template/ Button#PART_PrimaryButton">
+        <Setter Property="Background" Value="{DynamicResource AppBarToggleButtonBackgroundCheckedPressed}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonForegroundCheckedPressed}" />
+      </Style>
+      <Style Selector="^ /template/ Button#PART_SecondaryButton">
+        <Setter Property="Background" Value="{DynamicResource AppBarToggleButtonBackgroundCheckedPressed}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonForegroundCheckedPressed}" />
+      </Style>
+      <Style Selector="^ /template/ Border#Border">
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBarToggleButtonBorderBrushCheckedPressed}" />
+      </Style>
+    </Style>
+    <!-- CheckedFlyoutOpen -->
+    <Style Selector="^:checked:flyout-open">
+      <Style Selector="^ /template/ Button#PART_PrimaryButton">
+        <Setter Property="Background" Value="{DynamicResource AppBarToggleButtonBackgroundCheckedPressed}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonForegroundCheckedPressed}" />
+      </Style>
+      <Style Selector="^ /template/ Button#PART_SecondaryButton">
+        <Setter Property="Background" Value="{DynamicResource AppBarToggleButtonBackgroundCheckedPressed}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppBarToggleButtonForegroundCheckedPressed}" />
+      </Style>
+      <Style Selector="^ /template/ Border#Border">
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBarToggleButtonBorderBrushCheckedPressed}" />
+      </Style>
+    </Style>
+    <!-- Disabled (the state replaces every other state of the group) -->
+    <Style Selector="^:disabled">
+      <Style Selector="^ /template/ Button#PART_PrimaryButton">
+        <Setter Property="Background" Value="{TemplateBinding Background}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppBarButtonForegroundDisabled}" />
+      </Style>
+      <Style Selector="^ /template/ Button#PART_SecondaryButton">
+        <Setter Property="Background" Value="{TemplateBinding Background}" />
+        <Setter Property="Foreground" Value="{DynamicResource AppBarButtonForegroundDisabled}" />
+      </Style>
+      <Style Selector="^ /template/ Border#Border">
+        <Setter Property="BorderBrush" Value="{DynamicResource AppBarButtonBorderBrushDisabled}" />
+      </Style>
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

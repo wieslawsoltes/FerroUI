@@ -1,0 +1,130 @@
+<!--
+  macOS 26 control theme, adapted from the FerroUI WinUI template foundation.
+  Foundation: microsoft-ui-xaml 7e4b0c2096be402f51cc8f7d203ebf67cff183d0.
+  Copyright (c) Microsoft Corporation. MIT License; see NOTICE.md.
+  macOS geometry and states are theme calibrations against Apple's WWDC25
+  AppKit design guidance; exact native rendering remains a comparison gate.
+  FerroUI template parts, bindings and routed interaction are preserved.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <StackPanel Spacing="20" Width="220">
+        <ButtonSpinner Content="Right spinner" />
+        <ButtonSpinner ButtonSpinnerLocation="Left" Content="Left spinner" />
+        <ButtonSpinner AllowSpin="False" Content="Spinning not allowed" />
+      </StackPanel>
+    </Border>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="{x:Type ButtonSpinner}" TargetType="ButtonSpinner">
+    <Setter Property="Foreground" Value="{DynamicResource TextControlForeground}" />
+    <Setter Property="Background" Value="{DynamicResource TextControlBackground}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource TextControlBorderThemeThickness}" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
+    <Setter Property="MinHeight" Value="{DynamicResource MacOSControlHeight}" />
+    <Setter Property="MinWidth" Value="{DynamicResource TextControlThemeMinWidth}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource MacOSControlCornerRadius}" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Focusable" Value="True" />
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border IsHitTestVisible="False" Margin="-3" BorderThickness="3"
+                BorderBrush="{DynamicResource MacOSFocusBrush}"
+                CornerRadius="{DynamicResource MacOSControlCornerRadius}" />
+      </FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <!-- The errors of FerroUI's data validation under the box (DataValidationErrors.xaml). -->
+        <DataValidationErrors>
+          <Grid>
+            <Border x:Name="BorderElement"
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="{TemplateBinding CornerRadius}"
+                    BackgroundSizing="InnerBorderEdge"
+                    MinWidth="{TemplateBinding MinWidth}"
+                    MinHeight="{TemplateBinding MinHeight}"
+                    TemplatedControl.IsTemplateFocusTarget="True" />
+            <DockPanel Margin="{TemplateBinding BorderThickness}">
+              <StackPanel x:Name="SpinButtons"
+                          DockPanel.Dock="Right"
+                          Orientation="Vertical"
+                          VerticalAlignment="Center"
+                          Margin="4,2"
+                          IsVisible="{TemplateBinding ShowButtonSpinner}">
+                <RepeatButton x:Name="PART_IncreaseButton"
+                              Theme="{StaticResource NumericUpDownSpinButtonStyle}"
+                              Margin="0"
+                              CornerRadius="4,4,0,0">
+                  <Path Data="{StaticResource GlyphGeometryE70E}"
+                        Fill="{Binding $parent[RepeatButton].Foreground}"
+                        Stretch="Uniform"
+                        Width="6"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center" />
+                </RepeatButton>
+                <RepeatButton x:Name="PART_DecreaseButton"
+                              Theme="{StaticResource NumericUpDownSpinButtonStyle}"
+                              Margin="0"
+                              CornerRadius="0,0,4,4">
+                  <Path Data="{StaticResource GlyphGeometryE70D}"
+                        Fill="{Binding $parent[RepeatButton].Foreground}"
+                        Stretch="Uniform"
+                        Width="6"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center" />
+                </RepeatButton>
+              </StackPanel>
+              <ContentPresenter x:Name="PART_ContentPresenter"
+                                Content="{TemplateBinding Content}"
+                                ContentTemplate="{TemplateBinding ContentTemplate}"
+                                Foreground="{TemplateBinding Foreground}"
+                                Padding="{TemplateBinding Padding}"
+                                HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+            </DockPanel>
+          </Grid>
+        </DataValidationErrors>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- The buttons at the left. -->
+    <Style Selector="^:left /template/ StackPanel#SpinButtons">
+      <Setter Property="DockPanel.Dock" Value="Left" />
+    </Style>
+
+    <!-- The states of BorderElement of DefaultTextBoxStyle: PointerOver -->
+    <Style Selector="^:pointerover /template/ Border#BorderElement">
+      <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrushPointerOver}" />
+      <Setter Property="Background" Value="{DynamicResource TextControlBackgroundPointerOver}" />
+    </Style>
+    <!-- Focused -->
+    <Style Selector="^:focus-within /template/ Border#BorderElement">
+      <Setter Property="Background" Value="{DynamicResource TextControlBackgroundFocused}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrushFocused}" />
+      <Setter Property="BorderThickness" Value="{DynamicResource TextControlBorderThemeThickness}" />
+    </Style>
+    <!-- Disabled -->
+    <Style Selector="^:disabled">
+      <Style Selector="^ /template/ Border#BorderElement">
+        <Setter Property="Background" Value="{DynamicResource TextControlBackgroundDisabled}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrushDisabled}" />
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource TextControlForegroundDisabled}" />
+      </Style>
+    </Style>
+    <!-- Data validation (FerroUI). -->
+    <Style Selector="^:error /template/ Border#BorderElement">
+      <Setter Property="BorderBrush" Value="{DynamicResource SystemFillColorCriticalBrush}" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

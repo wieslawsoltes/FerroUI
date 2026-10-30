@@ -19,8 +19,9 @@ use super::interop::{
 use super::marshalling::{free_bstr, ptr_to_string_bstr, SafeArrayMarshaller, VariantArray, VariantValue};
 use ferroui_base::layout::ILayoutManager;
 use ferroui_base::threading::Dispatcher;
-use ferroui_base::Ref;
+use ferroui_base::{BoxedValue, Ref};
 use ferroui_controls::automation::peers::{AutomationPeer, ControlAutomationPeer};
+use ferroui_controls::automation::RangeValuePatternIdentifiers;
 use ferroui_controls::automation::provider::ToggleState;
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
 use ferroui_controls::{Button, CheckBox, Control, MenuItem, MenuItemToggleType, Slider, StackPanel, TextBox, Window};
@@ -503,7 +504,12 @@ fn the_patterns_a_peer_provides_are_the_ones_a_client_gets() {
     assert_eq!(0.0, range.get_minimum().unwrap());
     assert_eq!(100.0, range.get_maximum().unwrap());
     assert_eq!(0, range.get_is_read_only().unwrap());
-    assert_eq!((1.0, 1.0), (range.get_small_change().unwrap(), range.get_large_change().unwrap()));
+    // Deviation (DEVIATIONS.md, Windows platform backend): the changes of the provider, where the
+    // reference answers one for both.
+    assert_eq!((1.0, 10.0), (range.get_small_change().unwrap(), range.get_large_change().unwrap()));
+    ui.slider.set_small_change(2.5);
+    ui.slider.set_large_change(12.5);
+    assert_eq!((2.5, 12.5), (range.get_small_change().unwrap(), range.get_large_change().unwrap()));
     ui.take_calls();
     range.set_value(60.0).unwrap();
     assert_eq!(60.0, ui.slider.value());
@@ -580,6 +586,23 @@ fn the_events_of_the_peers_are_raised_for_their_nodes() {
     Dispatcher::ui_thread().run_jobs(None);
     assert!(flag(&button, UiaPropertyId::HasKeyboardFocus));
     assert!(ui.take_calls().contains(&format!("event {} AutomationFocusChanged", number(Some(&button)))));
+
+    // The changes of a range value reach the system with their identifiers (DEVIATIONS.md,
+    // Windows platform backend: the two identifiers FerroUI adds after WinUI).
+    let slider = ui.node_of(&ui.slider);
+    let peer: Ref<AutomationPeer> = ControlAutomationPeer::create_peer_for_element(&ui.slider);
+    ui.take_calls();
+    for (identifier, name) in [
+        (RangeValuePatternIdentifiers::small_change_property(), "RangeValueSmallChange"),
+        (RangeValuePatternIdentifiers::large_change_property(), "RangeValueLargeChange"),
+    ] {
+        peer.raise_property_changed_event(identifier, Some(Rc::new(1.0_f64) as BoxedValue), Some(Rc::new(2.0_f64) as BoxedValue));
+        let calls = ui.take_calls();
+        assert!(
+            calls.contains(&format!("property {} {name} Some(R8(1.0)) -> Some(R8(2.0))", number(Some(&slider)))),
+            "the calls: {calls:?}"
+        );
+    }
 }
 
 #[test]
@@ -604,6 +627,32 @@ fn a_node_whose_peer_is_forgotten_answers_that_its_element_is_not_available() {
     assert_ne!(button.as_ptr(), again.as_ptr());
     assert_ne!(number(Some(&button)), number(Some(&again)));
     assert_eq!(Some("Save".to_owned()), text(&again, UiaPropertyId::Name));
+}
+
+// Not in the reference, whose peer holds its control: the peer of a control that is gone is
+// still held (by the children of its parent peer, as when a page is replaced), and a client asks
+// its node for the fragment root, its neighbours, its bounds and its properties.
+#[test]
+fn the_node_of_a_peer_whose_control_is_gone_answers_that_its_element_is_not_available() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let border = ferroui_controls::Border::new();
+    let peer: Ref<AutomationPeer> = ControlAutomationPeer::create_peer_for_element(&border);
+    let node = AutomationNode::get_or_create(Some(&peer)).expect("a node");
+    let fragment = node.cast::<IRawElementProviderFragment>().unwrap();
+    assert!(fragment.get_bounding_rectangle().is_ok());
+
+    drop(border);
+    assert!(!peer.is_element_available());
+
+    assert_eq!(Err(ELEMENT_NOT_AVAILABLE), fragment.get_fragment_root().map(|_| ()));
+    assert_eq!(Err(ELEMENT_NOT_AVAILABLE), fragment.navigate(NavigateDirection::Parent).map(|_| ()));
+    assert_eq!(Err(ELEMENT_NOT_AVAILABLE), fragment.navigate(NavigateDirection::FirstChild).map(|_| ()));
+    assert_eq!(Err(ELEMENT_NOT_AVAILABLE), fragment.get_bounding_rectangle().map(|_| ()));
+    assert_eq!(Err(ELEMENT_NOT_AVAILABLE), fragment.set_focus());
+    assert_eq!(Err(ELEMENT_NOT_AVAILABLE), node.get_property_value(UiaPropertyId::Name.0).map(|_| ()));
+    assert_eq!(Err(ELEMENT_NOT_AVAILABLE), node.get_pattern_provider(UiaPatternId::Invoke.0).map(|_| ()));
+    // What does not ask the peer still answers.
+    assert_eq!(ProviderOptions::ServerSideProvider, node.get_provider_options().unwrap());
 }
 
 #[test]

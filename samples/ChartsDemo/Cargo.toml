@@ -1,0 +1,42 @@
+[package]
+name = "charts-demo"
+description = "Compiled-XAML FerroUI Charts sample with shared live data, calendar axes, legends and theme resources"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+build = "build.rs"
+autobins = false
+
+[lib]
+path = "lib.rs"
+
+[[bin]]
+name = "charts-demo"
+path = "program.rs"
+required-features = ["desktop"]
+
+[features]
+default = []
+desktop = ["dep:ferroui-desktop", "dep:ferroui-themes-winui"]
+render-smoke = ["dep:ferroui-vello", "dep:ferroui-harfbuzz", "dep:ferroui-themes-winui"]
+
+[dependencies]
+ferroui-base = { workspace = true, features = ["markup-functions"] }
+ferroui-controls = { workspace = true }
+ferroui-controls-charts = { workspace = true }
+ferroui-markup-xaml = { workspace = true }
+ferroui-desktop = { workspace = true, optional = true }
+ferroui-themes-winui = { workspace = true, optional = true }
+ferroui-vello = { workspace = true, optional = true }
+ferroui-harfbuzz = { workspace = true, optional = true }
+
+[build-dependencies]
+ferroui-build = { workspace = true }
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "testing"] }

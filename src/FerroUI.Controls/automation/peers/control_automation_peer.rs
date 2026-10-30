@@ -77,6 +77,10 @@ impl ControlAutomationPeerImpl for ControlAutomationPeer {
 }
 
 impl AutomationPeerImpl for ControlAutomationPeer {
+    fn is_element_available_core(this: &Self) -> bool {
+        this.try_owner().is_some()
+    }
+
     fn bring_into_view_core(this: &Self) {
         this.owner().bring_into_view();
     }

@@ -2,8 +2,6 @@
 //  menu.h
 //  FerroUI.Native.OSX
 //
-//  Created by Dan Walmsley on 01/08/2019.
-//
 
 #ifndef menu_h
 #define menu_h

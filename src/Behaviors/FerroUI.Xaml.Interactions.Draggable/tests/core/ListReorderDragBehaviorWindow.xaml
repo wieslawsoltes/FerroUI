@@ -1,0 +1,22 @@
+<Window xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:draggable="using:FerroUI.Xaml.Interactions.Draggable"
+        Width="400"
+        Height="210">
+  <!-- Ported from tests/Xaml.Behaviors.Interactions.UnitTests/Core/ListReorderDragBehaviorWindow
+       of Xaml.Behaviors. Adapted: no x:Class (the test loads the window with the run-time
+       loader). -->
+  <ListBox x:Name="TargetListBox">
+    <ListBox.Styles>
+      <Style Selector="ListBoxItem">
+        <Setter Property="(Interaction.Behaviors)">
+          <BehaviorCollectionTemplate>
+            <BehaviorCollection>
+              <draggable:ListReorderDragBehavior Orientation="Vertical" />
+            </BehaviorCollection>
+          </BehaviorCollectionTemplate>
+        </Setter>
+      </Style>
+    </ListBox.Styles>
+  </ListBox>
+</Window>
