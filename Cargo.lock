@@ -6405,6 +6405,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "winui-gallery"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-controls-color-picker",
+ "ferroui-desktop",
+ "ferroui-harfbuzz",
+ "ferroui-headless",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-markup-xaml-winui",
+ "ferroui-skia",
+ "ferroui-themes-winui",
+]
+
+[[package]]
 name = "winui-theme-gallery"
 version = "0.4.0"
 dependencies = [

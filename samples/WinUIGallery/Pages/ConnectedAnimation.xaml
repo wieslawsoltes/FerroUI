@@ -1,0 +1,33 @@
+<!-- Adapted from the pinned Gallery ConnectedAnimationPage; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel Spacing="8">
+    <TextBlock Text="Connected animation between a collection and its details" FontSize="20" />
+    <Frame x:Name="ConnectedCollectionFrame" Height="750" MinWidth="500" />
+    <TextBlock x:Name="ConnectedCollectionStatus" Text="Choose an item to see its details." TextWrapping="Wrap" />
+  </StackPanel>
+  <StackPanel Spacing="8">
+    <TextBlock Text="Connected animation between elements on the same page" FontSize="20" />
+    <Frame x:Name="ConnectedCardFrame" Height="500" MinWidth="500" />
+    <TextBlock x:Name="ConnectedCardStatus" Text="Choose a card to expand it." TextWrapping="Wrap" />
+  </StackPanel>
+  <StackPanel Spacing="8">
+    <TextBlock Text="Connected animation configurations" FontSize="20" />
+    <Button x:Name="ConnectedNavigate" Content="Navigate" />
+    <TextBlock Text="Configurations" />
+    <RadioButtons x:Name="ConfigurationPanel" SelectedIndex="0" MaxColumns="4">
+      <RadioButton Content="Default" />
+      <RadioButton Content="Gravity" />
+      <RadioButton Content="Direct" />
+      <RadioButton Content="Basic" />
+    </RadioButtons>
+    <Frame x:Name="ConnectedContentFrame" Height="500" MinWidth="500" />
+    <TextBlock x:Name="ConnectedSimpleStatus" Text="First page" />
+  </StackPanel>
+  <StackPanel Spacing="8">
+    <TextBlock Text="Connected animation with manually located item visuals" FontSize="20" />
+    <TextBlock Text="Choose an item with the pointer or press Enter or Space. Returning restores the scroll position and keyboard focus." TextWrapping="Wrap" />
+    <Frame x:Name="ConnectedRepeaterFrame" Height="400" MinWidth="500" />
+    <TextBlock x:Name="ConnectedRepeaterStatus" Text="Choose an item to see its details." TextWrapping="Wrap" />
+  </StackPanel>
+</StackPanel>

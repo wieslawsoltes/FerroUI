@@ -21,7 +21,7 @@
     MaxDropDownHeight of the control, the maximum height of SuggestionsContainer (whose MinWidth
     is the width of the control).
   - The shadow of the suggestion list (ApplyElevationEffect on the popup, AutoSuggestBox_Partial.cpp:
-    a ThemeShadow at a Translation.Z of 32) is the BoxShadow ThemeShadowFlyoutBoxShadow of
+    a ThemeShadow at a Translation.Z of 32) is a ThemeShadow (the shared WinUIThemeShadow, Translation.Z as in WinUI) on
     SuggestionsContainer, with the margin ThemeShadowFlyoutMargin as the room for it in the popup
     (Resources/ThemeShadows.xaml; DEVIATIONS.md, G-24).
   - AutoSuggestBoxTextBoxStyle: the template of the source with FerroUI's parts (as
@@ -290,7 +290,7 @@
                  IsLightDismissEnabled="True"
                  PlacementTarget="{TemplateBinding}">
             <Border x:Name="SuggestionsContainer"
-                    BoxShadow="{DynamicResource ThemeShadowFlyoutBoxShadow}"
+                    Translation="0,0,32" Shadow="{StaticResource WinUIThemeShadow}"
                     Margin="{StaticResource ThemeShadowFlyoutMargin}"
                     MinWidth="{Binding Bounds.Width, RelativeSource={RelativeSource TemplatedParent}}"
                     MaxHeight="{TemplateBinding MaxDropDownHeight}"

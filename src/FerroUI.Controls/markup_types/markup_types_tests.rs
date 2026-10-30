@@ -202,6 +202,7 @@ const DECLARED_NEXT_TO_THE_TYPE: &[&str] = &[
     "TextLayoutRoundingPlacement",
     "Symbol",
     "InfoBarSeverity",
+    "ZoomMode",
     "InfoBarCloseReason",
     "InfoBarClosingEventArgs",
     "InfoBarClosedEventArgs",

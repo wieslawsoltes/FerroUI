@@ -1,0 +1,27 @@
+<!-- Adapted from all three Samples/InfoBar examples; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <TextBlock Text="A closable InfoBar with severity options" FontSize="18"/>
+  <InfoBar x:Name="TestInfoBar1" Title="Title" IsOpen="True" Severity="Informational"
+                Message="Essential app message for your users to be informed of, acknowledge, or take action on."/>
+  <StackPanel Orientation="Horizontal" Spacing="12">
+    <CheckBox x:Name="IsOpenCheckBox1" Content="Is Open" IsChecked="{Binding #TestInfoBar1.IsOpen, Mode=TwoWay}"/>
+    <ComboBox x:Name="SeverityComboBox" SelectedIndex="0" Width="180" AutomationProperties.Name="Severity">
+      <x:String>Informational</x:String><x:String>Success</x:String><x:String>Warning</x:String><x:String>Error</x:String>
+    </ComboBox>
+  </StackPanel>
+  <TextBlock Text="Short and long messages, with an optional action" FontSize="18"/>
+  <InfoBar x:Name="TestInfoBar2" Title="Title" IsOpen="True"/>
+  <StackPanel Orientation="Horizontal" Spacing="12">
+    <CheckBox x:Name="IsOpenCheckBox2" Content="Is Open" IsChecked="{Binding #TestInfoBar2.IsOpen, Mode=TwoWay}"/>
+    <ComboBox x:Name="MessageComboBox" SelectedIndex="1" Width="120" AutomationProperties.Name="Message length"><x:String>Short</x:String><x:String>Long</x:String></ComboBox>
+    <ComboBox x:Name="ActionButtonComboBox" SelectedIndex="0" Width="140" AutomationProperties.Name="Action button"><x:String>None</x:String><x:String>Button</x:String><x:String>Hyperlink</x:String></ComboBox>
+  </StackPanel>
+  <TextBlock Text="Icon and close-button options" FontSize="18"/>
+  <InfoBar x:Name="TestInfoBar3" Title="Title" IsOpen="True" IsClosable="True" IsIconVisible="True"
+                Message="Essential app message for your users to be informed of, acknowledge, or take action on."/>
+  <StackPanel Orientation="Horizontal" Spacing="12">
+    <CheckBox Content="Is Open" IsChecked="{Binding #TestInfoBar3.IsOpen, Mode=TwoWay}"/>
+    <CheckBox x:Name="IsIconVisibleCheckBox" Content="Is Icon Visible" IsChecked="{Binding #TestInfoBar3.IsIconVisible, Mode=TwoWay}"/>
+    <CheckBox x:Name="IsClosableCheckBox" Content="Is Closable" IsChecked="{Binding #TestInfoBar3.IsClosable, Mode=TwoWay}"/>
+  </StackPanel>
+</StackPanel>

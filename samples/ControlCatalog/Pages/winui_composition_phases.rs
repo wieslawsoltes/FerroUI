@@ -38,12 +38,12 @@ use std::rc::Rc;
 use std::time::{Duration, Instant};
 
 /// What the smoke run does in an open section: presses its buttons.
-type SmokeAction = Rc<dyn Fn()>;
+pub(super) type SmokeAction = Rc<dyn Fn()>;
 
 /// A demo: its content, and what the smoke run does in it.
-struct Demo {
-    content: Ref<Control>,
-    smoke: SmokeAction,
+pub(super) struct Demo {
+    pub(super) content: Ref<Control>,
+    pub(super) smoke: SmokeAction,
 }
 
 ferroui_base::ferro_thread_local! {
@@ -120,10 +120,14 @@ pub fn phase_sections() -> Vec<Ref<StackPanel>> {
             effects_demo,
         ),
     ]
+    .into_iter()
+    // Phase 7: alpha masks, theme shadows and zoom.
+    .chain(super::winui_composition_phase7::phase7_sections())
+    .collect()
 }
 
 /// A section whose demo is built when its expander first opens.
-fn lazy_section(title: &str, description: &str, build: fn() -> Demo) -> Ref<StackPanel> {
+pub(super) fn lazy_section(title: &str, description: &str, build: fn() -> Demo) -> Ref<StackPanel> {
     let expander = Expander::new();
     expander.set_header(Some(label("Show the demo")));
     expander.set_horizontal_alignment(HorizontalAlignment::Stretch);

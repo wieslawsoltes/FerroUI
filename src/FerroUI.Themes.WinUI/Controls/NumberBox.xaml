@@ -38,7 +38,7 @@
     the layout slot of the popup in WinUI) with the offsets NumberBoxPopupHorizonalOffset and
     NumberBoxPopupVerticalOffset. The shadow of PopupContentRoot (a ThemeShadow at the
     Translation.Z NumberBoxPopupShadowDepth, 16, set by NumberBox::OnApplyTemplate) is the
-    BoxShadow ThemeShadowToolTipBoxShadow of elevation 16, with ThemeShadowToolTipMargin as its
+    same: the shared WinUIThemeShadow at Translation.Z 16, with ThemeShadowToolTipMargin as its
     room (Resources/ThemeShadows.xaml; DEVIATIONS.md, G-24). PopupContentRoot, a Grid with a
     border and padding, is a Border of the same name around the Grid. ShouldConstrainToRootBounds
     has no counterpart.
@@ -152,7 +152,7 @@
                       BorderBrush="{DynamicResource NumberBoxPopupBorderBrush}"
                       BorderThickness="{DynamicResource NumberBoxPopupBorderThickness}"
                       CornerRadius="{DynamicResource OverlayCornerRadius}"
-                      BoxShadow="{DynamicResource ThemeShadowToolTipBoxShadow}">
+                      Translation="0,0,16" Shadow="{StaticResource WinUIThemeShadow}">
                 <Grid RowDefinitions="*,*">
                   <RepeatButton x:Name="PopupUpSpinButton"
                                 Theme="{StaticResource NumberBoxPopupContentRootButtonStyle}"
