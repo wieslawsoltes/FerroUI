@@ -6,6 +6,7 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ### Added
 
+- **XAML: lexical namespace scopes** (C1 of #345, a recorded deviation): namespaces declared on nested elements are resolved at run time as the compiler resolves them, in compiled documents (`rt::push_namespace_scope`) and in the run-time loader; the compiled XAML of the four themes is regenerated.
 - **LiveCharts2 port, pie engine** (L1c of [docs/porting/livecharts2.md](docs/porting/livecharts2.md); from #312): `PieChartEngine` measures pie, doughnut, gauge and nested-ring series into a retained scene, with the upstream pie scale and data label tests.
 - **LiveCharts2 port, Cartesian engine** (L1b of [docs/porting/livecharts2.md](docs/porting/livecharts2.md); from #312): `CartesianChartEngine` measures Cartesian series and axes into a retained scene, with the `ShouldScale` fixtures of the upstream column, row, scatter, step line, stacked, financial and box series tests.
 - **LiveCharts2 port, core** (L1a of [docs/porting/livecharts2.md](docs/porting/livecharts2.md); from #312): the new crate `ferroui-livecharts` holds the shared core of the chart engines (axes, scales and ticks, stacking, easing, motion, paints, scenes and hit testing, series descriptions, visual states), with the dispositions of the core sources and upstream tests in `docs/porting/livecharts2/mapping.json`.

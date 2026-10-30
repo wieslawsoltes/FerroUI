@@ -917,6 +917,9 @@ impl IXamlLineInfo for XamlIlFerroClassProperty {
     fn set_position(&self, value: i32) {
         self.base.set_position(value)
     }
+    fn namespace_scope(&self) -> Option<Rc<xamlx::ast::XamlNamespaceScope>> {
+        self.base.namespace_scope()
+    }
 }
 
 impl IXamlAstNode for XamlIlFerroClassProperty {
