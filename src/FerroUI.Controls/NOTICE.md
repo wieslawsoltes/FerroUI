@@ -141,6 +141,15 @@ context-menu events) are ported from the WinUI project directly (`dxaml/xcp/core
 `RichTextBlockOverflow_Partial.cpp` and `TextControlFlyoutHelper.cpp` at the same commit), under the
 same license (`docs/porting/winui-rich-text.md`).
 
+`rich_text/` (the editor, the text object model, RTF and the rich clipboard), `rich_edit_box*.rs`,
+`rich_edit_*.rs`, `automation/provider/i_text_*.rs`, `automation/provider/rich_text_automation.rs`
+and the rich automation peers (WinUI's `RichEditBox` with `TextBoxBase`, the documented contracts of
+`Microsoft.UI.Text` and of the UI Automation text pattern) are ported from the WinUI project directly
+(`dxaml/xcp/core/native/text/`, `dxaml/xcp/dxaml/lib/RichEditBox_Partial.cpp`,
+`TextBoxBase_Partial.cpp`, `packaging/Intellisense/generated/Microsoft.UI.Text.xml` at the same commit),
+under the same license. The RTF charset-to-code-page table was checked against
+`RtfToXamlReader.cs` of [dotnet/wpf](https://github.com/dotnet/wpf) (MIT, Copyright (c) .NET Foundation and Contributors).
+
 `radio_buttons.rs`, `primitives/radio_buttons_panel.rs`, `rating_control.rs`,
 `rating_item_info.rs`, `automation/peers/radio_buttons_automation_peer.rs` and
 `automation/peers/rating_control_automation_peer.rs` (WinUI's `RadioButtons` with the layout
