@@ -8,6 +8,7 @@
 //! The members that emit IL upstream carry only their data here; each type documents what its
 //! IL does so that the back ends can implement it.
 
+use std::sync::Arc;
 use std::any::Any;
 use std::cell::Cell;
 use std::rc::Rc;
@@ -916,6 +917,9 @@ impl IXamlLineInfo for XamlIlFerroClassProperty {
     }
     fn set_position(&self, value: i32) {
         self.base.set_position(value)
+    }
+    fn namespace_scope(&self) -> Option<Arc<xamlx::ast::XamlNamespaceScope>> {
+        self.base.namespace_scope()
     }
 }
 

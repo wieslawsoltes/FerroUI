@@ -5,12 +5,16 @@
 //! The tools run on the shared inspector of the UI thread (`ferroui_inspect::Inspector::shared`),
 //! the one the Chrome DevTools Protocol endpoint uses too: node IDs are the same for both, and a
 //! custom lifetime registers its top levels there (`register_root`).
+mod extensions;
 mod protocol;
+mod services;
 mod transport;
+pub use extensions::UiToolProvider;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_inspect::LogCapture;
 pub use ferroui_inspect::Permissions;
 use serde_json::Value;
+pub use services::{RequestContext, ServiceToolProvider};
 use std::{
     io,
     net::{IpAddr, Ipv4Addr, SocketAddr},
@@ -53,6 +57,7 @@ static STDIO_STARTED: AtomicBool = AtomicBool::new(false);
 
 /// Dropping this handle stops accepting requests and invalidates queued work. A stdio reader
 /// blocked in the OS remains parked until EOF; it cannot execute more UI operations.
+/// This inspector-only handle can be moved to another thread after server startup.
 pub struct ServerHandle {
     client: Client,
     log_guard: Option<ferroui_inspect::LogGuard>,
@@ -72,10 +77,83 @@ impl Drop for ServerHandle {
     }
 }
 
+/// A server that also owns application tools on the creating UI thread.
+///
+/// Keep and drop this handle on that thread, since providers may own controls and other
+/// thread-affine state. The underlying inspector handle remains accessible through `Deref`.
+pub struct UiServerHandle {
+    // Fields drop in declaration order: cancel queued requests before disposing the provider.
+    server: ServerHandle,
+    _registration: extensions::Registration,
+}
+impl std::ops::Deref for UiServerHandle {
+    type Target = ServerHandle;
+
+    fn deref(&self) -> &Self::Target {
+        &self.server
+    }
+}
+
 /// Start the server on the UI thread. The returned handle is the lifetime of the service.
 pub fn serve(options: Options) -> io::Result<ServerHandle> {
-    let dispatcher = Dispatcher::ui_thread();
-    dispatcher.verify_access();
+    serve_registered(options, None, None, None)
+}
+
+/// Serve inspector tools and application tools through the same transport, permissions,
+/// cancellation and UI dispatcher. Keep the returned handle on this UI thread.
+pub fn serve_with_tools(
+    options: Options,
+    provider: std::rc::Rc<dyn UiToolProvider>,
+) -> io::Result<UiServerHandle> {
+    let registration = extensions::Registration::new(provider)?;
+    let server = serve_registered(options, Some(registration.catalog.clone()), None, None)?;
+    Ok(UiServerHandle {
+        server,
+        _registration: registration,
+    })
+}
+
+/// Host an isolated, thread-safe application service through the existing MCP protocol.
+///
+/// Only the provider's tools are exposed: no inspector, input, logs or UI objects are
+/// reachable through this server. Calls run on transport workers and receive cooperative
+/// cancellation and deadlines. This mode requires no application or UI message loop.
+pub fn serve_service(
+    options: Options,
+    provider: Arc<dyn ServiceToolProvider>,
+) -> io::Result<ServerHandle> {
+    let service = services::ServiceCatalog::new(provider)?;
+    serve_registered(options, None, Some(service), None)
+}
+
+/// Use a securely persisted 256-bit bearer for a durable service, so restarting the process
+/// does not invalidate peers' endpoints. Inspector servers continue generating fresh tokens.
+pub fn serve_service_with_token(
+    options: Options,
+    provider: Arc<dyn ServiceToolProvider>,
+    bearer: String,
+) -> io::Result<ServerHandle> {
+    if bearer.len() != 64 || !bearer.bytes().all(|byte| byte.is_ascii_hexdigit()) {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidInput,
+            "Service bearer must be 256-bit hexadecimal",
+        ));
+    }
+    let service = services::ServiceCatalog::new(provider)?;
+    serve_registered(options, None, Some(service), Some(bearer))
+}
+
+fn serve_registered(
+    options: Options,
+    extension: Option<extensions::Catalog>,
+    service: Option<services::ServiceCatalog>,
+    bearer: Option<String>,
+) -> io::Result<ServerHandle> {
+    let dispatcher = service.is_none().then(|| {
+        let dispatcher = Dispatcher::ui_thread();
+        dispatcher.verify_access();
+        dispatcher
+    });
     if options.dispatch_timeout.is_zero() {
         return Err(io::Error::new(
             io::ErrorKind::InvalidInput,
@@ -90,14 +168,20 @@ pub fn serve(options: Options) -> io::Result<ServerHandle> {
         ));
     }
     // A server that fails to start leaves stdio free for another attempt.
-    let result = start(options, dispatcher);
+    let result = start(options, dispatcher, extension, service, bearer);
     if stdio && result.is_err() {
         STDIO_STARTED.store(false, Ordering::Release);
     }
     result
 }
 
-fn start(options: Options, dispatcher: Arc<Dispatcher>) -> io::Result<ServerHandle> {
+fn start(
+    options: Options,
+    dispatcher: Option<Arc<Dispatcher>>,
+    extension: Option<extensions::Catalog>,
+    service: Option<services::ServiceCatalog>,
+    bearer: Option<String>,
+) -> io::Result<ServerHandle> {
     let (http, address, token) = match &options.transport {
         Transport::Http(address) => {
             if !address.ip().is_loopback() {
@@ -110,7 +194,8 @@ fn start(options: Options, dispatcher: Arc<Dispatcher>) -> io::Result<ServerHand
             let address = server.local_addr()?;
             let mut bytes = [0u8; 32];
             getrandom::fill(&mut bytes).map_err(|e| io::Error::other(e.to_string()))?;
-            let token = bytes.iter().map(|b| format!("{b:02x}")).collect::<String>();
+            let token = bearer
+                .unwrap_or_else(|| bytes.iter().map(|b| format!("{b:02x}")).collect::<String>());
             (Some(server), Some(address), Some(token))
         }
         Transport::Stdio => (None, None, None),
@@ -123,9 +208,12 @@ fn start(options: Options, dispatcher: Arc<Dispatcher>) -> io::Result<ServerHand
     } else {
         None
     };
-    let log_guard = options.capture_logs.then(LogCapture::install);
+    let log_guard = (options.capture_logs && service.is_none()).then(LogCapture::install);
+    let is_service = service.is_some();
     let client = Client {
         dispatcher,
+        extension,
+        service,
         permissions: options.permissions,
         timeout: options.dispatch_timeout,
         stop: Arc::new(AtomicBool::new(false)),
@@ -148,52 +236,107 @@ fn start(options: Options, dispatcher: Arc<Dispatcher>) -> io::Result<ServerHand
     std::thread::Builder::new()
         .name("FerroUI MCP".into())
         .spawn(task)?;
-    if let (Some(address), Some(token)) = (handle.address, &handle.token) {
-        eprintln!("FerroUI MCP: http://{address}/mcp\nAuthorization: Bearer {token}");
+    if !is_service {
+        if let (Some(address), Some(token)) = (handle.address, &handle.token) {
+            eprintln!("FerroUI MCP: http://{address}/mcp\nAuthorization: Bearer {token}");
+        }
     }
     Ok(handle)
 }
 
 #[derive(Clone)]
 pub(crate) struct Client {
-    dispatcher: Arc<Dispatcher>,
+    dispatcher: Option<Arc<Dispatcher>>,
+    extension: Option<extensions::Catalog>,
+    service: Option<services::ServiceCatalog>,
     permissions: Permissions,
     timeout: Duration,
     stop: Arc<AtomicBool>,
 }
 impl Client {
+    fn tools(&self) -> Vec<Value> {
+        if let Some(service) = &self.service {
+            return service.tools().to_vec();
+        }
+        let mut tools = ferroui_inspect::tools();
+        if let Some(extension) = &self.extension {
+            tools.extend(extension.tools.iter().cloned());
+        }
+        tools
+    }
+    fn validate(&self, name: &str, args: &Value) -> Result<(), String> {
+        if let Some(service) = &self.service {
+            return service.validate(name, args);
+        }
+        if let Some(extension) = self
+            .extension
+            .as_ref()
+            .filter(|extension| extension.contains(name))
+        {
+            extension.validate_envelope(name, args)
+        } else {
+            ferroui_inspect::validate(name, args)
+        }
+    }
     fn call(&self, name: &str, args: Value, cancel: &Arc<AtomicBool>) -> Result<Value, String> {
-        ferroui_inspect::validate(name, &args)?;
-        let deadline =
-            Instant::now() + Duration::from_millis(args["timeout_ms"].as_u64().unwrap_or(5000));
+        self.validate(name, &args)?;
+        if let Some(service) = &self.service {
+            let context = RequestContext::new(
+                self.permissions,
+                cancel.clone(),
+                self.stop.clone(),
+                self.timeout,
+            );
+            context.check_cancelled()?;
+            return std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                service.execute(name, &args, &context)
+            }))
+            .unwrap_or_else(|_| Err("Service operation panicked".into()));
+        }
+        // Only the built-in wait tool owns timeout_ms. In particular, application tools may
+        // use that argument independently, and adding an arbitrary duration to Instant can
+        // overflow on some platforms. Elapsed-time comparison also keeps wait_for portable.
+        let wait_started = Instant::now();
+        let wait_timeout = Duration::from_millis(args["timeout_ms"].as_u64().unwrap_or(5000));
         loop {
             if self.stop.load(Ordering::Acquire) || cancel.load(Ordering::Acquire) {
                 return Err("Request cancelled or server stopped".into());
             }
             let (tx, rx) = mpsc::sync_channel(1);
             let permissions = self.permissions;
+            let extension = self
+                .extension
+                .clone()
+                .filter(|extension| extension.contains(name));
             let tool = name.to_owned();
             let args = args.clone();
             let cancelled = cancel.clone();
             let stop = self.stop.clone();
             let pending = Arc::new(AtomicBool::new(true));
             let queued = pending.clone();
-            self.dispatcher.post(
-                move || {
-                    if !queued.swap(false, Ordering::AcqRel)
-                        || cancelled.load(Ordering::Acquire)
-                        || stop.load(Ordering::Acquire)
-                    {
-                        return;
-                    }
-                    let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                        ferroui_inspect::execute(&tool, &args, permissions)
-                    }))
-                    .unwrap_or_else(|_| Err("UI operation panicked".into()));
-                    let _ = tx.send(result);
-                },
-                DispatcherPriority::BACKGROUND,
-            );
+            self.dispatcher
+                .as_ref()
+                .expect("UI client owns a dispatcher")
+                .post(
+                    move || {
+                        if !queued.swap(false, Ordering::AcqRel)
+                            || cancelled.load(Ordering::Acquire)
+                            || stop.load(Ordering::Acquire)
+                        {
+                            return;
+                        }
+                        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                            if let Some(extension) = extension {
+                                extension.execute(&tool, &args, permissions)
+                            } else {
+                                ferroui_inspect::execute(&tool, &args, permissions)
+                            }
+                        }))
+                        .unwrap_or_else(|_| Err("UI operation panicked".into()));
+                        let _ = tx.send(result);
+                    },
+                    DispatcherPriority::BACKGROUND,
+                );
             let queued_at = Instant::now();
             let result = loop {
                 if self.stop.load(Ordering::Acquire) || cancel.load(Ordering::Acquire) {
@@ -216,7 +359,7 @@ impl Client {
             if name != "wait_for" || result["matched"] == true {
                 return Ok(result);
             }
-            if Instant::now() >= deadline {
+            if wait_started.elapsed() >= wait_timeout {
                 return Err("Condition timed out".into());
             }
             std::thread::sleep(Duration::from_millis(25));
@@ -251,5 +394,7 @@ pub fn reserve_stdout() -> io::Result<std::fs::File> {
     }
 }
 
+#[cfg(test)]
+mod extensions_tests;
 #[cfg(test)]
 mod tests;
