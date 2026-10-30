@@ -63,6 +63,8 @@ mod input_element_gestures;
 mod input_extensions;
 mod input_manager;
 mod input_method;
+mod input_scope;
+mod input_scope_name_value;
 mod key;
 mod key_device_type;
 mod key_binding;
@@ -192,3 +194,9 @@ pub use window_decorations_element_role::WindowDecorationsElementRole;
 mod data_transfer_tests;
 #[cfg(test)]
 mod input_tests;
+
+pub use input_scope::{InputScope, InputScopeName};
+pub use input_scope_name_value::InputScopeNameValue;
+
+#[cfg(test)]
+mod input_scope_tests;
