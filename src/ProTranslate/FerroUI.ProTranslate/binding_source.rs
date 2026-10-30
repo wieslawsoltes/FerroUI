@@ -62,7 +62,9 @@ impl TranslationBindingSource {
                     // upstream's indexer node ignores the empty name. No borrowed service
                     // during callbacks.
                     inner.property_changed.raise("");
-                    inner.property_changed.raise(ferroui_base::data::core::INDEXER_NAME);
+                    inner
+                        .property_changed
+                        .raise(ferroui_base::data::core::INDEXER_NAME);
                     inner.changed.raise(&());
                 }
             }
