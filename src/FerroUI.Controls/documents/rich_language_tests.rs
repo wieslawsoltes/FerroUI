@@ -3,6 +3,8 @@ use super::{CharacterFormat, Paragraph, RichTextDocument, Run, Span, TextElement
 use crate::test_support::test_scope;
 use ferroui_base::utilities::CultureInfo;
 use ferroui_base::{Rect, Size};
+#[allow(unused_imports)]
+use crate::{RichTextBlock, RichTextBlockOverflow};
 
 #[test]
 fn rich_language_source_validation_and_patch_assignment_are_atomic() {
@@ -57,4 +59,39 @@ fn runs_get_a_culture_only_from_a_set_language() {
     span.set_language(CultureInfo::get_culture_info("ja-JP"));
     assert!(run.has_language());
     assert_eq!(run.run_culture().map(|culture| culture.name().to_owned()).as_deref(), Some("ja-JP"));
+}
+
+#[test]
+fn rich_language_inherits_into_shaping_and_local_values_override() {
+    let _scope = test_scope();
+    let view = RichTextBlock::new();
+    view.set_language(CultureInfo::get_culture_info("ja-JP"));
+    let paragraph = Paragraph::new();
+    let span = Span::new();
+    let run = Run::with_text(Some("漢字"));
+    span.add_child(run.clone());
+    paragraph.inlines().add(span.clone());
+    view.blocks().add(paragraph);
+    let culture = || {
+        run.create_text_run_properties()
+            .culture_info()
+            .cloned()
+            .unwrap()
+    };
+    assert_eq!(culture().name(), "ja-JP");
+    span.set_language(CultureInfo::get_culture_info("zh-CN"));
+    assert_eq!(culture().name(), "zh-CN");
+    run.set_language(CultureInfo::get_culture_info("zh-TW"));
+    assert_eq!(culture().name(), "zh-TW");
+    view.measure(Size::new(200.0, 100.0));
+    view.arrange(Rect::new(0.0, 0.0, 200.0, 100.0));
+    assert!(view.is_measure_valid());
+    run.clear_value(TextElement::language_property());
+    assert!(!view.is_measure_valid());
+    assert_eq!(culture().name(), "zh-CN");
+    run.set_language(CultureInfo::invariant_culture());
+    assert!(
+        !culture().is_invariant(),
+        "an empty assigned language resolves for shaping"
+    );
 }

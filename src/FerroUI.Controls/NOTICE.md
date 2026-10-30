@@ -132,6 +132,15 @@ directly (`dxaml/xcp/dxaml/lib/AutoSuggestBox_Partial.cpp`,
 `dxaml/xcp/tools/XCPTypesAutoGen/Modules/AutoSuggestBox/AutoSuggestBox.cs` at the same commit),
 under the same license.
 
+The rich text of `documents/` (the sources are listed in `documents/NOTICE.md`), and
+`rich_text_block.rs`, `rich_text_block_overflow.rs`, `rich_text_layout.rs`,
+`rich_text_overflow_links.rs`, `rich_text_context_menu.rs` and `context_menu_event_args.rs`
+(WinUI's `RichTextBlock`, `RichTextBlockOverflow`, their paragraph layout, linked containers and
+context-menu events) are ported from the WinUI project directly (`dxaml/xcp/core/text/RichTextBlock/`,
+`dxaml/xcp/core/text/BlockLayout/`, `dxaml/xcp/dxaml/lib/RichTextBlock_Partial.cpp`,
+`RichTextBlockOverflow_Partial.cpp` and `TextControlFlyoutHelper.cpp` at the same commit), under the
+same license (`docs/porting/winui-rich-text.md`).
+
 `radio_buttons.rs`, `primitives/radio_buttons_panel.rs`, `rating_control.rs`,
 `rating_item_info.rs`, `automation/peers/radio_buttons_automation_peer.rs` and
 `automation/peers/rating_control_automation_peer.rs` (WinUI's `RadioButtons` with the layout

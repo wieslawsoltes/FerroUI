@@ -2,7 +2,8 @@ use super::{
     DocumentChangedEventArgs, DocumentError, RichTextDocument, TextElement, WeakRichTextDocument,
 };
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::Ref;
+use crate::{Control, RichTextBlock};
+use ferroui_base::{Rect, Ref};
 use std::cell::{Cell, RefCell};
 use std::ops::Range;
 use std::rc::Rc;
@@ -140,6 +141,26 @@ impl TextPointer {
 
     pub fn parent(&self) -> Option<Ref<TextElement>> {
         self.document()?.element_at(self.offset(), self.gravity())
+    }
+
+    pub fn visual_parent(&self) -> Option<Ref<Control>> {
+        let document = self.document()?;
+        let owner = document
+            .blocks()
+            .logical_parent()?
+            .cast::<RichTextBlock>()?;
+        owner.text_view_for_position(self.offset()).map(Ref::upcast)
+    }
+
+    /// A caret rectangle in the owning text view. A detached document has no
+    /// geometry. Direction chooses the character affinity at this same insertion
+    /// position. Like the source TextPointer contract, the rectangle has zero width.
+    pub fn get_character_rect(&self, direction: TextGravity) -> Option<Rect> {
+        let view = self.visual_parent()?.cast::<RichTextBlock>()?;
+        let mut rect =
+            view.get_rect_from_text_position(TextPosition::new(self.offset(), direction));
+        rect.width = 0.0;
+        Some(rect)
     }
 
     pub fn is_at_insertion_position(&self) -> bool {

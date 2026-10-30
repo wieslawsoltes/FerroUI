@@ -47,6 +47,7 @@ mod info_badge_page;
 mod info_bar_page;
 mod navigation_view_page;
 mod auto_suggest_box_page;
+mod rich_text_block_page;
 mod number_box_page;
 mod radio_buttons_page;
 mod rating_control_page;
@@ -194,6 +195,7 @@ pub use info_bar_page::InfoBarPage;
 pub use progress_ring_page::ProgressRingPage;
 pub use navigation_view_page::NavigationViewPage;
 pub use auto_suggest_box_page::AutoSuggestBoxPage;
+pub use rich_text_block_page::RichTextBlockPage;
 pub use number_box_page::NumberBoxPage;
 pub use radio_buttons_page::RadioButtonsPage;
 pub use rating_control_page::RatingControlPage;
@@ -299,6 +301,7 @@ const ROOT_TYPES: &[&TypeInfo] = &[
     ProgressRingPage::TYPE,
     NavigationViewPage::TYPE,
     AutoSuggestBoxPage::TYPE,
+    RichTextBlockPage::TYPE,
     NumberBoxPage::TYPE,
     RadioButtonsPage::TYPE,
     RatingControlPage::TYPE,
@@ -396,6 +399,7 @@ const ROOT_CLASSES: &[&XamlClass] = &[
     &ProgressRingPage::XAML_CLASS,
     &NavigationViewPage::XAML_CLASS,
     &AutoSuggestBoxPage::XAML_CLASS,
+    &RichTextBlockPage::XAML_CLASS,
     &NumberBoxPage::XAML_CLASS,
     &RadioButtonsPage::XAML_CLASS,
     &RatingControlPage::XAML_CLASS,

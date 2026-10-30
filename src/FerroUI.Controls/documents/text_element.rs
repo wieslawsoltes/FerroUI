@@ -18,6 +18,10 @@ use std::rc::Rc;
 
 
 #[cfg(test)]
+#[path = "rich_presentation_invalidation_tests.rs"]
+mod rich_presentation_invalidation_tests;
+
+#[cfg(test)]
 #[path = "text_element_namescope_tests.rs"]
 mod text_element_namescope_tests;
 

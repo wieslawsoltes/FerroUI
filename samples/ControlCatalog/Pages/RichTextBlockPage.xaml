@@ -1,0 +1,71 @@
+<ContentPage xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="using:ControlCatalog.Controls"
+             x:Class="ControlCatalog.Pages.RichTextBlockPage"
+             Theme="{StaticResource ScrollPage}"
+             Header="RichTextBlock">
+  <StackPanel Spacing="24" MaxWidth="920">
+    <TextBlock Text="Read-only rich text: paragraphs with formatted runs, links and selection, flowing into linked containers."
+               TextWrapping="Wrap" />
+
+    <controls:SampleSection Header="Formatted paragraphs"
+                            Description="Paragraphs hold runs, spans, bold, italic, underline and hyperlinks. Select text with the pointer or the keyboard.">
+      <Border BorderBrush="{DynamicResource CatalogBaseMediumColor}" BorderThickness="1" Padding="16">
+        <RichTextBlock Name="Formatted" TextWrapping="Wrap" IsTextSelectionEnabled="True">
+          <Paragraph>
+            <Bold><Run Text="A shared document" /></Bold>
+          </Paragraph>
+          <Paragraph>
+            <Run Text="Start with a thought, add " />
+            <Italic><Run Text="emphasis" /></Italic>
+            <Run Text=", " />
+            <Underline><Run Text="mark the next step" /></Underline>
+            <Run Text=" and follow a " />
+            <Hyperlink NavigateUri="https://github.com/ferroui"><Run Text="link" /></Hyperlink>
+            <Run Text="." />
+          </Paragraph>
+          <Paragraph>
+            <Run Text="Text can include café, 日本語, العربية and emoji 😀." />
+          </Paragraph>
+        </RichTextBlock>
+      </Border>
+      <controls:SampleSection.Code><x:String xml:space="preserve"><![CDATA[<RichTextBlock TextWrapping="Wrap" IsTextSelectionEnabled="True">
+  <Paragraph><Bold><Run Text="A shared document" /></Bold></Paragraph>
+  <Paragraph>
+    <Run Text="Start with a thought, add " />
+    <Italic><Run Text="emphasis" /></Italic>
+    <Hyperlink NavigateUri="https://github.com/ferroui"><Run Text="link" /></Hyperlink>
+  </Paragraph>
+</RichTextBlock>]]></x:String></controls:SampleSection.Code>
+    </controls:SampleSection>
+
+    <controls:SampleSection Header="Linked columns"
+                            Description="A fixed-height view continues in a RichTextBlockOverflow. Each column lays out the remaining text at its own width.">
+      <WrapPanel>
+        <Border BorderBrush="{DynamicResource CatalogBaseMediumColor}" BorderThickness="1"
+                Padding="16" Margin="0,0,12,12">
+          <RichTextBlock Name="Column" Width="250" Height="150" TextWrapping="Wrap"
+                         OverflowContentTarget="{Binding #Continuation}">
+            <Paragraph>
+              <Bold><Run Text="Room for the whole story" /></Bold>
+            </Paragraph>
+            <Paragraph>
+              <Run Text="Rich text can flow through several views without duplicating its content. This first column has a fixed height. The next column starts where it ends and keeps paragraph and character formatting." />
+            </Paragraph>
+            <Paragraph>
+              <Italic><Run Text="Resize the catalog or switch its theme to see how the columns adapt." /></Italic>
+            </Paragraph>
+          </RichTextBlock>
+        </Border>
+        <Border BorderBrush="{DynamicResource CatalogBaseMediumColor}" BorderThickness="1"
+                Padding="16" Margin="0,0,12,12">
+          <RichTextBlockOverflow Name="Continuation" Width="250" Height="150" />
+        </Border>
+      </WrapPanel>
+      <controls:SampleSection.Code><x:String xml:space="preserve"><![CDATA[<RichTextBlock Height="150" OverflowContentTarget="{Binding #Continuation}">
+  <Paragraph><Run Text="A story that continues into the next view..." /></Paragraph>
+</RichTextBlock>
+<RichTextBlockOverflow Name="Continuation" Height="150" />]]></x:String></controls:SampleSection.Code>
+    </controls:SampleSection>
+  </StackPanel>
+</ContentPage>

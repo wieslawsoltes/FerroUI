@@ -5,6 +5,8 @@ use crate::{Border, Button};
 use ferroui_base::controls::{ChildNameScope, NameScope, NameScopeRef};
 use ferroui_base::metadata::{from_markup_value, into_markup_value};
 use ferroui_base::{FerroObject, Ref};
+#[allow(unused_imports)]
+use crate::{RichTextBlock, RichTextBlockOverflow};
 
 #[test]
 fn text_element_find_name_stops_at_nearest_scope_even_when_name_is_missing() {
@@ -200,4 +202,42 @@ fn text_element_find_name_reaches_the_name_scope_of_its_template() {
     assert!(run.find_name("missing").is_none());
     let root = target.visual_children().get(0).cast::<Decorator>().unwrap();
     assert!(NameScope::get_name_scope(&root).is_none());
+}
+
+#[test]
+fn text_element_find_name_shares_control_and_text_registrations() {
+    let _scope = test_scope();
+    let display = RichTextBlock::new();
+    let paragraph = Paragraph::new();
+    let span = Span::new();
+    let link = Hyperlink::new();
+    let run = Run::with_text(Some("lookup"));
+    let button = Button::new();
+    link.inlines().add(run.clone());
+    span.inlines().add(link.clone());
+    span.inlines()
+        .add(InlineUIContainer::with_child(button.clone()));
+    paragraph.inlines().add(span.clone());
+    display.blocks().add(paragraph.clone());
+    let scope = NameScopeRef::new(NameScope::new());
+    NameScope::set_name_scope(&display, Some(scope.clone()));
+    for (name, object) in [
+        ("display", display.clone().upcast::<FerroObject>()),
+        ("paragraph", paragraph.clone().upcast()),
+        ("span", span.clone().upcast()),
+        ("link", link.clone().upcast()),
+        ("run", run.clone().upcast()),
+        ("button", button.clone().upcast()),
+    ] {
+        scope.register(name, object.clone());
+        assert_eq!(run.find_name(name), Some(object.clone()), "{name}");
+        assert_eq!(paragraph.find_name(name), Some(object), "{name}");
+    }
+    assert_eq!(display.find_control::<Run>("run"), Some(run));
+    assert!(
+        link.find_name("Run").is_none(),
+        "names remain case-sensitive"
+    );
+    assert!(link.find_name("").is_none());
+    assert!(link.find_name("missing").is_none());
 }

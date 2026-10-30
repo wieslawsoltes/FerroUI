@@ -10,6 +10,8 @@ use ferroui_base::metadata::{from_markup_value, into_markup_value, MarkupTyped};
 use ferroui_base::{FerroObject, FerroPropertyRegistry, Rect, Ref, Size};
 use std::cell::Cell;
 use std::rc::Rc;
+#[allow(unused_imports)]
+use crate::{RichTextBlock, RichTextBlockOverflow};
 
 fn feature_values(features: &FontFeatureCollection) -> Vec<(String, i32)> {
     features
@@ -412,4 +414,72 @@ fn typography_format_patches_and_character_snapshots_preserve_independent_assign
     assert_eq!(CharacterFormat::from_element(&run), captured);
     assert!(!Typography::get_slashed_zero(&run));
     assert!(!TypographyFormat::from_object(&run).is_default());
+}
+
+#[test]
+fn typography_inherits_through_document_nodes_and_explicit_defaults_reset_each_family() {
+    let _scope = test_scope();
+    let view = RichTextBlock::new();
+    let paragraph = Paragraph::new();
+    let span = Span::new();
+    let run = Run::with_text(Some("inherited"));
+    span.inlines().add(run.clone());
+    paragraph.inlines().add(span.clone());
+    view.blocks().add(paragraph.clone());
+    let patch = TypographyFormat {
+        annotation_alternates: Some(3),
+        east_asian_expert_forms: Some(true),
+        east_asian_language: Some(FontEastAsianLanguage::Jis90),
+        east_asian_widths: Some(FontEastAsianWidths::Full),
+        standard_ligatures: Some(false),
+        contextual_ligatures: Some(false),
+        discretionary_ligatures: Some(true),
+        historical_ligatures: Some(true),
+        standard_swashes: Some(4),
+        contextual_swashes: Some(5),
+        contextual_alternates: Some(false),
+        stylistic_alternates: Some(6),
+        stylistic_set1: Some(true),
+        stylistic_set2: Some(true),
+        stylistic_set3: Some(true),
+        stylistic_set4: Some(true),
+        stylistic_set5: Some(true),
+        stylistic_set6: Some(true),
+        stylistic_set7: Some(true),
+        stylistic_set8: Some(true),
+        stylistic_set9: Some(true),
+        stylistic_set10: Some(true),
+        stylistic_set11: Some(true),
+        stylistic_set12: Some(true),
+        stylistic_set13: Some(true),
+        stylistic_set14: Some(true),
+        stylistic_set15: Some(true),
+        stylistic_set16: Some(true),
+        stylistic_set17: Some(true),
+        stylistic_set18: Some(true),
+        stylistic_set19: Some(true),
+        stylistic_set20: Some(true),
+        capitals: Some(FontCapitals::SmallCaps),
+        capital_spacing: Some(true),
+        kerning: Some(false),
+        case_sensitive_forms: Some(true),
+        historical_forms: Some(true),
+        fraction: Some(FontFraction::Stacked),
+        numeral_style: Some(FontNumeralStyle::OldStyle),
+        numeral_alignment: Some(FontNumeralAlignment::Tabular),
+        slashed_zero: Some(true),
+        mathematical_greek: Some(true),
+        variants: Some(FontVariants::Superscript),
+    };
+    patch.apply_to(&view);
+    assert_eq!(TypographyFormat::effective(&paragraph), patch);
+    assert_eq!(TypographyFormat::effective(&span), patch);
+    assert_eq!(TypographyFormat::effective(&run), patch);
+    assert!(TypographyFormat::from_object(&run).is_empty());
+    defaults().apply_to(&span);
+    assert_eq!(TypographyFormat::effective(&run), defaults());
+    assert_eq!(TypographyFormat::from_object(&span), defaults());
+    assert!(Typography::effective_font_features(&run).is_none());
+    TypographyFormat::clear_on(&span);
+    assert_eq!(TypographyFormat::effective(&run), patch);
 }

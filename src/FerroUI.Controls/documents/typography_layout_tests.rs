@@ -15,6 +15,8 @@ use ferroui_base::utilities::{ReadOnlyMemory, ValueSpan};
 use ferroui_base::{FerroLocator, Rect, Size};
 use std::cell::RefCell;
 use std::rc::Rc;
+#[allow(unused_imports)]
+use crate::{RichTextBlock, RichTextBlockOverflow};
 
 fn layout(control: &Control) {
     control.measure(Size::new(400.0, 300.0));
@@ -305,6 +307,78 @@ fn typography_presenter_observes_raw_mutation_without_cancelling_preedit_and_det
     presenter.set_font_features(Some(features.clone()));
     let weak = presenter.downgrade();
     drop(presenter);
+    assert!(weak.upgrade().is_none());
+    assert!(!features.list().has_collection_changed_subscribers());
+}
+
+#[test]
+fn typography_rich_empty_paragraph_and_overflow_continuations_share_the_effective_input() {
+    let _scope = test_scope();
+    let view = RichTextBlock::new();
+    Typography::set_kerning(&view, false);
+    assert_feature(
+        &*view.page_layout().source.paragraphs[0].properties,
+        "kern",
+        0,
+    );
+    view.blocks().add(Paragraph::new());
+    assert_feature(
+        &*view.page_layout().source.paragraphs[0].properties,
+        "kern",
+        0,
+    );
+    view.set_document(RichTextDocument::from_text("AV\nAV\nAV\nAV"));
+    let overflow = RichTextBlockOverflow::new();
+    view.set_overflow_content_target(Some(overflow.clone()));
+    view.measure(Size::new(100.0, 15.0));
+    view.arrange(Rect::new(0.0, 0.0, 100.0, 15.0));
+    layout(&overflow);
+    let initial = view.page_layout();
+    let continued = overflow.page_layout();
+    assert!(Rc::ptr_eq(&initial.source, &continued.source));
+    assert!(!continued.lines.is_empty());
+    for line in initial.lines.iter().chain(continued.lines.iter()) {
+        for run in line.line.text_runs().iter() {
+            if let Some(properties) = run.properties() {
+                assert_feature(&**properties, "kern", 0);
+            }
+        }
+    }
+    Typography::set_kerning(&view, true);
+    assert!(!view.is_measure_valid());
+    assert!(!overflow.is_measure_valid());
+    let next = overflow.page_layout();
+    assert!(!Rc::ptr_eq(&next.source, &continued.source));
+    assert!(next.source.paragraphs[0]
+        .properties
+        .font_features()
+        .is_none());
+}
+
+#[test]
+fn typography_empty_rich_view_observes_raw_features_without_changing_document_history() {
+    let _scope = test_scope();
+    let features = FontFeatureCollection::new();
+    let view = RichTextBlock::new();
+    Typography::set_kerning(&view, false);
+    view.set_font_features(Some(features.clone()));
+    layout(&view);
+    let document = view.document();
+    let snapshot = document.snapshot();
+    let revision = document.revision();
+    let mutation = document.mutation_version();
+    features.add(kern(1));
+    assert!(!view.is_measure_valid());
+    assert_feature(
+        &*view.page_layout().source.paragraphs[0].properties,
+        "kern",
+        1,
+    );
+    assert_eq!(document.snapshot(), snapshot);
+    assert_eq!(document.revision(), revision);
+    assert_eq!(document.mutation_version(), mutation);
+    let weak = view.downgrade();
+    drop(view);
     assert!(weak.upgrade().is_none());
     assert!(!features.list().has_collection_changed_subscribers());
 }

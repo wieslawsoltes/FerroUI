@@ -1,4 +1,4 @@
-use crate::{Control, TextBlock};
+use crate::{Control, RichTextBlock, TextBlock};
 use ferroui_base::media::text_formatting::{
     DrawableTextRun, ITextDrawingSink, TextRun, TextRunProperties,
 };
@@ -103,7 +103,11 @@ impl EmbeddedControlRun {
             return explicit;
         }
         if control.is_measure_valid() {
-            if let Some(text) = control.clone().cast::<TextBlock>() {
+            if let Some(rich) = control.clone().cast::<RichTextBlock>() {
+                if let Some(baseline) = rich.cached_baseline_offset() {
+                    return baseline;
+                }
+            } else if let Some(text) = control.clone().cast::<TextBlock>() {
                 if let Some(baseline) = text.cached_text_baseline() {
                     return baseline;
                 }

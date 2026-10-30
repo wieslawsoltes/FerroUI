@@ -7,6 +7,8 @@ use crate::test_support::test_scope;
 use ferroui_base::media::text_formatting::testing::TextTestScope;
 use ferroui_base::media::{FlowDirection, TextAlignment};
 use ferroui_base::{Rect, Size};
+#[allow(unused_imports)]
+use crate::{RichTextBlock, RichTextBlockOverflow};
 
 #[test]
 fn rich_paragraph_tabs_use_native_values_points_and_sorted_replacement() {
@@ -94,3 +96,64 @@ fn rich_paragraph_tabs_reject_invalid_edits_atomically_and_enforce_native_limit(
     );
 }
 
+#[test]
+fn rich_paragraph_tabs_layout_positions_invalidate_with_the_property() {
+    let _scope = test_scope();
+    let _text = TextTestScope::new();
+    let view = RichTextBlock::new();
+    view.set_font_size(12.0);
+    let paragraph = Paragraph::with_text("a\tb");
+    paragraph.set_tab_stops(
+        TextTabStops::new([TextTabStop::new(
+            80.0,
+            TabAlignment::Left,
+            TabLeader::Spaces,
+        )])
+        .unwrap(),
+    );
+    view.blocks().add(paragraph.clone());
+    view.measure(Size::new(300.0, 100.0));
+    view.arrange(Rect::new(0.0, 0.0, 300.0, 100.0));
+    let x = view.get_rect_from_character_index(2).x;
+    assert!((x - 80.0).abs() < 0.01, "{x}");
+    let revision = view.document().revision();
+    paragraph.set_tab_stops(
+        TextTabStops::new([TextTabStop::new(
+            120.0,
+            TabAlignment::Left,
+            TabLeader::Spaces,
+        )])
+        .unwrap(),
+    );
+    assert!(view.document().revision() > revision);
+    view.measure(Size::new(300.0, 100.0));
+    view.arrange(Rect::new(0.0, 0.0, 300.0, 100.0));
+    assert!((view.get_rect_from_character_index(2).x - 120.0).abs() < 0.01);
+}
+
+#[test]
+fn rich_paragraph_tabs_rtl_indent_keeps_the_page_origin_and_first_line_leading_edge() {
+    let _scope = test_scope();
+    let _text = TextTestScope::new();
+    let view = RichTextBlock::new();
+    view.set_font_size(12.0);
+    let paragraph = Paragraph::with_text("אב\t123");
+    paragraph.set_flow_direction(FlowDirection::RightToLeft);
+    paragraph.set_text_alignment(TextAlignment::Start);
+    paragraph.set_text_indent(20.0);
+    paragraph.set_left_indent(10.0);
+    paragraph.set_right_indent(10.0);
+    paragraph.set_tab_stops(
+        TextTabStops::new([TextTabStop::new(
+            60.0,
+            TabAlignment::Right,
+            TabLeader::Spaces,
+        )])
+        .unwrap(),
+    );
+    view.blocks().add(paragraph);
+    view.measure(Size::new(300.0, 100.0));
+    view.arrange(Rect::new(0.0, 0.0, 300.0, 100.0));
+    assert!((view.get_rect_from_character_index(0).x - 270.0).abs() < 0.01);
+    assert!((view.get_rect_from_character_index(3).x - 222.0).abs() < 0.01);
+}

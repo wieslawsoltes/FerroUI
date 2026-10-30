@@ -33,7 +33,7 @@ mod markup_types_tests;
 
 /// The lists of the types declared in this module, by area.
 pub(crate) const TYPE_LISTS: &[&[&MarkupType]] =
-    &[enums::TYPES, values::TYPES, contracts::TYPES, plain::TYPES, classes::TYPES, converters::TYPES, crate::documents::MARKUP_TYPES];
+    &[enums::TYPES, values::TYPES, contracts::TYPES, plain::TYPES, classes::TYPES, converters::TYPES, crate::documents::MARKUP_TYPES, crate::context_menu_event_args::MARKUP_TYPES];
 
 /// Adds the types declared in this module to the process-wide table of
 /// types with markup metadata. Called once by `register_types()`.
@@ -67,6 +67,7 @@ fn register_value_types() {
     classes::register_value_types();
     converters::register_value_types();
     crate::documents::register_value_types();
+    crate::context_menu_event_args::register_value_types();
     register_assigned_binding();
     // The delegate of `DataValidationErrors.ErrorConverter` (`Func<object, object>?`): a binding
     // delivers a converter, and the property holds the nullable form.

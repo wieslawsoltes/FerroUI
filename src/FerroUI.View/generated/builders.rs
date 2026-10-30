@@ -1297,6 +1297,32 @@ pub fn reversible_stack_panel() -> El<ferroui_controls::ReversibleStackPanel> {
     El::new()
 }
 
+pub use ferroui_controls::RichTextBlock;
+
+impl ViewClass for ferroui_controls::RichTextBlock {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::RichTextBlock>::new()
+    }
+}
+
+/// Starts an element of [`RichTextBlock`](ferroui_controls::RichTextBlock).
+pub fn rich_text_block() -> El<ferroui_controls::RichTextBlock> {
+    El::new()
+}
+
+pub use ferroui_controls::RichTextBlockOverflow;
+
+impl ViewClass for ferroui_controls::RichTextBlockOverflow {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::RichTextBlockOverflow>::new()
+    }
+}
+
+/// Starts an element of [`RichTextBlockOverflow`](ferroui_controls::RichTextBlockOverflow).
+pub fn rich_text_block_overflow() -> El<ferroui_controls::RichTextBlockOverflow> {
+    El::new()
+}
+
 pub use ferroui_controls::primitives::ScrollBar;
 
 impl ViewClass for ferroui_controls::primitives::ScrollBar {
@@ -6514,6 +6540,155 @@ pub trait ReversibleStackPanelProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::ReversibleStackPanel>> ReversibleStackPanelProps for El<T> {}
+
+/// The properties and routed events of [`RichTextBlock`](ferroui_controls::RichTextBlock).
+pub trait RichTextBlockProps: ElementBuilder {
+    /// Sets [`RichTextBlock::rich_document_property`](ferroui_controls::RichTextBlock::rich_document_property).
+    fn rich_document<M>(self, value: impl IntoProp<ferroui_controls::documents::RichTextDocument, M>) -> Self {
+        self.prop(<ferroui_controls::RichTextBlock>::rich_document_property(), value)
+    }
+
+    /// Sets [`RichTextBlock::selection_start_property`](ferroui_controls::RichTextBlock::selection_start_property).
+    fn selection_start<M>(self, value: impl IntoProp<i32, M>) -> Self {
+        self.prop(<ferroui_controls::RichTextBlock>::selection_start_property(), value)
+    }
+
+    /// Sets [`RichTextBlock::selection_end_property`](ferroui_controls::RichTextBlock::selection_end_property).
+    fn selection_end<M>(self, value: impl IntoProp<i32, M>) -> Self {
+        self.prop(<ferroui_controls::RichTextBlock>::selection_end_property(), value)
+    }
+
+    /// Sets [`RichTextBlock::is_text_selection_enabled_property`](ferroui_controls::RichTextBlock::is_text_selection_enabled_property).
+    fn is_text_selection_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::RichTextBlock>::is_text_selection_enabled_property(), value)
+    }
+
+    /// Sets [`RichTextBlock::selection_highlight_color_property`](ferroui_controls::RichTextBlock::selection_highlight_color_property).
+    fn selection_highlight_color<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
+        self.prop(<ferroui_controls::RichTextBlock>::selection_highlight_color_property(), value)
+    }
+
+    /// Sets [`RichTextBlock::selection_foreground_brush_property`](ferroui_controls::RichTextBlock::selection_foreground_brush_property).
+    fn selection_foreground_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
+        self.prop(<ferroui_controls::RichTextBlock>::selection_foreground_brush_property(), value)
+    }
+
+    /// Sets [`RichTextBlock::caret_brush_property`](ferroui_controls::RichTextBlock::caret_brush_property).
+    fn caret_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
+        self.prop(<ferroui_controls::RichTextBlock>::caret_brush_property(), value)
+    }
+
+    /// Sets [`RichTextBlock::background_property`](ferroui_controls::RichTextBlock::background_property).
+    fn background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
+        self.prop(<ferroui_controls::RichTextBlock>::background_property(), value)
+    }
+
+    /// Sets [`RichTextBlock::padding_property`](ferroui_controls::RichTextBlock::padding_property).
+    fn padding<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
+        self.prop(<ferroui_controls::RichTextBlock>::padding_property(), value)
+    }
+
+    /// Sets [`RichTextBlock::font_family_property`](ferroui_controls::RichTextBlock::font_family_property).
+    fn font_family<M>(self, value: impl IntoProp<ferroui_base::media::FontFamily, M>) -> Self {
+        self.prop(<ferroui_controls::RichTextBlock>::font_family_property(), value)
+    }
+
+    /// Sets [`RichTextBlock::font_size_property`](ferroui_controls::RichTextBlock::font_size_property).
+    fn font_size<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::RichTextBlock>::font_size_property(), value)
+    }
+
+    /// Sets [`RichTextBlock::font_style_property`](ferroui_controls::RichTextBlock::font_style_property).
+    fn font_style<M>(self, value: impl IntoProp<ferroui_base::media::FontStyle, M>) -> Self {
+        self.prop(<ferroui_controls::RichTextBlock>::font_style_property(), value)
+    }
+
+    /// Sets [`RichTextBlock::font_weight_property`](ferroui_controls::RichTextBlock::font_weight_property).
+    fn font_weight<M>(self, value: impl IntoProp<ferroui_base::media::FontWeight, M>) -> Self {
+        self.prop(<ferroui_controls::RichTextBlock>::font_weight_property(), value)
+    }
+
+    /// Sets [`RichTextBlock::font_stretch_property`](ferroui_controls::RichTextBlock::font_stretch_property).
+    fn font_stretch<M>(self, value: impl IntoProp<ferroui_base::media::FontStretch, M>) -> Self {
+        self.prop(<ferroui_controls::RichTextBlock>::font_stretch_property(), value)
+    }
+
+    /// Sets [`RichTextBlock::font_features_property`](ferroui_controls::RichTextBlock::font_features_property).
+    fn font_features<M>(self, value: impl IntoProp<Option<ferroui_base::media::FontFeatureCollection>, M>) -> Self {
+        self.prop(<ferroui_controls::RichTextBlock>::font_features_property(), value)
+    }
+
+    /// Sets [`RichTextBlock::foreground_property`](ferroui_controls::RichTextBlock::foreground_property).
+    fn foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
+        self.prop(<ferroui_controls::RichTextBlock>::foreground_property(), value)
+    }
+
+    /// Sets [`RichTextBlock::letter_spacing_property`](ferroui_controls::RichTextBlock::letter_spacing_property).
+    fn letter_spacing<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::RichTextBlock>::letter_spacing_property(), value)
+    }
+
+    /// Sets [`RichTextBlock::text_alignment_property`](ferroui_controls::RichTextBlock::text_alignment_property).
+    fn text_alignment<M>(self, value: impl IntoProp<ferroui_base::media::TextAlignment, M>) -> Self {
+        self.prop(<ferroui_controls::RichTextBlock>::text_alignment_property(), value)
+    }
+
+    /// Sets [`RichTextBlock::line_height_property`](ferroui_controls::RichTextBlock::line_height_property).
+    fn line_height<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::RichTextBlock>::line_height_property(), value)
+    }
+
+    /// Sets [`RichTextBlock::text_indent_property`](ferroui_controls::RichTextBlock::text_indent_property).
+    fn text_indent<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::RichTextBlock>::text_indent_property(), value)
+    }
+
+    /// Sets [`RichTextBlock::line_stacking_strategy_property`](ferroui_controls::RichTextBlock::line_stacking_strategy_property).
+    fn line_stacking_strategy<M>(self, value: impl IntoProp<ferroui_controls::documents::LineStackingStrategy, M>) -> Self {
+        self.prop(<ferroui_controls::RichTextBlock>::line_stacking_strategy_property(), value)
+    }
+
+    /// Sets [`RichTextBlock::text_line_bounds_property`](ferroui_controls::RichTextBlock::text_line_bounds_property).
+    fn text_line_bounds<M>(self, value: impl IntoProp<ferroui_base::media::TextLineBounds, M>) -> Self {
+        self.prop(<ferroui_controls::RichTextBlock>::text_line_bounds_property(), value)
+    }
+
+    /// Sets [`RichTextBlock::text_decorations_property`](ferroui_controls::RichTextBlock::text_decorations_property).
+    fn text_decorations<M>(self, value: impl IntoProp<Option<ferroui_base::media::TextDecorationCollection>, M>) -> Self {
+        self.prop(<ferroui_controls::RichTextBlock>::text_decorations_property(), value)
+    }
+
+    /// Sets [`RichTextBlock::text_trimming_property`](ferroui_controls::RichTextBlock::text_trimming_property).
+    fn text_trimming<M>(self, value: impl IntoProp<std::rc::Rc<dyn ferroui_base::media::TextTrimming>, M>) -> Self {
+        self.prop(<ferroui_controls::RichTextBlock>::text_trimming_property(), value)
+    }
+
+    /// Sets [`RichTextBlock::text_wrapping_property`](ferroui_controls::RichTextBlock::text_wrapping_property).
+    fn text_wrapping<M>(self, value: impl IntoProp<ferroui_base::media::TextWrapping, M>) -> Self {
+        self.prop(<ferroui_controls::RichTextBlock>::text_wrapping_property(), value)
+    }
+
+    /// Sets [`RichTextBlock::max_lines_property`](ferroui_controls::RichTextBlock::max_lines_property).
+    fn max_lines<M>(self, value: impl IntoProp<i32, M>) -> Self {
+        self.prop(<ferroui_controls::RichTextBlock>::max_lines_property(), value)
+    }
+
+    /// Handles [`RichTextBlock::selection_changed_event`](ferroui_controls::RichTextBlock::selection_changed_event).
+    fn on_selection_changed(self, handler: impl Fn(&ferroui_base::interactivity::RoutedEventArgs) + 'static) -> Self {
+        self.routed(<ferroui_controls::RichTextBlock>::selection_changed_event(), move |_, e| handler(e))
+    }
+
+    /// Handles [`RichTextBlock::is_text_trimmed_changed_event`](ferroui_controls::RichTextBlock::is_text_trimmed_changed_event).
+    fn on_is_text_trimmed_changed(self, handler: impl Fn(&ferroui_base::interactivity::RoutedEventArgs) + 'static) -> Self {
+        self.routed(<ferroui_controls::RichTextBlock>::is_text_trimmed_changed_event(), move |_, e| handler(e))
+    }
+
+    /// Handles [`RichTextBlock::context_menu_opening_event`](ferroui_controls::RichTextBlock::context_menu_opening_event).
+    fn on_context_menu_opening(self, handler: impl Fn(&ferroui_controls::ContextMenuEventArgs) + 'static) -> Self {
+        self.routed(<ferroui_controls::RichTextBlock>::context_menu_opening_event(), move |_, e| handler(e))
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::RichTextBlock>> RichTextBlockProps for El<T> {}
 
 /// The properties and routed events of [`Rotate3DTransform`](ferroui_base::media::Rotate3DTransform).
 pub trait Rotate3DTransformProps: ElementBuilder {

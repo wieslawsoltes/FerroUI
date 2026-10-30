@@ -226,6 +226,9 @@ const DECLARED_NEXT_TO_THE_TYPE: &[&str] = &[
     "TextRange",
     "TextRangeCollection",
     "TextHighlighterCollection",
+    // The rich text views (crate::context_menu_event_args::MARKUP_TYPES).
+    "ContextMenuEventArgs",
+    "RoutedEvent`1",
 ];
 
 #[test]
