@@ -1,0 +1,56 @@
+name: Visual designer
+
+# The designer crates of #345 (docs: the series C1-C6 and D1-D9 of its review). Each part of the
+# stack adds its crates to the jobs here; the schema of the language service is checked by the
+# source conventions of ci.yml, since any framework crate can change it.
+on:
+  pull_request:
+    paths:
+      - 'src/FerroUI.Designer*/**'
+      - 'docs/designer/samples/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '.github/workflows/designer.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: designer-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: '0'
+  CARGO_PROFILE_DEV_DEBUG: '0'
+  CARGO_PROFILE_TEST_DEBUG: '0'
+  RUST_BACKTRACE: '1'
+
+jobs:
+  portable:
+    name: Portable engines (${{ matrix.os }}, Rust ${{ matrix.rust }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            rust: stable
+          - os: ubuntu-latest
+            rust: '1.89.0'
+          - os: macos-latest
+            rust: stable
+          - os: windows-latest
+            rust: stable
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+        with:
+          toolchain: ${{ matrix.rust }}
+          components: clippy
+      - name: Source preservation, transaction and language regressions
+        run: cargo test --locked -p ferroui-designer-core -p ferroui-designer-project -p ferroui-designer-tools -p ferroui-designer-language
+      - name: Portable public APIs are warning-free
+        run: cargo clippy --locked -p ferroui-designer-core -p ferroui-designer-project -p ferroui-designer-tools -p ferroui-designer-language --all-targets -- -D warnings
