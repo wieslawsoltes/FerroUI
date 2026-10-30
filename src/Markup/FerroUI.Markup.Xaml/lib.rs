@@ -19,7 +19,7 @@ mod eager_parent_stack_enumerator;
 mod extensions;
 mod ferro_xaml_loader;
 mod populate_overrides;
-#[cfg(all(feature = "hot-reload", debug_assertions))]
+#[cfg(feature = "source-overlays")]
 pub mod source_overlay;
 #[cfg(all(feature = "hot-reload", debug_assertions))]
 pub mod reload_validation;

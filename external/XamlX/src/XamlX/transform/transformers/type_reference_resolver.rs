@@ -193,7 +193,7 @@ impl TypeReferenceResolver {
             Some((ns, name)) => (ns, name),
             None => ("", xml_name),
         };
-        let Some(xmlns) = context.try_get_namespace_alias(short_ns) else {
+        let Some(xmlns) = context.try_get_namespace_alias_at(short_ns, line_info) else {
             return Err(XamlError::transform_exception(
                 format!("Unable to resolve type namespace alias {short_ns}"),
                 Some(line_info),

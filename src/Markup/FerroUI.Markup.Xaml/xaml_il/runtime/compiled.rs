@@ -935,6 +935,14 @@ struct CompiledXmlNamespaceInfo {
     table: XmlNamespaceTable,
 }
 
+/// Install the lexical XML namespace table of an emitted node for the duration of its
+/// evaluation. The guard restores the previous provider on normal return and early errors.
+// Deviation (DEVIATIONS.md, XAML namespace declarations): upstream's runtime table holds the
+// declarations of the root element only.
+pub fn push_namespace_scope(context: &Rc<XamlIlContext>, namespaces: XmlNamespaceTable) -> super::XamlStaticProviderScope {
+    context.push_static_provider(Rc::new(CompiledXmlNamespaceInfo { table: namespaces }))
+}
+
 impl IFerroXamlIlXmlNamespaceInfoProvider for CompiledXmlNamespaceInfo {
     fn xml_namespaces(&self) -> XmlNamespaces {
         let mut namespaces = HashMap::with_capacity(self.table.len());
