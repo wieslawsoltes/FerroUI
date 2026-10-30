@@ -315,6 +315,44 @@ fn imm32_rich_detached_client_drops_late_results_without_ordinary_text_fallback(
 }
 
 #[test]
+fn imm32_rich_removed_client_leaves_connection_mode_once_its_disable_has_run() {
+    let f = Fixture::new();
+    f.outside.focus();
+    assert!(f.native.has_managed_connection());
+    f.system.run_posted();
+    assert!(!f.native.has_managed_connection());
+    // Without a client, a composition result is the reference's raw text input again.
+    f.native.handle_composition_start();
+    f.commit("late");
+    assert_eq!(f.owner.text(), "abcd");
+    assert_eq!(&*f.parent.text.borrow(), &["late".to_owned()]);
+    // The next connection client takes the connection path again.
+    f.owner.focus();
+    f.system.run_posted();
+    assert!(f.native.has_managed_connection());
+}
+
+#[test]
+fn imm32_rich_client_adopts_a_composition_begun_before_it_had_the_focus() {
+    let f = Fixture::new();
+    f.outside.focus();
+    f.system.run_posted();
+    // A composition begun without a connection client (a TextBox, or no client) ...
+    f.native.handle_composition_start();
+    f.preview("ka");
+    // ... goes on when the connection client takes the focus: its result is the
+    // client's text, as the reference's text input of the new focus, never dropped.
+    f.owner.focus();
+    f.system.run_posted();
+    assert!(f.native.has_managed_connection());
+    f.preview("か");
+    f.commit("か");
+    f.native.handle_composition_end(3);
+    assert!(f.owner.text().contains('か'), "{}", f.owner.text());
+    assert!(f.parent.text.borrow().is_empty());
+}
+
+#[test]
 fn imm32_rich_reset_cancels_the_native_composition_and_invalidates_posted_geometry() {
     let f = Fixture::new();
     f.system.active_window.set(HWND);

@@ -42,13 +42,17 @@ fn active(system: &Rc<FakeSystem>, parent: &Rc<dyn Imm32Parent>) -> (Rc<Imm32Inp
 }
 
 /// An input method of a window that served a connection client, without a
-/// client now: what posted for the client is run.
+/// client now, before the disable its removal posted has run (which ends the
+/// connection mode): the native ownership of the connection path without a
+/// client. The posted disable acts on no window yet (the window is set after).
 fn managed(system: &Rc<FakeSystem>, parent: &Rc<dyn Imm32Parent>) -> (Rc<Imm32InputMethod>, ConnectionApp) {
     let input = Imm32InputMethod::new(system.clone());
     let app = ConnectionApp::start(&input);
-    input.set_client(None);
     system.run_posted();
+    input.set_client(None);
+    system.posted.borrow_mut().clear();
     system.take_calls();
+    assert!(input.has_managed_connection());
     input.set_language_and_window(Rc::downgrade(parent), parent.hwnd(), JAPANESE);
     (input, app)
 }

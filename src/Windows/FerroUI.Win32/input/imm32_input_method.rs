@@ -226,7 +226,7 @@ impl Imm32InputMethod {
     }
 
     /// Whether the input method serves a client of the exact-edit connection
-    /// (or did, and has no client now).
+    /// (until the posted disable after its removal has run).
     pub fn has_managed_connection(&self) -> bool {
         self.managed_input.get()
     }
@@ -1190,6 +1190,10 @@ impl Imm32InputMethod {
     ) {
         let cancel_native =
             self.managed_input.get() && (self.is_composing.get() || self.composition_session.borrow().is_some());
+        // A composition the input method began for a legacy client (or for no client) goes on
+        // when a connection client takes the focus, as in the reference, where its result is
+        // the text input of the new focus: the new client adopts it, so its text is not lost.
+        let adopt_native = !self.managed_input.get() && self.is_composing.get() && connection.is_some();
         let generation = self.generation.get().wrapping_add(1);
         self.generation.set(generation);
         if client.is_none() {
@@ -1229,6 +1233,10 @@ impl Imm32InputMethod {
         if self.generation.get() != generation {
             return;
         }
+        if adopt_native {
+            self.handle_managed_composition_start();
+        }
+        let generation = self.generation.get();
         let this = self.this.clone();
         self.system.post(Box::new(move || {
             let Some(this) = this.upgrade() else {
@@ -1241,6 +1249,12 @@ impl Imm32InputMethod {
                 this.enable_imm();
             } else {
                 this.disable_imm();
+            }
+            // Without a client the input method is the reference's again: a message that
+            // arrives before the next client is installed is handled as for a legacy client
+            // (raw text input), not dropped as for a connection client that is gone.
+            if this.client().is_none() {
+                this.managed_input.set(false);
             }
         }));
     }
