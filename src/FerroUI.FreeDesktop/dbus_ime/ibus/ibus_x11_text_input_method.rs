@@ -371,11 +371,21 @@ impl DBusTextInputMethodCore for IBusX11TextInputMethod {
             })));
             let weak = this.weak_self.clone();
             base.enqueue(move || async move {
-                context.set_capabilities(IBusCapability::CAP_FOCUS.bits()).await?;
-                // A connection client bound before the context was there gets its content type.
-                if let Some(this) = weak.upgrade() {
-                    this.apply_content_type(generation).await;
+                let Some(this) = weak.upgrade() else {
+                    return Ok(());
+                };
+                // A context retired before the call ran, or while it ran, is not called and does
+                // not disconnect the one after it (DEVIATIONS.md, X11 platform).
+                if this.context_generation.get() != generation {
+                    return Ok(());
                 }
+                let result = context.set_capabilities(IBusCapability::CAP_FOCUS.bits()).await;
+                if this.context_generation.get() != generation {
+                    return Ok(());
+                }
+                result?;
+                // A connection client bound before the context was there gets its content type.
+                this.apply_content_type(generation).await;
                 Ok(())
             });
             Ok(true)
