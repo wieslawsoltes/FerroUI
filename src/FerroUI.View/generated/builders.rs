@@ -2055,6 +2055,20 @@ pub trait AcrylicBrushProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_base::media::AcrylicBrush>> AcrylicBrushProps for El<T> {}
 
+/// The properties and routed events of [`AdaptiveTrigger`](ferroui_controls::AdaptiveTrigger).
+pub trait AdaptiveTriggerProps: ElementBuilder {
+    /// Sets [`AdaptiveTrigger::min_window_width_property`](ferroui_controls::AdaptiveTrigger::min_window_width_property).
+    fn min_window_width<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::AdaptiveTrigger>::min_window_width_property(), value)
+    }
+
+    /// Sets [`AdaptiveTrigger::min_window_height_property`](ferroui_controls::AdaptiveTrigger::min_window_height_property).
+    fn min_window_height<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::AdaptiveTrigger>::min_window_height_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::AdaptiveTrigger>> AdaptiveTriggerProps for El<T> {}
+
 /// The properties and routed events of [`AdornerLayer`](ferroui_controls::primitives::AdornerLayer).
 pub trait AdornerLayerProps: ElementBuilder {
     /// Sets [`AdornerLayer::is_clip_enabled_property`](ferroui_controls::primitives::AdornerLayer::is_clip_enabled_property).
@@ -7482,6 +7496,15 @@ pub trait StackPanelProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::StackPanel>> StackPanelProps for El<T> {}
+
+/// The properties and routed events of [`StateTrigger`](ferroui_controls::StateTrigger).
+pub trait StateTriggerProps: ElementBuilder {
+    /// Sets [`StateTrigger::is_active_property`](ferroui_controls::StateTrigger::is_active_property).
+    fn is_active<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::StateTrigger>::is_active_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::StateTrigger>> StateTriggerProps for El<T> {}
 
 /// The properties and routed events of [`StyledElement`](ferroui_base::StyledElement).
 pub trait StyledElementProps: ElementBuilder {
