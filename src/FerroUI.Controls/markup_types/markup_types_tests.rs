@@ -229,6 +229,10 @@ const DECLARED_NEXT_TO_THE_TYPE: &[&str] = &[
     // The rich text views (crate::context_menu_event_args::MARKUP_TYPES).
     "ContextMenuEventArgs",
     "RoutedEvent`1",
+    // The WinUI materials (winui-materials.md).
+    "ApplicationTheme",
+    "RevealBrushState",
+    "FocusVisualKind",
 ];
 
 #[test]

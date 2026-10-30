@@ -4,7 +4,9 @@
 
 use super::effect_graph::EffectGraph;
 use super::{CanvasComposite, GraphicsEffect};
-use crate::rendering::composition::{CompositionBackdropBrush, CompositionEffectBrush, Compositor};
+use crate::rendering::composition::{
+    CompositionBackdropBrush, CompositionEffectBrush, CompositionHostBackdropBrush, Compositor,
+};
 use std::rc::Rc;
 use std::sync::Arc;
 
@@ -33,7 +35,8 @@ pub enum CompositionEffectFactoryError {
     /// An effect of the graph is of a type the drawing contexts cannot
     /// draw (the name of its Win2D class).
     EffectTypeNotSupported(&'static str),
-    /// A composite effect has a mode other than `SourceOver`.
+    /// A composite effect has a mode the drawing contexts do not have
+    /// (`MaskInvert`).
     CompositeModeNotSupported(CanvasComposite),
     /// An effect of the graph has an input that is not set.
     MissingSource {
@@ -143,12 +146,16 @@ impl Compositor {
         CompositionEffectFactory::new(self.this_handle(), &effect.into(), animatable_properties)
     }
 
-    /// `CreateBackdropBrush`: a brush that shows what is behind the visual.
-    ///
-    /// Deviation (winui-composition.md): the drawing contexts cannot read
-    /// back what was drawn under a rectangle, so the brush draws nothing
-    /// (also as a source of an effect).
+    /// `CreateBackdropBrush`: a brush that shows what is behind the visual
+    /// that paints it: the compositor draws again what was drawn under the
+    /// visual (winui-materials.md, the backdrop).
     pub fn create_backdrop_brush(&self) -> CompositionBackdropBrush {
         CompositionBackdropBrush::new(&self.this_handle())
+    }
+
+    /// `CreateHostBackdropBrush`: a brush that shows what is behind the
+    /// window (see [`CompositionHostBackdropBrush`]).
+    pub fn create_host_backdrop_brush(&self) -> CompositionHostBackdropBrush {
+        CompositionHostBackdropBrush::new(&self.this_handle())
     }
 }

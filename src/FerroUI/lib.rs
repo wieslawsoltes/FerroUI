@@ -34,6 +34,7 @@
 //! | `controls_charts` | `ferroui-controls-charts` | `charts` | no |
 //! | `controls_inking` | `ferroui-controls-inking` | `inking` | no |
 //! | `controls_repeater` | `ferroui-controls-repeater` | `repeater` | no |
+//! | `pretext`, `pretext_layout`, `pretext_media` | prepared text, custom flow and native text services | `pretext` | no |
 //! | `controls_treedatagrid`, `treedatagrid_core` | `ferroui-controls-treedatagrid`, `ferroui-treedatagrid-core` | `treedatagrid` | no |
 //! | `dialogs` | `ferroui-dialogs` | `dialogs` | no |
 //! | `diagnostics` | `ferroui-diagnostics` (the developer tools) | `diagnostics` | no |
@@ -172,6 +173,12 @@ pub use ferroui_controls_charts as controls_charts;
 pub use ferroui_controls_inking as controls_inking;
 #[cfg(feature = "repeater")]
 pub use ferroui_controls_repeater as controls_repeater;
+#[cfg(feature = "pretext")]
+pub use ferroui_pretext as pretext;
+#[cfg(feature = "pretext")]
+pub use ferroui_pretext_layout as pretext_layout;
+#[cfg(feature = "pretext")]
+pub use ferroui_pretext_media as pretext_media;
 #[cfg(feature = "treedatagrid")]
 pub use ferroui_controls_treedatagrid as controls_treedatagrid;
 #[cfg(feature = "treedatagrid")]

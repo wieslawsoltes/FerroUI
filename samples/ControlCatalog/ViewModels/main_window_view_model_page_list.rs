@@ -138,6 +138,13 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
                 Icons::LAYERS,
                 "Connected animations and ElementCompositionPreview",
             );
+            // Not from the managed original: the page of the WinUI materials.
+            s.add_page(
+                || crate::pages::winui_materials_page().upcast(),
+                "Materials (WinUI)",
+                Icons::BLUR,
+                "Acrylic, Reveal and system backdrops",
+            );
             s.add("/Pages/CustomDrawing.xaml", "Custom Drawing", Icons::BRUSH, "Render custom geometry in code");
             // Not from upstream: SymbolIcon and FontIcon of WinUI (docs/porting/winui-controls.md) and PathIcon.
             s.add("/Pages/IconElementPage.xaml", "IconElement", Icons::SPARKLE, "Symbol, font and path icons");

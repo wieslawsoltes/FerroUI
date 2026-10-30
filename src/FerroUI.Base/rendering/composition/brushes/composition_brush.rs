@@ -122,6 +122,8 @@ pub(crate) enum CompositionBrushKind {
     Effect(CompositionEffectBrushData),
     /// The WinUI `CompositionBackdropBrush`.
     Backdrop(CompositionBrushProps),
+    /// The WinUI `CompositionHostBackdropBrush`.
+    HostBackdrop(CompositionBrushProps),
 }
 
 /// A brush of the composition API.
@@ -170,7 +172,7 @@ impl CompositionBrush {
             CompositionBrushKind::NineGrid(props) => props.initialize_defaults(self),
             CompositionBrushKind::Mask(props) => props.initialize_defaults(self),
             CompositionBrushKind::Effect(data) => data.brush.initialize_defaults(self),
-            CompositionBrushKind::Backdrop(props) => props.initialize_defaults(self),
+            CompositionBrushKind::Backdrop(props) | CompositionBrushKind::HostBackdrop(props) => props.initialize_defaults(self),
         }
     }
 
@@ -185,7 +187,7 @@ impl CompositionBrush {
             CompositionBrushKind::NineGrid(props) => props.base(),
             CompositionBrushKind::Mask(props) => props.base(),
             CompositionBrushKind::Effect(data) => &data.brush,
-            CompositionBrushKind::Backdrop(props) => props,
+            CompositionBrushKind::Backdrop(props) | CompositionBrushKind::HostBackdrop(props) => props,
         }
     }
 
@@ -196,7 +198,7 @@ impl CompositionBrush {
             | CompositionBrushKind::NineGrid(_)
             | CompositionBrushKind::Mask(_)
             | CompositionBrushKind::Effect(_)
-            | CompositionBrushKind::Backdrop(_) => None,
+            | CompositionBrushKind::Backdrop(_) | CompositionBrushKind::HostBackdrop(_) => None,
             CompositionBrushKind::LinearGradient(data, _)
             | CompositionBrushKind::RadialGradient(data, _)
             | CompositionBrushKind::ConicGradient(data, _) => Some(data),
@@ -233,6 +235,7 @@ impl CompositionBrush {
             CompositionBrushKind::Mask(_) => "CompositionMaskBrush",
             CompositionBrushKind::Effect(_) => "CompositionEffectBrush",
             CompositionBrushKind::Backdrop(_) => "CompositionBackdropBrush",
+            CompositionBrushKind::HostBackdrop(_) => "CompositionHostBackdropBrush",
         }
     }
 
@@ -306,7 +309,7 @@ impl CompositionBrush {
             CompositionBrushKind::NineGrid(props) => props.serialize_changes_core(self, writer),
             CompositionBrushKind::Mask(props) => props.serialize_changes_core(self, writer),
             CompositionBrushKind::Effect(data) => data.serialize_changes_core(self, writer),
-            CompositionBrushKind::Backdrop(props) => props.serialize_changes_core(self, writer),
+            CompositionBrushKind::Backdrop(props) | CompositionBrushKind::HostBackdrop(props) => props.serialize_changes_core(self, writer),
         }
     }
 
@@ -414,7 +417,7 @@ impl ICompositionObjectAnimations for CompositionBrush {
                 self.object.properties().try_start_animation(property_name, animation, final_value)
             }
             CompositionBrushKind::Effect(data) => data.brush.start_animation(self, property_name, animation, final_value),
-            CompositionBrushKind::Backdrop(props) => props.start_animation(self, property_name, animation, final_value),
+            CompositionBrushKind::Backdrop(props) | CompositionBrushKind::HostBackdrop(props) => props.start_animation(self, property_name, animation, final_value),
         }
     }
 
@@ -443,7 +446,7 @@ impl ICompositionObjectAnimations for CompositionBrush {
             }
             // The animatable properties of an effect are properties of its
             // property set, not of the brush.
-            CompositionBrushKind::Effect(_) | CompositionBrushKind::Backdrop(_) => None,
+            CompositionBrushKind::Effect(_) | CompositionBrushKind::Backdrop(_) | CompositionBrushKind::HostBackdrop(_) => None,
         }
         .or_else(|| ServerCompositionBrushProps::get_composition_property(property_name))
     }

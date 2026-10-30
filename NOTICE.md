@@ -57,7 +57,7 @@ Avalonia itself incorporates code from other projects (for example WPF-derived l
 
 - Project: <https://github.com/microsoft/microsoft-ui-xaml> (branch `winui3/main`, commit `7e4b0c2096be402f51cc8f7d203ebf67cff183d0`)
 - License: MIT, Copyright (c) Microsoft Corporation
-- Used for: the WinUI theme `src/FerroUI.Themes.WinUI`, whose resource and control theme documents are ported from the theme of WinUI 3 (`generic.xaml` and the theme resources of the controls library; see `src/FerroUI.Themes.WinUI/NOTICE.md`, which holds the license text, and `docs/porting/winui-theme.md`). Also for the Charts library `src/FerroUI.Controls.Charts`, whose conformance tests and the ChartsDemo scenarios are adapted from the public Charts tests and ChartApp samples at commit `9427b7216337ea3d7b19ac32d48c327286ee7138` (see `src/FerroUI.Controls.Charts/NOTICE.md` and `docs/porting/winui-charts.md`). Also for the inking crate `src/FerroUI.Controls.Inking`, ported from `controls/dev/InkCanvas` and `controls/dev/InkToolbar` at the same commit, with the WinUI styles of its toolbar (see `src/FerroUI.Controls.Inking/NOTICE.md` and `docs/porting/winui-inking.md`). Also for the ItemsRepeater crate `src/FerroUI.Controls.Repeater`, ported from `controls/dev/Repeater` at the same commit (see `src/FerroUI.Controls.Repeater/NOTICE.md` and `docs/porting/winui-repeater/README.md`).
+- Used for: the WinUI theme `src/FerroUI.Themes.WinUI`, whose resource and control theme documents are ported from the theme of WinUI 3 (`generic.xaml` and the theme resources of the controls library; see `src/FerroUI.Themes.WinUI/NOTICE.md`, which holds the license text, and `docs/porting/winui-theme.md`). Also for the Charts library `src/FerroUI.Controls.Charts`, whose conformance tests and the ChartsDemo scenarios are adapted from the public Charts tests and ChartApp samples at commit `9427b7216337ea3d7b19ac32d48c327286ee7138` (see `src/FerroUI.Controls.Charts/NOTICE.md` and `docs/porting/winui-charts.md`). Also for the inking crate `src/FerroUI.Controls.Inking`, ported from `controls/dev/InkCanvas` and `controls/dev/InkToolbar` at the same commit, with the WinUI styles of its toolbar (see `src/FerroUI.Controls.Inking/NOTICE.md` and `docs/porting/winui-inking.md`). Also for the ItemsRepeater crate `src/FerroUI.Controls.Repeater`, ported from `controls/dev/Repeater` at the same commit (see `src/FerroUI.Controls.Repeater/NOTICE.md` and `docs/porting/winui-repeater/README.md`). Also the materials and lights of WinUI in `src/FerroUI.Base` and `src/FerroUI.Controls` (`AcrylicBrush`, `XamlCompositionBrushBase`, `XamlLight`, the material policy and its noise texture `src/FerroUI.Base/media/assets/noise_asset_256x256_png.png`, the Reveal brushes and lights, and the system backdrops with their controllers), ported from `controls/dev/Materials` and the system backdrop sources of WinUI 3 (`docs/porting/winui-materials.md`).
 
 ## Reactive Extensions for .NET (Rx.NET)
 
@@ -131,3 +131,18 @@ Rust dependencies are used under their own licenses as declared in their crate m
 The Vello render backend (`src/Vello/FerroUI.Vello`) links crates of the Vello project and their companions: `kurbo`, `peniko`, `vello_cpu` (with `vello_common`), `linesweeper` and `png`, each under the Apache License 2.0 or the MIT license at the choice of the user. The versions, what each is used for and the copyright lines are in `src/Vello/FerroUI.Vello/NOTICE.md`.
 
 The Vulkan platform contracts (`src/FerroUI.Vulkan`) use `ash` 0.38.0 (MIT OR Apache-2.0, Copyright (c) 2016 ASH contributors) for the types, constants and function tables of Vulkan, with `libloading` (ISC) to open the Vulkan loader of the system at run time.
+
+## ProTranslate
+
+- Project: <https://github.com/wieslawsoltes/ProTranslate> (commit `b088669a22c8979d54dd81098991f8d16f880156`)
+- License: MIT, Copyright (c) 2026 Wiesław Šoltés.
+- Used for: the translation/globalization services, catalog formats, build-time generation, native UI integration and portable Translation Studio authoring engine under `src/ProTranslate/`, with the corresponding source license in each package's `NOTICE.md`.
+## Pretext text preparation and layout
+
+The crates under `src/Pretext/` derive from
+[PretextSharp](https://github.com/wieslawsoltes/PretextSharp), commit
+`e70a544e43f7ecffee76d2d22a0224213d7fbba3`, copyright (c) 2026 Wiesław Šoltés,
+licensed under MIT. The source project credits Cheng Lou's original
+[pretext](https://github.com/chenglou/pretext). Each Pretext crate includes the
+full source MIT notice in its own `NOTICE.md`. Source mappings, native service
+adaptations and validation are documented in `docs/porting/pretext.md`.

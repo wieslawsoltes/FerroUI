@@ -23,6 +23,7 @@ pub struct DefaultPlatformSettings {
     color_values_changed: Rc<HandlerList<dyn Fn(&PlatformColorValues)>>,
     preferred_application_language_changed: Rc<HandlerList<dyn Fn()>>,
     accessibility_settings_changed: Rc<HandlerList<dyn Fn()>>,
+    energy_saver_changed: Rc<HandlerList<dyn Fn()>>,
 }
 
 impl DefaultPlatformSettings {
@@ -61,6 +62,14 @@ impl DefaultPlatformSettings {
     /// thread. Snapshot dispatch permits a handler to unsubscribe itself.
     pub fn on_accessibility_settings_changed(&self) {
         for (_, handler) in self.accessibility_settings_changed.snapshot().iter() {
+            handler();
+        }
+    }
+
+    /// Raises [`IPlatformSettings::energy_saver_changed`] on the UI thread. Snapshot dispatch
+    /// permits a handler to unsubscribe itself.
+    pub fn on_energy_saver_changed(&self) {
+        for (_, handler) in self.energy_saver_changed.snapshot().iter() {
             handler();
         }
     }
@@ -145,6 +154,14 @@ impl IPlatformSettings for DefaultPlatformSettings {
             handlers.remove(token);
         })
     }
+
+    fn energy_saver_changed(&self, handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
+        let token = self.energy_saver_changed.add(handler);
+        let handlers = self.energy_saver_changed.clone();
+        Disposable::create(move || {
+            handlers.remove(token);
+        })
+    }
 }
 
 #[cfg(test)]
@@ -197,6 +214,24 @@ mod tests {
     }
 
     #[test]
+    fn the_energy_saver_is_off_and_its_changes_unsubscribe_cleanly() {
+        use std::cell::Cell;
+        let settings = DefaultPlatformSettings::new();
+        assert!(!IPlatformSettings::energy_saver_enabled(&settings));
+        let count = Rc::new(Cell::new(0));
+        let subscription = {
+            let count = count.clone();
+            settings.energy_saver_changed(Rc::new(move || count.set(count.get() + 1)))
+        };
+        settings.on_energy_saver_changed();
+        settings.on_accessibility_settings_changed();
+        assert_eq!(count.get(), 1);
+        subscription.dispose();
+        settings.on_energy_saver_changed();
+        assert_eq!(count.get(), 1);
+    }
+
+    #[test]
     fn accessibility_changes_are_independent_and_unsubscribe_cleanly() {
         use std::cell::Cell;
         let settings = DefaultPlatformSettings::new();
@@ -208,6 +243,7 @@ mod tests {
         settings.on_accessibility_settings_changed();
         settings.on_color_values_changed(PlatformColorValues::new());
         settings.on_preferred_application_language_changed();
+        settings.on_energy_saver_changed();
         assert_eq!(count.get(), 1);
         changes.dispose();
         settings.on_accessibility_settings_changed();
