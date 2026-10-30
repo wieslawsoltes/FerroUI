@@ -80,6 +80,10 @@ jobs:
       # FerroUI.Base and FerroUI.Controls (docs/declarative-ui.md, section 4).
       - name: Generated view builders are up to date
         run: python3 scripts/generate_view_builders.py --check
+      # The XAML schema of the designer's language service, read from the markup metadata of the
+      # framework crates: a new control or property changes it (#345, D3).
+      - name: The designer's language schema is up to date
+        run: python3 src/FerroUI.Designer.Language/generate_schema.py --check
       # The scoped names of the generator (two public types of one crate with the same name).
       - name: Tests of the view builder generator
         run: python3 scripts/test_generate_view_builders.py

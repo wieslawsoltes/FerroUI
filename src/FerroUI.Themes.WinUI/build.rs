@@ -94,6 +94,25 @@ fn main() {
     documents.push_str("];\n");
     text.push_str(&documents);
 
+    // With the feature `designer-sources`: the control theme documents of the theme (every document
+    // under `Controls/` that the theme compiles), by their resource URI and source text, for the
+    // definition libraries of designers. Derived from the same table, so a new document is listed.
+    text.push_str("#[cfg(any(test, feature = \"designer-sources\"))]\npub(crate) static DESIGNER_DOCUMENTS: &[(&str, &str)] = &[\n");
+    for (asset_path, path) in &assets {
+        if !asset_path.starts_with("/Controls/") || !compiled(asset_path) {
+            continue;
+        }
+        let path = path.canonicalize().unwrap_or_else(|e| panic!("cannot resolve {}: {e}", path.display()));
+        writeln!(
+            text,
+            "    ({:?}, include_str!({:?})),",
+            format!("ferres://FerroUI.Themes.WinUI{asset_path}"),
+            path.display().to_string()
+        )
+        .expect("write");
+    }
+    text.push_str("];\n");
+
     text.push_str("pub(crate) static EXCLUDED: &[ExcludedDocument] = &[\n");
     for (asset_path, missing_types) in &excluded {
         writeln!(text, "    ExcludedDocument {{ path: {asset_path:?}, missing_types: {missing_types:?} }},").expect("write");
