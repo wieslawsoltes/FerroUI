@@ -774,22 +774,31 @@ impl TreeDataGrid {
             DragDropEffects::NONE
         };
         let route = self.build_event_route(Self::row_drag_started_event());
-
+        let mut additional_data = None;
         if route.has_handlers() {
-            let e = TreeDataGridRowDragStartedEventArgs::new(presentation.selected_items().unwrap_or_default());
+            let e = TreeDataGridRowDragStartedEventArgs::with_modifiers(
+                presentation.selected_items().unwrap_or_default(),
+                trigger.key_modifiers(),
+            );
             e.set_allowed_effects(allowed_effects);
             self.raise_event(&e);
             allowed_effects = e.allowed_effects();
+            additional_data = Some(e.data_transfer().clone());
         }
 
         if allowed_effects != DragDropEffects::NONE {
             let source = self.model().or_else(|| self.source()).map(|source| source.source().clone());
             let info = Rc::new(DragInfo::from_presentation(&*presentation, source, selected_indexes));
-            Self::do_drag_drop_async(trigger, info, allowed_effects);
+            Self::do_drag_drop_async(trigger, info, allowed_effects, additional_data);
         }
     }
 
-    fn do_drag_drop_async(trigger: &PointerPressedEventArgs, info: Rc<DragInfo>, allowed_effects: DragDropEffects) {
+    fn do_drag_drop_async(
+        trigger: &PointerPressedEventArgs,
+        info: Rc<DragInfo>,
+        allowed_effects: DragDropEffects,
+        additional_data: Option<Rc<DataTransfer>>,
+    ) {
         let token = NEXT_DRAG_TOKEN.with(|next| {
             let token = next.get();
             next.set(token + 1);
@@ -800,9 +809,18 @@ impl TreeDataGrid {
             data.borrow_mut().insert(token.clone(), info);
         });
 
-        let item = DataTransferItem::create(&DragInfo::data_format(), Some(token.clone()));
+        // Native backends may expose only the first non-file item. Put the internal
+        // row identity on that same item so application formats remain available there.
+        let additional_items = additional_data.as_ref().map(|data| data.items());
+        let item = additional_items.as_ref().and_then(|items| items.first()).cloned().unwrap_or_else(DataTransferItem::new);
+        item.set(&DragInfo::data_format(), Some(token.clone()));
         let transfer = DataTransfer::new();
         transfer.add(item);
+        if let Some(items) = additional_items {
+            for item in items.iter().skip(1) {
+                transfer.add(item.clone());
+            }
+        }
         let transfer: Rc<dyn IDataTransfer> = transfer;
         let operation = DragDrop::do_drag_drop_async(trigger, transfer, allowed_effects);
         drop(Dispatcher::ui_thread().invoke_async_task_local(move || async move {
