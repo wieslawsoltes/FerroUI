@@ -3,14 +3,16 @@ use std::rc::Rc;
 
 use crate::media::text_formatting::TextRunProperties;
 use crate::media::{
-    BaselineAlignment, FontFeatureCollection, GlyphTypeface, IBrush, TextDecorationCollection, Typeface,
+    BaselineAlignment, FontFamily, FontFeatureCollection, GlyphTypeface, IBrush, TextDecorationCollection, Typeface,
 };
 use crate::utilities::CultureInfo;
 
 /// Generic implementation of `TextRunProperties`.
 pub struct GenericTextRunProperties {
     typeface: Typeface,
+    requested_font_family: Option<FontFamily>,
     font_rendering_em_size: f64,
+    font_scale: f64,
     text_decorations: Option<TextDecorationCollection>,
     foreground_brush: Option<Rc<dyn IBrush>>,
     background_brush: Option<Rc<dyn IBrush>>,
@@ -49,7 +51,9 @@ impl GenericTextRunProperties {
     ) -> Self {
         Self {
             typeface,
+            requested_font_family: None,
             font_rendering_em_size,
+            font_scale: 1.0,
             text_decorations,
             foreground_brush,
             background_brush,
@@ -59,6 +63,21 @@ impl GenericTextRunProperties {
             cached_glyph_typeface: OnceCell::new(),
         }
     }
+    pub(crate) fn with_font_scale(mut self, scale: f64) -> Self {
+        self.font_scale = scale;
+        self
+    }
+
+    pub(crate) fn with_cached_glyph_typeface(mut self, glyph_typeface: Rc<GlyphTypeface>) -> Self {
+        self.cached_glyph_typeface = OnceCell::from(glyph_typeface);
+        self
+    }
+
+    /// Fallback changes the glyph typeface while retaining the source family.
+    pub(crate) fn with_requested_font_family(mut self, font_family: FontFamily) -> Self {
+        self.requested_font_family = Some(font_family);
+        self
+    }
 }
 
 impl TextRunProperties for GenericTextRunProperties {
@@ -66,8 +85,16 @@ impl TextRunProperties for GenericTextRunProperties {
         &self.typeface
     }
 
+    fn requested_font_family(&self) -> &FontFamily {
+        self.requested_font_family.as_ref().unwrap_or_else(|| self.typeface.font_family())
+    }
+
     fn font_rendering_em_size(&self) -> f64 {
         self.font_rendering_em_size
+    }
+
+    fn font_scale(&self) -> f64 {
+        self.font_scale
     }
 
     fn text_decorations(&self) -> Option<&TextDecorationCollection> {

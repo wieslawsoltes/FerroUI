@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use crate::media::text_formatting::GenericTextRunProperties;
 use crate::media::{
-    BaselineAlignment, FontFeatureCollection, GlyphTypeface, IBrush, TextDecorationCollection, Typeface,
+    BaselineAlignment, FontFamily, FontFallbackMapping, FontFeatureCollection, GlyphTypeface, IBrush, TextDecorationCollection, Typeface,
 };
 use crate::utilities::CultureInfo;
 
@@ -15,8 +15,26 @@ pub trait TextRunProperties: 'static {
     /// Run typeface.
     fn typeface(&self) -> &Typeface;
 
-    /// Em size of font used to format and display text.
+    /// The family requested by the source before glyph fallback. The family
+    /// metrics policy uses its regular face without changing the glyphs drawn.
+    fn requested_font_family(&self) -> &FontFamily {
+        self.typeface().font_family()
+    }
+
+    /// Font size requested by the source, before a fallback multiplier.
     fn font_rendering_em_size(&self) -> f64;
+
+    /// Provider fallback multiplier relative to the source em size. Existing
+    /// run implementations use one. Custom values must be finite and positive.
+    fn font_scale(&self) -> f64 {
+        1.0
+    }
+
+    /// Effective em size for glyph shaping, drawing and font metrics. The
+    /// source's `font_rendering_em_size` remains unchanged by fallback.
+    fn effective_font_rendering_em_size(&self) -> f64 {
+        self.font_rendering_em_size() * self.font_scale()
+    }
 
     /// Run text decorations.
     fn text_decorations(&self) -> Option<&TextDecorationCollection>;
@@ -66,6 +84,7 @@ impl PartialEq for dyn TextRunProperties {
 
         self.typeface() == other.typeface()
             && self.font_rendering_em_size() == other.font_rendering_em_size()
+            && self.font_scale() == other.font_scale()
             && self.text_decorations() == other.text_decorations()
             && rc_option_eq(self.foreground_brush(), other.foreground_brush())
             && rc_option_eq(self.background_brush(), other.background_brush())
@@ -75,6 +94,22 @@ impl PartialEq for dyn TextRunProperties {
 }
 
 impl dyn TextRunProperties {
+    pub(crate) fn with_font_mapping(self: &Rc<Self>, mapping: &FontFallbackMapping) -> Rc<dyn TextRunProperties> {
+        Rc::new(GenericTextRunProperties::with_all(
+            mapping.typeface().clone(),
+            self.font_rendering_em_size(),
+            self.text_decorations().cloned(),
+            self.foreground_brush().cloned(),
+            self.background_brush().cloned(),
+            self.baseline_alignment(),
+            self.culture_info().cloned(),
+            self.font_features().cloned(),
+        )
+        .with_requested_font_family(self.requested_font_family().clone())
+        .with_font_scale(mapping.scale())
+        .with_cached_glyph_typeface(mapping.glyph_typeface().clone()))
+    }
+
     /// The same properties with another typeface.
     pub(crate) fn with_typeface(self: &Rc<Self>, typeface: &Typeface) -> Rc<dyn TextRunProperties> {
         if self.typeface() == typeface {
@@ -90,6 +125,6 @@ impl dyn TextRunProperties {
             self.baseline_alignment(),
             self.culture_info().cloned(),
             self.font_features().cloned(),
-        ))
+        ).with_requested_font_family(self.requested_font_family().clone()).with_font_scale(self.font_scale()))
     }
 }

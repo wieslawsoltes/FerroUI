@@ -281,6 +281,7 @@ mod baseline_pixel_alignment;
 mod character_hit;
 mod composite_font_family_key;
 mod font_fallback;
+mod font_fallback_mapping;
 mod font_family;
 mod font_feature;
 mod font_feature_collection;
@@ -297,6 +298,7 @@ mod font_simulations;
 mod font_source_identifier;
 mod font_stretch;
 mod font_style;
+mod font_typography;
 mod font_variation_settings;
 mod font_weight;
 mod glyph_bounds;
@@ -334,6 +336,7 @@ pub use baseline_alignment::BaselineAlignment;
 pub use baseline_pixel_alignment::BaselinePixelAlignment;
 pub use character_hit::CharacterHit;
 pub use font_fallback::FontFallback;
+pub use font_fallback_mapping::FontFallbackMapping;
 pub use font_family::FontFamily;
 pub use font_feature::FontFeature;
 pub use font_feature_collection::FontFeatureCollection;
@@ -343,6 +346,10 @@ pub use font_metrics::FontMetrics;
 pub use font_simulations::FontSimulations;
 pub use font_stretch::FontStretch;
 pub use font_style::FontStyle;
+pub use font_typography::{
+    FontCapitals, FontEastAsianLanguage, FontEastAsianWidths, FontFraction, FontNumeralAlignment, FontNumeralStyle,
+    FontVariants,
+};
 pub use font_variation_settings::{FontVariation, FontVariationSettings};
 pub use font_weight::FontWeight;
 pub(crate) use glyph_bounds::GlyphBounds;
