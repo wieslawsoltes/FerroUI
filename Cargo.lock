@@ -808,6 +808,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "designer-studio"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-designer",
+ "ferroui-desktop",
+ "ferroui-headless",
+ "ferroui-markup-xaml",
+ "ferroui-themes-winui",
+ "sample-support",
+]
+
+[[package]]
 name = "digest"
 version = "0.10.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
