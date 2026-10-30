@@ -214,6 +214,10 @@ const DECLARED_NEXT_TO_THE_TYPE: &[&str] = &[
     "AutoSuggestBoxTextChangedEventArgs",
     "AutoSuggestBoxSuggestionChosenEventArgs",
     "AutoSuggestBoxQuerySubmittedEventArgs",
+    // The WinUI materials (winui-materials.md).
+    "ApplicationTheme",
+    "RevealBrushState",
+    "FocusVisualKind",
 ];
 
 #[test]

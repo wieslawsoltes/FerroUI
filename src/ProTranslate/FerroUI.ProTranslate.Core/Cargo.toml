@@ -1,0 +1,28 @@
+[package]
+name = "ferroui-protranslate-core"
+description = "Framework-independent translation, culture and globalization services for FerroUI"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+icu_locale.workspace = true
+icu_decimal.workspace = true
+icu_calendar.workspace = true
+icu_datetime.workspace = true
+fixed_decimal = { version = "0.7", features = ["ryu"] }
+writeable = "0.6"
+
+time = { workspace = true }
+
+[package.metadata.release]
+group = "core"

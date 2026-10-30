@@ -76,4 +76,20 @@ pub trait IPlatformSettings {
     /// Raised when the system language preferences change. Disposing the
     /// returned handle unsubscribes.
     fn preferred_application_language_changed(&self, handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable>;
+
+    /// Whether the energy saver of the system (battery saver, low power mode) is on: WinUI's
+    /// material policy (`MaterialHelper`) draws no acrylic while it is, from
+    /// `PowerManager.EnergySaverStatus`. A platform that does not report it answers `false`.
+    /// Backends should query the current state rather than cache it for the process lifetime.
+    /// A FerroUI addition (docs/porting/winui-materials.md).
+    fn energy_saver_enabled(&self) -> bool {
+        false
+    }
+
+    /// Raised when the energy saver is turned on or off. The callback runs on the UI thread;
+    /// consumers read [`energy_saver_enabled`](Self::energy_saver_enabled). The default is an
+    /// empty subscription, for platforms that do not report it.
+    fn energy_saver_changed(&self, _handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
+        Disposable::empty()
+    }
 }
