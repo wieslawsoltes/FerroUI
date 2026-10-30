@@ -203,6 +203,7 @@ macro_rules! ferro_markup_type {
                     $crate::__ferro_compiler_metadata!(
                         $crate::ferro_markup_type!(@this $kind $form markup, $this);
                         markup.value = ::std::option::Option::Some(<$type_>::__MARKUP_VALUE);
+                        markup.owner_rust_name = ::std::option::Option::Some(|| ::std::any::type_name::<$type_>());
                     );
                     $crate::__ferro_markup_items!(markup, $this; $($body)*);
                     markup

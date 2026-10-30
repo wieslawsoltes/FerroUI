@@ -1,0 +1,8 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:m="clr-namespace:FerroDock.Model.ReactiveUI.Controls;assembly=FerroDock.Model.ReactiveUI"
+ x:CompileBindings="True" x:DataType="m:ToolDock">
+ <TextBlock Text="{Binding Title}" />
+ <TextBox Text="{Binding Alignment, Mode=TwoWay}" />
+ <CheckBox IsChecked="{Binding IsExpanded, Mode=TwoWay}" />
+ <CheckBox IsChecked="{Binding AutoHide, Mode=TwoWay}" />
+</StackPanel>

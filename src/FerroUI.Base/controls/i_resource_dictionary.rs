@@ -1,9 +1,19 @@
 use super::{IResourceProvider, IThemeVariantProvider, ResourceKey, ResourceValue};
+use crate::collections::FerroList;
 use crate::styling::ThemeVariant;
 use std::rc::Rc;
 
 /// An indexed dictionary of resources.
 pub trait IResourceDictionary: IResourceProvider {
+    /// The collection of child resource dictionaries, shared with the dictionary:
+    /// a change to the list is a change to the dictionary. The default, for a
+    /// dictionary that keeps no such list, is a new list with the providers of
+    /// [`merged_dictionaries_snapshot`](Self::merged_dictionaries_snapshot), which
+    /// the dictionary does not see change.
+    fn merged_dictionaries(&self) -> FerroList<Rc<dyn IResourceProvider>> {
+        FerroList::from_items(self.merged_dictionaries_snapshot().iter().cloned())
+    }
+
     /// A snapshot of the collection of child resource dictionaries.
     fn merged_dictionaries_snapshot(&self) -> Rc<Vec<Rc<dyn IResourceProvider>>>;
 

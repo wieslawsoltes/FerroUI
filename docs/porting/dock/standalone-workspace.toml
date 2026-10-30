@@ -1,0 +1,61 @@
+[workspace]
+resolver = "2"
+exclude = ["vendor/ferroui-native", "vendor/ferroui-controls", "vendor/ferroui-build-scan", "vendor/ferroui-base", "vendor/ferroui-markup-xaml", "vendor/ferroui-markup-xaml-loader", "vendor/ferroui-build"]
+members = ["src/Dock/FerroDock.Serializer.SystemTextJson.ReactiveUI", "src/Dock/FerroDock.Serializer.SystemTextJson.Generators.Rust", "tests/Dock/FerroDock.Serializer.Generated.Tests", "src/Dock/FerroDock.Serializer.SystemTextJson.Generators", "src/Dock/FerroDock.Serializer.SystemTextJson", "src/Dock/FerroDock.Controls.Recycling.Model.Ferro", "src/Dock/FerroDock.Runtime", "src/Dock/FerroDock.Model.Ferro", "src/Dock/FerroDock.Model.ReactiveUI.Ferro", "src/Dock/FerroDock.MarkupExtension", "src/Dock/FerroDock.Ferro.Diagnostics", "src/Dock/FerroDock.Ferro.Themes.Browser", "src/Dock/FerroDock.Ferro.Themes.Simple", "samples/Dock/FerroDockReactiveUISample", "tests/Dock/FerroDock.Settings.Markup.Tests", "src/Dock/FerroDock.Settings", "src/Dock/FerroDock.Controls.DeferredContentControl", "src/Dock/FerroDock.Model", "src/Dock/FerroDock.Model.ReactiveUI", "src/Dock/FerroDock.Model.ReactiveUI.Services", "src/Dock/FerroDock.Controls.Recycling.Model", "src/Dock/FerroDock.Controls.Recycling", "src/Dock/FerroDock.Model.ReactiveUI.Services.Ferro", "src/Dock/FerroDock.Controls.ProportionalStackPanel", "tests/Dock/FerroDock.Markup.Tests", "src/Dock/FerroDock.Ferro", "src/Dock/FerroDock.Ferro.Themes.Fluent"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.89"
+license = "MIT"
+authors = ["Wiesław Šoltés"]
+
+# Generated markup produces large incremental caches during a full port.
+# Keep normal debug/test semantics while bounding rebuildable disk usage.
+[profile.dev]
+incremental = false
+
+[profile.test]
+incremental = false
+# Keep source locations while bounding large native UI test harnesses.
+debug = "line-tables-only"
+
+[workspace.dependencies]
+serde = "1.0"
+serde_json = { version = "1.0", features = ["raw_value"] }
+ferrodock-controls-recycling-model-ferro = { path = "src/Dock/FerroDock.Controls.Recycling.Model.Ferro", version = "0.1.0" }
+ferrodock-runtime = { path = "src/Dock/FerroDock.Runtime", version = "0.1.0" }
+ferrodock-model-ferro = { path = "src/Dock/FerroDock.Model.Ferro", version = "0.1.0" }
+ferrodock-settings = { path = "src/Dock/FerroDock.Settings", version = "0.1.0" }
+bitflags = "2.10"
+ryu = "1.0"
+ferroui-system = "=0.3.0"
+ferroui-reactive = "=0.3.0"
+ferroui-reactiveui = "=0.3.0"
+ferroui-splat = "=0.3.0"
+ferroui-base = "=0.3.0"
+ferroui-controls = "=0.3.0"
+ferroui-desktop = "=0.3.0"
+ferroui-reactiveui-controls = "=0.3.0"
+ferroui-headless = "=0.3.0"
+ferroui-themes-fluent = "=0.3.0"
+ferroui-themes-simple = "=0.3.0"
+ferroui-fonts-inter = "=0.3.0"
+ferroui-build-scan = "=0.3.0"
+ferroui-build = "=0.3.0"
+ferroui-markup-xaml = "=0.3.0"
+ferrodock-model = { path = "src/Dock/FerroDock.Model", version = "0.1.0" }
+ferrodock-controls-recycling-model = { path = "src/Dock/FerroDock.Controls.Recycling.Model", version = "0.1.0" }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+missing_docs = "deny"
+
+[patch.crates-io]
+ferroui-build-scan = { path = "vendor/ferroui-build-scan" }
+ferroui-base = { path = "vendor/ferroui-base" }
+ferroui-markup-xaml = { path = "vendor/ferroui-markup-xaml" }
+ferroui-markup-xaml-loader = { path = "vendor/ferroui-markup-xaml-loader" }
+ferroui-build = { path = "vendor/ferroui-build" }
+ferroui-controls = { path = "vendor/ferroui-controls" }
+ferroui-native = { path = "vendor/ferroui-native" }

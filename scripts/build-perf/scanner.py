@@ -51,6 +51,11 @@ def fingerprints(directory: Path) -> dict:
             for path in sorted(directory.rglob("*")) if path.is_file() and path.name != "timings.json"}
 
 
+def changed_files(first: dict, second: dict) -> list[str]:
+    """The semantic files whose hashes differ."""
+    return sorted(key for key in first.keys() | second.keys() if first.get(key) != second.get(key))
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--baseline", required=True, type=Path)
@@ -59,6 +64,9 @@ def main() -> int:
     parser.add_argument("--repetitions", default=5, type=int)
     parser.add_argument("--minimum-speedup", default=0.0, type=float)
     parser.add_argument("--candidate-build-tools", action="store_true")
+    parser.add_argument("--accept-output-changes", action="store_true",
+                        help="The pull request changes the scanner output on purpose (label build-output-changes): "
+                             "each revision must repeat its own output, and the changes against the baseline are reported")
     args = parser.parse_args()
     if args.repetitions < 1:
         parser.error("repetitions must be positive")
@@ -87,7 +95,9 @@ def main() -> int:
                 executables[label], report["builds"][label] = build(
                     source, driver, Path(temporary) / label, build_dir,
                     optimize=label == "candidate" and args.candidate_build_tools)
-            reference = None
+            # The output of each revision is compared with its own first scan (determinism), and the
+            # candidate's with the baseline's.
+            references = {}
             for repeat in range(1, args.repetitions + 1):
                 labels = ["baseline", "candidate"] if repeat % 2 else ["candidate", "baseline"]
                 for label in labels:
@@ -98,29 +108,39 @@ def main() -> int:
                     hashes = fingerprints(destination)
                     if not hashes:
                         raise RuntimeError("scanner emitted no semantic evidence")
-                    if reference is None:
-                        reference = hashes
-                    identical = hashes == reference
+                    own = references.setdefault(label, hashes)
+                    other = references.get("baseline" if label == "candidate" else "candidate")
+                    identical = hashes == (references.get("baseline") or hashes)
                     sample = {"label": label, "repeat": repeat, "wall_seconds": elapsed,
                               "semantic_sha256": hashes, "equal_to_baseline": identical,
+                              "equal_to_own_first_scan": hashes == own,
                               "timings": json.loads((destination / "timings.json").read_text())}
                     report["samples"].append(sample)
                     (output / "report.json").write_text(json.dumps(report, indent=2) + "\n")
-                    if not identical:
-                        changed = sorted(key for key in hashes.keys() | reference.keys() if hashes.get(key) != reference.get(key))
-                        raise RuntimeError(f"scanner output changed: {changed}")
+                    if hashes != own:
+                        raise RuntimeError(f"{label} scanner output is not deterministic: {changed_files(own, hashes)}")
+                    if other is not None and hashes != other and not args.accept_output_changes:
+                        raise RuntimeError(f"scanner output changed: {changed_files(other, hashes)}")
                     print(f"{label} scan {repeat}: {elapsed:.3f}s; all {len(hashes)} semantic outputs match", flush=True)
+            reference = references["baseline"]
+            changes = changed_files(references["baseline"], references["candidate"])
             medians = {label: statistics.median(sample["wall_seconds"] for sample in report["samples"] if sample["label"] == label)
                        for label in executables}
             report["summary"] = {"median_seconds": medians, "speedup": medians["baseline"] / medians["candidate"],
-                                 "semantic_outputs_equal": True, "semantic_files": len(reference)}
+                                 "semantic_outputs_equal": not changes, "semantic_files": len(reference),
+                                 "output_changes_acknowledged": args.accept_output_changes, "changed_semantic_files": changes}
             (output / "report.json").write_text(json.dumps(report, indent=2) + "\n")
+            agreement = (f"All {len(reference)} model, diagnostic, source inventory, function and statistic files agree byte for byte. "
+                         if not changes else
+                         "Output changes acknowledged (`build-output-changes`): each revision repeats its own output byte for byte; "
+                         f"{len(changes)} of {len(reference)} files differ from the baseline: "
+                         + ", ".join(f"`{name}`" for name in changes) + ". ")
             text = ("## Source scanner comparison\n\n"
                     "Same driver, source tree and compiler; alternating independent processes. "
                     f"Candidate uses explicit build-tool opt-level experiment: **{args.candidate_build_tools}**.\n\n"
                     "| Baseline median | Candidate median | Speedup |\n|---:|---:|---:|\n"
                     f"| {medians['baseline']:.3f}s | {medians['candidate']:.3f}s | {report['summary']['speedup']:.3f}× |\n\n"
-                    f"All {len(reference)} model, diagnostic, source inventory, function and statistic files agree byte for byte. "
+                    + agreement +
                     "This measures the build-time scanner, not whole-project Rust compilation. "
                     "Library and driver compilation costs are recorded separately in report.json.\n")
             (output / "summary.md").write_text(text)

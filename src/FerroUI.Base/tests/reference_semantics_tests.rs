@@ -859,6 +859,164 @@ fn try_register_reports_duplicate_names_and_completed_scopes() {
     );
 }
 
+/// Values that are not objects of the object model are registered by name too
+/// (the `object` parameter of the original), with the errors of a value; the
+/// registration of an element keeps reporting `NameScopeError`.
+#[test]
+fn try_register_value_reports_the_errors_of_a_value() {
+    use crate::controls::{INameScope, NameScopeError, NameScopeValueError};
+
+    let scope = NameScope::new();
+    let model: crate::BoxedValue = Rc::new("model".to_string());
+    assert_eq!(scope.try_register_value("model", model.clone()), Ok(()));
+    assert_eq!(scope.try_register_value("model", model.clone()), Ok(()), "the same value again");
+    let other: crate::BoxedValue = Rc::new("other".to_string());
+    assert_eq!(scope.try_register_value("model", other), Err(NameScopeValueError::DuplicateName("model".to_string())));
+    assert!(scope.find_value("model").is_some_and(|found| Rc::ptr_eq(&found, &model)));
+    assert!(scope.find("model").is_none(), "a plain value is no element");
+
+    // An element under a name a value has: the error of an element.
+    let element = StyledElement::new().upcast::<FerroObject>();
+    assert_eq!(scope.try_register("model", element), Err(NameScopeError::DuplicateName("model".to_string())));
+
+    let null: crate::BoxedValue = Rc::new(None::<crate::BoxedValue>);
+    let error = scope.try_register_value("null", null).unwrap_err();
+    assert_eq!(error, NameScopeValueError::NullValue);
+    assert_eq!(error.to_string(), "Value cannot be null. (Parameter 'element')");
+
+    scope.complete();
+    let completed = scope.try_register_value("later", Rc::new(1_i32)).unwrap_err();
+    assert_eq!(completed, NameScopeValueError::Completed);
+    assert_eq!(completed.to_string(), NameScopeError::Completed.to_string());
+}
+
+/// A name scope that implements only the registration of elements (written
+/// before values could be registered) gets the value methods of the trait:
+/// elements go through its own registration, other values are unsupported.
+#[test]
+fn a_scope_of_elements_only_registers_elements_through_the_value_methods() {
+    use crate::controls::{INameScope, NameScopeError, NameScopeValueError};
+    use crate::utilities::SynchronousCompletionAsyncResult;
+
+    struct ElementsOnly(NameScope);
+    impl INameScope for ElementsOnly {
+        fn try_register(&self, name: &str, element: Ref<FerroObject>) -> Result<(), NameScopeError> {
+            self.0.try_register(name, element)
+        }
+        fn find_async(&self, name: &str) -> SynchronousCompletionAsyncResult<Option<Ref<FerroObject>>> {
+            self.0.find_async(name)
+        }
+        fn find(&self, name: &str) -> Option<Ref<FerroObject>> {
+            self.0.find(name)
+        }
+        fn complete(&self) {
+            self.0.complete()
+        }
+        fn is_completed(&self) -> bool {
+            self.0.is_completed()
+        }
+    }
+
+    let scope = ElementsOnly(NameScope::new());
+    let element = StyledElement::new().upcast::<FerroObject>();
+    assert_eq!(scope.try_register_value("element", Rc::new(element.clone())), Ok(()));
+    assert!(scope.find("element") == Some(element.clone()));
+    assert!(scope.find_value("element").is_some());
+    let second = StyledElement::new().upcast::<FerroObject>();
+    assert_eq!(
+        scope.try_register_value("element", Rc::new(second)),
+        Err(NameScopeValueError::DuplicateName("element".to_string()))
+    );
+    assert_eq!(scope.try_register_value("model", Rc::new(1_i32)), Err(NameScopeValueError::UnsupportedValue));
+    scope.complete();
+    assert_eq!(scope.try_register_value("late", Rc::new(element)), Err(NameScopeValueError::Completed));
+}
+
+// --- resource providers of the Dock port -------------------------------------
+
+/// The merged dictionaries of a resource dictionary are its own list: a
+/// provider added to the list is a merged dictionary of the dictionary. A
+/// dictionary that keeps no list (it only implements the snapshot) gives a copy.
+/// A provider offers itself as `Any` for a downcast to its type.
+#[test]
+fn merged_dictionaries_and_providers_as_any() {
+    use crate::controls::{
+        IResourceDictionary, IResourceNode, IResourceProvider, IThemeVariantProvider, ResourceDictionary,
+        ResourceHostRef, ResourceKey, ResourceValue,
+    };
+    use crate::reactive::IDisposable;
+    use crate::styling::ThemeVariant;
+
+    let dictionary: Rc<dyn IResourceDictionary> = ResourceDictionary::new().into();
+    let child: Rc<dyn IResourceDictionary> = ResourceDictionary::new().into();
+    let child_provider: Rc<dyn IResourceProvider> = child.clone();
+    dictionary.merged_dictionaries().add(child_provider.clone());
+    assert_eq!(dictionary.merged_dictionaries_snapshot().len(), 1, "the list is the dictionary's own");
+    assert!(dictionary.as_resource_dictionary().is_some());
+    assert!(dictionary.as_any().is_some(), "a dictionary of the framework offers itself as Any");
+
+    struct SnapshotOnly(Rc<dyn IResourceDictionary>);
+    impl IResourceNode for SnapshotOnly {
+        fn has_resources(&self) -> bool {
+            self.0.has_resources()
+        }
+        fn try_get_resource(&self, key: &ResourceKey, theme: Option<&ThemeVariant>) -> Option<ResourceValue> {
+            self.0.try_get_resource(key, theme)
+        }
+    }
+    impl IResourceProvider for SnapshotOnly {
+        fn owner(&self) -> Option<ResourceHostRef> {
+            self.0.owner()
+        }
+        fn owner_changed(&self, handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
+            self.0.owner_changed(handler)
+        }
+        fn add_owner(&self, owner: &ResourceHostRef) {
+            self.0.add_owner(owner)
+        }
+        fn remove_owner(&self, owner: &ResourceHostRef) {
+            self.0.remove_owner(owner)
+        }
+    }
+    impl IResourceDictionary for SnapshotOnly {
+        fn merged_dictionaries_snapshot(&self) -> Rc<Vec<Rc<dyn IResourceProvider>>> {
+            self.0.merged_dictionaries_snapshot()
+        }
+        fn theme_dictionaries_snapshot(&self) -> Vec<(ThemeVariant, Rc<dyn IThemeVariantProvider>)> {
+            self.0.theme_dictionaries_snapshot()
+        }
+        fn count(&self) -> usize {
+            self.0.count()
+        }
+        fn add(&self, key: ResourceKey, value: ResourceValue) {
+            self.0.add(key, value)
+        }
+        fn set(&self, key: ResourceKey, value: ResourceValue) {
+            self.0.set(key, value)
+        }
+        fn contains_key(&self, key: &ResourceKey) -> bool {
+            self.0.contains_key(key)
+        }
+        fn remove(&self, key: &ResourceKey) -> bool {
+            self.0.remove(key)
+        }
+        fn try_get_value(&self, key: &ResourceKey) -> Option<ResourceValue> {
+            self.0.try_get_value(key)
+        }
+        fn clear(&self) {
+            self.0.clear()
+        }
+    }
+
+    let custom = SnapshotOnly(dictionary.clone());
+    let copy = custom.merged_dictionaries();
+    assert_eq!(copy.count(), 1, "the default is a copy of the snapshot");
+    copy.add(ResourceDictionary::new().into());
+    assert_eq!(dictionary.merged_dictionaries_snapshot().len(), 1, "the copy is not the dictionary's list");
+    assert!(custom.as_resource_dictionary().is_none(), "the default of a provider");
+    assert!(custom.as_any().is_none(), "a provider that does not offer itself");
+}
+
 #[test]
 #[should_panic(expected = "Control with the name 'foo' already registered.")]
 fn register_panics_for_a_duplicate_name() {

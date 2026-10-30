@@ -344,6 +344,10 @@ impl IResourceNode for MacOSThemeHandle {
 }
 
 impl IResourceProvider for MacOSThemeHandle {
+    fn as_any(&self) -> Option<&dyn std::any::Any> {
+        Some(self)
+    }
+
     fn owner(&self) -> Option<ResourceHostRef> {
         self.0.owner()
     }

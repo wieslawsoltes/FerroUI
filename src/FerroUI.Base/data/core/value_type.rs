@@ -136,6 +136,7 @@ type NullFn = fn() -> BoxedValue;
 type ObjectFn = fn(&dyn AnyValue) -> Option<Ref<FerroObject>>;
 type FromObjectFn = fn(Ref<FerroObject>) -> Option<BoxedValue>;
 type InterfaceFn = Rc<dyn Fn(&Ref<FerroObject>) -> Option<BoxedValue>>;
+type ReferenceIdentityFn = Rc<dyn Fn(&dyn AnyValue) -> Option<*const ()>>;
 type InterfaceObjectFn = Rc<dyn Fn(&dyn AnyValue) -> Option<Ref<FerroObject>>>;
 type OrderingFn = Rc<dyn Fn(&dyn AnyValue, &dyn AnyValue) -> Option<std::cmp::Ordering>>;
 
@@ -153,6 +154,8 @@ struct Registry {
     reference_handles: IdMap<TypeId, TypeId>,
     /// A model type `T` → `Rc<T>`.
     reference_objects: IdMap<TypeId, TypeId>,
+    /// Typed interface/class views of an enclosing reference object's identity.
+    reference_identities: IdMap<TypeId, ReferenceIdentityFn>,
     conversions: IdMap<(TypeId, TypeId), ConvertFn>,
     /// The conversions that are assignability casts: the value is the same
     /// value, seen as a wider type.
@@ -574,20 +577,24 @@ impl ValueTypes {
     /// Converts an object to the interface handle type `target` (or its
     /// nullable form), if the class of the object declares the interface.
     fn object_to_interface(object: &Ref<FerroObject>, target: ValueType) -> Option<BoxedValue> {
+        Self::object_to_interface_id(object, target.id())
+    }
+
+    fn object_to_interface_id(object: &Ref<FerroObject>, target: TypeId) -> Option<BoxedValue> {
         let class = object.get_type();
         let (cast, wrap) = with_registry(|r| {
-            if let Some(cast) = r.interface_cast(target.id(), class) {
+            if let Some(cast) = r.interface_cast(target, class) {
                 return (Some(cast.clone()), None);
             }
-            let Some(inner) = r.nullable_inner.get(&target.id()) else {
+            let Some(inner) = r.nullable_inner.get(&target) else {
                 return (None, None);
             };
-            (r.interface_cast(inner.id(), class).cloned(), r.casts.get(&(inner.id(), target.id())).cloned())
+            (r.interface_cast(inner.id(), class).cloned(), r.casts.get(&(inner.id(), target)).cloned())
         });
         let value = cast?(object)?;
         match wrap {
             Some(wrap) => wrap(&value),
-            None if value_type_id(&*value) == target.id() => Some(value),
+            None if value_type_id(&*value) == target => Some(value),
             None => None,
         }
     }
@@ -711,6 +718,51 @@ impl ValueTypes {
         cast(value)
     }
 
+    /// Registers the enclosing object identity of a typed view. `identity`
+    /// returns the address of the shared object which the view keeps alive,
+    /// never a temporary adapter or a value-derived hash. The address is only
+    /// compared, never dereferenced. Registration does not change conversions.
+    pub fn register_reference_identity<T: 'static>(identity: fn(&T) -> *const ()) {
+        let identity: ReferenceIdentityFn = Rc::new(move |value| value.downcast_ref::<T>().map(identity));
+        with_registry(|r| { r.reference_identities.insert(TypeId::of::<T>(), identity); });
+    }
+
+    /// The identity of the object an untyped value represents. Native objects,
+    /// registered interface/class views and Rc<T> handles use their enclosing
+    /// object; other boxes retain their own identity, never value equality.
+    pub fn reference_identity(value: &BoxedValue) -> *const () {
+        if let Some(object) = Self::as_object(&**value) {
+            return &*object as *const FerroObject as *const ();
+        }
+        Self::boxed_reference_identity(value)
+    }
+
+    fn boxed_reference_identity(value: &BoxedValue) -> *const () {
+        let identity = with_registry(|r| r.reference_identities.get(&value_type_id(&**value)).cloned());
+        if let Some(identity) = identity.and_then(|identity| identity(&**value)) {
+            return identity;
+        }
+        let object = Self::reference_object(value).unwrap_or_else(|| value.clone());
+        Rc::as_ptr(&object) as *const ()
+    }
+
+    /// Whether two non-null boxed values represent the same object instance.
+    /// Equal value-type boxes remain distinct objects.
+    pub fn reference_equals(first: &BoxedValue, other: &BoxedValue) -> bool {
+        if Rc::ptr_eq(first, other) {
+            return true;
+        }
+        // Keep native objects alive through both lookups, including weak element
+        // references, and invoke each native projection only once.
+        let first_native = Self::as_object(&**first);
+        let other_native = Self::as_object(&**other);
+        let first_identity = first_native.as_ref().map(|object| &**object as *const FerroObject as *const ())
+            .unwrap_or_else(|| Self::boxed_reference_identity(first));
+        let other_identity = other_native.as_ref().map(|object| &**object as *const FerroObject as *const ())
+            .unwrap_or_else(|| Self::boxed_reference_identity(other));
+        first_identity == other_identity
+    }
+
     /// The class `T` of a registered element reference type
     /// ([`register_element_ref`](Self::register_element_ref)) with the id
     /// `id` (`ElementRef<T>`, or `Option<ElementRef<T>>`, the nullable form),
@@ -787,6 +839,7 @@ impl ValueTypes {
         if registered {
             return;
         }
+        Self::register_reference_identity::<Rc<T>>(|value| Rc::as_ptr(value) as *const ());
         with_registry(|r| {
             r.nullable.insert(TypeId::of::<Option<Rc<T>>>(), unwrap::<T>);
             r.null_values.insert(TypeId::of::<Option<Rc<T>>>(), null::<T>);
@@ -829,7 +882,13 @@ impl ValueTypes {
             return Some(Rc::new(object));
         }
         let f = with_registry(|r| r.objects.get(&id).map(|o| o.1).or_else(|| r.element_ref_objects.get(&id).map(|e| e.1)));
-        f.and_then(|f| f(object))
+        match f {
+            Some(restore) => restore(object),
+            // Weak binding sources retain the original interface handle type.
+            // Restore it through the class's declared interface facts, including
+            // inherited and nullable views, without retaining a strong source.
+            None => Self::object_to_interface_id(&object, id),
+        }
     }
 
     /// The type a registered nullable form holds: `T` for `Option<T>` and for
@@ -886,7 +945,15 @@ impl ValueTypes {
         if target.is::<BoxedValue>() {
             return Some(Some(Rc::new(value.clone())));
         }
-        if let Some(v) = Self::try_convert_registered(value, target) {
+        let conversion = with_registry(|r| r.conversions.get(&(id, target.id())).cloned());
+        if let Some(convert) = conversion {
+            if let Some(v) = convert(value) {
+                return Some(Some(v));
+            }
+        } else if let Some(v) = Self::try_cast(value, target) {
+            // Assignability includes the object/handle form of a reference and
+            // lifting an interface handle to its nullable target. Do not run a
+            // registered failing converter twice while looking for that path.
             return Some(Some(v));
         }
         // A nullable source: convert its contents.
