@@ -6,6 +6,7 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ### Added
 
+- **Designer: layout and editing tools** (D2 of #345, not published before 0.5): `ferroui-designer-tools`, panel layout adapters, property metadata, selection geometry, snapping and manipulation plans.
 - **Designer: document core and projects** (D1 of #345, not published before 0.5): `ferroui-designer-core`, a source-preserving XAML document model with transactions and history, and `ferroui-designer-project`, solution discovery, document buffers, resource URIs and cancellable build tasks.
 - **LiveCharts2 port, pie engine** (L1c of [docs/porting/livecharts2.md](docs/porting/livecharts2.md); from #312): `PieChartEngine` measures pie, doughnut, gauge and nested-ring series into a retained scene, with the upstream pie scale and data label tests.
 - **LiveCharts2 port, Cartesian engine** (L1b of [docs/porting/livecharts2.md](docs/porting/livecharts2.md); from #312): `CartesianChartEngine` measures Cartesian series and axes into a retained scene, with the `ShouldScale` fixtures of the upstream column, row, scatter, step line, stacked, financial and box series tests.
