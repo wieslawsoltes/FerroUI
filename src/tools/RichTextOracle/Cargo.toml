@@ -1,0 +1,27 @@
+[package]
+name = "ferroui-rich-text-oracle"
+description = "Tool: characterises the system Msftedit (RichEdit) through its text object model and prints the observations that scripts/winui-rich-text reads"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+# A Windows tool, run on demand (`.github/workflows/rich-text.yml`, docs/porting/winui-rich-text.md,
+# section 8). On other targets it builds as a program that only says so.
+[[bin]]
+name = "ferroui-rich-text-oracle"
+path = "main.rs"
+
+[target.'cfg(windows)'.dependencies]
+# The COM pointers and interface identifiers of the text object model.
+ferroui-microcom.workspace = true
+windows-sys = { workspace = true, features = [
+    "Win32_Foundation",
+    "Win32_Storage_FileSystem",
+    "Win32_System_LibraryLoader",
+    "Win32_System_Ole",
+    "Win32_System_SystemInformation",
+    "Win32_UI_WindowsAndMessaging",
+] }

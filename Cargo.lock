@@ -2333,6 +2333,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-rich-text-oracle"
+version = "0.4.0"
+dependencies = [
+ "ferroui-microcom",
+ "windows-sys 0.61.2",
+]
+
+[[package]]
 name = "ferroui-skia"
 version = "0.4.0"
 dependencies = [
