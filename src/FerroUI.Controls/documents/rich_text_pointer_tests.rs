@@ -3,6 +3,8 @@ use super::*;
 use crate::documents::CharacterFormat;
 use ferroui_base::media::FontWeight;
 use ferroui_base::threading::Dispatcher;
+#[allow(unused_imports)]
+use crate::rich_text::*;
 
 #[test]
 fn rich_pointer_created_after_an_edit_does_not_replay_that_edit_at_batch_end() {
@@ -152,4 +154,73 @@ fn rich_pointer_formatting_and_rejected_utf16_edits_do_not_rebase_positions() {
     assert_eq!(pointer.offset(), 3);
     assert_eq!(formatted.offset(), 3);
     assert_eq!(document.text(), "a😀b");
+}
+
+/// Live positions follow the real replacement, also where the same character repeats
+/// (#243 review, S2): a text diff sees an insertion at 0 of "a" into "aa" as one at 2.
+#[test]
+fn pointers_follow_the_real_edit_when_characters_repeat() {
+    let _scope = Dispatcher::unit_test_scope();
+    let document = RichTextDocument::from_text("aa");
+    let second = document.create_pointer(1, TextGravity::Forward).unwrap();
+    let end = document.create_pointer(2, TextGravity::Forward).unwrap();
+    document.replace_text(0..0, "a").unwrap();
+    assert_eq!((second.offset(), end.offset()), (2, 3));
+
+    let document = RichTextDocument::from_text("abab");
+    let third = document.create_pointer(2, TextGravity::Forward).unwrap();
+    document.replace_text(0..2, "").unwrap();
+    assert_eq!(third.offset(), 0);
+    let document = RichTextDocument::from_text("abab");
+    let first = document.create_pointer(1, TextGravity::Forward).unwrap();
+    document.replace_text(0..2, "").unwrap();
+    assert_eq!(first.offset(), 0);
+}
+
+#[test]
+fn rich_pointer_new_and_existing_positions_follow_failed_group_rollback_once() {
+    let _scope = Dispatcher::unit_test_scope();
+    let services = RichEditTextDocument::new(RichTextDocument::from_text("abcd"));
+    let document = services.document();
+    let end = document.create_pointer(4, TextGravity::Forward).unwrap();
+    let range = services.get_range(1, 3).unwrap();
+    let created = Rc::new(RefCell::new(None));
+    let result: Result<(), EditError> = services.edit_group(|_| {
+        range.set_text("😀Q")?;
+        assert_eq!(range.range(), 1..4);
+        assert_eq!(end.offset(), 5);
+        *created.borrow_mut() = Some(document.create_pointer(4, TextGravity::Forward)?);
+        Err(EditError::ReadOnly)
+    });
+    assert!(result.is_err());
+    assert_eq!(document.text(), "abcd");
+    assert_eq!(end.offset(), 4);
+    assert_eq!(range.range(), 1..3);
+    assert_eq!(created.borrow().as_ref().unwrap().offset(), 3);
+    assert!(!services.can_undo());
+}
+
+#[test]
+fn rich_pointer_range_moved_inside_nested_editor_groups_uses_current_coordinates() {
+    let _scope = Dispatcher::unit_test_scope();
+    let services = RichEditTextDocument::new(RichTextDocument::from_text("abcd"));
+    let range = services.get_range(1, 3).unwrap();
+    services
+        .edit_group(|services| {
+            range.set_text("😀Q")?;
+            assert_eq!(range.range(), 1..4);
+            range.set_range(4, 4)?;
+            services.edit_group(|services| services.get_range(0, 0)?.set_text("Z"))?;
+            assert_eq!(range.range(), 5..5);
+            Ok(())
+        })
+        .unwrap();
+    assert_eq!(services.text(), "Za😀Qd");
+    assert_eq!(range.range(), 5..5);
+    assert!(services.undo().unwrap());
+    assert_eq!(services.text(), "abcd");
+    assert_eq!(range.range(), 3..3);
+    assert!(services.redo().unwrap());
+    assert_eq!(services.text(), "Za😀Qd");
+    assert_eq!(range.range(), 5..5);
 }

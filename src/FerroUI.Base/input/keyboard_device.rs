@@ -8,7 +8,7 @@ use crate::reactive::{Disposable, IDisposable};
 use crate::utilities::HandlerList;
 use crate::{FerroLocator, LocatorExtensions, Ref};
 use std::any::Any;
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
 
 /// Represents the keyboard: turns raw key and text input into routed
@@ -20,6 +20,9 @@ pub struct KeyboardDevice {
     focused_root: RefCell<Option<Rc<dyn IInputRoot>>>,
     text_input_manager: Rc<TextInputMethodManager>,
     property_changed: HandlerList<dyn Fn(&str)>,
+    /// Advanced by every accepted focus change, so that an enclosing change whose
+    /// events are still being raised stops (DEVIATIONS.md, Input).
+    focus_generation: Cell<u64>,
 }
 
 impl KeyboardDevice {
@@ -31,6 +34,7 @@ impl KeyboardDevice {
             focused_root: RefCell::new(None),
             text_input_manager: TextInputMethodManager::new(),
             property_changed: HandlerList::new(),
+            focus_generation: Cell::new(0),
         })
     }
 
@@ -176,6 +180,7 @@ impl KeyboardDevice {
         if element == focused_element.as_ref() {
             return;
         }
+        let initial_generation = self.focus_generation.get();
 
         let mut element = element.cloned();
         let interactive = focused_element.clone();
@@ -191,6 +196,9 @@ impl KeyboardDevice {
         if let Some(interactive) = &interactive {
             interactive.raise_event(&losing_focus);
         }
+        if self.focus_generation.get() != initial_generation {
+            return;
+        }
 
         if losing_focus.canceled() {
             change_focus = false;
@@ -198,7 +206,8 @@ impl KeyboardDevice {
 
         if change_focus {
             if let Some(new_focus) = losing_focus.new_focused_element() {
-                let mut getting_focus = FocusChangingEventArgs::new(InputElement::getting_focus_event());
+                let mut getting_focus =
+                    FocusChangingEventArgs::new(InputElement::getting_focus_event());
                 getting_focus.old_focused_element = focused_element.clone();
                 getting_focus.set_new_focused_element(Some(new_focus.clone()));
                 getting_focus.navigation_method = method;
@@ -206,6 +215,9 @@ impl KeyboardDevice {
                 getting_focus.can_cancel_or_redirect_focus = is_focus_change_cancellable;
 
                 new_focus.raise_event(&getting_focus);
+                if self.focus_generation.get() != initial_generation {
+                    return;
+                }
 
                 if getting_focus.canceled() {
                     change_focus = false;
@@ -219,22 +231,46 @@ impl KeyboardDevice {
             return;
         }
 
+        // Only an accepted focus change supersedes an enclosing request. A
+        // canceled nested request leaves the outer transition intact, while
+        // a committed round trip still invalidates its old event sequence
+        // (DEVIATIONS.md, Input).
+        let generation = initial_generation.wrapping_add(1);
+        self.focus_generation.set(generation);
+
         let old_element = self.focused_element();
         let focused_root = self.focused_root.borrow().clone();
+        let new_root = element.as_ref().and_then(|e| e.get_input_root());
+        if self.focus_generation.get() != generation {
+            return;
+        }
 
         // Clear keyboard focus from the currently focused element.
         if let (Some(old), Some(focused_root)) = (&old_element, &focused_root) {
-            let new_root = element.as_ref().and_then(|e| e.get_input_root());
-            let same_root = new_root.as_ref().is_some_and(|r| std::ptr::addr_eq(Rc::as_ptr(r), Rc::as_ptr(focused_root)));
+            let same_root = new_root
+                .as_ref()
+                .is_some_and(|r| std::ptr::addr_eq(Rc::as_ptr(r), Rc::as_ptr(focused_root)));
 
             if !old.is_attached_to_visual_tree() || !same_root {
                 Self::clear_children_focus_within(&focused_root.root_element(), true);
             }
         }
+        if self.focus_generation.get() != generation {
+            return;
+        }
 
         Self::set_is_focus_within(old_element.as_ref(), element.as_ref());
+        if self.focus_generation.get() != generation {
+            return;
+        }
         drop(self.focused_element.replace(element.clone()));
-        drop(self.focused_root.replace(element.as_ref().and_then(|e| e.get_input_root())));
+        drop(self.focused_root.replace(new_root));
+
+        let current =
+            || self.focus_generation.get() == generation && self.focused_element() == element;
+        if !current() {
+            return;
+        }
 
         if let Some(interactive) = &interactive {
             let mut lost_focus = FocusChangedEventArgs::new(InputElement::lost_focus_event());
@@ -243,6 +279,9 @@ impl KeyboardDevice {
             lost_focus.navigation_method = method;
             lost_focus.key_modifiers = key_modifiers;
             interactive.raise_event(&lost_focus);
+        }
+        if !current() {
+            return;
         }
 
         if let Some(new_element) = &element {
@@ -253,8 +292,17 @@ impl KeyboardDevice {
             got_focus.key_modifiers = key_modifiers;
             new_element.raise_event(&got_focus);
         }
+        if !current() {
+            return;
+        }
 
-        self.text_input_manager.set_focused_element(element);
+        // The element that has focus now (DEVIATIONS.md, Input: a nested focus change
+        // supersedes this one).
+        self.text_input_manager
+            .set_focused_element(self.focused_element());
+        if !current() {
+            return;
+        }
         self.raise_property_changed("FocusedElement");
     }
 

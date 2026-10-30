@@ -85,7 +85,7 @@ The changes #243 made on default paths and what the landing pull requests do wit
 |---|---|---|
 | IME on every backend (P1, P6, P8, P20, P24, P28, P33, P34) | applied to every TextBox | only for clients with the connection (D5); legacy unchanged; R9 to R12 |
 | `InputMethodManager` (B5) | rewritten; no reset of the new root's IME | legacy clients keep the upstream reset (the expectation of `input_tests.rs` restored); R3 |
-| Focus (B3) | a nested focus change aborts the outer sequence | recorded with a direct nested-focus test, or left out; R3 |
+| Focus (B3) | a nested focus change aborts the outer sequence | taken in R8 with a direct nested-focus test, recorded in DEVIATIONS.md (Input) |
 | `TextInputOptions` (B7) | a new public field | attached-property accessor (D8); R3 |
 | Popup and PopupFlyoutBase (C8, C11) | lifecycle rewrite, reversed IsOpen order | recorded deviations, upstream order kept (D6); R4 |
 | Generic ContextMenu and PopupFlyoutBase (C13) | downcasts to `RichTextBlock` | an extension point; R4 |
@@ -192,4 +192,31 @@ What remains outside the port (RT-P of #243): the exact LineServices metrics, th
 | `RichTextBlockAutomationPeer` exposes the Text pattern. | Until R8, the peer is a Text element named by the document text, without the Text pattern. | The text pattern is built on the text object model (R7, R8). |
 | `RichTextBlockOverflow` falls back to the master's context flyout (`GetContextFlyout`). | The same, through the `Control::effective_context_flyout` virtual (R4) instead of a type test in the flyout code. | Layering (S10). |
 | The selection context menu of WinUI (`TextCommandBarFlyout` with Copy) opens by default. | Only a configured `ContextMenu` or `ContextFlyout` opens; `ContextMenuOpening` is raised before it. | The automatic selection menu of the legacy selection manager is not projected (RT-I22, RT-I37). |
+
+### 11.2 The editor, the text object model, RTF and the clipboard (R7)
+
+| WinUI | FerroUI | Why |
+|---|---|---|
+| `WinUIEdit.dll` (RichEdit) edits the story; TOM is its COM interface. | `RichTextEditor` edits the shared `RichTextDocument`; `RichEditTextDocument`, `RichEditTextRange` and `RichEditTextSelection` are facades over it. The editor, the RTF reader and writer and the field stories are `#[doc(hidden)]`. | RT-A03: the engine is not in the reference; the documented contract is implemented (S12: only the WinUI-facing types are API). |
+| Undo keeps one unit per typing group, including Backspace (`EM_STOPGROUPTYPING`). | The same: typing, exact IME insertions at the caret and Backspace at a collapsed caret merge into one unit until a caret move, a format change, a paste or Delete; a unit shares its snapshots with its neighbours. Units are document snapshots, not deltas (F1). | #243 review M6, S1, S8; decision D9. |
+| A soft line break (`LineBreak`, VT) is one character in TOM. | One unit, U+000B, in the model on every platform; plain text on the clipboard gets the platform's line terminator. | Decision D10 (#243 used `\r\n` on Windows: two units). |
+| Live ranges follow the edits RichEdit makes. | Ranges, `TextPointer`s and link fields follow the replacement the editor made; a text diff is used only for writes that bypass the editor. | #243 review S2. |
+| Removing a paragraph mark keeps the format of the trailing paragraph. | The same for typing over the mark, Backspace, Delete and Cut. | #243 review S6. |
+| RTF reads every Windows code page. | With the cargo feature `rtf-codepages` (encoding_rs); without it, the code page 1252 and Unicode escapes only. | Decision D2. |
+| `UndoLimit` limits the undo stack. | It limits the redo stack too. | #243 review N3. |
+
+### 11.3 RichEditBox (R8)
+
+| WinUI | FerroUI | Why |
+|---|---|---|
+| `Document` and `TextDocument` return the text object model. | The same (`document()`, `text_document()`); the shared document is the property `RichDocument`, and `Paragraph` content in markup fills it (FerroUI additions). | Decision D3 (#243 had `Document` as the shared model, S13). |
+| Programmatic edits, undo and paste during a composition end it with `TextCompositionEnded` and reset the input method. | The same: a composition the editor ends outside the control's own composition calls raises `TextCompositionEnded` and resets the IME. | #243 review S4. |
+| A click or focus loss terminates the composition and keeps its text (`TextBoxBase.cpp`). | The same: the preview is committed, then the IME is reset (#243 discarded it). | #243 review S5. |
+| `TextCompositionStarted` precedes the first `TextChanging` of a composition. | The same, at the caret with no composed text yet. | #243 review N1. |
+| The caret rectangle is current in `TextChanging`. | While an edit is published, the caret rectangle (and so the IME candidate window) follows the editor, not the view's earlier selection. | #243 review N4. |
+| Shift+Enter inserts a soft line break. | It inserts a paragraph, as #243 did, until the Windows check confirms RichEdit's behaviour. | #243 review N2 (open). |
+| The context menu is `TextCommandBarFlyout`. | A `MenuFlyout` with the same commands (`docs/porting/winui-theme/DEVIATIONS.md`, G-30). | FerroUI has no command bar flyout. |
+| The template is in every theme. | The WinUI theme has it (`WINUI_ONLY_CONTROLS`), and so do the macOS and Material themes, which derive every control theme of the WinUI theme; Fluent and Simple show nothing. | Decision D4. |
+
+Not taken from #243 in R8: its manager tests for a client without exact editing whose cursor query moves focus or replaces the client (`rich_edit_input_geometry_tests.rs`). Such a client keeps the upstream manager (D5), which has no such guarantees. While a connection client's flyout has focus, the manager keeps the input method of the owner's root, also when the flyout is in a popup root of its own.
 
