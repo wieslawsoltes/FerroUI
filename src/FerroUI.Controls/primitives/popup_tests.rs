@@ -571,6 +571,35 @@ fn popup_close_should_raise_single_closed_event(use_popup_host: bool) {
     assert_eq!(1, closed_count.get());
 }
 
+/// Deviation (DEVIATIONS.md, Popup): a Closing that is cancelled leaves the popup open
+/// and IsOpen true; upstream leaves IsOpen false on the open popup.
+fn popup_cancelled_closing_keeps_is_open_true(use_popup_host: bool) {
+    let _app = create_services(use_popup_host);
+    let window = prepared_window(None);
+    let target = Popup::new();
+    target.set_placement(PlacementMode::Pointer);
+
+    window.set_content(Some(Control::boxed(target.clone())));
+    window.apply_template();
+    target.open();
+
+    let closed_count = Rc::new(Cell::new(0));
+    let count = closed_count.clone();
+    let _ = target.closed(move || count.set(count.get() + 1));
+    let cancel = target.closing(|e| e.set_cancel(true));
+
+    target.set_is_open(false);
+    assert!(target.is_open());
+    assert!(target.host().is_some());
+    assert_eq!(0, closed_count.get());
+
+    cancel.dispose();
+    target.set_is_open(false);
+    assert!(!target.is_open());
+    assert!(target.host().is_none());
+    assert_eq!(1, closed_count.get());
+}
+
 fn popup_close_on_closed_popup_should_not_raise_closed_event(use_popup_host: bool) {
     let _app = create_services(use_popup_host);
     let window = prepared_window(None);
@@ -1625,4 +1654,5 @@ popup_tests! {
     inherits_transform_scales_the_host_with_the_placement_target,
     closing_window_closes_its_open_popup_and_frees_both,
     reopening_a_popup_does_not_accumulate_platform_handlers,
+    popup_cancelled_closing_keeps_is_open_true,
 }

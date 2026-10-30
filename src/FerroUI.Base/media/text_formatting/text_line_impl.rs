@@ -249,6 +249,15 @@ impl TextLineImpl {
                 break;
             };
 
+            // Deviation (DEVIATIONS.md, Text formatting).
+            // A structural line/paragraph marker has no bidi glyph position.
+            // Keeping it inside an RTL span makes reverse traversal consume
+            // the marker before the requested source character and can turn
+            // every caret or short range into the same zero-width rectangle.
+            if next_run.as_text_end_of_line().is_some() {
+                break;
+            }
+
             let next_direction = Self::get_run_direction(Some(&**next_run), flow_direction);
 
             if next_direction != flow_direction {
@@ -610,7 +619,11 @@ impl TextLineImpl {
         // Current position is a text source index and first cluster is relative to the GlyphRun's buffer.
         let text_source_offset = current_position - first_cluster;
 
-        debug_assert!(text_source_offset >= 0);
+        // Deviation (DEVIATIONS.md, Text formatting).
+        // A leading or middle ellipsis retains a suffix of the original glyph
+        // buffer. Its first cluster can be greater than its compacted position
+        // in the collapsed line, so this translation is legitimately negative.
+        debug_assert!(text_source_offset >= 0 || self.has_collapsed);
 
         let mut cluster_offset = 0;
 
@@ -1357,7 +1370,8 @@ impl TextLine for TextLineImpl {
 
         let line_end = self.first_text_source_index + self.length;
 
-        let character_index = (character_hit.first_character_index() + character_hit.trailing_length()).min(line_end);
+        let mut character_index =
+            (character_hit.first_character_index() + character_hit.trailing_length()).min(line_end);
 
         let mut current_position = self.first_text_source_index;
 
@@ -1387,9 +1401,23 @@ impl TextLine for TextLineImpl {
             break;
         }
 
-        let Some(current_text_run) = current_text_run else {
+        let Some(mut current_text_run) = current_text_run else {
             return self.start();
         };
+
+        if current_text_run.as_text_end_of_line().is_some() && indexed_run_index > 0 {
+            // Deviation (DEVIATIONS.md, Text formatting).
+            // The terminator shares the trailing caret of the preceding logical
+            // run. Its visual array position is not a caret position in bidi
+            // text: the logical end can be at either side of the line.
+            let preceding = &indexed_text_runs[indexed_run_index - 1];
+            if let Some(run) = preceding.text_run.borrow().clone() {
+                indexed_run_index -= 1;
+                current_text_run = run;
+                current_position = preceding.text_source_character_index;
+                character_index = character_index.min(current_position + current_text_run.length());
+            }
+        }
 
         let current_indexed_run = &indexed_text_runs[indexed_run_index];
 
@@ -1560,7 +1588,11 @@ impl TextLine for TextLineImpl {
                 continue;
             }
 
-            let current_x = self.start() + self.get_preceding_distance(current_indexed_run.run_index.get());
+            let current_x = if current_text_run.as_text_end_of_line().is_some() {
+                self.get_distance_from_character_hit(CharacterHit::new(current_position))
+            } else {
+                self.start() + self.get_preceding_distance(current_indexed_run.run_index.get())
+            };
             let mut directional_width = 0.0;
 
             if let Some(current_drawable) = current_text_run.as_drawable() {

@@ -18,7 +18,7 @@ use crate::data::converters::{
     BoolConverters, DefaultValueConverter, IMultiValueConverter, IValueConverter, ObjectConverters, StringConverters,
     StringFormatMultiValueConverter, StringFormatValueConverter,
 };
-use crate::input::KeyBinding;
+use crate::input::{InputScopeName, KeyBinding};
 use crate::input::gesture_recognizers::{GestureRecognizer, GestureRecognizerCollection};
 use crate::interactivity::{RoutedEvent, RoutingStrategies};
 use crate::media::{
@@ -771,6 +771,18 @@ ferro_markup_type!(class FerroList<Rc<dyn IResourceProvider>> as "FerroList`1" {
     methods: [fn Add(Rc<dyn IResourceProvider>) => |list: &FerroList<Rc<dyn IResourceProvider>>, item: Rc<dyn IResourceProvider>| list.add(item)],
 });
 
+ferro_markup_type!(class FerroList<Ref<InputScopeName>> as "FerroList`1" {
+    namespace: "FerroUI.Collections",
+    handles: [FerroList<Ref<InputScopeName>>, Option<FerroList<Ref<InputScopeName>>>],
+    generic: "FerroList`1" [Ref<InputScopeName>],
+    constructors: [() => FerroList::<Ref<InputScopeName>>::new],
+    properties: [
+        Capacity: i32 { get: list_capacity, try_set: set_list_capacity },
+        Count: i32 { get: |list: &FerroList<Ref<InputScopeName>>| list.count() as i32 },
+    ],
+    methods: [fn Add(Ref<InputScopeName>) => |list: &FerroList<Ref<InputScopeName>>, item: Ref<InputScopeName>| list.add(item)],
+});
+
 ferro_markup_type!(class FerroList<Ref<KeyBinding>> as "FerroList`1" {
     namespace: "FerroUI.Collections",
     handles: [FerroList<Ref<KeyBinding>>, Option<FerroList<Ref<KeyBinding>>>],
@@ -1037,6 +1049,7 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <FerroList<Ref<GradientStop>> as MarkupTyped>::MARKUP,
     <FerroList<Rc<dyn ITransition>> as MarkupTyped>::MARKUP,
     <FerroList<Ref<KeyFrame>> as MarkupTyped>::MARKUP,
+    <FerroList<Ref<InputScopeName>> as MarkupTyped>::MARKUP,
     <FerroList<Ref<PathFigure>> as MarkupTyped>::MARKUP,
     <FerroList<Ref<PathSegment>> as MarkupTyped>::MARKUP,
     <FerroList<Ref<Drawing>> as MarkupTyped>::MARKUP,
@@ -1082,6 +1095,7 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<FerroList<Ref<GradientStop>>>();
     ValueTypes::register_nullable::<FerroList<Rc<dyn ITransition>>>();
     ValueTypes::register_nullable::<FerroList<Ref<KeyFrame>>>();
+    ValueTypes::register_nullable::<FerroList<Ref<InputScopeName>>>();
     ValueTypes::register_nullable::<FerroList<Ref<PathFigure>>>();
     ValueTypes::register_nullable::<FerroList<Ref<PathSegment>>>();
     ValueTypes::register_nullable::<FerroList<Ref<Drawing>>>();

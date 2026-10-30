@@ -932,6 +932,22 @@ fn is_open_set_true_cancelled_opening_reverts_to_false(use_overlay_popups: bool)
     assert!(!flyout.is_open());
 }
 
+/// Deviation (DEVIATIONS.md, Popup): an Opening that is cancelled releases the target
+/// and the placement target of the popup; upstream keeps both until the next show.
+fn cancelled_opening_releases_the_target(use_overlay_popups: bool) {
+    let _app = create_services_with_focus(use_overlay_popups);
+    let window = prepared_window(None);
+    window.show();
+
+    let flyout = Flyout::new();
+    let _ = flyout.opening(|e| e.set_cancel(true));
+    flyout.show_at(&window);
+
+    assert!(!flyout.is_open());
+    assert!(flyout.target().is_none());
+    assert!(flyout.popup().placement_target().is_none());
+}
+
 macro_rules! flyout_tests {
     ($($name:ident,)*) => {
         /// The reference `FlyoutTests`: the platform creates native popups.
@@ -990,4 +1006,8 @@ flyout_tests! {
     is_open_set_false_cancelled_closing_reverts_to_true,
     is_open_set_true_after_target_detached_reverts_to_false,
     is_open_set_true_cancelled_opening_reverts_to_false,
+    cancelled_opening_releases_the_target,
 }
+
+#[path = "popup_flyout_request_tests.rs"]
+mod request_ownership_tests;

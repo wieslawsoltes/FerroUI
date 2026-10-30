@@ -398,6 +398,7 @@ ferroui_base::ferro_rust_paths! {
         crate::WindowTransparencyLevel,
         crate::WindowTransparencyLevelCollection,
         crate::WrapPanelItemsAlignment,
+        crate::ZoomMode,
         crate::automation::AccessibilityView,
         crate::automation::AutomationLiveSetting,
         crate::automation::ExpandCollapseState,
