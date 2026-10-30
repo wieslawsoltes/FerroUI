@@ -4,7 +4,7 @@ use super::testing::{
     RecordingDrawingSink, SingleBufferTextSource, TextTestScope,
 };
 use super::{
-    GenericTextParagraphProperties, GenericTextRunProperties, TabAlignment,
+    GenericTextParagraphProperties, GenericTextRunProperties, InterWordJustification, TabAlignment,
     TabLeader, TextCharacters, TextFormatter, TextParagraphProperties, TextRunCache,
     TextRunProperties, TextTabError, TextTabStop, TextTabStops,
 };
@@ -536,4 +536,99 @@ fn paragraph_tabs_without_tab_stops_keep_the_upstream_formatter() {
     )
     .unwrap();
     assert!(with_stops.text_runs().len() > 1);
+}
+
+#[test]
+fn paragraph_tabs_justification_keeps_stops_and_leaders_while_filling_the_last_leading_field() {
+    let _scope = TextTestScope::new();
+    for (direction, alignment, text, field_start) in [
+        (
+            FlowDirection::LeftToRight,
+            TabAlignment::Left,
+            "a b\tc d e",
+            60.0,
+        ),
+        (
+            FlowDirection::RightToLeft,
+            TabAlignment::Right,
+            "א ב\tד ה ו",
+            140.0,
+        ),
+    ] {
+        let props = colored_properties(None);
+        let source = SingleBufferTextSource::new(text, props.clone());
+        let line = format_line(
+            &source,
+            0,
+            200.0,
+            &tabs(
+                props,
+                &[TextTabStop::new(60.0, alignment, TabLeader::Dots)],
+                direction,
+                TextWrapping::NoWrap,
+                0.0,
+            ),
+            None,
+        )
+        .unwrap();
+        let first_word_end = line.get_distance_from_character_hit(CharacterHit::new(1));
+        line.justify(&InterWordJustification::new(120.0));
+        close(line.width(), 120.0);
+        close(
+            line.get_distance_from_character_hit(CharacterHit::new(1)),
+            first_word_end,
+        );
+        close(
+            line.get_distance_from_character_hit(CharacterHit::new(4)),
+            field_start,
+        );
+        let mut sink = RecordingDrawingSink::new();
+        line.draw(&mut sink, Point::new(0.0, 0.0));
+        assert_eq!(
+            sink.calls()
+                .iter()
+                .filter(|call| matches!(call, DrawCall::Line(..)))
+                .count(),
+            1
+        );
+    }
+}
+
+#[test]
+fn paragraph_tabs_justification_does_not_move_centered_trailing_or_decimal_anchors() {
+    let _scope = TextTestScope::new();
+    for alignment in [
+        TabAlignment::Center,
+        TabAlignment::Right,
+        TabAlignment::Decimal,
+    ] {
+        let props = run_properties(12.0);
+        let source = SingleBufferTextSource::new("a b\t1 2.5", props.clone());
+        let line = format_line(
+            &source,
+            0,
+            200.0,
+            &tabs(
+                props,
+                &[stop(60.0, alignment)],
+                FlowDirection::LeftToRight,
+                TextWrapping::NoWrap,
+                0.0,
+            ),
+            None,
+        )
+        .unwrap();
+        let width = line.width();
+        let positions: Vec<_> = (0..line.length())
+            .map(|index| line.get_distance_from_character_hit(CharacterHit::new(index)))
+            .collect();
+        line.justify(&InterWordJustification::new(200.0));
+        close(line.width(), width);
+        for (index, before) in positions.into_iter().enumerate() {
+            close(
+                line.get_distance_from_character_hit(CharacterHit::new(index as i32)),
+                before,
+            );
+        }
+    }
 }
