@@ -138,9 +138,11 @@ pub use standard_asset_loader::StandardAssetLoader;
 
 // --- font and text contracts ---
 
+mod i_font_fallback_mapper;
 mod i_font_manager_impl;
 mod i_text_shaper_impl;
 
+pub use i_font_fallback_mapper::IFontFallbackMapper;
 pub use i_font_manager_impl::IFontManagerImpl;
 pub use i_text_shaper_impl::ITextShaperImpl;
 
