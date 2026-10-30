@@ -35,6 +35,8 @@ mod control_state;
 pub use control_state::{CapturedControlState, ControlStateAdapter, ControlStateRestoreContext};
 pub use component::{ComponentRefresh, ComponentReloadTarget};
 mod contract;
+#[cfg(test)]
+mod runtime_contract_tests;
 mod identity;
 mod manifest;
 mod state;
@@ -108,6 +110,7 @@ pub struct HotReloadSession {
     )>,
     source_registration: Option<ferroui_markup_xaml::source_overlay::SourceRegistration>,
     contracts: BTreeMap<String, DocumentContract>,
+    runtime_contracts: bool,
     build_contracts: Option<Rc<contract::BuildContracts>>,
     pending: BTreeMap<String, String>,
     read_errors: BTreeMap<String, String>,
@@ -121,6 +124,16 @@ pub struct HotReloadSession {
 impl HotReloadSession {
     pub fn new() -> Self {
         Self::default()
+    }
+    /// Creates a session for runtime-instantiated documents whose target adapters replace
+    /// the entire affected object graph, including namescopes and event subscriptions.
+    /// Structural contracts are accepted only after every target commits successfully.
+    /// Compiled class population overrides are prohibited in this mode; application and
+    /// manifest sessions retain the default restart protection for contract changes.
+    pub fn for_runtime_documents() -> Self {
+        let mut session = Self::new();
+        session.runtime_contracts = true;
+        session
     }
     pub fn register_document(&mut self, uri: String, source: String) -> Result<(), ReloadError> {
         let uri = document_key(&uri);
@@ -156,6 +169,11 @@ impl HotReloadSession {
         configuration: ferroui_markup_xaml::RuntimeXamlLoaderConfiguration,
     ) -> Result<(), ReloadError> {
         use ferroui_markup_xaml::{FerroXamlLoader, RuntimeXamlLoaderDocument};
+        if self.runtime_contracts {
+            return Err(ReloadError::Failed(
+                "Runtime document sessions cannot bind compiled class population overrides".into(),
+            ));
+        }
         let uri = document_key(&uri);
         if !self.accepted.contains_key(&uri) {
             return Err(ReloadError::Failed(format!("Unregistered document: {uri}")));
@@ -402,6 +420,7 @@ impl HotReloadSession {
             return Some(outcome);
         }
         let mut candidate = (*self.accepted).clone();
+        let mut candidate_contracts = BTreeMap::new();
         for (uri, text) in &pending {
             if let (Some(contracts), Some(before)) = (&self.build_contracts, self.accepted.get(uri)) {
                 let check = contracts.fingerprint(before).and_then(|baseline| {
@@ -419,9 +438,16 @@ impl HotReloadSession {
                     return Some(outcome);
                 }
             }
-            let check =
-                DocumentContract::parse_with_build(text, self.build_contracts.as_deref()).and_then(|contract| match self.contracts.get(uri) {
-                    Some(baseline) if baseline == &contract => Ok(()),
+            let check = DocumentContract::parse_with_build(text, self.build_contracts.as_deref())
+                .and_then(|contract| match self.contracts.get(uri) {
+                    Some(baseline)
+                        if baseline == &contract
+                            || (self.runtime_contracts
+                                && self.build_contracts.is_none()
+                                && self.overrides.is_empty()) =>
+                    {
+                        Ok(contract)
+                    }
                     Some(_) => Err(ReloadError::RestartRequired(format!(
                         "XAML contract changed: {uri}"
                     ))),
@@ -429,11 +455,15 @@ impl HotReloadSession {
                         "Unregistered document: {uri}"
                     ))),
                 });
-            if let Err(error) = check {
-                outcome.fail(error);
-                outcome.preparation = start.elapsed();
-                return Some(outcome);
-            }
+            let contract = match check {
+                Ok(contract) => contract,
+                Err(error) => {
+                    outcome.fail(error);
+                    outcome.preparation = start.elapsed();
+                    return Some(outcome);
+                }
+            };
+            candidate_contracts.insert(uri.clone(), contract);
             candidate.insert(uri.clone(), text.clone());
         }
         let candidate = Rc::new(candidate);
@@ -526,6 +556,7 @@ impl HotReloadSession {
             Err(error) => outcome.fail(error),
             Ok(()) => {
                 self.pending.clear();
+                self.contracts.extend(candidate_contracts);
                 self.accepted = candidate;
                 *self.published.borrow_mut() = self.accepted.clone();
                 self.applied_revision = self.revision;
