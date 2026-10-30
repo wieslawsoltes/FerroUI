@@ -9,6 +9,7 @@
 //! (manipulation nodes; the target is the value the IL leaves on the
 //! evaluation stack).
 
+use std::sync::Arc;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -225,7 +226,7 @@ pub struct RuntimeDocument {
 
 struct ScopedNamespaceProvider {
     // Retain the scope whose address is the cache key, including for host-created AST nodes.
-    _scope: Rc<XamlNamespaceScope>,
+    _scope: Arc<XamlNamespaceScope>,
     provider: Rc<dyn IStaticServiceProvider>,
 }
 
@@ -260,9 +261,9 @@ impl RuntimeDocument {
     fn namespace_provider(
         &self,
         interpreter: &Interpreter,
-        scope: &Rc<XamlNamespaceScope>,
+        scope: &Arc<XamlNamespaceScope>,
     ) -> Rc<dyn IStaticServiceProvider> {
-        let key = Rc::as_ptr(scope) as usize;
+        let key = Arc::as_ptr(scope) as usize;
         if let Some(cached) = self.namespace_providers.borrow().get(&key) {
             return cached.provider.clone();
         }
@@ -626,7 +627,7 @@ pub struct EvalContext<'a> {
     scope: usize,
     parent_nodes: Vec<Rc<dyn IXamlAstNode>>,
     current_node: Option<Rc<dyn IXamlAstNode>>,
-    namespace_scope: Option<Rc<XamlNamespaceScope>>,
+    namespace_scope: Option<Arc<XamlNamespaceScope>>,
     targets: Vec<MarkupValue>,
     locals: Vec<(usize, MarkupValue)>,
     parent_stack_cache: Option<ParentStackCache>,
@@ -728,7 +729,7 @@ impl<'a> EvalContext<'a> {
                 if self.interpreter.definition.xml_namespace_info_provider
                     && !previous_scope
                         .as_ref()
-                        .is_some_and(|previous| Rc::ptr_eq(previous, scope)) =>
+                        .is_some_and(|previous| Arc::ptr_eq(previous, scope)) =>
             {
                 Some(context.push_static_provider(
                     self.document.namespace_provider(self.interpreter, scope),

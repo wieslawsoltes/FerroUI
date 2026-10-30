@@ -6,6 +6,7 @@
 //! transformers depend on: nodes are mutated in place, visitors replace children in
 //! place, and one node can be referenced from several places and compared by identity.
 
+use std::sync::Arc;
 use std::any::Any;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -25,7 +26,7 @@ pub trait IXamlLineInfo {
     fn set_position(&self, value: i32);
     /// Lexical XML namespaces of this source occurrence. Synthetic or host-defined nodes
     /// without a scope continue to use the document-level namespace fallback.
-    fn namespace_scope(&self) -> Option<Rc<XamlNamespaceScope>> {
+    fn namespace_scope(&self) -> Option<Arc<XamlNamespaceScope>> {
         None
     }
 }
@@ -35,7 +36,7 @@ pub trait IXamlLineInfo {
 pub struct XamlLineInfo {
     line: Cell<i32>,
     position: Cell<i32>,
-    namespace_scope: Option<Rc<XamlNamespaceScope>>,
+    namespace_scope: Option<Arc<XamlNamespaceScope>>,
 }
 
 impl XamlLineInfo {
@@ -46,7 +47,7 @@ impl XamlLineInfo {
             namespace_scope: None,
         }
     }
-    pub fn with_namespace_scope(mut self, scope: Option<Rc<XamlNamespaceScope>>) -> Self {
+    pub fn with_namespace_scope(mut self, scope: Option<Arc<XamlNamespaceScope>>) -> Self {
         self.namespace_scope = scope;
         self
     }
@@ -65,7 +66,7 @@ impl IXamlLineInfo for XamlLineInfo {
     fn set_position(&self, value: i32) {
         self.position.set(value)
     }
-    fn namespace_scope(&self) -> Option<Rc<XamlNamespaceScope>> {
+    fn namespace_scope(&self) -> Option<Arc<XamlNamespaceScope>> {
         self.namespace_scope.clone()
     }
 }
@@ -242,7 +243,7 @@ macro_rules! xaml_line_info_impl {
             fn set_position(&self, value: i32) {
                 $crate::ast::IXamlLineInfo::set_position(&self.$($field)+, value)
             }
-            fn namespace_scope(&self) -> Option<::std::rc::Rc<$crate::ast::XamlNamespaceScope>> {
+            fn namespace_scope(&self) -> Option<::std::sync::Arc<$crate::ast::XamlNamespaceScope>> {
                 $crate::ast::IXamlLineInfo::namespace_scope(&self.$($field)+)
             }
         }
@@ -254,7 +255,7 @@ macro_rules! xaml_line_info_impl {
 pub struct XamlAstNode {
     line: Cell<i32>,
     position: Cell<i32>,
-    namespace_scope: Option<Rc<XamlNamespaceScope>>,
+    namespace_scope: Option<Arc<XamlNamespaceScope>>,
 }
 
 impl XamlAstNode {
@@ -280,7 +281,7 @@ impl IXamlLineInfo for XamlAstNode {
     fn set_position(&self, value: i32) {
         self.position.set(value)
     }
-    fn namespace_scope(&self) -> Option<Rc<XamlNamespaceScope>> {
+    fn namespace_scope(&self) -> Option<Arc<XamlNamespaceScope>> {
         self.namespace_scope.clone()
     }
 }

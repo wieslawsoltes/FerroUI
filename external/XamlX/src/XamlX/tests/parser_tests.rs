@@ -588,7 +588,7 @@ fn nested_namespace_declarations_are_lexical_and_shared_with_inheriting_nodes() 
     assert_eq!(child_scope.lookup("t"), Some("shadow"));
     assert_eq!(child_scope.lookup(""), Some("inner"));
     assert_eq!(doc.namespace_aliases["t"], "outer");
-    assert!(Rc::ptr_eq(&sibling.namespace_scope().unwrap(), &root_scope));
+    assert!(std::sync::Arc::ptr_eq(&sibling.namespace_scope().unwrap(), &root_scope));
     let child_children = child.children.borrow();
     let property = child_children[0]
         .cast::<XamlAstXamlPropertyValueNode>()
@@ -605,18 +605,18 @@ fn nested_namespace_declarations_are_lexical_and_shared_with_inheriting_nodes() 
             .as_deref(),
         Some("shadow")
     );
-    assert!(Rc::ptr_eq(
+    assert!(std::sync::Arc::ptr_eq(
         &extension.namespace_scope().unwrap(),
         &child_scope
     ));
     let member = extension.children.borrow()[0]
         .cast::<XamlAstXamlPropertyValueNode>()
         .unwrap();
-    assert!(Rc::ptr_eq(
+    assert!(std::sync::Arc::ptr_eq(
         &member.property().namespace_scope().unwrap(),
         &child_scope
     ));
-    assert!(Rc::ptr_eq(
+    assert!(std::sync::Arc::ptr_eq(
         &child_children[1].namespace_scope().unwrap(),
         &child_scope
     ));

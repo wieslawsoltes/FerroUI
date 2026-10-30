@@ -1,30 +1,31 @@
 //! Lexical XML namespace declarations shared by parsed and transformed nodes.
 //! Deviation (DEVIATIONS.md, XAML namespace declarations): upstream resolves prefixes lexically
 //! while parsing but keeps no scope on the nodes; the port keeps it for the runtime.
-use std::cell::OnceCell;
 use std::collections::HashMap;
-use std::rc::Rc;
+use std::sync::{Arc, OnceLock};
 
-/// An immutable lexical scope. Nodes without new declarations share their parent's handle;
+/// An immutable lexical scope, shared through `Arc` so that the nodes that carry it stay `Send`
+/// and unwind-safe, as they were before the port kept scopes on them.
+/// Nodes without new declarations share their parent's handle;
 /// child scopes store only their declarations until a namespace service needs a complete map.
 #[derive(Debug)]
 pub struct XamlNamespaceScope {
-    parent: Option<Rc<Self>>,
+    parent: Option<Arc<Self>>,
     declarations: HashMap<String, String>,
-    flattened: OnceCell<HashMap<String, String>>,
+    flattened: OnceLock<HashMap<String, String>>,
 }
 
 impl XamlNamespaceScope {
-    pub fn new(parent: Option<Rc<Self>>, declarations: HashMap<String, String>) -> Rc<Self> {
+    pub fn new(parent: Option<Arc<Self>>, declarations: HashMap<String, String>) -> Arc<Self> {
         if declarations.is_empty() {
             if let Some(parent) = &parent {
                 return parent.clone();
             }
         }
-        Rc::new(Self {
+        Arc::new(Self {
             parent,
             declarations,
-            flattened: OnceCell::new(),
+            flattened: OnceLock::new(),
         })
     }
 

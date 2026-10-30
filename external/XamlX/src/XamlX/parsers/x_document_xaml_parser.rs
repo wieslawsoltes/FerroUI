@@ -5,6 +5,7 @@
 //! the same rules while walking the tree; see the crate documentation for the known
 //! behavioral differences.
 
+use std::sync::Arc;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -292,7 +293,7 @@ struct ParserContext<'input> {
     lines: LineIndex<'input>,
     source: &'input str,
     compat: RefCell<CompatibleXmlReader>,
-    namespace_scopes: RefCell<Vec<Rc<XamlNamespaceScope>>>,
+    namespace_scopes: RefCell<Vec<Arc<XamlNamespaceScope>>>,
 }
 
 fn lookup_raw_namespace<'a>(el: XmlNode<'a, '_>, prefix: &str) -> Option<&'a str> {

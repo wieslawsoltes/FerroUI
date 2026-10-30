@@ -1,5 +1,6 @@
 //! Port of `Transform/AstTransformationContext.cs`.
 
+use std::sync::Arc;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::ops::Deref;
@@ -24,7 +25,7 @@ pub struct AstTransformationContext {
     /// See [`AstTransformationContext::set_document_override`].
     document_override: RefCell<Option<Option<String>>>,
     pub namespace_aliases: RefCell<HashMap<String, String>>,
-    current_namespace_scope: RefCell<Option<Rc<XamlNamespaceScope>>>,
+    current_namespace_scope: RefCell<Option<Arc<XamlNamespaceScope>>>,
     configuration: Rc<TransformerConfiguration>,
 }
 
