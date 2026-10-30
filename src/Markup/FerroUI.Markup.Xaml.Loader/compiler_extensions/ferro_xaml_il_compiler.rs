@@ -282,6 +282,7 @@ impl FerroXamlIlCompiler {
         insert_before::<NewObjectTransformer>(
             &mut transformers,
             vec![
+                Box::new(DevelopmentKeyTransformer),
                 Box::new(AddNameScopeRegistration),
                 Box::new(FerroXamlIlControlTemplatePartsChecker),
                 Box::new(FerroXamlIlDataContextTypeTransformer),
@@ -445,6 +446,7 @@ impl FerroXamlIlCompiler {
             XamlNamespaces::BLEND2008.to_string(),
             XamlNamespaces::BLEND2008.to_string(),
         );
+        compatibility_mappings.insert(DEVELOPMENT_NAMESPACE.into(), DEVELOPMENT_NAMESPACE.into());
         let parsed = XDocumentXamlParser::parse(xaml, Some(&compatibility_mappings))?;
 
         let root = parsed.root()?;

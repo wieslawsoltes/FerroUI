@@ -192,18 +192,15 @@ impl FerroRuntimeXamlLoader {
         populate: Rc<dyn Fn(&BoxedValue) -> xamlx::exceptions::XamlResult<()>>,
         create: impl FnOnce() -> T,
     ) -> (T, Option<xamlx::exceptions::XamlResult<()>>) {
-        let key = class as *const TypeInfo as usize;
-        let previous = POPULATE_OVERRIDES
-            .with(|overrides| overrides.borrow_mut().insert(key, PopulateOverride { populate, result: None }));
+        let result = Rc::new(std::cell::RefCell::new(None));
+        let captured = result.clone();
+        let _guard = ferroui_markup_xaml::FerroXamlLoader::scoped_populate_override(class, Rc::new(move |_, target| {
+            *captured.borrow_mut() = Some(populate(target));
+            Ok(())
+        }));
         let created = create();
-        let current = POPULATE_OVERRIDES.with(|overrides| {
-            let mut overrides = overrides.borrow_mut();
-            match previous {
-                Some(previous) => overrides.insert(key, previous),
-                None => overrides.remove(&key),
-            }
-        });
-        (created, current.and_then(|current| current.result))
+        let populated = result.borrow_mut().take();
+        (created, populated)
     }
 
     /// Populates `instance` from the document registered for its class
@@ -214,21 +211,9 @@ impl FerroRuntimeXamlLoader {
         service_provider: Option<&Rc<dyn IServiceProvider>>,
     ) -> Result<(), XamlLoadException> {
         let object = ValueTypes::as_object(&**instance);
-        // The document being loaded by the run-time loader replaces the registered one
-        // (`with_populate_override`). Its failure is reported by the load, not here: the
-        // constructor that asked for the populate has nothing to do with it.
         if let Some(object) = &object {
-            let key = object.get_type() as *const TypeInfo as usize;
-            let populate = POPULATE_OVERRIDES
-                .with(|overrides| overrides.borrow().get(&key).map(|current| current.populate.clone()));
-            if let Some(populate) = populate {
-                let result = populate(instance);
-                POPULATE_OVERRIDES.with(|overrides| {
-                    if let Some(current) = overrides.borrow_mut().get_mut(&key) {
-                        current.result = Some(result);
-                    }
-                });
-                return Ok(());
+            if let Some(populate) = ferroui_markup_xaml::FerroXamlLoader::populate_override(object.get_type()) {
+                return populate(service_provider, instance);
             }
         }
         let type_name = match &object {
@@ -344,18 +329,6 @@ impl IRuntimeXamlLoader for RuntimeXamlLoaderService {
     }
 }
 
-/// The populate of the document being loaded for a class, and its result once the
-/// constructor of the class has asked for it.
-struct PopulateOverride {
-    populate: Rc<dyn Fn(&BoxedValue) -> xamlx::exceptions::XamlResult<()>>,
-    result: Option<xamlx::exceptions::XamlResult<()>>,
-}
-
-ferroui_base::ferro_thread_local! {
-    static POPULATE_OVERRIDES: std::cell::RefCell<HashMap<usize, PopulateOverride>> =
-        std::cell::RefCell::new(HashMap::new());
-}
-
 /// The documents of the classes with markup, by class.
 fn class_documents() -> &'static RwLock<HashMap<usize, String>> {
     static DOCUMENTS: OnceLock<RwLock<HashMap<usize, String>>> = OnceLock::new();
@@ -399,15 +372,23 @@ fn collect_included_documents(
             (false, None) => continue,
         };
         let key = included.absolute_uri().to_string();
-        if visited.contains(&key) || skip(&included) || !assets.exists(&included, None) {
+        if visited.contains(&key) || skip(&included) {
             continue;
         }
         visited.push(key);
-        let Ok(mut stream) = assets.open(&included, None) else { continue };
-        let mut text = String::new();
-        if stream.read_to_string(&mut text).is_err() {
-            continue;
-        }
+        #[cfg(all(feature = "hot-reload", debug_assertions))]
+        let overlay = ferroui_markup_xaml::source_overlay::source(included.absolute_uri());
+        #[cfg(not(all(feature = "hot-reload", debug_assertions)))]
+        let overlay: Option<String> = None;
+        let text = match overlay {
+            Some(text) => text,
+            None => {
+                let Ok(mut stream) = assets.open(&included, None) else { continue };
+                let mut text = String::new();
+                if stream.read_to_string(&mut text).is_err() { continue; }
+                text
+            }
+        };
         let at = documents.len();
         documents.push((included.clone(), String::new()));
         collect_included_documents(assets, Some(&included), &text, visited, skip, documents);

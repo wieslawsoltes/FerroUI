@@ -1,0 +1,28 @@
+<ResourceDictionary xmlns:fd="using:FerroDock.Ferro.Controls"
+                    xmlns:pc="using:FerroDock.Ferro.Converters"
+                    xmlns:sp="using:FerroDock.Settings" xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="using:FerroDock.Model.Controls"
+                    x:DataType="controls:IDocumentContent"
+                    x:CompileBindings="True">
+  <Design.PreviewWith>
+    <fd:DocumentContentControl Width="300" Height="300" />
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="{x:Type fd:DocumentContentControl}" TargetType="fd:DocumentContentControl" x:DataType="controls:IDocumentContent">
+
+    <Setter Property="(sp:DockProperties.IsDragEnabled)" Value="{Binding CanDrag}" />
+    <Setter Property="(sp:DockProperties.IsDropEnabled)" Value="{Binding CanDrop}" />
+
+    <Setter Property="Template">
+      <ControlTemplate>
+        <fd:DockableControl TrackingMode="Visible">
+          <DeferredContentControl Content="{Binding}"
+                                  ContentTemplate="{Binding}" />
+        </fd:DockableControl>
+      </ControlTemplate>
+    </Setter>
+
+  </ControlTheme>
+
+</ResourceDictionary>

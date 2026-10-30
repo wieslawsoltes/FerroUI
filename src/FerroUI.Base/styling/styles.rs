@@ -211,7 +211,7 @@ impl Styles {
 
         if !self.styles.is_empty() {
             for style in self.styles.snapshot().iter().rev() {
-                if let Some(value) = style.try_get_resource(key, theme) {
+                if let Some(value) = crate::controls::resource_preview::lookup(&**style, key, theme) {
                     return Some(value);
                 }
             }
@@ -411,6 +411,10 @@ impl IResourceNode for StylesHandle {
 }
 
 impl IResourceProvider for StylesHandle {
+    fn as_any(&self) -> Option<&dyn std::any::Any> {
+        Some(self)
+    }
+
     fn owner(&self) -> Option<ResourceHostRef> {
         self.0.owner()
     }

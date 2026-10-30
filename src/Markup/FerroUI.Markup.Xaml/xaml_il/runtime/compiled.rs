@@ -15,7 +15,7 @@ use std::collections::HashMap;
 use std::fmt::Display;
 use std::rc::Rc;
 
-use ferroui_base::controls::{INameScope, NameScope, NameScopeError, NameScopeRef};
+use ferroui_base::controls::{INameScope, NameScope, NameScopeRef, NameScopeValueError};
 use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::metadata::{
     from_markup_value, into_markup_value, service, IServiceProvider, MarkupInvokeError, MarkupValue,
@@ -792,7 +792,7 @@ impl DeclaredAccessors {
         if let Some(value) = value {
             // An object passed to a property of type `object` is handed over in the untyped form.
             let value = match value {
-                Some(value) if (self.property.type_)().is_object() => untyped_object_form(value).or(Some(value.clone())),
+                Some(value) if (self.property.type_)().is_object() => object_assignment_value(Some(value.clone())),
                 other => other.cloned(),
             };
             arguments.push(value);
@@ -1013,8 +1013,14 @@ pub fn deferred_content(
     line: i32,
     position: i32,
 ) -> Result<Rc<DeferredContent>, XamlLoadException> {
-    XamlIlRuntimeHelpers::try_deferred_transformation_factory_for(result_type, builder, &service_provider(context))
-        .map_err(|error| at("InvalidOperationException", error.message(), line, position))
+    let content = XamlIlRuntimeHelpers::try_deferred_transformation_factory_for(result_type, builder, &service_provider(context))
+        .map_err(|error| at("InvalidOperationException", error.message(), line, position))?;
+    #[cfg(all(feature = "hot-reload", debug_assertions))]
+    content.set_declaration(crate::reload_templates::Declaration {
+        uri: context.base_uri().map(|uri| uri.absolute_uri().to_owned()),
+        line, column: position, source: None,
+    });
+    Ok(content)
 }
 
 /// The build function of deferred content as generated code writes it: a
@@ -1057,13 +1063,27 @@ pub fn register_name(
     line: i32,
     position: i32,
 ) -> Result<(), XamlLoadException> {
+    register_name_value(scope, name, Rc::new(element), line, position)
+}
+
+/// Registers any non-null named object in the shared context scope, including
+/// plain models which do not derive from FerroObject.
+pub fn register_name_value(
+    scope: Option<&Rc<dyn INameScope>>,
+    name: &str,
+    value: BoxedValue,
+    line: i32,
+    position: i32,
+) -> Result<(), XamlLoadException> {
     let scope = scope.ok_or_else(|| {
         at("NullReferenceException", "The runtime context has no name scope to register a name in", line, position)
     })?;
-    scope.try_register(name, element).map_err(|error: NameScopeError| {
+    scope.try_register_value(name, value).map_err(|error: NameScopeValueError| {
         let type_name = match error {
-            NameScopeError::Completed => "InvalidOperationException",
-            NameScopeError::DuplicateName(_) => "ArgumentException",
+            NameScopeValueError::Completed => "InvalidOperationException",
+            NameScopeValueError::DuplicateName(_) => "ArgumentException",
+            NameScopeValueError::UnsupportedValue => "NotSupportedException",
+            NameScopeValueError::NullValue => "ArgumentNullException",
         };
         at(type_name, error, line, position)
     })
@@ -1116,6 +1136,13 @@ pub fn untyped_object_form(value: &BoxedValue) -> Option<BoxedValue> {
     }
     let root: BoxedValue = Rc::new(object);
     ValueTypes::try_convert_registered(&root, control_handle)
+}
+
+/// The value a member typed `object` receives: nullable and object-value
+/// transport boxes are unwrapped, null remains null, and a native control
+/// keeps its enclosing object identity in the canonical untyped handle.
+pub fn object_assignment_value(value: MarkupValue) -> MarkupValue {
+    ValueTypes::normalize(value?).map(|value| untyped_object_form(&value).unwrap_or(value))
 }
 
 /// `value` as the value of a member of type `object` (`System.Object`):
@@ -1555,6 +1582,22 @@ pub fn add_handler<Target, EventArgs: ?Sized>(
     let _ = target.upcast_ref::<Interactive>().add_handler_untyped(event, handler, routes, false);
 }
 
+/// Context-aware XAML routed event subscription, preserving development ownership.
+pub fn add_handler_with_context<Target, EventArgs: ?Sized>(
+    context: &Rc<XamlIlContext>, target: &Ref<Target>,
+    event: &ferroui_base::interactivity::RoutedEvent<EventArgs>,
+    handler: ferroui_base::metadata::MarkupDelegate,
+) where Target: ferroui_base::ObjectType + ferroui_base::Upcast<ferroui_base::interactivity::Interactive> {
+    #[cfg(all(feature = "hot-reload", debug_assertions))]
+    {
+        use ferroui_base::interactivity::{Interactive, RoutingStrategies};
+        crate::reload_events::add_handler(context, &target.clone().upcast::<Interactive>(), &event.as_routed_event(), handler,
+            RoutingStrategies::DIRECT | RoutingStrategies::BUBBLE, false);
+    }
+    #[cfg(not(all(feature = "hot-reload", debug_assertions)))]
+    { let _ = context; add_handler(target, event, handler); }
+}
+
 /// `target.Event += handler` for an event that is not a routed event, which metadata
 /// declares with its subscription (`events:`): the subscription the run-time loader
 /// invokes, of the event `event` the metadata `declaring` declares. No typed function
@@ -1603,4 +1646,17 @@ mod tests {
         assert!(!uri_equals("ferres://App/Views/Main.xam", root, "Views/Main.xaml"));
         assert!(!uri_equals("ferres://Other/Views/Main.xaml", root, "Views/Main.xaml"));
     }
+}
+
+/// Generated code retains development keys only in an enabled debug runtime.
+#[inline]
+pub const fn development_keys_enabled() -> bool {
+    cfg!(all(feature = "hot-reload", debug_assertions))
+}
+#[inline]
+pub fn set_development_key(value: &MarkupValue, key: &str) {
+    #[cfg(all(feature = "hot-reload", debug_assertions))]
+    crate::reload_identity::record(value, key);
+    #[cfg(not(all(feature = "hot-reload", debug_assertions)))]
+    let _ = (value, key);
 }

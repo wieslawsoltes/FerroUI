@@ -1,0 +1,11 @@
+//! The behaviors, triggers and actions of the auto-complete box (`AutoCompleteBox/`).
+
+mod auto_complete_box_open_drop_down_on_focus_behavior;
+mod auto_complete_box_selection_changed_trigger;
+mod clear_auto_complete_box_selection_action;
+mod focus_auto_complete_box_text_box_behavior;
+
+pub use auto_complete_box_open_drop_down_on_focus_behavior::AutoCompleteBoxOpenDropDownOnFocusBehavior;
+pub use auto_complete_box_selection_changed_trigger::AutoCompleteBoxSelectionChangedTrigger;
+pub use clear_auto_complete_box_selection_action::ClearAutoCompleteBoxSelectionAction;
+pub use focus_auto_complete_box_text_box_behavior::FocusAutoCompleteBoxTextBoxBehavior;

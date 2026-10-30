@@ -1,0 +1,96 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:material="using:FerroUI.Themes.Material"
+             x:Class="MaterialThemeGallery.Pages.MaterialComponentsPage">
+  <StackPanel Margin="24" Spacing="20">
+    <StackPanel Spacing="4">
+      <TextBlock Theme="{StaticResource MaterialLabelLarge}" Foreground="{DynamicResource MaterialPrimaryBrush}" Text="FERROUI · ANDROID MATERIAL" />
+      <TextBlock Theme="{StaticResource MaterialHeadlineLarge}" Text="Made to feel alive" />
+      <TextBlock Theme="{StaticResource MaterialBodyMedium}" Foreground="{DynamicResource MaterialOnSurfaceVariantBrush}"
+                 Text="Material 3 Expressive · Color, shape, type and motion" />
+    </StackPanel>
+    <WrapPanel ItemSpacing="8" LineSpacing="8">
+      <Button Theme="{StaticResource MaterialFilledButton}" Content="Filled" />
+      <Button Theme="{StaticResource MaterialTonalButton}" Content="Tonal" />
+      <Button Theme="{StaticResource MaterialOutlinedButton}" Content="Outlined" />
+      <Button Theme="{StaticResource MaterialElevatedButton}" Content="Elevated" />
+      <Button Theme="{StaticResource MaterialTextButton}" Content="Text" />
+    </WrapPanel>
+    <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
+      <ContentControl Theme="{StaticResource MaterialFilledCard}">
+        <StackPanel Spacing="12">
+          <TextBlock Theme="{StaticResource MaterialTitleLarge}" Text="Your everyday" />
+          <TextBlock Theme="{StaticResource MaterialBodyMedium}" Text="Thoughtful surfaces. Comfortable touch targets. Familiar controls." />
+          <ToggleSwitch Content="Notifications" IsChecked="True" />
+          <CheckBox Content="Keep me updated" IsChecked="True" />
+          <WrapPanel ItemSpacing="8">
+            <ToggleButton Theme="{StaticResource MaterialExpressiveFilterChip}" Content="Design" IsChecked="True">
+              <material:MaterialChip.LeadingIcon><PathIcon Theme="{StaticResource MaterialSymbolIcon}" Data="M3 17.25V21H6.75L17.81 9.94 14.06 6.19ZM20.71 7.04a.996 .996 0 0 0 0 -1.41l-2.34 -2.34a.996 .996 0 0 0 -1.41 0l-1.83 1.83 3.75 3.75 1.83 -1.83Z" /></material:MaterialChip.LeadingIcon>
+            </ToggleButton>
+            <ToggleButton Theme="{StaticResource MaterialElevatedFilterChip}" Content="Build" />
+          </WrapPanel>
+        </StackPanel>
+      </ContentControl>
+      <ContentControl Grid.Column="1" Theme="{StaticResource MaterialElevatedCard}">
+        <StackPanel Spacing="12">
+          <TextBlock Theme="{StaticResource MaterialTitleLarge}" Text="Find your rhythm" />
+          <TextBlock Theme="{StaticResource MaterialBodyMedium}" Text="Responsive motion with expressive springs and a bounded ripple." />
+          <Slider Value="65" Minimum="0" Maximum="100" />
+          <ProgressBar Theme="{StaticResource MaterialWavyLinearProgress}" Value="64" />
+          <StackPanel Orientation="Horizontal" Spacing="16">
+            <ProgressBar Theme="{StaticResource MaterialCircularProgress}" Value="72" Width="40" Height="40" />
+            <ProgressBar Theme="{StaticResource MaterialWavyCircularProgress}" Value="68" Width="48" Height="48" />
+            <material:MaterialLoadingIndicator Theme="{StaticResource MaterialContainedLoadingIndicator}" IsIndeterminate="False" Value="65" />
+            <ContentControl Theme="{StaticResource MaterialBadgeWithLabel}" Content="3" VerticalAlignment="Center" />
+          </StackPanel>
+        </StackPanel>
+      </ContentControl>
+    </Grid>
+    <TextBox Theme="{StaticResource MaterialSearchBar}" PlaceholderText="Search your collection" />
+    <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
+      <TextBox Classes="floatingLabel" PlaceholderText="Project name" Text="A new perspective" />
+      <TextBox Grid.Column="1" Classes="outlined floatingLabel" PlaceholderText="A little more detail" Text="Built with FerroUI" />
+    </Grid>
+    <TabControl Theme="{StaticResource MaterialNavigationBar}" Height="174" SelectedIndex="0">
+      <TabItem Header="Explore">
+        <TabItem.Icon><PathIcon Theme="{StaticResource MaterialSymbolIcon}" Data="M12 2 L21 10 L18 21 L6 21 L3 10 Z M12 7 L8 14 L16 14 Z" /></TabItem.Icon>
+        <Border Padding="20" Background="{DynamicResource MaterialSurfaceContainerLowBrush}" CornerRadius="16">
+          <StackPanel Spacing="6">
+            <TextBlock Theme="{StaticResource MaterialTitleMedium}" Text="Room for what matters" />
+            <TextBlock Theme="{StaticResource MaterialBodyMedium}" Text="Navigation, forms and content share one color system." />
+          </StackPanel>
+        </Border>
+      </TabItem>
+      <TabItem Header="Favorites">
+        <TabItem.Icon><PathIcon Theme="{StaticResource MaterialSymbolIcon}" Data="M12 17.27 L18.18 21 L16.54 13.97 L22 9.24 L14.81 8.63 L12 2 L9.19 8.63 L2 9.24 L7.46 13.97 L5.82 21 Z" /></TabItem.Icon>
+        <TextBlock Text="Your saved items" Margin="24" />
+      </TabItem>
+      <TabItem Header="Library">
+        <TabItem.Icon><PathIcon Theme="{StaticResource MaterialSymbolIcon}" Data="M3 4 L9 4 L12 6 L15 4 L21 4 L21 20 L15 20 L12 22 L9 20 L3 20 Z M5 6 L5 18 L9.6 18 L11 18.93 L11 7.07 L8.4 6 Z M13 7.07 L13 18.93 L14.4 18 L19 18 L19 6 L15.6 6 Z" /></TabItem.Icon>
+        <TextBlock Text="Your collection" Margin="24" />
+      </TabItem>
+    </TabControl>
+    <WrapPanel ItemSpacing="8" LineSpacing="8">
+      <Button Theme="{StaticResource MaterialElevatedAssistChip}" Content="Add a task">
+        <material:MaterialChip.LeadingIcon><PathIcon Theme="{StaticResource MaterialSymbolIcon}" Data="M19 13H13V19H11V13H5V11H11V5H13V11H19Z" /></material:MaterialChip.LeadingIcon>
+      </Button>
+      <Button Theme="{StaticResource MaterialSuggestionChip}" Content="Plan tomorrow">
+        <material:MaterialChip.TrailingIcon><PathIcon Theme="{StaticResource MaterialSymbolIcon}" Data="M12 4 10.59 5.41 16.17 11H4V13H16.17L10.59 18.59 12 20 20 12Z" /></material:MaterialChip.TrailingIcon>
+      </Button>
+      <ToggleButton x:Name="RecipientChip" Theme="{StaticResource MaterialExpressiveInputChip}" Content="Alex" IsChecked="True"
+                    material:MaterialChip.IsDismissible="True" material:MaterialChip.DismissLabel="Remove Alex">
+        <material:MaterialChip.Avatar>
+          <Border Background="{DynamicResource MaterialTertiaryContainerBrush}" Width="24" Height="24">
+            <TextBlock Text="AL" FontSize="10" FontWeight="Medium" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource MaterialOnTertiaryContainerBrush}" />
+          </Border>
+        </material:MaterialChip.Avatar>
+      </ToggleButton>
+      <Button x:Name="RestoreRecipient" Theme="{StaticResource MaterialTextButton}" Content="Restore Alex" IsVisible="False" />
+      <material:MaterialSegmentedGroup>
+        <RadioButton Content="Day" IsChecked="True" />
+        <RadioButton Content="Week" />
+      </material:MaterialSegmentedGroup>
+      <Button Content="Disabled" IsEnabled="False" />
+    </WrapPanel>
+  </StackPanel>
+</UserControl>

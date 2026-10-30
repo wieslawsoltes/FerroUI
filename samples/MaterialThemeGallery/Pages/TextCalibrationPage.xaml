@@ -1,0 +1,44 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="MaterialThemeGallery.Pages.TextCalibrationPage">
+  <!-- The text calibration page (docs/porting/text-rendering.md, section 10): plain TextBlocks of
+       the default font of the theme, one line per size and weight, each at the top of a grid row
+       of a whole number of device-independent pixels, so that the comparison with the native
+       counterpart (TextCalibrationPage.winui.xml, the same grid) measures the weight and the
+       baseline of every size on its own (the rows option of scripts/text-quality.py). The rows are far
+       enough apart that the ink of two lines never touches. The grid is aligned to the top, as tall
+       as its rows: a grid of the framework that is taller than its fixed rows gives each row one
+       more device pixel under layout rounding (docs/porting/material-theme-gallery.md, "Layout"),
+       which moved every row of the page lower than the one before it (by 11 px at the last row at
+       a scaling of 2). -->
+  <Grid Margin="24,24,24,0" VerticalAlignment="Top">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="30" />
+      <RowDefinition Height="32" />
+      <RowDefinition Height="33" />
+      <RowDefinition Height="33" />
+      <RowDefinition Height="34" />
+      <RowDefinition Height="36" />
+      <RowDefinition Height="38" />
+      <RowDefinition Height="41" />
+      <RowDefinition Height="41" />
+      <RowDefinition Height="46" />
+      <RowDefinition Height="52" />
+      <RowDefinition Height="52" />
+      <RowDefinition Height="57" />
+    </Grid.RowDefinitions>
+    <TextBlock Grid.Row="0" VerticalAlignment="Top" FontSize="12" Text="12 Sphinx of black quartz, judge my vow" />
+    <TextBlock Grid.Row="1" VerticalAlignment="Top" FontSize="13" Text="13 Sphinx of black quartz, judge my vow" />
+    <TextBlock Grid.Row="2" VerticalAlignment="Top" FontSize="14" Text="14 Sphinx of black quartz, judge my vow" />
+    <TextBlock Grid.Row="3" VerticalAlignment="Top" FontSize="14" FontWeight="SemiBold" Text="14 semibold Sphinx of black quartz, judge my vow" />
+    <TextBlock Grid.Row="4" VerticalAlignment="Top" FontSize="15" Text="15 Sphinx of black quartz, judge my vow" />
+    <TextBlock Grid.Row="5" VerticalAlignment="Top" FontSize="16" Text="16 Sphinx of black quartz, judge my vow" />
+    <TextBlock Grid.Row="6" VerticalAlignment="Top" FontSize="18" Text="18 Sphinx of black quartz, judge my vow" />
+    <TextBlock Grid.Row="7" VerticalAlignment="Top" FontSize="20" Text="20 Sphinx of black quartz, judge my vow" />
+    <TextBlock Grid.Row="8" VerticalAlignment="Top" FontSize="20" FontWeight="SemiBold" Text="20 semibold Sphinx of black quartz, judge my vow" />
+    <TextBlock Grid.Row="9" VerticalAlignment="Top" FontSize="24" Text="24 Sphinx of black quartz" />
+    <TextBlock Grid.Row="10" VerticalAlignment="Top" FontSize="28" Text="28 Sphinx of black quartz" />
+    <TextBlock Grid.Row="11" VerticalAlignment="Top" FontSize="28" FontWeight="SemiBold" Text="28 semibold Sphinx of black quartz" />
+    <TextBlock Grid.Row="12" VerticalAlignment="Top" FontSize="32" Text="32 Sphinx of black quartz" />
+  </Grid>
+</UserControl>

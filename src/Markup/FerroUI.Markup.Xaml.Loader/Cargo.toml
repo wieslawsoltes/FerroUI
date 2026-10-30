@@ -18,10 +18,11 @@ autoexamples = false
 path = "lib.rs"
 
 [features]
+hot-reload = ["runtime", "ferroui-markup-xaml/hot-reload"]
 default = ["runtime"]
 # The run-time back end: the run-time type system, the AST interpreter (`ferroui_markup_xaml_loader::runtime`)
 # and the run-time XAML loader built on the XAML runtime library.
-runtime = ["dep:ferroui-markup-xaml"]
+runtime = ["dep:ferroui-markup-xaml", "ferroui-markup-xaml/runtime-populate"]
 # The compiler as a build tool (`ferroui_markup_xaml_loader::rust_emitter`): the transform of a group of
 # documents and the emitter of Rust source, against the type system the host states. It links neither the
 # XAML runtime library nor the controls: `ferroui-build` compiles with it against the type models of the

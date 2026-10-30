@@ -11,7 +11,7 @@
                 Spacing="16">
       <StackPanel Orientation="Vertical"
                   Spacing="16">
-        <CheckBox>_Unchecked</CheckBox>
+        <CheckBox x:Name="ReloadCheckBox">_Unchecked</CheckBox>
         <CheckBox IsChecked="True">_Checked</CheckBox>
         <CheckBox IsChecked="{x:Null}">_Indeterminate</CheckBox>
         <CheckBox IsChecked="True" IsEnabled="False">Disabled</CheckBox>

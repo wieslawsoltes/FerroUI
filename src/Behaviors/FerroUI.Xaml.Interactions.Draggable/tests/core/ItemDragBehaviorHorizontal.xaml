@@ -1,0 +1,26 @@
+<Window xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:id="using:FerroUI.Xaml.Interactions.Draggable"
+        Title="ItemDragBehaviorHorizontal">
+  <!-- Ported from tests/Xaml.Behaviors.Interactions.UnitTests/Core/ItemDragBehaviorHorizontal of
+       Xaml.Behaviors. Adapted: no x:Class and no data context (the test loads the window with the
+       run-time loader and sets the items source of the items control). -->
+  <Window.Styles>
+    <Style Selector="ItemsControl > ContentPresenter">
+      <Setter Property="(Interaction.Behaviors)">
+        <BehaviorCollectionTemplate>
+          <BehaviorCollection>
+            <id:ItemDragBehavior Orientation="Horizontal" HorizontalDragThreshold="0" VerticalDragThreshold="0" />
+          </BehaviorCollection>
+        </BehaviorCollectionTemplate>
+      </Setter>
+    </Style>
+  </Window.Styles>
+  <ItemsControl Name="TargetItemsControl">
+    <ItemsControl.ItemsPanel>
+      <ItemsPanelTemplate>
+        <StackPanel Orientation="Horizontal" />
+      </ItemsPanelTemplate>
+    </ItemsControl.ItemsPanel>
+  </ItemsControl>
+</Window>

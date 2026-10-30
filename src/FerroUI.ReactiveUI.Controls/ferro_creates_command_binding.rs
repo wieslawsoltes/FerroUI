@@ -56,20 +56,13 @@ impl FerroCreatesCommandBinding {
     }
 
     /// The routed event named `event_name` that `class` or one of its base classes registers; the
-    /// comparison is case-sensitive (`FindRoutedEvent`).
+    /// comparison is case-sensitive (`FindRoutedEvent`). Only an input element registers events
+    /// that can be bound.
     fn find_routed_event(class: &'static TypeInfo, event_name: &str) -> Option<RoutedEvent> {
-        let mut current = Some(class);
-        while let Some(type_) = current {
-            if !InputElement::TYPE.is_assignable_from(type_) {
-                return None;
-            }
-            let registered = RoutedEventRegistry::instance().get_registered(type_);
-            if let Some(found) = registered.into_iter().find(|routed_event| routed_event.name() == event_name) {
-                return Some(found);
-            }
-            current = type_.base_type();
+        if !InputElement::TYPE.is_assignable_from(class) {
+            return None;
         }
-        None
+        RoutedEventRegistry::instance().find_by_name(class, event_name)
     }
 }
 

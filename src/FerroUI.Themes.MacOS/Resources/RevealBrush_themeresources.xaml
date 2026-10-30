@@ -1,0 +1,44 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/Materials/Reveal/RevealBrush_themeresources.xaml
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+  Copied from the WinUI theme foundation and adapted for macOS 26.
+  Maintained here independently; see docs/porting/macos26-theme.md.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:winui="using:FerroUI.Themes.MacOS"
+                    x:ClassModifier="internal">
+  <ResourceDictionary.ThemeDictionaries>
+    <ResourceDictionary x:Key="Default">
+      <SolidColorBrush x:Key="SystemControlTransparentRevealBackgroundBrush" Color="Transparent" />
+      <SolidColorBrush x:Key="SystemControlHighlightAccentRevealBackgroundBrush" Color="{DynamicResource SystemAccentColor}" />
+      <SolidColorBrush x:Key="SystemControlHighlightListMediumRevealBackgroundBrush" Color="{DynamicResource SystemListMediumColor}" />
+      <SolidColorBrush x:Key="SystemControlHighlightListLowRevealBackgroundBrush" Color="{DynamicResource SystemListLowColor}" />
+      <SolidColorBrush x:Key="SystemControlTransparentRevealBorderBrush" Color="Transparent" />
+      <SolidColorBrush x:Key="SystemControlBackgroundTransparentRevealBorderBrush" Color="Transparent" />
+      <SolidColorBrush x:Key="SystemControlHighlightAltTransparentRevealBorderBrush" Color="Transparent" />
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="Light">
+      <SolidColorBrush x:Key="SystemControlTransparentRevealBackgroundBrush" Color="Transparent" />
+      <SolidColorBrush x:Key="SystemControlHighlightAccentRevealBackgroundBrush" Color="{DynamicResource SystemAccentColor}" />
+      <SolidColorBrush x:Key="SystemControlHighlightListMediumRevealBackgroundBrush" Color="{DynamicResource SystemListMediumColor}" />
+      <SolidColorBrush x:Key="SystemControlHighlightListLowRevealBackgroundBrush" Color="{DynamicResource SystemListLowColor}" />
+      <SolidColorBrush x:Key="SystemControlTransparentRevealBorderBrush" Color="Transparent" />
+      <SolidColorBrush x:Key="SystemControlBackgroundTransparentRevealBorderBrush" Color="Transparent" />
+      <SolidColorBrush x:Key="SystemControlHighlightAltTransparentRevealBorderBrush" Color="Transparent" />
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="{x:Static winui:MacOSTheme.HighContrast}">
+      <SolidColorBrush x:Key="SystemControlTransparentRevealBackgroundBrush" Color="Transparent" />
+      <SolidColorBrush x:Key="SystemControlHighlightAccentRevealBackgroundBrush" Color="{DynamicResource SystemAccentColor}" />
+      <SolidColorBrush x:Key="SystemControlHighlightListMediumRevealBackgroundBrush" Color="{DynamicResource SystemListMediumColor}" />
+      <SolidColorBrush x:Key="SystemControlHighlightListLowRevealBackgroundBrush" Color="{DynamicResource SystemListLowColor}" />
+      <SolidColorBrush x:Key="SystemControlTransparentRevealBorderBrush" Color="Transparent" />
+      <SolidColorBrush x:Key="SystemControlBackgroundTransparentRevealBorderBrush" Color="Transparent" />
+      <SolidColorBrush x:Key="SystemControlHighlightAltTransparentRevealBorderBrush" Color="Transparent" />
+    </ResourceDictionary>
+  </ResourceDictionary.ThemeDictionaries>
+  <Thickness x:Key="CommandBarMoreButtonMargin">14,19,14,0</Thickness>
+  <x:Double x:Key="AppBarButtonContentHeight">16</x:Double>
+</ResourceDictionary>

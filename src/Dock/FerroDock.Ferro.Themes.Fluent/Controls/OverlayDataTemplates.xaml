@@ -1,0 +1,18 @@
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:o="using:FerroDock.Ferro.Controls.Overlays" x:CompileBindings="True"
+                    xmlns:services="using:FerroDock.Model.Services">
+  <DataTemplate x:Key="DockDialogRequestTemplate" DataType="services:DialogRequest" x:DataType="services:DialogRequest">
+    <o:DialogShellControl Title="{Binding Title}"
+                        CloseCommand="{Binding Close}"
+                        Content="{Binding Content}" />
+  </DataTemplate>
+  <DataTemplate x:Key="DockConfirmationRequestTemplate" DataType="services:ConfirmationRequest" x:DataType="services:ConfirmationRequest">
+    <o:ConfirmationDialogControl Title="{Binding Title}"
+                               Message="{Binding Message}"
+                               ConfirmText="{Binding ConfirmText}"
+                               CancelText="{Binding CancelText}"
+                               ConfirmCommand="{Binding Confirm}"
+                               CancelCommand="{Binding Cancel}" />
+  </DataTemplate>
+</ResourceDictionary>

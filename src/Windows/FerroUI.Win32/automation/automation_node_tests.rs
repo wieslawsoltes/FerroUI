@@ -19,8 +19,9 @@ use super::interop::{
 use super::marshalling::{free_bstr, ptr_to_string_bstr, SafeArrayMarshaller, VariantArray, VariantValue};
 use ferroui_base::layout::ILayoutManager;
 use ferroui_base::threading::Dispatcher;
-use ferroui_base::Ref;
+use ferroui_base::{BoxedValue, Ref};
 use ferroui_controls::automation::peers::{AutomationPeer, ControlAutomationPeer};
+use ferroui_controls::automation::RangeValuePatternIdentifiers;
 use ferroui_controls::automation::provider::ToggleState;
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
 use ferroui_controls::{Button, CheckBox, Control, MenuItem, MenuItemToggleType, Slider, StackPanel, TextBox, Window};
@@ -503,7 +504,12 @@ fn the_patterns_a_peer_provides_are_the_ones_a_client_gets() {
     assert_eq!(0.0, range.get_minimum().unwrap());
     assert_eq!(100.0, range.get_maximum().unwrap());
     assert_eq!(0, range.get_is_read_only().unwrap());
-    assert_eq!((1.0, 1.0), (range.get_small_change().unwrap(), range.get_large_change().unwrap()));
+    // Deviation (DEVIATIONS.md, Windows platform backend): the changes of the provider, where the
+    // reference answers one for both.
+    assert_eq!((1.0, 10.0), (range.get_small_change().unwrap(), range.get_large_change().unwrap()));
+    ui.slider.set_small_change(2.5);
+    ui.slider.set_large_change(12.5);
+    assert_eq!((2.5, 12.5), (range.get_small_change().unwrap(), range.get_large_change().unwrap()));
     ui.take_calls();
     range.set_value(60.0).unwrap();
     assert_eq!(60.0, ui.slider.value());
@@ -580,6 +586,23 @@ fn the_events_of_the_peers_are_raised_for_their_nodes() {
     Dispatcher::ui_thread().run_jobs(None);
     assert!(flag(&button, UiaPropertyId::HasKeyboardFocus));
     assert!(ui.take_calls().contains(&format!("event {} AutomationFocusChanged", number(Some(&button)))));
+
+    // The changes of a range value reach the system with their identifiers (DEVIATIONS.md,
+    // Windows platform backend: the two identifiers FerroUI adds after WinUI).
+    let slider = ui.node_of(&ui.slider);
+    let peer: Ref<AutomationPeer> = ControlAutomationPeer::create_peer_for_element(&ui.slider);
+    ui.take_calls();
+    for (identifier, name) in [
+        (RangeValuePatternIdentifiers::small_change_property(), "RangeValueSmallChange"),
+        (RangeValuePatternIdentifiers::large_change_property(), "RangeValueLargeChange"),
+    ] {
+        peer.raise_property_changed_event(identifier, Some(Rc::new(1.0_f64) as BoxedValue), Some(Rc::new(2.0_f64) as BoxedValue));
+        let calls = ui.take_calls();
+        assert!(
+            calls.contains(&format!("property {} {name} Some(R8(1.0)) -> Some(R8(2.0))", number(Some(&slider)))),
+            "the calls: {calls:?}"
+        );
+    }
 }
 
 #[test]

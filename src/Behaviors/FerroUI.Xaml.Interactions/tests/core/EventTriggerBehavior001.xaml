@@ -1,0 +1,19 @@
+<Window xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="EventTriggerBehavior001">
+  <!-- Ported from tests/Xaml.Behaviors.Interactions.UnitTests/Core/EventTriggerBehavior001 of Xaml.Behaviors.
+       Adapted: no x:Class (the test loads the window with the run-time loader). -->
+  <StackPanel>
+    <TextBox Name="TargetTextBox"
+             Text="Initial Text" />
+    <Button Name="TargetButton" Content="Button">
+      <Interaction.Behaviors>
+        <EventTriggerBehavior EventName="Click">
+          <ChangePropertyAction TargetObject="TargetTextBox"
+                                PropertyName="Text"
+                                Value="Click Text" />
+        </EventTriggerBehavior>
+      </Interaction.Behaviors>
+    </Button>
+  </StackPanel>
+</Window>

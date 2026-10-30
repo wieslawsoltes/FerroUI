@@ -1,0 +1,3 @@
+<m:GridDock xmlns="https://github.com/ferroui"
+ xmlns:m="clr-namespace:FerroDock.Model.ReactiveUI.Controls;assembly=FerroDock.Model.ReactiveUI"
+ Title="Source GridDock" ColumnDefinitions="2*,Auto,*" RowDefinitions="*,3*" />

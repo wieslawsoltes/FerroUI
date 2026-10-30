@@ -323,16 +323,16 @@ ferro_markup_type!(interface dyn crate::controls::INameScope as "INameScope" {
         IsCompleted: bool { get: |scope: &crate::controls::NameScopeRef| scope.is_completed() },
     ],
     methods: [
-        // The element is any object in the managed original; the port registers objects of the object model.
+        // The original accepts arbitrary non-null objects, including plain models.
         try fn Register(String, Option<crate::BoxedValue>) =>
             |scope: &crate::controls::NameScopeRef, name: String, element: Option<crate::BoxedValue>| {
-                match element.as_ref().and_then(|element| ValueTypes::as_object(&**element)) {
-                    Some(element) => scope.try_register(&name, element).map_err(|error| error.to_string()),
-                    None => Err("Only an object of the object model can be registered in a name scope.".to_string()),
+                match element {
+                    Some(element) => scope.try_register_value(&name, element).map_err(|error| error.to_string()),
+                    None => Err("Value cannot be null. (Parameter 'element')".to_string()),
                 }
             },
-        fn Find(String) -> Option<crate::Ref<crate::FerroObject>> =>
-            |scope: &crate::controls::NameScopeRef, name: String| scope.find(&name),
+        fn Find(String) -> Option<crate::BoxedValue> =>
+            |scope: &crate::controls::NameScopeRef, name: String| scope.find_value(&name),
         fn Complete() => |scope: &crate::controls::NameScopeRef| scope.complete(),
     ],
 });

@@ -1,0 +1,274 @@
+<!-- macOS 26 theme: the control theme of the WinUI theme (src/FerroUI.Themes.WinUI/Controls/NumberBox.xaml),
+     as docs/porting/macos26-theme.md derives every control theme of the WinUI theme; the resources are this theme's. -->
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/NumberBox/NumberBox.xaml (the implicit style of NumberBox; NumberBoxSpinButtonStyle,
+    NumberBoxPopupSpinButtonStyle and NumberBoxTextBoxStyle are ported in NumericUpDown.xaml, and
+    the resources of controls/dev/NumberBox/NumberBox_themeresources.xaml are
+    Resources/NumberBox_themeresources.xaml)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  Translation notes (docs/porting/winui-theme.md, section 4):
+  - FerroUI's NumberBox is WinUI's NumberBox (a WinUI control in ferroui-controls,
+    docs/porting/winui-controls.md). The parts keep WinUI's names, which the control looks up:
+    HeaderContentPresenter, InputBox, UpSpinButton, DownSpinButton, UpDownPopup,
+    PopupUpSpinButton and PopupDownSpinButton.
+  - The keyed themes of the spin buttons and of the text box are the ones NumericUpDown.xaml ports
+    (one definition of each key in the theme): NumberBoxTextBoxStyle for InputBox,
+    NumericUpDownSpinButtonStyle (NumberBoxSpinButtonStyle with the RepeatButton brushes that the
+    Grid.Resources of the template set to the TextControlButton brushes) for UpSpinButton and
+    DownSpinButton, and NumberBoxPopupContentRootButtonStyle (NumberBoxPopupSpinButtonStyle with the
+    same brushes, which the Grid.Resources of PopupContentRoot set) for the popup buttons.
+  - The spin buttons show the glyphs E70E and E70D of the symbol font: Paths of GlyphGeometryE70E
+    and GlyphGeometryE70D filled with the Foreground of the button, 12 px wide in the inline
+    buttons (the font size of the control, 14 px) and 14 px wide in the popup buttons (16 px).
+  - SpinButtonStates are the pseudo-classes the control sets: SpinButtonsVisible is
+    :spinbuttonsvisible, SpinButtonsPopup is :spinbuttonspopup, SpinButtonsCollapsed is neither.
+    NumberBox also sets the state on the text box, whose NumberBoxTextBoxStyle reserves the column
+    of the buttons (SpinButtonsVisible) or shows the popup indicator (SpinButtonsPopup): the Tag of
+    InputBox, which NumberBoxTextBoxStyle selects, as NumericUpDown.xaml does. The Style setter of
+    SpinButtonsPopup (InputBox.Style = NumberBoxTextBoxStyle) is the theme the text box has.
+  - UpSpinButtonEnabledStates and DownSpinButtonEnabledStates are :upspinbuttondisabled and
+    :downspinbuttondisabled (the enabled states set nothing).
+  - HeaderContentPresenter (Visibility Collapsed, x:DeferLoadStrategy Lazy) is shown by the
+    control, as UpdateHeaderPresenterState does.
+  - The Button InputEater, which takes the pointer input between the inline buttons so that it
+    does not reach the text box, is a Border of the same name with a transparent background: a
+    pointer press on it reaches the number box, not the text box.
+  - UpDownPopup: the popup is placed at the top-right corner of the text box (RightEdgeAlignedTop,
+    the layout slot of the popup in WinUI) with the offsets NumberBoxPopupHorizonalOffset and
+    NumberBoxPopupVerticalOffset. The shadow of PopupContentRoot (a ThemeShadow at the
+    Translation.Z NumberBoxPopupShadowDepth, 16, set by NumberBox::OnApplyTemplate) is the
+    BoxShadow ThemeShadowToolTipBoxShadow of elevation 16, with ThemeShadowToolTipMargin as its
+    room (Resources/ThemeShadows.xaml; DEVIATIONS.md, G-24). PopupContentRoot, a Grid with a
+    border and padding, is a Border of the same name around the Grid. ShouldConstrainToRootBounds
+    has no counterpart.
+  - Left out: SelectionFlyout, SelectionHighlightColor, InputScope, TextReadingOrder and
+    PreventKeyboardDisplayOnProgrammaticFocus (FerroUI's NumberBox has none of them), the
+    FontFamily setters of the symbol font (the glyphs are paths), IsTabStop of the spin buttons
+    (Focusable False in their theme) and AutomationProperties.AccessibilityView.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <StackPanel Spacing="20" Width="240">
+        <NumberBox Header="Enter a number" Value="42" />
+        <NumberBox Header="Inline spin buttons" Value="1" SpinButtonPlacementMode="Inline" />
+        <NumberBox Header="Compact spin buttons" Value="1" SpinButtonPlacementMode="Compact" />
+        <NumberBox PlaceholderText="1 + 2 ^ 2" AcceptsExpression="True" />
+        <NumberBox Value="42" IsEnabled="False" />
+      </StackPanel>
+    </Border>
+  </Design.PreviewWith>
+
+  <!-- The popup spin buttons with the RepeatButton brushes that the Grid.Resources of
+       PopupContentRoot set to the TextControlButton brushes (RepeatButtonBorderBrushDisabled to
+       TextControlButtonBorderBrush; the other disabled brushes are not overridden). -->
+  <ControlTheme x:Key="NumberBoxPopupContentRootButtonStyle" TargetType="RepeatButton" BasedOn="{StaticResource NumberBoxPopupSpinButtonStyle}">
+    <Setter Property="Background" Value="{DynamicResource TextControlButtonBackground}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextControlButtonForeground}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource TextControlButtonBorderBrush}" />
+    <Style Selector="^:pointerover">
+      <Setter Property="Foreground" Value="{DynamicResource TextControlButtonForegroundPointerOver}" />
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource TextControlButtonBackgroundPointerOver}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource TextControlButtonBorderBrushPointerOver}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextControlButtonForegroundPointerOver}" />
+      </Style>
+    </Style>
+    <Style Selector="^:pressed">
+      <Setter Property="Foreground" Value="{DynamicResource TextControlButtonForegroundPressed}" />
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource TextControlButtonBackgroundPressed}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource TextControlButtonBorderBrushPressed}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextControlButtonForegroundPressed}" />
+      </Style>
+    </Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Foreground" Value="{DynamicResource RepeatButtonForegroundDisabled}" />
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="BorderBrush" Value="{DynamicResource TextControlButtonBorderBrush}" />
+      </Style>
+    </Style>
+  </ControlTheme>
+
+  <!-- The implicit style of NumberBox (it has no key in WinUI). -->
+  <ControlTheme x:Key="{x:Type NumberBox}" TargetType="NumberBox">
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="Background" Value="{DynamicResource TextControlBackground}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource TextControlBorderThemeThickness}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextControlForeground}" />
+    <Setter Property="Padding" Value="{DynamicResource TextControlThemePadding}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid Height="{TemplateBinding Height}"
+              RowDefinitions="Auto,*,Auto"
+              ColumnDefinitions="*,Auto,Auto">
+          <ContentPresenter x:Name="HeaderContentPresenter"
+                            Grid.ColumnSpan="3"
+                            Content="{TemplateBinding Header}"
+                            ContentTemplate="{TemplateBinding HeaderTemplate}"
+                            FontWeight="Normal"
+                            Foreground="{DynamicResource TextControlHeaderForeground}"
+                            Margin="{DynamicResource TextBoxTopHeaderMargin}"
+                            FontSize="{TemplateBinding FontSize}"
+                            FontFamily="{TemplateBinding FontFamily}"
+                            TextWrapping="Wrap"
+                            VerticalAlignment="Top"
+                            IsVisible="False" />
+          <TextBox x:Name="InputBox"
+                   Grid.Row="1"
+                   Grid.ColumnSpan="3"
+                   Theme="{StaticResource NumberBoxTextBoxStyle}"
+                   PlaceholderText="{TemplateBinding PlaceholderText}"
+                   FontSize="{TemplateBinding FontSize}"
+                   FontWeight="{TemplateBinding FontWeight}"
+                   FontFamily="{TemplateBinding FontFamily}"
+                   Background="{TemplateBinding Background}"
+                   BorderThickness="{TemplateBinding BorderThickness}"
+                   BorderBrush="{TemplateBinding BorderBrush}"
+                   Padding="{TemplateBinding Padding}"
+                   Foreground="{TemplateBinding Foreground}"
+                   TextAlignment="{TemplateBinding TextAlignment}"
+                   CornerRadius="{TemplateBinding CornerRadius}"
+                   AcceptsReturn="False"
+                   TextWrapping="NoWrap" />
+          <Popup x:Name="UpDownPopup"
+                 Grid.Row="1"
+                 Grid.Column="1"
+                 PlacementTarget="{Binding #InputBox}"
+                 Placement="RightEdgeAlignedTop"
+                 VerticalOffset="{DynamicResource NumberBoxPopupVerticalOffset}"
+                 HorizontalOffset="{DynamicResource NumberBoxPopupHorizonalOffset}"
+                 WindowManagerAddShadowHint="False"
+                 HorizontalAlignment="Left">
+            <Border Margin="{StaticResource ThemeShadowToolTipMargin}">
+              <Border x:Name="PopupContentRoot"
+                      Padding="6"
+                      Background="{DynamicResource NumberBoxPopupBackground}"
+                      BorderBrush="{DynamicResource NumberBoxPopupBorderBrush}"
+                      BorderThickness="{DynamicResource NumberBoxPopupBorderThickness}"
+                      CornerRadius="{DynamicResource OverlayCornerRadius}"
+                      BoxShadow="{DynamicResource ThemeShadowToolTipBoxShadow}">
+                <Grid RowDefinitions="*,*">
+                  <RepeatButton x:Name="PopupUpSpinButton"
+                                Theme="{StaticResource NumberBoxPopupContentRootButtonStyle}"
+                                Margin="0,0,0,4">
+                    <Path Data="{StaticResource GlyphGeometryE70E}"
+                          Fill="{Binding $parent[RepeatButton].Foreground}"
+                          Stretch="Uniform"
+                          Width="14"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Center" />
+                  </RepeatButton>
+                  <RepeatButton x:Name="PopupDownSpinButton"
+                                Grid.Row="1"
+                                Theme="{StaticResource NumberBoxPopupContentRootButtonStyle}">
+                    <Path Data="{StaticResource GlyphGeometryE70D}"
+                          Fill="{Binding $parent[RepeatButton].Foreground}"
+                          Stretch="Uniform"
+                          Width="14"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Center" />
+                  </RepeatButton>
+                </Grid>
+              </Border>
+            </Border>
+          </Popup>
+          <Border x:Name="InputEater"
+                  Grid.Row="1"
+                  Grid.Column="1"
+                  Grid.ColumnSpan="2"
+                  Background="Transparent"
+                  HorizontalAlignment="Stretch"
+                  VerticalAlignment="Stretch"
+                  Margin="4,0,0,0"
+                  IsVisible="False" />
+          <RepeatButton x:Name="UpSpinButton"
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        IsVisible="False"
+                        FontSize="{TemplateBinding FontSize}"
+                        Theme="{StaticResource NumericUpDownSpinButtonStyle}"
+                        Margin="4"
+                        CornerRadius="{TemplateBinding CornerRadius}">
+            <Path Data="{StaticResource GlyphGeometryE70E}"
+                  Fill="{Binding $parent[RepeatButton].Foreground}"
+                  Stretch="Uniform"
+                  Width="12"
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Center" />
+          </RepeatButton>
+          <RepeatButton x:Name="DownSpinButton"
+                        Grid.Row="1"
+                        Grid.Column="2"
+                        IsVisible="False"
+                        FontSize="{TemplateBinding FontSize}"
+                        Theme="{StaticResource NumericUpDownSpinButtonStyle}"
+                        Margin="0,4,4,4"
+                        CornerRadius="{TemplateBinding CornerRadius}">
+            <Path Data="{StaticResource GlyphGeometryE70D}"
+                  Fill="{Binding $parent[RepeatButton].Foreground}"
+                  Stretch="Uniform"
+                  Width="12"
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Center" />
+          </RepeatButton>
+          <ContentPresenter x:Name="DescriptionPresenter"
+                            Grid.Row="2"
+                            Grid.ColumnSpan="3"
+                            Content="{TemplateBinding Description}"
+                            Foreground="{DynamicResource SystemControlDescriptionTextForegroundBrush}" />
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- CommonStates -->
+    <Style Selector="^:disabled /template/ ContentPresenter#HeaderContentPresenter">
+      <Setter Property="Foreground" Value="{DynamicResource TextControlHeaderForegroundDisabled}" />
+    </Style>
+
+    <!-- SpinButtonStates (SpinButtonsCollapsed sets the base values). -->
+    <Style Selector="^:spinbuttonsvisible">
+      <Style Selector="^ /template/ RepeatButton#DownSpinButton">
+        <Setter Property="IsVisible" Value="True" />
+      </Style>
+      <Style Selector="^ /template/ RepeatButton#UpSpinButton">
+        <Setter Property="IsVisible" Value="True" />
+      </Style>
+      <Style Selector="^ /template/ Border#InputEater">
+        <Setter Property="IsVisible" Value="True" />
+      </Style>
+      <Style Selector="^ /template/ TextBox#InputBox">
+        <Setter Property="MinWidth" Value="{DynamicResource NumberBoxMinWidth}" />
+        <Setter Property="Tag" Value="SpinButtonsVisible" />
+      </Style>
+    </Style>
+    <Style Selector="^:spinbuttonspopup /template/ TextBox#InputBox">
+      <Setter Property="Tag" Value="SpinButtonsPopup" />
+    </Style>
+
+    <!-- UpSpinButtonEnabledStates and DownSpinButtonEnabledStates. -->
+    <Style Selector="^:upspinbuttondisabled">
+      <Style Selector="^ /template/ RepeatButton#UpSpinButton">
+        <Setter Property="IsEnabled" Value="False" />
+      </Style>
+      <Style Selector="^ /template/ RepeatButton#PopupUpSpinButton">
+        <Setter Property="IsEnabled" Value="False" />
+      </Style>
+    </Style>
+    <Style Selector="^:downspinbuttondisabled">
+      <Style Selector="^ /template/ RepeatButton#DownSpinButton">
+        <Setter Property="IsEnabled" Value="False" />
+      </Style>
+      <Style Selector="^ /template/ RepeatButton#PopupDownSpinButton">
+        <Setter Property="IsEnabled" Value="False" />
+      </Style>
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

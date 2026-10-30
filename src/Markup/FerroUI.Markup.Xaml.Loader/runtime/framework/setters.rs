@@ -230,6 +230,10 @@ fn bind(
     let property = load_property(field, line_info)?;
     let binding = binding_of(binding, line_info)?;
     let object = object_of(target, line_info)?;
+    #[cfg(all(debug_assertions, feature = "hot-reload"))]
+    if crate::binding_capture::defer(&object, property, &binding) {
+        return Ok(());
+    }
     let _ = object.bind_binding(property, &*binding);
     Ok(())
 }
@@ -274,6 +278,20 @@ fn add_handler(
         XamlError::load_exception("The AddHandler method doesn't take routing strategies", Some(line_info))
     })?;
     let routes = enum_constant(&routes_type, 5, line_info)?;
+    #[cfg(all(feature = "hot-reload", debug_assertions))]
+    // Only an owned population intercepts the metadata call. Other interpreter
+    // hosts (including recording/evaluation back ends) retain method dispatch.
+    if context.runtime_context()?.extension::<ferroui_markup_xaml::reload_events::EventGeneration>().is_some() {
+        use ferroui_base::{interactivity::{Interactive, RoutedEvent, RoutingStrategies}, metadata::from_markup_value};
+        let object = object_of(target, line_info)?;
+        let object = object.cast::<Interactive>().ok_or_else(|| XamlError::load_exception("Event target is not Interactive", Some(line_info)))?;
+        let event = from_markup_value::<RoutedEvent>(&event).ok_or_else(|| XamlError::load_exception("Invalid routed event", Some(line_info)))?;
+        let handler = from_markup_value::<ferroui_base::metadata::MarkupDelegate>(&handler).ok_or_else(|| XamlError::load_exception("Invalid event delegate", Some(line_info)))?;
+        let routes = from_markup_value::<RoutingStrategies>(&routes).ok_or_else(|| XamlError::load_exception("Invalid event routes", Some(line_info)))?;
+        ferroui_markup_xaml::reload_events::add_handler(context.runtime_context()?, &object, &event, handler, routes, false);
+        return Ok(());
+    }
+
     context
         .call_method(&setter.add_method, &[target.clone(), event, handler, routes, boxed(false)], line_info)
         .map(|_| ())
@@ -314,7 +332,7 @@ fn add_resource(
 /// model attaches handlers to. A field declared with its typed handle
 /// (`RoutedEvent<TEventArgs>`) that has no registered conversion to the
 /// untyped handle is looked up in the registry of routed events by its
-/// owner and name.
+/// owner and name (the field name, `<Name>Event`).
 fn untyped_routed_event(field: &Rc<dyn xamlx::type_system::IXamlField>, value: MarkupValue) -> MarkupValue {
     use ferroui_base::interactivity::{RoutedEvent, RoutedEventRegistry};
     if from_markup_value::<RoutedEvent>(&value).is_some() {
@@ -326,10 +344,7 @@ fn untyped_routed_event(field: &Rc<dyn xamlx::type_system::IXamlField>, value: M
         .downcast_ref::<crate::runtime::type_system::RuntimeType>()
         .and_then(crate::runtime::type_system::RuntimeType::type_info);
     let field_name = field.name();
-    let name = field_name.strip_suffix("Event").unwrap_or(&field_name);
-    let found = owner.and_then(|owner| {
-        RoutedEventRegistry::instance().get_registered(owner).into_iter().find(|event| event.name() == name)
-    });
+    let found = owner.and_then(|owner| RoutedEventRegistry::instance().find_by_name(owner, &field_name));
     match found {
         Some(event) => boxed(event),
         None => value,

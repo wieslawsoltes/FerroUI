@@ -1,0 +1,7 @@
+depth	1	1	1
+depth	63	1	63
+depth	64	1	64
+depth	65	0	64
+depth	100	0	64
+base-self-reference	1
+unrecognized-to-base	1

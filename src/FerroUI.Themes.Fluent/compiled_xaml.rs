@@ -27,6 +27,10 @@ pub fn populate(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
     root: &::ferroui_base::Ref<crate::FluentTheme>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadException> {
+    ::ferroui_markup_xaml::FerroXamlLoader::track_instance(<crate::FluentTheme as ::ferroui_base::StaticType>::TYPE, root);
+    if let Some(populate) = ::ferroui_markup_xaml::FerroXamlLoader::populate_override(<crate::FluentTheme as ::ferroui_base::StaticType>::TYPE) {
+        return populate(service_provider.as_ref(), &(::std::rc::Rc::new(root.clone()) as ::ferroui_base::BoxedValue));
+    }
     let service_provider =
         ::ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers::create_root_service_provider_v3(service_provider);
     populate_fluenttheme_xaml(::core::option::Option::Some(service_provider), root)
@@ -19611,7 +19615,7 @@ fn build_controls_fluentcontrols_xaml_deferred_1(
     content_presenter_0.begin_init();
     // Controls/FluentControls.xaml(31,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 31, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 31, 27)?;
     // Controls/FluentControls.xaml(32,27) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 32, 27)?;
     // Controls/FluentControls.xaml(33,27) BorderBrush
@@ -19679,7 +19683,7 @@ fn build_controls_fluentcontrols_xaml_deferred_3(
     carousel_0.begin_init();
     // Controls/FluentControls.xaml(21,19) Name
     carousel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Carousel")));
-    rt::register_name(name_scope.as_ref(), "PART_Carousel", ::core::clone::Clone::clone(&carousel_0).upcast::<::ferroui_base::FerroObject>(), 21, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Carousel", ::std::rc::Rc::new(::core::clone::Clone::clone(&carousel_0)), 21, 19)?;
     // Controls/FluentControls.xaml(22,19) Background
     rt::bind_template_binding(carousel_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 22, 19)?;
     // Controls/FluentControls.xaml(23,19) ItemTemplate
@@ -19744,7 +19748,7 @@ fn build_controls_fluentcontrols_xaml_deferred_5(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(19,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TopCommandBar")));
-    rt::register_name(name_scope.as_ref(), "PART_TopCommandBar", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 19, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TopCommandBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 19, 29)?;
     // Controls/FluentControls.xaml(19,12) Dock
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Top, priority_0);
@@ -19763,7 +19767,7 @@ fn build_controls_fluentcontrols_xaml_deferred_5(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(25,29) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_BottomCommandBar")));
-    rt::register_name(name_scope.as_ref(), "PART_BottomCommandBar", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 25, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_BottomCommandBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 25, 29)?;
     // Controls/FluentControls.xaml(25,12) Dock
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Bottom, priority_3);
@@ -19782,7 +19786,7 @@ fn build_controls_fluentcontrols_xaml_deferred_5(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(30,29) Name
     content_presenter_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_base::FerroObject>(), 30, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_2)), 30, 29)?;
     // Controls/FluentControls.xaml(31,29) HorizontalContentAlignment
     rt::bind_template_binding(content_presenter_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::horizontal_content_alignment_property(), rt::property(::ferroui_controls::ContentPage::horizontal_content_alignment_property()), 31, 29)?;
     // Controls/FluentControls.xaml(32,29) VerticalContentAlignment
@@ -19875,7 +19879,7 @@ fn build_controls_fluentcontrols_xaml_deferred_7(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/FluentControls.xaml(36,17) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "PART_LayoutRoot", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 36, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 36, 17)?;
     // Controls/FluentControls.xaml(37,14) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
     // Controls/FluentControls.xaml(37,14) TextBox
@@ -19884,7 +19888,7 @@ fn build_controls_fluentcontrols_xaml_deferred_7(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&text_box_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(37,22) Name
     text_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TextBox")));
-    rt::register_name(name_scope.as_ref(), "PART_TextBox", ::core::clone::Clone::clone(&text_box_0).upcast::<::ferroui_base::FerroObject>(), 37, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TextBox", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_box_0)), 37, 22)?;
     // Controls/FluentControls.xaml(38,22) PlaceholderText
     rt::bind_template_binding(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBox::placeholder_text_property(), rt::property(::ferroui_controls::AutoCompleteBox::placeholder_text_property()), 38, 22)?;
     // Controls/FluentControls.xaml(39,22) PlaceholderForeground
@@ -19948,7 +19952,7 @@ fn build_controls_fluentcontrols_xaml_deferred_7(
     context.push_parent(rt::to_value(popup_0.clone()));
     // Controls/FluentControls.xaml(55,20) Name
     popup_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Popup")));
-    rt::register_name(name_scope.as_ref(), "PART_Popup", ::core::clone::Clone::clone(&popup_0).upcast::<::ferroui_base::FerroObject>(), 55, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Popup", ::std::rc::Rc::new(::core::clone::Clone::clone(&popup_0)), 55, 20)?;
     // Controls/FluentControls.xaml(55,14) WindowManagerAddShadowHint
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     popup_0.set_value_with_priority(::ferroui_controls::primitives::Popup::window_manager_add_shadow_hint_property(), ::core::clone::Clone::clone(&false), priority_3);
@@ -19979,7 +19983,7 @@ fn build_controls_fluentcontrols_xaml_deferred_7(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/FluentControls.xaml(61,23) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SuggestionsContainer")));
-    rt::register_name(name_scope.as_ref(), "PART_SuggestionsContainer", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 61, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SuggestionsContainer", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 61, 23)?;
     // Controls/FluentControls.xaml(62,23) Padding
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Decorator::padding_property(), "AutoCompleteListMargin", 62, 23)?;
     // Controls/FluentControls.xaml(63,23) BorderThickness
@@ -19998,7 +20002,7 @@ fn build_controls_fluentcontrols_xaml_deferred_7(
     context.push_parent(rt::to_value(list_box_0.clone()));
     // Controls/FluentControls.xaml(67,26) Name
     list_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SelectingItemsControl")));
-    rt::register_name(name_scope.as_ref(), "PART_SelectingItemsControl", ::core::clone::Clone::clone(&list_box_0).upcast::<::ferroui_base::FerroObject>(), 67, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SelectingItemsControl", ::std::rc::Rc::new(::core::clone::Clone::clone(&list_box_0)), 67, 26)?;
     // Controls/FluentControls.xaml(67,18) BorderThickness
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     list_box_0.set_value_with_priority(::ferroui_controls::primitives::TemplatedControl::border_thickness_property(), ::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_5);
@@ -20076,7 +20080,7 @@ fn build_controls_fluentcontrols_xaml_deferred_9(
     stack_panel_0.begin_init();
     // Controls/FluentControls.xaml(28,13) Name
     stack_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Root")));
-    rt::register_name(name_scope.as_ref(), "PART_Root", ::core::clone::Clone::clone(&stack_panel_0).upcast::<::ferroui_base::FerroObject>(), 28, 13)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&stack_panel_0)), 28, 13)?;
     // Controls/FluentControls.xaml(27,10) HorizontalAlignment
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     stack_panel_0.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Center, priority_0);
@@ -20091,7 +20095,7 @@ fn build_controls_fluentcontrols_xaml_deferred_9(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&calendar_item_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(32,15) Name
     calendar_item_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_CalendarItem")));
-    rt::register_name(name_scope.as_ref(), "PART_CalendarItem", ::core::clone::Clone::clone(&calendar_item_0).upcast::<::ferroui_base::FerroObject>(), 32, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_CalendarItem", ::std::rc::Rc::new(::core::clone::Clone::clone(&calendar_item_0)), 32, 15)?;
     // Controls/FluentControls.xaml(33,15) Background
     rt::bind_template_binding(calendar_item_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 33, 15)?;
     // Controls/FluentControls.xaml(34,15) BorderBrush
@@ -20419,7 +20423,7 @@ fn build_controls_fluentcontrols_xaml_deferred_11(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(36,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Root")));
-    rt::register_name(name_scope.as_ref(), "Root", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 36, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 36, 19)?;
     // Controls/FluentControls.xaml(36,31) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 36, 31)?;
     // Controls/FluentControls.xaml(36,12) BorderThickness
@@ -20435,7 +20439,7 @@ fn build_controls_fluentcontrols_xaml_deferred_11(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/FluentControls.xaml(38,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 38, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 38, 31)?;
     // Controls/FluentControls.xaml(39,31) ContentTemplate
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_template_property(), rt::property(::ferroui_controls::ContentControl::content_template_property()), 39, 31)?;
     // Controls/FluentControls.xaml(40,31) Content (setter chosen at run time)
@@ -20464,7 +20468,7 @@ fn build_controls_fluentcontrols_xaml_deferred_11(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(47,19) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Border")));
-    rt::register_name(name_scope.as_ref(), "Border", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 47, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "Border", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 47, 19)?;
     // Controls/FluentControls.xaml(47,12) BorderThickness
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Border::border_thickness_property(), ::ferroui_base::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64), priority_3);
@@ -20783,7 +20787,7 @@ fn build_controls_fluentcontrols_xaml_deferred_13(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(36,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Root")));
-    rt::register_name(name_scope.as_ref(), "Root", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 36, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 36, 19)?;
     // Controls/FluentControls.xaml(36,31) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 36, 31)?;
     // Controls/FluentControls.xaml(36,12) BorderThickness
@@ -20799,7 +20803,7 @@ fn build_controls_fluentcontrols_xaml_deferred_13(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/FluentControls.xaml(39,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 39, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 39, 31)?;
     // Controls/FluentControls.xaml(40,31) ContentTemplate
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_template_property(), rt::property(::ferroui_controls::ContentControl::content_template_property()), 40, 31)?;
     // Controls/FluentControls.xaml(41,31) Content (setter chosen at run time)
@@ -20828,7 +20832,7 @@ fn build_controls_fluentcontrols_xaml_deferred_13(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(49,19) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Border")));
-    rt::register_name(name_scope.as_ref(), "Border", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 49, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "Border", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 49, 19)?;
     // Controls/FluentControls.xaml(49,12) BorderThickness
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Border::border_thickness_property(), ::ferroui_base::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64), priority_3);
@@ -20871,7 +20875,7 @@ fn build_controls_fluentcontrols_xaml_deferred_15(
     scroll_viewer_0.begin_init();
     // Controls/FluentControls.xaml(7,23) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "PART_ScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 7, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 7, 23)?;
     // Controls/FluentControls.xaml(8,23) Background
     rt::bind_template_binding(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 8, 23)?;
     // Controls/FluentControls.xaml(9,23) BorderBrush
@@ -20894,7 +20898,7 @@ fn build_controls_fluentcontrols_xaml_deferred_15(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&items_presenter_0)));
     // Controls/FluentControls.xaml(14,27) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 14, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 14, 27)?;
     // Controls/FluentControls.xaml(15,27) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 15, 27)?;
     // Controls/FluentControls.xaml(16,27) Margin
@@ -21032,7 +21036,7 @@ fn build_controls_fluentcontrols_xaml_deferred_20(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/FluentControls.xaml(12,27) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 12, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 12, 27)?;
     // Controls/FluentControls.xaml(13,27) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 13, 27)?;
     rt::invoked(items_presenter_0.try_end_init(), 12, 12)?;
@@ -21089,7 +21093,7 @@ fn build_controls_fluentcontrols_xaml_deferred_22(
     content_presenter_0.begin_init();
     // Controls/FluentControls.xaml(9,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 9, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 9, 27)?;
     // Controls/FluentControls.xaml(10,27) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 10, 27)?;
     // Controls/FluentControls.xaml(11,27) BorderBrush
@@ -21174,7 +21178,7 @@ fn build_controls_fluentcontrols_xaml_deferred_24(
     border_0.begin_init();
     // Controls/FluentControls.xaml(26,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("border")));
-    rt::register_name(name_scope.as_ref(), "border", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 26, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "border", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 26, 17)?;
     // Controls/FluentControls.xaml(27,17) ClipToBounds
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::clip_to_bounds_property(), rt::property(::ferroui_base::Visual::clip_to_bounds_property()), 27, 17)?;
     // Controls/FluentControls.xaml(28,17) Background
@@ -21192,7 +21196,7 @@ fn build_controls_fluentcontrols_xaml_deferred_24(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_controls::Control>()));
     // Controls/FluentControls.xaml(32,25) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "PART_ScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 32, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 32, 25)?;
     // Controls/FluentControls.xaml(33,25) VerticalSnapPointsType
     rt::bind_template_binding(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ScrollViewer::vertical_snap_points_type_property(), rt::property(::ferroui_controls::ScrollViewer::vertical_snap_points_type_property()), 33, 25)?;
     // Controls/FluentControls.xaml(34,25) HorizontalSnapPointsType
@@ -21218,7 +21222,7 @@ fn build_controls_fluentcontrols_xaml_deferred_24(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&items_presenter_0)));
     // Controls/FluentControls.xaml(42,29) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 42, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 42, 29)?;
     // Controls/FluentControls.xaml(43,29) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 43, 29)?;
     // Controls/FluentControls.xaml(44,29) Margin
@@ -21570,7 +21574,7 @@ fn build_controls_fluentcontrols_xaml_deferred_26(
     context.push_parent(rt::to_value(scroll_content_presenter_0.clone()));
     // Controls/FluentControls.xaml(80,35) Name
     scroll_content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&scroll_content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 80, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_content_presenter_0)), 80, 35)?;
     // Controls/FluentControls.xaml(82,16) GestureRecognizers
     let gesture_recognizers_collection_0 = ::ferroui_base::input::InputElement::__markup_get_GestureRecognizers(scroll_content_presenter_0.upcast_ref::<::ferroui_base::input::InputElement>());
     // Controls/FluentControls.xaml(82,16) ScrollGestureRecognizer
@@ -21962,7 +21966,7 @@ fn build_controls_fluentcontrols_xaml_deferred_28(
     context.push_parent(rt::to_value(layout_transform_control_0.clone()));
     // Controls/FluentControls.xaml(19,33) Name
     layout_transform_control_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_LayoutTransformControl")));
-    rt::register_name(name_scope.as_ref(), "PART_LayoutTransformControl", ::core::clone::Clone::clone(&layout_transform_control_0).upcast::<::ferroui_base::FerroObject>(), 19, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_LayoutTransformControl", ::std::rc::Rc::new(::core::clone::Clone::clone(&layout_transform_control_0)), 19, 33)?;
     // Controls/FluentControls.xaml(19,10) UseRenderTransform
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     layout_transform_control_0.set_value_with_priority(::ferroui_controls::LayoutTransformControl::use_render_transform_property(), ::core::clone::Clone::clone(&true), priority_0);
@@ -22011,7 +22015,7 @@ fn build_controls_fluentcontrols_xaml_deferred_28(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/FluentControls.xaml(27,24) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HeaderBar")));
-    rt::register_name(name_scope.as_ref(), "PART_HeaderBar", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 27, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HeaderBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 27, 24)?;
     // Controls/FluentControls.xaml(27,18) Height
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     panel_0.set_value_with_priority(::ferroui_base::layout::Layoutable::height_property(), 4.0_f64, priority_3);
@@ -22030,7 +22034,7 @@ fn build_controls_fluentcontrols_xaml_deferred_28(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(28,35) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 28, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 28, 35)?;
     // Controls/FluentControls.xaml(28,18) MinHeight
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_base::layout::Layoutable::min_height_property(), 64.0_f64, priority_5);
@@ -22126,7 +22130,7 @@ fn build_controls_fluentcontrols_xaml_deferred_30(
     context.push_parent(rt::to_value(button_spinner_0.clone()));
     // Controls/FluentControls.xaml(65,26) Name
     button_spinner_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Spinner")));
-    rt::register_name(name_scope.as_ref(), "PART_Spinner", ::core::clone::Clone::clone(&button_spinner_0).upcast::<::ferroui_base::FerroObject>(), 65, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Spinner", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_spinner_0)), 65, 26)?;
     // Controls/FluentControls.xaml(66,26) Background
     rt::bind_template_binding(button_spinner_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 66, 26)?;
     // Controls/FluentControls.xaml(67,26) BorderThickness
@@ -22164,7 +22168,7 @@ fn build_controls_fluentcontrols_xaml_deferred_30(
     context.push_parent(rt::to_value(text_box_0.clone()));
     // Controls/FluentControls.xaml(78,22) Name
     text_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TextBox")));
-    rt::register_name(name_scope.as_ref(), "PART_TextBox", ::core::clone::Clone::clone(&text_box_0).upcast::<::ferroui_base::FerroObject>(), 78, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TextBox", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_box_0)), 78, 22)?;
     // Controls/FluentControls.xaml(78,14) Background
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     text_box_0.set_value_with_priority(::ferroui_controls::primitives::TemplatedControl::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_5);
@@ -22304,7 +22308,7 @@ fn build_controls_fluentcontrols_xaml_deferred_32(
     layout_transform_control_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&visual_layer_manager_0).upcast::<::ferroui_controls::Control>()));
     // Controls/FluentControls.xaml(14,31) Name
     visual_layer_manager_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_VisualLayerManager")));
-    rt::register_name(name_scope.as_ref(), "PART_VisualLayerManager", ::core::clone::Clone::clone(&visual_layer_manager_0).upcast::<::ferroui_base::FerroObject>(), 14, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_VisualLayerManager", ::std::rc::Rc::new(::core::clone::Clone::clone(&visual_layer_manager_0)), 14, 31)?;
     // Controls/FluentControls.xaml(15,14) Child
     // Controls/FluentControls.xaml(15,14) ContentPresenter
     let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
@@ -22312,7 +22316,7 @@ fn build_controls_fluentcontrols_xaml_deferred_32(
     visual_layer_manager_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/FluentControls.xaml(15,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 15, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 15, 31)?;
     // Controls/FluentControls.xaml(16,31) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 16, 31)?;
     // Controls/FluentControls.xaml(17,31) ContentTemplate
@@ -22410,7 +22414,7 @@ fn build_controls_fluentcontrols_xaml_deferred_34(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(17,21) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TransparencyFallback")));
-    rt::register_name(name_scope.as_ref(), "PART_TransparencyFallback", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 17, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TransparencyFallback", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 17, 21)?;
     // Controls/FluentControls.xaml(17,14) IsHitTestVisible
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_base::input::InputElement::is_hit_test_visible_property(), ::core::clone::Clone::clone(&false), priority_0);
@@ -22423,7 +22427,7 @@ fn build_controls_fluentcontrols_xaml_deferred_34(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&visual_layer_manager_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(18,33) Name
     visual_layer_manager_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_VisualLayerManager")));
-    rt::register_name(name_scope.as_ref(), "PART_VisualLayerManager", ::core::clone::Clone::clone(&visual_layer_manager_0).upcast::<::ferroui_base::FerroObject>(), 18, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_VisualLayerManager", ::std::rc::Rc::new(::core::clone::Clone::clone(&visual_layer_manager_0)), 18, 33)?;
     // Controls/FluentControls.xaml(19,16) Child
     // Controls/FluentControls.xaml(19,16) ContentPresenter
     let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
@@ -22431,7 +22435,7 @@ fn build_controls_fluentcontrols_xaml_deferred_34(
     visual_layer_manager_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/FluentControls.xaml(19,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 19, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 19, 33)?;
     // Controls/FluentControls.xaml(20,33) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 20, 33)?;
     // Controls/FluentControls.xaml(21,33) ContentTemplate
@@ -22666,7 +22670,7 @@ fn build_controls_fluentcontrols_xaml_deferred_38(
     content_presenter_0.begin_init();
     // Controls/FluentControls.xaml(26,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 26, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 26, 27)?;
     // Controls/FluentControls.xaml(27,27) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 27, 27)?;
     // Controls/FluentControls.xaml(28,27) BorderBrush
@@ -22791,7 +22795,7 @@ fn build_controls_fluentcontrols_xaml_deferred_40(
     context.push_parent(rt::to_value(scroll_content_presenter_0.clone()));
     // Controls/FluentControls.xaml(27,35) Name
     scroll_content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&scroll_content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 27, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_content_presenter_0)), 27, 35)?;
     // Controls/FluentControls.xaml(27,12) Row
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     scroll_content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 0_i32, priority_0);
@@ -22867,7 +22871,7 @@ fn build_controls_fluentcontrols_xaml_deferred_40(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&scroll_bar_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(46,22) Name
     scroll_bar_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HorizontalScrollBar")));
-    rt::register_name(name_scope.as_ref(), "PART_HorizontalScrollBar", ::core::clone::Clone::clone(&scroll_bar_0).upcast::<::ferroui_base::FerroObject>(), 46, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HorizontalScrollBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_bar_0)), 46, 22)?;
     // Controls/FluentControls.xaml(46,12) Orientation
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     scroll_bar_0.set_value_with_priority(::ferroui_controls::primitives::ScrollBar::orientation_property(), ::ferroui_base::layout::Orientation::Horizontal, priority_2);
@@ -22883,7 +22887,7 @@ fn build_controls_fluentcontrols_xaml_deferred_40(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&scroll_bar_1).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(49,22) Name
     scroll_bar_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_VerticalScrollBar")));
-    rt::register_name(name_scope.as_ref(), "PART_VerticalScrollBar", ::core::clone::Clone::clone(&scroll_bar_1).upcast::<::ferroui_base::FerroObject>(), 49, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_VerticalScrollBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_bar_1)), 49, 22)?;
     // Controls/FluentControls.xaml(49,12) Orientation
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     scroll_bar_1.set_value_with_priority(::ferroui_controls::primitives::ScrollBar::orientation_property(), ::ferroui_base::layout::Orientation::Vertical, priority_4);
@@ -22900,7 +22904,7 @@ fn build_controls_fluentcontrols_xaml_deferred_40(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/FluentControls.xaml(52,18) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ScrollBarsSeparator")));
-    rt::register_name(name_scope.as_ref(), "PART_ScrollBarsSeparator", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 52, 18)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ScrollBarsSeparator", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 52, 18)?;
     // Controls/FluentControls.xaml(52,12) Row
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     panel_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_6);
@@ -23051,7 +23055,7 @@ fn build_controls_fluentcontrols_xaml_deferred_44(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/FluentControls.xaml(22,27) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 22, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 22, 27)?;
     // Controls/FluentControls.xaml(23,27) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 23, 27)?;
     rt::invoked(items_presenter_0.try_end_init(), 22, 12)?;
@@ -23432,7 +23436,7 @@ fn build_controls_fluentcontrols_xaml_deferred_47(
     content_presenter_0.begin_init();
     // Controls/FluentControls.xaml(32,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 32, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 32, 27)?;
     // Controls/FluentControls.xaml(33,27) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 33, 27)?;
     // Controls/FluentControls.xaml(34,27) BorderBrush
@@ -23501,7 +23505,7 @@ fn build_controls_fluentcontrols_xaml_deferred_49(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(8,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 8, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 8, 29)?;
     // Controls/FluentControls.xaml(9,29) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 9, 29)?;
     // Controls/FluentControls.xaml(10,29) BorderBrush
@@ -23527,7 +23531,7 @@ fn build_controls_fluentcontrols_xaml_deferred_49(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(17,29) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter2")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter2", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 17, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter2", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 17, 29)?;
     // Controls/FluentControls.xaml(18,29) Background
     rt::bind_template_binding(content_presenter_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 18, 29)?;
     // Controls/FluentControls.xaml(19,29) BorderBrush
@@ -23625,7 +23629,7 @@ fn build_controls_fluentcontrols_xaml_deferred_51(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&items_presenter_0)));
     // Controls/FluentControls.xaml(37,29) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 37, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 37, 29)?;
     // Controls/FluentControls.xaml(38,29) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 38, 29)?;
     // Controls/FluentControls.xaml(39,29) Margin
@@ -23771,7 +23775,7 @@ fn build_controls_fluentcontrols_xaml_deferred_53(
     context.push_parent(rt::to_value(reversible_stack_panel_0.clone()));
     // Controls/FluentControls.xaml(9,31) Name
     reversible_stack_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Items")));
-    rt::register_name(name_scope.as_ref(), "PART_Items", ::core::clone::Clone::clone(&reversible_stack_panel_0).upcast::<::ferroui_base::FerroObject>(), 9, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Items", ::std::rc::Rc::new(::core::clone::Clone::clone(&reversible_stack_panel_0)), 9, 31)?;
     // Controls/FluentControls.xaml(11,14) DataTemplates
     let data_templates_collection_0 = ::ferroui_controls::Control::__markup_get_DataTemplates(reversible_stack_panel_0.upcast_ref::<::ferroui_controls::Control>());
     let data_template_0 = ::ferroui_markup_xaml::templates::DataTemplate::__markup_new_0();
@@ -23943,7 +23947,7 @@ fn build_controls_fluentcontrols_xaml_deferred_57(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(14,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TransparencyFallback")));
-    rt::register_name(name_scope.as_ref(), "PART_TransparencyFallback", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 14, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TransparencyFallback", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 14, 19)?;
     // Controls/FluentControls.xaml(14,12) IsHitTestVisible
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_base::input::InputElement::is_hit_test_visible_property(), ::core::clone::Clone::clone(&false), priority_0);
@@ -23980,7 +23984,7 @@ fn build_controls_fluentcontrols_xaml_deferred_57(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&visual_layer_manager_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(17,31) Name
     visual_layer_manager_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_VisualLayerManager")));
-    rt::register_name(name_scope.as_ref(), "PART_VisualLayerManager", ::core::clone::Clone::clone(&visual_layer_manager_0).upcast::<::ferroui_base::FerroObject>(), 17, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_VisualLayerManager", ::std::rc::Rc::new(::core::clone::Clone::clone(&visual_layer_manager_0)), 17, 31)?;
     // Controls/FluentControls.xaml(18,14) Child
     // Controls/FluentControls.xaml(18,14) ContentPresenter
     let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
@@ -23988,7 +23992,7 @@ fn build_controls_fluentcontrols_xaml_deferred_57(
     visual_layer_manager_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/FluentControls.xaml(18,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 18, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 18, 31)?;
     // Controls/FluentControls.xaml(19,31) ContentTemplate
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_template_property(), rt::property(::ferroui_controls::ContentControl::content_template_property()), 19, 31)?;
     // Controls/FluentControls.xaml(20,31) Content (setter chosen at run time)
@@ -24214,7 +24218,7 @@ fn build_controls_fluentcontrols_xaml_deferred_59(
     content_presenter_0.begin_init();
     // Controls/FluentControls.xaml(25,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 25, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 25, 27)?;
     // Controls/FluentControls.xaml(26,27) Foreground
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::foreground_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 26, 27)?;
     // Controls/FluentControls.xaml(27,27) Background
@@ -24302,7 +24306,7 @@ fn build_controls_fluentcontrols_xaml_deferred_61(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(13,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TransparencyFallback")));
-    rt::register_name(name_scope.as_ref(), "PART_TransparencyFallback", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 13, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TransparencyFallback", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 13, 19)?;
     // Controls/FluentControls.xaml(13,12) IsHitTestVisible
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_base::input::InputElement::is_hit_test_visible_property(), ::core::clone::Clone::clone(&false), priority_0);
@@ -24322,7 +24326,7 @@ fn build_controls_fluentcontrols_xaml_deferred_61(
     border_1.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&visual_layer_manager_0).upcast::<::ferroui_controls::Control>()));
     // Controls/FluentControls.xaml(15,33) Name
     visual_layer_manager_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_VisualLayerManager")));
-    rt::register_name(name_scope.as_ref(), "PART_VisualLayerManager", ::core::clone::Clone::clone(&visual_layer_manager_0).upcast::<::ferroui_base::FerroObject>(), 15, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_VisualLayerManager", ::std::rc::Rc::new(::core::clone::Clone::clone(&visual_layer_manager_0)), 15, 33)?;
     // Controls/FluentControls.xaml(16,16) Child
     // Controls/FluentControls.xaml(16,16) ContentPresenter
     let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
@@ -24330,7 +24334,7 @@ fn build_controls_fluentcontrols_xaml_deferred_61(
     visual_layer_manager_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/FluentControls.xaml(16,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 16, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 16, 33)?;
     // Controls/FluentControls.xaml(17,33) ContentTemplate
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_template_property(), rt::property(::ferroui_controls::ContentControl::content_template_property()), 17, 33)?;
     // Controls/FluentControls.xaml(18,33) Content (setter chosen at run time)
@@ -24390,7 +24394,7 @@ fn build_controls_fluentcontrols_xaml_deferred_63(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(9,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 9, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 9, 29)?;
     // Controls/FluentControls.xaml(10,31) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 10, 31)?;
     // Controls/FluentControls.xaml(11,31) BorderBrush
@@ -24426,7 +24430,7 @@ fn build_controls_fluentcontrols_xaml_deferred_63(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(20,17) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_RefreshVisualizerPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_RefreshVisualizerPresenter", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 20, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_RefreshVisualizerPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 20, 17)?;
     rt::invoked(grid_1.try_end_init(), 20, 12)?;
     rt::invoked(grid_0.try_end_init(), 8, 10)?;
     ::core::result::Result::Ok(rt::to_value(grid_0.clone()))
@@ -24489,7 +24493,7 @@ fn build_controls_fluentcontrols_xaml_deferred_65(
     context.push_parent(rt::to_value(path_icon_0.clone()));
     // Controls/FluentControls.xaml(16,19) Name
     path_icon_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Icon")));
-    rt::register_name(name_scope.as_ref(), "PART_Icon", ::core::clone::Clone::clone(&path_icon_0).upcast::<::ferroui_base::FerroObject>(), 16, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Icon", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_icon_0)), 16, 19)?;
     // Controls/FluentControls.xaml(16,10) Data
     let value_0 = rt::invoked(::ferroui_base::media::Geometry::__markup_parse(::std::string::String::from("M18.6195264,3.31842271 C19.0080059,3.31842271 19.3290603,3.60710385 19.3798716,3.9816481 L19.3868766,4.08577298 L19.3868766,6.97963208 C19.3868766,7.36811161 19.0981955,7.68916605 18.7236513,7.73997735 L18.6195264,7.74698235 L15.7256673,7.74698235 C15.3018714,7.74698235 14.958317,7.40342793 14.958317,6.97963208 C14.958317,6.59115255 15.2469981,6.27009811 15.6215424,6.21928681 L15.7256673,6.21228181 L16.7044011,6.21182461 C13.7917384,3.87107476 9.52212532,4.05209336 6.81933829,6.75488039 C3.92253872,9.65167996 3.92253872,14.34832 6.81933829,17.2451196 C9.71613786,20.1419192 14.4127779,20.1419192 17.3095775,17.2451196 C19.0725398,15.4821573 19.8106555,12.9925923 19.3476248,10.58925 C19.2674502,10.173107 19.5398064,9.77076216 19.9559494,9.69058758 C20.3720923,9.610413 20.7744372,9.88276918 20.8546118,10.2989121 C21.4129973,13.1971899 20.5217103,16.2033812 18.3947747,18.3303168 C14.8986373,21.8264542 9.23027854,21.8264542 5.73414113,18.3303168 C2.23800371,14.8341794 2.23800371,9.16582064 5.73414113,5.66968323 C9.05475132,2.34907304 14.3349409,2.18235834 17.8523166,5.16953912 L17.8521761,4.08577298 C17.8521761,3.66197713 18.1957305,3.31842271 18.6195264,3.31842271 Z")), 17, 19)?;
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
@@ -24515,7 +24519,7 @@ fn build_controls_fluentcontrols_xaml_deferred_66(
     grid_0.begin_init();
     // Controls/FluentControls.xaml(25,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Root")));
-    rt::register_name(name_scope.as_ref(), "PART_Root", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 25, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 25, 15)?;
     // Controls/FluentControls.xaml(25,10) MinHeight
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     grid_0.set_value_with_priority(::ferroui_base::layout::Layoutable::min_height_property(), 80.0_f64, priority_0);
@@ -24634,7 +24638,7 @@ fn build_controls_fluentcontrols_xaml_deferred_69(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(16,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HeaderPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_HeaderPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 16, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HeaderPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 16, 31)?;
     // Controls/FluentControls.xaml(17,31) Content (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_5 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::HeaderedContentControl::header_property()));
@@ -24663,7 +24667,7 @@ fn build_controls_fluentcontrols_xaml_deferred_69(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(22,31) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 22, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 22, 31)?;
     // Controls/FluentControls.xaml(23,31) ContentTemplate
     rt::bind_template_binding(content_presenter_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_template_property(), rt::property(::ferroui_controls::ContentControl::content_template_property()), 23, 31)?;
     // Controls/FluentControls.xaml(24,31) Content (setter chosen at run time)
@@ -24985,7 +24989,7 @@ fn build_controls_fluentcontrols_xaml_deferred_73(
     border_0.begin_init();
     // Controls/FluentControls.xaml(41,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Border")));
-    rt::register_name(name_scope.as_ref(), "PART_Border", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 41, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Border", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 41, 17)?;
     // Controls/FluentControls.xaml(42,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 42, 17)?;
     // Controls/FluentControls.xaml(43,17) BorderBrush
@@ -25003,7 +25007,7 @@ fn build_controls_fluentcontrols_xaml_deferred_73(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&stack_panel_0).upcast::<::ferroui_controls::Control>()));
     // Controls/FluentControls.xaml(47,23) Name
     stack_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "PART_LayoutRoot", ::core::clone::Clone::clone(&stack_panel_0).upcast::<::ferroui_base::FerroObject>(), 47, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&stack_panel_0)), 47, 23)?;
     // Controls/FluentControls.xaml(47,12) Spacing
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     stack_panel_0.set_value_with_priority(::ferroui_controls::StackPanel::spacing_property(), 4.0_f64, priority_0);
@@ -25021,7 +25025,7 @@ fn build_controls_fluentcontrols_xaml_deferred_73(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(51,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_IconPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_IconPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 51, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_IconPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 51, 31)?;
     // Controls/FluentControls.xaml(52,31) Content (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_5 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::CommandBarButton::icon_property()));
@@ -25046,7 +25050,7 @@ fn build_controls_fluentcontrols_xaml_deferred_73(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(55,24) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Label")));
-    rt::register_name(name_scope.as_ref(), "PART_Label", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 55, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Label", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 55, 24)?;
     // Controls/FluentControls.xaml(56,24) Text
     rt::bind_template_binding(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), rt::property(::ferroui_controls::CommandBarButton::label_property()), 56, 24)?;
     // Controls/FluentControls.xaml(57,24) Foreground
@@ -25322,7 +25326,7 @@ fn build_controls_fluentcontrols_xaml_deferred_75(
     border_0.begin_init();
     // Controls/FluentControls.xaml(137,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Border")));
-    rt::register_name(name_scope.as_ref(), "PART_Border", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 137, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Border", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 137, 17)?;
     // Controls/FluentControls.xaml(138,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 138, 17)?;
     // Controls/FluentControls.xaml(139,17) BorderBrush
@@ -25340,7 +25344,7 @@ fn build_controls_fluentcontrols_xaml_deferred_75(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&stack_panel_0).upcast::<::ferroui_controls::Control>()));
     // Controls/FluentControls.xaml(143,23) Name
     stack_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "PART_LayoutRoot", ::core::clone::Clone::clone(&stack_panel_0).upcast::<::ferroui_base::FerroObject>(), 143, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&stack_panel_0)), 143, 23)?;
     // Controls/FluentControls.xaml(143,12) Spacing
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     stack_panel_0.set_value_with_priority(::ferroui_controls::StackPanel::spacing_property(), 4.0_f64, priority_0);
@@ -25358,7 +25362,7 @@ fn build_controls_fluentcontrols_xaml_deferred_75(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(147,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_IconPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_IconPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 147, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_IconPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 147, 31)?;
     // Controls/FluentControls.xaml(148,31) Content (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_5 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::CommandBarToggleButton::icon_property()));
@@ -25383,7 +25387,7 @@ fn build_controls_fluentcontrols_xaml_deferred_75(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(151,24) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Label")));
-    rt::register_name(name_scope.as_ref(), "PART_Label", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 151, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Label", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 151, 24)?;
     // Controls/FluentControls.xaml(152,24) Text
     rt::bind_template_binding(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), rt::property(::ferroui_controls::CommandBarToggleButton::label_property()), 152, 24)?;
     // Controls/FluentControls.xaml(153,24) Foreground
@@ -25571,7 +25575,7 @@ fn build_controls_fluentcontrols_xaml_deferred_79(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/FluentControls.xaml(270,23) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_OverflowButton")));
-    rt::register_name(name_scope.as_ref(), "PART_OverflowButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 270, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_OverflowButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 270, 23)?;
     // Controls/FluentControls.xaml(270,16) Dock
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Right, priority_1);
@@ -25622,7 +25626,7 @@ fn build_controls_fluentcontrols_xaml_deferred_79(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(285,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 285, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 285, 33)?;
     // Controls/FluentControls.xaml(286,33) Content (setter chosen at run time)
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_8 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::CommandBar::content_property()));
@@ -25649,7 +25653,7 @@ fn build_controls_fluentcontrols_xaml_deferred_79(
     context.push_parent(rt::to_value(items_control_0.clone()));
     // Controls/FluentControls.xaml(291,29) Name
     items_control_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PrimaryCommands")));
-    rt::register_name(name_scope.as_ref(), "PART_PrimaryCommands", ::core::clone::Clone::clone(&items_control_0).upcast::<::ferroui_base::FerroObject>(), 291, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PrimaryCommands", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_control_0)), 291, 29)?;
     // Controls/FluentControls.xaml(292,29) ItemsSource
     let reflection_binding_extension_0 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("VisiblePrimaryCommands"));
     context.push_parent(rt::to_value(reflection_binding_extension_0.clone()));
@@ -25689,7 +25693,7 @@ fn build_controls_fluentcontrols_xaml_deferred_79(
     context.push_parent(rt::to_value(popup_0.clone()));
     // Controls/FluentControls.xaml(305,20) Name
     popup_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_OverflowPopup")));
-    rt::register_name(name_scope.as_ref(), "PART_OverflowPopup", ::core::clone::Clone::clone(&popup_0).upcast::<::ferroui_base::FerroObject>(), 305, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_OverflowPopup", ::std::rc::Rc::new(::core::clone::Clone::clone(&popup_0)), 305, 20)?;
     // Controls/FluentControls.xaml(306,20) IsOpen
     let template_binding_9 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::CommandBar::is_open_property()));
     // Controls/FluentControls.xaml(306,20) Mode
@@ -25738,7 +25742,7 @@ fn build_controls_fluentcontrols_xaml_deferred_79(
     context.push_parent(rt::to_value(items_control_1.clone()));
     // Controls/FluentControls.xaml(317,31) Name
     items_control_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_OverflowPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_OverflowPresenter", ::core::clone::Clone::clone(&items_control_1).upcast::<::ferroui_base::FerroObject>(), 317, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_OverflowPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_control_1)), 317, 31)?;
     // Controls/FluentControls.xaml(318,31) ItemsSource
     let reflection_binding_extension_2 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("OverflowItems"));
     context.push_parent(rt::to_value(reflection_binding_extension_2.clone()));
@@ -26080,7 +26084,7 @@ fn build_controls_fluentcontrols_xaml_deferred_85(
     context.push_parent(rt::to_value(split_view_0.clone()));
     // Controls/FluentControls.xaml(24,20) Name
     split_view_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SplitView")));
-    rt::register_name(name_scope.as_ref(), "PART_SplitView", ::core::clone::Clone::clone(&split_view_0).upcast::<::ferroui_base::FerroObject>(), 24, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SplitView", ::std::rc::Rc::new(::core::clone::Clone::clone(&split_view_0)), 24, 20)?;
     // Controls/FluentControls.xaml(25,20) DisplayMode
     rt::bind_template_binding(split_view_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::SplitView::display_mode_property(), rt::property(::ferroui_controls::DrawerPage::display_mode_property()), 25, 20)?;
     // Controls/FluentControls.xaml(26,20) OpenPaneLength
@@ -26127,7 +26131,7 @@ fn build_controls_fluentcontrols_xaml_deferred_85(
     context.push_parent(rt::to_value(toggle_button_0.clone()));
     // Controls/FluentControls.xaml(33,29) Name
     toggle_button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_CompactPaneToggle")));
-    rt::register_name(name_scope.as_ref(), "PART_CompactPaneToggle", ::core::clone::Clone::clone(&toggle_button_0).upcast::<::ferroui_base::FerroObject>(), 33, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_CompactPaneToggle", ::std::rc::Rc::new(::core::clone::Clone::clone(&toggle_button_0)), 33, 29)?;
     // Controls/FluentControls.xaml(33,16) Dock
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     toggle_button_0.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Top, priority_1);
@@ -26201,7 +26205,7 @@ fn build_controls_fluentcontrols_xaml_deferred_85(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/FluentControls.xaml(50,21) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_CompactPaneIconPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_CompactPaneIconPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 50, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_CompactPaneIconPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 50, 21)?;
     // Controls/FluentControls.xaml(51,21) Content (setter chosen at run time)
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_6 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::DrawerPage::drawer_icon_property()));
@@ -26247,7 +26251,7 @@ fn build_controls_fluentcontrols_xaml_deferred_85(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(58,33) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DrawerHeader")));
-    rt::register_name(name_scope.as_ref(), "PART_DrawerHeader", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 58, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DrawerHeader", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 58, 33)?;
     // Controls/FluentControls.xaml(58,16) Dock
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Top, priority_12);
@@ -26281,7 +26285,7 @@ fn build_controls_fluentcontrols_xaml_deferred_85(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(64,33) Name
     content_presenter_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DrawerFooter")));
-    rt::register_name(name_scope.as_ref(), "PART_DrawerFooter", ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_base::FerroObject>(), 64, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DrawerFooter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_2)), 64, 33)?;
     // Controls/FluentControls.xaml(64,16) Dock
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_2.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Bottom, priority_14);
@@ -26315,7 +26319,7 @@ fn build_controls_fluentcontrols_xaml_deferred_85(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&content_presenter_3).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(70,33) Name
     content_presenter_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DrawerPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_DrawerPresenter", ::core::clone::Clone::clone(&content_presenter_3).upcast::<::ferroui_base::FerroObject>(), 70, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DrawerPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_3)), 70, 33)?;
     // Controls/FluentControls.xaml(70,16) HorizontalContentAlignment
     let priority_16 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_3.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::horizontal_content_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Stretch, priority_16);
@@ -26358,7 +26362,7 @@ fn build_controls_fluentcontrols_xaml_deferred_85(
     context.push_parent(rt::to_value(dock_panel_1.clone()));
     // Controls/FluentControls.xaml(79,24) Name
     dock_panel_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentDock")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentDock", ::core::clone::Clone::clone(&dock_panel_1).upcast::<::ferroui_base::FerroObject>(), 79, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentDock", ::std::rc::Rc::new(::core::clone::Clone::clone(&dock_panel_1)), 79, 24)?;
     // Controls/FluentControls.xaml(80,16) Children
     let children_collection_7 = ::ferroui_controls::Panel::__markup_get_Children(dock_panel_1.upcast_ref::<::ferroui_controls::Panel>());
     // Controls/FluentControls.xaml(80,16) Border
@@ -26368,7 +26372,7 @@ fn build_controls_fluentcontrols_xaml_deferred_85(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/FluentControls.xaml(81,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TopBar")));
-    rt::register_name(name_scope.as_ref(), "PART_TopBar", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 81, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TopBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 81, 17)?;
     // Controls/FluentControls.xaml(80,16) Padding
     let priority_21 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_controls::Decorator::padding_property(), ::ferroui_base::Thickness::__markup_new_3(5.0_f64, 5.0_f64, 5.0_f64, 5.0_f64), priority_21);
@@ -26415,7 +26419,7 @@ fn build_controls_fluentcontrols_xaml_deferred_85(
     context.push_parent(rt::to_value(toggle_button_1.clone()));
     // Controls/FluentControls.xaml(95,33) Name
     toggle_button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PaneButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PaneButton", ::core::clone::Clone::clone(&toggle_button_1).upcast::<::ferroui_base::FerroObject>(), 95, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PaneButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&toggle_button_1)), 95, 33)?;
     // Controls/FluentControls.xaml(96,33) IsChecked
     let reflection_binding_extension_5 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("#PART_SplitView.IsPaneOpen"));
     // Controls/FluentControls.xaml(96,33) Mode
@@ -26479,7 +26483,7 @@ fn build_controls_fluentcontrols_xaml_deferred_85(
     context.push_parent(rt::to_value(content_presenter_4.clone()));
     // Controls/FluentControls.xaml(108,25) Name
     content_presenter_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PaneIconPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_PaneIconPresenter", ::core::clone::Clone::clone(&content_presenter_4).upcast::<::ferroui_base::FerroObject>(), 108, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PaneIconPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_4)), 108, 25)?;
     // Controls/FluentControls.xaml(109,25) Content (setter chosen at run time)
     let priority_30 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_18 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::DrawerPage::drawer_icon_property()));
@@ -26525,7 +26529,7 @@ fn build_controls_fluentcontrols_xaml_deferred_85(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_11, ::core::clone::Clone::clone(&content_presenter_5).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(116,37) Name
     content_presenter_5.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TitlePresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_TitlePresenter", ::core::clone::Clone::clone(&content_presenter_5).upcast::<::ferroui_base::FerroObject>(), 116, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TitlePresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_5)), 116, 37)?;
     // Controls/FluentControls.xaml(117,37) Content (setter chosen at run time)
     let priority_33 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_20 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::Page::header_property()));
@@ -26575,7 +26579,7 @@ fn build_controls_fluentcontrols_xaml_deferred_85(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/FluentControls.xaml(128,17) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_BottomBar")));
-    rt::register_name(name_scope.as_ref(), "PART_BottomBar", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 128, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_BottomBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 128, 17)?;
     // Controls/FluentControls.xaml(127,16) Padding
     let priority_39 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Decorator::padding_property(), ::ferroui_base::Thickness::__markup_new_3(5.0_f64, 5.0_f64, 5.0_f64, 5.0_f64), priority_39);
@@ -26625,7 +26629,7 @@ fn build_controls_fluentcontrols_xaml_deferred_85(
     context.push_parent(rt::to_value(toggle_button_2.clone()));
     // Controls/FluentControls.xaml(143,33) Name
     toggle_button_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_BottomPaneButton")));
-    rt::register_name(name_scope.as_ref(), "PART_BottomPaneButton", ::core::clone::Clone::clone(&toggle_button_2).upcast::<::ferroui_base::FerroObject>(), 143, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_BottomPaneButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&toggle_button_2)), 143, 33)?;
     // Controls/FluentControls.xaml(144,33) IsChecked
     let reflection_binding_extension_8 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("#PART_SplitView.IsPaneOpen"));
     // Controls/FluentControls.xaml(144,33) Mode
@@ -26689,7 +26693,7 @@ fn build_controls_fluentcontrols_xaml_deferred_85(
     context.push_parent(rt::to_value(content_presenter_6.clone()));
     // Controls/FluentControls.xaml(156,25) Name
     content_presenter_6.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_BottomPaneIconPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_BottomPaneIconPresenter", ::core::clone::Clone::clone(&content_presenter_6).upcast::<::ferroui_base::FerroObject>(), 156, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_BottomPaneIconPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_6)), 156, 25)?;
     // Controls/FluentControls.xaml(157,25) Content (setter chosen at run time)
     let priority_49 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_23 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::DrawerPage::drawer_icon_property()));
@@ -26735,7 +26739,7 @@ fn build_controls_fluentcontrols_xaml_deferred_85(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_16, ::core::clone::Clone::clone(&content_presenter_7).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(164,37) Name
     content_presenter_7.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_BottomTitlePresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_BottomTitlePresenter", ::core::clone::Clone::clone(&content_presenter_7).upcast::<::ferroui_base::FerroObject>(), 164, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_BottomTitlePresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_7)), 164, 37)?;
     // Controls/FluentControls.xaml(165,37) Content (setter chosen at run time)
     let priority_52 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_25 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::Page::header_property()));
@@ -26784,7 +26788,7 @@ fn build_controls_fluentcontrols_xaml_deferred_85(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_17, ::core::clone::Clone::clone(&content_presenter_8).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(175,33) Name
     content_presenter_8.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_8).upcast::<::ferroui_base::FerroObject>(), 175, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_8)), 175, 33)?;
     // Controls/FluentControls.xaml(176,33) HorizontalContentAlignment
     rt::bind_template_binding(content_presenter_8.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::horizontal_content_alignment_property(), rt::property(::ferroui_controls::DrawerPage::horizontal_content_alignment_property()), 176, 33)?;
     // Controls/FluentControls.xaml(177,33) VerticalContentAlignment
@@ -26820,7 +26824,7 @@ fn build_controls_fluentcontrols_xaml_deferred_85(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_18, ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(185,21) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Backdrop")));
-    rt::register_name(name_scope.as_ref(), "PART_Backdrop", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 185, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Backdrop", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 185, 21)?;
     // Controls/FluentControls.xaml(186,21) Background
     rt::bind_template_binding(border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::DrawerPage::backdrop_brush_property()), 186, 21)?;
     // Controls/FluentControls.xaml(185,14) IsVisible
@@ -27083,7 +27087,7 @@ fn build_controls_fluentcontrols_xaml_deferred_92(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(55,21) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_NavBarSpacer")));
-    rt::register_name(name_scope.as_ref(), "PART_NavBarSpacer", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 55, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_NavBarSpacer", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 55, 21)?;
     // Controls/FluentControls.xaml(56,21) Height
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), rt::property(::ferroui_controls::NavigationPage::effective_bar_height_property()), 56, 21)?;
     // Controls/FluentControls.xaml(55,14) IsVisible
@@ -27102,7 +27106,7 @@ fn build_controls_fluentcontrols_xaml_deferred_92(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/FluentControls.xaml(60,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_BottomCommandBar")));
-    rt::register_name(name_scope.as_ref(), "PART_BottomCommandBar", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 60, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_BottomCommandBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 60, 31)?;
     // Controls/FluentControls.xaml(60,14) Dock
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Bottom, priority_3);
@@ -27139,7 +27143,7 @@ fn build_controls_fluentcontrols_xaml_deferred_92(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(67,19) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentHost")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentHost", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 67, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 67, 19)?;
     // Controls/FluentControls.xaml(68,19) Background
     rt::bind_template_binding(grid_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Panel::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 68, 19)?;
     // Controls/FluentControls.xaml(67,14) ClipToBounds
@@ -27153,7 +27157,7 @@ fn build_controls_fluentcontrols_xaml_deferred_92(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(70,33) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PageBackPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_PageBackPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 70, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PageBackPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 70, 33)?;
     // Controls/FluentControls.xaml(70,16) HorizontalAlignment
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Stretch, priority_7);
@@ -27169,7 +27173,7 @@ fn build_controls_fluentcontrols_xaml_deferred_92(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(73,33) Name
     content_presenter_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PagePresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_PagePresenter", ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_base::FerroObject>(), 73, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PagePresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_2)), 73, 33)?;
     // Controls/FluentControls.xaml(73,16) HorizontalAlignment
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_2.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Stretch, priority_9);
@@ -27189,7 +27193,7 @@ fn build_controls_fluentcontrols_xaml_deferred_92(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/FluentControls.xaml(80,19) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_NavigationBar")));
-    rt::register_name(name_scope.as_ref(), "PART_NavigationBar", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 80, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_NavigationBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 80, 19)?;
     // Controls/FluentControls.xaml(80,12) ZIndex
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_base::Visual::z_index_property(), 1_i32, priority_11);
@@ -27384,7 +27388,7 @@ fn build_controls_fluentcontrols_xaml_deferred_92(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/FluentControls.xaml(120,23) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_BackButton")));
-    rt::register_name(name_scope.as_ref(), "PART_BackButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 120, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_BackButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 120, 23)?;
     // Controls/FluentControls.xaml(120,16) Column
     let priority_15 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_15);
@@ -27424,7 +27428,7 @@ fn build_controls_fluentcontrols_xaml_deferred_92(
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), "NavigationPageBackIcon", 129, 25)?;
     // Controls/FluentControls.xaml(130,25) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_BackButtonDefaultIcon")));
-    rt::register_name(name_scope.as_ref(), "PART_BackButtonDefaultIcon", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 130, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_BackButtonDefaultIcon", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 130, 25)?;
     // Controls/FluentControls.xaml(131,25) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "NavigationBarForeground", 131, 25)?;
     // Controls/FluentControls.xaml(129,20) Width
@@ -27452,7 +27456,7 @@ fn build_controls_fluentcontrols_xaml_deferred_92(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_9, ::core::clone::Clone::clone(&content_presenter_3).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(138,21) Name
     content_presenter_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_BackButtonContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_BackButtonContentPresenter", ::core::clone::Clone::clone(&content_presenter_3).upcast::<::ferroui_base::FerroObject>(), 138, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_BackButtonContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_3)), 138, 21)?;
     // Controls/FluentControls.xaml(137,20) VerticalAlignment
     let priority_26 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_3.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Center, priority_26);
@@ -27473,7 +27477,7 @@ fn build_controls_fluentcontrols_xaml_deferred_92(
     context.push_parent(rt::to_value(content_presenter_4.clone()));
     // Controls/FluentControls.xaml(144,33) Name
     content_presenter_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Header")));
-    rt::register_name(name_scope.as_ref(), "PART_Header", ::core::clone::Clone::clone(&content_presenter_4).upcast::<::ferroui_base::FerroObject>(), 144, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Header", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_4)), 144, 33)?;
     // Controls/FluentControls.xaml(144,16) Column
     let priority_28 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_4.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_28);
@@ -27535,7 +27539,7 @@ fn build_controls_fluentcontrols_xaml_deferred_92(
     context.push_parent(rt::to_value(content_presenter_5.clone()));
     // Controls/FluentControls.xaml(155,33) Name
     content_presenter_5.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TopCommandBar")));
-    rt::register_name(name_scope.as_ref(), "PART_TopCommandBar", ::core::clone::Clone::clone(&content_presenter_5).upcast::<::ferroui_base::FerroObject>(), 155, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TopCommandBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_5)), 155, 33)?;
     // Controls/FluentControls.xaml(155,16) Column
     let priority_35 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_5.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_35);
@@ -27642,7 +27646,7 @@ fn build_controls_fluentcontrols_xaml_deferred_92(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/FluentControls.xaml(186,19) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_NavBarShadow")));
-    rt::register_name(name_scope.as_ref(), "PART_NavBarShadow", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 186, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_NavBarShadow", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 186, 19)?;
     // Controls/FluentControls.xaml(186,12) ZIndex
     let priority_39 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_base::Visual::z_index_property(), 1_i32, priority_39);
@@ -27670,7 +27674,7 @@ fn build_controls_fluentcontrols_xaml_deferred_92(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_13, ::core::clone::Clone::clone(&content_presenter_6).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(195,29) Name
     content_presenter_6.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ModalBackPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ModalBackPresenter", ::core::clone::Clone::clone(&content_presenter_6).upcast::<::ferroui_base::FerroObject>(), 195, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ModalBackPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_6)), 195, 29)?;
     // Controls/FluentControls.xaml(195,12) ZIndex
     let priority_44 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_6.set_value_with_priority(::ferroui_base::Visual::z_index_property(), 99_i32, priority_44);
@@ -27688,7 +27692,7 @@ fn build_controls_fluentcontrols_xaml_deferred_92(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_14, ::core::clone::Clone::clone(&content_presenter_7).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(199,29) Name
     content_presenter_7.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ModalPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ModalPresenter", ::core::clone::Clone::clone(&content_presenter_7).upcast::<::ferroui_base::FerroObject>(), 199, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ModalPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_7)), 199, 29)?;
     // Controls/FluentControls.xaml(199,12) ZIndex
     let priority_46 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_7.set_value_with_priority(::ferroui_base::Visual::z_index_property(), 100_i32, priority_46);
@@ -27948,7 +27952,7 @@ fn build_controls_fluentcontrols_xaml_deferred_106(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/FluentControls.xaml(68,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TabStrip")));
-    rt::register_name(name_scope.as_ref(), "PART_TabStrip", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 68, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TabStrip", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 68, 19)?;
     // Controls/FluentControls.xaml(69,19) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 69, 19)?;
     // Controls/FluentControls.xaml(70,19) CornerRadius
@@ -27970,7 +27974,7 @@ fn build_controls_fluentcontrols_xaml_deferred_106(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/FluentControls.xaml(76,29) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 76, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 76, 29)?;
     // Controls/FluentControls.xaml(78,18) ItemsPanel
     let items_panel_template_0 = ::ferroui_markup_xaml::templates::ItemsPanelTemplate::__markup_new_0();
     // Controls/FluentControls.xaml(79,20) Content
@@ -27998,7 +28002,7 @@ fn build_controls_fluentcontrols_xaml_deferred_106(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(85,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SelectedContentHost2")));
-    rt::register_name(name_scope.as_ref(), "PART_SelectedContentHost2", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 85, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SelectedContentHost2", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 85, 31)?;
     // Controls/FluentControls.xaml(85,14) HorizontalContentAlignment
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::horizontal_content_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Stretch, priority_2);
@@ -28017,7 +28021,7 @@ fn build_controls_fluentcontrols_xaml_deferred_106(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(89,31) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SelectedContentHost")));
-    rt::register_name(name_scope.as_ref(), "PART_SelectedContentHost", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 89, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SelectedContentHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 89, 31)?;
     // Controls/FluentControls.xaml(89,14) HorizontalContentAlignment
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::horizontal_content_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Stretch, priority_5);
@@ -28394,7 +28398,7 @@ fn build_controls_fluentcontrols_xaml_deferred_110(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/FluentControls.xaml(128,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "PART_LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 128, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 128, 19)?;
     // Controls/FluentControls.xaml(129,19) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 129, 19)?;
     // Controls/FluentControls.xaml(130,19) BorderBrush
@@ -28413,7 +28417,7 @@ fn build_controls_fluentcontrols_xaml_deferred_110(
     context.push_parent(rt::to_value(stack_panel_0.clone()));
     // Controls/FluentControls.xaml(134,25) Name
     stack_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HeaderPanel")));
-    rt::register_name(name_scope.as_ref(), "PART_HeaderPanel", ::core::clone::Clone::clone(&stack_panel_0).upcast::<::ferroui_base::FerroObject>(), 134, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HeaderPanel", ::std::rc::Rc::new(::core::clone::Clone::clone(&stack_panel_0)), 134, 25)?;
     // Controls/FluentControls.xaml(135,25) Spacing
     rt::bind_dynamic_resource(&context, stack_panel_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::StackPanel::spacing_property(), "TabbedPageTabItemHeaderSpacing", 135, 25)?;
     // Controls/FluentControls.xaml(136,25) HorizontalAlignment
@@ -28429,7 +28433,7 @@ fn build_controls_fluentcontrols_xaml_deferred_110(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/FluentControls.xaml(138,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_IconPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_IconPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 138, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_IconPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 138, 33)?;
     // Controls/FluentControls.xaml(139,33) Content (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_7 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TabItem::icon_property()));
@@ -28467,7 +28471,7 @@ fn build_controls_fluentcontrols_xaml_deferred_110(
     context.push_parent(rt::to_value(content_presenter_1.clone()));
     // Controls/FluentControls.xaml(145,33) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 145, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 145, 33)?;
     // Controls/FluentControls.xaml(145,16) HorizontalAlignment
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Center, priority_2);
@@ -28506,7 +28510,7 @@ fn build_controls_fluentcontrols_xaml_deferred_110(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(155,29) Name
     content_presenter_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SelectedPipe")));
-    rt::register_name(name_scope.as_ref(), "PART_SelectedPipe", ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_base::FerroObject>(), 155, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SelectedPipe", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_2)), 155, 29)?;
     // Controls/FluentControls.xaml(155,12) VerticalAlignment
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_2.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Bottom, priority_5);
@@ -28643,7 +28647,7 @@ fn build_controls_fluentcontrols_xaml_deferred_114(
     context.push_parent(rt::to_value(tab_control_0.clone()));
     // Controls/FluentControls.xaml(254,23) Name
     tab_control_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TabControl")));
-    rt::register_name(name_scope.as_ref(), "PART_TabControl", ::core::clone::Clone::clone(&tab_control_0).upcast::<::ferroui_base::FerroObject>(), 254, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TabControl", ::std::rc::Rc::new(::core::clone::Clone::clone(&tab_control_0)), 254, 23)?;
     // Controls/FluentControls.xaml(255,23) Theme (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TabbedPageTabControlTheme"));
@@ -29074,7 +29078,7 @@ fn build_controls_fluentcontrols_xaml_deferred_116(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/FluentControls.xaml(29,13) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootBorder")));
-    rt::register_name(name_scope.as_ref(), "RootBorder", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 29, 13)?;
+    rt::register_name_value(name_scope.as_ref(), "RootBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 29, 13)?;
     // Controls/FluentControls.xaml(30,13) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 30, 13)?;
     // Controls/FluentControls.xaml(31,13) BorderBrush
@@ -29120,7 +29124,7 @@ fn build_controls_fluentcontrols_xaml_deferred_116(
     context.push_parent(rt::to_value(ellipse_0.clone()));
     // Controls/FluentControls.xaml(38,19) Name
     ellipse_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("OuterEllipse")));
-    rt::register_name(name_scope.as_ref(), "OuterEllipse", ::core::clone::Clone::clone(&ellipse_0).upcast::<::ferroui_base::FerroObject>(), 38, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "OuterEllipse", ::std::rc::Rc::new(::core::clone::Clone::clone(&ellipse_0)), 38, 19)?;
     // Controls/FluentControls.xaml(37,16) Width
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     ellipse_0.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 20.0_f64, priority_1);
@@ -29147,7 +29151,7 @@ fn build_controls_fluentcontrols_xaml_deferred_116(
     context.push_parent(rt::to_value(ellipse_1.clone()));
     // Controls/FluentControls.xaml(47,19) Name
     ellipse_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("CheckOuterEllipse")));
-    rt::register_name(name_scope.as_ref(), "CheckOuterEllipse", ::core::clone::Clone::clone(&ellipse_1).upcast::<::ferroui_base::FerroObject>(), 47, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "CheckOuterEllipse", ::std::rc::Rc::new(::core::clone::Clone::clone(&ellipse_1)), 47, 19)?;
     // Controls/FluentControls.xaml(46,16) Width
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     ellipse_1.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 20.0_f64, priority_4);
@@ -29177,7 +29181,7 @@ fn build_controls_fluentcontrols_xaml_deferred_116(
     context.push_parent(rt::to_value(ellipse_2.clone()));
     // Controls/FluentControls.xaml(57,19) Name
     ellipse_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("CheckGlyph")));
-    rt::register_name(name_scope.as_ref(), "CheckGlyph", ::core::clone::Clone::clone(&ellipse_2).upcast::<::ferroui_base::FerroObject>(), 57, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "CheckGlyph", ::std::rc::Rc::new(::core::clone::Clone::clone(&ellipse_2)), 57, 19)?;
     // Controls/FluentControls.xaml(56,16) Width
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
     ellipse_2.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 8.0_f64, priority_8);
@@ -29206,7 +29210,7 @@ fn build_controls_fluentcontrols_xaml_deferred_116(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(67,17) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 67, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 67, 17)?;
     // Controls/FluentControls.xaml(66,14) Column
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_12);
@@ -29598,7 +29602,7 @@ fn build_controls_fluentcontrols_xaml_deferred_118(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/FluentControls.xaml(78,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ToggleButtonBackground")));
-    rt::register_name(name_scope.as_ref(), "ToggleButtonBackground", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 78, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "ToggleButtonBackground", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 78, 17)?;
     // Controls/FluentControls.xaml(79,17) CornerRadius
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::corner_radius_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()), 79, 17)?;
     // Controls/FluentControls.xaml(80,17) Background
@@ -29615,7 +29619,7 @@ fn build_controls_fluentcontrols_xaml_deferred_118(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/FluentControls.xaml(83,17) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ToggleButtonGrid")));
-    rt::register_name(name_scope.as_ref(), "ToggleButtonGrid", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 83, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "ToggleButtonGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 83, 17)?;
     // Controls/FluentControls.xaml(83,12) ColumnDefinitions
     let column_definitions_0 = ::ferroui_controls::ColumnDefinitions::__markup_new_0();
     rt::invoked(<::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::ColumnDefinition>>>::__markup_set_Capacity(&column_definitions_0, 2_i32), 84, 17)?;
@@ -29634,7 +29638,7 @@ fn build_controls_fluentcontrols_xaml_deferred_118(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(85,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 85, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 85, 31)?;
     // Controls/FluentControls.xaml(86,31) Content (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_4 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -29665,7 +29669,7 @@ fn build_controls_fluentcontrols_xaml_deferred_118(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/FluentControls.xaml(92,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ExpandCollapseChevronBorder")));
-    rt::register_name(name_scope.as_ref(), "ExpandCollapseChevronBorder", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 92, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "ExpandCollapseChevronBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 92, 21)?;
     // Controls/FluentControls.xaml(92,14) Column
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_1);
@@ -29691,7 +29695,7 @@ fn build_controls_fluentcontrols_xaml_deferred_118(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/FluentControls.xaml(101,21) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ExpandCollapseChevron")));
-    rt::register_name(name_scope.as_ref(), "ExpandCollapseChevron", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 101, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "ExpandCollapseChevron", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 101, 21)?;
     // Controls/FluentControls.xaml(101,16) HorizontalAlignment
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     path_0.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Center, priority_2);
@@ -30383,7 +30387,7 @@ fn build_controls_fluentcontrols_xaml_deferred_124(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&toggle_button_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(230,25) Name
     toggle_button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ExpanderHeader")));
-    rt::register_name(name_scope.as_ref(), "ExpanderHeader", ::core::clone::Clone::clone(&toggle_button_0).upcast::<::ferroui_base::FerroObject>(), 230, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "ExpanderHeader", ::std::rc::Rc::new(::core::clone::Clone::clone(&toggle_button_0)), 230, 25)?;
     // Controls/FluentControls.xaml(231,25) MinHeight
     rt::bind_template_binding(toggle_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_height_property(), rt::property(::ferroui_base::layout::Layoutable::min_height_property()), 231, 25)?;
     // Controls/FluentControls.xaml(232,25) CornerRadius
@@ -30417,7 +30421,7 @@ fn build_controls_fluentcontrols_xaml_deferred_124(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(237,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ExpanderContent")));
-    rt::register_name(name_scope.as_ref(), "ExpanderContent", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 237, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "ExpanderContent", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 237, 19)?;
     // Controls/FluentControls.xaml(238,19) IsVisible
     let template_binding_8 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::Expander::is_expanded_property()));
     // Controls/FluentControls.xaml(238,19) Mode
@@ -30447,7 +30451,7 @@ fn build_controls_fluentcontrols_xaml_deferred_124(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/FluentControls.xaml(246,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 246, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 246, 31)?;
     // Controls/FluentControls.xaml(247,31) Content (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_14 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -31124,7 +31128,7 @@ fn build_controls_fluentcontrols_xaml_deferred_127(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/FluentControls.xaml(39,13) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ProgressBarRoot")));
-    rt::register_name(name_scope.as_ref(), "ProgressBarRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 39, 13)?;
+    rt::register_name_value(name_scope.as_ref(), "ProgressBarRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 39, 13)?;
     // Controls/FluentControls.xaml(40,13) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 40, 13)?;
     // Controls/FluentControls.xaml(41,13) BorderBrush
@@ -31150,7 +31154,7 @@ fn build_controls_fluentcontrols_xaml_deferred_127(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&panel_1).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(46,20) Name
     panel_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("DeterminateRoot")));
-    rt::register_name(name_scope.as_ref(), "DeterminateRoot", ::core::clone::Clone::clone(&panel_1).upcast::<::ferroui_base::FerroObject>(), 46, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "DeterminateRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_1)), 46, 20)?;
     // Controls/FluentControls.xaml(46,14) Opacity
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     panel_1.set_value_with_priority(::ferroui_base::Visual::opacity_property(), 1.0_f64, priority_1);
@@ -31175,7 +31179,7 @@ fn build_controls_fluentcontrols_xaml_deferred_127(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(53,19) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Indicator")));
-    rt::register_name(name_scope.as_ref(), "PART_Indicator", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 53, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Indicator", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 53, 19)?;
     // Controls/FluentControls.xaml(54,19) Margin
     rt::bind_template_binding(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), 54, 19)?;
     // Controls/FluentControls.xaml(55,19) Background
@@ -31192,7 +31196,7 @@ fn build_controls_fluentcontrols_xaml_deferred_127(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&panel_2).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(58,20) Name
     panel_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("IndeterminateRoot")));
-    rt::register_name(name_scope.as_ref(), "IndeterminateRoot", ::core::clone::Clone::clone(&panel_2).upcast::<::ferroui_base::FerroObject>(), 58, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "IndeterminateRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_2)), 58, 20)?;
     // Controls/FluentControls.xaml(58,14) Opacity
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     panel_2.set_value_with_priority(::ferroui_base::Visual::opacity_property(), 0.0_f64, priority_3);
@@ -31217,7 +31221,7 @@ fn build_controls_fluentcontrols_xaml_deferred_127(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(65,19) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("IndeterminateProgressBarIndicator")));
-    rt::register_name(name_scope.as_ref(), "IndeterminateProgressBarIndicator", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 65, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "IndeterminateProgressBarIndicator", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 65, 19)?;
     // Controls/FluentControls.xaml(66,19) Margin
     rt::bind_template_binding(border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), 66, 19)?;
     // Controls/FluentControls.xaml(67,19) Background
@@ -31233,7 +31237,7 @@ fn build_controls_fluentcontrols_xaml_deferred_127(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&border_3).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(70,19) Name
     border_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("IndeterminateProgressBarIndicator2")));
-    rt::register_name(name_scope.as_ref(), "IndeterminateProgressBarIndicator2", ::core::clone::Clone::clone(&border_3).upcast::<::ferroui_base::FerroObject>(), 70, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "IndeterminateProgressBarIndicator2", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_3)), 70, 19)?;
     // Controls/FluentControls.xaml(71,19) Margin
     rt::bind_template_binding(border_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), 71, 19)?;
     // Controls/FluentControls.xaml(72,19) Background
@@ -31251,7 +31255,7 @@ fn build_controls_fluentcontrols_xaml_deferred_127(
     context.push_parent(rt::to_value(layout_transform_control_0.clone()));
     // Controls/FluentControls.xaml(76,17) Name
     layout_transform_control_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_LayoutTransformControl")));
-    rt::register_name(name_scope.as_ref(), "PART_LayoutTransformControl", ::core::clone::Clone::clone(&layout_transform_control_0).upcast::<::ferroui_base::FerroObject>(), 76, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_LayoutTransformControl", ::std::rc::Rc::new(::core::clone::Clone::clone(&layout_transform_control_0)), 76, 17)?;
     // Controls/FluentControls.xaml(75,14) HorizontalAlignment
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     layout_transform_control_0.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Center, priority_5);
@@ -31461,7 +31465,7 @@ fn build_controls_fluentcontrols_xaml_deferred_133(
     content_presenter_0.begin_init();
     // Controls/FluentControls.xaml(48,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 48, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 48, 27)?;
     // Controls/FluentControls.xaml(49,27) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 49, 27)?;
     // Controls/FluentControls.xaml(50,27) BorderBrush
@@ -31644,7 +31648,7 @@ fn build_controls_fluentcontrols_xaml_deferred_135(
     context.push_parent(rt::to_value(stack_panel_0.clone()));
     // Controls/FluentControls.xaml(94,27) Name
     stack_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SpinnerPanel")));
-    rt::register_name(name_scope.as_ref(), "PART_SpinnerPanel", ::core::clone::Clone::clone(&stack_panel_0).upcast::<::ferroui_base::FerroObject>(), 94, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SpinnerPanel", ::std::rc::Rc::new(::core::clone::Clone::clone(&stack_panel_0)), 94, 27)?;
     // Controls/FluentControls.xaml(94,16) TabIndex
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     stack_panel_0.set_value_with_priority(::ferroui_base::input::InputElement::tab_index_property(), 2_i32, priority_0);
@@ -31665,7 +31669,7 @@ fn build_controls_fluentcontrols_xaml_deferred_135(
     context.push_parent(rt::to_value(repeat_button_0.clone()));
     // Controls/FluentControls.xaml(99,31) Name
     repeat_button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_IncreaseButton")));
-    rt::register_name(name_scope.as_ref(), "PART_IncreaseButton", ::core::clone::Clone::clone(&repeat_button_0).upcast::<::ferroui_base::FerroObject>(), 99, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_IncreaseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_0)), 99, 31)?;
     // Controls/FluentControls.xaml(100,31) IsTabStop
     rt::bind_template_binding(repeat_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::input::InputElement::is_tab_stop_property(), rt::property(::ferroui_base::input::InputElement::is_tab_stop_property()), 100, 31)?;
     // Controls/FluentControls.xaml(101,31) Theme (setter chosen at run time)
@@ -31746,7 +31750,7 @@ fn build_controls_fluentcontrols_xaml_deferred_135(
     context.push_parent(rt::to_value(repeat_button_1.clone()));
     // Controls/FluentControls.xaml(114,31) Name
     repeat_button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DecreaseButton")));
-    rt::register_name(name_scope.as_ref(), "PART_DecreaseButton", ::core::clone::Clone::clone(&repeat_button_1).upcast::<::ferroui_base::FerroObject>(), 114, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DecreaseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_1)), 114, 31)?;
     // Controls/FluentControls.xaml(115,31) IsTabStop
     rt::bind_template_binding(repeat_button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::input::InputElement::is_tab_stop_property(), rt::property(::ferroui_base::input::InputElement::is_tab_stop_property()), 115, 31)?;
     // Controls/FluentControls.xaml(116,31) Theme (setter chosen at run time)
@@ -31828,7 +31832,7 @@ fn build_controls_fluentcontrols_xaml_deferred_135(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(130,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 130, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 130, 33)?;
     // Controls/FluentControls.xaml(130,16) Column
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_17);
@@ -31964,7 +31968,7 @@ fn build_controls_fluentcontrols_xaml_deferred_137(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(28,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Background")));
-    rt::register_name(name_scope.as_ref(), "Background", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 28, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "Background", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 28, 19)?;
     // Controls/FluentControls.xaml(28,12) Margin
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(0.0_f64, -1.0_f64, 0.0_f64, 0.0_f64), priority_6);
@@ -32279,7 +32283,7 @@ fn build_controls_fluentcontrols_xaml_deferred_139(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/FluentControls.xaml(79,18) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 79, 18)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 79, 18)?;
     // Controls/FluentControls.xaml(79,12) HorizontalAlignment
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     panel_0.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Stretch, priority_0);
@@ -32294,7 +32298,7 @@ fn build_controls_fluentcontrols_xaml_deferred_139(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(82,21) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Background")));
-    rt::register_name(name_scope.as_ref(), "Background", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 82, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "Background", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 82, 21)?;
     // Controls/FluentControls.xaml(83,21) CornerRadius
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::corner_radius_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()), 83, 21)?;
     // Controls/FluentControls.xaml(84,21) BorderThickness
@@ -32330,7 +32334,7 @@ fn build_controls_fluentcontrols_xaml_deferred_139(
     context.push_parent(rt::to_value(text_box_0.clone()));
     // Controls/FluentControls.xaml(88,24) Name
     text_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TextBox")));
-    rt::register_name(name_scope.as_ref(), "PART_TextBox", ::core::clone::Clone::clone(&text_box_0).upcast::<::ferroui_base::FerroObject>(), 88, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TextBox", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_box_0)), 88, 24)?;
     // Controls/FluentControls.xaml(89,24) Foreground
     rt::bind_template_binding(text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::foreground_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 89, 24)?;
     // Controls/FluentControls.xaml(88,16) Background
@@ -32443,7 +32447,7 @@ fn build_controls_fluentcontrols_xaml_deferred_139(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/FluentControls.xaml(123,23) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Button")));
-    rt::register_name(name_scope.as_ref(), "PART_Button", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 123, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Button", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 123, 23)?;
     // Controls/FluentControls.xaml(124,23) Theme (setter chosen at run time)
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("FluentCalendarDatePickerButton"));
@@ -32475,7 +32479,7 @@ fn build_controls_fluentcontrols_xaml_deferred_139(
     context.push_parent(rt::to_value(popup_0.clone()));
     // Controls/FluentControls.xaml(127,22) Name
     popup_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Popup")));
-    rt::register_name(name_scope.as_ref(), "PART_Popup", ::core::clone::Clone::clone(&popup_0).upcast::<::ferroui_base::FerroObject>(), 127, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Popup", ::std::rc::Rc::new(::core::clone::Clone::clone(&popup_0)), 127, 22)?;
     // Controls/FluentControls.xaml(128,22) PlacementTarget
     let template_binding_13 = ::ferroui_base::data::TemplateBinding::__markup_new_0();
     let provided_15 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_13);
@@ -32491,7 +32495,7 @@ fn build_controls_fluentcontrols_xaml_deferred_139(
     context.push_parent(rt::to_value(calendar_0.clone()));
     // Controls/FluentControls.xaml(130,27) Name
     calendar_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Calendar")));
-    rt::register_name(name_scope.as_ref(), "PART_Calendar", ::core::clone::Clone::clone(&calendar_0).upcast::<::ferroui_base::FerroObject>(), 130, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Calendar", ::std::rc::Rc::new(::core::clone::Clone::clone(&calendar_0)), 130, 27)?;
     // Controls/FluentControls.xaml(131,27) FirstDayOfWeek
     rt::bind_template_binding(calendar_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Calendar::first_day_of_week_property(), rt::property(::ferroui_controls::CalendarDatePicker::first_day_of_week_property()), 131, 27)?;
     // Controls/FluentControls.xaml(132,27) IsTodayHighlighted
@@ -32629,7 +32633,7 @@ fn build_controls_fluentcontrols_xaml_deferred_141(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/FluentControls.xaml(35,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 35, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 35, 27)?;
     // Controls/FluentControls.xaml(35,56) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 35, 56)?;
     // Controls/FluentControls.xaml(36,27) BorderBrush
@@ -32885,7 +32889,7 @@ fn build_controls_fluentcontrols_xaml_deferred_144(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/FluentControls.xaml(87,23) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HeaderButton")));
-    rt::register_name(name_scope.as_ref(), "PART_HeaderButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 87, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HeaderButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 87, 23)?;
     // Controls/FluentControls.xaml(88,23) Theme (setter chosen at run time)
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("FluentCalendarButton"));
@@ -32919,7 +32923,7 @@ fn build_controls_fluentcontrols_xaml_deferred_144(
     context.push_parent(rt::to_value(button_1.clone()));
     // Controls/FluentControls.xaml(92,23) Name
     button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PreviousButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PreviousButton", ::core::clone::Clone::clone(&button_1).upcast::<::ferroui_base::FerroObject>(), 92, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PreviousButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_1)), 92, 23)?;
     // Controls/FluentControls.xaml(92,16) Column
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
     button_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_8);
@@ -32979,7 +32983,7 @@ fn build_controls_fluentcontrols_xaml_deferred_144(
     context.push_parent(rt::to_value(button_2.clone()));
     // Controls/FluentControls.xaml(105,23) Name
     button_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_NextButton")));
-    rt::register_name(name_scope.as_ref(), "PART_NextButton", ::core::clone::Clone::clone(&button_2).upcast::<::ferroui_base::FerroObject>(), 105, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_NextButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_2)), 105, 23)?;
     // Controls/FluentControls.xaml(105,16) Column
     let priority_16 = ::ferroui_base::data::BindingPriority::Template;
     button_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_16);
@@ -33041,7 +33045,7 @@ fn build_controls_fluentcontrols_xaml_deferred_144(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/FluentControls.xaml(120,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("BackgroundLayer")));
-    rt::register_name(name_scope.as_ref(), "BackgroundLayer", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 120, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "BackgroundLayer", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 120, 21)?;
     // Controls/FluentControls.xaml(121,21) Background
     rt::bind_template_binding(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()), 121, 21)?;
     // Controls/FluentControls.xaml(120,14) Margin
@@ -33068,7 +33072,7 @@ fn build_controls_fluentcontrols_xaml_deferred_144(
     context.push_parent(rt::to_value(grid_2.clone()));
     // Controls/FluentControls.xaml(127,19) Name
     grid_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ElementWeekNumberLabels")));
-    rt::register_name(name_scope.as_ref(), "PART_ElementWeekNumberLabels", ::core::clone::Clone::clone(&grid_2).upcast::<::ferroui_base::FerroObject>(), 127, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ElementWeekNumberLabels", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_2)), 127, 19)?;
     // Controls/FluentControls.xaml(127,14) Row
     let priority_27 = ::ferroui_base::data::BindingPriority::Template;
     grid_2.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_27);
@@ -33164,7 +33168,7 @@ fn build_controls_fluentcontrols_xaml_deferred_144(
     context.push_parent(rt::to_value(content_control_0.clone()));
     // Controls/FluentControls.xaml(142,31) Name
     content_control_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("WeekNumberHeader")));
-    rt::register_name(name_scope.as_ref(), "WeekNumberHeader", ::core::clone::Clone::clone(&content_control_0).upcast::<::ferroui_base::FerroObject>(), 142, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "WeekNumberHeader", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_0)), 142, 31)?;
     // Controls/FluentControls.xaml(142,16) Row
     let priority_44 = ::ferroui_base::data::BindingPriority::Template;
     content_control_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 0_i32, priority_44);
@@ -33198,7 +33202,7 @@ fn build_controls_fluentcontrols_xaml_deferred_144(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_7, ::core::clone::Clone::clone(&grid_3).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(149,19) Name
     grid_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MonthView")));
-    rt::register_name(name_scope.as_ref(), "PART_MonthView", ::core::clone::Clone::clone(&grid_3).upcast::<::ferroui_base::FerroObject>(), 149, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MonthView", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_3)), 149, 19)?;
     // Controls/FluentControls.xaml(149,14) Column
     let priority_48 = ::ferroui_base::data::BindingPriority::Template;
     grid_3.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_48);
@@ -33350,7 +33354,7 @@ fn build_controls_fluentcontrols_xaml_deferred_144(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_8, ::core::clone::Clone::clone(&grid_4).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(174,19) Name
     grid_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_YearView")));
-    rt::register_name(name_scope.as_ref(), "PART_YearView", ::core::clone::Clone::clone(&grid_4).upcast::<::ferroui_base::FerroObject>(), 174, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_YearView", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_4)), 174, 19)?;
     // Controls/FluentControls.xaml(175,19) Background
     rt::bind_template_binding(grid_4.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Panel::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()), 175, 19)?;
     // Controls/FluentControls.xaml(174,14) MinHeight
@@ -34320,7 +34324,7 @@ fn build_controls_fluentcontrols_xaml_deferred_147(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/FluentControls.xaml(31,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootGrid")));
-    rt::register_name(name_scope.as_ref(), "RootGrid", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 31, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 31, 15)?;
     // Controls/FluentControls.xaml(31,10) ColumnDefinitions
     let column_definitions_0 = ::ferroui_controls::ColumnDefinitions::__markup_new_0();
     rt::invoked(<::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::ColumnDefinition>>>::__markup_set_Capacity(&column_definitions_0, 2_i32), 31, 33)?;
@@ -34339,7 +34343,7 @@ fn build_controls_fluentcontrols_xaml_deferred_147(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(32,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Border")));
-    rt::register_name(name_scope.as_ref(), "PART_Border", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 32, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Border", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 32, 19)?;
     // Controls/FluentControls.xaml(32,12) ColumnSpan
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 2_i32, priority_0);
@@ -34373,7 +34377,7 @@ fn build_controls_fluentcontrols_xaml_deferred_147(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/FluentControls.xaml(40,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("NormalRectangle")));
-    rt::register_name(name_scope.as_ref(), "NormalRectangle", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 40, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "NormalRectangle", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 40, 21)?;
     // Controls/FluentControls.xaml(41,21) BorderBrush
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::border_brush_property(), "CheckBoxCheckBackgroundStrokeUnchecked", 41, 21)?;
     // Controls/FluentControls.xaml(42,21) Background
@@ -34431,7 +34435,7 @@ fn build_controls_fluentcontrols_xaml_deferred_147(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/FluentControls.xaml(52,23) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("CheckGlyph")));
-    rt::register_name(name_scope.as_ref(), "CheckGlyph", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 52, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "CheckGlyph", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 52, 23)?;
     // Controls/FluentControls.xaml(52,18) Opacity
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
     path_0.set_value_with_priority(::ferroui_base::Visual::opacity_property(), 0.0_f64, priority_8);
@@ -34462,7 +34466,7 @@ fn build_controls_fluentcontrols_xaml_deferred_147(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_6, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(61,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 61, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 61, 29)?;
     // Controls/FluentControls.xaml(62,27) ContentTemplate
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_template_property(), rt::property(::ferroui_controls::ContentControl::content_template_property()), 62, 27)?;
     // Controls/FluentControls.xaml(63,27) Content (setter chosen at run time)
@@ -34565,7 +34569,7 @@ fn build_controls_fluentcontrols_xaml_deferred_149(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/FluentControls.xaml(21,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 21, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 21, 17)?;
     // Controls/FluentControls.xaml(22,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 22, 17)?;
     // Controls/FluentControls.xaml(23,17) BorderBrush
@@ -34592,7 +34596,7 @@ fn build_controls_fluentcontrols_xaml_deferred_149(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&content_presenter_0)));
     // Controls/FluentControls.xaml(29,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 29, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 29, 31)?;
     // Controls/FluentControls.xaml(30,31) Content (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_6 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -34709,7 +34713,7 @@ fn build_controls_fluentcontrols_xaml_deferred_152(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/FluentControls.xaml(21,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootGrid")));
-    rt::register_name(name_scope.as_ref(), "RootGrid", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 21, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 21, 15)?;
     // Controls/FluentControls.xaml(21,10) UseLayoutRounding
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     grid_0.set_value_with_priority(::ferroui_base::layout::Layoutable::use_layout_rounding_property(), ::core::clone::Clone::clone(&true), priority_0);
@@ -34852,7 +34856,7 @@ fn build_controls_fluentcontrols_xaml_deferred_152(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/FluentControls.xaml(52,19) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Header")));
-    rt::register_name(name_scope.as_ref(), "Header", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 52, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "Header", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 52, 19)?;
     // Controls/FluentControls.xaml(52,12) Padding
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_controls::Decorator::padding_property(), ::ferroui_base::Thickness::__markup_new_3(3.0_f64, 0.0_f64, 3.0_f64, 0.0_f64), priority_9);
@@ -34873,7 +34877,7 @@ fn build_controls_fluentcontrols_xaml_deferred_152(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/FluentControls.xaml(57,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HeaderPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_HeaderPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 57, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HeaderPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 57, 31)?;
     // Controls/FluentControls.xaml(58,31) Content (setter chosen at run time)
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_6 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::HeaderedContentControl::header_property()));
@@ -34917,7 +34921,7 @@ fn build_controls_fluentcontrols_xaml_deferred_152(
     content_presenter_1.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 2_i32, priority_16);
     // Controls/FluentControls.xaml(70,29) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 70, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 70, 29)?;
     // Controls/FluentControls.xaml(71,29) ContentTemplate
     rt::bind_template_binding(content_presenter_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_template_property(), rt::property(::ferroui_controls::ContentControl::content_template_property()), 71, 29)?;
     // Controls/FluentControls.xaml(72,29) Content (setter chosen at run time)
@@ -35176,7 +35180,7 @@ fn build_controls_fluentcontrols_xaml_deferred_154(
     content_presenter_0.begin_init();
     // Controls/FluentControls.xaml(36,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 36, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 36, 27)?;
     // Controls/FluentControls.xaml(37,27) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 37, 27)?;
     // Controls/FluentControls.xaml(38,27) BackgroundSizing
@@ -35388,7 +35392,7 @@ fn build_controls_fluentcontrols_xaml_deferred_156(
     content_presenter_0.begin_init();
     // Controls/FluentControls.xaml(22,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 22, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 22, 27)?;
     // Controls/FluentControls.xaml(23,27) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 23, 27)?;
     // Controls/FluentControls.xaml(24,27) BorderBrush
@@ -35589,7 +35593,7 @@ fn build_controls_fluentcontrols_xaml_deferred_158(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/FluentControls.xaml(23,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "PART_LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 23, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 23, 17)?;
     // Controls/FluentControls.xaml(24,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 24, 17)?;
     // Controls/FluentControls.xaml(25,17) BorderBrush
@@ -35612,7 +35616,7 @@ fn build_controls_fluentcontrols_xaml_deferred_158(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(29,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HeaderPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_HeaderPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 29, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HeaderPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 29, 31)?;
     // Controls/FluentControls.xaml(30,31) Content (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_4 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::HeaderedSelectingItemsControl::header_property()));
@@ -35643,7 +35647,7 @@ fn build_controls_fluentcontrols_xaml_deferred_158(
     context.push_parent(rt::to_value(popup_0.clone()));
     // Controls/FluentControls.xaml(35,20) Name
     popup_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Popup")));
-    rt::register_name(name_scope.as_ref(), "PART_Popup", ::core::clone::Clone::clone(&popup_0).upcast::<::ferroui_base::FerroObject>(), 35, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Popup", ::std::rc::Rc::new(::core::clone::Clone::clone(&popup_0)), 35, 20)?;
     // Controls/FluentControls.xaml(35,14) WindowManagerAddShadowHint
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     popup_0.set_value_with_priority(::ferroui_controls::primitives::Popup::window_manager_add_shadow_hint_property(), ::core::clone::Clone::clone(&false), priority_3);
@@ -35724,7 +35728,7 @@ fn build_controls_fluentcontrols_xaml_deferred_158(
     context.push_parent(rt::to_value(items_presenter_0.clone()));
     // Controls/FluentControls.xaml(51,35) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 51, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 51, 35)?;
     // Controls/FluentControls.xaml(52,35) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 52, 35)?;
     // Controls/FluentControls.xaml(53,35) Margin
@@ -35810,7 +35814,7 @@ fn build_controls_fluentcontrols_xaml_deferred_160(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/FluentControls.xaml(106,27) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 106, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 106, 27)?;
     // Controls/FluentControls.xaml(107,27) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 107, 27)?;
     // Controls/FluentControls.xaml(106,12) VerticalAlignment
@@ -36231,7 +36235,7 @@ fn build_controls_fluentcontrols_xaml_deferred_164(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/FluentControls.xaml(66,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "PART_LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 66, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 66, 19)?;
     // Controls/FluentControls.xaml(67,19) Padding
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Decorator::padding_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), 67, 19)?;
     // Controls/FluentControls.xaml(68,19) Background
@@ -36312,7 +36316,7 @@ fn build_controls_fluentcontrols_xaml_deferred_164(
     content_control_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_9);
     // Controls/FluentControls.xaml(86,31) Name
     content_control_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ToggleIconPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ToggleIconPresenter", ::core::clone::Clone::clone(&content_control_0).upcast::<::ferroui_base::FerroObject>(), 86, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ToggleIconPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_0)), 86, 31)?;
     // Controls/FluentControls.xaml(85,16) IsVisible
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
     content_control_0.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_10);
@@ -36346,7 +36350,7 @@ fn build_controls_fluentcontrols_xaml_deferred_164(
     content_control_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_12);
     // Controls/FluentControls.xaml(92,31) Name
     content_control_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_IconPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_IconPresenter", ::core::clone::Clone::clone(&content_control_1).upcast::<::ferroui_base::FerroObject>(), 92, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_IconPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_1)), 92, 31)?;
     // Controls/FluentControls.xaml(91,16) IsVisible
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     content_control_1.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_13);
@@ -36386,7 +36390,7 @@ fn build_controls_fluentcontrols_xaml_deferred_164(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(98,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HeaderPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_HeaderPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 98, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HeaderPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 98, 33)?;
     // Controls/FluentControls.xaml(99,33) Content (setter chosen at run time)
     let priority_16 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_6 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::HeaderedSelectingItemsControl::header_property()));
@@ -36418,7 +36422,7 @@ fn build_controls_fluentcontrols_xaml_deferred_164(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/FluentControls.xaml(104,26) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_InputGestureText")));
-    rt::register_name(name_scope.as_ref(), "PART_InputGestureText", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 104, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_InputGestureText", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 104, 26)?;
     // Controls/FluentControls.xaml(104,16) Column
     let priority_20 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 3_i32, priority_20);
@@ -36453,7 +36457,7 @@ fn build_controls_fluentcontrols_xaml_deferred_164(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/FluentControls.xaml(111,21) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ChevronPath")));
-    rt::register_name(name_scope.as_ref(), "PART_ChevronPath", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 111, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ChevronPath", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 111, 21)?;
     // Controls/FluentControls.xaml(111,16) Stretch
     let priority_23 = ::ferroui_base::data::BindingPriority::Template;
     path_0.set_value_with_priority(::ferroui_controls::shapes::Shape::stretch_property(), ::ferroui_base::media::Stretch::Uniform, priority_23);
@@ -36502,7 +36506,7 @@ fn build_controls_fluentcontrols_xaml_deferred_164(
     context.push_parent(rt::to_value(popup_0.clone()));
     // Controls/FluentControls.xaml(122,18) Name
     popup_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Popup")));
-    rt::register_name(name_scope.as_ref(), "PART_Popup", ::core::clone::Clone::clone(&popup_0).upcast::<::ferroui_base::FerroObject>(), 122, 18)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Popup", ::std::rc::Rc::new(::core::clone::Clone::clone(&popup_0)), 122, 18)?;
     // Controls/FluentControls.xaml(122,12) WindowManagerAddShadowHint
     let priority_29 = ::ferroui_base::data::BindingPriority::Template;
     popup_0.set_value_with_priority(::ferroui_controls::primitives::Popup::window_manager_add_shadow_hint_property(), ::core::clone::Clone::clone(&false), priority_29);
@@ -36571,7 +36575,7 @@ fn build_controls_fluentcontrols_xaml_deferred_164(
     context.push_parent(rt::to_value(items_presenter_0.clone()));
     // Controls/FluentControls.xaml(137,33) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 137, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 137, 33)?;
     // Controls/FluentControls.xaml(138,33) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 138, 33)?;
     // Controls/FluentControls.xaml(139,33) Margin
@@ -36743,7 +36747,7 @@ fn build_controls_fluentcontrols_xaml_deferred_170(
     viewbox_0.set_value(::ferroui_controls::Viewbox::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/FluentControls.xaml(256,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 256, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 256, 29)?;
     // Controls/FluentControls.xaml(256,60) Content (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_0 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -36821,7 +36825,7 @@ fn build_controls_fluentcontrols_xaml_deferred_172(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/FluentControls.xaml(16,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 16, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 16, 17)?;
     // Controls/FluentControls.xaml(17,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 17, 17)?;
     // Controls/FluentControls.xaml(18,17) BorderBrush
@@ -36864,7 +36868,7 @@ fn build_controls_fluentcontrols_xaml_deferred_172(
     context.push_parent(rt::to_value(items_presenter_0.clone()));
     // Controls/FluentControls.xaml(25,29) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 25, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 25, 29)?;
     // Controls/FluentControls.xaml(26,29) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 26, 29)?;
     // Controls/FluentControls.xaml(27,29) Margin
@@ -38145,7 +38149,7 @@ fn build_controls_fluentcontrols_xaml_deferred_261(
     content_presenter_0.begin_init();
     // Controls/FluentControls.xaml(31,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 31, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 31, 27)?;
     // Controls/FluentControls.xaml(32,27) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 32, 27)?;
     // Controls/FluentControls.xaml(33,27) BorderBrush
@@ -38478,7 +38482,7 @@ fn build_controls_fluentcontrols_xaml_deferred_265(
     context.push_parent(rt::to_value(ellipse_0.clone()));
     // Controls/FluentControls.xaml(81,20) Name
     ellipse_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PipBackground")));
-    rt::register_name(name_scope.as_ref(), "PipBackground", ::core::clone::Clone::clone(&ellipse_0).upcast::<::ferroui_base::FerroObject>(), 81, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PipBackground", ::std::rc::Rc::new(::core::clone::Clone::clone(&ellipse_0)), 81, 20)?;
     // Controls/FluentControls.xaml(81,12) Width
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     ellipse_0.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 10.0_f64, priority_1);
@@ -38531,7 +38535,7 @@ fn build_controls_fluentcontrols_xaml_deferred_265(
     context.push_parent(rt::to_value(ellipse_1.clone()));
     // Controls/FluentControls.xaml(96,20) Name
     ellipse_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Pip")));
-    rt::register_name(name_scope.as_ref(), "Pip", ::core::clone::Clone::clone(&ellipse_1).upcast::<::ferroui_base::FerroObject>(), 96, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "Pip", ::std::rc::Rc::new(::core::clone::Clone::clone(&ellipse_1)), 96, 20)?;
     // Controls/FluentControls.xaml(96,12) Width
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     ellipse_1.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 4.0_f64, priority_7);
@@ -38799,7 +38803,7 @@ fn build_controls_fluentcontrols_xaml_deferred_267(
     context.push_parent(rt::to_value(stack_panel_0.clone()));
     // Controls/FluentControls.xaml(169,21) Name
     stack_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_RootPanel")));
-    rt::register_name(name_scope.as_ref(), "PART_RootPanel", ::core::clone::Clone::clone(&stack_panel_0).upcast::<::ferroui_base::FerroObject>(), 169, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_RootPanel", ::std::rc::Rc::new(::core::clone::Clone::clone(&stack_panel_0)), 169, 21)?;
     // Controls/FluentControls.xaml(170,21) Orientation
     rt::bind_template_binding(stack_panel_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::StackPanel::orientation_property(), rt::property(::ferroui_controls::PipsPager::orientation_property()), 170, 21)?;
     // Controls/FluentControls.xaml(171,21) Background
@@ -38816,7 +38820,7 @@ fn build_controls_fluentcontrols_xaml_deferred_267(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/FluentControls.xaml(173,19) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PreviousButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PreviousButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 173, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PreviousButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 173, 19)?;
     // Controls/FluentControls.xaml(174,19) Theme
     rt::bind_template_binding(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), rt::property(::ferroui_controls::PipsPager::previous_button_theme_property()), 174, 19)?;
     // Controls/FluentControls.xaml(175,19) IsVisible
@@ -38835,7 +38839,7 @@ fn build_controls_fluentcontrols_xaml_deferred_267(
     context.push_parent(rt::to_value(path_icon_0.clone()));
     // Controls/FluentControls.xaml(178,23) Name
     path_icon_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PreviousButtonIcon")));
-    rt::register_name(name_scope.as_ref(), "PreviousButtonIcon", ::core::clone::Clone::clone(&path_icon_0).upcast::<::ferroui_base::FerroObject>(), 178, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PreviousButtonIcon", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_icon_0)), 178, 23)?;
     // Controls/FluentControls.xaml(178,14) Width
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     path_icon_0.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 10.0_f64, priority_3);
@@ -38869,7 +38873,7 @@ fn build_controls_fluentcontrols_xaml_deferred_267(
     context.push_parent(rt::to_value(list_box_0.clone()));
     // Controls/FluentControls.xaml(182,20) Name
     list_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PipsPagerList")));
-    rt::register_name(name_scope.as_ref(), "PART_PipsPagerList", ::core::clone::Clone::clone(&list_box_0).upcast::<::ferroui_base::FerroObject>(), 182, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PipsPagerList", ::std::rc::Rc::new(::core::clone::Clone::clone(&list_box_0)), 182, 20)?;
     // Controls/FluentControls.xaml(182,12) Background
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     list_box_0.set_value_with_priority(::ferroui_controls::primitives::TemplatedControl::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_6);
@@ -38963,7 +38967,7 @@ fn build_controls_fluentcontrols_xaml_deferred_267(
     context.push_parent(rt::to_value(button_1.clone()));
     // Controls/FluentControls.xaml(210,19) Name
     button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_NextButton")));
-    rt::register_name(name_scope.as_ref(), "PART_NextButton", ::core::clone::Clone::clone(&button_1).upcast::<::ferroui_base::FerroObject>(), 210, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_NextButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_1)), 210, 19)?;
     // Controls/FluentControls.xaml(211,19) Theme
     rt::bind_template_binding(button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), rt::property(::ferroui_controls::PipsPager::next_button_theme_property()), 211, 19)?;
     // Controls/FluentControls.xaml(212,19) IsVisible
@@ -38982,7 +38986,7 @@ fn build_controls_fluentcontrols_xaml_deferred_267(
     context.push_parent(rt::to_value(path_icon_1.clone()));
     // Controls/FluentControls.xaml(215,23) Name
     path_icon_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("NextButtonIcon")));
-    rt::register_name(name_scope.as_ref(), "NextButtonIcon", ::core::clone::Clone::clone(&path_icon_1).upcast::<::ferroui_base::FerroObject>(), 215, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "NextButtonIcon", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_icon_1)), 215, 23)?;
     // Controls/FluentControls.xaml(215,14) Width
     let priority_19 = ::ferroui_base::data::BindingPriority::Template;
     path_icon_1.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 10.0_f64, priority_19);
@@ -39751,7 +39755,7 @@ fn build_controls_fluentcontrols_xaml_deferred_276(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/FluentControls.xaml(92,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 92, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 92, 27)?;
     // Controls/FluentControls.xaml(93,27) Background
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), "ScrollBarButtonBackground", 93, 27)?;
     // Controls/FluentControls.xaml(94,27) BorderBrush
@@ -39940,7 +39944,7 @@ fn build_controls_fluentcontrols_xaml_deferred_278(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/FluentControls.xaml(143,17) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Root")));
-    rt::register_name(name_scope.as_ref(), "Root", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 143, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 143, 17)?;
     // Controls/FluentControls.xaml(144,14) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
     // Controls/FluentControls.xaml(144,14) Border
@@ -39950,7 +39954,7 @@ fn build_controls_fluentcontrols_xaml_deferred_278(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/FluentControls.xaml(144,21) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("VerticalRoot")));
-    rt::register_name(name_scope.as_ref(), "VerticalRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 144, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "VerticalRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 144, 21)?;
     // Controls/FluentControls.xaml(145,21) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 145, 21)?;
     // Controls/FluentControls.xaml(146,21) BorderBrush
@@ -39983,7 +39987,7 @@ fn build_controls_fluentcontrols_xaml_deferred_278(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/FluentControls.xaml(148,28) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TrackRect")));
-    rt::register_name(name_scope.as_ref(), "TrackRect", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 148, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "TrackRect", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 148, 28)?;
     // Controls/FluentControls.xaml(149,28) Fill
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "ScrollBarTrackFill", 149, 28)?;
     // Controls/FluentControls.xaml(150,28) Stroke
@@ -40020,7 +40024,7 @@ fn build_controls_fluentcontrols_xaml_deferred_278(
     context.push_parent(rt::to_value(repeat_button_0.clone()));
     // Controls/FluentControls.xaml(161,31) Name
     repeat_button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_LineUpButton")));
-    rt::register_name(name_scope.as_ref(), "PART_LineUpButton", ::core::clone::Clone::clone(&repeat_button_0).upcast::<::ferroui_base::FerroObject>(), 161, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_LineUpButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_0)), 161, 31)?;
     // Controls/FluentControls.xaml(161,18) HorizontalAlignment
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     repeat_button_0.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Center, priority_3);
@@ -40107,7 +40111,7 @@ fn build_controls_fluentcontrols_xaml_deferred_278(
     context.push_parent(rt::to_value(repeat_button_1.clone()));
     // Controls/FluentControls.xaml(183,35) Name
     repeat_button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PageUpButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PageUpButton", ::core::clone::Clone::clone(&repeat_button_1).upcast::<::ferroui_base::FerroObject>(), 183, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PageUpButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_1)), 183, 35)?;
     // Controls/FluentControls.xaml(183,22) Classes
     let classes_collection_0 = ::ferroui_base::StyledElement::__markup_get_Classes(repeat_button_1.upcast_ref::<::ferroui_base::StyledElement>());
     ::ferroui_base::controls::Classes::__markup_Add_0(&classes_collection_0, ::std::string::String::from("largeIncrease"));
@@ -40142,7 +40146,7 @@ fn build_controls_fluentcontrols_xaml_deferred_278(
     context.push_parent(rt::to_value(repeat_button_2.clone()));
     // Controls/FluentControls.xaml(190,35) Name
     repeat_button_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PageDownButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PageDownButton", ::core::clone::Clone::clone(&repeat_button_2).upcast::<::ferroui_base::FerroObject>(), 190, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PageDownButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_2)), 190, 35)?;
     // Controls/FluentControls.xaml(190,22) Classes
     let classes_collection_1 = ::ferroui_base::StyledElement::__markup_get_Classes(repeat_button_2.upcast_ref::<::ferroui_base::StyledElement>());
     ::ferroui_base::controls::Classes::__markup_Add_0(&classes_collection_1, ::std::string::String::from("largeIncrease"));
@@ -40213,7 +40217,7 @@ fn build_controls_fluentcontrols_xaml_deferred_278(
     context.push_parent(rt::to_value(repeat_button_3.clone()));
     // Controls/FluentControls.xaml(204,31) Name
     repeat_button_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_LineDownButton")));
-    rt::register_name(name_scope.as_ref(), "PART_LineDownButton", ::core::clone::Clone::clone(&repeat_button_3).upcast::<::ferroui_base::FerroObject>(), 204, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_LineDownButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_3)), 204, 31)?;
     // Controls/FluentControls.xaml(204,18) HorizontalAlignment
     let priority_22 = ::ferroui_base::data::BindingPriority::Template;
     repeat_button_3.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Center, priority_22);
@@ -40284,7 +40288,7 @@ fn build_controls_fluentcontrols_xaml_deferred_279(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/FluentControls.xaml(227,17) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Root")));
-    rt::register_name(name_scope.as_ref(), "Root", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 227, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 227, 17)?;
     // Controls/FluentControls.xaml(228,14) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
     // Controls/FluentControls.xaml(228,14) Border
@@ -40294,7 +40298,7 @@ fn build_controls_fluentcontrols_xaml_deferred_279(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/FluentControls.xaml(228,21) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HorizontalRoot")));
-    rt::register_name(name_scope.as_ref(), "HorizontalRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 228, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "HorizontalRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 228, 21)?;
     // Controls/FluentControls.xaml(229,21) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 229, 21)?;
     // Controls/FluentControls.xaml(230,21) BorderBrush
@@ -40327,7 +40331,7 @@ fn build_controls_fluentcontrols_xaml_deferred_279(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/FluentControls.xaml(232,28) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TrackRect")));
-    rt::register_name(name_scope.as_ref(), "TrackRect", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 232, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "TrackRect", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 232, 28)?;
     // Controls/FluentControls.xaml(233,28) Fill
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "ScrollBarTrackFill", 233, 28)?;
     // Controls/FluentControls.xaml(234,28) Stroke
@@ -40364,7 +40368,7 @@ fn build_controls_fluentcontrols_xaml_deferred_279(
     context.push_parent(rt::to_value(repeat_button_0.clone()));
     // Controls/FluentControls.xaml(245,31) Name
     repeat_button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_LineUpButton")));
-    rt::register_name(name_scope.as_ref(), "PART_LineUpButton", ::core::clone::Clone::clone(&repeat_button_0).upcast::<::ferroui_base::FerroObject>(), 245, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_LineUpButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_0)), 245, 31)?;
     // Controls/FluentControls.xaml(246,31) Theme (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("FluentScrollBarLineButton"));
@@ -40448,7 +40452,7 @@ fn build_controls_fluentcontrols_xaml_deferred_279(
     context.push_parent(rt::to_value(repeat_button_1.clone()));
     // Controls/FluentControls.xaml(266,35) Name
     repeat_button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PageUpButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PageUpButton", ::core::clone::Clone::clone(&repeat_button_1).upcast::<::ferroui_base::FerroObject>(), 266, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PageUpButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_1)), 266, 35)?;
     // Controls/FluentControls.xaml(266,22) Classes
     let classes_collection_0 = ::ferroui_base::StyledElement::__markup_get_Classes(repeat_button_1.upcast_ref::<::ferroui_base::StyledElement>());
     ::ferroui_base::controls::Classes::__markup_Add_0(&classes_collection_0, ::std::string::String::from("largeIncrease"));
@@ -40483,7 +40487,7 @@ fn build_controls_fluentcontrols_xaml_deferred_279(
     context.push_parent(rt::to_value(repeat_button_2.clone()));
     // Controls/FluentControls.xaml(273,35) Name
     repeat_button_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PageDownButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PageDownButton", ::core::clone::Clone::clone(&repeat_button_2).upcast::<::ferroui_base::FerroObject>(), 273, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PageDownButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_2)), 273, 35)?;
     // Controls/FluentControls.xaml(273,22) Classes
     let classes_collection_1 = ::ferroui_base::StyledElement::__markup_get_Classes(repeat_button_2.upcast_ref::<::ferroui_base::StyledElement>());
     ::ferroui_base::controls::Classes::__markup_Add_0(&classes_collection_1, ::std::string::String::from("largeIncrease"));
@@ -40554,7 +40558,7 @@ fn build_controls_fluentcontrols_xaml_deferred_279(
     context.push_parent(rt::to_value(repeat_button_3.clone()));
     // Controls/FluentControls.xaml(287,31) Name
     repeat_button_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_LineDownButton")));
-    rt::register_name(name_scope.as_ref(), "PART_LineDownButton", ::core::clone::Clone::clone(&repeat_button_3).upcast::<::ferroui_base::FerroObject>(), 287, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_LineDownButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_3)), 287, 31)?;
     // Controls/FluentControls.xaml(288,31) Theme (setter chosen at run time)
     let priority_21 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("FluentScrollBarLineButton"));
@@ -40905,7 +40909,7 @@ fn build_controls_fluentcontrols_xaml_deferred_284(
     content_presenter_0.begin_init();
     // Controls/FluentControls.xaml(46,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 46, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 46, 27)?;
     // Controls/FluentControls.xaml(47,27) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 47, 27)?;
     // Controls/FluentControls.xaml(48,27) BorderBrush
@@ -41074,7 +41078,7 @@ fn build_controls_fluentcontrols_xaml_deferred_286(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/FluentControls.xaml(143,19) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PrimaryButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PrimaryButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 143, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PrimaryButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 143, 19)?;
     // Controls/FluentControls.xaml(143,12) Column
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_3);
@@ -41173,7 +41177,7 @@ fn build_controls_fluentcontrols_xaml_deferred_286(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/FluentControls.xaml(164,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SeparatorBorder")));
-    rt::register_name(name_scope.as_ref(), "SeparatorBorder", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 164, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "SeparatorBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 164, 19)?;
     // Controls/FluentControls.xaml(164,12) Column
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_11);
@@ -41205,7 +41209,7 @@ fn build_controls_fluentcontrols_xaml_deferred_286(
     context.push_parent(rt::to_value(button_1.clone()));
     // Controls/FluentControls.xaml(171,19) Name
     button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SecondaryButton")));
-    rt::register_name(name_scope.as_ref(), "PART_SecondaryButton", ::core::clone::Clone::clone(&button_1).upcast::<::ferroui_base::FerroObject>(), 171, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SecondaryButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_1)), 171, 19)?;
     // Controls/FluentControls.xaml(171,12) Column
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     button_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_13);
@@ -42896,7 +42900,7 @@ fn build_controls_fluentcontrols_xaml_deferred_289(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/FluentControls.xaml(33,17) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Container")));
-    rt::register_name(name_scope.as_ref(), "Container", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 33, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Container", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 33, 17)?;
     // Controls/FluentControls.xaml(33,34) Background
     rt::bind_template_binding(grid_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Panel::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 33, 34)?;
     // Controls/FluentControls.xaml(36,16) ColumnDefinitions
@@ -42935,7 +42939,7 @@ fn build_controls_fluentcontrols_xaml_deferred_289(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/FluentControls.xaml(40,20) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PaneRoot")));
-    rt::register_name(name_scope.as_ref(), "PART_PaneRoot", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 40, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PaneRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 40, 20)?;
     // Controls/FluentControls.xaml(41,20) Background
     rt::bind_template_binding(panel_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Panel::background_property(), rt::property(::ferroui_controls::SplitView::pane_background_property()), 41, 20)?;
     // Controls/FluentControls.xaml(40,14) ClipToBounds
@@ -42955,7 +42959,7 @@ fn build_controls_fluentcontrols_xaml_deferred_289(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(45,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PanePresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_PanePresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 45, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PanePresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 45, 33)?;
     // Controls/FluentControls.xaml(46,33) Content (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_2 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::SplitView::pane_property()));
@@ -42978,7 +42982,7 @@ fn build_controls_fluentcontrols_xaml_deferred_289(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/FluentControls.xaml(48,26) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HCPaneBorder")));
-    rt::register_name(name_scope.as_ref(), "HCPaneBorder", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 48, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "HCPaneBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 48, 26)?;
     // Controls/FluentControls.xaml(49,26) Fill
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "SystemControlForegroundTransparentBrush", 49, 26)?;
     // Controls/FluentControls.xaml(48,16) Width
@@ -42999,7 +43003,7 @@ fn build_controls_fluentcontrols_xaml_deferred_289(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&panel_1).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(54,20) Name
     panel_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentRoot")));
-    rt::register_name(name_scope.as_ref(), "ContentRoot", ::core::clone::Clone::clone(&panel_1).upcast::<::ferroui_base::FerroObject>(), 54, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_1)), 54, 20)?;
     // Controls/FluentControls.xaml(54,14) Column
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     panel_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_7);
@@ -43011,7 +43015,7 @@ fn build_controls_fluentcontrols_xaml_deferred_289(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(55,33) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 55, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 55, 33)?;
     // Controls/FluentControls.xaml(56,33) Content (setter chosen at run time)
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_4 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -43033,7 +43037,7 @@ fn build_controls_fluentcontrols_xaml_deferred_289(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(58,26) Name
     rectangle_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LightDismissLayer")));
-    rt::register_name(name_scope.as_ref(), "LightDismissLayer", ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_base::FerroObject>(), 58, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "LightDismissLayer", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_1)), 58, 26)?;
     // Controls/FluentControls.xaml(58,16) Fill
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_1.set_value_with_priority(::ferroui_controls::shapes::Shape::fill_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_9);
@@ -43060,7 +43064,7 @@ fn build_controls_fluentcontrols_xaml_deferred_290(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/FluentControls.xaml(119,17) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Container")));
-    rt::register_name(name_scope.as_ref(), "Container", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 119, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Container", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 119, 17)?;
     // Controls/FluentControls.xaml(119,34) Background
     rt::bind_template_binding(grid_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Panel::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 119, 34)?;
     // Controls/FluentControls.xaml(121,16) ColumnDefinitions
@@ -43099,7 +43103,7 @@ fn build_controls_fluentcontrols_xaml_deferred_290(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/FluentControls.xaml(125,20) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PaneRoot")));
-    rt::register_name(name_scope.as_ref(), "PART_PaneRoot", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 125, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PaneRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 125, 20)?;
     // Controls/FluentControls.xaml(125,41) Background
     rt::bind_template_binding(panel_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Panel::background_property(), rt::property(::ferroui_controls::SplitView::pane_background_property()), 125, 41)?;
     // Controls/FluentControls.xaml(125,14) ClipToBounds
@@ -43119,7 +43123,7 @@ fn build_controls_fluentcontrols_xaml_deferred_290(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(129,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PanePresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_PanePresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 129, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PanePresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 129, 33)?;
     // Controls/FluentControls.xaml(130,33) Content (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_2 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::SplitView::pane_property()));
@@ -43142,7 +43146,7 @@ fn build_controls_fluentcontrols_xaml_deferred_290(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/FluentControls.xaml(132,26) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HCPaneBorder")));
-    rt::register_name(name_scope.as_ref(), "HCPaneBorder", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 132, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "HCPaneBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 132, 26)?;
     // Controls/FluentControls.xaml(133,26) Fill
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "SystemControlForegroundTransparentBrush", 133, 26)?;
     // Controls/FluentControls.xaml(132,16) Width
@@ -43163,7 +43167,7 @@ fn build_controls_fluentcontrols_xaml_deferred_290(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&panel_1).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(137,20) Name
     panel_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentRoot")));
-    rt::register_name(name_scope.as_ref(), "ContentRoot", ::core::clone::Clone::clone(&panel_1).upcast::<::ferroui_base::FerroObject>(), 137, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_1)), 137, 20)?;
     // Controls/FluentControls.xaml(137,14) Column
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     panel_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_7);
@@ -43175,7 +43179,7 @@ fn build_controls_fluentcontrols_xaml_deferred_290(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(138,33) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 138, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 138, 33)?;
     // Controls/FluentControls.xaml(139,33) Content (setter chosen at run time)
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_4 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -43197,7 +43201,7 @@ fn build_controls_fluentcontrols_xaml_deferred_290(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(141,26) Name
     rectangle_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LightDismissLayer")));
-    rt::register_name(name_scope.as_ref(), "LightDismissLayer", ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_base::FerroObject>(), 141, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "LightDismissLayer", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_1)), 141, 26)?;
     // Controls/FluentControls.xaml(141,16) Fill
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_1.set_value_with_priority(::ferroui_controls::shapes::Shape::fill_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_9);
@@ -43224,7 +43228,7 @@ fn build_controls_fluentcontrols_xaml_deferred_291(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/FluentControls.xaml(201,17) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Container")));
-    rt::register_name(name_scope.as_ref(), "Container", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 201, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Container", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 201, 17)?;
     // Controls/FluentControls.xaml(201,34) Background
     rt::bind_template_binding(grid_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Panel::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 201, 34)?;
     // Controls/FluentControls.xaml(203,16) RowDefinitions
@@ -43263,7 +43267,7 @@ fn build_controls_fluentcontrols_xaml_deferred_291(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/FluentControls.xaml(207,20) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PaneRoot")));
-    rt::register_name(name_scope.as_ref(), "PART_PaneRoot", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 207, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PaneRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 207, 20)?;
     // Controls/FluentControls.xaml(208,20) Background
     rt::bind_template_binding(panel_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Panel::background_property(), rt::property(::ferroui_controls::SplitView::pane_background_property()), 208, 20)?;
     // Controls/FluentControls.xaml(207,14) ClipToBounds
@@ -43283,7 +43287,7 @@ fn build_controls_fluentcontrols_xaml_deferred_291(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(212,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PanePresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_PanePresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 212, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PanePresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 212, 33)?;
     // Controls/FluentControls.xaml(213,33) Content (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_2 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::SplitView::pane_property()));
@@ -43306,7 +43310,7 @@ fn build_controls_fluentcontrols_xaml_deferred_291(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/FluentControls.xaml(215,26) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HCPaneBorder")));
-    rt::register_name(name_scope.as_ref(), "HCPaneBorder", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 215, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "HCPaneBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 215, 26)?;
     // Controls/FluentControls.xaml(216,26) Fill
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "SystemControlForegroundTransparentBrush", 216, 26)?;
     // Controls/FluentControls.xaml(215,16) Height
@@ -43327,7 +43331,7 @@ fn build_controls_fluentcontrols_xaml_deferred_291(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&panel_1).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(221,20) Name
     panel_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentRoot")));
-    rt::register_name(name_scope.as_ref(), "ContentRoot", ::core::clone::Clone::clone(&panel_1).upcast::<::ferroui_base::FerroObject>(), 221, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_1)), 221, 20)?;
     // Controls/FluentControls.xaml(221,14) Row
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     panel_1.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_7);
@@ -43339,7 +43343,7 @@ fn build_controls_fluentcontrols_xaml_deferred_291(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(222,33) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 222, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 222, 33)?;
     // Controls/FluentControls.xaml(223,33) Content (setter chosen at run time)
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_4 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -43361,7 +43365,7 @@ fn build_controls_fluentcontrols_xaml_deferred_291(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(225,26) Name
     rectangle_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LightDismissLayer")));
-    rt::register_name(name_scope.as_ref(), "LightDismissLayer", ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_base::FerroObject>(), 225, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "LightDismissLayer", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_1)), 225, 26)?;
     // Controls/FluentControls.xaml(225,16) Fill
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_1.set_value_with_priority(::ferroui_controls::shapes::Shape::fill_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_9);
@@ -43388,7 +43392,7 @@ fn build_controls_fluentcontrols_xaml_deferred_292(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/FluentControls.xaml(287,17) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Container")));
-    rt::register_name(name_scope.as_ref(), "Container", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 287, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Container", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 287, 17)?;
     // Controls/FluentControls.xaml(287,34) Background
     rt::bind_template_binding(grid_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Panel::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 287, 34)?;
     // Controls/FluentControls.xaml(289,16) RowDefinitions
@@ -43427,7 +43431,7 @@ fn build_controls_fluentcontrols_xaml_deferred_292(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/FluentControls.xaml(293,20) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PaneRoot")));
-    rt::register_name(name_scope.as_ref(), "PART_PaneRoot", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 293, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PaneRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 293, 20)?;
     // Controls/FluentControls.xaml(293,41) Background
     rt::bind_template_binding(panel_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Panel::background_property(), rt::property(::ferroui_controls::SplitView::pane_background_property()), 293, 41)?;
     // Controls/FluentControls.xaml(293,14) ClipToBounds
@@ -43447,7 +43451,7 @@ fn build_controls_fluentcontrols_xaml_deferred_292(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(297,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PanePresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_PanePresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 297, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PanePresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 297, 33)?;
     // Controls/FluentControls.xaml(298,33) Content (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_2 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::SplitView::pane_property()));
@@ -43470,7 +43474,7 @@ fn build_controls_fluentcontrols_xaml_deferred_292(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/FluentControls.xaml(300,26) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HCPaneBorder")));
-    rt::register_name(name_scope.as_ref(), "HCPaneBorder", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 300, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "HCPaneBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 300, 26)?;
     // Controls/FluentControls.xaml(301,26) Fill
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "SystemControlForegroundTransparentBrush", 301, 26)?;
     // Controls/FluentControls.xaml(300,16) Height
@@ -43491,7 +43495,7 @@ fn build_controls_fluentcontrols_xaml_deferred_292(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&panel_1).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(305,20) Name
     panel_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentRoot")));
-    rt::register_name(name_scope.as_ref(), "ContentRoot", ::core::clone::Clone::clone(&panel_1).upcast::<::ferroui_base::FerroObject>(), 305, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_1)), 305, 20)?;
     // Controls/FluentControls.xaml(305,14) Row
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     panel_1.set_value_with_priority(::ferroui_controls::Grid::row_property(), 0_i32, priority_7);
@@ -43503,7 +43507,7 @@ fn build_controls_fluentcontrols_xaml_deferred_292(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(306,33) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 306, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 306, 33)?;
     // Controls/FluentControls.xaml(307,33) Content (setter chosen at run time)
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_4 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -43525,7 +43529,7 @@ fn build_controls_fluentcontrols_xaml_deferred_292(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(309,26) Name
     rectangle_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LightDismissLayer")));
-    rt::register_name(name_scope.as_ref(), "LightDismissLayer", ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_base::FerroObject>(), 309, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "LightDismissLayer", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_1)), 309, 26)?;
     // Controls/FluentControls.xaml(309,16) Fill
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_1.set_value_with_priority(::ferroui_controls::shapes::Shape::fill_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_9);
@@ -43650,7 +43654,7 @@ fn build_controls_fluentcontrols_xaml_deferred_294(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(35,29) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 35, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 35, 29)?;
     // Controls/FluentControls.xaml(36,29) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 36, 29)?;
     // Controls/FluentControls.xaml(37,29) Dock
@@ -43673,7 +43677,7 @@ fn build_controls_fluentcontrols_xaml_deferred_294(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(39,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SelectedContentHost2")));
-    rt::register_name(name_scope.as_ref(), "PART_SelectedContentHost2", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 39, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SelectedContentHost2", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 39, 33)?;
     // Controls/FluentControls.xaml(40,33) Margin
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), 40, 33)?;
     // Controls/FluentControls.xaml(41,33) HorizontalContentAlignment
@@ -43692,7 +43696,7 @@ fn build_controls_fluentcontrols_xaml_deferred_294(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(44,33) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SelectedContentHost")));
-    rt::register_name(name_scope.as_ref(), "PART_SelectedContentHost", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 44, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SelectedContentHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 44, 33)?;
     // Controls/FluentControls.xaml(45,33) Margin
     rt::bind_template_binding(content_presenter_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), 45, 33)?;
     // Controls/FluentControls.xaml(46,33) HorizontalContentAlignment
@@ -44017,7 +44021,7 @@ fn build_controls_fluentcontrols_xaml_deferred_296(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/FluentControls.xaml(31,13) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "PART_LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 31, 13)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 31, 13)?;
     // Controls/FluentControls.xaml(32,13) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 32, 13)?;
     // Controls/FluentControls.xaml(33,13) BorderBrush
@@ -44042,7 +44046,7 @@ fn build_controls_fluentcontrols_xaml_deferred_296(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(39,17) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 39, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 39, 17)?;
     // Controls/FluentControls.xaml(40,17) HorizontalAlignment
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::horizontal_alignment_property(), rt::property(::ferroui_controls::ContentControl::horizontal_content_alignment_property()), 40, 17)?;
     // Controls/FluentControls.xaml(41,17) VerticalAlignment
@@ -44069,7 +44073,7 @@ fn build_controls_fluentcontrols_xaml_deferred_296(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/FluentControls.xaml(45,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SelectedPipe")));
-    rt::register_name(name_scope.as_ref(), "PART_SelectedPipe", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 45, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SelectedPipe", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 45, 21)?;
     // Controls/FluentControls.xaml(46,21) Background
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "TabItemHeaderSelectedPipeFill", 46, 21)?;
     // Controls/FluentControls.xaml(47,21) CornerRadius
@@ -44180,7 +44184,7 @@ fn build_controls_fluentcontrols_xaml_deferred_298(
     context.push_parent(rt::to_value(dock_panel_0.clone()));
     // Controls/FluentControls.xaml(23,24) Name
     dock_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentPanel")));
-    rt::register_name(name_scope.as_ref(), "ContentPanel", ::core::clone::Clone::clone(&dock_panel_0).upcast::<::ferroui_base::FerroObject>(), 23, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentPanel", ::std::rc::Rc::new(::core::clone::Clone::clone(&dock_panel_0)), 23, 24)?;
     // Controls/FluentControls.xaml(24,16) Children
     let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(dock_panel_0.upcast_ref::<::ferroui_controls::Panel>());
     // Controls/FluentControls.xaml(24,16) Border
@@ -44212,7 +44216,7 @@ fn build_controls_fluentcontrols_xaml_deferred_298(
     context.push_parent(rt::to_value(scroll_content_presenter_0.clone()));
     // Controls/FluentControls.xaml(29,39) Name
     scroll_content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&scroll_content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 29, 39)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_content_presenter_0)), 29, 39)?;
     // Controls/FluentControls.xaml(30,39) Background
     rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 30, 39)?;
     // Controls/FluentControls.xaml(31,39) HorizontalSnapPointsType
@@ -44266,7 +44270,7 @@ fn build_controls_fluentcontrols_xaml_deferred_298(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&scroll_bar_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(44,22) Name
     scroll_bar_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HorizontalScrollBar")));
-    rt::register_name(name_scope.as_ref(), "PART_HorizontalScrollBar", ::core::clone::Clone::clone(&scroll_bar_0).upcast::<::ferroui_base::FerroObject>(), 44, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HorizontalScrollBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_bar_0)), 44, 22)?;
     // Controls/FluentControls.xaml(44,12) Orientation
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     scroll_bar_0.set_value_with_priority(::ferroui_controls::primitives::ScrollBar::orientation_property(), ::ferroui_base::layout::Orientation::Horizontal, priority_1);
@@ -44285,7 +44289,7 @@ fn build_controls_fluentcontrols_xaml_deferred_298(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&scroll_bar_1).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(48,22) Name
     scroll_bar_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_VerticalScrollBar")));
-    rt::register_name(name_scope.as_ref(), "PART_VerticalScrollBar", ::core::clone::Clone::clone(&scroll_bar_1).upcast::<::ferroui_base::FerroObject>(), 48, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_VerticalScrollBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_bar_1)), 48, 22)?;
     // Controls/FluentControls.xaml(48,12) Orientation
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     scroll_bar_1.set_value_with_priority(::ferroui_controls::primitives::ScrollBar::orientation_property(), ::ferroui_base::layout::Orientation::Vertical, priority_4);
@@ -44305,7 +44309,7 @@ fn build_controls_fluentcontrols_xaml_deferred_298(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/FluentControls.xaml(52,18) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ScrollBarsSeparator")));
-    rt::register_name(name_scope.as_ref(), "PART_ScrollBarsSeparator", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 52, 18)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ScrollBarsSeparator", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 52, 18)?;
     // Controls/FluentControls.xaml(52,12) Row
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     panel_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_7);
@@ -44415,7 +44419,7 @@ fn build_controls_fluentcontrols_xaml_deferred_300(
     context.push_parent(rt::to_value(scroll_viewer_0.clone()));
     // Controls/FluentControls.xaml(96,25) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "PART_ScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 96, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 96, 25)?;
     // Controls/FluentControls.xaml(97,25) Theme (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TableViewScrollViewerTheme"));
@@ -44455,7 +44459,7 @@ fn build_controls_fluentcontrols_xaml_deferred_300(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&items_presenter_0)));
     // Controls/FluentControls.xaml(107,29) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 107, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 107, 29)?;
     // Controls/FluentControls.xaml(108,29) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 108, 29)?;
     // Controls/FluentControls.xaml(109,29) Margin
@@ -44592,7 +44596,7 @@ fn build_controls_fluentcontrols_xaml_deferred_305(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(31,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 31, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 31, 29)?;
     // Controls/FluentControls.xaml(32,29) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 32, 29)?;
     // Controls/FluentControls.xaml(33,29) BorderBrush
@@ -44629,7 +44633,7 @@ fn build_controls_fluentcontrols_xaml_deferred_305(
     context.push_parent(rt::to_value(thumb_0.clone()));
     // Controls/FluentControls.xaml(41,18) Name
     thumb_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Resizer")));
-    rt::register_name(name_scope.as_ref(), "PART_Resizer", ::core::clone::Clone::clone(&thumb_0).upcast::<::ferroui_base::FerroObject>(), 41, 18)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Resizer", ::std::rc::Rc::new(::core::clone::Clone::clone(&thumb_0)), 41, 18)?;
     // Controls/FluentControls.xaml(42,18) Template (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TableViewColumnHeaderResizerTemplate"));
@@ -44838,7 +44842,7 @@ fn build_controls_fluentcontrols_xaml_deferred_307(
     border_0.begin_init();
     // Controls/FluentControls.xaml(12,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Border")));
-    rt::register_name(name_scope.as_ref(), "Border", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 12, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Border", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 12, 17)?;
     // Controls/FluentControls.xaml(13,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 13, 17)?;
     // Controls/FluentControls.xaml(14,17) BorderBrush
@@ -44860,7 +44864,7 @@ fn build_controls_fluentcontrols_xaml_deferred_307(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&table_view_cells_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/FluentControls.xaml(20,36) Name
     table_view_cells_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_CellsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_CellsPresenter", ::core::clone::Clone::clone(&table_view_cells_presenter_0).upcast::<::ferroui_base::FerroObject>(), 20, 36)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_CellsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&table_view_cells_presenter_0)), 20, 36)?;
     rt::invoked(table_view_cells_presenter_0.try_end_init(), 20, 12)?;
     rt::invoked(border_0.try_end_init(), 12, 10)?;
     ::core::result::Result::Ok(rt::to_value(border_0.clone()))
@@ -45051,7 +45055,7 @@ fn build_controls_fluentcontrols_xaml_deferred_309(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/FluentControls.xaml(30,13) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "PART_LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 30, 13)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 30, 13)?;
     // Controls/FluentControls.xaml(31,13) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 31, 13)?;
     // Controls/FluentControls.xaml(32,13) BorderBrush
@@ -45076,7 +45080,7 @@ fn build_controls_fluentcontrols_xaml_deferred_309(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(38,17) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 38, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 38, 17)?;
     // Controls/FluentControls.xaml(39,17) HorizontalAlignment
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::horizontal_alignment_property(), rt::property(::ferroui_controls::ContentControl::horizontal_content_alignment_property()), 39, 17)?;
     // Controls/FluentControls.xaml(40,17) VerticalAlignment
@@ -45103,7 +45107,7 @@ fn build_controls_fluentcontrols_xaml_deferred_309(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/FluentControls.xaml(43,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SelectedPipe")));
-    rt::register_name(name_scope.as_ref(), "PART_SelectedPipe", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 43, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SelectedPipe", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 43, 21)?;
     // Controls/FluentControls.xaml(44,21) Background
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "TabItemHeaderSelectedPipeFill", 44, 21)?;
     // Controls/FluentControls.xaml(45,21) CornerRadius
@@ -45525,7 +45529,7 @@ fn build_controls_fluentcontrols_xaml_deferred_316(
     content_presenter_0.begin_init();
     // Controls/FluentControls.xaml(46,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 46, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 46, 29)?;
     // Controls/FluentControls.xaml(47,29) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 47, 29)?;
     // Controls/FluentControls.xaml(48,29) BorderBrush
@@ -45614,7 +45618,7 @@ fn build_controls_fluentcontrols_xaml_deferred_318(
     content_presenter_0.begin_init();
     // Controls/FluentControls.xaml(80,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 80, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 80, 29)?;
     // Controls/FluentControls.xaml(81,29) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 81, 29)?;
     // Controls/FluentControls.xaml(82,29) Content (setter chosen at run time)
@@ -45711,153 +45715,153 @@ fn build_controls_fluentcontrols_xaml_deferred_319(
     ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_14, rt::to_object(::core::clone::Clone::clone(&control_template_0)));
-    // Controls/FluentControls.xaml(201,6) Content
-    // Controls/FluentControls.xaml(201,6) Style
+    // Controls/FluentControls.xaml(203,6) Content
+    // Controls/FluentControls.xaml(203,6) Style
     let style_0 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_0.clone()));
-    // Controls/FluentControls.xaml(201,6) Selector
+    // Controls/FluentControls.xaml(203,6) Selector
     let selector_0 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_1 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_0), ":touch-mode");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_1.clone()));
-    // Controls/FluentControls.xaml(202,8) Content
+    // Controls/FluentControls.xaml(204,8) Content
     let setter_15 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::Control::context_flyout_property()));
-    // Controls/FluentControls.xaml(202,40) Value
+    // Controls/FluentControls.xaml(204,40) Value
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("HorizontalTextBoxContextFlyout"));
-    let provided_14 = rt::provide_value_invoked(&context, rt::setter_value_property(), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 202, 40)?;
+    let provided_14 = rt::provide_value_invoked(&context, rt::setter_value_property(), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 204, 40)?;
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_15, ::core::clone::Clone::clone(&provided_14));
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_0.clone(), 201, 6)?);
-    // Controls/FluentControls.xaml(206,6) Content
-    // Controls/FluentControls.xaml(206,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_0.clone(), 203, 6)?);
+    // Controls/FluentControls.xaml(208,6) Content
+    // Controls/FluentControls.xaml(208,6) Style
     let style_1 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_1.clone()));
-    // Controls/FluentControls.xaml(206,6) Selector
+    // Controls/FluentControls.xaml(208,6) Selector
     let selector_2 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_3 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_2), ":disabled");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_1, ::core::option::Option::Some(selector_3.clone()));
-    // Controls/FluentControls.xaml(207,8) Content
-    // Controls/FluentControls.xaml(207,37) Value
-    rt::add_dynamic_resource_setter_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), "TextControlForegroundDisabled");
     // Controls/FluentControls.xaml(209,8) Content
-    // Controls/FluentControls.xaml(209,8) Style
+    // Controls/FluentControls.xaml(209,37) Value
+    rt::add_dynamic_resource_setter_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), "TextControlForegroundDisabled");
+    // Controls/FluentControls.xaml(211,8) Content
+    // Controls/FluentControls.xaml(211,8) Style
     let style_2 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_2.clone()));
-    // Controls/FluentControls.xaml(209,8) Selector
+    // Controls/FluentControls.xaml(211,8) Selector
     let selector_4 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_5 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_4));
     let selector_6 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_5), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
     let selector_7 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_6), "PART_BorderElement");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_2, ::core::option::Option::Some(selector_7.clone()));
-    // Controls/FluentControls.xaml(210,10) Content
-    // Controls/FluentControls.xaml(210,39) Value
+    // Controls/FluentControls.xaml(212,10) Content
+    // Controls/FluentControls.xaml(212,39) Value
     rt::add_dynamic_resource_setter_with_parent(&context, style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::background_property()), "TextControlBackgroundDisabled");
-    // Controls/FluentControls.xaml(211,10) Content
-    // Controls/FluentControls.xaml(211,40) Value
+    // Controls/FluentControls.xaml(213,10) Content
+    // Controls/FluentControls.xaml(213,40) Value
     rt::add_dynamic_resource_setter_with_parent(&context, style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::border_brush_property()), "TextControlBorderBrushDisabled");
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_2.clone(), 209, 8)?);
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_2.clone(), 211, 8)?);
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 206, 6)?);
-    // Controls/FluentControls.xaml(217,6) Content
-    // Controls/FluentControls.xaml(217,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 208, 6)?);
+    // Controls/FluentControls.xaml(219,6) Content
+    // Controls/FluentControls.xaml(219,6) Style
     let style_3 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_3.clone()));
-    // Controls/FluentControls.xaml(217,6) Selector
+    // Controls/FluentControls.xaml(219,6) Selector
     let selector_8 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_9 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_8), ":pointerover");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_3, ::core::option::Option::Some(selector_9.clone()));
-    // Controls/FluentControls.xaml(218,8) Content
-    // Controls/FluentControls.xaml(218,37) Value
-    rt::add_dynamic_resource_setter_with_parent(&context, style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), "TextControlForegroundPointerOver");
     // Controls/FluentControls.xaml(220,8) Content
-    // Controls/FluentControls.xaml(220,8) Style
+    // Controls/FluentControls.xaml(220,37) Value
+    rt::add_dynamic_resource_setter_with_parent(&context, style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), "TextControlForegroundPointerOver");
+    // Controls/FluentControls.xaml(222,8) Content
+    // Controls/FluentControls.xaml(222,8) Style
     let style_4 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_4.clone()));
-    // Controls/FluentControls.xaml(220,8) Selector
+    // Controls/FluentControls.xaml(222,8) Selector
     let selector_10 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_11 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_10));
     let selector_12 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_11), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
     let selector_13 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_12), "PART_BorderElement");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_4, ::core::option::Option::Some(selector_13.clone()));
-    // Controls/FluentControls.xaml(221,10) Content
-    // Controls/FluentControls.xaml(221,40) Value
+    // Controls/FluentControls.xaml(223,10) Content
+    // Controls/FluentControls.xaml(223,40) Value
     rt::add_dynamic_resource_setter_with_parent(&context, style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::border_brush_property()), "TextControlBorderBrushPointerOver");
-    // Controls/FluentControls.xaml(222,10) Content
-    // Controls/FluentControls.xaml(222,39) Value
+    // Controls/FluentControls.xaml(224,10) Content
+    // Controls/FluentControls.xaml(224,39) Value
     rt::add_dynamic_resource_setter_with_parent(&context, style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::background_property()), "TextControlBackgroundPointerOver");
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_4.clone(), 220, 8)?);
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_4.clone(), 222, 8)?);
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_3.clone(), 217, 6)?);
-    // Controls/FluentControls.xaml(228,6) Content
-    // Controls/FluentControls.xaml(228,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_3.clone(), 219, 6)?);
+    // Controls/FluentControls.xaml(230,6) Content
+    // Controls/FluentControls.xaml(230,6) Style
     let style_5 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_5.clone()));
-    // Controls/FluentControls.xaml(228,6) Selector
+    // Controls/FluentControls.xaml(230,6) Selector
     let selector_14 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_15 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_14), ":focus");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_5, ::core::option::Option::Some(selector_15.clone()));
-    // Controls/FluentControls.xaml(229,8) Content
-    // Controls/FluentControls.xaml(229,37) Value
-    rt::add_dynamic_resource_setter_with_parent(&context, style_5.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), "TextControlForegroundFocused");
     // Controls/FluentControls.xaml(231,8) Content
-    // Controls/FluentControls.xaml(231,8) Style
+    // Controls/FluentControls.xaml(231,37) Value
+    rt::add_dynamic_resource_setter_with_parent(&context, style_5.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), "TextControlForegroundFocused");
+    // Controls/FluentControls.xaml(233,8) Content
+    // Controls/FluentControls.xaml(233,8) Style
     let style_6 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_6.clone()));
-    // Controls/FluentControls.xaml(231,8) Selector
+    // Controls/FluentControls.xaml(233,8) Selector
     let selector_16 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_17 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_16));
     let selector_18 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_17), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
     let selector_19 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_18), "PART_BorderElement");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_6, ::core::option::Option::Some(selector_19.clone()));
-    // Controls/FluentControls.xaml(232,10) Content
-    // Controls/FluentControls.xaml(232,39) Value
-    rt::add_dynamic_resource_setter_with_parent(&context, style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::background_property()), "TextControlBackgroundFocused");
-    // Controls/FluentControls.xaml(233,10) Content
-    // Controls/FluentControls.xaml(233,40) Value
-    rt::add_dynamic_resource_setter_with_parent(&context, style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::border_brush_property()), "TextControlBorderBrushFocused");
     // Controls/FluentControls.xaml(234,10) Content
-    // Controls/FluentControls.xaml(234,44) Value
+    // Controls/FluentControls.xaml(234,39) Value
+    rt::add_dynamic_resource_setter_with_parent(&context, style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::background_property()), "TextControlBackgroundFocused");
+    // Controls/FluentControls.xaml(235,10) Content
+    // Controls/FluentControls.xaml(235,40) Value
+    rt::add_dynamic_resource_setter_with_parent(&context, style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::border_brush_property()), "TextControlBorderBrushFocused");
+    // Controls/FluentControls.xaml(236,10) Content
+    // Controls/FluentControls.xaml(236,44) Value
     rt::add_dynamic_resource_setter_with_parent(&context, style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::border_thickness_property()), "TextControlBorderThemeThicknessFocused");
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_5.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_6.clone(), 231, 8)?);
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_5.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_6.clone(), 233, 8)?);
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_5.clone(), 228, 6)?);
-    // Controls/FluentControls.xaml(238,6) Content
-    // Controls/FluentControls.xaml(238,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_5.clone(), 230, 6)?);
+    // Controls/FluentControls.xaml(240,6) Content
+    // Controls/FluentControls.xaml(240,6) Style
     let style_7 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_7.clone()));
-    // Controls/FluentControls.xaml(238,6) Selector
+    // Controls/FluentControls.xaml(240,6) Selector
     let selector_20 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_21 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_20), ":error");
     let selector_22 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_21));
     let selector_23 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_22), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
     let selector_24 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_23), "PART_BorderElement");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_7, ::core::option::Option::Some(selector_24.clone()));
-    // Controls/FluentControls.xaml(239,8) Content
-    // Controls/FluentControls.xaml(239,38) Value
+    // Controls/FluentControls.xaml(241,8) Content
+    // Controls/FluentControls.xaml(241,38) Value
     rt::add_dynamic_resource_setter_with_parent(&context, style_7.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::border_brush_property()), "SystemControlErrorTextForegroundBrush");
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_7.clone(), 238, 6)?);
-    // Controls/FluentControls.xaml(242,6) Content
-    // Controls/FluentControls.xaml(242,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_7.clone(), 240, 6)?);
+    // Controls/FluentControls.xaml(244,6) Content
+    // Controls/FluentControls.xaml(244,6) Style
     let style_8 = ::ferroui_base::styling::Style::new();
-    // Controls/FluentControls.xaml(242,6) Selector
+    // Controls/FluentControls.xaml(244,6) Selector
     let selector_25 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_26 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_25));
     let selector_27 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_26), <::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE);
     let selector_28 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_27), "PART_FloatingPlaceholder");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_8, ::core::option::Option::Some(selector_28.clone()));
-    // Controls/FluentControls.xaml(243,8) Content
+    // Controls/FluentControls.xaml(245,8) Content
     let setter_27 = rt::new_setter(rt::property(::ferroui_base::input::InputElement::cursor_property()));
-    // Controls/FluentControls.xaml(243,8) Value
-    let value_0 = rt::invoked(::ferroui_base::input::Cursor::__markup_parse(::std::string::String::from("IBeam")), 243, 33)?;
+    // Controls/FluentControls.xaml(245,8) Value
+    let value_0 = rt::invoked(::ferroui_base::input::Cursor::__markup_parse(::std::string::String::from("IBeam")), 245, 33)?;
     rt::add_setter_value(style_8.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_27, rt::to_object(::core::clone::Clone::clone(&value_0)));
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_8.clone(), 242, 6)?);
-    // Controls/FluentControls.xaml(246,6) Content
-    // Controls/FluentControls.xaml(246,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_8.clone(), 244, 6)?);
+    // Controls/FluentControls.xaml(248,6) Content
+    // Controls/FluentControls.xaml(248,6) Style
     let style_9 = ::ferroui_base::styling::Style::new();
-    // Controls/FluentControls.xaml(246,6) Selector
+    // Controls/FluentControls.xaml(248,6) Selector
     let selector_29 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_30 = ::ferroui_base::styling::Selectors::property_equals_untyped(::core::option::Option::Some(selector_29), rt::property(::ferroui_controls::TextBox::use_floating_placeholder_property()), ::std::rc::Rc::new(::core::clone::Clone::clone(&true)));
     let selector_31 = ::ferroui_base::styling::Selectors::class(::core::option::Option::None, ":empty");
@@ -45866,14 +45870,14 @@ fn build_controls_fluentcontrols_xaml_deferred_319(
     let selector_34 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_33), <::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE);
     let selector_35 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_34), "PART_FloatingPlaceholder");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_9, ::core::option::Option::Some(selector_35.clone()));
-    // Controls/FluentControls.xaml(247,8) Content
+    // Controls/FluentControls.xaml(249,8) Content
     rt::add_setter(style_9.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::is_visible_property()), rt::to_object(::core::clone::Clone::clone(&true)));
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_9.clone(), 246, 6)?);
-    // Controls/FluentControls.xaml(251,6) Content
-    // Controls/FluentControls.xaml(251,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_9.clone(), 248, 6)?);
+    // Controls/FluentControls.xaml(253,6) Content
+    // Controls/FluentControls.xaml(253,6) Style
     let style_10 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_10.clone()));
-    // Controls/FluentControls.xaml(251,6) Selector
+    // Controls/FluentControls.xaml(253,6) Selector
     let selector_36 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_37 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_36), "revealPasswordButton");
     let selector_38 = ::ferroui_base::styling::Selectors::property_equals_untyped(::core::option::Option::Some(selector_37), rt::property(::ferroui_controls::TextBox::accepts_return_property()), ::std::rc::Rc::new(::core::clone::Clone::clone(&false)));
@@ -45882,23 +45886,23 @@ fn build_controls_fluentcontrols_xaml_deferred_319(
     let selector_41 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_40), ":empty");
     let selector_42 = ::ferroui_base::styling::Selectors::not(::core::option::Option::Some(selector_39), selector_41);
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_10, ::core::option::Option::Some(selector_42.clone()));
-    // Controls/FluentControls.xaml(252,8) Content
+    // Controls/FluentControls.xaml(254,8) Content
     let setter_29 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::TextBox::inner_right_content_property()));
-    // Controls/FluentControls.xaml(253,10) Value
+    // Controls/FluentControls.xaml(255,10) Value
     let template_0 = ::ferroui_markup_xaml::templates::Template::__markup_new_0();
     context.push_parent(rt::to_value(template_0.clone()));
-    // Controls/FluentControls.xaml(254,12) Content
-    let deferred_1 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_321, 254, 12)?;
+    // Controls/FluentControls.xaml(256,12) Content
+    let deferred_1 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_321, 256, 12)?;
     ::ferroui_markup_xaml::templates::Template::__markup_set_Content(&template_0, rt::to_object(::core::clone::Clone::clone(&deferred_1)));
     context.pop_parent();
     rt::add_setter_value_with_parent(&context, style_10.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_29, rt::to_object(::core::clone::Clone::clone(&template_0)));
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_10.clone(), 251, 6)?);
-    // Controls/FluentControls.xaml(270,6) Content
-    // Controls/FluentControls.xaml(270,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_10.clone(), 253, 6)?);
+    // Controls/FluentControls.xaml(272,6) Content
+    // Controls/FluentControls.xaml(272,6) Style
     let style_11 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_11.clone()));
-    // Controls/FluentControls.xaml(270,6) Selector
+    // Controls/FluentControls.xaml(272,6) Selector
     let selector_43 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_44 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_43), "clearButton");
     let selector_45 = ::ferroui_base::styling::Selectors::property_equals_untyped(::core::option::Option::Some(selector_44), rt::property(::ferroui_controls::TextBox::accepts_return_property()), ::std::rc::Rc::new(::core::clone::Clone::clone(&false)));
@@ -45908,18 +45912,18 @@ fn build_controls_fluentcontrols_xaml_deferred_319(
     let selector_49 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_48), ":empty");
     let selector_50 = ::ferroui_base::styling::Selectors::not(::core::option::Option::Some(selector_47), selector_49);
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_11, ::core::option::Option::Some(selector_50.clone()));
-    // Controls/FluentControls.xaml(271,8) Content
+    // Controls/FluentControls.xaml(273,8) Content
     let setter_30 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::TextBox::inner_right_content_property()));
-    // Controls/FluentControls.xaml(272,10) Value
+    // Controls/FluentControls.xaml(274,10) Value
     let template_1 = ::ferroui_markup_xaml::templates::Template::__markup_new_0();
     context.push_parent(rt::to_value(template_1.clone()));
-    // Controls/FluentControls.xaml(273,12) Content
-    let deferred_2 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_322, 273, 12)?;
+    // Controls/FluentControls.xaml(275,12) Content
+    let deferred_2 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_322, 275, 12)?;
     ::ferroui_markup_xaml::templates::Template::__markup_set_Content(&template_1, rt::to_object(::core::clone::Clone::clone(&deferred_2)));
     context.pop_parent();
     rt::add_setter_value_with_parent(&context, style_11.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_30, rt::to_object(::core::clone::Clone::clone(&template_1)));
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_11.clone(), 270, 6)?);
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_11.clone(), 272, 6)?);
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
 }
@@ -45949,7 +45953,7 @@ fn build_controls_fluentcontrols_xaml_deferred_320(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(116,13) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_BorderElement")));
-    rt::register_name(name_scope.as_ref(), "PART_BorderElement", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 116, 13)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_BorderElement", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 116, 13)?;
     // Controls/FluentControls.xaml(117,13) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 117, 13)?;
     // Controls/FluentControls.xaml(118,13) BorderBrush
@@ -46025,7 +46029,7 @@ fn build_controls_fluentcontrols_xaml_deferred_320(
     context.push_parent(rt::to_value(dock_panel_0.clone()));
     // Controls/FluentControls.xaml(132,28) Name
     dock_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_InnerDockPanel")));
-    rt::register_name(name_scope.as_ref(), "PART_InnerDockPanel", ::core::clone::Clone::clone(&dock_panel_0).upcast::<::ferroui_base::FerroObject>(), 132, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_InnerDockPanel", ::std::rc::Rc::new(::core::clone::Clone::clone(&dock_panel_0)), 132, 28)?;
     // Controls/FluentControls.xaml(132,18) Column
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     dock_panel_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_3);
@@ -46042,7 +46046,7 @@ fn build_controls_fluentcontrols_xaml_deferred_320(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(136,30) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_FloatingPlaceholder")));
-    rt::register_name(name_scope.as_ref(), "PART_FloatingPlaceholder", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 136, 30)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_FloatingPlaceholder", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 136, 30)?;
     // Controls/FluentControls.xaml(137,30) Foreground
     rt::bind_template_binding(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::foreground_property(), rt::property(::ferroui_controls::TextBox::placeholder_foreground_property()), 137, 30)?;
     // Controls/FluentControls.xaml(136,20) IsVisible
@@ -46063,7 +46067,7 @@ fn build_controls_fluentcontrols_xaml_deferred_320(
     context.push_parent(rt::to_value(scroll_viewer_0.clone()));
     // Controls/FluentControls.xaml(142,33) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "PART_ScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 142, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 142, 33)?;
     // Controls/FluentControls.xaml(143,33) HorizontalScrollBarVisibility
     rt::bind_template_binding(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(::ferroui_controls::ScrollViewer::horizontal_scroll_bar_visibility_property()), 143, 33)?;
     // Controls/FluentControls.xaml(144,33) VerticalScrollBarVisibility
@@ -46074,20 +46078,20 @@ fn build_controls_fluentcontrols_xaml_deferred_320(
     rt::bind_template_binding(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ScrollViewer::allow_auto_hide_property(), rt::property(::ferroui_controls::ScrollViewer::allow_auto_hide_property()), 146, 33)?;
     // Controls/FluentControls.xaml(147,33) BringIntoViewOnFocusChange
     rt::bind_template_binding(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ScrollViewer::bring_into_view_on_focus_change_property(), rt::property(::ferroui_controls::ScrollViewer::bring_into_view_on_focus_change_property()), 147, 33)?;
-    // Controls/FluentControls.xaml(184,24) Styles
+    // Controls/FluentControls.xaml(186,24) Styles
     let styles_collection_0 = ::ferroui_base::StyledElement::__markup_get_Styles(scroll_viewer_0.upcast_ref::<::ferroui_base::StyledElement>());
-    // Controls/FluentControls.xaml(184,24) Style
+    // Controls/FluentControls.xaml(186,24) Style
     let style_0 = ::ferroui_base::styling::Style::new();
-    // Controls/FluentControls.xaml(184,24) Selector
+    // Controls/FluentControls.xaml(186,24) Selector
     let selector_0 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::None, <::ferroui_controls::presenters::ScrollContentPresenter as ::ferroui_base::StaticType>::TYPE);
     let selector_1 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_0), "PART_ContentPresenter");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_1.clone()));
-    // Controls/FluentControls.xaml(185,26) Content
+    // Controls/FluentControls.xaml(187,26) Content
     let setter_0 = rt::new_setter(rt::property(::ferroui_base::input::InputElement::cursor_property()));
-    // Controls/FluentControls.xaml(185,26) Value
-    let value_1 = rt::invoked(::ferroui_base::input::Cursor::__markup_parse(::std::string::String::from("IBeam")), 185, 51)?;
+    // Controls/FluentControls.xaml(187,26) Value
+    let value_1 = rt::invoked(::ferroui_base::input::Cursor::__markup_parse(::std::string::String::from("IBeam")), 187, 51)?;
     rt::add_setter_value(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_0, rt::to_object(::core::clone::Clone::clone(&value_1)));
-    rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_0, rt::cast(style_0.clone(), 184, 24)?), 184, 24)?;
+    rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_0, rt::cast(style_0.clone(), 186, 24)?), 186, 24)?;
     // Controls/FluentControls.xaml(148,22) Content
     // Controls/FluentControls.xaml(148,22) Panel
     let panel_1 = ::ferroui_controls::Panel::new();
@@ -46103,7 +46107,7 @@ fn build_controls_fluentcontrols_xaml_deferred_320(
     context.push_parent(rt::to_value(text_block_1.clone()));
     // Controls/FluentControls.xaml(149,34) Name
     text_block_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Placeholder")));
-    rt::register_name(name_scope.as_ref(), "PART_Placeholder", ::core::clone::Clone::clone(&text_block_1).upcast::<::ferroui_base::FerroObject>(), 149, 34)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Placeholder", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_1)), 149, 34)?;
     // Controls/FluentControls.xaml(150,34) Foreground
     rt::bind_template_binding(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::foreground_property(), rt::property(::ferroui_controls::TextBox::placeholder_foreground_property()), 150, 34)?;
     // Controls/FluentControls.xaml(151,34) Opacity
@@ -46164,43 +46168,47 @@ fn build_controls_fluentcontrols_xaml_deferred_320(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_7, ::core::clone::Clone::clone(&text_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(165,38) Name
     text_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TextPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_TextPresenter", ::core::clone::Clone::clone(&text_presenter_0).upcast::<::ferroui_base::FerroObject>(), 165, 38)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TextPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_presenter_0)), 165, 38)?;
     // Controls/FluentControls.xaml(166,38) Text
     let template_binding_23 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TextBox::text_property()));
     // Controls/FluentControls.xaml(166,38) Mode
     ::ferroui_base::data::TemplateBinding::__markup_set_Mode(&template_binding_23, ::ferroui_base::data::BindingMode::TwoWay);
     let provided_27 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_23);
     rt::bind(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::text_property(), provided_27, 166, 38)?;
-    // Controls/FluentControls.xaml(167,38) CaretBlinkInterval
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::caret_blink_interval_property(), rt::property(::ferroui_controls::TextBox::caret_blink_interval_property()), 167, 38)?;
-    // Controls/FluentControls.xaml(168,38) CaretIndex
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::caret_index_property(), rt::property(::ferroui_controls::TextBox::caret_index_property()), 168, 38)?;
-    // Controls/FluentControls.xaml(169,38) SelectionStart
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::selection_start_property(), rt::property(::ferroui_controls::TextBox::selection_start_property()), 169, 38)?;
-    // Controls/FluentControls.xaml(170,38) SelectionEnd
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::selection_end_property(), rt::property(::ferroui_controls::TextBox::selection_end_property()), 170, 38)?;
-    // Controls/FluentControls.xaml(171,38) TextAlignment
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::text_alignment_property(), rt::property(::ferroui_controls::TextBox::text_alignment_property()), 171, 38)?;
-    // Controls/FluentControls.xaml(172,38) TextWrapping
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::text_wrapping_property(), rt::property(::ferroui_controls::TextBox::text_wrapping_property()), 172, 38)?;
-    // Controls/FluentControls.xaml(173,38) LineHeight
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::line_height_property(), rt::property(::ferroui_controls::TextBox::line_height_property()), 173, 38)?;
-    // Controls/FluentControls.xaml(174,38) LetterSpacing
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::letter_spacing_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::letter_spacing_property()), 174, 38)?;
-    // Controls/FluentControls.xaml(175,38) PasswordChar
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::password_char_property(), rt::property(::ferroui_controls::TextBox::password_char_property()), 175, 38)?;
-    // Controls/FluentControls.xaml(176,38) RevealPassword
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::reveal_password_property(), rt::property(::ferroui_controls::TextBox::reveal_password_property()), 176, 38)?;
-    // Controls/FluentControls.xaml(177,38) SelectionBrush
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::selection_brush_property(), rt::property(::ferroui_controls::TextBox::selection_brush_property()), 177, 38)?;
-    // Controls/FluentControls.xaml(178,38) SelectionForegroundBrush
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::selection_foreground_brush_property(), rt::property(::ferroui_controls::TextBox::selection_foreground_brush_property()), 178, 38)?;
-    // Controls/FluentControls.xaml(179,38) CaretBrush
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::caret_brush_property(), rt::property(::ferroui_controls::TextBox::caret_brush_property()), 179, 38)?;
-    // Controls/FluentControls.xaml(180,38) HorizontalAlignment
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::horizontal_alignment_property(), rt::property(::ferroui_controls::TextBox::horizontal_content_alignment_property()), 180, 38)?;
-    // Controls/FluentControls.xaml(181,38) VerticalAlignment
-    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::vertical_alignment_property(), rt::property(::ferroui_controls::TextBox::vertical_content_alignment_property()), 181, 38)?;
+    // Controls/FluentControls.xaml(167,38) TextStyleOverrides
+    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::text_style_overrides_property(), rt::property(::ferroui_controls::TextBox::text_style_overrides_property()), 167, 38)?;
+    // Controls/FluentControls.xaml(168,38) TextParagraphStyles
+    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::text_paragraph_styles_property(), rt::property(::ferroui_controls::TextBox::text_paragraph_styles_property()), 168, 38)?;
+    // Controls/FluentControls.xaml(169,38) CaretBlinkInterval
+    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::caret_blink_interval_property(), rt::property(::ferroui_controls::TextBox::caret_blink_interval_property()), 169, 38)?;
+    // Controls/FluentControls.xaml(170,38) CaretIndex
+    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::caret_index_property(), rt::property(::ferroui_controls::TextBox::caret_index_property()), 170, 38)?;
+    // Controls/FluentControls.xaml(171,38) SelectionStart
+    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::selection_start_property(), rt::property(::ferroui_controls::TextBox::selection_start_property()), 171, 38)?;
+    // Controls/FluentControls.xaml(172,38) SelectionEnd
+    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::selection_end_property(), rt::property(::ferroui_controls::TextBox::selection_end_property()), 172, 38)?;
+    // Controls/FluentControls.xaml(173,38) TextAlignment
+    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::text_alignment_property(), rt::property(::ferroui_controls::TextBox::text_alignment_property()), 173, 38)?;
+    // Controls/FluentControls.xaml(174,38) TextWrapping
+    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::text_wrapping_property(), rt::property(::ferroui_controls::TextBox::text_wrapping_property()), 174, 38)?;
+    // Controls/FluentControls.xaml(175,38) LineHeight
+    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::line_height_property(), rt::property(::ferroui_controls::TextBox::line_height_property()), 175, 38)?;
+    // Controls/FluentControls.xaml(176,38) LetterSpacing
+    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::letter_spacing_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::letter_spacing_property()), 176, 38)?;
+    // Controls/FluentControls.xaml(177,38) PasswordChar
+    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::password_char_property(), rt::property(::ferroui_controls::TextBox::password_char_property()), 177, 38)?;
+    // Controls/FluentControls.xaml(178,38) RevealPassword
+    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::reveal_password_property(), rt::property(::ferroui_controls::TextBox::reveal_password_property()), 178, 38)?;
+    // Controls/FluentControls.xaml(179,38) SelectionBrush
+    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::selection_brush_property(), rt::property(::ferroui_controls::TextBox::selection_brush_property()), 179, 38)?;
+    // Controls/FluentControls.xaml(180,38) SelectionForegroundBrush
+    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::selection_foreground_brush_property(), rt::property(::ferroui_controls::TextBox::selection_foreground_brush_property()), 180, 38)?;
+    // Controls/FluentControls.xaml(181,38) CaretBrush
+    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::TextPresenter::caret_brush_property(), rt::property(::ferroui_controls::TextBox::caret_brush_property()), 181, 38)?;
+    // Controls/FluentControls.xaml(182,38) HorizontalAlignment
+    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::horizontal_alignment_property(), rt::property(::ferroui_controls::TextBox::horizontal_content_alignment_property()), 182, 38)?;
+    // Controls/FluentControls.xaml(183,38) VerticalAlignment
+    rt::bind_template_binding(text_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::vertical_alignment_property(), rt::property(::ferroui_controls::TextBox::vertical_content_alignment_property()), 183, 38)?;
     rt::invoked(text_presenter_0.try_end_init(), 165, 24)?;
     context.pop_parent();
     rt::invoked(panel_1.try_end_init(), 148, 22)?;
@@ -46208,31 +46216,31 @@ fn build_controls_fluentcontrols_xaml_deferred_320(
     rt::invoked(scroll_viewer_0.try_end_init(), 142, 20)?;
     context.pop_parent();
     rt::invoked(dock_panel_0.try_end_init(), 132, 18)?;
-    // Controls/FluentControls.xaml(190,18) Children
+    // Controls/FluentControls.xaml(192,18) Children
     let children_collection_8 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(190,18) ContentPresenter
+    // Controls/FluentControls.xaml(192,18) ContentPresenter
     let content_presenter_1 = ::ferroui_controls::presenters::ContentPresenter::new();
     content_presenter_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_8, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
-    // Controls/FluentControls.xaml(190,18) Column
+    // Controls/FluentControls.xaml(192,18) Column
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_7);
-    // Controls/FluentControls.xaml(190,18) ColumnSpan
+    // Controls/FluentControls.xaml(192,18) ColumnSpan
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 1_i32, priority_8);
-    // Controls/FluentControls.xaml(192,35) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::vertical_content_alignment_property(), rt::property(::ferroui_controls::TextBox::vertical_content_alignment_property()), 192, 35)?;
-    // Controls/FluentControls.xaml(193,35) Content (setter chosen at run time)
+    // Controls/FluentControls.xaml(194,35) VerticalContentAlignment
+    rt::bind_template_binding(content_presenter_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::vertical_content_alignment_property(), rt::property(::ferroui_controls::TextBox::vertical_content_alignment_property()), 194, 35)?;
+    // Controls/FluentControls.xaml(195,35) Content (setter chosen at run time)
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
-    let template_binding_40 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TextBox::inner_right_content_property()));
-    let provided_44 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_40);
-    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_44);
+    let template_binding_42 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TextBox::inner_right_content_property()));
+    let provided_46 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_42);
+    let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_46);
     if value_5.is_some() {
-        rt::bind(content_presenter_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_property(), value_5.clone(), 193, 35)?;
+        rt::bind(content_presenter_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_property(), value_5.clone(), 195, 35)?;
     } else {
-        content_presenter_1.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::content_property(), rt::exact(value_5.clone(), "ContentControl.Content", 1, 193, 35)?, priority_9);
+        content_presenter_1.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::content_property(), rt::exact(value_5.clone(), "ContentControl.Content", 1, 195, 35)?, priority_9);
     }
-    rt::invoked(content_presenter_1.try_end_init(), 190, 18)?;
+    rt::invoked(content_presenter_1.try_end_init(), 192, 18)?;
     context.pop_parent();
     rt::invoked(grid_0.try_end_init(), 127, 16)?;
     context.pop_parent();
@@ -46244,179 +46252,179 @@ fn build_controls_fluentcontrols_xaml_deferred_320(
     ::core::result::Result::Ok(rt::to_value(data_validation_errors_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/FluentControls.xaml(254,12)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/FluentControls.xaml(256,12)` (a template or a deferred resource).
 fn build_controls_fluentcontrols_xaml_deferred_321(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
-    // Controls/FluentControls.xaml(254,12) ToggleButton
+    // Controls/FluentControls.xaml(256,12) ToggleButton
     let toggle_button_0 = ::ferroui_controls::primitives::ToggleButton::new();
     context.set_intermediate_root_object(rt::to_value(toggle_button_0.clone()));
     toggle_button_0.begin_init();
     context.push_parent(rt::to_value(toggle_button_0.clone()));
-    // Controls/FluentControls.xaml(254,25) Theme (setter chosen at run time)
+    // Controls/FluentControls.xaml(256,25) Theme (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("FluentTextBoxToggleButton"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 254, 25)?;
+    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 256, 25)?;
     let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
     if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(toggle_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0.clone(), 254, 25)?;
+        rt::bind(toggle_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0.clone(), 256, 25)?;
     } else if rt::is_instance(&value_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE)) {
-        toggle_button_0.set_value_with_priority(::ferroui_base::StyledElement::theme_property(), rt::exact(value_0.clone(), "StyledElement.Theme", 1, 254, 25)?, priority_0);
+        toggle_button_0.set_value_with_priority(::ferroui_base::StyledElement::theme_property(), rt::exact(value_0.clone(), "StyledElement.Theme", 1, 256, 25)?, priority_0);
     } else if value_0.is_none() {
-        toggle_button_0.set_value_with_priority(::ferroui_base::StyledElement::theme_property(), rt::exact(value_0.clone(), "StyledElement.Theme", 1, 254, 25)?, priority_0);
+        toggle_button_0.set_value_with_priority(::ferroui_base::StyledElement::theme_property(), rt::exact(value_0.clone(), "StyledElement.Theme", 1, 256, 25)?, priority_0);
     } else {
-        return ::core::result::Result::Err(rt::no_setter("Theme", &value_0, 254, 25));
+        return ::core::result::Result::Err(rt::no_setter("Theme", &value_0, 256, 25));
     }
-    // Controls/FluentControls.xaml(255,25) IsChecked
+    // Controls/FluentControls.xaml(257,25) IsChecked
     let reflection_binding_extension_0 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("$parent[TextBox].RevealPassword"));
-    // Controls/FluentControls.xaml(255,25) Mode
-    ::ferroui_base::data::ReflectionBinding::__markup_set_Mode(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_0), 255, 25)?, ::ferroui_base::data::BindingMode::TwoWay);
+    // Controls/FluentControls.xaml(257,25) Mode
+    ::ferroui_base::data::ReflectionBinding::__markup_set_Mode(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_0), 257, 25)?, ::ferroui_base::data::BindingMode::TwoWay);
     let provided_1 = rt::provide_value(&context, rt::property_value(::ferroui_controls::primitives::ToggleButton::is_checked_property()), &reflection_binding_extension_0, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
-    rt::bind(toggle_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::ToggleButton::is_checked_property(), provided_1, 255, 25)?;
-    // Controls/FluentControls.xaml(254,12) ClipToBounds
+    rt::bind(toggle_button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::ToggleButton::is_checked_property(), provided_1, 257, 25)?;
+    // Controls/FluentControls.xaml(256,12) ClipToBounds
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     toggle_button_0.set_value_with_priority(::ferroui_base::Visual::clip_to_bounds_property(), ::core::clone::Clone::clone(&true), priority_1);
-    // Controls/FluentControls.xaml(257,14) Content
-    // Controls/FluentControls.xaml(257,14) Panel
+    // Controls/FluentControls.xaml(259,14) Content
+    // Controls/FluentControls.xaml(259,14) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
     panel_0.begin_init();
     toggle_button_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&panel_0)));
     context.push_parent(rt::to_value(panel_0.clone()));
-    // Controls/FluentControls.xaml(258,16) Children
+    // Controls/FluentControls.xaml(260,16) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(&panel_0);
-    // Controls/FluentControls.xaml(258,16) PathIcon
+    // Controls/FluentControls.xaml(260,16) PathIcon
     let path_icon_0 = ::ferroui_controls::PathIcon::new();
     path_icon_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&path_icon_0).upcast::<::ferroui_controls::Control>());
     context.push_parent(rt::to_value(path_icon_0.clone()));
-    // Controls/FluentControls.xaml(258,25) Data (setter chosen at run time)
+    // Controls/FluentControls.xaml(260,25) Data (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("PasswordBoxRevealButtonData"));
-    let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::PathIcon::data_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 258, 25)?;
+    let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::PathIcon::data_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 260, 25)?;
     let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_2);
     if rt::is_instance(&value_1, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(path_icon_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::PathIcon::data_property(), value_1.clone(), 258, 25)?;
+        rt::bind(path_icon_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::PathIcon::data_property(), value_1.clone(), 260, 25)?;
     } else if rt::is_instance(&value_1, rt::class_handle(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE)) {
-        path_icon_0.set_value_with_priority(::ferroui_controls::PathIcon::data_property(), rt::exact(value_1.clone(), "PathIcon.Data", 1, 258, 25)?, priority_2);
+        path_icon_0.set_value_with_priority(::ferroui_controls::PathIcon::data_property(), rt::exact(value_1.clone(), "PathIcon.Data", 1, 260, 25)?, priority_2);
     } else if value_1.is_none() {
-        path_icon_0.set_value_with_priority(::ferroui_controls::PathIcon::data_property(), rt::exact(value_1.clone(), "PathIcon.Data", 1, 258, 25)?, priority_2);
+        path_icon_0.set_value_with_priority(::ferroui_controls::PathIcon::data_property(), rt::exact(value_1.clone(), "PathIcon.Data", 1, 260, 25)?, priority_2);
     } else {
-        return ::core::result::Result::Err(rt::no_setter("Data", &value_1, 258, 25));
+        return ::core::result::Result::Err(rt::no_setter("Data", &value_1, 260, 25));
     }
-    // Controls/FluentControls.xaml(258,16) Height
+    // Controls/FluentControls.xaml(260,16) Height
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     path_icon_0.set_value_with_priority(::ferroui_base::layout::Layoutable::height_property(), 8.0_f64, priority_3);
-    // Controls/FluentControls.xaml(258,16) Width
+    // Controls/FluentControls.xaml(260,16) Width
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     path_icon_0.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 12.0_f64, priority_4);
-    // Controls/FluentControls.xaml(260,25) IsVisible
+    // Controls/FluentControls.xaml(262,25) IsVisible
     let reflection_binding_extension_1 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("!$parent[ToggleButton].IsChecked"));
     let provided_3 = rt::provide_value(&context, rt::property_value(::ferroui_base::Visual::is_visible_property()), &reflection_binding_extension_1, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
-    rt::bind(path_icon_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::is_visible_property(), provided_3, 260, 25)?;
+    rt::bind(path_icon_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::is_visible_property(), provided_3, 262, 25)?;
     context.pop_parent();
-    rt::invoked(path_icon_0.try_end_init(), 258, 16)?;
-    // Controls/FluentControls.xaml(261,16) Children
+    rt::invoked(path_icon_0.try_end_init(), 260, 16)?;
+    // Controls/FluentControls.xaml(263,16) Children
     let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(&panel_0);
-    // Controls/FluentControls.xaml(261,16) PathIcon
+    // Controls/FluentControls.xaml(263,16) PathIcon
     let path_icon_1 = ::ferroui_controls::PathIcon::new();
     path_icon_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&path_icon_1).upcast::<::ferroui_controls::Control>());
     context.push_parent(rt::to_value(path_icon_1.clone()));
-    // Controls/FluentControls.xaml(261,25) Data (setter chosen at run time)
+    // Controls/FluentControls.xaml(263,25) Data (setter chosen at run time)
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("PasswordBoxHideButtonData"));
-    let provided_4 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::PathIcon::data_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 261, 25)?;
+    let provided_4 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::PathIcon::data_property()), &static_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 263, 25)?;
     let value_2: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_4);
     if rt::is_instance(&value_2, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(path_icon_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::PathIcon::data_property(), value_2.clone(), 261, 25)?;
+        rt::bind(path_icon_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::PathIcon::data_property(), value_2.clone(), 263, 25)?;
     } else if rt::is_instance(&value_2, rt::class_handle(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE)) {
-        path_icon_1.set_value_with_priority(::ferroui_controls::PathIcon::data_property(), rt::exact(value_2.clone(), "PathIcon.Data", 1, 261, 25)?, priority_5);
+        path_icon_1.set_value_with_priority(::ferroui_controls::PathIcon::data_property(), rt::exact(value_2.clone(), "PathIcon.Data", 1, 263, 25)?, priority_5);
     } else if value_2.is_none() {
-        path_icon_1.set_value_with_priority(::ferroui_controls::PathIcon::data_property(), rt::exact(value_2.clone(), "PathIcon.Data", 1, 261, 25)?, priority_5);
+        path_icon_1.set_value_with_priority(::ferroui_controls::PathIcon::data_property(), rt::exact(value_2.clone(), "PathIcon.Data", 1, 263, 25)?, priority_5);
     } else {
-        return ::core::result::Result::Err(rt::no_setter("Data", &value_2, 261, 25));
+        return ::core::result::Result::Err(rt::no_setter("Data", &value_2, 263, 25));
     }
-    // Controls/FluentControls.xaml(261,16) Height
+    // Controls/FluentControls.xaml(263,16) Height
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     path_icon_1.set_value_with_priority(::ferroui_base::layout::Layoutable::height_property(), 12.0_f64, priority_6);
-    // Controls/FluentControls.xaml(261,16) Width
+    // Controls/FluentControls.xaml(263,16) Width
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     path_icon_1.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 12.0_f64, priority_7);
-    // Controls/FluentControls.xaml(263,25) IsVisible
+    // Controls/FluentControls.xaml(265,25) IsVisible
     let reflection_binding_extension_2 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("$parent[ToggleButton].IsChecked"));
     let provided_5 = rt::provide_value(&context, rt::property_value(::ferroui_base::Visual::is_visible_property()), &reflection_binding_extension_2, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
-    rt::bind(path_icon_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::is_visible_property(), provided_5, 263, 25)?;
+    rt::bind(path_icon_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::is_visible_property(), provided_5, 265, 25)?;
     context.pop_parent();
-    rt::invoked(path_icon_1.try_end_init(), 261, 16)?;
+    rt::invoked(path_icon_1.try_end_init(), 263, 16)?;
     context.pop_parent();
-    rt::invoked(panel_0.try_end_init(), 257, 14)?;
+    rt::invoked(panel_0.try_end_init(), 259, 14)?;
     context.pop_parent();
-    rt::invoked(toggle_button_0.try_end_init(), 254, 12)?;
+    rt::invoked(toggle_button_0.try_end_init(), 256, 12)?;
     ::core::result::Result::Ok(rt::to_value(toggle_button_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/FluentControls.xaml(273,12)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/FluentControls.xaml(275,12)` (a template or a deferred resource).
 fn build_controls_fluentcontrols_xaml_deferred_322(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
-    // Controls/FluentControls.xaml(273,12) Button
+    // Controls/FluentControls.xaml(275,12) Button
     let button_0 = ::ferroui_controls::Button::new();
     context.set_intermediate_root_object(rt::to_value(button_0.clone()));
     button_0.begin_init();
     context.push_parent(rt::to_value(button_0.clone()));
-    // Controls/FluentControls.xaml(273,19) Theme (setter chosen at run time)
+    // Controls/FluentControls.xaml(275,19) Theme (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("FluentTextBoxButton"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 273, 19)?;
+    let provided_0 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::StyledElement::theme_property()), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 275, 19)?;
     let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_0);
     if rt::is_instance(&value_0, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0.clone(), 273, 19)?;
+        rt::bind(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), value_0.clone(), 275, 19)?;
     } else if rt::is_instance(&value_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE)) {
-        button_0.set_value_with_priority(::ferroui_base::StyledElement::theme_property(), rt::exact(value_0.clone(), "StyledElement.Theme", 1, 273, 19)?, priority_0);
+        button_0.set_value_with_priority(::ferroui_base::StyledElement::theme_property(), rt::exact(value_0.clone(), "StyledElement.Theme", 1, 275, 19)?, priority_0);
     } else if value_0.is_none() {
-        button_0.set_value_with_priority(::ferroui_base::StyledElement::theme_property(), rt::exact(value_0.clone(), "StyledElement.Theme", 1, 273, 19)?, priority_0);
+        button_0.set_value_with_priority(::ferroui_base::StyledElement::theme_property(), rt::exact(value_0.clone(), "StyledElement.Theme", 1, 275, 19)?, priority_0);
     } else {
-        return ::core::result::Result::Err(rt::no_setter("Theme", &value_0, 273, 19));
+        return ::core::result::Result::Err(rt::no_setter("Theme", &value_0, 275, 19));
     }
-    // Controls/FluentControls.xaml(274,19) Command
+    // Controls/FluentControls.xaml(276,19) Command
     let reflection_binding_extension_0 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("$parent[TextBox].Clear"));
     let provided_1 = rt::provide_value(&context, rt::property_value(::ferroui_controls::Button::command_property()), &reflection_binding_extension_0, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
-    rt::bind(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Button::command_property(), provided_1, 274, 19)?;
-    // Controls/FluentControls.xaml(273,12) ClipToBounds
+    rt::bind(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Button::command_property(), provided_1, 276, 19)?;
+    // Controls/FluentControls.xaml(275,12) ClipToBounds
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_base::Visual::clip_to_bounds_property(), ::core::clone::Clone::clone(&true), priority_1);
-    // Controls/FluentControls.xaml(276,14) Content
-    // Controls/FluentControls.xaml(276,14) PathIcon
+    // Controls/FluentControls.xaml(278,14) Content
+    // Controls/FluentControls.xaml(278,14) PathIcon
     let path_icon_0 = ::ferroui_controls::PathIcon::new();
     path_icon_0.begin_init();
     button_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&path_icon_0)));
     context.push_parent(rt::to_value(path_icon_0.clone()));
-    // Controls/FluentControls.xaml(276,23) Data (setter chosen at run time)
+    // Controls/FluentControls.xaml(278,23) Data (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TextBoxClearButtonData"));
-    let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::PathIcon::data_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 276, 23)?;
+    let provided_2 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_controls::PathIcon::data_property()), &static_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 278, 23)?;
     let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_2);
     if rt::is_instance(&value_1, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
-        rt::bind(path_icon_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::PathIcon::data_property(), value_1.clone(), 276, 23)?;
+        rt::bind(path_icon_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::PathIcon::data_property(), value_1.clone(), 278, 23)?;
     } else if rt::is_instance(&value_1, rt::class_handle(<::ferroui_base::media::Geometry as ::ferroui_base::StaticType>::TYPE)) {
-        path_icon_0.set_value_with_priority(::ferroui_controls::PathIcon::data_property(), rt::exact(value_1.clone(), "PathIcon.Data", 1, 276, 23)?, priority_2);
+        path_icon_0.set_value_with_priority(::ferroui_controls::PathIcon::data_property(), rt::exact(value_1.clone(), "PathIcon.Data", 1, 278, 23)?, priority_2);
     } else if value_1.is_none() {
-        path_icon_0.set_value_with_priority(::ferroui_controls::PathIcon::data_property(), rt::exact(value_1.clone(), "PathIcon.Data", 1, 276, 23)?, priority_2);
+        path_icon_0.set_value_with_priority(::ferroui_controls::PathIcon::data_property(), rt::exact(value_1.clone(), "PathIcon.Data", 1, 278, 23)?, priority_2);
     } else {
-        return ::core::result::Result::Err(rt::no_setter("Data", &value_1, 276, 23));
+        return ::core::result::Result::Err(rt::no_setter("Data", &value_1, 278, 23));
     }
-    // Controls/FluentControls.xaml(276,14) Height
+    // Controls/FluentControls.xaml(278,14) Height
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     path_icon_0.set_value_with_priority(::ferroui_base::layout::Layoutable::height_property(), 10.0_f64, priority_3);
-    // Controls/FluentControls.xaml(276,14) Width
+    // Controls/FluentControls.xaml(278,14) Width
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     path_icon_0.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 10.0_f64, priority_4);
     context.pop_parent();
-    rt::invoked(path_icon_0.try_end_init(), 276, 14)?;
+    rt::invoked(path_icon_0.try_end_init(), 278, 14)?;
     context.pop_parent();
-    rt::invoked(button_0.try_end_init(), 273, 12)?;
+    rt::invoked(button_0.try_end_init(), 275, 12)?;
     ::core::result::Result::Ok(rt::to_value(button_0.clone()))
 }
 
@@ -46940,7 +46948,7 @@ fn build_controls_fluentcontrols_xaml_deferred_324(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/FluentControls.xaml(43,15) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 43, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 43, 15)?;
     // Controls/FluentControls.xaml(42,12) Row
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 0_i32, priority_0);
@@ -47043,7 +47051,7 @@ fn build_controls_fluentcontrols_xaml_deferred_324(
     context.push_parent(rt::to_value(grid_2.clone()));
     // Controls/FluentControls.xaml(69,17) Name
     grid_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SwitchAreaGrid")));
-    rt::register_name(name_scope.as_ref(), "SwitchAreaGrid", ::core::clone::Clone::clone(&grid_2).upcast::<::ferroui_base::FerroObject>(), 69, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "SwitchAreaGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_2)), 69, 17)?;
     // Controls/FluentControls.xaml(68,14) RowSpan
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     grid_2.set_value_with_priority(::ferroui_controls::Grid::row_span_property(), 3_i32, priority_11);
@@ -47068,7 +47076,7 @@ fn build_controls_fluentcontrols_xaml_deferred_324(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(77,17) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_OffContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_OffContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 77, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_OffContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 77, 17)?;
     // Controls/FluentControls.xaml(76,14) RowSpan
     let priority_15 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_controls::Grid::row_span_property(), 3_i32, priority_15);
@@ -47100,7 +47108,7 @@ fn build_controls_fluentcontrols_xaml_deferred_324(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(86,17) Name
     content_presenter_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_OnContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_OnContentPresenter", ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_base::FerroObject>(), 86, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_OnContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_2)), 86, 17)?;
     // Controls/FluentControls.xaml(85,14) RowSpan
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_2.set_value_with_priority(::ferroui_controls::Grid::row_span_property(), 3_i32, priority_18);
@@ -47133,7 +47141,7 @@ fn build_controls_fluentcontrols_xaml_deferred_324(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/FluentControls.xaml(95,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("OuterBorder")));
-    rt::register_name(name_scope.as_ref(), "OuterBorder", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 95, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "OuterBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 95, 17)?;
     // Controls/FluentControls.xaml(94,14) Row
     let priority_21 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_21);
@@ -47163,7 +47171,7 @@ fn build_controls_fluentcontrols_xaml_deferred_324(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/FluentControls.xaml(105,17) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SwitchKnobBounds")));
-    rt::register_name(name_scope.as_ref(), "SwitchKnobBounds", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 105, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "SwitchKnobBounds", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 105, 17)?;
     // Controls/FluentControls.xaml(104,14) Row
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_25);
@@ -47193,7 +47201,7 @@ fn build_controls_fluentcontrols_xaml_deferred_324(
     context.push_parent(rt::to_value(canvas_0.clone()));
     // Controls/FluentControls.xaml(115,17) Name
     canvas_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SwitchKnob")));
-    rt::register_name(name_scope.as_ref(), "PART_SwitchKnob", ::core::clone::Clone::clone(&canvas_0).upcast::<::ferroui_base::FerroObject>(), 115, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SwitchKnob", ::std::rc::Rc::new(::core::clone::Clone::clone(&canvas_0)), 115, 17)?;
     // Controls/FluentControls.xaml(114,14) Row
     let priority_29 = ::ferroui_base::data::BindingPriority::Template;
     canvas_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_29);
@@ -47215,7 +47223,7 @@ fn build_controls_fluentcontrols_xaml_deferred_324(
     context.push_parent(rt::to_value(grid_3.clone()));
     // Controls/FluentControls.xaml(121,21) Name
     grid_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MovingKnobs")));
-    rt::register_name(name_scope.as_ref(), "PART_MovingKnobs", ::core::clone::Clone::clone(&grid_3).upcast::<::ferroui_base::FerroObject>(), 121, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MovingKnobs", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_3)), 121, 21)?;
     // Controls/FluentControls.xaml(121,16) Width
     let priority_33 = ::ferroui_base::data::BindingPriority::Template;
     grid_3.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 20.0_f64, priority_33);
@@ -47231,7 +47239,7 @@ fn build_controls_fluentcontrols_xaml_deferred_324(
     context.push_parent(rt::to_value(ellipse_0.clone()));
     // Controls/FluentControls.xaml(123,19) Name
     ellipse_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SwitchKnobOn")));
-    rt::register_name(name_scope.as_ref(), "SwitchKnobOn", ::core::clone::Clone::clone(&ellipse_0).upcast::<::ferroui_base::FerroObject>(), 123, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "SwitchKnobOn", ::std::rc::Rc::new(::core::clone::Clone::clone(&ellipse_0)), 123, 19)?;
     // Controls/FluentControls.xaml(124,19) Fill
     rt::bind_dynamic_resource(&context, ellipse_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "ToggleSwitchKnobFillOn", 124, 19)?;
     // Controls/FluentControls.xaml(122,18) Width
@@ -47251,7 +47259,7 @@ fn build_controls_fluentcontrols_xaml_deferred_324(
     context.push_parent(rt::to_value(ellipse_1.clone()));
     // Controls/FluentControls.xaml(128,19) Name
     ellipse_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SwitchKnobOff")));
-    rt::register_name(name_scope.as_ref(), "SwitchKnobOff", ::core::clone::Clone::clone(&ellipse_1).upcast::<::ferroui_base::FerroObject>(), 128, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "SwitchKnobOff", ::std::rc::Rc::new(::core::clone::Clone::clone(&ellipse_1)), 128, 19)?;
     // Controls/FluentControls.xaml(129,19) Fill
     rt::bind_dynamic_resource(&context, ellipse_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "ToggleSwitchKnobFillOff", 129, 19)?;
     // Controls/FluentControls.xaml(127,18) Width
@@ -47357,7 +47365,7 @@ fn build_controls_fluentcontrols_xaml_deferred_326(
     border_0.begin_init();
     // Controls/FluentControls.xaml(39,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "PART_LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 39, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 39, 17)?;
     // Controls/FluentControls.xaml(40,17) BorderThickness
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::border_thickness_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()), 40, 17)?;
     // Controls/FluentControls.xaml(41,17) Background
@@ -47375,7 +47383,7 @@ fn build_controls_fluentcontrols_xaml_deferred_326(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/FluentControls.xaml(45,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 45, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 45, 29)?;
     // Controls/FluentControls.xaml(46,29) MaxWidth
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::max_width_property(), rt::property(::ferroui_base::layout::Layoutable::max_width_property()), 46, 29)?;
     // Controls/FluentControls.xaml(47,29) Content (setter chosen at run time)
@@ -47507,7 +47515,7 @@ fn build_controls_fluentcontrols_xaml_deferred_330(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/FluentControls.xaml(40,17) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ChevronPath")));
-    rt::register_name(name_scope.as_ref(), "ChevronPath", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 40, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "ChevronPath", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 40, 17)?;
     // Controls/FluentControls.xaml(41,17) Data (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TreeViewItemCollapsedChevronPathData"));
@@ -47908,7 +47916,7 @@ fn build_controls_fluentcontrols_xaml_deferred_332(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/FluentControls.xaml(66,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "PART_LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 66, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 66, 19)?;
     // Controls/FluentControls.xaml(66,12) Classes
     let classes_collection_0 = ::ferroui_base::StyledElement::__markup_get_Classes(border_0.upcast_ref::<::ferroui_base::StyledElement>());
     ::ferroui_base::controls::Classes::__markup_Add_0(&classes_collection_0, ::std::string::String::from("TreeViewItemLayoutRoot"));
@@ -47936,7 +47944,7 @@ fn build_controls_fluentcontrols_xaml_deferred_332(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/FluentControls.xaml(75,19) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Header")));
-    rt::register_name(name_scope.as_ref(), "PART_Header", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 75, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Header", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 75, 19)?;
     // Controls/FluentControls.xaml(75,14) ColumnDefinitions
     let column_definitions_0 = ::ferroui_controls::ColumnDefinitions::__markup_new_0();
     rt::invoked(<::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::ColumnDefinition>>>::__markup_set_Capacity(&column_definitions_0, 2_i32), 76, 19)?;
@@ -47984,7 +47992,7 @@ fn build_controls_fluentcontrols_xaml_deferred_332(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/FluentControls.xaml(83,22) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ExpandCollapseChevronContainer")));
-    rt::register_name(name_scope.as_ref(), "PART_ExpandCollapseChevronContainer", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 83, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ExpandCollapseChevronContainer", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 83, 22)?;
     // Controls/FluentControls.xaml(84,22) Margin (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TreeViewItemExpandCollapseChevronMargin"));
@@ -48006,7 +48014,7 @@ fn build_controls_fluentcontrols_xaml_deferred_332(
     context.push_parent(rt::to_value(toggle_button_0.clone()));
     // Controls/FluentControls.xaml(85,31) Name
     toggle_button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ExpandCollapseChevron")));
-    rt::register_name(name_scope.as_ref(), "PART_ExpandCollapseChevron", ::core::clone::Clone::clone(&toggle_button_0).upcast::<::ferroui_base::FerroObject>(), 85, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ExpandCollapseChevron", ::std::rc::Rc::new(::core::clone::Clone::clone(&toggle_button_0)), 85, 31)?;
     // Controls/FluentControls.xaml(86,31) Theme (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("FluentTreeViewExpandCollapseChevron"));
@@ -48042,7 +48050,7 @@ fn build_controls_fluentcontrols_xaml_deferred_332(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(90,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HeaderPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_HeaderPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 90, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HeaderPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 90, 33)?;
     // Controls/FluentControls.xaml(90,16) Column
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_5);
@@ -48083,7 +48091,7 @@ fn build_controls_fluentcontrols_xaml_deferred_332(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(101,27) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 101, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 101, 27)?;
     // Controls/FluentControls.xaml(102,27) IsVisible
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::is_visible_property(), rt::property(::ferroui_controls::TreeViewItem::is_expanded_property()), 102, 27)?;
     // Controls/FluentControls.xaml(103,27) ItemsPanel
@@ -48205,7 +48213,7 @@ fn build_controls_fluentcontrols_xaml_deferred_336(
     content_presenter_0.begin_init();
     // Controls/FluentControls.xaml(21,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 21, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 21, 27)?;
     // Controls/FluentControls.xaml(21,10) Background
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_0);
@@ -48540,7 +48548,7 @@ fn build_controls_fluentcontrols_xaml_deferred_338(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/FluentControls.xaml(45,20) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_UnderlayWrapper")));
-    rt::register_name(name_scope.as_ref(), "PART_UnderlayWrapper", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 45, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_UnderlayWrapper", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 45, 20)?;
     // Controls/FluentControls.xaml(46,16) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(&panel_0);
     // Controls/FluentControls.xaml(46,16) Border
@@ -48550,7 +48558,7 @@ fn build_controls_fluentcontrols_xaml_deferred_338(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/FluentControls.xaml(46,23) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_WindowBorder")));
-    rt::register_name(name_scope.as_ref(), "PART_WindowBorder", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 46, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_WindowBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 46, 23)?;
     // Controls/FluentControls.xaml(47,23) Background
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "SystemControlTransparentBrush", 47, 23)?;
     // Controls/FluentControls.xaml(48,23) BorderThickness
@@ -48571,7 +48579,7 @@ fn build_controls_fluentcontrols_xaml_deferred_338(
     context.push_parent(rt::to_value(panel_1.clone()));
     // Controls/FluentControls.xaml(52,22) Name
     panel_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TitleBar")));
-    rt::register_name(name_scope.as_ref(), "PART_TitleBar", ::core::clone::Clone::clone(&panel_1).upcast::<::ferroui_base::FerroObject>(), 52, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TitleBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_1)), 52, 22)?;
     // Controls/FluentControls.xaml(52,16) VerticalAlignment
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     panel_1.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Top, priority_1);
@@ -48596,7 +48604,7 @@ fn build_controls_fluentcontrols_xaml_deferred_338(
     context.push_parent(rt::to_value(panel_2.clone()));
     // Controls/FluentControls.xaml(63,20) Name
     panel_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_OverlayWrapper")));
-    rt::register_name(name_scope.as_ref(), "PART_OverlayWrapper", ::core::clone::Clone::clone(&panel_2).upcast::<::ferroui_base::FerroObject>(), 63, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_OverlayWrapper", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_2)), 63, 20)?;
     // Controls/FluentControls.xaml(65,16) Children
     let children_collection_2 = ::ferroui_controls::Panel::__markup_get_Children(&panel_2);
     // Controls/FluentControls.xaml(65,16) Panel
@@ -48605,7 +48613,7 @@ fn build_controls_fluentcontrols_xaml_deferred_338(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&panel_3).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(65,22) Name
     panel_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TitleTextPanel")));
-    rt::register_name(name_scope.as_ref(), "PART_TitleTextPanel", ::core::clone::Clone::clone(&panel_3).upcast::<::ferroui_base::FerroObject>(), 65, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TitleTextPanel", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_3)), 65, 22)?;
     // Controls/FluentControls.xaml(65,16) VerticalAlignment
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     panel_3.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Top, priority_3);
@@ -48644,7 +48652,7 @@ fn build_controls_fluentcontrols_xaml_deferred_338(
     context.push_parent(rt::to_value(stack_panel_0.clone()));
     // Controls/FluentControls.xaml(74,27) Name
     stack_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_OverlayPanel")));
-    rt::register_name(name_scope.as_ref(), "PART_OverlayPanel", ::core::clone::Clone::clone(&stack_panel_0).upcast::<::ferroui_base::FerroObject>(), 74, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_OverlayPanel", ::std::rc::Rc::new(::core::clone::Clone::clone(&stack_panel_0)), 74, 27)?;
     // Controls/FluentControls.xaml(74,16) VerticalAlignment
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
     stack_panel_0.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Top, priority_8);
@@ -48673,7 +48681,7 @@ fn build_controls_fluentcontrols_xaml_deferred_338(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/FluentControls.xaml(82,25) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_FullScreenButton")));
-    rt::register_name(name_scope.as_ref(), "PART_FullScreenButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 82, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_FullScreenButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 82, 25)?;
     // Controls/FluentControls.xaml(83,25) Theme (setter chosen at run time)
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("FluentDrawnCaptionButton"));
@@ -48711,7 +48719,7 @@ fn build_controls_fluentcontrols_xaml_deferred_338(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/FluentControls.xaml(86,27) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("FullScreenButtonPath")));
-    rt::register_name(name_scope.as_ref(), "FullScreenButtonPath", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 86, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "FullScreenButtonPath", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 86, 27)?;
     // Controls/FluentControls.xaml(86,22) Stretch
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
     path_0.set_value_with_priority(::ferroui_controls::shapes::Shape::stretch_property(), ::ferroui_base::media::Stretch::UniformToFill, priority_17);
@@ -48736,7 +48744,7 @@ fn build_controls_fluentcontrols_xaml_deferred_338(
     context.push_parent(rt::to_value(button_1.clone()));
     // Controls/FluentControls.xaml(92,25) Name
     button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MinimizeButton")));
-    rt::register_name(name_scope.as_ref(), "PART_MinimizeButton", ::core::clone::Clone::clone(&button_1).upcast::<::ferroui_base::FerroObject>(), 92, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MinimizeButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_1)), 92, 25)?;
     // Controls/FluentControls.xaml(93,25) Theme (setter chosen at run time)
     let priority_19 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("FluentDrawnCaptionButton"));
@@ -48796,7 +48804,7 @@ fn build_controls_fluentcontrols_xaml_deferred_338(
     context.push_parent(rt::to_value(button_2.clone()));
     // Controls/FluentControls.xaml(101,25) Name
     button_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MaximizeButton")));
-    rt::register_name(name_scope.as_ref(), "PART_MaximizeButton", ::core::clone::Clone::clone(&button_2).upcast::<::ferroui_base::FerroObject>(), 101, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MaximizeButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_2)), 101, 25)?;
     // Controls/FluentControls.xaml(102,25) Theme (setter chosen at run time)
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("FluentDrawnCaptionButton"));
@@ -48842,7 +48850,7 @@ fn build_controls_fluentcontrols_xaml_deferred_338(
     context.push_parent(rt::to_value(path_2.clone()));
     // Controls/FluentControls.xaml(108,27) Name
     path_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RestoreButtonPath")));
-    rt::register_name(name_scope.as_ref(), "RestoreButtonPath", ::core::clone::Clone::clone(&path_2).upcast::<::ferroui_base::FerroObject>(), 108, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "RestoreButtonPath", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_2)), 108, 27)?;
     // Controls/FluentControls.xaml(108,22) Stretch
     let priority_31 = ::ferroui_base::data::BindingPriority::Template;
     path_2.set_value_with_priority(::ferroui_controls::shapes::Shape::stretch_property(), ::ferroui_base::media::Stretch::UniformToFill, priority_31);
@@ -48867,7 +48875,7 @@ fn build_controls_fluentcontrols_xaml_deferred_338(
     context.push_parent(rt::to_value(button_3.clone()));
     // Controls/FluentControls.xaml(114,25) Name
     button_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_CloseButton")));
-    rt::register_name(name_scope.as_ref(), "PART_CloseButton", ::core::clone::Clone::clone(&button_3).upcast::<::ferroui_base::FerroObject>(), 114, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_CloseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_3)), 114, 25)?;
     // Controls/FluentControls.xaml(115,25) Background
     rt::bind_dynamic_resource(&context, button_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::background_property(), "CaptionButtonCloseBackground", 115, 25)?;
     // Controls/FluentControls.xaml(116,25) BorderBrush
@@ -48950,7 +48958,7 @@ fn build_controls_fluentcontrols_xaml_deferred_338(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_9, ::core::clone::Clone::clone(&text_block_1).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(134,26) Name
     text_block_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PopoverTitleText")));
-    rt::register_name(name_scope.as_ref(), "PART_PopoverTitleText", ::core::clone::Clone::clone(&text_block_1).upcast::<::ferroui_base::FerroObject>(), 134, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PopoverTitleText", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_1)), 134, 26)?;
     // Controls/FluentControls.xaml(135,26) Text
     rt::bind_template_binding(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), rt::property(::ferroui_controls::chrome::WindowDrawnDecorations::title_property()), 135, 26)?;
     // Controls/FluentControls.xaml(134,16) VerticalAlignment
@@ -48991,7 +48999,7 @@ fn build_controls_fluentcontrols_xaml_deferred_338(
     context.push_parent(rt::to_value(button_4.clone()));
     // Controls/FluentControls.xaml(143,25) Name
     button_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PopoverFullScreenButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PopoverFullScreenButton", ::core::clone::Clone::clone(&button_4).upcast::<::ferroui_base::FerroObject>(), 143, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PopoverFullScreenButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_4)), 143, 25)?;
     // Controls/FluentControls.xaml(144,25) Theme (setter chosen at run time)
     let priority_48 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("FluentDrawnCaptionButton"));
@@ -49051,7 +49059,7 @@ fn build_controls_fluentcontrols_xaml_deferred_338(
     context.push_parent(rt::to_value(button_5.clone()));
     // Controls/FluentControls.xaml(152,25) Name
     button_5.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PopoverCloseButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PopoverCloseButton", ::core::clone::Clone::clone(&button_5).upcast::<::ferroui_base::FerroObject>(), 152, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PopoverCloseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_5)), 152, 25)?;
     // Controls/FluentControls.xaml(153,25) Background
     rt::bind_dynamic_resource(&context, button_5.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::background_property(), "CaptionButtonCloseBackground", 153, 25)?;
     // Controls/FluentControls.xaml(154,25) BorderBrush
@@ -49482,7 +49490,7 @@ fn build_controls_fluentcontrols_xaml_deferred_340(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/FluentControls.xaml(81,21) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Background")));
-    rt::register_name(name_scope.as_ref(), "Background", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 81, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "Background", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 81, 21)?;
     // Controls/FluentControls.xaml(81,14) Column
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_0);
@@ -49510,7 +49518,7 @@ fn build_controls_fluentcontrols_xaml_deferred_340(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/FluentControls.xaml(89,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HighlightBackground")));
-    rt::register_name(name_scope.as_ref(), "HighlightBackground", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 89, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "HighlightBackground", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 89, 21)?;
     // Controls/FluentControls.xaml(89,14) Column
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_2);
@@ -49539,7 +49547,7 @@ fn build_controls_fluentcontrols_xaml_deferred_340(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/FluentControls.xaml(97,24) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PlaceholderTextBlock")));
-    rt::register_name(name_scope.as_ref(), "PlaceholderTextBlock", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 97, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "PlaceholderTextBlock", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 97, 24)?;
     // Controls/FluentControls.xaml(97,14) Column
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_5);
@@ -49602,7 +49610,7 @@ fn build_controls_fluentcontrols_xaml_deferred_340(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&content_control_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(112,29) Name
     content_control_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "ContentPresenter", ::core::clone::Clone::clone(&content_control_0).upcast::<::ferroui_base::FerroObject>(), 112, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_0)), 112, 29)?;
     // Controls/FluentControls.xaml(113,29) Content (setter chosen at run time)
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_11 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ComboBox::selection_box_item_property()));
@@ -49645,7 +49653,7 @@ fn build_controls_fluentcontrols_xaml_deferred_340(
     }
     // Controls/FluentControls.xaml(122,22) Name
     text_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_EditableTextBox")));
-    rt::register_name(name_scope.as_ref(), "PART_EditableTextBox", ::core::clone::Clone::clone(&text_box_0).upcast::<::ferroui_base::FerroObject>(), 122, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_EditableTextBox", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_box_0)), 122, 22)?;
     // Controls/FluentControls.xaml(122,14) Column
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
     text_box_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_8);
@@ -49693,7 +49701,7 @@ fn build_controls_fluentcontrols_xaml_deferred_340(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(140,21) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("DropDownOverlay")));
-    rt::register_name(name_scope.as_ref(), "DropDownOverlay", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 140, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "DropDownOverlay", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 140, 21)?;
     // Controls/FluentControls.xaml(140,14) Column
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_11);
@@ -49722,7 +49730,7 @@ fn build_controls_fluentcontrols_xaml_deferred_340(
     context.push_parent(rt::to_value(path_icon_0.clone()));
     // Controls/FluentControls.xaml(148,23) Name
     path_icon_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("DropDownGlyph")));
-    rt::register_name(name_scope.as_ref(), "DropDownGlyph", ::core::clone::Clone::clone(&path_icon_0).upcast::<::ferroui_base::FerroObject>(), 148, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "DropDownGlyph", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_icon_0)), 148, 23)?;
     // Controls/FluentControls.xaml(148,14) Column
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
     path_icon_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_17);
@@ -49764,7 +49772,7 @@ fn build_controls_fluentcontrols_xaml_deferred_340(
     context.push_parent(rt::to_value(popup_0.clone()));
     // Controls/FluentControls.xaml(160,20) Name
     popup_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Popup")));
-    rt::register_name(name_scope.as_ref(), "PART_Popup", ::core::clone::Clone::clone(&popup_0).upcast::<::ferroui_base::FerroObject>(), 160, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Popup", ::std::rc::Rc::new(::core::clone::Clone::clone(&popup_0)), 160, 20)?;
     // Controls/FluentControls.xaml(160,14) WindowManagerAddShadowHint
     let priority_26 = ::ferroui_base::data::BindingPriority::Template;
     popup_0.set_value_with_priority(::ferroui_controls::primitives::Popup::window_manager_add_shadow_hint_property(), ::core::clone::Clone::clone(&false), priority_26);
@@ -49814,7 +49822,7 @@ fn build_controls_fluentcontrols_xaml_deferred_340(
     context.push_parent(rt::to_value(border_3.clone()));
     // Controls/FluentControls.xaml(168,23) Name
     border_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PopupBorder")));
-    rt::register_name(name_scope.as_ref(), "PopupBorder", ::core::clone::Clone::clone(&border_3).upcast::<::ferroui_base::FerroObject>(), 168, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PopupBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_3)), 168, 23)?;
     // Controls/FluentControls.xaml(169,23) Background
     rt::bind_dynamic_resource(&context, border_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "ComboBoxDropDownBackground", 169, 23)?;
     // Controls/FluentControls.xaml(170,23) BorderBrush
@@ -49851,7 +49859,7 @@ fn build_controls_fluentcontrols_xaml_deferred_340(
     context.push_parent(rt::to_value(items_presenter_0.clone()));
     // Controls/FluentControls.xaml(179,35) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 179, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 179, 35)?;
     // Controls/FluentControls.xaml(180,35) Margin
     rt::bind_dynamic_resource(&context, items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "ComboBoxDropdownContentMargin", 180, 35)?;
     // Controls/FluentControls.xaml(181,35) ItemsPanel
@@ -49993,7 +50001,7 @@ fn build_controls_fluentcontrols_xaml_deferred_344(
     context.push_parent(rt::to_value(items_presenter_0.clone()));
     // Controls/FluentControls.xaml(58,29) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 58, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 58, 29)?;
     // Controls/FluentControls.xaml(59,29) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 59, 29)?;
     // Controls/FluentControls.xaml(60,29) Margin
@@ -50072,7 +50080,7 @@ fn build_controls_fluentcontrols_xaml_deferred_346(
     context.push_parent(rt::to_value(content_control_0.clone()));
     // Controls/FluentControls.xaml(33,27) Name
     content_control_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("InlineDataValidationContentControl")));
-    rt::register_name(name_scope.as_ref(), "InlineDataValidationContentControl", ::core::clone::Clone::clone(&content_control_0).upcast::<::ferroui_base::FerroObject>(), 33, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "InlineDataValidationContentControl", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_0)), 33, 27)?;
     // Controls/FluentControls.xaml(33,12) Margin
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     content_control_0.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(0.0_f64, 4.0_f64, 0.0_f64, 0.0_f64), priority_1);
@@ -50115,7 +50123,7 @@ fn build_controls_fluentcontrols_xaml_deferred_346(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(40,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 40, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 40, 29)?;
     // Controls/FluentControls.xaml(41,29) Padding
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::padding_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), 41, 29)?;
     // Controls/FluentControls.xaml(42,29) Background
@@ -50269,7 +50277,7 @@ fn build_controls_fluentcontrols_xaml_deferred_349(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(75,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 75, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 75, 29)?;
     // Controls/FluentControls.xaml(76,29) Padding
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::padding_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), 76, 29)?;
     // Controls/FluentControls.xaml(77,29) Background
@@ -50311,7 +50319,7 @@ fn build_controls_fluentcontrols_xaml_deferred_350(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/FluentControls.xaml(88,16) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_InlineErrorTemplatePanel")));
-    rt::register_name(name_scope.as_ref(), "PART_InlineErrorTemplatePanel", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 88, 16)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_InlineErrorTemplatePanel", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 88, 16)?;
     // Controls/FluentControls.xaml(88,10) Background
     panel_0.set_value(::ferroui_controls::Panel::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>));
     // Controls/FluentControls.xaml(91,14) Styles
@@ -50570,7 +50578,7 @@ fn build_controls_fluentcontrols_xaml_deferred_353(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/FluentControls.xaml(58,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 58, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 58, 29)?;
     // Controls/FluentControls.xaml(59,19) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 59, 19)?;
     // Controls/FluentControls.xaml(60,19) BorderBrush
@@ -50875,7 +50883,7 @@ fn build_controls_fluentcontrols_xaml_deferred_359(
     content_presenter_0.begin_init();
     // Controls/FluentControls.xaml(46,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 46, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 46, 27)?;
     // Controls/FluentControls.xaml(47,27) BorderBrush
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::border_brush_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()), 47, 27)?;
     // Controls/FluentControls.xaml(48,27) Background
@@ -51041,7 +51049,7 @@ fn build_controls_fluentcontrols_xaml_deferred_361(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/FluentControls.xaml(87,17) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 87, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 87, 17)?;
     // Controls/FluentControls.xaml(87,35) Margin
     rt::bind_template_binding(grid_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), 87, 35)?;
     // Controls/FluentControls.xaml(88,14) Children
@@ -51053,7 +51061,7 @@ fn build_controls_fluentcontrols_xaml_deferred_361(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/FluentControls.xaml(88,21) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_FlyoutButton")));
-    rt::register_name(name_scope.as_ref(), "PART_FlyoutButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 88, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_FlyoutButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 88, 21)?;
     // Controls/FluentControls.xaml(89,21) Theme (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("FluentDatePickerFlyoutButton"));
@@ -51101,7 +51109,7 @@ fn build_controls_fluentcontrols_xaml_deferred_361(
     context.push_parent(rt::to_value(grid_1.clone()));
     // Controls/FluentControls.xaml(101,21) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ButtonContentGrid")));
-    rt::register_name(name_scope.as_ref(), "PART_ButtonContentGrid", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 101, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ButtonContentGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 101, 21)?;
     // Controls/FluentControls.xaml(101,16) ColumnDefinitions
     let column_definitions_0 = ::ferroui_controls::ColumnDefinitions::__markup_new_0();
     rt::invoked(<::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::ColumnDefinition>>>::__markup_set_Capacity(&column_definitions_0, 5_i32), 101, 51)?;
@@ -51130,7 +51138,7 @@ fn build_controls_fluentcontrols_xaml_deferred_361(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/FluentControls.xaml(102,28) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DayTextBlock")));
-    rt::register_name(name_scope.as_ref(), "PART_DayTextBlock", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 102, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DayTextBlock", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 102, 28)?;
     // Controls/FluentControls.xaml(102,53) Text
     rt::bind_dynamic_resource(&context, text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), "StringDatePickerDayText", 102, 53)?;
     // Controls/FluentControls.xaml(102,18) HorizontalAlignment
@@ -51149,7 +51157,7 @@ fn build_controls_fluentcontrols_xaml_deferred_361(
     context.push_parent(rt::to_value(text_block_1.clone()));
     // Controls/FluentControls.xaml(104,28) Name
     text_block_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MonthTextBlock")));
-    rt::register_name(name_scope.as_ref(), "PART_MonthTextBlock", ::core::clone::Clone::clone(&text_block_1).upcast::<::ferroui_base::FerroObject>(), 104, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MonthTextBlock", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_1)), 104, 28)?;
     // Controls/FluentControls.xaml(104,55) Text
     rt::bind_dynamic_resource(&context, text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), "StringDatePickerMonthText", 104, 55)?;
     // Controls/FluentControls.xaml(104,18) TextAlignment
@@ -51168,7 +51176,7 @@ fn build_controls_fluentcontrols_xaml_deferred_361(
     context.push_parent(rt::to_value(text_block_2.clone()));
     // Controls/FluentControls.xaml(106,28) Name
     text_block_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_YearTextBlock")));
-    rt::register_name(name_scope.as_ref(), "PART_YearTextBlock", ::core::clone::Clone::clone(&text_block_2).upcast::<::ferroui_base::FerroObject>(), 106, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_YearTextBlock", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_2)), 106, 28)?;
     // Controls/FluentControls.xaml(106,54) Text
     rt::bind_dynamic_resource(&context, text_block_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), "StringDatePickerYearText", 106, 54)?;
     // Controls/FluentControls.xaml(106,18) HorizontalAlignment
@@ -51187,7 +51195,7 @@ fn build_controls_fluentcontrols_xaml_deferred_361(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/FluentControls.xaml(108,28) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_FirstSpacer")));
-    rt::register_name(name_scope.as_ref(), "PART_FirstSpacer", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 108, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_FirstSpacer", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 108, 28)?;
     // Controls/FluentControls.xaml(109,23) Fill
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "DatePickerSpacerFill", 109, 23)?;
     // Controls/FluentControls.xaml(108,18) HorizontalAlignment
@@ -51210,7 +51218,7 @@ fn build_controls_fluentcontrols_xaml_deferred_361(
     context.push_parent(rt::to_value(rectangle_1.clone()));
     // Controls/FluentControls.xaml(113,28) Name
     rectangle_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SecondSpacer")));
-    rt::register_name(name_scope.as_ref(), "PART_SecondSpacer", ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_base::FerroObject>(), 113, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SecondSpacer", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_1)), 113, 28)?;
     // Controls/FluentControls.xaml(114,23) Fill
     rt::bind_dynamic_resource(&context, rectangle_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "DatePickerSpacerFill", 114, 23)?;
     // Controls/FluentControls.xaml(113,18) HorizontalAlignment
@@ -51236,7 +51244,7 @@ fn build_controls_fluentcontrols_xaml_deferred_361(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_6, ::core::clone::Clone::clone(&popup_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(121,20) Name
     popup_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Popup")));
-    rt::register_name(name_scope.as_ref(), "PART_Popup", ::core::clone::Clone::clone(&popup_0).upcast::<::ferroui_base::FerroObject>(), 121, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Popup", ::std::rc::Rc::new(::core::clone::Clone::clone(&popup_0)), 121, 20)?;
     // Controls/FluentControls.xaml(121,14) WindowManagerAddShadowHint
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     popup_0.set_value_with_priority(::ferroui_controls::primitives::Popup::window_manager_add_shadow_hint_property(), ::core::clone::Clone::clone(&false), priority_13);
@@ -51257,7 +51265,7 @@ fn build_controls_fluentcontrols_xaml_deferred_361(
     popup_0.set_value(::ferroui_controls::primitives::Popup::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&date_picker_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/FluentControls.xaml(124,36) Name
     date_picker_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PickerPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_PickerPresenter", ::core::clone::Clone::clone(&date_picker_presenter_0).upcast::<::ferroui_base::FerroObject>(), 124, 36)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PickerPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&date_picker_presenter_0)), 124, 36)?;
     rt::invoked(date_picker_presenter_0.try_end_init(), 124, 16)?;
     rt::invoked(popup_0.try_end_init(), 121, 14)?;
     context.pop_parent();
@@ -51345,7 +51353,7 @@ fn build_controls_fluentcontrols_xaml_deferred_363(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/FluentControls.xaml(161,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Background")));
-    rt::register_name(name_scope.as_ref(), "Background", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 161, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Background", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 161, 17)?;
     // Controls/FluentControls.xaml(161,35) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 161, 35)?;
     // Controls/FluentControls.xaml(162,17) BorderBrush
@@ -51367,7 +51375,7 @@ fn build_controls_fluentcontrols_xaml_deferred_363(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/FluentControls.xaml(166,17) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentRoot")));
-    rt::register_name(name_scope.as_ref(), "ContentRoot", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 166, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 166, 17)?;
     // Controls/FluentControls.xaml(166,12) RowDefinitions
     let row_definitions_0 = ::ferroui_controls::RowDefinitions::__markup_new_0();
     rt::invoked(<::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::RowDefinition>>>::__markup_set_Capacity(&row_definitions_0, 2_i32), 166, 36)?;
@@ -51387,7 +51395,7 @@ fn build_controls_fluentcontrols_xaml_deferred_363(
     context.push_parent(rt::to_value(grid_1.clone()));
     // Controls/FluentControls.xaml(167,19) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PickerContainer")));
-    rt::register_name(name_scope.as_ref(), "PART_PickerContainer", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 167, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PickerContainer", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 167, 19)?;
     // Controls/FluentControls.xaml(169,18) Styles
     let styles_collection_0 = ::ferroui_base::StyledElement::__markup_get_Styles(grid_1.upcast_ref::<::ferroui_base::StyledElement>());
     // Controls/FluentControls.xaml(169,18) Style
@@ -51415,7 +51423,7 @@ fn build_controls_fluentcontrols_xaml_deferred_363(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/FluentControls.xaml(174,22) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MonthHost")));
-    rt::register_name(name_scope.as_ref(), "PART_MonthHost", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 174, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MonthHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 174, 22)?;
     // Controls/FluentControls.xaml(175,18) Children
     let children_collection_2 = ::ferroui_controls::Panel::__markup_get_Children(&panel_0);
     // Controls/FluentControls.xaml(175,18) ScrollViewer
@@ -51437,7 +51445,7 @@ fn build_controls_fluentcontrols_xaml_deferred_363(
     context.push_parent(rt::to_value(date_time_picker_panel_0.clone()));
     // Controls/FluentControls.xaml(177,40) Name
     date_time_picker_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MonthSelector")));
-    rt::register_name(name_scope.as_ref(), "PART_MonthSelector", ::core::clone::Clone::clone(&date_time_picker_panel_0).upcast::<::ferroui_base::FerroObject>(), 177, 40)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MonthSelector", ::std::rc::Rc::new(::core::clone::Clone::clone(&date_time_picker_panel_0)), 177, 40)?;
     // Controls/FluentControls.xaml(177,20) PanelType
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     date_time_picker_panel_0.set_value_with_priority(::ferroui_controls::date_time_pickers::DateTimePickerPanel::panel_type_property(), ::ferroui_controls::date_time_pickers::DateTimePickerPanelType::Month, priority_3);
@@ -51459,7 +51467,7 @@ fn build_controls_fluentcontrols_xaml_deferred_363(
     context.push_parent(rt::to_value(repeat_button_0.clone()));
     // Controls/FluentControls.xaml(182,31) Name
     repeat_button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MonthUpButton")));
-    rt::register_name(name_scope.as_ref(), "PART_MonthUpButton", ::core::clone::Clone::clone(&repeat_button_0).upcast::<::ferroui_base::FerroObject>(), 182, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MonthUpButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_0)), 182, 31)?;
     // Controls/FluentControls.xaml(182,57) Theme (setter chosen at run time)
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("FluentDateTimePickerUpButton"));
@@ -51485,7 +51493,7 @@ fn build_controls_fluentcontrols_xaml_deferred_363(
     context.push_parent(rt::to_value(repeat_button_1.clone()));
     // Controls/FluentControls.xaml(183,31) Name
     repeat_button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MonthDownButton")));
-    rt::register_name(name_scope.as_ref(), "PART_MonthDownButton", ::core::clone::Clone::clone(&repeat_button_1).upcast::<::ferroui_base::FerroObject>(), 183, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MonthDownButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_1)), 183, 31)?;
     // Controls/FluentControls.xaml(183,59) Theme (setter chosen at run time)
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("FluentDateTimePickerDownButton"));
@@ -51513,7 +51521,7 @@ fn build_controls_fluentcontrols_xaml_deferred_363(
     context.push_parent(rt::to_value(panel_1.clone()));
     // Controls/FluentControls.xaml(185,22) Name
     panel_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DayHost")));
-    rt::register_name(name_scope.as_ref(), "PART_DayHost", ::core::clone::Clone::clone(&panel_1).upcast::<::ferroui_base::FerroObject>(), 185, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DayHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_1)), 185, 22)?;
     // Controls/FluentControls.xaml(186,18) Children
     let children_collection_6 = ::ferroui_controls::Panel::__markup_get_Children(&panel_1);
     // Controls/FluentControls.xaml(186,18) ScrollViewer
@@ -51535,7 +51543,7 @@ fn build_controls_fluentcontrols_xaml_deferred_363(
     context.push_parent(rt::to_value(date_time_picker_panel_1.clone()));
     // Controls/FluentControls.xaml(188,40) Name
     date_time_picker_panel_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DaySelector")));
-    rt::register_name(name_scope.as_ref(), "PART_DaySelector", ::core::clone::Clone::clone(&date_time_picker_panel_1).upcast::<::ferroui_base::FerroObject>(), 188, 40)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DaySelector", ::std::rc::Rc::new(::core::clone::Clone::clone(&date_time_picker_panel_1)), 188, 40)?;
     // Controls/FluentControls.xaml(188,20) PanelType
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     date_time_picker_panel_1.set_value_with_priority(::ferroui_controls::date_time_pickers::DateTimePickerPanel::panel_type_property(), ::ferroui_controls::date_time_pickers::DateTimePickerPanelType::Day, priority_9);
@@ -51557,7 +51565,7 @@ fn build_controls_fluentcontrols_xaml_deferred_363(
     context.push_parent(rt::to_value(repeat_button_2.clone()));
     // Controls/FluentControls.xaml(193,31) Name
     repeat_button_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DayUpButton")));
-    rt::register_name(name_scope.as_ref(), "PART_DayUpButton", ::core::clone::Clone::clone(&repeat_button_2).upcast::<::ferroui_base::FerroObject>(), 193, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DayUpButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_2)), 193, 31)?;
     // Controls/FluentControls.xaml(193,55) Theme (setter chosen at run time)
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("FluentDateTimePickerUpButton"));
@@ -51583,7 +51591,7 @@ fn build_controls_fluentcontrols_xaml_deferred_363(
     context.push_parent(rt::to_value(repeat_button_3.clone()));
     // Controls/FluentControls.xaml(194,31) Name
     repeat_button_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DayDownButton")));
-    rt::register_name(name_scope.as_ref(), "PART_DayDownButton", ::core::clone::Clone::clone(&repeat_button_3).upcast::<::ferroui_base::FerroObject>(), 194, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DayDownButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_3)), 194, 31)?;
     // Controls/FluentControls.xaml(194,57) Theme (setter chosen at run time)
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("FluentDateTimePickerDownButton"));
@@ -51611,7 +51619,7 @@ fn build_controls_fluentcontrols_xaml_deferred_363(
     context.push_parent(rt::to_value(panel_2.clone()));
     // Controls/FluentControls.xaml(196,22) Name
     panel_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_YearHost")));
-    rt::register_name(name_scope.as_ref(), "PART_YearHost", ::core::clone::Clone::clone(&panel_2).upcast::<::ferroui_base::FerroObject>(), 196, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_YearHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_2)), 196, 22)?;
     // Controls/FluentControls.xaml(197,18) Children
     let children_collection_10 = ::ferroui_controls::Panel::__markup_get_Children(&panel_2);
     // Controls/FluentControls.xaml(197,18) ScrollViewer
@@ -51633,7 +51641,7 @@ fn build_controls_fluentcontrols_xaml_deferred_363(
     context.push_parent(rt::to_value(date_time_picker_panel_2.clone()));
     // Controls/FluentControls.xaml(199,40) Name
     date_time_picker_panel_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_YearSelector")));
-    rt::register_name(name_scope.as_ref(), "PART_YearSelector", ::core::clone::Clone::clone(&date_time_picker_panel_2).upcast::<::ferroui_base::FerroObject>(), 199, 40)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_YearSelector", ::std::rc::Rc::new(::core::clone::Clone::clone(&date_time_picker_panel_2)), 199, 40)?;
     // Controls/FluentControls.xaml(199,20) PanelType
     let priority_15 = ::ferroui_base::data::BindingPriority::Template;
     date_time_picker_panel_2.set_value_with_priority(::ferroui_controls::date_time_pickers::DateTimePickerPanel::panel_type_property(), ::ferroui_controls::date_time_pickers::DateTimePickerPanelType::Year, priority_15);
@@ -51655,7 +51663,7 @@ fn build_controls_fluentcontrols_xaml_deferred_363(
     context.push_parent(rt::to_value(repeat_button_4.clone()));
     // Controls/FluentControls.xaml(204,31) Name
     repeat_button_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_YearUpButton")));
-    rt::register_name(name_scope.as_ref(), "PART_YearUpButton", ::core::clone::Clone::clone(&repeat_button_4).upcast::<::ferroui_base::FerroObject>(), 204, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_YearUpButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_4)), 204, 31)?;
     // Controls/FluentControls.xaml(204,56) Theme (setter chosen at run time)
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("FluentDateTimePickerUpButton"));
@@ -51681,7 +51689,7 @@ fn build_controls_fluentcontrols_xaml_deferred_363(
     context.push_parent(rt::to_value(repeat_button_5.clone()));
     // Controls/FluentControls.xaml(205,31) Name
     repeat_button_5.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_YearDownButton")));
-    rt::register_name(name_scope.as_ref(), "PART_YearDownButton", ::core::clone::Clone::clone(&repeat_button_5).upcast::<::ferroui_base::FerroObject>(), 205, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_YearDownButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_5)), 205, 31)?;
     // Controls/FluentControls.xaml(205,58) Theme (setter chosen at run time)
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("FluentDateTimePickerDownButton"));
@@ -51709,7 +51717,7 @@ fn build_controls_fluentcontrols_xaml_deferred_363(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/FluentControls.xaml(207,26) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HighlightRect")));
-    rt::register_name(name_scope.as_ref(), "HighlightRect", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 207, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "HighlightRect", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 207, 26)?;
     // Controls/FluentControls.xaml(207,16) IsHitTestVisible
     let priority_19 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_0.set_value_with_priority(::ferroui_base::input::InputElement::is_hit_test_visible_property(), ::core::clone::Clone::clone(&false), priority_19);
@@ -51740,7 +51748,7 @@ fn build_controls_fluentcontrols_xaml_deferred_363(
     context.push_parent(rt::to_value(rectangle_1.clone()));
     // Controls/FluentControls.xaml(211,26) Name
     rectangle_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_FirstSpacer")));
-    rt::register_name(name_scope.as_ref(), "PART_FirstSpacer", ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_base::FerroObject>(), 211, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_FirstSpacer", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_1)), 211, 26)?;
     // Controls/FluentControls.xaml(212,26) Fill
     rt::bind_dynamic_resource(&context, rectangle_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "DatePickerFlyoutPresenterSpacerFill", 212, 26)?;
     // Controls/FluentControls.xaml(211,16) HorizontalAlignment
@@ -51762,7 +51770,7 @@ fn build_controls_fluentcontrols_xaml_deferred_363(
     context.push_parent(rt::to_value(rectangle_2.clone()));
     // Controls/FluentControls.xaml(216,26) Name
     rectangle_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SecondSpacer")));
-    rt::register_name(name_scope.as_ref(), "PART_SecondSpacer", ::core::clone::Clone::clone(&rectangle_2).upcast::<::ferroui_base::FerroObject>(), 216, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SecondSpacer", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_2)), 216, 26)?;
     // Controls/FluentControls.xaml(217,26) Fill
     rt::bind_dynamic_resource(&context, rectangle_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "DatePickerFlyoutPresenterSpacerFill", 217, 26)?;
     // Controls/FluentControls.xaml(216,16) HorizontalAlignment
@@ -51786,7 +51794,7 @@ fn build_controls_fluentcontrols_xaml_deferred_363(
     context.push_parent(rt::to_value(grid_2.clone()));
     // Controls/FluentControls.xaml(223,19) Name
     grid_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("AcceptDismissGrid")));
-    rt::register_name(name_scope.as_ref(), "AcceptDismissGrid", ::core::clone::Clone::clone(&grid_2).upcast::<::ferroui_base::FerroObject>(), 223, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "AcceptDismissGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_2)), 223, 19)?;
     // Controls/FluentControls.xaml(223,14) Row
     let priority_28 = ::ferroui_base::data::BindingPriority::Template;
     grid_2.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_28);
@@ -51828,7 +51836,7 @@ fn build_controls_fluentcontrols_xaml_deferred_363(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/FluentControls.xaml(230,23) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_AcceptButton")));
-    rt::register_name(name_scope.as_ref(), "PART_AcceptButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 230, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_AcceptButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 230, 23)?;
     // Controls/FluentControls.xaml(230,16) Column
     let priority_31 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_31);
@@ -51887,7 +51895,7 @@ fn build_controls_fluentcontrols_xaml_deferred_363(
     context.push_parent(rt::to_value(button_1.clone()));
     // Controls/FluentControls.xaml(241,23) Name
     button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DismissButton")));
-    rt::register_name(name_scope.as_ref(), "PART_DismissButton", ::core::clone::Clone::clone(&button_1).upcast::<::ferroui_base::FerroObject>(), 241, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DismissButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_1)), 241, 23)?;
     // Controls/FluentControls.xaml(241,16) Column
     let priority_38 = ::ferroui_base::data::BindingPriority::Template;
     button_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_38);
@@ -52039,7 +52047,7 @@ fn build_controls_fluentcontrols_xaml_deferred_365(
     content_presenter_0.begin_init();
     // Controls/FluentControls.xaml(45,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 45, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 45, 27)?;
     // Controls/FluentControls.xaml(46,27) BorderBrush
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::border_brush_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()), 46, 27)?;
     // Controls/FluentControls.xaml(47,27) Background
@@ -52205,7 +52213,7 @@ fn build_controls_fluentcontrols_xaml_deferred_367(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/FluentControls.xaml(86,17) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 86, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 86, 17)?;
     // Controls/FluentControls.xaml(86,35) Margin
     rt::bind_template_binding(grid_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), 86, 35)?;
     // Controls/FluentControls.xaml(87,14) Children
@@ -52217,7 +52225,7 @@ fn build_controls_fluentcontrols_xaml_deferred_367(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/FluentControls.xaml(87,21) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_FlyoutButton")));
-    rt::register_name(name_scope.as_ref(), "PART_FlyoutButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 87, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_FlyoutButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 87, 21)?;
     // Controls/FluentControls.xaml(88,21) Theme (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("FluentTimePickerFlyoutButton"));
@@ -52262,7 +52270,7 @@ fn build_controls_fluentcontrols_xaml_deferred_367(
     context.push_parent(rt::to_value(grid_1.clone()));
     // Controls/FluentControls.xaml(100,21) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_FlyoutButtonContentGrid")));
-    rt::register_name(name_scope.as_ref(), "PART_FlyoutButtonContentGrid", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 100, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_FlyoutButtonContentGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 100, 21)?;
     // Controls/FluentControls.xaml(102,18) Children
     let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(grid_1.upcast_ref::<::ferroui_controls::Panel>());
     // Controls/FluentControls.xaml(102,18) Border
@@ -52272,7 +52280,7 @@ fn build_controls_fluentcontrols_xaml_deferred_367(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/FluentControls.xaml(102,25) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_FirstPickerHost")));
-    rt::register_name(name_scope.as_ref(), "PART_FirstPickerHost", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 102, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_FirstPickerHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 102, 25)?;
     // Controls/FluentControls.xaml(102,18) Column
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_3);
@@ -52290,7 +52298,7 @@ fn build_controls_fluentcontrols_xaml_deferred_367(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/FluentControls.xaml(106,30) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HourTextBlock")));
-    rt::register_name(name_scope.as_ref(), "PART_HourTextBlock", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 106, 30)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HourTextBlock", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 106, 30)?;
     // Controls/FluentControls.xaml(107,23) Text
     rt::bind_dynamic_resource(&context, text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), "StringTimePickerHourText", 107, 23)?;
     // Controls/FluentControls.xaml(106,20) HorizontalAlignment
@@ -52311,7 +52319,7 @@ fn build_controls_fluentcontrols_xaml_deferred_367(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/FluentControls.xaml(112,28) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_FirstColumnDivider")));
-    rt::register_name(name_scope.as_ref(), "PART_FirstColumnDivider", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 112, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_FirstColumnDivider", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 112, 28)?;
     // Controls/FluentControls.xaml(113,28) Fill
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "TimePickerSpacerFill", 113, 28)?;
     // Controls/FluentControls.xaml(112,18) HorizontalAlignment
@@ -52333,7 +52341,7 @@ fn build_controls_fluentcontrols_xaml_deferred_367(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/FluentControls.xaml(118,25) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SecondPickerHost")));
-    rt::register_name(name_scope.as_ref(), "PART_SecondPickerHost", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 118, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SecondPickerHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 118, 25)?;
     // Controls/FluentControls.xaml(118,18) Column
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_9);
@@ -52351,7 +52359,7 @@ fn build_controls_fluentcontrols_xaml_deferred_367(
     context.push_parent(rt::to_value(text_block_1.clone()));
     // Controls/FluentControls.xaml(122,30) Name
     text_block_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MinuteTextBlock")));
-    rt::register_name(name_scope.as_ref(), "PART_MinuteTextBlock", ::core::clone::Clone::clone(&text_block_1).upcast::<::ferroui_base::FerroObject>(), 122, 30)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MinuteTextBlock", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_1)), 122, 30)?;
     // Controls/FluentControls.xaml(123,30) Text
     rt::bind_dynamic_resource(&context, text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), "StringTimePickerMinuteText", 123, 30)?;
     // Controls/FluentControls.xaml(122,20) HorizontalAlignment
@@ -52372,7 +52380,7 @@ fn build_controls_fluentcontrols_xaml_deferred_367(
     context.push_parent(rt::to_value(rectangle_1.clone()));
     // Controls/FluentControls.xaml(128,28) Name
     rectangle_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SecondColumnDivider")));
-    rt::register_name(name_scope.as_ref(), "PART_SecondColumnDivider", ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_base::FerroObject>(), 128, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SecondColumnDivider", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_1)), 128, 28)?;
     // Controls/FluentControls.xaml(129,28) Fill
     rt::bind_dynamic_resource(&context, rectangle_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "TimePickerSpacerFill", 129, 28)?;
     // Controls/FluentControls.xaml(128,18) HorizontalAlignment
@@ -52394,7 +52402,7 @@ fn build_controls_fluentcontrols_xaml_deferred_367(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/FluentControls.xaml(134,25) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ThirdPickerHost")));
-    rt::register_name(name_scope.as_ref(), "PART_ThirdPickerHost", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 134, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ThirdPickerHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 134, 25)?;
     // Controls/FluentControls.xaml(134,18) Column
     let priority_15 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 4_i32, priority_15);
@@ -52412,7 +52420,7 @@ fn build_controls_fluentcontrols_xaml_deferred_367(
     context.push_parent(rt::to_value(text_block_2.clone()));
     // Controls/FluentControls.xaml(138,30) Name
     text_block_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SecondTextBlock")));
-    rt::register_name(name_scope.as_ref(), "PART_SecondTextBlock", ::core::clone::Clone::clone(&text_block_2).upcast::<::ferroui_base::FerroObject>(), 138, 30)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SecondTextBlock", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_2)), 138, 30)?;
     // Controls/FluentControls.xaml(139,30) Text
     rt::bind_dynamic_resource(&context, text_block_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), "StringTimePickerSecondText", 139, 30)?;
     // Controls/FluentControls.xaml(138,20) HorizontalAlignment
@@ -52433,7 +52441,7 @@ fn build_controls_fluentcontrols_xaml_deferred_367(
     context.push_parent(rt::to_value(rectangle_2.clone()));
     // Controls/FluentControls.xaml(144,28) Name
     rectangle_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ThirdColumnDivider")));
-    rt::register_name(name_scope.as_ref(), "PART_ThirdColumnDivider", ::core::clone::Clone::clone(&rectangle_2).upcast::<::ferroui_base::FerroObject>(), 144, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ThirdColumnDivider", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_2)), 144, 28)?;
     // Controls/FluentControls.xaml(145,28) Fill
     rt::bind_dynamic_resource(&context, rectangle_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "TimePickerSpacerFill", 145, 28)?;
     // Controls/FluentControls.xaml(144,18) HorizontalAlignment
@@ -52455,7 +52463,7 @@ fn build_controls_fluentcontrols_xaml_deferred_367(
     context.push_parent(rt::to_value(border_3.clone()));
     // Controls/FluentControls.xaml(150,25) Name
     border_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_FourthPickerHost")));
-    rt::register_name(name_scope.as_ref(), "PART_FourthPickerHost", ::core::clone::Clone::clone(&border_3).upcast::<::ferroui_base::FerroObject>(), 150, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_FourthPickerHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_3)), 150, 25)?;
     // Controls/FluentControls.xaml(150,18) Column
     let priority_21 = ::ferroui_base::data::BindingPriority::Template;
     border_3.set_value_with_priority(::ferroui_controls::Grid::column_property(), 6_i32, priority_21);
@@ -52473,7 +52481,7 @@ fn build_controls_fluentcontrols_xaml_deferred_367(
     context.push_parent(rt::to_value(text_block_3.clone()));
     // Controls/FluentControls.xaml(154,30) Name
     text_block_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PeriodTextBlock")));
-    rt::register_name(name_scope.as_ref(), "PART_PeriodTextBlock", ::core::clone::Clone::clone(&text_block_3).upcast::<::ferroui_base::FerroObject>(), 154, 30)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PeriodTextBlock", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_3)), 154, 30)?;
     // Controls/FluentControls.xaml(154,20) HorizontalAlignment
     let priority_24 = ::ferroui_base::data::BindingPriority::Template;
     text_block_3.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Center, priority_24);
@@ -52495,7 +52503,7 @@ fn build_controls_fluentcontrols_xaml_deferred_367(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_8, ::core::clone::Clone::clone(&popup_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(161,20) Name
     popup_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Popup")));
-    rt::register_name(name_scope.as_ref(), "PART_Popup", ::core::clone::Clone::clone(&popup_0).upcast::<::ferroui_base::FerroObject>(), 161, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Popup", ::std::rc::Rc::new(::core::clone::Clone::clone(&popup_0)), 161, 20)?;
     // Controls/FluentControls.xaml(161,14) WindowManagerAddShadowHint
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
     popup_0.set_value_with_priority(::ferroui_controls::primitives::Popup::window_manager_add_shadow_hint_property(), ::core::clone::Clone::clone(&false), priority_25);
@@ -52516,7 +52524,7 @@ fn build_controls_fluentcontrols_xaml_deferred_367(
     popup_0.set_value(::ferroui_controls::primitives::Popup::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&time_picker_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/FluentControls.xaml(166,36) Name
     time_picker_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PickerPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_PickerPresenter", ::core::clone::Clone::clone(&time_picker_presenter_0).upcast::<::ferroui_base::FerroObject>(), 166, 36)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PickerPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&time_picker_presenter_0)), 166, 36)?;
     rt::invoked(time_picker_presenter_0.try_end_init(), 166, 16)?;
     rt::invoked(popup_0.try_end_init(), 161, 14)?;
     context.pop_parent();
@@ -52604,7 +52612,7 @@ fn build_controls_fluentcontrols_xaml_deferred_369(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/FluentControls.xaml(201,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Background")));
-    rt::register_name(name_scope.as_ref(), "Background", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 201, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Background", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 201, 17)?;
     // Controls/FluentControls.xaml(202,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 202, 17)?;
     // Controls/FluentControls.xaml(203,17) BorderBrush
@@ -52626,7 +52634,7 @@ fn build_controls_fluentcontrols_xaml_deferred_369(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/FluentControls.xaml(208,17) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentPanel")));
-    rt::register_name(name_scope.as_ref(), "ContentPanel", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 208, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentPanel", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 208, 17)?;
     // Controls/FluentControls.xaml(208,12) RowDefinitions
     let row_definitions_0 = ::ferroui_controls::RowDefinitions::__markup_new_0();
     rt::invoked(<::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::RowDefinition>>>::__markup_set_Capacity(&row_definitions_0, 2_i32), 208, 37)?;
@@ -52646,7 +52654,7 @@ fn build_controls_fluentcontrols_xaml_deferred_369(
     context.push_parent(rt::to_value(grid_1.clone()));
     // Controls/FluentControls.xaml(209,19) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PickerContainer")));
-    rt::register_name(name_scope.as_ref(), "PART_PickerContainer", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 209, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PickerContainer", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 209, 19)?;
     // Controls/FluentControls.xaml(211,18) Styles
     let styles_collection_0 = ::ferroui_base::StyledElement::__markup_get_Styles(grid_1.upcast_ref::<::ferroui_base::StyledElement>());
     // Controls/FluentControls.xaml(211,18) Style
@@ -52674,7 +52682,7 @@ fn build_controls_fluentcontrols_xaml_deferred_369(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/FluentControls.xaml(216,22) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HourHost")));
-    rt::register_name(name_scope.as_ref(), "PART_HourHost", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 216, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HourHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 216, 22)?;
     // Controls/FluentControls.xaml(216,16) Column
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     panel_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_1);
@@ -52699,7 +52707,7 @@ fn build_controls_fluentcontrols_xaml_deferred_369(
     context.push_parent(rt::to_value(date_time_picker_panel_0.clone()));
     // Controls/FluentControls.xaml(219,40) Name
     date_time_picker_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HourSelector")));
-    rt::register_name(name_scope.as_ref(), "PART_HourSelector", ::core::clone::Clone::clone(&date_time_picker_panel_0).upcast::<::ferroui_base::FerroObject>(), 219, 40)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HourSelector", ::std::rc::Rc::new(::core::clone::Clone::clone(&date_time_picker_panel_0)), 219, 40)?;
     // Controls/FluentControls.xaml(219,20) PanelType
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     date_time_picker_panel_0.set_value_with_priority(::ferroui_controls::date_time_pickers::DateTimePickerPanel::panel_type_property(), ::ferroui_controls::date_time_pickers::DateTimePickerPanelType::Hour, priority_4);
@@ -52721,7 +52729,7 @@ fn build_controls_fluentcontrols_xaml_deferred_369(
     context.push_parent(rt::to_value(repeat_button_0.clone()));
     // Controls/FluentControls.xaml(224,31) Name
     repeat_button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HourUpButton")));
-    rt::register_name(name_scope.as_ref(), "PART_HourUpButton", ::core::clone::Clone::clone(&repeat_button_0).upcast::<::ferroui_base::FerroObject>(), 224, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HourUpButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_0)), 224, 31)?;
     // Controls/FluentControls.xaml(224,56) Theme (setter chosen at run time)
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("FluentDateTimePickerUpButton"));
@@ -52747,7 +52755,7 @@ fn build_controls_fluentcontrols_xaml_deferred_369(
     context.push_parent(rt::to_value(repeat_button_1.clone()));
     // Controls/FluentControls.xaml(225,31) Name
     repeat_button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HourDownButton")));
-    rt::register_name(name_scope.as_ref(), "PART_HourDownButton", ::core::clone::Clone::clone(&repeat_button_1).upcast::<::ferroui_base::FerroObject>(), 225, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HourDownButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_1)), 225, 31)?;
     // Controls/FluentControls.xaml(225,58) Theme (setter chosen at run time)
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("FluentDateTimePickerDownButton"));
@@ -52775,7 +52783,7 @@ fn build_controls_fluentcontrols_xaml_deferred_369(
     context.push_parent(rt::to_value(panel_1.clone()));
     // Controls/FluentControls.xaml(228,22) Name
     panel_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MinuteHost")));
-    rt::register_name(name_scope.as_ref(), "PART_MinuteHost", ::core::clone::Clone::clone(&panel_1).upcast::<::ferroui_base::FerroObject>(), 228, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MinuteHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_1)), 228, 22)?;
     // Controls/FluentControls.xaml(228,16) Column
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
     panel_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_8);
@@ -52800,7 +52808,7 @@ fn build_controls_fluentcontrols_xaml_deferred_369(
     context.push_parent(rt::to_value(date_time_picker_panel_1.clone()));
     // Controls/FluentControls.xaml(231,40) Name
     date_time_picker_panel_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MinuteSelector")));
-    rt::register_name(name_scope.as_ref(), "PART_MinuteSelector", ::core::clone::Clone::clone(&date_time_picker_panel_1).upcast::<::ferroui_base::FerroObject>(), 231, 40)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MinuteSelector", ::std::rc::Rc::new(::core::clone::Clone::clone(&date_time_picker_panel_1)), 231, 40)?;
     // Controls/FluentControls.xaml(231,20) PanelType
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     date_time_picker_panel_1.set_value_with_priority(::ferroui_controls::date_time_pickers::DateTimePickerPanel::panel_type_property(), ::ferroui_controls::date_time_pickers::DateTimePickerPanelType::Minute, priority_11);
@@ -52822,7 +52830,7 @@ fn build_controls_fluentcontrols_xaml_deferred_369(
     context.push_parent(rt::to_value(repeat_button_2.clone()));
     // Controls/FluentControls.xaml(236,31) Name
     repeat_button_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MinuteUpButton")));
-    rt::register_name(name_scope.as_ref(), "PART_MinuteUpButton", ::core::clone::Clone::clone(&repeat_button_2).upcast::<::ferroui_base::FerroObject>(), 236, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MinuteUpButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_2)), 236, 31)?;
     // Controls/FluentControls.xaml(236,58) Theme (setter chosen at run time)
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("FluentDateTimePickerUpButton"));
@@ -52848,7 +52856,7 @@ fn build_controls_fluentcontrols_xaml_deferred_369(
     context.push_parent(rt::to_value(repeat_button_3.clone()));
     // Controls/FluentControls.xaml(237,31) Name
     repeat_button_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MinuteDownButton")));
-    rt::register_name(name_scope.as_ref(), "PART_MinuteDownButton", ::core::clone::Clone::clone(&repeat_button_3).upcast::<::ferroui_base::FerroObject>(), 237, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MinuteDownButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_3)), 237, 31)?;
     // Controls/FluentControls.xaml(237,60) Theme (setter chosen at run time)
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("FluentDateTimePickerDownButton"));
@@ -52876,7 +52884,7 @@ fn build_controls_fluentcontrols_xaml_deferred_369(
     context.push_parent(rt::to_value(panel_2.clone()));
     // Controls/FluentControls.xaml(240,22) Name
     panel_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SecondHost")));
-    rt::register_name(name_scope.as_ref(), "PART_SecondHost", ::core::clone::Clone::clone(&panel_2).upcast::<::ferroui_base::FerroObject>(), 240, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SecondHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_2)), 240, 22)?;
     // Controls/FluentControls.xaml(240,16) Column
     let priority_15 = ::ferroui_base::data::BindingPriority::Template;
     panel_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 4_i32, priority_15);
@@ -52901,7 +52909,7 @@ fn build_controls_fluentcontrols_xaml_deferred_369(
     context.push_parent(rt::to_value(date_time_picker_panel_2.clone()));
     // Controls/FluentControls.xaml(243,40) Name
     date_time_picker_panel_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SecondSelector")));
-    rt::register_name(name_scope.as_ref(), "PART_SecondSelector", ::core::clone::Clone::clone(&date_time_picker_panel_2).upcast::<::ferroui_base::FerroObject>(), 243, 40)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SecondSelector", ::std::rc::Rc::new(::core::clone::Clone::clone(&date_time_picker_panel_2)), 243, 40)?;
     // Controls/FluentControls.xaml(243,20) PanelType
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
     date_time_picker_panel_2.set_value_with_priority(::ferroui_controls::date_time_pickers::DateTimePickerPanel::panel_type_property(), ::ferroui_controls::date_time_pickers::DateTimePickerPanelType::Second, priority_18);
@@ -52923,7 +52931,7 @@ fn build_controls_fluentcontrols_xaml_deferred_369(
     context.push_parent(rt::to_value(repeat_button_4.clone()));
     // Controls/FluentControls.xaml(248,31) Name
     repeat_button_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SecondUpButton")));
-    rt::register_name(name_scope.as_ref(), "PART_SecondUpButton", ::core::clone::Clone::clone(&repeat_button_4).upcast::<::ferroui_base::FerroObject>(), 248, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SecondUpButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_4)), 248, 31)?;
     // Controls/FluentControls.xaml(248,58) Theme (setter chosen at run time)
     let priority_20 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("FluentDateTimePickerUpButton"));
@@ -52949,7 +52957,7 @@ fn build_controls_fluentcontrols_xaml_deferred_369(
     context.push_parent(rt::to_value(repeat_button_5.clone()));
     // Controls/FluentControls.xaml(249,31) Name
     repeat_button_5.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SecondDownButton")));
-    rt::register_name(name_scope.as_ref(), "PART_SecondDownButton", ::core::clone::Clone::clone(&repeat_button_5).upcast::<::ferroui_base::FerroObject>(), 249, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SecondDownButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_5)), 249, 31)?;
     // Controls/FluentControls.xaml(249,60) Theme (setter chosen at run time)
     let priority_21 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("FluentDateTimePickerDownButton"));
@@ -52977,7 +52985,7 @@ fn build_controls_fluentcontrols_xaml_deferred_369(
     context.push_parent(rt::to_value(panel_3.clone()));
     // Controls/FluentControls.xaml(252,22) Name
     panel_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PeriodHost")));
-    rt::register_name(name_scope.as_ref(), "PART_PeriodHost", ::core::clone::Clone::clone(&panel_3).upcast::<::ferroui_base::FerroObject>(), 252, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PeriodHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_3)), 252, 22)?;
     // Controls/FluentControls.xaml(252,16) Column
     let priority_22 = ::ferroui_base::data::BindingPriority::Template;
     panel_3.set_value_with_priority(::ferroui_controls::Grid::column_property(), 6_i32, priority_22);
@@ -53002,7 +53010,7 @@ fn build_controls_fluentcontrols_xaml_deferred_369(
     context.push_parent(rt::to_value(date_time_picker_panel_3.clone()));
     // Controls/FluentControls.xaml(255,40) Name
     date_time_picker_panel_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PeriodSelector")));
-    rt::register_name(name_scope.as_ref(), "PART_PeriodSelector", ::core::clone::Clone::clone(&date_time_picker_panel_3).upcast::<::ferroui_base::FerroObject>(), 255, 40)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PeriodSelector", ::std::rc::Rc::new(::core::clone::Clone::clone(&date_time_picker_panel_3)), 255, 40)?;
     // Controls/FluentControls.xaml(255,20) PanelType
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
     date_time_picker_panel_3.set_value_with_priority(::ferroui_controls::date_time_pickers::DateTimePickerPanel::panel_type_property(), ::ferroui_controls::date_time_pickers::DateTimePickerPanelType::TimePeriod, priority_25);
@@ -53024,7 +53032,7 @@ fn build_controls_fluentcontrols_xaml_deferred_369(
     context.push_parent(rt::to_value(repeat_button_6.clone()));
     // Controls/FluentControls.xaml(260,31) Name
     repeat_button_6.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PeriodUpButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PeriodUpButton", ::core::clone::Clone::clone(&repeat_button_6).upcast::<::ferroui_base::FerroObject>(), 260, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PeriodUpButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_6)), 260, 31)?;
     // Controls/FluentControls.xaml(260,58) Theme (setter chosen at run time)
     let priority_27 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_7 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("FluentDateTimePickerUpButton"));
@@ -53050,7 +53058,7 @@ fn build_controls_fluentcontrols_xaml_deferred_369(
     context.push_parent(rt::to_value(repeat_button_7.clone()));
     // Controls/FluentControls.xaml(261,31) Name
     repeat_button_7.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PeriodDownButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PeriodDownButton", ::core::clone::Clone::clone(&repeat_button_7).upcast::<::ferroui_base::FerroObject>(), 261, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PeriodDownButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_7)), 261, 31)?;
     // Controls/FluentControls.xaml(261,60) Theme (setter chosen at run time)
     let priority_28 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_8 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("FluentDateTimePickerDownButton"));
@@ -53078,7 +53086,7 @@ fn build_controls_fluentcontrols_xaml_deferred_369(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/FluentControls.xaml(264,26) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HighlightRect")));
-    rt::register_name(name_scope.as_ref(), "HighlightRect", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 264, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "HighlightRect", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 264, 26)?;
     // Controls/FluentControls.xaml(264,16) ZIndex
     let priority_29 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_0.set_value_with_priority(::ferroui_base::Visual::z_index_property(), -1_i32, priority_29);
@@ -53106,7 +53114,7 @@ fn build_controls_fluentcontrols_xaml_deferred_369(
     context.push_parent(rt::to_value(rectangle_1.clone()));
     // Controls/FluentControls.xaml(270,26) Name
     rectangle_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_FirstSpacer")));
-    rt::register_name(name_scope.as_ref(), "PART_FirstSpacer", ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_base::FerroObject>(), 270, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_FirstSpacer", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_1)), 270, 26)?;
     // Controls/FluentControls.xaml(271,26) Fill
     rt::bind_dynamic_resource(&context, rectangle_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "TimePickerFlyoutPresenterSpacerFill", 271, 26)?;
     // Controls/FluentControls.xaml(270,16) HorizontalAlignment
@@ -53128,7 +53136,7 @@ fn build_controls_fluentcontrols_xaml_deferred_369(
     context.push_parent(rt::to_value(rectangle_2.clone()));
     // Controls/FluentControls.xaml(275,26) Name
     rectangle_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SecondSpacer")));
-    rt::register_name(name_scope.as_ref(), "PART_SecondSpacer", ::core::clone::Clone::clone(&rectangle_2).upcast::<::ferroui_base::FerroObject>(), 275, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SecondSpacer", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_2)), 275, 26)?;
     // Controls/FluentControls.xaml(276,26) Fill
     rt::bind_dynamic_resource(&context, rectangle_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "TimePickerFlyoutPresenterSpacerFill", 276, 26)?;
     // Controls/FluentControls.xaml(275,16) HorizontalAlignment
@@ -53150,7 +53158,7 @@ fn build_controls_fluentcontrols_xaml_deferred_369(
     context.push_parent(rt::to_value(rectangle_3.clone()));
     // Controls/FluentControls.xaml(280,26) Name
     rectangle_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ThirdSpacer")));
-    rt::register_name(name_scope.as_ref(), "PART_ThirdSpacer", ::core::clone::Clone::clone(&rectangle_3).upcast::<::ferroui_base::FerroObject>(), 280, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ThirdSpacer", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_3)), 280, 26)?;
     // Controls/FluentControls.xaml(281,26) Fill
     rt::bind_dynamic_resource(&context, rectangle_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "TimePickerFlyoutPresenterSpacerFill", 281, 26)?;
     // Controls/FluentControls.xaml(280,16) HorizontalAlignment
@@ -53174,7 +53182,7 @@ fn build_controls_fluentcontrols_xaml_deferred_369(
     context.push_parent(rt::to_value(grid_2.clone()));
     // Controls/FluentControls.xaml(287,19) Name
     grid_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("AcceptDismissGrid")));
-    rt::register_name(name_scope.as_ref(), "AcceptDismissGrid", ::core::clone::Clone::clone(&grid_2).upcast::<::ferroui_base::FerroObject>(), 287, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "AcceptDismissGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_2)), 287, 19)?;
     // Controls/FluentControls.xaml(287,14) Row
     let priority_39 = ::ferroui_base::data::BindingPriority::Template;
     grid_2.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_39);
@@ -53216,7 +53224,7 @@ fn build_controls_fluentcontrols_xaml_deferred_369(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/FluentControls.xaml(294,23) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_AcceptButton")));
-    rt::register_name(name_scope.as_ref(), "PART_AcceptButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 294, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_AcceptButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 294, 23)?;
     // Controls/FluentControls.xaml(294,16) Column
     let priority_42 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_42);
@@ -53275,7 +53283,7 @@ fn build_controls_fluentcontrols_xaml_deferred_369(
     context.push_parent(rt::to_value(button_1.clone()));
     // Controls/FluentControls.xaml(305,23) Name
     button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DismissButton")));
-    rt::register_name(name_scope.as_ref(), "PART_DismissButton", ::core::clone::Clone::clone(&button_1).upcast::<::ferroui_base::FerroObject>(), 305, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DismissButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_1)), 305, 23)?;
     // Controls/FluentControls.xaml(305,16) Column
     let priority_49 = ::ferroui_base::data::BindingPriority::Template;
     button_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_49);
@@ -53542,7 +53550,7 @@ fn build_controls_fluentcontrols_xaml_deferred_371(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/FluentControls.xaml(30,21) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootBorder")));
-    rt::register_name(name_scope.as_ref(), "RootBorder", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 30, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "RootBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 30, 21)?;
     // Controls/FluentControls.xaml(31,21) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 31, 21)?;
     // Controls/FluentControls.xaml(32,21) BorderBrush
@@ -53562,7 +53570,7 @@ fn build_controls_fluentcontrols_xaml_deferred_371(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/FluentControls.xaml(36,21) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("InnerGrid")));
-    rt::register_name(name_scope.as_ref(), "InnerGrid", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 36, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "InnerGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 36, 21)?;
     // Controls/FluentControls.xaml(38,20) ColumnDefinitions
     let column_definitions_collection_0 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_0);
     // Controls/FluentControls.xaml(38,20) ColumnDefinition
@@ -53587,7 +53595,7 @@ fn build_controls_fluentcontrols_xaml_deferred_371(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(42,35) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 42, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 42, 35)?;
     // Controls/FluentControls.xaml(42,18) Column
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_3);
@@ -53619,7 +53627,7 @@ fn build_controls_fluentcontrols_xaml_deferred_371(
     context.push_parent(rt::to_value(path_icon_0.clone()));
     // Controls/FluentControls.xaml(50,27) Name
     path_icon_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("DropDownGlyph")));
-    rt::register_name(name_scope.as_ref(), "DropDownGlyph", ::core::clone::Clone::clone(&path_icon_0).upcast::<::ferroui_base::FerroObject>(), 50, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "DropDownGlyph", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_icon_0)), 50, 27)?;
     // Controls/FluentControls.xaml(50,18) Column
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     path_icon_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_5);
@@ -53702,7 +53710,7 @@ fn build_controls_fluentcontrols_xaml_deferred_373(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(52,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("FocusTarget")));
-    rt::register_name(name_scope.as_ref(), "FocusTarget", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 52, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "FocusTarget", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 52, 19)?;
     // Controls/FluentControls.xaml(52,12) Margin
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(0.0_f64, -10.0_f64, 0.0_f64, -10.0_f64), priority_0);
@@ -53719,7 +53727,7 @@ fn build_controls_fluentcontrols_xaml_deferred_373(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/FluentControls.xaml(53,19) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TrackBackground")));
-    rt::register_name(name_scope.as_ref(), "TrackBackground", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 53, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "TrackBackground", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 53, 19)?;
     // Controls/FluentControls.xaml(54,19) Background
     rt::bind_template_binding(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 54, 19)?;
     // Controls/FluentControls.xaml(55,19) CornerRadius
@@ -53779,7 +53787,7 @@ fn build_controls_fluentcontrols_xaml_deferred_375(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(67,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("FocusTarget")));
-    rt::register_name(name_scope.as_ref(), "FocusTarget", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 67, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "FocusTarget", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 67, 19)?;
     // Controls/FluentControls.xaml(67,12) Margin
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(0.0_f64, -10.0_f64, 0.0_f64, -10.0_f64), priority_0);
@@ -53796,7 +53804,7 @@ fn build_controls_fluentcontrols_xaml_deferred_375(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/FluentControls.xaml(68,19) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TrackBackground")));
-    rt::register_name(name_scope.as_ref(), "TrackBackground", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 68, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "TrackBackground", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 68, 19)?;
     // Controls/FluentControls.xaml(69,19) Background
     rt::bind_template_binding(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 69, 19)?;
     // Controls/FluentControls.xaml(70,19) CornerRadius
@@ -54278,7 +54286,7 @@ fn build_controls_fluentcontrols_xaml_deferred_379(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/FluentControls.xaml(102,23) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SliderContainer")));
-    rt::register_name(name_scope.as_ref(), "SliderContainer", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 102, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "SliderContainer", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 102, 23)?;
     // Controls/FluentControls.xaml(103,23) Margin
     rt::bind_template_binding(grid_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), 103, 23)?;
     // Controls/FluentControls.xaml(104,23) Background
@@ -54308,7 +54316,7 @@ fn build_controls_fluentcontrols_xaml_deferred_379(
     context.push_parent(rt::to_value(grid_1.clone()));
     // Controls/FluentControls.xaml(111,23) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HorizontalTemplate")));
-    rt::register_name(name_scope.as_ref(), "HorizontalTemplate", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 111, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "HorizontalTemplate", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 111, 23)?;
     // Controls/FluentControls.xaml(112,23) MinHeight
     rt::bind_dynamic_resource(&context, grid_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_height_property(), "SliderHorizontalHeight", 112, 23)?;
     // Controls/FluentControls.xaml(110,20) ColumnDefinitions
@@ -54359,7 +54367,7 @@ fn build_controls_fluentcontrols_xaml_deferred_379(
     context.push_parent(rt::to_value(tick_bar_0.clone()));
     // Controls/FluentControls.xaml(120,25) Name
     tick_bar_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TopTickBar")));
-    rt::register_name(name_scope.as_ref(), "TopTickBar", ::core::clone::Clone::clone(&tick_bar_0).upcast::<::ferroui_base::FerroObject>(), 120, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "TopTickBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&tick_bar_0)), 120, 25)?;
     // Controls/FluentControls.xaml(119,22) ColumnSpan
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     tick_bar_0.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 3_i32, priority_1);
@@ -54402,7 +54410,7 @@ fn build_controls_fluentcontrols_xaml_deferred_379(
     context.push_parent(rt::to_value(tick_bar_1.clone()));
     // Controls/FluentControls.xaml(135,25) Name
     tick_bar_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("BottomTickBar")));
-    rt::register_name(name_scope.as_ref(), "BottomTickBar", ::core::clone::Clone::clone(&tick_bar_1).upcast::<::ferroui_base::FerroObject>(), 135, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "BottomTickBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&tick_bar_1)), 135, 25)?;
     // Controls/FluentControls.xaml(134,22) Row
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     tick_bar_1.set_value_with_priority(::ferroui_controls::Grid::row_property(), 2_i32, priority_6);
@@ -54448,7 +54456,7 @@ fn build_controls_fluentcontrols_xaml_deferred_379(
     context.push_parent(rt::to_value(track_0.clone()));
     // Controls/FluentControls.xaml(151,25) Name
     track_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Track")));
-    rt::register_name(name_scope.as_ref(), "PART_Track", ::core::clone::Clone::clone(&track_0).upcast::<::ferroui_base::FerroObject>(), 151, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Track", ::std::rc::Rc::new(::core::clone::Clone::clone(&track_0)), 151, 25)?;
     // Controls/FluentControls.xaml(150,22) Row
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
     track_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_12);
@@ -54479,7 +54487,7 @@ fn build_controls_fluentcontrols_xaml_deferred_379(
     context.push_parent(rt::to_value(repeat_button_0.clone()));
     // Controls/FluentControls.xaml(161,29) Name
     repeat_button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DecreaseButton")));
-    rt::register_name(name_scope.as_ref(), "PART_DecreaseButton", ::core::clone::Clone::clone(&repeat_button_0).upcast::<::ferroui_base::FerroObject>(), 161, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DecreaseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_0)), 161, 29)?;
     // Controls/FluentControls.xaml(162,29) Theme (setter chosen at run time)
     let priority_16 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("FluentSliderHorizontalRepeatButton"));
@@ -54510,7 +54518,7 @@ fn build_controls_fluentcontrols_xaml_deferred_379(
     context.push_parent(rt::to_value(repeat_button_1.clone()));
     // Controls/FluentControls.xaml(168,29) Name
     repeat_button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_IncreaseButton")));
-    rt::register_name(name_scope.as_ref(), "PART_IncreaseButton", ::core::clone::Clone::clone(&repeat_button_1).upcast::<::ferroui_base::FerroObject>(), 168, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_IncreaseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_1)), 168, 29)?;
     // Controls/FluentControls.xaml(169,29) Theme (setter chosen at run time)
     let priority_19 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("FluentSliderHorizontalRepeatButton"));
@@ -54540,7 +54548,7 @@ fn build_controls_fluentcontrols_xaml_deferred_379(
     context.push_parent(rt::to_value(thumb_0.clone()));
     // Controls/FluentControls.xaml(174,27) Name
     thumb_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("thumb")));
-    rt::register_name(name_scope.as_ref(), "thumb", ::core::clone::Clone::clone(&thumb_0).upcast::<::ferroui_base::FerroObject>(), 174, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "thumb", ::std::rc::Rc::new(::core::clone::Clone::clone(&thumb_0)), 174, 27)?;
     // Controls/FluentControls.xaml(175,27) Width
     rt::bind_dynamic_resource(&context, thumb_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), "SliderHorizontalThumbWidth", 175, 27)?;
     // Controls/FluentControls.xaml(176,27) Height
@@ -54626,7 +54634,7 @@ fn build_controls_fluentcontrols_xaml_deferred_380(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/FluentControls.xaml(199,23) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SliderContainer")));
-    rt::register_name(name_scope.as_ref(), "SliderContainer", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 199, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "SliderContainer", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 199, 23)?;
     // Controls/FluentControls.xaml(199,18) Row
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     grid_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_0);
@@ -54659,7 +54667,7 @@ fn build_controls_fluentcontrols_xaml_deferred_380(
     context.push_parent(rt::to_value(grid_1.clone()));
     // Controls/FluentControls.xaml(209,23) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("VerticalTemplate")));
-    rt::register_name(name_scope.as_ref(), "VerticalTemplate", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 209, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "VerticalTemplate", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 209, 23)?;
     // Controls/FluentControls.xaml(210,23) MinWidth
     rt::bind_dynamic_resource(&context, grid_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_width_property(), "SliderVerticalWidth", 210, 23)?;
     // Controls/FluentControls.xaml(208,20) RowDefinitions
@@ -54710,7 +54718,7 @@ fn build_controls_fluentcontrols_xaml_deferred_380(
     context.push_parent(rt::to_value(tick_bar_0.clone()));
     // Controls/FluentControls.xaml(218,25) Name
     tick_bar_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LeftTickBar")));
-    rt::register_name(name_scope.as_ref(), "LeftTickBar", ::core::clone::Clone::clone(&tick_bar_0).upcast::<::ferroui_base::FerroObject>(), 218, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "LeftTickBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&tick_bar_0)), 218, 25)?;
     // Controls/FluentControls.xaml(217,22) RowSpan
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     tick_bar_0.set_value_with_priority(::ferroui_controls::Grid::row_span_property(), 3_i32, priority_2);
@@ -54753,7 +54761,7 @@ fn build_controls_fluentcontrols_xaml_deferred_380(
     context.push_parent(rt::to_value(tick_bar_1.clone()));
     // Controls/FluentControls.xaml(233,25) Name
     tick_bar_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RightTickBar")));
-    rt::register_name(name_scope.as_ref(), "RightTickBar", ::core::clone::Clone::clone(&tick_bar_1).upcast::<::ferroui_base::FerroObject>(), 233, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "RightTickBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&tick_bar_1)), 233, 25)?;
     // Controls/FluentControls.xaml(232,22) RowSpan
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     tick_bar_1.set_value_with_priority(::ferroui_controls::Grid::row_span_property(), 3_i32, priority_7);
@@ -54799,7 +54807,7 @@ fn build_controls_fluentcontrols_xaml_deferred_380(
     context.push_parent(rt::to_value(track_0.clone()));
     // Controls/FluentControls.xaml(249,25) Name
     track_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Track")));
-    rt::register_name(name_scope.as_ref(), "PART_Track", ::core::clone::Clone::clone(&track_0).upcast::<::ferroui_base::FerroObject>(), 249, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Track", ::std::rc::Rc::new(::core::clone::Clone::clone(&track_0)), 249, 25)?;
     // Controls/FluentControls.xaml(248,22) RowSpan
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     track_0.set_value_with_priority(::ferroui_controls::Grid::row_span_property(), 3_i32, priority_13);
@@ -54833,7 +54841,7 @@ fn build_controls_fluentcontrols_xaml_deferred_380(
     context.push_parent(rt::to_value(repeat_button_0.clone()));
     // Controls/FluentControls.xaml(260,29) Name
     repeat_button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DecreaseButton")));
-    rt::register_name(name_scope.as_ref(), "PART_DecreaseButton", ::core::clone::Clone::clone(&repeat_button_0).upcast::<::ferroui_base::FerroObject>(), 260, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DecreaseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_0)), 260, 29)?;
     // Controls/FluentControls.xaml(261,29) Theme (setter chosen at run time)
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("FluentSliderVerticalRepeatButton"));
@@ -54864,7 +54872,7 @@ fn build_controls_fluentcontrols_xaml_deferred_380(
     context.push_parent(rt::to_value(repeat_button_1.clone()));
     // Controls/FluentControls.xaml(267,29) Name
     repeat_button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_IncreaseButton")));
-    rt::register_name(name_scope.as_ref(), "PART_IncreaseButton", ::core::clone::Clone::clone(&repeat_button_1).upcast::<::ferroui_base::FerroObject>(), 267, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_IncreaseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_1)), 267, 29)?;
     // Controls/FluentControls.xaml(268,29) Background
     rt::bind_template_binding(repeat_button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 268, 29)?;
     // Controls/FluentControls.xaml(269,29) Theme (setter chosen at run time)
@@ -54894,7 +54902,7 @@ fn build_controls_fluentcontrols_xaml_deferred_380(
     context.push_parent(rt::to_value(thumb_0.clone()));
     // Controls/FluentControls.xaml(273,27) Name
     thumb_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SliderThumb")));
-    rt::register_name(name_scope.as_ref(), "SliderThumb", ::core::clone::Clone::clone(&thumb_0).upcast::<::ferroui_base::FerroObject>(), 273, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "SliderThumb", ::std::rc::Rc::new(::core::clone::Clone::clone(&thumb_0)), 273, 27)?;
     // Controls/FluentControls.xaml(274,27) Width
     rt::bind_dynamic_resource(&context, thumb_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), "SliderVerticalThumbWidth", 274, 27)?;
     // Controls/FluentControls.xaml(275,27) Height
@@ -55737,7 +55745,7 @@ fn build_controls_fluentcontrols_xaml_deferred_386(
     context.push_parent(rt::to_value(list_box_0.clone()));
     // Controls/FluentControls.xaml(149,22) Name
     list_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_QuickLinks")));
-    rt::register_name(name_scope.as_ref(), "PART_QuickLinks", ::core::clone::Clone::clone(&list_box_0).upcast::<::ferroui_base::FerroObject>(), 149, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_QuickLinks", ::std::rc::Rc::new(::core::clone::Clone::clone(&list_box_0)), 149, 22)?;
     // Controls/FluentControls.xaml(149,14) Dock
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     list_box_0.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Left, priority_0);
@@ -55775,7 +55783,7 @@ fn build_controls_fluentcontrols_xaml_deferred_386(
     context.push_parent(rt::to_value(dock_panel_1.clone()));
     // Controls/FluentControls.xaml(164,24) Name
     dock_panel_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("NavBar")));
-    rt::register_name(name_scope.as_ref(), "NavBar", ::core::clone::Clone::clone(&dock_panel_1).upcast::<::ferroui_base::FerroObject>(), 164, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "NavBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&dock_panel_1)), 164, 24)?;
     // Controls/FluentControls.xaml(164,14) Dock
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     dock_panel_1.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Top, priority_4);
@@ -55931,7 +55939,7 @@ fn build_controls_fluentcontrols_xaml_deferred_386(
     context.push_parent(rt::to_value(text_box_0.clone()));
     // Controls/FluentControls.xaml(174,26) Name
     text_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Location")));
-    rt::register_name(name_scope.as_ref(), "Location", ::core::clone::Clone::clone(&text_box_0).upcast::<::ferroui_base::FerroObject>(), 174, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "Location", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_box_0)), 174, 26)?;
     // Controls/FluentControls.xaml(174,44) Text
     let reflection_binding_extension_4 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("Location"));
     let provided_12 = rt::provide_value(&context, rt::property_value(::ferroui_controls::TextBox::text_property()), &reflection_binding_extension_4, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
@@ -56098,7 +56106,7 @@ fn build_controls_fluentcontrols_xaml_deferred_386(
     context.push_parent(rt::to_value(uniform_grid_0.clone()));
     // Controls/FluentControls.xaml(192,30) Name
     uniform_grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Finalize")));
-    rt::register_name(name_scope.as_ref(), "Finalize", ::core::clone::Clone::clone(&uniform_grid_0).upcast::<::ferroui_base::FerroObject>(), 192, 30)?;
+    rt::register_name_value(name_scope.as_ref(), "Finalize", ::std::rc::Rc::new(::core::clone::Clone::clone(&uniform_grid_0)), 192, 30)?;
     // Controls/FluentControls.xaml(192,18) HorizontalAlignment
     let priority_36 = ::ferroui_base::data::BindingPriority::Template;
     uniform_grid_0.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Right, priority_36);
@@ -56416,7 +56424,7 @@ fn build_controls_fluentcontrols_xaml_deferred_386(
     context.push_parent(rt::to_value(list_box_1.clone()));
     // Controls/FluentControls.xaml(233,24) Name
     list_box_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Files")));
-    rt::register_name(name_scope.as_ref(), "PART_Files", ::core::clone::Clone::clone(&list_box_1).upcast::<::ferroui_base::FerroObject>(), 233, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Files", ::std::rc::Rc::new(::core::clone::Clone::clone(&list_box_1)), 233, 24)?;
     // Controls/FluentControls.xaml(234,19) ItemsSource
     let reflection_binding_extension_14 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("Items"));
     let provided_32 = rt::provide_value(&context, rt::property_value(::ferroui_controls::ItemsControl::items_source_property()), &reflection_binding_extension_14, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
@@ -56772,7 +56780,7 @@ fn build_controls_fluentcontrols_xaml_deferred_390(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/FluentControls.xaml(288,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("border")));
-    rt::register_name(name_scope.as_ref(), "border", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 288, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "border", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 288, 19)?;
     // Controls/FluentControls.xaml(288,33) BoxShadow
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::box_shadow_property(), "ManagedFileChooserQuickLinksBoxShadow", 288, 33)?;
     // Controls/FluentControls.xaml(288,101) Background
@@ -56788,7 +56796,7 @@ fn build_controls_fluentcontrols_xaml_deferred_390(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_controls::Control>()));
     // Controls/FluentControls.xaml(289,27) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "PART_ScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 289, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 289, 27)?;
     // Controls/FluentControls.xaml(289,52) HorizontalScrollBarVisibility
     rt::bind_template_binding(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(::ferroui_controls::ScrollViewer::horizontal_scroll_bar_visibility_property()), 289, 52)?;
     // Controls/FluentControls.xaml(289,147) VerticalScrollBarVisibility
@@ -56800,7 +56808,7 @@ fn build_controls_fluentcontrols_xaml_deferred_390(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&items_presenter_0)));
     // Controls/FluentControls.xaml(290,31) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 290, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 290, 31)?;
     // Controls/FluentControls.xaml(291,31) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 291, 31)?;
     // Controls/FluentControls.xaml(292,31) Margin
@@ -56825,7 +56833,7 @@ fn build_controls_fluentcontrols_xaml_deferred_391(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/FluentControls.xaml(303,23) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 303, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 303, 23)?;
     // Controls/FluentControls.xaml(303,16) CornerRadius
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_controls::Border::corner_radius_property(), ::ferroui_base::CornerRadius::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64), priority_0);
@@ -56847,7 +56855,7 @@ fn build_controls_fluentcontrols_xaml_deferred_391(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/FluentControls.xaml(305,27) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SelectedLine")));
-    rt::register_name(name_scope.as_ref(), "SelectedLine", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 305, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "SelectedLine", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 305, 27)?;
     // Controls/FluentControls.xaml(305,20) HorizontalAlignment
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Left, priority_2);
@@ -56874,7 +56882,7 @@ fn build_controls_fluentcontrols_xaml_deferred_391(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/FluentControls.xaml(306,37) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 306, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 306, 37)?;
     // Controls/FluentControls.xaml(306,20) Background
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_6);
@@ -57486,7 +57494,7 @@ fn build_controls_fluentcontrols_xaml_deferred_401(
     image_0.set_value_with_priority(::ferroui_base::input::InputElement::cursor_property(), rt::cast(::ferroui_base::input::Cursor::__markup_new_0(::ferroui_base::input::StandardCursorType::Arrow), 86, 22)?, priority_4);
     // Controls/FluentControls.xaml(87,22) Name
     image_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HandlePathIcon")));
-    rt::register_name(name_scope.as_ref(), "PART_HandlePathIcon", ::core::clone::Clone::clone(&image_0).upcast::<::ferroui_base::FerroObject>(), 87, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HandlePathIcon", ::std::rc::Rc::new(::core::clone::Clone::clone(&image_0)), 87, 22)?;
     // Controls/FluentControls.xaml(88,22) Height
     rt::bind_dynamic_resource(&context, image_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), "TextSelectHandleSize", 88, 22)?;
     // Controls/FluentControls.xaml(89,22) Source
@@ -57506,7 +57514,7 @@ fn build_controls_fluentcontrols_xaml_deferred_401(
     border_1.set_value_with_priority(::ferroui_controls::Border::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_5);
     // Controls/FluentControls.xaml(92,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Indicator")));
-    rt::register_name(name_scope.as_ref(), "PART_Indicator", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 92, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Indicator", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 92, 21)?;
     // Controls/FluentControls.xaml(91,14) HorizontalAlignment
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Center, priority_6);

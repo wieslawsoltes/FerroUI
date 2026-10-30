@@ -28,6 +28,8 @@ use crate::markup::XamlClass;
 use ferroui_base::metadata::MarkupType;
 use ferroui_base::TypeInfo;
 
+#[cfg(all(feature = "hot-reload", debug_assertions))]
+mod hot_reload;
 mod app;
 mod assets;
 #[cfg(feature = "classic-themes")]

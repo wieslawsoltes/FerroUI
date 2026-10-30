@@ -36,7 +36,7 @@ use xamlx::type_system::IXamlTypeSystem;
 use crate::compiler_extensions::IXamlCompileTimeValueParser;
 
 use super::emit_types::{EmitClass, EmitTypes, Known};
-use super::emitter::{emit_function, root_class_of, DocumentFunctions};
+use super::emitter::{emit_function, root_value_handle_of, DocumentFunctions};
 use super::transform::{transform_group, DocumentSource, TransformOptions};
 use super::source::{function_name_of, rust_string_literal};
 use ferroui_build_scan::xaml_metadata::{DocumentModel, XamlMetadata};
@@ -195,8 +195,8 @@ pub fn compile_documents_with(
             let functions_of_group = || {
                 let mut functions = DocumentFunctions::default();
                 for (name, transformed) in names.iter().zip(&transformed) {
-                    if let (Some(build), Some(root_class)) = (&transformed.build, root_class_of(types, &transformed.root)) {
-                        functions.insert(build, name, root_class);
+                    if let (Some(build), Some(root_class)) = (&transformed.build, root_value_handle_of(types, &transformed.root)) {
+                        functions.insert_value(build, name, root_class);
                     }
                 }
                 functions
@@ -763,8 +763,8 @@ pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, 
             _ => function_name_of(&document.0),
         };
         if index > 0 {
-            if let (Some(build), Some(root_class)) = (&transformed.build, root_class_of(types, &transformed.root)) {
-                functions.insert(build, &function_name, root_class);
+            if let (Some(build), Some(root_class)) = (&transformed.build, root_value_handle_of(types, &transformed.root)) {
+                functions.insert_value(build, &function_name, root_class);
                 has_build[index] = true;
             }
         }
@@ -861,6 +861,9 @@ pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, 
     source.push_str("    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n");
     source.push_str(&format!("    root: &::ferroui_base::Ref<::{}>,\n", class_path.trim_start_matches("::")));
     source.push_str(") -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadException> {\n");
+    source.push_str(&format!("    ::ferroui_markup_xaml::FerroXamlLoader::track_instance(<::{} as ::ferroui_base::StaticType>::TYPE, root);\n", class_path.trim_start_matches("::")));
+    source.push_str(&format!("    if let Some(populate) = ::ferroui_markup_xaml::FerroXamlLoader::populate_override(<::{} as ::ferroui_base::StaticType>::TYPE) {{\n", class_path.trim_start_matches("::")));
+    source.push_str("        return populate(service_provider.as_ref(), &(::std::rc::Rc::new(root.clone()) as ::ferroui_base::BoxedValue));\n    }\n");
     source.push_str("    let service_provider =\n");
     source.push_str("        ::ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers::create_root_service_provider_v3(service_provider);\n");
     source.push_str(&format!("    {}(::core::option::Option::Some(service_provider), root)\n", names[0]));

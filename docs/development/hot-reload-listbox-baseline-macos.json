@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "measured_on": "2026-10-20",
+  "scope": "runtime-xaml-save-to-compositor-render-completion",
+  "platform": {
+    "os": "macOS",
+    "version": "27.0.1",
+    "architecture": "arm64"
+  },
+  "profile": "debug",
+  "concurrent_builds": true,
+  "source": "Shared-data-context handoff; measured before the TLS cleanup fix.",
+  "watch_interval_ms": 60,
+  "limitations": [
+    "Three observations, not percentile estimates or a latency guarantee.",
+    "Catalog test compilation and Linux native patch compilation were running concurrently.",
+    "First edit follows tracking registration and can include initial navigation/layout work.",
+    "Render completion is not physical display scan-out."
+  ],
+  "measurements": [
+    {
+      "application_us": 6835,
+      "batch": 666,
+      "commit_to_render_us": 69073,
+      "documents": [
+        "ferres://controlcatalog/Pages/ListBoxPage.xaml"
+      ],
+      "preparation_us": 16151,
+      "rendered_unix_ns": "1792484689650800000",
+      "revision": 2,
+      "page": "ListBoxPage",
+      "save_to_render_us": 1826916.0,
+      "atomic_save": false
+    },
+    {
+      "application_us": 11726,
+      "batch": 683,
+      "commit_to_render_us": 70649,
+      "documents": [
+        "ferres://controlcatalog/Pages/ListBoxPage.xaml"
+      ],
+      "preparation_us": 15847,
+      "rendered_unix_ns": "1792484690050310000",
+      "revision": 4,
+      "page": "ListBoxPage",
+      "save_to_render_us": 213571.0,
+      "atomic_save": true
+    },
+    {
+      "application_us": 11747,
+      "batch": 691,
+      "commit_to_render_us": 59589,
+      "documents": [
+        "ferres://controlcatalog/Pages/ListBoxPage.xaml"
+      ],
+      "preparation_us": 15537,
+      "rendered_unix_ns": "1792484690250300000",
+      "revision": 5,
+      "page": "ListBoxPage",
+      "save_to_render_us": 186571.0,
+      "atomic_save": false
+    }
+  ]
+}

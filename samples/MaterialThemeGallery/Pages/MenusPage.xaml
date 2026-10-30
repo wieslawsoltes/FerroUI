@@ -1,0 +1,94 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="MaterialThemeGallery.Pages.MenusPage">
+  <!-- Menu with its items, the content of an open menu (MenuFlyoutPresenter with MenuItem in
+       their states, a separator, a check item, a submenu, an input gesture and an icon) and of a
+       context menu (ContextMenu), shown in the page because a picture of a page does not hold
+       its popups, and CommandBar with its buttons, a toggle button, a separator and the overflow
+       button, its labels at the right of the icons (a closed WinUI CommandBar hides labels at
+       the bottom, FerroUI's has no closed state). The pointer-over menu items are selected items
+       (IsSelected): a menu selects the item under the pointer, and the Material theme draws the
+       pointer-over state of a menu item on its selection. The native counterpart is
+       MenusPage.winui.xml. The menu presenter and the context menu have no margin: the theme
+       gives them the margin of their shadow, the room for the shadow in a popup, which in the
+       page would move them; their shadows are drawn outside their bounds, as WinUI draws
+       them. -->
+  <StackPanel Margin="24" Spacing="12">
+    <TextBlock Text="Menus and command bars" FontSize="28" FontWeight="SemiBold" />
+
+    <TextBlock Text="Menu" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+    <Menu HorizontalAlignment="Left">
+      <MenuItem Header="File" />
+      <MenuItem Header="Edit" />
+      <MenuItem Header="View" IsSelected="True" />
+      <MenuItem Header="Help" IsEnabled="False" />
+    </Menu>
+
+    <Grid ColumnSpacing="24" HorizontalAlignment="Left">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="300" />
+        <ColumnDefinition Width="300" />
+      </Grid.ColumnDefinitions>
+
+      <StackPanel Grid.Column="0" Spacing="12">
+        <TextBlock Text="Menu items" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+        <MenuFlyoutPresenter Width="280" HorizontalAlignment="Left" Margin="0">
+          <MenuItem Header="New" InputGesture="Ctrl+N">
+            <MenuItem.Icon>
+              <PathIcon Data="M11,5H13V11H19V13H13V19H11V13H5V11H11Z" />
+            </MenuItem.Icon>
+          </MenuItem>
+          <MenuItem Header="Open" InputGesture="Ctrl+O" />
+          <MenuItem Header="Pointer over" IsSelected="True" />
+          <Separator />
+          <MenuItem Header="Show hidden files" ToggleType="CheckBox" IsChecked="True" />
+          <MenuItem Header="Recent">
+            <MenuItem Header="Report.docx" />
+          </MenuItem>
+          <MenuItem Header="Disabled" IsEnabled="False" />
+        </MenuFlyoutPresenter>
+      </StackPanel>
+
+      <StackPanel Grid.Column="1" Spacing="12">
+        <TextBlock Text="Context menu" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+        <ContextMenu Width="280" HorizontalAlignment="Left" Margin="0">
+          <MenuItem Header="Cut" InputGesture="Ctrl+X" />
+          <MenuItem Header="Copy" InputGesture="Ctrl+C" />
+          <MenuItem Header="Paste" InputGesture="Ctrl+V" IsEnabled="False" />
+          <Separator />
+          <MenuItem Header="Select all" InputGesture="Ctrl+A" />
+        </ContextMenu>
+      </StackPanel>
+    </Grid>
+
+    <TextBlock Text="CommandBar" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+    <CommandBar DefaultLabelPosition="Right">
+      <CommandBar.PrimaryCommands>
+        <CommandBarButton Label="Add">
+          <CommandBarButton.Icon>
+            <PathIcon Data="M11,5H13V11H19V13H13V19H11V13H5V11H11Z" />
+          </CommandBarButton.Icon>
+        </CommandBarButton>
+        <CommandBarButton Label="Remove">
+          <CommandBarButton.Icon>
+            <PathIcon Data="M5,11H19V13H5Z" />
+          </CommandBarButton.Icon>
+        </CommandBarButton>
+        <CommandBarSeparator />
+        <CommandBarToggleButton Label="Checked" IsChecked="True">
+          <CommandBarToggleButton.Icon>
+            <PathIcon FlowDirection="LeftToRight" Data="M4,12.5L5.5,11L9.5,15L18.5,6L20,7.5L9.5,18Z" />
+          </CommandBarToggleButton.Icon>
+        </CommandBarToggleButton>
+        <CommandBarButton Label="Disabled" IsEnabled="False">
+          <CommandBarButton.Icon>
+            <PathIcon Data="M5,5H19V19H5Z M7,7V17H17V7Z" />
+          </CommandBarButton.Icon>
+        </CommandBarButton>
+      </CommandBar.PrimaryCommands>
+      <CommandBar.SecondaryCommands>
+        <CommandBarButton Label="Settings" />
+      </CommandBar.SecondaryCommands>
+    </CommandBar>
+  </StackPanel>
+</UserControl>

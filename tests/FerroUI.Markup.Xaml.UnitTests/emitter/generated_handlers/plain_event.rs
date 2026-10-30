@@ -19,6 +19,10 @@ pub fn populate(
     service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
     root: &::ferroui_base::Ref<crate::support::xaml::event_tests::MyHost>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadException> {
+    ::ferroui_markup_xaml::FerroXamlLoader::track_instance(<crate::support::xaml::event_tests::MyHost as ::ferroui_base::StaticType>::TYPE, root);
+    if let Some(populate) = ::ferroui_markup_xaml::FerroXamlLoader::populate_override(<crate::support::xaml::event_tests::MyHost as ::ferroui_base::StaticType>::TYPE) {
+        return populate(service_provider.as_ref(), &(::std::rc::Rc::new(root.clone()) as ::ferroui_base::BoxedValue));
+    }
     let service_provider =
         ::ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers::create_root_service_provider_v3(service_provider);
     populate_handlers_plainevent_xaml(::core::option::Option::Some(service_provider), root)
@@ -46,7 +50,7 @@ pub fn populate_handlers_plainevent_xaml(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Handlers/PlainEvent.xaml(1,178) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("target")));
-    rt::register_name(name_scope.as_ref(), "target", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 1, 178)?;
+    rt::register_name_value(name_scope.as_ref(), "target", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 1, 178)?;
     // Handlers/PlainEvent.xaml(1,171) PropertyChanged
     rt::add_event_handler(rt::class_markup(<::ferroui_base::FerroObject as ::ferroui_base::StaticType>::TYPE), "PropertyChanged", rt::to_value(border_0.clone()), rt::method_delegate(&context, 2, |this, arguments| { crate::support::xaml::event_tests::MyHost::__markup_OnPropertyChanged_2(this, arguments.next()?, arguments.next()?); ::core::result::Result::Ok(::core::option::Option::None) }), 1, 171)?;
     rt::invoked(border_0.try_end_init(), 1, 171)?;

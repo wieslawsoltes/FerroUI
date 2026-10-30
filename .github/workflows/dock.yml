@@ -1,0 +1,99 @@
+name: Dock
+
+on:
+  pull_request:
+    # The Dock port (docs/porting/dock): its crates, tests and sample, its scripts and records, and
+    # the core changes of the framework it needs (docs/porting/dock/core-patches). The workspace
+    # run of ci.yml builds and tests the framework; this workflow runs the Dock crates and the
+    # inventory of the port against the original sources.
+    paths:
+      - '.github/workflows/dock.yml'
+      - 'src/Dock/**'
+      - 'tests/Dock/**'
+      - 'samples/Dock/**'
+      - 'scripts/dock/**'
+      - 'docs/porting/dock/**'
+  push:
+    # A run of main saves the build cache the pull requests restore.
+    branches: [main]
+    paths:
+      - '.github/workflows/dock.yml'
+      - 'src/Dock/**'
+      - 'tests/Dock/**'
+      - 'samples/Dock/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dock-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  CARGO_PROFILE_DEV_DEBUG: 0
+  CARGO_PROFILE_TEST_DEBUG: 0
+  RUST_BACKTRACE: 1
+
+jobs:
+  inventory:
+    name: Port inventory against the original sources
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      # The scripts read the original Dock beside this checkout (../Dock), at the revision the
+      # inventory records (docs/porting/dock/upstream-files.json).
+      - name: The original sources at the recorded revision
+        run: |
+          revision="$(python3 -c "import json; print(json.load(open('docs/porting/dock/upstream-files.json'))['source_revision'])")"
+          echo "original revision $revision"
+          git init -q ../Dock
+          git -C ../Dock fetch -q --depth 1 https://github.com/wieslawsoltes/Dock "$revision"
+          git -C ../Dock checkout -q FETCH_HEAD
+      - name: Tests of the scripts
+        run: python3 -m unittest discover -s scripts/dock -p 'test_*.py'
+      - name: Source inventory and port records
+        run: python3 scripts/dock/check_port.py
+      - name: Inspector views match their source migrations
+        run: python3 scripts/dock/check_inspector_views.py
+      - name: Shared links of the Simple theme
+        run: python3 scripts/dock/check_theme_links.py
+
+  tests:
+    name: Tests of the Dock crates (Linux)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: dock
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
+      # Skia links FreeType and Fontconfig and needs a font for the default family (the headless
+      # tests render text); the sample links the desktop platforms.
+      - name: System packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libfontconfig1-dev libfreetype6-dev fonts-dejavu-core pkg-config
+      - name: The Dock crates
+        id: crates
+        run: |
+          packages="$(cargo metadata --locked --no-deps --format-version 1 | python3 -c "
+          import json, sys
+          for package in json.load(sys.stdin)['packages']:
+              if '/Dock/' in package['manifest_path'].replace('\\\\', '/'):
+                  print('-p', package['name'])
+          " | tr '\n' ' ')"
+          echo "$packages"
+          test -n "$packages"
+          echo "packages=$packages" >> "$GITHUB_OUTPUT"
+      - name: Build of every target
+        run: cargo test --locked --no-run ${{ steps.crates.outputs.packages }}
+      - name: Tests
+        run: cargo test --locked --no-fail-fast ${{ steps.crates.outputs.packages }}

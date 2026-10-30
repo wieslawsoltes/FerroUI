@@ -1,0 +1,28 @@
+[package]
+name = "ferrodock-controls-deferred-content-control"
+description = "Native deferred content presentation for FerroDock"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+build = "build.rs"
+links = "ferrodock_controls_deferred_content_control_metadata"
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+
+[build-dependencies]
+ferroui-build-scan.workspace = true
+
+[dev-dependencies]
+ferroui-themes-fluent.workspace = true
+ferroui-headless = { workspace = true, features = ["testing"] }
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "deny"

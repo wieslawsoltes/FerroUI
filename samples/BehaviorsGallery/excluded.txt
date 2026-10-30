@@ -1,0 +1,8 @@
+# Documents of the gallery whose generated tests are ignored: `<document> | <reason>` (see
+# `samples/SampleBuild/lib.rs`). `page: <reason>` lists a document that loads but whose class does
+# not construct or show yet under the tests.
+#
+#   harness: <text>          the page works in the application but not under its tests
+
+# --- group B ---
+pages/ListBoxSelectionBehaviorsView.xaml | page: harness: the class test shows the page without the view model of the window, so its list boxes have no items; ListBoxSelectAllBehavior then selects all, and the selection model of the framework, which has no items view, selects the range 0 to i32::MAX and enumerates it (src/FerroUI.Controls/selection/selection_model.rs, coerce_range)

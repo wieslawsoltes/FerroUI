@@ -1,0 +1,155 @@
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:d="using:FerroDock.Ferro.Controls"
+                    xmlns:s="using:FerroDock.Settings"
+                    xmlns:p="using:FerroDock.Controls.ProportionalStackPanel"
+                    x:CompileBindings="True">
+  <Design.PreviewWith>
+    <Panel Width="300" Height="300">
+      <d:GlobalDockTarget>
+        <d:GlobalDockTarget.Styles>
+          <Style Selector="^/template/ Panel#PART_TopIndicator">
+            <Setter Property="Opacity" Value="0.0" />
+          </Style>
+          <Style Selector="^/template/ Panel#PART_BottomIndicator">
+            <Setter Property="Opacity" Value="0.0" />
+          </Style>
+          <Style Selector="^/template/ Panel#PART_LeftIndicator">
+            <Setter Property="Opacity" Value="0.0" />
+          </Style>
+          <Style Selector="^/template/ Panel#PART_RightIndicator">
+            <Setter Property="Opacity" Value="0.0" />
+          </Style>
+        </d:GlobalDockTarget.Styles>
+      </d:GlobalDockTarget>
+    </Panel>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="{x:Type d:GlobalDockTarget}" TargetType="d:GlobalDockTarget" x:DataType="d:GlobalDockTarget">
+
+    <Setter Property="Template">
+      <ControlTemplate x:DataType="d:GlobalDockTarget">
+        <Panel>
+          <p:ProportionalStackPanel Orientation="Horizontal">
+            <Panel x:Name="PART_LeftIndicator"
+                   p:ProportionalStackPanel.Proportion="{x:Static s:DockSettings.GlobalDockingProportion}"
+                   s:DockProperties.IndicatorDockOperation="Left" />
+            <Border />
+            <Panel x:Name="PART_RightIndicator"
+                   p:ProportionalStackPanel.Proportion="{x:Static s:DockSettings.GlobalDockingProportion}"
+                   s:DockProperties.IndicatorDockOperation="Right" />
+          </p:ProportionalStackPanel>
+          <p:ProportionalStackPanel Orientation="Vertical">
+            <Panel x:Name="PART_TopIndicator"
+                   p:ProportionalStackPanel.Proportion="{x:Static s:DockSettings.GlobalDockingProportion}"
+                   s:DockProperties.IndicatorDockOperation="Top" />
+            <Border />
+            <Panel x:Name="PART_BottomIndicator"
+                   p:ProportionalStackPanel.Proportion="{x:Static s:DockSettings.GlobalDockingProportion}"
+                   s:DockProperties.IndicatorDockOperation="Bottom" />
+          </p:ProportionalStackPanel>
+
+          <Grid x:Name="PART_IndicatorGrid" RowDefinitions="*,*" ColumnDefinitions="*,*">
+            <Panel x:Name="PART_SelectorPanel"
+                   Grid.Row="0" Grid.RowSpan="2" Grid.ColumnSpan="2" Grid.Column="0">
+              <Image x:Name="PART_TopSelector" Classes="selector"
+                     HorizontalAlignment="Center" VerticalAlignment="Top"
+                     s:DockProperties.IndicatorDockOperation="Top" />
+              <Image x:Name="PART_BottomSelector" Classes="selector"
+                     HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                     s:DockProperties.IndicatorDockOperation="Bottom" />
+              <Image x:Name="PART_LeftSelector" Classes="selector"
+                     HorizontalAlignment="Left" VerticalAlignment="Center"
+                     s:DockProperties.IndicatorDockOperation="Left" />
+              <Image x:Name="PART_RightSelector"  Classes="selector"
+                     HorizontalAlignment="Right" VerticalAlignment="Center"
+                     s:DockProperties.IndicatorDockOperation="Right" />
+            </Panel>
+          </Grid>
+        </Panel>
+
+      </ControlTemplate>
+    </Setter>
+
+    <Style Selector="^/template/ Panel#PART_TopIndicator">
+      <Setter Property="Background" Value="{DynamicResource DockTargetIndicatorBrush}" />
+      <Setter Property="Opacity" Value="0" />
+    </Style>
+
+    <Style Selector="^/template/ Panel#PART_BottomIndicator">
+      <Setter Property="Background" Value="{DynamicResource DockTargetIndicatorBrush}" />
+      <Setter Property="Opacity" Value="0" />
+    </Style>
+
+    <Style Selector="^/template/ Panel#PART_LeftIndicator">
+      <Setter Property="Background" Value="{DynamicResource DockTargetIndicatorBrush}" />
+      <Setter Property="Opacity" Value="0" />
+    </Style>
+
+    <Style Selector="^/template/ Panel#PART_RightIndicator">
+      <Setter Property="Background" Value="{DynamicResource DockTargetIndicatorBrush}" />
+      <Setter Property="Opacity" Value="0" />
+    </Style>
+
+    <Style Selector="^/template/ Image#PART_TopSelector">
+      <Setter Property="Source" Value="ferres://FerroDock.Ferro.Themes.Fluent/Assets/DockAnchorableTop.png" />
+      <Setter Property="Width" Value="{DynamicResource DockTargetSelectorSize}" />
+      <Setter Property="Height" Value="{DynamicResource DockTargetSelectorSize}" />
+    </Style>
+
+    <Style Selector="^/template/ Image#PART_BottomSelector">
+      <Setter Property="Source" Value="ferres://FerroDock.Ferro.Themes.Fluent/Assets/DockAnchorableBottom.png" />
+      <Setter Property="Width" Value="{DynamicResource DockTargetSelectorSize}" />
+      <Setter Property="Height" Value="{DynamicResource DockTargetSelectorSize}" />
+    </Style>
+
+    <Style Selector="^/template/ Image#PART_LeftSelector">
+      <Setter Property="Source" Value="ferres://FerroDock.Ferro.Themes.Fluent/Assets/DockAnchorableLeft.png" />
+      <Setter Property="Width" Value="{DynamicResource DockTargetSelectorSize}" />
+      <Setter Property="Height" Value="{DynamicResource DockTargetSelectorSize}" />
+    </Style>
+
+    <Style Selector="^/template/ Image#PART_RightSelector">
+      <Setter Property="Source" Value="ferres://FerroDock.Ferro.Themes.Fluent/Assets/DockAnchorableRight.png" />
+      <Setter Property="Width" Value="{DynamicResource DockTargetSelectorSize}" />
+      <Setter Property="Height" Value="{DynamicResource DockTargetSelectorSize}" />
+    </Style>
+
+    <Style Selector="^/template/ Image#PART_CenterSelector">
+      <Setter Property="Source" Value="ferres://FerroDock.Ferro.Themes.Fluent/Assets/DockDocumentInside.png" />
+      <Setter Property="Width" Value="{DynamicResource DockTargetSelectorSize}" />
+      <Setter Property="Height" Value="{DynamicResource DockTargetSelectorSize}" />
+    </Style>
+
+    <Style Selector="^/template/ Panel#PART_SelectorPanel">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^[ShowIndicatorsOnly=True] /template/ Panel#PART_SelectorPanel">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+
+    <Style Selector="^/template/ Image.selector">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+
+    <Style Selector="^:vertical /template/ Image">
+      <Style Selector="^#PART_TopSelector.selector">
+        <Setter Property="IsVisible" Value="True" />
+      </Style>
+      <Style Selector="^#PART_BottomSelector.selector">
+        <Setter Property="IsVisible" Value="True" />
+      </Style>
+    </Style>
+
+    <Style Selector="^:horizontal /template/ Image">
+      <Style Selector="^#PART_LeftSelector.selector">
+        <Setter Property="IsVisible" Value="True" />
+      </Style>
+      <Style Selector="^#PART_RightSelector.selector">
+        <Setter Property="IsVisible" Value="True" />
+      </Style>
+    </Style>
+
+  </ControlTheme>
+
+</ResourceDictionary>

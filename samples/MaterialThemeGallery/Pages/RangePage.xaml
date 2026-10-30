@@ -1,0 +1,84 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:material="using:FerroUI.Themes.Material"
+             x:Class="MaterialThemeGallery.Pages.RangePage">
+  <!-- Slider (horizontal and vertical, pointer over, disabled, with ticks), ProgressBar (values,
+       indeterminate, disabled), ScrollBar in the mouse indicator mode with its thin collapsed
+       thumb (AllowAutoHide on, the default; the full bar shows while the pointer rests on it), and
+       a ScrollViewer with more content than it shows, whose bars are hidden while the pointer is
+       not over it. The native counterpart is RangePage.winui.xml. -->
+  <StackPanel Margin="24" Spacing="12">
+    <TextBlock Text="Sliders, progress and scrolling" FontSize="28" FontWeight="SemiBold" />
+
+    <Grid ColumnSpacing="24" HorizontalAlignment="Left">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="340" />
+        <ColumnDefinition Width="280" />
+      </Grid.ColumnDefinitions>
+
+      <StackPanel Grid.Column="0" Spacing="12">
+        <TextBlock Text="Slider" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+        <TextBlock Text="Value 30" />
+        <Slider Width="300" HorizontalAlignment="Left" Minimum="0" Maximum="100" Value="30" />
+        <TextBlock Text="Pointer over" />
+        <Slider Width="300" HorizontalAlignment="Left" Minimum="0" Maximum="100" Value="30" Classes="force-pointerover" />
+        <TextBlock Text="Disabled" />
+        <Slider Width="300" HorizontalAlignment="Left" Minimum="0" Maximum="100" Value="30" IsEnabled="False" />
+        <TextBlock Text="Ticks every 10" />
+        <Slider Width="300" HorizontalAlignment="Left" Minimum="0" Maximum="100" Value="60"
+                TickFrequency="10" TickPlacement="Outside" />
+
+        <TextBlock Text="ProgressBar" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+        <TextBlock Text="0, 40 and 100 percent" />
+        <ProgressBar Width="300" HorizontalAlignment="Left" Minimum="0" Maximum="100" Value="0" />
+        <ProgressBar Width="300" HorizontalAlignment="Left" Minimum="0" Maximum="100" Value="40" />
+        <ProgressBar Width="300" HorizontalAlignment="Left" Minimum="0" Maximum="100" Value="100" />
+        <TextBlock Text="Disabled" />
+        <ProgressBar Width="300" HorizontalAlignment="Left" Minimum="0" Maximum="100" Value="40" IsEnabled="False" />
+        <TextBlock Text="Indeterminate" />
+        <ProgressBar Width="300" HorizontalAlignment="Left" IsIndeterminate="True" />
+      </StackPanel>
+
+      <StackPanel Grid.Column="1" Spacing="12">
+        <TextBlock Text="Range slider" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+        <material:MaterialRangeSlider Width="260" HorizontalAlignment="Left"
+                                      RangeStart="20" RangeEnd="75"
+                                      StartLabel="Minimum price" EndLabel="Maximum price" />
+        <TextBlock Text="Discrete · 5 steps" />
+        <material:MaterialRangeSlider Width="260" HorizontalAlignment="Left"
+                                      Minimum="0" Maximum="60" RangeStart="10" RangeEnd="40" Steps="5" />
+        <TextBlock Text="Disabled" />
+        <material:MaterialRangeSlider Width="260" HorizontalAlignment="Left"
+                                      RangeStart="20" RangeEnd="75" IsEnabled="False" />
+
+        <TextBlock Text="Vertical slider" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+        <StackPanel Orientation="Horizontal" Spacing="24" Height="120">
+          <Slider Orientation="Vertical" Minimum="0" Maximum="100" Value="30" />
+          <Slider Orientation="Vertical" Minimum="0" Maximum="100" Value="70" IsEnabled="False" />
+        </StackPanel>
+
+        <TextBlock Text="ScrollBar" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+        <ScrollBar Orientation="Horizontal" Width="260" HorizontalAlignment="Left"
+                   Minimum="0" Maximum="100" ViewportSize="25" Value="30" />
+        <ScrollBar Orientation="Vertical" Height="120" HorizontalAlignment="Left"
+                   Minimum="0" Maximum="100" ViewportSize="25" Value="30" />
+
+        <TextBlock Text="ScrollViewer" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+        <ScrollViewer Width="260" Height="120" HorizontalAlignment="Left"
+                      VerticalScrollBarVisibility="Visible">
+          <StackPanel Spacing="4">
+            <TextBlock Text="The first line of the content" />
+            <TextBlock Text="The second line" />
+            <TextBlock Text="The third line" />
+            <TextBlock Text="The fourth line" />
+            <TextBlock Text="The fifth line" />
+            <TextBlock Text="The sixth line" />
+            <TextBlock Text="The seventh line" />
+            <TextBlock Text="The eighth line" />
+            <TextBlock Text="The last line of the content" />
+          </StackPanel>
+        </ScrollViewer>
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+</UserControl>

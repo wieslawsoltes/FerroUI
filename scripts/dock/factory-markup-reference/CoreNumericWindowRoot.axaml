@@ -1,0 +1,3 @@
+<model:DockWindow xmlns="https://github.com/avaloniaui"
+ xmlns:model="clr-namespace:Dock.Model.ReactiveUI.Core;assembly=Dock.Model.ReactiveUI"
+ Id="numeric-window" OwnerMode="123" WindowState="-17" IsModal="True" ShowInTaskbar="False" />

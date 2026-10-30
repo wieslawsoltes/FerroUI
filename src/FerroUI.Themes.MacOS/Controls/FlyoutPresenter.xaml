@@ -1,0 +1,51 @@
+<!-- macOS 26 adaptation; see docs/porting/macos26-theme.md.
+     Derived from FerroUI WinUI templates and microsoft-ui-xaml commit
+     7e4b0c2096be402f51cc8f7d203ebf67cff183d0. Copyright (c) Microsoft Corporation.
+     Licensed under the MIT License; see NOTICE.md.
+     Acrylic backing is the portable fallback for native Liquid Glass. -->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <FlyoutPresenter Width="300">
+        <StackPanel Spacing="12">
+          <TextBlock Text="A flyout" FontWeight="SemiBold"/>
+          <TextBlock Text="The content of a flyout." TextWrapping="Wrap"/>
+          <Button Content="Button"/>
+        </StackPanel>
+      </FlyoutPresenter>
+    </Border>
+  </Design.PreviewWith>
+  <ControlTheme x:Key="DefaultFlyoutPresenterStyle" TargetType="FlyoutPresenter">
+    <Setter Property="ClipToBounds" Value="False"/>
+    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+    <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+    <Setter Property="IsTabStop" Value="False"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource FlyoutBorderThemeBrush}"/>
+    <Setter Property="BorderThickness" Value="{DynamicResource FlyoutBorderThemeThickness}"/>
+    <Setter Property="Padding" Value="16"/>
+    <Setter Property="MinWidth" Value="{DynamicResource FlyoutThemeMinWidth}"/>
+    <Setter Property="MaxWidth" Value="{DynamicResource FlyoutThemeMaxWidth}"/>
+    <Setter Property="MinHeight" Value="0"/>
+    <Setter Property="MaxHeight" Value="{DynamicResource FlyoutThemeMaxHeight}"/>
+    <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
+    <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
+    <Setter Property="CornerRadius" Value="12"/>
+    <Setter Property="Margin" Value="{DynamicResource MacOSMenuShadowMargin}"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="ThemeShadowWrapper" BoxShadow="{DynamicResource MacOSMenuShadow}" CornerRadius="{TemplateBinding CornerRadius}">
+          <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" BackgroundSizing="InnerBorderEdge">
+            <Panel>
+              <ExperimentalAcrylicBorder Material="{DynamicResource MacOSRegularGlassMaterial}" IsHitTestVisible="False" CornerRadius="{TemplateBinding CornerRadius}"/>
+              <ScrollViewer x:Name="ScrollViewer" HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}" VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}">
+                <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Margin="{TemplateBinding Padding}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+              </ScrollViewer>
+            </Panel>
+          </Border>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type FlyoutPresenter}" TargetType="FlyoutPresenter" BasedOn="{StaticResource DefaultFlyoutPresenterStyle}"/>
+</ResourceDictionary>

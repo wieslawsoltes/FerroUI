@@ -1,0 +1,30 @@
+# Opt-in optimization of the source-scanner executable's Rust dependencies.
+#
+# Usage (stable Cargo):
+#   cargo --config .cargo/build-tools.toml build --locked -p control-catalog-desktop
+#
+# Cargo does not load this file automatically. The default development, release,
+# distribution and browser profiles remain unchanged. These are package overrides:
+# they affect each named package wherever it is used, including as a build dependency.
+# They do not disable debug assertions, overflow checks, features, tests, or Cargo's
+# dependency tracking. Test builds inherit dev's settings in the usual Cargo way.
+#
+# Tradeoff: the four libraries take longer to compile, then the source scans run
+# faster. This is useful with reused build-tool artifacts or many framework crates;
+# measure the complete cold build before enabling it for a short-lived CI job.
+# The build-performance workflow checks full scanner output against the default
+# profile and reports library compilation separately from scanner execution.
+# Level 2 retains the measured scan throughput of level 3 while reducing the
+# cost of compiling these tools; see docs/build-performance-profile-tuning.md.
+
+[profile.dev.package.ferroui-build-scan]
+opt-level = 2
+
+[profile.dev.package.syn]
+opt-level = 2
+
+[profile.dev.package.proc-macro2]
+opt-level = 2
+
+[profile.dev.package.quote]
+opt-level = 2

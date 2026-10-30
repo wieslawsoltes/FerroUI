@@ -1,0 +1,24 @@
+[package]
+name = "ferrodock-markup-extension"
+description = "Original Dock Load and Reference markup extensions for FerroUI"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+build = "build.rs"
+links = "ferrodock_markup_extension_metadata"
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base.workspace = true
+ferroui-markup-xaml.workspace = true
+
+[build-dependencies]
+ferroui-build-scan.workspace = true
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "deny"

@@ -1,6 +1,7 @@
-use super::{IResourceNode, ResourceHostRef};
+use super::{IResourceDictionary, IResourceNode, ResourceHostRef};
 use crate::reactive::IDisposable;
 use crate::FerroObject;
+use std::any::Any;
 use std::rc::Rc;
 
 /// Represents an object that can be queried for resources but does not appear
@@ -9,6 +10,19 @@ use std::rc::Rc;
 /// The interface represented by this trait is implemented by resource
 /// dictionaries, styles and the like.
 pub trait IResourceProvider: IResourceNode {
+    /// Views this provider through its dictionary contract when it implements one.
+    /// Plain providers return `None`; dictionaries return their actual interface.
+    fn as_resource_dictionary(&self) -> Option<&dyn IResourceDictionary> {
+        None
+    }
+
+    /// The provider as `Any`, for a downcast to its concrete type (the type test of
+    /// the managed original). `None` from a provider that does not offer it; the
+    /// providers of the framework return themselves.
+    fn as_any(&self) -> Option<&dyn Any> {
+        None
+    }
+
     /// The owner of the resource provider.
     ///
     /// If the resource provider is, or is a child of, a resource dictionary or
@@ -23,6 +37,12 @@ pub trait IResourceProvider: IResourceNode {
 
     /// Removes a resource provider owner.
     fn remove_owner(&self, owner: &ResourceHostRef);
+
+    /// Canonical source of a development markup include, without loading it.
+    #[cfg(all(debug_assertions, feature = "hot-reload"))]
+    fn development_source(&self) -> Option<String> {
+        super::resource_provenance::source(self.as_object()?)
+    }
 
     /// The provider as an object, when it is a class instance. Used for
     /// identity comparison and type tests.
