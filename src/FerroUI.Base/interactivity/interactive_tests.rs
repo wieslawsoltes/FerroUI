@@ -618,6 +618,52 @@ fn events_should_be_registered_on_their_owner_only() {
     assert!(registry.get_registered(TestInteractive::TYPE).is_empty());
 }
 
+struct FindBase;
+
+impl StaticType for FindBase {
+    const TYPE: &'static TypeInfo = {
+        static TYPE: TypeInfo = TypeInfo::new("FindBase", None);
+        &TYPE
+    };
+}
+
+struct FindDerived;
+
+impl StaticType for FindDerived {
+    const TYPE: &'static TypeInfo = {
+        static TYPE: TypeInfo = TypeInfo::new("FindDerived", Some(FindBase::TYPE));
+        &TYPE
+    };
+}
+
+#[test]
+fn events_are_found_by_name_on_the_type_and_its_base_types() {
+    let tapped = RoutedEvent::register::<FindBase, RoutedEventArgs>("Tapped", RoutingStrategies::BUBBLE);
+    let pressed = RoutedEvent::register::<FindDerived, RoutedEventArgs>("Pressed", RoutingStrategies::DIRECT);
+    let registry = RoutedEventRegistry::instance();
+
+    // By the name of the event or of the field that holds it (`<Name>Event`).
+    assert_eq!(registry.find_by_name(FindDerived::TYPE, "Pressed"), Some(pressed.as_routed_event()));
+    assert_eq!(registry.find_by_name(FindDerived::TYPE, "PressedEvent"), Some(pressed.as_routed_event()));
+    // On a base type.
+    assert_eq!(registry.find_by_name(FindDerived::TYPE, "Tapped"), Some(tapped.as_routed_event()));
+    assert_eq!(registry.find_by_name(FindDerived::TYPE, "TappedEvent"), Some(tapped.as_routed_event()));
+    // Not on a deriving type, case-sensitive, and the suffix alone names nothing.
+    assert_eq!(registry.find_by_name(FindBase::TYPE, "Pressed"), None);
+    assert_eq!(registry.find_by_name(FindDerived::TYPE, "pressed"), None);
+    assert_eq!(registry.find_by_name(FindDerived::TYPE, "Event"), None);
+
+    // An event whose name ends with the suffix is found by its exact name first.
+    let named = RoutedEvent::register::<FindDerived, RoutedEventArgs>("TappedEvent", RoutingStrategies::BUBBLE);
+    assert_eq!(registry.find_by_name(FindDerived::TYPE, "TappedEvent"), Some(named.as_routed_event()));
+    assert_eq!(registry.find_by_name(FindDerived::TYPE, "Tapped"), Some(tapped.as_routed_event()));
+
+    // The events of the input elements; a base class of them has none.
+    let pointer_pressed = InputElement::pointer_pressed_event().as_routed_event();
+    assert_eq!(registry.find_by_name(InputElement::TYPE, "PointerPressedEvent"), Some(pointer_pressed));
+    assert_eq!(registry.find_by_name(TestInteractive::TYPE, "PointerPressed"), None);
+}
+
 // --- untyped handlers ---------------------------------------------------------
 
 /// The args handle an untyped handler was given.

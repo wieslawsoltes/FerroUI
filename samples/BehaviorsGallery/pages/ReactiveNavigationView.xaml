@@ -1,0 +1,65 @@
+<rxui:ReactiveUserControlBase x:Class="BehaviorsGallery.Views.Pages.ReactiveNavigationView"
+                              xmlns="https://github.com/ferroui"
+                              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                              xmlns:vm="using:BehaviorsGallery.ViewModels.ReactiveUI"
+                              xmlns:rxui="using:ReactiveUI.FerroUI"
+                              x:DataType="vm:ReactiveNavigationViewModel"
+                              mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="450">
+  <!-- Ported from Views/ReactiveUI/ReactiveNavigationView of the reference sample. -->
+  <!-- Deviation (DEVIATIONS.md, Behaviors gallery): the view models of the ReactiveUI pages are in
+       the namespace of their folder (BehaviorsGallery.ViewModels.ReactiveUI), and the root is the
+       reactive user control of the port (the class of the page is a ReactiveUserControl). -->
+  <Design.DataContext>
+    <vm:ReactiveNavigationViewModel />
+  </Design.DataContext>
+  <Grid RowDefinitions="Auto,*" Margin="5">
+    <WrapPanel Orientation="Horizontal" ItemSpacing="5" LineSpacing="5">
+      <Button Content="Navigate to Details">
+        <Interaction.Behaviors>
+          <EventTriggerBehavior EventName="Click">
+            <NavigateAction Router="{Binding Router}"
+                            ViewModel="{Binding DetailsViewModel}" />
+          </EventTriggerBehavior>
+        </Interaction.Behaviors>
+      </Button>
+      <!-- Deviation (DEVIATIONS.md, Behaviors gallery): markup has no type arguments for the
+           generic NavigateToAction and NavigateToAndResetAction; the code-behind of the page adds
+           the two actions (with their view model types) to the click triggers of these buttons. -->
+      <Button x:Name="NavigateToDetailsButton" Content="Navigate to Details (Generic)">
+        <Interaction.Behaviors>
+          <EventTriggerBehavior EventName="Click" />
+        </Interaction.Behaviors>
+      </Button>
+      <Button Content="Navigate to Home and Reset">
+        <Interaction.Behaviors>
+          <EventTriggerBehavior EventName="Click">
+            <NavigateAndReset Router="{Binding Router}"
+                              ViewModel="{Binding HomePageViewModel}" />
+          </EventTriggerBehavior>
+        </Interaction.Behaviors>
+      </Button>
+      <Button x:Name="NavigateToHomeAndResetButton" Content="Navigate to Home and Reset (Generic)">
+        <Interaction.Behaviors>
+          <EventTriggerBehavior EventName="Click" />
+        </Interaction.Behaviors>
+      </Button>
+      <Button Content="Navigate Back">
+        <Interaction.Behaviors>
+          <EventTriggerBehavior EventName="Click">
+            <NavigateBackAction Router="{Binding Router}" />
+          </EventTriggerBehavior>
+        </Interaction.Behaviors>
+      </Button>
+      <Button Content="Clear Navigation">
+        <Interaction.Behaviors>
+          <EventTriggerBehavior EventName="Click">
+            <ClearNavigationStackAction Router="{Binding Router}" />
+          </EventTriggerBehavior>
+        </Interaction.Behaviors>
+      </Button>
+    </WrapPanel>
+    <rxui:RoutedViewHost Router="{Binding Router}" Grid.Row="1" />
+  </Grid>
+</rxui:ReactiveUserControlBase>

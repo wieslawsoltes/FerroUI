@@ -829,6 +829,27 @@ impl Window {
         self.set_and_raise_cell(Self::window_decoration_margin_property(), &self.window_decoration_margin, value);
     }
 
+    /// The room the caption buttons take at the left and the right of the title bar while the
+    /// client area is extended into the decorations: the traffic lights of macOS at the left, the
+    /// caption buttons the toolkit draws (Windows, Linux) at the right; zero otherwise. Not in
+    /// upstream: the insets of WinUI's `AppWindowTitleBar` (`LeftInset`, `RightInset`), which a
+    /// [`TitleBar`](crate::TitleBar) leaves free.
+    pub fn caption_button_insets(&self) -> Thickness {
+        // Full screen hides the caption buttons of the system and of the toolkit.
+        if !self.is_extended_into_window_decorations() || self.window_state() == WindowState::FullScreen {
+            return Thickness::default();
+        }
+        if let Some(insets) = self.platform_impl().and_then(|platform_impl| platform_impl.caption_button_insets()) {
+            return insets;
+        }
+        if let Some(decorations) = self.top_level_host().decorations() {
+            if decorations.enabled_parts().contains(crate::chrome::DrawnWindowDecorationParts::TITLE_BAR) {
+                return Thickness::new(0.0, 0.0, decorations.caption_buttons_width(), 0.0);
+            }
+        }
+        Thickness::default()
+    }
+
     /// The window margin that is hidden off the screen area. This is
     /// generally only the case on Windows when maximized, where the window
     /// border is hidden off the screen. This margin may be used to ensure

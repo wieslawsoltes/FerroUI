@@ -28,9 +28,5 @@ pub use reveal_lights::{
     REVEAL_BORDER_LIGHT_DARK_THEME_ID, REVEAL_BORDER_LIGHT_LIGHT_THEME_ID, REVEAL_HOVER_LIGHT_ID, XAML_AMBIENT_LIGHT_ID,
 };
 
-/// The number of enums of this module that declare their markup metadata
-/// next to the type (registered with the value types of the crate).
-pub(crate) const MARKUP_ENUM_COUNT: usize = 3;
-
 #[cfg(test)]
 mod media_tests;

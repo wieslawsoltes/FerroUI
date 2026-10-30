@@ -14,6 +14,7 @@ mod i_popup_host;
 mod overlay_popup_host;
 mod popup;
 mod popup_root;
+mod radio_buttons_panel;
 mod snap_points_alignment;
 mod snap_points_type;
 mod template_applied_event_args;
@@ -34,11 +35,27 @@ pub use i_popup_host::IPopupHost;
 pub use overlay_popup_host::OverlayPopupHost;
 pub use popup::{CustomPopupPlacementCallbackValue, Popup};
 pub use popup_root::PopupRoot;
+pub use radio_buttons_panel::RadioButtonsPanel;
 pub use snap_points_alignment::SnapPointsAlignment;
 pub use snap_points_type::SnapPointsType;
 pub use template_applied_event_args::TemplateAppliedEventArgs;
 pub use templated_control::{TemplatedControl, TemplatedControlImpl, TemplatedControlImplExt, TemplatedControlVTable};
 pub use uniform_grid::UniformGrid;
+// The primitives of WinUI's status controls (docs/porting/winui-controls.md).
+mod info_badge_template_settings;
+mod title_bar_template_settings;
+mod info_bar_panel;
+mod info_bar_template_settings;
+mod navigation_view_template_settings;
+mod progress_ring_template_settings;
+pub use info_badge_template_settings::InfoBadgeTemplateSettings;
+pub use title_bar_template_settings::TitleBarTemplateSettings;
+pub use info_bar_panel::InfoBarPanel;
+pub use info_bar_template_settings::InfoBarTemplateSettings;
+pub use navigation_view_template_settings::NavigationViewTemplateSettings;
+pub use progress_ring_template_settings::ProgressRingTemplateSettings;
+#[cfg(test)]
+mod info_bar_panel_tests;
 pub use scroll_bar_visibility::ScrollBarVisibility;
 
 #[cfg(test)]

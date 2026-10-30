@@ -99,9 +99,13 @@ fn a_connected_reveal_brush_attaches_the_border_lights_to_the_window() {
     assert!(ids.iter().any(|id| id == REVEAL_BORDER_LIGHT_LIGHT_THEME_ID));
     assert!(!ids.iter().any(|id| id == REVEAL_BORDER_LIGHT_DARK_THEME_ID));
 
-    // Fallback: the brush is its fallback colour and targets no light.
+    // Fallback: the brush is its fallback colour and no longer targets its border light; the
+    // ambient light stays, as WinUI's `OnPropertyChanged` updates the targets without it
+    // (`UpdateLightTargets(false /* ambientToo */)`).
     brush.set_always_use_fallback(true);
-    assert!(brush.light_target_ids().is_empty());
+    let ids = brush.light_target_ids();
+    assert!(!ids.iter().any(|id| id == REVEAL_BORDER_LIGHT_LIGHT_THEME_ID || id == REVEAL_BORDER_LIGHT_DARK_THEME_ID));
+    assert!(ids.iter().any(|id| id == XAML_AMBIENT_LIGHT_ID));
 
     // The last brush that disconnects removes the lights.
     services.set_content(&Border::new().upcast::<Control>());

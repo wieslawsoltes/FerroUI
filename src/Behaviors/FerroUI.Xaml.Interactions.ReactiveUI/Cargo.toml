@@ -1,0 +1,48 @@
+[package]
+name = "ferroui-xaml-interactions-reactiveui"
+description = "The ReactiveUI behaviors of FerroUI: actions that navigate a ReactiveUI router (navigate, navigate back, navigate and reset, clear the stack, navigate to a view model the service locator resolves) and the trigger that runs its actions when a ReactiveUI interaction is handled"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+build = "build.rs"
+# The build script exports the type model of the crate (its actions and its trigger, for markup);
+# Cargo hands the path of the file to the build scripts of the crates that depend on this one
+# (docs/porting/xaml.md, 9.5.13 and 9.6.3).
+links = "ferroui_xaml_interactions_reactiveui_xaml"
+
+# Unit tests live next to the code (the `tests/` module of the library), not as integration test
+# targets.
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base = { workspace = true }
+# The subscription that runs a navigation command (`ObservableExt::subscribe_ignore`).
+ferroui-reactive = { workspace = true }
+# The service locator the navigation to a view model type resolves it from.
+ferroui-splat = { workspace = true }
+ferroui-reactiveui = { workspace = true }
+ferroui-xaml-interactivity = { workspace = true }
+
+[build-dependencies]
+ferroui-build-scan = { workspace = true }
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+# `block_on` of the task of a handled interaction.
+ferroui-system = { workspace = true }
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "controls"

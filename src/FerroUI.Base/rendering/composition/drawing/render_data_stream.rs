@@ -4,12 +4,13 @@
 
 use super::{
     DrawBitmapPayload, DrawCustomPayload, DrawEllipsePayload, DrawGeometryPayload, DrawGlyphRunPayload,
-    DrawLinePayload, DrawRectanglePayload, IRenderDataVisitor, PushClipPayload,
+    DrawLinePayload, DrawRectanglePayload, IRenderDataVisitor, PushClipPayload, PushCompositingLayerPayload,
     PushEffectPayload, PushGeometryClipPayload, PushOpacityMaskPayload, PushOpacityPayload,
     PushRenderOptionsPayload, PushTextOptionsPayload, PushTransformPayload, RenderDataOpcode, RenderDataReader,
     RenderDataResource, RenderDataResources, RenderDataWriter,
 };
 use crate::media::{BoxShadow, BoxShadows, RenderOptions, TextOptions};
+use crate::media::imaging::BitmapBlendingMode;
 use crate::platform::IGlyphRunImpl;
 use crate::rendering::composition::server::{IServerObject, ServerObjectId};
 use crate::rendering::composition::transport::{BatchObject, BatchStreamReader, BatchStreamWriter};
@@ -224,6 +225,11 @@ impl RenderDataStream {
         self.enter_scope();
     }
 
+    pub fn push_compositing_layer(&mut self, blend: BitmapBlendingMode, opacity: f64, bounds: Rect) {
+        self.writer.write_payload(PushCompositingLayerPayload { blend, opacity, bounds });
+        self.enter_scope();
+    }
+
     pub fn push_opacity_mask(&mut self, server_brush: Option<RenderDataResource>, bounds: Rect) {
         let payload = PushOpacityMaskPayload { brush: self.resources.intern(server_brush), bounds };
         self.writer.write_payload(payload);
@@ -364,7 +370,7 @@ impl RenderDataStream {
                         Some(brush) => RenderDataResource::Brush(brush),
                         // A composition brush the compositor paints itself
                         // (winui-materials.md).
-                        None => match super::composition_painted_brush::painted_brush_of(&object) {
+                        None => match super::painted_brush_of(&object) {
                             Some(brush) => RenderDataResource::Brush(brush),
                             None => panic!("the server object referenced by render data is not a brush"),
                         },
@@ -458,6 +464,10 @@ impl RenderDataStream {
                 RenderDataOpcode::PushOpacity => {
                     let p = reader.read_payload::<PushOpacityPayload>();
                     scopes.push(visitor.on_push_opacity(p.opacity));
+                }
+                RenderDataOpcode::PushCompositingLayer => {
+                    let p = reader.read_payload::<PushCompositingLayerPayload>();
+                    scopes.push(visitor.on_push_compositing_layer(p.blend, p.opacity, p.bounds));
                 }
                 RenderDataOpcode::PushOpacityMask => {
                     let p = reader.read_payload::<PushOpacityMaskPayload>();

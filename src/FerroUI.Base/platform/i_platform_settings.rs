@@ -1,7 +1,7 @@
-use super::{PlatformColorValues, PlatformMaterialSettings};
+use super::PlatformColorValues;
 use crate::input::platform::PlatformHotkeyConfiguration;
 use crate::input::PointerType;
-use crate::reactive::IDisposable;
+use crate::reactive::{Disposable, IDisposable};
 use crate::Size;
 use std::rc::Rc;
 use std::time::Duration;
@@ -45,6 +45,25 @@ pub trait IPlatformSettings {
         true
     }
 
+    /// Whether the system permits translucent materials and backdrop effects.
+    ///
+    /// A backend that does not expose a transparency preference preserves the
+    /// application's normal materials. Backends should query the current
+    /// preference rather than cache it for the process lifetime.
+    fn transparency_enabled(&self) -> bool {
+        true
+    }
+
+    /// Raised when motion, transparency, or other display accessibility
+    /// preferences change. The callback runs on the UI thread; consumers read
+    /// the current values and invalidate any derived resources.
+    ///
+    /// The default is an empty subscription so existing platform backends and
+    /// external implementations remain source-compatible.
+    fn accessibility_settings_changed(&self, _handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
+        Disposable::empty()
+    }
+
     /// Gets current system color values including dark mode and accent
     /// colors.
     fn get_color_values(&self) -> PlatformColorValues;
@@ -58,18 +77,19 @@ pub trait IPlatformSettings {
     /// returned handle unsubscribes.
     fn preferred_application_language_changed(&self, handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable>;
 
-    /// The settings of the system that decide whether materials (acrylic,
-    /// Mica) are drawn: whether transparency effects are on and whether the
-    /// energy saver is (winui-materials.md). A FerroUI addition; a platform
-    /// that does not know them reports effects on and no energy saver.
-    fn get_material_settings(&self) -> PlatformMaterialSettings {
-        PlatformMaterialSettings::default()
+    /// Whether the energy saver of the system (battery saver, low power mode) is on: WinUI's
+    /// material policy (`MaterialHelper`) draws no acrylic while it is, from
+    /// `PowerManager.EnergySaverStatus`. A platform that does not report it answers `false`.
+    /// Backends should query the current state rather than cache it for the process lifetime.
+    /// A FerroUI addition (docs/porting/winui-materials.md).
+    fn energy_saver_enabled(&self) -> bool {
+        false
     }
 
-    /// Raised when the material settings change. Disposing the returned
-    /// handle unsubscribes. A platform that never reports a change returns
-    /// an empty subscription.
-    fn material_settings_changed(&self, _handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
-        crate::reactive::Disposable::empty()
+    /// Raised when the energy saver is turned on or off. The callback runs on the UI thread;
+    /// consumers read [`energy_saver_enabled`](Self::energy_saver_enabled). The default is an
+    /// empty subscription, for platforms that do not report it.
+    fn energy_saver_changed(&self, _handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
+        Disposable::empty()
     }
 }

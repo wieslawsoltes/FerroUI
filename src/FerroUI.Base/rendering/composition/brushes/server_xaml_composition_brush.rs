@@ -154,6 +154,14 @@ impl IServerObject for ServerXamlCompositionBrush {
         Some(self)
     }
 
+    /// The brush as the compositor paints it (a XAML brush is painted by the compositor, not
+    /// handed to the drawing context), so it can also be the brush of a pen: the border brush
+    /// of a Reveal border.
+    fn as_brush(self: Rc<Self>) -> Option<Rc<dyn crate::media::IBrush>> {
+        let object: Rc<dyn IServerObject> = self;
+        crate::rendering::composition::drawing::painted_brush_of(&object)
+    }
+
     fn get_props(&self, type_id: TypeId) -> Option<&dyn Any> {
         self.props.find_props(type_id)
     }

@@ -1,0 +1,53 @@
+<ResourceDictionary xmlns:fd="using:FerroDock.Ferro.Controls"
+                    xmlns:pc="using:FerroDock.Ferro.Converters"
+                    xmlns:sp="using:FerroDock.Settings" xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:dmc="using:FerroDock.Model.Controls"
+                    xmlns:core="using:FerroDock.Model.Core"
+                    x:DataType="dmc:IRootDock"
+                    x:CompileBindings="True">
+  <Design.PreviewWith>
+    <Border>
+      <fd:PinnedDockControl />
+    </Border>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="{x:Type fd:PinnedDockControl}" TargetType="fd:PinnedDockControl" x:DataType="dmc:IRootDock">
+
+    <Setter Property="(AutomationProperties.AutomationId)" Value="{Binding Id}" />
+    <Setter Property="(AutomationProperties.Name)" Value="{Binding Title}" />
+
+    <Setter Property="(sp:DockProperties.IsDragEnabled)" Value="{Binding CanDrag}" />
+    <Setter Property="(sp:DockProperties.IsDropEnabled)" Value="{Binding CanDrop}" />
+    <Setter Property="(sp:DockProperties.DockGroup)" Value="{Binding DockGroup}" />
+
+    <Setter Property="PinnedDockAlignment" Value="{Binding PinnedDock?.Alignment, TargetNullValue={x:Static core:Alignment.Unset}, FallbackValue={x:Static core:Alignment.Unset}}" />
+    <Setter Property="PinnedDockDisplayMode" Value="{Binding PinnedDockDisplayMode, FallbackValue={x:Static core:PinnedDockDisplayMode.Overlay}}" />
+
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid Name="PART_PinnedDockGrid"
+              IsVisible="{Binding !!PinnedDock?.VisibleDockables?.Count, TargetNullValue={x:False}, FallbackValue={x:False}}">
+          <DeferredContentControl Content="{Binding PinnedDock}" Name="PART_PinnedDock">
+            <DeferredContentControl.Styles>
+              <Style Selector="fd|ToolDockControl">
+                <Setter Property="Background">
+                  <MultiBinding Converter="{x:Static pc:EitherNotNullConverter.Instance}">
+                    <Binding Path="$parent[Window].Background" />
+                    <Binding Path="$parent[Window].TransparencyBackgroundFallback" />
+                  </MultiBinding>
+                </Setter>
+              </Style>
+              <Style Selector="fd|ToolControl">
+                <Setter Property="IsHitTestVisible" Value="{Binding !$parent[fd:DockControl].IsDraggingDock}" />
+              </Style>
+            </DeferredContentControl.Styles>
+          </DeferredContentControl>
+          <GridSplitter Name="PART_PinnedDockSplitter"
+                        Grid.Column="1" Grid.Row="1"
+                        Background="{Binding $parent[Window].Background, TargetNullValue={x:Static Brushes.Transparent}}" />
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

@@ -896,6 +896,15 @@ interface IUISettings3 : IInspectable
     HRESULT GetColorValue([in] UIColorType desiredColor, [out][retval] Color* value);
 }
 
+// `UISettings.AdvancedEffectsEnabled` (the transparency effects setting, which WinUI's material
+// policy reads; FerroUI addition, docs/porting/winui-materials.md). Only the first member of the
+// interface is declared; the events after it are not used. A WinRT boolean is one byte.
+[uuid(52BB3002-919B-4D6B-9B78-8DD66FF4B93B)]
+interface IUISettings4 : IInspectable
+{
+    [propget] HRESULT AdvancedEffectsEnabled([out][retval] BYTE* value);
+}
+
 [uuid(FE0E8147-C4C0-4562-B962-1327B52AD5B9)]
 interface IAccessibilitySettings : IInspectable
 {

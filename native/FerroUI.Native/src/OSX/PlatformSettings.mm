@@ -10,19 +10,47 @@
 -(void)localeDidChange:(NSNotification *)notification;
 @end
 
-@interface CocoaMaterialPolicyObserver : NSObject
+@interface CocoaAccessibilityObserver : NSObject
 -(id)initWithCallback:(IFrnActionCallback *)callback;
--(void)settingsDidChange:(NSNotification *)notification;
+-(void)accessibilityOptionsDidChange:(NSNotification *)notification;
+-(void)invalidate;
 @end
 
-class PlatformSettings : public ComSingleObject<IFrnPlatformSettings, &IID_IFrnPlatformSettings>
+@interface CocoaPowerObserver : NSObject
+-(id)initWithCallback:(IFrnActionCallback *)callback;
+-(void)powerStateDidChange:(NSNotification *)notification;
+-(void)invalidate;
+@end
+
+// Keep IFrnPlatformSettings' original vtable intact. New runtimes discover the
+// optional interface with QueryInterface and can still load an older native lib.
+class PlatformSettings : public ComObject,
+                         public virtual IFrnPlatformSettings,
+                         public virtual IFrnAccessibilitySettings,
+                         public virtual IFrnPowerSettings
 {
-    CocoaThemeObserver* observer;
-    CocoaLocaleObserver* localeObserver;
-    CocoaMaterialPolicyObserver* materialPolicyObserver;
+    CocoaThemeObserver* observer = nil;
+    CocoaLocaleObserver* localeObserver = nil;
+    CocoaAccessibilityObserver* accessibilityObserver = nil;
+    CocoaPowerObserver* powerObserver = nil;
+
+    BEGIN_INTERFACE_MAP()
+    INTERFACE_MAP_ENTRY(IFrnPlatformSettings, IID_IFrnPlatformSettings)
+    INTERFACE_MAP_ENTRY(IFrnAccessibilitySettings, IID_IFrnAccessibilitySettings)
+    INTERFACE_MAP_ENTRY(IFrnPowerSettings, IID_IFrnPowerSettings)
+    END_INTERFACE_MAP()
 
 public:
     FORWARD_IUNKNOWN()
+
+    virtual ~PlatformSettings()
+    {
+        RegisterColorsChange(nullptr);
+        RegisterLanguageChange(nullptr);
+        RegisterAccessibilityChange(nullptr);
+        RegisterPowerChange(nullptr);
+    }
+
     virtual FrnPlatformThemeVariant GetPlatformTheme() override
     {
         @autoreleasepool
@@ -78,8 +106,16 @@ public:
     {
         if (@available(macOS 10.14, *))
         {
-            observer = [[CocoaThemeObserver alloc] initWithCallback: callback];
-            [[NSApplication sharedApplication] addObserver:observer forKeyPath:@"effectiveAppearance" options:NSKeyValueObservingOptionNew context:nil];
+            if (observer != nil)
+            {
+                [[NSApplication sharedApplication] removeObserver:observer forKeyPath:@"effectiveAppearance"];
+                observer = nil;
+            }
+            if (callback != nullptr)
+            {
+                observer = [[CocoaThemeObserver alloc] initWithCallback: callback];
+                [[NSApplication sharedApplication] addObserver:observer forKeyPath:@"effectiveAppearance" options:NSKeyValueObservingOptionNew context:nil];
+            }
         }
     }
 
@@ -98,46 +134,78 @@ public:
 
     virtual void RegisterLanguageChange(IFrnActionCallback *callback) override
     {
-        localeObserver = [[CocoaLocaleObserver alloc] initWithCallback: callback];
-        [[NSNotificationCenter defaultCenter] addObserver:localeObserver
-                                                 selector:@selector(localeDidChange:)
-                                                     name:NSCurrentLocaleDidChangeNotification
-                                                   object:nil];
-    }
-    
-    virtual int GetMaterialPolicyFlags() override
-    {
-        @autoreleasepool
+        if (localeObserver != nil)
         {
-            int flags = 0;
-            if ([[NSWorkspace sharedWorkspace] accessibilityDisplayShouldReduceTransparency])
-            {
-                flags |= 1;
-            }
-            if (@available(macOS 12.0, *))
-            {
-                if ([[NSProcessInfo processInfo] isLowPowerModeEnabled])
-                {
-                    flags |= 2;
-                }
-            }
-            return flags;
+            [[NSNotificationCenter defaultCenter] removeObserver:localeObserver];
+            localeObserver = nil;
+        }
+        if (callback != nullptr)
+        {
+            localeObserver = [[CocoaLocaleObserver alloc] initWithCallback: callback];
+            [[NSNotificationCenter defaultCenter] addObserver:localeObserver
+                                                     selector:@selector(localeDidChange:)
+                                                         name:NSCurrentLocaleDidChangeNotification
+                                                       object:nil];
         }
     }
 
-    virtual void RegisterMaterialPolicyChange(IFrnActionCallback *callback) override
+    virtual bool GetReduceMotion() override
     {
-        materialPolicyObserver = [[CocoaMaterialPolicyObserver alloc] initWithCallback: callback];
-        [[[NSWorkspace sharedWorkspace] notificationCenter] addObserver:materialPolicyObserver
-                                                               selector:@selector(settingsDidChange:)
-                                                                   name:NSWorkspaceAccessibilityDisplayOptionsDidChangeNotification
-                                                                 object:nil];
+        return NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceMotion;
+    }
+
+    virtual bool GetReduceTransparency() override
+    {
+        return NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceTransparency;
+    }
+
+    virtual void RegisterAccessibilityChange(IFrnActionCallback *callback) override
+    {
+        auto center = NSWorkspace.sharedWorkspace.notificationCenter;
+        if (accessibilityObserver != nil)
+        {
+            [accessibilityObserver invalidate];
+            [center removeObserver:accessibilityObserver];
+            accessibilityObserver = nil;
+        }
+        if (callback != nullptr)
+        {
+            accessibilityObserver = [[CocoaAccessibilityObserver alloc] initWithCallback:callback];
+            [center addObserver:accessibilityObserver
+                       selector:@selector(accessibilityOptionsDidChange:)
+                           name:NSWorkspaceAccessibilityDisplayOptionsDidChangeNotification
+                         object:nil];
+        }
+    }
+    
+    virtual bool GetLowPowerMode() override
+    {
         if (@available(macOS 12.0, *))
         {
-            [[NSNotificationCenter defaultCenter] addObserver:materialPolicyObserver
-                                                     selector:@selector(settingsDidChange:)
-                                                         name:NSProcessInfoPowerStateDidChangeNotification
-                                                       object:nil];
+            return NSProcessInfo.processInfo.isLowPowerModeEnabled;
+        }
+        return false;
+    }
+
+    virtual void RegisterPowerChange(IFrnActionCallback *callback) override
+    {
+        auto center = NSNotificationCenter.defaultCenter;
+        if (powerObserver != nil)
+        {
+            [powerObserver invalidate];
+            [center removeObserver:powerObserver];
+            powerObserver = nil;
+        }
+        if (callback != nullptr)
+        {
+            if (@available(macOS 12.0, *))
+            {
+                powerObserver = [[CocoaPowerObserver alloc] initWithCallback:callback];
+                [center addObserver:powerObserver
+                           selector:@selector(powerStateDidChange:)
+                               name:NSProcessInfoPowerStateDidChangeNotification
+                             object:nil];
+            }
         }
     }
 
@@ -179,7 +247,8 @@ private:
                         change:(NSDictionary *)change
                        context:(void *)context {
     if([keyPath isEqualToString:@"effectiveAppearance"]) {
-        _callback->Run();
+        auto callback = _callback;
+        callback->Run();
     } else {
         [super observeValueForKeyPath:keyPath
                              ofObject:object
@@ -202,15 +271,17 @@ private:
 }
 
 - (void)localeDidChange:(NSNotification *)notification {
-    _callback->Run();
+    auto callback = _callback;
+    callback->Run();
 }
 @end
 
-@implementation CocoaMaterialPolicyObserver
+@implementation CocoaAccessibilityObserver
 {
     ComPtr<IFrnActionCallback> _callback;
 }
-- (id) initWithCallback:(IFrnActionCallback *)callback {
+
+- (id)initWithCallback:(IFrnActionCallback *)callback {
     self = [super init];
     if (self) {
         _callback = callback;
@@ -218,12 +289,66 @@ private:
     return self;
 }
 
-// The power state notification comes on any thread: the callback runs on the main thread.
-- (void)settingsDidChange:(NSNotification *)notification {
-    ComPtr<IFrnActionCallback> callback = _callback;
-    dispatch_async(dispatch_get_main_queue(), ^{
+- (void)invalidate {
+    _callback = nullptr;
+}
+
+- (void)invokeCallback {
+    // A subscriber can dispose the settings during the call. Keep the COM
+    // callback alive even when unregistration clears the observer's field.
+    auto callback = _callback;
+    if (callback != nullptr) {
         callback->Run();
-    });
+    }
+}
+
+- (void)accessibilityOptionsDidChange:(NSNotification *)notification {
+    // Rust platform settings and their subscribers belong to the UI thread.
+    // Capture the observer, not a Rust Rc, when a notification arrives elsewhere.
+    if ([NSThread isMainThread]) {
+        [self invokeCallback];
+    } else {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self invokeCallback];
+        });
+    }
+}
+@end
+
+@implementation CocoaPowerObserver
+{
+    ComPtr<IFrnActionCallback> _callback;
+}
+
+- (id)initWithCallback:(IFrnActionCallback *)callback {
+    self = [super init];
+    if (self) {
+        _callback = callback;
+    }
+    return self;
+}
+
+- (void)invalidate {
+    _callback = nullptr;
+}
+
+- (void)invokeCallback {
+    // Keep the COM callback alive even when a subscriber unregisters during the call.
+    auto callback = _callback;
+    if (callback != nullptr) {
+        callback->Run();
+    }
+}
+
+// The power state notification is posted on any thread: the callback runs on the main thread.
+- (void)powerStateDidChange:(NSNotification *)notification {
+    if ([NSThread isMainThread]) {
+        [self invokeCallback];
+    } else {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self invokeCallback];
+        });
+    }
 }
 @end
 

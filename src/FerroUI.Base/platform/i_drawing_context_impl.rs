@@ -3,6 +3,7 @@ use super::{
     IPlatformRenderInterfaceRegion,
 };
 use crate::media::{BoxShadows, Color, IBrush, IPen, RenderOptions};
+use crate::media::imaging::BitmapBlendingMode;
 use crate::{Matrix, PixelSize, Point, Rect, RoundedRect};
 use std::any::{Any, TypeId};
 use std::rc::Rc;
@@ -85,6 +86,19 @@ pub trait IDrawingContextImpl {
 
     /// Pops the latest pushed intermediate surface layer.
     fn pop_layer(&mut self);
+
+    /// Begins one isolated group for vectors, text and images, composed with
+    /// `blend` and multiplied by `opacity` when popped. Bounds are in the
+    /// current coordinate space and are an allocation hint, not a clip.
+    /// Returning false leaves every drawing state unchanged.
+    fn try_push_compositing_layer(&mut self, _blend: BitmapBlendingMode, _opacity: f64, _bounds: Rect) -> bool {
+        false
+    }
+
+    /// Pops a successful try_push_compositing_layer and restores its state.
+    fn pop_compositing_layer(&mut self) {
+        panic!("This rendering backend does not support isolated compositing layers");
+    }
 
     /// Pushes an opacity value.
     fn push_opacity(&mut self, opacity: f64, bounds: Option<Rect>);

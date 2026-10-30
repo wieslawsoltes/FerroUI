@@ -260,12 +260,6 @@ HRESULT TopLevelImpl::SetTransparencyMode(FrnWindowTransparencyMode mode) {
     return S_OK;
 }
 
-HRESULT TopLevelImpl::SetBlurMaterial(int material, int appearance) {
-    START_COM_CALL;
-
-    return S_OK;
-}
-
 HRESULT TopLevelImpl::GetCurrentDisplayId (CGDirectDisplayID* ret) {
     START_COM_CALL;
 

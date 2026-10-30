@@ -7,7 +7,6 @@
 #   scripts/android/apk.sh catalog [options]    the ControlCatalog (samples/ControlCatalog.Android)
 #   scripts/android/apk.sh safearea [options]   the SafeAreaDemo (samples/SafeAreaDemo.Android)
 #   scripts/android/apk.sh sandbox [options]    the SingleProjectSandbox (samples/SingleProjectSandbox)
-#   scripts/android/apk.sh ember   [options]    the Ember Hacker News reader (samples/Ember.Android)
 #
 # Options:
 #   --release           build with the release profile of cargo (default: the dev profile)
@@ -19,6 +18,19 @@
 #   --features LIST     cargo features of the build, for example ferroui-android/vulkan (the Vulkan
 #                       rendering mode with the Skia binary that has Ganesh on Vulkan as well)
 #
+# An application of another cargo workspace (a repository with this one as a submodule,
+# docs/apps.md): `package` with the library package of its Android host, built in the workspace of
+# FERROUI_ANDROID_WORKSPACE (the target directory then defaults to its target/):
+#
+#   FERROUI_ANDROID_WORKSPACE=$PWD FerroUI/scripts/android/apk.sh package --package ember-android \
+#       --label Ember --application-id org.ferroui.ember --permission android.permission.INTERNET
+#
+#   --package NAME           the package (a cdylib; the library is the name with - as _); the
+#                            package is <out>/NAME-<abi>-<profile>.apk
+#   --label LABEL            the label of the application (default: the package)
+#   --application-id ID      the application id (default: org.ferroui.<package with - as .>)
+#   --permission NAME        a permission of the manifest (repeatable)
+#
 # Environment: ANDROID_HOME (the SDK); CARGO_TARGET_DIR is honoured; see scripts/android/env.sh for
 # the pinned versions of the NDK, the build tools and the platform. The native library is built with
 # the stable Rust toolchain and its target (rustup target add aarch64-linux-android).
@@ -27,7 +39,7 @@
 set -euo pipefail
 
 usage() {
-    sed -n '2,24p' "$0" | sed 's/^# \{0,1\}//'
+    sed -n '2,38p' "$0" | sed 's/^# \{0,1\}//'
 }
 
 app=""
@@ -37,9 +49,18 @@ out=""
 strip=1
 run_cargo=1
 features=""
+host_package=""
+package_label=""
+package_id=""
+package_permissions=()
 while [ $# -gt 0 ]; do
     case "$1" in
-        smoke|catalog|safearea|sandbox|ember) app="$1" ;;
+        smoke|catalog|safearea|sandbox) app="$1" ;;
+        package) app="$1" ;;
+        --package) host_package="${2:?--package needs a value}"; shift ;;
+        --label) package_label="${2:?--label needs a value}"; shift ;;
+        --application-id) package_id="${2:?--application-id needs a value}"; shift ;;
+        --permission) package_permissions+=("${2:?--permission needs a value}"); shift ;;
         --release) profile="release" ;;
         --abi) abi="${2:?--abi needs a value}"; shift ;;
         --out) out="${2:?--out needs a value}"; shift ;;
@@ -59,6 +80,8 @@ fi
 repo="$(cd "$(dirname "$0")/../.." && pwd)"
 # shellcheck source=scripts/android/env.sh
 . "$repo/scripts/android/env.sh"
+# The cargo workspace of the application: this repository, or that of FERROUI_ANDROID_WORKSPACE.
+workspace="$(cd "${FERROUI_ANDROID_WORKSPACE:-$repo}" && pwd)"
 
 case "$abi" in
     arm64-v8a) target="aarch64-linux-android" ;;
@@ -106,19 +129,25 @@ case "$app" in
         # The permission the manifest of the reference states.
         permissions='    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />'
         ;;
-    ember)
-        cargo_args=(-p ember-android --lib)
-        library="ember_android"
+    package)
+        [ -n "$host_package" ] || { echo "package needs --package NAME" >&2; exit 2; }
+        cargo_args=(-p "$host_package" --lib)
+        library="${host_package//-/_}"
         library_dir=""
-        application_id="org.ferroui.ember"
-        label="Ember"
-        permissions='    <uses-permission android:name="android.permission.INTERNET" />'
+        application_id="${package_id:-org.ferroui.${host_package//-/.}}"
+        label="${package_label:-$host_package}"
+        # The files of the build are named after the package (<package>-<abi>-<profile>.apk).
+        app="$host_package"
+        for permission in ${package_permissions[@]+"${package_permissions[@]}"}; do
+            [ -n "$permissions" ] && permissions+=$'\n'
+            permissions+="    <uses-permission android:name=\"$permission\" />"
+        done
         ;;
 esac
 min_sdk="$FERROUI_ANDROID_API"
 target_sdk="${FERROUI_ANDROID_PLATFORM#android-}"
 
-cargo_target_dir="${CARGO_TARGET_DIR:-$repo/target}"
+cargo_target_dir="${CARGO_TARGET_DIR:-$workspace/target}"
 out="${out:-${FERROUI_ANDROID_BUILD_DIR:-$cargo_target_dir/android}}"
 work="$out/$app-$abi"
 if [ "$profile" = "release" ]; then
@@ -158,7 +187,7 @@ if [ "$run_cargo" = 1 ]; then
         echo "the Rust target $target is not installed: rustup target add $target" >&2
         exit 1
     fi
-    (cd "$repo" && cargo build "${cargo_args[@]}" --target "$target" ${profile_args[@]+"${profile_args[@]}"})
+    (cd "$workspace" && cargo build "${cargo_args[@]}" --target "$target" ${profile_args[@]+"${profile_args[@]}"})
 fi
 built="$cargo_target_dir/$target/$profile_dir/${library_dir:+$library_dir/}lib$library.so"
 if [ ! -f "$built" ]; then

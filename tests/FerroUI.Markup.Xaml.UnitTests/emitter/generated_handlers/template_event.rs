@@ -8,7 +8,7 @@ use ::ferroui_markup_xaml::xaml_il::runtime::compiled as rt;
 
 /// The XML namespaces of documents of this file, as the compiler resolved them.
 const XML_NAMESPACES_0: rt::XmlNamespaceTable = &[
-    ("", &[("FerroUI", "FerroUI.Base"), ("FerroUI.Animation", "FerroUI.Base"), ("FerroUI.Animation.Easings", "FerroUI.Base"), ("FerroUI.Controls", "FerroUI.Base"), ("FerroUI.Data", "FerroUI.Base"), ("FerroUI.Data.Converters", "FerroUI.Base"), ("FerroUI.Input", "FerroUI.Base"), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base"), ("FerroUI.Input.TextInput", "FerroUI.Base"), ("FerroUI.Layout", "FerroUI.Base"), ("FerroUI.LogicalTree", "FerroUI.Base"), ("FerroUI.Media", "FerroUI.Base"), ("FerroUI.Media.Imaging", "FerroUI.Base"), ("FerroUI.Media.Transformation", "FerroUI.Base"), ("FerroUI.Styling", "FerroUI.Base"), ("FerroUI", "FerroUI.Controls"), ("FerroUI.Automation", "FerroUI.Controls"), ("FerroUI.Controls", "FerroUI.Controls"), ("FerroUI.Controls.Embedding", "FerroUI.Controls"), ("FerroUI.Controls.Presenters", "FerroUI.Controls"), ("FerroUI.Controls.Primitives", "FerroUI.Controls"), ("FerroUI.Controls.Shapes", "FerroUI.Controls"), ("FerroUI.Controls.Templates", "FerroUI.Controls"), ("FerroUI.Controls.Notifications", "FerroUI.Controls"), ("FerroUI.Controls.Chrome", "FerroUI.Controls"), ("FerroUI.Controls.Documents", "FerroUI.Controls"), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml"), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml"), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml")]),
+    ("", &[("FerroUI", "FerroUI.Base"), ("FerroUI.Animation", "FerroUI.Base"), ("FerroUI.Animation.Easings", "FerroUI.Base"), ("FerroUI.Controls", "FerroUI.Base"), ("FerroUI.Data", "FerroUI.Base"), ("FerroUI.Data.Converters", "FerroUI.Base"), ("FerroUI.Input", "FerroUI.Base"), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base"), ("FerroUI.Input.TextInput", "FerroUI.Base"), ("FerroUI.Layout", "FerroUI.Base"), ("FerroUI.LogicalTree", "FerroUI.Base"), ("FerroUI.Media", "FerroUI.Base"), ("FerroUI.Media.Imaging", "FerroUI.Base"), ("FerroUI.Media.Transformation", "FerroUI.Base"), ("FerroUI.Styling", "FerroUI.Base"), ("FerroUI", "FerroUI.Controls"), ("FerroUI.Automation", "FerroUI.Controls"), ("FerroUI.Controls", "FerroUI.Controls"), ("FerroUI.Controls.Embedding", "FerroUI.Controls"), ("FerroUI.Controls.Presenters", "FerroUI.Controls"), ("FerroUI.Controls.Primitives", "FerroUI.Controls"), ("FerroUI.Controls.Shapes", "FerroUI.Controls"), ("FerroUI.Controls.Templates", "FerroUI.Controls"), ("FerroUI.Controls.Notifications", "FerroUI.Controls"), ("FerroUI.Controls.Chrome", "FerroUI.Controls"), ("FerroUI.Controls.Documents", "FerroUI.Controls"), ("FerroUI.Media", "FerroUI.Controls"), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml"), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml"), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml")]),
     ("x", &[]),
 ];
 
@@ -48,7 +48,7 @@ pub fn populate_handlers_templateevent_xaml(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_controls::Control>());
     // Handlers/TemplateEvent.xaml(1,159) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("target")));
-    rt::register_name(name_scope.as_ref(), "target", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 1, 159)?;
+    rt::register_name_value(name_scope.as_ref(), "target", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 1, 159)?;
     // Handlers/TemplateEvent.xaml(1,191) Template
     let control_template_0 = ::ferroui_markup_xaml::templates::ControlTemplate::__markup_new_0();
     // Handlers/TemplateEvent.xaml(1,208) Content
@@ -73,7 +73,7 @@ fn populate_handlers_templateevent_xaml_deferred_0(
     border_0.begin_init();
     // Handlers/TemplateEvent.xaml(1,215) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("part")));
-    rt::register_name(name_scope.as_ref(), "part", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 1, 215)?;
+    rt::register_name_value(name_scope.as_ref(), "part", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 1, 215)?;
     // Handlers/TemplateEvent.xaml(1,208) Tapped
     rt::add_handler_with_context(&context, &border_0, &::ferroui_base::input::InputElement::__markup_field_TappedEvent(), rt::method_delegate(&context, 2, |this, arguments| { crate::support::xaml::event_tests::MyPanel::__markup_OnTapped_1(this, arguments.next()?, arguments.next()?); ::core::result::Result::Ok(::core::option::Option::None) }));
     rt::invoked(border_0.try_end_init(), 1, 208)?;

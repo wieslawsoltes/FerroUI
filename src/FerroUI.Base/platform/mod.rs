@@ -104,9 +104,7 @@ mod platform_handle;
 pub use default_platform_settings::DefaultPlatformSettings;
 pub use i_mac_os_top_level_platform_handle::IMacOSTopLevelPlatformHandle;
 pub use i_platform_handle::IPlatformHandle;
-pub use platform_color_values::{
-    AccentColorShades, ColorContrastPreference, PlatformColorValues, PlatformMaterialSettings, PlatformThemeVariant,
-};
+pub use platform_color_values::{AccentColorShades, ColorContrastPreference, PlatformColorValues, PlatformThemeVariant};
 pub use platform_handle::PlatformHandle;
 pub use i_cursor_factory::ICursorFactory;
 pub use i_cursor_impl::ICursorImpl;

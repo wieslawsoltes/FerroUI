@@ -1,0 +1,18 @@
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:core="using:FerroDock.Model.Core" x:CompileBindings="True">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceInclude Source="ferres://FerroDock.Ferro.Themes.Fluent/Accents/Fluent.xaml" />
+    <ResourceInclude Source="ferres://FerroDock.Ferro.Themes.Fluent/Controls/ControlStrings.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+  <core:DockOperation x:Key="OperationNone">None</core:DockOperation>
+  <core:DockOperation x:Key="OperationFill">Fill</core:DockOperation>
+  <core:DockOperation x:Key="OperationLeft">Left</core:DockOperation>
+  <core:DockOperation x:Key="OperationBottom">Bottom</core:DockOperation>
+  <core:DockOperation x:Key="OperationRight">Right</core:DockOperation>
+  <core:DockOperation x:Key="OperationTop">Top</core:DockOperation>
+  <core:DockOperation x:Key="OperationWindow">Window</core:DockOperation>
+  <core:DockOperation x:Key="OperationOuterLeft">OuterLeft</core:DockOperation>
+  <core:DockOperation x:Key="OperationOuterTop">OuterTop</core:DockOperation>
+  <core:DockOperation x:Key="OperationOuterRight">OuterRight</core:DockOperation>
+  <core:DockOperation x:Key="OperationOuterBottom">OuterBottom</core:DockOperation>
+</ResourceDictionary>

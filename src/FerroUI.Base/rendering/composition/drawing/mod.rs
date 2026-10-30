@@ -25,7 +25,7 @@ mod server_resource_helper_extensions;
 
 pub use composition_painted_brush::CompositionPaintedBrush;
 pub(crate) use composition_painted_brush::{
-    draw_with_painted_brushes, is_painted_composition_brush, PaintedShape,
+    draw_with_painted_brushes, is_painted_composition_brush, painted_brush_of, PaintedShape,
 };
 pub use composition_render_data::CompositionRenderData;
 pub use composition_render_data_scene_brush_content::{
@@ -41,7 +41,7 @@ pub use render_data_resources::{RenderDataResource, RenderDataResources, NULL_HA
 pub use render_data_opcode::RenderDataOpcode;
 pub use render_data_payloads::{
     DrawBitmapPayload, DrawCustomPayload, DrawEllipsePayload, DrawGeometryPayload, DrawGlyphRunPayload,
-    DrawLinePayload, DrawRectanglePayload, IRenderDataPayload, PushClipPayload, PushEffectPayload,
+    DrawLinePayload, DrawRectanglePayload, IRenderDataPayload, PushClipPayload, PushCompositingLayerPayload, PushEffectPayload,
     PushGeometryClipPayload, PushOpacityMaskPayload, PushOpacityPayload, PushRenderOptionsPayload,
     PushTextOptionsPayload, PushTransformPayload,
 };

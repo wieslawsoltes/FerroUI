@@ -332,7 +332,7 @@ fn add_resource(
 /// model attaches handlers to. A field declared with its typed handle
 /// (`RoutedEvent<TEventArgs>`) that has no registered conversion to the
 /// untyped handle is looked up in the registry of routed events by its
-/// owner and name.
+/// owner and name (the field name, `<Name>Event`).
 fn untyped_routed_event(field: &Rc<dyn xamlx::type_system::IXamlField>, value: MarkupValue) -> MarkupValue {
     use ferroui_base::interactivity::{RoutedEvent, RoutedEventRegistry};
     if from_markup_value::<RoutedEvent>(&value).is_some() {
@@ -344,10 +344,7 @@ fn untyped_routed_event(field: &Rc<dyn xamlx::type_system::IXamlField>, value: M
         .downcast_ref::<crate::runtime::type_system::RuntimeType>()
         .and_then(crate::runtime::type_system::RuntimeType::type_info);
     let field_name = field.name();
-    let name = field_name.strip_suffix("Event").unwrap_or(&field_name);
-    let found = owner.and_then(|owner| {
-        RoutedEventRegistry::instance().get_registered(owner).into_iter().find(|event| event.name() == name)
-    });
+    let found = owner.and_then(|owner| RoutedEventRegistry::instance().find_by_name(owner, &field_name));
     match found {
         Some(event) => boxed(event),
         None => value,

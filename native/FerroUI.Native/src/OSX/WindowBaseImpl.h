@@ -12,6 +12,7 @@
 
 class WindowBaseImpl : public virtual TopLevelImpl,
                        public virtual IFrnWindowBase,
+                       public virtual IFrnWindowBlurMaterial,
                        public INSWindowHolder {
 
 public:
@@ -20,6 +21,7 @@ public:
     BEGIN_INTERFACE_MAP()
         INHERIT_INTERFACE_MAP(TopLevelImpl)
         INTERFACE_MAP_ENTRY(IFrnWindowBase, IID_IFrnWindowBase)
+        INTERFACE_MAP_ENTRY(IFrnWindowBlurMaterial, IID_IFrnWindowBlurMaterial)
     END_INTERFACE_MAP()
 
     virtual ~WindowBaseImpl();

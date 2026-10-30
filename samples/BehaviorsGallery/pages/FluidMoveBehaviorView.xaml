@@ -1,0 +1,33 @@
+<UserControl x:Class="BehaviorsGallery.Views.Pages.FluidMoveBehaviorView"
+             xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:BehaviorsGallery.ViewModels"
+             x:DataType="vm:FluidMoveBehaviorViewModel"
+             mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="450">
+  <!-- Ported from Views/Pages/FluidMoveBehaviorView of the reference sample. -->
+  <Design.DataContext>
+    <vm:FluidMoveBehaviorViewModel />
+  </Design.DataContext>
+  <StackPanel Margin="10" Spacing="10">
+    <Button Content="Shuffle" Width="100" Command="{Binding ShuffleCommand}" />
+    <ItemsControl ItemsSource="{Binding Items}">
+      <ItemsControl.ItemsPanel>
+        <ItemsPanelTemplate>
+          <WrapPanel />
+        </ItemsPanelTemplate>
+      </ItemsControl.ItemsPanel>
+      <ItemsControl.ItemTemplate>
+        <DataTemplate>
+          <Border Width="40" Height="40" Margin="4" Background="LightBlue">
+            <TextBlock Text="{Binding .}" VerticalAlignment="Center" HorizontalAlignment="Center" />
+          </Border>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+      <Interaction.Behaviors>
+        <FluidMoveBehavior AppliesTo="Children" Duration="0:0:0.3" />
+      </Interaction.Behaviors>
+    </ItemsControl>
+  </StackPanel>
+</UserControl>

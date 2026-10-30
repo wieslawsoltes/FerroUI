@@ -97,6 +97,7 @@ macro_rules! document_tests {
 document_tests! {
     controls_adorner_layer => "/Controls/AdornerLayer.xaml";
     controls_auto_complete_box => "/Controls/AutoCompleteBox.xaml";
+    controls_auto_suggest_box => "/Controls/AutoSuggestBox.xaml";
     controls_button => "/Controls/Button.xaml";
     controls_calendar => "/Controls/Calendar.xaml";
     controls_calendar_button => "/Controls/CalendarButton.xaml";
@@ -126,10 +127,14 @@ document_tests! {
     controls_menu_scroll_viewer => "/Controls/MenuScrollViewer.xaml";
     controls_overlay_popup_host => "/Controls/OverlayPopupHost.xaml";
     controls_path_icon => "/Controls/PathIcon.xaml";
+    controls_font_icon => "/Controls/FontIcon.xaml";
+    controls_symbol_icon => "/Controls/SymbolIcon.xaml";
     controls_popup_root => "/Controls/PopupRoot.xaml";
     controls_progress_bar => "/Controls/ProgressBar.xaml";
     controls_radio_button => "/Controls/RadioButton.xaml";
+    controls_radio_buttons => "/Controls/RadioButtons.xaml";
     controls_repeat_button => "/Controls/RepeatButton.xaml";
+    controls_reveal_styles => "/Controls/RevealStyles.xaml";
     controls_scroll_bar => "/Controls/ScrollBar.xaml";
     controls_scroll_viewer => "/Controls/ScrollViewer.xaml";
     controls_selectable_text_block => "/Controls/SelectableTextBlock.xaml";
@@ -152,6 +157,8 @@ document_tests! {
     controls_command_bar => "/Controls/CommandBar.xaml";
     controls_content_page => "/Controls/ContentPage.xaml";
     controls_drawer_page => "/Controls/DrawerPage.xaml";
+    controls_frame => "/Controls/Frame.xaml";
+    controls_navigation_view => "/Controls/NavigationView.xaml";
     controls_navigation_page => "/Controls/NavigationPage.xaml";
     controls_split_view => "/Controls/SplitView.xaml";
     controls_tab_control => "/Controls/TabControl.xaml";
@@ -189,6 +196,7 @@ document_tests! {
     resources_glyphs => "/Resources/Glyphs.xaml";
     resources_hyperlink_button_themeresources => "/Resources/HyperlinkButton_themeresources.xaml";
     resources_hyperlink_themeresources => "/Resources/Hyperlink_themeresources.xaml";
+    resources_info_badge_themeresources => "/Resources/InfoBadge_themeresources.xaml";
     resources_info_bar_themeresources => "/Resources/InfoBar_themeresources.xaml";
     resources_list_box_themeresources => "/Resources/ListBox_themeresources.xaml";
     resources_list_view_item_themeresources => "/Resources/ListViewItem_themeresources.xaml";
@@ -200,7 +208,10 @@ document_tests! {
     resources_password_box_themeresources => "/Resources/PasswordBox_themeresources.xaml";
     resources_pips_pager_themeresources => "/Resources/PipsPager_themeresources.xaml";
     resources_progress_bar_themeresources => "/Resources/ProgressBar_themeresources.xaml";
+    resources_progress_ring_themeresources => "/Resources/ProgressRing_themeresources.xaml";
     resources_radio_button_themeresources => "/Resources/RadioButton_themeresources.xaml";
+    resources_radio_buttons_themeresources => "/Resources/RadioButtons_themeresources.xaml";
+    resources_rating_control_themeresources => "/Resources/RatingControl_themeresources.xaml";
     resources_refresh_container_themeresources => "/Resources/RefreshContainer_themeresources.xaml";
     resources_refresh_visualizer_themeresources => "/Resources/RefreshVisualizer_themeresources.xaml";
     resources_repeat_button_themeresources => "/Resources/RepeatButton_themeresources.xaml";
@@ -225,6 +236,10 @@ document_tests! {
     resources_tree_view_themeresources => "/Resources/TreeView_themeresources.xaml";
     controls_managed_file_chooser => "/Controls/ManagedFileChooser.xaml";
     controls_notification_card => "/Controls/NotificationCard.xaml";
+    controls_info_bar => "/Controls/InfoBar.xaml";
+    controls_info_badge => "/Controls/InfoBadge.xaml";
+    controls_title_bar => "/Controls/TitleBar.xaml";
+    controls_progress_ring => "/Controls/ProgressRing.xaml";
     controls_table_view => "/Controls/TableView.xaml";
     controls_table_view_cell => "/Controls/TableViewCell.xaml";
     controls_table_view_column_header => "/Controls/TableViewColumnHeader.xaml";
@@ -241,7 +256,9 @@ document_tests! {
     controls_drop_down_button => "/Controls/DropDownButton.xaml";
     controls_expander => "/Controls/Expander.xaml";
     controls_numeric_up_down => "/Controls/NumericUpDown.xaml";
+    controls_number_box => "/Controls/NumberBox.xaml";
     controls_pips_pager => "/Controls/PipsPager.xaml";
+    controls_rating_control => "/Controls/RatingControl.xaml";
     controls_refresh_container => "/Controls/RefreshContainer.xaml";
     controls_refresh_visualizer => "/Controls/RefreshVisualizer.xaml";
     controls_slider => "/Controls/Slider.xaml";

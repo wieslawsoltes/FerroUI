@@ -17,6 +17,7 @@ use crate::surface_render_target::{SurfaceRenderTarget, SurfaceRenderTargetCreat
 use crate::text_rendering_settings::TextRenderingSettings;
 use crate::picture_render_target::PictureRenderTarget;
 use ferroui_base::media::effects::IEffect;
+use ferroui_base::media::imaging::BitmapBlendingMode;
 use ferroui_base::media::{
     AcrylicBackgroundSource, BaselinePixelAlignment, BoxShadow, BoxShadows, Color, Colors, EdgeMode, IBrush,
     IExperimentalAcrylicMaterial, IGradientBrush, IPen, ISceneBrushContent, ITileBrush, MediaExtensions, RenderOptions,
@@ -288,7 +289,8 @@ pub struct DrawingContextImpl {
     /// The multiply layers that are pushed: the image of their factors, their
     /// bounds, and whether a scaling layer is under them.
     multiply_stack: Vec<(Option<sk::Image>, sk::Rect, bool)>,
-    opacity_stack: Vec<f64>,
+    opacity_stack: Vec<(f64, bool)>,
+    compositing_opacity_stack: Vec<f64>,
     render_options_stack: Vec<RenderOptions>,
     text_options_stack: Vec<TextOptions>,
     post_transform: Option<Matrix>,
@@ -348,6 +350,7 @@ impl DrawingContextImpl {
             mask_stack: Vec::new(),
             multiply_stack: Vec::new(),
             opacity_stack: Vec::new(),
+            compositing_opacity_stack: Vec::new(),
             render_options_stack: Vec::new(),
             text_options_stack: Vec::new(),
             post_transform,
@@ -1032,6 +1035,9 @@ impl DrawingContextImpl {
     }
 
     fn create_effect(&self, effect: &dyn IEffect) -> Option<sk::ImageFilter> {
+        if effect.as_any().is::<ferroui_base::media::ImmutableLuminanceToAlphaEffect>() {
+            return sk::image_filters::color_filter(sk::ColorFilter::luma(), None, None);
+        }
         if let Some(blur) = effect.as_blur_effect() {
             if blur.radius() <= 0.0 {
                 return None;
@@ -1592,13 +1598,43 @@ impl IDrawingContextImpl for DrawingContextImpl {
         self.restore_canvas();
     }
 
+    fn try_push_compositing_layer(&mut self, blend: BitmapBlendingMode, opacity: f64, bounds: Rect) -> bool {
+        self.check_lease();
+        if ![bounds.x, bounds.y, bounds.width, bounds.height, opacity].iter().all(|value| value.is_finite())
+            || bounds.width < 0.0 || bounds.height < 0.0 || !(0.0..=1.0).contains(&opacity)
+        {
+            return false;
+        }
+        // The public operation composites the completed contents once. Consume
+        // inherited per-primitive opacity here, then restore it for siblings.
+        let inherited_opacity = self.current_opacity;
+        let mut paint = sk::Paint::default();
+        paint.set_blend_mode(to_sk_blend_mode(blend));
+        paint.set_color4f(sk::Color4f::new(0.0, 0.0, 0.0, (inherited_opacity * opacity).clamp(0.0, 1.0) as f32), None);
+        // Bounds are advisory in the FerroUI contract. Keep the existing clip
+        // as the allocation limit rather than trimming content to this hint.
+        self.canvas.get().save_layer(&SaveLayerRec::default().paint(&paint));
+        self.compositing_opacity_stack.push(inherited_opacity);
+        self.current_opacity = 1.0;
+        true
+    }
+
+    fn pop_compositing_layer(&mut self) {
+        self.check_lease();
+        self.restore_canvas();
+        self.current_opacity = self.compositing_opacity_stack.pop()
+            .unwrap_or_else(|| panic!("The compositing opacity stack is empty"));
+    }
+
     fn push_opacity(&mut self, opacity: f64, bounds: Option<Rect>) {
         self.check_lease();
 
-        self.opacity_stack.push(self.current_opacity);
-
+        // DrawingGroup uses unit-opacity structural wrappers. An unnecessary
+        // saveLayer there would isolate a nested blend from the real backdrop.
         let use_opacity_save_layer =
-            self.use_opacity_save_layer || self.render_options.requires_full_opacity_handling == Some(true);
+            (self.use_opacity_save_layer || self.render_options.requires_full_opacity_handling == Some(true))
+                && (opacity != 1.0 || self.current_opacity != 1.0);
+        self.opacity_stack.push((self.current_opacity, use_opacity_save_layer));
 
         if use_opacity_save_layer {
             // Take the current multiplied opacity.
@@ -1627,14 +1663,13 @@ impl IDrawingContextImpl for DrawingContextImpl {
     fn pop_opacity(&mut self) {
         self.check_lease();
 
-        let use_opacity_save_layer =
-            self.use_opacity_save_layer || self.render_options.requires_full_opacity_handling == Some(true);
-
+        let (opacity, use_opacity_save_layer) = self.opacity_stack.pop()
+            .unwrap_or_else(|| panic!("The opacity stack is empty"));
         if use_opacity_save_layer {
             self.restore_canvas();
         }
 
-        self.current_opacity = self.opacity_stack.pop().unwrap_or_else(|| panic!("The opacity stack is empty"));
+        self.current_opacity = opacity;
     }
 
     fn push_opacity_mask(&mut self, mask: &dyn IBrush, bounds: Rect) {

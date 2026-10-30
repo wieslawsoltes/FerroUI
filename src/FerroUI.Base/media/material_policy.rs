@@ -2,7 +2,7 @@
 //! whether acrylic (and Reveal) are drawn or fall back to a colour, and the
 //! noise texture the materials share.
 
-use crate::platform::{IPlatformSettings, PlatformMaterialSettings};
+use crate::platform::IPlatformSettings;
 use crate::reactive::{Disposable, IDisposable};
 use crate::rendering::composition::{
     CompositionStretch, CompositionSurfaceBrush, Compositor, ICompositionSurface, LoadedImageSurface,
@@ -17,16 +17,40 @@ pub const NOISE_ASSET_PNG: &[u8] = include_bytes!("assets/noise_asset_256x256_pn
 
 type PolicyHandler = Rc<dyn Fn(bool)>;
 
+/// The settings of the platform the policy reads: transparency effects
+/// ([`IPlatformSettings::transparency_enabled`]) and the energy saver
+/// ([`IPlatformSettings::energy_saver_enabled`]).
+#[derive(Clone, Copy, PartialEq, Eq)]
+struct PlatformMaterialState {
+    transparency_enabled: bool,
+    energy_saver_enabled: bool,
+}
+
+impl Default for PlatformMaterialState {
+    fn default() -> Self {
+        Self { transparency_enabled: true, energy_saver_enabled: false }
+    }
+}
+
+impl PlatformMaterialState {
+    fn read(settings: &dyn IPlatformSettings) -> Self {
+        Self {
+            transparency_enabled: settings.transparency_enabled(),
+            energy_saver_enabled: settings.energy_saver_enabled(),
+        }
+    }
+}
+
 struct PolicyState {
     initialized: bool,
     disabled: bool,
     simulate_disabled: bool,
     ignore_effects_fast: bool,
     effects_fast: bool,
-    settings: Option<PlatformMaterialSettings>,
+    settings: Option<PlatformMaterialState>,
     listeners: Vec<(u64, PolicyHandler)>,
     next_token: u64,
-    settings_subscription: Option<Rc<dyn IDisposable>>,
+    settings_subscriptions: Vec<Rc<dyn IDisposable>>,
     noise: Vec<(Weak<Compositor>, CompositionSurfaceBrush)>,
     window_active: bool,
     activation_listeners: Vec<(u64, Rc<dyn Fn(bool)>)>,
@@ -43,7 +67,7 @@ impl PolicyState {
             settings: None,
             listeners: Vec::new(),
             next_token: 0,
-            settings_subscription: None,
+            settings_subscriptions: Vec::new(),
             noise: Vec::new(),
             window_active: true,
             activation_listeners: Vec::new(),
@@ -53,8 +77,8 @@ impl PolicyState {
     fn compute_disabled(&self) -> bool {
         let settings = self.settings.unwrap_or_default();
         self.simulate_disabled
-            || settings.energy_saver_on
-            || !settings.transparency_effects_enabled
+            || settings.energy_saver_enabled
+            || !settings.transparency_enabled
             || !(self.effects_fast || self.ignore_effects_fast)
     }
 }
@@ -69,8 +93,11 @@ crate::ferro_thread_local! {
 /// or a test simulates it.
 ///
 /// The settings come from the platform
-/// ([`IPlatformSettings::get_material_settings`]), read when the policy is
-/// first asked and whenever the platform reports a change. The policy is
+/// ([`IPlatformSettings::transparency_enabled`] and
+/// [`IPlatformSettings::energy_saver_enabled`]), read when the policy is
+/// first asked and whenever the platform reports a change of either
+/// ([`IPlatformSettings::accessibility_settings_changed`],
+/// [`IPlatformSettings::energy_saver_changed`]). The policy is
 /// per thread, as the objects it serves.
 pub struct MaterialPolicy;
 
@@ -81,14 +108,20 @@ impl MaterialPolicy {
             return;
         }
         let settings = FerroLocator::current().get_service::<dyn IPlatformSettings>();
-        let subscription = settings.as_ref().map(|settings| {
-            settings.material_settings_changed(Rc::new(|| MaterialPolicy::update_policy_status()))
-        });
+        let subscriptions = settings
+            .as_ref()
+            .map(|settings| {
+                vec![
+                    settings.accessibility_settings_changed(Rc::new(MaterialPolicy::update_policy_status)),
+                    settings.energy_saver_changed(Rc::new(MaterialPolicy::update_policy_status)),
+                ]
+            })
+            .unwrap_or_default();
         POLICY.with(|state| {
             let mut state = state.borrow_mut();
             state.initialized = true;
-            state.settings = settings.map(|settings| settings.get_material_settings());
-            state.settings_subscription = subscription;
+            state.settings = settings.map(|settings| PlatformMaterialState::read(&*settings));
+            state.settings_subscriptions = subscriptions;
             state.disabled = state.compute_disabled();
         });
     }
@@ -123,7 +156,7 @@ impl MaterialPolicy {
     pub fn update_policy_status() {
         let settings = FerroLocator::current()
             .get_service::<dyn IPlatformSettings>()
-            .map(|settings| settings.get_material_settings());
+            .map(|settings| PlatformMaterialState::read(&*settings));
         POLICY.with(|state| state.borrow_mut().settings = settings);
         Self::recompute();
     }
@@ -179,10 +212,20 @@ impl MaterialPolicy {
         Self::recompute();
     }
 
-    /// The settings of the platform the policy last read.
-    pub fn platform_settings() -> PlatformMaterialSettings {
+    /// Whether the platform permits transparency effects, as the policy last
+    /// read it ([`IPlatformSettings::transparency_enabled`]; `true` without
+    /// platform settings).
+    pub fn transparency_enabled() -> bool {
         Self::ensure_initialized();
-        POLICY.with(|state| state.borrow().settings.unwrap_or_default())
+        POLICY.with(|state| state.borrow().settings.unwrap_or_default().transparency_enabled)
+    }
+
+    /// Whether the energy saver is on, as the policy last read it
+    /// ([`IPlatformSettings::energy_saver_enabled`]; `false` without platform
+    /// settings).
+    pub fn energy_saver_enabled() -> bool {
+        Self::ensure_initialized();
+        POLICY.with(|state| state.borrow().settings.unwrap_or_default().energy_saver_enabled)
     }
 
     /// Whether a window of the application is active: the acrylic of the

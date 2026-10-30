@@ -755,10 +755,6 @@ interface IFrnTopLevel : IUnknown
      
      HRESULT GetInputMethod(IFrnTextInputMethod **ppv);
      HRESULT SetTransparencyMode(FrnWindowTransparencyMode mode);
-     // The material and appearance of the blur behind the window (an NSVisualEffectMaterial;
-     // appearance 0 follows the window, 1 aqua, 2 dark aqua); a negative material restores
-     // the default. A FerroUI addition for the system backdrops (docs/porting/winui-materials.md).
-     HRESULT SetBlurMaterial(int material, int appearance);
      
      HRESULT GetCurrentDisplayId(uint* ret);
 
@@ -1381,10 +1377,39 @@ interface IFrnPlatformSettings : IUnknown
     void RegisterColorsChange(IFrnActionCallback* callback);
     HRESULT GetPreferredLanguage(IFrnString** ret);
     void RegisterLanguageChange(IFrnActionCallback* callback);
-    // The settings that decide whether materials are drawn: bit 1 reduce transparency, bit 2
-    // low power mode. A FerroUI addition (docs/porting/winui-materials.md).
-    int GetMaterialPolicyFlags();
-    void RegisterMaterialPolicyChange(IFrnActionCallback* callback);
+}
+
+// Optional extension: keep IFrnPlatformSettings and its existing IID/vtable
+// unchanged so a host can still use an older native library.
+[uuid(56b3638d-e693-4784-92ba-351be9cbf68e)]
+interface IFrnAccessibilitySettings : IUnknown
+{
+    bool GetReduceMotion();
+    bool GetReduceTransparency();
+    // A null callback unregisters the previous observer.
+    void RegisterAccessibilityChange(IFrnActionCallback* callback);
+}
+
+// Optional extension of a window, as IFrnAccessibilitySettings of the platform settings (the
+// vtables of IFrnTopLevel and the interfaces that derive from it stay unchanged): the material
+// and appearance of the blur behind the window (an NSVisualEffectMaterial; appearance 0 follows
+// the window, 1 aqua, 2 dark aqua); a negative material restores the default. A FerroUI addition
+// for the system backdrops (docs/porting/winui-materials.md).
+[uuid(881b270d-4e4b-422c-a0dd-04d82483e77a)]
+interface IFrnWindowBlurMaterial : IUnknown
+{
+    HRESULT SetBlurMaterial(int material, int appearance);
+}
+
+// Optional extension, as IFrnAccessibilitySettings: the low power mode of the system, which
+// WinUI's material policy reads as the energy saver. A FerroUI addition
+// (docs/porting/winui-materials.md).
+[uuid(43375f75-e670-42bd-ba6d-202c54816ced)]
+interface IFrnPowerSettings : IUnknown
+{
+    bool GetLowPowerMode();
+    // A null callback unregisters the previous observer.
+    void RegisterPowerChange(IFrnActionCallback* callback);
 }
 
 [uuid(12edf00d-5803-4d3f-9947-b4840e5e9372)]

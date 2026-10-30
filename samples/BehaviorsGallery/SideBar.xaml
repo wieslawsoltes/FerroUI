@@ -1,0 +1,44 @@
+<Styles xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- Ported from SideBar of the reference sample: the tab control of the pages, with its tab
+       strip on the left in a scroll viewer. -->
+  <Design.PreviewWith>
+    <Border Padding="20" Width="500" Height="400">
+      <TabControl Classes="sidebar">
+        <TabItem Header="Item1">
+          <Button Content="Button" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </TabItem>
+        <TabItem Header="Item2">
+          <TextBlock Text="Text" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </TabItem>
+      </TabControl>
+    </Border>
+  </Design.PreviewWith>
+  <Style Selector="TabControl.sidebar">
+    <Setter Property="TabStripPlacement" Value="Left" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border BorderBrush="{TemplateBinding BorderBrush}"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}"
+                Background="{TemplateBinding Background}"
+                HorizontalAlignment="{TemplateBinding HorizontalAlignment}"
+                VerticalAlignment="{TemplateBinding VerticalAlignment}">
+          <DockPanel>
+            <ScrollViewer>
+              <ItemsPresenter Name="PART_ItemsPresenter"
+                              ItemsPanel="{TemplateBinding ItemsPanel}"
+                              DockPanel.Dock="{TemplateBinding TabStripPlacement}"/>
+            </ScrollViewer>
+            <ContentPresenter Name="PART_SelectedContentHost"
+                              Margin="{TemplateBinding Padding}"
+                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                              Content="{TemplateBinding SelectedContent}"
+                              ContentTemplate="{TemplateBinding SelectedContentTemplate}" />
+          </DockPanel>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+</Styles>

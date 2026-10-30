@@ -195,7 +195,8 @@ more than a value, and updates the inventory.
 
 `MaterialPolicy` (the policy of `MaterialHelper`: energy saver, transparency effects, effects that
 are not fast, a simulated policy, `PolicyChanged`; the shared noise brush), the platform settings
-it reads (`IPlatformSettings::get_material_settings` on macOS and Windows), the high contrast
+it reads (`IPlatformSettings::transparency_enabled` and `energy_saver_enabled`, with their change
+events, on macOS and Windows), the high contrast
 preference; `XamlCompositionBrushBase`; `AcrylicBrush` with WinUI's recipe, its tint animations and
 its cross-fade to and from the fallback colour.
 
@@ -292,7 +293,7 @@ were partial and 43 missing. After it:
 | Phase | State | Where |
 |---|---|---|
 | 1 | done | `ferroui_base::media::ColorMatrix`, `platform::IDrawingContextImplWithLayerEffects` (Skia, Vello, the compositor's proxy, the mock), `rendering::composition::effects` (the effects and the effect graph), `server::render_scope` (the backdrop), `drawing::composition_painted_brush` (composition brushes as element brushes), `CompositionHostBackdropBrush` |
-| 2 | done | `media::{MaterialPolicy, XamlCompositionBrushBase, AcrylicBrush}`, `PlatformMaterialSettings` (macOS: reduce transparency and low power mode; Windows: `EnableTransparency` and the battery saver) |
+| 2 | done | `media::{MaterialPolicy, XamlCompositionBrushBase, AcrylicBrush}`, `IPlatformSettings::energy_saver_enabled` beside `transparency_enabled` (macOS: low power mode and reduce transparency; Windows: the battery saver and `UISettings.AdvancedEffectsEnabled`) |
 | 3 | done | `media::XamlLight`, `Visual::lights()`, the scene lighting of `server_composition_light.rs`, `ferroui_controls::media::{RevealBrush, RevealBackgroundBrush, RevealBorderBrush, RevealHoverLight, RevealPressLight, RevealBorderLight, XamlAmbientLight}` |
 | 4 | done | `rendering::composition::system_backdrops`, `ferroui_controls::media::{SystemBackdrop, MicaBackdrop, DesktopAcrylicBackdrop}`, `TopLevel::system_backdrop`, `MenuFlyoutPresenter::system_backdrop`, `ContextMenu::system_backdrop`, `ITopLevelImpl::set_system_backdrop` (macOS, Windows) |
 | 5 | done | `scripts/winui-theme/convert.py` keeps `AcrylicBrush`, the Reveal brushes and `DesktopAcrylicBackdrop`; the menu flyout presenter and the context menu draw `MenuFlyoutSystemBackdrop`; the popups of `Menu` and `MenuItem` draw `AcrylicBackgroundFillColorDefaultBrush`; a window with a system backdrop has a transparent background |
@@ -356,9 +357,9 @@ run in this port's development (it is compiled for `x86_64-pc-windows-msvc` only
    when it is activated.
 4. Windows 10 and Windows 11 before 22H2 (no system backdrop types): the controllers report
    `Fallback` and the window shows the fallback colour.
-5. The material policy: turning "Transparency effects" off (`EnableTransparency`, read again on
-   `WM_SETTINGCHANGE`) and the battery saver (`WM_POWERBROADCAST`) make acrylic and Reveal draw their
-   fallback colours and the system backdrops fall back.
+5. The material policy: turning "Transparency effects" off (`UISettings.AdvancedEffectsEnabled`,
+   announced by `WM_SETTINGCHANGE`) and the battery saver (`WM_POWERBROADCAST`) make acrylic and
+   Reveal draw their fallback colours and the system backdrops fall back.
 6. High contrast: the controllers draw the high contrast background colour.
 7. The default colours of the controllers (section 8) against WinUI's own window with the same
    backdrop.

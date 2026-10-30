@@ -1,0 +1,252 @@
+<!-- macOS 26 adaptation; see docs/porting/macos26-theme.md.
+     Derived from FerroUI WinUI templates and microsoft-ui-xaml commit
+     7e4b0c2096be402f51cc8f7d203ebf67cff183d0. Copyright (c) Microsoft Corporation.
+     Licensed under the MIT License; see NOTICE.md.
+     Acrylic backing is the portable fallback for native Liquid Glass. -->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:ClassModifier="internal">
+  <BoxShadows x:Key="WindowDrawnDecorationsWindowBorderBoxShadow">0 12 36 0 #40000000, 0 1 4 0 #33000000</BoxShadows>
+  <StreamGeometry x:Key="MacOSTrafficRestoreGeometry">M 3,0 V 3 H 0 Z M 5,8 V 5 H 8 Z</StreamGeometry>
+  <StreamGeometry x:Key="MacOSTrafficZoomGeometry">M 0,0 H 5 L 0,5 Z M 8,8 H 3 L 8,3 Z</StreamGeometry>
+  <StreamGeometry x:Key="MacOSTrafficMinimizeGeometry">M 0,3.5 H 8 V 4.5 H 0 Z</StreamGeometry>
+  <StreamGeometry x:Key="MacOSTrafficCloseGeometry">M 1,0 L 4,3 L 7,0 L 8,1 L 5,4 L 8,7 L 7,8 L 4,5 L 1,8 L 0,7 L 3,4 L 0,1 Z</StreamGeometry>
+  <ControlTheme x:Key="WindowCaptionButton" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+    <Setter Property="BorderBrush" Value="{DynamicResource MacOSTrafficLightBorderBrush}"/>
+    <Setter Property="CornerRadius" Value="6"/>
+    <Setter Property="Margin" Value="0"/>
+    <Setter Property="Padding" Value="0"/>
+    <Setter Property="MinHeight" Value="0"/>
+    <Setter Property="MinWidth" Value="0"/>
+    <Setter Property="BorderThickness" Value="0.5"/>
+    <Setter Property="Background" Value="{DynamicResource MacOSTrafficLightZoomBrush}"/>
+    <Setter Property="Foreground" Value="{DynamicResource MacOSTrafficLightGlyphBrush}"/>
+    <Setter Property="IsTabStop" Value="False"/>
+    <Setter Property="VerticalAlignment" Value="Center"/>
+    <Setter Property="Width" Value="20"/>
+    <Setter Property="Height" Value="24"/>
+    <Setter Property="(WindowDecorationProperties.ElementRole)" Value="DecorationsElement"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="LayoutRoot" Background="{TemplateBinding Background}" BackgroundSizing="{TemplateBinding BackgroundSizing}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" Padding="{TemplateBinding Padding}" Width="12" Height="12" HorizontalAlignment="Center" VerticalAlignment="Center">
+          <Border.Transitions>
+            <Transitions>
+              <DoubleTransition Property="Opacity" Duration="{DynamicResource MacOSMotionFastDuration}" Easing="CubicEaseOut"/>
+            </Transitions>
+          </Border.Transitions>
+          <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Foreground="{TemplateBinding Foreground}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:pressed /template/ Border#LayoutRoot">
+      <Setter Property="Opacity" Value="0.72"/>
+    </Style>
+    <Style Selector="^:disabled /template/ Border#LayoutRoot">
+      <Setter Property="Background" Value="{DynamicResource MacOSTrafficLightInactiveBrush}"/>
+    </Style>
+  </ControlTheme>
+  <ControlTheme TargetType="Button" BasedOn="{StaticResource WindowCaptionButton}" x:Key="MacOSZoomCaptionButton">
+    <Setter Property="Background" Value="{DynamicResource MacOSTrafficLightZoomBrush}"/>
+  </ControlTheme>
+  <ControlTheme TargetType="Button" BasedOn="{StaticResource WindowCaptionButton}" x:Key="MacOSMinimizeCaptionButton">
+    <Setter Property="Background" Value="{DynamicResource MacOSTrafficLightMinimizeBrush}"/>
+  </ControlTheme>
+  <ControlTheme x:Key="WindowDrawnDecorationsCloseButton" TargetType="Button" BasedOn="{StaticResource WindowCaptionButton}">
+    <Setter Property="Background" Value="{DynamicResource MacOSTrafficLightCloseBrush}"/>
+  </ControlTheme>
+  <ControlTheme x:Key="TitleBarBackButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+    <Setter Property="Background" Value="{DynamicResource TitleBarBackButtonBackground}"/>
+    <Setter Property="Foreground" Value="{DynamicResource TitleBarBackButtonForeground}"/>
+    <Setter Property="Width" Value="{DynamicResource TitleBarBackButtonWidth}"/>
+    <Setter Property="VerticalAlignment" Value="Stretch"/>
+    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    <Setter Property="VerticalContentAlignment" Value="Center"/>
+    <Setter Property="Margin" Value="2"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="RootGrid" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}">
+          <Path x:Name="Content" Data="{StaticResource GlyphGeometryE72B}" Fill="{TemplateBinding Foreground}" Stretch="Uniform" Width="14" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:pointerover /template/ Border#RootGrid">
+      <Setter Property="Background" Value="{DynamicResource TitleBarBackButtonBackgroundPointerOver}"/>
+    </Style>
+    <Style Selector="^:pointerover /template/ Path#Content">
+      <Setter Property="Fill" Value="{DynamicResource TitleBarBackButtonForegroundPointerOver}"/>
+    </Style>
+    <Style Selector="^:pressed /template/ Border#RootGrid">
+      <Setter Property="Background" Value="{DynamicResource TitleBarBackButtonBackgroundPressed}"/>
+    </Style>
+    <Style Selector="^:pressed /template/ Path#Content">
+      <Setter Property="Fill" Value="{DynamicResource TitleBarBackButtonForegroundPressed}"/>
+    </Style>
+    <Style Selector="^:disabled /template/ Border#RootGrid">
+      <Setter Property="Background" Value="{DynamicResource TitleBarBackButtonBackgroundDisabled}"/>
+    </Style>
+    <Style Selector="^:disabled /template/ Path#Content">
+      <Setter Property="Fill" Value="{DynamicResource TitleBarBackButtonForegroundDisabled}"/>
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="TitleBarPaneToggleButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+    <Setter Property="Background" Value="{DynamicResource TitleBarPaneToggleButtonBackground}"/>
+    <Setter Property="Foreground" Value="{DynamicResource TitleBarPaneToggleButtonForeground}"/>
+    <Setter Property="Width" Value="{DynamicResource TitleBarPaneToggleButtonWidth}"/>
+    <Setter Property="VerticalAlignment" Value="Stretch"/>
+    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    <Setter Property="VerticalContentAlignment" Value="Center"/>
+    <Setter Property="Margin" Value="2"/>
+    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="RootGrid" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}">
+          <Path x:Name="Content" Data="{StaticResource GlyphGeometryE700}" Fill="{TemplateBinding Foreground}" Stretch="Uniform" Width="14" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:pointerover /template/ Border#RootGrid">
+      <Setter Property="Background" Value="{DynamicResource TitleBarPaneToggleButtonBackgroundPointerOver}"/>
+    </Style>
+    <Style Selector="^:pointerover /template/ Path#Content">
+      <Setter Property="Fill" Value="{DynamicResource TitleBarPaneToggleButtonForegroundPointerOver}"/>
+    </Style>
+    <Style Selector="^:pressed /template/ Border#RootGrid">
+      <Setter Property="Background" Value="{DynamicResource TitleBarPaneToggleButtonBackgroundPressed}"/>
+    </Style>
+    <Style Selector="^:pressed /template/ Path#Content">
+      <Setter Property="Fill" Value="{DynamicResource TitleBarPaneToggleButtonForegroundPressed}"/>
+    </Style>
+    <Style Selector="^:disabled /template/ Border#RootGrid">
+      <Setter Property="Background" Value="{DynamicResource TitleBarPaneToggleButtonBackgroundDisabled}"/>
+    </Style>
+    <Style Selector="^:disabled /template/ Path#Content">
+      <Setter Property="Fill" Value="{DynamicResource TitleBarPaneToggleButtonForegroundDisabled}"/>
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="WindowChromeStyle" TargetType="ContentControl">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Foreground="{TemplateBinding Foreground}"/>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+  <ControlTheme x:Key="DefaultTitleBarStyle" TargetType="WindowDrawnDecorations">
+    <Setter Property="DefaultTitleBarHeight" Value="{DynamicResource MacOSWindowTitleBarHeight}"/>
+    <Setter Property="DefaultFrameThickness" Value="1"/>
+    <Setter Property="DefaultShadowThickness" Value="{DynamicResource MacOSWindowShadowMargin}"/>
+    <Setter Property="Template">
+      <WindowDrawnDecorationsTemplate>
+        <WindowDrawnDecorationsContent>
+          <WindowDrawnDecorationsContent.Underlay>
+            <Panel x:Name="PART_UnderlayWrapper">
+              <Border x:Name="PART_WindowBorder" Background="{DynamicResource SystemControlTransparentBrush}" BorderThickness="{TemplateBinding FrameThickness}" BorderBrush="{DynamicResource SurfaceStrokeColorDefaultBrush}" IsHitTestVisible="False" CornerRadius="{DynamicResource MacOSWindowCornerRadius}"/>
+              <Panel x:Name="PART_TitleBar" VerticalAlignment="Top" Height="{TemplateBinding TitleBarHeight}" Background="Transparent" IsVisible="{TemplateBinding HasTitleBar}" WindowDecorationProperties.ElementRole="TitleBar">
+                <ExperimentalAcrylicBorder Material="{DynamicResource MacOSToolbarGlassMaterial}" CornerRadius="{DynamicResource MacOSWindowCornerRadius}" IsHitTestVisible="False"/>
+              </Panel>
+            </Panel>
+          </WindowDrawnDecorationsContent.Underlay>
+          <WindowDrawnDecorationsContent.Overlay>
+            <Panel x:Name="PART_OverlayWrapper">
+              <Panel x:Name="PART_TitleTextPanel" VerticalAlignment="Top" Height="{TemplateBinding TitleBarHeight}" IsHitTestVisible="False" IsVisible="{TemplateBinding HasTitleBar}">
+                <TextBlock x:Name="PART_TitleText" Theme="{StaticResource CaptionTextBlockStyle}" Text="{TemplateBinding Title}" Foreground="{DynamicResource TitleBarForegroundBrush}" Margin="88,0,88,0" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{DynamicResource MacOSWindowTitleFontSize}" FontWeight="{DynamicResource MacOSWindowTitleFontWeight}"/>
+              </Panel>
+              <StackPanel x:Name="PART_OverlayPanel" VerticalAlignment="Top" HorizontalAlignment="Left" Height="{TemplateBinding TitleBarHeight}" IsVisible="{TemplateBinding HasTitleBar}" Orientation="Horizontal" Margin="12,0,0,0">
+                <Button x:Name="PART_CloseButton" Theme="{StaticResource WindowDrawnDecorationsCloseButton}" WindowDecorationProperties.ElementRole="CloseButton">
+                  <Path Data="{StaticResource MacOSTrafficCloseGeometry}" Fill="{Binding $parent[Button].Foreground}" Stretch="Uniform" Width="6" Opacity="0"/>
+                </Button>
+                <Button x:Name="PART_MinimizeButton" Theme="{StaticResource MacOSMinimizeCaptionButton}" WindowDecorationProperties.ElementRole="MinimizeButton">
+                  <Path Data="{StaticResource MacOSTrafficMinimizeGeometry}" Fill="{Binding $parent[Button].Foreground}" Stretch="Uniform" Width="6" Opacity="0"/>
+                </Button>
+                <Button x:Name="PART_FullScreenButton" Theme="{StaticResource MacOSZoomCaptionButton}" WindowDecorationProperties.ElementRole="FullScreenButton">
+                  <Path Data="{StaticResource MacOSTrafficZoomGeometry}" Fill="{Binding $parent[Button].Foreground}" Stretch="Uniform" Width="6" Opacity="0"/>
+                </Button>
+                <Button x:Name="PART_MaximizeButton" Theme="{StaticResource MacOSZoomCaptionButton}" WindowDecorationProperties.ElementRole="MaximizeButton">
+                  <Path x:Name="RestoreButtonPath" Data="{StaticResource MacOSTrafficZoomGeometry}" Fill="{Binding $parent[Button].Foreground}" Stretch="Uniform" Width="6" Opacity="0"/>
+                </Button>
+              </StackPanel>
+            </Panel>
+          </WindowDrawnDecorationsContent.Overlay>
+          <WindowDrawnDecorationsContent.FullscreenPopover>
+            <Panel Height="{TemplateBinding DefaultTitleBarHeight}" VerticalAlignment="Top" Background="{DynamicResource SolidBackgroundFillColorBaseBrush}" WindowDecorationProperties.ElementRole="DecorationsElement">
+              <TextBlock x:Name="PART_PopoverTitleText" Theme="{StaticResource CaptionTextBlockStyle}" Text="{TemplateBinding Title}" Foreground="{DynamicResource TitleBarForegroundBrush}" Margin="88,0,88,0" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="{DynamicResource MacOSWindowTitleFontSize}" FontWeight="{DynamicResource MacOSWindowTitleFontWeight}"/>
+              <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" Margin="12,0,0,0">
+                <Button x:Name="PART_PopoverCloseButton" Theme="{StaticResource WindowDrawnDecorationsCloseButton}" WindowDecorationProperties.ElementRole="CloseButton">
+                  <Path Data="{StaticResource MacOSTrafficCloseGeometry}" Fill="{Binding $parent[Button].Foreground}" Stretch="Uniform" Width="6" Opacity="0"/>
+                </Button>
+                <Button x:Name="PART_PopoverFullScreenButton" Theme="{StaticResource MacOSZoomCaptionButton}" WindowDecorationProperties.ElementRole="FullScreenButton">
+                  <Path Data="{StaticResource MacOSTrafficRestoreGeometry}" Fill="{Binding $parent[Button].Foreground}" Stretch="Uniform" Width="6" Opacity="0"/>
+                </Button>
+              </StackPanel>
+            </Panel>
+          </WindowDrawnDecorationsContent.FullscreenPopover>
+        </WindowDrawnDecorationsContent>
+      </WindowDrawnDecorationsTemplate>
+    </Setter>
+    <Style Selector="^:has-shadow /template/ Panel#PART_UnderlayWrapper">
+      <Setter Property="Margin" Value="{TemplateBinding ShadowThickness}"/>
+    </Style>
+    <Style Selector="^:has-shadow /template/ Border#PART_WindowBorder">
+      <Setter Property="BoxShadow" Value="{DynamicResource WindowDrawnDecorationsWindowBorderBoxShadow}"/>
+    </Style>
+    <Style Selector="^:has-shadow /template/ Panel#PART_OverlayWrapper">
+      <Setter Property="Margin" Value="{TemplateBinding ShadowThickness}"/>
+    </Style>
+    <Style Selector="^:has-border /template/ Panel#PART_TitleTextPanel">
+      <Setter Property="Margin" Value="1,1,1,0"/>
+    </Style>
+    <Style Selector="^:has-border /template/ Panel#PART_TitleBar">
+      <Setter Property="Margin" Value="1,1,1,0"/>
+    </Style>
+    <Style Selector="^:has-border /template/ StackPanel#PART_OverlayPanel">
+      <Setter Property="Margin" Value="12,1,0,0"/>
+    </Style>
+    <Style Selector="^:maximized /template/ Path#RestoreButtonPath">
+      <Setter Property="Data" Value="{StaticResource MacOSTrafficRestoreGeometry}"/>
+    </Style>
+    <Style Selector="^:not(:has-minimize) /template/ Button#PART_MinimizeButton">
+      <Setter Property="IsVisible" Value="False"/>
+    </Style>
+    <Style Selector="^:not(:has-maximize) /template/ Button#PART_MaximizeButton">
+      <Setter Property="IsVisible" Value="False"/>
+    </Style>
+    <Style Selector="^:not(:has-fullscreen) /template/ Button#PART_FullScreenButton">
+      <Setter Property="IsVisible" Value="False"/>
+    </Style>
+    <Style Selector="^:not(:has-fullscreen) /template/ Button#PART_PopoverFullScreenButton">
+      <Setter Property="IsVisible" Value="False"/>
+    </Style>
+    <Style Selector="^:not(:has-close) /template/ Button#PART_CloseButton">
+      <Setter Property="IsVisible" Value="False"/>
+    </Style>
+    <Style Selector="^:not(:has-close) /template/ Button#PART_PopoverCloseButton">
+      <Setter Property="IsVisible" Value="False"/>
+    </Style>
+    <Style Selector="^:not(:has-title) /template/ Panel#PART_TitleTextPanel">
+      <Setter Property="IsVisible" Value="False"/>
+    </Style>
+    <Style Selector="^:not(:has-title) /template/ TextBlock#PART_PopoverTitleText">
+      <Setter Property="IsVisible" Value="False"/>
+    </Style>
+    <Style Selector="^:fullscreen /template/ Panel#PART_TitleTextPanel">
+      <Setter Property="IsVisible" Value="False"/>
+    </Style>
+    <Style Selector="^:fullscreen /template/ StackPanel#PART_OverlayPanel">
+      <Setter Property="IsVisible" Value="False"/>
+    </Style>
+    <Style Selector="^:fullscreen /template/ Panel#PART_TitleBar">
+      <Setter Property="IsVisible" Value="False"/>
+    </Style>
+    <Style Selector="^:has-fullscreen /template/ Button#PART_MaximizeButton">
+      <Setter Property="IsVisible" Value="False"/>
+    </Style>
+    <Style Selector="^ /template/ StackPanel:pointerover Path">
+      <Setter Property="Opacity" Value="1"/>
+    </Style>
+    <Style Selector="^ /template/ Button:disabled Path">
+      <Setter Property="Opacity" Value="0"/>
+    </Style>
+    <Style Selector="^:maximized /template/ Border#PART_WindowBorder">
+      <Setter Property="CornerRadius" Value="0"/>
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type WindowDrawnDecorations}" TargetType="WindowDrawnDecorations" BasedOn="{StaticResource DefaultTitleBarStyle}"/>
+</ResourceDictionary>

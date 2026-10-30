@@ -103,7 +103,10 @@
 ///   values: `Name(Option<BoxedValue>, EventArgs)` for an
 ///   `EventHandler<EventArgs>` (the adapter passes the instance as sender
 ///   when the Rust event has none), `Name()` for an event without
-///   arguments.
+///   arguments. The callable returns the subscription (`Rc<dyn IDisposable>`,
+///   the form the events of the port return) or `()` when the handler
+///   cannot be removed; see [`IntoMarkupSubscription`](crate::metadata::IntoMarkupSubscription)
+///   and [`MarkupEvent::subscribe`](crate::metadata::MarkupEvent::subscribe).
 /// * `attributes: [Name, Name("text", 1, true, type(T), Key = value), ..]`
 ///   — type attributes; arguments are literals (text, integers, floating
 ///   point numbers, booleans, characters), `null`, `type(T)` or an array of
@@ -200,6 +203,7 @@ macro_rules! ferro_markup_type {
                     $crate::__ferro_compiler_metadata!(
                         $crate::ferro_markup_type!(@this $kind $form markup, $this);
                         markup.value = ::std::option::Option::Some(<$type_>::__MARKUP_VALUE);
+                        markup.owner_rust_name = ::std::option::Option::Some(|| ::std::any::type_name::<$type_>());
                     );
                     $crate::__ferro_markup_items!(markup, $this; $($body)*);
                     markup
@@ -552,8 +556,7 @@ macro_rules! __ferro_markup_events {
                 let mut arguments = $crate::metadata::MarkupArguments::new(arguments, 2)?;
                 let this = arguments.next::<$this>()?;
                 let handler = arguments.next::<$crate::metadata::MarkupDelegate>()?;
-                let _ = ($add)(&this, handler);
-                ::std::result::Result::Ok(::std::option::Option::None)
+                ::std::result::Result::Ok($crate::metadata::MarkupEvent::subscription_value(($add)(&this, handler)))
             },
         },] $($($rest)*)?)
     };
@@ -565,8 +568,8 @@ macro_rules! __ferro_markup_events {
                 let mut arguments = $crate::metadata::MarkupArguments::new(arguments, 2)?;
                 let this = arguments.next::<$this>()?;
                 let handler = arguments.next::<$crate::metadata::MarkupDelegate>()?;
-                let _ = $crate::metadata::markup_result(($add)(&this, handler))?;
-                ::std::result::Result::Ok(::std::option::Option::None)
+                let subscription = $crate::metadata::markup_result(($add)(&this, handler))?;
+                ::std::result::Result::Ok($crate::metadata::MarkupEvent::subscription_value(subscription))
             },
         },] $($($rest)*)?)
     };

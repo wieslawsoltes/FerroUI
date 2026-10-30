@@ -105,6 +105,9 @@ pub use point::Point;
 pub use rect::Rect;
 pub use metadata::IServiceProvider;
 pub use register_types::register_types;
+#[cfg(feature = "testing")]
+#[doc(hidden)]
+pub use register_types::registered_type_list;
 pub use relative_point::{RelativePoint, RelativeUnit};
 pub use relative_rect::RelativeRect;
 pub use relative_scalar::RelativeScalar;

@@ -185,12 +185,11 @@ fn acrylic_section() -> Ref<StackPanel> {
         let policy = policy.downgrade();
         Rc::new(move || {
             if let Some(policy) = policy.upgrade() {
-                let settings = MaterialPolicy::platform_settings();
                 policy.set_text(Some(&format!(
                     "Material policy: {} (transparency effects {}, energy saver {}, simulated {})",
                     if MaterialPolicy::is_disabled_by_policy() { "fallback" } else { "materials" },
-                    if settings.transparency_effects_enabled { "on" } else { "off" },
-                    if settings.energy_saver_on { "on" } else { "off" },
+                    if MaterialPolicy::transparency_enabled() { "on" } else { "off" },
+                    if MaterialPolicy::energy_saver_enabled() { "on" } else { "off" },
                     if MaterialPolicy::simulate_disabled_by_policy() { "yes" } else { "no" },
                 )));
             }

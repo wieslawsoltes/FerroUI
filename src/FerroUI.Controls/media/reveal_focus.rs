@@ -486,7 +486,7 @@ fn animate_lights(
     }
 
     // `ShouldBreathe`: the pulsing light, unless the energy saver is on.
-    if !MaterialPolicy::platform_settings().energy_saver_on {
+    if !MaterialPolicy::energy_saver_enabled() {
         let pulse = scalar_frames(
             compositor,
             &[(0.0, PULSING_LIGHT_INTENSITY_MID), (0.5, PULSING_LIGHT_INTENSITY_HIGH), (1.0, PULSING_LIGHT_INTENSITY_LOW)],

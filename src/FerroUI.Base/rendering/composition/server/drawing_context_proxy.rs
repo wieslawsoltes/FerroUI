@@ -2,6 +2,7 @@
 //! `DrawingContextProxy.PendingCommands.cs`).
 
 use crate::media::effects::IEffect;
+use crate::media::imaging::BitmapBlendingMode;
 use crate::media::immutable::ImmutableSolidColorBrush;
 use crate::media::{BoxShadows, Color, IBrush, IExperimentalAcrylicMaterial, IPen, RenderOptions, TextOptions};
 use crate::platform::{
@@ -353,6 +354,22 @@ impl IDrawingContextImpl for CompositorDrawingContextProxy {
         self.inner.get_feature(feature_type)
     }
 
+    fn try_push_compositing_layer(&mut self, blend: BitmapBlendingMode, opacity: f64, bounds: Rect) -> bool {
+        self.flush();
+        if self.inner.try_push_compositing_layer(blend, opacity, bounds) {
+            self.save_transform();
+            true
+        } else {
+            false
+        }
+    }
+
+    fn pop_compositing_layer(&mut self) {
+        self.flush();
+        self.inner.pop_compositing_layer();
+        self.restore_transform();
+    }
+
     fn as_drawing_context_impl_with_effects(&mut self) -> Option<&mut dyn IDrawingContextImplWithEffects> {
         Some(self)
     }
@@ -487,6 +504,30 @@ mod tests {
     fn proxy() -> (CompositorDrawingContextProxy, DrawingLog) {
         let log = DrawingLog::new();
         (CompositorDrawingContextProxy::new(Box::new(MockDrawingContextImpl::new(log.clone()))), log)
+    }
+
+    #[test]
+    fn compositing_layer_flushes_pending_clips_and_restores_the_proxy_transform() {
+        let log = DrawingLog::new();
+        let mut implementation = MockDrawingContextImpl::new(log.clone());
+        implementation.supports_compositing_layers = true;
+        implementation.log_transforms = false;
+        let mut proxy = CompositorDrawingContextProxy::new(Box::new(implementation));
+        let bounds = Rect::new(0.0, 0.0, 10.0, 10.0);
+        proxy.push_clip(bounds);
+        let at_push = Matrix::create_translation(5.0, 6.0);
+        proxy.set_transform(at_push);
+        assert!(proxy.try_push_compositing_layer(BitmapBlendingMode::Multiply, 0.5, bounds));
+        proxy.set_transform(Matrix::create_scale(2.0, 2.0));
+        proxy.draw_ellipse(None, None, bounds);
+        proxy.pop_compositing_layer();
+        assert_eq!(proxy.transform(), at_push);
+        proxy.pop_clip();
+        assert_eq!(proxy.transform(), Matrix::IDENTITY);
+        assert_eq!(log.entries(), [
+            "PushClip 0, 0, 10, 10", "PushCompositingLayer Multiply 0.5 0, 0, 10, 10",
+            "DrawEllipse none none 0, 0, 10, 10", "PopCompositingLayer", "PopClip",
+        ]);
     }
 
     #[test]

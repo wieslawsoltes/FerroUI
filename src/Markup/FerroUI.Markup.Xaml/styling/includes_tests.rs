@@ -467,7 +467,7 @@ fn a_registration_can_be_replaced_and_removed() {
 
 #[test]
 fn subscribing_to_owner_changed_through_metadata_reports_a_failing_load() {
-    use ferroui_base::metadata::{MarkupDelegate, MarkupInvokeError};
+    use ferroui_base::metadata::{MarkupDelegate, MarkupEvent, MarkupInvokeError};
 
     register_types();
     let scope = TestAssetLoader::new().install();
@@ -513,7 +513,8 @@ fn subscribing_to_owner_changed_through_metadata_reports_a_failing_load() {
         counter.set(counter.get() + 1);
         None
     });
-    assert_eq!((markup.find_event("OwnerChanged").unwrap().add)(&[include.clone(), into_markup_value(delegate)]), Ok(None));
+    let subscription = (markup.find_event("OwnerChanged").unwrap().add)(&[include.clone(), into_markup_value(delegate)]).unwrap();
+    assert!(MarkupEvent::subscription_of(&subscription).is_some());
     let typed = from_markup_value::<Rc<ResourceInclude>>(&include).unwrap();
     let owner: ResourceHostRef = Border::new().into();
     typed.add_owner(&owner);

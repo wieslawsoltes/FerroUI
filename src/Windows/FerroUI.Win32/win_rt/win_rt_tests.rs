@@ -7,7 +7,7 @@ use super::win_rt_api_information::WinRTApiInformation;
 use super::win_rt_property_value::WinRTPropertyValue;
 use super::{
     IAccessibilitySettings, IApiInformationStatics, IGlobalizationPreferencesStatics, IInspectable, IPropertyValue,
-    IUISettings, IUISettings3, PropertyType, TrustLevel, UIColorType,
+    IUISettings, IUISettings3, IUISettings4, PropertyType, TrustLevel, UIColorType,
 };
 use crate::interop::unmanaged_methods::co_task_mem_free;
 use ferroui_microcom::{Guid, Interface};
@@ -80,6 +80,17 @@ fn the_settings_of_the_user_are_read_through_activation() {
         assert_eq!(
             ferroui_base::platform::IPlatformSettings::animations_enabled(&*platform),
             enabled != 0,
+        );
+
+        // The transparency effects (`IUISettings4`, FerroUI addition): the setting the
+        // platform settings report as `transparency_enabled`.
+        let effects = ui_settings.cast::<IUISettings4>().unwrap();
+        let advanced = effects.advanced_effects_enabled().unwrap();
+        println!("UISettings: animations {enabled}, advanced effects {advanced}");
+        assert!(advanced <= 1, "UISettings returns a WinRT boolean.");
+        assert_eq!(
+            ferroui_base::platform::IPlatformSettings::transparency_enabled(&*platform),
+            advanced != 0,
         );
 
         // The six shades of the accent, which the platform settings report

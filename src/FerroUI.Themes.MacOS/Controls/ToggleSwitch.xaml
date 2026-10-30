@@ -1,0 +1,157 @@
+<!--
+  macOS 26 switch using FerroUI's original toggle-switch input contract.
+  The Canvas width is the knob travel, not the track width: ToggleSwitch moves
+  PART_MovingKnobs from Canvas.Left=0 to PART_SwitchKnob.Bounds.Width and uses
+  the same interval for dragging. A 22-point moving panel plus 16-point travel
+  spans the 38-point track. Dimensions and easing are theme calibrations.
+  Foundation: FerroUI WinUI theme, microsoft-ui-xaml
+  7e4b0c2096be402f51cc8f7d203ebf67cff183d0, MIT (see NOTICE.md).
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <ControlTheme x:Key="DefaultToggleSwitchStyle" TargetType="ToggleSwitch">
+    <Setter Property="Foreground" Value="{DynamicResource ToggleSwitchContentForeground}" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="HorizontalContentAlignment" Value="Left" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="MinWidth" Value="38" />
+    <Setter Property="MinHeight" Value="22" />
+    <Setter Property="OffContent" Value="{x:Null}" />
+    <Setter Property="OnContent" Value="{x:Null}" />
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border IsHitTestVisible="False" Margin="-3" BorderThickness="3" CornerRadius="999"
+                BorderBrush="{DynamicResource MacOSFocusBrush}" />
+      </FocusAdornerTemplate>
+    </Setter>
+    <!-- Resolve at the control: nested setter values have no resource host of
+         their own. Each lookup creates an independently owned typed collection. -->
+    <Setter Property="KnobTransitions" Value="{DynamicResource MacOSSwitchKnobTransitions}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BorderThickness="{TemplateBinding BorderThickness}">
+          <Grid ColumnDefinitions="Auto,Auto">
+            <Border x:Name="SwitchTrack" Width="38" Height="22"
+                    CornerRadius="999" VerticalAlignment="Center"
+                    Background="{DynamicResource ToggleSwitchFillOff}"
+                    BorderBrush="{DynamicResource ToggleSwitchStrokeOff}"
+                    BorderThickness="0.5"
+                    TemplatedControl.IsTemplateFocusTarget="True">
+              <Border.Transitions>
+                <Transitions>
+                  <BrushTransition Property="Background" Duration="{DynamicResource MacOSMotionFastDuration}" />
+                  <BrushTransition Property="BorderBrush" Duration="{DynamicResource MacOSMotionFastDuration}" />
+                </Transitions>
+              </Border.Transitions>
+              <Canvas x:Name="PART_SwitchKnob" Width="16" Height="22"
+                      HorizontalAlignment="Left" Margin="-0.5">
+                <Grid x:Name="PART_MovingKnobs" Width="22" Height="22">
+                  <Border x:Name="SwitchKnob" Width="18" Height="18"
+                          HorizontalAlignment="Center" VerticalAlignment="Center"
+                          CornerRadius="999" BorderThickness="0.5"
+                          Background="{DynamicResource ToggleSwitchKnobFillOff}"
+                          BorderBrush="{DynamicResource ToggleSwitchKnobStrokeOn}"
+                          BoxShadow="{DynamicResource MacOSSwitchKnobShadow}">
+                    <Border.Transitions>
+                      <Transitions>
+                        <BrushTransition Property="Background" Duration="{DynamicResource MacOSMotionFastDuration}" />
+                        <DoubleTransition Property="Width" Duration="{DynamicResource MacOSMotionFastDuration}" Easing="CubicEaseOut" />
+                      </Transitions>
+                    </Border.Transitions>
+                  </Border>
+                </Grid>
+              </Canvas>
+            </Border>
+            <StackPanel x:Name="SwitchLabels" Grid.Column="1" Orientation="Horizontal" Spacing="6"
+                        Margin="8,0,0,0" VerticalAlignment="Center">
+              <StackPanel.IsVisible>
+                <MultiBinding Converter="{x:Static BoolConverters.Or}">
+                  <Binding Path="Content" RelativeSource="{RelativeSource TemplatedParent}" Converter="{x:Static ObjectConverters.IsNotNull}" />
+                  <Binding Path="OffContent" RelativeSource="{RelativeSource TemplatedParent}" Converter="{x:Static ObjectConverters.IsNotNull}" />
+                  <Binding Path="OnContent" RelativeSource="{RelativeSource TemplatedParent}" Converter="{x:Static ObjectConverters.IsNotNull}" />
+                </MultiBinding>
+              </StackPanel.IsVisible>
+              <ContentPresenter x:Name="PART_ContentPresenter"
+                                Content="{TemplateBinding Content}"
+                                ContentTemplate="{TemplateBinding ContentTemplate}"
+                                Foreground="{TemplateBinding Foreground}"
+                                HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                IsHitTestVisible="False" RecognizesAccessKey="True" />
+              <ContentPresenter x:Name="PART_OffContentPresenter"
+                                Content="{TemplateBinding OffContent}"
+                                ContentTemplate="{TemplateBinding OffContentTemplate}"
+                                Foreground="{TemplateBinding Foreground}"
+                                IsVisible="False" IsHitTestVisible="False"
+                                VerticalAlignment="Center" />
+              <ContentPresenter x:Name="PART_OnContentPresenter"
+                                Content="{TemplateBinding OnContent}"
+                                ContentTemplate="{TemplateBinding OnContentTemplate}"
+                                Foreground="{TemplateBinding Foreground}"
+                                IsVisible="False" IsHitTestVisible="False"
+                                VerticalAlignment="Center" />
+            </StackPanel>
+          </Grid>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:empty /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:unchecked /template/ ContentPresenter#PART_OffContentPresenter">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^:checked /template/ ContentPresenter#PART_OnContentPresenter">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^:pointerover /template/ Border#SwitchTrack">
+      <Setter Property="Background" Value="{DynamicResource ToggleSwitchFillOffPointerOver}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource ToggleSwitchStrokeOffPointerOver}" />
+    </Style>
+    <Style Selector="^:pressed /template/ Border#SwitchTrack">
+      <Setter Property="Background" Value="{DynamicResource ToggleSwitchFillOffPressed}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource ToggleSwitchStrokeOffPressed}" />
+    </Style>
+    <Style Selector="^:pressed /template/ Border#SwitchKnob">
+      <Setter Property="Width" Value="20" />
+    </Style>
+    <Style Selector="^:checked /template/ Border#SwitchTrack">
+      <Setter Property="Background" Value="{DynamicResource ToggleSwitchFillOn}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource ToggleSwitchStrokeOn}" />
+    </Style>
+    <Style Selector="^:checked /template/ Border#SwitchKnob">
+      <Setter Property="Background" Value="{DynamicResource ToggleSwitchKnobFillOn}" />
+    </Style>
+    <Style Selector="^:checked:pointerover /template/ Border#SwitchTrack">
+      <Setter Property="Background" Value="{DynamicResource ToggleSwitchFillOnPointerOver}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource ToggleSwitchStrokeOnPointerOver}" />
+    </Style>
+    <Style Selector="^:checked:pressed /template/ Border#SwitchTrack">
+      <Setter Property="Background" Value="{DynamicResource ToggleSwitchFillOnPressed}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource ToggleSwitchStrokeOnPressed}" />
+    </Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Foreground" Value="{DynamicResource ToggleSwitchContentForegroundDisabled}" />
+      <Style Selector="^ /template/ Border#SwitchTrack">
+        <Setter Property="Background" Value="{DynamicResource ToggleSwitchFillOffDisabled}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ToggleSwitchStrokeOffDisabled}" />
+      </Style>
+      <Style Selector="^ /template/ Border#SwitchKnob">
+        <Setter Property="Background" Value="{DynamicResource ToggleSwitchKnobFillOffDisabled}" />
+        <Setter Property="Width" Value="18" />
+        <Setter Property="BoxShadow" Value="none" />
+      </Style>
+    </Style>
+    <Style Selector="^:checked:disabled /template/ Border#SwitchTrack">
+      <Setter Property="Background" Value="{DynamicResource ToggleSwitchFillOnDisabled}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource ToggleSwitchStrokeOnDisabled}" />
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type ToggleSwitch}" TargetType="ToggleSwitch" BasedOn="{StaticResource DefaultToggleSwitchStyle}" />
+</ResourceDictionary>

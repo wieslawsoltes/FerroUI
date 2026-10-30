@@ -1,0 +1,444 @@
+--- a/runtime/framework/binding_path.rs
++++ b/runtime/framework/binding_path.rs
+@@ -49,6 +49,8 @@
+     /// (`XamlIlClrPropertyGetterResult::CachedBoxedBoolean`), so that reading a boolean
+     /// property does not allocate a box per read.
+     cached_boxed_boolean: bool,
++    /// The setter receives the contents of a value typed as System.Object.
++    object_value: bool,
+ }
+ 
+ /// The owner in the form invokers take it. A member receives the handle of
+@@ -85,7 +87,12 @@
+         }
+         arguments.extend(self.indexer_arguments.iter().cloned());
+         if let Some(value) = value {
+-            arguments.push(value.cloned());
++            let value = if self.object_value {
++                ferroui_markup_xaml::xaml_il::runtime::compiled::object_assignment_value(value.cloned())
++            } else {
++                value.cloned()
++            };
++            arguments.push(value);
+         }
+         Ok(arguments)
+     }
+@@ -199,6 +206,7 @@
+         indexer_arguments: arguments,
+         is_static: property.getter().or_else(|| property.setter()).is_some_and(|accessor| accessor.is_static()),
+         cached_boxed_boolean: property.getter().is_some_and(|getter| getter.return_type().is("System", "Boolean")),
++        object_value: property.property_type().is("System", "Object"),
+     };
+     Ok(Rc::new(accessors.into_property_info(handle_of(&property.property_type()))))
+ }
+--- a/runtime/framework/evaluator_tests.rs
++++ b/runtime/framework/evaluator_tests.rs
+@@ -747,9 +747,13 @@
+     let found = h.scope.find("brush").expect("registered");
+     let object: Ref<FerroObject> = brush.clone().upcast();
+     assert!(found == object);
+-    // Not an object of the object model.
++    // Plain boxed objects retain their original identity in the same scope.
+     let registration = FerroNameScopeRegistrationXamlIlNode::new(h.text("other"), None);
+-    assert!(message(h.manipulate(registration.as_node(), &boxed(1i32))).contains("FerroObject"));
++    let scalar=boxed(1i32);
++    ok(h.manipulate(registration.as_node(), &scalar));
++    assert!(Rc::ptr_eq(&h.scope.find_value("other").unwrap(),scalar.as_ref().unwrap()));
++    let registration=FerroNameScopeRegistrationXamlIlNode::new(h.text("missing"),None);
++    assert!(message(h.manipulate(registration.as_node(),&None)).contains("element"));
+ 
+     // The root: a styled element gets the scope attached; the scope is completed.
+     let styled = StyledElement::new();
+--- a/runtime/framework/nodes.rs
++++ b/runtime/framework/nodes.rs
+@@ -401,13 +401,17 @@
+     let name = from_markup_value::<String>(&name).ok_or_else(|| {
+         runtime_error("ArgumentNullException", "Value cannot be null. (Parameter 'name')", &**node)
+     })?;
+-    let element = object_of(&target, &**node)?;
++    let element = target.ok_or_else(|| {
++        runtime_error("ArgumentNullException", "Value cannot be null. (Parameter 'element')", &**node)
++    })?;
+     // A failed registration (a duplicate name, a completed scope) is the exception
+     // of the managed original: a load error at the registration.
+-    scope.try_register(&name, element).map_err(|e| {
++    scope.try_register_value(&name, element).map_err(|e| {
+         let kind = match e {
+             ferroui_base::controls::NameScopeError::Completed => "InvalidOperationException",
+             ferroui_base::controls::NameScopeError::DuplicateName(_) => "ArgumentException",
++            ferroui_base::controls::NameScopeError::UnsupportedValue => "NotSupportedException",
++            ferroui_base::controls::NameScopeError::NullValue => "ArgumentNullException",
+         };
+         runtime_error(kind, e.to_string(), &**node)
+     })?;
+--- a/rust_emitter/compiled.rs
++++ b/rust_emitter/compiled.rs
+@@ -36,7 +36,7 @@
+ use crate::compiler_extensions::IXamlCompileTimeValueParser;
+ 
+ use super::emit_types::{EmitClass, EmitTypes, Known};
+-use super::emitter::{emit_function, root_class_of, DocumentFunctions};
++use super::emitter::{emit_function, root_value_handle_of, DocumentFunctions};
+ use super::transform::{transform_group, DocumentSource, TransformOptions};
+ use super::source::{function_name_of, rust_string_literal};
+ use ferroui_build_scan::xaml_metadata::{DocumentModel, XamlMetadata};
+@@ -195,8 +195,8 @@
+             let functions_of_group = || {
+                 let mut functions = DocumentFunctions::default();
+                 for (name, transformed) in names.iter().zip(&transformed) {
+-                    if let (Some(build), Some(root_class)) = (&transformed.build, root_class_of(types, &transformed.root)) {
+-                        functions.insert(build, name, root_class);
++                    if let (Some(build), Some(root_class)) = (&transformed.build, root_value_handle_of(types, &transformed.root)) {
++                        functions.insert_value(build, name, root_class);
+                     }
+                 }
+                 functions
+@@ -763,8 +763,8 @@
+             _ => function_name_of(&document.0),
+         };
+         if index > 0 {
+-            if let (Some(build), Some(root_class)) = (&transformed.build, root_class_of(types, &transformed.root)) {
+-                functions.insert(build, &function_name, root_class);
++            if let (Some(build), Some(root_class)) = (&transformed.build, root_value_handle_of(types, &transformed.root)) {
++                functions.insert_value(build, &function_name, root_class);
+                 has_build[index] = true;
+             }
+         }
+--- a/rust_emitter/emit_types.rs
++++ b/rust_emitter/emit_types.rs
+@@ -168,6 +168,12 @@
+     fn handles(&self) -> Vec<TypeKey<'_>>;
+     /// The first handle is a shared reference (`Rc<T>`).
+     fn handle_is_shared(&self) -> bool;
++    /// The actual constructor/Parse value is a shared reference, which can be
++    /// a later handle when a declaration also exposes its unshared value form.
++    fn value_is_shared(&self) -> bool { false }
++    /// The first handle is Rc of the actual declaring trait, not a foreign
++    /// contract described by a separate metadata carrier.
++    fn handle_is_own_trait(&self) -> bool { false }
+     /// The nullable form of the handle of a value type (`Option<T>`).
+     fn nullable(&self) -> Option<TypeKey<'_>>;
+     /// The handles of the contracts the declaration lists.
+@@ -178,8 +184,19 @@
+     fn this(&self) -> Option<TypeKey<'_>>;
+     /// The type of a value of the type: what constructors and `Parse` return.
+     fn value(&self) -> Option<TypeKey<'_>>;
++    /// The exact public Rust type returned by constructors, when it can be
++    /// stated from the declaration. Native class roots use their class handle.
++    fn value_rust_type(&self) -> Option<String> {
++        let TypeKey::Text(value) = self.value()? else { return None };
++        // The model host has the actual, import-resolved Rust declaration.
++        // A metadata carrier's own path is NOT the returned model's type.
++        Some(format!("::{}", value.trim_start_matches("::")))
++    }
+     fn is_flags(&self) -> bool;
+     fn enum_members(&self) -> Vec<EnumMember<'_>>;
++    /// Explicit associated `fn(i32) -> value` for unnamed plain-enum literals.
++    /// Closed enumerations retain their existing member-only emission.
++    fn enum_i32_factory(&self) -> Option<&str> { None }
+     /// The members of the set of flags make up `value`.
+     fn flags_compose(&self, value: i64) -> bool;
+     /// `other` is this metadata.
+@@ -405,3 +422,30 @@
+         Vec::new()
+     }
+ }
++
++/// Render a value containing the actual metadata owner's type through its
++/// public alias. Only complete type components may be substituted: Foo must
++/// never rewrite FooImpl, nor may a descriptor's path stand for another model.
++pub(super) fn markup_value_rust_type(value: &str, owner: &str, public_path: &str) -> Option<String> {
++    fn is_type_boundary(character: char) -> bool {
++        character.is_whitespace() || matches!(character, '<' | '>' | ',' | '(' | ')' | '[' | ']' | '&')
++    }
++    if owner.is_empty() { return None; }
++    let mut result = String::new();
++    let mut copied = 0;
++    let mut matched = false;
++    for (start, _) in value.match_indices(owner) {
++        let end = start + owner.len();
++        if value[..start].chars().next_back().is_some_and(|character| !is_type_boundary(character))
++            || value[end..].chars().next().is_some_and(|character| !is_type_boundary(character)) {
++            continue;
++        }
++        result.push_str(&value[copied..start]);
++        result.push_str(public_path.trim_start_matches("::"));
++        copied = end;
++        matched = true;
++    }
++    if !matched { return None; }
++    result.push_str(&value[copied..]);
++    Some(format!("::{}", result.trim_start_matches("::").replace("alloc::", "std::")))
++}
+--- a/rust_emitter/emitter.rs
++++ b/rust_emitter/emitter.rs
+@@ -1054,12 +1054,16 @@
+             return self.flags_value(node, markup, value);
+         }
+         let members = markup.enum_members();
+-        let variant = members
+-            .iter()
+-            .find(|member| member.value == value)
+-            .and_then(|member| member.rust_variant)
+-            .ok_or_else(|| unsupported(node, format!("{value} is not a member of {}", type_.full_name())))?;
+-        self.enum_variant(node, markup, variant)
++        if let Some(variant) = members.iter().find(|member| member.value == value).and_then(|member| member.rust_variant) {
++            return self.enum_variant(node, markup, variant);
++        }
++        if let Some(factory) = markup.enum_i32_factory() {
++            let number=i32::try_from(value).map_err(|_|unsupported(node,format!("{value} is outside the Int32 range of {}",type_.full_name())))?;
++            let path=markup.rust_path().ok_or_else(||unsupported(node,format!("no public Rust path is recorded for {}",markup.full_name())))?;
++            let id=markup.handle().ok_or_else(||unsupported(node,"the enumeration has no value type"))?;
++            return Ok(Typed{expr:format!("{}::{factory}({number}_i32)",absolute(path)),kind:Kind::Exact{id,nullable:markup.nullable()}});
++        }
++        Err(unsupported(node,format!("{value} is not a member of {}",type_.full_name())))
+     }
+ 
+     fn enum_variant(&mut self, node: &Rc<dyn IXamlAstNode>, markup: &'a dyn EmitMarkup, variant: &str) -> EmitResult<Typed<'a>> {
+@@ -1254,7 +1258,13 @@
+             _ if contract.handles().get(1).is_some_and(|second| *second == target) => true,
+             _ => return None,
+         };
+-        if !contract.rust_path_is_trait() {
++        // Metadata carriers can describe another crate's interface, and value
++        // class views can expose a real model through registered casts. Neither
++        // is a Rust Rc unsizing coercion to the carrier trait. Use the same
++        // registered conversion as the runtime loader for those representations.
++        let shared_source = (source.handle() == Some(from) && source.handle_is_shared())
++            || (source.value() == Some(from) && source.value_is_shared());
++        if !shared_source || !contract.handle_is_own_trait() {
+             return None;
+         }
+         let path = absolute(contract.rust_path()?);
+@@ -3061,9 +3071,9 @@
+             .downcast_ref::<XamlWrappedMethod>()
+             .map(|wrapped| wrapped.method().clone())
+             .ok_or_else(|| unsupported(node, "a method call with argument casts"))?;
+-        if let Some((function, class)) = self.documents.get(&method) {
++        if let Some((function, handle)) = self.documents.get(&method) {
+             // `Build(serviceProvider)` of another document of the group: its function.
+-            let (function, class) = (function.clone(), *class);
++            let (function, handle) = (function.clone(), *handle);
+             let values = call.arguments.borrow().clone();
+             let [service_provider] = values.as_slice() else {
+                 return Err(unsupported(node, "a call of the build method of a document without its service provider"));
+@@ -3072,17 +3082,17 @@
+             let service_provider = self
+                 .coerce(&service_provider, self.types.known(Known::OptionServiceProvider))
+                 .ok_or_else(|| unsupported(node, "the service provider of a build method that is not one"))?;
+-            let handle = class.handle().ok_or_else(|| unsupported(node, "the root class of the document has no handle"))?;
++            let handle = handle.ok_or_else(|| unsupported(node, "the root of the document has no handle"))?;
+             return Ok((format!("{function}({service_provider})?"), Some(handle)));
+         }
+         if let Some(compiled) = method.as_any().downcast_ref::<CompiledDocumentBuildMethod>() {
+             // `Build:<path>(serviceProvider)` of a compiled document of another crate: its
+             // build function there.
+             let return_type = compiled.return_type();
+-            let class = self
+-                .types
+-                .class_of(&*return_type)
+-                .ok_or_else(|| unsupported(node, "a compiled document of another crate whose root is not a class"))?;
++            let handle = match self.types.class_of(&*return_type) {
++                Some(class) => class.handle(),
++                None => self.types.metadata_of(&*return_type).and_then(|markup| markup.value()),
++            }.ok_or_else(|| unsupported(node, "the compiled document root has no declared value type"))?;
+             let values = call.arguments.borrow().clone();
+             let [service_provider] = values.as_slice() else {
+                 return Err(unsupported(node, "a call of the build method of a document without its service provider"));
+@@ -3091,7 +3101,6 @@
+             let service_provider = self
+                 .coerce(&service_provider, self.types.known(Known::OptionServiceProvider))
+                 .ok_or_else(|| unsupported(node, "the service provider of a build method that is not one"))?;
+-            let handle = class.handle().ok_or_else(|| unsupported(node, "the root class of the document has no handle"))?;
+             return Ok((format!("{}({service_provider})?", compiled.rust_path()), Some(handle)));
+         }
+         let runtime = self.types.method(method.as_ref())
+@@ -3490,11 +3499,13 @@
+ 
+     /// `if (root is StyledElement s) NameScope.SetNameScope(s, scope); scope.Complete();`.
+     fn root_object_scope(&mut self, node: &Rc<dyn IXamlAstNode>, target: &Typed<'a>) -> EmitResult<()> {
+-        let Kind::Class(class) = target.kind else {
+-            return Err(unsupported(node, "the root object is not an object of the object model"));
+-        };
+-        // The exact class of the root is known, so is whether it is a styled element.
+-        let root = match self.types.is_styled_element(class) {
++        // Only styled roots attach the scope; plain roots complete it too.
++        let styled = match target.kind {
++            Kind::Class(class) => self.types.is_styled_element(class),
++            Kind::Exact { .. } => false,
++            _ => return Err(unsupported(node, "the root object is not an object")),
++        };
++        let root = match styled {
+             true => format!("::core::option::Option::Some(&{})", target.expr),
+             false => "::core::option::Option::None".to_string(),
+         };
+@@ -3514,8 +3525,8 @@
+         registration: &Rc<FerroNameScopeRegistrationXamlIlNode>,
+         target: &Typed<'a>,
+     ) -> EmitResult<()> {
+-        if !matches!(target.kind, Kind::Class(_)) {
+-            return Err(unsupported(node, "the target is not an object of the object model"));
++        if !matches!(target.kind, Kind::Class(_) | Kind::Exact { .. }) {
++            return Err(unsupported(node, "the target is not an object"));
+         }
+         let name = registration
+             .name()
+@@ -3524,7 +3535,7 @@
+             .text();
+         self.uses_name_scope = true;
+         self.line(format!(
+-            "rt::register_name(name_scope.as_ref(), {}, ::core::clone::Clone::clone(&{}).upcast::<::ferroui_base::FerroObject>(), {}, {})?;",
++            "rt::register_name_value(name_scope.as_ref(), {}, ::std::rc::Rc::new(::core::clone::Clone::clone(&{})), {}, {})?;",
+             rust_string_literal(&name),
+             target.expr,
+             node.line(),
+@@ -3567,12 +3578,14 @@
+     emit_function(types, root, configuration, base_uri, namespaces, function_name, document_name, &DocumentFunctions::default(), None)
+ }
+ 
+-/// The class of the root object a transformed document builds, if it is a
+-/// class of the object model.
+-pub fn root_class_of<'a>(types: &'a dyn EmitTypes, root: &Rc<dyn IXamlAstNode>) -> Option<&'a dyn EmitClass> {
++/// The actual constructed handle of a root, including a plain model reference.
++pub(crate) fn root_value_handle_of<'a>(types: &'a dyn EmitTypes, root: &Rc<dyn IXamlAstNode>) -> Option<TypeKey<'a>> {
+     let group = root.as_value_with_manipulation_node()?;
+     let type_ = group.value().type_().get_clr_type().ok()?;
+-    types.class_of(&*type_)
++    match types.class_of(&*type_) {
++        Some(class) => class.handle(),
++        None => types.metadata_of(&*type_).and_then(|markup| markup.value()),
++    }
+ }
+ 
+ /// The generated functions of the other documents of a group, by the
+@@ -3580,19 +3593,18 @@
+ /// resource include the group transformers linked) calls.
+ #[derive(Default)]
+ pub struct DocumentFunctions<'a> {
+-    builds: HashMap<usize, (String, &'a dyn EmitClass)>,
++    builds: HashMap<usize, (String, Option<TypeKey<'a>>)>,
+     /// The functions the emitted documents call, in the order of the calls.
+     called: std::cell::RefCell<Vec<String>>,
+ }
+ 
+ impl<'a> DocumentFunctions<'a> {
+-    /// Records that `build`, the build method of a document whose root is an
+-    /// object of `class`, is the generated function `function_name`.
+-    pub fn insert(&mut self, build: &Rc<dyn IXamlMethod>, function_name: &str, class: &'a dyn EmitClass) {
+-        self.builds.insert(node_address(build), (function_name.to_string(), class));
+-    }
+-
+-    fn get(&self, method: &Rc<dyn IXamlMethod>) -> Option<&(String, &'a dyn EmitClass)> {
++    /// Records the actual constructed value of another document's Build method.
++    pub(crate) fn insert_value(&mut self, build: &Rc<dyn IXamlMethod>, function_name: &str, handle: TypeKey<'a>) {
++        self.builds.insert(node_address(build), (function_name.to_string(), Some(handle)));
++    }
++
++    fn get(&self, method: &Rc<dyn IXamlMethod>) -> Option<&(String, Option<TypeKey<'a>>)> {
+         let found = self.builds.get(&node_address(method))?;
+         let mut called = self.called.borrow_mut();
+         if !called.contains(&found.0) {
+@@ -3677,19 +3689,29 @@
+     // `Build`: the root object, then `Populate` with a context of its own (its name
+     // scope field is filled from the parent service provider) whose root object is
+     // the root. `Populate` alone acts on the given root.
+-    let created = match populate {
++    let mut created = match populate {
+         Some(class) => {
+             emitter.line("let root = root.clone();".to_string());
+             Typed { expr: "root".to_string(), kind: Kind::Class(class) }
+         }
+         None => emitter.value(&root_value)?,
+     };
+-    let Kind::Class(root_class) = created.kind else {
+-        return Err(unsupported(&root_value, "the root object is not a class of the object model"));
++    // A plain constructor can be an expression rather than a local. The
++    // context, assignments, scope and returned object must all use ONE instance.
++    if !is_identifier(&created.expr) {
++        let local = emitter.local_named("root");
++        emitter.line(format!("let {local} = {};", created.expr));
++        created.expr = local;
++    }
++    let root_type = match created.kind {
++        Kind::Class(class) => format!("::ferroui_base::Ref<{}>", absolute(class.rust_path()
++            .ok_or_else(|| unsupported(&root_value, "no public Rust path is recorded for the root class"))?)),
++        Kind::Exact { id, .. } => types.markup_by_handle(id)
++            .filter(|markup| markup.value() == Some(id))
++            .and_then(|markup| markup.value_rust_type())
++            .ok_or_else(|| unsupported(&root_value, "no exact public Rust value type is recorded for the root"))?,
++        _ => return Err(unsupported(&root_value, "the root object is not an object")),
+     };
+-    let root_path = root_class
+-        .rust_path()
+-        .ok_or_else(|| unsupported(&root_value, "no public Rust path is recorded for the root class"))?;
+     emitter.line(format!(
+         "let context = rt::populate_context(service_provider, &{document_constant}, rt::to_value({}.clone()));",
+         created.expr
+@@ -3713,12 +3735,11 @@
+     source.push_str("    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n");
+     match populate {
+         Some(_) => {
+-            source.push_str(&format!("    root: &::ferroui_base::Ref<{}>,\n", absolute(root_path)));
++            source.push_str(&format!("    root: &{root_type},\n"));
+             source.push_str(") -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadException> {\n");
+         }
+         None => source.push_str(&format!(
+-            ") -> ::core::result::Result<::ferroui_base::Ref<{}>, ::ferroui_markup_xaml::XamlLoadException> {{\n",
+-            absolute(root_path)
++            ") -> ::core::result::Result<{root_type}, ::ferroui_markup_xaml::XamlLoadException> {{\n"
+         )),
+     }
+     let mut local_types = std::mem::take(&mut emitter.local_types);
+@@ -3727,7 +3748,8 @@
+         "name_scope".to_string(),
+         "::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::controls::INameScope>>".to_string(),
+     );
+-    local_types.insert("root".to_string(), format!("::ferroui_base::Ref<{}>", absolute(root_path)));
++    local_types.insert("root".to_string(), root_type.clone());
++    local_types.insert(created.expr.clone(), root_type);
+     let (body, parts) = split_into_parts(function_name, &document_text, &emitter.lines, &local_types);
+     for line in &body {
+         source.push_str(line);
+--- a/rust_emitter/runtime_types.rs
++++ b/rust_emitter/runtime_types.rs
+@@ -137,6 +137,14 @@
+     fn handle_is_shared(&self) -> bool {
+         self.0.handle().is_some_and(|handle| handle.name().starts_with("alloc::rc::Rc<"))
+     }
++    fn value_is_shared(&self) -> bool {
++        self.0.value.is_some_and(|value| value().name().starts_with("alloc::rc::Rc<"))
++    }
++    fn handle_is_own_trait(&self) -> bool {
++        if !self.0.rust_path_is_trait() { return false; }
++        let (Some(handle), Some(owner)) = (self.0.handle(), self.0.owner_rust_name) else { return false };
++        handle.name() == format!("alloc::rc::Rc<{}>", owner())
++    }
+     fn nullable(&self) -> Option<TypeKey<'_>> {
+         self.0.nullable.map(|nullable| TypeKey::Id(nullable().id()))
+     }
+@@ -152,12 +160,25 @@
+     fn value(&self) -> Option<TypeKey<'_>> {
+         self.0.value.map(|value| TypeKey::Id(value().id()))
+     }
++    fn value_rust_type(&self) -> Option<String> {
++        let value = self.0.value?();
++        if let Some(path) = rust_path_of_type(value.id()) {
++            return Some(format!("::{}", path.trim_start_matches("::")));
++        }
++        let owner = self.0.owner_rust_name?();
++        let path = match self.0.rust_path_is_trait() {
++            true => format!("dyn {}", self.0.rust_path()?),
++            false => self.0.rust_path()?.to_string(),
++        };
++        super::emit_types::markup_value_rust_type(value.name(), owner, &path)
++    }
+     fn is_flags(&self) -> bool {
+         self.0.is_flags
+     }
+     fn enum_members(&self) -> Vec<EnumMember<'_>> {
+         self.0.enum_members.iter().map(|member| EnumMember { name: member.name, value: member.value, rust_variant: member.rust_variant }).collect()
+     }
++    fn enum_i32_factory(&self) -> Option<&str> { self.0.enum_i32_factory }
+     fn flags_compose(&self, value: i64) -> bool {
+         self.0.enum_from_value.is_some_and(|from_value| from_value(value).is_some())
+     }

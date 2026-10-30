@@ -1,0 +1,12 @@
+<!-- Consumer test template only; the original complete root theme remains pending. -->
+<d:RootDockControl xmlns="https://github.com/ferroui"
+                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                   xmlns:dc="using:FerroDock.Controls.DeferredContentControl"
+                   xmlns:d="using:FerroDock.Ferro.Controls"
+                   x:DataType="d:RootDockControl" x:CompileBindings="True">
+  <d:RootDockControl.Template>
+    <ControlTemplate x:DataType="d:RootDockControl">
+      <dc:DeferredContentControl Name="PART_MainContent" Background="Transparent" />
+    </ControlTemplate>
+  </d:RootDockControl.Template>
+</d:RootDockControl>

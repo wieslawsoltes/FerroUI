@@ -1,0 +1,3 @@
+<m:WrapDock xmlns="https://github.com/avaloniaui"
+ xmlns:m="clr-namespace:Dock.Model.ReactiveUI.Controls;assembly=Dock.Model.ReactiveUI"
+ Title="Source WrapDock" Orientation="Vertical" />

@@ -1,0 +1,50 @@
+<UserControl x:Class="BehaviorsGallery.Views.Pages.AdvancedView"
+             xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:BehaviorsGallery.ViewModels"
+             x:DataType="vm:MainWindowViewModel"
+             mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="450">
+  <!-- Ported from Views/Pages/AdvancedView of the reference sample. -->
+  <Design.DataContext>
+    <vm:MainWindowViewModel />
+  </Design.DataContext>
+  <Grid RowDefinitions="Auto,*" ColumnDefinitions="*">
+    <Border x:Name="Button" 
+            Background="{DynamicResource GreenBrush}" 
+            Width="100" Height="50" 
+            Grid.Row="1" Grid.Column="0" 
+            Margin="5,0,0,5">
+      <Interaction.Behaviors>
+        <EventTriggerBehavior EventName="PointerPressed" 
+                                 SourceObject="Button">
+          <ChangePropertyAction TargetObject="Button" 
+                                   PropertyName="Background"
+                                   Value="{DynamicResource RedBrush}" />
+          <ChangePropertyAction TargetObject="Text" 
+                                   PropertyName="Foreground"
+                                   Value="{DynamicResource YellowBrush}" />
+          <CallMethodAction TargetObject="{Binding}" 
+                               MethodName="IncrementCount" />
+        </EventTriggerBehavior>
+        <EventTriggerBehavior EventName="PointerReleased" 
+                                 SourceObject="Button">
+          <ChangePropertyAction TargetObject="Button" 
+                                   PropertyName="Background"
+                                   Value="{DynamicResource GreenBrush}" />
+          <ChangePropertyAction TargetObject="Text" 
+                                   PropertyName="Foreground"
+                                   Value="{DynamicResource WhiteBrush}" />
+          <CallMethodAction TargetObject="{Binding}"
+                               MethodName="DecrementCount" />
+        </EventTriggerBehavior>
+      </Interaction.Behaviors>
+      <TextBlock x:Name="Text" 
+                 Text="{Binding Count}" 
+                 Foreground="{DynamicResource WhiteBrush}"
+                 VerticalAlignment="Center" 
+                 HorizontalAlignment="Center" />
+    </Border>
+  </Grid>
+</UserControl>

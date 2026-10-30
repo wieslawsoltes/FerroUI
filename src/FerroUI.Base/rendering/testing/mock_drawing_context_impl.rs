@@ -1,4 +1,5 @@
 use crate::media::{BoxShadows, Color, IBrush, IEffect, IExperimentalAcrylicMaterial, IPen, RenderOptions};
+use crate::media::imaging::BitmapBlendingMode;
 use crate::platform::{
     AlphaFormat, IBitmapImpl, IDrawingContextImpl, IDrawingContextImplWithEffects, IDrawingContextLayerImpl,
     IDrawingContextWithAcrylicLikeSupport, IGeometryImpl, IGlyphRunImpl, ILockedFramebuffer,
@@ -79,6 +80,8 @@ pub struct MockDrawingContextImpl {
     /// Whether the context reports effect support (`PushEffect <clip>` /
     /// `PopEffect`). Off by default.
     pub supports_effects: bool,
+    /// Whether explicit isolated group pushes are accepted. Off by default.
+    pub supports_compositing_layers: bool,
     /// Whether pushed effects are recorded with the effect
     /// (`PushEffect <clip> blur(<radius>)`). Off by default.
     pub log_effects: bool,
@@ -103,6 +106,7 @@ impl MockDrawingContextImpl {
             transform: Matrix::IDENTITY,
             log_transforms: true,
             supports_effects: false,
+            supports_compositing_layers: false,
             log_effects: false,
             supports_acrylic: false,
             supports_layer_effects: false,
@@ -217,6 +221,18 @@ impl IDrawingContextImpl for MockDrawingContextImpl {
 
     fn pop_layer(&mut self) {
         self.log.push("PopLayer");
+    }
+
+    fn try_push_compositing_layer(&mut self, blend: BitmapBlendingMode, opacity: f64, bounds: Rect) -> bool {
+        if !self.supports_compositing_layers {
+            return false;
+        }
+        self.log.push(format!("PushCompositingLayer {blend:?} {opacity} {bounds}"));
+        true
+    }
+
+    fn pop_compositing_layer(&mut self) {
+        self.log.push("PopCompositingLayer");
     }
 
     fn push_opacity(&mut self, opacity: f64, _bounds: Option<Rect>) {

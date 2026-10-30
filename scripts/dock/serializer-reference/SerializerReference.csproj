@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+<PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework><Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings><ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally><DefineConstants>$(DefineConstants);AVALONIA_11</DefineConstants></PropertyGroup>
+<ItemGroup><ProjectReference Include="../../../../Dock/src/Dock.Model.ReactiveUI/Dock.Model.ReactiveUI.csproj" />
+<Compile Include="../../../../Dock/samples/DockReactiveUISample/ViewModels/Documents/DocumentViewModel.cs" Link="OriginalSample/DocumentViewModel.cs" />
+<Compile Include="../../../../Dock/samples/DockReactiveUISample/ViewModels/Docks/CustomDocumentDock.cs" Link="OriginalSample/CustomDocumentDock.cs" />
+<Compile Include="../../../../Dock/samples/DockReactiveUISample/ViewModels/Views/*.cs" Link="OriginalSample/Views/%(Filename)%(Extension)" />
+<Compile Include="../../../../Dock/samples/DockReactiveUISample/ViewModels/Tools/*.cs" Link="OriginalSample/Tools/%(Filename)%(Extension)" />
+<ProjectReference Include="../../../../Dock/src/Dock.Model/Dock.Model.csproj" />
+<Compile Include="../../../../Dock/src/Dock.Serializer.SystemTextJson/DockSerializer.cs" Link="Original/DockSerializer.cs" />
+<Compile Include="../../../../Dock/src/Dock.Serializer.SystemTextJson/DockSerializerOptionsFactory.cs" Link="Original/DockSerializerOptionsFactory.cs" />
+<Compile Include="../../../../Dock/src/Dock.Serializer.SystemTextJson/DockModelPolymorphicTypeResolver.cs" Link="Original/DockModelPolymorphicTypeResolver.cs" />
+<Compile Include="../../../../Dock/src/Dock.Serializer.SystemTextJson/DockListTypeInfoModifier.cs" Link="Original/DockListTypeInfoModifier.cs" />
+<Compile Include="../../../../Dock/src/Dock.Serializer.SystemTextJson/DockJsonSerializableAttribute.cs" Link="Original/DockJsonSerializableAttribute.cs" />
+<Compile Include="../../../../Dock/src/Dock.Serializer.SystemTextJson/DockJsonSourceGenerationAttribute.cs" Link="Original/DockJsonSourceGenerationAttribute.cs" />
+<ProjectReference Include="../../../../Dock/src/Dock.Serializer.SystemTextJson.Generators/Dock.Serializer.SystemTextJson.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="all" SetTargetFramework="TargetFramework=netstandard2.0" />
+</ItemGroup></Project>

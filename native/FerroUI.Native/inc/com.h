@@ -45,7 +45,7 @@ struct IUnknown
 
 #ifdef COM_GUIDS_MATERIALIZE
 #define __IID_DEF(name,d1,d2,d3, d41, d42, d43, d44, d45, d46, d47, d48) extern "C" const GUID IID_ ## name = {0x ## d1, 0x ## d2, 0x ## d3, \
-{0x ## d41, 0x ## d42, 0x ## d42, 0x ## d42, 0x ## d42, 0x ## d42, 0x ## d42, 0x ## d42 } };
+{0x ## d41, 0x ## d42, 0x ## d43, 0x ## d44, 0x ## d45, 0x ## d46, 0x ## d47, 0x ## d48 } };
 #else
 #define __IID_DEF(name,d1,d2,d3, d41, d42, d43, d44, d45, d46, d47, d48) extern "C" const GUID IID_ ## name;
 #endif

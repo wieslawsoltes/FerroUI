@@ -1,0 +1,8 @@
+<StackPanel xmlns="https://github.com/avaloniaui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:core="clr-namespace:Dock.Model.Core;assembly=Dock.Model"
+ x:DataType="core:IDock" x:CompileBindings="True">
+ <TextBlock Text="{Binding VisibleDockables.Count}" />
+ <ContentControl Content="{Binding VisibleDockables[0]}" />
+ <ItemsControl ItemsSource="{Binding VisibleDockables}" />
+</StackPanel>

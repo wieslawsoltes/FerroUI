@@ -52,4 +52,34 @@ impl RoutedEventRegistry {
     pub fn get_registered_for<TOwner: StaticType>(&self) -> Vec<RoutedEvent> {
         self.get_registered(TOwner::TYPE)
     }
+
+    /// Finds the routed event named `name` that `owner` or one of its base
+    /// classes registers, nearest class first: the lookup of the routed
+    /// event behind an event name of the managed original (the static
+    /// `<Name>Event` field of the class or of a base class, found by
+    /// reflection).
+    ///
+    /// The comparison is case-sensitive. `name` is the name of the event
+    /// (`"Click"`) or of the field that holds it (`"ClickEvent"`): on each
+    /// class an event of exactly that name is preferred, then the name
+    /// without the `Event` suffix.
+    pub fn find_by_name(&self, owner: &'static TypeInfo, name: &str) -> Option<RoutedEvent> {
+        let field_name = name.strip_suffix("Event").filter(|stripped| !stripped.is_empty());
+        let events = self.registered_routed_events.borrow();
+        let mut current = Some(owner);
+        while let Some(type_) = current {
+            if let Some(registered) = events.get(type_) {
+                let exact = registered.iter().find(|event| event.name() == name);
+                let found = exact.or_else(|| {
+                    let field_name = field_name?;
+                    registered.iter().find(|event| event.name() == field_name)
+                });
+                if let Some(found) = found {
+                    return Some(*found);
+                }
+            }
+            current = type_.base_type();
+        }
+        None
+    }
 }

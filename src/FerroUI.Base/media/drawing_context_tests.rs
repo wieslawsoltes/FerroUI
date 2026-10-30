@@ -1,4 +1,5 @@
 use crate::media::immutable::{ImmutablePen, ImmutableSolidColorBrush};
+use crate::media::imaging::BitmapBlendingMode;
 use crate::media::{
     BoxShadows, Colors, DrawingContext, IBrush, IPen, ImmediateDrawingContext, PlatformDrawingContext, PushedState,
 };
@@ -20,6 +21,59 @@ fn quiet(log: &DrawingLog) -> MockDrawingContextImpl {
     let mut platform_impl = MockDrawingContextImpl::new(log.clone());
     platform_impl.log_transforms = false;
     platform_impl
+}
+
+#[test]
+fn compositing_layer_unsupported_or_invalid_push_does_not_change_the_stack() {
+    for supported in [false, true] {
+        let log = DrawingLog::new();
+        let mut platform_impl = quiet(&log);
+        platform_impl.supports_compositing_layers = supported;
+        let mut core = PlatformDrawingContext::borrowed(&mut platform_impl);
+        let mut context = DrawingContext::new(&mut core);
+        let bounds = Rect::new(0.0, 0.0, 10.0, 10.0);
+        let clip = context.push_clip(bounds);
+        if !supported {
+            assert!(context.try_push_compositing_layer(BitmapBlendingMode::Multiply, 0.5, bounds).is_none());
+        }
+        for opacity in [f64::NAN, f64::INFINITY, -0.1, 1.1] {
+            assert!(context.try_push_compositing_layer(BitmapBlendingMode::Multiply, opacity, bounds).is_none());
+        }
+        for invalid in [Rect::new(f64::NAN, 0.0, 1.0, 1.0), Rect::new(0.0, 0.0, -1.0, 1.0)] {
+            assert!(context.try_push_compositing_layer(BitmapBlendingMode::Multiply, 0.5, invalid).is_none());
+        }
+        context.fill_rectangle(&red(), Rect::new(1.0, 1.0, 2.0, 2.0), 0.0);
+        context.pop(clip);
+        context.dispose();
+        assert_eq!(log.entries(), [
+            "PushClip 0, 0, 10, 10",
+            "DrawRectangle Red none 1, 1, 2, 2 shadows=0",
+            "PopClip",
+        ]);
+    }
+}
+
+#[test]
+fn compositing_layers_mix_with_other_scopes_and_dispose_in_reverse_order() {
+    let log = DrawingLog::new();
+    let mut platform_impl = quiet(&log);
+    platform_impl.supports_compositing_layers = true;
+    let mut core = PlatformDrawingContext::borrowed(&mut platform_impl);
+    let mut context = DrawingContext::new(&mut core);
+    let bounds = Rect::new(0.0, 0.0, 10.0, 10.0);
+    let _outer = context.try_push_compositing_layer(BitmapBlendingMode::Multiply, 0.5, bounds).unwrap();
+    let _clip = context.push_clip(bounds);
+    let inner = context.try_push_compositing_layer(BitmapBlendingMode::Screen, 0.25, bounds).unwrap();
+    context.fill_rectangle(&red(), Rect::new(1.0, 1.0, 2.0, 2.0), 0.0);
+    context.pop(inner);
+    context.dispose();
+    assert_eq!(log.entries(), [
+        "PushCompositingLayer Multiply 0.5 0, 0, 10, 10",
+        "PushClip 0, 0, 10, 10",
+        "PushCompositingLayer Screen 0.25 0, 0, 10, 10",
+        "DrawRectangle Red none 1, 1, 2, 2 shadows=0",
+        "PopCompositingLayer", "PopClip", "PopCompositingLayer",
+    ]);
 }
 
 #[test]

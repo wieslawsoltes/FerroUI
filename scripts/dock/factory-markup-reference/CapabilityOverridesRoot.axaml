@@ -1,0 +1,1 @@
+<m:DockCapabilityOverrides xmlns="https://github.com/avaloniaui" xmlns:m="using:Dock.Model.Core" CanPin="False" CanDrop="True" />

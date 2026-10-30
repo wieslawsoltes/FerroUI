@@ -1,0 +1,113 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="MaterialThemeGallery.Pages.NavigationSamplesPage">
+  <!-- The page controls (TabbedPage, NavigationPage with a ContentPage, DrawerPage with its
+       drawer open, CarouselPage), Carousel, PipsPager and RefreshContainer (its
+       RefreshVisualizer shows while the content is pulled). The native counterpart is
+       NavigationSamplesPage.winui.xml, made of the navigation controls of WinUI. -->
+  <StackPanel Margin="24" Spacing="12">
+    <TextBlock Text="Pages and navigation" FontSize="28" FontWeight="SemiBold" />
+
+    <Grid ColumnSpacing="24" HorizontalAlignment="Left">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="320" />
+        <ColumnDefinition Width="320" />
+      </Grid.ColumnDefinitions>
+
+      <StackPanel Grid.Column="0" Spacing="12">
+        <TextBlock Text="TabbedPage" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+        <!-- The pages of TabbedPage and DrawerPage are transparent here, as WinUI's pages, so that
+             they show the content layer of the NavigationView these controls are drawn as; the
+             theme keeps FerroUI's opaque page (ApplicationPageBackgroundThemeBrush, CTP-1). -->
+        <TabbedPage Width="320" Height="170" HorizontalAlignment="Left">
+          <ContentPage Header="Home" Background="Transparent">
+            <ContentPage.Icon>
+              <Path Width="24" Height="24" Stretch="None" FlowDirection="LeftToRight"
+                    Fill="{Binding $parent[ContentPresenter].Foreground}"
+                    Data="M10 20V14H14V20H19V11H22L12 2L2 11H5V20Z" />
+            </ContentPage.Icon>
+            <TextBlock Text="The home page." Margin="12" />
+          </ContentPage>
+          <ContentPage Header="Search" Background="Transparent">
+            <ContentPage.Icon>
+              <Path Width="24" Height="24" Stretch="None" FlowDirection="LeftToRight"
+                    Fill="{Binding $parent[ContentPresenter].Foreground}"
+                    Data="M15.5 14H14.71L14.43 13.73A6.5 6.5 0 1 0 13.73 14.43L14 14.71V15.5L19 20.49L20.49 19ZM9.5 14A4.5 4.5 0 1 1 9.5 5A4.5 4.5 0 0 1 9.5 14Z" />
+            </ContentPage.Icon>
+            <TextBlock Text="The search page." Margin="12" />
+          </ContentPage>
+          <ContentPage Header="Settings" Background="Transparent">
+            <ContentPage.Icon>
+              <Path Width="24" Height="24" Stretch="None" FlowDirection="LeftToRight"
+                    Fill="{Binding $parent[ContentPresenter].Foreground}"
+                    Data="M19.14 12.94A7.8 7.8 0 0 0 19.2 12A7.8 7.8 0 0 0 19.14 11.06L21.17 9.48L19.25 6.16L16.86 7.12A7.1 7.1 0 0 0 15.24 6.18L14.88 3.6H11.04L10.68 6.18A7.1 7.1 0 0 0 9.06 7.12L6.67 6.16L4.75 9.48L6.78 11.06A7.8 7.8 0 0 0 6.72 12A7.8 7.8 0 0 0 6.78 12.94L4.75 14.52L6.67 17.84L9.06 16.88A7.1 7.1 0 0 0 10.68 17.82L11.04 20.4H14.88L15.24 17.82A7.1 7.1 0 0 0 16.86 16.88L19.25 17.84L21.17 14.52ZM12.96 15.36A3.36 3.36 0 1 1 12.96 8.64A3.36 3.36 0 0 1 12.96 15.36Z" />
+            </ContentPage.Icon>
+            <TextBlock Text="The settings page." Margin="12" />
+          </ContentPage>
+        </TabbedPage>
+
+        <TextBlock Text="NavigationPage" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+        <NavigationPage Width="320" Height="160" HorizontalAlignment="Left">
+          <ContentPage Header="Inbox">
+            <TextBlock Text="The first page of a navigation page." Margin="12" />
+          </ContentPage>
+        </NavigationPage>
+
+        <TextBlock Text="PipsPager" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+        <PipsPager HorizontalAlignment="Left" NumberOfPages="5" SelectedPageIndex="2" />
+      </StackPanel>
+
+      <StackPanel Grid.Column="1" Spacing="12">
+        <TextBlock Text="DrawerPage" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+        <DrawerPage Width="320" Height="170" HorizontalAlignment="Left"
+                    IsOpen="True"
+                    DrawerBehavior="Locked"
+                    DrawerLayoutBehavior="Split"
+                    DrawerLength="130">
+          <DrawerPage.Drawer>
+            <!-- The items of the pane of NavigationView (the native side's NavigationViewItems). -->
+            <ListBox Theme="{StaticResource DrawerPageNavigationViewMenu}">
+              <ListBoxItem Content="Home" IsSelected="True" />
+              <ListBoxItem Content="Settings" />
+              <ListBoxItem Content="About" />
+            </ListBox>
+          </DrawerPage.Drawer>
+          <DrawerPage.Content>
+            <ContentPage Header="Home" Background="Transparent">
+              <TextBlock Text="The content beside the drawer." Margin="12" TextWrapping="Wrap" />
+            </ContentPage>
+          </DrawerPage.Content>
+        </DrawerPage>
+
+        <TextBlock Text="CarouselPage and Carousel" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+        <CarouselPage Width="320" Height="100" HorizontalAlignment="Left">
+          <ContentPage Header="First">
+            <TextBlock Text="The first page of a carousel page." Margin="12" />
+          </ContentPage>
+          <ContentPage Header="Second">
+            <TextBlock Text="The second page." Margin="12" />
+          </ContentPage>
+        </CarouselPage>
+        <Carousel Width="320" Height="80" HorizontalAlignment="Left">
+          <Border Background="{DynamicResource ControlFillColorSecondaryBrush}">
+            <TextBlock Text="The first item of a carousel" VerticalAlignment="Center" HorizontalAlignment="Center" />
+          </Border>
+          <Border Background="{DynamicResource ControlFillColorSecondaryBrush}">
+            <TextBlock Text="The second item" VerticalAlignment="Center" HorizontalAlignment="Center" />
+          </Border>
+        </Carousel>
+
+        <TextBlock Text="RefreshContainer" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+        <RefreshContainer Width="320" Height="90" HorizontalAlignment="Left">
+          <ScrollViewer>
+            <StackPanel Spacing="4">
+              <TextBlock Text="Pull the content down to refresh it." />
+              <TextBlock Text="The second line" />
+              <TextBlock Text="The third line" />
+            </StackPanel>
+          </ScrollViewer>
+        </RefreshContainer>
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+</UserControl>

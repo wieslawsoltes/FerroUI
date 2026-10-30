@@ -94,6 +94,8 @@ mod layer_effect_tests;
 #[cfg(test)]
 mod tests;
 #[cfg(test)]
+mod compositing_tests;
+#[cfg(test)]
 mod text_tests;
 #[cfg(test)]
 mod text_rendering_tests;

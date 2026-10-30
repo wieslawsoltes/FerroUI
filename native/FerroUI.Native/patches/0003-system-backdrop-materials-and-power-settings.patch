@@ -1,0 +1,230 @@
+diff --git a/native/FerroUI.Native/src/OSX/AutoFitContentView.h b/native/FerroUI.Native/src/OSX/AutoFitContentView.h
+index 59a46dfbb..30a29693f 100644
+--- a/native/FerroUI.Native/src/OSX/AutoFitContentView.h
++++ b/native/FerroUI.Native/src/OSX/AutoFitContentView.h
+@@ -9,4 +9,5 @@
+ -(void) SetTitleBarHeightHint: (double) height;
+ 
+ -(void) ShowBlur: (bool) show;
++-(void) SetBlurMaterial: (int) material appearance: (int) appearance;
+ @end
+\ No newline at end of file
+diff --git a/native/FerroUI.Native/src/OSX/AutoFitContentView.mm b/native/FerroUI.Native/src/OSX/AutoFitContentView.mm
+index a7e6c8b3f..bd7ed1039 100644
+--- a/native/FerroUI.Native/src/OSX/AutoFitContentView.mm
++++ b/native/FerroUI.Native/src/OSX/AutoFitContentView.mm
+@@ -64,6 +64,43 @@
+     _blurBehind.hidden = !show;
+ }
+ 
++-(void) SetBlurMaterial:(int)material appearance:(int)appearance
++{
++    if (material < 0)
++    {
++        if (@available(macOS 10.14, *))
++        {
++            [_blurBehind setMaterial:NSVisualEffectMaterialHUDWindow];
++        }
++        else
++        {
++            [_blurBehind setMaterial:NSVisualEffectMaterialSidebar];
++        }
++        _blurBehind.appearance = nil;
++        [_blurBehind setState:NSVisualEffectStateFollowsWindowActiveState];
++        return;
++    }
++
++    [_blurBehind setMaterial:(NSVisualEffectMaterial)material];
++    if (appearance == 1)
++    {
++        _blurBehind.appearance = [NSAppearance appearanceNamed:NSAppearanceNameAqua];
++    }
++    else if (appearance == 2)
++    {
++        if (@available(macOS 10.14, *))
++        {
++            _blurBehind.appearance = [NSAppearance appearanceNamed:NSAppearanceNameDarkAqua];
++        }
++    }
++    else
++    {
++        _blurBehind.appearance = nil;
++    }
++    // The controller decides when the window is inactive (it shows the fallback colour).
++    [_blurBehind setState:NSVisualEffectStateActive];
++}
++
+ -(void) ShowTitleBar: (bool) show
+ {
+     _titleBarMaterial.hidden = !show;
+diff --git a/native/FerroUI.Native/src/OSX/PlatformSettings.mm b/native/FerroUI.Native/src/OSX/PlatformSettings.mm
+index 569adaa60..2b1c7df71 100644
+--- a/native/FerroUI.Native/src/OSX/PlatformSettings.mm
++++ b/native/FerroUI.Native/src/OSX/PlatformSettings.mm
+@@ -16,19 +16,28 @@
+ -(void)invalidate;
+ @end
+ 
++@interface CocoaPowerObserver : NSObject
++-(id)initWithCallback:(IFrnActionCallback *)callback;
++-(void)powerStateDidChange:(NSNotification *)notification;
++-(void)invalidate;
++@end
++
+ // Keep IFrnPlatformSettings' original vtable intact. New runtimes discover the
+ // optional interface with QueryInterface and can still load an older native lib.
+ class PlatformSettings : public ComObject,
+                          public virtual IFrnPlatformSettings,
+-                         public virtual IFrnAccessibilitySettings
++                         public virtual IFrnAccessibilitySettings,
++                         public virtual IFrnPowerSettings
+ {
+     CocoaThemeObserver* observer = nil;
+     CocoaLocaleObserver* localeObserver = nil;
+     CocoaAccessibilityObserver* accessibilityObserver = nil;
++    CocoaPowerObserver* powerObserver = nil;
+ 
+     BEGIN_INTERFACE_MAP()
+     INTERFACE_MAP_ENTRY(IFrnPlatformSettings, IID_IFrnPlatformSettings)
+     INTERFACE_MAP_ENTRY(IFrnAccessibilitySettings, IID_IFrnAccessibilitySettings)
++    INTERFACE_MAP_ENTRY(IFrnPowerSettings, IID_IFrnPowerSettings)
+     END_INTERFACE_MAP()
+ 
+ public:
+@@ -39,6 +48,7 @@ public:
+         RegisterColorsChange(nullptr);
+         RegisterLanguageChange(nullptr);
+         RegisterAccessibilityChange(nullptr);
++        RegisterPowerChange(nullptr);
+     }
+ 
+     virtual FrnPlatformThemeVariant GetPlatformTheme() override
+@@ -168,6 +178,37 @@ public:
+         }
+     }
+     
++    virtual bool GetLowPowerMode() override
++    {
++        if (@available(macOS 12.0, *))
++        {
++            return NSProcessInfo.processInfo.isLowPowerModeEnabled;
++        }
++        return false;
++    }
++
++    virtual void RegisterPowerChange(IFrnActionCallback *callback) override
++    {
++        auto center = NSNotificationCenter.defaultCenter;
++        if (powerObserver != nil)
++        {
++            [powerObserver invalidate];
++            [center removeObserver:powerObserver];
++            powerObserver = nil;
++        }
++        if (callback != nullptr)
++        {
++            if (@available(macOS 12.0, *))
++            {
++                powerObserver = [[CocoaPowerObserver alloc] initWithCallback:callback];
++                [center addObserver:powerObserver
++                           selector:@selector(powerStateDidChange:)
++                               name:NSProcessInfoPowerStateDidChangeNotification
++                             object:nil];
++            }
++        }
++    }
++
+ private:
+     unsigned int to_argb(NSColor* color)
+     {
+@@ -274,6 +315,43 @@ private:
+ }
+ @end
+ 
++@implementation CocoaPowerObserver
++{
++    ComPtr<IFrnActionCallback> _callback;
++}
++
++- (id)initWithCallback:(IFrnActionCallback *)callback {
++    self = [super init];
++    if (self) {
++        _callback = callback;
++    }
++    return self;
++}
++
++- (void)invalidate {
++    _callback = nullptr;
++}
++
++- (void)invokeCallback {
++    // Keep the COM callback alive even when a subscriber unregisters during the call.
++    auto callback = _callback;
++    if (callback != nullptr) {
++        callback->Run();
++    }
++}
++
++// The power state notification is posted on any thread: the callback runs on the main thread.
++- (void)powerStateDidChange:(NSNotification *)notification {
++    if ([NSThread isMainThread]) {
++        [self invokeCallback];
++    } else {
++        dispatch_async(dispatch_get_main_queue(), ^{
++            [self invokeCallback];
++        });
++    }
++}
++@end
++
+ extern IFrnPlatformSettings* CreatePlatformSettings()
+ {
+     return new PlatformSettings();
+diff --git a/native/FerroUI.Native/src/OSX/WindowBaseImpl.h b/native/FerroUI.Native/src/OSX/WindowBaseImpl.h
+index b50ffaabc..3976af42e 100644
+--- a/native/FerroUI.Native/src/OSX/WindowBaseImpl.h
++++ b/native/FerroUI.Native/src/OSX/WindowBaseImpl.h
+@@ -12,6 +12,7 @@
+ 
+ class WindowBaseImpl : public virtual TopLevelImpl,
+                        public virtual IFrnWindowBase,
++                       public virtual IFrnWindowBlurMaterial,
+                        public INSWindowHolder {
+ 
+ public:
+@@ -20,6 +21,7 @@ public:
+     BEGIN_INTERFACE_MAP()
+         INHERIT_INTERFACE_MAP(TopLevelImpl)
+         INTERFACE_MAP_ENTRY(IFrnWindowBase, IID_IFrnWindowBase)
++        INTERFACE_MAP_ENTRY(IFrnWindowBlurMaterial, IID_IFrnWindowBlurMaterial)
+     END_INTERFACE_MAP()
+ 
+     virtual ~WindowBaseImpl();
+@@ -65,6 +67,7 @@ public:
+     virtual HRESULT SetFrameThemeVariant(FrnPlatformThemeVariant variant) override;
+ 
+     virtual HRESULT SetTransparencyMode(FrnWindowTransparencyMode mode) override;
++    virtual HRESULT SetBlurMaterial(int material, int appearance) override;
+                            
+     virtual bool IsModal();
+ 
+diff --git a/native/FerroUI.Native/src/OSX/WindowBaseImpl.mm b/native/FerroUI.Native/src/OSX/WindowBaseImpl.mm
+index dd0ba7f2b..c7c91389c 100644
+--- a/native/FerroUI.Native/src/OSX/WindowBaseImpl.mm
++++ b/native/FerroUI.Native/src/OSX/WindowBaseImpl.mm
+@@ -451,6 +451,14 @@ HRESULT WindowBaseImpl::SetTransparencyMode(FrnWindowTransparencyMode mode) {
+     return S_OK;
+ }
+ 
++HRESULT WindowBaseImpl::SetBlurMaterial(int material, int appearance) {
++    START_COM_CALL;
++
++    [StandardContainer SetBlurMaterial: material appearance: appearance];
++
++    return S_OK;
++}
++
+ HRESULT WindowBaseImpl::SetFrameThemeVariant(FrnPlatformThemeVariant variant) {
+     START_COM_CALL;
+ 

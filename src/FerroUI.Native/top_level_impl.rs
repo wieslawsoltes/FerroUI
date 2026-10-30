@@ -646,6 +646,9 @@ impl TopLevelImpl {
             DesktopAcrylicKind, MicaKind, PlatformSystemBackdropKind, SystemBackdropSupport, SystemBackdropTheme,
         };
         let Some(native) = self.native() else { return SystemBackdropSupport::None };
+        // The optional extension of a window of the native library (an older library, or a top
+        // level that is not a window, has none: the backdrop is not drawn natively).
+        let Ok(blur) = native.cast::<IFrnWindowBlurMaterial>() else { return SystemBackdropSupport::None };
         match backdrop {
             Some(backdrop) => {
                 // NSVisualEffectMaterial: windowBackground (12), underWindowBackground (21),
@@ -661,14 +664,14 @@ impl TopLevelImpl {
                     SystemBackdropTheme::Light => 1,
                     SystemBackdropTheme::Dark => 2,
                 };
-                native.set_blur_material(material, appearance).check();
+                blur.set_blur_material(material, appearance).check();
                 native.set_transparency_mode(FrnWindowTransparencyMode::Blur).check();
                 self.system_backdrop_active.set(true);
                 SystemBackdropSupport::Native
             }
             None => {
                 if self.system_backdrop_active.replace(false) {
-                    native.set_blur_material(-1, 0).check();
+                    blur.set_blur_material(-1, 0).check();
                     let level = self.transparency_level();
                     let mode = if level == WindowTransparencyLevel::transparent() {
                         FrnWindowTransparencyMode::Transparent
