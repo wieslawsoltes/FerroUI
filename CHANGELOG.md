@@ -119,6 +119,7 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ### Fixed
 
+- **Browser catalog size** (`samples/ControlCatalog`): the RTF code pages (`rtf-codepages`, `encoding_rs`) are enabled for the desktop and mobile hosts only, so the published WebAssembly module is back under its 16 MB gzip budget and the Pages deploy runs again; in the browser the catalog reads RTF in code page 1252 only.
 - **Text formatting** (R2 of #243, recorded in `docs/porting/DEVIATIONS.md`, Text formatting): runs with different font features are shaped apart; carets and bounds at the end of right-to-left lines; justification of bidi text walks the runs in logical order; leftover runs of a wrapped line are released; copied paragraph properties keep their line spacing.
 - Gaps the port of the Behaviors sample gallery found (#298):
   - markup indexes an items source: the handle `ItemsSource` is published to markup as `System.Collections.IList` (was `IEnumerable`) with the indexer, so `{Binding Items[0]}` compiles and binds, and a reflection binding reads `Items.Count` (`ferroui-controls`, `ferroui-markup-xaml-loader`);
