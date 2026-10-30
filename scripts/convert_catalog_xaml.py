@@ -44,9 +44,54 @@ REPOSITORY = b"https://github.com/wieslawsoltes/FerroUI"
 
 FORBIDDEN = re.compile(rb"avalonia|\bavn|axaml|avares", re.IGNORECASE)
 
+# The macOS appearance controls are an addition to the upstream settings page.
+MACOS_SETTINGS = b'''
+    <Border Classes="card" IsVisible="{Binding MacOSThemeSettingsVisible}">
+      <StackPanel Spacing="10">
+        <TextBlock Text="macOS 26 Appearance" FontWeight="SemiBold" />
+        <TextBlock Text="Preview the control sizes, accent and accessibility settings across the catalog."
+                   TextWrapping="Wrap" Foreground="{DynamicResource SubtleForeground}" />
+        <Grid ColumnSpacing="10" ColumnDefinitions="*,Auto">
+          <Label>Control Size</Label>
+          <ComboBox x:Name="MacOSControlSize" Grid.Column="1" SelectedIndex="{Binding MacOSControlSizeIndex}">
+            <ComboBoxItem>Mini</ComboBoxItem>
+            <ComboBoxItem>Small</ComboBoxItem>
+            <ComboBoxItem>Regular</ComboBoxItem>
+            <ComboBoxItem>Large</ComboBoxItem>
+            <ComboBoxItem>Extra Large</ComboBoxItem>
+          </ComboBox>
+        </Grid>
+        <Grid ColumnSpacing="10" ColumnDefinitions="*,Auto">
+          <Label>Accent</Label>
+          <ComboBox x:Name="MacOSAccent" Grid.Column="1" SelectedIndex="{Binding MacOSAccentIndex}">
+            <ComboBoxItem>System</ComboBoxItem>
+            <ComboBoxItem>Blue</ComboBoxItem>
+            <ComboBoxItem>Purple</ComboBoxItem>
+            <ComboBoxItem>Pink</ComboBoxItem>
+            <ComboBoxItem>Red</ComboBoxItem>
+            <ComboBoxItem>Orange</ComboBoxItem>
+            <ComboBoxItem>Yellow</ComboBoxItem>
+            <ComboBoxItem>Green</ComboBoxItem>
+            <ComboBoxItem>Graphite</ComboBoxItem>
+          </ComboBox>
+        </Grid>
+        <CheckBox x:Name="MacOSReduceMotion" Content="Reduce Motion" IsChecked="{Binding MacOSReduceMotion}" />
+        <CheckBox x:Name="MacOSReduceTransparency" Content="Reduce Transparency" IsChecked="{Binding MacOSReduceTransparency}" />
+        <CheckBox x:Name="MacOSIncreaseContrast" Content="Increase Contrast" IsChecked="{Binding MacOSIncreaseContrast}" />
+        <CheckBox x:Name="MacOSWindowActive" Content="Active Window" IsChecked="{Binding MacOSWindowActive}" />
+      </StackPanel>
+    </Border>
+'''[1:]
+
 # The lines this project adds to converted documents: (path relative to the sample, anchor line of
 # the converted text, the lines inserted after it, why).
 ADDITIONS = [
+    (
+        "Pages/SettingsPage.xaml",
+        b'                  ToolTip.Tip="Window State"/>\n      </Grid>\n    </Border>\n',
+        MACOS_SETTINGS,
+        "live macOS 26 theme preview settings, visible when the optional macos-theme is selected",
+    ),
     (
         "App.xaml",
         b"      <!-- Styles attached dynamically depending on current theme (simple or fluent) -->\n",
@@ -77,9 +122,26 @@ ADDITIONS = [
     ),
 ]
 
+ADDITIONS += [
+    (
+        "TransparentStyles.xaml",
+        b'    <SolidColorBrush x:Key="ExpanderHeaderBackgroundPressed" Color="#66808080" />\n',
+        b"    <!-- Not in upstream: the pane of the NavigationView shell, where upstream's drawer page had its\n"
+        b"         DrawerBackground. -->\n"
+        b'    <SolidColorBrush x:Key="NavigationViewDefaultPaneBackground" Color="Transparent" />\n'
+        b'    <SolidColorBrush x:Key="NavigationViewExpandedPaneBackground" Color="Transparent" />\n',
+        "the shell of the catalog is a NavigationView (MainView.xaml): its pane is transparent",
+    ),
+]
+
 # The lines this project removes from converted documents (after the additions): (path relative to
 # the sample, the lines, why). Each is in the converted text once.
 REMOVALS = [
+    (
+        "TransparentStyles.xaml",
+        b'    <Setter Property="DrawerBackground" Value="Transparent" />\n',
+        "the shell of the catalog is a NavigationView (MainView.xaml), not a drawer page",
+    ),
     (
         "App.xaml",
         b'      <FluentTheme x:Key="FluentTheme" />\n      <SimpleTheme x:Key="SimpleTheme" />\n',
@@ -100,10 +162,41 @@ REMOVALS = [
     ),
 ]
 
+# The control themes this project removes from converted documents: (path relative to the sample,
+# the key of the control theme, why). The theme is removed from the line before its `<ControlTheme`
+# (a blank line) to its `</ControlTheme>`.
+REMOVED_CONTROL_THEMES = [
+    ("CustomThemes.xaml", "SelectableItemButton", "the entries of upstream's drawer; the shell is a NavigationView"),
+    ("CustomThemes.xaml", "HomeSectionExpander", "the sections of upstream's drawer; the shell is a NavigationView"),
+]
+
+# The converted documents this project replaces with documents of its own: (path relative to the
+# sample, why). `--check` does not compare them with their conversion.
+REPLACED_DOCUMENTS = [
+    (
+        "MainView.xaml",
+        "the shell of the catalog is a NavigationView (docs/porting/winui-controls.md), where upstream's is a drawer page",
+    ),
+]
+
 # The markup files of the catalog that are the port's own: (path relative to the sample, why).
 PORT_DOCUMENTS = [
     ("ClassicThemes.xaml", "the Fluent and Simple themes of the original, with the feature classic-themes only"),
+    ("ClassicShell/Fluent.xaml", "the control themes of the NavigationView shell and its Frame for the Fluent theme, which has none (docs/porting/winui-controls.md, \"The ControlCatalog shell\")"),
+    ("ClassicShell/Simple.xaml", "the control themes of the NavigationView shell and its Frame for the Simple theme, which has none (docs/porting/winui-controls.md, \"The ControlCatalog shell\")"),
     ("Pages/TreeDataGridPage.xaml", "the page of the TreeDataGrid demo of the port"),
+    ("Pages/InkCanvasPage.xaml", "the page of the InkCanvas of the port"),
+    ("Pages/InkToolbarPage.xaml", "the page of the InkToolbar of the port"),
+    ("Pages/InfoBadgePage.xaml", "the page of WinUI's InfoBadge (docs/porting/winui-controls.md)"),
+    ("Pages/InfoBarPage.xaml", "the page of WinUI's InfoBar (docs/porting/winui-controls.md)"),
+    ("Pages/ProgressRingPage.xaml", "the page of WinUI's ProgressRing (docs/porting/winui-controls.md)"),
+    ("Pages/NumberBoxPage.xaml", "the page of WinUI's NumberBox (docs/porting/winui-controls.md)"),
+    ("Pages/RadioButtonsPage.xaml", "the page of WinUI's RadioButtons (docs/porting/winui-controls.md)"),
+    ("Pages/RatingControlPage.xaml", "the page of WinUI's RatingControl (docs/porting/winui-controls.md)"),
+    ("Pages/AutoSuggestBoxPage.xaml", "the page of WinUI's AutoSuggestBox (docs/porting/winui-controls.md)"),
+    ("Pages/NavigationViewPage.xaml", "the page of WinUI's NavigationView with a Frame (docs/porting/winui-controls.md)"),
+    ("Pages/IconElementPage.xaml", "the page of the icons of WinUI (SymbolIcon, FontIcon; docs/porting/winui-controls.md)"),
+    ("Pages/ItemsRepeaterPage.xaml", "the page of the ItemsRepeater of the port"),
     ("Pages/VisualStatesPage.xaml", "the page of WinUI's visual state manager (docs/porting/winui-calculator-gaps.md)"),
 ]
 
@@ -130,6 +223,15 @@ def add(relative: str, data: bytes) -> bytes:
         if data.count(lines_text) != 1:
             raise SystemExit(f"the lines of a removal from {relative} are not in its conversion once: {lines!r}")
         data = data.replace(lines_text, b"")
+    for path, key, _why in REMOVED_CONTROL_THEMES:
+        if path != relative:
+            continue
+        start = data.find(with_line_ends(f'\n\n  <ControlTheme x:Key="{key}"'.encode()))
+        end_tag = with_line_ends(b"\n  </ControlTheme>")
+        end = data.find(end_tag, start + 1) if start >= 0 else -1
+        if start < 0 or end < 0:
+            raise SystemExit(f"the control theme {key} is not in the conversion of {relative}")
+        data = data[:start] + data[end + len(end_tag) :]
     return data
 
 
@@ -181,6 +283,8 @@ def main() -> int:
         if FORBIDDEN.search(converted) or FORBIDDEN.search(str(destination.relative_to(target)).encode()):
             print(f"upstream name left in {destination}: {FORBIDDEN.findall(converted)[:5]}")
             failed = True
+        if destination.relative_to(target).as_posix() in {path for path, _why in REPLACED_DOCUMENTS}:
+            continue
         if check:
             if not destination.exists():
                 print(f"missing: {destination}")

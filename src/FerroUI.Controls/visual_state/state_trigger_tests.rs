@@ -45,6 +45,15 @@ fn rooted(size: Size, group: impl FnOnce(&Ref<Border>) -> Ref<VisualStateGroup>)
     (root, border)
 }
 
+/// Resizes `root` as a window is resized: its client size, and its size, which sizes its content
+/// (the test root has no client-size property; a window raises `ClientSize`).
+fn resize(root: &TestRoot, size: Size) {
+    root.set_client_size(size);
+    root.set_width(size.width);
+    root.set_height(size.height);
+    root.layout_manager().execute_layout_pass();
+}
+
 fn current(border: &Border) -> Option<String> {
     VisualStateManager::get_visual_state_groups(border).get(0).current_state().map(|state| state.name())
 }
@@ -92,13 +101,11 @@ fn adaptive_triggers_compare_with_the_window_and_the_larger_minimum_wins() {
     border.set_width(10.0);
     assert_eq!(current(&border).as_deref(), Some("Narrow"));
 
-    root.set_client_size(Size::new(700.0, 400.0));
-    root.execute_initial_layout_pass();
+    resize(&root, Size::new(700.0, 400.0));
     assert_eq!(current(&border).as_deref(), Some("Medium"));
     assert_eq!(border.opacity(), 0.5);
 
-    root.set_client_size(Size::new(1200.0, 400.0));
-    root.execute_initial_layout_pass();
+    resize(&root, Size::new(1200.0, 400.0));
     assert_eq!(current(&border).as_deref(), Some("Wide"));
 }
 
@@ -159,7 +166,8 @@ fn a_manual_state_holds_until_the_triggers_select_another_one() {
     let group = VisualStateManager::get_visual_state_groups(&border).get(0);
     trigger.set_is_active(true);
     assert_eq!(current(&border).as_deref(), Some("A"));
-    VisualStateManager::change_state(&border.to_ref().upcast(), &group, group.find_state("B").as_ref(), false);
+    let root: Ref<Control> = border.to_ref().upcast();
+    VisualStateManager::change_state(&root, &root, &group, group.find_state("B").as_ref(), false);
     assert_eq!(current(&border).as_deref(), Some("B"));
     // Re-evaluating with the same selection changes nothing.
     trigger.set_is_active(true);
@@ -289,13 +297,11 @@ fn a_custom_trigger_derives_from_state_trigger_base() {
     root.execute_initial_layout_pass();
     assert_eq!(current(&border), None);
 
-    root.set_client_size(Size::new(600.0, 600.0));
-    root.execute_initial_layout_pass();
+    resize(&root, Size::new(600.0, 600.0));
     assert_eq!(current(&border).as_deref(), Some("Medium"));
 
     // Both qualify: two extensible triggers rank alike, so the first in the source wins.
-    root.set_client_size(Size::new(900.0, 900.0));
-    root.execute_initial_layout_pass();
+    resize(&root, Size::new(900.0, 900.0));
     assert_eq!(current(&border).as_deref(), Some("Large"));
     assert_eq!(border.opacity(), 0.75);
 }

@@ -39,7 +39,7 @@ use crate::runtime::type_system::RuntimeType;
 use super::binding_path;
 use super::helpers::{
     boxed, enum_constant, evaluate_as, evaluate_as_own_type, exact_property_value, ferro_types, load_field,
-    load_property, object_of,
+    load_property,
 };
 use super::services::name_scope_of;
 
@@ -407,13 +407,17 @@ fn name_scope_registration(
     let name = from_markup_value::<String>(&name).ok_or_else(|| {
         runtime_error("ArgumentNullException", "Value cannot be null. (Parameter 'name')", &**node)
     })?;
-    let element = object_of(&target, &**node)?;
+    let element = target.ok_or_else(|| {
+        runtime_error("ArgumentNullException", "Value cannot be null. (Parameter 'element')", &**node)
+    })?;
     // A failed registration (a duplicate name, a completed scope) is the exception
     // of the managed original: a load error at the registration.
-    scope.try_register(&name, element).map_err(|e| {
+    scope.try_register_value(&name, element).map_err(|e| {
         let kind = match e {
-            ferroui_base::controls::NameScopeError::Completed => "InvalidOperationException",
-            ferroui_base::controls::NameScopeError::DuplicateName(_) => "ArgumentException",
+            ferroui_base::controls::NameScopeValueError::Completed => "InvalidOperationException",
+            ferroui_base::controls::NameScopeValueError::DuplicateName(_) => "ArgumentException",
+            ferroui_base::controls::NameScopeValueError::UnsupportedValue => "NotSupportedException",
+            ferroui_base::controls::NameScopeValueError::NullValue => "ArgumentNullException",
         };
         runtime_error(kind, e.to_string(), &**node)
     })?;

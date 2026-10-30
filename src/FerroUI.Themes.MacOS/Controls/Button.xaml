@@ -1,0 +1,324 @@
+<!--
+  macOS 26 control theme, adapted from the FerroUI WinUI template foundation.
+  Foundation: microsoft-ui-xaml 7e4b0c2096be402f51cc8f7d203ebf67cff183d0.
+  Copyright (c) Microsoft Corporation. MIT License; see NOTICE.md.
+  macOS geometry and states are theme calibrations against Apple's WWDC25
+  AppKit design guidance; exact native rendering remains a comparison gate.
+  FerroUI template parts, bindings and routed interaction are preserved.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <StackPanel Spacing="20">
+        <Button Content="Default" />
+        <Button Theme="{StaticResource AccentButtonStyle}" Content="Accent" />
+        <Button Theme="{StaticResource SubtleButtonStyle}" Content="Subtle" />
+        <Button IsEnabled="False" Content="Disabled" />
+      </StackPanel>
+    </Border>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="DefaultButtonStyle" TargetType="Button">
+    <Setter Property="MinHeight" Value="{DynamicResource MacOSControlHeight}" />
+    <!-- The defaults of a WinUI 3 control, which its style leaves unset and its template binds
+         (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27). -->
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Background" Value="{DynamicResource ButtonBackground}" />
+    <Setter Property="BackgroundSizing" Value="InnerBorderEdge" />
+    <Setter Property="Foreground" Value="{DynamicResource ButtonForeground}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource ButtonBorderBrush}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource ButtonBorderThemeThickness}" />
+    <Setter Property="Padding" Value="{DynamicResource MacOSControlPadding}" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontWeight" Value="Normal" />
+    <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource MacOSControlCornerRadius}" />
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border IsHitTestVisible="False" Margin="-3" BorderThickness="3"
+                BorderBrush="{DynamicResource MacOSFocusBrush}"
+                CornerRadius="{DynamicResource MacOSControlCornerRadius}" />
+      </FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <ContentPresenter x:Name="PART_ContentPresenter"
+                          Background="{TemplateBinding Background}"
+                          Foreground="{TemplateBinding Foreground}"
+                          BackgroundSizing="{TemplateBinding BackgroundSizing}"
+                          BorderBrush="{TemplateBinding BorderBrush}"
+                          BorderThickness="{TemplateBinding BorderThickness}"
+                          Content="{TemplateBinding Content}"
+                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                          CornerRadius="{TemplateBinding CornerRadius}"
+                          Padding="{TemplateBinding Padding}"
+                          HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                          VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                          RecognizesAccessKey="True">
+          <ContentPresenter.Transitions>
+            <Transitions>
+              <BrushTransition Property="Background" Duration="{DynamicResource MacOSMotionFastDuration}" />
+              <BrushTransition Property="BorderBrush" Duration="{DynamicResource MacOSMotionFastDuration}" />
+            </Transitions>
+          </ContentPresenter.Transitions>
+        </ContentPresenter>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- PointerOver -->
+    <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource ButtonBackgroundPointerOver}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource ButtonBorderBrushPointerOver}" />
+      <Setter Property="Foreground" Value="{DynamicResource ButtonForegroundPointerOver}" />
+    </Style>
+    <!-- Pressed -->
+    <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource ButtonBackgroundPressed}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource ButtonBorderBrushPressed}" />
+      <Setter Property="Foreground" Value="{DynamicResource ButtonForegroundPressed}" />
+    </Style>
+    <!-- Disabled -->
+    <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource ButtonBackgroundDisabled}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource ButtonBorderBrushDisabled}" />
+      <Setter Property="Foreground" Value="{DynamicResource ButtonForegroundDisabled}" />
+    </Style>
+
+    <!-- The style class `accent` of the framework's controls (a FerroUI addition, DEVIATIONS.md,
+         BTN-6): a button with the class looks as one with AccentButtonStyle. -->
+    <Style Selector="^.accent">
+      <Setter Property="BackgroundSizing" Value="OuterBorderEdge" />
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource AccentButtonBackground}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentButtonBorderBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AccentButtonForeground}" />
+      </Style>
+      <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource AccentButtonBackgroundPointerOver}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentButtonBorderBrushPointerOver}" />
+        <Setter Property="Foreground" Value="{DynamicResource AccentButtonForegroundPointerOver}" />
+      </Style>
+      <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource AccentButtonBackgroundPressed}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentButtonBorderBrushPressed}" />
+        <Setter Property="Foreground" Value="{DynamicResource AccentButtonForegroundPressed}" />
+      </Style>
+      <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource AccentButtonBackgroundDisabled}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentButtonBorderBrushDisabled}" />
+        <Setter Property="Foreground" Value="{DynamicResource AccentButtonForegroundDisabled}" />
+      </Style>
+    </Style>
+    <Style Selector="^[IsDefault=True]">
+      <Setter Property="BackgroundSizing" Value="OuterBorderEdge" />
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource AccentButtonBackground}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentButtonBorderBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AccentButtonForeground}" />
+      </Style>
+      <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource AccentButtonBackgroundPointerOver}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentButtonBorderBrushPointerOver}" />
+        <Setter Property="Foreground" Value="{DynamicResource AccentButtonForegroundPointerOver}" />
+      </Style>
+      <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource AccentButtonBackgroundPressed}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentButtonBorderBrushPressed}" />
+        <Setter Property="Foreground" Value="{DynamicResource AccentButtonForegroundPressed}" />
+      </Style>
+      <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource AccentButtonBackgroundDisabled}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentButtonBorderBrushDisabled}" />
+        <Setter Property="Foreground" Value="{DynamicResource AccentButtonForegroundDisabled}" />
+      </Style>
+    </Style>
+
+    <!-- macOS 26 mini/small/regular rectangles; large sizes use capsules. -->
+    <Style Selector="^.mini">
+      <Setter Property="MinHeight" Value="18" />
+      <Setter Property="Padding" Value="7,1" />
+      <Setter Property="FontSize" Value="9" />
+      <Setter Property="CornerRadius" Value="4" />
+      <Setter Property="FocusAdorner">
+        <FocusAdornerTemplate>
+          <Border IsHitTestVisible="False" Margin="-3" BorderThickness="3"
+                  BorderBrush="{DynamicResource MacOSFocusBrush}" CornerRadius="4" />
+        </FocusAdornerTemplate>
+      </Setter>
+    </Style>
+    <Style Selector="^.small">
+      <Setter Property="MinHeight" Value="22" />
+      <Setter Property="Padding" Value="8,2" />
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="CornerRadius" Value="5" />
+      <Setter Property="FocusAdorner">
+        <FocusAdornerTemplate>
+          <Border IsHitTestVisible="False" Margin="-3" BorderThickness="3"
+                  BorderBrush="{DynamicResource MacOSFocusBrush}" CornerRadius="5" />
+        </FocusAdornerTemplate>
+      </Setter>
+    </Style>
+    <Style Selector="^.large">
+      <Setter Property="MinHeight" Value="34" />
+      <Setter Property="Padding" Value="15,5" />
+      <Setter Property="FontSize" Value="15" />
+      <Setter Property="CornerRadius" Value="999" />
+      <Setter Property="FocusAdorner">
+        <FocusAdornerTemplate>
+          <Border IsHitTestVisible="False" Margin="-3" BorderThickness="3"
+                  BorderBrush="{DynamicResource MacOSFocusBrush}" CornerRadius="999" />
+        </FocusAdornerTemplate>
+      </Setter>
+    </Style>
+    <Style Selector="^.extra-large">
+      <Setter Property="MinHeight" Value="42" />
+      <Setter Property="Padding" Value="19,7" />
+      <Setter Property="FontSize" Value="17" />
+      <Setter Property="CornerRadius" Value="999" />
+      <Setter Property="FocusAdorner">
+        <FocusAdornerTemplate>
+          <Border IsHitTestVisible="False" Margin="-3" BorderThickness="3"
+                  BorderBrush="{DynamicResource MacOSFocusBrush}" CornerRadius="999" />
+        </FocusAdornerTemplate>
+      </Setter>
+    </Style>
+  </ControlTheme>
+
+  <!-- WinUI applies the default style of a control beneath an explicit style, so the keyed
+       themes are based on the default theme (docs/porting/winui-theme.md, section 4.2). -->
+  <ControlTheme x:Key="AccentButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+    <Setter Property="Foreground" Value="{DynamicResource AccentButtonForeground}" />
+    <Setter Property="Background" Value="{DynamicResource AccentButtonBackground}" />
+    <Setter Property="BackgroundSizing" Value="OuterBorderEdge" />
+    <Setter Property="BorderBrush" Value="{DynamicResource AccentButtonBorderBrush}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource MacOSControlCornerRadius}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <ContentPresenter x:Name="PART_ContentPresenter"
+                          Background="{TemplateBinding Background}"
+                          BackgroundSizing="{TemplateBinding BackgroundSizing}"
+                          Foreground="{TemplateBinding Foreground}"
+                          BorderBrush="{TemplateBinding BorderBrush}"
+                          BorderThickness="{TemplateBinding BorderThickness}"
+                          Content="{TemplateBinding Content}"
+                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                          CornerRadius="{TemplateBinding CornerRadius}"
+                          Padding="{TemplateBinding Padding}"
+                          HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                          VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                          RecognizesAccessKey="True">
+          <ContentPresenter.Transitions>
+            <Transitions>
+              <BrushTransition Property="Background" Duration="{DynamicResource MacOSMotionFastDuration}" />
+              <BrushTransition Property="BorderBrush" Duration="{DynamicResource MacOSMotionFastDuration}" />
+            </Transitions>
+          </ContentPresenter.Transitions>
+        </ContentPresenter>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- PointerOver -->
+    <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource AccentButtonBackgroundPointerOver}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentButtonBorderBrushPointerOver}" />
+      <Setter Property="Foreground" Value="{DynamicResource AccentButtonForegroundPointerOver}" />
+    </Style>
+    <!-- Pressed -->
+    <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource AccentButtonBackgroundPressed}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentButtonBorderBrushPressed}" />
+      <Setter Property="Foreground" Value="{DynamicResource AccentButtonForegroundPressed}" />
+    </Style>
+    <!-- Disabled -->
+    <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource AccentButtonBackgroundDisabled}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentButtonBorderBrushDisabled}" />
+      <Setter Property="Foreground" Value="{DynamicResource AccentButtonForegroundDisabled}" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="SubtleButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+    <Setter Property="Background" Value="{DynamicResource SubtleButtonBackground}" />
+    <Setter Property="BackgroundSizing" Value="InnerBorderEdge" />
+    <Setter Property="Foreground" Value="{DynamicResource SubtleButtonForeground}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource SubtleButtonBorderBrush}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource ButtonBorderThemeThickness}" />
+    <Setter Property="Padding" Value="{DynamicResource MacOSControlPadding}" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontWeight" Value="Normal" />
+    <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource MacOSControlCornerRadius}" />
+
+    <!-- The template of the source is the one of DefaultButtonStyle, which this theme is based on. -->
+
+    <!-- PointerOver -->
+    <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource SubtleButtonBackgroundPointerOver}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource SubtleButtonBorderBrushPointerOver}" />
+      <Setter Property="Foreground" Value="{DynamicResource SubtleButtonForegroundPointerOver}" />
+    </Style>
+    <!-- Pressed -->
+    <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource SubtleButtonBackgroundPressed}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource SubtleButtonBorderBrushPressed}" />
+      <Setter Property="Foreground" Value="{DynamicResource SubtleButtonForegroundPressed}" />
+    </Style>
+    <!-- Disabled -->
+    <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource SubtleButtonBackgroundDisabled}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource SubtleButtonBorderBrushDisabled}" />
+      <Setter Property="Foreground" Value="{DynamicResource SubtleButtonForegroundDisabled}" />
+    </Style>
+  </ControlTheme>
+
+  <!-- TextBlockButtonStyle of generic.xaml: a button that looks like a hyperlink without an underline. -->
+  <ControlTheme x:Key="TextBlockButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+    <Setter Property="Background" Value="{DynamicResource HyperlinkButtonBackground}" />
+    <Setter Property="Foreground" Value="{DynamicResource HyperlinkButtonForeground}" />
+    <Setter Property="MinWidth" Value="0" />
+    <Setter Property="MinHeight" Value="0" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel Margin="{TemplateBinding Padding}" Background="{TemplateBinding Background}">
+          <ContentPresenter x:Name="PART_ContentPresenter"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                            RecognizesAccessKey="True" />
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- PointerOver -->
+    <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Foreground" Value="{DynamicResource HyperlinkButtonForegroundPointerOver}" />
+      <Setter Property="Background" Value="{DynamicResource HyperlinkButtonBackgroundPointerOver}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource HyperlinkButtonBorderBrushPointerOver}" />
+    </Style>
+    <!-- Pressed -->
+    <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Foreground" Value="{DynamicResource HyperlinkButtonForegroundPressed}" />
+      <Setter Property="Background" Value="{DynamicResource HyperlinkButtonBackgroundPressed}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource HyperlinkButtonBorderBrushPressed}" />
+    </Style>
+    <!-- Disabled -->
+    <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Foreground" Value="{DynamicResource HyperlinkButtonForegroundDisabled}" />
+      <Setter Property="Background" Value="{DynamicResource HyperlinkButtonBackgroundDisabled}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource HyperlinkButtonBorderBrushDisabled}" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="MacOSPrimaryButtonStyle" TargetType="Button" BasedOn="{StaticResource AccentButtonStyle}" />
+  <ControlTheme x:Key="MacOSBorderlessButtonStyle" TargetType="Button" BasedOn="{StaticResource SubtleButtonStyle}" />
+
+  <ControlTheme x:Key="{x:Type Button}" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}" />
+</ResourceDictionary>

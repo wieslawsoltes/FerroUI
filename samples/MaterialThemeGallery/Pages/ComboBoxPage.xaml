@@ -1,0 +1,95 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:data="using:FerroUI.Data"
+             x:Class="MaterialThemeGallery.Pages.ComboBoxPage">
+  <!-- ComboBox closed in its states, and ComboBoxItem in its states in a border with the
+       brushes of the drop-down, as the open drop-down shows them (a picture of a page does not
+       hold its popups). The native counterpart is ComboBoxPage.winui.xml. The editable combo box
+       has no text: WinUI's ComboBox drops a Text set in markup before its editable text box is
+       loaded, so the native side cannot show one. -->
+  <StackPanel Margin="24" Spacing="12">
+    <TextBlock Text="Combo box" FontSize="28" FontWeight="SemiBold" />
+
+    <TextBlock Text="ComboBox" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+    <Grid ColumnSpacing="16" RowSpacing="12" HorizontalAlignment="Left">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="160" />
+        <ColumnDefinition Width="240" />
+      </Grid.ColumnDefinitions>
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+      </Grid.RowDefinitions>
+
+      <TextBlock Grid.Row="0" Text="Placeholder" VerticalAlignment="Center" />
+      <ComboBox Grid.Row="0" Grid.Column="1" Width="240" PlaceholderText="Pick a colour">
+        <ComboBoxItem Content="Red" />
+        <ComboBoxItem Content="Green" />
+        <ComboBoxItem Content="Blue" />
+      </ComboBox>
+
+      <TextBlock Grid.Row="1" Text="Selected item" VerticalAlignment="Center" />
+      <ComboBox Grid.Row="1" Grid.Column="1" Width="240" SelectedIndex="1">
+        <ComboBoxItem Content="Red" />
+        <ComboBoxItem Content="Green" />
+        <ComboBoxItem Content="Blue" />
+      </ComboBox>
+
+      <TextBlock Grid.Row="2" Text="Pointer over" VerticalAlignment="Center" />
+      <ComboBox Grid.Row="2" Grid.Column="1" Width="240" SelectedIndex="1" Classes="force-pointerover">
+        <ComboBoxItem Content="Red" />
+        <ComboBoxItem Content="Green" />
+        <ComboBoxItem Content="Blue" />
+      </ComboBox>
+
+      <TextBlock Grid.Row="3" Text="Disabled" VerticalAlignment="Center" />
+      <ComboBox Grid.Row="3" Grid.Column="1" Width="240" SelectedIndex="1" IsEnabled="False">
+        <ComboBoxItem Content="Red" />
+        <ComboBoxItem Content="Green" />
+        <ComboBoxItem Content="Blue" />
+      </ComboBox>
+
+      <TextBlock Grid.Row="4" Text="Editable" VerticalAlignment="Center" />
+      <ComboBox Grid.Row="4" Grid.Column="1" Width="240" IsEditable="True">
+        <ComboBoxItem Content="Red" />
+        <ComboBoxItem Content="Green" />
+        <ComboBoxItem Content="Blue" />
+      </ComboBox>
+
+      <TextBlock Grid.Row="5" Text="Validation error" VerticalAlignment="Top" Margin="0,6,0,0" />
+      <ComboBox Grid.Row="5" Grid.Column="1" Width="240" PlaceholderText="Pick a colour">
+        <DataValidationErrors.Error>
+          <data:DataValidationException>
+            <x:Arguments>
+              <x:String>Pick a colour.</x:String>
+            </x:Arguments>
+          </data:DataValidationException>
+        </DataValidationErrors.Error>
+        <ComboBoxItem Content="Red" />
+        <ComboBoxItem Content="Green" />
+        <ComboBoxItem Content="Blue" />
+      </ComboBox>
+    </Grid>
+
+    <TextBlock Text="ComboBoxItem" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+    <Border Width="240"
+            HorizontalAlignment="Left"
+            Padding="0,4"
+            CornerRadius="8"
+            BorderThickness="1"
+            Background="{DynamicResource ComboBoxDropDownBackground}"
+            BorderBrush="{DynamicResource ComboBoxDropDownBorderBrush}">
+      <StackPanel>
+        <ComboBoxItem Content="Normal" />
+        <ComboBoxItem Content="Selected" IsSelected="True" />
+        <ComboBoxItem Content="Pointer over" Classes="force-pointerover" />
+        <ComboBoxItem Content="Pressed" Classes="force-pressed" />
+        <ComboBoxItem Content="Disabled" IsEnabled="False" />
+      </StackPanel>
+    </Border>
+  </StackPanel>
+</UserControl>

@@ -1,0 +1,41 @@
+<!-- AndroidX Material3 1.5.0-beta02 SheetBottomTokens / BottomSheet.kt.
+     In-window modal host. Host supplies safe system/keyboard insets. -->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:material="using:FerroUI.Themes.Material">
+  <ControlTheme x:Key="{x:Type material:MaterialBottomSheetHost}" TargetType="material:MaterialBottomSheetHost">
+    <Setter Property="Background" Value="{DynamicResource MaterialSurfaceContainerLowBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceBrush}" />
+    <Setter Property="CornerRadius" Value="28,28,0,0" />
+    <Setter Property="ClipToBounds" Value="True" />
+    <Setter Property="ReducedMotion" Value="{DynamicResource MaterialReducedMotion}" />
+    <Setter Property="MotionScheme" Value="{DynamicResource MaterialMotionScheme}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid>
+          <Border Name="PART_Scrim" Background="{DynamicResource MaterialScrimBrush}" Opacity="0" />
+          <Grid Margin="{TemplateBinding SafeInsets}" IsHitTestVisible="True">
+            <Border Name="PART_Sheet" MaxWidth="640" VerticalAlignment="Top" HorizontalAlignment="Stretch"
+                    Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}"
+                    ClipToBounds="True" AutomationProperties.ControlTypeOverride="Pane">
+              <Grid RowDefinitions="48,*">
+                <Border Name="PART_DragHandle" Background="Transparent" MinHeight="48" Cursor="SizeNorthSouth"
+                        AutomationProperties.Name="Drag sheet">
+                  <Border Width="32" Height="4" CornerRadius="2" IsHitTestVisible="False"
+                          Background="{DynamicResource MaterialOnSurfaceVariantBrush}" />
+                </Border>
+                <ScrollViewer Name="PART_ContentScroll" Grid.Row="1" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                  <ContentPresenter Name="PART_ContentPresenter" Content="{TemplateBinding Content}"
+                                    ContentTemplate="{TemplateBinding ContentTemplate}"
+                                    Padding="{TemplateBinding Padding}"
+                                    HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                    VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+                </ScrollViewer>
+              </Grid>
+            </Border>
+          </Grid>
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

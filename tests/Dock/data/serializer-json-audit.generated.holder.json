@@ -1,0 +1,26 @@
+{
+  "$id": "1",
+  "Content": {
+    "$type": "GeneratedPayload",
+    "$id": "1",
+    "Name": "alpha",
+    "Self": {
+      "$ref": "1"
+    }
+  },
+  "Other": {
+    "$type": "GeneratedPayload",
+    "$id": "1",
+    "Name": "alpha",
+    "Self": {
+      "$ref": "1"
+    }
+  },
+  "Typed": {
+    "$id": "2",
+    "Name": "alpha",
+    "Self": {
+      "$ref": "2"
+    }
+  }
+}

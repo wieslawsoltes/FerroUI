@@ -1,0 +1,3 @@
+<m:DockCapabilityPolicy xmlns="https://github.com/ferroui"
+                        xmlns:m="using:FerroDock.Model.Core"
+                        CanClose="False" CanFloat="True" />

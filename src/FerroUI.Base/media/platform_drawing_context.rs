@@ -1,6 +1,7 @@
 use super::drawing_context::IDrawingContextCore;
 use super::immediate_drawing_context::ImmediateDrawingContext;
 use crate::media::immutable::ImmutableSolidColorBrush;
+use crate::media::imaging::BitmapBlendingMode;
 use crate::media::{
     BoxShadows, EffectExtensions, Geometry, GlyphRun, IBrush, IEffect, IExperimentalAcrylicMaterial, IPen,
     RenderOptions, TextOptions,
@@ -148,6 +149,14 @@ impl IDrawingContextCore for PlatformDrawingContext<'_> {
 
     fn push_opacity_core(&mut self, opacity: f64) {
         self.platform_impl.get().push_opacity(opacity, None);
+    }
+
+    fn try_push_compositing_layer_core(&mut self, blend: BitmapBlendingMode, opacity: f64, bounds: Rect) -> bool {
+        self.platform_impl.get().try_push_compositing_layer(blend, opacity, bounds)
+    }
+
+    fn pop_compositing_layer_core(&mut self) {
+        self.platform_impl.get().pop_compositing_layer();
     }
 
     fn push_opacity_mask_core(&mut self, mask: &Rc<dyn IBrush>, bounds: Rect) {

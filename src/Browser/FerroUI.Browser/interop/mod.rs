@@ -11,6 +11,7 @@
 //! crosses from one thread of the module to another, and asks the script
 //! only for what the runtime carried to the main thread.
 
+pub mod accessibility_helper;
 pub mod canvas_helper;
 pub mod completion_helper;
 pub mod dom_helper;

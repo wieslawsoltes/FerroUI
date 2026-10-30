@@ -1,0 +1,5 @@
+polymorphic-nearest-registered-class	1
+polymorphic-nearest-actual-shared-listener	1
+polymorphic-nearest-self-reference	1
+polymorphic-ambiguous-interface-ancestors-rejected	1
+polymorphic-exact-beats-ambiguous-ancestors	1

@@ -198,7 +198,7 @@ pub(crate) fn evaluate_group(group: &Ref<VisualStateGroup>) {
             }
         }
         None => {
-            VisualStateManager::change_state(&control, group, winner.as_ref(), true);
+            VisualStateManager::change_state(&control, &root, group, winner.as_ref(), true);
         }
     }
 }

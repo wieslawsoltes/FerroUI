@@ -1,0 +1,22 @@
+<Grid xmlns="https://github.com/ferroui"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:o="using:FerroDock.Ferro.Controls.Overlays"
+      x:DataType="Grid" x:CompileBindings="True">
+  <Grid.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="ferres://FerroDock.Ferro.Themes.Fluent/Accents/Fluent.xaml" />
+        <ResourceInclude Source="ferres://FerroDock.Ferro.Themes.Fluent/Controls/BusyOverlayControl.xaml" />
+        <ResourceInclude Source="ferres://FerroDock.Ferro.Themes.Fluent/Controls/DialogOverlayControl.xaml" />
+        <ResourceInclude Source="ferres://FerroDock.Ferro.Themes.Fluent/Controls/ConfirmationOverlayControl.xaml" />
+        <ResourceInclude Source="ferres://FerroDock.Ferro.Themes.Fluent/Controls/OverlayDataTemplates.xaml" />
+        <ResourceInclude Source="ferres://FerroDock.Ferro.Themes.Fluent/Controls/DialogShellControl.xaml" />
+        <ResourceInclude Source="ferres://FerroDock.Ferro.Themes.Fluent/Controls/ConfirmationDialogControl.xaml" />
+        <ResourceInclude Source="ferres://FerroDock.Ferro.Themes.Fluent/DensityStyles/Compact.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </Grid.Resources>
+  <o:BusyOverlayControl x:DataType="o:BusyOverlayControl"><Border /></o:BusyOverlayControl>
+  <o:DialogOverlayControl x:DataType="o:DialogOverlayControl"><Border /></o:DialogOverlayControl>
+  <o:ConfirmationOverlayControl x:DataType="o:ConfirmationOverlayControl"><Border /></o:ConfirmationOverlayControl>
+</Grid>

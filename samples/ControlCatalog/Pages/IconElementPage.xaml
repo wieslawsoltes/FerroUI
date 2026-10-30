@@ -1,0 +1,63 @@
+<ContentPage Theme="{StaticResource ScrollPage}" xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Header="IconElement"
+             x:Class="ControlCatalog.Pages.IconElementPage">
+  <!-- Not from upstream: the icons of WinUI that FerroUI ports as controls (SymbolIcon, FontIcon;
+       docs/porting/winui-controls.md) beside PathIcon. Their templates are in the WinUI theme and
+       the macOS and Material themes derived from it. The glyphs are drawn in the font of the
+       resource SymbolThemeFontFamily: Segoe Fluent Icons on Windows, the catalog's own
+       FerroUI Catalog Symbols elsewhere (set by the application, app.rs). -->
+  <StackPanel Orientation="Vertical" Spacing="4" MaxWidth="800">
+    <TextBlock Margin="2" Classes="h2" TextWrapping="Wrap">Icons draw a glyph of a symbol font (SymbolIcon, FontIcon) or a geometry (PathIcon) in the foreground of the control.</TextBlock>
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">SymbolIcon</TextBlock>
+    <TextBlock Margin="2" TextWrapping="Wrap">A predefined symbol of WinUI's Symbol enumeration, drawn at 20 px.</TextBlock>
+    <WrapPanel Margin="2" ItemSpacing="24" LineSpacing="12">
+      <StackPanel Spacing="4"><SymbolIcon Symbol="Accept" /><TextBlock FontSize="12" Text="Accept" /></StackPanel>
+      <StackPanel Spacing="4"><SymbolIcon Symbol="Cancel" /><TextBlock FontSize="12" Text="Cancel" /></StackPanel>
+      <StackPanel Spacing="4"><SymbolIcon Symbol="Add" /><TextBlock FontSize="12" Text="Add" /></StackPanel>
+      <StackPanel Spacing="4"><SymbolIcon Symbol="Find" /><TextBlock FontSize="12" Text="Find" /></StackPanel>
+      <StackPanel Spacing="4"><SymbolIcon Symbol="Home" /><TextBlock FontSize="12" Text="Home" /></StackPanel>
+      <StackPanel Spacing="4"><SymbolIcon Symbol="Mail" /><TextBlock FontSize="12" Text="Mail" /></StackPanel>
+      <StackPanel Spacing="4"><SymbolIcon Symbol="Folder" /><TextBlock FontSize="12" Text="Folder" /></StackPanel>
+      <StackPanel Spacing="4"><SymbolIcon Symbol="Setting" /><TextBlock FontSize="12" Text="Setting" /></StackPanel>
+      <StackPanel Spacing="4"><SymbolIcon Symbol="Favorite" /><TextBlock FontSize="12" Text="Favorite" /></StackPanel>
+      <StackPanel Spacing="4"><SymbolIcon Symbol="SolidStar" /><TextBlock FontSize="12" Text="SolidStar" /></StackPanel>
+      <StackPanel Spacing="4"><SymbolIcon Symbol="Refresh" /><TextBlock FontSize="12" Text="Refresh" /></StackPanel>
+      <StackPanel Spacing="4"><SymbolIcon Symbol="Cut" /><TextBlock FontSize="12" Text="Cut" /></StackPanel>
+      <StackPanel Spacing="4"><SymbolIcon Symbol="Copy" /><TextBlock FontSize="12" Text="Copy" /></StackPanel>
+      <StackPanel Spacing="4"><SymbolIcon Symbol="Paste" /><TextBlock FontSize="12" Text="Paste" /></StackPanel>
+      <StackPanel Spacing="4"><SymbolIcon Symbol="Undo" /><TextBlock FontSize="12" Text="Undo" /></StackPanel>
+      <StackPanel Spacing="4"><SymbolIcon Symbol="Redo" /><TextBlock FontSize="12" Text="Redo" /></StackPanel>
+      <StackPanel Spacing="4"><SymbolIcon Symbol="Accept" Foreground="Green" /><TextBlock FontSize="12" Text="Foreground" /></StackPanel>
+    </WrapPanel>
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">FontIcon</TextBlock>
+    <TextBlock Margin="2" TextWrapping="Wrap">Any glyph of a font, at the font size of the icon (20 by default). A glyph mirrored when right to left turns in a right-to-left flow.</TextBlock>
+    <Grid Margin="2" ColumnDefinitions="Auto,200" RowDefinitions="Auto,Auto">
+      <TextBlock Grid.Row="0" VerticalAlignment="Center" Margin="2">FontSize:</TextBlock>
+      <Slider Grid.Row="0" Grid.Column="1" x:Name="FontIconSize" Minimum="12" Maximum="64" Value="32" Margin="2" />
+      <TextBlock Grid.Row="1" VerticalAlignment="Center" Margin="2">MirroredWhenRightToLeft:</TextBlock>
+      <CheckBox Grid.Row="1" Grid.Column="1" x:Name="FontIconMirrored" IsChecked="True" Margin="2" />
+    </Grid>
+    <StackPanel Margin="2" Orientation="Horizontal" Spacing="24">
+      <FontIcon Glyph="&#xE710;" FontSize="{Binding #FontIconSize.Value}" />
+      <FontIcon Glyph="&#xE721;" FontSize="{Binding #FontIconSize.Value}" Foreground="{DynamicResource SystemAccentColor}" />
+      <FontIcon Glyph="&#xE72D;" FontSize="{Binding #FontIconSize.Value}" />
+      <Border FlowDirection="RightToLeft" BorderThickness="1" BorderBrush="Gray" Padding="8,0">
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <FontIcon Glyph="&#xE72D;" FontSize="{Binding #FontIconSize.Value}"
+                    MirroredWhenRightToLeft="{Binding #FontIconMirrored.IsChecked}" />
+          <TextBlock VerticalAlignment="Center" Text="right to left" />
+        </StackPanel>
+      </Border>
+    </StackPanel>
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">PathIcon</TextBlock>
+    <TextBlock Margin="2" TextWrapping="Wrap">A geometry scaled into the icon, for comparison.</TextBlock>
+    <StackPanel Margin="2" Orientation="Horizontal" Spacing="24">
+      <PathIcon Data="M12,2L15,9L22,9L16.5,13.5L18.5,21L12,16.5L5.5,21L7.5,13.5L2,9L9,9Z" />
+      <PathIcon Width="32" Height="32" Data="M12,2L15,9L22,9L16.5,13.5L18.5,21L12,16.5L5.5,21L7.5,13.5L2,9L9,9Z" />
+    </StackPanel>
+  </StackPanel>
+</ContentPage>

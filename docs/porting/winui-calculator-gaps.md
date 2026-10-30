@@ -252,13 +252,13 @@ controls call it from `on_apply_template` with `use_transitions == false`, as Wi
 
 ### 5.4 Names: setter targets and storyboard targets
 
-- The `VisualStateGroupCollection` keeps the namescope of the document or template that loaded it
-  (the `INameScope` of the markup's service provider). Targets are resolved in it when a state is
-  first entered, so a name declared after the groups resolves (forward references are the rule:
-  the groups are the first child of the root). That is the template namescope for a template and
-  the page namescope for a user control, as in WinUI.
-- Groups built in Rust (no namescope captured) resolve in `NameScope::find_name_scope` of the
-  root.
+- A setter keeps the name of its target (`TargetPropertyPath.TargetName`). The name is resolved
+  each time the state applies, so a name declared after the groups resolves (forward references
+  are the rule: the groups are the first child of the root). For groups on the root of a template
+  it is found among the elements of the template (the root and its template descendants); else in
+  the nearest name scope of the root of the states and its logical ancestors, the page namescope
+  for a user control, as in WinUI (`winui-controls.md`, VSM-D7).
+- An explicit target object (`TargetPropertyPath.Target`, set in Rust) is used as it is.
 - A target that does not resolve: the setter or animation is skipped and a warning is logged
   (WinUI raises an error at run time); the compiler reports it as an error when it can see the
   namescope (5.9).

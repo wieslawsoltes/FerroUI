@@ -1,0 +1,89 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/CommonStyles/TextBlock_themeresources.xaml (the styles; its resources are
+    Resources/TextBlock_themeresources.xaml)
+    controls/dev/CommonStyles/TextBlock_themeresources_v2.5.xaml (BodyStrongTextBlockStyle,
+    TitleLargeTextBlockStyle and DisplayTextBlockStyle, which replace the ones of the document
+    above in the merged theme; its resources are Resources/TextBlock_themeresources_v2.5.xaml)
+    dxaml/xcp/dxaml/themes/generic.xaml (HeaderTextBlockStyle and SubheaderTextBlockStyle, the
+    two styles of the type ramp of the platform theme that the controls library does not replace)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  The keyed styles of TextBlock are keyed control themes of TextBlock: a WinUI application writes
+  Style="{StaticResource BodyTextBlockStyle}", a FerroUI one Theme="{StaticResource
+  BodyTextBlockStyle}" (docs/porting/winui-theme.md, section 4.2). The font family
+  XamlAutoFontFamily is the value of ContentControlThemeFontFamily (section 3.5).
+  TextLineBounds is FerroUI's TextBlock.TextLineBounds (an addition after WinUI's).
+  LineStackingStrategy and OpticalMarginAlignment have no counterpart in FerroUI's TextBlock and
+  are left out.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <StackPanel Spacing="10">
+        <TextBlock Theme="{StaticResource DisplayTextBlockStyle}" Text="Display" />
+        <TextBlock Theme="{StaticResource TitleLargeTextBlockStyle}" Text="Title large" />
+        <TextBlock Theme="{StaticResource TitleTextBlockStyle}" Text="Title" />
+        <TextBlock Theme="{StaticResource SubtitleTextBlockStyle}" Text="Subtitle" />
+        <TextBlock Theme="{StaticResource BodyLargeTextBlockStyle}" Text="Body large" />
+        <TextBlock Theme="{StaticResource BodyStrongTextBlockStyle}" Text="Body strong" />
+        <TextBlock Theme="{StaticResource BodyTextBlockStyle}" Text="Body" />
+        <TextBlock Theme="{StaticResource CaptionTextBlockStyle}" Text="Caption" />
+      </StackPanel>
+    </Border>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="BaseTextBlockStyle" TargetType="TextBlock">
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontSize" Value="{StaticResource BodyTextBlockFontSize}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+    <Setter Property="TextLineBounds" Value="Full" />
+  </ControlTheme>
+  <ControlTheme x:Key="CaptionTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+    <Setter Property="FontSize" Value="{StaticResource CaptionTextBlockFontSize}" />
+    <Setter Property="FontWeight" Value="Normal" />
+  </ControlTheme>
+  <ControlTheme x:Key="BodyTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+    <Setter Property="FontWeight" Value="Normal" />
+  </ControlTheme>
+  <!-- TextBlock_themeresources_v2.5.xaml -->
+  <ControlTheme x:Key="BodyStrongTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+    <Setter Property="FontSize" Value="{StaticResource BodyStrongTextBlockFontSize}" />
+  </ControlTheme>
+  <ControlTheme x:Key="BodyLargeTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+    <Setter Property="FontWeight" Value="Normal" />
+    <Setter Property="FontSize" Value="{StaticResource BodyLargeTextBlockFontSize}" />
+  </ControlTheme>
+  <ControlTheme x:Key="BodyLargeStrongTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+    <Setter Property="FontSize" Value="{StaticResource BodyLargeTextBlockFontSize}" />
+  </ControlTheme>
+  <ControlTheme x:Key="SubtitleTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+    <Setter Property="FontSize" Value="{StaticResource SubtitleTextBlockFontSize}" />
+  </ControlTheme>
+  <ControlTheme x:Key="TitleTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+    <Setter Property="FontSize" Value="{StaticResource TitleTextBlockFontSize}" />
+  </ControlTheme>
+  <!-- TextBlock_themeresources_v2.5.xaml -->
+  <ControlTheme x:Key="TitleLargeTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+    <Setter Property="FontSize" Value="{StaticResource TitleLargeTextBlockFontSize}" />
+  </ControlTheme>
+  <!-- TextBlock_themeresources_v2.5.xaml -->
+  <ControlTheme x:Key="DisplayTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+    <Setter Property="FontSize" Value="{StaticResource DisplayTextBlockFontSize}" />
+  </ControlTheme>
+
+  <!-- generic.xaml -->
+  <ControlTheme x:Key="HeaderTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+    <Setter Property="FontSize" Value="46" />
+    <Setter Property="FontWeight" Value="Light" />
+  </ControlTheme>
+  <ControlTheme x:Key="SubheaderTextBlockStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+    <Setter Property="FontSize" Value="34" />
+    <Setter Property="FontWeight" Value="Light" />
+  </ControlTheme>
+</ResourceDictionary>

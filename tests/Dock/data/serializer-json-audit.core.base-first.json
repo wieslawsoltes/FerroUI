@@ -1,0 +1,11 @@
+{
+  "$id": "1",
+  "Policy": {
+    "$id": "2",
+    "CanFloat": false,
+    "CanDrop": true
+  },
+  "Overrides": {
+    "$ref": "2"
+  }
+}

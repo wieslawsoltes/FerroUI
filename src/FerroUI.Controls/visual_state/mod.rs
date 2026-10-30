@@ -20,4 +20,6 @@ pub use state_trigger_base::{AdaptiveTrigger, StateTrigger, StateTriggerBase};
 pub use visual_state::VisualState;
 pub use visual_state_changed_event_args::VisualStateChangedEventArgs;
 pub use visual_state_group::VisualStateGroup;
-pub use visual_state_manager::{VisualStateGroupCollection, VisualStateManager, VisualStateManagerImpl};
+pub use visual_state_manager::{
+    VisualStateGroupCollection, VisualStateManager, VisualStateManagerImpl, VisualStateManagerImplExt, VisualStateManagerVTable,
+};

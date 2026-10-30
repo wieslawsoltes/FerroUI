@@ -1,0 +1,9 @@
+<core:DockWindowOptions xmlns="https://github.com/avaloniaui"
+ xmlns:core="clr-namespace:Dock.Model.Core;assembly=Dock.Model"
+ xmlns:model="clr-namespace:Dock.Model.ReactiveUI.Core;assembly=Dock.Model.ReactiveUI"
+ OwnerMode="-19" IsModal="True" ShowInTaskbar="False">
+ <core:DockWindowOptions.ParentWindow>
+  <model:DockWindow Id="numeric-parent" Title="Numeric parent" OwnerMode="-2147483648"
+   WindowState="2147483647" Topmost="True" />
+ </core:DockWindowOptions.ParentWindow>
+</core:DockWindowOptions>

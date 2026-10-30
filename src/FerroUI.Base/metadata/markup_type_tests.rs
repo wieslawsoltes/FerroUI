@@ -18,6 +18,19 @@ fn unbox<T: Clone + 'static>(value: &MarkupValue) -> T {
     from_markup_value::<T>(value).expect("value of the expected type")
 }
 
+#[test]
+fn numeric_enum_factory_is_explicit_compiler_metadata_and_empty_by_default() {
+    let value=MarkupType::new("Numeric",MarkupTypeKind::Enum,"fixture");
+    crate::__ferro_compiler_metadata! {
+        assert!(value.enum_i32_factory.is_none());
+        let mut declared=MarkupType::new("Numeric",MarkupTypeKind::Enum,"fixture");
+        declared.enum_i32_factory=Some("__from_i32");
+        assert_eq!(declared.enum_i32_factory,Some("__from_i32"));
+    }
+    assert!(value.enum_members.is_empty());
+    assert!(!value.is_flags);
+}
+
 // A value type: handle, parse, constructors, read-only properties.
 
 #[derive(Clone, Copy, Debug, PartialEq)]

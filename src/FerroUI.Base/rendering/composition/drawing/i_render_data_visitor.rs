@@ -1,4 +1,5 @@
 use crate::media::{BoxShadows, IBrush, IPen, RenderOptions, TextOptions};
+use crate::media::imaging::BitmapBlendingMode;
 use crate::platform::{IGeometryImpl, IGlyphRunImpl};
 use crate::rendering::scene_graph::ICustomDrawOperation;
 use crate::{Matrix, Point, Rect, RoundedRect};
@@ -47,6 +48,13 @@ pub trait IRenderDataVisitor {
     fn on_push_render_options(&mut self, options: RenderOptions) -> Self::Scope;
     fn on_push_text_options(&mut self, options: TextOptions) -> Self::Scope;
     fn on_push_effect(&mut self, effect: Option<&std::sync::Arc<dyn crate::media::IImmutableEffect>>, bounds: Rect) -> Self::Scope;
+
+    /// A blend group changes neither geometric bounds nor hit geometry. The
+    /// default retains that behavior for existing analytical visitors; replay
+    /// visitors override it to preserve isolation and the requested blend.
+    fn on_push_compositing_layer(&mut self, _blend: BitmapBlendingMode, opacity: f64, _bounds: Rect) -> Self::Scope {
+        self.on_push_opacity(opacity)
+    }
 
     fn on_pop(&mut self, scope: Self::Scope);
 }

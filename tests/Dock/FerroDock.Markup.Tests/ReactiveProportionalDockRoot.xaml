@@ -1,0 +1,3 @@
+<m:ProportionalDock xmlns="https://github.com/ferroui"
+ xmlns:m="clr-namespace:FerroDock.Model.ReactiveUI.Controls;assembly=FerroDock.Model.ReactiveUI"
+ Title="Source ProportionalDock" Orientation="Vertical" />

@@ -1,0 +1,26 @@
+{
+  "$id": "1",
+  "Overrides": {
+    "$id": "2",
+    "CanFloat": false,
+    "CanDrop": true
+  },
+  "Policy": {
+    "$ref": "2"
+  },
+  "Contract": {
+    "$ref": "2"
+  },
+  "Bounds": {
+    "X": -0,
+    "Y": 0.125,
+    "Width": "Infinity",
+    "Height": "NaN"
+  },
+  "OtherBounds": {
+    "X": -0,
+    "Y": 0.125,
+    "Width": "Infinity",
+    "Height": "NaN"
+  }
+}

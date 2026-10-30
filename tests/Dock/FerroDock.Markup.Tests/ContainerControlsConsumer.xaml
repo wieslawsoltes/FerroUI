@@ -1,0 +1,40 @@
+<!-- Consumer test templates use original part names; full source themes remain pending. -->
+<Panel xmlns="https://github.com/ferroui"
+       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+       xmlns:d="using:FerroDock.Ferro.Controls"
+       x:DataType="Panel" x:CompileBindings="True">
+  <d:DocumentDockControl />
+  <d:DockDockControl />
+  <d:StackDockControl />
+  <d:WrapDockControl />
+  <d:UniformGridDockControl />
+  <d:ProportionalDockControl />
+  <d:ToolDockControl />
+  <d:DocumentContentControl />
+  <d:ToolContentControl />
+  <d:SplitViewDockControl>
+    <d:SplitViewDockControl.Template>
+      <ControlTemplate x:DataType="d:SplitViewDockControl">
+        <SplitView Name="PART_SplitView" />
+      </ControlTemplate>
+    </d:SplitViewDockControl.Template>
+  </d:SplitViewDockControl>
+  <d:GridDockControl>
+    <d:GridDockControl.Template>
+      <ControlTemplate x:DataType="d:GridDockControl">
+        <ItemsControl Name="PART_ItemsControl" DataContext="{TemplateBinding DataContext}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate x:DataType="ItemsControl">
+              <Grid />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.Template>
+            <ControlTemplate x:DataType="ItemsControl">
+              <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" />
+            </ControlTemplate>
+          </ItemsControl.Template>
+        </ItemsControl>
+      </ControlTemplate>
+    </d:GridDockControl.Template>
+  </d:GridDockControl>
+</Panel>

@@ -1,0 +1,148 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="MaterialThemeGallery.Pages.ButtonsPage">
+  <StackPanel Margin="24" Spacing="12">
+    <TextBlock Text="Buttons" Theme="{StaticResource MaterialHeadlineMedium}" />
+    <TextBlock Text="Choose an action. Try the icon toggles to see their selected shapes."
+               Theme="{StaticResource MaterialBodyMedium}" TextWrapping="Wrap"
+               Foreground="{DynamicResource MaterialOnSurfaceVariantBrush}" />
+    <WrapPanel ItemSpacing="8" LineSpacing="4">
+      <Button Content="Filled" Theme="{StaticResource MaterialFilledButton}" />
+      <Button Content="Tonal" Theme="{StaticResource MaterialTonalButton}" />
+      <Button Content="Outlined" Theme="{StaticResource MaterialOutlinedButton}" />
+      <Button Content="Elevated" Theme="{StaticResource MaterialElevatedButton}" />
+      <Button Content="Text" Theme="{StaticResource MaterialTextButton}" />
+    </WrapPanel>
+    <TextBlock Text="Icon buttons" Theme="{StaticResource MaterialTitleMedium}" Margin="0,8,0,0" />
+    <Grid ColumnDefinitions="72,80,80,80,80" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="4">
+      <TextBlock Grid.Column="1" Text="Standard" Theme="{StaticResource MaterialLabelMedium}" />
+      <TextBlock Grid.Column="2" Text="Filled" Theme="{StaticResource MaterialLabelMedium}" />
+      <TextBlock Grid.Column="3" Text="Tonal" Theme="{StaticResource MaterialLabelMedium}" />
+      <TextBlock Grid.Column="4" Text="Outlined" Theme="{StaticResource MaterialLabelMedium}" />
+      <TextBlock Grid.Row="1" Text="Action" Theme="{StaticResource MaterialLabelMedium}" VerticalAlignment="Center" />
+      <TextBlock Grid.Row="2" Text="Selected" Theme="{StaticResource MaterialLabelMedium}" VerticalAlignment="Center" />
+      <TextBlock Grid.Row="3" Text="Disabled" Theme="{StaticResource MaterialLabelMedium}" VerticalAlignment="Center" />
+      <Button Grid.Row="1" Grid.Column="1" Theme="{StaticResource MaterialIconButton}" AutomationProperties.Name="Open menu">
+        <PathIcon Data="M3,6 H21 V8 H3 Z M3,11 H21 V13 H3 Z M3,16 H21 V18 H3 Z" />
+      </Button>
+      <ToggleButton Grid.Row="2" Grid.Column="1" Theme="{StaticResource MaterialIconToggleButton}" IsChecked="True" AutomationProperties.Name="Favorite">
+        <PathIcon Data="M12,21 L10.55,19.68 C5.4,15.01 2,11.93 2,8.15 C2,5.07 4.42,2.65 7.5,2.65 C9.24,2.65 10.91,3.46 12,4.74 C13.09,3.46 14.76,2.65 16.5,2.65 C19.58,2.65 22,5.07 22,8.15 C22,11.93 18.6,15.01 13.45,19.69 Z" />
+      </ToggleButton>
+      <ToggleButton Grid.Row="3" Grid.Column="1" Theme="{StaticResource MaterialIconToggleButton}" IsChecked="True" IsEnabled="False" AutomationProperties.Name="Unavailable favorite">
+        <PathIcon Data="M12,21 L10.55,19.68 C5.4,15.01 2,11.93 2,8.15 C2,5.07 4.42,2.65 7.5,2.65 C9.24,2.65 10.91,3.46 12,4.74 C13.09,3.46 14.76,2.65 16.5,2.65 C19.58,2.65 22,5.07 22,8.15 C22,11.93 18.6,15.01 13.45,19.69 Z" />
+      </ToggleButton>
+      <Button Grid.Row="1" Grid.Column="2" Theme="{StaticResource MaterialFilledIconButton}" AutomationProperties.Name="Open menu">
+        <PathIcon Data="M3,6 H21 V8 H3 Z M3,11 H21 V13 H3 Z M3,16 H21 V18 H3 Z" />
+      </Button>
+      <ToggleButton Grid.Row="2" Grid.Column="2" Theme="{StaticResource MaterialFilledIconToggleButton}" IsChecked="True" AutomationProperties.Name="Favorite">
+        <PathIcon Data="M12,21 L10.55,19.68 C5.4,15.01 2,11.93 2,8.15 C2,5.07 4.42,2.65 7.5,2.65 C9.24,2.65 10.91,3.46 12,4.74 C13.09,3.46 14.76,2.65 16.5,2.65 C19.58,2.65 22,5.07 22,8.15 C22,11.93 18.6,15.01 13.45,19.69 Z" />
+      </ToggleButton>
+      <ToggleButton Grid.Row="3" Grid.Column="2" Theme="{StaticResource MaterialFilledIconToggleButton}" IsChecked="True" IsEnabled="False" AutomationProperties.Name="Unavailable favorite">
+        <PathIcon Data="M12,21 L10.55,19.68 C5.4,15.01 2,11.93 2,8.15 C2,5.07 4.42,2.65 7.5,2.65 C9.24,2.65 10.91,3.46 12,4.74 C13.09,3.46 14.76,2.65 16.5,2.65 C19.58,2.65 22,5.07 22,8.15 C22,11.93 18.6,15.01 13.45,19.69 Z" />
+      </ToggleButton>
+      <Button Grid.Row="1" Grid.Column="3" Theme="{StaticResource MaterialTonalIconButton}" AutomationProperties.Name="Open menu">
+        <PathIcon Data="M3,6 H21 V8 H3 Z M3,11 H21 V13 H3 Z M3,16 H21 V18 H3 Z" />
+      </Button>
+      <ToggleButton Grid.Row="2" Grid.Column="3" Theme="{StaticResource MaterialTonalIconToggleButton}" IsChecked="True" AutomationProperties.Name="Favorite">
+        <PathIcon Data="M12,21 L10.55,19.68 C5.4,15.01 2,11.93 2,8.15 C2,5.07 4.42,2.65 7.5,2.65 C9.24,2.65 10.91,3.46 12,4.74 C13.09,3.46 14.76,2.65 16.5,2.65 C19.58,2.65 22,5.07 22,8.15 C22,11.93 18.6,15.01 13.45,19.69 Z" />
+      </ToggleButton>
+      <ToggleButton Grid.Row="3" Grid.Column="3" Theme="{StaticResource MaterialTonalIconToggleButton}" IsChecked="True" IsEnabled="False" AutomationProperties.Name="Unavailable favorite">
+        <PathIcon Data="M12,21 L10.55,19.68 C5.4,15.01 2,11.93 2,8.15 C2,5.07 4.42,2.65 7.5,2.65 C9.24,2.65 10.91,3.46 12,4.74 C13.09,3.46 14.76,2.65 16.5,2.65 C19.58,2.65 22,5.07 22,8.15 C22,11.93 18.6,15.01 13.45,19.69 Z" />
+      </ToggleButton>
+      <Button Grid.Row="1" Grid.Column="4" Theme="{StaticResource MaterialOutlinedIconButton}" AutomationProperties.Name="Open menu">
+        <PathIcon Data="M3,6 H21 V8 H3 Z M3,11 H21 V13 H3 Z M3,16 H21 V18 H3 Z" />
+      </Button>
+      <ToggleButton Grid.Row="2" Grid.Column="4" Theme="{StaticResource MaterialOutlinedIconToggleButton}" IsChecked="True" AutomationProperties.Name="Favorite">
+        <PathIcon Data="M12,21 L10.55,19.68 C5.4,15.01 2,11.93 2,8.15 C2,5.07 4.42,2.65 7.5,2.65 C9.24,2.65 10.91,3.46 12,4.74 C13.09,3.46 14.76,2.65 16.5,2.65 C19.58,2.65 22,5.07 22,8.15 C22,11.93 18.6,15.01 13.45,19.69 Z" />
+      </ToggleButton>
+      <ToggleButton Grid.Row="3" Grid.Column="4" Theme="{StaticResource MaterialOutlinedIconToggleButton}" IsChecked="True" IsEnabled="False" AutomationProperties.Name="Unavailable favorite">
+        <PathIcon Data="M12,21 L10.55,19.68 C5.4,15.01 2,11.93 2,8.15 C2,5.07 4.42,2.65 7.5,2.65 C9.24,2.65 10.91,3.46 12,4.74 C13.09,3.46 14.76,2.65 16.5,2.65 C19.58,2.65 22,5.07 22,8.15 C22,11.93 18.6,15.01 13.45,19.69 Z" />
+      </ToggleButton>
+    </Grid>
+    <TextBlock Text="Expressive sizes and widths" Theme="{StaticResource MaterialTitleMedium}" Margin="0,8,0,0" />
+    <WrapPanel ItemSpacing="12" LineSpacing="12">
+      <StackPanel Spacing="4" VerticalAlignment="Center">
+        <ToggleButton Theme="{StaticResource MaterialTonalIconToggleButton}" Classes="extraSmall" AutomationProperties.Name="Favorite, XS">
+          <PathIcon Data="M12,21 L10.55,19.68 C5.4,15.01 2,11.93 2,8.15 C2,5.07 4.42,2.65 7.5,2.65 C9.24,2.65 10.91,3.46 12,4.74 C13.09,3.46 14.76,2.65 16.5,2.65 C19.58,2.65 22,5.07 22,8.15 C22,11.93 18.6,15.01 13.45,19.69 Z" />
+        </ToggleButton>
+        <TextBlock Text="XS" Theme="{StaticResource MaterialLabelMedium}" HorizontalAlignment="Center" />
+      </StackPanel>
+      <StackPanel Spacing="4" VerticalAlignment="Center">
+        <ToggleButton Theme="{StaticResource MaterialTonalIconToggleButton}" Classes="small" AutomationProperties.Name="Favorite, Small">
+          <PathIcon Data="M12,21 L10.55,19.68 C5.4,15.01 2,11.93 2,8.15 C2,5.07 4.42,2.65 7.5,2.65 C9.24,2.65 10.91,3.46 12,4.74 C13.09,3.46 14.76,2.65 16.5,2.65 C19.58,2.65 22,5.07 22,8.15 C22,11.93 18.6,15.01 13.45,19.69 Z" />
+        </ToggleButton>
+        <TextBlock Text="Small" Theme="{StaticResource MaterialLabelMedium}" HorizontalAlignment="Center" />
+      </StackPanel>
+      <StackPanel Spacing="4" VerticalAlignment="Center">
+        <ToggleButton Theme="{StaticResource MaterialTonalIconToggleButton}" Classes="medium" AutomationProperties.Name="Favorite, Medium">
+          <PathIcon Data="M12,21 L10.55,19.68 C5.4,15.01 2,11.93 2,8.15 C2,5.07 4.42,2.65 7.5,2.65 C9.24,2.65 10.91,3.46 12,4.74 C13.09,3.46 14.76,2.65 16.5,2.65 C19.58,2.65 22,5.07 22,8.15 C22,11.93 18.6,15.01 13.45,19.69 Z" />
+        </ToggleButton>
+        <TextBlock Text="Medium" Theme="{StaticResource MaterialLabelMedium}" HorizontalAlignment="Center" />
+      </StackPanel>
+      <StackPanel Spacing="4" VerticalAlignment="Center">
+        <ToggleButton Theme="{StaticResource MaterialTonalIconToggleButton}" Classes="medium narrow square" AutomationProperties.Name="Favorite, Narrow">
+          <PathIcon Data="M12,21 L10.55,19.68 C5.4,15.01 2,11.93 2,8.15 C2,5.07 4.42,2.65 7.5,2.65 C9.24,2.65 10.91,3.46 12,4.74 C13.09,3.46 14.76,2.65 16.5,2.65 C19.58,2.65 22,5.07 22,8.15 C22,11.93 18.6,15.01 13.45,19.69 Z" />
+        </ToggleButton>
+        <TextBlock Text="Narrow" Theme="{StaticResource MaterialLabelMedium}" HorizontalAlignment="Center" />
+      </StackPanel>
+      <StackPanel Spacing="4" VerticalAlignment="Center">
+        <ToggleButton Theme="{StaticResource MaterialTonalIconToggleButton}" Classes="medium wide" AutomationProperties.Name="Favorite, Wide">
+          <PathIcon Data="M12,21 L10.55,19.68 C5.4,15.01 2,11.93 2,8.15 C2,5.07 4.42,2.65 7.5,2.65 C9.24,2.65 10.91,3.46 12,4.74 C13.09,3.46 14.76,2.65 16.5,2.65 C19.58,2.65 22,5.07 22,8.15 C22,11.93 18.6,15.01 13.45,19.69 Z" />
+        </ToggleButton>
+        <TextBlock Text="Wide" Theme="{StaticResource MaterialLabelMedium}" HorizontalAlignment="Center" />
+      </StackPanel>
+      <StackPanel Spacing="4" VerticalAlignment="Center">
+        <ToggleButton Theme="{StaticResource MaterialTonalIconToggleButton}" Classes="large" AutomationProperties.Name="Favorite, Large">
+          <PathIcon Data="M12,21 L10.55,19.68 C5.4,15.01 2,11.93 2,8.15 C2,5.07 4.42,2.65 7.5,2.65 C9.24,2.65 10.91,3.46 12,4.74 C13.09,3.46 14.76,2.65 16.5,2.65 C19.58,2.65 22,5.07 22,8.15 C22,11.93 18.6,15.01 13.45,19.69 Z" />
+        </ToggleButton>
+        <TextBlock Text="Large" Theme="{StaticResource MaterialLabelMedium}" HorizontalAlignment="Center" />
+      </StackPanel>
+    </WrapPanel>
+    <TextBlock Text="Floating actions" Theme="{StaticResource MaterialTitleMedium}" Margin="0,8,0,0" />
+    <WrapPanel ItemSpacing="16" LineSpacing="12">
+      <StackPanel Spacing="4" VerticalAlignment="Center">
+        <Button Theme="{StaticResource MaterialSmallFab}" AutomationProperties.Name="Create, Small"><PathIcon Data="M11,5 H13 V11 H19 V13 H13 V19 H11 V13 H5 V11 H11 Z" /></Button>
+        <TextBlock Text="Small" Theme="{StaticResource MaterialLabelMedium}" HorizontalAlignment="Center" />
+      </StackPanel>
+      <StackPanel Spacing="4" VerticalAlignment="Center">
+        <Button Theme="{StaticResource MaterialFloatingActionButton}" AutomationProperties.Name="Create, Default"><PathIcon Data="M11,5 H13 V11 H19 V13 H13 V19 H11 V13 H5 V11 H11 Z" /></Button>
+        <TextBlock Text="Default" Theme="{StaticResource MaterialLabelMedium}" HorizontalAlignment="Center" />
+      </StackPanel>
+      <StackPanel Spacing="4" VerticalAlignment="Center">
+        <Button Theme="{StaticResource MaterialMediumFab}" AutomationProperties.Name="Create, Medium"><PathIcon Data="M11,5 H13 V11 H19 V13 H13 V19 H11 V13 H5 V11 H11 Z" /></Button>
+        <TextBlock Text="Medium" Theme="{StaticResource MaterialLabelMedium}" HorizontalAlignment="Center" />
+      </StackPanel>
+      <StackPanel Spacing="4" VerticalAlignment="Center">
+        <Button Theme="{StaticResource MaterialLargeFab}" AutomationProperties.Name="Create, Large"><PathIcon Data="M11,5 H13 V11 H19 V13 H13 V19 H11 V13 H5 V11 H11 Z" /></Button>
+        <TextBlock Text="Large" Theme="{StaticResource MaterialLabelMedium}" HorizontalAlignment="Center" />
+      </StackPanel>
+    </WrapPanel>
+    <WrapPanel ItemSpacing="16" LineSpacing="12">
+      <StackPanel Spacing="4" VerticalAlignment="Center">
+        <Button Theme="{StaticResource MaterialSurfaceFab}" AutomationProperties.Name="Create, Surface"><PathIcon Data="M11,5 H13 V11 H19 V13 H13 V19 H11 V13 H5 V11 H11 Z" /></Button>
+        <TextBlock Text="Surface" Theme="{StaticResource MaterialLabelMedium}" HorizontalAlignment="Center" />
+      </StackPanel>
+      <StackPanel Spacing="4" VerticalAlignment="Center">
+        <Button Theme="{StaticResource MaterialSecondaryFab}" AutomationProperties.Name="Create, Secondary"><PathIcon Data="M11,5 H13 V11 H19 V13 H13 V19 H11 V13 H5 V11 H11 Z" /></Button>
+        <TextBlock Text="Secondary" Theme="{StaticResource MaterialLabelMedium}" HorizontalAlignment="Center" />
+      </StackPanel>
+      <StackPanel Spacing="4" VerticalAlignment="Center">
+        <Button Theme="{StaticResource MaterialTertiaryFab}" AutomationProperties.Name="Create, Tertiary"><PathIcon Data="M11,5 H13 V11 H19 V13 H13 V19 H11 V13 H5 V11 H11 Z" /></Button>
+        <TextBlock Text="Tertiary" Theme="{StaticResource MaterialLabelMedium}" HorizontalAlignment="Center" />
+      </StackPanel>
+      <StackPanel Spacing="4" VerticalAlignment="Center">
+        <ToggleButton Theme="{StaticResource MaterialMediumToggleFab}" AutomationProperties.Name="Toggle actions"><PathIcon Data="M11,5 H13 V11 H19 V13 H13 V19 H11 V13 H5 V11 H11 Z" /></ToggleButton>
+        <TextBlock Text="Toggle" Theme="{StaticResource MaterialLabelMedium}" HorizontalAlignment="Center" />
+      </StackPanel>
+    </WrapPanel>
+    <TextBlock Text="Keyboard and desktop controls" Theme="{StaticResource MaterialTitleMedium}" Margin="0,8,0,0" />
+    <WrapPanel ItemSpacing="8" LineSpacing="8">
+      <RepeatButton Content="Repeat" />
+      <ToggleButton Content="Selected" IsChecked="True" />
+      <HyperlinkButton Content="Learn more" />
+      <DropDownButton Content="Options" />
+      <SplitButton Content="Send" />
+      <Button Content="Unavailable" IsEnabled="False" />
+    </WrapPanel>
+  </StackPanel>
+</UserControl>

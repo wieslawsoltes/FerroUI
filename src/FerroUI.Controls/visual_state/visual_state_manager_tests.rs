@@ -6,7 +6,7 @@ use crate::templates::{FuncControlTemplate, FuncTemplateNameScopeExtensions};
 use crate::test_support::test_scope;
 use crate::{
     Border, ContentControl, Control, UserControl, VisualState, VisualStateGroup, VisualStateManager,
-    VisualStateManagerImpl,
+    VisualStateManagerImpl, VisualStateManagerImplExt,
 };
 use ferroui_base::styling::{Selectors, Setter, Style, TargetPropertyPath};
 use ferroui_base::threading::Dispatcher;
@@ -148,8 +148,8 @@ fn the_groups_of_an_element_are_independent() {
         let mut groups = common_states(inner);
         let focus = VisualStateGroup::with_name("FocusStates");
         let focused = VisualState::with_name("Focused");
-        let width = Setter::new(crate::Layoutable::width_property(), 20.0);
-        width.set_target(Some(TargetPropertyPath::new(inner, crate::Layoutable::width_property().as_property())));
+        let width = Setter::new(ferroui_base::layout::Layoutable::width_property(), 20.0);
+        width.set_target(Some(TargetPropertyPath::new(inner, ferroui_base::layout::Layoutable::width_property().as_property())));
         focused.setters().add(width);
         focus.states().add(focused);
         focus.states().add(VisualState::with_name("Unfocused"));

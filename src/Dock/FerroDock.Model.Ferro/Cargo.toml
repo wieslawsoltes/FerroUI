@@ -1,0 +1,30 @@
+[package]
+name = "ferrodock-model-ferro"
+description = "FerroUI metadata for the original UI-independent Dock model contracts"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+build = "build.rs"
+links = "ferrodock_model_ferro_metadata"
+[lib]
+path = "lib.rs"
+[dependencies]
+ferroui-reactiveui.workspace = true
+ferrodock-controls-recycling-model-ferro.workspace = true
+ferrodock-runtime.workspace = true
+ferrodock-model.workspace = true
+ferroui-base.workspace = true
+ferroui-system.workspace = true
+[build-dependencies]
+ferrodock-model.workspace = true
+ferroui-build-scan.workspace = true
+syn = { version = "2", features = ["full"] }
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "deny"
+
+[dev-dependencies]
+ferrodock-model-reactiveui = { path = "../FerroDock.Model.ReactiveUI" }
+ferroui-build-scan.workspace = true

@@ -1,0 +1,60 @@
+<!--
+  Material 3 Expressive, AndroidX Compose Material3 1.5.0-beta02,
+  source e4d933c98df7baa7ea2b83eea6e086915961e0ff.
+  Component measurements and interaction states follow the Android Open Source Project
+  token definitions (Apache-2.0; see NOTICE.md). FerroUI template contracts are adapted
+  from the WinUI theme, Copyright (c) Microsoft Corporation, MIT license.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:material="using:FerroUI.Themes.Material"
+                    x:ClassModifier="internal">
+  <ControlTheme x:Key="DefaultDropDownButtonStyle" TargetType="DropDownButton" BasedOn="{StaticResource DefaultButtonStyle}">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <!-- 40dp painted surface inside the 48dp minimum interactive target. -->
+        <Grid x:Name="MaterialTouchTarget" MinHeight="48" Background="Transparent">
+          <Border x:Name="MaterialContainer" Margin="0,4" MinHeight="40"
+                  Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}"
+                  CornerRadius="{TemplateBinding CornerRadius}">
+            <Border.Transitions><Transitions>
+              <material:MaterialCornerRadiusTransition Property="CornerRadius" Duration="{DynamicResource MaterialMotionDefaultEffectsDuration}" Easing="{DynamicResource MaterialMotionDefaultEffectsEasing}" />
+              <BrushTransition Property="Background" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" />
+            </Transitions></Border.Transitions>
+            <Grid>
+              <Border x:Name="MaterialStateLayer" Background="{TemplateBinding Foreground}"
+                      CornerRadius="{Binding #MaterialContainer.CornerRadius}" Opacity="0"
+                      IsHitTestVisible="False">
+                <Border.Transitions><Transitions><material:MaterialDoubleTransition Property="Opacity" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" /></Transitions></Border.Transitions>
+              </Border>
+              <material:MaterialRipple x:Name="MaterialRipple" Fill="{TemplateBinding Foreground}"
+                                       CornerRadius="{Binding #MaterialContainer.CornerRadius}"
+                                       ReducedMotion="{DynamicResource MaterialReducedMotion}" />
+            <Grid ColumnDefinitions="*,24" Margin="{TemplateBinding Padding}">
+              <ContentPresenter x:Name="PART_ContentPresenter"
+                                Content="{TemplateBinding Content}"
+                                ContentTemplate="{TemplateBinding ContentTemplate}"
+                                Foreground="{TemplateBinding Foreground}"
+                                HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                RecognizesAccessKey="True" />
+              <Path x:Name="MaterialChevron" Grid.Column="1" Data="M 6,9 L 12,15 L 18,9"
+                    Stroke="{TemplateBinding Foreground}" StrokeThickness="2"
+                    Width="12" Height="6" Stretch="Fill" Margin="8,0,0,0"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    RenderTransformOrigin="50%,50%" RenderTransform="rotate(0deg)">
+                <Path.Transitions><Transitions><TransformOperationsTransition Property="RenderTransform" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" /></Transitions></Path.Transitions>
+              </Path>
+            </Grid>
+            </Grid>
+          </Border>
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:flyout-open /template/ Path#MaterialChevron">
+    <Setter Property="RenderTransform" Value="rotate(180deg)" />
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type DropDownButton}" TargetType="DropDownButton" BasedOn="{StaticResource DefaultDropDownButtonStyle}" />
+</ResourceDictionary>

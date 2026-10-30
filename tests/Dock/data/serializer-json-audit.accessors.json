@@ -1,0 +1,273 @@
+[
+  {
+    "Name": "get-error",
+    "Success": false,
+    "SameError": true,
+    "Trace": [
+      "get:A",
+      "get:B"
+    ],
+    "Values": [
+      0,
+      0,
+      0
+    ],
+    "Wire": null
+  },
+  {
+    "Name": "set-error",
+    "Success": false,
+    "SameError": true,
+    "Trace": [
+      "create",
+      "set:A",
+      "set:B"
+    ],
+    "Values": [
+      1,
+      2,
+      0
+    ],
+    "Wire": null
+  },
+  {
+    "Name": "invalid-token",
+    "Success": false,
+    "SameError": false,
+    "Trace": [
+      "create",
+      "set:A"
+    ],
+    "Values": [
+      1,
+      0,
+      0
+    ],
+    "Wire": null
+  },
+  {
+    "Name": "read-converter-error",
+    "Success": false,
+    "SameError": true,
+    "Trace": [
+      "create",
+      "set:A",
+      "convert:read:B"
+    ],
+    "Values": [
+      1,
+      0,
+      0
+    ],
+    "Wire": null
+  },
+  {
+    "Name": "write-converter-error",
+    "Success": false,
+    "SameError": true,
+    "Trace": [
+      "get:A",
+      "get:B",
+      "convert:write:B"
+    ],
+    "Values": [
+      0,
+      0,
+      0
+    ],
+    "Wire": null
+  },
+  {
+    "Name": "get-error-converter",
+    "Success": false,
+    "SameError": true,
+    "Trace": [
+      "get:A",
+      "get:B"
+    ],
+    "Values": [
+      0,
+      0,
+      0
+    ],
+    "Wire": null
+  },
+  {
+    "Name": "readonly-skip",
+    "Success": true,
+    "SameError": false,
+    "Trace": [
+      "create",
+      "set:A",
+      "set:C"
+    ],
+    "Values": [
+      1,
+      0,
+      3
+    ],
+    "Wire": null
+  },
+  {
+    "Name": "readonly-skip-converter",
+    "Success": true,
+    "SameError": false,
+    "Trace": [
+      "create",
+      "set:A",
+      "set:C"
+    ],
+    "Values": [
+      1,
+      0,
+      3
+    ],
+    "Wire": null
+  },
+  {
+    "Name": "writeonly-skip",
+    "Success": true,
+    "SameError": false,
+    "Trace": [
+      "get:A",
+      "get:C"
+    ],
+    "Values": [
+      0,
+      0,
+      0
+    ],
+    "Wire": "{\n  \u0022$id\u0022: \u00221\u0022,\n  \u0022A\u0022: 0,\n  \u0022C\u0022: 0\n}"
+  },
+  {
+    "Name": "writeonly-skip-converter",
+    "Success": true,
+    "SameError": false,
+    "Trace": [
+      "get:A",
+      "get:C"
+    ],
+    "Values": [
+      0,
+      0,
+      0
+    ],
+    "Wire": "{\n  \u0022$id\u0022: \u00221\u0022,\n  \u0022A\u0022: 0,\n  \u0022C\u0022: 0\n}"
+  },
+  {
+    "Name": "writeonly-set-error",
+    "Success": false,
+    "SameError": true,
+    "Trace": [
+      "create",
+      "set:A",
+      "set:B"
+    ],
+    "Values": [
+      1,
+      2,
+      0
+    ],
+    "Wire": null
+  },
+  {
+    "Name": "writeonly-set-error-converter",
+    "Success": false,
+    "SameError": true,
+    "Trace": [
+      "create",
+      "set:A",
+      "convert:read:B",
+      "set:B"
+    ],
+    "Values": [
+      1,
+      2,
+      0
+    ],
+    "Wire": null
+  },
+  {
+    "Name": "readonly-get-error",
+    "Success": false,
+    "SameError": true,
+    "Trace": [
+      "get:A",
+      "get:B"
+    ],
+    "Values": [
+      0,
+      0,
+      0
+    ],
+    "Wire": null
+  },
+  {
+    "Name": "readonly-get-error-converter",
+    "Success": false,
+    "SameError": true,
+    "Trace": [
+      "get:A",
+      "get:B"
+    ],
+    "Values": [
+      0,
+      0,
+      0
+    ],
+    "Wire": null
+  },
+  {
+    "Name": "persistent-getter",
+    "Success": true,
+    "SameError": false,
+    "Trace": [
+      "get:A",
+      "get:B",
+      "get:C",
+      "get:A",
+      "get:B",
+      "get:C"
+    ],
+    "Values": [
+      0,
+      0,
+      0
+    ],
+    "Wire": "{\n  \u0022$id\u0022: \u00221\u0022,\n  \u0022A\u0022: 0,\n  \u0022B\u0022: 2,\n  \u0022C\u0022: 0\n}"
+  },
+  {
+    "Name": "constructor-same-instance",
+    "Success": true,
+    "SameError": false,
+    "Trace": [
+      "create",
+      "set:B",
+      "create",
+      "set:C"
+    ],
+    "Values": [
+      2,
+      2,
+      3
+    ],
+    "Wire": null
+  },
+  {
+    "Name": "persistent-error",
+    "Success": false,
+    "SameError": true,
+    "Trace": [
+      "get:A",
+      "get:B",
+      "get:A",
+      "get:B"
+    ],
+    "Values": [
+      0,
+      0,
+      0
+    ],
+    "Wire": null
+  }
+]

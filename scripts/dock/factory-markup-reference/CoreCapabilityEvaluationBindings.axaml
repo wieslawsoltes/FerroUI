@@ -1,0 +1,8 @@
+<StackPanel xmlns="https://github.com/avaloniaui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:core="clr-namespace:Dock.Model.Core;assembly=Dock.Model"
+ x:DataType="core:DockCapabilityEvaluation">
+ <TextBlock Text="{Binding DiagnosticMessage}" />
+ <CheckBox IsChecked="{Binding EffectiveValue, Mode=OneWay}" />
+ <CheckBox IsChecked="{Binding DockPolicyValue, Mode=OneWay}" />
+</StackPanel>

@@ -83,14 +83,14 @@ impl VisualStateManagerImpl for VisualStateManager {
     fn go_to_state_core(
         _this: &Self,
         control: &Ref<Control>,
-        _template_root: &Ref<Control>,
+        template_root: &Ref<Control>,
         _state_name: &str,
         group: Option<&Ref<VisualStateGroup>>,
         state: Option<&Ref<VisualState>>,
         use_transitions: bool,
     ) -> bool {
         match (group, state) {
-            (Some(group), Some(state)) => Self::change_state(control, group, Some(state), use_transitions),
+            (Some(group), Some(state)) => Self::change_state(control, template_root, group, Some(state), use_transitions),
             _ => false,
         }
     }
@@ -181,7 +181,7 @@ impl VisualStateManager {
         match Self::get_custom_visual_state_manager(&root) {
             Some(custom) => custom.go_to_state_core(&control, &root, state_name, group, state, use_transitions),
             None => match (group, state) {
-                (Some(group), Some(state)) => Self::change_state(&control, group, Some(state), use_transitions),
+                (Some(group), Some(state)) => Self::change_state(&control, &root, group, Some(state), use_transitions),
                 _ => false,
             },
         }
@@ -258,6 +258,7 @@ impl VisualStateManager {
     /// `VisualStateManagerActuator::ChangeVisualState`).
     pub(crate) fn change_state(
         control: &Ref<Control>,
+        template_root: &Ref<Control>,
         group: &Ref<VisualStateGroup>,
         state: Option<&Ref<VisualState>>,
         use_transitions: bool,
@@ -265,13 +266,13 @@ impl VisualStateManager {
         let old_state = group.current_state();
         if old_state.as_ref() == state {
             if !use_transitions {
-                group.reapply_current_state();
+                group.reapply_current_state(Some(template_root));
             }
             return true;
         }
         let args = VisualStateChangedEventArgs::new(old_state, state.cloned(), Some(control.clone()));
         Self::raise_queued(group, args.clone(), true);
-        group.set_state(state);
+        group.set_state(state, Some(template_root));
         Self::raise_queued(group, args, false);
         true
     }

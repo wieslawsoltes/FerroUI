@@ -3,8 +3,9 @@
 //! (`<Setter Target="Element.Property" Value="..."/>`), loaded at run time.
 
 use ferroui_base::media::{Brushes, IBrush};
+use ferroui_base::styling::{Setter, TargetPropertyPath};
 use ferroui_base::Ref;
-use ferroui_controls::{Border, ContentControl, Control, Grid, TextBlock, UserControl, VisualStateManager};
+use ferroui_controls::{Border, ContentControl, Control, Grid, StackPanel, TextBlock, UserControl, VisualStateManager};
 use std::rc::Rc;
 
 use crate::support::app::styled_window_application;
@@ -89,7 +90,7 @@ fn each_instance_of_a_template_has_its_own_states() {
   <ContentControl Template='{{StaticResource Template}}'/>
 </StackPanel>"
     );
-    let panel = load_as::<Ref<ferroui_controls::StackPanel>>(&xaml);
+    let panel = load_as::<Ref<StackPanel>>(&xaml);
     let first = panel.children().get(0).cast::<ContentControl>().unwrap();
     let second = panel.children().get(1).cast::<ContentControl>().unwrap();
     first.apply_template();
@@ -164,8 +165,8 @@ fn a_setter_value_can_be_a_dynamic_resource() {
     let root = Control::from_boxed(&control.content().unwrap()).unwrap().cast::<Border>().unwrap();
     assert!(VisualStateManager::go_to_state(&control, "Pressed", false));
     let brush = root.background().expect("the brush of the resource");
-    let solid = brush.as_any().and_then(|any| any.downcast_ref::<ferroui_base::media::SolidColorBrush>()).map(|brush| brush.color());
-    assert_eq!(solid, Some(ferroui_base::media::Colors::blue()));
+    let solid = brush.as_solid_color_brush().map(|brush| brush.color());
+    assert_eq!(solid, Some(ferroui_base::media::Colors::BLUE));
 }
 
 #[test]
@@ -247,6 +248,8 @@ fn state_triggers_select_the_states_of_a_window() {
 </Window>"
     );
     let window = load_as::<Ref<ferroui_controls::Window>>(&xaml);
+    // The triggers are evaluated when the root of the states is in a visual tree.
+    window.show();
     let grid = Control::from_boxed(&window.content().unwrap()).unwrap().cast::<Grid>().unwrap();
     let label = grid.children().get(0).cast::<TextBlock>().unwrap();
     let groups = VisualStateManager::get_visual_state_groups(&grid);
@@ -256,4 +259,185 @@ fn state_triggers_select_the_states_of_a_window() {
     assert_eq!(label.text().as_deref(), Some("Forced"));
     assert_eq!(state(1).as_deref(), Some("Any"));
     assert_eq!(label.opacity(), 0.5);
+}
+
+/// The target of the setter at `index` of the state at `state` of the first group of `root`.
+fn target_of(root: &Control, state: usize, index: usize) -> Rc<TargetPropertyPath> {
+    let groups = VisualStateManager::get_visual_state_groups(root);
+    let setter = groups.get(0).states().get(state).setters().get(index);
+    let setter = setter.as_any().and_then(|any| any.downcast_ref::<Setter>()).expect("a setter");
+    setter.target().expect("a target")
+}
+
+fn user_control_with_late_elements() -> (Ref<UserControl>, Ref<Grid>) {
+    let xaml = format!(
+        "
+<UserControl {NS}>
+  <Grid x:Name='LayoutRoot'>
+    <VisualStateManager.VisualStateGroups>
+      <VisualStateGroup>
+        <VisualState x:Name='Normal'/>
+        <VisualState x:Name='Dimmed'>
+          <VisualState.Setters>
+            <Setter Target='Late.Opacity' Value='0.25'/>
+            <Setter Target='LayoutRoot.Opacity' Value='0.5'/>
+            <Setter Target='Later.Text' Value='Dimmed'/>
+          </VisualState.Setters>
+        </VisualState>
+      </VisualStateGroup>
+    </VisualStateManager.VisualStateGroups>
+    <StackPanel>
+      <Border>
+        <Border x:Name='Late'/>
+      </Border>
+      <TextBlock x:Name='Later' Text='Normal'/>
+    </StackPanel>
+  </Grid>
+</UserControl>"
+    );
+    let control = load_as::<Ref<UserControl>>(&xaml);
+    let grid = Control::from_boxed(&control.content().unwrap()).unwrap().cast::<Grid>().unwrap();
+    (control, grid)
+}
+
+fn late_elements(grid: &Grid) -> (Ref<Border>, Ref<TextBlock>) {
+    let panel = grid.children().get(0).cast::<StackPanel>().unwrap();
+    let outer = panel.children().get(0).cast::<Border>().unwrap();
+    let late = outer.child().unwrap().cast::<Border>().unwrap();
+    let later = panel.children().get(1).cast::<TextBlock>().unwrap();
+    (late, later)
+}
+
+// Forward references: WinUI resolves the target of a visual state setter by its name when the
+// state applies, so a setter may name an element declared after it.
+
+#[test]
+fn a_setter_in_a_template_names_an_element_declared_after_it() {
+    let _app = styled_window_application();
+    let xaml = format!(
+        "
+<ContentControl {NS}>
+  <ContentControl.Template>
+    <ControlTemplate>
+      <Border x:Name='Root'>
+        <VisualStateManager.VisualStateGroups>
+          <VisualStateGroup>
+            <VisualState x:Name='Normal'/>
+            <VisualState x:Name='Pressed'>
+              <VisualState.Setters>
+                <Setter Target='Deep.Opacity' Value='0.25'/>
+              </VisualState.Setters>
+            </VisualState>
+          </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+        <Border>
+          <Border x:Name='Deep'/>
+        </Border>
+      </Border>
+    </ControlTemplate>
+  </ContentControl.Template>
+</ContentControl>"
+    );
+    let control = load_as::<Ref<ContentControl>>(&xaml);
+    control.apply_template();
+    let (_, outer) = inner_of(&control);
+    let deep = outer.child().unwrap().cast::<Border>().unwrap();
+
+    assert!(VisualStateManager::go_to_state(&control, "Pressed", false));
+    assert_eq!(deep.opacity(), 0.25);
+    assert!(VisualStateManager::go_to_state(&control, "Normal", false));
+    assert_eq!(deep.opacity(), 1.0);
+}
+
+#[test]
+fn a_setter_in_a_document_names_elements_declared_after_it() {
+    let _app = styled_window_application();
+    let (control, grid) = user_control_with_late_elements();
+    let (late, later) = late_elements(&grid);
+
+    assert!(VisualStateManager::go_to_state(&control, "Dimmed", false));
+    assert_eq!(late.opacity(), 0.25);
+    assert_eq!(later.text().as_deref(), Some("Dimmed"));
+    assert!(VisualStateManager::go_to_state(&control, "Normal", false));
+    assert_eq!(late.opacity(), 1.0);
+    assert_eq!(later.text().as_deref(), Some("Normal"));
+}
+
+#[test]
+fn a_setter_names_the_element_that_has_the_groups() {
+    let _app = styled_window_application();
+    let (control, grid) = user_control_with_late_elements();
+
+    assert!(VisualStateManager::go_to_state(&control, "Dimmed", false));
+    assert_eq!(grid.opacity(), 0.5);
+    assert!(VisualStateManager::go_to_state(&control, "Normal", false));
+    assert_eq!(grid.opacity(), 1.0);
+}
+
+#[test]
+fn a_name_in_a_template_is_the_element_of_the_template_not_of_the_document() {
+    let _app = styled_window_application();
+    let xaml = format!(
+        "
+<StackPanel {NS}>
+  <Border x:Name='Inner'/>
+  <ContentControl>
+    <ContentControl.Template>
+      <ControlTemplate>
+        <Border>
+          <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup>
+              <VisualState x:Name='Pressed'>
+                <VisualState.Setters>
+                  <Setter Target='Inner.Opacity' Value='0.25'/>
+                </VisualState.Setters>
+              </VisualState>
+            </VisualStateGroup>
+          </VisualStateManager.VisualStateGroups>
+          <Border x:Name='Inner'/>
+        </Border>
+      </ControlTemplate>
+    </ContentControl.Template>
+  </ContentControl>
+</StackPanel>"
+    );
+    let panel = load_as::<Ref<StackPanel>>(&xaml);
+    let document_inner = panel.children().get(0).cast::<Border>().unwrap();
+    let control = panel.children().get(1).cast::<ContentControl>().unwrap();
+    control.apply_template();
+
+    assert!(VisualStateManager::go_to_state(&control, "Pressed", false));
+    assert_eq!(inner_of(&control).1.opacity(), 0.25);
+    assert_eq!(document_inner.opacity(), 1.0);
+}
+
+#[test]
+fn an_explicit_target_object_is_set_without_a_name() {
+    let _app = styled_window_application();
+    let (control, grid) = user_control_with_late_elements();
+    let (late, later) = late_elements(&grid);
+    // The first setter targets `Late`; given the object `Later` as its target, it sets that.
+    let path = target_of(&grid, 1, 0);
+    path.set_target(Some(later.clone().upcast()));
+
+    assert!(VisualStateManager::go_to_state(&control, "Dimmed", false));
+    assert_eq!(later.opacity(), 0.25);
+    assert_eq!(late.opacity(), 1.0);
+}
+
+#[test]
+fn a_name_not_in_the_scope_when_the_state_applies_sets_nothing() {
+    let _app = styled_window_application();
+    let (control, grid) = user_control_with_late_elements();
+    let (late, later) = late_elements(&grid);
+    target_of(&grid, 1, 0).set_target_name("Missing");
+
+    // The state changes; the setter of the missing element does nothing (a warning) and the
+    // other setters apply.
+    assert!(VisualStateManager::go_to_state(&control, "Dimmed", false));
+    assert_eq!(late.opacity(), 1.0);
+    assert_eq!(grid.opacity(), 0.5);
+    assert_eq!(later.text().as_deref(), Some("Dimmed"));
+    assert!(VisualStateManager::go_to_state(&control, "Normal", false));
+    assert_eq!(grid.opacity(), 1.0);
 }

@@ -1,0 +1,47 @@
+<!--
+  Not ported from a style: WinUI's FontIcon has no template in microsoft-ui-xaml
+  (https://github.com/microsoft/microsoft-ui-xaml, commit
+  7e4b0c2096be402f51cc8f7d203ebf67cff183d0). The control builds its visual in code
+  (CFontIcon::ApplyTemplate, dxaml/xcp/core/core/elements/icon.cpp): one TextBlock, stretched
+  horizontally and centred vertically, its text centred and the glyph of the icon as its text,
+  with the font of the icon, and the accessibility view Raw so that a screen reader does not read
+  the glyph. FerroUI's FontIcon is a templated control (IconElement), so the theme supplies that
+  text block as the part PART_Text, and the control gives it the glyph, the font and the
+  foreground of the icon (docs/porting/winui-controls.md, FontIcon). The font family of a font
+  icon is the theme resource SymbolThemeFontFamily, as WinUI's default font of a font icon; the
+  size, 20, is the default of the control.
+
+  macOS 26 theme: the same control theme as the WinUI theme
+  (src/FerroUI.Themes.WinUI/Controls/FontIcon.xaml), as docs/porting/macos26-theme.md derives every
+  control theme of the WinUI theme. The glyph font is this theme's SymbolThemeFontFamily
+  resource (docs/porting/winui-controls.md, section 5.2).
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <StackPanel Orientation="Horizontal" Spacing="16">
+        <FontIcon Glyph="&#xE710;" />
+        <FontIcon Glyph="&#xE72D;" MirroredWhenRightToLeft="True" />
+      </StackPanel>
+    </Border>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="{x:Type FontIcon}" TargetType="FontIcon">
+    <Setter Property="FontFamily" Value="{DynamicResource SymbolThemeFontFamily}" />
+    <!-- FontIcon.FontSize is a property of its own in WinUI, 20 by default and not inherited;
+         FerroUI's is the inherited font size of the templated control, so the theme sets 20 over
+         the inherited value (FI-3). -->
+    <Setter Property="FontSize" Value="20" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <TextBlock x:Name="PART_Text"
+                   HorizontalAlignment="Stretch"
+                   VerticalAlignment="Center"
+                   TextAlignment="Center"
+                   AutomationProperties.AccessibilityView="Raw" />
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>
