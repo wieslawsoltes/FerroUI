@@ -160,6 +160,33 @@ fn ltr_prefix_character_ellipsis_preserves_prefix_and_suffix() {
 }
 
 #[test]
+fn collapsed_suffix_bounds_translate_original_clusters_to_compacted_positions() {
+    let _scope = TextTestScope::new();
+    for flow in [FlowDirection::LeftToRight, FlowDirection::RightToLeft] {
+        for prefix in [0, 4] {
+            let original = build_line("0123456789abcdefghijklmnopqrstuvwxyz", flow);
+            let line = collapse(&original, leading_prefix(prefix, 60.0, flow));
+            assert!(line.has_collapsed());
+            let length = logical_text(&*line).encode_utf16().count() as i32;
+            for index in 0..length {
+                let bounds = line.get_text_bounds(index, 1);
+                assert!(!bounds.is_empty());
+                for bound in bounds {
+                    let rect = bound.rectangle();
+                    assert!(rect.x.is_finite() && rect.width.is_finite());
+                    assert!(rect.width > 0.0);
+                    assert!(rect.left() >= -1e-8 && rect.right() <= line.width() + 1e-8);
+                    for run in bound.text_run_bounds() {
+                        assert_eq!(run.text_source_character_index(), index);
+                    }
+                }
+            }
+            line.dispose();
+        }
+    }
+}
+
+#[test]
 fn ltr_path_segment_ellipsis_collapses_middle() {
     let _scope = TextTestScope::new();
 

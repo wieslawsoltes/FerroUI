@@ -197,6 +197,7 @@ PORT_DOCUMENTS = [
     ("Pages/NavigationViewPage.xaml", "the page of WinUI's NavigationView with a Frame (docs/porting/winui-controls.md)"),
     ("Pages/IconElementPage.xaml", "the page of the icons of WinUI (SymbolIcon, FontIcon; docs/porting/winui-controls.md)"),
     ("Pages/ItemsRepeaterPage.xaml", "the page of the ItemsRepeater of the port"),
+    ("Pages/VisualStatesPage.xaml", "the page of WinUI's visual state manager (docs/porting/winui-calculator-gaps.md)"),
 ]
 
 

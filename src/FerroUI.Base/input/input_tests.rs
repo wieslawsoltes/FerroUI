@@ -4848,6 +4848,12 @@ fn do_drag_drop_goes_through_the_platform_drag_source() {
 
 // --- text input methods ---------------------------------------------------------
 
+#[path = "text_input/text_input_method_revision_tests.rs"]
+mod text_input_method_revision_tests;
+
+#[path = "text_input/text_input_method_options_tests.rs"]
+mod text_input_method_options_tests;
+
 use text_input::{
     ContextMenuAction, ITextInputMethodImpl, TextInputContentType, TextInputMethodClient, TextInputMethodClientEvents,
     TextInputMethodClientRequeryRequestedEventArgs, TextInputOptions, TextInputReturnKeyType, TextSelection,
@@ -4901,10 +4907,25 @@ struct TestTextClient {
     cursor: Cell<Rect>,
     selection: Cell<TextSelection>,
     preedit: RefCell<Vec<Option<String>>>,
+    /// Whether the client opts in to the exact-edit connection.
+    uses_connection: bool,
+    /// The owner the client names (`input_method_owner`).
+    owner: RefCell<Option<Ref<InputElement>>>,
+    /// The focus destinations that belong to the client's editing UI.
+    retained: RefCell<Vec<Ref<InputElement>>>,
 }
 
 impl TestTextClient {
     fn new(name: &'static str, view: &Ref<TestControl>) -> Rc<Self> {
+        Self::with_connection(name, view, false)
+    }
+
+    /// A client that opts in to the exact-edit connection, as RichEditBox does.
+    fn connected(name: &'static str, view: &Ref<TestControl>) -> Rc<Self> {
+        Self::with_connection(name, view, true)
+    }
+
+    fn with_connection(name: &'static str, view: &Ref<TestControl>, uses_connection: bool) -> Rc<Self> {
         Rc::new(Self {
             events: TextInputMethodClientEvents::new(),
             name,
@@ -4912,13 +4933,39 @@ impl TestTextClient {
             cursor: Cell::new(Rect::new(1.0, 2.0, 3.0, 4.0)),
             selection: Cell::new(TextSelection::default()),
             preedit: RefCell::new(Vec::new()),
+            uses_connection,
+            owner: RefCell::new(None),
+            retained: RefCell::new(Vec::new()),
         })
+    }
+}
+
+impl text_input::TextInputMethodEditing for TestTextClient {
+    fn begin_composition(&self) -> Result<(), text_input::TextInputMethodError> {
+        Ok(())
+    }
+    fn update_composition(&self, text: &str, _cursor: Option<i32>) -> Result<(), text_input::TextInputMethodError> {
+        self.preedit.borrow_mut().push(Some(text.to_string()));
+        Ok(())
+    }
+    fn cancel_composition(&self) -> Result<bool, text_input::TextInputMethodError> {
+        self.preedit.borrow_mut().push(None);
+        Ok(true)
     }
 }
 
 impl TextInputMethodClient for TestTextClient {
     fn events(&self) -> &TextInputMethodClientEvents {
         &self.events
+    }
+    fn input_method_editing(&self) -> Option<&dyn text_input::TextInputMethodEditing> {
+        self.uses_connection.then_some(self as &dyn text_input::TextInputMethodEditing)
+    }
+    fn input_method_owner(&self) -> Option<Ref<InputElement>> {
+        self.owner.borrow().clone()
+    }
+    fn retains_input_method_focus(&self, focused: &InputElement) -> bool {
+        self.retained.borrow().iter().any(|element| std::ptr::eq::<InputElement>(&**element, focused))
     }
     fn text_view_visual(&self) -> Option<Ref<Visual>> {
         Some(self.view.borrow().clone())
@@ -4965,6 +5012,15 @@ fn offer_client(element: &Ref<TestControl>, client: &Rc<TestTextClient>) {
 }
 
 fn ime_tree() -> ImeTree {
+    ime_tree_with(TestTextClient::new)
+}
+
+/// An IME tree whose editor offers a client of the exact-edit connection.
+fn ime_tree_with_connection() -> ImeTree {
+    ime_tree_with(TestTextClient::connected)
+}
+
+fn ime_tree_with(new_client: fn(&'static str, &Ref<TestControl>) -> Rc<TestTextClient>) -> ImeTree {
     let keyboard = KeyboardDevice::new();
     let editor = TestControl::focusable("editor").at(20.0, 30.0, 100.0, 20.0);
     let button = TestControl::focusable("button").at(0.0, 100.0, 50.0, 20.0);
@@ -4976,7 +5032,7 @@ fn ime_tree() -> ImeTree {
     let im = TestInputMethod::new("im", &log);
     *root.host.input_method.borrow_mut() = Some(im.clone());
 
-    let client = TestTextClient::new("editor", &editor);
+    let client = new_client("editor", &editor);
     offer_client(&editor, &client);
 
     ImeTree { root, keyboard, editor, button, client, im, log }
@@ -5189,6 +5245,8 @@ fn the_cursor_rectangle_follows_the_text_view_through_layout_changes() {
 fn text_input_method_client_defaults() {
     let view = TestControl::new("view");
     let client = TestTextClient::new("client", &view);
+    assert_eq!(client.input_method_state_revision(), None);
+    assert!(client.input_method_connection().is_none());
 
     // Without an override the cursor position is dropped.
     client.set_preedit_text_with_cursor(Some("pre"), Some(2));

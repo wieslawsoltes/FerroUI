@@ -1,7 +1,9 @@
 //! Registration of the markup types of WinUI rich text: the typography
-//! enumerations and the paragraph tab stops (`docs/porting/winui-rich-text.md`).
+//! enumerations, the paragraph tab stops and the input scopes
+//! (`docs/porting/winui-rich-text.md`).
 
 use crate::data::core::ValueTypes;
+use crate::input::InputScopeNameValue;
 use crate::media::text_formatting::{TabAlignment, TabLeader, TextTabStops};
 use crate::media::{
     FontCapitals, FontEastAsianLanguage, FontEastAsianWidths, FontFraction, FontNumeralAlignment, FontNumeralStyle,
@@ -17,6 +19,7 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <FontNumeralAlignment as MarkupTyped>::MARKUP,
     <FontNumeralStyle as MarkupTyped>::MARKUP,
     <FontVariants as MarkupTyped>::MARKUP,
+    <InputScopeNameValue as MarkupTyped>::MARKUP,
     <TabAlignment as MarkupTyped>::MARKUP,
     <TabLeader as MarkupTyped>::MARKUP,
     <TextTabStops as MarkupTyped>::MARKUP,
@@ -30,6 +33,7 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<FontNumeralAlignment>();
     ValueTypes::register_nullable::<FontNumeralStyle>();
     ValueTypes::register_nullable::<FontVariants>();
+    ValueTypes::register_nullable::<InputScopeNameValue>();
     ValueTypes::register_nullable::<TabAlignment>();
     ValueTypes::register_nullable::<TabLeader>();
     ValueTypes::register_nullable::<TextTabStops>();

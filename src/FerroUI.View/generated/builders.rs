@@ -4552,6 +4552,15 @@ pub trait InputPaneAwareDecoratorProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_controls::InputPaneAwareDecorator>> InputPaneAwareDecoratorProps for El<T> {}
 
+/// The properties and routed events of [`InputScopeName`](ferroui_base::input::InputScopeName).
+pub trait InputScopeNameProps: ElementBuilder {
+    /// Sets [`InputScopeName::name_value_property`](ferroui_base::input::InputScopeName::name_value_property).
+    fn name_value<M>(self, value: impl IntoProp<ferroui_base::input::InputScopeNameValue, M>) -> Self {
+        self.prop(<ferroui_base::input::InputScopeName>::name_value_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_base::input::InputScopeName>> InputScopeNameProps for El<T> {}
+
 /// The properties and routed events of [`ItemsControl`](ferroui_controls::ItemsControl).
 pub trait ItemsControlProps: ElementBuilder {
     /// Sets [`ItemsControl::item_container_theme_property`](ferroui_controls::ItemsControl::item_container_theme_property).
@@ -6719,6 +6728,11 @@ pub trait ScrollViewerProps: ElementBuilder {
         self.prop(<ferroui_controls::ScrollViewer>::offset_property(), value)
     }
 
+    /// Sets [`ScrollViewer::zoom_mode_property`](ferroui_controls::ScrollViewer::zoom_mode_property).
+    fn zoom_mode<M>(self, value: impl IntoProp<ferroui_controls::ZoomMode, M>) -> Self {
+        self.prop(<ferroui_controls::ScrollViewer>::zoom_mode_property(), value)
+    }
+
     /// Sets [`ScrollViewer::min_zoom_factor_property`](ferroui_controls::ScrollViewer::min_zoom_factor_property).
     fn min_zoom_factor<M>(self, value: impl IntoProp<f32, M>) -> Self {
         self.prop(<ferroui_controls::ScrollViewer>::min_zoom_factor_property(), value)
@@ -8704,6 +8718,15 @@ pub trait VisualBrushProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_base::media::VisualBrush>> VisualBrushProps for El<T> {}
 
+/// The properties and routed events of [`VisualStateManager`](ferroui_controls::VisualStateManager).
+pub trait VisualStateManagerProps: ElementBuilder {
+    /// Sets [`VisualStateManager::custom_visual_state_manager_property`](ferroui_controls::VisualStateManager::custom_visual_state_manager_property).
+    fn custom_visual_state_manager<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::VisualStateManager>>, M>) -> Self {
+        self.prop(<ferroui_controls::VisualStateManager>::custom_visual_state_manager_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::VisualStateManager>> VisualStateManagerProps for El<T> {}
+
 /// The properties and routed events of [`Window`](ferroui_controls::Window).
 pub trait WindowProps: ElementBuilder {
     /// Sets [`Window::size_to_content_property`](ferroui_controls::Window::size_to_content_property).
@@ -9554,6 +9577,11 @@ pub trait AttachedProps: ElementBuilder {
         self.prop(<ferroui_controls::documents::TextElement>::letter_spacing_property(), value)
     }
 
+    /// Sets the attached [`TextInputOptions::input_scope_names_property`](ferroui_base::input::text_input::TextInputOptions::input_scope_names_property).
+    fn text_input_options_input_scope_names<M>(self, value: impl IntoProp<Option<std::rc::Rc<[ferroui_base::input::InputScopeNameValue]>>, M>) -> Self {
+        self.prop(<ferroui_base::input::text_input::TextInputOptions>::input_scope_names_property(), value)
+    }
+
     /// Sets the attached [`TextInputOptions::content_type_property`](ferroui_base::input::text_input::TextInputOptions::content_type_property).
     fn text_input_options_content_type<M>(self, value: impl IntoProp<ferroui_base::input::text_input::TextInputContentType, M>) -> Self {
         self.prop(<ferroui_base::input::text_input::TextInputOptions>::content_type_property(), value)
@@ -9707,6 +9735,11 @@ pub trait AttachedProps: ElementBuilder {
     /// Sets the attached [`Visual::flow_direction_property`](ferroui_base::Visual::flow_direction_property).
     fn visual_flow_direction<M>(self, value: impl IntoProp<ferroui_base::media::FlowDirection, M>) -> Self {
         self.prop(<ferroui_base::Visual>::flow_direction_property(), value)
+    }
+
+    /// Sets the attached [`VisualStateManager::custom_visual_state_manager_property`](ferroui_controls::VisualStateManager::custom_visual_state_manager_property).
+    fn visual_state_manager_custom_visual_state_manager<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::VisualStateManager>>, M>) -> Self {
+        self.prop(<ferroui_controls::VisualStateManager>::custom_visual_state_manager_property(), value)
     }
 
     /// Sets the attached [`Win32Properties::non_client_hit_test_result_property`](ferroui_controls::Win32Properties::non_client_hit_test_result_property).

@@ -196,3 +196,14 @@ fn paragraph_copy_without_tab_stops_keeps_the_upstream_defaults() {
     assert_eq!(copy.tab_origin(), 0.0);
     assert_eq!(copy.line_metrics_mode(), TextLineMetricsMode::GlyphTypeface);
 }
+
+/// Deviation (DEVIATIONS.md, Text formatting): the copy of paragraph properties keeps
+/// their line spacing; upstream's copy constructor drops it.
+#[test]
+fn paragraph_copy_keeps_line_spacing() {
+    let _scope = TextTestScope::new();
+    let properties = GenericTextParagraphProperties::new(run_properties(EM));
+    properties.set_line_spacing(3.0);
+    let copy = GenericTextParagraphProperties::from_properties(&properties);
+    assert_eq!(copy.line_spacing(), 3.0);
+}

@@ -9,7 +9,7 @@ use super::testing::{
 use super::{
     GenericTextParagraphProperties, GenericTextRunProperties, ITextDrawingSink, ITextSource,
     ShapedTextRun, TextCharacters, TextFormatter, TextLine, TextLineMetricsMode,
-    TextParagraphProperties, TextRunProperties,
+    TextParagraphProperties, TextRunCache, TextRunProperties,
 };
 use crate::media::font_fallback_mapping::FontFallbackMappingResult;
 use crate::media::{
@@ -762,4 +762,49 @@ fn font_fallback_scale_provider_reentry_can_query_fonts_and_format_an_independen
     assert_eq!(mapper.calls(), ["ab"]);
     close(line.width(), 60.0);
     close(line.height(), 44.0);
+}
+
+#[test]
+fn font_fallback_scale_cached_and_forked_wrapped_runs_preserve_scale_without_remapping() {
+    let face = mapped_face();
+    let mapper =
+        Mapper::new(move |text, _, _| FontFallbackMapping::new(face.clone(), text.len(), 2.0));
+    let scope = TextTestScope::with_fonts_and_fallback_mapper(fonts(), mapper.clone());
+    let properties = run_properties();
+    let source = SingleBufferTextSource::new("abcd", properties.clone());
+    let paragraph: Rc<dyn TextParagraphProperties> = paragraph(
+        properties,
+        TextLineMetricsMode::FontFamily,
+        TextLineBounds::Full,
+        TextWrapping::Wrap,
+    );
+    let cache = TextRunCache::new();
+    let formatter = <dyn TextFormatter>::current();
+    let first = formatter
+        .format_line_with_cache(&source, 0, 30.0, &paragraph, None, Some(&cache))
+        .unwrap();
+    assert_eq!(first.length(), 1);
+    let calls = mapper.calls();
+    let shaped_calls = scope.shaper().shape_call_count();
+    let wider = formatter
+        .format_line_with_cache(&source, 0, 60.0, &paragraph, None, Some(&cache))
+        .unwrap();
+    assert_eq!(wider.length(), 2);
+    close(wider.width(), 60.0);
+    let fork = first.text_line_break().unwrap().fork();
+    let second = formatter
+        .format_line(&source, 1, 30.0, &paragraph, Some(&fork))
+        .unwrap();
+    assert_eq!(line_text(&*second), "b");
+    close(second.height(), 44.0);
+    assert_eq!(scales(&*second), [2.0]);
+    assert_eq!(mapper.calls(), calls);
+    assert_eq!(scope.shaper().shape_call_count(), shaped_calls);
+    assert!(first
+        .text_line_break()
+        .unwrap()
+        .remaining_runs
+        .borrow()
+        .is_some());
+    cache.dispose();
 }

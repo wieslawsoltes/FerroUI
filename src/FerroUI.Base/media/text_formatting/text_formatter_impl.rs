@@ -399,6 +399,15 @@ impl TextFormatterImpl {
             && (line_metrics_mode == TextLineMetricsMode::GlyphTypeface
                 || (x.requested_font_family() == y.requested_font_family()
                     && Rc::ptr_eq(&x.cached_glyph_typeface(), &y.cached_glyph_typeface())))
+            // Deviation (DEVIATIONS.md, Text formatting): `CanShapeTogether` ignores the
+            // font features, and a group is shaped with the features of its first run.
+            // Runs with different features are shaped apart; independent collections
+            // with the same ordered values still share shaping.
+            && match (x.font_features(), y.font_features()) {
+                (None, None) => true,
+                (Some(x), Some(y)) => x == y || x.list().snapshot() == y.list().snapshot(),
+                _ => false,
+            }
     }
 
     fn shape_together(
