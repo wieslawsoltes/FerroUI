@@ -2236,3 +2236,57 @@ fn repopulating_a_typed_string_list_keeps_the_selected_item_and_the_next_selecti
         assert_eq!(Some("abide"), textbox.text().as_deref());
     });
 }
+
+// ---------------------------------------------------------------------------
+// WinUI addition (DEVIATIONS.md, "WinUI additions to upstream controls"):
+// Enter submits the query, after upstream's handling of the key.
+// ---------------------------------------------------------------------------
+
+fn record_queries(control: &Ref<AutoCompleteBox>) -> Rc<std::cell::RefCell<Vec<(String, Option<String>)>>> {
+    let queries = Rc::new(std::cell::RefCell::new(Vec::new()));
+    let log = queries.clone();
+    control.query_submitted(move |_, e| {
+        let chosen = e.chosen_suggestion().map(|item| text_of(&Some(item.clone())));
+        log.borrow_mut().push((e.query_text().to_string(), chosen));
+    });
+    queries
+}
+
+#[test]
+fn enter_with_the_drop_down_closed_submits_the_text_and_stays_unhandled() {
+    run_test(|control, textbox| {
+        let queries = record_queries(control);
+        textbox.set_text(Some("no match here"));
+        run_jobs();
+        assert!(!control.is_drop_down_open());
+        let mut args = KeyEventArgs::new();
+        args.set_routed_event(Some(InputElement::key_down_event()));
+        args.key = Key::Enter;
+        control.raise_event(&args);
+        assert!(!args.handled(), "upstream leaves Enter unhandled while the drop-down is closed");
+        assert_eq!(vec![("no match here".to_string(), None)], *queries.borrow());
+
+        // Another key submits nothing.
+        raise_key_down(control, Key::A);
+        assert_eq!(1, queries.borrow().len());
+    });
+}
+
+#[test]
+fn enter_in_the_open_drop_down_submits_the_chosen_suggestion() {
+    run_test(|control, textbox| {
+        let queries = record_queries(control);
+        textbox.set_text(Some("abid"));
+        run_jobs();
+        assert!(control.is_drop_down_open(), "the text has matches");
+        raise_key_down(control, Key::Down);
+        let mut args = KeyEventArgs::new();
+        args.set_routed_event(Some(InputElement::key_down_event()));
+        args.key = Key::Enter;
+        control.raise_event(&args);
+        assert!(args.handled(), "upstream handles Enter in the open drop-down");
+        let queries = queries.borrow();
+        assert_eq!(1, queries.len());
+        assert_eq!(Some("abide".to_string()), queries[0].1, "{queries:?}");
+    });
+}
