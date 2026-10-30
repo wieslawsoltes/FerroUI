@@ -8,6 +8,7 @@ on:
     paths:
       - 'src/FerroUI.Designer*/**'
       - 'docs/designer/samples/**'
+      - 'src/FerroUI.Mcp/**'
       - 'Cargo.toml'
       - 'Cargo.lock'
       - '.github/workflows/designer.yml'
@@ -50,7 +51,7 @@ jobs:
         with:
           toolchain: ${{ matrix.rust }}
           components: clippy
-      - name: Source preservation, transaction, language and timeline regressions
-        run: cargo test --locked -p ferroui-designer-core -p ferroui-designer-project -p ferroui-designer-tools -p ferroui-designer-language -p ferroui-designer-animation
+      - name: Source preservation, transaction, language, timeline and convergence regressions
+        run: cargo test --locked -p ferroui-designer-core -p ferroui-designer-project -p ferroui-designer-tools -p ferroui-designer-language -p ferroui-designer-animation -p ferroui-designer-collaboration -p ferroui-designer-collaboration-host --features ferroui-designer-collaboration-host/client,ferroui-designer-collaboration-host/server
       - name: Portable public APIs are warning-free
-        run: cargo clippy --locked -p ferroui-designer-core -p ferroui-designer-project -p ferroui-designer-tools -p ferroui-designer-language -p ferroui-designer-animation --all-targets -- -D warnings
+        run: cargo clippy --locked -p ferroui-designer-core -p ferroui-designer-project -p ferroui-designer-tools -p ferroui-designer-language -p ferroui-designer-animation -p ferroui-designer-collaboration -p ferroui-designer-collaboration-host --features ferroui-designer-collaboration-host/client,ferroui-designer-collaboration-host/server --all-targets --no-deps -- -D warnings
