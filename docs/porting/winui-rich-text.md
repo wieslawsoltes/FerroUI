@@ -85,7 +85,7 @@ The changes #243 made on default paths and what the landing pull requests do wit
 |---|---|---|
 | IME on every backend (P1, P6, P8, P20, P24, P28, P33, P34) | applied to every TextBox | only for clients with the connection (D5); legacy unchanged; R9 to R12 |
 | `InputMethodManager` (B5) | rewritten; no reset of the new root's IME | legacy clients keep the upstream reset (the expectation of `input_tests.rs` restored); R3 |
-| Focus (B3) | a nested focus change aborts the outer sequence | recorded with a direct nested-focus test, or left out; R3 |
+| Focus (B3) | a nested focus change aborts the outer sequence | taken in R8 with a direct nested-focus test, recorded in DEVIATIONS.md (Input) |
 | `TextInputOptions` (B7) | a new public field | attached-property accessor (D8); R3 |
 | Popup and PopupFlyoutBase (C8, C11) | lifecycle rewrite, reversed IsOpen order | recorded deviations, upstream order kept (D6); R4 |
 | Generic ContextMenu and PopupFlyoutBase (C13) | downcasts to `RichTextBlock` | an extension point; R4 |
