@@ -1,5 +1,6 @@
 use super::NumericUpDownValueChangedEventArgs;
 use crate::primitives::{TemplateAppliedEventArgs, TemplatedControl, TemplatedControlImpl};
+use crate::utils::number_expression::evaluate_number_expression;
 use crate::{
     ButtonSpinner, ContentControl, ControlImpl, Location, SpinDirection, SpinEventArgs, Spinner, TextBox,
     ValidSpinDirections,
@@ -163,6 +164,16 @@ impl InputElementImpl for NumericUpDown {
         if e.key == Key::Enter {
             let commit_success = this.commit_input(false);
             e.set_handled(!commit_success);
+        }
+        // Addition after WinUI's NumberBox (DEVIATIONS.md, "WinUI additions to upstream
+        // controls"): PageUp and PageDown step by `LargeChange` when it is set. Without it the keys
+        // stay unhandled, as upstream.
+        if let (Key::PageUp | Key::PageDown, Some(large_change)) = (e.key, this.large_change()) {
+            if !e.handled() && this.allow_spin() && !this.is_read_only() {
+                let change = if e.key == Key::PageUp { large_change } else { -large_change };
+                this.step_by(change);
+                e.set_handled(true);
+            }
         }
     }
 }
@@ -348,6 +359,29 @@ ferro_properties! {
         /// Defines the `ClipValueToMinMax` property.
         pub fn clip_value_to_min_max_property() -> StyledProperty<bool> {
             FerroProperty::register::<NumericUpDown, _>("ClipValueToMinMax", false)
+        }
+
+        /// Defines the `AcceptsExpression` property: a FerroUI addition after WinUI's
+        /// `NumberBox.AcceptsExpression` (DEVIATIONS.md, "WinUI additions to upstream controls").
+        /// With it, text that is not a number is evaluated as an arithmetic expression
+        /// (`utils::number_expression`). `false` by default, which keeps upstream's parsing.
+        pub fn accepts_expression_property() -> StyledProperty<bool> {
+            FerroProperty::register::<NumericUpDown, _>("AcceptsExpression", false)
+        }
+
+        /// Defines the `LargeChange` property: a FerroUI addition after WinUI's
+        /// `NumberBox.LargeChange`, the step of PageUp and PageDown. `None` by default: the keys
+        /// are not handled and bubble (to a scroll viewer), as upstream.
+        pub fn large_change_property() -> StyledProperty<Option<Decimal>> {
+            FerroProperty::register::<NumericUpDown, _>("LargeChange", None)
+        }
+
+        /// Defines the `IsWrapEnabled` property: a FerroUI addition after WinUI's
+        /// `NumberBox.IsWrapEnabled`. With it, a step past `Maximum` goes to `Minimum` and a step
+        /// below `Minimum` to `Maximum`. `false` by default: a step stops at the bounds, as
+        /// upstream.
+        pub fn is_wrap_enabled_property() -> StyledProperty<bool> {
+            FerroProperty::register::<NumericUpDown, _>("IsWrapEnabled", false)
         }
 
         /// Defines the `NumberFormat` property.
@@ -613,6 +647,36 @@ impl NumericUpDown {
         self.set_value(Self::clip_value_to_min_max_property(), value)
     }
 
+    /// Gets whether text that is not a number is evaluated as an arithmetic expression.
+    pub fn accepts_expression(&self) -> bool {
+        self.get_value(Self::accepts_expression_property())
+    }
+
+    /// Sets whether text that is not a number is evaluated as an arithmetic expression.
+    pub fn set_accepts_expression(&self, value: bool) {
+        self.set_value(Self::accepts_expression_property(), value)
+    }
+
+    /// Gets the step of PageUp and PageDown; `None` leaves the keys unhandled.
+    pub fn large_change(&self) -> Option<Decimal> {
+        self.get_value(Self::large_change_property())
+    }
+
+    /// Sets the step of PageUp and PageDown; `None` leaves the keys unhandled.
+    pub fn set_large_change(&self, value: Option<Decimal>) {
+        self.set_value(Self::large_change_property(), value)
+    }
+
+    /// Gets whether a step past one bound goes to the other.
+    pub fn is_wrap_enabled(&self) -> bool {
+        self.get_value(Self::is_wrap_enabled_property())
+    }
+
+    /// Sets whether a step past one bound goes to the other.
+    pub fn set_is_wrap_enabled(&self, value: bool) {
+        self.set_value(Self::is_wrap_enabled_property(), value)
+    }
+
     /// The current number format information.
     pub fn number_format(&self) -> Option<Rc<NumberFormatInfo>> {
         self.get_value(Self::number_format_property())
@@ -827,7 +891,12 @@ impl NumericUpDown {
             return Ok(self.value());
         }
 
-        let result = self.convert_text_to_value_core(current_value_text.as_deref(), text)?;
+        let result = match self.convert_text_to_value_core(current_value_text.as_deref(), text) {
+            // Addition after WinUI's NumberBox (DEVIATIONS.md, "WinUI additions to upstream
+            // controls"): text that is not a number is evaluated as an expression.
+            Err(error) if self.accepts_expression() => Some(self.evaluate_expression(text).ok_or(error)?),
+            result => result?,
+        };
 
         if self.clip_value_to_min_max() {
             if let Some(result) = result {
@@ -838,6 +907,14 @@ impl NumericUpDown {
         self.validate_min_max(result)?;
 
         Ok(result)
+    }
+
+    /// The value of an arithmetic expression (`utils::number_expression`), its numbers read with
+    /// the parsing style and the number format of the control.
+    fn evaluate_expression(&self, text: &str) -> Option<Decimal> {
+        let number_format = self.number_format();
+        let style = self.parsing_number_style();
+        evaluate_number_expression(text, |number| Decimal::parse_with(number, style, number_format.as_deref()).ok()).ok()
     }
 
     /// Converts the value to formatted text.
@@ -874,6 +951,10 @@ impl NumericUpDown {
     /// Called by `on_spin` when the spin direction is
     /// `SpinDirection::Increase`.
     fn on_increment(&self) {
+        if let Some(value) = self.value().filter(|_| self.is_wrap_enabled()) {
+            self.set_current_value(Self::value_property(), Some(self.wrapped(value, self.increment())));
+            return;
+        }
         let result = match self.value() {
             Some(value) => value.checked_add(self.increment()).unwrap_or(saturated(self.increment())),
             // If the minimum is set we set the value to the minimum on
@@ -890,6 +971,10 @@ impl NumericUpDown {
     /// Called by `on_spin` when the spin direction is
     /// `SpinDirection::Decrease`.
     fn on_decrement(&self) {
+        if let Some(value) = self.value().filter(|_| self.is_wrap_enabled()) {
+            self.set_current_value(Self::value_property(), Some(self.wrapped(value, -self.increment())));
+            return;
+        }
         let result = match self.value() {
             Some(value) => value.checked_sub(self.increment()).unwrap_or(saturated(-self.increment())),
             // If the maximum is set we set the value to the maximum on
@@ -900,6 +985,32 @@ impl NumericUpDown {
             None => Decimal::ZERO,
         };
 
+        self.set_current_value(Self::value_property(), Some(clamp(result, self.minimum(), self.maximum())));
+    }
+
+    /// `value` changed by `change`: past `Maximum` it goes to `Minimum`, below `Minimum` to
+    /// `Maximum` (WinUI's `NumberBox::StepValue` with `IsWrapEnabled`).
+    fn wrapped(&self, value: Decimal, change: Decimal) -> Decimal {
+        let (minimum, maximum) = (self.minimum(), self.maximum());
+        match value.checked_add(change) {
+            Some(result) if result > maximum => minimum,
+            Some(result) if result < minimum => maximum,
+            Some(result) => result,
+            None if change > Decimal::ZERO => minimum,
+            None => maximum,
+        }
+    }
+
+    /// Steps the value by `change` (PageUp and PageDown): wrapped with `IsWrapEnabled`, else
+    /// clamped to the bounds as the spin steps are; a null value starts as the spin steps do.
+    fn step_by(&self, change: Decimal) {
+        let result = match self.value() {
+            Some(value) if self.is_wrap_enabled() => self.wrapped(value, change),
+            Some(value) => value.checked_add(change).unwrap_or(saturated(change)),
+            None if change > Decimal::ZERO && self.is_set(Self::minimum_property().as_property()) => self.minimum(),
+            None if change < Decimal::ZERO && self.is_set(Self::maximum_property().as_property()) => self.maximum(),
+            None => Decimal::ZERO,
+        };
         self.set_current_value(Self::value_property(), Some(clamp(result, self.minimum(), self.maximum())));
     }
 
@@ -920,6 +1031,11 @@ impl NumericUpDown {
 
             if value.is_some_and(|value| value > self.minimum()) {
                 valid_directions |= ValidSpinDirections::DECREASE;
+            }
+
+            // With IsWrapEnabled (a WinUI addition) a bound is not the end of a direction.
+            if value.is_some() && self.is_wrap_enabled() {
+                valid_directions = ValidSpinDirections::INCREASE | ValidSpinDirections::DECREASE;
             }
         }
 

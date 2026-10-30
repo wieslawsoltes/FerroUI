@@ -813,9 +813,17 @@ ferro_class_info!(ToolTip {
     },
 });
 
+// `StorageProvider` is a read-only property of the managed original: markup reads it
+// (`{Binding $parent[TopLevel].StorageProvider}`), and the generator declares a read-only property only for a
+// collection.
 ferro_class_info!(TopLevel {
     markup: {
         namespace: "FerroUI.Controls",
+        properties: [
+            StorageProvider: Rc<dyn ferroui_base::platform::storage::IStorageProvider> {
+                get: |this: &Ref<TopLevel>| this.storage_provider()
+            },
+        ],
         fields: [
             BackRequestedEvent: RoutedEvent<RoutedEventArgs> => || *TopLevel::back_requested_event(),
         ],

@@ -1050,12 +1050,29 @@ impl<'a> Emitter<'a> {
             return Err(unsupported(node, format!("{property_name}: an item of a list with more than one value")));
         };
         self.position.set((node.line(), node.position()));
-        let item = self
-            .coerce(&value, parameter.id())
-            .ok_or_else(|| unsupported(node, format!("{property_name}: the item cannot be stated as `{}`", parameter.name())))?;
-        let item = match parameter.is_object() {
-            true => item,
-            false => format!("rt::to_value({item})"),
+        let cannot = || unsupported(node, format!("{property_name}: the item cannot be stated as `{}`", parameter.name()));
+        let item = match self.coerce_static(&value, parameter.id()) {
+            Some(item) if parameter.is_object() => item,
+            Some(item) => format!("rt::to_value({item})"),
+            None => {
+                // A cast the untyped value conversions register (a view model held in its
+                // `Rc`, cast to the type of the list): the element type has no Rust type
+                // generated code could name for `rt::cast`, whose target would be left to
+                // inference (and fall back to `()`), so the value is cast to the handle of
+                // the element type at run time and held untyped (`rt::cast_untyped`).
+                let (from, expr) = match value.kind {
+                    Kind::Exact { id, .. } => (id, owned(&value.expr)),
+                    Kind::Class(class) => (class.handle().ok_or_else(cannot)?, format!("{}.clone()", value.expr)),
+                    Kind::Null | Kind::SystemType { .. } => return Err(cannot()),
+                };
+                if from == self.types.known(Known::RuntimeList) || !self.types.is_assignable(from, parameter.id()) {
+                    return Err(cannot());
+                }
+                let element_type = add.parameters.first().cloned().ok_or_else(cannot)?;
+                let handle = self.handle_expr(node, &element_type)?;
+                let (line, position) = self.position.get();
+                format!("rt::cast_untyped({expr}, {handle}, {line}, {position})?")
+            }
         };
         self.line(format!("rt::RuntimeList::add(&{}, {item});", target.expr));
         Ok(())

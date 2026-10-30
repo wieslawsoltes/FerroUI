@@ -1,0 +1,43 @@
+[package]
+name = "ferroui-markup-xaml-winui"
+description = "WinUI XAML compatibility of FerroUI: an opt-in importer from WinUI XAML, its run-time loading entry points and the x:Bind property-path adapter"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+# The build script exports the type model of the crate; Cargo hands its path to the build
+# scripts of the crates that depend on this one (docs/porting/xaml.md, 9.5.13 and 9.6.3).
+links = "ferroui_markup_xaml_winui_xaml"
+# Unit tests live next to the code, not as integration test targets.
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base = { workspace = true, features = ["markup-functions"] }
+ferroui-controls = { workspace = true }
+ferroui-markup-xaml = { workspace = true }
+# The run-time loader the entry points load the migrated document with.
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime"] }
+# The importer reads the document with byte ranges and edits the source; it never reserializes.
+roxmltree = { workspace = true }
+
+[build-dependencies]
+ferroui-build-scan = { workspace = true }
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "emitter", "testing"] }
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "markup"

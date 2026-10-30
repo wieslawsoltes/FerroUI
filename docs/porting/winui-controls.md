@@ -115,7 +115,7 @@ The upstream-ported controls keep their upstream contract, defaults and behaviou
 3. a test checks that the default reproduces upstream, and another test checks the WinUI behaviour;
 4. it has a row in `DEVIATIONS.md`, section "WinUI additions to upstream controls", with the WinUI member, the default that keeps upstream, the kind **Behaviour (opt-in)** and the pull request.
 
-When one of these fails, the WinUI control is a separate type. The additions planned (W7):
+When one of these fails, the WinUI control is a separate type. The additions (W7, landed with their tests and DEVIATIONS rows):
 
 | Control | Member | Default (upstream unchanged) | WinUI source |
 |---|---|---|---|
@@ -330,3 +330,25 @@ WinUI's visual state manager (`docs/porting/winui-calculator-gaps.md`, section 5
 | VSM-D5 | A setter of a property that has no animation layer does not exist in WinUI (every dependency property has one). | A direct property has no priorities: the setter sets its value, and the value it had is set back when the state is left. | Behaviour | #338 |
 | VSM-D6 | Storyboards, `VisualTransition` and state triggers. | Not yet: they land in VSM-2 to VSM-4 (`winui-calculator-gaps.md`, section 8). | Missing (pending) | #338 |
 | VSM-D7 | The target of a setter is its element name (`TargetPropertyPath` keeps `m_targetName`, or an explicit target object), resolved in the name scope of the template or the page when the state applies (`ResolveTargetObjectForVisualStateSetter`), so a setter may name an element declared after it. | The same: the compiler writes `TargetName`; an explicit `Target` object is used as it is. The name is found among the elements of the template (its root and template descendants) when the groups are on the root of a template, else in the nearest name scope of the element that has the groups and its logical ancestors (the scope of the document). | Representation: FerroUI does not attach the name scope of a template to its root, so the elements of the template are searched instead; the same element is found. | #338 |
+
+### 10.6 WinUI XAML importer and x:Bind (W9)
+
+The crate `ferroui-markup-xaml-winui` (`src/Markup/FerroUI.Markup.Xaml.WinUI`; the facade feature `winui-xaml`). Nothing in it changes the default loader or the ordinary bindings: an application opts in.
+
+- **Importer** (`importer/`): `migrate_winui_xaml(xaml, &WinUIXamlOptions)` rewrites a WinUI document into FerroUI's XAML.
+  - The edits are namespace-aware, keep the byte ranges of the original, and never reserialize the document (roxmltree).
+  - The WinUI namespaces map to FerroUI's (`Microsoft.UI.Xaml.Controls` to `FerroUI.Controls`, `Microsoft.UI.Xaml.Navigation` to `FerroUI.Navigation`, and so on).
+  - Audited type and member mappings with a diagnostic replace the rest, such as WinUI's inline `ColorPicker` adapted to `ColorView`.
+  - What has no implementation is reported, not hidden, with the codes `WXAML0001` to `WXAML2006` and the source span of the original (`WinUIXamlMigration`, `WinUIXamlDiagnostic`).
+  - The event-target table (`importer/event_targets.rs`) is written by `scripts/winui-gallery/event_targets.py` from the WinUI API inventory `upstream-api.json`. That inventory is not committed (proposal section 9.3): the scanner of the gallery port (`scan.py`, W10) makes it from the pinned checkouts, and the gallery workflow runs `event_targets.py --check` after the scan.
+- **Loading** (`load.rs`): `load_winui`, `parse_winui` and `parse_winui_as` migrate the document, then load it with the run-time loader. A fresh root is loaded inside `xaml_error_scope::with_xaml_errors` (W2), so a deferred resource error comes back as `Err`. The entry points register the crate's types. A build-time compiler is fed the same migrated document.
+- **x:Bind** (`bindings/`): `WinUIBindExtension`, `WinUIBinding`, `WinUIBindingScope` and the `WinUIBindings` host lifecycle (`Initialize`, `Update`, `StopTracking`, opt-in stop on unload), in the namespace `FerroUI.Markup.Xaml.WinUI`, which the importer reaches through a `using:` prefix. It is an explicit property-path adapter on the ordinary binding engine, not WinUI's generated binding compiler. The contract and its pinned WinUI sources are in the crate's `NOTICE.md`.
+
+| WinUI | Port | Kind | Why |
+|---|---|---|---|
+| The XAML compiler generates `x:Bind` code: functions, casts, indexers, converters, fallback values, event bindings, `x:Phase`, `x:DefaultBindMode`. | Dotted property paths with an explicit mode and update trigger; every other form is a diagnostic of the importer. | Missing | The adapter binds through registered property and model metadata; the other forms need generated code. |
+| The generated code initializes the bindings of a page during `Loading`. | The host calls `WinUIBindings::Initialize` after construction (and sets the `DataContext` of a typed template first); `Loaded` is not substituted. | Behaviour | There is no generated page class to hook; the lifecycle is explicit. |
+| `StopTracking` skips the reset when the generated group needs no tracking. | `StopTracking` always resets the controller to uninitialized, so a later `Initialize` refreshes every path. | Behaviour | One explicit lifecycle for every group. |
+| Sources and named elements are kept alive by the managed collector. | Source roots, named elements and intermediate values are held weakly; the declaring root or model owns its fields. | Representation | Rust ownership without cycles, as the native binding engine. |
+
+Tests (75 in the crate, plus the regeneration of the compiled fixture): `importer_tests` (the migration, its diagnostics and the loading entry points), `bindings_tests` (the x:Bind lifecycle) and `compiled_tests`. In `compiled_tests` the same migrated documents run through the interpreter and through the Rust emitter, whose output, `fixtures/winui_bindings.generated.rs`, is checked in and compared with the current compiler.

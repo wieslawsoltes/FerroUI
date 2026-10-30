@@ -220,8 +220,8 @@ until the page is ported.
 | 65 | InsertItemToItemsControlAction | `Views/Pages/InsertItemToItemsControlActionView` | A | 60 | ported | the item of the template is created by the markup constructor of `ItemViewModel` (`x:Arguments`) |
 | 66 | ObjectTemplate | `Views/Pages/ObjectTemplateView` | A | 82 | ported | the items of the templates are created by the markup constructor of `ItemViewModel` (`x:Arguments`) |
 | 67 | ClearItemsControlAction | `Views/Pages/ClearItemsControlActionView` | A | 45 | ported |  |
-| 68 | AddRangeAction | `Views/Pages/AddRangeActionView` | A | 72 | ported | deviation: the items are in an `ArrayList`, not a `List<ItemViewModel>` (the compiled markup cannot add a view model to a typed list of the runtime library) |
-| 69 | RemoveRangeAction | `Views/Pages/RemoveRangeActionView` | A | 45 | ported | deviation: the page registers the conversion of the selected items of a list box (`SelectedItemsList`) to the items of the action (`ItemsSource`), which the framework lacks |
+| 68 | AddRangeAction | `Views/Pages/AddRangeActionView` | A | 72 | ported | the items in a `List<ItemViewModel>` created in markup, as the reference |
+| 69 | RemoveRangeAction | `Views/Pages/RemoveRangeActionView` | A | 45 | ported | the selected items of the list box bound to the items of the action |
 | 70 | MoveItemInItemsControlAction | `Views/Pages/MoveItemInItemsControlActionView` | A | 56 | ported |  |
 | 71 | MoveElementToPanelAction | `Views/Pages/MoveElementActionsView` | A | 76 | ported |  |
 | 72 | CollectionChangedTrigger | `Views/Pages/CollectionChangedTriggerBehaviorView` | A | 55 | ported |  |
@@ -262,8 +262,8 @@ until the page is ported.
 | 107 | KeyGestureTrigger | `Views/Pages/KeyGestureTriggerView` | B | 40 | ported | KeyGestureTrigger; own view model (`ViewModels/key_gesture_trigger_view_model.rs`) |
 | 108 | ExecuteCommand Behaviors | `Views/Pages/ExecuteCommandBehaviorsView` | B | 176 | ported | the execute command behaviors; own view model (`ViewModels/execute_command_behaviors_view_model.rs`, shared with ButtonExecuteCommandOnKeyDownBehavior) |
 | 109 | ButtonExecuteCommandOnKeyDownBehavior | `Views/Pages/ButtonExecuteCommandOnKeyDownBehaviorView` | B | 36 | ported | ButtonExecuteCommandOnKeyDownBehavior (`ExecuteCommandBehaviorsViewModel`, registered by ExecuteCommand Behaviors) |
-| 110 | Storage Provider | `Views/Pages/StorageProviderView` | B | 203 | ported | the picker behaviors and actions; code-behind: the `Pick` handler of the folder picker behavior is subscribed in the constructor (deviation: `Pick` is an event of the Rust API, the button of the behavior is named `OpenFoldersBehaviorButton`); deviation: `StorageProvider="{Binding $parent[TopLevel].StorageProvider}"` left out (the top level does not declare its storage provider to markup; the default is the same provider) |
-| 111 | Picker CanExecuteCommand | `Views/Pages/PickerCanExecuteCommandView` | B | 188 | ported | picker behaviors with can-execute commands; deviation: `StorageProvider="{Binding $parent[TopLevel].StorageProvider}"` left out (as Storage Provider) |
+| 110 | Storage Provider | `Views/Pages/StorageProviderView` | B | 203 | ported | the picker behaviors and actions; code-behind: the `Pick` handler of the folder picker behavior is subscribed in the constructor (deviation: `Pick` is an event of the Rust API, the button of the behavior is named `OpenFoldersBehaviorButton`); `StorageProvider="{Binding $parent[TopLevel].StorageProvider}"` as the reference |
+| 111 | Picker CanExecuteCommand | `Views/Pages/PickerCanExecuteCommandView` | B | 188 | ported | picker behaviors with can-execute commands; `StorageProvider="{Binding $parent[TopLevel].StorageProvider}"` as the reference |
 | 112 | Clipboard | `Views/Pages/ClipboardView` | B | 52 | ported | the clipboard text actions; the text names FerroUI |
 | 113 | GetClipboardDataAction | `Views/Pages/GetClipboardDataActionView` | B | 38 | ported | GetClipboardDataAction |
 | 114 | GetClipboardFormatsAction | `Views/Pages/GetClipboardFormatsActionView` | B | 38 | ported | GetClipboardFormatsAction |
@@ -276,7 +276,7 @@ until the page is ported.
 | 121 | ShowHidePopupAction | `Views/Pages/ShowHidePopupActionView` | B | 47 | ported | ShowPopupAction and HidePopupAction |
 | 122 | ShowOn Event Behaviors | `Views/Pages/ShowOnEventBehaviorsView` | B | 138 | ported | ShowOnTapped, ShowOnDoubleTapped and ShowOnKeyDown behaviors |
 | 123 | SetEnabledAction | `Views/Pages/SetEnabledActionView` | B | 44 | ported | SetEnabledAction |
-| 124 | ShowNotificationAction | `Views/Pages/ShowNotificationActionView` | B | 49 | ported | NotificationManagerBehavior and ShowNotificationAction; deviation: the `Notification` of the framework is not declared to markup, the code-behind sets the notification of the action |
+| 124 | ShowNotificationAction | `Views/Pages/ShowNotificationActionView` | B | 49 | ported | NotificationManagerBehavior and ShowNotificationAction with the `Notification` of the document |
 | 125 | Dialog Actions | `Views/Pages/DialogActionView` | B | 52 | ported | the dialog actions with the shared `Dialogs/SimpleDialog` |
 | 126 | File Drop Handler | `Views/Pages/FileDropHandlerView` | B | 55 | ported | ContextDropBehavior with a drop handler resource, FilesDropBehavior, TextDropBehavior; owns `Behaviors/files_drop_handler.rs` (registered by this page) |
 | 127 | Upload File | `Views/Pages/UploadFileView` | B | 102 | ported | ButtonUploadFileBehavior, UploadFileAction and UploadCompletedTrigger |
@@ -300,7 +300,7 @@ until the page is ported.
 | 145 | KeyTrigger | `Views/Pages/KeyTriggerView` | C | 49 | ported |  |
 | 146 | ToolTip Helpers | `Views/Pages/ToolTipHelpersView` | C | 62 | ported |  |
 | 147 | WriteableBitmap | `Views/Pages/WriteableBitmapView` | C | 123 | ported | owns `Renderers/sample_writeable_bitmap_renderer.rs` (registered by the page, cast to `IWriteableBitmapRenderer`) |
-| 148 | RenderTargetBitmap | `Views/Pages/RenderTargetBitmapView` | C | 67 | ported | owns `Renderers/rotating_square_renderer.rs` and `Renderers/solid_square_renderer.rs` (registered by the page, cast to their render target contracts); deviation: the code-behind sets the `Target` of the trigger and of the action (markup resolves the names to the behaviors but does not assign them to the render host contract) |
+| 148 | RenderTargetBitmap | `Views/Pages/RenderTargetBitmapView` | C | 67 | ported | owns `Renderers/rotating_square_renderer.rs` and `Renderers/solid_square_renderer.rs` (registered by the page, cast to their render target contracts); the `Target` of the trigger and of the action named in the document, as the reference |
 | 149 | LaunchUriOrFileAction | `Views/Pages/LaunchUriOrFileActionView` | C | 39 | ported | the address is the FerroUI repository (the reference names the site of its framework) |
 | 150 | Reactive Navigation | `Views/ReactiveUI/ReactiveNavigationView` | C | 84 | ported | own view models (`ViewModels/ReactiveUI/`: `ReactiveNavigationViewModel`, `HomePageViewModel`, `DetailPageViewModel`) and the views of its pages (`pages/HomePageView.xaml`, `pages/DetailPageView.xaml`); deviations: the view models are in the namespace `BehaviorsGallery.ViewModels.ReactiveUI`, the root of the documents is `ReactiveUserControlBase`, and the generic `NavigateToAction` and `NavigateToAndResetAction` (no type arguments in markup) are added by the code-behind; the gallery depends on `ferroui-splat` (`Locator.CurrentMutable`) |
 | 151 | Transitions Behavior | `Views/Pages/TransitionsBehaviorView` | C | 60 | ported |  |
@@ -316,7 +316,7 @@ until the page is ported.
 | 161 | Theme Variant | `Views/Pages/ThemeVariantView` | C | 58 | ported | code-behind: the static `Pink` variant (`ThemeVariantView::pink()`) |
 | 162 | Screens | `Views/Pages/ScreenView` | C | 86 | ported |  |
 | 163 | BindPointerOverBehavior | `Views/Pages/BindPointerOverBehaviorView` | C | 35 | ported |  |
-| 164 | BindTagToVisualRootDataContextBehavior | `Views/Pages/BindTagToVisualRootDataContextBehaviorView` | C | 45 | ported | deviation: the items of the view model have no indexer for markup (`Items[0]`), so the code-behind sets the data context of the text block to the first item |
+| 164 | BindTagToVisualRootDataContextBehavior | `Views/Pages/BindTagToVisualRootDataContextBehaviorView` | C | 45 | ported | `DataContext="{Binding Items[0]}"` of the text block, as the reference |
 | 165 | BoundsObserverBehavior | `Views/Pages/BoundsObserverBehaviorView` | C | 39 | ported |  |
 | 166 | HideAttachedFlyoutBehavior | `Views/Pages/HideAttachedFlyoutBehaviorView` | C | 48 | ported |  |
 | 167 | ButtonHideFlyoutBehavior | `Views/Pages/ButtonHideFlyoutBehaviorView` | C | 48 | ported |  |
