@@ -3,6 +3,7 @@ use crate::Permissions;
 use serde_json::Value;
 use std::collections::BTreeSet;
 use std::io;
+use std::panic::AssertUnwindSafe;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
@@ -62,10 +63,20 @@ pub trait ServiceToolProvider: Send + Sync + 'static {
     ) -> Result<Value, String>;
 }
 
-#[derive(Clone)]
 pub(crate) struct ServiceCatalog {
-    provider: Arc<dyn ServiceToolProvider>,
+    // The server handle that holds the catalog stays unwind-safe, as it was before services: a
+    // provider is shared state behind `Send + Sync`, and a panic in one of its calls is caught
+    // and answered as a tool error by the transport.
+    provider: AssertUnwindSafe<Arc<dyn ServiceToolProvider>>,
     tools: Arc<Vec<Value>>,
+}
+impl Clone for ServiceCatalog {
+    fn clone(&self) -> Self {
+        Self {
+            provider: AssertUnwindSafe(self.provider.0.clone()),
+            tools: self.tools.clone(),
+        }
+    }
 }
 impl ServiceCatalog {
     pub fn new(provider: Arc<dyn ServiceToolProvider>) -> io::Result<Self> {
@@ -98,7 +109,7 @@ impl ServiceCatalog {
             }
         }
         Ok(Self {
-            provider,
+            provider: AssertUnwindSafe(provider),
             tools: Arc::new(tools),
         })
     }

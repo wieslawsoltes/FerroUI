@@ -55,6 +55,9 @@ fn settings(write: bool) -> Options {
 fn inspector_only_server_handle_preserves_send_contract() {
     fn assert_send<T: Send>() {}
     assert_send::<ServerHandle>();
+    // The auto traits of 0.4.0's handle (the API gate checks them too).
+    fn assert_unwind_safe<T: std::panic::UnwindSafe + std::panic::RefUnwindSafe>() {}
+    assert_unwind_safe::<ServerHandle>();
 }
 
 #[test]
