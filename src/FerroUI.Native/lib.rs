@@ -87,6 +87,8 @@ mod native_control_host_impl;
 
 #[cfg(target_os = "macos")]
 mod native_platform_settings;
+#[cfg(any(target_os = "macos", test))]
+mod native_text_input_options;
 #[cfg(target_os = "macos")]
 mod platform_behavior_inhibition;
 #[cfg(target_os = "macos")]
@@ -211,6 +213,10 @@ mod tests {
         assert_eq!(size_of::<IFrnPopupVtbl>(), (3 + 16 + 17 + 1) * PTR);
         assert_eq!(size_of::<IFrnWindowVtbl>(), (3 + 16 + 17 + 14) * PTR);
         assert_eq!(size_of::<IFrnWindowEventsVtbl>(), (3 + 11 + 3 + 3) * PTR);
+        // The content hints are an interface of their own (R12 of winui-rich-text.md): the
+        // vtable of the text input method is upstream's.
+        assert_eq!(size_of::<IFrnTextInputMethodVtbl>(), (3 + 5) * PTR);
+        assert_eq!(size_of::<IFrnTextInputMethodOptionsVtbl>(), (3 + 1) * PTR);
         assert_eq!(size_of::<IFrnWindow>(), PTR);
     }
 

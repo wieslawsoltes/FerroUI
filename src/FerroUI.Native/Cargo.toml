@@ -49,6 +49,13 @@ name = "accessibility_tree"
 path = "tests/accessibility_tree.rs"
 harness = false
 
+# The content hints of a client of the exact-edit connection on the real AppKit view
+# (R12 of docs/porting/winui-rich-text.md).
+[[test]]
+name = "text_input_options"
+path = "tests/text_input_options.rs"
+harness = false
+
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]
 group = "platforms"

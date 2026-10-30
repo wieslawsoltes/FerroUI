@@ -468,6 +468,14 @@ impl FerroView {
 
     fn set_options(&self, options: &TextInputOptions) {
         *self.ivars().options.borrow_mut() = Some(options.clone());
+        // A client of the exact-edit connection gets its options (and input scopes)
+        // again while it keeps the keyboard: UIKit reads the traits of the responder
+        // anew. Upstream stores the options only, which every other client keeps
+        // (R12 of docs/porting/winui-rich-text.md, decision D5). The borrow of the
+        // options is released before UIKit asks for them.
+        if let Some(responder) = self.driving_responder().filter(|responder| responder.uses_connection()) {
+            responder.reloadInputViews();
+        }
     }
 
     fn reset(&self) {

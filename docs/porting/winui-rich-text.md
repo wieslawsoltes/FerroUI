@@ -134,7 +134,7 @@ Each pull request carries its tests, its `DEVIATIONS.md` rows and a line in `CHA
 | R9 | Windows: IMM32 for connection clients, the UIA text pattern, the WinUI CoreText host; the oracle as a tool | R8 | P1-P22 as opt-in | yes: Japanese, Chinese and Korean IMEs in TextBox and RichEditBox; Narrator and Inspect |
 | R10 | Browser: the connection protocol with the old public functions kept; `browser-platform.md` section 14 | R8 | P28-P32 as opt-in | no |
 | R11 | FreeDesktop, Wayland, X11: the connection for IBus and Fcitx, the IBus content-type property non-fatal | R8 | P23-P27 | Ubuntu VM (IBus, Fcitx) |
-| R12 | macOS, iOS, Android: content hints, input options; `patches/0003` regenerated | R8 | P33-P37 | iOS simulator and Android emulator (never with a VM) |
+| R12 | macOS, iOS, Android: content hints, input options; the native patch regenerated (`patches/0004`, after main's backdrop patch `0003`) | R8 | P33-P37 | iOS simulator and Android emulator (never with a VM) |
 | R13 | CI: the regeneration check repository-wide and the on-demand oracle job, actions pinned by SHA | R9 | | no |
 | F1 | Performance: a layout cache per paragraph, the selection drawn as an overlay, an incremental IME preview, the fast path near fields, delta undo units if not in R7 | R8 | S7, S8, S9 | no |
 
@@ -219,4 +219,12 @@ What remains outside the port (RT-P of #243): the exact LineServices metrics, th
 | The template is in every theme. | The WinUI theme has it (`WINUI_ONLY_CONTROLS`), and so do the macOS and Material themes, which derive every control theme of the WinUI theme; Fluent and Simple show nothing. | Decision D4. |
 
 Not taken from #243 in R8: its manager tests for a client without exact editing whose cursor query moves focus or replaces the client (`rich_edit_input_geometry_tests.rs`). Such a client keeps the upstream manager (D5), which has no such guarantees. While a connection client's flyout has focus, the manager keeps the input method of the owner's root, also when the flyout is in a popup root of its own.
+
+### 11.4 Input scopes on macOS, iOS and Android (R12)
+
+| WinUI | FerroUI | Why |
+|---|---|---|
+| `InputScope` chooses the touch keyboard and the text services of the field. | For RichEditBox (a client of the exact-edit connection) the first scope chooses what the platform has: the semantic `contentType` of the AppKit view (URL, email address, name, telephone number, macOS 14 and later), the `UIKeyboardType` and `UITextContentType` of the iOS responder, the `inputType` of the Android `EditorInfo`. Scopes of a script or a width (Hiragana, Hangul, full-width) have no counterpart there and give the default keyboard. TextBox keeps the upstream behaviour of each backend. | D5, D8; the platforms have no script or width selector. |
+| A password scope turns off prediction and learning. | The same for RichEditBox on iOS and Android; on macOS no content hint is set for a password, a PIN, sensitive content or `IsTextPredictionEnabled = false`. A scope never turns on secure (masked) entry. | The scope advises the keyboard; masking is the control's. |
+| Changing `InputScope` while the field has focus updates the keyboard. | The same: macOS updates the view's `contentType`, iOS calls `reloadInputViews`, Android restarts the input when the `EditorInfo` changes and keeps the composing region. | |
 

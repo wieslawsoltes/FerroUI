@@ -885,6 +885,25 @@ interface IFrnTextInputMethod : IUnknown
     void SetSelectionInSurroundingText(int start, int end);
 }
 
+enum FrnTextInputContentType
+{
+    FrnTextInputContentNone = 0,
+    FrnTextInputContentUrl = 1,
+    FrnTextInputContentEmailAddress = 2,
+    FrnTextInputContentName = 3,
+    FrnTextInputContentTelephoneNumber = 4
+}
+
+// Optional extension of the text input method, as IFrnAccessibilitySettings: the vtable and IID of
+// IFrnTextInputMethod stay unchanged. The semantic content type of the view (NSTextContent), sent
+// only for a client of the exact-edit connection. A FerroUI addition
+// (docs/porting/winui-rich-text.md, R12).
+[uuid(8b73203e-0e92-493d-b290-fe3fd801fdb8)]
+interface IFrnTextInputMethodOptions : IUnknown
+{
+    void SetContentType(FrnTextInputContentType contentType);
+}
+
 [uuid(e34ae0f8-18b4-48a3-b09d-2e6b19a3cf5e)]
 interface IFrnMacOptions : IUnknown
 {
