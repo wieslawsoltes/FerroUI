@@ -317,6 +317,20 @@ Where #286 differed from WinUI, the port follows WinUI: the text of NumberBox's 
 | `TitleBarTrace` (debug output). | Not ported. | Missing | Diagnostics of the WinUI build. |
 | `TitleBar` passes `RightToLeft` insets swapped. | The same, from `FlowDirection`. | - | - |
 
+### VisualStateManager
+
+WinUI's visual state manager (`docs/porting/winui-calculator-gaps.md`, section 5; module
+`ferroui_controls::visual_state`). Differences from WinUI:
+
+| ID | WinUI | FerroUI | Kind | Since |
+|---|---|---|---|---|
+| VSM-D1 | The groups are on the first visual child of the control (`Control.ImplementationRoot`): the root of the template, or the content of a `UserControl` or `Page`, which have no template. | The root of the template when it has groups (or a custom manager), else the content of a content control or of a content page that is a control with groups. | Representation: FerroUI's user control and page are templated; the same groups are found. | #338 |
+| VSM-D2 | `x:Name` of a group or a state registers it in the name scope (deferred names, `VisualStateGroupCollection.cpp`). | The name is set; the group or state is not registered, so `find_name` does not find it. | Missing | #338 |
+| VSM-D3 | A setter whose target is not found fails the change of state with an error. | The compiler reports a target whose name is not in the name scope of the setter (an error of the document); at run time a setter whose name is not found when the state applies, whose target is gone, or that has no property is skipped with a warning (area `Control`), and the other setters apply. | Behaviour | #338 |
+| VSM-D4 | Setters of built-in properties are set synchronously and once more through a deferred operation on the next tick (`VisualStateSetterHelper.cpp`). | Set once, synchronously, at `BindingPriority::Animation`. | Representation: FerroUI's property store has no deferred animated values. | #338 |
+| VSM-D5 | A setter of a property that has no animation layer does not exist in WinUI (every dependency property has one). | A direct property has no priorities: the setter sets its value, and the value it had is set back when the state is left. | Behaviour | #338 |
+| VSM-D6 | Storyboards, `VisualTransition` and state triggers. | Not yet: they land in VSM-2 to VSM-4 (`winui-calculator-gaps.md`, section 8). | Missing (pending) | #338 |
+| VSM-D7 | The target of a setter is its element name (`TargetPropertyPath` keeps `m_targetName`, or an explicit target object), resolved in the name scope of the template or the page when the state applies (`ResolveTargetObjectForVisualStateSetter`), so a setter may name an element declared after it. | The same: the compiler writes `TargetName`; an explicit `Target` object is used as it is. The name is found among the elements of the template (its root and template descendants) when the groups are on the root of a template, else in the nearest name scope of the element that has the groups and its logical ancestors (the scope of the document). | Representation: FerroUI does not attach the name scope of a template to its root, so the elements of the template are searched instead; the same element is found. | #338 |
 
 ### 10.6 WinUI XAML importer and x:Bind (W9)
 
@@ -327,7 +341,7 @@ The crate `ferroui-markup-xaml-winui` (`src/Markup/FerroUI.Markup.Xaml.WinUI`; t
   - The WinUI namespaces map to FerroUI's (`Microsoft.UI.Xaml.Controls` to `FerroUI.Controls`, `Microsoft.UI.Xaml.Navigation` to `FerroUI.Navigation`, and so on).
   - Audited type and member mappings with a diagnostic replace the rest, such as WinUI's inline `ColorPicker` adapted to `ColorView`.
   - What has no implementation is reported, not hidden, with the codes `WXAML0001` to `WXAML2006` and the source span of the original (`WinUIXamlMigration`, `WinUIXamlDiagnostic`).
-  - The event-target table (`importer/event_targets.rs`) is written by `scripts/winui-gallery/event_targets.py` from the WinUI API inventory `upstream-api.json`. That inventory is not committed (proposal section 9.3): the scanner of the gallery port (`scan.py`, W10) makes it from the pinned checkouts, and the gallery workflow runs `event_targets.py --check` after the scan.
+  - The event-target table (`importer/event_targets.rs`) is written by `scripts/winui-gallery/event_targets.py` from the WinUI API inventory `upstream-api.json`. That inventory is not committed (proposal section 9.3): the scanner of the gallery port (`scan.py`, W10b, section 10.8) makes it from the pinned checkouts, and the workflow `winui-gallery-scan.yml` runs `event_targets.py --check` after the scan.
 - **Loading** (`load.rs`): `load_winui`, `parse_winui` and `parse_winui_as` migrate the document, then load it with the run-time loader. A fresh root is loaded inside `xaml_error_scope::with_xaml_errors` (W2), so a deferred resource error comes back as `Err`. The entry points register the crate's types. A build-time compiler is fed the same migrated document.
 - **x:Bind** (`bindings/`): `WinUIBindExtension`, `WinUIBinding`, `WinUIBindingScope` and the `WinUIBindings` host lifecycle (`Initialize`, `Update`, `StopTracking`, opt-in stop on unload), in the namespace `FerroUI.Markup.Xaml.WinUI`, which the importer reaches through a `using:` prefix. It is an explicit property-path adapter on the ordinary binding engine, not WinUI's generated binding compiler. The contract and its pinned WinUI sources are in the crate's `NOTICE.md`.
 
@@ -351,4 +365,18 @@ The sample `samples/WinUIGallery` (package `winui-gallery`, not published) ports
 | The AutoSuggestBox has a template in Rust, with the parts `PART_TextBox` and `PART_SuggestionsList`. | The template of the WinUI theme (O2), with WinUI's parts `TextBox` and `SuggestionsList`; the two tests that open its suggestions run under the WinUI theme in a window. | No template in Rust. |
 | `VALIDATION.md`, the per-run evidence under `docs/porting/winui-gallery/`, the name baseline `existing_api.py`. | Not taken. | O8, O9. |
 
-The workflow `winui-gallery.yml` runs the tests of the sample and checks its desktop and capture binaries on the paths of the sample and the WinUI controls (O12); it renders every page, the WinUI controls in the dark theme and the NavigationView compositions nightly and on demand. The scanner of the gallery (`scan.py`, `REPORT.md`, `event_targets.py --check` after the scan) is W10b.
+The workflow `winui-gallery.yml` runs the tests of the sample and checks its desktop and capture binaries on the paths of the sample and the WinUI controls (O12); it renders every page, the WinUI controls in the dark theme and the NavigationView compositions nightly and on demand. The scanner of the gallery is W10b (section 10.8).
+
+### 10.8 WinUI API and Gallery scanner (W10b)
+
+`scripts/winui-gallery/scan.py` (from #286) compares the public API of WinUI and the pages of WinUI Gallery with FerroUI's sources at the pins of `docs/porting/winui-gallery/data/sources.lock.json` (WinUI `7e4b0c2`, O13; Gallery `14061eea`). Its result is a report of candidates: 1,545 public WinUI types and 7,462 public members are scanned, a same-name Rust type or member in the mapped namespace is a *candidate*, and no candidate counts as behaviour, which the tests of the controls and of the sample establish. The pages have the states of `samples/WinUIGallery/port-status.json`.
+
+| #286 | Port | Why |
+|---|---|---|
+| Committed snapshots of the pinned sources (`upstream-api.json`, `gallery-pages.json`, `gallery-usage.json`, `source-files.json`, about 9 MB) with their hashes in the lock, and committed maps (`api-map.json` and others, about 7 MB). | The scan reads the pinned checkouts (`--winui-root`, `--gallery-root`, verified against the pins); the inventories and maps go to `target/winui-gallery-scan` and are an artifact of the workflow. Committed: the pins, the reviewed `api-mappings.json`, and the generated `summary.json` and `REPORT.md`. | O8. |
+| `api-evidence.json` and execution records (`data/executions/`) promote contracts and pages to `verified`; `--require-complete` gates on it. | Not taken: no contract or page is `verified`, and the scanner refuses the state for a page. | The records are per-run evidence (O8); behaviour is what the tests prove. |
+| `existing_api.py` and `ferroui-api-baseline.json`. | Not taken. | O9: the API gate guards the API. |
+| The implementation and test anchors of `api-mappings.json` name the importer in `ferroui-markup-xaml-loader` and the x:Bind adapter in `ferroui-markup-xaml`. | The anchors name `ferroui-markup-xaml-winui` (W9). | Where they landed. |
+| The event-target generator reads the committed snapshot. | `event_targets.py --api` (default: the scan's output). The table is the one W9 generated; only the hash of the inventory in its header changes, to the inventory at the pin `7e4b0c2`. | The inventory is not committed. |
+
+The workflow `winui-gallery-scan.yml` checks out the pins (microsoft-ui-xaml sparsely: `controls/dev`, `controls/idl`, `dxaml/xcp/tools/XCPTypesAutoGen`), runs the tests of the scripts, `scan.py --check` and `event_targets.py --check`, and puts the report in the run summary. It blocks a pull request only on its own paths (the scripts, `docs/porting/winui-gallery/`, the event-target table); at night it reports the drift that changes of the controls make to the report, without failing.

@@ -28,7 +28,8 @@ use crate::media::{
 use crate::media::transformation::TransformOperations;
 use crate::metadata::{from_markup_value, MarkupType, MarkupTyped};
 use crate::styling::{
-    IStyle, ITemplate, Selector, Setter, SetterBase, SetterValue, StyleChildren, StyleQuery, ThemeVariant,
+    IStyle, ITemplate, Selector, Setter, SetterBase, SetterValue, StyleChildren, StyleQuery, TargetPropertyPath,
+    ThemeVariant,
 };
 use crate::utilities::NumberFormatInfo;
 use crate::{BoxedValue, FerroProperty, Point, Ref, TypeInfo};
@@ -277,6 +278,37 @@ ferro_markup_type!(class Setter {
     properties: [
         Property: Option<&'static FerroProperty> { get: Setter::property, set: Setter::set_property },
         Value: Option<BoxedValue> { get: setter_value, set: set_setter_value } [AssignBinding, DependsOn("Property")],
+        // WinUI's `Setter.Target` (an addition, docs/porting/winui-calculator-gaps.md): the
+        // compiler writes it from the text `Element.Property` of a setter of a visual state.
+        Target: Option<Rc<TargetPropertyPath>> { get: Setter::target, set: Setter::set_target },
+    ],
+});
+
+// WinUI's `TargetPropertyPath` (an addition): the element of a setter of a visual state,
+// resolved by name in the name scope of the document or the template.
+ferro_markup_type!(class TargetPropertyPath {
+    namespace: "FerroUI.Styling",
+    handles: [Rc<TargetPropertyPath>, Option<Rc<TargetPropertyPath>>],
+    this: Rc<TargetPropertyPath>,
+    constructors: [() => TargetPropertyPath::empty],
+    properties: [
+        Path: String {
+            get: |this: &Rc<TargetPropertyPath>| this.path(),
+            set: |this: &Rc<TargetPropertyPath>, value: String| this.set_path(value)
+        },
+        // The name of the target element, resolved when the setter applies (WinUI's target name).
+        TargetName: String {
+            get: |this: &Rc<TargetPropertyPath>| this.target_name(),
+            set: |this: &Rc<TargetPropertyPath>, value: String| this.set_target_name(value)
+        },
+        Property: Option<&'static FerroProperty> {
+            get: |this: &Rc<TargetPropertyPath>| this.property(),
+            set: |this: &Rc<TargetPropertyPath>, value: Option<&'static FerroProperty>| this.set_property(value)
+        },
+        Target: Option<Ref<crate::FerroObject>> {
+            get: |this: &Rc<TargetPropertyPath>| this.target(),
+            set: |this: &Rc<TargetPropertyPath>, value: Option<Ref<crate::FerroObject>>| this.set_target(value)
+        } [ResolveByName],
     ],
 });
 
@@ -978,6 +1010,7 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <BindingOperations as MarkupTyped>::MARKUP,
     <RoutedEvent as MarkupTyped>::MARKUP,
     <Setter as MarkupTyped>::MARKUP,
+    <TargetPropertyPath as MarkupTyped>::MARKUP,
     <Selector as MarkupTyped>::MARKUP,
     <StyleQuery as MarkupTyped>::MARKUP,
     <StyleChildren as MarkupTyped>::MARKUP,
@@ -1074,6 +1107,7 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<KeyFrames>();
     ValueTypes::register_nullable::<GestureRecognizerCollection>();
     ValueTypes::register_nullable::<Rc<Setter>>();
+    ValueTypes::register_nullable::<Rc<TargetPropertyPath>>();
     ValueTypes::register_nullable::<Rc<RelativeSource>>();
     ValueTypes::register_nullable::<Rc<CompiledBinding>>();
     ValueTypes::register_nullable::<Rc<ReflectionBinding>>();
