@@ -151,7 +151,7 @@ The focused workflow `.github/workflows/protranslate.yml` covers:
 5. Core, catalog and Studio crates compiled for `wasm32-unknown-unknown` with
    the optional filesystem feature disabled.
 6. Formatting and strict lint checks for the selected libraries and native sample.
-7. Generic multi-binding diagnostics and all-property indexer notification regressions.
+7. Format failures reported through the diagnostics of the service (a multi-binding converter error shows the fallback, as upstream), and the indexer notification of the binding source.
 
 Regression cases cover separate UI/format cultures, empty values, deterministic
 fallback, failed providers, malformed composite formats, reentrant callbacks,

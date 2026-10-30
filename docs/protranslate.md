@@ -161,7 +161,12 @@ culture change reformats the value even if the translated format string happens
 to be identical in both languages. Attached properties support `Key`,
 `FallbackValue`, `StringFormat`, inherited `Culture`, and inherited
 `AutoFlowDirection`. `Translation.Error` exposes a failure from attached-property
-evaluation. Binding failures use the framework's binding error notifications.
+evaluation. A failure of `Translate` is a binding error notification; a format
+failure of `Format` shows the fallback value and is reported through the
+diagnostics of the service (`subscribe_diagnostics`), since the framework, as
+upstream, does not turn a multi-binding converter error into a binding error.
+On a refresh the binding source raises the change of all properties and of its
+indexer (`Item`), so both typed getters and `[Key]` bindings update.
 
 An explicit `TranslationBindingSource` allows a service to be scoped to a control
 tree instead of using the UI-thread default. Replacing the service on an existing

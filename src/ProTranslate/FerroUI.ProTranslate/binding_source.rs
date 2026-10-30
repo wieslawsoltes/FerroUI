@@ -57,9 +57,12 @@ impl TranslationBindingSource {
         let subscription = service.subscribe(move |_| {
             if let Some(inner) = weak.upgrade() {
                 if !inner.disposed.get() {
-                    // The native all-properties contract covers both typed getters
-                    // and metadata indexers, with no borrowed service during callbacks.
+                    // All properties: the typed getters refresh on the empty name. The
+                    // metadata indexer (`[Key]`) refreshes on the name of the indexer, as
+                    // upstream's indexer node ignores the empty name. No borrowed service
+                    // during callbacks.
                     inner.property_changed.raise("");
+                    inner.property_changed.raise(ferroui_base::data::core::INDEXER_NAME);
                     inner.changed.raise(&());
                 }
             }

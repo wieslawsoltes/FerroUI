@@ -594,8 +594,9 @@ fn missing_markup_values_use_final_fallback_and_preserve_lower_priority_values()
 
 #[test]
 fn format_binding_reports_strict_errors_and_recovers_after_catalog_refresh() {
-    use ferroui_base::data::BindingErrorType;
-    use ferroui_protranslate_core::TranslationFormatFailureBehavior;
+    // A format failure is reported through the diagnostics of the service; the binding shows the
+    // fallback, as a multi-binding converter error does upstream (it is not a binding error).
+    use ferroui_protranslate_core::{ProTranslateDiagnosticKind, TranslationFormatFailureBehavior};
     let _app = start();
     let provider = Rc::new(InMemoryTranslationProvider::new("Strict"));
     provider.insert(culture("en-US"), "Value", "{3}");
@@ -603,25 +604,27 @@ fn format_binding_reports_strict_errors_and_recovers_after_catalog_refresh() {
     let mut options = service.options();
     options.format_failure_behavior = TranslationFormatFailureBehavior::ReportAndReturnError;
     service.set_options(options);
+    let failures = Rc::new(Cell::new(0));
+    let failures_seen = failures.clone();
+    let _diagnostics = service.subscribe_diagnostics(move |diagnostic| {
+        if diagnostic.kind == ProTranslateDiagnosticKind::FormatFailure {
+            failures_seen.set(failures_seen.get() + 1);
+        }
+    });
     let source = TranslationBindingSource::new(service);
     let target = TextBlock::new();
     let formatted = FormatExtension::with_key("Value");
     formatted.set_source(Some(source.clone()));
     formatted.set_value(Some(Rc::new(12_i32)));
     formatted.set_fallback_text(Some("Unavailable".into()));
-    let expression = target.bind_binding(TextBlock::text_property(), &formatted);
+    target.bind_binding(TextBlock::text_property(), &formatted);
     assert_eq!(target.text().as_deref(), Some("Unavailable"));
-    assert_eq!(
-        expression.as_untyped().unwrap().base().error_type(),
-        BindingErrorType::Error
-    );
+    let reported = failures.get();
+    assert!(reported >= 1);
     provider.insert(culture("en-US"), "Value", "Value: {0}");
     source.refresh();
     assert_eq!(target.text().as_deref(), Some("Value: 12"));
-    assert_eq!(
-        expression.as_untyped().unwrap().base().error_type(),
-        BindingErrorType::None
-    );
+    assert_eq!(failures.get(), reported);
 }
 
 #[test]
