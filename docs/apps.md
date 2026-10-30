@@ -158,7 +158,7 @@ FERROUI_IOS_WORKSPACE=$PWD FerroUI/scripts/ios/bundle.sh --package my-app-ios --
 
 The Android host is a `cdylib` package (its library is the package name with `-` as `_`), the iOS
 host a binary; the prerequisites are those of the FerroUI scripts (the SDK and NDK of
-`scripts/android/env.sh`, Xcode). CI does not build these packages.
+`scripts/android/env.sh`, Xcode). CI builds them with the inputs `android` and `ios` (section 6).
 
 ## 6. CI and GitHub Pages
 
@@ -193,18 +193,23 @@ jobs:
       browser-package: my-app-browser
 ```
 
-All jobs run on `ubuntu-latest`:
+All jobs run on `ubuntu-latest`, except the iOS bundle (`macos-15`):
 
 | Job | What it does |
 |---|---|
 | Conventions | the upstream name, `ferro_thread_local!`, the FerroUI blocks of `Cargo.toml` against the submodule |
 | Build and test | the stable toolchain, the Rust build cache (saved by runs of main only), mold as linker, the system packages for fonts and an X server; each line of `check` is a `cargo check --locked`, each line of `test` a `cargo test --locked` under `xvfb-run`, then `script` |
 | Browser site | the pinned browser toolchain (FerroUI's `browser-toolchain` action), `build-browser.sh` with `FERROUI_BROWSER_WORKSPACE`, then `browser-script` (with `SITE`), a smoke run of the site in headless Chrome (`scripts/apps/smoke-site.mjs`: it fails on a failed request, a 4xx or 5xx response, an error the page logs or throws, or a view that does not draw; its screenshot is the artifact `site-screenshot`), the module sizes and the Pages artifact |
+| Browser tests | one job per line of `browser-tests`, in parallel, after the site is built: the site of the Pages artifact is unpacked into `SITE`, `browser-tests-setup` runs (by default `npm ci` and the Chromium of Playwright), then the line |
+| Android package | the NDK, build tools and platform pinned in `scripts/android/env.sh`, `apk.sh package` with the arguments of `android` and `FERROUI_ANDROID_WORKSPACE`; the APK is the artifact `android-apk` |
+| iOS bundle | `bundle.sh` with the arguments of `ios` and `FERROUI_IOS_WORKSPACE` for the simulator, the bundle checked with `plutil` and `codesign`; the zipped bundle is the artifact `ios-app` |
 | Deploy to GitHub Pages | runs of main only, after the other jobs passed |
 
 Inputs: `test`, `check`, `apt-packages` (extra Ubuntu packages), `script`, `browser-package`,
 `browser-features`, `browser-script`, `smoke` (default `true`), `smoke-ignore` (regular expressions,
-one per line, of smoke errors to leave out), `pages` (default `true`). The actions are pinned by commit, as
+one per line, of smoke errors to leave out), `browser-tests`, `browser-tests-pull-request` (the
+lines for pull requests when they differ, for example fewer of the slow ones) and `browser-tests-setup`, `android` and
+`ios` (the arguments of the packaging scripts; empty: no package), `pages` (default `true`). The actions are pinned by commit, as
 in the workflows of this repository.
 
 GitHub Pages is enabled once, with GitHub Actions as its source:
