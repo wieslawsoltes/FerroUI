@@ -226,6 +226,10 @@ const DECLARED_NEXT_TO_THE_TYPE: &[&str] = &[
     "TextRange",
     "TextRangeCollection",
     "TextHighlighterCollection",
+    // The WinUI materials (winui-materials.md).
+    "ApplicationTheme",
+    "RevealBrushState",
+    "FocusVisualKind",
 ];
 
 #[test]

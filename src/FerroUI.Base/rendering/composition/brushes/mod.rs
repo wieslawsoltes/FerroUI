@@ -10,6 +10,7 @@ mod server_composition_nine_grid_brush;
 mod server_composition_surface_brush;
 mod server_simple_content_brush;
 mod server_simple_image_brush;
+mod server_xaml_composition_brush;
 
 pub use composition_brush::{
     CompositionBrush, CompositionConicGradientBrush, CompositionGradientBrush, CompositionLinearGradientBrush,
@@ -30,11 +31,14 @@ pub use server_composition_nine_grid_brush::{
     nine_grid_rects, NineGridEdges, ServerCompositionMaskBrush, ServerCompositionNineGridBrush, NINE_GRID_CENTER,
 };
 
-pub use composition_effect_brush::{CompositionBackdropBrush, CompositionEffectBrush};
-pub use server_composition_effect_brush::{ServerCompositionBackdropBrush, ServerCompositionEffectBrush};
+pub use composition_effect_brush::{CompositionBackdropBrush, CompositionEffectBrush, CompositionHostBackdropBrush};
+pub use server_composition_effect_brush::{
+    ServerCompositionBackdropBrush, ServerCompositionEffectBrush, ServerCompositionHostBackdropBrush,
+};
 
 pub use server_simple_content_brush::ServerCompositionSimpleContentBrush;
 pub use server_simple_image_brush::ServerCompositionSimpleImageBrush;
+pub use server_xaml_composition_brush::ServerXamlCompositionBrush;
 
 #[cfg(test)]
 mod composition_brush_tests;
