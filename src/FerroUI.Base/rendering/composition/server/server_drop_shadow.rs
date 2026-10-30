@@ -1,5 +1,5 @@
 use super::{
-    impl_server_render_resource, paint_composition_brush, IAnimatedServerObject, IServerObject, IServerRenderResource,
+    drop_shadow_effect, impl_server_render_resource, paint_composition_brush, IAnimatedServerObject, IServerObject, IServerRenderResource,
     ServerCompositionVisual, ServerCompositor, ServerRenderResource,
 };
 use crate::media::effects::ImmutableBlurEffect;
@@ -151,6 +151,40 @@ impl ServerDropShadow {
         self.props.mask()
     }
 
+    /// Draws the shadow of a sprite or layer visual whose area is `rect`, outside
+    /// the plane of any visual: [`render_under_rect_in`](Self::render_under_rect_in)
+    /// without a visual.
+    pub fn render_under_rect(&self, canvas: &mut dyn IDrawingContextImpl, rect: Rect) {
+        self.render_under_rect_in(canvas, None, rect)
+    }
+
+    /// Draws the content of a visual whose area is `rect` (`paint`) with the
+    /// shadow of the alpha of that content under it, through a drop shadow
+    /// effect of the drawing context: the `InheritFromVisualContent` source
+    /// policy. Returns `false`, drawing nothing, when the drawing context has
+    /// no effects; the caller then draws the shadow with
+    /// [`render_under_rect`](Self::render_under_rect) and the content itself.
+    pub fn render_with_content(
+        &self,
+        canvas: &mut dyn IDrawingContextImpl,
+        rect: Rect,
+        paint: impl FnOnce(&mut dyn IDrawingContextImpl),
+    ) -> bool {
+        if canvas.as_drawing_context_impl_with_effects().is_none() {
+            return false;
+        }
+        let effect = drop_shadow_effect(self);
+        let bounds = self.bounds(rect);
+        if let Some(effects) = canvas.as_drawing_context_impl_with_effects() {
+            effects.push_effect(Some(bounds), &effect);
+        }
+        paint(&mut *canvas);
+        if let Some(effects) = canvas.as_drawing_context_impl_with_effects() {
+            effects.pop_effect();
+        }
+        true
+    }
+
     /// Draws the shadow of a sprite or layer visual whose area is `rect`,
     /// without the content of the visual: the shadow of the alpha of the
     /// mask when there is one ([`render_shadow_of`](Self::render_shadow_of)),
@@ -159,7 +193,7 @@ impl ServerDropShadow {
     ///
     /// Deviation (winui-composition.md): without effects in the drawing
     /// context, the shadow of a mask is the box shadow of the rectangle.
-    pub fn render_under_rect(
+    pub fn render_under_rect_in(
         &self,
         canvas: &mut dyn IDrawingContextImpl,
         visual: Option<&ServerCompositionVisual>,

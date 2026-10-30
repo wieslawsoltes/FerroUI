@@ -31,10 +31,18 @@ pub(crate) fn observe_visual_resource(
     }
 }
 
+/// The drop shadow of the alpha of pushed content that draws `shadow`: its
+/// offset (X and Y), blur radius, colour and opacity. The offset is the one of
+/// the shadow, outside the plane of any visual
+/// ([`drop_shadow_effect_in`] projects it into the plane of a visual).
+pub fn drop_shadow_effect(shadow: &ServerDropShadow) -> ImmutableDropShadowEffect {
+    drop_shadow_effect_in(shadow, None)
+}
+
 /// The drop shadow of the alpha of pushed content that draws `shadow` for
 /// `visual`: its offset in the plane of the visual
 /// ([`ServerDropShadow::plane_offset`]), blur radius, colour and opacity.
-pub fn drop_shadow_effect(shadow: &ServerDropShadow, visual: Option<&ServerCompositionVisual>) -> ImmutableDropShadowEffect {
+pub fn drop_shadow_effect_in(shadow: &ServerDropShadow, visual: Option<&ServerCompositionVisual>) -> ImmutableDropShadowEffect {
     let props = shadow.props();
     let offset = shadow.plane_offset(visual);
     let color: Color = props.color();
@@ -126,7 +134,7 @@ impl ServerLayerVisual {
             Some(shadow)
                 if shadow.effective_mask().is_none() && canvas.as_drawing_context_impl_with_effects().is_some() =>
             {
-                LayerMode::Shadow(drop_shadow_effect(&shadow, Some(visual)))
+                LayerMode::Shadow(drop_shadow_effect_in(&shadow, Some(visual)))
             }
             _ => LayerMode::Layer,
         };
@@ -193,7 +201,7 @@ impl IServerVisualContent for ServerLayerVisual {
     /// the blur effect does.
     fn sub_tree_bounds_padding(&self, visual: &ServerCompositionVisual) -> Option<Thickness> {
         let shadow = self.visible_shadow().map(|shadow| {
-            let effect = drop_shadow_effect(&shadow, Some(visual));
+            let effect = drop_shadow_effect_in(&shadow, Some(visual));
             EffectExtensions::get_effect_output_padding(Some(&effect as &dyn IEffect))
         });
         let effect = self.effect_brush().map(|effect| effect.layer_padding());
@@ -225,7 +233,7 @@ impl IServerVisualContent for ServerLayerVisual {
             }
             LayerMode::Layer => {
                 if let Some(shadow) = self.visible_shadow() {
-                    shadow.render_under_rect(canvas, Some(visual), Self::rect(visual));
+                    shadow.render_under_rect_in(canvas, Some(visual), Self::rect(visual));
                 }
                 canvas.push_layer(bounds);
             }

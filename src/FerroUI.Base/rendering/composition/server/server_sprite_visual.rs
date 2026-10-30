@@ -140,12 +140,12 @@ impl IServerVisualContent for ServerSpriteVisual {
                         paint_composition_brush(canvas, brush, rect)
                     });
                     if !drawn {
-                        shadow.render_under_rect(context.canvas(), Some(visual), rect);
+                        shadow.render_under_rect_in(context.canvas(), Some(visual), rect);
                     }
                 }
             } else {
                 // The shadow of the mask, or of the rectangle.
-                shadow.render_under_rect(context.canvas(), Some(visual), rect);
+                shadow.render_under_rect_in(context.canvas(), Some(visual), rect);
             }
         }
         if let Some(brush) = brush {
