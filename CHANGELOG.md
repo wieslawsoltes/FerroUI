@@ -6,6 +6,7 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ### Added
 
+- **MCP: application tools and background services** (C4 of #345): `ferroui_mcp::serve_with_tools` serves an application's `UiToolProvider` beside the inspector, and `serve_service` and `serve_service_with_token` serve a thread-safe `ServiceToolProvider` on its own; see [docs/mcp.md](docs/mcp.md).
 - **XAML: lexical namespace scopes** (C1 of #345, a recorded deviation): namespaces declared on nested elements are resolved at run time as the compiler resolves them, in compiled documents (`rt::push_namespace_scope`) and in the run-time loader; the compiled XAML of the four themes is regenerated.
 - **Source snapshots for designers and runtime reload sessions** (C3 of #345): the feature `source-overlays` of `ferroui-markup-xaml` lets an embedded designer load documents and includes from a `SourceSnapshot` in every build profile; `HotReloadSession::for_runtime_documents` accepts structural changes of documents instantiated at run time.
 - **WinUI theme: designer sources** (C6 of #345): with the feature `designer-sources`, `ferroui_themes_winui::designer_documents()` lists the theme's control theme documents by resource URI and source text for designer definition libraries; the build script derives the table from the theme's documents.
