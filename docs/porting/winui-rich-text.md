@@ -214,7 +214,6 @@ What remains outside the port (RT-P of #243): the exact LineServices metrics, th
 | A click or focus loss terminates the composition and keeps its text (`TextBoxBase.cpp`). | The same: the preview is committed, then the IME is reset (#243 discarded it). | #243 review S5. |
 | `TextCompositionStarted` precedes the first `TextChanging` of a composition. | The same, at the caret with no composed text yet. | #243 review N1. |
 | The caret rectangle is current in `TextChanging`. | While an edit is published, the caret rectangle (and so the IME candidate window) follows the editor, not the view's earlier selection. | #243 review N4. |
-| Shift+Enter inserts a soft line break. | It inserts a paragraph, as #243 did, until the Windows check confirms RichEdit's behaviour. | #243 review N2 (open). |
 | The context menu is `TextCommandBarFlyout`. | A `MenuFlyout` with the same commands (`docs/porting/winui-theme/DEVIATIONS.md`, G-30). | FerroUI has no command bar flyout. |
 | The template is in every theme. | The WinUI theme has it (`WINUI_ONLY_CONTROLS`), and so do the macOS and Material themes, which derive every control theme of the WinUI theme; Fluent and Simple show nothing. | Decision D4. |
 

@@ -119,6 +119,7 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ### Fixed
 
+- **RichEditBox: Shift+Enter inserts a soft line break** (#243 review N2, [docs/porting/winui-rich-text.md](docs/porting/winui-rich-text.md)): a `LineBreak` (U+000B in the text, decision D10), as RichEdit (Msftedit) does in the Windows VM check; Enter still inserts a paragraph.
 - **Browser catalog size** (`samples/ControlCatalog`): the RTF code pages (`rtf-codepages`, `encoding_rs`) are enabled for the desktop and mobile hosts only, so the published WebAssembly module is back under its 16 MB gzip budget and the Pages deploy runs again; in the browser the catalog reads RTF in code page 1252 only.
 - **Text formatting** (R2 of #243, recorded in `docs/porting/DEVIATIONS.md`, Text formatting): runs with different font features are shaped apart; carets and bounds at the end of right-to-left lines; justification of bidi text walks the runs in logical order; leftover runs of a wrapped line are released; copied paragraph properties keep their line spacing.
 - Gaps the port of the Behaviors sample gallery found (#298):
