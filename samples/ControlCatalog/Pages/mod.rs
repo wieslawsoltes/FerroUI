@@ -123,6 +123,7 @@ mod refresh_container_page;
 mod scroll_viewer_page;
 mod tabbed_demo_page;
 mod table_view_page;
+mod visual_states_page;
 #[path = "OpenGl/mod.rs"]
 pub mod open_gl;
 // In the namespace of the pages, as its class is; the file is next to its document.
@@ -239,6 +240,7 @@ pub use tab_control_page::TabControlPage;
 pub use tab_strip_page::TabStripPage;
 pub use tabbed_demo_page::TabbedDemoPage;
 pub use table_view_page::TableViewPage;
+pub use visual_states_page::VisualStatesPage;
 pub use text_block_page::TextBlockPage;
 pub use text_box::{
     TextBoxEditingPage,
@@ -312,6 +314,7 @@ const ROOT_TYPES: &[&TypeInfo] = &[
     TabbedDemoPage::TYPE,
     DrawerDemoPage::TYPE,
     TableViewPage::TYPE,
+    VisualStatesPage::TYPE,
     RefreshContainerPage::TYPE,
     PipsPagerPage::TYPE,
     NotificationsPage::TYPE,
@@ -409,6 +412,7 @@ const ROOT_CLASSES: &[&XamlClass] = &[
     &TabbedDemoPage::XAML_CLASS,
     &DrawerDemoPage::XAML_CLASS,
     &TableViewPage::XAML_CLASS,
+    &VisualStatesPage::XAML_CLASS,
     &RefreshContainerPage::XAML_CLASS,
     &PipsPagerPage::XAML_CLASS,
     &NotificationsPage::XAML_CLASS,

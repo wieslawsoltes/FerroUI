@@ -1,0 +1,78 @@
+name: WinUI Gallery scan
+
+on:
+  pull_request:
+    # Blocking only on its own paths (docs/porting/winui-controls.md, W10b): the scanner, its
+    # reviewed map and reports, and the event-target table of the WinUI XAML importer. A change of
+    # the controls changes the report too; that drift shows in the nightly run, without blocking
+    # unrelated pull requests.
+    paths:
+      - '.github/workflows/winui-gallery-scan.yml'
+      - 'scripts/winui-gallery/**'
+      - 'scripts/port-status/rustscan.py'
+      - 'docs/porting/winui-gallery/**'
+      - 'src/Markup/FerroUI.Markup.Xaml.WinUI/importer/event_targets.rs'
+  schedule:
+    - cron: '43 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: winui-gallery-scan-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  scan:
+    name: WinUI API and Gallery scan against the pinned sources
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      # The pins of docs/porting/winui-gallery/data/sources.lock.json; the WinUI API folders only.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: microsoft/microsoft-ui-xaml
+          ref: 7e4b0c2096be402f51cc8f7d203ebf67cff183d0
+          path: upstream/microsoft-ui-xaml
+          fetch-depth: 1
+          sparse-checkout: |
+            controls/dev
+            controls/idl
+            dxaml/xcp/tools/XCPTypesAutoGen
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: microsoft/WinUI-Gallery
+          ref: 14061eeac21c38ae99f302edf3d9136d4f652c4c
+          path: upstream/WinUI-Gallery
+          fetch-depth: 1
+      # Writes upstream-api.json and the maps to target/winui-gallery-scan; fails on a pull request
+      # when the committed summary.json or REPORT.md is stale, and reports the drift at night.
+      - name: Scan, and compare with the committed report
+        continue-on-error: ${{ github.event_name == 'schedule' }}
+        run: >-
+          python3 scripts/winui-gallery/scan.py --check
+          --winui-root upstream/microsoft-ui-xaml --gallery-root upstream/WinUI-Gallery
+      - name: The event-target table of the importer matches the scanned API
+        run: python3 scripts/winui-gallery/event_targets.py --check
+      # After the scan: the tests of the event-target table read its upstream-api.json.
+      - name: Tests of the scanner and the event-target generator
+        run: python3 -m unittest discover -s scripts/winui-gallery -p 'test_*.py'
+      - name: The report in the run summary
+        if: always()
+        run: |
+          report=target/winui-gallery-scan/REPORT.md
+          if [ -f "$report" ]; then
+            echo "The committed report is stale; the report of this scan:" >> "$GITHUB_STEP_SUMMARY"
+          else
+            report=docs/porting/winui-gallery/data/REPORT.md
+          fi
+          cat "$report" >> "$GITHUB_STEP_SUMMARY"
+      - name: The inventories and maps, as an artifact of the run
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: winui-gallery-scan
+          path: target/winui-gallery-scan/
+          if-no-files-found: warn
