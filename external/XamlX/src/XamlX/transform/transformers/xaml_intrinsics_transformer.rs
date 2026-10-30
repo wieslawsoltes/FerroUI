@@ -96,8 +96,8 @@ impl IXamlAstTransformer for XamlIntrinsicsTransformer {
                 Some((prefix, type_name)) => (prefix, type_name),
                 None => ("", type_ref_text),
             };
-            let Some(resolved_ns) =
-                context.try_get_namespace_alias(prefix.trim_matches(char::is_whitespace))
+            let Some(resolved_ns) = context
+                .try_get_namespace_alias_at(prefix.trim_matches(char::is_whitespace), &*text_node)
             else {
                 return context.report_transform_error(
                     &format!("Unable to resolve namespace {prefix}"),
@@ -134,7 +134,7 @@ impl IXamlAstTransformer for XamlIntrinsicsTransformer {
                 ));
             };
 
-            let Some(resolved_ns) = context.try_get_namespace_alias(ns) else {
+            let Some(resolved_ns) = context.try_get_namespace_alias_at(ns, &*text_node) else {
                 return Err(XamlError::transform_exception(
                     format!("Unable to resolve namespace {ns}"),
                     Some(&*text_node),

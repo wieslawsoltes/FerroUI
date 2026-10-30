@@ -1,0 +1,214 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" x:Name="PrototypeScene" Foreground="{DynamicResource PrototypeInk}"
+             d:DesignWidth="390" d:DesignHeight="700">
+  <!-- Open Stages and create Home, Details and Settings stages using the Screen
+       state group. Home is the authored default. Add the Explore flow at Home and
+       optionally a Settings review flow at Settings. Prototype interactions:
+         HomeOpenDetails -> Navigate to Details
+         HomeOpenSettings -> Navigate to Settings
+         DetailsOpenSettings -> Navigate to Settings
+         DetailsBack -> Back
+         SettingsBack -> Back
+       Type in HomeNote while playing, navigate to another screen and return.
+       Restart returns to the start while preserving this run's native controls.
+       Exit and Play creates a fresh run. Prototype connections are saved with the
+       stage set; they do not add application event handlers to this XAML.
+       Encoded comments retain the designer's existing state-group identity. -->
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <SolidColorBrush x:Key="PrototypeAccent" Color="#FF6254D9" />
+      <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+          <SolidColorBrush x:Key="PrototypeBackground" Color="#FFF1F3F8" />
+          <SolidColorBrush x:Key="PrototypeCard" Color="#FFFFFFFF" />
+          <SolidColorBrush x:Key="PrototypeInk" Color="#FF202437" />
+          <SolidColorBrush x:Key="PrototypeMuted" Color="#FF687188" />
+          <SolidColorBrush x:Key="PrototypeOutline" Color="#FFE0E5F0" />
+          <SolidColorBrush x:Key="PrototypeTint" Color="#FFEAE7FF" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+          <SolidColorBrush x:Key="PrototypeBackground" Color="#FF171923" />
+          <SolidColorBrush x:Key="PrototypeCard" Color="#FF242837" />
+          <SolidColorBrush x:Key="PrototypeInk" Color="#FFF2F3FB" />
+          <SolidColorBrush x:Key="PrototypeMuted" Color="#FFB1BBD2" />
+          <SolidColorBrush x:Key="PrototypeOutline" Color="#FF3A4156" />
+          <SolidColorBrush x:Key="PrototypeTint" Color="#FF353053" />
+        </ResourceDictionary>
+      </ResourceDictionary.ThemeDictionaries>
+      <ControlTemplate x:Key="PrototypePrimaryButton" TargetType="Button">
+        <Border Background="{DynamicResource PrototypeAccent}" CornerRadius="8" Padding="16,12">
+          <ContentPresenter Content="{TemplateBinding Content}" Foreground="White"
+                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+        </Border>
+      </ControlTemplate>
+    </ResourceDictionary>
+  </UserControl.Resources>
+  <UserControl.Styles>
+    <Style Selector="UserControl#PrototypeScene">
+      <!--ferroui-designer-state-group:7b226e616d65223a2253637265656e222c226f776e6572223a312c22737461746573223a5b7b226e616d65223a22486f6d65222c2273657474657273223a5b7b22746172676574223a22486f6d6550616e656c222c2270726f7065727479223a22497356697369626c65222c2276616c7565223a2254727565227d2c7b22746172676574223a2244657461696c7350616e656c222c2270726f7065727479223a22497356697369626c65222c2276616c7565223a2246616c7365227d2c7b22746172676574223a2253657474696e677350616e656c222c2270726f7065727479223a22497356697369626c65222c2276616c7565223a2246616c7365227d5d7d2c7b226e616d65223a2244657461696c73222c2273657474657273223a5b7b22746172676574223a22486f6d6550616e656c222c2270726f7065727479223a22497356697369626c65222c2276616c7565223a2246616c7365227d2c7b22746172676574223a2244657461696c7350616e656c222c2270726f7065727479223a22497356697369626c65222c2276616c7565223a2254727565227d2c7b22746172676574223a2253657474696e677350616e656c222c2270726f7065727479223a22497356697369626c65222c2276616c7565223a2246616c7365227d5d7d2c7b226e616d65223a2253657474696e6773222c2273657474657273223a5b7b22746172676574223a22486f6d6550616e656c222c2270726f7065727479223a22497356697369626c65222c2276616c7565223a2246616c7365227d2c7b22746172676574223a2244657461696c7350616e656c222c2270726f7065727479223a22497356697369626c65222c2276616c7565223a2246616c7365227d2c7b22746172676574223a2253657474696e677350616e656c222c2270726f7065727479223a22497356697369626c65222c2276616c7565223a2254727565227d5d7d5d2c227472616e736974696f6e73223a5b5d7d-->
+      <Style Selector="^.ds_53637265656e_486f6d65 Border#HomePanel">
+        <!--ferroui-designer-state:486f6d65:486f6d6550616e656c-->
+        <Setter Property="IsVisible" Value="True" />
+        <Style.Animations>
+          <Animation Duration="0:0:0.0000001" FillMode="Forward">
+            <!--ferroui-designer-state-program:literal-->
+            <KeyFrame Cue="100%"><Setter Property="IsVisible" Value="True" /></KeyFrame>
+          </Animation>
+        </Style.Animations>
+      </Style>
+      <Style Selector="^.ds_53637265656e_486f6d65 Border#DetailsPanel">
+        <!--ferroui-designer-state:486f6d65:44657461696c7350616e656c-->
+        <Setter Property="IsVisible" Value="False" />
+        <Style.Animations>
+          <Animation Duration="0:0:0.0000001" FillMode="Forward">
+            <!--ferroui-designer-state-program:literal-->
+            <KeyFrame Cue="100%"><Setter Property="IsVisible" Value="False" /></KeyFrame>
+          </Animation>
+        </Style.Animations>
+      </Style>
+      <Style Selector="^.ds_53637265656e_486f6d65 Border#SettingsPanel">
+        <!--ferroui-designer-state:486f6d65:53657474696e677350616e656c-->
+        <Setter Property="IsVisible" Value="False" />
+        <Style.Animations>
+          <Animation Duration="0:0:0.0000001" FillMode="Forward">
+            <!--ferroui-designer-state-program:literal-->
+            <KeyFrame Cue="100%"><Setter Property="IsVisible" Value="False" /></KeyFrame>
+          </Animation>
+        </Style.Animations>
+      </Style>
+      <Style Selector="^.ds_53637265656e_44657461696c73 Border#HomePanel">
+        <!--ferroui-designer-state:44657461696c73:486f6d6550616e656c-->
+        <Setter Property="IsVisible" Value="False" />
+        <Style.Animations>
+          <Animation Duration="0:0:0.0000001" FillMode="Forward">
+            <!--ferroui-designer-state-program:literal-->
+            <KeyFrame Cue="100%"><Setter Property="IsVisible" Value="False" /></KeyFrame>
+          </Animation>
+        </Style.Animations>
+      </Style>
+      <Style Selector="^.ds_53637265656e_44657461696c73 Border#DetailsPanel">
+        <!--ferroui-designer-state:44657461696c73:44657461696c7350616e656c-->
+        <Setter Property="IsVisible" Value="True" />
+        <Style.Animations>
+          <Animation Duration="0:0:0.0000001" FillMode="Forward">
+            <!--ferroui-designer-state-program:literal-->
+            <KeyFrame Cue="100%"><Setter Property="IsVisible" Value="True" /></KeyFrame>
+          </Animation>
+        </Style.Animations>
+      </Style>
+      <Style Selector="^.ds_53637265656e_44657461696c73 Border#SettingsPanel">
+        <!--ferroui-designer-state:44657461696c73:53657474696e677350616e656c-->
+        <Setter Property="IsVisible" Value="False" />
+        <Style.Animations>
+          <Animation Duration="0:0:0.0000001" FillMode="Forward">
+            <!--ferroui-designer-state-program:literal-->
+            <KeyFrame Cue="100%"><Setter Property="IsVisible" Value="False" /></KeyFrame>
+          </Animation>
+        </Style.Animations>
+      </Style>
+      <Style Selector="^.ds_53637265656e_53657474696e6773 Border#HomePanel">
+        <!--ferroui-designer-state:53657474696e6773:486f6d6550616e656c-->
+        <Setter Property="IsVisible" Value="False" />
+        <Style.Animations>
+          <Animation Duration="0:0:0.0000001" FillMode="Forward">
+            <!--ferroui-designer-state-program:literal-->
+            <KeyFrame Cue="100%"><Setter Property="IsVisible" Value="False" /></KeyFrame>
+          </Animation>
+        </Style.Animations>
+      </Style>
+      <Style Selector="^.ds_53637265656e_53657474696e6773 Border#DetailsPanel">
+        <!--ferroui-designer-state:53657474696e6773:44657461696c7350616e656c-->
+        <Setter Property="IsVisible" Value="False" />
+        <Style.Animations>
+          <Animation Duration="0:0:0.0000001" FillMode="Forward">
+            <!--ferroui-designer-state-program:literal-->
+            <KeyFrame Cue="100%"><Setter Property="IsVisible" Value="False" /></KeyFrame>
+          </Animation>
+        </Style.Animations>
+      </Style>
+      <Style Selector="^.ds_53637265656e_53657474696e6773 Border#SettingsPanel">
+        <!--ferroui-designer-state:53657474696e6773:53657474696e677350616e656c-->
+        <Setter Property="IsVisible" Value="True" />
+        <Style.Animations>
+          <Animation Duration="0:0:0.0000001" FillMode="Forward">
+            <!--ferroui-designer-state-program:literal-->
+            <KeyFrame Cue="100%"><Setter Property="IsVisible" Value="True" /></KeyFrame>
+          </Animation>
+        </Style.Animations>
+      </Style>
+    </Style>
+    <Style Selector="TextBlock.muted"><Setter Property="Foreground" Value="{DynamicResource PrototypeMuted}" /></Style>
+    <Style Selector="Border.screen">
+      <Setter Property="Background" Value="{DynamicResource PrototypeCard}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource PrototypeOutline}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="14" />
+      <Setter Property="Padding" Value="22" />
+    </Style>
+  </UserControl.Styles>
+  <Grid Background="{DynamicResource PrototypeBackground}" RowDefinitions="Auto,*,Auto" RowSpacing="20">
+    <StackPanel Margin="24,24,24,0" Spacing="8">
+      <TextBlock Classes="muted" Text="TRAIL NOTES / WORKSPACE" FontSize="11" FontWeight="SemiBold" />
+      <TextBlock Text="Make room for ideas" FontSize="28" FontWeight="SemiBold" TextWrapping="Wrap" />
+      <TextBlock Classes="muted" Text="Your projects, notes and next steps." TextWrapping="Wrap" />
+    </StackPanel>
+    <ScrollViewer Grid.Row="1" Margin="24,0" HorizontalScrollBarVisibility="Disabled"
+                  VerticalScrollBarVisibility="Auto">
+      <Grid>
+        <Border Name="HomePanel" Classes="screen" VerticalAlignment="Top">
+          <StackPanel Spacing="16">
+            <TextBlock Classes="muted" Text="HOME" FontSize="11" FontWeight="SemiBold" />
+            <TextBlock Text="Welcome back" FontSize="23" FontWeight="SemiBold" TextWrapping="Wrap" />
+            <TextBlock Classes="muted" Text="Capture a note before you pick up your latest project." TextWrapping="Wrap" />
+            <TextBox Name="HomeNote" Text="Review the desktop layout" PlaceholderText="What is on your mind?" />
+            <Border Background="{DynamicResource PrototypeTint}" Padding="16" CornerRadius="10">
+              <StackPanel Spacing="7">
+                <TextBlock Text="Desktop workspace" FontWeight="SemiBold" TextWrapping="Wrap" />
+                <TextBlock Classes="muted" Text="Interface refresh · 3 tasks remaining" FontSize="12" TextWrapping="Wrap" />
+              </StackPanel>
+            </Border>
+            <Button Name="HomeOpenDetails" Content="Open project" Template="{StaticResource PrototypePrimaryButton}"
+                    HorizontalAlignment="Stretch" />
+            <Button Name="HomeOpenSettings" Content="Workspace settings" HorizontalAlignment="Stretch" />
+          </StackPanel>
+        </Border>
+        <Border Name="DetailsPanel" Classes="screen" IsVisible="False" VerticalAlignment="Top">
+          <StackPanel Spacing="16">
+            <TextBlock Classes="muted" Text="PROJECT" FontSize="11" FontWeight="SemiBold" />
+            <TextBlock Text="Desktop workspace" FontSize="23" FontWeight="SemiBold" TextWrapping="Wrap" />
+            <TextBlock Classes="muted" Text="Bring the project overview, details and settings into one clear journey." TextWrapping="Wrap" />
+            <ProgressBar Value="65" Maximum="100" Height="6" />
+            <Border BorderBrush="{DynamicResource PrototypeOutline}" BorderThickness="1" CornerRadius="10" Padding="16">
+              <StackPanel Spacing="10">
+                <CheckBox Content="Review the navigation" IsChecked="True" />
+                <CheckBox Content="Compare narrow layouts" IsChecked="True" />
+                <CheckBox Name="DetailsChecklist" Content="Try the complete journey" />
+              </StackPanel>
+            </Border>
+            <Button Name="DetailsOpenSettings" Content="Project settings" Template="{StaticResource PrototypePrimaryButton}"
+                    HorizontalAlignment="Stretch" />
+            <Button Name="DetailsBack" Content="Back" HorizontalAlignment="Stretch" />
+          </StackPanel>
+        </Border>
+        <Border Name="SettingsPanel" Classes="screen" IsVisible="False" VerticalAlignment="Top">
+          <StackPanel Spacing="16">
+            <TextBlock Classes="muted" Text="PREFERENCES" FontSize="11" FontWeight="SemiBold" />
+            <TextBlock Text="A workspace for you" FontSize="23" FontWeight="SemiBold" TextWrapping="Wrap" />
+            <TextBlock Classes="muted" Text="Choose how you keep track of the work ahead." TextWrapping="Wrap" />
+            <CheckBox Name="SettingsReminders" Content="Show project reminders" IsChecked="True" />
+            <CheckBox Name="SettingsCompleted" Content="Include completed tasks" />
+            <TextBlock Classes="muted" Text="Workspace name" FontSize="12" />
+            <TextBox Name="SettingsName" Text="Personal workspace" />
+            <Button Name="SettingsBack" Content="Back to previous screen" Template="{StaticResource PrototypePrimaryButton}"
+                    HorizontalAlignment="Stretch" />
+          </StackPanel>
+        </Border>
+      </Grid>
+    </ScrollViewer>
+    <TextBlock Grid.Row="2" Margin="24,0,24,22" Classes="muted" FontSize="11"
+               Text="Personal workspace · All changes stay with your session" TextWrapping="Wrap" />
+  </Grid>
+</UserControl>
