@@ -1,7 +1,1105 @@
 {
   "description": "Reviewed dispositions of the LiveCharts2 port. Each part of the port (L1 and later, docs/porting/livecharts2.md) adds the dispositions it implements; a `ported` or `native-replacement` entry names the Rust files that implement it.",
-  "files": {},
-  "members": {},
+  "files": {
+    "src/LiveChartsCore/Drawing/Animation.cs": {
+      "reason": "Owned animation options replace shared mutable animation state: duration uses caller clock milliseconds, Rc closure carries easing, Repeat enum expresses finite/infinite repeats. Repeat counters live on each motion property.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/animation.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/Drawing/KeyFrame.cs": {
+      "reason": "Time, Value and destination easing semantics are preserved in a Rust value with an Rc closure.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::KeyFrame"
+      ],
+      "status": "ported"
+    },
+    "src/LiveChartsCore/Easing/BackEasingFunction.cs": {
+      "reason": "All in/out/in-out source formulas are preserved, including source boundary branches; f64 follows FerroUI numerical precision.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing/back_easing_function.rs"
+      ],
+      "status": "ported"
+    },
+    "src/LiveChartsCore/Easing/BounceEasingFunction.cs": {
+      "reason": "All in/out/in-out source formulas are preserved, including source boundary branches; f64 follows FerroUI numerical precision.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing/bounce_easing_function.rs"
+      ],
+      "status": "ported"
+    },
+    "src/LiveChartsCore/Easing/CircleEasingFunction.cs": {
+      "reason": "All in/out/in-out source formulas are preserved, including source boundary branches; f64 follows FerroUI numerical precision.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing/circle_easing_function.rs"
+      ],
+      "status": "ported"
+    },
+    "src/LiveChartsCore/Easing/CubicBezierEasingFunction.cs": {
+      "reason": "The 257-sample LUT and bracketed Newton/bisection algorithm preserve source limits and identity shortcut, with finite-control validation and safe NaN sampling added.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing/cubic_bezier_easing_function.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/Easing/CubicEasingFunction.cs": {
+      "reason": "All in/out/in-out source formulas are preserved, including source boundary branches; f64 follows FerroUI numerical precision.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing/cubic_easing_function.rs"
+      ],
+      "status": "ported"
+    },
+    "src/LiveChartsCore/Easing/ElasticEasingFunction.cs": {
+      "reason": "All in/out/in-out source formulas are preserved, including source boundary branches; f64 follows FerroUI numerical precision.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing/elastic_easing_function.rs"
+      ],
+      "status": "ported"
+    },
+    "src/LiveChartsCore/Easing/ExponentialEasingFunction.cs": {
+      "reason": "All in/out/in-out source formulas are preserved, including source boundary branches; f64 follows FerroUI numerical precision.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing/exponential_easing_function.rs"
+      ],
+      "status": "ported"
+    },
+    "src/LiveChartsCore/Easing/PolinominalEasingFunction.cs": {
+      "reason": "All in/out/in-out source formulas are preserved, including source boundary branches; f64 follows FerroUI numerical precision.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing/polinominal_easing_function.rs"
+      ],
+      "status": "ported"
+    },
+    "src/LiveChartsCore/EasingFunctions.cs": {
+      "reason": "All predefined and parameterized easing functions plus keyframe composition are available as Rust functions/Rc closures. Ordered finite keyframe validation returns typed errors, and immutable Bezier presets are cached.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/Kernel/Coordinate.cs": {
+      "reason": "Six-dimensional immutable Rust value preserves explicit empty versus implicit default semantics, error values, constructor coordinate ordering and formatting. Overloaded constructors become named associated functions.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/coordinate.rs"
+      ],
+      "status": "ported"
+    },
+    "src/LiveChartsCore/Kernel/Drawing/AnnularSectorHoverArea.cs": {
+      "reason": "Annular containment respects the inner hole, radius, sweep sign, wraparound and full-circle spans.",
+      "remaining": [
+        "Source tooltip-placement aggregation and full hover-class API remain pending."
+      ],
+      "rust": [
+        "src/FerroUI.LiveCharts/scene.rs::HitShape::AnnularSector"
+      ],
+      "status": "partial"
+    },
+    "src/LiveChartsCore/Kernel/Drawing/BezierData.cs": {
+      "reason": "Six coordinate components use a copied Rust value; FerroUI Point accessors replace graphics-layer projections.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/line_spline_math.rs::BezierData"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/Kernel/Drawing/LineSplineMath.cs": {
+      "reason": "Seed and segment calculations preserve source operation order, f32 segment-length ratios, and the upstream signed stack-offset expression. FerroUI Point replaces source LvcPoint.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/line_spline_math.rs"
+      ],
+      "status": "ported"
+    },
+    "src/LiveChartsCore/Kernel/Drawing/RectangleHoverArea.cs": {
+      "reason": "Normalized hover bounds distinguish painted geometry from category discovery; all closest strategies choose within each series, and zero-area plots reject interactions.",
+      "remaining": [
+        "All source SuggestedTooltipLocation/placement aggregation methods are not modeled one-to-one."
+      ],
+      "rust": [
+        "src/FerroUI.LiveCharts/scene.rs::HitShape"
+      ],
+      "status": "partial"
+    },
+    "src/LiveChartsCore/Kernel/Drawing/SemicircleHoverArea.cs": {
+      "reason": "Annular containment respects the inner hole, radius, sweep sign, wraparound and full-circle spans.",
+      "remaining": [
+        "Source tooltip-placement aggregation and full hover-class API remain pending."
+      ],
+      "rust": [
+        "src/FerroUI.LiveCharts/scene.rs::HitShape::AnnularSector"
+      ],
+      "status": "partial"
+    },
+    "src/LiveChartsCore/Kernel/Error.cs": {
+      "reason": "Four directional error components and the explicit Empty marker retain source defaults; symmetric construction is an additional convenience.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/error.rs"
+      ],
+      "status": "ported"
+    },
+    "src/LiveChartsCore/Kernel/Extensions.cs": {
+      "reason": "Cartesian and polar tick calculation is ported with rotated-label, density, unit-width and minimum-separator logic. Degenerate input gets a finite fallback and loop iterations are bounded.",
+      "remaining": [
+        "Other source extension methods are not mapped by this contribution."
+      ],
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/axis_tick.rs"
+      ],
+      "status": "partial"
+    },
+    "src/LiveChartsCore/Kernel/StackedValue.cs": {
+      "reason": "Copied value carries positive, negative and cumulative tracks, including the sign-dependent Share formula.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/stacker.rs::StackedValue"
+      ],
+      "status": "ported"
+    },
+    "src/LiveChartsCore/Kernel/Stacker.cs": {
+      "reason": "The source category stacking algorithm uses caller-provided unique series IDs and copied Coordinates. Rust HashMap keys canonicalize NaN and signed zero like Double.Equals. MaxLength reports actual maximum row length (upstream remains zero); invalid stack positions are rejected; get_stack supplies the coordinate sign for Share.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/stacker.rs::Stacker"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/Measure/AxisLimit.cs": {
+      "reason": "Source sentinel defaults, explicit user pinning, scaling and validation are preserved.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/axis_limit.rs"
+      ],
+      "status": "ported"
+    },
+    "src/LiveChartsCore/Measure/AxisOrientation.cs": {
+      "reason": "Source Unknown, X and Y variants are retained.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/scaler.rs::AxisOrientation"
+      ],
+      "status": "ported"
+    },
+    "src/LiveChartsCore/Measure/AxisPosition.cs": {
+      "reason": "All source enum alternatives are explicit Rust variants and registered FerroUI markup values.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/axis.rs::AxisPosition"
+      ],
+      "status": "ported"
+    },
+    "src/LiveChartsCore/Measure/AxisTick.cs": {
+      "reason": "Source Value and Magnitude use f64 values. Calculation helpers are also supplied.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/axis_tick.rs::AxisTick"
+      ],
+      "status": "ported"
+    },
+    "src/LiveChartsCore/Measure/Bounds.cs": {
+      "reason": "Extrema, empty/default behavior, metadata aggregation, delta, and copying retain source behavior. Copy and Clone replace the copy constructor.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/bounds.rs::Bounds"
+      ],
+      "status": "ported"
+    },
+    "src/LiveChartsCore/Measure/DimensionalBounds.cs": {
+      "reason": "All six bounds and initial minimum-limits behavior are preserved without nullable owned bounds.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/bounds.rs::DimensionalBounds"
+      ],
+      "status": "ported"
+    },
+    "src/LiveChartsCore/Measure/FindingStrategy.cs": {
+      "reason": "All source enum alternatives are explicit Rust variants and registered FerroUI markup values.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/scene.rs::FindingStrategy"
+      ],
+      "status": "ported"
+    },
+    "src/LiveChartsCore/Measure/PolarLabelsPosition.cs": {
+      "reason": "All source enum alternatives are explicit Rust variants and registered FerroUI markup values.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/series.rs::PolarLabelsPosition"
+      ],
+      "status": "ported"
+    },
+    "src/LiveChartsCore/Measure/PolarScaler.cs": {
+      "reason": "Forward zero-origin angular convention and source radial scaling are retained using FerroUI Point/Rect. Inverse uses atan2 and signed revolution normalization, deliberately correcting upstream axis singularities and extra MinAngle; invalid/collapsed ranges return errors.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/polar_scaler.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/Measure/RadialAlignment.cs": {
+      "reason": "All source enum alternatives are explicit Rust variants and registered FerroUI markup values.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/series.rs::RadialAlignment"
+      ],
+      "status": "ported"
+    },
+    "src/LiveChartsCore/Measure/Scaler.cs": {
+      "reason": "Affine conversion, Y inversion, explicit inversion and collapsed-slope behavior use a value-based constructor with Result errors. Numeric precision is f64; sentinel limits are normalized before inversion, correcting the source reversed validation arguments for an empty X range. An explicit logarithmic constructor replaces subclass specialization.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/scaler.rs::Scaler"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/Motion/ByReferenceMotionProperty.cs": {
+      "reason": "Noninterpolated reference values use Discrete<T>, snap to target and mark completion on sampling without synthetic object ownership.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/motion_property.rs::ByReferenceMotionProperty"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/Motion/ColorMotionProperty.cs": {
+      "reason": "Generic Interpolate and MotionProperty specialize the source interpolation formula and transition eligibility using FerroUI value types; optional values and changed-length arrays snap to their destination.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/interpolate.rs",
+        "src/FerroUI.LiveCharts/motion/mod.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/Motion/DoubleMotionProperty.cs": {
+      "reason": "Generic Interpolate and MotionProperty specialize the source interpolation formula and transition eligibility using FerroUI value types; optional values and changed-length arrays snap to their destination.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/interpolate.rs",
+        "src/FerroUI.LiveCharts/motion/mod.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/Motion/FloatArrayMotionProperty.cs": {
+      "reason": "Generic Interpolate and MotionProperty specialize the source interpolation formula and transition eligibility using FerroUI value types; optional values and changed-length arrays snap to their destination.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/interpolate.rs",
+        "src/FerroUI.LiveCharts/motion/mod.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/Motion/FloatMotionProperty.cs": {
+      "reason": "Generic Interpolate and MotionProperty specialize the source interpolation formula and transition eligibility using FerroUI value types; optional values and changed-length arrays snap to their destination.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/interpolate.rs",
+        "src/FerroUI.LiveCharts/motion/mod.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/Motion/IMotionProperty.cs": {
+      "reason": "Typed MotionProperty methods cover sampling, retargeting, completion and animation configuration; the source object-erased registry interface is not reproduced.",
+      "remaining": [
+        "Review source property-registry operations against the native control system."
+      ],
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/motion_property.rs"
+      ],
+      "status": "partial"
+    },
+    "src/LiveChartsCore/Motion/MotionProperty.cs": {
+      "reason": "Retargeting, exact endpoint completion timing, phase-continuous overshoot, finite/infinite repeats, completion and snapping use explicit caller timestamps. Invalid times snap safely. Source object invalidation and registered completion callbacks are not provided by this generic numeric value.",
+      "remaining": [
+        "Animatable property registry, per-property OnCompleted callbacks and source reflection/debug hooks require separate native integration."
+      ],
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/motion_property.rs",
+        "src/FerroUI.LiveCharts/motion/interpolate.rs"
+      ],
+      "status": "partial"
+    },
+    "src/LiveChartsCore/Motion/NullableDoubleMotionProperty.cs": {
+      "reason": "Generic Interpolate and MotionProperty specialize the source interpolation formula and transition eligibility using FerroUI value types; optional values and changed-length arrays snap to their destination.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/interpolate.rs",
+        "src/FerroUI.LiveCharts/motion/mod.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/Motion/PaddingMotionProperty.cs": {
+      "reason": "Generic Interpolate and MotionProperty specialize the source interpolation formula and transition eligibility using FerroUI value types; optional values and changed-length arrays snap to their destination.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/interpolate.rs",
+        "src/FerroUI.LiveCharts/motion/mod.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/Motion/PointMotionProperty.cs": {
+      "reason": "Generic Interpolate and MotionProperty specialize the source interpolation formula and transition eligibility using FerroUI value types; optional values and changed-length arrays snap to their destination.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/interpolate.rs",
+        "src/FerroUI.LiveCharts/motion/mod.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/Motion/SizeMotionProperty.cs": {
+      "reason": "Generic Interpolate and MotionProperty specialize the source interpolation formula and transition eligibility using FerroUI value types; optional values and changed-length arrays snap to their destination.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/interpolate.rs",
+        "src/FerroUI.LiveCharts/motion/mod.rs"
+      ],
+      "status": "native-replacement"
+    }
+  },
+  "members": {
+    "src/LiveChartsCore/CorePieSeries.cs::LiveChartsCore.CorePieSeries<TModel, TVisual, TLabel, TMiniatureGeometry>::double HoverPushout { get; set; }#L85": {
+      "reason": "Reserves normal pie layout space and correctly excludes gauges.",
+      "remaining": [
+        "Pointer-driven hover pushout animation remains pending."
+      ],
+      "rust": [
+        "src/FerroUI.LiveCharts/series.rs::Series::hover_push_out"
+      ],
+      "status": "partial"
+    }
+  },
   "schema": 1,
-  "tests": {}
+  "tests": {
+    "tests/CoreTests/CoreObjectsTests/CubicBezierEasingTests.cs::CoreTests.CoreObjectsTests.CubicBezierEasingTests::void LinearShortcutIsReturnedForIdentityCurve()#L96": {
+      "reason": "The source six-curve matrix and 201 samples per curve are verified against an independent 80-iteration double-precision solve with source tolerances; the identity fixture is extended outside [0,1].",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing/cubic_bezier_easing_function.rs::tests::linear_shortcut_is_identity_curve"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/CubicBezierEasingTests.cs::CoreTests.CoreObjectsTests.CubicBezierEasingTests::void LutMatchesAnalyticAcrossDomain(float x1, float y1, float x2, float y2)#L62": {
+      "reason": "The source six-curve matrix and 201 samples per curve are verified against an independent 80-iteration double-precision solve with source tolerances; the identity fixture is extended outside [0,1].",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing/cubic_bezier_easing_function.rs::tests::lut_matches_analytic_across_domain"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void BackInBoundary()#L141": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void BackInOutBoundary()#L157": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void BackOutBoundary()#L149": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void BounceInBoundary()#L165": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void BounceInOutBoundary()#L181": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void BounceOutBoundary()#L173": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void BuildCubicBezierBoundary()#L341": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing/cubic_bezier_easing_function.rs::tests::lut_matches_analytic_across_domain"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void BuildFunctionUsingKeyFrames()#L349": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::key_frames_interpolate_and_extend_final_value"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void BuildFunctionUsingKeyFramesAddsLastFrameIfNotAtOne()#L374": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::key_frames_interpolate_and_extend_final_value"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void BuildFunctionUsingKeyFramesThrowsWithLessThanTwo()#L364": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::key_frames_use_destination_easing_and_reject_undefined_segments"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CircleInBoundary()#L69": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CircleInOutBoundary()#L85": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CircleOutBoundary()#L77": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CubicInBoundary()#L45": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CubicInOutBoundary()#L61": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CubicOutBoundary()#L53": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CustomBackInOutWithOvershoot()#L285": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::custom_easing_parameters_match_source_boundaries"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CustomBackInWithOvershoot()#L269": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::custom_easing_parameters_match_source_boundaries"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CustomBackOutWithOvershoot()#L277": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::custom_easing_parameters_match_source_boundaries"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CustomElasticInOutWithAmplitudeAndPeriod()#L309": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::custom_easing_parameters_match_source_boundaries"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CustomElasticInWithAmplitudeAndPeriod()#L293": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::custom_easing_parameters_match_source_boundaries"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CustomElasticOutWithAmplitudeAndPeriod()#L301": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::custom_easing_parameters_match_source_boundaries"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CustomPolinominalInOutWithExponent()#L333": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::custom_easing_parameters_match_source_boundaries"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CustomPolinominalInWithExponent()#L317": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::custom_easing_parameters_match_source_boundaries"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void CustomPolinominalOutWithExponent()#L325": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::custom_easing_parameters_match_source_boundaries"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void EaseBoundary()#L237": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void EaseInBoundary()#L245": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void EaseInOutBoundary()#L261": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void EaseOutBoundary()#L253": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void EasingFunctionsAreMonotonicForMostFunctions()#L388": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::customary_easing_curves_are_monotonic"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void ElasticInBoundary()#L189": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void ElasticInOutBoundary()#L205": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void ElasticOutBoundary()#L197": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void ExponentialInBoundary()#L93": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void ExponentialInOutBoundary()#L109": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void ExponentialOutBoundary()#L101": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void LinealIsIdentity()#L11": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void PolinominalInBoundary()#L213": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void PolinominalInOutBoundary()#L229": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void PolinominalOutBoundary()#L221": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void QuadraticInBoundary()#L20": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void QuadraticInOutBoundary()#L37": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void QuadraticOutBoundary()#L29": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void SinInBoundary()#L117": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void SinInOutBoundary()#L133": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/EasingFunctionsTesting.cs::CoreTests.CoreObjectsTests.EasingFunctionsTesting::void SinOutBoundary()#L125": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::all_predefined_easing_boundaries_match_source"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/GradientPaintAnimationTests.cs::CoreTests.CoreObjectsTests.GradientPaintAnimationTests::void ColorPos_InterpolatesThenNullSnaps()#L137": {
+      "reason": "The source inputs, transition, frame times and expected values are retained on a native Animatable that registers the source property name with the paint motion type.",
+      "remaining": [
+        "The SkiaSharp gradient paint types are replaced by native brushes with the chart controls (L2); the fixture does not yet run against that brush."
+      ],
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/paint_animation_tests.rs::source_color_positions_interpolate_then_null_snaps"
+      ],
+      "status": "partial"
+    },
+    "tests/CoreTests/CoreObjectsTests/GradientPaintAnimationTests.cs::CoreTests.CoreObjectsTests.GradientPaintAnimationTests::void GradientStops_InterpolatePerChannelAndComplete()#L17": {
+      "reason": "The source inputs, transition, frame times and expected values are retained on a native Animatable that registers the source property name with the paint motion type.",
+      "remaining": [
+        "The SkiaSharp gradient paint types are replaced by native brushes with the chart controls (L2); the fixture does not yet run against that brush."
+      ],
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/paint_animation_tests.rs::source_gradient_stops_interpolate_per_channel_and_complete"
+      ],
+      "status": "partial"
+    },
+    "tests/CoreTests/CoreObjectsTests/GradientPaintAnimationTests.cs::CoreTests.CoreObjectsTests.GradientPaintAnimationTests::void GradientStops_MismatchedLengthSnapsToTarget()#L69": {
+      "reason": "The source inputs, transition, frame times and expected values are retained on a native Animatable that registers the source property name with the paint motion type.",
+      "remaining": [
+        "The SkiaSharp gradient paint types are replaced by native brushes with the chart controls (L2); the fixture does not yet run against that brush."
+      ],
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/paint_animation_tests.rs::source_gradient_stops_mismatched_length_snaps_to_target"
+      ],
+      "status": "partial"
+    },
+    "tests/CoreTests/CoreObjectsTests/GradientPaintAnimationTests.cs::CoreTests.CoreObjectsTests.GradientPaintAnimationTests::void RadialGradient_CenterInterpolates()#L177": {
+      "reason": "The source inputs, transition, frame times and expected values are retained on a native Animatable that registers the source property name with the paint motion type.",
+      "remaining": [
+        "The SkiaSharp gradient paint types are replaced by native brushes with the chart controls (L2); the fixture does not yet run against that brush."
+      ],
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/paint_animation_tests.rs::source_linear_start_and_radial_center_interpolate"
+      ],
+      "status": "partial"
+    },
+    "tests/CoreTests/CoreObjectsTests/GradientPaintAnimationTests.cs::CoreTests.CoreObjectsTests.GradientPaintAnimationTests::void StartPoint_Interpolates()#L103": {
+      "reason": "The source inputs, transition, frame times and expected values are retained on a native Animatable that registers the source property name with the paint motion type.",
+      "remaining": [
+        "The SkiaSharp gradient paint types are replaced by native brushes with the chart controls (L2); the fixture does not yet run against that brush."
+      ],
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/paint_animation_tests.rs::source_linear_start_and_radial_center_interpolate"
+      ],
+      "status": "partial"
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void AxisLimitStruct()#L225": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/axis_limit.rs::tests::validate_defined_missing_and_scaled_limits"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void AxisLimitValidateLimitsWhenBothDefined()#L174": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/axis_limit.rs::tests::validate_defined_missing_and_scaled_limits"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void AxisLimitValidateLimitsWhenNoneDefined()#L205": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/axis_limit.rs::tests::validate_defined_missing_and_scaled_limits"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void AxisLimitValidateLimitsWhenOnlyMaxDefined()#L195": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/axis_limit.rs::tests::validate_defined_missing_and_scaled_limits"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void AxisLimitValidateLimitsWhenOnlyMinDefined()#L185": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/axis_limit.rs::tests::validate_defined_missing_and_scaled_limits"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void AxisLimitValidateLimitsWithStep()#L215": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/axis_limit.rs::tests::validate_defined_missing_and_scaled_limits"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void BoundsAppendBounds()#L80": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/bounds.rs::tests::bounds_single_value_and_merge_metadata"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void BoundsAppendNegativeValues()#L97": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/bounds.rs::tests::bounds_append_values_and_delta"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void BoundsAppendSingleValue()#L59": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/bounds.rs::tests::bounds_single_value_and_merge_metadata"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void BoundsAppendValueUpdatesMinAndMax()#L46": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/bounds.rs::tests::bounds_append_values_and_delta"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void BoundsConstructorWithMinMax()#L24": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/bounds.rs::tests::bounds_constructor_and_copy"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void BoundsCopyConstructor()#L32": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/bounds.rs::tests::bounds_constructor_and_copy"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void BoundsDefaultIsEmpty()#L15": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/bounds.rs::tests::bounds_default_is_empty"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void BoundsDelta()#L70": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/bounds.rs::tests::bounds_append_values_and_delta"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void CoordinateBoxConstructor()#L269": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/coordinate.rs::tests::coordinate_constructor_dimension_order_matches_source"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void CoordinateEmpty()#L276": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/coordinate.rs::tests::empty_coordinate_and_zero_coordinate_are_distinct"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void CoordinateFinancialConstructor()#L257": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/coordinate.rs::tests::coordinate_constructor_dimension_order_matches_source"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void CoordinateFullConstructor()#L292": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/coordinate.rs::tests::coordinate_constructor_dimension_order_matches_source"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void CoordinateToString()#L283": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/coordinate.rs::tests::coordinate_constructor_dimension_order_matches_source"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void CoordinateXYConstructor()#L238": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/coordinate.rs::tests::coordinate_constructor_dimension_order_matches_source"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void CoordinateXYWeightConstructor()#L247": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/kernel/coordinate.rs::tests::coordinate_constructor_dimension_order_matches_source"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/MeasureTesting.cs::CoreTests.CoreObjectsTests.MeasureTesting::void DimensionalBoundsDefaultConstructor()#L313": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/measure/bounds.rs::tests::dimensional_bounds_defaults"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/MotionlessStatePropertyTests.cs::CoreTests.CoreObjectsTests.MotionlessStatePropertyTests::void ClearStates_RestoresAMotionlessProperty()#L56": {
+      "reason": "The source inputs and assertions are retained. The target is a native Animatable with the registered properties of the fixture instead of a SkiaSharp paint; the behavior under test is the visual-state dictionary, which is the same for every animatable target.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/visual_states/tests.rs::source_clear_states_restores_motionless_property"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/MotionlessStatePropertyTests.cs::CoreTests.CoreObjectsTests.MotionlessStatePropertyTests::void Layered_MotionlessStates_RestoreInOrder()#L68": {
+      "reason": "The source inputs and assertions are retained. The target is a native Animatable with the registered properties of the fixture instead of a SkiaSharp paint; the behavior under test is the visual-state dictionary, which is the same for every animatable target.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/visual_states/tests.rs::source_layered_motionless_states_restore_in_order"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/MotionlessStatePropertyTests.cs::CoreTests.CoreObjectsTests.MotionlessStatePropertyTests::void SetState_AppliesAndClearState_RestoresAMotionlessProperty()#L43": {
+      "reason": "The source inputs and assertions are retained. The target is a native Animatable with the registered properties of the fixture instead of a SkiaSharp paint; the behavior under test is the visual-state dictionary, which is the same for every animatable target.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/visual_states/tests.rs::source_set_state_applies_and_clear_state_restores_motionless_property"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/StateBehaviorTests.cs::CoreTests.CoreObjectsTests.StateBehaviorTests::void Behavior_FiresOnceOnApply_AndOnceOnRemove()#L42": {
+      "reason": "The source inputs and assertions are retained. The target is a native Animatable with the registered properties of the fixture instead of a SkiaSharp paint; the behavior under test is the visual-state dictionary, which is the same for every animatable target.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/visual_states/tests.rs::source_behavior_fires_once_on_apply_and_once_on_remove"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/StateBehaviorTests.cs::CoreTests.CoreObjectsTests.StateBehaviorTests::void Behavior_NotRemoved_WhenStateNeverApplied()#L63": {
+      "reason": "The source inputs and assertions are retained. The target is a native Animatable with the registered properties of the fixture instead of a SkiaSharp paint; the behavior under test is the visual-state dictionary, which is the same for every animatable target.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/visual_states/tests.rs::source_behavior_not_removed_when_state_never_applied"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/StateBehaviorTests.cs::CoreTests.CoreObjectsTests.StateBehaviorTests::void Behavior_RunsAlongsideValueSetters()#L108": {
+      "reason": "The source inputs and assertions are retained. The target is a native Animatable with the registered properties of the fixture instead of a SkiaSharp paint; the behavior under test is the visual-state dictionary, which is the same for every animatable target.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/visual_states/tests.rs::source_behavior_runs_alongside_value_setters"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/StateBehaviorTests.cs::CoreTests.CoreObjectsTests.StateBehaviorTests::void ClearStates_ReversesEveryActiveBehavior()#L124": {
+      "reason": "The source inputs and assertions are retained. The target is a native Animatable with the registered properties of the fixture instead of a SkiaSharp paint; the behavior under test is the visual-state dictionary, which is the same for every animatable target.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/visual_states/tests.rs::source_clear_states_reverses_every_active_behavior"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/StateBehaviorTests.cs::CoreTests.CoreObjectsTests.StateBehaviorTests::void StateBehavior_LambdaAdapter_InvokesDelegates()#L76": {
+      "reason": "The source inputs and assertions are retained. The target is a native Animatable with the registered properties of the fixture instead of a SkiaSharp paint; the behavior under test is the visual-state dictionary, which is the same for every animatable target.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/visual_states/tests.rs::source_state_behavior_lambda_adapter_invokes_delegates"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/StateBehaviorTests.cs::CoreTests.CoreObjectsTests.StateBehaviorTests::void StateBehavior_NullDelegates_AreNoOps()#L98": {
+      "reason": "The source inputs and assertions are retained. The target is a native Animatable with the registered properties of the fixture instead of a SkiaSharp paint; the behavior under test is the visual-state dictionary, which is the same for every animatable target.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/visual_states/tests.rs::source_state_behavior_null_delegates_are_no_ops"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/TransitionsTesting.cs::CoreTests.CoreObjectsTests.TransitionsTesting::void AnimationComplete()#L87": {
+      "reason": "Source time samples, values, retargeting and completion boundaries are directly verified with caller timestamps. The source drawing-object/registry and IsValid invalidation assertions have no counterpart in this numeric fixture.",
+      "remaining": [
+        "Port source multi-property Animatable invalidation and property-registry assertions through native control integration."
+      ],
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/motion_property.rs::tests::source_animation_complete_observes_next_frame_after_exact_endpoint"
+      ],
+      "status": "partial"
+    },
+    "tests/CoreTests/CoreObjectsTests/TransitionsTesting.cs::CoreTests.CoreObjectsTests.TransitionsTesting::void InfiniteAnimation()#L13": {
+      "reason": "Source time samples, values, retargeting and completion boundaries are directly verified with caller timestamps. The source drawing-object/registry and IsValid invalidation assertions have no counterpart in this numeric fixture.",
+      "remaining": [
+        "Port source multi-property Animatable invalidation and property-registry assertions through native control integration."
+      ],
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/motion_property.rs::tests::source_infinite_animation_exact_frames"
+      ],
+      "status": "partial"
+    },
+    "tests/CoreTests/CoreObjectsTests/TransitionsTesting.cs::CoreTests.CoreObjectsTests.TransitionsTesting::void KeyFramesTest()#L147": {
+      "reason": "Source test inputs and assertions are retained in the referenced Rust test; some closely related source cases share a parameterized Rust fixture.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/easing_functions.rs::tests::source_key_frame_triangle_and_delayed_ramp"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/CoreObjectsTests/TransitionsTesting.cs::CoreTests.CoreObjectsTests.TransitionsTesting::void NotFinishedAnimation()#L184": {
+      "reason": "Source time samples, values, retargeting and completion boundaries are directly verified with caller timestamps. The source drawing-object/registry and IsValid invalidation assertions have no counterpart in this numeric fixture.",
+      "remaining": [
+        "Port source multi-property Animatable invalidation and property-registry assertions through native control integration."
+      ],
+      "rust": [
+        "src/FerroUI.LiveCharts/motion/motion_property.rs::tests::source_not_finished_animation_retargets_at_eighty_milliseconds"
+      ],
+      "status": "partial"
+    }
+  }
 }

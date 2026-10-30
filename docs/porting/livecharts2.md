@@ -7,7 +7,9 @@ FerroUI ports [LiveCharts2](https://github.com/Live-Charts/LiveCharts2) (MIT, Co
 | Part | Content |
 |---|---|
 | L0 | The accounting of the port against the pinned sources (this page, `scripts/livecharts2`, `docs/porting/livecharts2/`, the scan job of `livecharts.yml`) |
-| L1 | `ferroui-livecharts`: the shared core (paint, motion, geometry, measurement, hit testing, the chart engine base) and the Cartesian and pie engines, with their upstream tests ported; licence and notices |
+| L1a | `ferroui-livecharts`: the shared core (axes, scales and ticks, stacking, coordinates, easing, motion, paints and their motion, scenes and hit testing, series descriptions, visual states) with the dispositions of the core sources and tests; licence and notices |
+| L1b | The Cartesian engine and series, with the upstream Cartesian series and chart tests that do not need a rendering host |
+| L1c | The pie engine and series, with their upstream tests |
 | L2 | `ferroui-controls-livecharts`: the native `CartesianChart` and `PieChart` controls, typed series collections, runtime XAML, the facade feature |
 | L3 | `samples/LiveChartsDemo` (Cartesian and pie), the catalog page, the test and render jobs of `livecharts.yml` |
 | L4 and later | Polar, Sankey, treemap, geographic, each with its upstream tests |
@@ -26,3 +28,7 @@ Committed in `docs/porting/livecharts2/` (O8 of `winui-controls.md`, the pattern
 Every entry is `pending` until `mapping.json` records a reviewed disposition: `ported` or `native-replacement` with the Rust files that implement it (which must exist), `partial` with what remains, or `not-applicable` with the reason. Each part of the port adds the dispositions it implements. The counts are declarations, not executed tests or behavioural equivalence.
 
 The `scan` job of `livecharts.yml` checks out the pin, runs `inventory.py --check`, puts the report in the run summary and keeps the inventories as an artifact. It runs on the paths of the port and nightly.
+
+## Status
+
+L1a: the core crate compiles against `main` unchanged and its 88 tests pass. `mapping.json` records the dispositions of the core: 43 source files (21 ported, 16 native replacements, 6 partial), 80 ported and 8 partial test declarations (the easing, cubic Bezier, measurement, transition, visual-state and state-behaviour suites of `CoreObjectsTests`). The gradient paint animation fixtures are partial until they run against the native brushes of L2. The colour, labeler, margin and hover-area suites follow with the types that carry them (L1b and L2).

@@ -7,14 +7,20 @@
   "source_types": 1024,
   "source_members": 4859,
   "source_status": {
-    "pending": 698
+    "native-replacement": 16,
+    "partial": 6,
+    "pending": 655,
+    "ported": 21
   },
   "member_status": {
-    "pending": 4859
+    "partial": 1,
+    "pending": 4858
   },
   "test_declarations": 1066,
   "test_status": {
-    "pending": 1066
+    "partial": 8,
+    "pending": 978,
+    "ported": 80
   },
   "test_declarations_by_suite": {
     "ConsoleTests": 33,
