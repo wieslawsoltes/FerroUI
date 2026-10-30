@@ -120,7 +120,9 @@ An application adds its own tools to the same transport, permissions, cancellati
   their endpoint across restarts; the provider stays responsible for its own identity and access
   rules.
 
-HTTP binds to loopback only, for these servers as for the inspector.
+HTTP binds to loopback only, for these servers as for the inspector. A service server prints
+nothing at startup, so a persisted bearer never reaches a log; only an inspector server prints its
+URL and its fresh token to stderr.
 
 ## Tools and resources
 
