@@ -193,3 +193,15 @@ What remains outside the port (RT-P of #243): the exact LineServices metrics, th
 | `RichTextBlockOverflow` falls back to the master's context flyout (`GetContextFlyout`). | The same, through the `Control::effective_context_flyout` virtual (R4) instead of a type test in the flyout code. | Layering (S10). |
 | The selection context menu of WinUI (`TextCommandBarFlyout` with Copy) opens by default. | Only a configured `ContextMenu` or `ContextFlyout` opens; `ContextMenuOpening` is raised before it. | The automatic selection menu of the legacy selection manager is not projected (RT-I22, RT-I37). |
 
+### 11.2 The editor, the text object model, RTF and the clipboard (R7)
+
+| WinUI | FerroUI | Why |
+|---|---|---|
+| `WinUIEdit.dll` (RichEdit) edits the story; TOM is its COM interface. | `RichTextEditor` edits the shared `RichTextDocument`; `RichEditTextDocument`, `RichEditTextRange` and `RichEditTextSelection` are facades over it. The editor, the RTF reader and writer and the field stories are `#[doc(hidden)]`. | RT-A03: the engine is not in the reference; the documented contract is implemented (S12: only the WinUI-facing types are API). |
+| Undo keeps one unit per typing group, including Backspace (`EM_STOPGROUPTYPING`). | The same: typing, exact IME insertions at the caret and Backspace at a collapsed caret merge into one unit until a caret move, a format change, a paste or Delete; a unit shares its snapshots with its neighbours. Units are document snapshots, not deltas (F1). | #243 review M6, S1, S8; decision D9. |
+| A soft line break (`LineBreak`, VT) is one character in TOM. | One unit, U+000B, in the model on every platform; plain text on the clipboard gets the platform's line terminator. | Decision D10 (#243 used `\r\n` on Windows: two units). |
+| Live ranges follow the edits RichEdit makes. | Ranges, `TextPointer`s and link fields follow the replacement the editor made; a text diff is used only for writes that bypass the editor. | #243 review S2. |
+| Removing a paragraph mark keeps the format of the trailing paragraph. | The same for typing over the mark, Backspace, Delete and Cut. | #243 review S6. |
+| RTF reads every Windows code page. | With the cargo feature `rtf-codepages` (encoding_rs); without it, the code page 1252 and Unicode escapes only. | Decision D2. |
+| `UndoLimit` limits the undo stack. | It limits the redo stack too. | #243 review N3. |
+

@@ -12,6 +12,8 @@ use std::cell::Cell;
 use std::rc::Rc;
 #[allow(unused_imports)]
 use crate::{RichTextBlock, RichTextBlockOverflow};
+#[allow(unused_imports)]
+use crate::rich_text::*;
 
 fn feature_values(features: &FontFeatureCollection) -> Vec<(String, i32)> {
     features
@@ -482,4 +484,130 @@ fn typography_inherits_through_document_nodes_and_explicit_defaults_reset_each_f
     assert!(Typography::effective_font_features(&run).is_none());
     TypographyFormat::clear_on(&span);
     assert_eq!(TypographyFormat::effective(&run), patch);
+}
+
+#[test]
+fn typography_local_property_assignment_and_clear_are_document_mutations() {
+    let _scope = test_scope();
+    let view = RichTextBlock::new();
+    Typography::set_kerning(&view, false);
+    let document = RichTextDocument::from_text("abc");
+    view.set_document(document.clone());
+    let editor = RichTextEditor::new(document.clone());
+    editor.insert_text("!", EditKind::Typing).unwrap();
+    assert!(editor.can_undo());
+    let run = document.paragraphs()[0]
+        .inlines()
+        .get(0)
+        .cast::<Run>()
+        .unwrap();
+    let revision = document.revision();
+    Typography::set_kerning(&run, true);
+    assert!(document.revision() > revision);
+    assert!(!editor.can_undo());
+    let revision = document.revision();
+    let mutation = document.mutation_version();
+    let batch = document.begin_edit();
+    run.clear_value(Typography::kerning_property());
+    assert!(!Typography::get_kerning(&run));
+    assert_eq!(document.revision(), revision);
+    assert!(document.mutation_version() > mutation);
+    batch.finish();
+    assert!(document.revision() > revision);
+    assert_eq!(TypographyFormat::from_object(&run).kerning, None);
+}
+
+#[test]
+fn typography_rich_splits_undo_redo_and_snapshot_restore_retain_full_format_patches() {
+    let _scope = test_scope();
+    let document = RichTextDocument::from_text("abcd");
+    let facade = RichEditTextDocument::new(document.clone());
+    let before = document.snapshot();
+    let patch = CharacterFormat {
+        typography: TypographyFormat {
+            capitals: Some(FontCapitals::AllSmallCaps),
+            standard_ligatures: Some(false),
+            stylistic_set20: Some(true),
+            standard_swashes: Some(4),
+            ..Default::default()
+        },
+        ..Default::default()
+    };
+    facade
+        .get_range(1, 3)
+        .unwrap()
+        .set_character_format(&patch)
+        .unwrap();
+    let formatted = document.snapshot();
+    assert!(facade.undo().unwrap());
+    assert_eq!(document.snapshot(), before);
+    assert!(facade.redo().unwrap());
+    assert_eq!(document.snapshot(), formatted);
+    document.replace_text(2..2, "x\ny").unwrap();
+    assert_eq!(document.text(), "abx\nycd");
+    for position in [2, 3, 5] {
+        let format = document.character_format_at(position).unwrap().typography;
+        assert_eq!(format.capitals, patch.typography.capitals);
+        assert_eq!(
+            format.standard_ligatures,
+            patch.typography.standard_ligatures
+        );
+        assert_eq!(format.stylistic_set20, patch.typography.stylistic_set20);
+        assert_eq!(format.standard_swashes, patch.typography.standard_swashes);
+    }
+    document.restore(&formatted).unwrap();
+    assert_eq!(document.snapshot(), formatted);
+}
+
+#[test]
+fn typography_structured_fragment_retains_nested_default_resets_after_source_drop() {
+    let _scope = test_scope();
+    let fragment = {
+        let source = RichTextDocument::new();
+        let paragraph = Paragraph::new();
+        let span = Span::new();
+        let run = Run::with_text(Some("abcd"));
+        Typography::set_capitals(&paragraph, FontCapitals::SmallCaps);
+        Typography::set_capitals(&span, FontCapitals::Normal);
+        Typography::set_standard_ligatures(&span, false);
+        Typography::set_standard_ligatures(&run, true);
+        span.inlines().add(run);
+        paragraph.inlines().add(span);
+        source.blocks().add(paragraph);
+        source.slice(1..3).unwrap()
+    };
+    let target = RichTextDocument::from_text("");
+    let before = target.snapshot();
+    let facade = RichEditTextDocument::new(target.clone());
+    facade
+        .editor()
+        .insert_fragment(&fragment, EditKind::Paste)
+        .unwrap();
+    assert_eq!(target.text(), "bc");
+    let paragraph_format = target.paragraphs()[0]
+        .inlines()
+        .get(0)
+        .cast::<Span>()
+        .unwrap();
+    assert_eq!(
+        TypographyFormat::from_object(&paragraph_format).capitals,
+        Some(FontCapitals::SmallCaps)
+    );
+    let span = paragraph_format.inlines().get(0).cast::<Span>().unwrap();
+    let run = span.inlines().get(0).cast::<Run>().unwrap();
+    assert_eq!(Typography::get_capitals(&run), FontCapitals::Normal);
+    assert!(Typography::get_standard_ligatures(&run));
+    assert_eq!(
+        TypographyFormat::from_object(&span).capitals,
+        Some(FontCapitals::Normal)
+    );
+    assert_eq!(
+        TypographyFormat::from_object(&run).standard_ligatures,
+        Some(true)
+    );
+    let copied = target.snapshot();
+    assert!(facade.undo().unwrap());
+    assert_eq!(target.snapshot(), before);
+    assert!(facade.redo().unwrap());
+    assert_eq!(target.snapshot(), copied);
 }
