@@ -39,6 +39,11 @@ struct Target {
 #[test]
 fn watcher_revision_changed_during_preparation_discards_candidate_before_commit() {
     use std::time::{Duration, Instant};
+    fn save_complete(path: &std::path::Path, source: &str) {
+        let temporary = path.with_extension("pending");
+        std::fs::write(&temporary, source).unwrap();
+        std::fs::rename(temporary, path).unwrap();
+    }
     struct SupersedingTarget {
         inner: Target,
         path: std::path::PathBuf,
@@ -52,7 +57,10 @@ fn watcher_revision_changed_during_preparation_discards_candidate_before_commit(
         fn prepare(&self, sources: Rc<Sources>) -> Result<Box<dyn PreparedReload>, ReloadError> {
             let candidate = self.inner.prepare(sources)?;
             if self.supersede.replace(false) {
-                std::fs::write(&self.path, "<View Width=\"3\"/>").unwrap();
+                // A truncate-and-write save can remain empty across two watcher polls
+                // if the writer is descheduled. Hold that state until the test admits
+                // its batch, rather than assuming the next batch is complete markup.
+                std::fs::write(&self.path, "").unwrap();
                 let deadline = Instant::now() + Duration::from_secs(5);
                 while self.revision.is_current() {
                     assert!(
@@ -78,11 +86,12 @@ fn watcher_revision_changed_during_preparation_discards_candidate_before_commit(
         Duration::from_millis(10),
         BTreeMap::from([(uri.into(), "<View/>".into())]),
     );
-    std::fs::write(&path, "<View Width=\"2\"/>").unwrap();
+    save_complete(&path, "<View Width=\"2\"/>");
     let batch = watcher
         .changes
         .recv_timeout(Duration::from_secs(5))
         .unwrap();
+    assert_eq!(batch.files[0].contents.as_deref(), Ok("<View Width=\"2\"/>"));
     let revision = batch.revision.clone().unwrap();
     let value = Rc::new(RefCell::new("before".into()));
     let prepares = Rc::new(Cell::new(0));
@@ -109,7 +118,7 @@ fn watcher_revision_changed_during_preparation_discards_candidate_before_commit(
             Ok(())
         })
         .unwrap();
-    assert_eq!(outcome.status, ReloadStatus::Superseded);
+    assert_eq!(outcome.status, ReloadStatus::Superseded, "{outcome:?}");
     assert_eq!(prepares.get(), 1);
     assert!(!finalized.get());
     assert_eq!(&*value.borrow(), "before");
@@ -120,20 +129,59 @@ fn watcher_revision_changed_during_preparation_discards_candidate_before_commit(
         "stale drafts must not spin"
     );
 
-    session.submit_files(
-        watcher
-            .changes
-            .recv_timeout(Duration::from_secs(5))
-            .unwrap(),
+    let partial = watcher
+        .changes
+        .recv_timeout(Duration::from_secs(5))
+        .unwrap();
+    assert_eq!(partial.files.len(), 1);
+    assert_eq!(partial.files[0].contents.as_deref(), Ok(""));
+    assert!(partial.revision.as_ref().unwrap().is_current());
+    session.submit_files(partial);
+    let rejected = session
+        .apply_pending_with(|| {
+            finalized.set(true);
+            Ok(())
+        })
+        .unwrap();
+    assert_eq!(rejected.status, ReloadStatus::Failed, "{rejected:?}");
+    assert_eq!(prepares.get(), 1, "invalid markup must not prepare a target");
+    assert!(!finalized.get());
+    assert_eq!(&*value.borrow(), "before");
+    assert_eq!(session.sources()[uri], "<View/>");
+    assert_eq!(session.applied_revision(), 0);
+    assert!(
+        session.apply_pending().is_none(),
+        "failed drafts must not spin"
     );
+
+    // Publish the completed save as a single path replacement so this phase cannot
+    // accidentally enqueue another truncation snapshot under scheduler load.
+    save_complete(&path, "<View Width=\"3\"/>");
+    let completed = watcher
+        .changes
+        .recv_timeout(Duration::from_secs(5))
+        .unwrap();
     assert_eq!(
-        session.apply_pending().unwrap().status,
-        ReloadStatus::Applied
+        completed.files[0].contents.as_deref(),
+        Ok("<View Width=\"3\"/>")
     );
+    assert!(completed.revision.as_ref().unwrap().is_current());
+    session.submit_files(completed);
+    let applied = session
+        .apply_pending_with(|| {
+            finalized.set(true);
+            Ok(())
+        })
+        .unwrap();
+    assert_eq!(applied.status, ReloadStatus::Applied, "{applied:?}");
+    assert_eq!(prepares.get(), 2);
+    assert!(finalized.get());
     assert_eq!(&*value.borrow(), "<View Width=\"3\"/>");
+    assert_eq!(session.sources()[uri], "<View Width=\"3\"/>");
+    assert_eq!(session.applied_revision(), applied.revision);
     assert!(!session.has_pending_changes());
     let applied_read = session.watch_revision.clone().unwrap();
-    std::fs::write(&path, "<View Width=\"4\"/>").unwrap();
+    save_complete(&path, "<View Width=\"4\"/>");
     let deadline = Instant::now() + Duration::from_secs(5);
     while applied_read.is_current() {
         assert!(Instant::now() < deadline);

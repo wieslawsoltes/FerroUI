@@ -653,6 +653,19 @@ struct Emitter<'a> {
     /// an object created with its default constructor): what a part of a
     /// split function can be passed ([`split_into_parts`]).
     local_types: HashMap<String, String>,
+    /// Lexical namespace meanings currently installed by generated RAII guards. Root-only
+    /// documents emit exactly the existing fast path without additional context operations.
+    namespace_aliases: HashMap<String, String>,
+    root_namespace_aliases: HashMap<String, String>,
+    /// Scoped tables are shared by the document's guards and deferred factories. A merged
+    /// dictionary can contribute thousands of values with the same lexical declaration.
+    namespace_tables: Vec<ScopedNamespaceTable>,
+}
+
+struct ScopedNamespaceTable {
+    aliases: HashMap<String, String>,
+    name: String,
+    source: String,
 }
 
 fn node_address<T: ?Sized>(node: &Rc<T>) -> usize {
@@ -716,6 +729,52 @@ impl<'a> Emitter<'a> {
     // --- values -------------------------------------------------------------
 
     fn value(&mut self, node: &Rc<dyn IXamlAstNode>) -> EmitResult<Typed<'a>> {
+        let scope = self.enter_namespace_scope(node);
+        let result = self.value_scoped(node);
+        let result = match (&scope, result) {
+            // Expressions must be evaluated while the lexical provider is still installed.
+            (Some(_), Ok(value)) if matches!(value.kind, Kind::Class(_) | Kind::Exact { .. }) => {
+                Ok(self.bind(&value, "scoped_value"))
+            }
+            (_, result) => result,
+        };
+        self.leave_namespace_scope(scope);
+        result
+    }
+    fn enter_namespace_scope(&mut self, node: &Rc<dyn IXamlAstNode>) -> Option<(String, HashMap<String, String>)> {
+        let scope = node.namespace_scope()?;
+        if scope.aliases() == &self.namespace_aliases {
+            return None;
+        }
+        let previous = std::mem::replace(&mut self.namespace_aliases, scope.aliases().clone());
+        let guard = self.local_named("namespace_scope");
+        let table = self.scoped_namespace_table(scope.aliases());
+        self.uses_context = true;
+        self.line(format!("let {guard} = rt::push_namespace_scope(&context, {table});"));
+        Some((guard, previous))
+    }
+    fn leave_namespace_scope(&mut self, scope: Option<(String, HashMap<String, String>)>) {
+        if let Some((guard, previous)) = scope {
+            self.line(format!("::core::mem::drop({guard});"));
+            self.namespace_aliases = previous;
+        }
+    }
+    fn scoped_namespace_table(&mut self, aliases: &HashMap<String, String>) -> String {
+        if aliases == &self.root_namespace_aliases {
+            return format!("{}.namespaces", self.document);
+        }
+        if let Some(table) = self.namespace_tables.iter().find(|table| table.aliases == *aliases) {
+            return table.name.clone();
+        }
+        let name = format!("{}_XML_NAMESPACES_{}", self.function_name.to_uppercase(), self.namespace_tables.len());
+        self.namespace_tables.push(ScopedNamespaceTable {
+            aliases: aliases.clone(),
+            name: name.clone(),
+            source: super::transform::namespace_table_for_aliases(self.configuration, aliases),
+        });
+        name
+    }
+    fn value_scoped(&mut self, node: &Rc<dyn IXamlAstNode>) -> EmitResult<Typed<'a>> {
         if let Some(group) = node.as_value_with_manipulation_node() {
             // `value_with_manipulation`: the value, then its manipulation unless it is an empty group.
             let created = self.value(&group.value().as_node())?;
@@ -1527,13 +1586,37 @@ impl<'a> Emitter<'a> {
     // --- manipulations ------------------------------------------------------
 
     fn manipulation(&mut self, node: &Rc<dyn IXamlAstNode>, target: &Typed<'a>) -> EmitResult<()> {
+        let scope = self.enter_namespace_scope(node);
+        let result = self.manipulation_scoped(node, target);
+        self.leave_namespace_scope(scope);
+        result
+    }
+    fn manipulation_scoped(&mut self, node: &Rc<dyn IXamlAstNode>, target: &Typed<'a>) -> EmitResult<()> {
         if let Some(n) = node.cast::<XamlObjectInitializationNode>() {
             return self.object_initialization(node, &n, target);
         }
         if let Some(n) = node.cast::<XamlManipulationGroupNode>() {
             let children = n.children.borrow().clone();
-            for child in &children {
-                self.manipulation(&child.as_node(), target)?;
+            let mut index = 0;
+            while index < children.len() {
+                let first = children[index].as_node();
+                let scope = self.enter_namespace_scope(&first);
+                let mut end = index + 1;
+                if scope.is_some() {
+                    // Group transforms flatten imported dictionaries into adjacent member
+                    // assignments. Keep their lexical provider installed for the whole run;
+                    // a different or unspecified scope ends the run and restores the parent.
+                    while end < children.len() && children[end].namespace_scope()
+                        .is_some_and(|scope| scope.aliases() == &self.namespace_aliases)
+                    {
+                        end += 1;
+                    }
+                }
+                let result = children[index..end].iter()
+                    .try_for_each(|child| self.manipulation_scoped(&child.as_node(), target));
+                self.leave_namespace_scope(scope);
+                result?;
+                index = end;
             }
             return Ok(());
         }
@@ -2471,7 +2554,11 @@ impl<'a> Emitter<'a> {
         // around it.
         let outer_names = std::mem::take(&mut self.local_names);
         let outer_uses = (std::mem::take(&mut self.uses_context), std::mem::take(&mut self.uses_name_scope));
+        let declaration_aliases = node.namespace_scope().map(|scope| scope.aliases().clone())
+            .unwrap_or_else(|| self.namespace_aliases.clone());
+        let outer_aliases = std::mem::replace(&mut self.namespace_aliases, declaration_aliases.clone());
         let body = self.deferred_body(deferred);
+        self.namespace_aliases = outer_aliases;
         let body_lines = std::mem::replace(&mut self.lines, outer_lines);
         self.assignments = outer_assignments;
         self.local_names = outer_names;
@@ -2492,7 +2579,16 @@ impl<'a> Emitter<'a> {
         text.push_str(
             ") -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {\n",
         );
-        match fused_static_resource_content(self.types, &body_lines, &returned, &self.document) {
+        let document_info = if declaration_aliases != self.root_namespace_aliases {
+            let table = self.scoped_namespace_table(&declaration_aliases);
+            format!("rt::DocumentInfo {{ base_uri: {}.base_uri, namespaces: {table} }}", self.document)
+        } else {
+            self.document.clone()
+        };
+        // The shared helper accepts the declaration's DocumentInfo as well as the root's.
+        // Retain the fused resource fast path when a dictionary imports another lexical scope.
+        let fused = fused_static_resource_content(self.types, &body_lines, &returned, &document_info);
+        match fused {
             Some(fused) if !uses_name_scope => {
                 for line in fused {
                     text.push_str(&line);
@@ -2500,10 +2596,7 @@ impl<'a> Emitter<'a> {
                 }
             }
             _ => {
-                text.push_str(&format!(
-                    "    let {context_name} = rt::deferred_context(service_provider, &{});\n",
-                    self.document
-                ));
+                text.push_str(&format!("    let {context_name} = rt::deferred_context(service_provider, &{document_info});\n"));
                 if uses_name_scope {
                     text.push_str("    let name_scope = context.name_scope_field();\n");
                 }
@@ -3916,6 +4009,9 @@ pub fn emit_function<'a>(
         function_name,
         deferred_functions: Vec::new(),
         local_types: HashMap::new(),
+        namespace_aliases: root.namespace_scope().or_else(|| root_value.namespace_scope()).map(|scope| scope.aliases().clone()).unwrap_or_default(),
+        root_namespace_aliases: root.namespace_scope().or_else(|| root_value.namespace_scope()).map(|scope| scope.aliases().clone()).unwrap_or_default(),
+        namespace_tables: Vec::new(),
     };
     // `Build`: the root object, then `Populate` with a context of its own (its name
     // scope field is filled from the parent service provider) whose root object is
@@ -3956,6 +4052,10 @@ pub fn emit_function<'a>(
 
     let mut source = String::new();
     let document_text = document_name.replace('`', "'").replace(['\r', '\n'], " ");
+    for table in &emitter.namespace_tables {
+        source.push_str(&format!("/// A lexical XML namespace scope used by `{document_text}`.\n"));
+        source.push_str(&format!("const {}: rt::XmlNamespaceTable = {};\n\n", table.name, table.source));
+    }
     source.push_str(&format!("/// The base URI and the XML namespaces of `{document_text}`.\n"));
     source.push_str(&format!(
         "static {document_constant}: rt::DocumentInfo = rt::DocumentInfo {{ base_uri: {base_uri}, namespaces: {namespaces} }};\n"
@@ -4296,6 +4396,25 @@ mod tests {
         for part in &parts {
             assert_eq!(part.matches("let deferred_").count(), part.matches("add(&dictionary_0").count());
         }
+    }
+
+    #[test]
+    fn a_coalesced_namespace_guard_survives_split_function_calls() {
+        let mut operations = vec![
+            "let namespace_scope_0 = rt::push_namespace_scope(&context, TABLE);".to_string(),
+        ];
+        for index in 0..=SPLIT_THRESHOLD {
+            operations.push(format!("touch(&context, {index});"));
+        }
+        operations.push("::core::mem::drop(namespace_scope_0);".to_string());
+        operations.push("Ok(())".to_string());
+        let (split, parts) = split_into_parts("build_x", "x.xaml", &body(&operations), &known_types());
+        assert!(!parts.is_empty());
+        assert!(split.first().unwrap().contains("let namespace_scope_0"));
+        assert!(split[split.len() - 2].contains("drop(namespace_scope_0)"));
+        assert!(parts.iter().all(|part| !part.contains("namespace_scope_0")));
+        assert_eq!(split.join("\n").matches("touch(&context,").count()
+            + parts.concat().matches("touch(&context,").count(), SPLIT_THRESHOLD + 1);
     }
 
     #[test]
