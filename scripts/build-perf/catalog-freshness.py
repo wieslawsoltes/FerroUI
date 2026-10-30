@@ -570,7 +570,14 @@ def main() -> int:
                                   if name.startswith("samples/ControlCatalog/") and name != "samples/ControlCatalog/build.rs"}
                           for label in sources}
         if catalog_inputs["baseline"] != catalog_inputs["candidate"]:
-            raise RuntimeError("catalog source/assets differ beyond the intended build.rs change")
+            # A pull request that changes the catalog itself (a page, an asset) changes what it
+            # builds; with the acknowledged output changes (the label build-output-changes) the
+            # changed inputs are recorded and the timings compare the two catalogs.
+            if not args.accept_output_changes:
+                raise RuntimeError("catalog source/assets differ beyond the intended build.rs change")
+            names = set(catalog_inputs["baseline"]) | set(catalog_inputs["candidate"])
+            report["catalog_inputs_changed"] = sorted(
+                name for name in names if catalog_inputs["baseline"].get(name) != catalog_inputs["candidate"].get(name))
         if not args.offline:
             for label, source in sources.items():
                 capture(["cargo", "fetch", "--locked"], source, env, output / "provenance" / label / "fetch")
