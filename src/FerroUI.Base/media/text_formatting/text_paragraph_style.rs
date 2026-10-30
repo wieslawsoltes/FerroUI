@@ -92,6 +92,9 @@ impl TextParagraphProperties for StyledParagraph {
     fn indent(&self) -> f64 { Self::style_indent(&self.style) }
     fn paragraph_indent(&self) -> f64 { self.defaults.paragraph_indent() }
     fn default_incremental_tab(&self) -> f64 { self.defaults.default_incremental_tab() }
+    fn line_metrics_mode(&self) -> super::TextLineMetricsMode { self.defaults.line_metrics_mode() }
+    fn tab_stops(&self) -> Option<&[super::TextTabStop]> { self.defaults.tab_stops() }
+    fn tab_origin(&self) -> f64 { self.defaults.tab_origin() }
 }
 
 impl StyledParagraph {

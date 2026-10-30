@@ -3,6 +3,7 @@ use std::rc::Rc;
 
 use crate::media::{FontSimulations, FontStretch, FontStyle, FontWeight, IPlatformTypeface, Typeface};
 use crate::utilities::CultureInfo;
+use super::IFontFallbackMapper;
 
 /// The font backend contract: enumerates installed fonts, creates platform
 /// typefaces and matches fallback fonts for characters.
@@ -29,6 +30,14 @@ pub trait IFontManagerImpl: 'static {
         family_name: Option<&str>,
         culture: Option<&CultureInfo>,
     ) -> Option<Rc<dyn IPlatformTypeface>>;
+
+    /// Optional range mapping with an independent fallback font scale.
+    /// Existing providers return `None` and retain the character matcher with
+    /// scale one. The rich family-metrics policy queries this capability;
+    /// the default formatter does not.
+    fn font_fallback_mapper(&self) -> Option<&dyn IFontFallbackMapper> {
+        None
+    }
 
     /// Tries to get a glyph typeface for specified parameters.
     fn try_create_glyph_typeface(

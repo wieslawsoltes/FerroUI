@@ -1,7 +1,7 @@
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
-use crate::media::text_formatting::TextRun;
+use crate::media::text_formatting::{TextLineMetricsMode, TextRun};
 use crate::media::FlowDirection;
 
 /// Represents the state of a line break: how the line ended and what the
@@ -10,6 +10,9 @@ pub struct TextLineBreak {
     text_end_of_line: Option<Rc<dyn TextRun>>,
     flow_direction: FlowDirection,
     is_split: bool,
+    /// The line-metrics mode of the paragraph that made the break; a wrapped
+    /// continuation is reused only by a paragraph with the same mode.
+    line_metrics_mode: TextLineMetricsMode,
     /// The runs left over by a wrapped line (upstream `WrappingTextLineBreak`).
     pub(crate) remaining_runs: RefCell<Option<Vec<Rc<dyn TextRun>>>>,
     /// Whether this is a wrapping line break (stays true after the runs were acquired).
@@ -22,7 +25,23 @@ impl TextLineBreak {
     /// `text_end_of_line` is the end of line run (a run whose
     /// `as_text_end_of_line` is `Some`) when the line ended with one.
     pub fn new(text_end_of_line: Option<Rc<dyn TextRun>>, flow_direction: FlowDirection, is_split: bool) -> Self {
-        Self { text_end_of_line, flow_direction, is_split, remaining_runs: RefCell::new(None), is_wrapping: Cell::new(false) }
+        Self {
+            text_end_of_line,
+            flow_direction,
+            is_split,
+            line_metrics_mode: TextLineMetricsMode::GlyphTypeface,
+            remaining_runs: RefCell::new(None),
+            is_wrapping: Cell::new(false),
+        }
+    }
+
+    pub(crate) fn with_line_metrics_mode(mut self, mode: TextLineMetricsMode) -> Self {
+        self.line_metrics_mode = mode;
+        self
+    }
+
+    pub(crate) fn line_metrics_mode(&self) -> TextLineMetricsMode {
+        self.line_metrics_mode
     }
 
     /// Get the end of line run.
