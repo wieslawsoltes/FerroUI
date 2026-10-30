@@ -284,6 +284,34 @@ impl Drop for CompositorCanvas {
     }
 }
 
+#[test]
+fn counted_render_suppression_updates_composition_without_changing_authored_visibility() {
+    let scene = CompositorCanvas::new();
+    let child = TestBorder::filled(10.0, 10.0, 40.0, 30.0);
+    child.set_opacity(0.4);
+    scene.canvas.add(&child);
+    scene.run_jobs();
+    assert!(scene.server_visual(&child).visible());
+    child.add_render_suppression_request();
+    child.add_render_suppression_request();
+    scene.run_jobs();
+    assert!(!scene.server_visual(&child).visible());
+    assert!(child.is_visible());
+    assert_eq!(child.opacity(), 0.4);
+    assert_eq!(child.bounds(), Rect::new(10.0, 10.0, 40.0, 30.0));
+    child.remove_render_suppression_request();
+    scene.run_jobs();
+    assert!(!scene.server_visual(&child).visible());
+    child.add_composition_hide_request();
+    child.remove_render_suppression_request();
+    scene.run_jobs();
+    assert!(!child.is_render_suppressed());
+    assert!(!scene.server_visual(&child).visible(), "another composition owner still hides it");
+    child.remove_composition_hide_request();
+    scene.run_jobs();
+    assert!(scene.server_visual(&child).visible());
+}
+
 // --- CompositorInvalidationTests ---------------------------------------------------
 
 #[test]
