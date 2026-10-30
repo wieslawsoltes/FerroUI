@@ -1,3 +1,5 @@
+use ferroui_base::metadata::{MarkupType, MarkupTyped};
+
 mod rich_edit_text_document;
 mod rich_edit_text_field_story;
 mod rich_text_editor;
@@ -32,3 +34,33 @@ pub use rich_edit_text_field_story::{
 };
 #[doc(hidden)]
 pub use rich_text_field_story::FieldStoryOffset;
+
+/// The markup types of the text object model declared next to their types, registered
+/// with the other types of the crate.
+pub(crate) const MARKUP_TYPES: &[&MarkupType] = &[
+    <RichEditClipboardFormat as MarkupTyped>::MARKUP,
+    <FindOptions as MarkupTyped>::MARKUP,
+    <RangeGravity as MarkupTyped>::MARKUP,
+    <SelectionOptions as MarkupTyped>::MARKUP,
+    <SelectionType as MarkupTyped>::MARKUP,
+    <TextGetOptions as MarkupTyped>::MARKUP,
+    <TextSetOptions as MarkupTyped>::MARKUP,
+    <TextStreamEncoding as MarkupTyped>::MARKUP,
+    <TextRangeUnit as MarkupTyped>::MARKUP,
+    <LetterCase as MarkupTyped>::MARKUP,
+];
+
+/// Registers the nullable forms of the value types of [`MARKUP_TYPES`].
+pub(crate) fn register_value_types() {
+    use ferroui_base::data::core::ValueTypes;
+    ValueTypes::register_nullable::<RichEditClipboardFormat>();
+    ValueTypes::register_nullable::<FindOptions>();
+    ValueTypes::register_nullable::<RangeGravity>();
+    ValueTypes::register_nullable::<SelectionOptions>();
+    ValueTypes::register_nullable::<SelectionType>();
+    ValueTypes::register_nullable::<TextGetOptions>();
+    ValueTypes::register_nullable::<TextSetOptions>();
+    ValueTypes::register_nullable::<TextStreamEncoding>();
+    ValueTypes::register_nullable::<TextRangeUnit>();
+    ValueTypes::register_nullable::<LetterCase>();
+}
