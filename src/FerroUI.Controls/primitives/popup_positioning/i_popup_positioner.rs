@@ -515,5 +515,39 @@ fn calculate_anchor_rect(top_level: &TopLevel, position_request: &PopupPositionR
 
     let bounds = Rect::from_size(target.bounds().size());
     let anchor_rect = position_request.anchor_rect().unwrap_or(bounds);
-    anchor_rect.intersect(bounds).transform_to_aabb(matrix)
+    constrain_anchor_rect(anchor_rect, bounds).transform_to_aabb(matrix)
+}
+
+/// The anchor rectangle limited to the bounds of the placement target.
+///
+/// Deviation (DEVIATIONS.md, Popup): `IPopupPositioner.CalculateAnchorRect` intersects
+/// the anchor with the bounds, which turns a zero-size anchor (a point, such as the
+/// caret a text control anchors its context menu at) into an empty rectangle at the
+/// origin of the target. A point is kept, clamped into the bounds.
+fn constrain_anchor_rect(anchor_rect: Rect, bounds: Rect) -> Rect {
+    if anchor_rect.width == 0.0 && anchor_rect.height == 0.0 {
+        Rect::new(anchor_rect.x.clamp(bounds.x, bounds.right()), anchor_rect.y.clamp(bounds.y, bounds.bottom()), 0.0, 0.0)
+    } else {
+        anchor_rect.intersect(bounds)
+    }
+}
+
+#[cfg(test)]
+mod anchor_tests {
+    use super::constrain_anchor_rect;
+    use ferroui_base::Rect;
+
+    #[test]
+    fn a_zero_size_anchor_is_kept_as_a_point_inside_the_bounds() {
+        let bounds = Rect::new(0.0, 0.0, 100.0, 50.0);
+        assert_eq!(constrain_anchor_rect(Rect::new(30.0, 20.0, 0.0, 0.0), bounds), Rect::new(30.0, 20.0, 0.0, 0.0));
+        assert_eq!(constrain_anchor_rect(Rect::new(130.0, -5.0, 0.0, 0.0), bounds), Rect::new(100.0, 0.0, 0.0, 0.0));
+    }
+
+    #[test]
+    fn an_anchor_with_an_area_is_intersected_with_the_bounds_as_upstream() {
+        let bounds = Rect::new(0.0, 0.0, 100.0, 50.0);
+        assert_eq!(constrain_anchor_rect(Rect::new(80.0, 40.0, 40.0, 40.0), bounds), Rect::new(80.0, 40.0, 20.0, 10.0));
+        assert_eq!(constrain_anchor_rect(Rect::new(10.0, 10.0, 20.0, 0.0), bounds), Rect::new(10.0, 10.0, 20.0, 0.0).intersect(bounds));
+    }
 }
