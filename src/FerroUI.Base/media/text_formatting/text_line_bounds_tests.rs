@@ -9,7 +9,9 @@ use crate::media::text_formatting::testing::{
     format_line, line_height, run_properties, SingleBufferTextSource, TextTestScope, ASCENDER, DESCENDER,
     DESIGN_EM_HEIGHT, LINE_GAP,
 };
-use crate::media::text_formatting::{GenericTextParagraphProperties, TextLine, TextParagraphProperties, TextRunProperties};
+use crate::media::text_formatting::{
+    GenericTextParagraphProperties, TextLine, TextLineMetricsMode, TextParagraphProperties, TextRunProperties,
+};
 use crate::media::{FlowDirection, GlyphTypeface, TextAlignment, TextLineBounds, TextWrapping, Typeface};
 
 const EM: f64 = 12.0;
@@ -145,4 +147,52 @@ fn full_is_the_default_of_paragraph_properties() {
     let copy = GenericTextParagraphProperties::from_properties(&properties);
 
     assert_eq!(copy.text_line_bounds(), TextLineBounds::Tight);
+}
+
+#[test]
+fn paragraph_copy_preserves_tabs_and_line_bounds() {
+    use crate::media::text_formatting::TextTabStops;
+
+    let _scope = TextTestScope::new();
+    let properties = GenericTextParagraphProperties::new(run_properties(EM)).with_tabs(
+        TextTabStops::parse("48,Left;96,Decimal,Dots").unwrap(),
+        24.0,
+        7.0,
+    );
+    properties.set_text_line_bounds(TextLineBounds::Tight);
+
+    let copy = GenericTextParagraphProperties::from_properties(&properties);
+
+    assert_eq!(copy.tab_stops(), properties.tab_stops());
+    assert_eq!(copy.default_incremental_tab(), 24.0);
+    assert_eq!(copy.tab_origin(), 7.0);
+    assert_eq!(copy.text_line_bounds(), TextLineBounds::Tight);
+    properties.set_text_line_bounds(TextLineBounds::Full);
+    assert_eq!(copy.text_line_bounds(), TextLineBounds::Tight);
+}
+
+/// Tab layout is opt-in: a copy of paragraph properties without tab stops
+/// keeps upstream's values (no tab stops, the default tab width of the copy).
+#[test]
+fn paragraph_copy_without_tab_stops_keeps_the_upstream_defaults() {
+    struct WithIncrementalTab(Rc<dyn TextRunProperties>);
+    impl TextParagraphProperties for WithIncrementalTab {
+        fn flow_direction(&self) -> FlowDirection { FlowDirection::LeftToRight }
+        fn text_alignment(&self) -> TextAlignment { TextAlignment::Left }
+        fn line_height(&self) -> f64 { f64::NAN }
+        fn first_line_in_paragraph(&self) -> bool { true }
+        fn default_text_run_properties(&self) -> &Rc<dyn TextRunProperties> { &self.0 }
+        fn text_wrapping(&self) -> TextWrapping { TextWrapping::NoWrap }
+        fn indent(&self) -> f64 { 0.0 }
+        fn default_incremental_tab(&self) -> f64 { 40.0 }
+    }
+
+    let _scope = TextTestScope::new();
+    let source = WithIncrementalTab(run_properties(EM));
+    let copy = GenericTextParagraphProperties::from_properties(&source);
+
+    assert_eq!(copy.tab_stops(), None);
+    assert_eq!(copy.default_incremental_tab(), 0.0);
+    assert_eq!(copy.tab_origin(), 0.0);
+    assert_eq!(copy.line_metrics_mode(), TextLineMetricsMode::GlyphTypeface);
 }

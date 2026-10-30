@@ -80,7 +80,7 @@ impl dyn TextFormatter {
 
         let glyph_typeface = properties.cached_glyph_typeface();
 
-        let font_rendering_em_size = properties.font_rendering_em_size();
+        let font_rendering_em_size = properties.effective_font_rendering_em_size();
 
         let culture_info = properties.culture_info().cloned();
 
