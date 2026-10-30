@@ -1,5 +1,22 @@
 # Third-party notices
 
+## WinUI: the UI Automation text pattern
+
+The text pattern of the automation nodes (`automation/automation_node_text.rs`,
+`automation/text_range_node.rs`, `automation/text_pattern_marshalling.rs`) and
+the event sink that raises `UiaRaiseTextEditTextChangedEvent`
+(`automation/automation_event_sink.rs`, the function in
+`automation/interop/uia_core_provider_api.rs`) follow WinUI's
+`CUIATextProviderWrapper` and `CUIATextRangeProviderWrapper`
+(`dxaml/xcp/win/shared/UIAPatternProviderWrapper.cpp`,
+`dxaml/xcp/win/inc/UIAPatternProviderWrapper.h`), `CUIAWindow::UIARaiseTextEditTextChangedEvent`
+(`dxaml/xcp/win/shared/UIAWindow.cpp`) and the text attribute identifiers of
+`dxaml/xcp/components/metadata/inc/EnumDefs.g.h`, of microsoft-ui-xaml
+(<https://github.com/microsoft/microsoft-ui-xaml>, branch `winui3/main`, commit
+`7e4b0c2096be402f51cc8f7d203ebf67cff183d0`; MIT License, Copyright (c) Microsoft
+Corporation; the license text is in `src/FerroUI.Controls/documents/NOTICE.md`).
+The plan and the register of the port are `docs/porting/winui-rich-text.md`.
+
 ## Avalonia
 
 The Windows platform backend is a port of `src/Windows/Avalonia.Win32` of the
