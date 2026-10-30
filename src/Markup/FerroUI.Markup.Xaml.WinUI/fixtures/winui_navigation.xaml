@@ -1,0 +1,24 @@
+<NavigationView xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                x:Name="Navigation" PaneDisplayMode="Left" Header="Messages"
+                IsBackButtonVisible="Visible" IsBackEnabled="True">
+  <NavigationView.AutoSuggestBox>
+    <AutoSuggestBox x:Name="Search" QueryIcon="Find" PlaceholderText="Search messages" />
+  </NavigationView.AutoSuggestBox>
+  <NavigationView.MenuItems>
+    <NavigationViewItem x:Name="Inbox" Content="Inbox" Icon="Mail" IsExpanded="True">
+      <NavigationViewItem.InfoBadge>
+        <InfoBadge x:Name="Badge" Value="5" />
+      </NavigationViewItem.InfoBadge>
+      <NavigationViewItem.MenuItems>
+        <NavigationViewItem x:Name="Archive" Content="Archive" Icon="Save" />
+      </NavigationViewItem.MenuItems>
+    </NavigationViewItem>
+    <NavigationViewItemHeader Content="Other" />
+    <NavigationViewItemSeparator />
+  </NavigationView.MenuItems>
+  <NavigationView.FooterMenuItems>
+    <NavigationViewItem x:Name="Help" Content="Help" Icon="Help" SelectsOnInvoked="False" />
+  </NavigationView.FooterMenuItems>
+  <Frame x:Name="ContentFrame" />
+</NavigationView>

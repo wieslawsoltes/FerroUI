@@ -1346,6 +1346,7 @@ dependencies = [
  "ferroui-markup",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
+ "ferroui-markup-xaml-winui",
  "ferroui-metal",
  "ferroui-native",
  "ferroui-opengl",
@@ -1854,6 +1855,18 @@ dependencies = [
  "ferroui-themes-fluent",
  "ferroui-themes-simple",
  "xamlx",
+]
+
+[[package]]
+name = "ferroui-markup-xaml-winui"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "roxmltree 0.20.0",
 ]
 
 [[package]]
