@@ -12,7 +12,7 @@
                     x:ClassModifier="internal">
   <ResourceDictionary.ThemeDictionaries>
     <ResourceDictionary x:Key="Default">
-      <SolidColorBrush x:Key="SystemControlTransientBackgroundBrush" Color="#2C2C2C" />
+      <AcrylicBrush x:Key="SystemControlTransientBackgroundBrush" TintColor="#2C2C2C" TintOpacity="0.15" FallbackColor="#2C2C2C" />
       <Color x:Key="TextOnAccentFillColorDefault">#FFFFFF</Color>
       <Color x:Key="TextOnAccentAAFillColorPrimary">#000000</Color>
       <Color x:Key="TextOnAccentAAFillColorSecondary">#80000000</Color>
@@ -38,7 +38,7 @@
       <SolidColorBrush x:Key="ControlAAStrokeColorDisabledBrush" Color="{StaticResource ControlAAStrokeColorDisabled}" />
     </ResourceDictionary>
     <ResourceDictionary x:Key="Light">
-      <SolidColorBrush x:Key="SystemControlTransientBackgroundBrush" Color="#FCFCFC" />
+      <AcrylicBrush x:Key="SystemControlTransientBackgroundBrush" TintColor="#FCFCFC" TintOpacity="0.0" FallbackColor="#FCFCFC" />
       <Color x:Key="TextOnAccentFillColorDefault">#FFFFFF</Color>
       <Color x:Key="TextOnAccentAAFillColorPrimary">#FFFFFF</Color>
       <Color x:Key="TextOnAccentAAFillColorSecondary">#B3FFFFFF</Color>

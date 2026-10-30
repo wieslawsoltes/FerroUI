@@ -134,6 +134,7 @@ document_tests! {
     controls_radio_button => "/Controls/RadioButton.xaml";
     controls_radio_buttons => "/Controls/RadioButtons.xaml";
     controls_repeat_button => "/Controls/RepeatButton.xaml";
+    controls_reveal_styles => "/Controls/RevealStyles.xaml";
     controls_scroll_bar => "/Controls/ScrollBar.xaml";
     controls_scroll_viewer => "/Controls/ScrollViewer.xaml";
     controls_selectable_text_block => "/Controls/SelectableTextBlock.xaml";

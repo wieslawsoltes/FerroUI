@@ -1,0 +1,10 @@
+{
+  "Title": "One application. Every language.",
+  "Subtitle": "Change language to update text, number formatting, region preferences and reading direction instantly.",
+  "AmountLabel": "Live number formatting",
+  "Price": "Amount: {0:N2}",
+  "FormatExplanation": "Move the slider. The same native binding follows both its value and the active culture.",
+  "RegionLabel": "Culture and measurements",
+  "RegionDetails": "Culture: {0} · Region: {1}",
+  "Measurements": "Distance: {0} · Temperature: {1}"
+}

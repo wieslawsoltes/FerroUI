@@ -49,6 +49,9 @@ pub struct NativePlatformSettings {
     base: DefaultPlatformSettings,
     platform_settings: ComPtr<IFrnPlatformSettings>,
     accessibility_settings: Option<ComPtr<IFrnAccessibilitySettings>>,
+    /// The optional power extension of the native library: the low power mode (the energy
+    /// saver of the material policy, docs/porting/winui-materials.md).
+    power_settings: Option<ComPtr<IFrnPowerSettings>>,
     color_values: Cell<Option<PlatformColorValues>>,
     last_language: RefCell<Option<String>>,
 }
@@ -73,6 +76,20 @@ struct LanguageChangeCallback {
 
 struct AccessibilityChangeCallback {
     settings: Weak<NativePlatformSettings>,
+}
+
+struct PowerChangeCallback {
+    settings: Weak<NativePlatformSettings>,
+}
+
+impl IFrnActionCallbackImpl for PowerChangeCallback {
+    fn run(&self) {
+        crate::callback_base::guard((), || {
+            if let Some(settings) = self.settings.upgrade() {
+                settings.base.on_energy_saver_changed();
+            }
+        })
+    }
 }
 
 impl IFrnActionCallbackImpl for AccessibilityChangeCallback {
@@ -101,10 +118,12 @@ impl IFrnActionCallbackImpl for LanguageChangeCallback {
 impl NativePlatformSettings {
     pub fn new(platform_settings: ComPtr<IFrnPlatformSettings>) -> Rc<NativePlatformSettings> {
         let accessibility_settings = platform_settings.cast::<IFrnAccessibilitySettings>().ok();
+        let power_settings = platform_settings.cast::<IFrnPowerSettings>().ok();
         let this = Rc::new(NativePlatformSettings {
             base: DefaultPlatformSettings::new(),
             platform_settings,
             accessibility_settings,
+            power_settings,
             color_values: Cell::new(None),
             last_language: RefCell::new(None),
         });
@@ -117,6 +136,10 @@ impl NativePlatformSettings {
             let callback =
                 IFrnActionCallback::from_impl(AccessibilityChangeCallback { settings: Rc::downgrade(&this) });
             settings.register_accessibility_change(Some(&callback));
+        }
+        if let Some(settings) = &this.power_settings {
+            let callback = IFrnActionCallback::from_impl(PowerChangeCallback { settings: Rc::downgrade(&this) });
+            settings.register_power_change(Some(&callback));
         }
         this
     }
@@ -157,6 +180,9 @@ impl Drop for NativePlatformSettings {
         if let Some(settings) = &self.accessibility_settings {
             settings.register_accessibility_change(None);
         }
+        if let Some(settings) = &self.power_settings {
+            settings.register_power_change(None);
+        }
     }
 }
 
@@ -191,6 +217,14 @@ impl IPlatformSettings for NativePlatformSettings {
 
     fn accessibility_settings_changed(&self, handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
         self.base.accessibility_settings_changed(handler)
+    }
+
+    fn energy_saver_enabled(&self) -> bool {
+        self.power_settings.as_ref().is_some_and(|settings| settings.get_low_power_mode())
+    }
+
+    fn energy_saver_changed(&self, handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
+        self.base.energy_saver_changed(handler)
     }
 
     fn preferred_application_language(&self) -> String {
@@ -232,6 +266,8 @@ mod tests {
         reduce_motion: Cell<bool>,
         reduce_transparency: Cell<bool>,
         callback: RefCell<Option<ComPtr<IFrnActionCallback>>>,
+        low_power_mode: Cell<bool>,
+        power_callback: RefCell<Option<ComPtr<IFrnActionCallback>>>,
     }
 
     struct FakePlatformSettings {
@@ -254,6 +290,16 @@ mod tests {
         }
 
         fn register_language_change(&self, _callback: Option<&IFrnActionCallback>) {}
+    }
+
+    impl IFrnPowerSettingsImpl for FakePlatformSettings {
+        fn get_low_power_mode(&self) -> bool {
+            self.accessibility.low_power_mode.get()
+        }
+
+        fn register_power_change(&self, callback: Option<&IFrnActionCallback>) {
+            *self.accessibility.power_callback.borrow_mut() = callback.map(ComPtr::from_ref);
+        }
     }
 
     impl IFrnAccessibilitySettingsImpl for FakePlatformSettings {
@@ -280,6 +326,9 @@ mod tests {
         let native = IFrnPlatformSettings::from_impl(FakePlatformSettings { accessibility: state.clone() });
         let settings = NativePlatformSettings::new(native);
         assert!(settings.accessibility_settings.is_none());
+        assert!(settings.power_settings.is_none());
+        assert!(!settings.energy_saver_enabled());
+        assert!(state.power_callback.borrow().is_none());
         assert!(settings.animations_enabled());
         assert!(settings.transparency_enabled());
         assert!(state.callback.borrow().is_none());
@@ -322,6 +371,39 @@ mod tests {
         // reference to the disposed Rust adapter.
         callback.run();
         assert_eq!(seen.borrow().len(), 2);
+    }
+
+    #[test]
+    fn power_extension_reports_the_low_power_mode_and_releases_its_subscription() {
+        let state = Rc::new(AccessibilityState::default());
+        let native = make_com_with::<IFrnPlatformSettings, _, 2>(
+            FakePlatformSettings { accessibility: state.clone() },
+            [InterfaceEntry::of::<IFrnAccessibilitySettings>(), InterfaceEntry::of::<IFrnPowerSettings>()],
+        );
+        let settings = NativePlatformSettings::new(native);
+        assert!(!settings.energy_saver_enabled());
+        let seen = Rc::new(RefCell::new(Vec::new()));
+        let subscription = {
+            let seen = seen.clone();
+            let settings_weak = Rc::downgrade(&settings);
+            settings.energy_saver_changed(Rc::new(move || {
+                if let Some(settings) = settings_weak.upgrade() {
+                    seen.borrow_mut().push(settings.energy_saver_enabled());
+                }
+            }))
+        };
+        let callback = state.power_callback.borrow().clone().expect("native power callback");
+        state.low_power_mode.set(true);
+        callback.run();
+        state.low_power_mode.set(false);
+        callback.run();
+        assert_eq!(*seen.borrow(), [true, false]);
+
+        subscription.dispose();
+        callback.run();
+        assert_eq!(seen.borrow().len(), 2);
+        drop(settings);
+        assert!(state.power_callback.borrow().is_none(), "drop unregisters the native power observer");
     }
 
     #[test]

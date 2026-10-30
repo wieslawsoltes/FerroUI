@@ -2,7 +2,7 @@ use super::walker::{walk, IServerTreeVisitor, TreeWalkContext};
 use super::ServerCompositionVisual;
 use crate::media::{RenderOptions, TextOptions};
 use crate::platform::{IDrawingContextImpl, LtrbRect};
-use crate::rendering::composition::server::{CompositorPools, IDirtyRectTracker, LitContent, ServerVisualRenderContext};
+use crate::rendering::composition::server::{render_scope, CompositorPools, IDirtyRectTracker, LitContent, ServerVisualRenderContext};
 use crate::Matrix;
 use std::rc::Rc;
 
@@ -23,6 +23,11 @@ pub(super) struct RenderContext<'a> {
     rendering_to_bitmap_cache: bool,
     pub(super) adorner_pushed_clip_stack: Option<Vec<i32>>,
     pub(super) current_adorner_layer: Option<Rc<ServerCompositionVisual>>,
+    /// The visual the render stops at (a backdrop render): it and
+    /// everything after it in paint order are not drawn.
+    stop_at: Option<*const ServerCompositionVisual>,
+    /// Whether the render reached `stop_at`.
+    stopped: bool,
 }
 
 impl<'a> RenderContext<'a> {
@@ -64,6 +69,8 @@ impl<'a> RenderContext<'a> {
             rendering_to_bitmap_cache,
             adorner_pushed_clip_stack: None,
             current_adorner_layer: None,
+            stop_at: None,
+            stopped: false,
         }
     }
 
@@ -146,6 +153,15 @@ impl<'a> RenderContext<'a> {
 
 impl IServerTreeVisitor for RenderContext<'_> {
     fn pre_subgraph(&mut self, visual: &Rc<ServerCompositionVisual>) -> bool {
+        // A backdrop render stops at the visual that paints the backdrop
+        // (winui-materials.md).
+        if let Some(stop_at) = self.stop_at {
+            if self.stopped || std::ptr::eq(Rc::as_ptr(visual), stop_at) {
+                self.stopped = true;
+                self.full_skip = true;
+                return false;
+            }
+        }
         self.visited_visuals += 1;
         let bitmap_cache_root = self.rendering_to_bitmap_cache && Rc::ptr_eq(visual, &self.root_visual);
         if !bitmap_cache_root {
@@ -193,7 +209,12 @@ impl IServerTreeVisitor for RenderContext<'_> {
         // The WinUI lights that reach the content (not from upstream): the
         // content is drawn into a layer and the light map over it.
         let lit = LitContent::begin(visual, self.canvas);
-        visual.render_core(&mut ServerVisualRenderContext::new(self.canvas), clip);
+        // The brushes the content paints learn which visual paints them
+        // (backdrops, scene lighting).
+        let canvas = &mut *self.canvas;
+        render_scope::with_painting_visual(visual, || {
+            visual.render_core(&mut ServerVisualRenderContext::new(canvas), clip);
+        });
         if let Some(lit) = lit {
             lit.end(self.canvas);
         }
@@ -212,7 +233,10 @@ impl IServerTreeVisitor for RenderContext<'_> {
         // If we've used cache, those never got pushed in PreSubgraph
         if !self.used_cache {
             // What the content pushed for its children (not from upstream).
-            visual.content.render_after_children(visual, &mut ServerVisualRenderContext::new(self.canvas));
+            let canvas = &mut *self.canvas;
+            render_scope::with_painting_visual(visual, || {
+                visual.content.render_after_children(visual, &mut ServerVisualRenderContext::new(canvas));
+            });
 
             if visual.effect().is_some() && visual.sub_tree_bounds.get().is_some() {
                 if let Some(effects) = self.canvas.as_drawing_context_impl_with_effects() {
@@ -285,23 +309,78 @@ impl ServerCompositionVisual {
         skip_root_visual_transform: bool,
         rendering_to_bitmap_cache: bool,
     ) -> (i32, i32) {
-        let Some(compositor) = self.compositor() else { return (0, 0) };
-        let pools = compositor.pools();
-        let transform = canvas.transform();
-        let mut render_context = RenderContext::new(
-            self.clone(),
+        self.render_with_stop(
             canvas,
-            dirty_rects,
-            pools,
-            transform,
             clip,
+            dirty_rects,
             render_children,
             skip_root_visual_transform,
             rendering_to_bitmap_cache,
+            None,
+        )
+    }
+
+    /// Renders the subtree of the visual onto `canvas` up to `stop_at`: the
+    /// visuals before it in paint order, not it and not those after it
+    /// (the backdrop of `stop_at`, winui-materials.md). The transform of the
+    /// canvas is that of the render the backdrop belongs to.
+    pub(crate) fn render_up_to(
+        self: &Rc<Self>,
+        canvas: &mut dyn IDrawingContextImpl,
+        clip: LtrbRect,
+        stop_at: &Rc<ServerCompositionVisual>,
+        skip_root_visual_transform: bool,
+        rendering_to_bitmap_cache: bool,
+    ) {
+        self.render_with_stop(
+            canvas,
+            clip,
+            None,
+            true,
+            skip_root_visual_transform,
+            rendering_to_bitmap_cache,
+            Some(Rc::as_ptr(stop_at)),
         );
-        walk(&mut render_context, self, pools);
-        let result = (render_context.visited_visuals, render_context.rendered_visuals);
-        render_context.dispose();
-        result
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn render_with_stop(
+        self: &Rc<Self>,
+        canvas: &mut dyn IDrawingContextImpl,
+        clip: LtrbRect,
+        dirty_rects: Option<Rc<dyn IDirtyRectTracker>>,
+        render_children: bool,
+        skip_root_visual_transform: bool,
+        rendering_to_bitmap_cache: bool,
+        stop_at: Option<*const ServerCompositionVisual>,
+    ) -> (i32, i32) {
+        let Some(compositor) = self.compositor() else { return (0, 0) };
+        let pools = compositor.pools();
+        let transform = canvas.transform();
+        let root = render_scope::RenderRoot {
+            visual: self.clone(),
+            transform,
+            clip,
+            skip_root_visual_transform,
+            rendering_to_bitmap_cache,
+        };
+        render_scope::with_render_root(root, || {
+            let mut render_context = RenderContext::new(
+                self.clone(),
+                canvas,
+                dirty_rects,
+                pools,
+                transform,
+                clip,
+                render_children,
+                skip_root_visual_transform,
+                rendering_to_bitmap_cache,
+            );
+            render_context.stop_at = stop_at;
+            walk(&mut render_context, self, pools);
+            let result = (render_context.visited_visuals, render_context.rendered_visuals);
+            render_context.dispose();
+            result
+        })
     }
 }

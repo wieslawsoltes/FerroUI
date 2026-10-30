@@ -117,6 +117,10 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <AutoSuggestBoxTextChangedEventArgs as MarkupTyped>::MARKUP,
     <AutoSuggestBoxSuggestionChosenEventArgs as MarkupTyped>::MARKUP,
     <AutoSuggestBoxQuerySubmittedEventArgs as MarkupTyped>::MARKUP,
+    // The WinUI materials (winui-materials.md), declared next to the types.
+    <crate::media::ApplicationTheme as MarkupTyped>::MARKUP,
+    <crate::media::RevealBrushState as MarkupTyped>::MARKUP,
+    <crate::media::FocusVisualKind as MarkupTyped>::MARKUP,
     // WinUI's ZoomMode of the scroll viewer (docs/porting/winui-composition.md, phase 7).
     <crate::ZoomMode as MarkupTyped>::MARKUP,
 ];
@@ -139,6 +143,9 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<AutoSuggestionBoxTextChangeReason>();
     crate::navigation::register_value_types();
     crate::navigation_view_events::register_value_types();
+    ValueTypes::register_nullable::<crate::media::ApplicationTheme>();
+    ValueTypes::register_nullable::<crate::media::RevealBrushState>();
+    ValueTypes::register_nullable::<crate::media::FocusVisualKind>();
     // A tick list is the list of numbers it derives from: the same list, so that the
     // members of the list (`Capacity`, `Add`) are reached through the tick list.
     ValueTypes::register_cast::<TickList, MediaCollection<f64>>(|ticks| MediaCollection::from_list(ticks.list().clone()));
