@@ -14,6 +14,8 @@ use std::rc::Rc;
 use crate::{RichTextBlock, RichTextBlockOverflow};
 #[allow(unused_imports)]
 use crate::rich_text::*;
+#[allow(unused_imports)]
+use crate::{RichEditBox, RichEditBoxTextPresenter};
 
 fn feature_values(features: &FontFeatureCollection) -> Vec<(String, i32)> {
     features
@@ -610,4 +612,92 @@ fn typography_structured_fragment_retains_nested_default_resets_after_source_dro
     assert_eq!(target.snapshot(), before);
     assert!(facade.redo().unwrap());
     assert_eq!(target.snapshot(), copied);
+}
+
+#[test]
+fn typography_inherited_presentation_invalidates_layout_preserving_model_and_composition() {
+    let _scope = test_scope();
+    let control = RichEditBox::new();
+    control.set_text("original").unwrap();
+    control.select(8, 8);
+    control.insert_text("!").unwrap();
+    control.set_preedit_text(Some("preview"), Some(2)).unwrap();
+    let document = control.rich_document();
+    let snapshot = document.snapshot();
+    let revision = document.revision();
+    let mutation = document.mutation_version();
+    let composition = control.editor().active_composition_range();
+    let changed = Rc::new(Cell::new(0));
+    let count = changed.clone();
+    let _subscription = document.changed(move |_| count.set(count.get() + 1));
+    let presenter = control.text_presenter();
+    presenter.measure(Size::new(400.0, 300.0));
+    presenter.arrange(Rect::new(0.0, 0.0, 400.0, 300.0));
+    Typography::set_kerning(&control, false);
+    Typography::set_numeral_alignment(&control, FontNumeralAlignment::Tabular);
+    assert!(!presenter.is_measure_valid());
+    assert!(!Typography::get_kerning(&document.paragraphs()[0]));
+    presenter.measure(Size::new(400.0, 300.0));
+    assert_eq!(document.snapshot(), snapshot);
+    assert_eq!(document.revision(), revision);
+    assert_eq!(document.mutation_version(), mutation);
+    assert_eq!(changed.get(), 0);
+    assert_eq!(control.editor().active_composition_range(), composition);
+    assert!(control.editor().is_composing());
+    control.cancel_composition().unwrap();
+    assert!(control.undo().unwrap());
+    assert_eq!(control.text(), "original");
+    assert!(control.redo().unwrap());
+    assert_eq!(control.text(), "original!");
+    assert!(!Typography::get_kerning(&document.paragraphs()[0]));
+}
+
+#[test]
+fn typography_rtf_rejects_nondefault_features_and_exports_resolved_default_typing() {
+    let _scope = test_scope();
+    for typography in [
+        TypographyFormat {
+            capitals: Some(FontCapitals::SmallCaps),
+            ..Default::default()
+        },
+        TypographyFormat {
+            standard_ligatures: Some(false),
+            ..Default::default()
+        },
+    ] {
+        let document = RichTextDocument::from_text("text");
+        document
+            .apply_format(
+                0..4,
+                &CharacterFormat {
+                    typography,
+                    ..Default::default()
+                },
+            )
+            .unwrap();
+        assert_eq!(
+            RtfWriter::write(&document.snapshot()).unwrap_err(),
+            RtfError::UnsupportedFeature("OpenType feature overrides")
+        );
+    }
+    assert!(RtfWriter::write(&RichTextDocument::from_text("plain").snapshot()).is_ok());
+    let control = RichEditBox::new();
+    control.set_text("typed").unwrap();
+    control.select(5, 5);
+    control.insert_text(" text").unwrap();
+    assert!(RtfWriter::write(&control.rich_document().snapshot()).is_ok());
+    let document = RichTextDocument::from_text("text");
+    document
+        .apply_format(
+            0..4,
+            &CharacterFormat {
+                typography: TypographyFormat {
+                    standard_ligatures: Some(true),
+                    ..Default::default()
+                },
+                ..Default::default()
+            },
+        )
+        .unwrap();
+    assert!(RtfWriter::write(&document.snapshot()).is_ok());
 }
