@@ -1,6 +1,8 @@
 [workspace]
 resolver = "2"
 members = [
+    "src/FerroUI.Designer.Core",
+    "src/FerroUI.Designer.Project",
     # The Dock port (docs/porting/dock).
     "samples/Dock/FerroDockReactiveUISample",
     "src/Dock/FerroDock.Controls.DeferredContentControl",
@@ -237,6 +239,8 @@ ferroui-pretext-contracts = { version = "=0.4.0", path = "src/Pretext/FerroUI.Pr
 ferroui-pretext = { version = "=0.4.0", path = "src/Pretext/FerroUI.Pretext" }
 ferroui-pretext-layout = { version = "=0.4.0", path = "src/Pretext/FerroUI.Pretext.Layout" }
 ferroui-pretext-media = { version = "=0.4.0", path = "src/Pretext/FerroUI.Pretext.Media" }
+ferroui-designer-core = { version = "=0.4.0", path = "src/FerroUI.Designer.Core" }
+ferroui-designer-project = { version = "=0.4.0", path = "src/FerroUI.Designer.Project" }
 ferroui-hot-reload = { version = "=0.4.0", path = "src/FerroUI.HotReload" }
 ferroui-hot-patch = { version = "=0.4.0", path = "src/FerroUI.HotPatch" }
 ferroui-inspect = { version = "=0.4.0", path = "src/FerroUI.Inspect" }
