@@ -393,3 +393,6 @@ fn install_color_popup_palette(body: &StackPanel) {
 #[path = "property_color_editor_tests.rs"]
 mod tests;
 
+#[cfg(all(test, feature = "render-smoke"))]
+#[path = "color_render_tests.rs"]
+mod render_tests;

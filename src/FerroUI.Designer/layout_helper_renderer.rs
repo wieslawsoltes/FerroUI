@@ -592,3 +592,6 @@ fn pen(color: u32, width: f64, dashed: bool) -> Rc<dyn IPen> {
 #[path = "layout_helper_renderer_tests.rs"]
 mod tests;
 
+#[cfg(all(test, feature = "render-smoke"))]
+#[path = "layout_helper_render_tests.rs"]
+mod render_tests;

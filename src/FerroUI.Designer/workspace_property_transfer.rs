@@ -3,6 +3,9 @@ use super::*;
 use crate::{PropertyClipboard, PropertyTransferEditor};
 use ferroui_controls::{Flyout, MenuItem};
 
+#[cfg(all(test, feature = "render-smoke"))]
+#[path = "render_selection_workflows_tests.rs"]
+mod render_tests;
 
 #[derive(Default)]
 pub(super) struct PropertyTransferUi {

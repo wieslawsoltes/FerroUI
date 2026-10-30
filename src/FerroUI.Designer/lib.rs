@@ -192,6 +192,8 @@ pub use workspace_layout_helpers::{LayoutEditPreview, LayoutHelperSnapshot};
 #[cfg(feature = "mcp")]
 pub mod mcp;
 
+#[cfg(all(test, feature = "render-smoke"))]
+mod render_tests;
 
 #[cfg(test)]
 mod animation_integration_tests;
