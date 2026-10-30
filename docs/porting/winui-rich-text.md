@@ -218,9 +218,16 @@ What remains outside the port (RT-P of #243): the exact LineServices metrics, th
 | The context menu is `TextCommandBarFlyout`. | A `MenuFlyout` with the same commands (`docs/porting/winui-theme/DEVIATIONS.md`, G-30). | FerroUI has no command bar flyout. |
 | The template is in every theme. | The WinUI theme has it (`WINUI_ONLY_CONTROLS`), and so do the macOS and Material themes, which derive every control theme of the WinUI theme; Fluent and Simple show nothing. | Decision D4. |
 
+### 11.4 The input method on Windows (R9b)
+
+| WinUI | FerroUI | Why |
+|---|---|---|
+| RichEdit talks to the text services framework (TSF) of the system: the composition, reconversion and the input scopes of the document. | The Win32 backend serves RichEditBox through IMM32 (with TSF behind it as the system provides): the composition is a preview of the exact-edit connection and the result one undo unit; no reconversion. Input scopes are set on the window (`SetInputScopes`); a touch keyboard that is already shown is not told of a change. | The backend's input method is IMM32 (`win32-platform.md`, section 8.2); TSF for the backend is not in the reference. |
+| Terminating a composition keeps its text in the document and ends the composition of the text service. | The editor commits the preview, and the composition of the input method is cancelled (`CPS_CANCEL`), so the input method does not send the text a second time. | S5 (R8) with the backend's reset. |
+
 Not taken from #243 in R8: its manager tests for a client without exact editing whose cursor query moves focus or replaces the client (`rich_edit_input_geometry_tests.rs`). Such a client keeps the upstream manager (D5), which has no such guarantees. While a connection client's flyout has focus, the manager keeps the input method of the owner's root, also when the flyout is in a popup root of its own.
 
-### 11.4 Browser input (R10)
+### 11.5 Browser input (R10)
 
 | WinUI | FerroUI | Why |
 |---|---|---|
@@ -228,3 +235,10 @@ Not taken from #243 in R8: its manager tests for a client without exact editing 
 | The IME edits the story directly, CR and CRLF included. | The textarea shows LF; a caret between CR and LF of a raw Run cannot start a native edit there (the edit is rejected and the textarea restored). | `<textarea>` normalizes line ends. |
 
 Not taken from #243 in R10: its tests of input options and preedit resets for clients without the connection (`browser_text_input_method.rs`); such clients keep the upstream path (D5), which ignores options and is tested as such.
+
+### 11.6 The UI Automation text pattern on Windows (R9a)
+
+| WinUI | FerroUI | Why |
+|---|---|---|
+| `TextBlockAutomationPeer` has the Text pattern, and so do the text boxes. | On Windows only the nodes of RichEditBox and RichTextBlock (and their hyperlinks, through TextChild) have the Text, Text2, TextEdit and TextChild patterns; the nodes of TextBlock and TextBox keep what upstream has (TextBox: the Value pattern). | Decision D5: TextBox keeps upstream behaviour until it moves to the connection; TextBlock has no portable text provider. |
+| The text pattern wrappers call RichEdit's and the core's text objects on the UI thread. | The native ranges are COM objects with a number; the portable range stays in a table of the UI thread and is released when the client releases the native one, from any thread. A range resolves a range passed back by a client by its COM identity, so a range of another provider is `E_INVALIDARG`. | The node and range objects are called on threads of the automation core (`win32-platform.md`, section 13.3). |

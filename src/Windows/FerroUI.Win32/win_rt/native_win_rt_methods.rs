@@ -96,12 +96,39 @@ impl NativeWinRTMethods {
     /// Creates a string handle with the text. The caller deletes it.
     pub fn windows_create_string(source_string: &str) -> Result<isize, HResult> {
         let text: Vec<u16> = source_string.encode_utf16().collect();
+        Self::windows_create_string_utf16(&text)
+    }
+
+    /// Creates a native counted UTF-16 string without transcoding. This is
+    /// needed when a native text query requests only one code unit of a pair.
+    /// The caller owns and deletes the returned handle.
+    pub fn windows_create_string_utf16(text: &[u16]) -> Result<isize, HResult> {
+        let length = u32::try_from(text.len()).map_err(|_| HResult::INVALIDARG)?;
         let mut string = 0;
         // SAFETY: the text is valid for its length, which is passed; the
         // handle is written to a number of this frame. The system copies
         // the text.
-        check(unsafe { WindowsCreateString(text.as_ptr(), text.len() as u32, &mut string) })?;
+        check(unsafe { WindowsCreateString(text.as_ptr(), length, &mut string) })?;
         Ok(string)
+    }
+
+    /// Decodes a counted native string without replacing malformed UTF-16.
+    /// Embedded NULs are retained; an isolated surrogate returns E_INVALIDARG.
+    pub fn windows_get_string_raw_buffer_exact(hstring: isize) -> Result<String, HResult> {
+        let mut length = 0;
+        // SAFETY: the caller supplies a live HSTRING (null denotes empty).
+        // Its buffer remains owned by that handle throughout this copy.
+        unsafe {
+            let buffer = WindowsGetStringRawBuffer(hstring, &mut length);
+            if length == 0 {
+                return Ok(String::new());
+            }
+            if buffer.is_null() {
+                return Err(HResult::POINTER);
+            }
+            String::from_utf16(std::slice::from_raw_parts(buffer, length as usize))
+                .map_err(|_| HResult::INVALIDARG)
+        }
     }
 
     /// The text of a string handle; the empty text for the null handle.
@@ -245,6 +272,15 @@ pub struct HStringInterop {
 }
 
 impl HStringInterop {
+    /// Owns a counted native UTF-16 string, preserving every requested code
+    /// unit. Use `try_value` at boundaries that require valid Unicode text.
+    pub fn new_utf16(text: &[u16]) -> Result<Self, HResult> {
+        Ok(Self {
+            s: NativeWinRTMethods::windows_create_string_utf16(text)?,
+            owns: true,
+        })
+    }
+
     /// Creates a string handle for the text (the null handle for `None`)
     /// and owns it.
     pub fn new(s: Option<&str>) -> Result<HStringInterop, HResult> {
@@ -272,6 +308,15 @@ impl HStringInterop {
         }
 
         Some(NativeWinRTMethods::windows_get_string_raw_buffer(self.s))
+    }
+
+    /// Reads valid Unicode without lossy replacement. Null retains the existing
+    /// `None` convention; a non-null malformed string returns an error.
+    pub fn try_value(&self) -> Result<Option<String>, HResult> {
+        if self.s == 0 {
+            return Ok(None);
+        }
+        NativeWinRTMethods::windows_get_string_raw_buffer_exact(self.s).map(Some)
     }
 }
 

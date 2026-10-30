@@ -439,6 +439,8 @@ mod imp {
         class_name: RefCell<Option<String>>,
         hwnd: Cell<isize>,
         owner: RefCell<Option<Rc<dyn IInputRoot>>>,
+        /// The text input method of this window (`Imm32InputMethod::for_window`).
+        text_input_method: RefCell<Option<Rc<dyn ITextInputMethodImpl>>>,
         /// The drop target that is registered for the window, from the
         /// moment the window has an input root until it is destroyed.
         drop_target: RefCell<Option<ferroui_microcom::ComPtr<crate::win32_com::IDropTarget>>>,
@@ -585,6 +587,7 @@ mod imp {
                 class_name: RefCell::new(None),
                 hwnd: Cell::new(0),
                 owner: RefCell::new(None),
+                text_input_method: RefCell::new(None),
                 drop_target: RefCell::new(None),
                 window_properties: Cell::new(window_properties),
                 tracking_mouse: Cell::new(false),
@@ -809,6 +812,12 @@ mod imp {
 
             let parent: Weak<dyn Imm32Parent> = self.this.clone();
             Imm32InputMethod::current().set_language_and_window(parent, self.hwnd.get(), hkl);
+        }
+
+        /// `WM_DESTROY`: the input method gives up the window.
+        pub(crate) fn release_input_method(&self, hwnd: isize) {
+            let parent: Weak<dyn Imm32Parent> = self.this.clone();
+            Imm32InputMethod::current().release_window(hwnd, &parent);
         }
 
         pub(crate) fn dispose_input_pane(&self) {
@@ -2072,6 +2081,10 @@ mod imp {
     }
 
     impl Imm32Parent for WindowImpl {
+        fn hwnd(&self) -> isize {
+            self.hwnd.get()
+        }
+
         fn desktop_scaling(&self) -> f64 {
             self.scaling.get()
         }
@@ -2119,7 +2132,13 @@ mod imp {
         /// implementation arrives with a later stage, is absent.
         fn try_get_feature(&self, feature_type: TypeId) -> Option<Rc<dyn Any>> {
             if feature_type == TypeId::of::<dyn ITextInputMethodImpl>() {
-                let input_method: Rc<dyn ITextInputMethodImpl> = Imm32InputMethod::current();
+                let existing = self.text_input_method.borrow().clone();
+                let input_method = existing.unwrap_or_else(|| {
+                    let parent: Weak<dyn Imm32Parent> = self.this.clone();
+                    let input_method = Imm32InputMethod::current().for_window(parent);
+                    *self.text_input_method.borrow_mut() = Some(input_method.clone());
+                    input_method
+                });
                 return Some(Rc::new(input_method));
             }
 
