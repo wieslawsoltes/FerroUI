@@ -1,0 +1,97 @@
+<!-- Adapted from the pinned ColorPicker example; see ../NOTICE.md.
+     ColorView is FerroUI's inline picker. Its spectrum/components views and
+     native alpha controls are composed explicitly; ColorPicker remains the
+     existing dropdown API. The library's Fluent templates are scoped here. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            xmlns:primitives="using:FerroUI.Controls.Primitives"
+            x:Name="ColorPickerExample1" Spacing="12">
+  <StackPanel.Resources>
+    <!-- ColorView's Fluent tab theme uses these aliases. WinUITheme supplies
+         the underlying colors, but names its own tabs with TabViewItem keys.
+         Keep this bridge local and dynamic so existing views follow theme changes. -->
+    <SolidColorBrush x:Key="TabItemHeaderForegroundUnselected"
+                     Color="{DynamicResource SystemBaseMediumColor}" />
+    <SolidColorBrush x:Key="TabItemHeaderForegroundSelected"
+                     Color="{DynamicResource SystemBaseHighColor}" />
+    <SolidColorBrush x:Key="TabItemHeaderForegroundUnselectedPointerOver"
+                     Color="{DynamicResource SystemBaseMediumHighColor}" />
+    <SolidColorBrush x:Key="TabItemHeaderForegroundUnselectedPressed"
+                     Color="{DynamicResource SystemBaseMediumHighColor}" />
+    <SolidColorBrush x:Key="TabItemHeaderForegroundSelectedPointerOver"
+                     Color="{DynamicResource SystemBaseMediumHighColor}" />
+    <SolidColorBrush x:Key="TabItemHeaderForegroundSelectedPressed"
+                     Color="{DynamicResource SystemBaseMediumHighColor}" />
+  </StackPanel.Resources>
+  <StackPanel.Styles>
+    <StyleInclude Source="ferres://FerroUI.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />
+  </StackPanel.Styles>
+  <TextBlock Text="ColorPicker Properties." FontSize="18" />
+  <Grid ColumnDefinitions="*,250" ColumnSpacing="24">
+    <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top" Spacing="8">
+      <ColorView x:Name="colorPicker" Color="White" IsAlphaEnabled="True"
+                 IsAlphaVisible="False" IsColorPaletteVisible="False"
+                 IsColorComponentsVisible="False" IsColorPreviewVisible="False"
+                 IsHexInputVisible="False" IsColorSpectrumSliderVisible="True"
+                 ColorSpectrumShape="Box" SelectedIndex="0"
+                 AutomationProperties.Name="Color spectrum" />
+      <StackPanel x:Name="AlphaSliderPanel" Spacing="4" IsVisible="False">
+        <TextBlock Text="Alpha" />
+        <primitives:ColorSlider x:Name="AlphaColorSlider" Width="350"
+                                ColorModel="Rgba" ColorComponent="Alpha" Color="White"
+                                AutomationProperties.Name="Alpha slider" />
+      </StackPanel>
+      <ToggleButton x:Name="MoreButton" Content="More" HorizontalAlignment="Right"
+                    IsVisible="False" IsChecked="False"
+                    AutomationProperties.Name="Show color text inputs" />
+      <StackPanel x:Name="ColorTextEntry" Spacing="8">
+        <RadioButtons x:Name="ColorModelRadioButtons" Header="Color model"
+                      SelectedIndex="0" MaxColumns="2">
+          <x:String>RGB</x:String>
+          <x:String>HSV</x:String>
+        </RadioButtons>
+        <ColorView x:Name="ColorInputs" Color="White" IsAlphaEnabled="True"
+                   IsAlphaVisible="False" IsColorSpectrumVisible="False"
+                   IsColorPaletteVisible="False" IsColorPreviewVisible="False"
+                   IsColorComponentsVisible="True" IsComponentSliderVisible="False"
+                   IsComponentTextInputVisible="True" IsColorModelVisible="False"
+                   IsHexInputVisible="False" HexInputAlphaPosition="Leading"
+                   SelectedIndex="2" AutomationProperties.Name="Color text inputs" />
+        <StackPanel x:Name="HexInputPanel" Orientation="Horizontal" Spacing="8">
+          <TextBlock Text="Hex" VerticalAlignment="Center" />
+          <TextBox x:Name="HexInput" Text="#FFFFFF" Width="150" MaxLength="7"
+                   AutomationProperties.Name="RGB hexadecimal color" />
+        </StackPanel>
+        <TextBlock x:Name="HexInputError" IsVisible="False" TextWrapping="Wrap"
+                   Text="Enter a hexadecimal color."
+                   AutomationProperties.LiveSetting="Polite" />
+        <StackPanel x:Name="AlphaTextPanel" Orientation="Horizontal" Spacing="8"
+                    IsVisible="False">
+          <TextBlock Text="Alpha (%)" VerticalAlignment="Center" />
+          <TextBox x:Name="AlphaInput" Text="100%" Width="90"
+                   AutomationProperties.Name="Alpha percentage" />
+        </StackPanel>
+        <TextBlock x:Name="AlphaInputError" IsVisible="False" TextWrapping="Wrap"
+                   Text="Enter an alpha percentage from 0 to 100."
+                   AutomationProperties.LiveSetting="Polite" />
+      </StackPanel>
+    </StackPanel>
+    <StackPanel Grid.Column="1" Spacing="8" VerticalAlignment="Top">
+      <CheckBox x:Name="moreBtn" Content="IsMoreButtonVisible" IsChecked="False" />
+      <CheckBox x:Name="colorSlider" Content="IsColorSliderVisible" IsChecked="True" />
+      <CheckBox x:Name="colorChannelInput" Content="IsColorChannelTextInputVisible" IsChecked="True" />
+      <CheckBox x:Name="hexInput" Content="IsHexInputVisible" IsChecked="True" />
+      <CheckBox x:Name="alpha" Content="Alpha Enabled" IsChecked="False" />
+      <CheckBox x:Name="alphaSlider" Content="IsAlphaSliderVisible" IsChecked="True" IsEnabled="False" />
+      <CheckBox x:Name="alphaTextInput" Content="IsAlphaTextInputVisible" IsChecked="True" IsEnabled="False" />
+      <RadioButtons x:Name="ColorSpectrumShapeRadioButtons" Header="Colorspectrum shape"
+                    SelectedIndex="0" MaxColumns="2">
+        <x:String>Box</x:String>
+        <x:String>Ring</x:String>
+      </RadioButtons>
+      <TextBlock Text="ColorPicker applied on a Rectangle" Margin="0,12,0,0" TextWrapping="Wrap" />
+      <Rectangle x:Name="previewRect" Height="100" Fill="White" Stroke="Gray"
+                 StrokeThickness="1" AutomationProperties.Name="Selected color preview" />
+    </StackPanel>
+  </Grid>
+</StackPanel>

@@ -1,0 +1,4 @@
+<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <StackPanel Orientation="Horizontal" Spacing="12"><Button x:Name="Primary" Content="Standard XAML button" AutomationProperties.Name="Standard XAML"/><Button IsEnabled="False" Content="Disabled"/><Button><StackPanel Orientation="Horizontal" Spacing="8"><Ellipse Width="16" Height="16" Fill="DodgerBlue"/><TextBlock Text="Graphical content"/></StackPanel></Button></StackPanel><CheckBox x:Name="Disable" Content="Disable button"/><TextBlock x:Name="Output" Text="Click the button"/>
+</StackPanel>

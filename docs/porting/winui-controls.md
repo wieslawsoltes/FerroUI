@@ -338,3 +338,16 @@ The crate `ferroui-markup-xaml-winui` (`src/Markup/FerroUI.Markup.Xaml.WinUI`; t
 | Sources and named elements are kept alive by the managed collector. | Source roots, named elements and intermediate values are held weakly; the declaring root or model owns its fields. | Representation | Rust ownership without cycles, as the native binding engine. |
 
 Tests (75 in the crate, plus the regeneration of the compiled fixture): `importer_tests` (the migration, its diagnostics and the loading entry points), `bindings_tests` (the x:Bind lifecycle) and `compiled_tests`. In `compiled_tests` the same migrated documents run through the interpreter and through the Rust emitter, whose output, `fixtures/winui_bindings.generated.rs`, is checked in and compared with the current compiler.
+
+### 10.7 WinUI Gallery (W10a)
+
+The sample `samples/WinUIGallery` (package `winui-gallery`, not published) ports WinUI Gallery at `14061eea`: the whole pinned catalog (126 pages, 350 sample definitions with their original source, path and SHA-256), and native examples for a reviewed subset of the pages, each `partial` in `port-status.json`. It is #286's sample, adapted to the controls as they landed:
+
+| #286 | Port | Why |
+|---|---|---|
+| The WinUI XAML loading entry points on `FerroRuntimeXamlLoader` (`ferroui_markup_xaml_loader::winui`). | The crate `ferroui-markup-xaml-winui` (W9, O4): `parse_winui_as`, `WinUIXamlOptions`, `migrate_winui_xaml`. | Where the importer landed. |
+| The tests call `RatingControl::select_rating`, `NumberBox::commit_input` and `AutoSuggestBox::submit_query`. | The tests raise key events, as a user does: Right, Home and End on the rating control, the key-up of Enter on the number box, Enter on the suggestion box. | Those members are private in WinUI (`SetRatingTo`, `ValidateInput`, `SubmitQuery`) and stayed crate-private in W5 and W6. |
+| The AutoSuggestBox has a template in Rust, with the parts `PART_TextBox` and `PART_SuggestionsList`. | The template of the WinUI theme (O2), with WinUI's parts `TextBox` and `SuggestionsList`; the two tests that open its suggestions run under the WinUI theme in a window. | No template in Rust. |
+| `VALIDATION.md`, the per-run evidence under `docs/porting/winui-gallery/`, the name baseline `existing_api.py`. | Not taken. | O8, O9. |
+
+The workflow `winui-gallery.yml` runs the tests of the sample and checks its desktop and capture binaries on the paths of the sample and the WinUI controls (O12); it renders every page, the WinUI controls in the dark theme and the NavigationView compositions nightly and on demand. The scanner of the gallery (`scan.py`, `REPORT.md`, `event_targets.py --check` after the scan) is W10b.
