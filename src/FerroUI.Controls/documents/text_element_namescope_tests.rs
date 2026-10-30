@@ -186,6 +186,8 @@ fn text_element_find_name_reaches_the_name_scope_of_its_template() {
     let target = TemplatedControl::new();
     let run = Run::with_text(Some("text"));
     let named = Border::new();
+    // x:Name sets the name and registers it in the template's scope.
+    named.set_name(Some("named".to_owned()));
     let template_run = run.clone();
     let template_named = named.clone();
     target.set_template(Some(FuncControlTemplate::new(move |_, scope| {
