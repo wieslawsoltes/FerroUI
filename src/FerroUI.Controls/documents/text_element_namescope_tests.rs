@@ -178,7 +178,7 @@ fn text_element_find_name_metadata_returns_the_same_live_object_or_none() {
 fn text_element_find_name_reaches_the_name_scope_of_its_template() {
     use crate::primitives::TemplatedControl;
     use crate::templates::FuncControlTemplate;
-    use crate::{Decorator, TextBlock};
+    use crate::{StackPanel, TextBlock};
 
     let _scope = test_scope();
     let target = TemplatedControl::new();
@@ -189,10 +189,11 @@ fn text_element_find_name_reaches_the_name_scope_of_its_template() {
     let template_run = run.clone();
     let template_named = named.clone();
     target.set_template(Some(FuncControlTemplate::new(move |_, scope| {
-        let root = Decorator::new();
+        let root = StackPanel::new();
         let text = TextBlock::new();
         text.inlines().unwrap().add(template_run.clone());
-        root.set_child(&text);
+        root.children().add(text);
+        root.children().add(template_named.clone());
         scope.register("named", template_named.clone().upcast());
         root.upcast()
     })));
@@ -200,6 +201,6 @@ fn text_element_find_name_reaches_the_name_scope_of_its_template() {
 
     assert_eq!(run.find_name("named"), Some(named.upcast()));
     assert!(run.find_name("missing").is_none());
-    let root = target.visual_children().get(0).cast::<Decorator>().unwrap();
+    let root = target.visual_children().get(0).cast::<StackPanel>().unwrap();
     assert!(NameScope::get_name_scope(&root).is_none());
 }
