@@ -409,7 +409,8 @@ fn rich_selection_options_preserves_structured_soft_breaks_as_model_policy() {
         model.blocks().add(paragraph);
         let original = model.text();
         let line_break = &original[1..original.len() - 1];
-        assert!(matches!(line_break, "\n" | "\r\n"));
+        // A soft line break is one unit, U+000B, on every platform (decision D10).
+        assert_eq!(line_break, "\u{000B}");
         let before = model.snapshot();
         let document = RichEditTextDocument::new(model.clone());
         let selection = document.selection();

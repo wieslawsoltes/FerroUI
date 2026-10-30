@@ -607,7 +607,11 @@ impl RichTextDocument {
             return Ok(());
         }
         let normalized = normalize_paragraph_breaks(text);
-        *self.0.pending_edit.borrow_mut() = Some((range.clone(), normalized.clone()));
+        // The explicit range SetText reports its own operation span (paired tracking);
+        // every other replacement reports its real range instead of a text diff.
+        if !paired_tracking {
+            *self.0.pending_edit.borrow_mut() = Some((range.clone(), normalized.clone()));
+        }
         let _clear_pending_edit = PendingEditScope(self);
         if !normalized.contains('\n') && self.0.link_fields.borrow().is_empty() {
             if let Some(found) = self.find_splice_run(range.clone()) {

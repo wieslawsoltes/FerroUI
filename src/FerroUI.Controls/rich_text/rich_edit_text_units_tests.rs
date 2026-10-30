@@ -623,11 +623,9 @@ fn cluster_units_cover_embedded_objects_soft_breaks_and_structural_paragraph_mar
         format: CharacterFormat::default(),
         kind: InlineSnapshotKind::LineBreak,
     };
-    let soft_text = if soft.text_length() == 2 {
-        "\r\n"
-    } else {
-        "\n"
-    };
+    // A soft line break is one unit, U+000B, on every platform (decision D10).
+    assert_eq!(soft.text_length(), 1);
+    let soft_text = "\u{000B}";
     assert_eq!(
         cluster_strings(&document),
         ["a", "\u{fffc}", soft_text, "b", "\n", "c"]
