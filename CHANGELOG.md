@@ -111,6 +111,7 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ### Fixed
 
+- **Line endings of Rust sources** (`.gitattributes`): `*.rs` files are LF in every checkout, so the tests that compare generated sources byte for byte with the generators (emitter output, rust paths) pass on Windows checkouts that convert to CRLF.
 - **Hot reload: binding element edits** (`ferroui-hot-reload`): an edit of a member of a `<Binding>` element (its `Path`, for example) no longer asks for a restart when the build did not describe the type, because no document of the build used it. The runtime fallback of the contract check resolves `Binding` to `CompiledBinding`/`ReflectionBinding` and a name to its markup extension, as the build does; this fixes `generated_manifest_allows_binding_element_path_edits` of the catalog (hot-reload workflow).
 - **Text formatting** (R2 of #243, recorded in `docs/porting/DEVIATIONS.md`, Text formatting): runs with different font features are shaped apart; carets and bounds at the end of right-to-left lines; justification of bidi text walks the runs in logical order; leftover runs of a wrapped line are released; copied paragraph properties keep their line spacing.
 - Gaps the port of the Behaviors sample gallery found (#298):
