@@ -227,3 +227,10 @@ What remains outside the port (RT-P of #243): the exact LineServices metrics, th
 
 Not taken from #243 in R8: its manager tests for a client without exact editing whose cursor query moves focus or replaces the client (`rich_edit_input_geometry_tests.rs`). Such a client keeps the upstream manager (D5), which has no such guarantees. While a connection client's flyout has focus, the manager keeps the input method of the owner's root, also when the flyout is in a popup root of its own.
 
+
+### 11.4 The UI Automation text pattern on Windows (R9a)
+
+| WinUI | FerroUI | Why |
+|---|---|---|
+| `TextBlockAutomationPeer` has the Text pattern, and so do the text boxes. | On Windows only the nodes of RichEditBox and RichTextBlock (and their hyperlinks, through TextChild) have the Text, Text2, TextEdit and TextChild patterns; the nodes of TextBlock and TextBox keep what upstream has (TextBox: the Value pattern). | Decision D5: TextBox keeps upstream behaviour until it moves to the connection; TextBlock has no portable text provider. |
+| The text pattern wrappers call RichEdit's and the core's text objects on the UI thread. | The native ranges are COM objects with a number; the portable range stays in a table of the UI thread and is released when the client releases the native one, from any thread. A range resolves a range passed back by a client by its COM identity, so a range of another provider is `E_INVALIDARG`. | The node and range objects are called on threads of the automation core (`win32-platform.md`, section 13.3). |

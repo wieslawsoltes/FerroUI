@@ -1,0 +1,58 @@
+[package]
+name = "ferroui-designer"
+description = "Embeddable FerroUI visual XAML designer with native workspace, transactional preview and timeline"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+# The designer crates are published from 0.5 (owner decision D6 of #345).
+publish = false
+
+[lib]
+path = "lib.rs"
+
+[features]
+default = []
+mcp = ["dep:ferroui-mcp", "dep:base64"]
+render-smoke = ["dep:ferroui-vello", "dep:ferroui-harfbuzz", "dep:ferroui-themes-winui"]
+
+[dependencies]
+base64 = { version = "0.22", optional = true }
+ferroui-designer-project.workspace = true
+ferroui-designer-language.workspace = true
+ferroui-designer-collaboration-host = { workspace = true, features = ["client", "server"] }
+ferroui-xaml-interactivity.workspace = true
+ferroui-xaml-interactions.workspace = true
+ferroui-xaml-interactions-custom.workspace = true
+ferroui-markup.workspace = true
+ferroui-designer-tools.workspace = true
+ferroui-vello = { workspace = true, optional = true }
+ferroui-harfbuzz = { workspace = true, optional = true }
+ferroui-themes-winui = { workspace = true, optional = true }
+ferroui-mcp = { workspace = true, optional = true }
+serde = "1"
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+ferroui-controls-color-picker = { workspace = true, features = ["document-assets"] }
+ferroui-controls-treedatagrid = { workspace = true, features = ["document-assets"] }
+ferroui-treedatagrid-core.workspace = true
+ferroui-inspect.workspace = true
+ferroui-hot-reload.workspace = true
+ferroui-markup-xaml = { workspace = true, features = ["source-overlays"] }
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime"] }
+ferroui-designer-core = { version = "=0.4.0", path = "../FerroUI.Designer.Core" }
+ferroui-designer-animation = { version = "=0.4.0", path = "../FerroUI.Designer.Animation" }
+ferroui-designer-collaboration = { version = "=0.4.0", path = "../FerroUI.Designer.Collaboration" }
+serde_json = "1"
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+
+[package.metadata.release]
+group = "tools"
