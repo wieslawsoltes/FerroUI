@@ -44,7 +44,7 @@ def body(source: str) -> str:
 class WriterTests(unittest.TestCase):
     def test_a_table_that_agrees_keeps_its_body_and_gets_the_provenance_of_the_record(self) -> None:
         result = write(RECORD)
-        self.assertIn("// Record: record.json (SHA-256 sha) of https://example.invalid/runs/1,", result)
+        self.assertIn("// Record: record.json of https://example.invalid/runs/1\n// (SHA-256 sha); oracle built from " + "a" * 40 + ".", result)
         self.assertIn("// Msftedit 6.2.1.2 on Windows 10.0.26100, never Rust expectations.", result)
         self.assertNotIn("not in the repository", result)
         expected = body(TABLE).replace('"00"', '"sha"').replace('"c"', '"' + "a" * 40 + '"')
