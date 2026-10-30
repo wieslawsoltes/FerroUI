@@ -14,6 +14,7 @@ pub struct FerroPropertyChangedEventArgs<'a> {
     new_value: &'a dyn Any,
     priority: BindingPriority,
     is_effective_value_change: bool,
+    is_inherited_value_change: bool,
 }
 
 impl<'a> FerroPropertyChangedEventArgs<'a> {
@@ -25,7 +26,7 @@ impl<'a> FerroPropertyChangedEventArgs<'a> {
         priority: BindingPriority,
         is_effective_value_change: bool,
     ) -> Self {
-        Self { sender, property, old_value, new_value, priority, is_effective_value_change }
+        Self { sender, property, old_value, new_value, priority, is_effective_value_change, is_inherited_value_change: false }
     }
 
     /// The object that the property changed on.
@@ -66,6 +67,18 @@ impl<'a> FerroPropertyChangedEventArgs<'a> {
         self.is_effective_value_change
     }
 
+    /// Whether an ancestor or inheritance-parent change produced this notification.
+    /// This differs from the resulting value's priority: clearing a local value
+    /// can expose an inherited value while still being an edit on this object.
+    pub fn is_inherited_value_change(&self) -> bool {
+        self.is_inherited_value_change
+    }
+
+    pub(crate) fn from_inheritance(mut self) -> Self {
+        self.is_inherited_value_change = true;
+        self
+    }
+
     /// Gets the old value of the property. Panics if `T` is not the type of
     /// the property.
     pub fn get_old_value<T: Clone + 'static>(&self) -> Option<T> {
@@ -95,6 +108,7 @@ impl<'a> FerroPropertyChangedEventArgs<'a> {
             new_value: routes.route_box_value(self.new_value).and_then(untyped),
             priority: self.priority,
             is_effective_value_change: self.is_effective_value_change,
+            is_inherited_value_change: self.is_inherited_value_change,
         }
     }
 
@@ -108,6 +122,7 @@ impl<'a> FerroPropertyChangedEventArgs<'a> {
             new_value: self.new_value,
             priority: self.priority,
             is_effective_value_change: self.is_effective_value_change,
+            is_inherited_value_change: self.is_inherited_value_change,
         }
     }
 
@@ -146,6 +161,7 @@ pub struct OwnedFerroPropertyChangedEventArgs {
     new_value: Option<BoxedValue>,
     priority: BindingPriority,
     is_effective_value_change: bool,
+    is_inherited_value_change: bool,
 }
 
 impl OwnedFerroPropertyChangedEventArgs {
@@ -179,6 +195,11 @@ impl OwnedFerroPropertyChangedEventArgs {
     pub fn is_effective_value_change(&self) -> bool {
         self.is_effective_value_change
     }
+
+    /// Whether an ancestor or inheritance-parent change produced this notification.
+    pub fn is_inherited_value_change(&self) -> bool {
+        self.is_inherited_value_change
+    }
 }
 
 impl PartialEq for OwnedFerroPropertyChangedEventArgs {
@@ -189,5 +210,6 @@ impl PartialEq for OwnedFerroPropertyChangedEventArgs {
             && ValueTypes::identity_equals(self.new_value.as_ref(), other.new_value.as_ref())
             && self.priority == other.priority
             && self.is_effective_value_change == other.is_effective_value_change
+            && self.is_inherited_value_change == other.is_inherited_value_change
     }
 }

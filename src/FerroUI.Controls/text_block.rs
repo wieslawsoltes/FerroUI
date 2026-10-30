@@ -1,5 +1,5 @@
 use crate::utils::debug_display::{append_optional_value, build_base_debug_display};
-use crate::documents::{EmbeddedControlRun, IInlineHost, Inline, InlineCollection, TextElement};
+use crate::documents::{EmbeddedControlRun, IInlineHost, Inline, InlineCollection, TextElement, Typography};
 use crate::{Border, Control, ControlImpl, Decorator, TextLayoutRoundingPlacement};
 use ferroui_base::collections::FerroList;
 use ferroui_base::input::InputElementImpl;
@@ -44,6 +44,8 @@ pub struct TextBlock {
     /// The alpha mask of [`get_alpha_mask`](TextBlock::get_alpha_mask),
     /// created on the first request.
     alpha_mask: OnceCell<Box<ferroui_base::rendering::composition::AlphaMask>>,
+    /// The subscription to the changes of the `FontFeatures` collection.
+    font_features_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
 }
 
 ferro_class! {
@@ -61,6 +63,14 @@ ferroui_base::ferro_class_info!(TextBlock { new: TextBlock::new });
 
 ferroui_base::ferro_impl_classes!(TextBlock: InteractiveImpl);
 ferroui_base::ferro_impl_classes!(TextBlock: InputElementImpl);
+impl Drop for TextBlock {
+    fn drop(&mut self) {
+        if let Some(subscription) = self.font_features_subscription.get_mut().take() {
+            subscription.dispose();
+        }
+    }
+}
+
 impl ControlImpl for TextBlock {
     fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
         crate::automation::peers::TextBlockAutomationPeer::new(this).upcast()
@@ -80,6 +90,15 @@ ferroui_base::ferro_overrides! { impl FerroObjectImpl for TextBlock {
 
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
+
+        if change.property() == Self::font_features_property().as_property() {
+            this.refresh_font_features_subscription();
+        }
+        // WinUI's Typography attached properties shape the text (an addition,
+        // DEVIATIONS.md, Text block).
+        if Typography::is_property(change.property()) {
+            this.invalidate_text_layout();
+        }
 
         if change.property() == Self::text_property().as_property()
             && this.has_complex_content()
@@ -317,7 +336,7 @@ impl TextBlockImpl for TextBlock {
             None,
             Default::default(),
             None,
-            this.font_features(),
+            Typography::effective_font_features(this),
         ));
 
         let paragraph_properties = GenericTextParagraphProperties::with_all(
@@ -606,7 +625,41 @@ impl TextBlock {
             layout_text_alignment: Cell::new(TextAlignment::Left),
             utf16_text: RefCell::new(None),
             alpha_mask: OnceCell::new(),
+            font_features_subscription: RefCell::new(None),
         }
+    }
+
+    /// Deviation (DEVIATIONS.md, Text block): upstream does not lay the text out again
+    /// when the `FontFeatures` collection it has changes; the text block follows it.
+    fn refresh_font_features_subscription(&self) {
+        let previous = self.font_features_subscription.borrow_mut().take();
+        if let Some(previous) = previous {
+            previous.dispose();
+        }
+        let subscription = self.font_features().map(|features| {
+            let weak = self.to_ref().downgrade();
+            features.collection_changed(move |_| {
+                if let Some(this) = weak.upgrade() {
+                    this.invalidate_text_layout();
+                }
+            })
+        });
+        *self.font_features_subscription.borrow_mut() = subscription;
+    }
+
+    /// Baseline of the current measured text, without creating a layout or
+    /// invoking its formatter. Embedded rich objects use the rendered origin,
+    /// including padding and the existing layout-rounding placement policy.
+    pub(crate) fn cached_text_baseline(&self) -> Option<f64> {
+        let layout = self.text_layout.borrow().clone()?;
+        let mut padding = self.padding();
+        let mut scale = None;
+        if self.use_layout_rounding() {
+            let value = LayoutHelper::get_layout_scale(self);
+            padding = LayoutHelper::round_layout_thickness(padding, value);
+            scale = Some(value);
+        }
+        Some(padding.top + self.layout_rounding_offset_of(&layout, padding, scale) + layout.baseline())
     }
 
     /// `TextBlock.GetAlphaMask`: a composition brush that shows the alpha of
@@ -1244,6 +1297,11 @@ impl InlinesTextSource {
         text_modifier: Option<Rc<[ValueSpan<Rc<dyn TextRunProperties>>]>>,
     ) -> Self {
         Self { text_runs, text_modifier }
+    }
+
+    /// Rebinds page-local objects while retaining the logical formatting spans.
+    pub(crate) fn with_text_runs(&self, text_runs: Rc<Vec<Rc<dyn TextRun>>>) -> Self {
+        Self::new(text_runs, self.text_modifier.clone())
     }
 
     /// The text runs of the source.

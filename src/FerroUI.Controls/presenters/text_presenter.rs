@@ -1,4 +1,4 @@
-use crate::documents::TextElement;
+use crate::documents::{TextElement, Typography};
 use crate::primitives::{TextSelectionHandleCanvas, TextSelectorLayer};
 use crate::{Border, Control, ControlImpl, TextBlock, TextBox, TextBoxTextInputMethodClient};
 use ferroui_base::animation::TimeSpan;
@@ -68,6 +68,16 @@ pub struct TextPresenter {
     /// The UTF-16 form of `Text` (the outer `None`: not transcoded since the
     /// text changed; the inner one: the text is null).
     utf16_text: RefCell<Option<Option<ReadOnlyMemory<u16>>>>,
+    /// The subscription to the changes of the `FontFeatures` collection.
+    font_features_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+}
+
+impl Drop for TextPresenter {
+    fn drop(&mut self) {
+        if let Some(subscription) = self.font_features_subscription.get_mut().take() {
+            subscription.dispose();
+        }
+    }
 }
 
 ferro_class! {
@@ -107,6 +117,15 @@ impl FerroObjectImpl for TextPresenter {
 
         if property == Self::caret_blink_interval_property().as_property() {
             this.reset_caret_timer();
+        }
+
+        if property.name() == "FontFeatures" {
+            this.refresh_font_features_subscription();
+        }
+        // WinUI's Typography attached properties shape the text (an addition,
+        // DEVIATIONS.md, Text block).
+        if Typography::is_property(property) {
+            this.invalidate_text_layout();
         }
 
         match property.name() {
@@ -295,7 +314,7 @@ impl TextPresenterImpl for TextPresenter {
 
         let defaults: Rc<dyn TextRunProperties> = Rc::new(GenericTextRunProperties::with_all(
             typeface.clone(), this.font_size(), None, this.foreground(), None,
-            BaselineAlignment::Baseline, None, this.font_features(),
+            BaselineAlignment::Baseline, None, Typography::effective_font_features(this),
         ));
         let styles = this.text_style_overrides();
         let removed = this.current_im_client.borrow().as_ref().and_then(Weak::upgrade)
@@ -533,7 +552,26 @@ impl TextPresenter {
             caret_bounds_changed: HandlerList::new(),
             current_im_client: RefCell::new(None),
             utf16_text: RefCell::new(None),
+            font_features_subscription: RefCell::new(None),
         }
+    }
+
+    /// Deviation (DEVIATIONS.md, Text block): upstream does not lay the text out again
+    /// when the `FontFeatures` collection it has changes; the presenter follows it.
+    fn refresh_font_features_subscription(&self) {
+        let previous = self.font_features_subscription.borrow_mut().take();
+        if let Some(previous) = previous {
+            previous.dispose();
+        }
+        let subscription = self.font_features().map(|features| {
+            let weak = self.to_ref().downgrade();
+            features.collection_changed(move |_| {
+                if let Some(this) = weak.upgrade() {
+                    this.invalidate_text_layout();
+                }
+            })
+        });
+        *self.font_features_subscription.borrow_mut() = subscription;
     }
 
     /// Initializes a new instance of the `TextPresenter` class.
@@ -882,7 +920,7 @@ impl TextPresenter {
                 line_height: self.line_height(),
                 letter_spacing: self.letter_spacing(),
                 max_lines: 0,
-                font_features: self.font_features(),
+                font_features: Typography::effective_font_features(self),
                 text_style_overrides,
                 text_run_cache: Some(text_run_cache),
             },

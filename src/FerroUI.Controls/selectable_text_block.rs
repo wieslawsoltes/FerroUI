@@ -1,4 +1,4 @@
-use crate::documents::InlineCollection;
+use crate::documents::{InlineCollection, Typography};
 use crate::text_block::InlinesTextSource;
 use crate::utils::{ClipboardHelper, PrimarySelectionHelper, StringUtils};
 use crate::{Application, ControlImpl, TextBlock, TextBlockImpl, TextBlockImplExt, TextBox, TopLevel};
@@ -330,7 +330,7 @@ impl TextBlockImpl for SelectableTextBlock {
             None,
             BaselineAlignment::Baseline,
             None,
-            this.font_features(),
+            Typography::effective_font_features(this),
         ));
 
         let paragraph_properties = GenericTextParagraphProperties::with_all(
@@ -394,7 +394,7 @@ impl TextBlockImpl for SelectableTextBlock {
                                 run_properties.map_or_else(|| typeface.clone(), |p| p.typeface().clone()),
                                 match run_properties.and_then(|p| p.font_features()) {
                                     Some(font_features) => Some(font_features.clone()),
-                                    None => this.font_features(),
+                                    None => Typography::effective_font_features(this),
                                 },
                             ),
                         ));
@@ -405,7 +405,7 @@ impl TextBlockImpl for SelectableTextBlock {
                     text_style_overrides = Some(vec![ValueSpan::new(
                         start,
                         length,
-                        selection_properties(typeface.clone(), this.font_features()),
+                        selection_properties(typeface.clone(), Typography::effective_font_features(this)),
                     )]);
                 }
             }

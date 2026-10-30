@@ -320,6 +320,9 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
     crate::chrome::WindowDrawnDecorationsContent,
     // FerroUI.Controls.Documents
     crate::documents::Bold,
+    crate::documents::Block,
+    crate::documents::Paragraph,
+    crate::documents::Hyperlink,
     crate::documents::Inline,
     crate::documents::InlineUIContainer,
     crate::documents::Italic,
@@ -327,6 +330,8 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
     crate::documents::Run,
     crate::documents::Span,
     crate::documents::TextElement,
+    crate::documents::TextHighlighter,
+    crate::documents::Typography,
     crate::documents::Underline,
     // FerroUI.Controls.Embedding
     crate::embedding::EmbeddableControlRoot,

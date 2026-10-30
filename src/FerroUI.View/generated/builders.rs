@@ -2303,6 +2303,35 @@ pub trait BitmapCacheProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_base::media::BitmapCache>> BitmapCacheProps for El<T> {}
 
+/// The properties and routed events of [`Block`](ferroui_controls::documents::Block).
+pub trait BlockProps: ElementBuilder {
+    /// Sets [`Block::text_alignment_property`](ferroui_controls::documents::Block::text_alignment_property).
+    fn text_alignment<M>(self, value: impl IntoProp<ferroui_base::media::TextAlignment, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Block>::text_alignment_property(), value)
+    }
+
+    /// Sets [`Block::line_height_property`](ferroui_controls::documents::Block::line_height_property).
+    fn line_height<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Block>::line_height_property(), value)
+    }
+
+    /// Sets [`Block::line_stacking_strategy_property`](ferroui_controls::documents::Block::line_stacking_strategy_property).
+    fn line_stacking_strategy<M>(self, value: impl IntoProp<ferroui_controls::documents::LineStackingStrategy, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Block>::line_stacking_strategy_property(), value)
+    }
+
+    /// Sets [`Block::margin_property`](ferroui_controls::documents::Block::margin_property).
+    fn margin<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Block>::margin_property(), value)
+    }
+
+    /// Sets [`Block::flow_direction_property`](ferroui_controls::documents::Block::flow_direction_property).
+    fn flow_direction<M>(self, value: impl IntoProp<ferroui_base::media::FlowDirection, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Block>::flow_direction_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::documents::Block>> BlockProps for El<T> {}
+
 /// The properties and routed events of [`BlurEffect`](ferroui_base::media::BlurEffect).
 pub trait BlurEffectProps: ElementBuilder {
     /// Sets [`BlurEffect::radius_property`](ferroui_base::media::BlurEffect::radius_property).
@@ -4106,6 +4135,45 @@ pub trait HeaderedSelectingItemsControlProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_controls::primitives::HeaderedSelectingItemsControl>> HeaderedSelectingItemsControlProps for El<T> {}
 
+/// The properties and routed events of [`Hyperlink`](ferroui_controls::documents::Hyperlink).
+pub trait HyperlinkProps: ElementBuilder {
+    /// Sets [`Hyperlink::navigate_uri_property`](ferroui_controls::documents::Hyperlink::navigate_uri_property).
+    fn navigate_uri<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Hyperlink>::navigate_uri_property(), value)
+    }
+
+    /// Sets [`Hyperlink::target_name_property`](ferroui_controls::documents::Hyperlink::target_name_property).
+    fn target_name<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Hyperlink>::target_name_property(), value)
+    }
+
+    /// Sets [`Hyperlink::is_enabled_property`](ferroui_controls::documents::Hyperlink::is_enabled_property).
+    fn is_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Hyperlink>::is_enabled_property(), value)
+    }
+
+    /// Sets [`Hyperlink::is_tab_stop_property`](ferroui_controls::documents::Hyperlink::is_tab_stop_property).
+    fn is_tab_stop<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Hyperlink>::is_tab_stop_property(), value)
+    }
+
+    /// Sets [`Hyperlink::tab_index_property`](ferroui_controls::documents::Hyperlink::tab_index_property).
+    fn tab_index<M>(self, value: impl IntoProp<i32, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Hyperlink>::tab_index_property(), value)
+    }
+
+    /// Sets [`Hyperlink::is_visited_property`](ferroui_controls::documents::Hyperlink::is_visited_property).
+    fn is_visited<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Hyperlink>::is_visited_property(), value)
+    }
+
+    /// Sets [`Hyperlink::underline_style_property`](ferroui_controls::documents::Hyperlink::underline_style_property).
+    fn underline_style<M>(self, value: impl IntoProp<ferroui_controls::documents::UnderlineStyle, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Hyperlink>::underline_style_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::documents::Hyperlink>> HyperlinkProps for El<T> {}
+
 /// The properties and routed events of [`HyperlinkButton`](ferroui_controls::HyperlinkButton).
 pub trait HyperlinkButtonProps: ElementBuilder {
     /// Sets [`HyperlinkButton::is_visited_property`](ferroui_controls::HyperlinkButton::is_visited_property).
@@ -5549,6 +5617,45 @@ pub trait PanelProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_controls::Panel>> PanelProps for El<T> {}
 
+/// The properties and routed events of [`Paragraph`](ferroui_controls::documents::Paragraph).
+pub trait ParagraphProps: ElementBuilder {
+    /// Sets [`Paragraph::tab_stops_property`](ferroui_controls::documents::Paragraph::tab_stops_property).
+    fn tab_stops<M>(self, value: impl IntoProp<ferroui_base::media::text_formatting::TextTabStops, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Paragraph>::tab_stops_property(), value)
+    }
+
+    /// Sets [`Paragraph::default_tab_stop_property`](ferroui_controls::documents::Paragraph::default_tab_stop_property).
+    fn default_tab_stop<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Paragraph>::default_tab_stop_property(), value)
+    }
+
+    /// Sets [`Paragraph::text_indent_property`](ferroui_controls::documents::Paragraph::text_indent_property).
+    fn text_indent<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Paragraph>::text_indent_property(), value)
+    }
+
+    /// Sets [`Paragraph::line_spacing_rule_property`](ferroui_controls::documents::Paragraph::line_spacing_rule_property).
+    fn line_spacing_rule<M>(self, value: impl IntoProp<ferroui_controls::documents::LineSpacingRule, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Paragraph>::line_spacing_rule_property(), value)
+    }
+
+    /// Sets [`Paragraph::line_spacing_property`](ferroui_controls::documents::Paragraph::line_spacing_property).
+    fn line_spacing<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Paragraph>::line_spacing_property(), value)
+    }
+
+    /// Sets [`Paragraph::left_indent_property`](ferroui_controls::documents::Paragraph::left_indent_property).
+    fn left_indent<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Paragraph>::left_indent_property(), value)
+    }
+
+    /// Sets [`Paragraph::right_indent_property`](ferroui_controls::documents::Paragraph::right_indent_property).
+    fn right_indent<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Paragraph>::right_indent_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::documents::Paragraph>> ParagraphProps for El<T> {}
+
 /// The properties and routed events of [`Path`](ferroui_controls::shapes::Path).
 pub trait PathProps: ElementBuilder {
     /// Sets [`Path::data_property`](ferroui_controls::shapes::Path::data_property).
@@ -6645,6 +6752,11 @@ pub trait ScrollViewerProps: ElementBuilder {
     /// Sets [`ScrollViewer::offset_property`](ferroui_controls::ScrollViewer::offset_property).
     fn offset<M>(self, value: impl IntoProp<ferroui_base::Vector, M>) -> Self {
         self.prop(<ferroui_controls::ScrollViewer>::offset_property(), value)
+    }
+
+    /// Sets [`ScrollViewer::zoom_mode_property`](ferroui_controls::ScrollViewer::zoom_mode_property).
+    fn zoom_mode<M>(self, value: impl IntoProp<ferroui_controls::ZoomMode, M>) -> Self {
+        self.prop(<ferroui_controls::ScrollViewer>::zoom_mode_property(), value)
     }
 
     /// Sets [`ScrollViewer::min_zoom_factor_property`](ferroui_controls::ScrollViewer::min_zoom_factor_property).
@@ -7779,6 +7891,11 @@ impl<T: ObjectType + Upcast<ferroui_base::media::TextDecoration>> TextDecoration
 
 /// The properties and routed events of [`TextElement`](ferroui_controls::documents::TextElement).
 pub trait TextElementProps: ElementBuilder {
+    /// Sets [`TextElement::language_property`](ferroui_controls::documents::TextElement::language_property).
+    fn language<M>(self, value: impl IntoProp<ferroui_base::utilities::CultureInfo, M>) -> Self {
+        self.prop(<ferroui_controls::documents::TextElement>::language_property(), value)
+    }
+
     /// Sets [`TextElement::background_property`](ferroui_controls::documents::TextElement::background_property).
     fn background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::documents::TextElement>::background_property(), value)
@@ -7825,6 +7942,20 @@ pub trait TextElementProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::documents::TextElement>> TextElementProps for El<T> {}
+
+/// The properties and routed events of [`TextHighlighter`](ferroui_controls::documents::TextHighlighter).
+pub trait TextHighlighterProps: ElementBuilder {
+    /// Sets [`TextHighlighter::foreground_property`](ferroui_controls::documents::TextHighlighter::foreground_property).
+    fn foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
+        self.prop(<ferroui_controls::documents::TextHighlighter>::foreground_property(), value)
+    }
+
+    /// Sets [`TextHighlighter::background_property`](ferroui_controls::documents::TextHighlighter::background_property).
+    fn background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
+        self.prop(<ferroui_controls::documents::TextHighlighter>::background_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::documents::TextHighlighter>> TextHighlighterProps for El<T> {}
 
 /// The properties and routed events of [`TextPresenter`](ferroui_controls::presenters::TextPresenter).
 pub trait TextPresenterProps: ElementBuilder {
@@ -9409,6 +9540,11 @@ pub trait AttachedProps: ElementBuilder {
         self.prop(<ferroui_controls::TextBox>::line_height_property(), value)
     }
 
+    /// Sets the attached [`TextElement::language_property`](ferroui_controls::documents::TextElement::language_property).
+    fn text_element_language<M>(self, value: impl IntoProp<ferroui_base::utilities::CultureInfo, M>) -> Self {
+        self.prop(<ferroui_controls::documents::TextElement>::language_property(), value)
+    }
+
     /// Sets the attached [`TextElement::font_family_property`](ferroui_controls::documents::TextElement::font_family_property).
     fn text_element_font_family<M>(self, value: impl IntoProp<ferroui_base::media::FontFamily, M>) -> Self {
         self.prop(<ferroui_controls::documents::TextElement>::font_family_property(), value)
@@ -9597,6 +9733,221 @@ pub trait AttachedProps: ElementBuilder {
     /// Sets the attached [`TrayIcon::icons_property`](ferroui_controls::TrayIcon::icons_property).
     fn tray_icon_icons<M>(self, value: impl IntoProp<Option<std::rc::Rc<ferroui_controls::TrayIcons>>, M>) -> Self {
         self.prop(<ferroui_controls::TrayIcon>::icons_property(), value)
+    }
+
+    /// Sets the attached [`Typography::annotation_alternates_property`](ferroui_controls::documents::Typography::annotation_alternates_property).
+    fn typography_annotation_alternates<M>(self, value: impl IntoProp<i32, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::annotation_alternates_property(), value)
+    }
+
+    /// Sets the attached [`Typography::east_asian_expert_forms_property`](ferroui_controls::documents::Typography::east_asian_expert_forms_property).
+    fn typography_east_asian_expert_forms<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::east_asian_expert_forms_property(), value)
+    }
+
+    /// Sets the attached [`Typography::east_asian_language_property`](ferroui_controls::documents::Typography::east_asian_language_property).
+    fn typography_east_asian_language<M>(self, value: impl IntoProp<ferroui_base::media::FontEastAsianLanguage, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::east_asian_language_property(), value)
+    }
+
+    /// Sets the attached [`Typography::east_asian_widths_property`](ferroui_controls::documents::Typography::east_asian_widths_property).
+    fn typography_east_asian_widths<M>(self, value: impl IntoProp<ferroui_base::media::FontEastAsianWidths, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::east_asian_widths_property(), value)
+    }
+
+    /// Sets the attached [`Typography::standard_ligatures_property`](ferroui_controls::documents::Typography::standard_ligatures_property).
+    fn typography_standard_ligatures<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::standard_ligatures_property(), value)
+    }
+
+    /// Sets the attached [`Typography::contextual_ligatures_property`](ferroui_controls::documents::Typography::contextual_ligatures_property).
+    fn typography_contextual_ligatures<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::contextual_ligatures_property(), value)
+    }
+
+    /// Sets the attached [`Typography::discretionary_ligatures_property`](ferroui_controls::documents::Typography::discretionary_ligatures_property).
+    fn typography_discretionary_ligatures<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::discretionary_ligatures_property(), value)
+    }
+
+    /// Sets the attached [`Typography::historical_ligatures_property`](ferroui_controls::documents::Typography::historical_ligatures_property).
+    fn typography_historical_ligatures<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::historical_ligatures_property(), value)
+    }
+
+    /// Sets the attached [`Typography::standard_swashes_property`](ferroui_controls::documents::Typography::standard_swashes_property).
+    fn typography_standard_swashes<M>(self, value: impl IntoProp<i32, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::standard_swashes_property(), value)
+    }
+
+    /// Sets the attached [`Typography::contextual_swashes_property`](ferroui_controls::documents::Typography::contextual_swashes_property).
+    fn typography_contextual_swashes<M>(self, value: impl IntoProp<i32, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::contextual_swashes_property(), value)
+    }
+
+    /// Sets the attached [`Typography::contextual_alternates_property`](ferroui_controls::documents::Typography::contextual_alternates_property).
+    fn typography_contextual_alternates<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::contextual_alternates_property(), value)
+    }
+
+    /// Sets the attached [`Typography::stylistic_alternates_property`](ferroui_controls::documents::Typography::stylistic_alternates_property).
+    fn typography_stylistic_alternates<M>(self, value: impl IntoProp<i32, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::stylistic_alternates_property(), value)
+    }
+
+    /// Sets the attached [`Typography::stylistic_set1_property`](ferroui_controls::documents::Typography::stylistic_set1_property).
+    fn typography_stylistic_set1<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::stylistic_set1_property(), value)
+    }
+
+    /// Sets the attached [`Typography::stylistic_set2_property`](ferroui_controls::documents::Typography::stylistic_set2_property).
+    fn typography_stylistic_set2<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::stylistic_set2_property(), value)
+    }
+
+    /// Sets the attached [`Typography::stylistic_set3_property`](ferroui_controls::documents::Typography::stylistic_set3_property).
+    fn typography_stylistic_set3<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::stylistic_set3_property(), value)
+    }
+
+    /// Sets the attached [`Typography::stylistic_set4_property`](ferroui_controls::documents::Typography::stylistic_set4_property).
+    fn typography_stylistic_set4<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::stylistic_set4_property(), value)
+    }
+
+    /// Sets the attached [`Typography::stylistic_set5_property`](ferroui_controls::documents::Typography::stylistic_set5_property).
+    fn typography_stylistic_set5<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::stylistic_set5_property(), value)
+    }
+
+    /// Sets the attached [`Typography::stylistic_set6_property`](ferroui_controls::documents::Typography::stylistic_set6_property).
+    fn typography_stylistic_set6<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::stylistic_set6_property(), value)
+    }
+
+    /// Sets the attached [`Typography::stylistic_set7_property`](ferroui_controls::documents::Typography::stylistic_set7_property).
+    fn typography_stylistic_set7<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::stylistic_set7_property(), value)
+    }
+
+    /// Sets the attached [`Typography::stylistic_set8_property`](ferroui_controls::documents::Typography::stylistic_set8_property).
+    fn typography_stylistic_set8<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::stylistic_set8_property(), value)
+    }
+
+    /// Sets the attached [`Typography::stylistic_set9_property`](ferroui_controls::documents::Typography::stylistic_set9_property).
+    fn typography_stylistic_set9<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::stylistic_set9_property(), value)
+    }
+
+    /// Sets the attached [`Typography::stylistic_set10_property`](ferroui_controls::documents::Typography::stylistic_set10_property).
+    fn typography_stylistic_set10<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::stylistic_set10_property(), value)
+    }
+
+    /// Sets the attached [`Typography::stylistic_set11_property`](ferroui_controls::documents::Typography::stylistic_set11_property).
+    fn typography_stylistic_set11<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::stylistic_set11_property(), value)
+    }
+
+    /// Sets the attached [`Typography::stylistic_set12_property`](ferroui_controls::documents::Typography::stylistic_set12_property).
+    fn typography_stylistic_set12<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::stylistic_set12_property(), value)
+    }
+
+    /// Sets the attached [`Typography::stylistic_set13_property`](ferroui_controls::documents::Typography::stylistic_set13_property).
+    fn typography_stylistic_set13<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::stylistic_set13_property(), value)
+    }
+
+    /// Sets the attached [`Typography::stylistic_set14_property`](ferroui_controls::documents::Typography::stylistic_set14_property).
+    fn typography_stylistic_set14<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::stylistic_set14_property(), value)
+    }
+
+    /// Sets the attached [`Typography::stylistic_set15_property`](ferroui_controls::documents::Typography::stylistic_set15_property).
+    fn typography_stylistic_set15<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::stylistic_set15_property(), value)
+    }
+
+    /// Sets the attached [`Typography::stylistic_set16_property`](ferroui_controls::documents::Typography::stylistic_set16_property).
+    fn typography_stylistic_set16<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::stylistic_set16_property(), value)
+    }
+
+    /// Sets the attached [`Typography::stylistic_set17_property`](ferroui_controls::documents::Typography::stylistic_set17_property).
+    fn typography_stylistic_set17<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::stylistic_set17_property(), value)
+    }
+
+    /// Sets the attached [`Typography::stylistic_set18_property`](ferroui_controls::documents::Typography::stylistic_set18_property).
+    fn typography_stylistic_set18<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::stylistic_set18_property(), value)
+    }
+
+    /// Sets the attached [`Typography::stylistic_set19_property`](ferroui_controls::documents::Typography::stylistic_set19_property).
+    fn typography_stylistic_set19<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::stylistic_set19_property(), value)
+    }
+
+    /// Sets the attached [`Typography::stylistic_set20_property`](ferroui_controls::documents::Typography::stylistic_set20_property).
+    fn typography_stylistic_set20<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::stylistic_set20_property(), value)
+    }
+
+    /// Sets the attached [`Typography::capitals_property`](ferroui_controls::documents::Typography::capitals_property).
+    fn typography_capitals<M>(self, value: impl IntoProp<ferroui_base::media::FontCapitals, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::capitals_property(), value)
+    }
+
+    /// Sets the attached [`Typography::capital_spacing_property`](ferroui_controls::documents::Typography::capital_spacing_property).
+    fn typography_capital_spacing<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::capital_spacing_property(), value)
+    }
+
+    /// Sets the attached [`Typography::kerning_property`](ferroui_controls::documents::Typography::kerning_property).
+    fn typography_kerning<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::kerning_property(), value)
+    }
+
+    /// Sets the attached [`Typography::case_sensitive_forms_property`](ferroui_controls::documents::Typography::case_sensitive_forms_property).
+    fn typography_case_sensitive_forms<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::case_sensitive_forms_property(), value)
+    }
+
+    /// Sets the attached [`Typography::historical_forms_property`](ferroui_controls::documents::Typography::historical_forms_property).
+    fn typography_historical_forms<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::historical_forms_property(), value)
+    }
+
+    /// Sets the attached [`Typography::fraction_property`](ferroui_controls::documents::Typography::fraction_property).
+    fn typography_fraction<M>(self, value: impl IntoProp<ferroui_base::media::FontFraction, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::fraction_property(), value)
+    }
+
+    /// Sets the attached [`Typography::numeral_style_property`](ferroui_controls::documents::Typography::numeral_style_property).
+    fn typography_numeral_style<M>(self, value: impl IntoProp<ferroui_base::media::FontNumeralStyle, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::numeral_style_property(), value)
+    }
+
+    /// Sets the attached [`Typography::numeral_alignment_property`](ferroui_controls::documents::Typography::numeral_alignment_property).
+    fn typography_numeral_alignment<M>(self, value: impl IntoProp<ferroui_base::media::FontNumeralAlignment, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::numeral_alignment_property(), value)
+    }
+
+    /// Sets the attached [`Typography::slashed_zero_property`](ferroui_controls::documents::Typography::slashed_zero_property).
+    fn typography_slashed_zero<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::slashed_zero_property(), value)
+    }
+
+    /// Sets the attached [`Typography::mathematical_greek_property`](ferroui_controls::documents::Typography::mathematical_greek_property).
+    fn typography_mathematical_greek<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::mathematical_greek_property(), value)
+    }
+
+    /// Sets the attached [`Typography::variants_property`](ferroui_controls::documents::Typography::variants_property).
+    fn typography_variants<M>(self, value: impl IntoProp<ferroui_base::media::FontVariants, M>) -> Self {
+        self.prop(<ferroui_controls::documents::Typography>::variants_property(), value)
     }
 
     /// Sets the attached [`Visual::flow_direction_property`](ferroui_base::Visual::flow_direction_property).

@@ -733,7 +733,7 @@ impl ValueStore {
         if let Some(notifying) = notifying {
             notifying(owner, true);
         }
-        owner.raise_property_changed(property, Some(old_value), new_value, BindingPriority::Inherited, true);
+        owner.raise_inherited_property_changed(property, old_value, new_value, BindingPriority::Inherited);
         owner.for_each_inheritance_child(|child| {
             child.values().on_ancestor_inherited_value_changed(child, property, old_value, new_value);
         });
