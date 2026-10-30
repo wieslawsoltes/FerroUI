@@ -13,6 +13,7 @@ use ferroui_base::input::{KeyModifiers, LocalBoxFuture, RawInputModifiers};
 use ferroui_base::PixelRect;
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
+use zbus::message::Sequence;
 use zbus::proxy::CacheProperties;
 use zbus::zvariant::Value;
 use zbus::Connection;
@@ -25,6 +26,9 @@ pub struct IBusX11TextInputMethod {
     preedit_text: RefCell<String>,
     preedit_cursor: Cell<i32>,
     inside_reset: Cell<i32>,
+    /// Where the reply of the latest Reset call was received, in the order
+    /// of the messages of the connection.
+    reset_reply_position: Cell<Option<Sequence>>,
 }
 
 /// The text of an `IBusText` as it travels in a variant: a structure
@@ -123,6 +127,7 @@ impl IBusX11TextInputMethod {
                 preedit_text: RefCell::new(String::new()),
                 preedit_cursor: Cell::new(0),
                 inside_reset: Cell::new(0),
+                reset_reply_position: Cell::new(None),
             })
         })
     }
@@ -173,12 +178,19 @@ impl IBusX11TextInputMethod {
         }
     }
 
-    fn on_commit_text(&self, variant_item: &Value<'_>) {
+    fn on_commit_text(&self, variant_item: &Value<'_>, position: Sequence) {
         if self.inside_reset.get() > 0 {
             // For some reason iBus can trigger a CommitText while being reset.
             // Thankfully the signal is sent _during_ Reset call processing,
             // so it arrives on-the-wire before Reset call result, so we can
             // check if we have any pending Reset calls and ignore the signal here
+            return;
+        }
+        // The signal and the reply arrive in that order, but the reply
+        // completes its call on one task and the signal comes through its
+        // own stream, so the signal can be handled after the call ended: it
+        // is told by where it was received.
+        if self.reset_reply_position.get().is_some_and(|reply| position < reply) {
             return;
         }
 
@@ -227,7 +239,7 @@ impl DBusTextInputMethodCore for IBusX11TextInputMethod {
                 let weak = weak.clone();
                 move |signal| {
                     if let (Some(this), Ok(args)) = (weak.upgrade(), signal.args()) {
-                        this.on_commit_text(args.text());
+                        this.on_commit_text(args.text(), signal.message().recv_position());
                     }
                 }
             }));
@@ -318,7 +330,11 @@ impl DBusTextInputMethodCore for IBusX11TextInputMethod {
             };
 
             this.inside_reset.set(this.inside_reset.get() + 1);
-            let result = context.reset().await;
+            let result = context.inner().call_method("Reset", &()).await;
+            if let Ok(reply) = &result {
+                let position = reply.recv_position();
+                this.reset_reply_position.set(Some(this.reset_reply_position.get().map_or(position, |p| p.max(position))));
+            }
             this.inside_reset.set(this.inside_reset.get() - 1);
             result?;
             Ok(())
