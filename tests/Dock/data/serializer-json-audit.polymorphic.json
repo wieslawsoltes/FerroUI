@@ -1,0 +1,239 @@
+{
+  "writes": [
+    {
+      "policy": "empty",
+      "policyValue": 0,
+      "kind": "a",
+      "wire": "",
+      "error": "invalid-config"
+    },
+    {
+      "policy": "FailSerialization",
+      "policyValue": 0,
+      "kind": "a",
+      "wire": "{\n  \u0022$id\u0022: \u00221\u0022,\n  \u0022$type\u0022: \u0022a\u0022,\n  \u0022Name\u0022: \u0022value\u0022,\n  \u0022A\u0022: 11\n}",
+      "error": ""
+    },
+    {
+      "policy": "FailSerialization",
+      "policyValue": 0,
+      "kind": "b",
+      "wire": "{\n  \u0022$id\u0022: \u00221\u0022,\n  \u0022$type\u0022: \u0022b\u0022,\n  \u0022B\u0022: 22,\n  \u0022Name\u0022: \u0022value\u0022,\n  \u0022A\u0022: 11\n}",
+      "error": ""
+    },
+    {
+      "policy": "FailSerialization",
+      "policyValue": 0,
+      "kind": "c",
+      "wire": "",
+      "error": "unsupported"
+    },
+    {
+      "policy": "FailSerialization",
+      "policyValue": 0,
+      "kind": "x",
+      "wire": "",
+      "error": "unsupported"
+    },
+    {
+      "policy": "FallBackToBaseType",
+      "policyValue": 1,
+      "kind": "a",
+      "wire": "{\n  \u0022$id\u0022: \u00221\u0022,\n  \u0022$type\u0022: \u0022a\u0022,\n  \u0022Name\u0022: \u0022value\u0022,\n  \u0022A\u0022: 11\n}",
+      "error": ""
+    },
+    {
+      "policy": "FallBackToBaseType",
+      "policyValue": 1,
+      "kind": "b",
+      "wire": "{\n  \u0022$id\u0022: \u00221\u0022,\n  \u0022$type\u0022: \u0022b\u0022,\n  \u0022B\u0022: 22,\n  \u0022Name\u0022: \u0022value\u0022,\n  \u0022A\u0022: 11\n}",
+      "error": ""
+    },
+    {
+      "policy": "FallBackToBaseType",
+      "policyValue": 1,
+      "kind": "c",
+      "wire": "{\n  \u0022$id\u0022: \u00221\u0022,\n  \u0022Name\u0022: \u0022value\u0022\n}",
+      "error": ""
+    },
+    {
+      "policy": "FallBackToBaseType",
+      "policyValue": 1,
+      "kind": "x",
+      "wire": "{\n  \u0022$id\u0022: \u00221\u0022,\n  \u0022Name\u0022: \u0022value\u0022\n}",
+      "error": ""
+    },
+    {
+      "policy": "FallBackToNearestAncestor",
+      "policyValue": 2,
+      "kind": "a",
+      "wire": "{\n  \u0022$id\u0022: \u00221\u0022,\n  \u0022$type\u0022: \u0022a\u0022,\n  \u0022Name\u0022: \u0022value\u0022,\n  \u0022A\u0022: 11\n}",
+      "error": ""
+    },
+    {
+      "policy": "FallBackToNearestAncestor",
+      "policyValue": 2,
+      "kind": "b",
+      "wire": "{\n  \u0022$id\u0022: \u00221\u0022,\n  \u0022$type\u0022: \u0022b\u0022,\n  \u0022B\u0022: 22,\n  \u0022Name\u0022: \u0022value\u0022,\n  \u0022A\u0022: 11\n}",
+      "error": ""
+    },
+    {
+      "policy": "FallBackToNearestAncestor",
+      "policyValue": 2,
+      "kind": "c",
+      "wire": "{\n  \u0022$id\u0022: \u00221\u0022,\n  \u0022$type\u0022: \u0022b\u0022,\n  \u0022B\u0022: 22,\n  \u0022Name\u0022: \u0022value\u0022,\n  \u0022A\u0022: 11\n}",
+      "error": ""
+    },
+    {
+      "policy": "FallBackToNearestAncestor",
+      "policyValue": 2,
+      "kind": "x",
+      "wire": "{\n  \u0022$id\u0022: \u00221\u0022,\n  \u0022Name\u0022: \u0022value\u0022\n}",
+      "error": ""
+    },
+    {
+      "policy": "ambiguity",
+      "policyValue": 2,
+      "kind": "both",
+      "wire": "",
+      "error": "unsupported"
+    },
+    {
+      "policy": "ambiguity",
+      "policyValue": 2,
+      "kind": "both-exact",
+      "wire": "{\n  \u0022$id\u0022: \u00221\u0022,\n  \u0022$type\u0022: \u0022both\u0022,\n  \u0022Name\u0022: \u0022both\u0022,\n  \u0022L\u0022: 1,\n  \u0022R\u0022: 2\n}",
+      "error": ""
+    }
+  ],
+  "reads": [
+    {
+      "policy": "empty",
+      "input": "null",
+      "kind": "",
+      "wire": "",
+      "error": "invalid-config",
+      "self": false
+    },
+    {
+      "policy": "FailSerialization",
+      "input": "null",
+      "kind": "null",
+      "wire": "null",
+      "error": "",
+      "self": false
+    },
+    {
+      "policy": "FailSerialization",
+      "input": "{\u0022$type\u0022:\u0022a\u0022,\u0022Name\u0022:\u0022read\u0022,\u0022A\u0022:11}",
+      "kind": "PolyA",
+      "wire": "{\n  \u0022$id\u0022: \u00221\u0022,\n  \u0022$type\u0022: \u0022a\u0022,\n  \u0022Name\u0022: \u0022read\u0022,\n  \u0022A\u0022: 11\n}",
+      "error": "",
+      "self": false
+    },
+    {
+      "policy": "FailSerialization",
+      "input": "{\u0022$id\u0022:\u0022one\u0022,\u0022$type\u0022:\u0022b\u0022,\u0022B\u0022:22,\u0022Name\u0022:\u0022read\u0022,\u0022Next\u0022:{\u0022$ref\u0022:\u0022one\u0022},\u0022A\u0022:11}",
+      "kind": "PolyB",
+      "wire": "{\n  \u0022$id\u0022: \u00221\u0022,\n  \u0022$type\u0022: \u0022b\u0022,\n  \u0022B\u0022: 22,\n  \u0022Name\u0022: \u0022read\u0022,\n  \u0022Next\u0022: {\n    \u0022$ref\u0022: \u00221\u0022\n  },\n  \u0022A\u0022: 11\n}",
+      "error": "",
+      "self": true
+    },
+    {
+      "policy": "FailSerialization",
+      "input": "{\u0022Name\u0022:\u0022base\u0022}",
+      "kind": "",
+      "wire": "",
+      "error": "unsupported",
+      "self": false
+    },
+    {
+      "policy": "FailSerialization",
+      "input": "{\u0022$type\u0022:\u0022future\u0022,\u0022Name\u0022:\u0022base\u0022}",
+      "kind": "",
+      "wire": "",
+      "error": "unsupported",
+      "self": false
+    },
+    {
+      "policy": "FallBackToBaseType",
+      "input": "null",
+      "kind": "null",
+      "wire": "null",
+      "error": "",
+      "self": false
+    },
+    {
+      "policy": "FallBackToBaseType",
+      "input": "{\u0022$type\u0022:\u0022a\u0022,\u0022Name\u0022:\u0022read\u0022,\u0022A\u0022:11}",
+      "kind": "PolyA",
+      "wire": "{\n  \u0022$id\u0022: \u00221\u0022,\n  \u0022$type\u0022: \u0022a\u0022,\n  \u0022Name\u0022: \u0022read\u0022,\n  \u0022A\u0022: 11\n}",
+      "error": "",
+      "self": false
+    },
+    {
+      "policy": "FallBackToBaseType",
+      "input": "{\u0022$id\u0022:\u0022one\u0022,\u0022$type\u0022:\u0022b\u0022,\u0022B\u0022:22,\u0022Name\u0022:\u0022read\u0022,\u0022Next\u0022:{\u0022$ref\u0022:\u0022one\u0022},\u0022A\u0022:11}",
+      "kind": "PolyB",
+      "wire": "{\n  \u0022$id\u0022: \u00221\u0022,\n  \u0022$type\u0022: \u0022b\u0022,\n  \u0022B\u0022: 22,\n  \u0022Name\u0022: \u0022read\u0022,\n  \u0022Next\u0022: {\n    \u0022$ref\u0022: \u00221\u0022\n  },\n  \u0022A\u0022: 11\n}",
+      "error": "",
+      "self": true
+    },
+    {
+      "policy": "FallBackToBaseType",
+      "input": "{\u0022Name\u0022:\u0022base\u0022}",
+      "kind": "",
+      "wire": "",
+      "error": "unsupported",
+      "self": false
+    },
+    {
+      "policy": "FallBackToBaseType",
+      "input": "{\u0022$type\u0022:\u0022future\u0022,\u0022Name\u0022:\u0022base\u0022}",
+      "kind": "",
+      "wire": "",
+      "error": "unsupported",
+      "self": false
+    },
+    {
+      "policy": "FallBackToNearestAncestor",
+      "input": "null",
+      "kind": "null",
+      "wire": "null",
+      "error": "",
+      "self": false
+    },
+    {
+      "policy": "FallBackToNearestAncestor",
+      "input": "{\u0022$type\u0022:\u0022a\u0022,\u0022Name\u0022:\u0022read\u0022,\u0022A\u0022:11}",
+      "kind": "PolyA",
+      "wire": "{\n  \u0022$id\u0022: \u00221\u0022,\n  \u0022$type\u0022: \u0022a\u0022,\n  \u0022Name\u0022: \u0022read\u0022,\n  \u0022A\u0022: 11\n}",
+      "error": "",
+      "self": false
+    },
+    {
+      "policy": "FallBackToNearestAncestor",
+      "input": "{\u0022$id\u0022:\u0022one\u0022,\u0022$type\u0022:\u0022b\u0022,\u0022B\u0022:22,\u0022Name\u0022:\u0022read\u0022,\u0022Next\u0022:{\u0022$ref\u0022:\u0022one\u0022},\u0022A\u0022:11}",
+      "kind": "PolyB",
+      "wire": "{\n  \u0022$id\u0022: \u00221\u0022,\n  \u0022$type\u0022: \u0022b\u0022,\n  \u0022B\u0022: 22,\n  \u0022Name\u0022: \u0022read\u0022,\n  \u0022Next\u0022: {\n    \u0022$ref\u0022: \u00221\u0022\n  },\n  \u0022A\u0022: 11\n}",
+      "error": "",
+      "self": true
+    },
+    {
+      "policy": "FallBackToNearestAncestor",
+      "input": "{\u0022Name\u0022:\u0022base\u0022}",
+      "kind": "",
+      "wire": "",
+      "error": "unsupported",
+      "self": false
+    },
+    {
+      "policy": "FallBackToNearestAncestor",
+      "input": "{\u0022$type\u0022:\u0022future\u0022,\u0022Name\u0022:\u0022base\u0022}",
+      "kind": "",
+      "wire": "",
+      "error": "unsupported",
+      "self": false
+    }
+  ]
+}

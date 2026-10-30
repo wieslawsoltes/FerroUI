@@ -1,6 +1,34 @@
 [workspace]
 resolver = "2"
 members = [
+    # The Dock port (docs/porting/dock).
+    "samples/Dock/FerroDockReactiveUISample",
+    "src/Dock/FerroDock.Controls.DeferredContentControl",
+    "src/Dock/FerroDock.Controls.ProportionalStackPanel",
+    "src/Dock/FerroDock.Controls.Recycling",
+    "src/Dock/FerroDock.Controls.Recycling.Model",
+    "src/Dock/FerroDock.Controls.Recycling.Model.Ferro",
+    "src/Dock/FerroDock.Ferro",
+    "src/Dock/FerroDock.Ferro.Diagnostics",
+    "src/Dock/FerroDock.Ferro.Themes.Browser",
+    "src/Dock/FerroDock.Ferro.Themes.Fluent",
+    "src/Dock/FerroDock.Ferro.Themes.Simple",
+    "src/Dock/FerroDock.MarkupExtension",
+    "src/Dock/FerroDock.Model",
+    "src/Dock/FerroDock.Model.Ferro",
+    "src/Dock/FerroDock.Model.ReactiveUI",
+    "src/Dock/FerroDock.Model.ReactiveUI.Ferro",
+    "src/Dock/FerroDock.Model.ReactiveUI.Services",
+    "src/Dock/FerroDock.Model.ReactiveUI.Services.Ferro",
+    "src/Dock/FerroDock.Runtime",
+    "src/Dock/FerroDock.Serializer.SystemTextJson",
+    "src/Dock/FerroDock.Serializer.SystemTextJson.Generators",
+    "src/Dock/FerroDock.Serializer.SystemTextJson.Generators.Rust",
+    "src/Dock/FerroDock.Serializer.SystemTextJson.ReactiveUI",
+    "src/Dock/FerroDock.Settings",
+    "tests/Dock/FerroDock.Markup.Tests",
+    "tests/Dock/FerroDock.Serializer.Generated.Tests",
+    "tests/Dock/FerroDock.Settings.Markup.Tests",
     "samples/HotReload",
     "src/FerroUI.HotReload",
     "src/FerroUI.HotPatch",
@@ -181,6 +209,17 @@ categories = ["gui"]
 # that the crates of a release are only ever resolved together (docs/release.md, "Version scheme").
 # `scripts/release/set-version.sh <version>` writes the version above and these keys.
 [workspace.dependencies]
+# The Dock port (docs/porting/dock): its crates and the dependencies only it has.
+ferrodock-controls-recycling-model = { path = "src/Dock/FerroDock.Controls.Recycling.Model" }
+ferrodock-controls-recycling-model-ferro = { path = "src/Dock/FerroDock.Controls.Recycling.Model.Ferro" }
+ferrodock-model = { path = "src/Dock/FerroDock.Model" }
+ferrodock-model-ferro = { path = "src/Dock/FerroDock.Model.Ferro" }
+ferrodock-runtime = { path = "src/Dock/FerroDock.Runtime" }
+ferrodock-settings = { path = "src/Dock/FerroDock.Settings" }
+ryu = "1.0"
+serde = "1.0"
+serde_json = { version = "1.0", features = ["raw_value"] }
+
 ferroui-hot-reload = { version = "=0.4.0", path = "src/FerroUI.HotReload" }
 ferroui-hot-patch = { version = "=0.4.0", path = "src/FerroUI.HotPatch" }
 ferroui-inspect = { version = "=0.4.0", path = "src/FerroUI.Inspect" }

@@ -414,33 +414,19 @@ pub fn boxed_reference_equals(a: &BoxedValue, b: &BoxedValue) -> bool {
     }
 }
 
-/// Boxes a typed value as an item. A value that already is an untyped value
-/// is passed through.
+/// Boxes a typed value as an item, erasing nullable wrappers to native null or
+/// their contents. A value that already is untyped is passed through.
 #[inline]
 pub fn box_item<T: PropertyValue>(value: &T) -> Option<BoxedValue> {
-    let any: &dyn Any = value;
-    if let Some(boxed) = any.downcast_ref::<BoxedValue>() {
-        return Some(boxed.clone());
-    }
-    if let Some(boxed) = any.downcast_ref::<Option<BoxedValue>>() {
-        return boxed.clone();
-    }
-    Some(Rc::new(value.clone()))
+    ferroui_base::metadata::into_markup_value(value.clone())
 }
 
 /// The typed value held by an item: the item itself when `T` is the untyped
-/// value type, otherwise the contained `T`. `None` for a null item or an
-/// item of another type.
+/// value type, otherwise the contained `T`. A nullable `T` accepts native null
+/// as its empty value; a type mismatch returns `None`.
 #[inline]
 pub fn unbox_item<T: PropertyValue>(item: &Option<BoxedValue>) -> Option<T> {
-    let boxed = item.as_ref()?;
-    let any: &dyn Any = boxed;
-    if let Some(value) = any.downcast_ref::<T>() {
-        // `T` is `BoxedValue`.
-        return Some(value.clone());
-    }
-    let value: &dyn AnyValue = &**boxed;
-    value.downcast_ref::<T>().cloned()
+    ferroui_base::metadata::from_markup_value(item)
 }
 
 /// Whether an item holds a value equal to `value`, without boxing `value`.
@@ -453,13 +439,15 @@ fn item_equals_typed<T: PropertyValue>(item: &Option<BoxedValue>, value: &T) -> 
     if let Some(boxed) = any.downcast_ref::<Option<BoxedValue>>() {
         return items_equal(item, boxed);
     }
-    match item {
-        Some(item) => {
-            let item: &dyn AnyValue = &**item;
-            item.downcast_ref::<T>().is_some_and(|item| item == value)
+    // Keep the exact-value path allocation-free (notably for strings).
+    if let Some(item) = item {
+        if let Some(item) = (**item).downcast_ref::<T>() {
+            return item == value;
         }
-        None => false,
     }
+    // Nullable source representations must compare their native null/value.
+    ferroui_base::metadata::from_markup_value::<T>(item)
+        .is_some_and(|item| &item == value)
 }
 
 /// An untyped, indexable list of items that may notify of changes.
@@ -952,5 +940,39 @@ mod identity_tests {
         let vector = ItemsSource::from(vec![None, None]);
         assert!(vector.ptr_eq(&vector.clone()));
         assert!(!vector.ptr_eq(&ItemsSource::from(vec![None, None])));
+    }
+}
+
+#[cfg(test)]
+mod nullable_item_tests {
+    use super::*;
+    use ferroui_base::data::core::ValueTypes;
+
+    #[test]
+    fn nullable_items_box_as_native_null_or_value_and_unbox_to_the_same_typed_slot() {
+        ValueTypes::register_nullable::<i32>();
+        assert!(box_item(&None::<i32>).is_none());
+        let boxed = box_item(&Some(42_i32));
+        assert_eq!(boxed.as_ref().unwrap().downcast_ref::<i32>(), Some(&42));
+        assert_eq!(unbox_item::<Option<i32>>(&None), Some(None));
+        assert_eq!(unbox_item::<Option<i32>>(&boxed), Some(Some(42)));
+        assert!(item_equals_typed(&None, &None::<i32>));
+        assert!(item_equals_typed(&boxed, &Some(42_i32)));
+        assert!(!item_equals_typed(&boxed, &None::<i32>));
+    }
+
+    #[test]
+    fn nullable_typed_change_views_keep_null_slots_and_untyped_reference_identity() {
+        ValueTypes::register_nullable::<i32>();
+        let values = [None, Some(7_i32), None];
+        let typed = TypedItems(&values);
+        let view = ItemsView::from_typed(&typed);
+        assert_eq!(view.len(), 3);
+        assert!(view.get(0).is_none() && view.get(2).is_none());
+        assert_eq!(view.get(1).unwrap().downcast_ref::<i32>(), Some(&7));
+        let value: BoxedValue = Rc::new("original".to_owned());
+        assert!(Rc::ptr_eq(&box_item(&value).unwrap(), &value));
+        assert!(Rc::ptr_eq(&box_item(&Some(value.clone())).unwrap(), &value));
+        assert!(item_equals_typed(&Some(value.clone()), &Some(value)));
     }
 }

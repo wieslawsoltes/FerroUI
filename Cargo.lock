@@ -922,6 +922,409 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f4beca3cb2444e3304ac30843cc091f44ed58932353cd492ce740067bfce6b12"
 
 [[package]]
+name = "ferrodock-controls-deferred-content-control"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-headless",
+ "ferroui-themes-fluent",
+]
+
+[[package]]
+name = "ferrodock-controls-proportional-stack-panel"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-model",
+ "ferrodock-model-reactiveui",
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-headless",
+ "ferroui-markup-xaml",
+]
+
+[[package]]
+name = "ferrodock-controls-recycling"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-controls-recycling-model",
+ "ferrodock-controls-recycling-model-ferro",
+ "ferrodock-runtime",
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-headless",
+ "ferroui-system",
+]
+
+[[package]]
+name = "ferrodock-controls-recycling-model"
+version = "0.4.0"
+
+[[package]]
+name = "ferrodock-controls-recycling-model-ferro"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-controls-recycling-model",
+ "ferrodock-runtime",
+ "ferroui-base",
+ "ferroui-build-scan",
+]
+
+[[package]]
+name = "ferrodock-ferro"
+version = "0.4.0"
+dependencies = [
+ "bitflags",
+ "ferrodock-controls-deferred-content-control",
+ "ferrodock-controls-proportional-stack-panel",
+ "ferrodock-controls-recycling",
+ "ferrodock-model",
+ "ferrodock-model-ferro",
+ "ferrodock-model-reactiveui",
+ "ferrodock-model-reactiveui-ferro",
+ "ferrodock-model-reactiveui-services",
+ "ferrodock-settings",
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-headless",
+ "ferroui-markup-xaml",
+ "ferroui-reactive",
+ "ferroui-reactiveui",
+ "ferroui-reactiveui-controls",
+ "ferroui-system",
+ "ferroui-themes-fluent",
+]
+
+[[package]]
+name = "ferrodock-ferro-diagnostics"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-ferro",
+ "ferrodock-ferro-themes-fluent",
+ "ferrodock-model",
+ "ferrodock-model-ferro",
+ "ferrodock-model-reactiveui",
+ "ferrodock-settings",
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-fonts-inter",
+ "ferroui-headless",
+ "ferroui-markup-xaml",
+ "ferroui-reactiveui",
+ "ferroui-reactiveui-controls",
+ "ferroui-system",
+ "ferroui-themes-fluent",
+]
+
+[[package]]
+name = "ferrodock-ferro-themes-browser"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-controls-deferred-content-control",
+ "ferrodock-controls-proportional-stack-panel",
+ "ferrodock-controls-recycling",
+ "ferrodock-ferro",
+ "ferrodock-ferro-themes-fluent",
+ "ferrodock-model",
+ "ferrodock-model-ferro",
+ "ferrodock-settings",
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-headless",
+ "ferroui-markup-xaml",
+ "ferroui-themes-fluent",
+]
+
+[[package]]
+name = "ferrodock-ferro-themes-fluent"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-controls-deferred-content-control",
+ "ferrodock-controls-proportional-stack-panel",
+ "ferrodock-controls-recycling",
+ "ferrodock-ferro",
+ "ferrodock-model",
+ "ferrodock-model-ferro",
+ "ferrodock-settings",
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-headless",
+ "ferroui-markup-xaml",
+]
+
+[[package]]
+name = "ferrodock-ferro-themes-simple"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-controls-deferred-content-control",
+ "ferrodock-controls-proportional-stack-panel",
+ "ferrodock-controls-recycling",
+ "ferrodock-ferro",
+ "ferrodock-model",
+ "ferrodock-model-ferro",
+ "ferrodock-settings",
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-headless",
+ "ferroui-markup-xaml",
+ "ferroui-themes-simple",
+]
+
+[[package]]
+name = "ferrodock-markup-extension"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-markup-xaml",
+]
+
+[[package]]
+name = "ferrodock-markup-tests"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-controls-deferred-content-control",
+ "ferrodock-controls-proportional-stack-panel",
+ "ferrodock-controls-recycling",
+ "ferrodock-controls-recycling-model-ferro",
+ "ferrodock-ferro",
+ "ferrodock-ferro-diagnostics",
+ "ferrodock-ferro-themes-browser",
+ "ferrodock-ferro-themes-fluent",
+ "ferrodock-ferro-themes-simple",
+ "ferrodock-markup-extension",
+ "ferrodock-model",
+ "ferrodock-model-ferro",
+ "ferrodock-model-reactiveui",
+ "ferrodock-model-reactiveui-ferro",
+ "ferrodock-model-reactiveui-services",
+ "ferrodock-serializer-system-text-json",
+ "ferrodock-serializer-system-text-json-generators",
+ "ferrodock-serializer-system-text-json-generators-rust",
+ "ferrodock-serializer-system-text-json-reactiveui",
+ "ferrodock-settings",
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-headless",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-reactive",
+ "ferroui-reactiveui",
+ "ferroui-system",
+ "ferroui-themes-fluent",
+ "ferroui-themes-simple",
+ "serde_json",
+]
+
+[[package]]
+name = "ferrodock-model"
+version = "0.4.0"
+dependencies = [
+ "bitflags",
+ "ferrodock-controls-recycling-model",
+ "ferroui-reactive",
+ "ferroui-reactiveui",
+ "ferroui-system",
+ "ryu",
+]
+
+[[package]]
+name = "ferrodock-model-ferro"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-controls-recycling-model-ferro",
+ "ferrodock-model",
+ "ferrodock-model-reactiveui",
+ "ferrodock-runtime",
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-reactiveui",
+ "ferroui-system",
+ "syn 2.0.119",
+]
+
+[[package]]
+name = "ferrodock-model-reactiveui"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-controls-recycling-model",
+ "ferrodock-model",
+ "ferroui-reactive",
+ "ferroui-reactiveui",
+ "ferroui-system",
+]
+
+[[package]]
+name = "ferrodock-model-reactiveui-ferro"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-controls-recycling",
+ "ferrodock-model",
+ "ferrodock-model-ferro",
+ "ferrodock-model-reactiveui",
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-reactiveui",
+ "ferroui-system",
+]
+
+[[package]]
+name = "ferrodock-model-reactiveui-services"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-model",
+ "ferrodock-model-reactiveui",
+ "ferroui-reactive",
+ "ferroui-reactiveui",
+ "ferroui-splat",
+ "ferroui-system",
+]
+
+[[package]]
+name = "ferrodock-model-reactiveui-services-ferro"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-model-reactiveui-services",
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-headless",
+ "ferroui-reactive",
+ "ferroui-reactiveui",
+ "ferroui-reactiveui-controls",
+ "ferroui-splat",
+ "ferroui-system",
+]
+
+[[package]]
+name = "ferrodock-reactiveui-sample"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-controls-recycling",
+ "ferrodock-ferro",
+ "ferrodock-ferro-diagnostics",
+ "ferrodock-ferro-themes-browser",
+ "ferrodock-ferro-themes-fluent",
+ "ferrodock-model",
+ "ferrodock-model-ferro",
+ "ferrodock-model-reactiveui",
+ "ferrodock-model-reactiveui-ferro",
+ "ferrodock-serializer-system-text-json",
+ "ferrodock-serializer-system-text-json-reactiveui",
+ "ferrodock-settings",
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-desktop",
+ "ferroui-fonts-inter",
+ "ferroui-headless",
+ "ferroui-markup-xaml",
+ "ferroui-reactive",
+ "ferroui-reactiveui",
+ "ferroui-reactiveui-controls",
+ "ferroui-system",
+ "ferroui-themes-fluent",
+]
+
+[[package]]
+name = "ferrodock-runtime"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+]
+
+[[package]]
+name = "ferrodock-serializer-generated-tests"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-model",
+ "ferrodock-model-reactiveui",
+ "ferrodock-serializer-system-text-json",
+ "ferrodock-serializer-system-text-json-generators",
+ "ferrodock-serializer-system-text-json-generators-rust",
+ "ferroui-build-scan",
+ "serde_json",
+]
+
+[[package]]
+name = "ferrodock-serializer-system-text-json"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-model",
+ "ferrodock-model-reactiveui",
+ "ferroui-system",
+ "ryu",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "ferrodock-serializer-system-text-json-generators"
+version = "0.4.0"
+dependencies = [
+ "serde_json",
+]
+
+[[package]]
+name = "ferrodock-serializer-system-text-json-generators-rust"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-serializer-system-text-json-generators",
+ "ferroui-build-scan",
+ "proc-macro2",
+ "quote",
+ "serde_json",
+ "syn 2.0.119",
+]
+
+[[package]]
+name = "ferrodock-serializer-system-text-json-reactiveui"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-model",
+ "ferrodock-model-reactiveui",
+ "ferrodock-serializer-system-text-json",
+ "ferroui-reactiveui",
+]
+
+[[package]]
+name = "ferrodock-settings"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-model",
+ "ferrodock-model-ferro",
+ "ferrodock-model-reactiveui",
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-headless",
+]
+
+[[package]]
+name = "ferrodock-settings-markup-tests"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-model",
+ "ferrodock-model-ferro",
+ "ferrodock-settings",
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-headless",
+ "ferroui-markup-xaml",
+]
+
+[[package]]
 name = "ferroui"
 version = "0.4.0"
 dependencies = [
@@ -3948,6 +4351,12 @@ name = "rustversion"
 version = "1.0.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf54715a573b99ac80df0bc206da022bcd442c974952c7b9720069370852e21f"
+
+[[package]]
+name = "ryu"
+version = "1.0.23"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9774ba4a74de5f7b1c1451ed6cd5285a32eddb5cccb8cc655a4e50009e06477f"
 
 [[package]]
 name = "safe-area-demo"

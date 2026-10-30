@@ -1,0 +1,13 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:FerroDock.Model.Controls;assembly=FerroDock.Model"
+             x:Class="FerroDock.Ferro.Diagnostics.Controls.UniformGridDockDebugView"
+             x:DataType="controls:IUniformGridDock"
+             x:CompileBindings="True">
+  <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,*">
+    <TextBlock Text="Rows" Grid.Row="0" Grid.Column="0" />
+    <TextBox Text="{Binding Rows, Mode=TwoWay}" Margin="2" Grid.Row="0" Grid.Column="1" />
+    <TextBlock Text="Columns" Grid.Row="1" Grid.Column="0" />
+    <TextBox Text="{Binding Columns, Mode=TwoWay}" Margin="2" Grid.Row="1" Grid.Column="1" />
+  </Grid>
+</UserControl>

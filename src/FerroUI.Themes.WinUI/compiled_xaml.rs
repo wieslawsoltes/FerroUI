@@ -75648,7 +75648,7 @@ fn build_controls_winuicontrols_xaml_deferred_3(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(23,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TransparencyFallback")));
-    rt::register_name(name_scope.as_ref(), "PART_TransparencyFallback", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 23, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TransparencyFallback", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 23, 19)?;
     // Controls/WinUIControls.xaml(23,12) IsHitTestVisible
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_base::input::InputElement::is_hit_test_visible_property(), ::core::clone::Clone::clone(&false), priority_0);
@@ -75668,7 +75668,7 @@ fn build_controls_winuicontrols_xaml_deferred_3(
     border_1.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&visual_layer_manager_0).upcast::<::ferroui_controls::Control>()));
     // Controls/WinUIControls.xaml(25,33) Name
     visual_layer_manager_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_VisualLayerManager")));
-    rt::register_name(name_scope.as_ref(), "PART_VisualLayerManager", ::core::clone::Clone::clone(&visual_layer_manager_0).upcast::<::ferroui_base::FerroObject>(), 25, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_VisualLayerManager", ::std::rc::Rc::new(::core::clone::Clone::clone(&visual_layer_manager_0)), 25, 33)?;
     // Controls/WinUIControls.xaml(26,16) Child
     // Controls/WinUIControls.xaml(26,16) ContentPresenter
     let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
@@ -75676,7 +75676,7 @@ fn build_controls_winuicontrols_xaml_deferred_3(
     visual_layer_manager_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/WinUIControls.xaml(26,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 26, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 26, 33)?;
     // Controls/WinUIControls.xaml(27,33) ContentTemplate
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_template_property(), rt::property(::ferroui_controls::ContentControl::content_template_property()), 27, 33)?;
     // Controls/WinUIControls.xaml(28,33) Content (setter chosen at run time)
@@ -75762,7 +75762,7 @@ fn build_controls_winuicontrols_xaml_deferred_5(
     layout_transform_control_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&visual_layer_manager_0).upcast::<::ferroui_controls::Control>()));
     // Controls/WinUIControls.xaml(23,31) Name
     visual_layer_manager_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_VisualLayerManager")));
-    rt::register_name(name_scope.as_ref(), "PART_VisualLayerManager", ::core::clone::Clone::clone(&visual_layer_manager_0).upcast::<::ferroui_base::FerroObject>(), 23, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_VisualLayerManager", ::std::rc::Rc::new(::core::clone::Clone::clone(&visual_layer_manager_0)), 23, 31)?;
     // Controls/WinUIControls.xaml(24,14) Child
     // Controls/WinUIControls.xaml(24,14) ContentPresenter
     let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
@@ -75770,7 +75770,7 @@ fn build_controls_winuicontrols_xaml_deferred_5(
     visual_layer_manager_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/WinUIControls.xaml(24,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 24, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 24, 31)?;
     // Controls/WinUIControls.xaml(25,31) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 25, 31)?;
     // Controls/WinUIControls.xaml(26,31) ContentTemplate
@@ -75870,7 +75870,7 @@ fn build_controls_winuicontrols_xaml_deferred_7(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(28,21) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TransparencyFallback")));
-    rt::register_name(name_scope.as_ref(), "PART_TransparencyFallback", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 28, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TransparencyFallback", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 28, 21)?;
     // Controls/WinUIControls.xaml(28,14) IsHitTestVisible
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_base::input::InputElement::is_hit_test_visible_property(), ::core::clone::Clone::clone(&false), priority_0);
@@ -75883,7 +75883,7 @@ fn build_controls_winuicontrols_xaml_deferred_7(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&visual_layer_manager_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(29,33) Name
     visual_layer_manager_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_VisualLayerManager")));
-    rt::register_name(name_scope.as_ref(), "PART_VisualLayerManager", ::core::clone::Clone::clone(&visual_layer_manager_0).upcast::<::ferroui_base::FerroObject>(), 29, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_VisualLayerManager", ::std::rc::Rc::new(::core::clone::Clone::clone(&visual_layer_manager_0)), 29, 33)?;
     // Controls/WinUIControls.xaml(30,16) Child
     // Controls/WinUIControls.xaml(30,16) ContentPresenter
     let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
@@ -75891,7 +75891,7 @@ fn build_controls_winuicontrols_xaml_deferred_7(
     visual_layer_manager_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/WinUIControls.xaml(30,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 30, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 30, 33)?;
     // Controls/WinUIControls.xaml(31,33) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 31, 33)?;
     // Controls/WinUIControls.xaml(32,33) ContentTemplate
@@ -75992,7 +75992,7 @@ fn build_controls_winuicontrols_xaml_deferred_10(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(27,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TransparencyFallback")));
-    rt::register_name(name_scope.as_ref(), "PART_TransparencyFallback", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 27, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TransparencyFallback", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 27, 19)?;
     // Controls/WinUIControls.xaml(27,12) IsHitTestVisible
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_base::input::InputElement::is_hit_test_visible_property(), ::core::clone::Clone::clone(&false), priority_0);
@@ -76029,7 +76029,7 @@ fn build_controls_winuicontrols_xaml_deferred_10(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&visual_layer_manager_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(30,31) Name
     visual_layer_manager_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_VisualLayerManager")));
-    rt::register_name(name_scope.as_ref(), "PART_VisualLayerManager", ::core::clone::Clone::clone(&visual_layer_manager_0).upcast::<::ferroui_base::FerroObject>(), 30, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_VisualLayerManager", ::std::rc::Rc::new(::core::clone::Clone::clone(&visual_layer_manager_0)), 30, 31)?;
     // Controls/WinUIControls.xaml(31,14) Child
     // Controls/WinUIControls.xaml(31,14) ContentPresenter
     let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
@@ -76037,7 +76037,7 @@ fn build_controls_winuicontrols_xaml_deferred_10(
     visual_layer_manager_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/WinUIControls.xaml(31,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 31, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 31, 31)?;
     // Controls/WinUIControls.xaml(32,31) ContentTemplate
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_template_property(), rt::property(::ferroui_controls::ContentControl::content_template_property()), 32, 31)?;
     // Controls/WinUIControls.xaml(33,31) Content (setter chosen at run time)
@@ -76191,7 +76191,7 @@ fn build_controls_winuicontrols_xaml_deferred_12(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(23,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Background")));
-    rt::register_name(name_scope.as_ref(), "Background", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 23, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "Background", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 23, 19)?;
     // Controls/WinUIControls.xaml(24,19) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 24, 19)?;
     // Controls/WinUIControls.xaml(25,19) BorderBrush
@@ -76213,7 +76213,7 @@ fn build_controls_winuicontrols_xaml_deferred_12(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(29,19) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("BackgroundPointerOver")));
-    rt::register_name(name_scope.as_ref(), "BackgroundPointerOver", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 29, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "BackgroundPointerOver", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 29, 19)?;
     // Controls/WinUIControls.xaml(30,19) Background
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "ThumbBackgroundPointerOver", 30, 19)?;
     // Controls/WinUIControls.xaml(31,19) BorderBrush
@@ -76239,7 +76239,7 @@ fn build_controls_winuicontrols_xaml_deferred_12(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/WinUIControls.xaml(36,19) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("BackgroundPressed")));
-    rt::register_name(name_scope.as_ref(), "BackgroundPressed", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 36, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "BackgroundPressed", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 36, 19)?;
     // Controls/WinUIControls.xaml(37,19) Background
     rt::bind_dynamic_resource(&context, border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "ThumbBackgroundPressed", 37, 19)?;
     // Controls/WinUIControls.xaml(38,19) BorderBrush
@@ -76364,7 +76364,7 @@ fn build_controls_winuicontrols_xaml_deferred_16(
     text_block_0.begin_init();
     // Controls/WinUIControls.xaml(34,20) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Text")));
-    rt::register_name(name_scope.as_ref(), "PART_Text", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 34, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Text", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 34, 20)?;
     // Controls/WinUIControls.xaml(34,10) HorizontalAlignment
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Stretch, priority_0);
@@ -76418,7 +76418,7 @@ fn build_controls_winuicontrols_xaml_deferred_18(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/WinUIControls.xaml(29,20) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Text")));
-    rt::register_name(name_scope.as_ref(), "PART_Text", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 29, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Text", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 29, 20)?;
     // Controls/WinUIControls.xaml(29,10) HorizontalAlignment
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Stretch, priority_0);
@@ -76484,7 +76484,7 @@ fn build_controls_winuicontrols_xaml_deferred_20(
     content_presenter_0.begin_init();
     // Controls/WinUIControls.xaml(43,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 43, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 43, 27)?;
     // Controls/WinUIControls.xaml(44,27) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 44, 27)?;
     // Controls/WinUIControls.xaml(45,27) BackgroundSizing
@@ -76570,7 +76570,7 @@ fn build_controls_winuicontrols_xaml_deferred_22(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/WinUIControls.xaml(33,27) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 33, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 33, 27)?;
     // Controls/WinUIControls.xaml(34,27) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 34, 27)?;
     rt::invoked(items_presenter_0.try_end_init(), 33, 12)?;
@@ -76631,7 +76631,7 @@ fn build_controls_winuicontrols_xaml_deferred_24(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(35,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 35, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 35, 17)?;
     // Controls/WinUIControls.xaml(36,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 36, 17)?;
     // Controls/WinUIControls.xaml(37,17) BackgroundSizing
@@ -76669,7 +76669,7 @@ fn build_controls_winuicontrols_xaml_deferred_24(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/WinUIControls.xaml(43,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HeaderPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_HeaderPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 43, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HeaderPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 43, 31)?;
     // Controls/WinUIControls.xaml(43,14) Row
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 0_i32, priority_0);
@@ -76723,7 +76723,7 @@ fn build_controls_winuicontrols_xaml_deferred_24(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(56,31) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 56, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 56, 31)?;
     // Controls/WinUIControls.xaml(56,14) Row
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_6);
@@ -76857,7 +76857,7 @@ fn build_controls_winuicontrols_xaml_deferred_26(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/WinUIControls.xaml(62,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootGrid")));
-    rt::register_name(name_scope.as_ref(), "RootGrid", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 62, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 62, 15)?;
     // Controls/WinUIControls.xaml(62,10) RowDefinitions
     let row_definitions_0 = ::ferroui_controls::RowDefinitions::__markup_new_0();
     rt::invoked(<::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::RowDefinition>>>::__markup_set_Capacity(&row_definitions_0, 2_i32), 62, 33)?;
@@ -76877,7 +76877,7 @@ fn build_controls_winuicontrols_xaml_deferred_26(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(63,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ToggleButtonGrid")));
-    rt::register_name(name_scope.as_ref(), "ToggleButtonGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 63, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "ToggleButtonGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 63, 19)?;
     // Controls/WinUIControls.xaml(63,12) Row
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 0_i32, priority_0);
@@ -76921,7 +76921,7 @@ fn build_controls_winuicontrols_xaml_deferred_26(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/WinUIControls.xaml(72,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HeaderPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_HeaderPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 72, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HeaderPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 72, 31)?;
     // Controls/WinUIControls.xaml(73,31) Content (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_3 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::HeaderedContentControl::header_property()));
@@ -76976,7 +76976,7 @@ fn build_controls_winuicontrols_xaml_deferred_26(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(80,19) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ExpanderContent")));
-    rt::register_name(name_scope.as_ref(), "ExpanderContent", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 80, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "ExpanderContent", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 80, 19)?;
     // Controls/WinUIControls.xaml(80,12) Row
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_6);
@@ -77009,7 +77009,7 @@ fn build_controls_winuicontrols_xaml_deferred_26(
     border_1.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>()));
     // Controls/WinUIControls.xaml(89,31) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 89, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 89, 31)?;
     // Controls/WinUIControls.xaml(90,31) Content (setter chosen at run time)
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_12 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -77108,7 +77108,7 @@ fn build_controls_winuicontrols_xaml_deferred_29(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(36,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 36, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 36, 29)?;
     // Controls/WinUIControls.xaml(37,29) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 37, 29)?;
     // Controls/WinUIControls.xaml(38,29) BackgroundSizing
@@ -77136,7 +77136,7 @@ fn build_controls_winuicontrols_xaml_deferred_29(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(46,29) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter2")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter2", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 46, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter2", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 46, 29)?;
     // Controls/WinUIControls.xaml(47,29) Background
     rt::bind_template_binding(content_presenter_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 47, 29)?;
     // Controls/WinUIControls.xaml(48,29) BackgroundSizing
@@ -77199,7 +77199,7 @@ fn build_controls_winuicontrols_xaml_deferred_31(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/WinUIControls.xaml(34,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HitTestBox")));
-    rt::register_name(name_scope.as_ref(), "HitTestBox", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 34, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "HitTestBox", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 34, 15)?;
     // Controls/WinUIControls.xaml(34,10) Width
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     grid_0.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 30.24_f64, priority_0);
@@ -77217,7 +77217,7 @@ fn build_controls_winuicontrols_xaml_deferred_31(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(35,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Indicator")));
-    rt::register_name(name_scope.as_ref(), "PART_Indicator", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 35, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Indicator", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 35, 19)?;
     // Controls/WinUIControls.xaml(35,12) Width
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 1.0_f64, priority_3);
@@ -77240,7 +77240,7 @@ fn build_controls_winuicontrols_xaml_deferred_31(
     context.push_parent(rt::to_value(ellipse_0.clone()));
     // Controls/WinUIControls.xaml(40,20) Name
     ellipse_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("EllipseExternal")));
-    rt::register_name(name_scope.as_ref(), "EllipseExternal", ::core::clone::Clone::clone(&ellipse_0).upcast::<::ferroui_base::FerroObject>(), 40, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "EllipseExternal", ::std::rc::Rc::new(::core::clone::Clone::clone(&ellipse_0)), 40, 20)?;
     // Controls/WinUIControls.xaml(40,12) Width
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     ellipse_0.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 18.14_f64, priority_7);
@@ -77266,7 +77266,7 @@ fn build_controls_winuicontrols_xaml_deferred_31(
     context.push_parent(rt::to_value(ellipse_1.clone()));
     // Controls/WinUIControls.xaml(46,20) Name
     ellipse_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("EllipseInternal")));
-    rt::register_name(name_scope.as_ref(), "EllipseInternal", ::core::clone::Clone::clone(&ellipse_1).upcast::<::ferroui_base::FerroObject>(), 46, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "EllipseInternal", ::std::rc::Rc::new(::core::clone::Clone::clone(&ellipse_1)), 46, 20)?;
     // Controls/WinUIControls.xaml(46,12) Width
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     ellipse_1.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 13.98_f64, priority_11);
@@ -77379,7 +77379,7 @@ fn build_controls_winuicontrols_xaml_deferred_34(
     border_0.begin_init();
     // Controls/WinUIControls.xaml(36,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SplitterBorder")));
-    rt::register_name(name_scope.as_ref(), "SplitterBorder", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 36, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "SplitterBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 36, 17)?;
     // Controls/WinUIControls.xaml(37,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 37, 17)?;
     // Controls/WinUIControls.xaml(38,17) BorderBrush
@@ -78187,7 +78187,7 @@ fn build_controls_winuicontrols_xaml_deferred_36(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(74,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("OuterBorder")));
-    rt::register_name(name_scope.as_ref(), "OuterBorder", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 74, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "OuterBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 74, 19)?;
     // Controls/WinUIControls.xaml(75,19) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 75, 19)?;
     // Controls/WinUIControls.xaml(76,19) BorderBrush
@@ -78211,7 +78211,7 @@ fn build_controls_winuicontrols_xaml_deferred_36(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(81,19) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("InnerBorder")));
-    rt::register_name(name_scope.as_ref(), "InnerBorder", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 81, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "InnerBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 81, 19)?;
     // Controls/WinUIControls.xaml(82,19) Margin
     rt::bind_template_binding(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()), 82, 19)?;
     // Controls/WinUIControls.xaml(81,12) BorderThickness
@@ -78242,7 +78242,7 @@ fn build_controls_winuicontrols_xaml_deferred_36(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/WinUIControls.xaml(87,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 87, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 87, 31)?;
     // Controls/WinUIControls.xaml(88,31) Content (setter chosen at run time)
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_6 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -78278,7 +78278,7 @@ fn build_controls_winuicontrols_xaml_deferred_36(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/WinUIControls.xaml(97,17) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("BlackoutStrikethrough")));
-    rt::register_name(name_scope.as_ref(), "BlackoutStrikethrough", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 97, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "BlackoutStrikethrough", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 97, 17)?;
     // Controls/WinUIControls.xaml(97,12) Data
     let value_1 = rt::invoked(::ferroui_base::media::Geometry::__markup_parse(::std::string::String::from("M 0,0 L 18,18")), 98, 17)?;
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
@@ -78311,7 +78311,7 @@ fn build_controls_winuicontrols_xaml_deferred_36(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/WinUIControls.xaml(105,19) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("FocusVisual")));
-    rt::register_name(name_scope.as_ref(), "FocusVisual", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 105, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "FocusVisual", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 105, 19)?;
     // Controls/WinUIControls.xaml(105,12) Margin
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(-3.0_f64, -3.0_f64, -3.0_f64, -3.0_f64), priority_12);
@@ -78794,7 +78794,7 @@ fn build_controls_winuicontrols_xaml_deferred_38(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(62,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("OuterBorder")));
-    rt::register_name(name_scope.as_ref(), "OuterBorder", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 62, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "OuterBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 62, 19)?;
     // Controls/WinUIControls.xaml(63,19) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 63, 19)?;
     // Controls/WinUIControls.xaml(64,19) BorderBrush
@@ -78828,7 +78828,7 @@ fn build_controls_winuicontrols_xaml_deferred_38(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/WinUIControls.xaml(70,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 70, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 70, 31)?;
     // Controls/WinUIControls.xaml(71,31) Content (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_5 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -78864,7 +78864,7 @@ fn build_controls_winuicontrols_xaml_deferred_38(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(79,19) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("FocusVisual")));
-    rt::register_name(name_scope.as_ref(), "FocusVisual", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 79, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "FocusVisual", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 79, 19)?;
     // Controls/WinUIControls.xaml(79,12) Margin
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(-3.0_f64, -3.0_f64, -3.0_f64, -3.0_f64), priority_3);
@@ -79253,7 +79253,7 @@ fn build_controls_winuicontrols_xaml_deferred_40(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(53,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentRoot")));
-    rt::register_name(name_scope.as_ref(), "ContentRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 53, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 53, 17)?;
     // Controls/WinUIControls.xaml(53,10) VerticalAlignment
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Top, priority_0);
@@ -79333,7 +79333,7 @@ fn build_controls_winuicontrols_xaml_deferred_40(
     context.push_parent(rt::to_value(grid_1.clone()));
     // Controls/WinUIControls.xaml(68,21) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("StandardIconArea")));
-    rt::register_name(name_scope.as_ref(), "StandardIconArea", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 68, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "StandardIconArea", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 68, 21)?;
     // Controls/WinUIControls.xaml(68,16) IsVisible
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     grid_1.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_4);
@@ -79346,7 +79346,7 @@ fn build_controls_winuicontrols_xaml_deferred_40(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/WinUIControls.xaml(69,28) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("IconBackground")));
-    rt::register_name(name_scope.as_ref(), "IconBackground", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 69, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "IconBackground", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 69, 28)?;
     // Controls/WinUIControls.xaml(69,18) VerticalAlignment
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Top, priority_5);
@@ -79403,7 +79403,7 @@ fn build_controls_winuicontrols_xaml_deferred_40(
     context.push_parent(rt::to_value(text_block_1.clone()));
     // Controls/WinUIControls.xaml(76,28) Name
     text_block_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("StandardIcon")));
-    rt::register_name(name_scope.as_ref(), "StandardIcon", ::core::clone::Clone::clone(&text_block_1).upcast::<::ferroui_base::FerroObject>(), 76, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "StandardIcon", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_1)), 76, 28)?;
     // Controls/WinUIControls.xaml(76,18) VerticalAlignment
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     text_block_1.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Top, priority_9);
@@ -79462,7 +79462,7 @@ fn build_controls_winuicontrols_xaml_deferred_40(
     context.push_parent(rt::to_value(viewbox_0.clone()));
     // Controls/WinUIControls.xaml(84,24) Name
     viewbox_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("UserIconBox")));
-    rt::register_name(name_scope.as_ref(), "UserIconBox", ::core::clone::Clone::clone(&viewbox_0).upcast::<::ferroui_base::FerroObject>(), 84, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "UserIconBox", ::std::rc::Rc::new(::core::clone::Clone::clone(&viewbox_0)), 84, 24)?;
     // Controls/WinUIControls.xaml(84,16) Column
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     viewbox_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_13);
@@ -79545,7 +79545,7 @@ fn build_controls_winuicontrols_xaml_deferred_40(
     context.push_parent(rt::to_value(text_block_2.clone()));
     // Controls/WinUIControls.xaml(96,28) Name
     text_block_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Title")));
-    rt::register_name(name_scope.as_ref(), "Title", ::core::clone::Clone::clone(&text_block_2).upcast::<::ferroui_base::FerroObject>(), 96, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "Title", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_2)), 96, 28)?;
     // Controls/WinUIControls.xaml(97,28) Text
     rt::bind_template_binding(text_block_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), rt::property(::ferroui_controls::InfoBar::title_property()), 97, 28)?;
     // Controls/WinUIControls.xaml(98,28) Foreground
@@ -79612,7 +79612,7 @@ fn build_controls_winuicontrols_xaml_deferred_40(
     context.push_parent(rt::to_value(text_block_3.clone()));
     // Controls/WinUIControls.xaml(104,28) Name
     text_block_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Message")));
-    rt::register_name(name_scope.as_ref(), "Message", ::core::clone::Clone::clone(&text_block_3).upcast::<::ferroui_base::FerroObject>(), 104, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "Message", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_3)), 104, 28)?;
     // Controls/WinUIControls.xaml(105,28) Text
     rt::bind_template_binding(text_block_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), rt::property(::ferroui_controls::InfoBar::message_property()), 105, 28)?;
     // Controls/WinUIControls.xaml(106,28) Foreground
@@ -79745,7 +79745,7 @@ fn build_controls_winuicontrols_xaml_deferred_40(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_8, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(124,33) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 124, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 124, 33)?;
     // Controls/WinUIControls.xaml(124,16) Column
     let priority_34 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_34);
@@ -79777,7 +79777,7 @@ fn build_controls_winuicontrols_xaml_deferred_40(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/WinUIControls.xaml(130,23) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("CloseButton")));
-    rt::register_name(name_scope.as_ref(), "CloseButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 130, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "CloseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 130, 23)?;
     // Controls/WinUIControls.xaml(130,16) Column
     let priority_38 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_38);
@@ -79935,7 +79935,7 @@ fn build_controls_winuicontrols_xaml_deferred_42(
     grid_0.begin_init();
     // Controls/WinUIControls.xaml(54,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 54, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 54, 15)?;
     // Controls/WinUIControls.xaml(54,10) Background
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     grid_0.set_value_with_priority(::ferroui_controls::Panel::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_0);
@@ -79947,7 +79947,7 @@ fn build_controls_winuicontrols_xaml_deferred_42(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&viewbox_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(56,20) Name
     viewbox_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LottiePlayer")));
-    rt::register_name(name_scope.as_ref(), "LottiePlayer", ::core::clone::Clone::clone(&viewbox_0).upcast::<::ferroui_base::FerroObject>(), 56, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "LottiePlayer", ::std::rc::Rc::new(::core::clone::Clone::clone(&viewbox_0)), 56, 20)?;
     // Controls/WinUIControls.xaml(56,12) Stretch
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     viewbox_0.set_value_with_priority(::ferroui_controls::Viewbox::stretch_property(), ::ferroui_base::media::Stretch::Fill, priority_1);
@@ -79970,7 +79970,7 @@ fn build_controls_winuicontrols_xaml_deferred_42(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&arc_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(58,20) Name
     arc_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Track")));
-    rt::register_name(name_scope.as_ref(), "PART_Track", ::core::clone::Clone::clone(&arc_0).upcast::<::ferroui_base::FerroObject>(), 58, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Track", ::std::rc::Rc::new(::core::clone::Clone::clone(&arc_0)), 58, 20)?;
     // Controls/WinUIControls.xaml(58,16) Width
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     arc_0.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 77.5_f64, priority_4);
@@ -80000,7 +80000,7 @@ fn build_controls_winuicontrols_xaml_deferred_42(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&arc_1).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(66,20) Name
     arc_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Indicator")));
-    rt::register_name(name_scope.as_ref(), "PART_Indicator", ::core::clone::Clone::clone(&arc_1).upcast::<::ferroui_base::FerroObject>(), 66, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Indicator", ::std::rc::Rc::new(::core::clone::Clone::clone(&arc_1)), 66, 20)?;
     // Controls/WinUIControls.xaml(66,16) Width
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
     arc_1.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 77.5_f64, priority_10);
@@ -80175,7 +80175,7 @@ fn build_controls_winuicontrols_xaml_deferred_44(
     context.push_parent(rt::to_value(reversible_stack_panel_0.clone()));
     // Controls/WinUIControls.xaml(30,31) Name
     reversible_stack_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Items")));
-    rt::register_name(name_scope.as_ref(), "PART_Items", ::core::clone::Clone::clone(&reversible_stack_panel_0).upcast::<::ferroui_base::FerroObject>(), 30, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Items", ::std::rc::Rc::new(::core::clone::Clone::clone(&reversible_stack_panel_0)), 30, 31)?;
     // Controls/WinUIControls.xaml(30,10) Margin
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     reversible_stack_panel_0.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(12.0_f64, 12.0_f64, 12.0_f64, 12.0_f64), priority_0);
@@ -80517,7 +80517,7 @@ fn build_controls_winuicontrols_xaml_deferred_48(
     border_0.begin_init();
     // Controls/WinUIControls.xaml(31,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("CellWrapper")));
-    rt::register_name(name_scope.as_ref(), "CellWrapper", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 31, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "CellWrapper", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 31, 17)?;
     // Controls/WinUIControls.xaml(32,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 32, 17)?;
     // Controls/WinUIControls.xaml(33,17) BorderBrush
@@ -80536,7 +80536,7 @@ fn build_controls_winuicontrols_xaml_deferred_48(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/WinUIControls.xaml(37,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 37, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 37, 29)?;
     // Controls/WinUIControls.xaml(38,29) Content (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_4 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -80877,7 +80877,7 @@ fn build_controls_winuicontrols_xaml_deferred_50(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(43,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_RootBorder")));
-    rt::register_name(name_scope.as_ref(), "PART_RootBorder", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 43, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_RootBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 43, 19)?;
     // Controls/WinUIControls.xaml(44,19) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 44, 19)?;
     // Controls/WinUIControls.xaml(45,19) BorderThickness
@@ -80904,7 +80904,7 @@ fn build_controls_winuicontrols_xaml_deferred_50(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&panel_2).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(52,22) Name
     panel_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_CellForegroundPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_CellForegroundPresenter", ::core::clone::Clone::clone(&panel_2).upcast::<::ferroui_base::FerroObject>(), 52, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_CellForegroundPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_2)), 52, 22)?;
     // Controls/WinUIControls.xaml(53,18) Children
     let children_collection_2 = ::ferroui_controls::Panel::__markup_get_Children(&panel_2);
     // Controls/WinUIControls.xaml(53,18) TableViewCellsPresenter
@@ -80913,7 +80913,7 @@ fn build_controls_winuicontrols_xaml_deferred_50(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&table_view_cells_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(53,42) Name
     table_view_cells_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_CellsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_CellsPresenter", ::core::clone::Clone::clone(&table_view_cells_presenter_0).upcast::<::ferroui_base::FerroObject>(), 53, 42)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_CellsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&table_view_cells_presenter_0)), 53, 42)?;
     // Controls/WinUIControls.xaml(53,18) HorizontalAlignment
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     table_view_cells_presenter_0.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Left, priority_0);
@@ -80928,7 +80928,7 @@ fn build_controls_winuicontrols_xaml_deferred_50(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/WinUIControls.xaml(58,26) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SelectionIndicator")));
-    rt::register_name(name_scope.as_ref(), "PART_SelectionIndicator", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 58, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SelectionIndicator", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 58, 26)?;
     // Controls/WinUIControls.xaml(58,16) Width
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_0.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 3.0_f64, priority_1);
@@ -80985,7 +80985,7 @@ fn build_controls_winuicontrols_xaml_deferred_50(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(78,19) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_GridLineBorder")));
-    rt::register_name(name_scope.as_ref(), "PART_GridLineBorder", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 78, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_GridLineBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 78, 19)?;
     // Controls/WinUIControls.xaml(79,19) BorderBrush
     rt::bind_template_binding(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::border_brush_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()), 79, 19)?;
     // Controls/WinUIControls.xaml(80,19) BorderThickness
@@ -82002,7 +82002,7 @@ fn build_controls_winuicontrols_xaml_deferred_52(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(78,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 78, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 78, 17)?;
     // Controls/WinUIControls.xaml(79,17) Padding
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Decorator::padding_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), 79, 17)?;
     // Controls/WinUIControls.xaml(78,10) UseLayoutRounding
@@ -82036,7 +82036,7 @@ fn build_controls_winuicontrols_xaml_deferred_52(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(82,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("BottomBorderLine")));
-    rt::register_name(name_scope.as_ref(), "BottomBorderLine", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 82, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "BottomBorderLine", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 82, 21)?;
     // Controls/WinUIControls.xaml(82,14) ColumnSpan
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 3_i32, priority_1);
@@ -82059,7 +82059,7 @@ fn build_controls_winuicontrols_xaml_deferred_52(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/WinUIControls.xaml(87,19) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LeftRadiusRenderArc")));
-    rt::register_name(name_scope.as_ref(), "LeftRadiusRenderArc", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 87, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "LeftRadiusRenderArc", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 87, 19)?;
     // Controls/WinUIControls.xaml(87,14) IsVisible
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     path_0.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_4);
@@ -82092,7 +82092,7 @@ fn build_controls_winuicontrols_xaml_deferred_52(
     context.push_parent(rt::to_value(path_1.clone()));
     // Controls/WinUIControls.xaml(95,19) Name
     path_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RightRadiusRenderArc")));
-    rt::register_name(name_scope.as_ref(), "RightRadiusRenderArc", ::core::clone::Clone::clone(&path_1).upcast::<::ferroui_base::FerroObject>(), 95, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "RightRadiusRenderArc", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_1)), 95, 19)?;
     // Controls/WinUIControls.xaml(95,14) Column
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
     path_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_10);
@@ -82128,7 +82128,7 @@ fn build_controls_winuicontrols_xaml_deferred_52(
     context.push_parent(rt::to_value(grid_1.clone()));
     // Controls/WinUIControls.xaml(105,19) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SelectedBackgroundPath")));
-    rt::register_name(name_scope.as_ref(), "SelectedBackgroundPath", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 105, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "SelectedBackgroundPath", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 105, 19)?;
     // Controls/WinUIControls.xaml(105,14) ColumnSpan
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
     grid_1.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 3_i32, priority_17);
@@ -82237,7 +82237,7 @@ fn build_controls_winuicontrols_xaml_deferred_52(
     context.push_parent(rt::to_value(border_3.clone()));
     // Controls/WinUIControls.xaml(125,21) Name
     border_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TabSeparator")));
-    rt::register_name(name_scope.as_ref(), "TabSeparator", ::core::clone::Clone::clone(&border_3).upcast::<::ferroui_base::FerroObject>(), 125, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "TabSeparator", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_3)), 125, 21)?;
     // Controls/WinUIControls.xaml(125,14) Column
     let priority_30 = ::ferroui_base::data::BindingPriority::Template;
     border_3.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_30);
@@ -82262,7 +82262,7 @@ fn build_controls_winuicontrols_xaml_deferred_52(
     context.push_parent(rt::to_value(border_4.clone()));
     // Controls/WinUIControls.xaml(132,21) Name
     border_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TabContainer")));
-    rt::register_name(name_scope.as_ref(), "TabContainer", ::core::clone::Clone::clone(&border_4).upcast::<::ferroui_base::FerroObject>(), 132, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "TabContainer", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_4)), 132, 21)?;
     // Controls/WinUIControls.xaml(132,14) BackgroundSizing
     let priority_33 = ::ferroui_base::data::BindingPriority::Template;
     border_4.set_value_with_priority(::ferroui_controls::Border::background_sizing_property(), ::ferroui_base::media::BackgroundSizing::InnerBorderEdge, priority_33);
@@ -82305,7 +82305,7 @@ fn build_controls_winuicontrols_xaml_deferred_52(
     context.push_parent(rt::to_value(grid_2.clone()));
     // Controls/WinUIControls.xaml(140,21) Name
     grid_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TabContentGrid")));
-    rt::register_name(name_scope.as_ref(), "TabContentGrid", ::core::clone::Clone::clone(&grid_2).upcast::<::ferroui_base::FerroObject>(), 140, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "TabContentGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_2)), 140, 21)?;
     // Controls/WinUIControls.xaml(140,16) ColumnDefinitions
     let column_definitions_2 = ::ferroui_controls::ColumnDefinitions::__markup_new_0();
     rt::invoked(<::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::ColumnDefinition>>>::__markup_set_Capacity(&column_definitions_2, 2_i32), 141, 21)?;
@@ -82328,7 +82328,7 @@ fn build_controls_winuicontrols_xaml_deferred_52(
     context.push_parent(rt::to_value(viewbox_0.clone()));
     // Controls/WinUIControls.xaml(143,26) Name
     viewbox_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("IconBox")));
-    rt::register_name(name_scope.as_ref(), "IconBox", ::core::clone::Clone::clone(&viewbox_0).upcast::<::ferroui_base::FerroObject>(), 143, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "IconBox", ::std::rc::Rc::new(::core::clone::Clone::clone(&viewbox_0)), 143, 26)?;
     // Controls/WinUIControls.xaml(144,26) MaxWidth
     rt::bind_dynamic_resource(&context, viewbox_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::max_width_property(), "TabViewItemHeaderIconSize", 144, 26)?;
     // Controls/WinUIControls.xaml(145,26) MaxHeight
@@ -82350,7 +82350,7 @@ fn build_controls_winuicontrols_xaml_deferred_52(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/WinUIControls.xaml(148,37) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("IconControl")));
-    rt::register_name(name_scope.as_ref(), "IconControl", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 148, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "IconControl", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 148, 37)?;
     // Controls/WinUIControls.xaml(149,37) Content (setter chosen at run time)
     let priority_37 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_7 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TabItem::icon_property()));
@@ -82398,7 +82398,7 @@ fn build_controls_winuicontrols_xaml_deferred_52(
     context.push_parent(rt::to_value(content_presenter_1.clone()));
     // Controls/WinUIControls.xaml(162,35) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 162, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 162, 35)?;
     // Controls/WinUIControls.xaml(162,18) Column
     let priority_38 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_38);
@@ -82453,7 +82453,7 @@ fn build_controls_winuicontrols_xaml_deferred_53(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(271,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 271, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 271, 19)?;
     // Controls/WinUIControls.xaml(272,19) MinHeight
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_height_property(), "NavigationViewItemOnLeftMinHeight", 272, 19)?;
     // Controls/WinUIControls.xaml(273,19) Background
@@ -82470,7 +82470,7 @@ fn build_controls_winuicontrols_xaml_deferred_53(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/WinUIControls.xaml(276,20) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PresenterContentRootGrid")));
-    rt::register_name(name_scope.as_ref(), "PresenterContentRootGrid", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 276, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PresenterContentRootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 276, 20)?;
     // Controls/WinUIControls.xaml(277,16) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(&panel_0);
     // Controls/WinUIControls.xaml(277,16) Panel
@@ -82493,7 +82493,7 @@ fn build_controls_winuicontrols_xaml_deferred_53(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/WinUIControls.xaml(278,28) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SelectionIndicator")));
-    rt::register_name(name_scope.as_ref(), "SelectionIndicator", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 278, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "SelectionIndicator", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 278, 28)?;
     // Controls/WinUIControls.xaml(279,28) Width
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), "NavigationViewSelectionIndicatorWidth", 279, 28)?;
     // Controls/WinUIControls.xaml(280,28) Height
@@ -82540,7 +82540,7 @@ fn build_controls_winuicontrols_xaml_deferred_53(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/WinUIControls.xaml(286,21) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentGrid")));
-    rt::register_name(name_scope.as_ref(), "ContentGrid", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 286, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 286, 21)?;
     // Controls/WinUIControls.xaml(287,21) MinHeight
     rt::bind_dynamic_resource(&context, grid_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_height_property(), "NavigationViewItemOnLeftMinHeight", 287, 21)?;
     // Controls/WinUIControls.xaml(286,16) Margin
@@ -82568,7 +82568,7 @@ fn build_controls_winuicontrols_xaml_deferred_53(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(293,25) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("IconColumn")));
-    rt::register_name(name_scope.as_ref(), "IconColumn", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 293, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "IconColumn", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 293, 25)?;
     // Controls/WinUIControls.xaml(293,18) Width
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 40.0_f64, priority_7);
@@ -82587,7 +82587,7 @@ fn build_controls_winuicontrols_xaml_deferred_53(
     context.push_parent(rt::to_value(viewbox_0.clone()));
     // Controls/WinUIControls.xaml(296,28) Name
     viewbox_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("IconBox")));
-    rt::register_name(name_scope.as_ref(), "IconBox", ::core::clone::Clone::clone(&viewbox_0).upcast::<::ferroui_base::FerroObject>(), 296, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "IconBox", ::std::rc::Rc::new(::core::clone::Clone::clone(&viewbox_0)), 296, 28)?;
     // Controls/WinUIControls.xaml(297,28) Height
     rt::bind_dynamic_resource(&context, viewbox_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), "NavigationViewItemOnLeftIconBoxHeight", 297, 28)?;
     // Controls/WinUIControls.xaml(296,20) HorizontalAlignment
@@ -82603,7 +82603,7 @@ fn build_controls_winuicontrols_xaml_deferred_53(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/WinUIControls.xaml(300,39) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Icon")));
-    rt::register_name(name_scope.as_ref(), "Icon", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 300, 39)?;
+    rt::register_name_value(name_scope.as_ref(), "Icon", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 300, 39)?;
     // Controls/WinUIControls.xaml(301,39) Content (setter chosen at run time)
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_3 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TabItem::icon_property()));
@@ -82654,7 +82654,7 @@ fn build_controls_winuicontrols_xaml_deferred_53(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(316,25) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("IconColumnCollapsed")));
-    rt::register_name(name_scope.as_ref(), "IconColumnCollapsed", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 316, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "IconColumnCollapsed", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 316, 25)?;
     // Controls/WinUIControls.xaml(316,18) Width
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 8.0_f64, priority_10);
@@ -82675,7 +82675,7 @@ fn build_controls_winuicontrols_xaml_deferred_53(
     context.push_parent(rt::to_value(content_presenter_1.clone()));
     // Controls/WinUIControls.xaml(319,35) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 319, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 319, 35)?;
     // Controls/WinUIControls.xaml(319,18) Column
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_11);
@@ -82728,7 +82728,7 @@ fn build_controls_winuicontrols_xaml_deferred_54(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(400,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 400, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 400, 19)?;
     // Controls/WinUIControls.xaml(401,19) MinHeight
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_height_property(), "NavigationViewItemOnLeftMinHeight", 401, 19)?;
     // Controls/WinUIControls.xaml(402,19) Background
@@ -82745,7 +82745,7 @@ fn build_controls_winuicontrols_xaml_deferred_54(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/WinUIControls.xaml(405,20) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PresenterContentRootGrid")));
-    rt::register_name(name_scope.as_ref(), "PresenterContentRootGrid", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 405, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PresenterContentRootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 405, 20)?;
     // Controls/WinUIControls.xaml(406,16) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(&panel_0);
     // Controls/WinUIControls.xaml(406,16) Panel
@@ -82768,7 +82768,7 @@ fn build_controls_winuicontrols_xaml_deferred_54(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/WinUIControls.xaml(407,28) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SelectionIndicator")));
-    rt::register_name(name_scope.as_ref(), "SelectionIndicator", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 407, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "SelectionIndicator", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 407, 28)?;
     // Controls/WinUIControls.xaml(408,28) Width
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), "NavigationViewSelectionIndicatorWidth", 408, 28)?;
     // Controls/WinUIControls.xaml(409,28) Height
@@ -82815,7 +82815,7 @@ fn build_controls_winuicontrols_xaml_deferred_54(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/WinUIControls.xaml(415,21) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentGrid")));
-    rt::register_name(name_scope.as_ref(), "ContentGrid", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 415, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 415, 21)?;
     // Controls/WinUIControls.xaml(416,21) MinHeight
     rt::bind_dynamic_resource(&context, grid_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_height_property(), "NavigationViewItemOnLeftMinHeight", 416, 21)?;
     // Controls/WinUIControls.xaml(415,16) Margin
@@ -82843,7 +82843,7 @@ fn build_controls_winuicontrols_xaml_deferred_54(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(422,25) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("IconColumn")));
-    rt::register_name(name_scope.as_ref(), "IconColumn", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 422, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "IconColumn", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 422, 25)?;
     // Controls/WinUIControls.xaml(422,18) Width
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 40.0_f64, priority_7);
@@ -82862,7 +82862,7 @@ fn build_controls_winuicontrols_xaml_deferred_54(
     context.push_parent(rt::to_value(viewbox_0.clone()));
     // Controls/WinUIControls.xaml(425,28) Name
     viewbox_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("IconBox")));
-    rt::register_name(name_scope.as_ref(), "IconBox", ::core::clone::Clone::clone(&viewbox_0).upcast::<::ferroui_base::FerroObject>(), 425, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "IconBox", ::std::rc::Rc::new(::core::clone::Clone::clone(&viewbox_0)), 425, 28)?;
     // Controls/WinUIControls.xaml(426,28) Height
     rt::bind_dynamic_resource(&context, viewbox_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), "NavigationViewItemOnLeftIconBoxHeight", 426, 28)?;
     // Controls/WinUIControls.xaml(425,20) HorizontalAlignment
@@ -82878,7 +82878,7 @@ fn build_controls_winuicontrols_xaml_deferred_54(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/WinUIControls.xaml(429,39) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Icon")));
-    rt::register_name(name_scope.as_ref(), "Icon", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 429, 39)?;
+    rt::register_name_value(name_scope.as_ref(), "Icon", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 429, 39)?;
     // Controls/WinUIControls.xaml(430,39) Content (setter chosen at run time)
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_3 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TabItem::icon_property()));
@@ -82929,7 +82929,7 @@ fn build_controls_winuicontrols_xaml_deferred_54(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(445,25) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("IconColumnCollapsed")));
-    rt::register_name(name_scope.as_ref(), "IconColumnCollapsed", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 445, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "IconColumnCollapsed", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 445, 25)?;
     // Controls/WinUIControls.xaml(445,18) Width
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 8.0_f64, priority_10);
@@ -82950,7 +82950,7 @@ fn build_controls_winuicontrols_xaml_deferred_54(
     context.push_parent(rt::to_value(content_presenter_1.clone()));
     // Controls/WinUIControls.xaml(448,35) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 448, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 448, 35)?;
     // Controls/WinUIControls.xaml(448,18) Column
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_11);
@@ -83036,7 +83036,7 @@ fn build_controls_winuicontrols_xaml_deferred_56(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(30,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TopCommandBar")));
-    rt::register_name(name_scope.as_ref(), "PART_TopCommandBar", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 30, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TopCommandBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 30, 29)?;
     // Controls/WinUIControls.xaml(30,12) Dock
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Top, priority_0);
@@ -83055,7 +83055,7 @@ fn build_controls_winuicontrols_xaml_deferred_56(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(34,29) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_BottomCommandBar")));
-    rt::register_name(name_scope.as_ref(), "PART_BottomCommandBar", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 34, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_BottomCommandBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 34, 29)?;
     // Controls/WinUIControls.xaml(34,12) Dock
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Bottom, priority_3);
@@ -83074,7 +83074,7 @@ fn build_controls_winuicontrols_xaml_deferred_56(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(38,29) Name
     content_presenter_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_base::FerroObject>(), 38, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_2)), 38, 29)?;
     // Controls/WinUIControls.xaml(39,29) HorizontalContentAlignment
     rt::bind_template_binding(content_presenter_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::horizontal_content_alignment_property(), rt::property(::ferroui_controls::ContentPage::horizontal_content_alignment_property()), 39, 29)?;
     // Controls/WinUIControls.xaml(40,29) VerticalContentAlignment
@@ -83145,7 +83145,7 @@ fn build_controls_winuicontrols_xaml_deferred_58(
     content_presenter_0.begin_init();
     // Controls/WinUIControls.xaml(33,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 33, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 33, 27)?;
     // Controls/WinUIControls.xaml(34,27) Content (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_0 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -83213,7 +83213,7 @@ fn build_controls_winuicontrols_xaml_deferred_60(
     carousel_0.begin_init();
     // Controls/WinUIControls.xaml(33,19) Name
     carousel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Carousel")));
-    rt::register_name(name_scope.as_ref(), "PART_Carousel", ::core::clone::Clone::clone(&carousel_0).upcast::<::ferroui_base::FerroObject>(), 33, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Carousel", ::std::rc::Rc::new(::core::clone::Clone::clone(&carousel_0)), 33, 19)?;
     // Controls/WinUIControls.xaml(34,19) Background
     rt::bind_template_binding(carousel_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 34, 19)?;
     // Controls/WinUIControls.xaml(35,19) ItemTemplate
@@ -83429,7 +83429,7 @@ fn build_controls_winuicontrols_xaml_deferred_62(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(54,21) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("BorderElement")));
-    rt::register_name(name_scope.as_ref(), "BorderElement", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 54, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "BorderElement", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 54, 21)?;
     // Controls/WinUIControls.xaml(55,21) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 55, 21)?;
     // Controls/WinUIControls.xaml(56,21) BorderBrush
@@ -83464,7 +83464,7 @@ fn build_controls_winuicontrols_xaml_deferred_62(
     context.push_parent(rt::to_value(stack_panel_0.clone()));
     // Controls/WinUIControls.xaml(63,27) Name
     stack_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SpinButtons")));
-    rt::register_name(name_scope.as_ref(), "SpinButtons", ::core::clone::Clone::clone(&stack_panel_0).upcast::<::ferroui_base::FerroObject>(), 63, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "SpinButtons", ::std::rc::Rc::new(::core::clone::Clone::clone(&stack_panel_0)), 63, 27)?;
     // Controls/WinUIControls.xaml(63,16) Dock
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     stack_panel_0.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Right, priority_1);
@@ -83482,7 +83482,7 @@ fn build_controls_winuicontrols_xaml_deferred_62(
     context.push_parent(rt::to_value(repeat_button_0.clone()));
     // Controls/WinUIControls.xaml(67,31) Name
     repeat_button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_IncreaseButton")));
-    rt::register_name(name_scope.as_ref(), "PART_IncreaseButton", ::core::clone::Clone::clone(&repeat_button_0).upcast::<::ferroui_base::FerroObject>(), 67, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_IncreaseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_0)), 67, 31)?;
     // Controls/WinUIControls.xaml(68,31) Theme (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NumericUpDownSpinButtonStyle"));
@@ -83551,7 +83551,7 @@ fn build_controls_winuicontrols_xaml_deferred_62(
     context.push_parent(rt::to_value(repeat_button_1.clone()));
     // Controls/WinUIControls.xaml(78,31) Name
     repeat_button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DecreaseButton")));
-    rt::register_name(name_scope.as_ref(), "PART_DecreaseButton", ::core::clone::Clone::clone(&repeat_button_1).upcast::<::ferroui_base::FerroObject>(), 78, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DecreaseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_1)), 78, 31)?;
     // Controls/WinUIControls.xaml(79,31) Theme (setter chosen at run time)
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NumericUpDownSpinButtonStyle"));
@@ -83621,7 +83621,7 @@ fn build_controls_winuicontrols_xaml_deferred_62(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(90,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 90, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 90, 33)?;
     // Controls/WinUIControls.xaml(91,33) Content (setter chosen at run time)
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_10 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -83840,7 +83840,7 @@ fn build_controls_winuicontrols_xaml_deferred_65(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/WinUIControls.xaml(78,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 78, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 78, 15)?;
     // Controls/WinUIControls.xaml(78,35) Background
     rt::bind_template_binding(grid_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Panel::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 78, 35)?;
     // Controls/WinUIControls.xaml(79,12) Children
@@ -83852,7 +83852,7 @@ fn build_controls_winuicontrols_xaml_deferred_65(
     context.push_parent(rt::to_value(stack_panel_0.clone()));
     // Controls/WinUIControls.xaml(79,23) Name
     stack_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("CaptionStackPanel")));
-    rt::register_name(name_scope.as_ref(), "CaptionStackPanel", ::core::clone::Clone::clone(&stack_panel_0).upcast::<::ferroui_base::FerroObject>(), 79, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "CaptionStackPanel", ::std::rc::Rc::new(::core::clone::Clone::clone(&stack_panel_0)), 79, 23)?;
     // Controls/WinUIControls.xaml(79,12) Orientation
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     stack_panel_0.set_value_with_priority(::ferroui_controls::StackPanel::orientation_property(), ::ferroui_base::layout::Orientation::Horizontal, priority_0);
@@ -83868,7 +83868,7 @@ fn build_controls_winuicontrols_xaml_deferred_65(
     context.push_parent(rt::to_value(stack_panel_1.clone()));
     // Controls/WinUIControls.xaml(80,25) Name
     stack_panel_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RatingBackgroundStackPanel")));
-    rt::register_name(name_scope.as_ref(), "RatingBackgroundStackPanel", ::core::clone::Clone::clone(&stack_panel_1).upcast::<::ferroui_base::FerroObject>(), 80, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "RatingBackgroundStackPanel", ::std::rc::Rc::new(::core::clone::Clone::clone(&stack_panel_1)), 80, 25)?;
     // Controls/WinUIControls.xaml(80,14) Orientation
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     stack_panel_1.set_value_with_priority(::ferroui_controls::StackPanel::orientation_property(), ::ferroui_base::layout::Orientation::Horizontal, priority_2);
@@ -83915,7 +83915,7 @@ fn build_controls_winuicontrols_xaml_deferred_65(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/WinUIControls.xaml(87,24) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Caption")));
-    rt::register_name(name_scope.as_ref(), "Caption", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 87, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "Caption", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 87, 24)?;
     // Controls/WinUIControls.xaml(88,24) Theme (setter chosen at run time)
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("CaptionTextBlockStyle"));
@@ -83962,7 +83962,7 @@ fn build_controls_winuicontrols_xaml_deferred_65(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/WinUIControls.xaml(98,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ForegroundContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "ForegroundContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 98, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "ForegroundContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 98, 29)?;
     // Controls/WinUIControls.xaml(98,12) IsHitTestVisible
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_base::input::InputElement::is_hit_test_visible_property(), ::core::clone::Clone::clone(&false), priority_13);
@@ -83987,7 +83987,7 @@ fn build_controls_winuicontrols_xaml_deferred_65(
     context.push_parent(rt::to_value(stack_panel_3.clone()));
     // Controls/WinUIControls.xaml(100,27) Name
     stack_panel_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RatingForegroundStackPanel")));
-    rt::register_name(name_scope.as_ref(), "RatingForegroundStackPanel", ::core::clone::Clone::clone(&stack_panel_3).upcast::<::ferroui_base::FerroObject>(), 100, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "RatingForegroundStackPanel", ::std::rc::Rc::new(::core::clone::Clone::clone(&stack_panel_3)), 100, 27)?;
     // Controls/WinUIControls.xaml(100,16) Orientation
     let priority_16 = ::ferroui_base::data::BindingPriority::Template;
     stack_panel_3.set_value_with_priority(::ferroui_controls::StackPanel::orientation_property(), ::ferroui_base::layout::Orientation::Horizontal, priority_16);
@@ -84151,7 +84151,7 @@ fn build_controls_winuicontrols_xaml_deferred_68(
     grid_0.begin_init();
     // Controls/WinUIControls.xaml(46,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Root")));
-    rt::register_name(name_scope.as_ref(), "PART_Root", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 46, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 46, 15)?;
     // Controls/WinUIControls.xaml(46,10) MinHeight
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     grid_0.set_value_with_priority(::ferroui_base::layout::Layoutable::min_height_property(), 80.0_f64, priority_0);
@@ -84263,7 +84263,7 @@ fn build_controls_winuicontrols_xaml_deferred_71(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(63,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ThemeShadowWrapper")));
-    rt::register_name(name_scope.as_ref(), "ThemeShadowWrapper", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 63, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "ThemeShadowWrapper", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 63, 17)?;
     // Controls/WinUIControls.xaml(64,17) BoxShadow
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::box_shadow_property(), "ThemeShadowFlyoutBoxShadow", 64, 17)?;
     // Controls/WinUIControls.xaml(65,17) CornerRadius
@@ -84293,7 +84293,7 @@ fn build_controls_winuicontrols_xaml_deferred_71(
     context.push_parent(rt::to_value(scroll_viewer_0.clone()));
     // Controls/WinUIControls.xaml(71,27) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("MenuFlyoutPresenterScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "MenuFlyoutPresenterScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 71, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "MenuFlyoutPresenterScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 71, 27)?;
     // Controls/WinUIControls.xaml(72,27) Theme (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MenuFlyoutPresenterScrollViewer"));
@@ -84321,7 +84321,7 @@ fn build_controls_winuicontrols_xaml_deferred_71(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&items_presenter_0)));
     // Controls/WinUIControls.xaml(76,31) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 76, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 76, 31)?;
     // Controls/WinUIControls.xaml(77,31) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 77, 31)?;
     // Controls/WinUIControls.xaml(76,16) TabNavigation
@@ -84939,7 +84939,7 @@ fn build_controls_winuicontrols_xaml_deferred_86(
     content_presenter_0.begin_init();
     // Controls/WinUIControls.xaml(63,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 63, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 63, 27)?;
     // Controls/WinUIControls.xaml(64,27) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 64, 27)?;
     // Controls/WinUIControls.xaml(65,27) Foreground
@@ -85108,7 +85108,7 @@ fn build_controls_winuicontrols_xaml_deferred_88(
     content_presenter_0.begin_init();
     // Controls/WinUIControls.xaml(141,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 141, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 141, 27)?;
     // Controls/WinUIControls.xaml(142,27) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 142, 27)?;
     // Controls/WinUIControls.xaml(143,27) BackgroundSizing
@@ -85405,7 +85405,7 @@ fn build_controls_winuicontrols_xaml_deferred_91(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(228,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 228, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 228, 29)?;
     // Controls/WinUIControls.xaml(229,29) Content (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_2 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -85637,7 +85637,7 @@ fn build_controls_winuicontrols_xaml_deferred_95(
     content_presenter_0.begin_init();
     // Controls/WinUIControls.xaml(53,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 53, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 53, 27)?;
     // Controls/WinUIControls.xaml(54,27) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 54, 27)?;
     // Controls/WinUIControls.xaml(55,27) Foreground
@@ -86191,7 +86191,7 @@ fn build_controls_winuicontrols_xaml_deferred_99(
     content_presenter_0.begin_init();
     // Controls/WinUIControls.xaml(58,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 58, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 58, 27)?;
     // Controls/WinUIControls.xaml(59,27) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 59, 27)?;
     // Controls/WinUIControls.xaml(60,27) Foreground
@@ -86443,7 +86443,7 @@ fn build_controls_winuicontrols_xaml_deferred_103(
     content_presenter_0.begin_init();
     // Controls/WinUIControls.xaml(55,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 55, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 55, 27)?;
     // Controls/WinUIControls.xaml(56,27) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 56, 27)?;
     // Controls/WinUIControls.xaml(57,27) BackgroundSizing
@@ -87526,7 +87526,7 @@ fn build_controls_winuicontrols_xaml_deferred_107(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(62,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootGrid")));
-    rt::register_name(name_scope.as_ref(), "RootGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 62, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 62, 17)?;
     // Controls/WinUIControls.xaml(63,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 63, 17)?;
     // Controls/WinUIControls.xaml(64,17) BorderBrush
@@ -87600,7 +87600,7 @@ fn build_controls_winuicontrols_xaml_deferred_107(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/WinUIControls.xaml(73,26) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("NormalRectangle")));
-    rt::register_name(name_scope.as_ref(), "NormalRectangle", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 73, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "NormalRectangle", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 73, 26)?;
     // Controls/WinUIControls.xaml(74,26) Fill
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "CheckBoxCheckBackgroundFillUnchecked", 74, 26)?;
     // Controls/WinUIControls.xaml(75,26) Stroke
@@ -87675,7 +87675,7 @@ fn build_controls_winuicontrols_xaml_deferred_107(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/WinUIControls.xaml(83,21) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("CheckGlyph")));
-    rt::register_name(name_scope.as_ref(), "CheckGlyph", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 83, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "CheckGlyph", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 83, 21)?;
     // Controls/WinUIControls.xaml(84,21) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "CheckBoxCheckGlyphForegroundUnchecked", 84, 21)?;
     // Controls/WinUIControls.xaml(85,21) Data (setter chosen at run time)
@@ -87725,7 +87725,7 @@ fn build_controls_winuicontrols_xaml_deferred_107(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(94,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 94, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 94, 31)?;
     // Controls/WinUIControls.xaml(94,14) Column
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_17);
@@ -88285,7 +88285,7 @@ fn build_controls_winuicontrols_xaml_deferred_111(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(61,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootGrid")));
-    rt::register_name(name_scope.as_ref(), "RootGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 61, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 61, 17)?;
     // Controls/WinUIControls.xaml(62,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 62, 17)?;
     // Controls/WinUIControls.xaml(63,17) BorderBrush
@@ -88335,7 +88335,7 @@ fn build_controls_winuicontrols_xaml_deferred_111(
     context.push_parent(rt::to_value(ellipse_0.clone()));
     // Controls/WinUIControls.xaml(69,24) Name
     ellipse_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("OuterEllipse")));
-    rt::register_name(name_scope.as_ref(), "OuterEllipse", ::core::clone::Clone::clone(&ellipse_0).upcast::<::ferroui_base::FerroObject>(), 69, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "OuterEllipse", ::std::rc::Rc::new(::core::clone::Clone::clone(&ellipse_0)), 69, 24)?;
     // Controls/WinUIControls.xaml(69,16) Width
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     ellipse_0.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 20.0_f64, priority_3);
@@ -88362,7 +88362,7 @@ fn build_controls_winuicontrols_xaml_deferred_111(
     context.push_parent(rt::to_value(ellipse_1.clone()));
     // Controls/WinUIControls.xaml(77,24) Name
     ellipse_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("CheckOuterEllipse")));
-    rt::register_name(name_scope.as_ref(), "CheckOuterEllipse", ::core::clone::Clone::clone(&ellipse_1).upcast::<::ferroui_base::FerroObject>(), 77, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "CheckOuterEllipse", ::std::rc::Rc::new(::core::clone::Clone::clone(&ellipse_1)), 77, 24)?;
     // Controls/WinUIControls.xaml(77,16) Width
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     ellipse_1.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 20.0_f64, priority_6);
@@ -88392,7 +88392,7 @@ fn build_controls_winuicontrols_xaml_deferred_111(
     context.push_parent(rt::to_value(ellipse_2.clone()));
     // Controls/WinUIControls.xaml(85,24) Name
     ellipse_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("CheckGlyph")));
-    rt::register_name(name_scope.as_ref(), "CheckGlyph", ::core::clone::Clone::clone(&ellipse_2).upcast::<::ferroui_base::FerroObject>(), 85, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "CheckGlyph", ::std::rc::Rc::new(::core::clone::Clone::clone(&ellipse_2)), 85, 24)?;
     // Controls/WinUIControls.xaml(86,24) Width
     rt::bind_dynamic_resource(&context, ellipse_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), "RadioButtonCheckGlyphSize", 86, 24)?;
     // Controls/WinUIControls.xaml(87,24) Height
@@ -88446,7 +88446,7 @@ fn build_controls_winuicontrols_xaml_deferred_111(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(100,23) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PressedCheckGlyph")));
-    rt::register_name(name_scope.as_ref(), "PressedCheckGlyph", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 100, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PressedCheckGlyph", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 100, 23)?;
     // Controls/WinUIControls.xaml(100,16) Width
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 4.0_f64, priority_13);
@@ -88509,7 +88509,7 @@ fn build_controls_winuicontrols_xaml_deferred_111(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(117,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 117, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 117, 31)?;
     // Controls/WinUIControls.xaml(117,14) Column
     let priority_20 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_20);
@@ -88610,7 +88610,7 @@ fn build_controls_winuicontrols_xaml_deferred_115(
     grid_0.begin_init();
     // Controls/WinUIControls.xaml(61,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Root")));
-    rt::register_name(name_scope.as_ref(), "Root", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 61, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 61, 15)?;
     // Controls/WinUIControls.xaml(61,10) Background
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     grid_0.set_value_with_priority(::ferroui_controls::Panel::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_0);
@@ -88708,7 +88708,7 @@ fn build_controls_winuicontrols_xaml_deferred_117(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(70,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Root")));
-    rt::register_name(name_scope.as_ref(), "Root", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 70, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 70, 17)?;
     // Controls/WinUIControls.xaml(71,17) Background
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "ScrollBarButtonBackground", 71, 17)?;
     // Controls/WinUIControls.xaml(72,17) BorderBrush
@@ -88726,7 +88726,7 @@ fn build_controls_winuicontrols_xaml_deferred_117(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/WinUIControls.xaml(75,17) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Arrow")));
-    rt::register_name(name_scope.as_ref(), "Arrow", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 75, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Arrow", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 75, 17)?;
     // Controls/WinUIControls.xaml(75,12) RenderTransformOrigin
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     path_0.set_value_with_priority(::ferroui_base::Visual::render_transform_origin_property(), ::ferroui_base::RelativePoint::__markup_new_1(0.5_f64, 0.5_f64, ::ferroui_base::RelativeUnit::Relative), priority_1);
@@ -88864,7 +88864,7 @@ fn build_controls_winuicontrols_xaml_deferred_119(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(102,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Root")));
-    rt::register_name(name_scope.as_ref(), "Root", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 102, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 102, 17)?;
     // Controls/WinUIControls.xaml(103,17) Background
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "ScrollBarButtonBackground", 103, 17)?;
     // Controls/WinUIControls.xaml(104,17) BorderBrush
@@ -88882,7 +88882,7 @@ fn build_controls_winuicontrols_xaml_deferred_119(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/WinUIControls.xaml(107,17) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Arrow")));
-    rt::register_name(name_scope.as_ref(), "Arrow", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 107, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Arrow", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 107, 17)?;
     // Controls/WinUIControls.xaml(107,12) RenderTransformOrigin
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     path_0.set_value_with_priority(::ferroui_base::Visual::render_transform_origin_property(), ::ferroui_base::RelativePoint::__markup_new_1(0.5_f64, 0.5_f64, ::ferroui_base::RelativeUnit::Relative), priority_1);
@@ -89020,7 +89020,7 @@ fn build_controls_winuicontrols_xaml_deferred_121(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(134,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Root")));
-    rt::register_name(name_scope.as_ref(), "Root", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 134, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 134, 17)?;
     // Controls/WinUIControls.xaml(135,17) Background
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "ScrollBarButtonBackground", 135, 17)?;
     // Controls/WinUIControls.xaml(136,17) BorderBrush
@@ -89038,7 +89038,7 @@ fn build_controls_winuicontrols_xaml_deferred_121(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/WinUIControls.xaml(139,17) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Arrow")));
-    rt::register_name(name_scope.as_ref(), "Arrow", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 139, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Arrow", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 139, 17)?;
     // Controls/WinUIControls.xaml(139,12) RenderTransformOrigin
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     path_0.set_value_with_priority(::ferroui_base::Visual::render_transform_origin_property(), ::ferroui_base::RelativePoint::__markup_new_1(0.5_f64, 0.5_f64, ::ferroui_base::RelativeUnit::Relative), priority_1);
@@ -89176,7 +89176,7 @@ fn build_controls_winuicontrols_xaml_deferred_123(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(166,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Root")));
-    rt::register_name(name_scope.as_ref(), "Root", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 166, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 166, 17)?;
     // Controls/WinUIControls.xaml(167,17) Background
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "ScrollBarButtonBackground", 167, 17)?;
     // Controls/WinUIControls.xaml(168,17) BorderBrush
@@ -89194,7 +89194,7 @@ fn build_controls_winuicontrols_xaml_deferred_123(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/WinUIControls.xaml(171,17) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Arrow")));
-    rt::register_name(name_scope.as_ref(), "Arrow", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 171, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Arrow", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 171, 17)?;
     // Controls/WinUIControls.xaml(171,12) RenderTransformOrigin
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     path_0.set_value_with_priority(::ferroui_base::Visual::render_transform_origin_property(), ::ferroui_base::RelativePoint::__markup_new_1(0.5_f64, 0.5_f64, ::ferroui_base::RelativeUnit::Relative), priority_1);
@@ -89297,7 +89297,7 @@ fn build_controls_winuicontrols_xaml_deferred_125(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/WinUIControls.xaml(198,20) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ThumbVisual")));
-    rt::register_name(name_scope.as_ref(), "ThumbVisual", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 198, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "ThumbVisual", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 198, 20)?;
     // Controls/WinUIControls.xaml(199,20) Fill
     rt::bind_template_binding(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 199, 20)?;
     // Controls/WinUIControls.xaml(200,20) Stroke
@@ -89397,7 +89397,7 @@ fn build_controls_winuicontrols_xaml_deferred_127(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/WinUIControls.xaml(223,20) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ThumbVisual")));
-    rt::register_name(name_scope.as_ref(), "ThumbVisual", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 223, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "ThumbVisual", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 223, 20)?;
     // Controls/WinUIControls.xaml(224,20) Fill
     rt::bind_template_binding(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 224, 20)?;
     // Controls/WinUIControls.xaml(225,20) Stroke
@@ -89720,7 +89720,7 @@ fn build_controls_winuicontrols_xaml_deferred_129(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(258,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Root")));
-    rt::register_name(name_scope.as_ref(), "Root", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 258, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 258, 19)?;
     // Controls/WinUIControls.xaml(259,14) Child
     // Controls/WinUIControls.xaml(259,14) Border
     let border_1 = ::ferroui_controls::Border::new();
@@ -89729,7 +89729,7 @@ fn build_controls_winuicontrols_xaml_deferred_129(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(259,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("VerticalRoot")));
-    rt::register_name(name_scope.as_ref(), "VerticalRoot", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 259, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "VerticalRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 259, 21)?;
     // Controls/WinUIControls.xaml(260,21) Background
     rt::bind_template_binding(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 260, 21)?;
     // Controls/WinUIControls.xaml(261,21) BorderBrush
@@ -89765,7 +89765,7 @@ fn build_controls_winuicontrols_xaml_deferred_129(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/WinUIControls.xaml(264,25) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("VerticalTrackRect")));
-    rt::register_name(name_scope.as_ref(), "VerticalTrackRect", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 264, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "VerticalTrackRect", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 264, 25)?;
     // Controls/WinUIControls.xaml(264,18) RowSpan
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_controls::Grid::row_span_property(), 3_i32, priority_1);
@@ -89815,7 +89815,7 @@ fn build_controls_winuicontrols_xaml_deferred_129(
     context.push_parent(rt::to_value(repeat_button_0.clone()));
     // Controls/WinUIControls.xaml(278,31) Name
     repeat_button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_LineUpButton")));
-    rt::register_name(name_scope.as_ref(), "PART_LineUpButton", ::core::clone::Clone::clone(&repeat_button_0).upcast::<::ferroui_base::FerroObject>(), 278, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_LineUpButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_0)), 278, 31)?;
     // Controls/WinUIControls.xaml(278,18) Row
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     repeat_button_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 0_i32, priority_5);
@@ -89924,7 +89924,7 @@ fn build_controls_winuicontrols_xaml_deferred_129(
     context.push_parent(rt::to_value(repeat_button_1.clone()));
     // Controls/WinUIControls.xaml(303,35) Name
     repeat_button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PageUpButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PageUpButton", ::core::clone::Clone::clone(&repeat_button_1).upcast::<::ferroui_base::FerroObject>(), 303, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PageUpButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_1)), 303, 35)?;
     // Controls/WinUIControls.xaml(303,22) Focusable
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
     repeat_button_1.set_value_with_priority(::ferroui_base::input::InputElement::focusable_property(), ::core::clone::Clone::clone(&false), priority_17);
@@ -89956,7 +89956,7 @@ fn build_controls_winuicontrols_xaml_deferred_129(
     context.push_parent(rt::to_value(repeat_button_2.clone()));
     // Controls/WinUIControls.xaml(309,35) Name
     repeat_button_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PageDownButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PageDownButton", ::core::clone::Clone::clone(&repeat_button_2).upcast::<::ferroui_base::FerroObject>(), 309, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PageDownButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_2)), 309, 35)?;
     // Controls/WinUIControls.xaml(309,22) Focusable
     let priority_21 = ::ferroui_base::data::BindingPriority::Template;
     repeat_button_2.set_value_with_priority(::ferroui_base::input::InputElement::focusable_property(), ::core::clone::Clone::clone(&false), priority_21);
@@ -89987,7 +89987,7 @@ fn build_controls_winuicontrols_xaml_deferred_129(
     context.push_parent(rt::to_value(thumb_0.clone()));
     // Controls/WinUIControls.xaml(314,26) Name
     thumb_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("VerticalThumb")));
-    rt::register_name(name_scope.as_ref(), "VerticalThumb", ::core::clone::Clone::clone(&thumb_0).upcast::<::ferroui_base::FerroObject>(), 314, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "VerticalThumb", ::std::rc::Rc::new(::core::clone::Clone::clone(&thumb_0)), 314, 26)?;
     // Controls/WinUIControls.xaml(315,26) Background
     rt::bind_dynamic_resource(&context, thumb_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::background_property(), "ScrollBarPanningThumbBackground", 315, 26)?;
     // Controls/WinUIControls.xaml(316,26) BorderBrush
@@ -90070,7 +90070,7 @@ fn build_controls_winuicontrols_xaml_deferred_129(
     context.push_parent(rt::to_value(repeat_button_3.clone()));
     // Controls/WinUIControls.xaml(332,31) Name
     repeat_button_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_LineDownButton")));
-    rt::register_name(name_scope.as_ref(), "PART_LineDownButton", ::core::clone::Clone::clone(&repeat_button_3).upcast::<::ferroui_base::FerroObject>(), 332, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_LineDownButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_3)), 332, 31)?;
     // Controls/WinUIControls.xaml(332,18) Row
     let priority_29 = ::ferroui_base::data::BindingPriority::Template;
     repeat_button_3.set_value_with_priority(::ferroui_controls::Grid::row_property(), 2_i32, priority_29);
@@ -90163,7 +90163,7 @@ fn build_controls_winuicontrols_xaml_deferred_130(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(358,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Root")));
-    rt::register_name(name_scope.as_ref(), "Root", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 358, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 358, 19)?;
     // Controls/WinUIControls.xaml(359,14) Child
     // Controls/WinUIControls.xaml(359,14) Border
     let border_1 = ::ferroui_controls::Border::new();
@@ -90172,7 +90172,7 @@ fn build_controls_winuicontrols_xaml_deferred_130(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(359,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HorizontalRoot")));
-    rt::register_name(name_scope.as_ref(), "HorizontalRoot", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 359, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "HorizontalRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 359, 21)?;
     // Controls/WinUIControls.xaml(360,21) Background
     rt::bind_template_binding(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 360, 21)?;
     // Controls/WinUIControls.xaml(361,21) BorderBrush
@@ -90210,7 +90210,7 @@ fn build_controls_winuicontrols_xaml_deferred_130(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/WinUIControls.xaml(365,25) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HorizontalTrackRect")));
-    rt::register_name(name_scope.as_ref(), "HorizontalTrackRect", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 365, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "HorizontalTrackRect", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 365, 25)?;
     // Controls/WinUIControls.xaml(365,18) ColumnSpan
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 3_i32, priority_1);
@@ -90260,7 +90260,7 @@ fn build_controls_winuicontrols_xaml_deferred_130(
     context.push_parent(rt::to_value(repeat_button_0.clone()));
     // Controls/WinUIControls.xaml(379,31) Name
     repeat_button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_LineUpButton")));
-    rt::register_name(name_scope.as_ref(), "PART_LineUpButton", ::core::clone::Clone::clone(&repeat_button_0).upcast::<::ferroui_base::FerroObject>(), 379, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_LineUpButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_0)), 379, 31)?;
     // Controls/WinUIControls.xaml(379,18) Column
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     repeat_button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_5);
@@ -90366,7 +90366,7 @@ fn build_controls_winuicontrols_xaml_deferred_130(
     context.push_parent(rt::to_value(repeat_button_1.clone()));
     // Controls/WinUIControls.xaml(403,35) Name
     repeat_button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PageUpButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PageUpButton", ::core::clone::Clone::clone(&repeat_button_1).upcast::<::ferroui_base::FerroObject>(), 403, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PageUpButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_1)), 403, 35)?;
     // Controls/WinUIControls.xaml(403,22) Focusable
     let priority_16 = ::ferroui_base::data::BindingPriority::Template;
     repeat_button_1.set_value_with_priority(::ferroui_base::input::InputElement::focusable_property(), ::core::clone::Clone::clone(&false), priority_16);
@@ -90398,7 +90398,7 @@ fn build_controls_winuicontrols_xaml_deferred_130(
     context.push_parent(rt::to_value(repeat_button_2.clone()));
     // Controls/WinUIControls.xaml(409,35) Name
     repeat_button_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PageDownButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PageDownButton", ::core::clone::Clone::clone(&repeat_button_2).upcast::<::ferroui_base::FerroObject>(), 409, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PageDownButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_2)), 409, 35)?;
     // Controls/WinUIControls.xaml(409,22) Focusable
     let priority_20 = ::ferroui_base::data::BindingPriority::Template;
     repeat_button_2.set_value_with_priority(::ferroui_base::input::InputElement::focusable_property(), ::core::clone::Clone::clone(&false), priority_20);
@@ -90429,7 +90429,7 @@ fn build_controls_winuicontrols_xaml_deferred_130(
     context.push_parent(rt::to_value(thumb_0.clone()));
     // Controls/WinUIControls.xaml(414,26) Name
     thumb_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HorizontalThumb")));
-    rt::register_name(name_scope.as_ref(), "HorizontalThumb", ::core::clone::Clone::clone(&thumb_0).upcast::<::ferroui_base::FerroObject>(), 414, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "HorizontalThumb", ::std::rc::Rc::new(::core::clone::Clone::clone(&thumb_0)), 414, 26)?;
     // Controls/WinUIControls.xaml(415,26) Background
     rt::bind_dynamic_resource(&context, thumb_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::background_property(), "ScrollBarPanningThumbBackground", 415, 26)?;
     // Controls/WinUIControls.xaml(416,26) BorderBrush
@@ -90512,7 +90512,7 @@ fn build_controls_winuicontrols_xaml_deferred_130(
     context.push_parent(rt::to_value(repeat_button_3.clone()));
     // Controls/WinUIControls.xaml(432,31) Name
     repeat_button_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_LineDownButton")));
-    rt::register_name(name_scope.as_ref(), "PART_LineDownButton", ::core::clone::Clone::clone(&repeat_button_3).upcast::<::ferroui_base::FerroObject>(), 432, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_LineDownButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_3)), 432, 31)?;
     // Controls/WinUIControls.xaml(432,18) Column
     let priority_28 = ::ferroui_base::data::BindingPriority::Template;
     repeat_button_3.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_28);
@@ -90712,7 +90712,7 @@ fn build_controls_winuicontrols_xaml_deferred_133(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(76,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Root")));
-    rt::register_name(name_scope.as_ref(), "Root", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 76, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 76, 17)?;
     // Controls/WinUIControls.xaml(77,17) BorderBrush
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::border_brush_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()), 77, 17)?;
     // Controls/WinUIControls.xaml(78,17) BorderThickness
@@ -90756,7 +90756,7 @@ fn build_controls_winuicontrols_xaml_deferred_133(
     context.push_parent(rt::to_value(scroll_content_presenter_0.clone()));
     // Controls/WinUIControls.xaml(83,37) Name
     scroll_content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&scroll_content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 83, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_content_presenter_0)), 83, 37)?;
     // Controls/WinUIControls.xaml(83,14) Background
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     scroll_content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_0);
@@ -90849,7 +90849,7 @@ fn build_controls_winuicontrols_xaml_deferred_133(
     context.push_parent(rt::to_value(scroll_bar_0.clone()));
     // Controls/WinUIControls.xaml(105,24) Name
     scroll_bar_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_VerticalScrollBar")));
-    rt::register_name(name_scope.as_ref(), "PART_VerticalScrollBar", ::core::clone::Clone::clone(&scroll_bar_0).upcast::<::ferroui_base::FerroObject>(), 105, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_VerticalScrollBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_bar_0)), 105, 24)?;
     // Controls/WinUIControls.xaml(105,14) Column
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     scroll_bar_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_5);
@@ -90891,7 +90891,7 @@ fn build_controls_winuicontrols_xaml_deferred_133(
     context.push_parent(rt::to_value(scroll_bar_1.clone()));
     // Controls/WinUIControls.xaml(118,24) Name
     scroll_bar_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HorizontalScrollBar")));
-    rt::register_name(name_scope.as_ref(), "PART_HorizontalScrollBar", ::core::clone::Clone::clone(&scroll_bar_1).upcast::<::ferroui_base::FerroObject>(), 118, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HorizontalScrollBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_bar_1)), 118, 24)?;
     // Controls/WinUIControls.xaml(118,14) Row
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     scroll_bar_1.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_11);
@@ -90930,7 +90930,7 @@ fn build_controls_winuicontrols_xaml_deferred_133(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(130,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ScrollBarSeparator")));
-    rt::register_name(name_scope.as_ref(), "ScrollBarSeparator", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 130, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "ScrollBarSeparator", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 130, 21)?;
     // Controls/WinUIControls.xaml(130,14) Row
     let priority_16 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_16);
@@ -91020,7 +91020,7 @@ fn build_controls_winuicontrols_xaml_deferred_136(
     context.push_parent(rt::to_value(scroll_content_presenter_0.clone()));
     // Controls/WinUIControls.xaml(165,31) Name
     scroll_content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&scroll_content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 165, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_content_presenter_0)), 165, 31)?;
     // Controls/WinUIControls.xaml(165,8) Background
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     scroll_content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_0);
@@ -91226,7 +91226,7 @@ fn build_controls_winuicontrols_xaml_deferred_138(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(72,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ButtonLayoutGrid")));
-    rt::register_name(name_scope.as_ref(), "ButtonLayoutGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 72, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "ButtonLayoutGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 72, 17)?;
     // Controls/WinUIControls.xaml(73,17) Margin
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "TextBoxInnerButtonMargin", 73, 17)?;
     // Controls/WinUIControls.xaml(74,17) BorderBrush
@@ -91247,7 +91247,7 @@ fn build_controls_winuicontrols_xaml_deferred_138(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/WinUIControls.xaml(80,17) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("GlyphElement")));
-    rt::register_name(name_scope.as_ref(), "GlyphElement", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 80, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "GlyphElement", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 80, 17)?;
     // Controls/WinUIControls.xaml(81,17) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "TextControlButtonForeground", 81, 17)?;
     // Controls/WinUIControls.xaml(82,17) Data (setter chosen at run time)
@@ -91422,7 +91422,7 @@ fn build_controls_winuicontrols_xaml_deferred_140(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(122,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ButtonLayoutGrid")));
-    rt::register_name(name_scope.as_ref(), "ButtonLayoutGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 122, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "ButtonLayoutGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 122, 17)?;
     // Controls/WinUIControls.xaml(123,17) Margin
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "TextBoxInnerButtonMargin", 123, 17)?;
     // Controls/WinUIControls.xaml(124,17) BorderBrush
@@ -91444,7 +91444,7 @@ fn build_controls_winuicontrols_xaml_deferred_140(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/WinUIControls.xaml(130,17) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("GlyphElement")));
-    rt::register_name(name_scope.as_ref(), "GlyphElement", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 130, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "GlyphElement", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 130, 17)?;
     // Controls/WinUIControls.xaml(131,17) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "TextControlButtonForeground", 131, 17)?;
     // Controls/WinUIControls.xaml(132,17) Data (setter chosen at run time)
@@ -92240,7 +92240,7 @@ fn build_controls_winuicontrols_xaml_deferred_144(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(263,21) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("BorderElement")));
-    rt::register_name(name_scope.as_ref(), "BorderElement", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 263, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "BorderElement", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 263, 21)?;
     // Controls/WinUIControls.xaml(263,14) Column
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_0);
@@ -92270,7 +92270,7 @@ fn build_controls_winuicontrols_xaml_deferred_144(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(274,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("InnerLeftContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "InnerLeftContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 274, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "InnerLeftContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 274, 31)?;
     // Controls/WinUIControls.xaml(275,31) IsVisible
     let template_binding_7 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TextBox::inner_left_content_property()));
     // Controls/WinUIControls.xaml(275,31) Converter
@@ -92304,7 +92304,7 @@ fn build_controls_winuicontrols_xaml_deferred_144(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(280,27) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "PART_ScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 280, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 280, 27)?;
     // Controls/WinUIControls.xaml(280,14) Column
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     scroll_viewer_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_4);
@@ -92344,7 +92344,7 @@ fn build_controls_winuicontrols_xaml_deferred_144(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&text_presenter_0)));
     // Controls/WinUIControls.xaml(289,30) Name
     text_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TextPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_TextPresenter", ::core::clone::Clone::clone(&text_presenter_0).upcast::<::ferroui_base::FerroObject>(), 289, 30)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TextPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_presenter_0)), 289, 30)?;
     // Controls/WinUIControls.xaml(290,30) Text
     let template_binding_17 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TextBox::text_property()));
     // Controls/WinUIControls.xaml(290,30) Mode
@@ -92392,7 +92392,7 @@ fn build_controls_winuicontrols_xaml_deferred_144(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/WinUIControls.xaml(312,24) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PlaceholderTextContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PlaceholderTextContentPresenter", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 312, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "PlaceholderTextContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 312, 24)?;
     // Controls/WinUIControls.xaml(312,14) Column
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_6);
@@ -92463,7 +92463,7 @@ fn build_controls_winuicontrols_xaml_deferred_144(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/WinUIControls.xaml(330,21) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("DeleteButton")));
-    rt::register_name(name_scope.as_ref(), "DeleteButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 330, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "DeleteButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 330, 21)?;
     // Controls/WinUIControls.xaml(330,14) Column
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_9);
@@ -92516,7 +92516,7 @@ fn build_controls_winuicontrols_xaml_deferred_144(
     context.push_parent(rt::to_value(toggle_button_0.clone()));
     // Controls/WinUIControls.xaml(344,27) Name
     toggle_button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RevealButton")));
-    rt::register_name(name_scope.as_ref(), "RevealButton", ::core::clone::Clone::clone(&toggle_button_0).upcast::<::ferroui_base::FerroObject>(), 344, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "RevealButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&toggle_button_0)), 344, 27)?;
     // Controls/WinUIControls.xaml(344,14) Column
     let priority_15 = ::ferroui_base::data::BindingPriority::Template;
     toggle_button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 3_i32, priority_15);
@@ -92570,7 +92570,7 @@ fn build_controls_winuicontrols_xaml_deferred_144(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_6, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(357,31) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("InnerRightContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "InnerRightContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 357, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "InnerRightContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 357, 31)?;
     // Controls/WinUIControls.xaml(358,31) IsVisible
     let template_binding_47 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TextBox::inner_right_content_property()));
     // Controls/WinUIControls.xaml(358,31) Converter
@@ -92805,7 +92805,7 @@ fn build_controls_winuicontrols_xaml_deferred_148(
     border_0.begin_init();
     // Controls/WinUIControls.xaml(61,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ThemeShadowWrapper")));
-    rt::register_name(name_scope.as_ref(), "ThemeShadowWrapper", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 61, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "ThemeShadowWrapper", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 61, 17)?;
     // Controls/WinUIControls.xaml(61,45) CornerRadius
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::corner_radius_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()), 61, 45)?;
     // Controls/WinUIControls.xaml(62,12) Child
@@ -92815,7 +92815,7 @@ fn build_controls_winuicontrols_xaml_deferred_148(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/WinUIControls.xaml(62,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 62, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 62, 29)?;
     // Controls/WinUIControls.xaml(63,29) BorderThickness
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::border_thickness_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()), 63, 29)?;
     // Controls/WinUIControls.xaml(64,29) Background
@@ -93608,7 +93608,7 @@ fn build_controls_winuicontrols_xaml_deferred_152(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/WinUIControls.xaml(77,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 77, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 77, 15)?;
     // Controls/WinUIControls.xaml(77,10) ColumnDefinitions
     let column_definitions_0 = ::ferroui_controls::ColumnDefinitions::__markup_new_0();
     rt::invoked(<::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::ColumnDefinition>>>::__markup_set_Capacity(&column_definitions_0, 2_i32), 77, 35)?;
@@ -93638,7 +93638,7 @@ fn build_controls_winuicontrols_xaml_deferred_152(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(78,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ProgressBarRoot")));
-    rt::register_name(name_scope.as_ref(), "ProgressBarRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 78, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "ProgressBarRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 78, 19)?;
     // Controls/WinUIControls.xaml(79,19) BorderBrush
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::border_brush_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()), 79, 19)?;
     // Controls/WinUIControls.xaml(80,19) BorderThickness
@@ -93655,7 +93655,7 @@ fn build_controls_winuicontrols_xaml_deferred_152(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(83,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ProgressBarClip")));
-    rt::register_name(name_scope.as_ref(), "ProgressBarClip", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 83, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "ProgressBarClip", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 83, 21)?;
     // Controls/WinUIControls.xaml(83,14) ClipToBounds
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_base::Visual::clip_to_bounds_property(), ::core::clone::Clone::clone(&true), priority_0);
@@ -93667,7 +93667,7 @@ fn build_controls_winuicontrols_xaml_deferred_152(
     context.push_parent(rt::to_value(grid_1.clone()));
     // Controls/WinUIControls.xaml(84,21) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ProgressBarGrid")));
-    rt::register_name(name_scope.as_ref(), "ProgressBarGrid", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 84, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "ProgressBarGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 84, 21)?;
     // Controls/WinUIControls.xaml(85,18) Children
     let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(grid_1.upcast_ref::<::ferroui_controls::Panel>());
     // Controls/WinUIControls.xaml(85,18) Border
@@ -93677,7 +93677,7 @@ fn build_controls_winuicontrols_xaml_deferred_152(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/WinUIControls.xaml(85,25) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ProgressBarTrack")));
-    rt::register_name(name_scope.as_ref(), "ProgressBarTrack", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 85, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "ProgressBarTrack", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 85, 25)?;
     // Controls/WinUIControls.xaml(86,25) Background
     rt::bind_template_binding(border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 86, 25)?;
     // Controls/WinUIControls.xaml(87,25) CornerRadius (setter chosen at run time)
@@ -93702,7 +93702,7 @@ fn build_controls_winuicontrols_xaml_deferred_152(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&border_3).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(88,25) Name
     border_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Indicator")));
-    rt::register_name(name_scope.as_ref(), "PART_Indicator", ::core::clone::Clone::clone(&border_3).upcast::<::ferroui_base::FerroObject>(), 88, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Indicator", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_3)), 88, 25)?;
     // Controls/WinUIControls.xaml(89,25) Background
     rt::bind_template_binding(border_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 89, 25)?;
     // Controls/WinUIControls.xaml(90,25) CornerRadius
@@ -93716,7 +93716,7 @@ fn build_controls_winuicontrols_xaml_deferred_152(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&border_4).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(91,25) Name
     border_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("IndeterminateProgressBarIndicator")));
-    rt::register_name(name_scope.as_ref(), "IndeterminateProgressBarIndicator", ::core::clone::Clone::clone(&border_4).upcast::<::ferroui_base::FerroObject>(), 91, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "IndeterminateProgressBarIndicator", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_4)), 91, 25)?;
     // Controls/WinUIControls.xaml(92,25) Background
     rt::bind_template_binding(border_4.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 92, 25)?;
     // Controls/WinUIControls.xaml(93,25) CornerRadius
@@ -93733,7 +93733,7 @@ fn build_controls_winuicontrols_xaml_deferred_152(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&border_5).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(95,25) Name
     border_5.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("IndeterminateProgressBarIndicator2")));
-    rt::register_name(name_scope.as_ref(), "IndeterminateProgressBarIndicator2", ::core::clone::Clone::clone(&border_5).upcast::<::ferroui_base::FerroObject>(), 95, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "IndeterminateProgressBarIndicator2", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_5)), 95, 25)?;
     // Controls/WinUIControls.xaml(96,25) Background
     rt::bind_template_binding(border_5.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 96, 25)?;
     // Controls/WinUIControls.xaml(97,25) CornerRadius
@@ -93757,7 +93757,7 @@ fn build_controls_winuicontrols_xaml_deferred_152(
     context.push_parent(rt::to_value(layout_transform_control_0.clone()));
     // Controls/WinUIControls.xaml(102,35) Name
     layout_transform_control_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ProgressTextRoot")));
-    rt::register_name(name_scope.as_ref(), "ProgressTextRoot", ::core::clone::Clone::clone(&layout_transform_control_0).upcast::<::ferroui_base::FerroObject>(), 102, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "ProgressTextRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&layout_transform_control_0)), 102, 35)?;
     // Controls/WinUIControls.xaml(102,12) Column
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     layout_transform_control_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_4);
@@ -93777,7 +93777,7 @@ fn build_controls_winuicontrols_xaml_deferred_152(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/WinUIControls.xaml(107,24) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ProgressText")));
-    rt::register_name(name_scope.as_ref(), "ProgressText", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 107, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "ProgressText", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 107, 24)?;
     // Controls/WinUIControls.xaml(107,46) Foreground
     rt::bind_dynamic_resource(&context, text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::foreground_property(), "TextFillColorPrimaryBrush", 107, 46)?;
     // Controls/WinUIControls.xaml(109,18) Text
@@ -93890,7 +93890,7 @@ fn build_controls_winuicontrols_xaml_deferred_155(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&path_0).upcast::<::ferroui_controls::Control>()));
     // Controls/WinUIControls.xaml(38,13) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Path")));
-    rt::register_name(name_scope.as_ref(), "Path", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 38, 13)?;
+    rt::register_name_value(name_scope.as_ref(), "Path", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 38, 13)?;
     // Controls/WinUIControls.xaml(39,13) Data
     rt::bind_template_binding(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), rt::property(::ferroui_controls::PathIcon::data_property()), 39, 13)?;
     // Controls/WinUIControls.xaml(40,13) Fill
@@ -93952,7 +93952,7 @@ fn build_controls_winuicontrols_xaml_deferred_157(
     viewbox_0.set_value(::ferroui_controls::Viewbox::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&path_0).upcast::<::ferroui_controls::Control>()));
     // Controls/WinUIControls.xaml(53,19) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Path")));
-    rt::register_name(name_scope.as_ref(), "Path", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 53, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "Path", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 53, 19)?;
     // Controls/WinUIControls.xaml(54,19) Data
     rt::bind_template_binding(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), rt::property(::ferroui_controls::PathIcon::data_property()), 54, 19)?;
     // Controls/WinUIControls.xaml(55,19) Fill
@@ -94025,7 +94025,7 @@ fn build_controls_winuicontrols_xaml_deferred_159(
     context.push_parent(rt::to_value(content_control_0.clone()));
     // Controls/WinUIControls.xaml(30,27) Name
     content_control_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("InlineDataValidationContentControl")));
-    rt::register_name(name_scope.as_ref(), "InlineDataValidationContentControl", ::core::clone::Clone::clone(&content_control_0).upcast::<::ferroui_base::FerroObject>(), 30, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "InlineDataValidationContentControl", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_0)), 30, 27)?;
     // Controls/WinUIControls.xaml(30,12) Margin
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     content_control_0.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(0.0_f64, 4.0_f64, 0.0_f64, 0.0_f64), priority_1);
@@ -94068,7 +94068,7 @@ fn build_controls_winuicontrols_xaml_deferred_159(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(37,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 37, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 37, 29)?;
     // Controls/WinUIControls.xaml(38,29) Padding
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::padding_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), 38, 29)?;
     // Controls/WinUIControls.xaml(39,29) Background
@@ -94190,7 +94190,7 @@ fn build_controls_winuicontrols_xaml_deferred_162(
     context.push_parent(rt::to_value(content_control_0.clone()));
     // Controls/WinUIControls.xaml(68,27) Name
     content_control_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("InlineDataValidationContentControl")));
-    rt::register_name(name_scope.as_ref(), "InlineDataValidationContentControl", ::core::clone::Clone::clone(&content_control_0).upcast::<::ferroui_base::FerroObject>(), 68, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "InlineDataValidationContentControl", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_0)), 68, 27)?;
     // Controls/WinUIControls.xaml(69,27) Content (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     let reflection_binding_extension_0 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("(DataValidationErrors.Errors)"));
@@ -94230,7 +94230,7 @@ fn build_controls_winuicontrols_xaml_deferred_162(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(74,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 74, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 74, 29)?;
     // Controls/WinUIControls.xaml(75,29) Padding
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::padding_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), 75, 29)?;
     // Controls/WinUIControls.xaml(76,29) Background
@@ -94275,7 +94275,7 @@ fn build_controls_winuicontrols_xaml_deferred_163(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/WinUIControls.xaml(88,16) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("InlineErrorIcon")));
-    rt::register_name(name_scope.as_ref(), "InlineErrorIcon", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 88, 16)?;
+    rt::register_name_value(name_scope.as_ref(), "InlineErrorIcon", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 88, 16)?;
     // Controls/WinUIControls.xaml(88,10) Width
     panel_0.set_value(::ferroui_base::layout::Layoutable::width_property(), 16.0_f64);
     // Controls/WinUIControls.xaml(88,10) Height
@@ -94561,7 +94561,7 @@ fn build_controls_winuicontrols_xaml_deferred_166(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/WinUIControls.xaml(92,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 92, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 92, 29)?;
     // Controls/WinUIControls.xaml(93,29) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 93, 29)?;
     // Controls/WinUIControls.xaml(94,29) BackgroundSizing
@@ -94737,7 +94737,7 @@ fn build_controls_winuicontrols_xaml_deferred_168(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(139,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootBorder")));
-    rt::register_name(name_scope.as_ref(), "RootBorder", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 139, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "RootBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 139, 19)?;
     // Controls/WinUIControls.xaml(140,19) BackgroundSizing
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_sizing_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_sizing_property()), 140, 19)?;
     // Controls/WinUIControls.xaml(141,19) Padding
@@ -94749,7 +94749,7 @@ fn build_controls_winuicontrols_xaml_deferred_168(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/WinUIControls.xaml(142,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 142, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 142, 31)?;
     // Controls/WinUIControls.xaml(143,31) Foreground
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::foreground_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 143, 31)?;
     // Controls/WinUIControls.xaml(144,31) Content (setter chosen at run time)
@@ -95223,7 +95223,7 @@ fn build_controls_winuicontrols_xaml_deferred_174(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(246,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Root")));
-    rt::register_name(name_scope.as_ref(), "Root", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 246, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 246, 17)?;
     // Controls/WinUIControls.xaml(246,10) Background
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_controls::Border::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_0);
@@ -95248,7 +95248,7 @@ fn build_controls_winuicontrols_xaml_deferred_174(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/WinUIControls.xaml(250,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 250, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 250, 29)?;
     // Controls/WinUIControls.xaml(251,29) Foreground
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::foreground_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 251, 29)?;
     // Controls/WinUIControls.xaml(252,29) Content (setter chosen at run time)
@@ -95482,7 +95482,7 @@ fn build_controls_winuicontrols_xaml_deferred_178(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/WinUIControls.xaml(99,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 99, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 99, 27)?;
     // Controls/WinUIControls.xaml(100,27) Foreground
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::foreground_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 100, 27)?;
     // Controls/WinUIControls.xaml(101,27) Background
@@ -95719,7 +95719,7 @@ fn build_controls_winuicontrols_xaml_deferred_181(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/WinUIControls.xaml(160,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 160, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 160, 27)?;
     // Controls/WinUIControls.xaml(161,27) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 161, 27)?;
     // Controls/WinUIControls.xaml(162,27) BackgroundSizing
@@ -95898,7 +95898,7 @@ fn build_controls_winuicontrols_xaml_deferred_184(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(212,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootBorder")));
-    rt::register_name(name_scope.as_ref(), "RootBorder", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 212, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "RootBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 212, 17)?;
     // Controls/WinUIControls.xaml(213,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 213, 17)?;
     // Controls/WinUIControls.xaml(214,17) BorderBrush
@@ -95960,7 +95960,7 @@ fn build_controls_winuicontrols_xaml_deferred_184(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/WinUIControls.xaml(220,23) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HeaderButton")));
-    rt::register_name(name_scope.as_ref(), "PART_HeaderButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 220, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HeaderButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 220, 23)?;
     // Controls/WinUIControls.xaml(221,23) Theme (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("CalendarItemHeaderNavigationButtonStyle"));
@@ -95991,7 +95991,7 @@ fn build_controls_winuicontrols_xaml_deferred_184(
     context.push_parent(rt::to_value(button_1.clone()));
     // Controls/WinUIControls.xaml(224,23) Name
     button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PreviousButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PreviousButton", ::core::clone::Clone::clone(&button_1).upcast::<::ferroui_base::FerroObject>(), 224, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PreviousButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_1)), 224, 23)?;
     // Controls/WinUIControls.xaml(224,16) Column
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     button_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_3);
@@ -96080,7 +96080,7 @@ fn build_controls_winuicontrols_xaml_deferred_184(
     context.push_parent(rt::to_value(button_2.clone()));
     // Controls/WinUIControls.xaml(240,23) Name
     button_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_NextButton")));
-    rt::register_name(name_scope.as_ref(), "PART_NextButton", ::core::clone::Clone::clone(&button_2).upcast::<::ferroui_base::FerroObject>(), 240, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_NextButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_2)), 240, 23)?;
     // Controls/WinUIControls.xaml(240,16) Column
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     button_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_13);
@@ -96185,7 +96185,7 @@ fn build_controls_winuicontrols_xaml_deferred_184(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_7, ::core::clone::Clone::clone(&grid_2).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(260,19) Name
     grid_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Views")));
-    rt::register_name(name_scope.as_ref(), "Views", ::core::clone::Clone::clone(&grid_2).upcast::<::ferroui_base::FerroObject>(), 260, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "Views", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_2)), 260, 19)?;
     // Controls/WinUIControls.xaml(260,14) Row
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
     grid_2.set_value_with_priority(::ferroui_controls::Grid::row_property(), 2_i32, priority_25);
@@ -96216,7 +96216,7 @@ fn build_controls_winuicontrols_xaml_deferred_184(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_8, ::core::clone::Clone::clone(&grid_3).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(266,21) Name
     grid_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ElementWeekNumberLabels")));
-    rt::register_name(name_scope.as_ref(), "PART_ElementWeekNumberLabels", ::core::clone::Clone::clone(&grid_3).upcast::<::ferroui_base::FerroObject>(), 266, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ElementWeekNumberLabels", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_3)), 266, 21)?;
     // Controls/WinUIControls.xaml(266,16) Column
     let priority_29 = ::ferroui_base::data::BindingPriority::Template;
     grid_3.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_29);
@@ -96312,7 +96312,7 @@ fn build_controls_winuicontrols_xaml_deferred_184(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_9, ::core::clone::Clone::clone(&grid_4).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(280,21) Name
     grid_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MonthView")));
-    rt::register_name(name_scope.as_ref(), "PART_MonthView", ::core::clone::Clone::clone(&grid_4).upcast::<::ferroui_base::FerroObject>(), 280, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MonthView", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_4)), 280, 21)?;
     // Controls/WinUIControls.xaml(280,16) Column
     let priority_46 = ::ferroui_base::data::BindingPriority::Template;
     grid_4.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_46);
@@ -96467,7 +96467,7 @@ fn build_controls_winuicontrols_xaml_deferred_184(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_10, ::core::clone::Clone::clone(&grid_5).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(304,21) Name
     grid_5.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_YearView")));
-    rt::register_name(name_scope.as_ref(), "PART_YearView", ::core::clone::Clone::clone(&grid_5).upcast::<::ferroui_base::FerroObject>(), 304, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_YearView", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_5)), 304, 21)?;
     // Controls/WinUIControls.xaml(304,16) ColumnSpan
     let priority_71 = ::ferroui_base::data::BindingPriority::Template;
     grid_5.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 2_i32, priority_71);
@@ -96604,7 +96604,7 @@ fn build_controls_winuicontrols_xaml_deferred_186(
     panel_0.begin_init();
     // Controls/WinUIControls.xaml(48,16) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Root")));
-    rt::register_name(name_scope.as_ref(), "PART_Root", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 48, 16)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 48, 16)?;
     // Controls/WinUIControls.xaml(49,12) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(&panel_0);
     // Controls/WinUIControls.xaml(49,12) CalendarItem
@@ -96613,7 +96613,7 @@ fn build_controls_winuicontrols_xaml_deferred_186(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&calendar_item_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(49,25) Name
     calendar_item_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_CalendarItem")));
-    rt::register_name(name_scope.as_ref(), "PART_CalendarItem", ::core::clone::Clone::clone(&calendar_item_0).upcast::<::ferroui_base::FerroObject>(), 49, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_CalendarItem", ::std::rc::Rc::new(::core::clone::Clone::clone(&calendar_item_0)), 49, 25)?;
     // Controls/WinUIControls.xaml(50,25) Foreground
     rt::bind_template_binding(calendar_item_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::foreground_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 50, 25)?;
     // Controls/WinUIControls.xaml(51,25) Background
@@ -96745,7 +96745,7 @@ fn build_controls_winuicontrols_xaml_deferred_189(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(77,24) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_FloatingPlaceholder")));
-    rt::register_name(name_scope.as_ref(), "PART_FloatingPlaceholder", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 77, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_FloatingPlaceholder", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 77, 24)?;
     // Controls/WinUIControls.xaml(77,14) Dock
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Top, priority_0);
@@ -96766,7 +96766,7 @@ fn build_controls_winuicontrols_xaml_deferred_189(
     context.push_parent(rt::to_value(scroll_viewer_0.clone()));
     // Controls/WinUIControls.xaml(82,27) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "PART_ScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 82, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 82, 27)?;
     // Controls/WinUIControls.xaml(83,27) HorizontalScrollBarVisibility
     rt::bind_template_binding(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(::ferroui_controls::ScrollViewer::horizontal_scroll_bar_visibility_property()), 83, 27)?;
     // Controls/WinUIControls.xaml(84,27) VerticalScrollBarVisibility
@@ -96805,7 +96805,7 @@ fn build_controls_winuicontrols_xaml_deferred_189(
     context.push_parent(rt::to_value(text_block_1.clone()));
     // Controls/WinUIControls.xaml(88,28) Name
     text_block_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PlaceholderTextContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PlaceholderTextContentPresenter", ::core::clone::Clone::clone(&text_block_1).upcast::<::ferroui_base::FerroObject>(), 88, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "PlaceholderTextContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_1)), 88, 28)?;
     // Controls/WinUIControls.xaml(89,28) Foreground
     rt::bind_template_binding(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::foreground_property(), rt::property(::ferroui_controls::TextBox::placeholder_foreground_property()), 89, 28)?;
     // Controls/WinUIControls.xaml(90,28) Text
@@ -96867,7 +96867,7 @@ fn build_controls_winuicontrols_xaml_deferred_189(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&text_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(103,32) Name
     text_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TextPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_TextPresenter", ::core::clone::Clone::clone(&text_presenter_0).upcast::<::ferroui_base::FerroObject>(), 103, 32)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TextPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_presenter_0)), 103, 32)?;
     // Controls/WinUIControls.xaml(104,32) Text
     let template_binding_13 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TextBox::text_property()));
     // Controls/WinUIControls.xaml(104,32) Mode
@@ -96962,7 +96962,7 @@ fn build_controls_winuicontrols_xaml_deferred_191(
     content_presenter_0.begin_init();
     // Controls/WinUIControls.xaml(148,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 148, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 148, 27)?;
     // Controls/WinUIControls.xaml(149,27) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 149, 27)?;
     // Controls/WinUIControls.xaml(150,27) Content (setter chosen at run time)
@@ -97302,7 +97302,7 @@ fn build_controls_winuicontrols_xaml_deferred_194(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/WinUIControls.xaml(189,17) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Root")));
-    rt::register_name(name_scope.as_ref(), "Root", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 189, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 189, 17)?;
     // Controls/WinUIControls.xaml(189,12) ColumnDefinitions
     let column_definitions_0 = ::ferroui_controls::ColumnDefinitions::__markup_new_0();
     rt::invoked(<::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::ColumnDefinition>>>::__markup_set_Capacity(&column_definitions_0, 2_i32), 189, 31)?;
@@ -97321,7 +97321,7 @@ fn build_controls_winuicontrols_xaml_deferred_194(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(190,21) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Background")));
-    rt::register_name(name_scope.as_ref(), "Background", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 190, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "Background", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 190, 21)?;
     // Controls/WinUIControls.xaml(190,14) ColumnSpan
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 2_i32, priority_0);
@@ -97352,7 +97352,7 @@ fn build_controls_winuicontrols_xaml_deferred_194(
     context.push_parent(rt::to_value(text_box_0.clone()));
     // Controls/WinUIControls.xaml(199,22) Name
     text_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TextBox")));
-    rt::register_name(name_scope.as_ref(), "PART_TextBox", ::core::clone::Clone::clone(&text_box_0).upcast::<::ferroui_base::FerroObject>(), 199, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TextBox", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_box_0)), 199, 22)?;
     // Controls/WinUIControls.xaml(199,14) Column
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     text_box_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_4);
@@ -97401,7 +97401,7 @@ fn build_controls_winuicontrols_xaml_deferred_194(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/WinUIControls.xaml(211,21) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Button")));
-    rt::register_name(name_scope.as_ref(), "PART_Button", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 211, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Button", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 211, 21)?;
     // Controls/WinUIControls.xaml(211,14) Column
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_8);
@@ -97427,7 +97427,7 @@ fn build_controls_winuicontrols_xaml_deferred_194(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/WinUIControls.xaml(215,21) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("CalendarGlyph")));
-    rt::register_name(name_scope.as_ref(), "CalendarGlyph", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 215, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "CalendarGlyph", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 215, 21)?;
     // Controls/WinUIControls.xaml(216,21) Data (setter chosen at run time)
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE787"));
@@ -97469,7 +97469,7 @@ fn build_controls_winuicontrols_xaml_deferred_194(
     context.push_parent(rt::to_value(popup_0.clone()));
     // Controls/WinUIControls.xaml(223,20) Name
     popup_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Popup")));
-    rt::register_name(name_scope.as_ref(), "PART_Popup", ::core::clone::Clone::clone(&popup_0).upcast::<::ferroui_base::FerroObject>(), 223, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Popup", ::std::rc::Rc::new(::core::clone::Clone::clone(&popup_0)), 223, 20)?;
     // Controls/WinUIControls.xaml(223,14) WindowManagerAddShadowHint
     let priority_15 = ::ferroui_base::data::BindingPriority::Template;
     popup_0.set_value_with_priority(::ferroui_controls::primitives::Popup::window_manager_add_shadow_hint_property(), ::core::clone::Clone::clone(&false), priority_15);
@@ -97491,7 +97491,7 @@ fn build_controls_winuicontrols_xaml_deferred_194(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(228,23) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("CalendarShadow")));
-    rt::register_name(name_scope.as_ref(), "CalendarShadow", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 228, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "CalendarShadow", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 228, 23)?;
     // Controls/WinUIControls.xaml(229,23) BoxShadow
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::box_shadow_property(), "ThemeShadowFlyoutBoxShadow", 229, 23)?;
     // Controls/WinUIControls.xaml(230,23) CornerRadius
@@ -97516,7 +97516,7 @@ fn build_controls_winuicontrols_xaml_deferred_194(
     context.push_parent(rt::to_value(calendar_0.clone()));
     // Controls/WinUIControls.xaml(232,27) Name
     calendar_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Calendar")));
-    rt::register_name(name_scope.as_ref(), "PART_Calendar", ::core::clone::Clone::clone(&calendar_0).upcast::<::ferroui_base::FerroObject>(), 232, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Calendar", ::std::rc::Rc::new(::core::clone::Clone::clone(&calendar_0)), 232, 27)?;
     // Controls/WinUIControls.xaml(233,27) CornerRadius
     rt::bind_dynamic_resource(&context, calendar_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::corner_radius_property(), "OverlayCornerRadius", 233, 27)?;
     // Controls/WinUIControls.xaml(234,27) FirstDayOfWeek
@@ -97684,7 +97684,7 @@ fn build_controls_winuicontrols_xaml_deferred_197(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(77,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 77, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 77, 29)?;
     // Controls/WinUIControls.xaml(78,29) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 78, 29)?;
     // Controls/WinUIControls.xaml(79,29) Foreground
@@ -97938,7 +97938,7 @@ fn build_controls_winuicontrols_xaml_deferred_200(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/WinUIControls.xaml(144,17) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 144, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 144, 17)?;
     // Controls/WinUIControls.xaml(144,37) Margin
     rt::bind_template_binding(grid_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), 144, 37)?;
     // Controls/WinUIControls.xaml(145,14) Children
@@ -97950,7 +97950,7 @@ fn build_controls_winuicontrols_xaml_deferred_200(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/WinUIControls.xaml(145,21) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_FlyoutButton")));
-    rt::register_name(name_scope.as_ref(), "PART_FlyoutButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 145, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_FlyoutButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 145, 21)?;
     // Controls/WinUIControls.xaml(146,21) Theme (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DatePickerFlyoutButtonStyle"));
@@ -98001,7 +98001,7 @@ fn build_controls_winuicontrols_xaml_deferred_200(
     context.push_parent(rt::to_value(grid_1.clone()));
     // Controls/WinUIControls.xaml(159,21) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ButtonContentGrid")));
-    rt::register_name(name_scope.as_ref(), "PART_ButtonContentGrid", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 159, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ButtonContentGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 159, 21)?;
     // Controls/WinUIControls.xaml(159,16) ColumnDefinitions
     let column_definitions_0 = ::ferroui_controls::ColumnDefinitions::__markup_new_0();
     rt::invoked(<::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::ColumnDefinition>>>::__markup_set_Capacity(&column_definitions_0, 5_i32), 159, 53)?;
@@ -98030,7 +98030,7 @@ fn build_controls_winuicontrols_xaml_deferred_200(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/WinUIControls.xaml(160,28) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DayTextBlock")));
-    rt::register_name(name_scope.as_ref(), "PART_DayTextBlock", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 160, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DayTextBlock", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 160, 28)?;
     // Controls/WinUIControls.xaml(161,28) Text
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_controls::TextBlock::text_property(), ::core::option::Option::Some(::std::string::String::from("day")), priority_5);
@@ -98056,7 +98056,7 @@ fn build_controls_winuicontrols_xaml_deferred_200(
     context.push_parent(rt::to_value(text_block_1.clone()));
     // Controls/WinUIControls.xaml(167,28) Name
     text_block_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MonthTextBlock")));
-    rt::register_name(name_scope.as_ref(), "PART_MonthTextBlock", ::core::clone::Clone::clone(&text_block_1).upcast::<::ferroui_base::FerroObject>(), 167, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MonthTextBlock", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_1)), 167, 28)?;
     // Controls/WinUIControls.xaml(168,28) Text
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     text_block_1.set_value_with_priority(::ferroui_controls::TextBlock::text_property(), ::core::option::Option::Some(::std::string::String::from("month")), priority_7);
@@ -98085,7 +98085,7 @@ fn build_controls_winuicontrols_xaml_deferred_200(
     context.push_parent(rt::to_value(text_block_2.clone()));
     // Controls/WinUIControls.xaml(175,28) Name
     text_block_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_YearTextBlock")));
-    rt::register_name(name_scope.as_ref(), "PART_YearTextBlock", ::core::clone::Clone::clone(&text_block_2).upcast::<::ferroui_base::FerroObject>(), 175, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_YearTextBlock", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_2)), 175, 28)?;
     // Controls/WinUIControls.xaml(176,28) Text
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
     text_block_2.set_value_with_priority(::ferroui_controls::TextBlock::text_property(), ::core::option::Option::Some(::std::string::String::from("year")), priority_10);
@@ -98111,7 +98111,7 @@ fn build_controls_winuicontrols_xaml_deferred_200(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/WinUIControls.xaml(182,28) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_FirstSpacer")));
-    rt::register_name(name_scope.as_ref(), "PART_FirstSpacer", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 182, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_FirstSpacer", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 182, 28)?;
     // Controls/WinUIControls.xaml(183,28) Fill
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "DatePickerSpacerFill", 183, 28)?;
     // Controls/WinUIControls.xaml(182,18) HorizontalAlignment
@@ -98133,7 +98133,7 @@ fn build_controls_winuicontrols_xaml_deferred_200(
     context.push_parent(rt::to_value(rectangle_1.clone()));
     // Controls/WinUIControls.xaml(187,28) Name
     rectangle_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SecondSpacer")));
-    rt::register_name(name_scope.as_ref(), "PART_SecondSpacer", ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_base::FerroObject>(), 187, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SecondSpacer", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_1)), 187, 28)?;
     // Controls/WinUIControls.xaml(188,28) Fill
     rt::bind_dynamic_resource(&context, rectangle_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "DatePickerSpacerFill", 188, 28)?;
     // Controls/WinUIControls.xaml(187,18) HorizontalAlignment
@@ -98159,7 +98159,7 @@ fn build_controls_winuicontrols_xaml_deferred_200(
     context.push_parent(rt::to_value(popup_0.clone()));
     // Controls/WinUIControls.xaml(194,20) Name
     popup_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Popup")));
-    rt::register_name(name_scope.as_ref(), "PART_Popup", ::core::clone::Clone::clone(&popup_0).upcast::<::ferroui_base::FerroObject>(), 194, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Popup", ::std::rc::Rc::new(::core::clone::Clone::clone(&popup_0)), 194, 20)?;
     // Controls/WinUIControls.xaml(194,14) WindowManagerAddShadowHint
     let priority_16 = ::ferroui_base::data::BindingPriority::Template;
     popup_0.set_value_with_priority(::ferroui_controls::primitives::Popup::window_manager_add_shadow_hint_property(), ::core::clone::Clone::clone(&false), priority_16);
@@ -98181,7 +98181,7 @@ fn build_controls_winuicontrols_xaml_deferred_200(
     context.push_parent(rt::to_value(date_picker_presenter_0.clone()));
     // Controls/WinUIControls.xaml(199,36) Name
     date_picker_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PickerPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_PickerPresenter", ::core::clone::Clone::clone(&date_picker_presenter_0).upcast::<::ferroui_base::FerroObject>(), 199, 36)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PickerPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&date_picker_presenter_0)), 199, 36)?;
     // Controls/WinUIControls.xaml(199,66) Margin (setter chosen at run time)
     let priority_19 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeShadowFlyoutMargin"));
@@ -98338,7 +98338,7 @@ fn build_controls_winuicontrols_xaml_deferred_203(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(248,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Background")));
-    rt::register_name(name_scope.as_ref(), "Background", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 248, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Background", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 248, 17)?;
     // Controls/WinUIControls.xaml(249,17) BoxShadow
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::box_shadow_property(), "ThemeShadowFlyoutBoxShadow", 249, 17)?;
     // Controls/WinUIControls.xaml(250,17) Background
@@ -98362,7 +98362,7 @@ fn build_controls_winuicontrols_xaml_deferred_203(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/WinUIControls.xaml(256,17) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentPanel")));
-    rt::register_name(name_scope.as_ref(), "ContentPanel", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 256, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentPanel", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 256, 17)?;
     // Controls/WinUIControls.xaml(256,12) RowDefinitions
     let row_definitions_0 = ::ferroui_controls::RowDefinitions::__markup_new_0();
     rt::invoked(<::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::RowDefinition>>>::__markup_set_Capacity(&row_definitions_0, 2_i32), 256, 39)?;
@@ -98382,7 +98382,7 @@ fn build_controls_winuicontrols_xaml_deferred_203(
     context.push_parent(rt::to_value(grid_1.clone()));
     // Controls/WinUIControls.xaml(257,19) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PickerContainer")));
-    rt::register_name(name_scope.as_ref(), "PART_PickerContainer", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 257, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PickerContainer", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 257, 19)?;
     // Controls/WinUIControls.xaml(259,18) Styles
     let styles_collection_0 = ::ferroui_base::StyledElement::__markup_get_Styles(grid_1.upcast_ref::<::ferroui_base::StyledElement>());
     // Controls/WinUIControls.xaml(259,18) Style
@@ -98410,7 +98410,7 @@ fn build_controls_winuicontrols_xaml_deferred_203(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(264,23) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HighlightRect")));
-    rt::register_name(name_scope.as_ref(), "HighlightRect", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 264, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "HighlightRect", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 264, 23)?;
     // Controls/WinUIControls.xaml(264,16) ZIndex
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_base::Visual::z_index_property(), -1_i32, priority_1);
@@ -98446,7 +98446,7 @@ fn build_controls_winuicontrols_xaml_deferred_203(
     context.push_parent(rt::to_value(grid_2.clone()));
     // Controls/WinUIControls.xaml(274,21) Name
     grid_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MonthHost")));
-    rt::register_name(name_scope.as_ref(), "PART_MonthHost", ::core::clone::Clone::clone(&grid_2).upcast::<::ferroui_base::FerroObject>(), 274, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MonthHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_2)), 274, 21)?;
     // Controls/WinUIControls.xaml(275,18) Children
     let children_collection_3 = ::ferroui_controls::Panel::__markup_get_Children(grid_2.upcast_ref::<::ferroui_controls::Panel>());
     // Controls/WinUIControls.xaml(275,18) ScrollViewer
@@ -98482,7 +98482,7 @@ fn build_controls_winuicontrols_xaml_deferred_203(
     context.push_parent(rt::to_value(date_time_picker_panel_0.clone()));
     // Controls/WinUIControls.xaml(278,40) Name
     date_time_picker_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MonthSelector")));
-    rt::register_name(name_scope.as_ref(), "PART_MonthSelector", ::core::clone::Clone::clone(&date_time_picker_panel_0).upcast::<::ferroui_base::FerroObject>(), 278, 40)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MonthSelector", ::std::rc::Rc::new(::core::clone::Clone::clone(&date_time_picker_panel_0)), 278, 40)?;
     // Controls/WinUIControls.xaml(278,20) PanelType
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
     date_time_picker_panel_0.set_value_with_priority(::ferroui_controls::date_time_pickers::DateTimePickerPanel::panel_type_property(), ::ferroui_controls::date_time_pickers::DateTimePickerPanelType::Month, priority_10);
@@ -98504,7 +98504,7 @@ fn build_controls_winuicontrols_xaml_deferred_203(
     context.push_parent(rt::to_value(repeat_button_0.clone()));
     // Controls/WinUIControls.xaml(283,31) Name
     repeat_button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MonthUpButton")));
-    rt::register_name(name_scope.as_ref(), "PART_MonthUpButton", ::core::clone::Clone::clone(&repeat_button_0).upcast::<::ferroui_base::FerroObject>(), 283, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MonthUpButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_0)), 283, 31)?;
     // Controls/WinUIControls.xaml(283,59) Theme (setter chosen at run time)
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorUpButtonStyle"));
@@ -98530,7 +98530,7 @@ fn build_controls_winuicontrols_xaml_deferred_203(
     context.push_parent(rt::to_value(repeat_button_1.clone()));
     // Controls/WinUIControls.xaml(284,31) Name
     repeat_button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MonthDownButton")));
-    rt::register_name(name_scope.as_ref(), "PART_MonthDownButton", ::core::clone::Clone::clone(&repeat_button_1).upcast::<::ferroui_base::FerroObject>(), 284, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MonthDownButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_1)), 284, 31)?;
     // Controls/WinUIControls.xaml(284,61) Theme (setter chosen at run time)
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorDownButtonStyle"));
@@ -98558,7 +98558,7 @@ fn build_controls_winuicontrols_xaml_deferred_203(
     context.push_parent(rt::to_value(grid_3.clone()));
     // Controls/WinUIControls.xaml(286,21) Name
     grid_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DayHost")));
-    rt::register_name(name_scope.as_ref(), "PART_DayHost", ::core::clone::Clone::clone(&grid_3).upcast::<::ferroui_base::FerroObject>(), 286, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DayHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_3)), 286, 21)?;
     // Controls/WinUIControls.xaml(287,18) Children
     let children_collection_7 = ::ferroui_controls::Panel::__markup_get_Children(grid_3.upcast_ref::<::ferroui_controls::Panel>());
     // Controls/WinUIControls.xaml(287,18) ScrollViewer
@@ -98594,7 +98594,7 @@ fn build_controls_winuicontrols_xaml_deferred_203(
     context.push_parent(rt::to_value(date_time_picker_panel_1.clone()));
     // Controls/WinUIControls.xaml(290,40) Name
     date_time_picker_panel_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DaySelector")));
-    rt::register_name(name_scope.as_ref(), "PART_DaySelector", ::core::clone::Clone::clone(&date_time_picker_panel_1).upcast::<::ferroui_base::FerroObject>(), 290, 40)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DaySelector", ::std::rc::Rc::new(::core::clone::Clone::clone(&date_time_picker_panel_1)), 290, 40)?;
     // Controls/WinUIControls.xaml(290,20) PanelType
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
     date_time_picker_panel_1.set_value_with_priority(::ferroui_controls::date_time_pickers::DateTimePickerPanel::panel_type_property(), ::ferroui_controls::date_time_pickers::DateTimePickerPanelType::Day, priority_17);
@@ -98616,7 +98616,7 @@ fn build_controls_winuicontrols_xaml_deferred_203(
     context.push_parent(rt::to_value(repeat_button_2.clone()));
     // Controls/WinUIControls.xaml(295,31) Name
     repeat_button_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DayUpButton")));
-    rt::register_name(name_scope.as_ref(), "PART_DayUpButton", ::core::clone::Clone::clone(&repeat_button_2).upcast::<::ferroui_base::FerroObject>(), 295, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DayUpButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_2)), 295, 31)?;
     // Controls/WinUIControls.xaml(295,57) Theme (setter chosen at run time)
     let priority_19 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorUpButtonStyle"));
@@ -98642,7 +98642,7 @@ fn build_controls_winuicontrols_xaml_deferred_203(
     context.push_parent(rt::to_value(repeat_button_3.clone()));
     // Controls/WinUIControls.xaml(296,31) Name
     repeat_button_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DayDownButton")));
-    rt::register_name(name_scope.as_ref(), "PART_DayDownButton", ::core::clone::Clone::clone(&repeat_button_3).upcast::<::ferroui_base::FerroObject>(), 296, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DayDownButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_3)), 296, 31)?;
     // Controls/WinUIControls.xaml(296,59) Theme (setter chosen at run time)
     let priority_20 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorDownButtonStyle"));
@@ -98670,7 +98670,7 @@ fn build_controls_winuicontrols_xaml_deferred_203(
     context.push_parent(rt::to_value(grid_4.clone()));
     // Controls/WinUIControls.xaml(298,21) Name
     grid_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_YearHost")));
-    rt::register_name(name_scope.as_ref(), "PART_YearHost", ::core::clone::Clone::clone(&grid_4).upcast::<::ferroui_base::FerroObject>(), 298, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_YearHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_4)), 298, 21)?;
     // Controls/WinUIControls.xaml(299,18) Children
     let children_collection_11 = ::ferroui_controls::Panel::__markup_get_Children(grid_4.upcast_ref::<::ferroui_controls::Panel>());
     // Controls/WinUIControls.xaml(299,18) ScrollViewer
@@ -98706,7 +98706,7 @@ fn build_controls_winuicontrols_xaml_deferred_203(
     context.push_parent(rt::to_value(date_time_picker_panel_2.clone()));
     // Controls/WinUIControls.xaml(302,40) Name
     date_time_picker_panel_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_YearSelector")));
-    rt::register_name(name_scope.as_ref(), "PART_YearSelector", ::core::clone::Clone::clone(&date_time_picker_panel_2).upcast::<::ferroui_base::FerroObject>(), 302, 40)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_YearSelector", ::std::rc::Rc::new(::core::clone::Clone::clone(&date_time_picker_panel_2)), 302, 40)?;
     // Controls/WinUIControls.xaml(302,20) PanelType
     let priority_24 = ::ferroui_base::data::BindingPriority::Template;
     date_time_picker_panel_2.set_value_with_priority(::ferroui_controls::date_time_pickers::DateTimePickerPanel::panel_type_property(), ::ferroui_controls::date_time_pickers::DateTimePickerPanelType::Year, priority_24);
@@ -98728,7 +98728,7 @@ fn build_controls_winuicontrols_xaml_deferred_203(
     context.push_parent(rt::to_value(repeat_button_4.clone()));
     // Controls/WinUIControls.xaml(307,31) Name
     repeat_button_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_YearUpButton")));
-    rt::register_name(name_scope.as_ref(), "PART_YearUpButton", ::core::clone::Clone::clone(&repeat_button_4).upcast::<::ferroui_base::FerroObject>(), 307, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_YearUpButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_4)), 307, 31)?;
     // Controls/WinUIControls.xaml(307,58) Theme (setter chosen at run time)
     let priority_26 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_8 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorUpButtonStyle"));
@@ -98754,7 +98754,7 @@ fn build_controls_winuicontrols_xaml_deferred_203(
     context.push_parent(rt::to_value(repeat_button_5.clone()));
     // Controls/WinUIControls.xaml(308,31) Name
     repeat_button_5.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_YearDownButton")));
-    rt::register_name(name_scope.as_ref(), "PART_YearDownButton", ::core::clone::Clone::clone(&repeat_button_5).upcast::<::ferroui_base::FerroObject>(), 308, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_YearDownButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_5)), 308, 31)?;
     // Controls/WinUIControls.xaml(308,60) Theme (setter chosen at run time)
     let priority_27 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_9 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorDownButtonStyle"));
@@ -98782,7 +98782,7 @@ fn build_controls_winuicontrols_xaml_deferred_203(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/WinUIControls.xaml(310,26) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_FirstSpacer")));
-    rt::register_name(name_scope.as_ref(), "PART_FirstSpacer", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 310, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_FirstSpacer", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 310, 26)?;
     // Controls/WinUIControls.xaml(310,16) ZIndex
     let priority_28 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_0.set_value_with_priority(::ferroui_base::Visual::z_index_property(), 10000_i32, priority_28);
@@ -98807,7 +98807,7 @@ fn build_controls_winuicontrols_xaml_deferred_203(
     context.push_parent(rt::to_value(rectangle_1.clone()));
     // Controls/WinUIControls.xaml(316,26) Name
     rectangle_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SecondSpacer")));
-    rt::register_name(name_scope.as_ref(), "PART_SecondSpacer", ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_base::FerroObject>(), 316, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SecondSpacer", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_1)), 316, 26)?;
     // Controls/WinUIControls.xaml(316,16) ZIndex
     let priority_31 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_1.set_value_with_priority(::ferroui_base::Visual::z_index_property(), 10000_i32, priority_31);
@@ -98834,7 +98834,7 @@ fn build_controls_winuicontrols_xaml_deferred_203(
     context.push_parent(rt::to_value(grid_5.clone()));
     // Controls/WinUIControls.xaml(323,19) Name
     grid_5.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("AcceptDismissHostGrid")));
-    rt::register_name(name_scope.as_ref(), "AcceptDismissHostGrid", ::core::clone::Clone::clone(&grid_5).upcast::<::ferroui_base::FerroObject>(), 323, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "AcceptDismissHostGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_5)), 323, 19)?;
     // Controls/WinUIControls.xaml(323,14) Row
     let priority_34 = ::ferroui_base::data::BindingPriority::Template;
     grid_5.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_34);
@@ -98878,7 +98878,7 @@ fn build_controls_winuicontrols_xaml_deferred_203(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/WinUIControls.xaml(331,23) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_AcceptButton")));
-    rt::register_name(name_scope.as_ref(), "PART_AcceptButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 331, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_AcceptButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 331, 23)?;
     // Controls/WinUIControls.xaml(331,16) Column
     let priority_37 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_37);
@@ -98969,7 +98969,7 @@ fn build_controls_winuicontrols_xaml_deferred_203(
     context.push_parent(rt::to_value(button_1.clone()));
     // Controls/WinUIControls.xaml(347,23) Name
     button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DismissButton")));
-    rt::register_name(name_scope.as_ref(), "PART_DismissButton", ::core::clone::Clone::clone(&button_1).upcast::<::ferroui_base::FerroObject>(), 347, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DismissButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_1)), 347, 23)?;
     // Controls/WinUIControls.xaml(347,16) Column
     let priority_49 = ::ferroui_base::data::BindingPriority::Template;
     button_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_49);
@@ -99184,7 +99184,7 @@ fn build_controls_winuicontrols_xaml_deferred_206(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(71,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 71, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 71, 29)?;
     // Controls/WinUIControls.xaml(72,29) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 72, 29)?;
     // Controls/WinUIControls.xaml(73,29) Foreground
@@ -99451,7 +99451,7 @@ fn build_controls_winuicontrols_xaml_deferred_209(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/WinUIControls.xaml(135,17) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 135, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 135, 17)?;
     // Controls/WinUIControls.xaml(135,37) Margin
     rt::bind_template_binding(grid_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), 135, 37)?;
     // Controls/WinUIControls.xaml(136,14) Children
@@ -99463,7 +99463,7 @@ fn build_controls_winuicontrols_xaml_deferred_209(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/WinUIControls.xaml(136,21) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_FlyoutButton")));
-    rt::register_name(name_scope.as_ref(), "PART_FlyoutButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 136, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_FlyoutButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 136, 21)?;
     // Controls/WinUIControls.xaml(137,21) Theme (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TimePickerFlyoutButtonStyle"));
@@ -99514,7 +99514,7 @@ fn build_controls_winuicontrols_xaml_deferred_209(
     context.push_parent(rt::to_value(grid_1.clone()));
     // Controls/WinUIControls.xaml(151,21) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_FlyoutButtonContentGrid")));
-    rt::register_name(name_scope.as_ref(), "PART_FlyoutButtonContentGrid", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 151, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_FlyoutButtonContentGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 151, 21)?;
     // Controls/WinUIControls.xaml(152,18) Children
     let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(grid_1.upcast_ref::<::ferroui_controls::Panel>());
     // Controls/WinUIControls.xaml(152,18) Border
@@ -99524,7 +99524,7 @@ fn build_controls_winuicontrols_xaml_deferred_209(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(152,25) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_FirstPickerHost")));
-    rt::register_name(name_scope.as_ref(), "PART_FirstPickerHost", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 152, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_FirstPickerHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 152, 25)?;
     // Controls/WinUIControls.xaml(152,18) Column
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_5);
@@ -99536,7 +99536,7 @@ fn build_controls_winuicontrols_xaml_deferred_209(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/WinUIControls.xaml(153,30) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HourTextBlock")));
-    rt::register_name(name_scope.as_ref(), "PART_HourTextBlock", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 153, 30)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HourTextBlock", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 153, 30)?;
     // Controls/WinUIControls.xaml(154,30) Text
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_controls::TextBlock::text_property(), ::core::option::Option::Some(::std::string::String::from("hour")), priority_6);
@@ -99564,7 +99564,7 @@ fn build_controls_winuicontrols_xaml_deferred_209(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/WinUIControls.xaml(161,28) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_FirstColumnDivider")));
-    rt::register_name(name_scope.as_ref(), "PART_FirstColumnDivider", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 161, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_FirstColumnDivider", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 161, 28)?;
     // Controls/WinUIControls.xaml(162,28) Fill
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "TimePickerSpacerFill", 162, 28)?;
     // Controls/WinUIControls.xaml(161,18) HorizontalAlignment
@@ -99586,7 +99586,7 @@ fn build_controls_winuicontrols_xaml_deferred_209(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(166,25) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SecondPickerHost")));
-    rt::register_name(name_scope.as_ref(), "PART_SecondPickerHost", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 166, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SecondPickerHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 166, 25)?;
     // Controls/WinUIControls.xaml(166,18) Column
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_10);
@@ -99598,7 +99598,7 @@ fn build_controls_winuicontrols_xaml_deferred_209(
     context.push_parent(rt::to_value(text_block_1.clone()));
     // Controls/WinUIControls.xaml(167,30) Name
     text_block_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MinuteTextBlock")));
-    rt::register_name(name_scope.as_ref(), "PART_MinuteTextBlock", ::core::clone::Clone::clone(&text_block_1).upcast::<::ferroui_base::FerroObject>(), 167, 30)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MinuteTextBlock", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_1)), 167, 30)?;
     // Controls/WinUIControls.xaml(168,30) Text
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     text_block_1.set_value_with_priority(::ferroui_controls::TextBlock::text_property(), ::core::option::Option::Some(::std::string::String::from("minute")), priority_11);
@@ -99626,7 +99626,7 @@ fn build_controls_winuicontrols_xaml_deferred_209(
     context.push_parent(rt::to_value(rectangle_1.clone()));
     // Controls/WinUIControls.xaml(175,28) Name
     rectangle_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SecondColumnDivider")));
-    rt::register_name(name_scope.as_ref(), "PART_SecondColumnDivider", ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_base::FerroObject>(), 175, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SecondColumnDivider", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_1)), 175, 28)?;
     // Controls/WinUIControls.xaml(176,28) Fill
     rt::bind_dynamic_resource(&context, rectangle_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "TimePickerSpacerFill", 176, 28)?;
     // Controls/WinUIControls.xaml(175,18) HorizontalAlignment
@@ -99648,7 +99648,7 @@ fn build_controls_winuicontrols_xaml_deferred_209(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/WinUIControls.xaml(180,25) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ThirdPickerHost")));
-    rt::register_name(name_scope.as_ref(), "PART_ThirdPickerHost", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 180, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ThirdPickerHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 180, 25)?;
     // Controls/WinUIControls.xaml(180,18) Column
     let priority_15 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 4_i32, priority_15);
@@ -99660,7 +99660,7 @@ fn build_controls_winuicontrols_xaml_deferred_209(
     context.push_parent(rt::to_value(text_block_2.clone()));
     // Controls/WinUIControls.xaml(181,30) Name
     text_block_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SecondTextBlock")));
-    rt::register_name(name_scope.as_ref(), "PART_SecondTextBlock", ::core::clone::Clone::clone(&text_block_2).upcast::<::ferroui_base::FerroObject>(), 181, 30)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SecondTextBlock", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_2)), 181, 30)?;
     // Controls/WinUIControls.xaml(182,30) Text
     let priority_16 = ::ferroui_base::data::BindingPriority::Template;
     text_block_2.set_value_with_priority(::ferroui_controls::TextBlock::text_property(), ::core::option::Option::Some(::std::string::String::from("second")), priority_16);
@@ -99688,7 +99688,7 @@ fn build_controls_winuicontrols_xaml_deferred_209(
     context.push_parent(rt::to_value(rectangle_2.clone()));
     // Controls/WinUIControls.xaml(189,28) Name
     rectangle_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ThirdColumnDivider")));
-    rt::register_name(name_scope.as_ref(), "PART_ThirdColumnDivider", ::core::clone::Clone::clone(&rectangle_2).upcast::<::ferroui_base::FerroObject>(), 189, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ThirdColumnDivider", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_2)), 189, 28)?;
     // Controls/WinUIControls.xaml(190,28) Fill
     rt::bind_dynamic_resource(&context, rectangle_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "TimePickerSpacerFill", 190, 28)?;
     // Controls/WinUIControls.xaml(189,18) HorizontalAlignment
@@ -99710,7 +99710,7 @@ fn build_controls_winuicontrols_xaml_deferred_209(
     context.push_parent(rt::to_value(border_3.clone()));
     // Controls/WinUIControls.xaml(194,25) Name
     border_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_FourthPickerHost")));
-    rt::register_name(name_scope.as_ref(), "PART_FourthPickerHost", ::core::clone::Clone::clone(&border_3).upcast::<::ferroui_base::FerroObject>(), 194, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_FourthPickerHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_3)), 194, 25)?;
     // Controls/WinUIControls.xaml(194,18) Column
     let priority_20 = ::ferroui_base::data::BindingPriority::Template;
     border_3.set_value_with_priority(::ferroui_controls::Grid::column_property(), 6_i32, priority_20);
@@ -99722,7 +99722,7 @@ fn build_controls_winuicontrols_xaml_deferred_209(
     context.push_parent(rt::to_value(text_block_3.clone()));
     // Controls/WinUIControls.xaml(195,30) Name
     text_block_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PeriodTextBlock")));
-    rt::register_name(name_scope.as_ref(), "PART_PeriodTextBlock", ::core::clone::Clone::clone(&text_block_3).upcast::<::ferroui_base::FerroObject>(), 195, 30)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PeriodTextBlock", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_3)), 195, 30)?;
     // Controls/WinUIControls.xaml(195,20) TextAlignment
     let priority_21 = ::ferroui_base::data::BindingPriority::Template;
     text_block_3.set_value_with_priority(::ferroui_controls::TextBlock::text_alignment_property(), ::ferroui_base::media::TextAlignment::Center, priority_21);
@@ -99751,7 +99751,7 @@ fn build_controls_winuicontrols_xaml_deferred_209(
     context.push_parent(rt::to_value(popup_0.clone()));
     // Controls/WinUIControls.xaml(204,20) Name
     popup_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Popup")));
-    rt::register_name(name_scope.as_ref(), "PART_Popup", ::core::clone::Clone::clone(&popup_0).upcast::<::ferroui_base::FerroObject>(), 204, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Popup", ::std::rc::Rc::new(::core::clone::Clone::clone(&popup_0)), 204, 20)?;
     // Controls/WinUIControls.xaml(204,14) WindowManagerAddShadowHint
     let priority_22 = ::ferroui_base::data::BindingPriority::Template;
     popup_0.set_value_with_priority(::ferroui_controls::primitives::Popup::window_manager_add_shadow_hint_property(), ::core::clone::Clone::clone(&false), priority_22);
@@ -99773,7 +99773,7 @@ fn build_controls_winuicontrols_xaml_deferred_209(
     context.push_parent(rt::to_value(time_picker_presenter_0.clone()));
     // Controls/WinUIControls.xaml(209,36) Name
     time_picker_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PickerPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_PickerPresenter", ::core::clone::Clone::clone(&time_picker_presenter_0).upcast::<::ferroui_base::FerroObject>(), 209, 36)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PickerPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&time_picker_presenter_0)), 209, 36)?;
     // Controls/WinUIControls.xaml(209,66) Margin (setter chosen at run time)
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeShadowFlyoutMargin"));
@@ -99924,7 +99924,7 @@ fn build_controls_winuicontrols_xaml_deferred_211(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(258,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Background")));
-    rt::register_name(name_scope.as_ref(), "Background", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 258, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Background", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 258, 17)?;
     // Controls/WinUIControls.xaml(259,17) BoxShadow
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::box_shadow_property(), "ThemeShadowFlyoutBoxShadow", 259, 17)?;
     // Controls/WinUIControls.xaml(260,17) Background
@@ -99948,7 +99948,7 @@ fn build_controls_winuicontrols_xaml_deferred_211(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/WinUIControls.xaml(266,17) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentPanel")));
-    rt::register_name(name_scope.as_ref(), "ContentPanel", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 266, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentPanel", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 266, 17)?;
     // Controls/WinUIControls.xaml(266,12) RowDefinitions
     let row_definitions_0 = ::ferroui_controls::RowDefinitions::__markup_new_0();
     rt::invoked(<::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::RowDefinition>>>::__markup_set_Capacity(&row_definitions_0, 2_i32), 266, 39)?;
@@ -99968,7 +99968,7 @@ fn build_controls_winuicontrols_xaml_deferred_211(
     context.push_parent(rt::to_value(grid_1.clone()));
     // Controls/WinUIControls.xaml(268,19) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PickerContainer")));
-    rt::register_name(name_scope.as_ref(), "PART_PickerContainer", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 268, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PickerContainer", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 268, 19)?;
     // Controls/WinUIControls.xaml(270,18) Styles
     let styles_collection_0 = ::ferroui_base::StyledElement::__markup_get_Styles(grid_1.upcast_ref::<::ferroui_base::StyledElement>());
     // Controls/WinUIControls.xaml(270,18) Style
@@ -99996,7 +99996,7 @@ fn build_controls_winuicontrols_xaml_deferred_211(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(274,23) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HighlightRect")));
-    rt::register_name(name_scope.as_ref(), "HighlightRect", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 274, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "HighlightRect", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 274, 23)?;
     // Controls/WinUIControls.xaml(274,16) ZIndex
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_base::Visual::z_index_property(), -1_i32, priority_1);
@@ -100032,7 +100032,7 @@ fn build_controls_winuicontrols_xaml_deferred_211(
     context.push_parent(rt::to_value(grid_2.clone()));
     // Controls/WinUIControls.xaml(284,21) Name
     grid_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HourHost")));
-    rt::register_name(name_scope.as_ref(), "PART_HourHost", ::core::clone::Clone::clone(&grid_2).upcast::<::ferroui_base::FerroObject>(), 284, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HourHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_2)), 284, 21)?;
     // Controls/WinUIControls.xaml(284,16) Column
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     grid_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_7);
@@ -100071,7 +100071,7 @@ fn build_controls_winuicontrols_xaml_deferred_211(
     context.push_parent(rt::to_value(date_time_picker_panel_0.clone()));
     // Controls/WinUIControls.xaml(288,40) Name
     date_time_picker_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HourSelector")));
-    rt::register_name(name_scope.as_ref(), "PART_HourSelector", ::core::clone::Clone::clone(&date_time_picker_panel_0).upcast::<::ferroui_base::FerroObject>(), 288, 40)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HourSelector", ::std::rc::Rc::new(::core::clone::Clone::clone(&date_time_picker_panel_0)), 288, 40)?;
     // Controls/WinUIControls.xaml(288,20) PanelType
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     date_time_picker_panel_0.set_value_with_priority(::ferroui_controls::date_time_pickers::DateTimePickerPanel::panel_type_property(), ::ferroui_controls::date_time_pickers::DateTimePickerPanelType::Hour, priority_11);
@@ -100093,7 +100093,7 @@ fn build_controls_winuicontrols_xaml_deferred_211(
     context.push_parent(rt::to_value(repeat_button_0.clone()));
     // Controls/WinUIControls.xaml(293,31) Name
     repeat_button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HourUpButton")));
-    rt::register_name(name_scope.as_ref(), "PART_HourUpButton", ::core::clone::Clone::clone(&repeat_button_0).upcast::<::ferroui_base::FerroObject>(), 293, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HourUpButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_0)), 293, 31)?;
     // Controls/WinUIControls.xaml(293,58) Theme (setter chosen at run time)
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorUpButtonStyle"));
@@ -100119,7 +100119,7 @@ fn build_controls_winuicontrols_xaml_deferred_211(
     context.push_parent(rt::to_value(repeat_button_1.clone()));
     // Controls/WinUIControls.xaml(294,31) Name
     repeat_button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HourDownButton")));
-    rt::register_name(name_scope.as_ref(), "PART_HourDownButton", ::core::clone::Clone::clone(&repeat_button_1).upcast::<::ferroui_base::FerroObject>(), 294, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HourDownButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_1)), 294, 31)?;
     // Controls/WinUIControls.xaml(294,60) Theme (setter chosen at run time)
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorDownButtonStyle"));
@@ -100147,7 +100147,7 @@ fn build_controls_winuicontrols_xaml_deferred_211(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/WinUIControls.xaml(296,26) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_FirstSpacer")));
-    rt::register_name(name_scope.as_ref(), "PART_FirstSpacer", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 296, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_FirstSpacer", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 296, 26)?;
     // Controls/WinUIControls.xaml(296,16) ZIndex
     let priority_15 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_0.set_value_with_priority(::ferroui_base::Visual::z_index_property(), 10000_i32, priority_15);
@@ -100172,7 +100172,7 @@ fn build_controls_winuicontrols_xaml_deferred_211(
     context.push_parent(rt::to_value(grid_3.clone()));
     // Controls/WinUIControls.xaml(302,21) Name
     grid_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MinuteHost")));
-    rt::register_name(name_scope.as_ref(), "PART_MinuteHost", ::core::clone::Clone::clone(&grid_3).upcast::<::ferroui_base::FerroObject>(), 302, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MinuteHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_3)), 302, 21)?;
     // Controls/WinUIControls.xaml(302,16) Column
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
     grid_3.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_18);
@@ -100211,7 +100211,7 @@ fn build_controls_winuicontrols_xaml_deferred_211(
     context.push_parent(rt::to_value(date_time_picker_panel_1.clone()));
     // Controls/WinUIControls.xaml(306,40) Name
     date_time_picker_panel_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MinuteSelector")));
-    rt::register_name(name_scope.as_ref(), "PART_MinuteSelector", ::core::clone::Clone::clone(&date_time_picker_panel_1).upcast::<::ferroui_base::FerroObject>(), 306, 40)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MinuteSelector", ::std::rc::Rc::new(::core::clone::Clone::clone(&date_time_picker_panel_1)), 306, 40)?;
     // Controls/WinUIControls.xaml(306,20) PanelType
     let priority_22 = ::ferroui_base::data::BindingPriority::Template;
     date_time_picker_panel_1.set_value_with_priority(::ferroui_controls::date_time_pickers::DateTimePickerPanel::panel_type_property(), ::ferroui_controls::date_time_pickers::DateTimePickerPanelType::Minute, priority_22);
@@ -100233,7 +100233,7 @@ fn build_controls_winuicontrols_xaml_deferred_211(
     context.push_parent(rt::to_value(repeat_button_2.clone()));
     // Controls/WinUIControls.xaml(311,31) Name
     repeat_button_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MinuteUpButton")));
-    rt::register_name(name_scope.as_ref(), "PART_MinuteUpButton", ::core::clone::Clone::clone(&repeat_button_2).upcast::<::ferroui_base::FerroObject>(), 311, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MinuteUpButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_2)), 311, 31)?;
     // Controls/WinUIControls.xaml(311,60) Theme (setter chosen at run time)
     let priority_24 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorUpButtonStyle"));
@@ -100259,7 +100259,7 @@ fn build_controls_winuicontrols_xaml_deferred_211(
     context.push_parent(rt::to_value(repeat_button_3.clone()));
     // Controls/WinUIControls.xaml(312,31) Name
     repeat_button_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MinuteDownButton")));
-    rt::register_name(name_scope.as_ref(), "PART_MinuteDownButton", ::core::clone::Clone::clone(&repeat_button_3).upcast::<::ferroui_base::FerroObject>(), 312, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MinuteDownButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_3)), 312, 31)?;
     // Controls/WinUIControls.xaml(312,62) Theme (setter chosen at run time)
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorDownButtonStyle"));
@@ -100287,7 +100287,7 @@ fn build_controls_winuicontrols_xaml_deferred_211(
     context.push_parent(rt::to_value(rectangle_1.clone()));
     // Controls/WinUIControls.xaml(314,26) Name
     rectangle_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SecondSpacer")));
-    rt::register_name(name_scope.as_ref(), "PART_SecondSpacer", ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_base::FerroObject>(), 314, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SecondSpacer", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_1)), 314, 26)?;
     // Controls/WinUIControls.xaml(314,16) ZIndex
     let priority_26 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_1.set_value_with_priority(::ferroui_base::Visual::z_index_property(), 10000_i32, priority_26);
@@ -100312,7 +100312,7 @@ fn build_controls_winuicontrols_xaml_deferred_211(
     context.push_parent(rt::to_value(grid_4.clone()));
     // Controls/WinUIControls.xaml(320,21) Name
     grid_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SecondHost")));
-    rt::register_name(name_scope.as_ref(), "PART_SecondHost", ::core::clone::Clone::clone(&grid_4).upcast::<::ferroui_base::FerroObject>(), 320, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SecondHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_4)), 320, 21)?;
     // Controls/WinUIControls.xaml(320,16) Column
     let priority_29 = ::ferroui_base::data::BindingPriority::Template;
     grid_4.set_value_with_priority(::ferroui_controls::Grid::column_property(), 4_i32, priority_29);
@@ -100351,7 +100351,7 @@ fn build_controls_winuicontrols_xaml_deferred_211(
     context.push_parent(rt::to_value(date_time_picker_panel_2.clone()));
     // Controls/WinUIControls.xaml(324,40) Name
     date_time_picker_panel_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SecondSelector")));
-    rt::register_name(name_scope.as_ref(), "PART_SecondSelector", ::core::clone::Clone::clone(&date_time_picker_panel_2).upcast::<::ferroui_base::FerroObject>(), 324, 40)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SecondSelector", ::std::rc::Rc::new(::core::clone::Clone::clone(&date_time_picker_panel_2)), 324, 40)?;
     // Controls/WinUIControls.xaml(324,20) PanelType
     let priority_33 = ::ferroui_base::data::BindingPriority::Template;
     date_time_picker_panel_2.set_value_with_priority(::ferroui_controls::date_time_pickers::DateTimePickerPanel::panel_type_property(), ::ferroui_controls::date_time_pickers::DateTimePickerPanelType::Second, priority_33);
@@ -100373,7 +100373,7 @@ fn build_controls_winuicontrols_xaml_deferred_211(
     context.push_parent(rt::to_value(repeat_button_4.clone()));
     // Controls/WinUIControls.xaml(329,31) Name
     repeat_button_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SecondUpButton")));
-    rt::register_name(name_scope.as_ref(), "PART_SecondUpButton", ::core::clone::Clone::clone(&repeat_button_4).upcast::<::ferroui_base::FerroObject>(), 329, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SecondUpButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_4)), 329, 31)?;
     // Controls/WinUIControls.xaml(329,60) Theme (setter chosen at run time)
     let priority_35 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_8 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorUpButtonStyle"));
@@ -100399,7 +100399,7 @@ fn build_controls_winuicontrols_xaml_deferred_211(
     context.push_parent(rt::to_value(repeat_button_5.clone()));
     // Controls/WinUIControls.xaml(330,31) Name
     repeat_button_5.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SecondDownButton")));
-    rt::register_name(name_scope.as_ref(), "PART_SecondDownButton", ::core::clone::Clone::clone(&repeat_button_5).upcast::<::ferroui_base::FerroObject>(), 330, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SecondDownButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_5)), 330, 31)?;
     // Controls/WinUIControls.xaml(330,62) Theme (setter chosen at run time)
     let priority_36 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_9 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorDownButtonStyle"));
@@ -100427,7 +100427,7 @@ fn build_controls_winuicontrols_xaml_deferred_211(
     context.push_parent(rt::to_value(rectangle_2.clone()));
     // Controls/WinUIControls.xaml(332,26) Name
     rectangle_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ThirdSpacer")));
-    rt::register_name(name_scope.as_ref(), "PART_ThirdSpacer", ::core::clone::Clone::clone(&rectangle_2).upcast::<::ferroui_base::FerroObject>(), 332, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ThirdSpacer", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_2)), 332, 26)?;
     // Controls/WinUIControls.xaml(332,16) ZIndex
     let priority_37 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_2.set_value_with_priority(::ferroui_base::Visual::z_index_property(), 10000_i32, priority_37);
@@ -100452,7 +100452,7 @@ fn build_controls_winuicontrols_xaml_deferred_211(
     context.push_parent(rt::to_value(grid_5.clone()));
     // Controls/WinUIControls.xaml(338,21) Name
     grid_5.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PeriodHost")));
-    rt::register_name(name_scope.as_ref(), "PART_PeriodHost", ::core::clone::Clone::clone(&grid_5).upcast::<::ferroui_base::FerroObject>(), 338, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PeriodHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_5)), 338, 21)?;
     // Controls/WinUIControls.xaml(338,16) Column
     let priority_40 = ::ferroui_base::data::BindingPriority::Template;
     grid_5.set_value_with_priority(::ferroui_controls::Grid::column_property(), 6_i32, priority_40);
@@ -100491,7 +100491,7 @@ fn build_controls_winuicontrols_xaml_deferred_211(
     context.push_parent(rt::to_value(date_time_picker_panel_3.clone()));
     // Controls/WinUIControls.xaml(342,40) Name
     date_time_picker_panel_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PeriodSelector")));
-    rt::register_name(name_scope.as_ref(), "PART_PeriodSelector", ::core::clone::Clone::clone(&date_time_picker_panel_3).upcast::<::ferroui_base::FerroObject>(), 342, 40)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PeriodSelector", ::std::rc::Rc::new(::core::clone::Clone::clone(&date_time_picker_panel_3)), 342, 40)?;
     // Controls/WinUIControls.xaml(342,20) PanelType
     let priority_44 = ::ferroui_base::data::BindingPriority::Template;
     date_time_picker_panel_3.set_value_with_priority(::ferroui_controls::date_time_pickers::DateTimePickerPanel::panel_type_property(), ::ferroui_controls::date_time_pickers::DateTimePickerPanelType::TimePeriod, priority_44);
@@ -100513,7 +100513,7 @@ fn build_controls_winuicontrols_xaml_deferred_211(
     context.push_parent(rt::to_value(repeat_button_6.clone()));
     // Controls/WinUIControls.xaml(347,31) Name
     repeat_button_6.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PeriodUpButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PeriodUpButton", ::core::clone::Clone::clone(&repeat_button_6).upcast::<::ferroui_base::FerroObject>(), 347, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PeriodUpButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_6)), 347, 31)?;
     // Controls/WinUIControls.xaml(347,60) Theme (setter chosen at run time)
     let priority_46 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_11 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorUpButtonStyle"));
@@ -100539,7 +100539,7 @@ fn build_controls_winuicontrols_xaml_deferred_211(
     context.push_parent(rt::to_value(repeat_button_7.clone()));
     // Controls/WinUIControls.xaml(348,31) Name
     repeat_button_7.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PeriodDownButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PeriodDownButton", ::core::clone::Clone::clone(&repeat_button_7).upcast::<::ferroui_base::FerroObject>(), 348, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PeriodDownButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_7)), 348, 31)?;
     // Controls/WinUIControls.xaml(348,62) Theme (setter chosen at run time)
     let priority_47 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_12 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorDownButtonStyle"));
@@ -100569,7 +100569,7 @@ fn build_controls_winuicontrols_xaml_deferred_211(
     context.push_parent(rt::to_value(grid_6.clone()));
     // Controls/WinUIControls.xaml(351,19) Name
     grid_6.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("AcceptDismissHostGrid")));
-    rt::register_name(name_scope.as_ref(), "AcceptDismissHostGrid", ::core::clone::Clone::clone(&grid_6).upcast::<::ferroui_base::FerroObject>(), 351, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "AcceptDismissHostGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_6)), 351, 19)?;
     // Controls/WinUIControls.xaml(351,14) Row
     let priority_48 = ::ferroui_base::data::BindingPriority::Template;
     grid_6.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_48);
@@ -100613,7 +100613,7 @@ fn build_controls_winuicontrols_xaml_deferred_211(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/WinUIControls.xaml(359,23) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_AcceptButton")));
-    rt::register_name(name_scope.as_ref(), "PART_AcceptButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 359, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_AcceptButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 359, 23)?;
     // Controls/WinUIControls.xaml(359,16) Column
     let priority_51 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_51);
@@ -100704,7 +100704,7 @@ fn build_controls_winuicontrols_xaml_deferred_211(
     context.push_parent(rt::to_value(button_1.clone()));
     // Controls/WinUIControls.xaml(375,23) Name
     button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DismissButton")));
-    rt::register_name(name_scope.as_ref(), "PART_DismissButton", ::core::clone::Clone::clone(&button_1).upcast::<::ferroui_base::FerroObject>(), 375, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DismissButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_1)), 375, 23)?;
     // Controls/WinUIControls.xaml(375,16) Column
     let priority_63 = ::ferroui_base::data::BindingPriority::Template;
     button_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_63);
@@ -100925,7 +100925,7 @@ fn build_controls_winuicontrols_xaml_deferred_213(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(64,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 64, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 64, 17)?;
     // Controls/WinUIControls.xaml(65,17) Background
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "WindowCaptionButtonBackground", 65, 17)?;
     // Controls/WinUIControls.xaml(66,17) BackgroundSizing
@@ -100945,7 +100945,7 @@ fn build_controls_winuicontrols_xaml_deferred_213(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/WinUIControls.xaml(71,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 71, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 71, 29)?;
     // Controls/WinUIControls.xaml(72,29) Content (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_5 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -101205,7 +101205,7 @@ fn build_controls_winuicontrols_xaml_deferred_216(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(131,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootGrid")));
-    rt::register_name(name_scope.as_ref(), "RootGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 131, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 131, 17)?;
     // Controls/WinUIControls.xaml(132,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 132, 17)?;
     // Controls/WinUIControls.xaml(133,17) CornerRadius
@@ -101218,7 +101218,7 @@ fn build_controls_winuicontrols_xaml_deferred_216(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/WinUIControls.xaml(135,17) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Content")));
-    rt::register_name(name_scope.as_ref(), "Content", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 135, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Content", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 135, 17)?;
     // Controls/WinUIControls.xaml(136,17) Data (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE72B"));
@@ -101409,7 +101409,7 @@ fn build_controls_winuicontrols_xaml_deferred_218(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(182,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootGrid")));
-    rt::register_name(name_scope.as_ref(), "RootGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 182, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 182, 17)?;
     // Controls/WinUIControls.xaml(183,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 183, 17)?;
     // Controls/WinUIControls.xaml(184,17) CornerRadius
@@ -101422,7 +101422,7 @@ fn build_controls_winuicontrols_xaml_deferred_218(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/WinUIControls.xaml(186,17) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Content")));
-    rt::register_name(name_scope.as_ref(), "Content", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 186, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Content", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 186, 17)?;
     // Controls/WinUIControls.xaml(187,17) Data (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE700"));
@@ -101488,7 +101488,7 @@ fn build_controls_winuicontrols_xaml_deferred_220(
     content_presenter_0.begin_init();
     // Controls/WinUIControls.xaml(225,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 225, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 225, 27)?;
     // Controls/WinUIControls.xaml(226,27) Content (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_0 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -101815,7 +101815,7 @@ fn build_controls_winuicontrols_xaml_deferred_222(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/WinUIControls.xaml(244,20) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_UnderlayWrapper")));
-    rt::register_name(name_scope.as_ref(), "PART_UnderlayWrapper", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 244, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_UnderlayWrapper", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 244, 20)?;
     // Controls/WinUIControls.xaml(245,16) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(&panel_0);
     // Controls/WinUIControls.xaml(245,16) Border
@@ -101825,7 +101825,7 @@ fn build_controls_winuicontrols_xaml_deferred_222(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(245,23) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_WindowBorder")));
-    rt::register_name(name_scope.as_ref(), "PART_WindowBorder", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 245, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_WindowBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 245, 23)?;
     // Controls/WinUIControls.xaml(246,23) Background
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "SystemControlTransparentBrush", 246, 23)?;
     // Controls/WinUIControls.xaml(247,23) BorderThickness
@@ -101846,7 +101846,7 @@ fn build_controls_winuicontrols_xaml_deferred_222(
     context.push_parent(rt::to_value(panel_1.clone()));
     // Controls/WinUIControls.xaml(251,22) Name
     panel_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TitleBar")));
-    rt::register_name(name_scope.as_ref(), "PART_TitleBar", ::core::clone::Clone::clone(&panel_1).upcast::<::ferroui_base::FerroObject>(), 251, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TitleBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_1)), 251, 22)?;
     // Controls/WinUIControls.xaml(251,16) VerticalAlignment
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     panel_1.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Top, priority_1);
@@ -101871,7 +101871,7 @@ fn build_controls_winuicontrols_xaml_deferred_222(
     context.push_parent(rt::to_value(panel_2.clone()));
     // Controls/WinUIControls.xaml(261,20) Name
     panel_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_OverlayWrapper")));
-    rt::register_name(name_scope.as_ref(), "PART_OverlayWrapper", ::core::clone::Clone::clone(&panel_2).upcast::<::ferroui_base::FerroObject>(), 261, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_OverlayWrapper", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_2)), 261, 20)?;
     // Controls/WinUIControls.xaml(265,16) Children
     let children_collection_2 = ::ferroui_controls::Panel::__markup_get_Children(&panel_2);
     // Controls/WinUIControls.xaml(265,16) Panel
@@ -101881,7 +101881,7 @@ fn build_controls_winuicontrols_xaml_deferred_222(
     context.push_parent(rt::to_value(panel_3.clone()));
     // Controls/WinUIControls.xaml(265,22) Name
     panel_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TitleTextPanel")));
-    rt::register_name(name_scope.as_ref(), "PART_TitleTextPanel", ::core::clone::Clone::clone(&panel_3).upcast::<::ferroui_base::FerroObject>(), 265, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TitleTextPanel", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_3)), 265, 22)?;
     // Controls/WinUIControls.xaml(265,16) VerticalAlignment
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     panel_3.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Top, priority_3);
@@ -101901,7 +101901,7 @@ fn build_controls_winuicontrols_xaml_deferred_222(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/WinUIControls.xaml(270,28) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TitleText")));
-    rt::register_name(name_scope.as_ref(), "PART_TitleText", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 270, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TitleText", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 270, 28)?;
     // Controls/WinUIControls.xaml(271,28) Theme (setter chosen at run time)
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("CaptionTextBlockStyle"));
@@ -101949,7 +101949,7 @@ fn build_controls_winuicontrols_xaml_deferred_222(
     context.push_parent(rt::to_value(stack_panel_0.clone()));
     // Controls/WinUIControls.xaml(280,27) Name
     stack_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_OverlayPanel")));
-    rt::register_name(name_scope.as_ref(), "PART_OverlayPanel", ::core::clone::Clone::clone(&stack_panel_0).upcast::<::ferroui_base::FerroObject>(), 280, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_OverlayPanel", ::std::rc::Rc::new(::core::clone::Clone::clone(&stack_panel_0)), 280, 27)?;
     // Controls/WinUIControls.xaml(280,16) VerticalAlignment
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     stack_panel_0.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Top, priority_11);
@@ -101972,7 +101972,7 @@ fn build_controls_winuicontrols_xaml_deferred_222(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/WinUIControls.xaml(286,25) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_FullScreenButton")));
-    rt::register_name(name_scope.as_ref(), "PART_FullScreenButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 286, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_FullScreenButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 286, 25)?;
     // Controls/WinUIControls.xaml(287,25) Theme (setter chosen at run time)
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("WindowCaptionButton"));
@@ -102033,7 +102033,7 @@ fn build_controls_winuicontrols_xaml_deferred_222(
     context.push_parent(rt::to_value(button_1.clone()));
     // Controls/WinUIControls.xaml(294,25) Name
     button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MinimizeButton")));
-    rt::register_name(name_scope.as_ref(), "PART_MinimizeButton", ::core::clone::Clone::clone(&button_1).upcast::<::ferroui_base::FerroObject>(), 294, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MinimizeButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_1)), 294, 25)?;
     // Controls/WinUIControls.xaml(295,25) Theme (setter chosen at run time)
     let priority_19 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("WindowCaptionButton"));
@@ -102094,7 +102094,7 @@ fn build_controls_winuicontrols_xaml_deferred_222(
     context.push_parent(rt::to_value(button_2.clone()));
     // Controls/WinUIControls.xaml(302,25) Name
     button_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MaximizeButton")));
-    rt::register_name(name_scope.as_ref(), "PART_MaximizeButton", ::core::clone::Clone::clone(&button_2).upcast::<::ferroui_base::FerroObject>(), 302, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MaximizeButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_2)), 302, 25)?;
     // Controls/WinUIControls.xaml(303,25) Theme (setter chosen at run time)
     let priority_24 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("WindowCaptionButton"));
@@ -102120,7 +102120,7 @@ fn build_controls_winuicontrols_xaml_deferred_222(
     context.push_parent(rt::to_value(path_2.clone()));
     // Controls/WinUIControls.xaml(305,25) Name
     path_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RestoreButtonPath")));
-    rt::register_name(name_scope.as_ref(), "RestoreButtonPath", ::core::clone::Clone::clone(&path_2).upcast::<::ferroui_base::FerroObject>(), 305, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "RestoreButtonPath", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_2)), 305, 25)?;
     // Controls/WinUIControls.xaml(306,25) Data (setter chosen at run time)
     let priority_26 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE922"));
@@ -102158,7 +102158,7 @@ fn build_controls_winuicontrols_xaml_deferred_222(
     context.push_parent(rt::to_value(button_3.clone()));
     // Controls/WinUIControls.xaml(311,25) Name
     button_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_CloseButton")));
-    rt::register_name(name_scope.as_ref(), "PART_CloseButton", ::core::clone::Clone::clone(&button_3).upcast::<::ferroui_base::FerroObject>(), 311, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_CloseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_3)), 311, 25)?;
     // Controls/WinUIControls.xaml(312,25) Theme (setter chosen at run time)
     let priority_29 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_7 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("WindowDrawnDecorationsCloseButton"));
@@ -102239,7 +102239,7 @@ fn build_controls_winuicontrols_xaml_deferred_222(
     context.push_parent(rt::to_value(text_block_1.clone()));
     // Controls/WinUIControls.xaml(328,26) Name
     text_block_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PopoverTitleText")));
-    rt::register_name(name_scope.as_ref(), "PART_PopoverTitleText", ::core::clone::Clone::clone(&text_block_1).upcast::<::ferroui_base::FerroObject>(), 328, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PopoverTitleText", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_1)), 328, 26)?;
     // Controls/WinUIControls.xaml(329,26) Theme (setter chosen at run time)
     let priority_36 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_9 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("CaptionTextBlockStyle"));
@@ -102298,7 +102298,7 @@ fn build_controls_winuicontrols_xaml_deferred_222(
     context.push_parent(rt::to_value(button_4.clone()));
     // Controls/WinUIControls.xaml(339,25) Name
     button_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PopoverFullScreenButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PopoverFullScreenButton", ::core::clone::Clone::clone(&button_4).upcast::<::ferroui_base::FerroObject>(), 339, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PopoverFullScreenButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_4)), 339, 25)?;
     // Controls/WinUIControls.xaml(340,25) Theme (setter chosen at run time)
     let priority_44 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_10 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("WindowCaptionButton"));
@@ -102359,7 +102359,7 @@ fn build_controls_winuicontrols_xaml_deferred_222(
     context.push_parent(rt::to_value(button_5.clone()));
     // Controls/WinUIControls.xaml(347,25) Name
     button_5.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PopoverCloseButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PopoverCloseButton", ::core::clone::Clone::clone(&button_5).upcast::<::ferroui_base::FerroObject>(), 347, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PopoverCloseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_5)), 347, 25)?;
     // Controls/WinUIControls.xaml(348,25) Theme (setter chosen at run time)
     let priority_49 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_12 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("WindowDrawnDecorationsCloseButton"));
@@ -102855,7 +102855,7 @@ fn build_controls_winuicontrols_xaml_deferred_226(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(107,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentRoot")));
-    rt::register_name(name_scope.as_ref(), "ContentRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 107, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 107, 17)?;
     // Controls/WinUIControls.xaml(107,10) VerticalAlignment
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Top, priority_0);
@@ -102938,7 +102938,7 @@ fn build_controls_winuicontrols_xaml_deferred_226(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/WinUIControls.xaml(126,22) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("StandardIconArea")));
-    rt::register_name(name_scope.as_ref(), "StandardIconArea", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 126, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "StandardIconArea", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 126, 22)?;
     // Controls/WinUIControls.xaml(127,22) Width (setter chosen at run time)
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarIconFontSize"));
@@ -102987,7 +102987,7 @@ fn build_controls_winuicontrols_xaml_deferred_226(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/WinUIControls.xaml(131,23) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("IconBackground")));
-    rt::register_name(name_scope.as_ref(), "IconBackground", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 131, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "IconBackground", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 131, 23)?;
     // Controls/WinUIControls.xaml(132,23) Data (setter chosen at run time)
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryF136"));
@@ -103027,7 +103027,7 @@ fn build_controls_winuicontrols_xaml_deferred_226(
     context.push_parent(rt::to_value(path_1.clone()));
     // Controls/WinUIControls.xaml(138,23) Name
     path_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("StandardIcon")));
-    rt::register_name(name_scope.as_ref(), "StandardIcon", ::core::clone::Clone::clone(&path_1).upcast::<::ferroui_base::FerroObject>(), 138, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "StandardIcon", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_1)), 138, 23)?;
     // Controls/WinUIControls.xaml(139,23) Data (setter chosen at run time)
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryF13F"));
@@ -103069,7 +103069,7 @@ fn build_controls_winuicontrols_xaml_deferred_226(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/WinUIControls.xaml(146,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 146, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 146, 33)?;
     // Controls/WinUIControls.xaml(146,16) Column
     let priority_19 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_19);
@@ -103112,7 +103112,7 @@ fn build_controls_winuicontrols_xaml_deferred_226(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/WinUIControls.xaml(153,23) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("CloseButton")));
-    rt::register_name(name_scope.as_ref(), "CloseButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 153, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "CloseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 153, 23)?;
     // Controls/WinUIControls.xaml(153,16) Column
     let priority_22 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_22);
@@ -103293,7 +103293,7 @@ fn build_controls_winuicontrols_xaml_deferred_228(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(45,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootGrid")));
-    rt::register_name(name_scope.as_ref(), "RootGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 45, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 45, 17)?;
     // Controls/WinUIControls.xaml(46,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 46, 17)?;
     // Controls/WinUIControls.xaml(47,17) CornerRadius
@@ -103323,7 +103323,7 @@ fn build_controls_winuicontrols_xaml_deferred_228(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/WinUIControls.xaml(50,24) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ValueTextBlock")));
-    rt::register_name(name_scope.as_ref(), "ValueTextBlock", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 50, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "ValueTextBlock", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 50, 24)?;
     // Controls/WinUIControls.xaml(51,24) Text
     let reflection_binding_extension_1 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("Value"));
     context.push_parent(rt::to_value(reflection_binding_extension_1.clone()));
@@ -103356,7 +103356,7 @@ fn build_controls_winuicontrols_xaml_deferred_228(
     context.push_parent(rt::to_value(viewbox_0.clone()));
     // Controls/WinUIControls.xaml(56,22) Name
     viewbox_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("IconPresenter")));
-    rt::register_name(name_scope.as_ref(), "IconPresenter", ::core::clone::Clone::clone(&viewbox_0).upcast::<::ferroui_base::FerroObject>(), 56, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "IconPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&viewbox_0)), 56, 22)?;
     // Controls/WinUIControls.xaml(56,14) IsVisible
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     viewbox_0.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_3);
@@ -104106,7 +104106,7 @@ fn build_controls_winuicontrols_xaml_deferred_246(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/WinUIControls.xaml(47,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "PART_LayoutRoot", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 47, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 47, 15)?;
     // Controls/WinUIControls.xaml(47,40) Height
     rt::bind_dynamic_resource(&context, grid_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), "TitleBarCompactHeight", 47, 40)?;
     // Controls/WinUIControls.xaml(47,89) Background
@@ -104217,7 +104217,7 @@ fn build_controls_winuicontrols_xaml_deferred_246(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(78,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LeftPaddingColumn")));
-    rt::register_name(name_scope.as_ref(), "LeftPaddingColumn", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 78, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "LeftPaddingColumn", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 78, 19)?;
     // Controls/WinUIControls.xaml(78,12) Column
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_11);
@@ -104234,7 +104234,7 @@ fn build_controls_winuicontrols_xaml_deferred_246(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(79,19) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LeftHeaderPaddingColumn")));
-    rt::register_name(name_scope.as_ref(), "LeftHeaderPaddingColumn", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 79, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "LeftHeaderPaddingColumn", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 79, 19)?;
     // Controls/WinUIControls.xaml(79,12) Column
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 4_i32, priority_12);
@@ -104251,7 +104251,7 @@ fn build_controls_winuicontrols_xaml_deferred_246(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/WinUIControls.xaml(80,19) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RightPaddingColumn")));
-    rt::register_name(name_scope.as_ref(), "RightPaddingColumn", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 80, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "RightPaddingColumn", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 80, 19)?;
     // Controls/WinUIControls.xaml(80,12) Column
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 11_i32, priority_13);
@@ -104268,7 +104268,7 @@ fn build_controls_winuicontrols_xaml_deferred_246(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/WinUIControls.xaml(82,19) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_BackButton")));
-    rt::register_name(name_scope.as_ref(), "PART_BackButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 82, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_BackButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 82, 19)?;
     // Controls/WinUIControls.xaml(82,12) Column
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_14);
@@ -104302,7 +104302,7 @@ fn build_controls_winuicontrols_xaml_deferred_246(
     context.push_parent(rt::to_value(button_1.clone()));
     // Controls/WinUIControls.xaml(88,19) Name
     button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PaneToggleButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PaneToggleButton", ::core::clone::Clone::clone(&button_1).upcast::<::ferroui_base::FerroObject>(), 88, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PaneToggleButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_1)), 88, 19)?;
     // Controls/WinUIControls.xaml(88,12) Column
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
     button_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_17);
@@ -104334,7 +104334,7 @@ fn build_controls_winuicontrols_xaml_deferred_246(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/WinUIControls.xaml(93,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_LeftHeaderPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_LeftHeaderPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 93, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_LeftHeaderPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 93, 29)?;
     // Controls/WinUIControls.xaml(93,12) Column
     let priority_20 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 3_i32, priority_20);
@@ -104366,7 +104366,7 @@ fn build_controls_winuicontrols_xaml_deferred_246(
     context.push_parent(rt::to_value(viewbox_0.clone()));
     // Controls/WinUIControls.xaml(100,20) Name
     viewbox_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Icon")));
-    rt::register_name(name_scope.as_ref(), "PART_Icon", ::core::clone::Clone::clone(&viewbox_0).upcast::<::ferroui_base::FerroObject>(), 100, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Icon", ::std::rc::Rc::new(::core::clone::Clone::clone(&viewbox_0)), 100, 20)?;
     // Controls/WinUIControls.xaml(100,12) Column
     let priority_23 = ::ferroui_base::data::BindingPriority::Template;
     viewbox_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 5_i32, priority_23);
@@ -104403,7 +104403,7 @@ fn build_controls_winuicontrols_xaml_deferred_246(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/WinUIControls.xaml(109,22) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TitleText")));
-    rt::register_name(name_scope.as_ref(), "PART_TitleText", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 109, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TitleText", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 109, 22)?;
     // Controls/WinUIControls.xaml(109,12) Column
     let priority_26 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 6_i32, priority_26);
@@ -104456,7 +104456,7 @@ fn build_controls_winuicontrols_xaml_deferred_246(
     context.push_parent(rt::to_value(text_block_1.clone()));
     // Controls/WinUIControls.xaml(122,22) Name
     text_block_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SubtitleText")));
-    rt::register_name(name_scope.as_ref(), "PART_SubtitleText", ::core::clone::Clone::clone(&text_block_1).upcast::<::ferroui_base::FerroObject>(), 122, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SubtitleText", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_1)), 122, 22)?;
     // Controls/WinUIControls.xaml(122,12) Column
     let priority_33 = ::ferroui_base::data::BindingPriority::Template;
     text_block_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 7_i32, priority_33);
@@ -104509,7 +104509,7 @@ fn build_controls_winuicontrols_xaml_deferred_246(
     context.push_parent(rt::to_value(grid_1.clone()));
     // Controls/WinUIControls.xaml(135,17) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenterGrid")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenterGrid", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 135, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenterGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 135, 17)?;
     // Controls/WinUIControls.xaml(135,12) Column
     let priority_40 = ::ferroui_base::data::BindingPriority::Template;
     grid_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 8_i32, priority_40);
@@ -104525,7 +104525,7 @@ fn build_controls_winuicontrols_xaml_deferred_246(
     context.push_parent(rt::to_value(content_presenter_1.clone()));
     // Controls/WinUIControls.xaml(136,31) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 136, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 136, 31)?;
     // Controls/WinUIControls.xaml(137,31) Content (setter chosen at run time)
     let priority_42 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_6 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TitleBar::content_property()));
@@ -104553,7 +104553,7 @@ fn build_controls_winuicontrols_xaml_deferred_246(
     context.push_parent(rt::to_value(content_presenter_2.clone()));
     // Controls/WinUIControls.xaml(142,29) Name
     content_presenter_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_RightHeaderPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_RightHeaderPresenter", ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_base::FerroObject>(), 142, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_RightHeaderPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_2)), 142, 29)?;
     // Controls/WinUIControls.xaml(142,12) Column
     let priority_43 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 9_i32, priority_43);
@@ -104640,7 +104640,7 @@ fn build_controls_winuicontrols_xaml_deferred_249(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(49,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Root")));
-    rt::register_name(name_scope.as_ref(), "Root", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 49, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 49, 17)?;
     // Controls/WinUIControls.xaml(50,17) BorderBrush
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::border_brush_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()), 50, 17)?;
     // Controls/WinUIControls.xaml(51,17) BorderThickness
@@ -104687,7 +104687,7 @@ fn build_controls_winuicontrols_xaml_deferred_249(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(56,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HeaderRow")));
-    rt::register_name(name_scope.as_ref(), "PART_HeaderRow", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 56, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HeaderRow", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 56, 21)?;
     // Controls/WinUIControls.xaml(56,14) ColumnSpan
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 2_i32, priority_0);
@@ -104711,7 +104711,7 @@ fn build_controls_winuicontrols_xaml_deferred_249(
     border_1.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&table_view_column_headers_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/WinUIControls.xaml(63,48) Name
     table_view_column_headers_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HeaderHost")));
-    rt::register_name(name_scope.as_ref(), "PART_HeaderHost", ::core::clone::Clone::clone(&table_view_column_headers_presenter_0).upcast::<::ferroui_base::FerroObject>(), 63, 48)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HeaderHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&table_view_column_headers_presenter_0)), 63, 48)?;
     rt::invoked(table_view_column_headers_presenter_0.try_end_init(), 63, 16)?;
     context.pop_parent();
     rt::invoked(border_1.try_end_init(), 56, 14)?;
@@ -104724,7 +104724,7 @@ fn build_controls_winuicontrols_xaml_deferred_249(
     context.push_parent(rt::to_value(scroll_content_presenter_0.clone()));
     // Controls/WinUIControls.xaml(65,37) Name
     scroll_content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&scroll_content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 65, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_content_presenter_0)), 65, 37)?;
     // Controls/WinUIControls.xaml(65,14) Row
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     scroll_content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_4);
@@ -104804,7 +104804,7 @@ fn build_controls_winuicontrols_xaml_deferred_249(
     context.push_parent(rt::to_value(scroll_bar_0.clone()));
     // Controls/WinUIControls.xaml(87,24) Name
     scroll_bar_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_VerticalScrollBar")));
-    rt::register_name(name_scope.as_ref(), "PART_VerticalScrollBar", ::core::clone::Clone::clone(&scroll_bar_0).upcast::<::ferroui_base::FerroObject>(), 87, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_VerticalScrollBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_bar_0)), 87, 24)?;
     // Controls/WinUIControls.xaml(87,14) Row
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     scroll_bar_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_7);
@@ -104849,7 +104849,7 @@ fn build_controls_winuicontrols_xaml_deferred_249(
     context.push_parent(rt::to_value(scroll_bar_1.clone()));
     // Controls/WinUIControls.xaml(101,24) Name
     scroll_bar_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HorizontalScrollBar")));
-    rt::register_name(name_scope.as_ref(), "PART_HorizontalScrollBar", ::core::clone::Clone::clone(&scroll_bar_1).upcast::<::ferroui_base::FerroObject>(), 101, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HorizontalScrollBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_bar_1)), 101, 24)?;
     // Controls/WinUIControls.xaml(101,14) Row
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
     scroll_bar_1.set_value_with_priority(::ferroui_controls::Grid::row_property(), 2_i32, priority_14);
@@ -104888,7 +104888,7 @@ fn build_controls_winuicontrols_xaml_deferred_249(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/WinUIControls.xaml(113,21) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ScrollBarSeparator")));
-    rt::register_name(name_scope.as_ref(), "ScrollBarSeparator", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 113, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "ScrollBarSeparator", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 113, 21)?;
     // Controls/WinUIControls.xaml(113,14) Row
     let priority_19 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_controls::Grid::row_property(), 2_i32, priority_19);
@@ -104988,7 +104988,7 @@ fn build_controls_winuicontrols_xaml_deferred_251(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(148,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Root")));
-    rt::register_name(name_scope.as_ref(), "Root", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 148, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 148, 17)?;
     // Controls/WinUIControls.xaml(149,17) ClipToBounds
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::clip_to_bounds_property(), rt::property(::ferroui_base::Visual::clip_to_bounds_property()), 149, 17)?;
     // Controls/WinUIControls.xaml(150,17) Background
@@ -105010,7 +105010,7 @@ fn build_controls_winuicontrols_xaml_deferred_251(
     context.push_parent(rt::to_value(scroll_viewer_0.clone()));
     // Controls/WinUIControls.xaml(155,25) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "PART_ScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 155, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 155, 25)?;
     // Controls/WinUIControls.xaml(156,25) Theme (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TableViewScrollViewerStyle"));
@@ -105050,7 +105050,7 @@ fn build_controls_winuicontrols_xaml_deferred_251(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&items_presenter_0)));
     // Controls/WinUIControls.xaml(166,29) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 166, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 166, 29)?;
     // Controls/WinUIControls.xaml(167,29) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 167, 29)?;
     // Controls/WinUIControls.xaml(168,29) Margin
@@ -105131,7 +105131,7 @@ fn build_controls_winuicontrols_xaml_deferred_253(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(46,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 46, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 46, 17)?;
     // Controls/WinUIControls.xaml(47,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 47, 17)?;
     // Controls/WinUIControls.xaml(46,10) HorizontalAlignment
@@ -105148,7 +105148,7 @@ fn build_controls_winuicontrols_xaml_deferred_253(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(50,19) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Separator")));
-    rt::register_name(name_scope.as_ref(), "Separator", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 50, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "Separator", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 50, 19)?;
     // Controls/WinUIControls.xaml(51,19) BorderBrush
     rt::bind_template_binding(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::border_brush_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()), 51, 19)?;
     // Controls/WinUIControls.xaml(52,19) BorderThickness
@@ -105245,7 +105245,7 @@ fn build_controls_winuicontrols_xaml_deferred_255(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/WinUIControls.xaml(85,16) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HeaderCell")));
-    rt::register_name(name_scope.as_ref(), "HeaderCell", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 85, 16)?;
+    rt::register_name_value(name_scope.as_ref(), "HeaderCell", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 85, 16)?;
     // Controls/WinUIControls.xaml(88,12) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(&panel_0);
     // Controls/WinUIControls.xaml(88,12) ContentPresenter
@@ -105254,7 +105254,7 @@ fn build_controls_winuicontrols_xaml_deferred_255(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(88,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 88, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 88, 29)?;
     // Controls/WinUIControls.xaml(89,29) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 89, 29)?;
     // Controls/WinUIControls.xaml(90,29) BorderBrush
@@ -105294,7 +105294,7 @@ fn build_controls_winuicontrols_xaml_deferred_255(
     context.push_parent(rt::to_value(thumb_0.clone()));
     // Controls/WinUIControls.xaml(99,18) Name
     thumb_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Resizer")));
-    rt::register_name(name_scope.as_ref(), "PART_Resizer", ::core::clone::Clone::clone(&thumb_0).upcast::<::ferroui_base::FerroObject>(), 99, 18)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Resizer", ::std::rc::Rc::new(::core::clone::Clone::clone(&thumb_0)), 99, 18)?;
     // Controls/WinUIControls.xaml(100,18) Theme (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TableViewColumnHeaderResizerStyle"));
@@ -105382,7 +105382,7 @@ fn build_controls_winuicontrols_xaml_deferred_257(
     border_0.begin_init();
     // Controls/WinUIControls.xaml(79,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("border")));
-    rt::register_name(name_scope.as_ref(), "border", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 79, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "border", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 79, 17)?;
     // Controls/WinUIControls.xaml(80,17) ClipToBounds
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::clip_to_bounds_property(), rt::property(::ferroui_base::Visual::clip_to_bounds_property()), 80, 17)?;
     // Controls/WinUIControls.xaml(81,17) Background
@@ -105403,7 +105403,7 @@ fn build_controls_winuicontrols_xaml_deferred_257(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_controls::Control>()));
     // Controls/WinUIControls.xaml(86,25) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "PART_ScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 86, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 86, 25)?;
     // Controls/WinUIControls.xaml(87,25) VerticalSnapPointsType
     rt::bind_template_binding(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ScrollViewer::vertical_snap_points_type_property(), rt::property(::ferroui_controls::ScrollViewer::vertical_snap_points_type_property()), 87, 25)?;
     // Controls/WinUIControls.xaml(88,25) HorizontalSnapPointsType
@@ -105429,7 +105429,7 @@ fn build_controls_winuicontrols_xaml_deferred_257(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&items_presenter_0)));
     // Controls/WinUIControls.xaml(96,29) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 96, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 96, 29)?;
     // Controls/WinUIControls.xaml(97,29) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 97, 29)?;
     // Controls/WinUIControls.xaml(98,29) Margin
@@ -105805,7 +105805,7 @@ fn build_controls_winuicontrols_xaml_deferred_260(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(136,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Backplate")));
-    rt::register_name(name_scope.as_ref(), "Backplate", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 136, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "Backplate", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 136, 19)?;
     // Controls/WinUIControls.xaml(136,12) Margin
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(4.0_f64, 2.0_f64, 4.0_f64, 2.0_f64), priority_0);
@@ -105829,7 +105829,7 @@ fn build_controls_winuicontrols_xaml_deferred_260(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(143,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 143, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 143, 29)?;
     // Controls/WinUIControls.xaml(144,29) Content (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_4 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -105860,7 +105860,7 @@ fn build_controls_winuicontrols_xaml_deferred_260(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(150,19) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SelectionIndicator")));
-    rt::register_name(name_scope.as_ref(), "SelectionIndicator", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 150, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "SelectionIndicator", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 150, 19)?;
     // Controls/WinUIControls.xaml(150,12) Width
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 3.0_f64, priority_3);
@@ -105959,7 +105959,7 @@ fn build_controls_winuicontrols_xaml_deferred_262(
     context.push_parent(rt::to_value(list_box_0.clone()));
     // Controls/WinUIControls.xaml(234,22) Name
     list_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_QuickLinks")));
-    rt::register_name(name_scope.as_ref(), "PART_QuickLinks", ::core::clone::Clone::clone(&list_box_0).upcast::<::ferroui_base::FerroObject>(), 234, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_QuickLinks", ::std::rc::Rc::new(::core::clone::Clone::clone(&list_box_0)), 234, 22)?;
     // Controls/WinUIControls.xaml(234,14) Dock
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     list_box_0.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Left, priority_1);
@@ -106027,7 +106027,7 @@ fn build_controls_winuicontrols_xaml_deferred_262(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/WinUIControls.xaml(274,19) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("NavBar")));
-    rt::register_name(name_scope.as_ref(), "NavBar", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 274, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "NavBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 274, 19)?;
     // Controls/WinUIControls.xaml(274,14) Dock
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     grid_0.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Top, priority_7);
@@ -106107,7 +106107,7 @@ fn build_controls_winuicontrols_xaml_deferred_262(
     context.push_parent(rt::to_value(text_box_0.clone()));
     // Controls/WinUIControls.xaml(285,24) Name
     text_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Location")));
-    rt::register_name(name_scope.as_ref(), "Location", ::core::clone::Clone::clone(&text_box_0).upcast::<::ferroui_base::FerroObject>(), 285, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "Location", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_box_0)), 285, 24)?;
     // Controls/WinUIControls.xaml(285,16) Column
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
     text_box_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_14);
@@ -106309,7 +106309,7 @@ fn build_controls_winuicontrols_xaml_deferred_262(
     context.push_parent(rt::to_value(stack_panel_0.clone()));
     // Controls/WinUIControls.xaml(317,27) Name
     stack_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Finalize")));
-    rt::register_name(name_scope.as_ref(), "Finalize", ::core::clone::Clone::clone(&stack_panel_0).upcast::<::ferroui_base::FerroObject>(), 317, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "Finalize", ::std::rc::Rc::new(::core::clone::Clone::clone(&stack_panel_0)), 317, 27)?;
     // Controls/WinUIControls.xaml(317,16) Row
     let priority_29 = ::ferroui_base::data::BindingPriority::Template;
     stack_panel_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_29);
@@ -106637,7 +106637,7 @@ fn build_controls_winuicontrols_xaml_deferred_262(
     context.push_parent(rt::to_value(list_box_1.clone()));
     // Controls/WinUIControls.xaml(369,24) Name
     list_box_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Files")));
-    rt::register_name(name_scope.as_ref(), "PART_Files", ::core::clone::Clone::clone(&list_box_1).upcast::<::ferroui_base::FerroObject>(), 369, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Files", ::std::rc::Rc::new(::core::clone::Clone::clone(&list_box_1)), 369, 24)?;
     // Controls/WinUIControls.xaml(369,16) Margin
     let priority_69 = ::ferroui_base::data::BindingPriority::Template;
     list_box_1.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(0.0_f64, 5.0_f64, 0.0_f64, 5.0_f64), priority_69);
@@ -107437,7 +107437,7 @@ fn build_controls_winuicontrols_xaml_deferred_267(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(444,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("BackgroundElement")));
-    rt::register_name(name_scope.as_ref(), "BackgroundElement", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 444, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "BackgroundElement", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 444, 17)?;
     // Controls/WinUIControls.xaml(445,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 445, 17)?;
     // Controls/WinUIControls.xaml(446,17) BorderThickness
@@ -107476,7 +107476,7 @@ fn build_controls_winuicontrols_xaml_deferred_267(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(458,19) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("DialogSpace")));
-    rt::register_name(name_scope.as_ref(), "DialogSpace", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 458, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "DialogSpace", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 458, 19)?;
     // Controls/WinUIControls.xaml(458,12) ClipToBounds
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_base::Visual::clip_to_bounds_property(), ::core::clone::Clone::clone(&true), priority_4);
@@ -107524,7 +107524,7 @@ fn build_controls_winuicontrols_xaml_deferred_267(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/WinUIControls.xaml(467,28) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Content")));
-    rt::register_name(name_scope.as_ref(), "Content", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 467, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "Content", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 467, 28)?;
     // Controls/WinUIControls.xaml(468,28) FontSize (setter chosen at run time)
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ControlContentThemeFontSize"));
@@ -107597,7 +107597,7 @@ fn build_controls_winuicontrols_xaml_deferred_267(
     context.push_parent(rt::to_value(border_3.clone()));
     // Controls/WinUIControls.xaml(485,23) Name
     border_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("CommandSpace")));
-    rt::register_name(name_scope.as_ref(), "CommandSpace", ::core::clone::Clone::clone(&border_3).upcast::<::ferroui_base::FerroObject>(), 485, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "CommandSpace", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_3)), 485, 23)?;
     // Controls/WinUIControls.xaml(485,16) Row
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     border_3.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_9);
@@ -107639,7 +107639,7 @@ fn build_controls_winuicontrols_xaml_deferred_267(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/WinUIControls.xaml(492,27) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PrimaryButton")));
-    rt::register_name(name_scope.as_ref(), "PrimaryButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 492, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PrimaryButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 492, 27)?;
     // Controls/WinUIControls.xaml(492,20) Column
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_12);
@@ -107697,7 +107697,7 @@ fn build_controls_winuicontrols_xaml_deferred_267(
     context.push_parent(rt::to_value(button_1.clone()));
     // Controls/WinUIControls.xaml(500,27) Name
     button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("CloseButton")));
-    rt::register_name(name_scope.as_ref(), "CloseButton", ::core::clone::Clone::clone(&button_1).upcast::<::ferroui_base::FerroObject>(), 500, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "CloseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_1)), 500, 27)?;
     // Controls/WinUIControls.xaml(500,20) Column
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
     button_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_18);
@@ -107846,7 +107846,7 @@ fn build_controls_winuicontrols_xaml_deferred_271(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/WinUIControls.xaml(52,27) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 52, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 52, 27)?;
     // Controls/WinUIControls.xaml(53,27) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 53, 27)?;
     // Controls/WinUIControls.xaml(54,27) Margin
@@ -108273,7 +108273,7 @@ fn build_controls_winuicontrols_xaml_deferred_275(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(87,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContainerRoot")));
-    rt::register_name(name_scope.as_ref(), "PART_ContainerRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 87, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContainerRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 87, 17)?;
     // Controls/WinUIControls.xaml(88,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 88, 17)?;
     // Controls/WinUIControls.xaml(89,17) CornerRadius
@@ -108313,7 +108313,7 @@ fn build_controls_winuicontrols_xaml_deferred_275(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/WinUIControls.xaml(91,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 91, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 91, 31)?;
     // Controls/WinUIControls.xaml(91,14) Column
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_0);
@@ -108362,7 +108362,7 @@ fn build_controls_winuicontrols_xaml_deferred_275(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/WinUIControls.xaml(106,24) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SelectionVisual")));
-    rt::register_name(name_scope.as_ref(), "PART_SelectionVisual", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 106, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SelectionVisual", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 106, 24)?;
     // Controls/WinUIControls.xaml(106,14) Row
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_4);
@@ -108461,7 +108461,7 @@ fn build_controls_winuicontrols_xaml_deferred_275(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(130,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_CommonVisual")));
-    rt::register_name(name_scope.as_ref(), "PART_CommonVisual", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 130, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_CommonVisual", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 130, 21)?;
     // Controls/WinUIControls.xaml(130,14) BackgroundSizing
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Border::background_sizing_property(), ::ferroui_base::media::BackgroundSizing::InnerBorderEdge, priority_17);
@@ -108691,7 +108691,7 @@ fn build_controls_winuicontrols_xaml_deferred_278(
     content_presenter_0.begin_init();
     // Controls/WinUIControls.xaml(99,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 99, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 99, 27)?;
     // Controls/WinUIControls.xaml(100,27) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 100, 27)?;
     // Controls/WinUIControls.xaml(101,27) BorderBrush
@@ -108867,7 +108867,7 @@ fn build_controls_winuicontrols_xaml_deferred_280(
     content_presenter_0.begin_init();
     // Controls/WinUIControls.xaml(163,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 163, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 163, 27)?;
     // Controls/WinUIControls.xaml(164,27) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 164, 27)?;
     // Controls/WinUIControls.xaml(165,27) BackgroundSizing
@@ -109050,7 +109050,7 @@ fn build_controls_winuicontrols_xaml_deferred_282(
     content_presenter_0.begin_init();
     // Controls/WinUIControls.xaml(216,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 216, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 216, 27)?;
     // Controls/WinUIControls.xaml(217,27) BackgroundSizing
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_sizing_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_sizing_property()), 217, 27)?;
     // Controls/WinUIControls.xaml(218,27) Background
@@ -109120,7 +109120,7 @@ fn build_controls_winuicontrols_xaml_deferred_284(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(252,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Root")));
-    rt::register_name(name_scope.as_ref(), "Root", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 252, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 252, 17)?;
     // Controls/WinUIControls.xaml(252,10) BackgroundSizing
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_controls::Border::background_sizing_property(), ::ferroui_base::media::BackgroundSizing::InnerBorderEdge, priority_0);
@@ -109172,7 +109172,7 @@ fn build_controls_winuicontrols_xaml_deferred_284(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(263,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LeftBottomBorderLine")));
-    rt::register_name(name_scope.as_ref(), "LeftBottomBorderLine", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 263, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "LeftBottomBorderLine", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 263, 21)?;
     // Controls/WinUIControls.xaml(264,21) Background
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "TabViewBorderBrush", 264, 21)?;
     // Controls/WinUIControls.xaml(263,14) Height
@@ -109192,7 +109192,7 @@ fn build_controls_winuicontrols_xaml_deferred_284(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/WinUIControls.xaml(267,21) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RightBottomBorderLine")));
-    rt::register_name(name_scope.as_ref(), "RightBottomBorderLine", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 267, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "RightBottomBorderLine", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 267, 21)?;
     // Controls/WinUIControls.xaml(267,14) Column
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_7);
@@ -109215,7 +109215,7 @@ fn build_controls_winuicontrols_xaml_deferred_284(
     context.push_parent(rt::to_value(border_3.clone()));
     // Controls/WinUIControls.xaml(272,21) Name
     border_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ScrollDecreaseButtonContainer")));
-    rt::register_name(name_scope.as_ref(), "ScrollDecreaseButtonContainer", ::core::clone::Clone::clone(&border_3).upcast::<::ferroui_base::FerroObject>(), 272, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "ScrollDecreaseButtonContainer", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_3)), 272, 21)?;
     // Controls/WinUIControls.xaml(273,21) Padding
     rt::bind_dynamic_resource(&context, border_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Decorator::padding_property(), "TabViewItemLeftScrollButtonContainerPadding", 273, 21)?;
     // Controls/WinUIControls.xaml(272,14) VerticalAlignment
@@ -109291,7 +109291,7 @@ fn build_controls_winuicontrols_xaml_deferred_284(
     context.push_parent(rt::to_value(repeat_button_0.clone()));
     // Controls/WinUIControls.xaml(284,29) Name
     repeat_button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ScrollDecreaseButton")));
-    rt::register_name(name_scope.as_ref(), "ScrollDecreaseButton", ::core::clone::Clone::clone(&repeat_button_0).upcast::<::ferroui_base::FerroObject>(), 284, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "ScrollDecreaseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_0)), 284, 29)?;
     // Controls/WinUIControls.xaml(285,29) Theme (setter chosen at run time)
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TabViewScrollButtonStyle"));
@@ -109441,7 +109441,7 @@ fn build_controls_winuicontrols_xaml_deferred_284(
     context.push_parent(rt::to_value(scroll_content_presenter_0.clone()));
     // Controls/WinUIControls.xaml(305,37) Name
     scroll_content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&scroll_content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 305, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_content_presenter_0)), 305, 37)?;
     // Controls/WinUIControls.xaml(305,14) Column
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
     scroll_content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_18);
@@ -109500,7 +109500,7 @@ fn build_controls_winuicontrols_xaml_deferred_284(
     context.push_parent(rt::to_value(border_4.clone()));
     // Controls/WinUIControls.xaml(317,21) Name
     border_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ScrollIncreaseButtonContainer")));
-    rt::register_name(name_scope.as_ref(), "ScrollIncreaseButtonContainer", ::core::clone::Clone::clone(&border_4).upcast::<::ferroui_base::FerroObject>(), 317, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "ScrollIncreaseButtonContainer", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_4)), 317, 21)?;
     // Controls/WinUIControls.xaml(317,14) Column
     let priority_20 = ::ferroui_base::data::BindingPriority::Template;
     border_4.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_20);
@@ -109579,7 +109579,7 @@ fn build_controls_winuicontrols_xaml_deferred_284(
     context.push_parent(rt::to_value(repeat_button_1.clone()));
     // Controls/WinUIControls.xaml(330,29) Name
     repeat_button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ScrollIncreaseButton")));
-    rt::register_name(name_scope.as_ref(), "ScrollIncreaseButton", ::core::clone::Clone::clone(&repeat_button_1).upcast::<::ferroui_base::FerroObject>(), 330, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "ScrollIncreaseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_1)), 330, 29)?;
     // Controls/WinUIControls.xaml(331,29) Theme (setter chosen at run time)
     let priority_22 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TabViewScrollButtonStyle"));
@@ -110034,7 +110034,7 @@ fn build_controls_winuicontrols_xaml_deferred_287(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(373,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TabContainerGrid")));
-    rt::register_name(name_scope.as_ref(), "TabContainerGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 373, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "TabContainerGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 373, 19)?;
     // Controls/WinUIControls.xaml(374,19) Dock
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::DockPanel::dock_property(), rt::property(::ferroui_controls::TabControl::tab_strip_placement_property()), 374, 19)?;
     // Controls/WinUIControls.xaml(375,19) Background
@@ -110076,7 +110076,7 @@ fn build_controls_winuicontrols_xaml_deferred_287(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(383,23) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LeftBottomBorderLine")));
-    rt::register_name(name_scope.as_ref(), "LeftBottomBorderLine", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 383, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "LeftBottomBorderLine", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 383, 23)?;
     // Controls/WinUIControls.xaml(384,23) Background
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "TabViewBorderBrush", 384, 23)?;
     // Controls/WinUIControls.xaml(383,16) Height
@@ -110096,7 +110096,7 @@ fn build_controls_winuicontrols_xaml_deferred_287(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/WinUIControls.xaml(388,23) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TabListView")));
-    rt::register_name(name_scope.as_ref(), "TabListView", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 388, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "TabListView", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 388, 23)?;
     // Controls/WinUIControls.xaml(388,16) Column
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_6);
@@ -110114,7 +110114,7 @@ fn build_controls_winuicontrols_xaml_deferred_287(
     context.push_parent(rt::to_value(scroll_viewer_0.clone()));
     // Controls/WinUIControls.xaml(392,31) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "ScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 392, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "ScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 392, 31)?;
     // Controls/WinUIControls.xaml(393,31) Theme (setter chosen at run time)
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TabScrollViewerStyle"));
@@ -110149,7 +110149,7 @@ fn build_controls_winuicontrols_xaml_deferred_287(
     context.push_parent(rt::to_value(dock_panel_1.clone()));
     // Controls/WinUIControls.xaml(398,30) Name
     dock_panel_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TabsItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "TabsItemsPresenter", ::core::clone::Clone::clone(&dock_panel_1).upcast::<::ferroui_base::FerroObject>(), 398, 30)?;
+    rt::register_name_value(name_scope.as_ref(), "TabsItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&dock_panel_1)), 398, 30)?;
     // Controls/WinUIControls.xaml(398,58) Margin
     rt::bind_template_binding(dock_panel_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), 398, 58)?;
     // Controls/WinUIControls.xaml(399,22) Children
@@ -110161,7 +110161,7 @@ fn build_controls_winuicontrols_xaml_deferred_287(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/WinUIControls.xaml(399,28) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TabsItemsPresenterHeader")));
-    rt::register_name(name_scope.as_ref(), "TabsItemsPresenterHeader", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 399, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "TabsItemsPresenterHeader", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 399, 28)?;
     // Controls/WinUIControls.xaml(399,22) Dock
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
     panel_0.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Left, priority_14);
@@ -110177,7 +110177,7 @@ fn build_controls_winuicontrols_xaml_deferred_287(
     context.push_parent(rt::to_value(border_3.clone()));
     // Controls/WinUIControls.xaml(400,31) Name
     border_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HeaderBottomBorderLine")));
-    rt::register_name(name_scope.as_ref(), "HeaderBottomBorderLine", ::core::clone::Clone::clone(&border_3).upcast::<::ferroui_base::FerroObject>(), 400, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "HeaderBottomBorderLine", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_3)), 400, 31)?;
     // Controls/WinUIControls.xaml(401,31) Background
     rt::bind_dynamic_resource(&context, border_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "TabViewBorderBrush", 401, 31)?;
     // Controls/WinUIControls.xaml(400,24) Width
@@ -110204,7 +110204,7 @@ fn build_controls_winuicontrols_xaml_deferred_287(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(407,37) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 407, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 407, 37)?;
     // Controls/WinUIControls.xaml(407,22) Dock
     let priority_20 = ::ferroui_base::data::BindingPriority::Template;
     items_presenter_0.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Left, priority_20);
@@ -110220,7 +110220,7 @@ fn build_controls_winuicontrols_xaml_deferred_287(
     context.push_parent(rt::to_value(panel_1.clone()));
     // Controls/WinUIControls.xaml(412,28) Name
     panel_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TabsItemsPresenterFooter")));
-    rt::register_name(name_scope.as_ref(), "TabsItemsPresenterFooter", ::core::clone::Clone::clone(&panel_1).upcast::<::ferroui_base::FerroObject>(), 412, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "TabsItemsPresenterFooter", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_1)), 412, 28)?;
     // Controls/WinUIControls.xaml(412,22) MinWidth
     let priority_21 = ::ferroui_base::data::BindingPriority::Template;
     panel_1.set_value_with_priority(::ferroui_base::layout::Layoutable::min_width_property(), 4.0_f64, priority_21);
@@ -110233,7 +110233,7 @@ fn build_controls_winuicontrols_xaml_deferred_287(
     context.push_parent(rt::to_value(border_4.clone()));
     // Controls/WinUIControls.xaml(413,31) Name
     border_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("FooterBottomBorderLine")));
-    rt::register_name(name_scope.as_ref(), "FooterBottomBorderLine", ::core::clone::Clone::clone(&border_4).upcast::<::ferroui_base::FerroObject>(), 413, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "FooterBottomBorderLine", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_4)), 413, 31)?;
     // Controls/WinUIControls.xaml(414,31) Background
     rt::bind_dynamic_resource(&context, border_4.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "TabViewBorderBrush", 414, 31)?;
     // Controls/WinUIControls.xaml(413,24) Height
@@ -110264,7 +110264,7 @@ fn build_controls_winuicontrols_xaml_deferred_287(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_8, ::core::clone::Clone::clone(&border_5).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(423,19) Name
     border_5.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TabContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "TabContentPresenter", ::core::clone::Clone::clone(&border_5).upcast::<::ferroui_base::FerroObject>(), 423, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "TabContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_5)), 423, 19)?;
     // Controls/WinUIControls.xaml(424,19) BorderBrush
     rt::bind_template_binding(border_5.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::border_brush_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()), 424, 19)?;
     // Controls/WinUIControls.xaml(425,19) BorderThickness
@@ -110287,7 +110287,7 @@ fn build_controls_winuicontrols_xaml_deferred_287(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_9, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(428,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SelectedContentHost2")));
-    rt::register_name(name_scope.as_ref(), "PART_SelectedContentHost2", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 428, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SelectedContentHost2", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 428, 33)?;
     // Controls/WinUIControls.xaml(429,33) HorizontalContentAlignment
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::horizontal_content_alignment_property(), rt::property(::ferroui_controls::TabControl::horizontal_content_alignment_property()), 429, 33)?;
     // Controls/WinUIControls.xaml(430,33) VerticalContentAlignment
@@ -110304,7 +110304,7 @@ fn build_controls_winuicontrols_xaml_deferred_287(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_10, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(432,33) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SelectedContentHost")));
-    rt::register_name(name_scope.as_ref(), "PART_SelectedContentHost", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 432, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SelectedContentHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 432, 33)?;
     // Controls/WinUIControls.xaml(433,33) HorizontalContentAlignment
     rt::bind_template_binding(content_presenter_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::horizontal_content_alignment_property(), rt::property(::ferroui_controls::TabControl::horizontal_content_alignment_property()), 433, 33)?;
     // Controls/WinUIControls.xaml(434,33) VerticalContentAlignment
@@ -111144,7 +111144,7 @@ fn build_controls_winuicontrols_xaml_deferred_292(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/WinUIControls.xaml(66,18) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PaneRoot")));
-    rt::register_name(name_scope.as_ref(), "PART_PaneRoot", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 66, 18)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PaneRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 66, 18)?;
     // Controls/WinUIControls.xaml(66,12) ClipToBounds
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     panel_0.set_value_with_priority(::ferroui_base::Visual::clip_to_bounds_property(), ::core::clone::Clone::clone(&true), priority_1);
@@ -111163,7 +111163,7 @@ fn build_controls_winuicontrols_xaml_deferred_292(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(70,21) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PaneRoot")));
-    rt::register_name(name_scope.as_ref(), "PaneRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 70, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PaneRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 70, 21)?;
     // Controls/WinUIControls.xaml(71,21) Width
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), rt::property(::ferroui_controls::SplitView::open_pane_length_property()), 71, 21)?;
     // Controls/WinUIControls.xaml(70,14) HorizontalAlignment
@@ -111207,7 +111207,7 @@ fn build_controls_winuicontrols_xaml_deferred_292(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(84,35) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PanePresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_PanePresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 84, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PanePresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 84, 35)?;
     // Controls/WinUIControls.xaml(85,35) Content (setter chosen at run time)
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_6 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::SplitView::pane_property()));
@@ -111230,7 +111230,7 @@ fn build_controls_winuicontrols_xaml_deferred_292(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/WinUIControls.xaml(87,28) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HCPaneBorder")));
-    rt::register_name(name_scope.as_ref(), "HCPaneBorder", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 87, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "HCPaneBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 87, 28)?;
     // Controls/WinUIControls.xaml(87,18) IsVisible
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_0.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_8);
@@ -111258,7 +111258,7 @@ fn build_controls_winuicontrols_xaml_deferred_292(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&panel_2).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(97,18) Name
     panel_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentRoot")));
-    rt::register_name(name_scope.as_ref(), "ContentRoot", ::core::clone::Clone::clone(&panel_2).upcast::<::ferroui_base::FerroObject>(), 97, 18)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_2)), 97, 18)?;
     // Controls/WinUIControls.xaml(97,12) Column
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     panel_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_11);
@@ -111270,7 +111270,7 @@ fn build_controls_winuicontrols_xaml_deferred_292(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(98,31) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 98, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 98, 31)?;
     // Controls/WinUIControls.xaml(99,31) Content (setter chosen at run time)
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_8 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -111296,7 +111296,7 @@ fn build_controls_winuicontrols_xaml_deferred_292(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_6, ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(103,24) Name
     rectangle_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LightDismissLayer")));
-    rt::register_name(name_scope.as_ref(), "LightDismissLayer", ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_base::FerroObject>(), 103, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "LightDismissLayer", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_1)), 103, 24)?;
     // Controls/WinUIControls.xaml(103,14) Fill
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_1.set_value_with_priority(::ferroui_controls::shapes::Shape::fill_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_13);
@@ -111359,7 +111359,7 @@ fn build_controls_winuicontrols_xaml_deferred_293(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/WinUIControls.xaml(141,20) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PaneRoot")));
-    rt::register_name(name_scope.as_ref(), "PART_PaneRoot", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 141, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PaneRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 141, 20)?;
     // Controls/WinUIControls.xaml(141,14) Column
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     panel_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_1);
@@ -111381,7 +111381,7 @@ fn build_controls_winuicontrols_xaml_deferred_293(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(146,23) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PaneRoot")));
-    rt::register_name(name_scope.as_ref(), "PaneRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 146, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PaneRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 146, 23)?;
     // Controls/WinUIControls.xaml(147,23) Width
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), rt::property(::ferroui_controls::SplitView::open_pane_length_property()), 147, 23)?;
     // Controls/WinUIControls.xaml(146,16) HorizontalAlignment
@@ -111425,7 +111425,7 @@ fn build_controls_winuicontrols_xaml_deferred_293(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(160,37) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PanePresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_PanePresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 160, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PanePresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 160, 37)?;
     // Controls/WinUIControls.xaml(161,37) Content (setter chosen at run time)
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_6 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::SplitView::pane_property()));
@@ -111448,7 +111448,7 @@ fn build_controls_winuicontrols_xaml_deferred_293(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/WinUIControls.xaml(163,30) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HCPaneBorder")));
-    rt::register_name(name_scope.as_ref(), "HCPaneBorder", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 163, 30)?;
+    rt::register_name_value(name_scope.as_ref(), "HCPaneBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 163, 30)?;
     // Controls/WinUIControls.xaml(163,20) IsVisible
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_0.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_9);
@@ -111476,7 +111476,7 @@ fn build_controls_winuicontrols_xaml_deferred_293(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&panel_2).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(172,20) Name
     panel_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentRoot")));
-    rt::register_name(name_scope.as_ref(), "ContentRoot", ::core::clone::Clone::clone(&panel_2).upcast::<::ferroui_base::FerroObject>(), 172, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_2)), 172, 20)?;
     // Controls/WinUIControls.xaml(172,14) Column
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
     panel_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_12);
@@ -111488,7 +111488,7 @@ fn build_controls_winuicontrols_xaml_deferred_293(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(173,33) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 173, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 173, 33)?;
     // Controls/WinUIControls.xaml(174,33) Content (setter chosen at run time)
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_8 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -111514,7 +111514,7 @@ fn build_controls_winuicontrols_xaml_deferred_293(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_6, ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(178,26) Name
     rectangle_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LightDismissLayer")));
-    rt::register_name(name_scope.as_ref(), "LightDismissLayer", ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_base::FerroObject>(), 178, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "LightDismissLayer", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_1)), 178, 26)?;
     // Controls/WinUIControls.xaml(178,16) Fill
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_1.set_value_with_priority(::ferroui_controls::shapes::Shape::fill_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_14);
@@ -111577,7 +111577,7 @@ fn build_controls_winuicontrols_xaml_deferred_294(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/WinUIControls.xaml(212,20) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PaneRoot")));
-    rt::register_name(name_scope.as_ref(), "PART_PaneRoot", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 212, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PaneRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 212, 20)?;
     // Controls/WinUIControls.xaml(212,14) ClipToBounds
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     panel_0.set_value_with_priority(::ferroui_base::Visual::clip_to_bounds_property(), ::core::clone::Clone::clone(&true), priority_1);
@@ -111596,7 +111596,7 @@ fn build_controls_winuicontrols_xaml_deferred_294(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(216,23) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PaneRoot")));
-    rt::register_name(name_scope.as_ref(), "PaneRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 216, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PaneRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 216, 23)?;
     // Controls/WinUIControls.xaml(217,23) Height
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), rt::property(::ferroui_controls::SplitView::open_pane_length_property()), 217, 23)?;
     // Controls/WinUIControls.xaml(216,16) VerticalAlignment
@@ -111640,7 +111640,7 @@ fn build_controls_winuicontrols_xaml_deferred_294(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(230,37) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PanePresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_PanePresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 230, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PanePresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 230, 37)?;
     // Controls/WinUIControls.xaml(231,37) Content (setter chosen at run time)
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_6 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::SplitView::pane_property()));
@@ -111663,7 +111663,7 @@ fn build_controls_winuicontrols_xaml_deferred_294(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/WinUIControls.xaml(233,30) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HCPaneBorder")));
-    rt::register_name(name_scope.as_ref(), "HCPaneBorder", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 233, 30)?;
+    rt::register_name_value(name_scope.as_ref(), "HCPaneBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 233, 30)?;
     // Controls/WinUIControls.xaml(233,20) IsVisible
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_0.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_8);
@@ -111691,7 +111691,7 @@ fn build_controls_winuicontrols_xaml_deferred_294(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&panel_2).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(242,20) Name
     panel_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentRoot")));
-    rt::register_name(name_scope.as_ref(), "ContentRoot", ::core::clone::Clone::clone(&panel_2).upcast::<::ferroui_base::FerroObject>(), 242, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_2)), 242, 20)?;
     // Controls/WinUIControls.xaml(242,14) Row
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     panel_2.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_11);
@@ -111703,7 +111703,7 @@ fn build_controls_winuicontrols_xaml_deferred_294(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(243,33) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 243, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 243, 33)?;
     // Controls/WinUIControls.xaml(244,33) Content (setter chosen at run time)
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_8 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -111729,7 +111729,7 @@ fn build_controls_winuicontrols_xaml_deferred_294(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_6, ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(248,26) Name
     rectangle_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LightDismissLayer")));
-    rt::register_name(name_scope.as_ref(), "LightDismissLayer", ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_base::FerroObject>(), 248, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "LightDismissLayer", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_1)), 248, 26)?;
     // Controls/WinUIControls.xaml(248,16) Fill
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_1.set_value_with_priority(::ferroui_controls::shapes::Shape::fill_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_13);
@@ -111792,7 +111792,7 @@ fn build_controls_winuicontrols_xaml_deferred_295(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/WinUIControls.xaml(282,20) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PaneRoot")));
-    rt::register_name(name_scope.as_ref(), "PART_PaneRoot", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 282, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PaneRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 282, 20)?;
     // Controls/WinUIControls.xaml(282,14) Row
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     panel_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_1);
@@ -111814,7 +111814,7 @@ fn build_controls_winuicontrols_xaml_deferred_295(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(287,23) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PaneRoot")));
-    rt::register_name(name_scope.as_ref(), "PaneRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 287, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PaneRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 287, 23)?;
     // Controls/WinUIControls.xaml(288,23) Height
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), rt::property(::ferroui_controls::SplitView::open_pane_length_property()), 288, 23)?;
     // Controls/WinUIControls.xaml(287,16) VerticalAlignment
@@ -111858,7 +111858,7 @@ fn build_controls_winuicontrols_xaml_deferred_295(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(301,37) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PanePresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_PanePresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 301, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PanePresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 301, 37)?;
     // Controls/WinUIControls.xaml(302,37) Content (setter chosen at run time)
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_6 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::SplitView::pane_property()));
@@ -111881,7 +111881,7 @@ fn build_controls_winuicontrols_xaml_deferred_295(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/WinUIControls.xaml(304,30) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HCPaneBorder")));
-    rt::register_name(name_scope.as_ref(), "HCPaneBorder", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 304, 30)?;
+    rt::register_name_value(name_scope.as_ref(), "HCPaneBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 304, 30)?;
     // Controls/WinUIControls.xaml(304,20) IsVisible
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_0.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_9);
@@ -111909,7 +111909,7 @@ fn build_controls_winuicontrols_xaml_deferred_295(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&panel_2).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(313,20) Name
     panel_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentRoot")));
-    rt::register_name(name_scope.as_ref(), "ContentRoot", ::core::clone::Clone::clone(&panel_2).upcast::<::ferroui_base::FerroObject>(), 313, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_2)), 313, 20)?;
     // Controls/WinUIControls.xaml(313,14) Row
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
     panel_2.set_value_with_priority(::ferroui_controls::Grid::row_property(), 0_i32, priority_12);
@@ -111921,7 +111921,7 @@ fn build_controls_winuicontrols_xaml_deferred_295(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(314,33) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 314, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 314, 33)?;
     // Controls/WinUIControls.xaml(315,33) Content (setter chosen at run time)
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_8 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -111947,7 +111947,7 @@ fn build_controls_winuicontrols_xaml_deferred_295(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_6, ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(319,26) Name
     rectangle_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LightDismissLayer")));
-    rt::register_name(name_scope.as_ref(), "LightDismissLayer", ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_base::FerroObject>(), 319, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "LightDismissLayer", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_1)), 319, 26)?;
     // Controls/WinUIControls.xaml(319,16) Fill
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_1.set_value_with_priority(::ferroui_controls::shapes::Shape::fill_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_14);
@@ -112167,7 +112167,7 @@ fn build_controls_winuicontrols_xaml_deferred_299(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(74,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TopNavArea")));
-    rt::register_name(name_scope.as_ref(), "TopNavArea", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 74, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "TopNavArea", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 74, 19)?;
     // Controls/WinUIControls.xaml(75,19) Dock
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::DockPanel::dock_property(), rt::property(::ferroui_controls::TabControl::tab_strip_placement_property()), 75, 19)?;
     // Controls/WinUIControls.xaml(76,19) Background
@@ -112180,7 +112180,7 @@ fn build_controls_winuicontrols_xaml_deferred_299(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(77,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TopNavGrid")));
-    rt::register_name(name_scope.as_ref(), "TopNavGrid", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 77, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "TopNavGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 77, 21)?;
     // Controls/WinUIControls.xaml(78,21) MinHeight
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_height_property(), "NavigationViewTopPaneHeight", 78, 21)?;
     // Controls/WinUIControls.xaml(79,21) Margin
@@ -112194,7 +112194,7 @@ fn build_controls_winuicontrols_xaml_deferred_299(
     border_1.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/WinUIControls.xaml(81,31) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 81, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 81, 31)?;
     // Controls/WinUIControls.xaml(82,31) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 82, 31)?;
     // Controls/WinUIControls.xaml(81,16) VerticalAlignment
@@ -112214,7 +112214,7 @@ fn build_controls_winuicontrols_xaml_deferred_299(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/WinUIControls.xaml(86,19) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentGrid")));
-    rt::register_name(name_scope.as_ref(), "ContentGrid", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 86, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 86, 19)?;
     // Controls/WinUIControls.xaml(87,19) BorderBrush
     rt::bind_dynamic_resource(&context, border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::border_brush_property(), "NavigationViewContentGridBorderBrush", 87, 19)?;
     // Controls/WinUIControls.xaml(86,12) BackgroundSizing
@@ -112244,7 +112244,7 @@ fn build_controls_winuicontrols_xaml_deferred_299(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(95,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SelectedContentHost2")));
-    rt::register_name(name_scope.as_ref(), "PART_SelectedContentHost2", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 95, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SelectedContentHost2", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 95, 33)?;
     // Controls/WinUIControls.xaml(95,16) HorizontalContentAlignment
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::horizontal_content_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Stretch, priority_3);
@@ -112263,7 +112263,7 @@ fn build_controls_winuicontrols_xaml_deferred_299(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(99,33) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SelectedContentHost")));
-    rt::register_name(name_scope.as_ref(), "PART_SelectedContentHost", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 99, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SelectedContentHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 99, 33)?;
     // Controls/WinUIControls.xaml(99,16) HorizontalContentAlignment
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::horizontal_content_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Stretch, priority_6);
@@ -112651,7 +112651,7 @@ fn build_controls_winuicontrols_xaml_deferred_302(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(158,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 158, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 158, 17)?;
     // Controls/WinUIControls.xaml(159,17) Margin (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationViewItemButtonMargin"));
@@ -112683,7 +112683,7 @@ fn build_controls_winuicontrols_xaml_deferred_302(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/WinUIControls.xaml(163,19) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentGrid")));
-    rt::register_name(name_scope.as_ref(), "ContentGrid", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 163, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 163, 19)?;
     // Controls/WinUIControls.xaml(163,14) ColumnDefinitions
     let column_definitions_0 = ::ferroui_controls::ColumnDefinitions::__markup_new_0();
     rt::invoked(<::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::ColumnDefinition>>>::__markup_set_Capacity(&column_definitions_0, 2_i32), 163, 40)?;
@@ -112716,7 +112716,7 @@ fn build_controls_winuicontrols_xaml_deferred_302(
     context.push_parent(rt::to_value(viewbox_0.clone()));
     // Controls/WinUIControls.xaml(165,26) Name
     viewbox_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("IconBox")));
-    rt::register_name(name_scope.as_ref(), "IconBox", ::core::clone::Clone::clone(&viewbox_0).upcast::<::ferroui_base::FerroObject>(), 165, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "IconBox", ::std::rc::Rc::new(::core::clone::Clone::clone(&viewbox_0)), 165, 26)?;
     // Controls/WinUIControls.xaml(165,18) Height
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     viewbox_0.set_value_with_priority(::ferroui_base::layout::Layoutable::height_property(), 16.0_f64, priority_3);
@@ -112744,7 +112744,7 @@ fn build_controls_winuicontrols_xaml_deferred_302(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/WinUIControls.xaml(171,37) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Icon")));
-    rt::register_name(name_scope.as_ref(), "Icon", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 171, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "Icon", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 171, 37)?;
     // Controls/WinUIControls.xaml(172,37) Content (setter chosen at run time)
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_3 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TabItem::icon_property()));
@@ -112810,7 +112810,7 @@ fn build_controls_winuicontrols_xaml_deferred_302(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(188,33) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 188, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 188, 33)?;
     // Controls/WinUIControls.xaml(188,16) Column
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_9);
@@ -112853,7 +112853,7 @@ fn build_controls_winuicontrols_xaml_deferred_302(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(199,31) Name
     content_presenter_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SelectionIndicator")));
-    rt::register_name(name_scope.as_ref(), "SelectionIndicator", ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_base::FerroObject>(), 199, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "SelectionIndicator", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_2)), 199, 31)?;
     // Controls/WinUIControls.xaml(199,14) Margin
     let priority_15 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_2.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(12.0_f64, 0.0_f64, 12.0_f64, 4.0_f64), priority_15);
@@ -112935,7 +112935,7 @@ fn build_controls_winuicontrols_xaml_deferred_304(
     context.push_parent(rt::to_value(tab_control_0.clone()));
     // Controls/WinUIControls.xaml(276,23) Name
     tab_control_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TabControl")));
-    rt::register_name(name_scope.as_ref(), "PART_TabControl", ::core::clone::Clone::clone(&tab_control_0).upcast::<::ferroui_base::FerroObject>(), 276, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TabControl", ::std::rc::Rc::new(::core::clone::Clone::clone(&tab_control_0)), 276, 23)?;
     // Controls/WinUIControls.xaml(277,23) Theme (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TabbedPageTabControlTheme"));
@@ -113280,7 +113280,7 @@ fn build_controls_winuicontrols_xaml_deferred_307(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(78,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootGrid")));
-    rt::register_name(name_scope.as_ref(), "RootGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 78, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 78, 17)?;
     // Controls/WinUIControls.xaml(79,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 79, 17)?;
     // Controls/WinUIControls.xaml(80,17) CornerRadius
@@ -113300,7 +113300,7 @@ fn build_controls_winuicontrols_xaml_deferred_307(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/WinUIControls.xaml(82,19) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Content")));
-    rt::register_name(name_scope.as_ref(), "Content", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 82, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "Content", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 82, 19)?;
     // Controls/WinUIControls.xaml(83,19) Data (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE72B"));
@@ -113347,7 +113347,7 @@ fn build_controls_winuicontrols_xaml_deferred_307(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(91,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 91, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 91, 31)?;
     // Controls/WinUIControls.xaml(92,31) Content (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_6 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -113563,7 +113563,7 @@ fn build_controls_winuicontrols_xaml_deferred_310(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(188,21) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_NavBarSpacer")));
-    rt::register_name(name_scope.as_ref(), "PART_NavBarSpacer", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 188, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_NavBarSpacer", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 188, 21)?;
     // Controls/WinUIControls.xaml(189,21) Height
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), rt::property(::ferroui_controls::NavigationPage::effective_bar_height_property()), 189, 21)?;
     // Controls/WinUIControls.xaml(188,14) IsVisible
@@ -113582,7 +113582,7 @@ fn build_controls_winuicontrols_xaml_deferred_310(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/WinUIControls.xaml(193,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_BottomCommandBar")));
-    rt::register_name(name_scope.as_ref(), "PART_BottomCommandBar", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 193, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_BottomCommandBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 193, 31)?;
     // Controls/WinUIControls.xaml(193,14) Dock
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Bottom, priority_3);
@@ -113619,7 +113619,7 @@ fn build_controls_winuicontrols_xaml_deferred_310(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(200,19) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentHost")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentHost", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 200, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 200, 19)?;
     // Controls/WinUIControls.xaml(201,19) Background
     rt::bind_template_binding(grid_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Panel::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 201, 19)?;
     // Controls/WinUIControls.xaml(200,14) ClipToBounds
@@ -113633,7 +113633,7 @@ fn build_controls_winuicontrols_xaml_deferred_310(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(203,33) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PageBackPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_PageBackPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 203, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PageBackPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 203, 33)?;
     // Controls/WinUIControls.xaml(203,16) HorizontalAlignment
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Stretch, priority_7);
@@ -113649,7 +113649,7 @@ fn build_controls_winuicontrols_xaml_deferred_310(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(206,33) Name
     content_presenter_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PagePresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_PagePresenter", ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_base::FerroObject>(), 206, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PagePresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_2)), 206, 33)?;
     // Controls/WinUIControls.xaml(206,16) HorizontalAlignment
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_2.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Stretch, priority_9);
@@ -113669,7 +113669,7 @@ fn build_controls_winuicontrols_xaml_deferred_310(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(213,19) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_NavigationBar")));
-    rt::register_name(name_scope.as_ref(), "PART_NavigationBar", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 213, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_NavigationBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 213, 19)?;
     // Controls/WinUIControls.xaml(213,12) ZIndex
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_base::Visual::z_index_property(), 1_i32, priority_11);
@@ -113709,7 +113709,7 @@ fn build_controls_winuicontrols_xaml_deferred_310(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/WinUIControls.xaml(219,23) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_BackButton")));
-    rt::register_name(name_scope.as_ref(), "PART_BackButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 219, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_BackButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 219, 23)?;
     // Controls/WinUIControls.xaml(219,16) Column
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_14);
@@ -113750,7 +113750,7 @@ fn build_controls_winuicontrols_xaml_deferred_310(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/WinUIControls.xaml(226,25) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_BackButtonDefaultIcon")));
-    rt::register_name(name_scope.as_ref(), "PART_BackButtonDefaultIcon", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 226, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_BackButtonDefaultIcon", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 226, 25)?;
     // Controls/WinUIControls.xaml(227,25) Data (setter chosen at run time)
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE72B"));
@@ -113794,7 +113794,7 @@ fn build_controls_winuicontrols_xaml_deferred_310(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_9, ::core::clone::Clone::clone(&content_presenter_3).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(234,37) Name
     content_presenter_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_BackButtonContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_BackButtonContentPresenter", ::core::clone::Clone::clone(&content_presenter_3).upcast::<::ferroui_base::FerroObject>(), 234, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_BackButtonContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_3)), 234, 37)?;
     // Controls/WinUIControls.xaml(234,20) VerticalAlignment
     let priority_24 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_3.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Center, priority_24);
@@ -113815,7 +113815,7 @@ fn build_controls_winuicontrols_xaml_deferred_310(
     context.push_parent(rt::to_value(content_presenter_4.clone()));
     // Controls/WinUIControls.xaml(240,33) Name
     content_presenter_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Header")));
-    rt::register_name(name_scope.as_ref(), "PART_Header", ::core::clone::Clone::clone(&content_presenter_4).upcast::<::ferroui_base::FerroObject>(), 240, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Header", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_4)), 240, 33)?;
     // Controls/WinUIControls.xaml(240,16) Column
     let priority_26 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_4.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_26);
@@ -113890,7 +113890,7 @@ fn build_controls_winuicontrols_xaml_deferred_310(
     context.push_parent(rt::to_value(content_presenter_5.clone()));
     // Controls/WinUIControls.xaml(252,33) Name
     content_presenter_5.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TopCommandBar")));
-    rt::register_name(name_scope.as_ref(), "PART_TopCommandBar", ::core::clone::Clone::clone(&content_presenter_5).upcast::<::ferroui_base::FerroObject>(), 252, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TopCommandBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_5)), 252, 33)?;
     // Controls/WinUIControls.xaml(252,16) Column
     let priority_34 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_5.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_34);
@@ -113947,7 +113947,7 @@ fn build_controls_winuicontrols_xaml_deferred_310(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/WinUIControls.xaml(269,19) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_NavBarShadow")));
-    rt::register_name(name_scope.as_ref(), "PART_NavBarShadow", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 269, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_NavBarShadow", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 269, 19)?;
     // Controls/WinUIControls.xaml(269,12) ZIndex
     let priority_38 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_base::Visual::z_index_property(), 1_i32, priority_38);
@@ -113975,7 +113975,7 @@ fn build_controls_winuicontrols_xaml_deferred_310(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_13, ::core::clone::Clone::clone(&content_presenter_6).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(279,29) Name
     content_presenter_6.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ModalBackPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ModalBackPresenter", ::core::clone::Clone::clone(&content_presenter_6).upcast::<::ferroui_base::FerroObject>(), 279, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ModalBackPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_6)), 279, 29)?;
     // Controls/WinUIControls.xaml(279,12) ZIndex
     let priority_43 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_6.set_value_with_priority(::ferroui_base::Visual::z_index_property(), 99_i32, priority_43);
@@ -113993,7 +113993,7 @@ fn build_controls_winuicontrols_xaml_deferred_310(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_14, ::core::clone::Clone::clone(&content_presenter_7).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(283,29) Name
     content_presenter_7.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ModalPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ModalPresenter", ::core::clone::Clone::clone(&content_presenter_7).upcast::<::ferroui_base::FerroObject>(), 283, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ModalPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_7)), 283, 29)?;
     // Controls/WinUIControls.xaml(283,12) ZIndex
     let priority_45 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_7.set_value_with_priority(::ferroui_base::Visual::z_index_property(), 100_i32, priority_45);
@@ -114309,7 +114309,7 @@ fn build_controls_winuicontrols_xaml_deferred_314(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(115,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 115, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 115, 17)?;
     // Controls/WinUIControls.xaml(116,17) Height
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), rt::property(::ferroui_base::layout::Layoutable::min_height_property()), 116, 17)?;
     // Controls/WinUIControls.xaml(117,17) Margin
@@ -114354,7 +114354,7 @@ fn build_controls_winuicontrols_xaml_deferred_314(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/WinUIControls.xaml(123,21) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Icon")));
-    rt::register_name(name_scope.as_ref(), "Icon", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 123, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "Icon", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 123, 21)?;
     // Controls/WinUIControls.xaml(124,21) Data (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE700"));
@@ -114397,7 +114397,7 @@ fn build_controls_winuicontrols_xaml_deferred_314(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(132,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 132, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 132, 31)?;
     // Controls/WinUIControls.xaml(132,14) Column
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_6);
@@ -114475,7 +114475,7 @@ fn build_controls_winuicontrols_xaml_deferred_316(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(192,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 192, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 192, 17)?;
     // Controls/WinUIControls.xaml(193,17) Height
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), rt::property(::ferroui_base::layout::Layoutable::min_height_property()), 193, 17)?;
     // Controls/WinUIControls.xaml(194,17) Margin
@@ -114510,7 +114510,7 @@ fn build_controls_winuicontrols_xaml_deferred_316(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/WinUIControls.xaml(200,21) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Icon")));
-    rt::register_name(name_scope.as_ref(), "Icon", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 200, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "Icon", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 200, 21)?;
     // Controls/WinUIControls.xaml(201,21) Data (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE700"));
@@ -114558,7 +114558,7 @@ fn build_controls_winuicontrols_xaml_deferred_316(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(209,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 209, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 209, 33)?;
     // Controls/WinUIControls.xaml(209,16) HorizontalAlignment
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Center, priority_6);
@@ -114898,7 +114898,7 @@ fn build_controls_winuicontrols_xaml_deferred_318(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(243,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 243, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 243, 17)?;
     // Controls/WinUIControls.xaml(244,17) MinHeight
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_height_property(), "NavigationViewItemOnLeftMinHeight", 244, 17)?;
     // Controls/WinUIControls.xaml(245,17) Background
@@ -114915,7 +114915,7 @@ fn build_controls_winuicontrols_xaml_deferred_318(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/WinUIControls.xaml(248,18) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PresenterContentRootGrid")));
-    rt::register_name(name_scope.as_ref(), "PresenterContentRootGrid", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 248, 18)?;
+    rt::register_name_value(name_scope.as_ref(), "PresenterContentRootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 248, 18)?;
     // Controls/WinUIControls.xaml(249,14) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(&panel_0);
     // Controls/WinUIControls.xaml(249,14) Panel
@@ -114938,7 +114938,7 @@ fn build_controls_winuicontrols_xaml_deferred_318(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/WinUIControls.xaml(250,26) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SelectionIndicator")));
-    rt::register_name(name_scope.as_ref(), "SelectionIndicator", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 250, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "SelectionIndicator", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 250, 26)?;
     // Controls/WinUIControls.xaml(251,26) Width
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), "NavigationViewSelectionIndicatorWidth", 251, 26)?;
     // Controls/WinUIControls.xaml(252,26) Height
@@ -114985,7 +114985,7 @@ fn build_controls_winuicontrols_xaml_deferred_318(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/WinUIControls.xaml(258,19) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentGrid")));
-    rt::register_name(name_scope.as_ref(), "ContentGrid", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 258, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 258, 19)?;
     // Controls/WinUIControls.xaml(259,19) MinHeight
     rt::bind_dynamic_resource(&context, grid_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_height_property(), "NavigationViewItemOnLeftMinHeight", 259, 19)?;
     // Controls/WinUIControls.xaml(258,14) Margin
@@ -115013,7 +115013,7 @@ fn build_controls_winuicontrols_xaml_deferred_318(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/WinUIControls.xaml(263,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 263, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 263, 33)?;
     // Controls/WinUIControls.xaml(263,16) Column
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_7);
@@ -115151,7 +115151,7 @@ fn build_controls_winuicontrols_xaml_deferred_321(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_controls::Control>()));
     // Controls/WinUIControls.xaml(362,25) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "PART_ScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 362, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 362, 25)?;
     // Controls/WinUIControls.xaml(363,25) Padding
     rt::bind_template_binding(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::padding_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), 363, 25)?;
     // Controls/WinUIControls.xaml(364,25) HorizontalScrollBarVisibility
@@ -115165,7 +115165,7 @@ fn build_controls_winuicontrols_xaml_deferred_321(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&items_presenter_0)));
     // Controls/WinUIControls.xaml(366,29) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 366, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 366, 29)?;
     // Controls/WinUIControls.xaml(367,29) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 367, 29)?;
     rt::invoked(items_presenter_0.try_end_init(), 366, 14)?;
@@ -115545,7 +115545,7 @@ fn build_controls_winuicontrols_xaml_deferred_323(
     context.push_parent(rt::to_value(split_view_0.clone()));
     // Controls/WinUIControls.xaml(378,20) Name
     split_view_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SplitView")));
-    rt::register_name(name_scope.as_ref(), "PART_SplitView", ::core::clone::Clone::clone(&split_view_0).upcast::<::ferroui_base::FerroObject>(), 378, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SplitView", ::std::rc::Rc::new(::core::clone::Clone::clone(&split_view_0)), 378, 20)?;
     // Controls/WinUIControls.xaml(379,20) Background
     rt::bind_template_binding(split_view_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 379, 20)?;
     // Controls/WinUIControls.xaml(380,20) BorderThickness
@@ -115587,7 +115587,7 @@ fn build_controls_winuicontrols_xaml_deferred_323(
     context.push_parent(rt::to_value(dock_panel_0.clone()));
     // Controls/WinUIControls.xaml(388,24) Name
     dock_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PaneContentGrid")));
-    rt::register_name(name_scope.as_ref(), "PaneContentGrid", ::core::clone::Clone::clone(&dock_panel_0).upcast::<::ferroui_base::FerroObject>(), 388, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "PaneContentGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&dock_panel_0)), 388, 24)?;
     // Controls/WinUIControls.xaml(388,49) Margin
     rt::bind_dynamic_resource(&context, dock_panel_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "NavigationViewPaneContentGridMargin", 388, 49)?;
     // Controls/WinUIControls.xaml(390,16) Children
@@ -115599,7 +115599,7 @@ fn build_controls_winuicontrols_xaml_deferred_323(
     context.push_parent(rt::to_value(toggle_button_0.clone()));
     // Controls/WinUIControls.xaml(390,29) Name
     toggle_button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_CompactPaneToggle")));
-    rt::register_name(name_scope.as_ref(), "PART_CompactPaneToggle", ::core::clone::Clone::clone(&toggle_button_0).upcast::<::ferroui_base::FerroObject>(), 390, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_CompactPaneToggle", ::std::rc::Rc::new(::core::clone::Clone::clone(&toggle_button_0)), 390, 29)?;
     // Controls/WinUIControls.xaml(390,16) Dock
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     toggle_button_0.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Top, priority_1);
@@ -115659,7 +115659,7 @@ fn build_controls_winuicontrols_xaml_deferred_323(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(402,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DrawerHeader")));
-    rt::register_name(name_scope.as_ref(), "PART_DrawerHeader", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 402, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DrawerHeader", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 402, 33)?;
     // Controls/WinUIControls.xaml(402,16) Dock
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Top, priority_8);
@@ -115699,7 +115699,7 @@ fn build_controls_winuicontrols_xaml_deferred_323(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(411,33) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DrawerFooter")));
-    rt::register_name(name_scope.as_ref(), "PART_DrawerFooter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 411, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DrawerFooter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 411, 33)?;
     // Controls/WinUIControls.xaml(411,16) Dock
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Bottom, priority_12);
@@ -115742,7 +115742,7 @@ fn build_controls_winuicontrols_xaml_deferred_323(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(421,33) Name
     content_presenter_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DrawerPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_DrawerPresenter", ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_base::FerroObject>(), 421, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DrawerPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_2)), 421, 33)?;
     // Controls/WinUIControls.xaml(421,16) HorizontalContentAlignment
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_2.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::horizontal_content_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Stretch, priority_17);
@@ -115785,7 +115785,7 @@ fn build_controls_winuicontrols_xaml_deferred_323(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(431,21) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentGrid")));
-    rt::register_name(name_scope.as_ref(), "ContentGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 431, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 431, 21)?;
     // Controls/WinUIControls.xaml(432,21) BorderBrush
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::border_brush_property(), "NavigationViewContentGridBorderBrush", 432, 21)?;
     // Controls/WinUIControls.xaml(431,14) BackgroundSizing
@@ -115810,7 +115810,7 @@ fn build_controls_winuicontrols_xaml_deferred_323(
     context.push_parent(rt::to_value(dock_panel_1.clone()));
     // Controls/WinUIControls.xaml(439,26) Name
     dock_panel_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentDock")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentDock", ::core::clone::Clone::clone(&dock_panel_1).upcast::<::ferroui_base::FerroObject>(), 439, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentDock", ::std::rc::Rc::new(::core::clone::Clone::clone(&dock_panel_1)), 439, 26)?;
     // Controls/WinUIControls.xaml(441,18) Children
     let children_collection_5 = ::ferroui_controls::Panel::__markup_get_Children(dock_panel_1.upcast_ref::<::ferroui_controls::Panel>());
     // Controls/WinUIControls.xaml(441,18) Border
@@ -115820,7 +115820,7 @@ fn build_controls_winuicontrols_xaml_deferred_323(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(441,25) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TopBar")));
-    rt::register_name(name_scope.as_ref(), "PART_TopBar", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 441, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TopBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 441, 25)?;
     // Controls/WinUIControls.xaml(441,18) Dock
     let priority_24 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Top, priority_24);
@@ -115844,7 +115844,7 @@ fn build_controls_winuicontrols_xaml_deferred_323(
     context.push_parent(rt::to_value(toggle_button_1.clone()));
     // Controls/WinUIControls.xaml(445,35) Name
     toggle_button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PaneButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PaneButton", ::core::clone::Clone::clone(&toggle_button_1).upcast::<::ferroui_base::FerroObject>(), 445, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PaneButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&toggle_button_1)), 445, 35)?;
     // Controls/WinUIControls.xaml(446,35) Theme (setter chosen at run time)
     let priority_26 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DrawerPagePaneToggleButton"));
@@ -115897,7 +115897,7 @@ fn build_controls_winuicontrols_xaml_deferred_323(
     context.push_parent(rt::to_value(content_control_0.clone()));
     // Controls/WinUIControls.xaml(453,37) Name
     content_control_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TitlePresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_TitlePresenter", ::core::clone::Clone::clone(&content_control_0).upcast::<::ferroui_base::FerroObject>(), 453, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TitlePresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_0)), 453, 37)?;
     // Controls/WinUIControls.xaml(454,37) Theme (setter chosen at run time)
     let priority_31 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationViewTitleHeaderContentControlTextStyle"));
@@ -115955,7 +115955,7 @@ fn build_controls_winuicontrols_xaml_deferred_323(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/WinUIControls.xaml(464,25) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_BottomBar")));
-    rt::register_name(name_scope.as_ref(), "PART_BottomBar", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 464, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_BottomBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 464, 25)?;
     // Controls/WinUIControls.xaml(464,18) Dock
     let priority_36 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Bottom, priority_36);
@@ -115982,7 +115982,7 @@ fn build_controls_winuicontrols_xaml_deferred_323(
     context.push_parent(rt::to_value(toggle_button_2.clone()));
     // Controls/WinUIControls.xaml(469,35) Name
     toggle_button_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_BottomPaneButton")));
-    rt::register_name(name_scope.as_ref(), "PART_BottomPaneButton", ::core::clone::Clone::clone(&toggle_button_2).upcast::<::ferroui_base::FerroObject>(), 469, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_BottomPaneButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&toggle_button_2)), 469, 35)?;
     // Controls/WinUIControls.xaml(470,35) Theme (setter chosen at run time)
     let priority_39 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DrawerPagePaneToggleButton"));
@@ -116035,7 +116035,7 @@ fn build_controls_winuicontrols_xaml_deferred_323(
     context.push_parent(rt::to_value(content_control_1.clone()));
     // Controls/WinUIControls.xaml(477,37) Name
     content_control_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_BottomTitlePresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_BottomTitlePresenter", ::core::clone::Clone::clone(&content_control_1).upcast::<::ferroui_base::FerroObject>(), 477, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_BottomTitlePresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_1)), 477, 37)?;
     // Controls/WinUIControls.xaml(478,37) Theme (setter chosen at run time)
     let priority_44 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationViewTitleHeaderContentControlTextStyle"));
@@ -116093,7 +116093,7 @@ fn build_controls_winuicontrols_xaml_deferred_323(
     context.push_parent(rt::to_value(content_presenter_3.clone()));
     // Controls/WinUIControls.xaml(487,35) Name
     content_presenter_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_3).upcast::<::ferroui_base::FerroObject>(), 487, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_3)), 487, 35)?;
     // Controls/WinUIControls.xaml(488,35) Margin
     rt::bind_dynamic_resource(&context, content_presenter_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "NavigationViewContentPresenterMargin", 488, 35)?;
     // Controls/WinUIControls.xaml(489,35) HorizontalContentAlignment
@@ -116135,7 +116135,7 @@ fn build_controls_winuicontrols_xaml_deferred_323(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_12, ::core::clone::Clone::clone(&border_3).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(499,21) Name
     border_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Backdrop")));
-    rt::register_name(name_scope.as_ref(), "PART_Backdrop", ::core::clone::Clone::clone(&border_3).upcast::<::ferroui_base::FerroObject>(), 499, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Backdrop", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_3)), 499, 21)?;
     // Controls/WinUIControls.xaml(500,21) Background
     rt::bind_template_binding(border_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::DrawerPage::backdrop_brush_property()), 500, 21)?;
     // Controls/WinUIControls.xaml(499,14) IsVisible
@@ -116755,7 +116755,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/WinUIControls.xaml(154,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootGrid")));
-    rt::register_name(name_scope.as_ref(), "RootGrid", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 154, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 154, 15)?;
     // Controls/WinUIControls.xaml(156,12) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
     // Controls/WinUIControls.xaml(156,12) Grid
@@ -116765,7 +116765,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     context.push_parent(rt::to_value(grid_1.clone()));
     // Controls/WinUIControls.xaml(156,17) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PaneToggleButtonGrid")));
-    rt::register_name(name_scope.as_ref(), "PaneToggleButtonGrid", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 156, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "PaneToggleButtonGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 156, 17)?;
     // Controls/WinUIControls.xaml(156,12) HorizontalAlignment
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     grid_1.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Left, priority_0);
@@ -116794,7 +116794,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/WinUIControls.xaml(161,20) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TogglePaneTopPadding")));
-    rt::register_name(name_scope.as_ref(), "TogglePaneTopPadding", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 161, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "TogglePaneTopPadding", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 161, 20)?;
     // Controls/WinUIControls.xaml(162,20) Height
     let reflection_binding_extension_0 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("TemplateSettings.TopPadding"));
     context.push_parent(rt::to_value(reflection_binding_extension_0.clone()));
@@ -116816,7 +116816,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     context.push_parent(rt::to_value(grid_2.clone()));
     // Controls/WinUIControls.xaml(163,19) Name
     grid_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ButtonHolderGrid")));
-    rt::register_name(name_scope.as_ref(), "ButtonHolderGrid", ::core::clone::Clone::clone(&grid_2).upcast::<::ferroui_base::FerroObject>(), 163, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "ButtonHolderGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_2)), 163, 19)?;
     // Controls/WinUIControls.xaml(163,14) Row
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     grid_2.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_3);
@@ -116841,7 +116841,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/WinUIControls.xaml(164,23) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("NavigationViewBackButton")));
-    rt::register_name(name_scope.as_ref(), "NavigationViewBackButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 164, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "NavigationViewBackButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 164, 23)?;
     // Controls/WinUIControls.xaml(165,23) Theme (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationBackButtonNormalStyle"));
@@ -116895,7 +116895,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     context.push_parent(rt::to_value(button_1.clone()));
     // Controls/WinUIControls.xaml(171,23) Name
     button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("NavigationViewCloseButton")));
-    rt::register_name(name_scope.as_ref(), "NavigationViewCloseButton", ::core::clone::Clone::clone(&button_1).upcast::<::ferroui_base::FerroObject>(), 171, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "NavigationViewCloseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_1)), 171, 23)?;
     // Controls/WinUIControls.xaml(172,23) Theme (setter chosen at run time)
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationBackButtonNormalStyle"));
@@ -116927,7 +116927,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     context.push_parent(rt::to_value(button_2.clone()));
     // Controls/WinUIControls.xaml(175,23) Name
     button_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TogglePaneButton")));
-    rt::register_name(name_scope.as_ref(), "TogglePaneButton", ::core::clone::Clone::clone(&button_2).upcast::<::ferroui_base::FerroObject>(), 175, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "TogglePaneButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_2)), 175, 23)?;
     // Controls/WinUIControls.xaml(176,23) Theme
     rt::bind_template_binding(button_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), rt::property(::ferroui_controls::NavigationView::pane_toggle_button_style_property()), 176, 23)?;
     // Controls/WinUIControls.xaml(177,23) IsVisible
@@ -116961,7 +116961,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/WinUIControls.xaml(180,28) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PaneTitleTextBlock")));
-    rt::register_name(name_scope.as_ref(), "PaneTitleTextBlock", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 180, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "PaneTitleTextBlock", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 180, 28)?;
     // Controls/WinUIControls.xaml(180,18) Margin
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(0.0_f64, -2.0_f64, 0.0_f64, 0.0_f64), priority_11);
@@ -117000,7 +117000,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     context.push_parent(rt::to_value(grid_3.clone()));
     // Controls/WinUIControls.xaml(187,21) Name
     grid_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PaneTitleHolder")));
-    rt::register_name(name_scope.as_ref(), "PaneTitleHolder", ::core::clone::Clone::clone(&grid_3).upcast::<::ferroui_base::FerroObject>(), 187, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PaneTitleHolder", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_3)), 187, 21)?;
     // Controls/WinUIControls.xaml(187,16) Height
     let priority_15 = ::ferroui_base::data::BindingPriority::Template;
     grid_3.set_value_with_priority(::ferroui_base::layout::Layoutable::height_property(), 40.0_f64, priority_15);
@@ -117016,7 +117016,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     context.push_parent(rt::to_value(content_control_0.clone()));
     // Controls/WinUIControls.xaml(188,33) Name
     content_control_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PaneTitlePresenter")));
-    rt::register_name(name_scope.as_ref(), "PaneTitlePresenter", ::core::clone::Clone::clone(&content_control_0).upcast::<::ferroui_base::FerroObject>(), 188, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PaneTitlePresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_0)), 188, 33)?;
     // Controls/WinUIControls.xaml(189,33) Margin
     rt::bind_dynamic_resource(&context, content_control_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "NavigationViewPaneTitlePresenterMargin", 189, 33)?;
     // Controls/WinUIControls.xaml(188,18) IsTabStop
@@ -117062,7 +117062,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     context.push_parent(rt::to_value(stack_panel_0.clone()));
     // Controls/WinUIControls.xaml(199,25) Name
     stack_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TopNavArea")));
-    rt::register_name(name_scope.as_ref(), "TopNavArea", ::core::clone::Clone::clone(&stack_panel_0).upcast::<::ferroui_base::FerroObject>(), 199, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "TopNavArea", ::std::rc::Rc::new(::core::clone::Clone::clone(&stack_panel_0)), 199, 25)?;
     // Controls/WinUIControls.xaml(200,25) Background
     rt::bind_dynamic_resource(&context, stack_panel_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Panel::background_property(), "NavigationViewTopPaneBackground", 200, 25)?;
     // Controls/WinUIControls.xaml(199,14) Row
@@ -117086,7 +117086,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     context.push_parent(rt::to_value(panel_1.clone()));
     // Controls/WinUIControls.xaml(205,22) Name
     panel_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TopNavTopPadding")));
-    rt::register_name(name_scope.as_ref(), "TopNavTopPadding", ::core::clone::Clone::clone(&panel_1).upcast::<::ferroui_base::FerroObject>(), 205, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "TopNavTopPadding", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_1)), 205, 22)?;
     // Controls/WinUIControls.xaml(206,22) Height
     let reflection_binding_extension_5 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("TemplateSettings.TopPadding"));
     context.push_parent(rt::to_value(reflection_binding_extension_5.clone()));
@@ -117118,7 +117118,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     context.push_parent(rt::to_value(grid_5.clone()));
     // Controls/WinUIControls.xaml(208,21) Name
     grid_5.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TopNavGrid")));
-    rt::register_name(name_scope.as_ref(), "TopNavGrid", ::core::clone::Clone::clone(&grid_5).upcast::<::ferroui_base::FerroObject>(), 208, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "TopNavGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_5)), 208, 21)?;
     // Controls/WinUIControls.xaml(209,21) Height
     rt::bind_dynamic_resource(&context, grid_5.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), "NavigationViewTopPaneHeight", 209, 21)?;
     // Controls/WinUIControls.xaml(210,21) Margin
@@ -117173,7 +117173,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     context.push_parent(rt::to_value(panel_2.clone()));
     // Controls/WinUIControls.xaml(213,24) Name
     panel_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("BackButtonPlaceholderOnTopNav")));
-    rt::register_name(name_scope.as_ref(), "BackButtonPlaceholderOnTopNav", ::core::clone::Clone::clone(&panel_2).upcast::<::ferroui_base::FerroObject>(), 213, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "BackButtonPlaceholderOnTopNav", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_2)), 213, 24)?;
     // Controls/WinUIControls.xaml(213,63) Width
     rt::bind_dynamic_resource(&context, panel_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), "NavigationBackButtonWidth", 213, 63)?;
     context.pop_parent();
@@ -117186,7 +117186,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_13, ::core::clone::Clone::clone(&panel_3).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(214,24) Name
     panel_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TopNavLeftPadding")));
-    rt::register_name(name_scope.as_ref(), "TopNavLeftPadding", ::core::clone::Clone::clone(&panel_3).upcast::<::ferroui_base::FerroObject>(), 214, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "TopNavLeftPadding", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_3)), 214, 24)?;
     // Controls/WinUIControls.xaml(214,18) Column
     let priority_24 = ::ferroui_base::data::BindingPriority::Template;
     panel_3.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_24);
@@ -117202,7 +117202,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_14, ::core::clone::Clone::clone(&content_control_1).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(215,33) Name
     content_control_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PaneHeaderOnTopPane")));
-    rt::register_name(name_scope.as_ref(), "PaneHeaderOnTopPane", ::core::clone::Clone::clone(&content_control_1).upcast::<::ferroui_base::FerroObject>(), 215, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PaneHeaderOnTopPane", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_1)), 215, 33)?;
     // Controls/WinUIControls.xaml(215,18) IsTabStop
     let priority_26 = ::ferroui_base::data::BindingPriority::Template;
     content_control_1.set_value_with_priority(::ferroui_base::input::InputElement::is_tab_stop_property(), ::core::clone::Clone::clone(&false), priority_26);
@@ -117225,7 +117225,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     context.push_parent(rt::to_value(content_control_2.clone()));
     // Controls/WinUIControls.xaml(220,33) Name
     content_control_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PaneTitleOnTopPane")));
-    rt::register_name(name_scope.as_ref(), "PaneTitleOnTopPane", ::core::clone::Clone::clone(&content_control_2).upcast::<::ferroui_base::FerroObject>(), 220, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PaneTitleOnTopPane", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_2)), 220, 33)?;
     // Controls/WinUIControls.xaml(220,18) IsTabStop
     let priority_30 = ::ferroui_base::data::BindingPriority::Template;
     content_control_2.set_value_with_priority(::ferroui_base::input::InputElement::is_tab_stop_property(), ::core::clone::Clone::clone(&false), priority_30);
@@ -117264,7 +117264,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&stack_panel_1)));
     // Controls/WinUIControls.xaml(230,31) Name
     stack_panel_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TopNavMenuItemsHost")));
-    rt::register_name(name_scope.as_ref(), "TopNavMenuItemsHost", ::core::clone::Clone::clone(&stack_panel_1).upcast::<::ferroui_base::FerroObject>(), 230, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "TopNavMenuItemsHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&stack_panel_1)), 230, 31)?;
     // Controls/WinUIControls.xaml(230,20) Orientation
     let priority_37 = ::ferroui_base::data::BindingPriority::Template;
     stack_panel_1.set_value_with_priority(::ferroui_controls::StackPanel::orientation_property(), ::ferroui_base::layout::Orientation::Horizontal, priority_37);
@@ -117279,7 +117279,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     context.push_parent(rt::to_value(content_control_3.clone()));
     // Controls/WinUIControls.xaml(232,33) Name
     content_control_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PaneCustomContentOnTopPane")));
-    rt::register_name(name_scope.as_ref(), "PaneCustomContentOnTopPane", ::core::clone::Clone::clone(&content_control_3).upcast::<::ferroui_base::FerroObject>(), 232, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PaneCustomContentOnTopPane", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_3)), 232, 33)?;
     // Controls/WinUIControls.xaml(232,18) IsTabStop
     let priority_38 = ::ferroui_base::data::BindingPriority::Template;
     content_control_3.set_value_with_priority(::ferroui_base::input::InputElement::is_tab_stop_property(), ::core::clone::Clone::clone(&false), priority_38);
@@ -117305,7 +117305,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     context.push_parent(rt::to_value(grid_6.clone()));
     // Controls/WinUIControls.xaml(238,23) Name
     grid_6.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TopPaneAutoSuggestArea")));
-    rt::register_name(name_scope.as_ref(), "TopPaneAutoSuggestArea", ::core::clone::Clone::clone(&grid_6).upcast::<::ferroui_base::FerroObject>(), 238, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "TopPaneAutoSuggestArea", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_6)), 238, 23)?;
     // Controls/WinUIControls.xaml(238,55) Height
     rt::bind_dynamic_resource(&context, grid_6.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), "NavigationViewTopPaneHeight", 238, 55)?;
     // Controls/WinUIControls.xaml(238,18) Column
@@ -117320,7 +117320,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     context.push_parent(rt::to_value(content_control_4.clone()));
     // Controls/WinUIControls.xaml(239,35) Name
     content_control_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TopPaneAutoSuggestBoxPresenter")));
-    rt::register_name(name_scope.as_ref(), "TopPaneAutoSuggestBoxPresenter", ::core::clone::Clone::clone(&content_control_4).upcast::<::ferroui_base::FerroObject>(), 239, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "TopPaneAutoSuggestBoxPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_4)), 239, 35)?;
     // Controls/WinUIControls.xaml(240,35) Margin
     rt::bind_dynamic_resource(&context, content_control_4.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "TopNavigationViewAutoSuggestBoxMargin", 240, 35)?;
     // Controls/WinUIControls.xaml(239,20) MinWidth
@@ -117347,7 +117347,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_20, ::core::clone::Clone::clone(&content_control_5).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(246,33) Name
     content_control_5.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PaneFooterOnTopPane")));
-    rt::register_name(name_scope.as_ref(), "PaneFooterOnTopPane", ::core::clone::Clone::clone(&content_control_5).upcast::<::ferroui_base::FerroObject>(), 246, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PaneFooterOnTopPane", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_5)), 246, 33)?;
     // Controls/WinUIControls.xaml(246,18) IsTabStop
     let priority_47 = ::ferroui_base::data::BindingPriority::Template;
     content_control_5.set_value_with_priority(::ferroui_base::input::InputElement::is_tab_stop_property(), ::core::clone::Clone::clone(&false), priority_47);
@@ -117369,7 +117369,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_21, ::core::clone::Clone::clone(&stack_panel_2).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(252,29) Name
     stack_panel_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TopFooterMenuItemsHost")));
-    rt::register_name(name_scope.as_ref(), "TopFooterMenuItemsHost", ::core::clone::Clone::clone(&stack_panel_2).upcast::<::ferroui_base::FerroObject>(), 252, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "TopFooterMenuItemsHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&stack_panel_2)), 252, 29)?;
     // Controls/WinUIControls.xaml(252,18) Column
     let priority_51 = ::ferroui_base::data::BindingPriority::Template;
     stack_panel_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 8_i32, priority_51);
@@ -117387,7 +117387,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_22, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(254,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TopNavContentOverlayAreaGrid")));
-    rt::register_name(name_scope.as_ref(), "TopNavContentOverlayAreaGrid", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 254, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "TopNavContentOverlayAreaGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 254, 33)?;
     // Controls/WinUIControls.xaml(254,71) Content (setter chosen at run time)
     let priority_53 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_3 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::NavigationView::content_overlay_property()));
@@ -117410,7 +117410,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     context.push_parent(rt::to_value(split_view_0.clone()));
     // Controls/WinUIControls.xaml(257,24) Name
     split_view_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootSplitView")));
-    rt::register_name(name_scope.as_ref(), "RootSplitView", ::core::clone::Clone::clone(&split_view_0).upcast::<::ferroui_base::FerroObject>(), 257, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "RootSplitView", ::std::rc::Rc::new(::core::clone::Clone::clone(&split_view_0)), 257, 24)?;
     // Controls/WinUIControls.xaml(258,24) Background
     rt::bind_template_binding(split_view_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 258, 24)?;
     // Controls/WinUIControls.xaml(259,24) BorderBrush
@@ -117459,7 +117459,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     context.push_parent(rt::to_value(grid_7.clone()));
     // Controls/WinUIControls.xaml(269,23) Name
     grid_7.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PaneContentGrid")));
-    rt::register_name(name_scope.as_ref(), "PaneContentGrid", ::core::clone::Clone::clone(&grid_7).upcast::<::ferroui_base::FerroObject>(), 269, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PaneContentGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_7)), 269, 23)?;
     // Controls/WinUIControls.xaml(270,23) Margin
     rt::bind_dynamic_resource(&context, grid_7.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "NavigationViewPaneContentGridMargin", 270, 23)?;
     // Controls/WinUIControls.xaml(271,23) IsVisible
@@ -117506,7 +117506,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     context.push_parent(rt::to_value(panel_4.clone()));
     // Controls/WinUIControls.xaml(273,26) Name
     panel_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentPaneTopPadding")));
-    rt::register_name(name_scope.as_ref(), "ContentPaneTopPadding", ::core::clone::Clone::clone(&panel_4).upcast::<::ferroui_base::FerroObject>(), 273, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentPaneTopPadding", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_4)), 273, 26)?;
     // Controls/WinUIControls.xaml(274,26) Height
     let reflection_binding_extension_10 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("TemplateSettings.TopPadding"));
     context.push_parent(rt::to_value(reflection_binding_extension_10.clone()));
@@ -117527,7 +117527,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_25, ::core::clone::Clone::clone(&panel_5).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(276,26) Name
     panel_5.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("BackButtonRowSpacer")));
-    rt::register_name(name_scope.as_ref(), "BackButtonRowSpacer", ::core::clone::Clone::clone(&panel_5).upcast::<::ferroui_base::FerroObject>(), 276, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "BackButtonRowSpacer", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_5)), 276, 26)?;
     // Controls/WinUIControls.xaml(276,20) Row
     let priority_58 = ::ferroui_base::data::BindingPriority::Template;
     panel_5.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_58);
@@ -117543,7 +117543,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_26, ::core::clone::Clone::clone(&panel_6).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(277,26) Name
     panel_6.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PaneContentGridToggleButtonRow")));
-    rt::register_name(name_scope.as_ref(), "PaneContentGridToggleButtonRow", ::core::clone::Clone::clone(&panel_6).upcast::<::ferroui_base::FerroObject>(), 277, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "PaneContentGridToggleButtonRow", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_6)), 277, 26)?;
     // Controls/WinUIControls.xaml(277,20) Row
     let priority_60 = ::ferroui_base::data::BindingPriority::Template;
     panel_6.set_value_with_priority(::ferroui_controls::Grid::row_property(), 2_i32, priority_60);
@@ -117555,7 +117555,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_27, ::core::clone::Clone::clone(&content_control_6).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(278,37) Name
     content_control_6.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PaneHeaderContentBorder")));
-    rt::register_name(name_scope.as_ref(), "PaneHeaderContentBorder", ::core::clone::Clone::clone(&content_control_6).upcast::<::ferroui_base::FerroObject>(), 278, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PaneHeaderContentBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_6)), 278, 37)?;
     // Controls/WinUIControls.xaml(278,22) IsTabStop
     let priority_61 = ::ferroui_base::data::BindingPriority::Template;
     content_control_6.set_value_with_priority(::ferroui_base::input::InputElement::is_tab_stop_property(), ::core::clone::Clone::clone(&false), priority_61);
@@ -117576,7 +117576,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     context.push_parent(rt::to_value(grid_8.clone()));
     // Controls/WinUIControls.xaml(283,25) Name
     grid_8.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("AutoSuggestArea")));
-    rt::register_name(name_scope.as_ref(), "AutoSuggestArea", ::core::clone::Clone::clone(&grid_8).upcast::<::ferroui_base::FerroObject>(), 283, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "AutoSuggestArea", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_8)), 283, 25)?;
     // Controls/WinUIControls.xaml(283,20) Row
     let priority_64 = ::ferroui_base::data::BindingPriority::Template;
     grid_8.set_value_with_priority(::ferroui_controls::Grid::row_property(), 3_i32, priority_64);
@@ -117597,7 +117597,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     context.push_parent(rt::to_value(content_control_7.clone()));
     // Controls/WinUIControls.xaml(288,37) Name
     content_control_7.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PaneAutoSuggestBoxPresenter")));
-    rt::register_name(name_scope.as_ref(), "PaneAutoSuggestBoxPresenter", ::core::clone::Clone::clone(&content_control_7).upcast::<::ferroui_base::FerroObject>(), 288, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PaneAutoSuggestBoxPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_7)), 288, 37)?;
     // Controls/WinUIControls.xaml(289,37) Margin
     rt::bind_dynamic_resource(&context, content_control_7.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "NavigationViewAutoSuggestBoxMargin", 289, 37)?;
     // Controls/WinUIControls.xaml(288,22) IsTabStop
@@ -117620,7 +117620,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     context.push_parent(rt::to_value(button_3.clone()));
     // Controls/WinUIControls.xaml(293,29) Name
     button_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PaneAutoSuggestButton")));
-    rt::register_name(name_scope.as_ref(), "PaneAutoSuggestButton", ::core::clone::Clone::clone(&button_3).upcast::<::ferroui_base::FerroObject>(), 293, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PaneAutoSuggestButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_3)), 293, 29)?;
     // Controls/WinUIControls.xaml(293,22) IsVisible
     let priority_70 = ::ferroui_base::data::BindingPriority::Template;
     button_3.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_70);
@@ -117660,7 +117660,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_31, ::core::clone::Clone::clone(&content_control_8).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(298,35) Name
     content_control_8.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PaneCustomContentBorder")));
-    rt::register_name(name_scope.as_ref(), "PaneCustomContentBorder", ::core::clone::Clone::clone(&content_control_8).upcast::<::ferroui_base::FerroObject>(), 298, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "PaneCustomContentBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_8)), 298, 35)?;
     // Controls/WinUIControls.xaml(298,20) IsTabStop
     let priority_72 = ::ferroui_base::data::BindingPriority::Template;
     content_control_8.set_value_with_priority(::ferroui_base::input::InputElement::is_tab_stop_property(), ::core::clone::Clone::clone(&false), priority_72);
@@ -117682,7 +117682,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_32, ::core::clone::Clone::clone(&grid_9).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(304,25) Name
     grid_9.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ItemsContainerGrid")));
-    rt::register_name(name_scope.as_ref(), "ItemsContainerGrid", ::core::clone::Clone::clone(&grid_9).upcast::<::ferroui_base::FerroObject>(), 304, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "ItemsContainerGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_9)), 304, 25)?;
     // Controls/WinUIControls.xaml(304,20) Row
     let priority_76 = ::ferroui_base::data::BindingPriority::Template;
     grid_9.set_value_with_priority(::ferroui_controls::Grid::row_property(), 6_i32, priority_76);
@@ -117710,7 +117710,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_33, ::core::clone::Clone::clone(&scroll_viewer_1).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(306,35) Name
     scroll_viewer_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("MenuItemsScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "MenuItemsScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_1).upcast::<::ferroui_base::FerroObject>(), 306, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "MenuItemsScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_1)), 306, 35)?;
     // Controls/WinUIControls.xaml(306,22) TabNavigation
     let priority_77 = ::ferroui_base::data::BindingPriority::Template;
     scroll_viewer_1.set_value_with_priority(::ferroui_base::input::KeyboardNavigation::tab_navigation_property(), ::ferroui_base::input::KeyboardNavigationMode::Local, priority_77);
@@ -117727,7 +117727,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     scroll_viewer_1.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&stack_panel_3)));
     // Controls/WinUIControls.xaml(310,35) Name
     stack_panel_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("MenuItemsHost")));
-    rt::register_name(name_scope.as_ref(), "MenuItemsHost", ::core::clone::Clone::clone(&stack_panel_3).upcast::<::ferroui_base::FerroObject>(), 310, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "MenuItemsHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&stack_panel_3)), 310, 35)?;
     rt::invoked(stack_panel_3.try_end_init(), 310, 24)?;
     rt::invoked(scroll_viewer_1.try_end_init(), 306, 22)?;
     // Controls/WinUIControls.xaml(312,22) Children
@@ -117738,7 +117738,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_34, ::core::clone::Clone::clone(&navigation_view_item_separator_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(312,50) Name
     navigation_view_item_separator_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("VisualItemsSeparator")));
-    rt::register_name(name_scope.as_ref(), "VisualItemsSeparator", ::core::clone::Clone::clone(&navigation_view_item_separator_0).upcast::<::ferroui_base::FerroObject>(), 312, 50)?;
+    rt::register_name_value(name_scope.as_ref(), "VisualItemsSeparator", ::std::rc::Rc::new(::core::clone::Clone::clone(&navigation_view_item_separator_0)), 312, 50)?;
     // Controls/WinUIControls.xaml(312,22) Row
     let priority_80 = ::ferroui_base::data::BindingPriority::Template;
     navigation_view_item_separator_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_80);
@@ -117763,7 +117763,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_35, ::core::clone::Clone::clone(&content_control_9).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(319,37) Name
     content_control_9.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("FooterContentBorder")));
-    rt::register_name(name_scope.as_ref(), "FooterContentBorder", ::core::clone::Clone::clone(&content_control_9).upcast::<::ferroui_base::FerroObject>(), 319, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "FooterContentBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_9)), 319, 37)?;
     // Controls/WinUIControls.xaml(319,22) IsTabStop
     let priority_85 = ::ferroui_base::data::BindingPriority::Template;
     content_control_9.set_value_with_priority(::ferroui_base::input::InputElement::is_tab_stop_property(), ::core::clone::Clone::clone(&false), priority_85);
@@ -117788,7 +117788,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_36, ::core::clone::Clone::clone(&scroll_viewer_2).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(326,35) Name
     scroll_viewer_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("FooterItemsScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "FooterItemsScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_2).upcast::<::ferroui_base::FerroObject>(), 326, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "FooterItemsScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_2)), 326, 35)?;
     // Controls/WinUIControls.xaml(326,22) Row
     let priority_90 = ::ferroui_base::data::BindingPriority::Template;
     scroll_viewer_2.set_value_with_priority(::ferroui_controls::Grid::row_property(), 3_i32, priority_90);
@@ -117805,7 +117805,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     scroll_viewer_2.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&stack_panel_4)));
     // Controls/WinUIControls.xaml(330,35) Name
     stack_panel_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("FooterMenuItemsHost")));
-    rt::register_name(name_scope.as_ref(), "FooterMenuItemsHost", ::core::clone::Clone::clone(&stack_panel_4).upcast::<::ferroui_base::FerroObject>(), 330, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "FooterMenuItemsHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&stack_panel_4)), 330, 35)?;
     rt::invoked(stack_panel_4.try_end_init(), 330, 24)?;
     rt::invoked(scroll_viewer_2.try_end_init(), 326, 22)?;
     rt::invoked(grid_9.try_end_init(), 304, 20)?;
@@ -117819,7 +117819,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(335,23) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentGrid")));
-    rt::register_name(name_scope.as_ref(), "ContentGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 335, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 335, 23)?;
     // Controls/WinUIControls.xaml(336,23) BorderBrush
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::border_brush_property(), "NavigationViewContentGridBorderBrush", 336, 23)?;
     // Controls/WinUIControls.xaml(337,23) BorderThickness
@@ -117871,7 +117871,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     context.push_parent(rt::to_value(panel_7.clone()));
     // Controls/WinUIControls.xaml(343,26) Name
     panel_7.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentTopPadding")));
-    rt::register_name(name_scope.as_ref(), "ContentTopPadding", ::core::clone::Clone::clone(&panel_7).upcast::<::ferroui_base::FerroObject>(), 343, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentTopPadding", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_7)), 343, 26)?;
     // Controls/WinUIControls.xaml(343,20) ColumnSpan
     let priority_94 = ::ferroui_base::data::BindingPriority::Template;
     panel_7.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 2_i32, priority_94);
@@ -117905,7 +117905,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_38, ::core::clone::Clone::clone(&panel_8).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(347,26) Name
     panel_8.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentLeftPadding")));
-    rt::register_name(name_scope.as_ref(), "ContentLeftPadding", ::core::clone::Clone::clone(&panel_8).upcast::<::ferroui_base::FerroObject>(), 347, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentLeftPadding", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_8)), 347, 26)?;
     // Controls/WinUIControls.xaml(347,20) Row
     let priority_95 = ::ferroui_base::data::BindingPriority::Template;
     panel_8.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_95);
@@ -117919,7 +117919,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     context.push_parent(rt::to_value(content_control_10.clone()));
     // Controls/WinUIControls.xaml(348,35) Name
     content_control_10.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HeaderContent")));
-    rt::register_name(name_scope.as_ref(), "HeaderContent", ::core::clone::Clone::clone(&content_control_10).upcast::<::ferroui_base::FerroObject>(), 348, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "HeaderContent", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_10)), 348, 35)?;
     // Controls/WinUIControls.xaml(348,20) Row
     let priority_96 = ::ferroui_base::data::BindingPriority::Template;
     content_control_10.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_96);
@@ -117984,7 +117984,7 @@ fn build_controls_winuicontrols_xaml_deferred_327(
     context.push_parent(rt::to_value(content_presenter_1.clone()));
     // Controls/WinUIControls.xaml(358,37) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 358, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 358, 37)?;
     // Controls/WinUIControls.xaml(358,20) Row
     let priority_104 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_controls::Grid::row_property(), 2_i32, priority_104);
@@ -119158,7 +119158,7 @@ fn build_controls_winuicontrols_xaml_deferred_329(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/WinUIControls.xaml(499,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("NVIRootGrid")));
-    rt::register_name(name_scope.as_ref(), "NVIRootGrid", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 499, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "NVIRootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 499, 15)?;
     // Controls/WinUIControls.xaml(499,10) RowDefinitions
     let row_definitions_0 = ::ferroui_controls::RowDefinitions::__markup_new_0();
     rt::invoked(<::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::RowDefinition>>>::__markup_set_Capacity(&row_definitions_0, 2_i32), 499, 36)?;
@@ -119178,7 +119178,7 @@ fn build_controls_winuicontrols_xaml_deferred_329(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/WinUIControls.xaml(501,18) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("NavigationViewItemPresenter")));
-    rt::register_name(name_scope.as_ref(), "NavigationViewItemPresenter", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 501, 18)?;
+    rt::register_name_value(name_scope.as_ref(), "NavigationViewItemPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 501, 18)?;
     // Controls/WinUIControls.xaml(502,14) Children
     let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(&panel_0);
     // Controls/WinUIControls.xaml(502,14) Border
@@ -119188,7 +119188,7 @@ fn build_controls_winuicontrols_xaml_deferred_329(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(502,21) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 502, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 502, 21)?;
     // Controls/WinUIControls.xaml(503,21) MinHeight
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_height_property(), "NavigationViewItemOnLeftMinHeight", 503, 21)?;
     // Controls/WinUIControls.xaml(504,21) Background
@@ -119205,7 +119205,7 @@ fn build_controls_winuicontrols_xaml_deferred_329(
     context.push_parent(rt::to_value(panel_1.clone()));
     // Controls/WinUIControls.xaml(507,22) Name
     panel_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PresenterContentRootGrid")));
-    rt::register_name(name_scope.as_ref(), "PresenterContentRootGrid", ::core::clone::Clone::clone(&panel_1).upcast::<::ferroui_base::FerroObject>(), 507, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PresenterContentRootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_1)), 507, 22)?;
     // Controls/WinUIControls.xaml(509,18) Children
     let children_collection_2 = ::ferroui_controls::Panel::__markup_get_Children(&panel_1);
     // Controls/WinUIControls.xaml(509,18) Panel
@@ -119215,7 +119215,7 @@ fn build_controls_winuicontrols_xaml_deferred_329(
     context.push_parent(rt::to_value(panel_2.clone()));
     // Controls/WinUIControls.xaml(509,24) Name
     panel_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SelectionIndicatorGrid")));
-    rt::register_name(name_scope.as_ref(), "SelectionIndicatorGrid", ::core::clone::Clone::clone(&panel_2).upcast::<::ferroui_base::FerroObject>(), 509, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "SelectionIndicatorGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_2)), 509, 24)?;
     // Controls/WinUIControls.xaml(509,18) HorizontalAlignment
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     panel_2.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Left, priority_0);
@@ -119231,7 +119231,7 @@ fn build_controls_winuicontrols_xaml_deferred_329(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/WinUIControls.xaml(510,30) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SelectionIndicator")));
-    rt::register_name(name_scope.as_ref(), "SelectionIndicator", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 510, 30)?;
+    rt::register_name_value(name_scope.as_ref(), "SelectionIndicator", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 510, 30)?;
     // Controls/WinUIControls.xaml(511,30) Width
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), "NavigationViewSelectionIndicatorWidth", 511, 30)?;
     // Controls/WinUIControls.xaml(512,30) Height
@@ -119278,7 +119278,7 @@ fn build_controls_winuicontrols_xaml_deferred_329(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(518,25) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentGridHost")));
-    rt::register_name(name_scope.as_ref(), "ContentGridHost", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 518, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentGridHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 518, 25)?;
     // Controls/WinUIControls.xaml(518,18) Margin
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 14.0_f64, 0.0_f64), priority_5);
@@ -119290,7 +119290,7 @@ fn build_controls_winuicontrols_xaml_deferred_329(
     context.push_parent(rt::to_value(grid_1.clone()));
     // Controls/WinUIControls.xaml(519,25) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentGrid")));
-    rt::register_name(name_scope.as_ref(), "ContentGrid", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 519, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 519, 25)?;
     // Controls/WinUIControls.xaml(520,25) MinHeight
     rt::bind_dynamic_resource(&context, grid_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_height_property(), "NavigationViewItemOnLeftMinHeight", 520, 25)?;
     // Controls/WinUIControls.xaml(519,20) HorizontalAlignment
@@ -119321,7 +119321,7 @@ fn build_controls_winuicontrols_xaml_deferred_329(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/WinUIControls.xaml(523,29) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("IconColumn")));
-    rt::register_name(name_scope.as_ref(), "IconColumn", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 523, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "IconColumn", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 523, 29)?;
     // Controls/WinUIControls.xaml(524,29) Width
     let reflection_binding_extension_0 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("$parent[NavigationView].TemplateSettings.SmallerPaneToggleButtonWidth"));
     let provided_10 = rt::provide_value(&context, rt::property_value(::ferroui_base::layout::Layoutable::width_property()), &reflection_binding_extension_0, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
@@ -119334,7 +119334,7 @@ fn build_controls_winuicontrols_xaml_deferred_329(
     context.push_parent(rt::to_value(viewbox_0.clone()));
     // Controls/WinUIControls.xaml(525,32) Name
     viewbox_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("IconBox")));
-    rt::register_name(name_scope.as_ref(), "IconBox", ::core::clone::Clone::clone(&viewbox_0).upcast::<::ferroui_base::FerroObject>(), 525, 32)?;
+    rt::register_name_value(name_scope.as_ref(), "IconBox", ::std::rc::Rc::new(::core::clone::Clone::clone(&viewbox_0)), 525, 32)?;
     // Controls/WinUIControls.xaml(526,32) Height
     rt::bind_dynamic_resource(&context, viewbox_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), "NavigationViewItemOnLeftIconBoxHeight", 526, 32)?;
     // Controls/WinUIControls.xaml(525,24) HorizontalAlignment
@@ -119350,7 +119350,7 @@ fn build_controls_winuicontrols_xaml_deferred_329(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/WinUIControls.xaml(529,43) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Icon")));
-    rt::register_name(name_scope.as_ref(), "Icon", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 529, 43)?;
+    rt::register_name_value(name_scope.as_ref(), "Icon", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 529, 43)?;
     // Controls/WinUIControls.xaml(530,43) Content (setter chosen at run time)
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_2 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::NavigationViewItem::icon_property()));
@@ -119400,7 +119400,7 @@ fn build_controls_winuicontrols_xaml_deferred_329(
     context.push_parent(rt::to_value(content_presenter_1.clone()));
     // Controls/WinUIControls.xaml(544,39) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 544, 39)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 544, 39)?;
     // Controls/WinUIControls.xaml(544,22) Column
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_9);
@@ -119437,7 +119437,7 @@ fn build_controls_winuicontrols_xaml_deferred_329(
     context.push_parent(rt::to_value(border_3.clone()));
     // Controls/WinUIControls.xaml(553,29) Name
     border_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ExpandCollapseChevron")));
-    rt::register_name(name_scope.as_ref(), "ExpandCollapseChevron", ::core::clone::Clone::clone(&border_3).upcast::<::ferroui_base::FerroObject>(), 553, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "ExpandCollapseChevron", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_3)), 553, 29)?;
     // Controls/WinUIControls.xaml(553,22) Column
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     border_3.set_value_with_priority(::ferroui_controls::Grid::column_property(), 3_i32, priority_11);
@@ -119463,7 +119463,7 @@ fn build_controls_winuicontrols_xaml_deferred_329(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/WinUIControls.xaml(560,34) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ExpandCollapseChevronIcon")));
-    rt::register_name(name_scope.as_ref(), "ExpandCollapseChevronIcon", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 560, 34)?;
+    rt::register_name_value(name_scope.as_ref(), "ExpandCollapseChevronIcon", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 560, 34)?;
     // Controls/WinUIControls.xaml(560,24) Width
     let priority_16 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 12.0_f64, priority_16);
@@ -119520,7 +119520,7 @@ fn build_controls_winuicontrols_xaml_deferred_329(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_8, ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(574,39) Name
     content_presenter_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("InfoBadgePresenter")));
-    rt::register_name(name_scope.as_ref(), "InfoBadgePresenter", ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_base::FerroObject>(), 574, 39)?;
+    rt::register_name_value(name_scope.as_ref(), "InfoBadgePresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_2)), 574, 39)?;
     // Controls/WinUIControls.xaml(574,22) Column
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_25);
@@ -119557,7 +119557,7 @@ fn build_controls_winuicontrols_xaml_deferred_329(
     context.push_parent(rt::to_value(popup_0.clone()));
     // Controls/WinUIControls.xaml(584,18) Name
     popup_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ChildrenFlyout")));
-    rt::register_name(name_scope.as_ref(), "ChildrenFlyout", ::core::clone::Clone::clone(&popup_0).upcast::<::ferroui_base::FerroObject>(), 584, 18)?;
+    rt::register_name_value(name_scope.as_ref(), "ChildrenFlyout", ::std::rc::Rc::new(::core::clone::Clone::clone(&popup_0)), 584, 18)?;
     // Controls/WinUIControls.xaml(585,18) PlacementTarget
     let reflection_binding_extension_1 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("#NavigationViewItemPresenter"));
     let provided_30 = rt::provide_value(&context, rt::property_value(::ferroui_controls::primitives::Popup::placement_target_property()), &reflection_binding_extension_1, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
@@ -119579,7 +119579,7 @@ fn build_controls_winuicontrols_xaml_deferred_329(
     context.push_parent(rt::to_value(border_4.clone()));
     // Controls/WinUIControls.xaml(589,21) Name
     border_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ChildrenFlyoutPresenter")));
-    rt::register_name(name_scope.as_ref(), "ChildrenFlyoutPresenter", ::core::clone::Clone::clone(&border_4).upcast::<::ferroui_base::FerroObject>(), 589, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "ChildrenFlyoutPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_4)), 589, 21)?;
     // Controls/WinUIControls.xaml(590,21) Background
     rt::bind_dynamic_resource(&context, border_4.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "FlyoutPresenterBackground", 590, 21)?;
     // Controls/WinUIControls.xaml(591,21) BorderBrush
@@ -119622,7 +119622,7 @@ fn build_controls_winuicontrols_xaml_deferred_329(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&grid_2)));
     // Controls/WinUIControls.xaml(602,23) Name
     grid_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("FlyoutRootGrid")));
-    rt::register_name(name_scope.as_ref(), "FlyoutRootGrid", ::core::clone::Clone::clone(&grid_2).upcast::<::ferroui_base::FerroObject>(), 602, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "FlyoutRootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_2)), 602, 23)?;
     // Controls/WinUIControls.xaml(603,20) Children
     let children_collection_10 = ::ferroui_controls::Panel::__markup_get_Children(grid_2.upcast_ref::<::ferroui_controls::Panel>());
     // Controls/WinUIControls.xaml(603,20) Grid
@@ -119631,7 +119631,7 @@ fn build_controls_winuicontrols_xaml_deferred_329(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_10, ::core::clone::Clone::clone(&grid_3).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(603,25) Name
     grid_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("FlyoutContentGrid")));
-    rt::register_name(name_scope.as_ref(), "FlyoutContentGrid", ::core::clone::Clone::clone(&grid_3).upcast::<::ferroui_base::FerroObject>(), 603, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "FlyoutContentGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_3)), 603, 25)?;
     rt::invoked(grid_3.try_end_init(), 603, 20)?;
     rt::invoked(grid_2.try_end_init(), 602, 18)?;
     rt::invoked(scroll_viewer_0.try_end_init(), 601, 16)?;
@@ -119647,7 +119647,7 @@ fn build_controls_winuicontrols_xaml_deferred_329(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_11, ::core::clone::Clone::clone(&stack_panel_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(609,23) Name
     stack_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("NavigationViewItemMenuItemsHost")));
-    rt::register_name(name_scope.as_ref(), "NavigationViewItemMenuItemsHost", ::core::clone::Clone::clone(&stack_panel_0).upcast::<::ferroui_base::FerroObject>(), 609, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "NavigationViewItemMenuItemsHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&stack_panel_0)), 609, 23)?;
     // Controls/WinUIControls.xaml(609,12) Row
     let priority_35 = ::ferroui_base::data::BindingPriority::Template;
     stack_panel_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_35);
@@ -119758,7 +119758,7 @@ fn build_controls_winuicontrols_xaml_deferred_331(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/WinUIControls.xaml(870,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("NavigationViewItemHeaderRootGrid")));
-    rt::register_name(name_scope.as_ref(), "NavigationViewItemHeaderRootGrid", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 870, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "NavigationViewItemHeaderRootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 870, 15)?;
     // Controls/WinUIControls.xaml(871,12) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
     // Controls/WinUIControls.xaml(871,12) Grid
@@ -119768,7 +119768,7 @@ fn build_controls_winuicontrols_xaml_deferred_331(
     context.push_parent(rt::to_value(grid_1.clone()));
     // Controls/WinUIControls.xaml(871,17) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("InnerHeaderGrid")));
-    rt::register_name(name_scope.as_ref(), "InnerHeaderGrid", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 871, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "InnerHeaderGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 871, 17)?;
     // Controls/WinUIControls.xaml(871,12) Height
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     grid_1.set_value_with_priority(::ferroui_base::layout::Layoutable::height_property(), 40.0_f64, priority_0);
@@ -119785,7 +119785,7 @@ fn build_controls_winuicontrols_xaml_deferred_331(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(876,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HeaderText")));
-    rt::register_name(name_scope.as_ref(), "HeaderText", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 876, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "HeaderText", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 876, 31)?;
     // Controls/WinUIControls.xaml(876,14) VerticalAlignment
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Center, priority_2);
@@ -119912,7 +119912,7 @@ fn build_controls_winuicontrols_xaml_deferred_333(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/WinUIControls.xaml(912,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("NavigationViewItemSeparatorRootGrid")));
-    rt::register_name(name_scope.as_ref(), "NavigationViewItemSeparatorRootGrid", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 912, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "NavigationViewItemSeparatorRootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 912, 15)?;
     // Controls/WinUIControls.xaml(913,12) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
     // Controls/WinUIControls.xaml(913,12) Rectangle
@@ -119922,7 +119922,7 @@ fn build_controls_winuicontrols_xaml_deferred_333(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/WinUIControls.xaml(913,22) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SeparatorLine")));
-    rt::register_name(name_scope.as_ref(), "SeparatorLine", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 913, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "SeparatorLine", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 913, 22)?;
     // Controls/WinUIControls.xaml(914,22) Height
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), "NavigationViewItemSeparatorHeight", 914, 22)?;
     // Controls/WinUIControls.xaml(915,22) Fill
@@ -120031,7 +120031,7 @@ fn build_controls_winuicontrols_xaml_deferred_336(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_controls::Control>()));
     // Controls/WinUIControls.xaml(68,25) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "PART_ScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 68, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 68, 25)?;
     // Controls/WinUIControls.xaml(69,25) HorizontalScrollBarVisibility
     rt::bind_template_binding(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(::ferroui_controls::ScrollViewer::horizontal_scroll_bar_visibility_property()), 69, 25)?;
     // Controls/WinUIControls.xaml(70,25) VerticalScrollBarVisibility
@@ -120049,7 +120049,7 @@ fn build_controls_winuicontrols_xaml_deferred_336(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&items_presenter_0)));
     // Controls/WinUIControls.xaml(73,29) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 73, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 73, 29)?;
     // Controls/WinUIControls.xaml(74,29) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 74, 29)?;
     // Controls/WinUIControls.xaml(75,29) Margin
@@ -120632,7 +120632,7 @@ fn build_controls_winuicontrols_xaml_deferred_340(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/WinUIControls.xaml(130,16) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Root")));
-    rt::register_name(name_scope.as_ref(), "Root", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 130, 16)?;
+    rt::register_name_value(name_scope.as_ref(), "Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 130, 16)?;
     // Controls/WinUIControls.xaml(130,10) Background
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     panel_0.set_value_with_priority(::ferroui_controls::Panel::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_0);
@@ -120645,7 +120645,7 @@ fn build_controls_winuicontrols_xaml_deferred_340(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(131,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("AppBarButtonInnerBorder")));
-    rt::register_name(name_scope.as_ref(), "AppBarButtonInnerBorder", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 131, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "AppBarButtonInnerBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 131, 19)?;
     // Controls/WinUIControls.xaml(132,19) Margin
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "AppBarButtonInnerBorderMargin", 132, 19)?;
     // Controls/WinUIControls.xaml(133,19) Background
@@ -120682,7 +120682,7 @@ fn build_controls_winuicontrols_xaml_deferred_340(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/WinUIControls.xaml(144,17) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentRoot")));
-    rt::register_name(name_scope.as_ref(), "ContentRoot", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 144, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 144, 17)?;
     // Controls/WinUIControls.xaml(145,17) MinHeight
     rt::bind_dynamic_resource(&context, grid_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_height_property(), "AppBarThemeMinHeight", 145, 17)?;
     // Controls/WinUIControls.xaml(144,12) ColumnDefinitions
@@ -120714,7 +120714,7 @@ fn build_controls_winuicontrols_xaml_deferred_340(
     context.push_parent(rt::to_value(viewbox_0.clone()));
     // Controls/WinUIControls.xaml(148,22) Name
     viewbox_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentViewbox")));
-    rt::register_name(name_scope.as_ref(), "ContentViewbox", ::core::clone::Clone::clone(&viewbox_0).upcast::<::ferroui_base::FerroObject>(), 148, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentViewbox", ::std::rc::Rc::new(::core::clone::Clone::clone(&viewbox_0)), 148, 22)?;
     // Controls/WinUIControls.xaml(149,22) Height
     rt::bind_dynamic_resource(&context, viewbox_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), "AppBarButtonContentHeight", 149, 22)?;
     // Controls/WinUIControls.xaml(150,22) Margin
@@ -120730,7 +120730,7 @@ fn build_controls_winuicontrols_xaml_deferred_340(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/WinUIControls.xaml(152,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Content")));
-    rt::register_name(name_scope.as_ref(), "Content", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 152, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "Content", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 152, 33)?;
     // Controls/WinUIControls.xaml(153,33) Content (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_5 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::CommandBarButton::icon_property()));
@@ -120776,7 +120776,7 @@ fn build_controls_winuicontrols_xaml_deferred_340(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/WinUIControls.xaml(165,24) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TextLabel")));
-    rt::register_name(name_scope.as_ref(), "TextLabel", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 165, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "TextLabel", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 165, 24)?;
     // Controls/WinUIControls.xaml(165,14) Row
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_4);
@@ -120807,7 +120807,7 @@ fn build_controls_winuicontrols_xaml_deferred_340(
     context.push_parent(rt::to_value(text_block_1.clone()));
     // Controls/WinUIControls.xaml(174,24) Name
     text_block_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("OverflowTextLabel")));
-    rt::register_name(name_scope.as_ref(), "OverflowTextLabel", ::core::clone::Clone::clone(&text_block_1).upcast::<::ferroui_base::FerroObject>(), 174, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "OverflowTextLabel", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_1)), 174, 24)?;
     // Controls/WinUIControls.xaml(175,24) Text
     rt::bind_template_binding(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), rt::property(::ferroui_controls::CommandBarButton::label_property()), 175, 24)?;
     // Controls/WinUIControls.xaml(176,24) Foreground
@@ -122312,7 +122312,7 @@ fn build_controls_winuicontrols_xaml_deferred_345(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/WinUIControls.xaml(338,16) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Root")));
-    rt::register_name(name_scope.as_ref(), "Root", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 338, 16)?;
+    rt::register_name_value(name_scope.as_ref(), "Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 338, 16)?;
     // Controls/WinUIControls.xaml(338,10) Background
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     panel_0.set_value_with_priority(::ferroui_controls::Panel::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_0);
@@ -122325,7 +122325,7 @@ fn build_controls_winuicontrols_xaml_deferred_345(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(339,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("AppBarToggleButtonInnerBorder")));
-    rt::register_name(name_scope.as_ref(), "AppBarToggleButtonInnerBorder", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 339, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "AppBarToggleButtonInnerBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 339, 19)?;
     // Controls/WinUIControls.xaml(340,19) Margin
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "AppBarButtonInnerBorderMargin", 340, 19)?;
     // Controls/WinUIControls.xaml(341,19) Background
@@ -122362,7 +122362,7 @@ fn build_controls_winuicontrols_xaml_deferred_345(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/WinUIControls.xaml(352,17) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentRoot")));
-    rt::register_name(name_scope.as_ref(), "ContentRoot", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 352, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 352, 17)?;
     // Controls/WinUIControls.xaml(353,17) MinHeight
     rt::bind_dynamic_resource(&context, grid_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_height_property(), "AppBarThemeMinHeight", 353, 17)?;
     // Controls/WinUIControls.xaml(352,12) ColumnDefinitions
@@ -122394,7 +122394,7 @@ fn build_controls_winuicontrols_xaml_deferred_345(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/WinUIControls.xaml(357,19) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("OverflowCheckGlyph")));
-    rt::register_name(name_scope.as_ref(), "OverflowCheckGlyph", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 357, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "OverflowCheckGlyph", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 357, 19)?;
     // Controls/WinUIControls.xaml(358,19) Data (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE73E"));
@@ -122442,7 +122442,7 @@ fn build_controls_winuicontrols_xaml_deferred_345(
     context.push_parent(rt::to_value(viewbox_0.clone()));
     // Controls/WinUIControls.xaml(367,22) Name
     viewbox_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentViewbox")));
-    rt::register_name(name_scope.as_ref(), "ContentViewbox", ::core::clone::Clone::clone(&viewbox_0).upcast::<::ferroui_base::FerroObject>(), 367, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentViewbox", ::std::rc::Rc::new(::core::clone::Clone::clone(&viewbox_0)), 367, 22)?;
     // Controls/WinUIControls.xaml(368,22) Height
     rt::bind_dynamic_resource(&context, viewbox_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), "AppBarButtonContentHeight", 368, 22)?;
     // Controls/WinUIControls.xaml(369,22) Margin
@@ -122458,7 +122458,7 @@ fn build_controls_winuicontrols_xaml_deferred_345(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/WinUIControls.xaml(371,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Content")));
-    rt::register_name(name_scope.as_ref(), "Content", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 371, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "Content", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 371, 33)?;
     // Controls/WinUIControls.xaml(372,33) Content (setter chosen at run time)
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_5 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::CommandBarToggleButton::icon_property()));
@@ -122504,7 +122504,7 @@ fn build_controls_winuicontrols_xaml_deferred_345(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/WinUIControls.xaml(384,24) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TextLabel")));
-    rt::register_name(name_scope.as_ref(), "TextLabel", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 384, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "TextLabel", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 384, 24)?;
     // Controls/WinUIControls.xaml(384,14) Row
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_11);
@@ -122536,7 +122536,7 @@ fn build_controls_winuicontrols_xaml_deferred_345(
     context.push_parent(rt::to_value(text_block_1.clone()));
     // Controls/WinUIControls.xaml(393,24) Name
     text_block_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("OverflowTextLabel")));
-    rt::register_name(name_scope.as_ref(), "OverflowTextLabel", ::core::clone::Clone::clone(&text_block_1).upcast::<::ferroui_base::FerroObject>(), 393, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "OverflowTextLabel", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_1)), 393, 24)?;
     // Controls/WinUIControls.xaml(394,24) Text
     rt::bind_template_binding(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), rt::property(::ferroui_controls::CommandBarToggleButton::label_property()), 394, 24)?;
     // Controls/WinUIControls.xaml(395,24) Foreground
@@ -122721,7 +122721,7 @@ fn build_controls_winuicontrols_xaml_deferred_349(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/WinUIControls.xaml(721,16) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootGrid")));
-    rt::register_name(name_scope.as_ref(), "RootGrid", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 721, 16)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 721, 16)?;
     // Controls/WinUIControls.xaml(722,12) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(&panel_0);
     // Controls/WinUIControls.xaml(722,12) Rectangle
@@ -122731,7 +122731,7 @@ fn build_controls_winuicontrols_xaml_deferred_349(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/WinUIControls.xaml(722,22) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SeparatorRectangle")));
-    rt::register_name(name_scope.as_ref(), "SeparatorRectangle", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 722, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "SeparatorRectangle", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 722, 22)?;
     // Controls/WinUIControls.xaml(723,22) RadiusX (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("AppBarSeparatorCornerRadius"));
@@ -122994,7 +122994,7 @@ fn build_controls_winuicontrols_xaml_deferred_352(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/WinUIControls.xaml(773,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 773, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 773, 29)?;
     // Controls/WinUIControls.xaml(774,29) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 774, 29)?;
     // Controls/WinUIControls.xaml(775,29) BorderBrush
@@ -123104,7 +123104,7 @@ fn build_controls_winuicontrols_xaml_deferred_354(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(832,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 832, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 832, 17)?;
     // Controls/WinUIControls.xaml(833,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 833, 17)?;
     // Controls/WinUIControls.xaml(832,10) BackgroundSizing
@@ -123136,7 +123136,7 @@ fn build_controls_winuicontrols_xaml_deferred_354(
     context.push_parent(rt::to_value(items_presenter_0.clone()));
     // Controls/WinUIControls.xaml(841,29) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 841, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 841, 29)?;
     // Controls/WinUIControls.xaml(842,29) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 842, 29)?;
     // Controls/WinUIControls.xaml(843,29) Margin
@@ -123284,7 +123284,7 @@ fn build_controls_winuicontrols_xaml_deferred_356(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/WinUIControls.xaml(864,16) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 864, 16)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 864, 16)?;
     // Controls/WinUIControls.xaml(865,12) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(&panel_0);
     // Controls/WinUIControls.xaml(865,12) Border
@@ -123294,7 +123294,7 @@ fn build_controls_winuicontrols_xaml_deferred_356(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(865,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentRoot")));
-    rt::register_name(name_scope.as_ref(), "ContentRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 865, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 865, 19)?;
     // Controls/WinUIControls.xaml(865,12) VerticalAlignment
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Top, priority_0);
@@ -123363,7 +123363,7 @@ fn build_controls_winuicontrols_xaml_deferred_356(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(875,35) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 875, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 875, 35)?;
     // Controls/WinUIControls.xaml(876,35) Margin
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), 876, 35)?;
     // Controls/WinUIControls.xaml(877,35) Content (setter chosen at run time)
@@ -123400,7 +123400,7 @@ fn build_controls_winuicontrols_xaml_deferred_356(
     context.push_parent(rt::to_value(items_control_0.clone()));
     // Controls/WinUIControls.xaml(883,31) Name
     items_control_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PrimaryItemsControl")));
-    rt::register_name(name_scope.as_ref(), "PrimaryItemsControl", ::core::clone::Clone::clone(&items_control_0).upcast::<::ferroui_base::FerroObject>(), 883, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PrimaryItemsControl", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_control_0)), 883, 31)?;
     // Controls/WinUIControls.xaml(883,18) Column
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     items_control_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_9);
@@ -123442,7 +123442,7 @@ fn build_controls_winuicontrols_xaml_deferred_356(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/WinUIControls.xaml(896,23) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_OverflowButton")));
-    rt::register_name(name_scope.as_ref(), "PART_OverflowButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 896, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_OverflowButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 896, 23)?;
     // Controls/WinUIControls.xaml(896,16) Column
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_13);
@@ -123477,7 +123477,7 @@ fn build_controls_winuicontrols_xaml_deferred_356(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/WinUIControls.xaml(904,23) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("EllipsisIcon")));
-    rt::register_name(name_scope.as_ref(), "EllipsisIcon", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 904, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "EllipsisIcon", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 904, 23)?;
     // Controls/WinUIControls.xaml(905,23) Data (setter chosen at run time)
     let priority_16 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE712"));
@@ -123520,7 +123520,7 @@ fn build_controls_winuicontrols_xaml_deferred_356(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/WinUIControls.xaml(912,26) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HighContrastBorder")));
-    rt::register_name(name_scope.as_ref(), "HighContrastBorder", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 912, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "HighContrastBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 912, 26)?;
     // Controls/WinUIControls.xaml(912,16) ColumnSpan
     let priority_20 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_0.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 2_i32, priority_20);
@@ -123546,7 +123546,7 @@ fn build_controls_winuicontrols_xaml_deferred_356(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(918,23) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("OpenBorder")));
-    rt::register_name(name_scope.as_ref(), "OpenBorder", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 918, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "OpenBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 918, 23)?;
     // Controls/WinUIControls.xaml(918,16) ColumnSpan
     let priority_24 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 2_i32, priority_24);
@@ -123577,7 +123577,7 @@ fn build_controls_winuicontrols_xaml_deferred_356(
     context.push_parent(rt::to_value(popup_0.clone()));
     // Controls/WinUIControls.xaml(927,18) Name
     popup_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_OverflowPopup")));
-    rt::register_name(name_scope.as_ref(), "PART_OverflowPopup", ::core::clone::Clone::clone(&popup_0).upcast::<::ferroui_base::FerroObject>(), 927, 18)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_OverflowPopup", ::std::rc::Rc::new(::core::clone::Clone::clone(&popup_0)), 927, 18)?;
     // Controls/WinUIControls.xaml(928,18) IsOpen
     let template_binding_7 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::CommandBar::is_open_property()));
     // Controls/WinUIControls.xaml(928,18) Mode
@@ -123605,7 +123605,7 @@ fn build_controls_winuicontrols_xaml_deferred_356(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/WinUIControls.xaml(933,21) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SecondaryItemsControlShadowWrapper")));
-    rt::register_name(name_scope.as_ref(), "SecondaryItemsControlShadowWrapper", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 933, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "SecondaryItemsControlShadowWrapper", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 933, 21)?;
     // Controls/WinUIControls.xaml(934,21) BoxShadow
     rt::bind_dynamic_resource(&context, border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::box_shadow_property(), "ThemeShadowFlyoutBoxShadow", 934, 21)?;
     // Controls/WinUIControls.xaml(935,21) Margin (setter chosen at run time)
@@ -123630,7 +123630,7 @@ fn build_controls_winuicontrols_xaml_deferred_356(
     context.push_parent(rt::to_value(items_control_1.clone()));
     // Controls/WinUIControls.xaml(937,29) Name
     items_control_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_OverflowPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_OverflowPresenter", ::core::clone::Clone::clone(&items_control_1).upcast::<::ferroui_base::FerroObject>(), 937, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_OverflowPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_control_1)), 937, 29)?;
     // Controls/WinUIControls.xaml(938,29) Theme (setter chosen at run time)
     let priority_31 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DefaultCommandBarOverflowPresenterStyle"));
@@ -124023,7 +124023,7 @@ fn build_controls_winuicontrols_xaml_deferred_362(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(63,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootGrid")));
-    rt::register_name(name_scope.as_ref(), "RootGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 63, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 63, 17)?;
     // Controls/WinUIControls.xaml(64,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 64, 17)?;
     // Controls/WinUIControls.xaml(65,17) Padding
@@ -124073,7 +124073,7 @@ fn build_controls_winuicontrols_xaml_deferred_362(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(76,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 76, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 76, 31)?;
     // Controls/WinUIControls.xaml(77,31) Content (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_6 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -124124,7 +124124,7 @@ fn build_controls_winuicontrols_xaml_deferred_362(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/WinUIControls.xaml(88,21) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ChevronIcon")));
-    rt::register_name(name_scope.as_ref(), "ChevronIcon", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 88, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "ChevronIcon", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 88, 21)?;
     // Controls/WinUIControls.xaml(89,21) Data (setter chosen at run time)
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE96E"));
@@ -124332,7 +124332,7 @@ fn build_controls_winuicontrols_xaml_deferred_366(
     grid_0.begin_init();
     // Controls/WinUIControls.xaml(90,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootGrid")));
-    rt::register_name(name_scope.as_ref(), "RootGrid", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 90, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 90, 15)?;
     // Controls/WinUIControls.xaml(90,10) Background
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     grid_0.set_value_with_priority(::ferroui_controls::Panel::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_0);
@@ -124344,7 +124344,7 @@ fn build_controls_winuicontrols_xaml_deferred_366(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(91,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 91, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 91, 29)?;
     // Controls/WinUIControls.xaml(92,29) Foreground
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::foreground_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 92, 29)?;
     // Controls/WinUIControls.xaml(93,29) BorderBrush
@@ -125062,7 +125062,7 @@ fn build_controls_winuicontrols_xaml_deferred_369(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(150,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootGrid")));
-    rt::register_name(name_scope.as_ref(), "RootGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 150, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 150, 17)?;
     // Controls/WinUIControls.xaml(150,10) Background
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_controls::Border::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_0);
@@ -125113,7 +125113,7 @@ fn build_controls_winuicontrols_xaml_deferred_369(
     context.push_parent(rt::to_value(grid_1.clone()));
     // Controls/WinUIControls.xaml(162,19) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PrimaryBackgroundGrid")));
-    rt::register_name(name_scope.as_ref(), "PrimaryBackgroundGrid", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 162, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PrimaryBackgroundGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 162, 19)?;
     // Controls/WinUIControls.xaml(162,14) ColumnSpan
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     grid_1.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 2_i32, priority_6);
@@ -125132,7 +125132,7 @@ fn build_controls_winuicontrols_xaml_deferred_369(
     context.push_parent(rt::to_value(grid_2.clone()));
     // Controls/WinUIControls.xaml(165,19) Name
     grid_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("DividerBackgroundGrid")));
-    rt::register_name(name_scope.as_ref(), "DividerBackgroundGrid", ::core::clone::Clone::clone(&grid_2).upcast::<::ferroui_base::FerroObject>(), 165, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "DividerBackgroundGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_2)), 165, 19)?;
     // Controls/WinUIControls.xaml(165,14) Column
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     grid_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_7);
@@ -125152,7 +125152,7 @@ fn build_controls_winuicontrols_xaml_deferred_369(
     context.push_parent(rt::to_value(grid_3.clone()));
     // Controls/WinUIControls.xaml(169,19) Name
     grid_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SecondaryBackgroundGrid")));
-    rt::register_name(name_scope.as_ref(), "SecondaryBackgroundGrid", ::core::clone::Clone::clone(&grid_3).upcast::<::ferroui_base::FerroObject>(), 169, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "SecondaryBackgroundGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_3)), 169, 19)?;
     // Controls/WinUIControls.xaml(169,14) Column
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     grid_3.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_9);
@@ -125171,7 +125171,7 @@ fn build_controls_winuicontrols_xaml_deferred_369(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/WinUIControls.xaml(172,21) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PrimaryButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PrimaryButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 172, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PrimaryButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 172, 21)?;
     // Controls/WinUIControls.xaml(172,14) Column
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_10);
@@ -125257,7 +125257,7 @@ fn build_controls_winuicontrols_xaml_deferred_369(
     context.push_parent(rt::to_value(button_1.clone()));
     // Controls/WinUIControls.xaml(193,21) Name
     button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SecondaryButton")));
-    rt::register_name(name_scope.as_ref(), "PART_SecondaryButton", ::core::clone::Clone::clone(&button_1).upcast::<::ferroui_base::FerroObject>(), 193, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SecondaryButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_1)), 193, 21)?;
     // Controls/WinUIControls.xaml(193,14) Column
     let priority_19 = ::ferroui_base::data::BindingPriority::Template;
     button_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_19);
@@ -125375,7 +125375,7 @@ fn build_controls_winuicontrols_xaml_deferred_369(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(220,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PrimaryButtonBorder")));
-    rt::register_name(name_scope.as_ref(), "PrimaryButtonBorder", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 220, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PrimaryButtonBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 220, 21)?;
     // Controls/WinUIControls.xaml(220,14) Column
     let priority_38 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_38);
@@ -125400,7 +125400,7 @@ fn build_controls_winuicontrols_xaml_deferred_369(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/WinUIControls.xaml(225,21) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SecondaryButtonBorder")));
-    rt::register_name(name_scope.as_ref(), "SecondaryButtonBorder", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 225, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "SecondaryButtonBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 225, 21)?;
     // Controls/WinUIControls.xaml(225,14) Column
     let priority_41 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_41);
@@ -125587,7 +125587,7 @@ fn build_controls_winuicontrols_xaml_deferred_373(
     grid_0.begin_init();
     // Controls/WinUIControls.xaml(406,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootGrid")));
-    rt::register_name(name_scope.as_ref(), "RootGrid", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 406, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 406, 15)?;
     // Controls/WinUIControls.xaml(406,10) Background
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     grid_0.set_value_with_priority(::ferroui_controls::Panel::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_0);
@@ -125599,7 +125599,7 @@ fn build_controls_winuicontrols_xaml_deferred_373(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(407,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 407, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 407, 29)?;
     // Controls/WinUIControls.xaml(408,29) Foreground
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::foreground_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 408, 29)?;
     // Controls/WinUIControls.xaml(409,29) BorderBrush
@@ -126332,7 +126332,7 @@ fn build_controls_winuicontrols_xaml_deferred_376(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(469,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootGrid")));
-    rt::register_name(name_scope.as_ref(), "RootGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 469, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 469, 17)?;
     // Controls/WinUIControls.xaml(469,10) Background
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_controls::Border::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_0);
@@ -126363,7 +126363,7 @@ fn build_controls_winuicontrols_xaml_deferred_376(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(475,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PrimaryBackgroundGrid")));
-    rt::register_name(name_scope.as_ref(), "PrimaryBackgroundGrid", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 475, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PrimaryBackgroundGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 475, 21)?;
     // Controls/WinUIControls.xaml(476,21) Background
     let reflection_binding_extension_0 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("#PART_PrimaryButton.Background"));
     let provided_1 = rt::provide_value(&context, rt::property_value(::ferroui_controls::Border::background_property()), &reflection_binding_extension_0, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
@@ -126389,7 +126389,7 @@ fn build_controls_winuicontrols_xaml_deferred_376(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/WinUIControls.xaml(478,21) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SecondaryBackgroundGrid")));
-    rt::register_name(name_scope.as_ref(), "SecondaryBackgroundGrid", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 478, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "SecondaryBackgroundGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 478, 21)?;
     // Controls/WinUIControls.xaml(478,14) Column
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_1);
@@ -126417,7 +126417,7 @@ fn build_controls_winuicontrols_xaml_deferred_376(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&border_3).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(482,21) Name
     border_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Border")));
-    rt::register_name(name_scope.as_ref(), "Border", ::core::clone::Clone::clone(&border_3).upcast::<::ferroui_base::FerroObject>(), 482, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "Border", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_3)), 482, 21)?;
     // Controls/WinUIControls.xaml(482,14) ColumnSpan
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     border_3.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 2_i32, priority_2);
@@ -126437,7 +126437,7 @@ fn build_controls_winuicontrols_xaml_deferred_376(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/WinUIControls.xaml(487,21) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PrimaryButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PrimaryButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 487, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PrimaryButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 487, 21)?;
     // Controls/WinUIControls.xaml(487,14) Column
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_3);
@@ -126523,7 +126523,7 @@ fn build_controls_winuicontrols_xaml_deferred_376(
     context.push_parent(rt::to_value(button_1.clone()));
     // Controls/WinUIControls.xaml(508,21) Name
     button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SecondaryButton")));
-    rt::register_name(name_scope.as_ref(), "PART_SecondaryButton", ::core::clone::Clone::clone(&button_1).upcast::<::ferroui_base::FerroObject>(), 508, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SecondaryButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_1)), 508, 21)?;
     // Controls/WinUIControls.xaml(508,14) Column
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
     button_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_12);
@@ -127233,7 +127233,7 @@ fn build_controls_winuicontrols_xaml_deferred_379(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/WinUIControls.xaml(86,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 86, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 86, 31)?;
     // Controls/WinUIControls.xaml(86,14) Row
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 0_i32, priority_1);
@@ -127343,7 +127343,7 @@ fn build_controls_winuicontrols_xaml_deferred_379(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(110,23) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SwitchAreaGrid")));
-    rt::register_name(name_scope.as_ref(), "SwitchAreaGrid", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 110, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "SwitchAreaGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 110, 23)?;
     // Controls/WinUIControls.xaml(110,16) RowSpan
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Grid::row_span_property(), 3_i32, priority_17);
@@ -127383,7 +127383,7 @@ fn build_controls_winuicontrols_xaml_deferred_379(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(123,33) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_OffContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_OffContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 123, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_OffContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 123, 33)?;
     // Controls/WinUIControls.xaml(123,16) RowSpan
     let priority_22 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_controls::Grid::row_span_property(), 3_i32, priority_22);
@@ -127423,7 +127423,7 @@ fn build_controls_winuicontrols_xaml_deferred_379(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(133,33) Name
     content_presenter_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_OnContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_OnContentPresenter", ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_base::FerroObject>(), 133, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_OnContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_2)), 133, 33)?;
     // Controls/WinUIControls.xaml(133,16) RowSpan
     let priority_27 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_2.set_value_with_priority(::ferroui_controls::Grid::row_span_property(), 3_i32, priority_27);
@@ -127464,7 +127464,7 @@ fn build_controls_winuicontrols_xaml_deferred_379(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/WinUIControls.xaml(143,26) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("OuterBorder")));
-    rt::register_name(name_scope.as_ref(), "OuterBorder", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 143, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "OuterBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 143, 26)?;
     // Controls/WinUIControls.xaml(143,16) Row
     let priority_32 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_32);
@@ -127528,7 +127528,7 @@ fn build_controls_winuicontrols_xaml_deferred_379(
     context.push_parent(rt::to_value(rectangle_1.clone()));
     // Controls/WinUIControls.xaml(160,26) Name
     rectangle_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SwitchKnobBounds")));
-    rt::register_name(name_scope.as_ref(), "SwitchKnobBounds", ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_base::FerroObject>(), 160, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "SwitchKnobBounds", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_1)), 160, 26)?;
     // Controls/WinUIControls.xaml(160,16) Row
     let priority_38 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_1.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_38);
@@ -127577,7 +127577,7 @@ fn build_controls_winuicontrols_xaml_deferred_379(
     context.push_parent(rt::to_value(canvas_0.clone()));
     // Controls/WinUIControls.xaml(176,23) Name
     canvas_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SwitchKnob")));
-    rt::register_name(name_scope.as_ref(), "PART_SwitchKnob", ::core::clone::Clone::clone(&canvas_0).upcast::<::ferroui_base::FerroObject>(), 176, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SwitchKnob", ::std::rc::Rc::new(::core::clone::Clone::clone(&canvas_0)), 176, 23)?;
     // Controls/WinUIControls.xaml(176,16) Row
     let priority_45 = ::ferroui_base::data::BindingPriority::Template;
     canvas_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_45);
@@ -127599,7 +127599,7 @@ fn build_controls_winuicontrols_xaml_deferred_379(
     context.push_parent(rt::to_value(grid_2.clone()));
     // Controls/WinUIControls.xaml(181,23) Name
     grid_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MovingKnobs")));
-    rt::register_name(name_scope.as_ref(), "PART_MovingKnobs", ::core::clone::Clone::clone(&grid_2).upcast::<::ferroui_base::FerroObject>(), 181, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MovingKnobs", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_2)), 181, 23)?;
     // Controls/WinUIControls.xaml(181,18) Width
     let priority_49 = ::ferroui_base::data::BindingPriority::Template;
     grid_2.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 20.0_f64, priority_49);
@@ -127615,7 +127615,7 @@ fn build_controls_winuicontrols_xaml_deferred_379(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/WinUIControls.xaml(182,27) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SwitchKnobOn")));
-    rt::register_name(name_scope.as_ref(), "SwitchKnobOn", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 182, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "SwitchKnobOn", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 182, 27)?;
     // Controls/WinUIControls.xaml(183,27) Background
     rt::bind_dynamic_resource(&context, border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "ToggleSwitchKnobFillOn", 183, 27)?;
     // Controls/WinUIControls.xaml(184,27) BorderBrush
@@ -127692,7 +127692,7 @@ fn build_controls_winuicontrols_xaml_deferred_379(
     context.push_parent(rt::to_value(rectangle_2.clone()));
     // Controls/WinUIControls.xaml(201,30) Name
     rectangle_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SwitchKnobOff")));
-    rt::register_name(name_scope.as_ref(), "SwitchKnobOff", ::core::clone::Clone::clone(&rectangle_2).upcast::<::ferroui_base::FerroObject>(), 201, 30)?;
+    rt::register_name_value(name_scope.as_ref(), "SwitchKnobOff", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_2)), 201, 30)?;
     // Controls/WinUIControls.xaml(202,30) Fill
     rt::bind_dynamic_resource(&context, rectangle_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "ToggleSwitchKnobFillOff", 202, 30)?;
     // Controls/WinUIControls.xaml(201,20) Width
@@ -127896,7 +127896,7 @@ fn build_controls_winuicontrols_xaml_deferred_382(
     context.push_parent(rt::to_value(ellipse_0.clone()));
     // Controls/WinUIControls.xaml(70,20) Name
     ellipse_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SliderInnerThumb")));
-    rt::register_name(name_scope.as_ref(), "SliderInnerThumb", ::core::clone::Clone::clone(&ellipse_0).upcast::<::ferroui_base::FerroObject>(), 70, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "SliderInnerThumb", ::std::rc::Rc::new(::core::clone::Clone::clone(&ellipse_0)), 70, 20)?;
     // Controls/WinUIControls.xaml(70,12) RenderTransformOrigin
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     ellipse_0.set_value_with_priority(::ferroui_base::Visual::render_transform_origin_property(), ::ferroui_base::RelativePoint::__markup_new_1(0.5_f64, 0.5_f64, ::ferroui_base::RelativeUnit::Relative), priority_2);
@@ -127980,7 +127980,7 @@ fn build_controls_winuicontrols_xaml_deferred_384(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/WinUIControls.xaml(106,22) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HorizontalDecreaseRect")));
-    rt::register_name(name_scope.as_ref(), "HorizontalDecreaseRect", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 106, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "HorizontalDecreaseRect", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 106, 22)?;
     // Controls/WinUIControls.xaml(107,22) Fill
     rt::bind_template_binding(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 107, 22)?;
     // Controls/WinUIControls.xaml(108,22) Height
@@ -128062,7 +128062,7 @@ fn build_controls_winuicontrols_xaml_deferred_386(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/WinUIControls.xaml(122,22) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("VerticalDecreaseRect")));
-    rt::register_name(name_scope.as_ref(), "VerticalDecreaseRect", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 122, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "VerticalDecreaseRect", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 122, 22)?;
     // Controls/WinUIControls.xaml(123,22) Fill
     rt::bind_template_binding(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 123, 22)?;
     // Controls/WinUIControls.xaml(124,22) Width
@@ -128640,7 +128640,7 @@ fn build_controls_winuicontrols_xaml_deferred_391(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(171,23) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("FocusBorder")));
-    rt::register_name(name_scope.as_ref(), "FocusBorder", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 171, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "FocusBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 171, 23)?;
     // Controls/WinUIControls.xaml(172,23) CornerRadius
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::corner_radius_property(), "ControlCornerRadius", 172, 23)?;
     // Controls/WinUIControls.xaml(171,16) IsTemplateFocusTarget
@@ -128657,7 +128657,7 @@ fn build_controls_winuicontrols_xaml_deferred_391(
     context.push_parent(rt::to_value(grid_1.clone()));
     // Controls/WinUIControls.xaml(174,21) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SliderContainer")));
-    rt::register_name(name_scope.as_ref(), "SliderContainer", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 174, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "SliderContainer", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 174, 21)?;
     // Controls/WinUIControls.xaml(174,46) Background
     rt::bind_dynamic_resource(&context, grid_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Panel::background_property(), "SliderContainerBackground", 174, 46)?;
     // Controls/WinUIControls.xaml(176,20) Styles
@@ -128685,7 +128685,7 @@ fn build_controls_winuicontrols_xaml_deferred_391(
     context.push_parent(rt::to_value(grid_2.clone()));
     // Controls/WinUIControls.xaml(180,23) Name
     grid_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HorizontalTemplate")));
-    rt::register_name(name_scope.as_ref(), "HorizontalTemplate", ::core::clone::Clone::clone(&grid_2).upcast::<::ferroui_base::FerroObject>(), 180, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "HorizontalTemplate", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_2)), 180, 23)?;
     // Controls/WinUIControls.xaml(181,23) MinHeight
     rt::bind_dynamic_resource(&context, grid_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_height_property(), "SliderHorizontalHeight", 181, 23)?;
     // Controls/WinUIControls.xaml(180,18) ColumnDefinitions
@@ -128734,7 +128734,7 @@ fn build_controls_winuicontrols_xaml_deferred_391(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/WinUIControls.xaml(189,30) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HorizontalTrackRect")));
-    rt::register_name(name_scope.as_ref(), "HorizontalTrackRect", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 189, 30)?;
+    rt::register_name_value(name_scope.as_ref(), "HorizontalTrackRect", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 189, 30)?;
     // Controls/WinUIControls.xaml(190,30) Fill
     rt::bind_template_binding(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 190, 30)?;
     // Controls/WinUIControls.xaml(191,30) Height
@@ -128776,7 +128776,7 @@ fn build_controls_winuicontrols_xaml_deferred_391(
     context.push_parent(rt::to_value(tick_bar_0.clone()));
     // Controls/WinUIControls.xaml(196,28) Name
     tick_bar_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TopTickBar")));
-    rt::register_name(name_scope.as_ref(), "TopTickBar", ::core::clone::Clone::clone(&tick_bar_0).upcast::<::ferroui_base::FerroObject>(), 196, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "TopTickBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&tick_bar_0)), 196, 28)?;
     // Controls/WinUIControls.xaml(196,20) IsVisible
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     tick_bar_0.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_6);
@@ -128819,7 +128819,7 @@ fn build_controls_winuicontrols_xaml_deferred_391(
     context.push_parent(rt::to_value(tick_bar_1.clone()));
     // Controls/WinUIControls.xaml(210,28) Name
     tick_bar_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("BottomTickBar")));
-    rt::register_name(name_scope.as_ref(), "BottomTickBar", ::core::clone::Clone::clone(&tick_bar_1).upcast::<::ferroui_base::FerroObject>(), 210, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "BottomTickBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&tick_bar_1)), 210, 28)?;
     // Controls/WinUIControls.xaml(210,20) IsVisible
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     tick_bar_1.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_11);
@@ -128865,7 +128865,7 @@ fn build_controls_winuicontrols_xaml_deferred_391(
     context.push_parent(rt::to_value(track_0.clone()));
     // Controls/WinUIControls.xaml(225,26) Name
     track_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Track")));
-    rt::register_name(name_scope.as_ref(), "PART_Track", ::core::clone::Clone::clone(&track_0).upcast::<::ferroui_base::FerroObject>(), 225, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Track", ::std::rc::Rc::new(::core::clone::Clone::clone(&track_0)), 225, 26)?;
     // Controls/WinUIControls.xaml(225,20) Row
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
     track_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 0_i32, priority_17);
@@ -128899,7 +128899,7 @@ fn build_controls_winuicontrols_xaml_deferred_391(
     context.push_parent(rt::to_value(repeat_button_0.clone()));
     // Controls/WinUIControls.xaml(235,37) Name
     repeat_button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DecreaseButton")));
-    rt::register_name(name_scope.as_ref(), "PART_DecreaseButton", ::core::clone::Clone::clone(&repeat_button_0).upcast::<::ferroui_base::FerroObject>(), 235, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DecreaseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_0)), 235, 37)?;
     // Controls/WinUIControls.xaml(236,37) Theme (setter chosen at run time)
     let priority_22 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SliderHorizontalDecreaseButtonStyle"));
@@ -128932,7 +128932,7 @@ fn build_controls_winuicontrols_xaml_deferred_391(
     context.push_parent(rt::to_value(repeat_button_1.clone()));
     // Controls/WinUIControls.xaml(242,37) Name
     repeat_button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_IncreaseButton")));
-    rt::register_name(name_scope.as_ref(), "PART_IncreaseButton", ::core::clone::Clone::clone(&repeat_button_1).upcast::<::ferroui_base::FerroObject>(), 242, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_IncreaseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_1)), 242, 37)?;
     // Controls/WinUIControls.xaml(243,37) Theme (setter chosen at run time)
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SliderIncreaseButtonStyle"));
@@ -128960,7 +128960,7 @@ fn build_controls_winuicontrols_xaml_deferred_391(
     context.push_parent(rt::to_value(thumb_0.clone()));
     // Controls/WinUIControls.xaml(246,28) Name
     thumb_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HorizontalThumb")));
-    rt::register_name(name_scope.as_ref(), "HorizontalThumb", ::core::clone::Clone::clone(&thumb_0).upcast::<::ferroui_base::FerroObject>(), 246, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "HorizontalThumb", ::std::rc::Rc::new(::core::clone::Clone::clone(&thumb_0)), 246, 28)?;
     // Controls/WinUIControls.xaml(247,28) Theme (setter chosen at run time)
     let priority_27 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SliderThumbStyle"));
@@ -129044,7 +129044,7 @@ fn build_controls_winuicontrols_xaml_deferred_392(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(268,23) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("FocusBorder")));
-    rt::register_name(name_scope.as_ref(), "FocusBorder", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 268, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "FocusBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 268, 23)?;
     // Controls/WinUIControls.xaml(269,23) CornerRadius
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::corner_radius_property(), "ControlCornerRadius", 269, 23)?;
     // Controls/WinUIControls.xaml(268,16) IsTemplateFocusTarget
@@ -129061,7 +129061,7 @@ fn build_controls_winuicontrols_xaml_deferred_392(
     context.push_parent(rt::to_value(grid_1.clone()));
     // Controls/WinUIControls.xaml(271,21) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SliderContainer")));
-    rt::register_name(name_scope.as_ref(), "SliderContainer", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 271, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "SliderContainer", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 271, 21)?;
     // Controls/WinUIControls.xaml(271,46) Background
     rt::bind_dynamic_resource(&context, grid_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Panel::background_property(), "SliderContainerBackground", 271, 46)?;
     // Controls/WinUIControls.xaml(273,20) Styles
@@ -129089,7 +129089,7 @@ fn build_controls_winuicontrols_xaml_deferred_392(
     context.push_parent(rt::to_value(grid_2.clone()));
     // Controls/WinUIControls.xaml(277,23) Name
     grid_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("VerticalTemplate")));
-    rt::register_name(name_scope.as_ref(), "VerticalTemplate", ::core::clone::Clone::clone(&grid_2).upcast::<::ferroui_base::FerroObject>(), 277, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "VerticalTemplate", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_2)), 277, 23)?;
     // Controls/WinUIControls.xaml(278,23) MinWidth
     rt::bind_dynamic_resource(&context, grid_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_width_property(), "SliderVerticalWidth", 278, 23)?;
     // Controls/WinUIControls.xaml(277,18) RowDefinitions
@@ -129138,7 +129138,7 @@ fn build_controls_winuicontrols_xaml_deferred_392(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/WinUIControls.xaml(286,30) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("VerticalTrackRect")));
-    rt::register_name(name_scope.as_ref(), "VerticalTrackRect", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 286, 30)?;
+    rt::register_name_value(name_scope.as_ref(), "VerticalTrackRect", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 286, 30)?;
     // Controls/WinUIControls.xaml(287,30) Fill
     rt::bind_template_binding(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 287, 30)?;
     // Controls/WinUIControls.xaml(288,30) Width
@@ -129180,7 +129180,7 @@ fn build_controls_winuicontrols_xaml_deferred_392(
     context.push_parent(rt::to_value(tick_bar_0.clone()));
     // Controls/WinUIControls.xaml(293,28) Name
     tick_bar_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LeftTickBar")));
-    rt::register_name(name_scope.as_ref(), "LeftTickBar", ::core::clone::Clone::clone(&tick_bar_0).upcast::<::ferroui_base::FerroObject>(), 293, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "LeftTickBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&tick_bar_0)), 293, 28)?;
     // Controls/WinUIControls.xaml(293,20) IsVisible
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     tick_bar_0.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_6);
@@ -129223,7 +129223,7 @@ fn build_controls_winuicontrols_xaml_deferred_392(
     context.push_parent(rt::to_value(tick_bar_1.clone()));
     // Controls/WinUIControls.xaml(307,28) Name
     tick_bar_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RightTickBar")));
-    rt::register_name(name_scope.as_ref(), "RightTickBar", ::core::clone::Clone::clone(&tick_bar_1).upcast::<::ferroui_base::FerroObject>(), 307, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "RightTickBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&tick_bar_1)), 307, 28)?;
     // Controls/WinUIControls.xaml(307,20) IsVisible
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     tick_bar_1.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_11);
@@ -129269,7 +129269,7 @@ fn build_controls_winuicontrols_xaml_deferred_392(
     context.push_parent(rt::to_value(track_0.clone()));
     // Controls/WinUIControls.xaml(322,26) Name
     track_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Track")));
-    rt::register_name(name_scope.as_ref(), "PART_Track", ::core::clone::Clone::clone(&track_0).upcast::<::ferroui_base::FerroObject>(), 322, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Track", ::std::rc::Rc::new(::core::clone::Clone::clone(&track_0)), 322, 26)?;
     // Controls/WinUIControls.xaml(322,20) Column
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
     track_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_17);
@@ -129303,7 +129303,7 @@ fn build_controls_winuicontrols_xaml_deferred_392(
     context.push_parent(rt::to_value(repeat_button_0.clone()));
     // Controls/WinUIControls.xaml(332,37) Name
     repeat_button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DecreaseButton")));
-    rt::register_name(name_scope.as_ref(), "PART_DecreaseButton", ::core::clone::Clone::clone(&repeat_button_0).upcast::<::ferroui_base::FerroObject>(), 332, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DecreaseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_0)), 332, 37)?;
     // Controls/WinUIControls.xaml(333,37) Theme (setter chosen at run time)
     let priority_22 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SliderVerticalDecreaseButtonStyle"));
@@ -129336,7 +129336,7 @@ fn build_controls_winuicontrols_xaml_deferred_392(
     context.push_parent(rt::to_value(repeat_button_1.clone()));
     // Controls/WinUIControls.xaml(339,37) Name
     repeat_button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_IncreaseButton")));
-    rt::register_name(name_scope.as_ref(), "PART_IncreaseButton", ::core::clone::Clone::clone(&repeat_button_1).upcast::<::ferroui_base::FerroObject>(), 339, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_IncreaseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_1)), 339, 37)?;
     // Controls/WinUIControls.xaml(340,37) Theme (setter chosen at run time)
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SliderIncreaseButtonStyle"));
@@ -129364,7 +129364,7 @@ fn build_controls_winuicontrols_xaml_deferred_392(
     context.push_parent(rt::to_value(thumb_0.clone()));
     // Controls/WinUIControls.xaml(343,28) Name
     thumb_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("VerticalThumb")));
-    rt::register_name(name_scope.as_ref(), "VerticalThumb", ::core::clone::Clone::clone(&thumb_0).upcast::<::ferroui_base::FerroObject>(), 343, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "VerticalThumb", ::std::rc::Rc::new(::core::clone::Clone::clone(&thumb_0)), 343, 28)?;
     // Controls/WinUIControls.xaml(344,28) Theme (setter chosen at run time)
     let priority_27 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SliderThumbStyle"));
@@ -129738,7 +129738,7 @@ fn build_controls_winuicontrols_xaml_deferred_398(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(130,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("BorderElement")));
-    rt::register_name(name_scope.as_ref(), "BorderElement", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 130, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "BorderElement", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 130, 19)?;
     // Controls/WinUIControls.xaml(130,12) Column
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_0);
@@ -129769,7 +129769,7 @@ fn build_controls_winuicontrols_xaml_deferred_398(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(140,19) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SpinButtonsSpaceLeft")));
-    rt::register_name(name_scope.as_ref(), "SpinButtonsSpaceLeft", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 140, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "SpinButtonsSpaceLeft", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 140, 19)?;
     // Controls/WinUIControls.xaml(140,12) Column
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_3);
@@ -129788,7 +129788,7 @@ fn build_controls_winuicontrols_xaml_deferred_398(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(144,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("InnerLeftContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "InnerLeftContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 144, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "InnerLeftContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 144, 29)?;
     // Controls/WinUIControls.xaml(145,29) IsVisible
     let template_binding_6 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TextBox::inner_left_content_property()));
     // Controls/WinUIControls.xaml(145,29) Converter
@@ -129822,7 +129822,7 @@ fn build_controls_winuicontrols_xaml_deferred_398(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(150,25) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "PART_ScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 150, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 150, 25)?;
     // Controls/WinUIControls.xaml(150,12) Column
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
     scroll_viewer_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_8);
@@ -129862,7 +129862,7 @@ fn build_controls_winuicontrols_xaml_deferred_398(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&text_presenter_0)));
     // Controls/WinUIControls.xaml(159,28) Name
     text_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TextPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_TextPresenter", ::core::clone::Clone::clone(&text_presenter_0).upcast::<::ferroui_base::FerroObject>(), 159, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TextPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_presenter_0)), 159, 28)?;
     // Controls/WinUIControls.xaml(160,28) Text
     let template_binding_16 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TextBox::text_property()));
     // Controls/WinUIControls.xaml(160,28) Mode
@@ -129910,7 +129910,7 @@ fn build_controls_winuicontrols_xaml_deferred_398(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/WinUIControls.xaml(182,22) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PlaceholderTextContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PlaceholderTextContentPresenter", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 182, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PlaceholderTextContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 182, 22)?;
     // Controls/WinUIControls.xaml(182,12) Column
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_10);
@@ -129978,7 +129978,7 @@ fn build_controls_winuicontrols_xaml_deferred_398(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(199,29) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("InnerRightContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "InnerRightContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 199, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "InnerRightContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 199, 29)?;
     // Controls/WinUIControls.xaml(200,29) IsVisible
     let template_binding_38 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TextBox::inner_right_content_property()));
     // Controls/WinUIControls.xaml(200,29) Converter
@@ -130013,7 +130013,7 @@ fn build_controls_winuicontrols_xaml_deferred_398(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/WinUIControls.xaml(205,19) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("DeleteButton")));
-    rt::register_name(name_scope.as_ref(), "DeleteButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 205, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "DeleteButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 205, 19)?;
     // Controls/WinUIControls.xaml(205,12) Column
     let priority_15 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 4_i32, priority_15);
@@ -130068,7 +130068,7 @@ fn build_controls_winuicontrols_xaml_deferred_398(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_7, ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(219,19) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SpinButtonsSpace")));
-    rt::register_name(name_scope.as_ref(), "SpinButtonsSpace", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 219, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "SpinButtonsSpace", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 219, 19)?;
     // Controls/WinUIControls.xaml(219,12) Column
     let priority_22 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 5_i32, priority_22);
@@ -130088,7 +130088,7 @@ fn build_controls_winuicontrols_xaml_deferred_398(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/WinUIControls.xaml(224,17) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PopupIndicator")));
-    rt::register_name(name_scope.as_ref(), "PopupIndicator", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 224, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "PopupIndicator", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 224, 17)?;
     // Controls/WinUIControls.xaml(224,12) Column
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
     path_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 5_i32, priority_25);
@@ -130202,7 +130202,7 @@ fn build_controls_winuicontrols_xaml_deferred_400(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(259,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 259, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 259, 29)?;
     // Controls/WinUIControls.xaml(260,29) Content (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_0 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -130229,7 +130229,7 @@ fn build_controls_winuicontrols_xaml_deferred_400(
     context.push_parent(rt::to_value(stack_panel_0.clone()));
     // Controls/WinUIControls.xaml(264,23) Name
     stack_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SpinButtons")));
-    rt::register_name(name_scope.as_ref(), "SpinButtons", ::core::clone::Clone::clone(&stack_panel_0).upcast::<::ferroui_base::FerroObject>(), 264, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "SpinButtons", ::std::rc::Rc::new(::core::clone::Clone::clone(&stack_panel_0)), 264, 23)?;
     // Controls/WinUIControls.xaml(264,12) Orientation
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     stack_panel_0.set_value_with_priority(::ferroui_controls::StackPanel::orientation_property(), ::ferroui_base::layout::Orientation::Horizontal, priority_1);
@@ -130247,7 +130247,7 @@ fn build_controls_winuicontrols_xaml_deferred_400(
     context.push_parent(rt::to_value(repeat_button_0.clone()));
     // Controls/WinUIControls.xaml(268,27) Name
     repeat_button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_IncreaseButton")));
-    rt::register_name(name_scope.as_ref(), "PART_IncreaseButton", ::core::clone::Clone::clone(&repeat_button_0).upcast::<::ferroui_base::FerroObject>(), 268, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_IncreaseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_0)), 268, 27)?;
     // Controls/WinUIControls.xaml(269,27) Theme (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NumericUpDownSpinButtonStyle"));
@@ -130316,7 +130316,7 @@ fn build_controls_winuicontrols_xaml_deferred_400(
     context.push_parent(rt::to_value(repeat_button_1.clone()));
     // Controls/WinUIControls.xaml(279,27) Name
     repeat_button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DecreaseButton")));
-    rt::register_name(name_scope.as_ref(), "PART_DecreaseButton", ::core::clone::Clone::clone(&repeat_button_1).upcast::<::ferroui_base::FerroObject>(), 279, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DecreaseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_1)), 279, 27)?;
     // Controls/WinUIControls.xaml(280,27) Theme (setter chosen at run time)
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NumericUpDownSpinButtonStyle"));
@@ -130500,7 +130500,7 @@ fn build_controls_winuicontrols_xaml_deferred_402(
     context.push_parent(rt::to_value(button_spinner_0.clone()));
     // Controls/WinUIControls.xaml(316,26) Name
     button_spinner_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Spinner")));
-    rt::register_name(name_scope.as_ref(), "PART_Spinner", ::core::clone::Clone::clone(&button_spinner_0).upcast::<::ferroui_base::FerroObject>(), 316, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Spinner", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_spinner_0)), 316, 26)?;
     // Controls/WinUIControls.xaml(317,26) Theme (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NumericUpDownButtonSpinnerStyle"));
@@ -130537,7 +130537,7 @@ fn build_controls_winuicontrols_xaml_deferred_402(
     context.push_parent(rt::to_value(text_box_0.clone()));
     // Controls/WinUIControls.xaml(324,22) Name
     text_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TextBox")));
-    rt::register_name(name_scope.as_ref(), "PART_TextBox", ::core::clone::Clone::clone(&text_box_0).upcast::<::ferroui_base::FerroObject>(), 324, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TextBox", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_box_0)), 324, 22)?;
     // Controls/WinUIControls.xaml(325,22) Theme (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NumberBoxTextBoxStyle"));
@@ -131002,7 +131002,7 @@ fn build_controls_winuicontrols_xaml_deferred_405(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/WinUIControls.xaml(110,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HeaderContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "HeaderContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 110, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "HeaderContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 110, 29)?;
     // Controls/WinUIControls.xaml(110,12) ColumnSpan
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 3_i32, priority_0);
@@ -131050,7 +131050,7 @@ fn build_controls_winuicontrols_xaml_deferred_405(
     context.push_parent(rt::to_value(text_box_0.clone()));
     // Controls/WinUIControls.xaml(122,20) Name
     text_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("InputBox")));
-    rt::register_name(name_scope.as_ref(), "InputBox", ::core::clone::Clone::clone(&text_box_0).upcast::<::ferroui_base::FerroObject>(), 122, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "InputBox", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_box_0)), 122, 20)?;
     // Controls/WinUIControls.xaml(122,12) Row
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     text_box_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_6);
@@ -131110,7 +131110,7 @@ fn build_controls_winuicontrols_xaml_deferred_405(
     context.push_parent(rt::to_value(popup_0.clone()));
     // Controls/WinUIControls.xaml(139,18) Name
     popup_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("UpDownPopup")));
-    rt::register_name(name_scope.as_ref(), "UpDownPopup", ::core::clone::Clone::clone(&popup_0).upcast::<::ferroui_base::FerroObject>(), 139, 18)?;
+    rt::register_name_value(name_scope.as_ref(), "UpDownPopup", ::std::rc::Rc::new(::core::clone::Clone::clone(&popup_0)), 139, 18)?;
     // Controls/WinUIControls.xaml(139,12) Row
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     popup_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_11);
@@ -131160,7 +131160,7 @@ fn build_controls_winuicontrols_xaml_deferred_405(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(149,23) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PopupContentRoot")));
-    rt::register_name(name_scope.as_ref(), "PopupContentRoot", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 149, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PopupContentRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 149, 23)?;
     // Controls/WinUIControls.xaml(149,16) Padding
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Decorator::padding_property(), ::ferroui_base::Thickness::__markup_new_3(6.0_f64, 6.0_f64, 6.0_f64, 6.0_f64), priority_17);
@@ -131199,7 +131199,7 @@ fn build_controls_winuicontrols_xaml_deferred_405(
     context.push_parent(rt::to_value(repeat_button_0.clone()));
     // Controls/WinUIControls.xaml(157,33) Name
     repeat_button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PopupUpSpinButton")));
-    rt::register_name(name_scope.as_ref(), "PopupUpSpinButton", ::core::clone::Clone::clone(&repeat_button_0).upcast::<::ferroui_base::FerroObject>(), 157, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PopupUpSpinButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_0)), 157, 33)?;
     // Controls/WinUIControls.xaml(158,33) Theme (setter chosen at run time)
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NumberBoxPopupContentRootButtonStyle"));
@@ -131266,7 +131266,7 @@ fn build_controls_winuicontrols_xaml_deferred_405(
     context.push_parent(rt::to_value(repeat_button_1.clone()));
     // Controls/WinUIControls.xaml(167,33) Name
     repeat_button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PopupDownSpinButton")));
-    rt::register_name(name_scope.as_ref(), "PopupDownSpinButton", ::core::clone::Clone::clone(&repeat_button_1).upcast::<::ferroui_base::FerroObject>(), 167, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PopupDownSpinButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_1)), 167, 33)?;
     // Controls/WinUIControls.xaml(167,20) Row
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
     repeat_button_1.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_25);
@@ -131340,7 +131340,7 @@ fn build_controls_winuicontrols_xaml_deferred_405(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(181,19) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("InputEater")));
-    rt::register_name(name_scope.as_ref(), "InputEater", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 181, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "InputEater", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 181, 19)?;
     // Controls/WinUIControls.xaml(181,12) Row
     let priority_32 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_32);
@@ -131375,7 +131375,7 @@ fn build_controls_winuicontrols_xaml_deferred_405(
     context.push_parent(rt::to_value(repeat_button_2.clone()));
     // Controls/WinUIControls.xaml(190,25) Name
     repeat_button_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("UpSpinButton")));
-    rt::register_name(name_scope.as_ref(), "UpSpinButton", ::core::clone::Clone::clone(&repeat_button_2).upcast::<::ferroui_base::FerroObject>(), 190, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "UpSpinButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_2)), 190, 25)?;
     // Controls/WinUIControls.xaml(190,12) Row
     let priority_40 = ::ferroui_base::data::BindingPriority::Template;
     repeat_button_2.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_40);
@@ -131455,7 +131455,7 @@ fn build_controls_winuicontrols_xaml_deferred_405(
     context.push_parent(rt::to_value(repeat_button_3.clone()));
     // Controls/WinUIControls.xaml(205,25) Name
     repeat_button_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("DownSpinButton")));
-    rt::register_name(name_scope.as_ref(), "DownSpinButton", ::core::clone::Clone::clone(&repeat_button_3).upcast::<::ferroui_base::FerroObject>(), 205, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "DownSpinButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_3)), 205, 25)?;
     // Controls/WinUIControls.xaml(205,12) Row
     let priority_50 = ::ferroui_base::data::BindingPriority::Template;
     repeat_button_3.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_50);
@@ -131535,7 +131535,7 @@ fn build_controls_winuicontrols_xaml_deferred_405(
     context.push_parent(rt::to_value(content_presenter_1.clone()));
     // Controls/WinUIControls.xaml(220,29) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("DescriptionPresenter")));
-    rt::register_name(name_scope.as_ref(), "DescriptionPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 220, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "DescriptionPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 220, 29)?;
     // Controls/WinUIControls.xaml(220,12) Row
     let priority_60 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_controls::Grid::row_property(), 2_i32, priority_60);
@@ -131905,7 +131905,7 @@ fn build_controls_winuicontrols_xaml_deferred_408(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(90,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ToggleButtonGrid")));
-    rt::register_name(name_scope.as_ref(), "ToggleButtonGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 90, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "ToggleButtonGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 90, 17)?;
     // Controls/WinUIControls.xaml(91,17) CornerRadius
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::corner_radius_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()), 91, 17)?;
     // Controls/WinUIControls.xaml(92,17) BackgroundSizing
@@ -131951,7 +131951,7 @@ fn build_controls_winuicontrols_xaml_deferred_408(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/WinUIControls.xaml(102,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 102, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 102, 31)?;
     // Controls/WinUIControls.xaml(103,31) Content (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_9 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -131984,7 +131984,7 @@ fn build_controls_winuicontrols_xaml_deferred_408(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(109,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ExpandCollapseChevronBorder")));
-    rt::register_name(name_scope.as_ref(), "ExpandCollapseChevronBorder", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 109, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "ExpandCollapseChevronBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 109, 21)?;
     // Controls/WinUIControls.xaml(109,14) Column
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_2);
@@ -132050,7 +132050,7 @@ fn build_controls_winuicontrols_xaml_deferred_408(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/WinUIControls.xaml(124,23) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ExpandCollapseChevron")));
-    rt::register_name(name_scope.as_ref(), "ExpandCollapseChevron", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 124, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "ExpandCollapseChevron", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 124, 23)?;
     // Controls/WinUIControls.xaml(125,23) Data (setter chosen at run time)
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE70D"));
@@ -132146,7 +132146,7 @@ fn build_controls_winuicontrols_xaml_deferred_410(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(201,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ToggleButtonGrid")));
-    rt::register_name(name_scope.as_ref(), "ToggleButtonGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 201, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "ToggleButtonGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 201, 17)?;
     // Controls/WinUIControls.xaml(202,17) CornerRadius
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::corner_radius_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()), 202, 17)?;
     // Controls/WinUIControls.xaml(203,17) BackgroundSizing
@@ -132192,7 +132192,7 @@ fn build_controls_winuicontrols_xaml_deferred_410(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/WinUIControls.xaml(213,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 213, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 213, 31)?;
     // Controls/WinUIControls.xaml(214,31) Content (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_9 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -132225,7 +132225,7 @@ fn build_controls_winuicontrols_xaml_deferred_410(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(220,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ExpandCollapseChevronBorder")));
-    rt::register_name(name_scope.as_ref(), "ExpandCollapseChevronBorder", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 220, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "ExpandCollapseChevronBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 220, 21)?;
     // Controls/WinUIControls.xaml(220,14) Column
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_2);
@@ -132291,7 +132291,7 @@ fn build_controls_winuicontrols_xaml_deferred_410(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/WinUIControls.xaml(235,23) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ExpandCollapseChevron")));
-    rt::register_name(name_scope.as_ref(), "ExpandCollapseChevron", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 235, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "ExpandCollapseChevron", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 235, 23)?;
     // Controls/WinUIControls.xaml(236,23) Data (setter chosen at run time)
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE70E"));
@@ -132801,7 +132801,7 @@ fn build_controls_winuicontrols_xaml_deferred_414(
     context.push_parent(rt::to_value(toggle_button_0.clone()));
     // Controls/WinUIControls.xaml(292,25) Name
     toggle_button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ExpanderHeader")));
-    rt::register_name(name_scope.as_ref(), "ExpanderHeader", ::core::clone::Clone::clone(&toggle_button_0).upcast::<::ferroui_base::FerroObject>(), 292, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "ExpanderHeader", ::std::rc::Rc::new(::core::clone::Clone::clone(&toggle_button_0)), 292, 25)?;
     // Controls/WinUIControls.xaml(292,12) Dock
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     toggle_button_0.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Top, priority_0);
@@ -132901,7 +132901,7 @@ fn build_controls_winuicontrols_xaml_deferred_414(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(310,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ExpanderContentClip")));
-    rt::register_name(name_scope.as_ref(), "ExpanderContentClip", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 310, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "ExpanderContentClip", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 310, 19)?;
     // Controls/WinUIControls.xaml(310,12) ClipToBounds
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_base::Visual::clip_to_bounds_property(), ::core::clone::Clone::clone(&true), priority_7);
@@ -132913,7 +132913,7 @@ fn build_controls_winuicontrols_xaml_deferred_414(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(311,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ExpanderContent")));
-    rt::register_name(name_scope.as_ref(), "ExpanderContent", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 311, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "ExpanderContent", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 311, 21)?;
     // Controls/WinUIControls.xaml(312,21) IsVisible
     rt::bind_template_binding(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::is_visible_property(), rt::property(::ferroui_controls::Expander::is_expanded_property()), 312, 21)?;
     // Controls/WinUIControls.xaml(313,21) Background
@@ -132961,7 +132961,7 @@ fn build_controls_winuicontrols_xaml_deferred_414(
     border_1.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/WinUIControls.xaml(322,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 322, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 322, 33)?;
     // Controls/WinUIControls.xaml(323,33) Content (setter chosen at run time)
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_16 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -133280,7 +133280,7 @@ fn build_controls_winuicontrols_xaml_deferred_418(
     border_0.begin_init();
     // Controls/WinUIControls.xaml(85,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootGrid")));
-    rt::register_name(name_scope.as_ref(), "RootGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 85, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 85, 17)?;
     // Controls/WinUIControls.xaml(86,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 86, 17)?;
     // Controls/WinUIControls.xaml(87,17) BorderBrush
@@ -133299,7 +133299,7 @@ fn build_controls_winuicontrols_xaml_deferred_418(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&border_1).upcast::<::ferroui_controls::Control>()));
     // Controls/WinUIControls.xaml(91,19) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ScaleTransform")));
-    rt::register_name(name_scope.as_ref(), "ScaleTransform", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 91, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "ScaleTransform", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 91, 19)?;
     // Controls/WinUIControls.xaml(91,12) RenderTransformOrigin
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_base::Visual::render_transform_origin_property(), ::ferroui_base::RelativePoint::__markup_new_1(0.5_f64, 0.5_f64, ::ferroui_base::RelativeUnit::Relative), priority_1);
@@ -133310,7 +133310,7 @@ fn build_controls_winuicontrols_xaml_deferred_418(
     border_1.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&path_0).upcast::<::ferroui_controls::Control>()));
     // Controls/WinUIControls.xaml(93,19) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Content")));
-    rt::register_name(name_scope.as_ref(), "Content", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 93, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "Content", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 93, 19)?;
     // Controls/WinUIControls.xaml(94,19) Fill
     rt::bind_template_binding(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 94, 19)?;
     // Controls/WinUIControls.xaml(93,14) Stretch
@@ -133652,7 +133652,7 @@ fn build_controls_winuicontrols_xaml_deferred_423(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(177,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootGrid")));
-    rt::register_name(name_scope.as_ref(), "RootGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 177, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 177, 17)?;
     // Controls/WinUIControls.xaml(178,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 178, 17)?;
     // Controls/WinUIControls.xaml(179,17) BorderBrush
@@ -133696,7 +133696,7 @@ fn build_controls_winuicontrols_xaml_deferred_423(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/WinUIControls.xaml(186,17) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Content")));
-    rt::register_name(name_scope.as_ref(), "Content", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 186, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Content", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 186, 17)?;
     // Controls/WinUIControls.xaml(187,17) Data (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryEA3B"));
@@ -134067,7 +134067,7 @@ fn build_controls_winuicontrols_xaml_deferred_428(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(280,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootGrid")));
-    rt::register_name(name_scope.as_ref(), "RootGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 280, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 280, 17)?;
     // Controls/WinUIControls.xaml(281,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 281, 17)?;
     // Controls/WinUIControls.xaml(282,17) BorderBrush
@@ -134087,7 +134087,7 @@ fn build_controls_winuicontrols_xaml_deferred_428(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/WinUIControls.xaml(286,17) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Content")));
-    rt::register_name(name_scope.as_ref(), "Content", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 286, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Content", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 286, 17)?;
     // Controls/WinUIControls.xaml(287,17) Data (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryEA3B"));
@@ -134160,7 +134160,7 @@ fn build_controls_winuicontrols_xaml_deferred_430(
     scroll_viewer_0.begin_init();
     // Controls/WinUIControls.xaml(348,23) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "PART_ScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 348, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 348, 23)?;
     // Controls/WinUIControls.xaml(348,10) HorizontalScrollBarVisibility
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     scroll_viewer_0.set_value_with_priority(::ferroui_controls::ScrollViewer::horizontal_scroll_bar_visibility_property(), ::ferroui_controls::primitives::ScrollBarVisibility::Hidden, priority_0);
@@ -134177,7 +134177,7 @@ fn build_controls_winuicontrols_xaml_deferred_430(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&items_presenter_0)));
     // Controls/WinUIControls.xaml(352,27) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 352, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 352, 27)?;
     // Controls/WinUIControls.xaml(352,56) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 352, 56)?;
     rt::invoked(items_presenter_0.try_end_init(), 352, 12)?;
@@ -134335,7 +134335,7 @@ fn build_controls_winuicontrols_xaml_deferred_432(
     context.push_parent(rt::to_value(stack_panel_0.clone()));
     // Controls/WinUIControls.xaml(367,21) Name
     stack_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootPanel")));
-    rt::register_name(name_scope.as_ref(), "RootPanel", ::core::clone::Clone::clone(&stack_panel_0).upcast::<::ferroui_base::FerroObject>(), 367, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "RootPanel", ::std::rc::Rc::new(::core::clone::Clone::clone(&stack_panel_0)), 367, 21)?;
     // Controls/WinUIControls.xaml(368,21) Orientation
     rt::bind_template_binding(stack_panel_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::StackPanel::orientation_property(), rt::property(::ferroui_controls::PipsPager::orientation_property()), 368, 21)?;
     // Controls/WinUIControls.xaml(369,21) Background
@@ -134348,7 +134348,7 @@ fn build_controls_winuicontrols_xaml_deferred_432(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(370,19) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PreviousButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PreviousButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 370, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PreviousButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 370, 19)?;
     // Controls/WinUIControls.xaml(371,19) Theme
     rt::bind_template_binding(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), rt::property(::ferroui_controls::PipsPager::previous_button_theme_property()), 371, 19)?;
     // Controls/WinUIControls.xaml(372,19) IsVisible
@@ -134372,7 +134372,7 @@ fn build_controls_winuicontrols_xaml_deferred_432(
     context.push_parent(rt::to_value(list_box_0.clone()));
     // Controls/WinUIControls.xaml(376,20) Name
     list_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PipsPagerList")));
-    rt::register_name(name_scope.as_ref(), "PART_PipsPagerList", ::core::clone::Clone::clone(&list_box_0).upcast::<::ferroui_base::FerroObject>(), 376, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PipsPagerList", ::std::rc::Rc::new(::core::clone::Clone::clone(&list_box_0)), 376, 20)?;
     // Controls/WinUIControls.xaml(377,20) Theme (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("PipsPagerListStyle"));
@@ -134451,7 +134451,7 @@ fn build_controls_winuicontrols_xaml_deferred_432(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&button_1).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(391,19) Name
     button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_NextButton")));
-    rt::register_name(name_scope.as_ref(), "PART_NextButton", ::core::clone::Clone::clone(&button_1).upcast::<::ferroui_base::FerroObject>(), 391, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_NextButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_1)), 391, 19)?;
     // Controls/WinUIControls.xaml(392,19) Theme
     rt::bind_template_binding(button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), rt::property(::ferroui_controls::PipsPager::next_button_theme_property()), 392, 19)?;
     // Controls/WinUIControls.xaml(393,19) IsVisible
@@ -134542,7 +134542,7 @@ fn build_controls_winuicontrols_xaml_deferred_435(
     grid_0.begin_init();
     // Controls/WinUIControls.xaml(24,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Root")));
-    rt::register_name(name_scope.as_ref(), "Root", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 24, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 24, 15)?;
     // Controls/WinUIControls.xaml(24,29) Background
     rt::bind_template_binding(grid_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Panel::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 24, 29)?;
     // Controls/WinUIControls.xaml(25,12) Children
@@ -134553,7 +134553,7 @@ fn build_controls_winuicontrols_xaml_deferred_435(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(25,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 25, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 25, 29)?;
     // Controls/WinUIControls.xaml(26,29) Content (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_1 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -134593,7 +134593,7 @@ fn build_controls_winuicontrols_xaml_deferred_435(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(36,17) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_RefreshVisualizerPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_RefreshVisualizerPresenter", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 36, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_RefreshVisualizerPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 36, 17)?;
     rt::invoked(grid_1.try_end_init(), 36, 12)?;
     rt::invoked(grid_0.try_end_init(), 24, 10)?;
     ::core::result::Result::Ok(rt::to_value(grid_0.clone()))
@@ -134702,7 +134702,7 @@ fn build_controls_winuicontrols_xaml_deferred_438(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(64,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ThemeShadowWrapper")));
-    rt::register_name(name_scope.as_ref(), "ThemeShadowWrapper", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 64, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "ThemeShadowWrapper", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 64, 17)?;
     // Controls/WinUIControls.xaml(65,17) BoxShadow
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::box_shadow_property(), "ThemeShadowFlyoutBoxShadow", 65, 17)?;
     // Controls/WinUIControls.xaml(66,17) CornerRadius
@@ -134730,7 +134730,7 @@ fn build_controls_winuicontrols_xaml_deferred_438(
     border_1.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_controls::Control>()));
     // Controls/WinUIControls.xaml(72,27) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "ScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 72, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "ScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 72, 27)?;
     // Controls/WinUIControls.xaml(73,27) HorizontalScrollBarVisibility
     rt::bind_template_binding(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(::ferroui_controls::ScrollViewer::horizontal_scroll_bar_visibility_property()), 73, 27)?;
     // Controls/WinUIControls.xaml(74,27) VerticalScrollBarVisibility
@@ -134742,7 +134742,7 @@ fn build_controls_winuicontrols_xaml_deferred_438(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&content_presenter_0)));
     // Controls/WinUIControls.xaml(75,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 75, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 75, 33)?;
     // Controls/WinUIControls.xaml(76,33) Content (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_7 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -134863,7 +134863,7 @@ fn build_controls_winuicontrols_xaml_deferred_441(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(63,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ThemeShadowWrapper")));
-    rt::register_name(name_scope.as_ref(), "ThemeShadowWrapper", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 63, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "ThemeShadowWrapper", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 63, 17)?;
     // Controls/WinUIControls.xaml(64,17) BoxShadow
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::box_shadow_property(), "ThemeShadowFlyoutBoxShadow", 64, 17)?;
     // Controls/WinUIControls.xaml(65,17) CornerRadius
@@ -134893,7 +134893,7 @@ fn build_controls_winuicontrols_xaml_deferred_441(
     context.push_parent(rt::to_value(scroll_viewer_0.clone()));
     // Controls/WinUIControls.xaml(71,27) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("MenuFlyoutPresenterScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "MenuFlyoutPresenterScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 71, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "MenuFlyoutPresenterScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 71, 27)?;
     // Controls/WinUIControls.xaml(72,27) Theme (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MenuFlyoutPresenterScrollViewer"));
@@ -134921,7 +134921,7 @@ fn build_controls_winuicontrols_xaml_deferred_441(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&items_presenter_0)));
     // Controls/WinUIControls.xaml(76,31) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 76, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 76, 31)?;
     // Controls/WinUIControls.xaml(77,31) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 77, 31)?;
     // Controls/WinUIControls.xaml(76,16) TabNavigation
@@ -136075,7 +136075,7 @@ fn build_controls_winuicontrols_xaml_deferred_445(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(93,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 93, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 93, 19)?;
     // Controls/WinUIControls.xaml(94,19) Padding
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Decorator::padding_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), 94, 19)?;
     // Controls/WinUIControls.xaml(95,19) Background
@@ -136165,7 +136165,7 @@ fn build_controls_winuicontrols_xaml_deferred_445(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/WinUIControls.xaml(110,21) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("CheckGlyph")));
-    rt::register_name(name_scope.as_ref(), "CheckGlyph", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 110, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "CheckGlyph", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 110, 21)?;
     // Controls/WinUIControls.xaml(110,16) Column
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
     path_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_10);
@@ -136213,7 +136213,7 @@ fn build_controls_winuicontrols_xaml_deferred_445(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&viewbox_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(120,24) Name
     viewbox_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("IconRoot")));
-    rt::register_name(name_scope.as_ref(), "IconRoot", ::core::clone::Clone::clone(&viewbox_0).upcast::<::ferroui_base::FerroObject>(), 120, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "IconRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&viewbox_0)), 120, 24)?;
     // Controls/WinUIControls.xaml(120,16) Column
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
     viewbox_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_18);
@@ -136242,7 +136242,7 @@ fn build_controls_winuicontrols_xaml_deferred_445(
     viewbox_0.set_value(::ferroui_controls::Viewbox::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/WinUIControls.xaml(132,35) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("IconContent")));
-    rt::register_name(name_scope.as_ref(), "IconContent", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 132, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "IconContent", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 132, 35)?;
     // Controls/WinUIControls.xaml(133,35) Content (setter chosen at run time)
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_5 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::MenuItem::icon_property()));
@@ -136265,7 +136265,7 @@ fn build_controls_winuicontrols_xaml_deferred_445(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(136,33) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HeaderPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_HeaderPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 136, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HeaderPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 136, 33)?;
     // Controls/WinUIControls.xaml(136,16) Column
     let priority_26 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_26);
@@ -136306,7 +136306,7 @@ fn build_controls_winuicontrols_xaml_deferred_445(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/WinUIControls.xaml(145,26) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("KeyboardAcceleratorTextBlock")));
-    rt::register_name(name_scope.as_ref(), "KeyboardAcceleratorTextBlock", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 145, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "KeyboardAcceleratorTextBlock", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 145, 26)?;
     // Controls/WinUIControls.xaml(145,16) Column
     let priority_32 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 3_i32, priority_32);
@@ -136366,7 +136366,7 @@ fn build_controls_winuicontrols_xaml_deferred_445(
     context.push_parent(rt::to_value(path_1.clone()));
     // Controls/WinUIControls.xaml(157,21) Name
     path_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SubItemChevron")));
-    rt::register_name(name_scope.as_ref(), "SubItemChevron", ::core::clone::Clone::clone(&path_1).upcast::<::ferroui_base::FerroObject>(), 157, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "SubItemChevron", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_1)), 157, 21)?;
     // Controls/WinUIControls.xaml(157,16) Column
     let priority_38 = ::ferroui_base::data::BindingPriority::Template;
     path_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 4_i32, priority_38);
@@ -136416,7 +136416,7 @@ fn build_controls_winuicontrols_xaml_deferred_445(
     context.push_parent(rt::to_value(popup_0.clone()));
     // Controls/WinUIControls.xaml(169,18) Name
     popup_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Popup")));
-    rt::register_name(name_scope.as_ref(), "PART_Popup", ::core::clone::Clone::clone(&popup_0).upcast::<::ferroui_base::FerroObject>(), 169, 18)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Popup", ::std::rc::Rc::new(::core::clone::Clone::clone(&popup_0)), 169, 18)?;
     // Controls/WinUIControls.xaml(169,12) WindowManagerAddShadowHint
     let priority_45 = ::ferroui_base::data::BindingPriority::Template;
     popup_0.set_value_with_priority(::ferroui_controls::primitives::Popup::window_manager_add_shadow_hint_property(), ::core::clone::Clone::clone(&false), priority_45);
@@ -136443,7 +136443,7 @@ fn build_controls_winuicontrols_xaml_deferred_445(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(176,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ThemeShadowWrapper")));
-    rt::register_name(name_scope.as_ref(), "ThemeShadowWrapper", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 176, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "ThemeShadowWrapper", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 176, 21)?;
     // Controls/WinUIControls.xaml(177,21) BoxShadow
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::box_shadow_property(), "ThemeShadowSubMenuBoxShadow", 177, 21)?;
     // Controls/WinUIControls.xaml(178,21) Margin (setter chosen at run time)
@@ -136499,7 +136499,7 @@ fn build_controls_winuicontrols_xaml_deferred_445(
     context.push_parent(rt::to_value(scroll_viewer_0.clone()));
     // Controls/WinUIControls.xaml(187,31) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("MenuFlyoutPresenterScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "MenuFlyoutPresenterScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 187, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "MenuFlyoutPresenterScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 187, 31)?;
     // Controls/WinUIControls.xaml(188,31) Theme (setter chosen at run time)
     let priority_52 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_7 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MenuFlyoutPresenterScrollViewer"));
@@ -136533,7 +136533,7 @@ fn build_controls_winuicontrols_xaml_deferred_445(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&items_presenter_0)));
     // Controls/WinUIControls.xaml(190,35) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 190, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 190, 35)?;
     // Controls/WinUIControls.xaml(191,35) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 191, 35)?;
     // Controls/WinUIControls.xaml(190,20) TabNavigation
@@ -136569,7 +136569,7 @@ fn build_controls_winuicontrols_xaml_deferred_446(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/WinUIControls.xaml(395,22) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SeparatorRectangle")));
-    rt::register_name(name_scope.as_ref(), "SeparatorRectangle", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 395, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "SeparatorRectangle", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 395, 22)?;
     // Controls/WinUIControls.xaml(396,22) Fill
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "MenuFlyoutSeparatorBackground", 396, 22)?;
     // Controls/WinUIControls.xaml(397,22) Margin (setter chosen at run time)
@@ -137079,7 +137079,7 @@ fn build_controls_winuicontrols_xaml_deferred_454(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(81,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentRoot")));
-    rt::register_name(name_scope.as_ref(), "ContentRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 81, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 81, 19)?;
     // Controls/WinUIControls.xaml(82,19) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 82, 19)?;
     // Controls/WinUIControls.xaml(83,19) CornerRadius
@@ -137098,7 +137098,7 @@ fn build_controls_winuicontrols_xaml_deferred_454(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(85,23) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Background")));
-    rt::register_name(name_scope.as_ref(), "Background", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 85, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "Background", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 85, 23)?;
     // Controls/WinUIControls.xaml(86,23) Background
     rt::bind_template_binding(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 86, 23)?;
     // Controls/WinUIControls.xaml(87,23) CornerRadius
@@ -137120,7 +137120,7 @@ fn build_controls_winuicontrols_xaml_deferred_454(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/WinUIControls.xaml(93,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HeaderPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_HeaderPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 93, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HeaderPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 93, 33)?;
     // Controls/WinUIControls.xaml(94,33) Content (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_6 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::HeaderedSelectingItemsControl::header_property()));
@@ -137187,7 +137187,7 @@ fn build_controls_winuicontrols_xaml_deferred_454(
     context.push_parent(rt::to_value(popup_0.clone()));
     // Controls/WinUIControls.xaml(110,18) Name
     popup_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Popup")));
-    rt::register_name(name_scope.as_ref(), "PART_Popup", ::core::clone::Clone::clone(&popup_0).upcast::<::ferroui_base::FerroObject>(), 110, 18)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Popup", ::std::rc::Rc::new(::core::clone::Clone::clone(&popup_0)), 110, 18)?;
     // Controls/WinUIControls.xaml(110,12) WindowManagerAddShadowHint
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     popup_0.set_value_with_priority(::ferroui_controls::primitives::Popup::window_manager_add_shadow_hint_property(), ::core::clone::Clone::clone(&false), priority_9);
@@ -137215,7 +137215,7 @@ fn build_controls_winuicontrols_xaml_deferred_454(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/WinUIControls.xaml(117,21) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ThemeShadowWrapper")));
-    rt::register_name(name_scope.as_ref(), "ThemeShadowWrapper", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 117, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "ThemeShadowWrapper", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 117, 21)?;
     // Controls/WinUIControls.xaml(118,21) BoxShadow
     rt::bind_dynamic_resource(&context, border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::box_shadow_property(), "ThemeShadowFlyoutBoxShadow", 118, 21)?;
     // Controls/WinUIControls.xaml(119,21) Margin (setter chosen at run time)
@@ -137271,7 +137271,7 @@ fn build_controls_winuicontrols_xaml_deferred_454(
     context.push_parent(rt::to_value(scroll_viewer_0.clone()));
     // Controls/WinUIControls.xaml(128,31) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("MenuFlyoutPresenterScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "MenuFlyoutPresenterScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 128, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "MenuFlyoutPresenterScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 128, 31)?;
     // Controls/WinUIControls.xaml(129,31) Theme (setter chosen at run time)
     let priority_15 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MenuFlyoutPresenterScrollViewer"));
@@ -137305,7 +137305,7 @@ fn build_controls_winuicontrols_xaml_deferred_454(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&items_presenter_0)));
     // Controls/WinUIControls.xaml(131,35) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 131, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 131, 35)?;
     // Controls/WinUIControls.xaml(132,35) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 132, 35)?;
     // Controls/WinUIControls.xaml(131,20) TabNavigation
@@ -137381,7 +137381,7 @@ fn build_controls_winuicontrols_xaml_deferred_456(
     border_0.begin_init();
     // Controls/WinUIControls.xaml(180,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 180, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 180, 17)?;
     // Controls/WinUIControls.xaml(181,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 181, 17)?;
     // Controls/WinUIControls.xaml(182,17) BorderBrush
@@ -137405,7 +137405,7 @@ fn build_controls_winuicontrols_xaml_deferred_456(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/WinUIControls.xaml(188,27) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 188, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 188, 27)?;
     // Controls/WinUIControls.xaml(189,27) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 189, 27)?;
     // Controls/WinUIControls.xaml(188,12) VerticalAlignment
@@ -137700,7 +137700,7 @@ fn build_controls_winuicontrols_xaml_deferred_459(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(79,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 79, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 79, 17)?;
     // Controls/WinUIControls.xaml(80,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 80, 17)?;
     // Controls/WinUIControls.xaml(81,17) BorderBrush
@@ -137726,7 +137726,7 @@ fn build_controls_winuicontrols_xaml_deferred_459(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(86,24) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PressedBackground")));
-    rt::register_name(name_scope.as_ref(), "PressedBackground", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 86, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "PressedBackground", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 86, 24)?;
     // Controls/WinUIControls.xaml(86,14) Fill
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_0.set_value_with_priority(::ferroui_controls::shapes::Shape::fill_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_1);
@@ -137743,7 +137743,7 @@ fn build_controls_winuicontrols_xaml_deferred_459(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/WinUIControls.xaml(91,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 91, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 91, 31)?;
     // Controls/WinUIControls.xaml(92,31) Content (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_4 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -138223,7 +138223,7 @@ fn build_controls_winuicontrols_xaml_deferred_463(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/WinUIControls.xaml(187,16) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Root")));
-    rt::register_name(name_scope.as_ref(), "Root", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 187, 16)?;
+    rt::register_name_value(name_scope.as_ref(), "Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 187, 16)?;
     // Controls/WinUIControls.xaml(189,12) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(&panel_0);
     // Controls/WinUIControls.xaml(189,12) Border
@@ -138233,7 +138233,7 @@ fn build_controls_winuicontrols_xaml_deferred_463(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(189,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Backplate")));
-    rt::register_name(name_scope.as_ref(), "Backplate", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 189, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "Backplate", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 189, 19)?;
     // Controls/WinUIControls.xaml(189,12) Margin
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(4.0_f64, 2.0_f64, 4.0_f64, 2.0_f64), priority_0);
@@ -138265,7 +138265,7 @@ fn build_controls_winuicontrols_xaml_deferred_463(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(199,19) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SelectionIndicator")));
-    rt::register_name(name_scope.as_ref(), "SelectionIndicator", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 199, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "SelectionIndicator", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 199, 19)?;
     // Controls/WinUIControls.xaml(199,12) Margin
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(4.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_4);
@@ -138320,7 +138320,7 @@ fn build_controls_winuicontrols_xaml_deferred_463(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(220,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 220, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 220, 29)?;
     // Controls/WinUIControls.xaml(220,12) Margin
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(7.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_13);
@@ -138644,7 +138644,7 @@ fn build_controls_winuicontrols_xaml_deferred_465(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(317,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentBorder")));
-    rt::register_name(name_scope.as_ref(), "ContentBorder", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 317, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 317, 17)?;
     // Controls/WinUIControls.xaml(318,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 318, 17)?;
     // Controls/WinUIControls.xaml(319,17) BorderBrush
@@ -138674,7 +138674,7 @@ fn build_controls_winuicontrols_xaml_deferred_465(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/WinUIControls.xaml(325,24) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("BorderBackground")));
-    rt::register_name(name_scope.as_ref(), "BorderBackground", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 325, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "BorderBackground", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 325, 24)?;
     // Controls/WinUIControls.xaml(325,14) IsHitTestVisible
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_0.set_value_with_priority(::ferroui_base::input::InputElement::is_hit_test_visible_property(), ::core::clone::Clone::clone(&false), priority_2);
@@ -138696,7 +138696,7 @@ fn build_controls_winuicontrols_xaml_deferred_465(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&panel_1).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(330,20) Name
     panel_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentPresenterGrid")));
-    rt::register_name(name_scope.as_ref(), "ContentPresenterGrid", ::core::clone::Clone::clone(&panel_1).upcast::<::ferroui_base::FerroObject>(), 330, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentPresenterGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_1)), 330, 20)?;
     // Controls/WinUIControls.xaml(330,14) Background
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     panel_1.set_value_with_priority(::ferroui_controls::Panel::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_5);
@@ -138708,7 +138708,7 @@ fn build_controls_winuicontrols_xaml_deferred_465(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(331,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 331, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 331, 33)?;
     // Controls/WinUIControls.xaml(332,33) Content (setter chosen at run time)
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_4 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -138821,7 +138821,7 @@ fn build_controls_winuicontrols_xaml_deferred_468(
     border_0.begin_init();
     // Controls/WinUIControls.xaml(51,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 51, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 51, 17)?;
     // Controls/WinUIControls.xaml(52,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 52, 17)?;
     // Controls/WinUIControls.xaml(53,17) BorderBrush
@@ -138842,7 +138842,7 @@ fn build_controls_winuicontrols_xaml_deferred_468(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_controls::Control>()));
     // Controls/WinUIControls.xaml(58,25) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "PART_ScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 58, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 58, 25)?;
     // Controls/WinUIControls.xaml(59,25) Padding
     rt::bind_template_binding(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::padding_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), 59, 25)?;
     // Controls/WinUIControls.xaml(60,25) HorizontalScrollBarVisibility
@@ -138870,7 +138870,7 @@ fn build_controls_winuicontrols_xaml_deferred_468(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&items_presenter_0)));
     // Controls/WinUIControls.xaml(69,29) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 69, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 69, 29)?;
     // Controls/WinUIControls.xaml(70,29) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 70, 29)?;
     rt::invoked(items_presenter_0.try_end_init(), 69, 14)?;
@@ -139340,7 +139340,7 @@ fn build_controls_winuicontrols_xaml_deferred_473(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(73,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 73, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 73, 17)?;
     // Controls/WinUIControls.xaml(74,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 74, 17)?;
     // Controls/WinUIControls.xaml(75,17) BorderBrush
@@ -139373,7 +139373,7 @@ fn build_controls_winuicontrols_xaml_deferred_473(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(82,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Pill")));
-    rt::register_name(name_scope.as_ref(), "Pill", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 82, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "Pill", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 82, 21)?;
     // Controls/WinUIControls.xaml(83,21) Theme (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ComboBoxItemPill"));
@@ -139417,7 +139417,7 @@ fn build_controls_winuicontrols_xaml_deferred_473(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(92,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 92, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 92, 31)?;
     // Controls/WinUIControls.xaml(93,31) Content (setter chosen at run time)
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_4 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -139652,7 +139652,7 @@ fn build_controls_winuicontrols_xaml_deferred_476(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(87,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("BorderElement")));
-    rt::register_name(name_scope.as_ref(), "BorderElement", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 87, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "BorderElement", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 87, 19)?;
     // Controls/WinUIControls.xaml(88,19) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 88, 19)?;
     // Controls/WinUIControls.xaml(89,19) BorderBrush
@@ -139676,7 +139676,7 @@ fn build_controls_winuicontrols_xaml_deferred_476(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(94,25) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "PART_ScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 94, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 94, 25)?;
     // Controls/WinUIControls.xaml(95,25) HorizontalScrollBarVisibility
     rt::bind_template_binding(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(::ferroui_controls::ScrollViewer::horizontal_scroll_bar_visibility_property()), 95, 25)?;
     // Controls/WinUIControls.xaml(96,25) VerticalScrollBarVisibility
@@ -139713,7 +139713,7 @@ fn build_controls_winuicontrols_xaml_deferred_476(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&text_presenter_0)));
     // Controls/WinUIControls.xaml(102,28) Name
     text_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TextPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_TextPresenter", ::core::clone::Clone::clone(&text_presenter_0).upcast::<::ferroui_base::FerroObject>(), 102, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TextPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_presenter_0)), 102, 28)?;
     // Controls/WinUIControls.xaml(103,28) Text
     let template_binding_10 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TextBox::text_property()));
     // Controls/WinUIControls.xaml(103,28) Mode
@@ -139761,7 +139761,7 @@ fn build_controls_winuicontrols_xaml_deferred_476(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/WinUIControls.xaml(125,22) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PlaceholderTextContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PlaceholderTextContentPresenter", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 125, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PlaceholderTextContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 125, 22)?;
     // Controls/WinUIControls.xaml(126,22) Foreground
     rt::bind_template_binding(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::foreground_property(), rt::property(::ferroui_controls::TextBox::placeholder_foreground_property()), 126, 22)?;
     // Controls/WinUIControls.xaml(127,22) Margin
@@ -140294,7 +140294,7 @@ fn build_controls_winuicontrols_xaml_deferred_478(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/WinUIControls.xaml(206,17) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 206, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 206, 17)?;
     // Controls/WinUIControls.xaml(206,12) ColumnDefinitions
     let column_definitions_0 = ::ferroui_controls::ColumnDefinitions::__markup_new_0();
     rt::invoked(<::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::ColumnDefinition>>>::__markup_set_Capacity(&column_definitions_0, 2_i32), 206, 37)?;
@@ -140314,7 +140314,7 @@ fn build_controls_winuicontrols_xaml_deferred_478(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(207,21) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HighlightBackground")));
-    rt::register_name(name_scope.as_ref(), "HighlightBackground", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 207, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "HighlightBackground", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 207, 21)?;
     // Controls/WinUIControls.xaml(207,14) Column
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_0);
@@ -140369,7 +140369,7 @@ fn build_controls_winuicontrols_xaml_deferred_478(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(217,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Background")));
-    rt::register_name(name_scope.as_ref(), "Background", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 217, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "Background", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 217, 21)?;
     // Controls/WinUIControls.xaml(217,14) Column
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_7);
@@ -140402,7 +140402,7 @@ fn build_controls_winuicontrols_xaml_deferred_478(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/WinUIControls.xaml(227,21) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Pill")));
-    rt::register_name(name_scope.as_ref(), "Pill", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 227, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "Pill", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 227, 21)?;
     // Controls/WinUIControls.xaml(227,14) Column
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_10);
@@ -140436,7 +140436,7 @@ fn build_controls_winuicontrols_xaml_deferred_478(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&content_control_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(232,29) Name
     content_control_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "ContentPresenter", ::core::clone::Clone::clone(&content_control_0).upcast::<::ferroui_base::FerroObject>(), 232, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_0)), 232, 29)?;
     // Controls/WinUIControls.xaml(232,14) Column
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
     content_control_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_14);
@@ -140477,7 +140477,7 @@ fn build_controls_winuicontrols_xaml_deferred_478(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/WinUIControls.xaml(241,24) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PlaceholderTextBlock")));
-    rt::register_name(name_scope.as_ref(), "PlaceholderTextBlock", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 241, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "PlaceholderTextBlock", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 241, 24)?;
     // Controls/WinUIControls.xaml(241,14) Column
     let priority_16 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_16);
@@ -140539,7 +140539,7 @@ fn build_controls_winuicontrols_xaml_deferred_478(
     context.push_parent(rt::to_value(text_box_0.clone()));
     // Controls/WinUIControls.xaml(255,22) Name
     text_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_EditableTextBox")));
-    rt::register_name(name_scope.as_ref(), "PART_EditableTextBox", ::core::clone::Clone::clone(&text_box_0).upcast::<::ferroui_base::FerroObject>(), 255, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_EditableTextBox", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_box_0)), 255, 22)?;
     // Controls/WinUIControls.xaml(255,14) Column
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
     text_box_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_17);
@@ -140594,7 +140594,7 @@ fn build_controls_winuicontrols_xaml_deferred_478(
     context.push_parent(rt::to_value(border_3.clone()));
     // Controls/WinUIControls.xaml(268,21) Name
     border_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("DropDownOverlay")));
-    rt::register_name(name_scope.as_ref(), "DropDownOverlay", ::core::clone::Clone::clone(&border_3).upcast::<::ferroui_base::FerroObject>(), 268, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "DropDownOverlay", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_3)), 268, 21)?;
     // Controls/WinUIControls.xaml(268,14) Column
     let priority_21 = ::ferroui_base::data::BindingPriority::Template;
     border_3.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_21);
@@ -140664,7 +140664,7 @@ fn build_controls_winuicontrols_xaml_deferred_478(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/WinUIControls.xaml(287,21) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("DropDownGlyph")));
-    rt::register_name(name_scope.as_ref(), "DropDownGlyph", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 287, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "DropDownGlyph", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 287, 21)?;
     // Controls/WinUIControls.xaml(288,21) Data (setter chosen at run time)
     let priority_35 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE96E"));
@@ -140706,7 +140706,7 @@ fn build_controls_winuicontrols_xaml_deferred_478(
     context.push_parent(rt::to_value(popup_0.clone()));
     // Controls/WinUIControls.xaml(295,20) Name
     popup_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Popup")));
-    rt::register_name(name_scope.as_ref(), "PART_Popup", ::core::clone::Clone::clone(&popup_0).upcast::<::ferroui_base::FerroObject>(), 295, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Popup", ::std::rc::Rc::new(::core::clone::Clone::clone(&popup_0)), 295, 20)?;
     // Controls/WinUIControls.xaml(295,14) WindowManagerAddShadowHint
     let priority_40 = ::ferroui_base::data::BindingPriority::Template;
     popup_0.set_value_with_priority(::ferroui_controls::primitives::Popup::window_manager_add_shadow_hint_property(), ::core::clone::Clone::clone(&false), priority_40);
@@ -140744,7 +140744,7 @@ fn build_controls_winuicontrols_xaml_deferred_478(
     context.push_parent(rt::to_value(border_4.clone()));
     // Controls/WinUIControls.xaml(303,23) Name
     border_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ThemeShadowWrapper")));
-    rt::register_name(name_scope.as_ref(), "ThemeShadowWrapper", ::core::clone::Clone::clone(&border_4).upcast::<::ferroui_base::FerroObject>(), 303, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "ThemeShadowWrapper", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_4)), 303, 23)?;
     // Controls/WinUIControls.xaml(304,23) BoxShadow
     rt::bind_dynamic_resource(&context, border_4.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::box_shadow_property(), "ThemeShadowFlyoutBoxShadow", 304, 23)?;
     // Controls/WinUIControls.xaml(303,16) Margin
@@ -140763,7 +140763,7 @@ fn build_controls_winuicontrols_xaml_deferred_478(
     context.push_parent(rt::to_value(border_5.clone()));
     // Controls/WinUIControls.xaml(308,25) Name
     border_5.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PopupBorder")));
-    rt::register_name(name_scope.as_ref(), "PopupBorder", ::core::clone::Clone::clone(&border_5).upcast::<::ferroui_base::FerroObject>(), 308, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PopupBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_5)), 308, 25)?;
     // Controls/WinUIControls.xaml(309,25) MinWidth
     let reflection_binding_extension_2 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("Bounds.Width"));
     context.push_parent(rt::to_value(reflection_binding_extension_2.clone()));
@@ -140797,7 +140797,7 @@ fn build_controls_winuicontrols_xaml_deferred_478(
     context.push_parent(rt::to_value(scroll_viewer_0.clone()));
     // Controls/WinUIControls.xaml(317,33) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "ScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 317, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "ScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 317, 33)?;
     // Controls/WinUIControls.xaml(318,33) Foreground
     rt::bind_dynamic_resource(&context, scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::foreground_property(), "ComboBoxDropDownForeground", 318, 33)?;
     // Controls/WinUIControls.xaml(319,33) HorizontalScrollBarVisibility
@@ -140819,7 +140819,7 @@ fn build_controls_winuicontrols_xaml_deferred_478(
     context.push_parent(rt::to_value(items_presenter_0.clone()));
     // Controls/WinUIControls.xaml(324,37) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 324, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 324, 37)?;
     // Controls/WinUIControls.xaml(325,37) Margin
     rt::bind_dynamic_resource(&context, items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "ComboBoxDropdownContentMargin", 325, 37)?;
     // Controls/WinUIControls.xaml(326,37) ItemsPanel
@@ -140978,7 +140978,7 @@ fn build_controls_winuicontrols_xaml_deferred_482(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/WinUIControls.xaml(76,19) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("CollapsedGlyph")));
-    rt::register_name(name_scope.as_ref(), "CollapsedGlyph", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 76, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "CollapsedGlyph", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 76, 19)?;
     // Controls/WinUIControls.xaml(77,19) Data (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE76C"));
@@ -141018,7 +141018,7 @@ fn build_controls_winuicontrols_xaml_deferred_482(
     context.push_parent(rt::to_value(path_1.clone()));
     // Controls/WinUIControls.xaml(84,19) Name
     path_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ExpandedGlyph")));
-    rt::register_name(name_scope.as_ref(), "ExpandedGlyph", ::core::clone::Clone::clone(&path_1).upcast::<::ferroui_base::FerroObject>(), 84, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "ExpandedGlyph", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_1)), 84, 19)?;
     // Controls/WinUIControls.xaml(85,19) Data (setter chosen at run time)
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE70D"));
@@ -141659,7 +141659,7 @@ fn build_controls_winuicontrols_xaml_deferred_485(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(138,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Header")));
-    rt::register_name(name_scope.as_ref(), "PART_Header", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 138, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Header", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 138, 19)?;
     // Controls/WinUIControls.xaml(139,19) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 139, 19)?;
     // Controls/WinUIControls.xaml(140,19) BorderBrush
@@ -141695,7 +141695,7 @@ fn build_controls_winuicontrols_xaml_deferred_485(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/WinUIControls.xaml(149,23) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SelectionIndicator")));
-    rt::register_name(name_scope.as_ref(), "SelectionIndicator", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 149, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "SelectionIndicator", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 149, 23)?;
     // Controls/WinUIControls.xaml(149,16) Width
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 3.0_f64, priority_2);
@@ -141727,7 +141727,7 @@ fn build_controls_winuicontrols_xaml_deferred_485(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/WinUIControls.xaml(157,23) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("MultiSelectGrid")));
-    rt::register_name(name_scope.as_ref(), "MultiSelectGrid", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 157, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "MultiSelectGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 157, 23)?;
     // Controls/WinUIControls.xaml(158,23) Margin
     rt::bind_dynamic_resource(&context, border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "TreeViewItemMultiSelectSelectedItemBorderMargin", 158, 23)?;
     // Controls/WinUIControls.xaml(159,23) Padding
@@ -141772,7 +141772,7 @@ fn build_controls_winuicontrols_xaml_deferred_485(
     context.push_parent(rt::to_value(toggle_button_0.clone()));
     // Controls/WinUIControls.xaml(164,33) Name
     toggle_button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ExpandCollapseChevron")));
-    rt::register_name(name_scope.as_ref(), "ExpandCollapseChevron", ::core::clone::Clone::clone(&toggle_button_0).upcast::<::ferroui_base::FerroObject>(), 164, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "ExpandCollapseChevron", ::std::rc::Rc::new(::core::clone::Clone::clone(&toggle_button_0)), 164, 33)?;
     // Controls/WinUIControls.xaml(164,20) Column
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     toggle_button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_9);
@@ -141807,7 +141807,7 @@ fn build_controls_winuicontrols_xaml_deferred_485(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/WinUIControls.xaml(168,37) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HeaderPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_HeaderPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 168, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HeaderPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 168, 37)?;
     // Controls/WinUIControls.xaml(168,20) Column
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_11);
@@ -141856,7 +141856,7 @@ fn build_controls_winuicontrols_xaml_deferred_485(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(182,27) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 182, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 182, 27)?;
     // Controls/WinUIControls.xaml(183,27) IsVisible
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::is_visible_property(), rt::property(::ferroui_controls::TreeViewItem::is_expanded_property()), 183, 27)?;
     // Controls/WinUIControls.xaml(184,27) ItemsPanel
@@ -141945,7 +141945,7 @@ fn build_controls_winuicontrols_xaml_deferred_488(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_controls::Control>()));
     // Controls/WinUIControls.xaml(51,25) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "ScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 51, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "ScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 51, 25)?;
     // Controls/WinUIControls.xaml(52,25) HorizontalScrollBarVisibility
     rt::bind_template_binding(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(::ferroui_controls::ScrollViewer::horizontal_scroll_bar_visibility_property()), 52, 25)?;
     // Controls/WinUIControls.xaml(53,25) VerticalScrollBarVisibility
@@ -141965,7 +141965,7 @@ fn build_controls_winuicontrols_xaml_deferred_488(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&items_presenter_0)));
     // Controls/WinUIControls.xaml(58,29) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 58, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 58, 29)?;
     // Controls/WinUIControls.xaml(59,29) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 59, 29)?;
     // Controls/WinUIControls.xaml(60,29) Margin
@@ -142130,7 +142130,7 @@ fn build_controls_winuicontrols_xaml_deferred_491(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(56,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ButtonLayoutGrid")));
-    rt::register_name(name_scope.as_ref(), "ButtonLayoutGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 56, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "ButtonLayoutGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 56, 17)?;
     // Controls/WinUIControls.xaml(57,17) BorderBrush
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::border_brush_property(), "TextControlButtonBorderBrush", 57, 17)?;
     // Controls/WinUIControls.xaml(56,10) BackgroundSizing
@@ -142162,7 +142162,7 @@ fn build_controls_winuicontrols_xaml_deferred_491(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/WinUIControls.xaml(65,17) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("GlyphElement")));
-    rt::register_name(name_scope.as_ref(), "GlyphElement", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 65, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "GlyphElement", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 65, 17)?;
     // Controls/WinUIControls.xaml(66,17) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "TextControlButtonForeground", 66, 17)?;
     // Controls/WinUIControls.xaml(67,17) Data (setter chosen at run time)
@@ -142450,7 +142450,7 @@ fn build_controls_winuicontrols_xaml_deferred_493(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(122,21) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("BorderElement")));
-    rt::register_name(name_scope.as_ref(), "BorderElement", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 122, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "BorderElement", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 122, 21)?;
     // Controls/WinUIControls.xaml(122,14) Column
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_0);
@@ -142477,7 +142477,7 @@ fn build_controls_winuicontrols_xaml_deferred_493(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(131,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("InnerLeftContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "InnerLeftContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 131, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "InnerLeftContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 131, 31)?;
     // Controls/WinUIControls.xaml(132,31) IsVisible
     let template_binding_4 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TextBox::inner_left_content_property()));
     // Controls/WinUIControls.xaml(132,31) Converter
@@ -142511,7 +142511,7 @@ fn build_controls_winuicontrols_xaml_deferred_493(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(137,27) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "PART_ScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 137, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 137, 27)?;
     // Controls/WinUIControls.xaml(137,14) Column
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     scroll_viewer_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_5);
@@ -142555,7 +142555,7 @@ fn build_controls_winuicontrols_xaml_deferred_493(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&text_presenter_0)));
     // Controls/WinUIControls.xaml(148,30) Name
     text_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TextPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_TextPresenter", ::core::clone::Clone::clone(&text_presenter_0).upcast::<::ferroui_base::FerroObject>(), 148, 30)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TextPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_presenter_0)), 148, 30)?;
     // Controls/WinUIControls.xaml(149,30) Text
     let template_binding_16 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TextBox::text_property()));
     // Controls/WinUIControls.xaml(149,30) Mode
@@ -142599,7 +142599,7 @@ fn build_controls_winuicontrols_xaml_deferred_493(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/WinUIControls.xaml(169,24) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PlaceholderTextContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PlaceholderTextContentPresenter", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 169, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "PlaceholderTextContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 169, 24)?;
     // Controls/WinUIControls.xaml(169,14) Column
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_7);
@@ -142668,7 +142668,7 @@ fn build_controls_winuicontrols_xaml_deferred_493(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/WinUIControls.xaml(186,21) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("DeleteButton")));
-    rt::register_name(name_scope.as_ref(), "DeleteButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 186, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "DeleteButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 186, 21)?;
     // Controls/WinUIControls.xaml(186,14) Column
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_10);
@@ -142720,7 +142720,7 @@ fn build_controls_winuicontrols_xaml_deferred_493(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(199,31) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("InnerRightContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "InnerRightContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 199, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "InnerRightContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 199, 31)?;
     // Controls/WinUIControls.xaml(200,31) IsVisible
     let template_binding_39 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TextBox::inner_right_content_property()));
     // Controls/WinUIControls.xaml(200,31) Converter
@@ -142826,7 +142826,7 @@ fn build_controls_winuicontrols_xaml_deferred_495(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/WinUIControls.xaml(262,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 262, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 262, 15)?;
     // Controls/WinUIControls.xaml(263,12) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
     // Controls/WinUIControls.xaml(263,12) TextBox
@@ -142836,7 +142836,7 @@ fn build_controls_winuicontrols_xaml_deferred_495(
     context.push_parent(rt::to_value(text_box_0.clone()));
     // Controls/WinUIControls.xaml(263,20) Name
     text_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TextBox")));
-    rt::register_name(name_scope.as_ref(), "PART_TextBox", ::core::clone::Clone::clone(&text_box_0).upcast::<::ferroui_base::FerroObject>(), 263, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TextBox", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_box_0)), 263, 20)?;
     // Controls/WinUIControls.xaml(264,20) Theme (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("AutoSuggestBoxTextBoxStyle"));
@@ -142932,7 +142932,7 @@ fn build_controls_winuicontrols_xaml_deferred_495(
     context.push_parent(rt::to_value(popup_0.clone()));
     // Controls/WinUIControls.xaml(288,18) Name
     popup_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Popup")));
-    rt::register_name(name_scope.as_ref(), "PART_Popup", ::core::clone::Clone::clone(&popup_0).upcast::<::ferroui_base::FerroObject>(), 288, 18)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Popup", ::std::rc::Rc::new(::core::clone::Clone::clone(&popup_0)), 288, 18)?;
     // Controls/WinUIControls.xaml(288,12) WindowManagerAddShadowHint
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     popup_0.set_value_with_priority(::ferroui_controls::primitives::Popup::window_manager_add_shadow_hint_property(), ::core::clone::Clone::clone(&false), priority_7);
@@ -142951,7 +142951,7 @@ fn build_controls_winuicontrols_xaml_deferred_495(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(292,21) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SuggestionsContainer")));
-    rt::register_name(name_scope.as_ref(), "SuggestionsContainer", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 292, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "SuggestionsContainer", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 292, 21)?;
     // Controls/WinUIControls.xaml(293,21) BoxShadow
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::box_shadow_property(), "ThemeShadowFlyoutBoxShadow", 293, 21)?;
     // Controls/WinUIControls.xaml(294,21) Margin (setter chosen at run time)
@@ -142996,7 +142996,7 @@ fn build_controls_winuicontrols_xaml_deferred_495(
     context.push_parent(rt::to_value(list_box_0.clone()));
     // Controls/WinUIControls.xaml(302,24) Name
     list_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SelectingItemsControl")));
-    rt::register_name(name_scope.as_ref(), "PART_SelectingItemsControl", ::core::clone::Clone::clone(&list_box_0).upcast::<::ferroui_base::FerroObject>(), 302, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SelectingItemsControl", ::std::rc::Rc::new(::core::clone::Clone::clone(&list_box_0)), 302, 24)?;
     // Controls/WinUIControls.xaml(303,24) ItemTemplate
     rt::bind_template_binding(list_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ItemsControl::item_template_property(), rt::property(::ferroui_controls::AutoCompleteBox::item_template_property()), 303, 24)?;
     // Controls/WinUIControls.xaml(304,24) ItemContainerTheme (setter chosen at run time)
@@ -143147,7 +143147,7 @@ fn build_controls_winuicontrols_xaml_deferred_498(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/WinUIControls.xaml(70,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 70, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 70, 27)?;
     // Controls/WinUIControls.xaml(71,27) Background
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), "TextControlButtonBackground", 71, 27)?;
     // Controls/WinUIControls.xaml(72,27) BackgroundSizing
@@ -143216,7 +143216,7 @@ fn build_controls_winuicontrols_xaml_deferred_500(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/WinUIControls.xaml(108,16) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Text")));
-    rt::register_name(name_scope.as_ref(), "PART_Text", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 108, 16)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Text", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 108, 16)?;
     // Controls/WinUIControls.xaml(108,6) HorizontalAlignment
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Stretch, priority_0);
@@ -143329,7 +143329,7 @@ fn build_controls_winuicontrols_xaml_deferred_502(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/WinUIControls.xaml(137,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 137, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 137, 15)?;
     // Controls/WinUIControls.xaml(137,10) RowDefinitions
     let row_definitions_0 = ::ferroui_controls::RowDefinitions::__markup_new_0();
     rt::invoked(<::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::RowDefinition>>>::__markup_set_Capacity(&row_definitions_0, 3_i32), 137, 35)?;
@@ -143352,7 +143352,7 @@ fn build_controls_winuicontrols_xaml_deferred_502(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/WinUIControls.xaml(138,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HeaderPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_HeaderPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 138, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HeaderPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 138, 29)?;
     // Controls/WinUIControls.xaml(138,12) Row
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 0_i32, priority_0);
@@ -143397,7 +143397,7 @@ fn build_controls_winuicontrols_xaml_deferred_502(
     context.push_parent(rt::to_value(text_box_0.clone()));
     // Controls/WinUIControls.xaml(147,20) Name
     text_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TextBox")));
-    rt::register_name(name_scope.as_ref(), "TextBox", ::core::clone::Clone::clone(&text_box_0).upcast::<::ferroui_base::FerroObject>(), 147, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "TextBox", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_box_0)), 147, 20)?;
     // Controls/WinUIControls.xaml(147,12) Row
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     text_box_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_4);
@@ -143452,7 +143452,7 @@ fn build_controls_winuicontrols_xaml_deferred_502(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/WinUIControls.xaml(164,23) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("QueryButton")));
-    rt::register_name(name_scope.as_ref(), "QueryButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 164, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "QueryButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 164, 23)?;
     // Controls/WinUIControls.xaml(165,23) Theme (setter chosen at run time)
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("AutoSuggestBoxQueryButtonStyle"));
@@ -143509,7 +143509,7 @@ fn build_controls_winuicontrols_xaml_deferred_502(
     context.push_parent(rt::to_value(popup_0.clone()));
     // Controls/WinUIControls.xaml(179,18) Name
     popup_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SuggestionsPopup")));
-    rt::register_name(name_scope.as_ref(), "SuggestionsPopup", ::core::clone::Clone::clone(&popup_0).upcast::<::ferroui_base::FerroObject>(), 179, 18)?;
+    rt::register_name_value(name_scope.as_ref(), "SuggestionsPopup", ::std::rc::Rc::new(::core::clone::Clone::clone(&popup_0)), 179, 18)?;
     // Controls/WinUIControls.xaml(179,12) WindowManagerAddShadowHint
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
     popup_0.set_value_with_priority(::ferroui_controls::primitives::Popup::window_manager_add_shadow_hint_property(), ::core::clone::Clone::clone(&false), priority_17);
@@ -143531,7 +143531,7 @@ fn build_controls_winuicontrols_xaml_deferred_502(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/WinUIControls.xaml(184,21) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SuggestionsContainer")));
-    rt::register_name(name_scope.as_ref(), "SuggestionsContainer", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 184, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "SuggestionsContainer", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 184, 21)?;
     // Controls/WinUIControls.xaml(185,21) BoxShadow
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::box_shadow_property(), "ThemeShadowFlyoutBoxShadow", 185, 21)?;
     // Controls/WinUIControls.xaml(186,21) Margin (setter chosen at run time)
@@ -143564,7 +143564,7 @@ fn build_controls_winuicontrols_xaml_deferred_502(
     context.push_parent(rt::to_value(list_box_0.clone()));
     // Controls/WinUIControls.xaml(192,24) Name
     list_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SuggestionsList")));
-    rt::register_name(name_scope.as_ref(), "SuggestionsList", ::core::clone::Clone::clone(&list_box_0).upcast::<::ferroui_base::FerroObject>(), 192, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "SuggestionsList", ::std::rc::Rc::new(::core::clone::Clone::clone(&list_box_0)), 192, 24)?;
     // Controls/WinUIControls.xaml(193,24) ItemTemplate
     rt::bind_template_binding(list_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ItemsControl::item_template_property(), rt::property(::ferroui_controls::ItemsControl::item_template_property()), 193, 24)?;
     // Controls/WinUIControls.xaml(194,24) ItemContainerTheme (setter chosen at run time)
@@ -143612,7 +143612,7 @@ fn build_controls_winuicontrols_xaml_deferred_502(
     context.push_parent(rt::to_value(content_presenter_1.clone()));
     // Controls/WinUIControls.xaml(203,29) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("DescriptionPresenter")));
-    rt::register_name(name_scope.as_ref(), "DescriptionPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 203, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "DescriptionPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 203, 29)?;
     // Controls/WinUIControls.xaml(203,12) Row
     let priority_26 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_controls::Grid::row_property(), 2_i32, priority_26);
@@ -143735,7 +143735,7 @@ fn build_controls_winuicontrols_xaml_deferred_505(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/WinUIControls.xaml(59,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HeaderPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_HeaderPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 59, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HeaderPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 59, 29)?;
     // Controls/WinUIControls.xaml(60,29) Content (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_0 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::HeaderedSelectingItemsControl::header_property()));
@@ -143762,7 +143762,7 @@ fn build_controls_winuicontrols_xaml_deferred_505(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/WinUIControls.xaml(64,27) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 64, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 64, 27)?;
     // Controls/WinUIControls.xaml(65,27) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 65, 27)?;
     rt::invoked(items_presenter_0.try_end_init(), 64, 12)?;

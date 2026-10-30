@@ -71150,7 +71150,7 @@ fn build_controls_macoscontrols_xaml_deferred_3(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(23,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TransparencyFallback")));
-    rt::register_name(name_scope.as_ref(), "PART_TransparencyFallback", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 23, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TransparencyFallback", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 23, 19)?;
     // Controls/MacOSControls.xaml(23,12) IsHitTestVisible
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_base::input::InputElement::is_hit_test_visible_property(), ::core::clone::Clone::clone(&false), priority_0);
@@ -71170,7 +71170,7 @@ fn build_controls_macoscontrols_xaml_deferred_3(
     border_1.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&visual_layer_manager_0).upcast::<::ferroui_controls::Control>()));
     // Controls/MacOSControls.xaml(25,33) Name
     visual_layer_manager_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_VisualLayerManager")));
-    rt::register_name(name_scope.as_ref(), "PART_VisualLayerManager", ::core::clone::Clone::clone(&visual_layer_manager_0).upcast::<::ferroui_base::FerroObject>(), 25, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_VisualLayerManager", ::std::rc::Rc::new(::core::clone::Clone::clone(&visual_layer_manager_0)), 25, 33)?;
     // Controls/MacOSControls.xaml(26,16) Child
     // Controls/MacOSControls.xaml(26,16) ContentPresenter
     let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
@@ -71178,7 +71178,7 @@ fn build_controls_macoscontrols_xaml_deferred_3(
     visual_layer_manager_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/MacOSControls.xaml(26,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 26, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 26, 33)?;
     // Controls/MacOSControls.xaml(27,33) ContentTemplate
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_template_property(), rt::property(::ferroui_controls::ContentControl::content_template_property()), 27, 33)?;
     // Controls/MacOSControls.xaml(28,33) Content (setter chosen at run time)
@@ -71264,7 +71264,7 @@ fn build_controls_macoscontrols_xaml_deferred_5(
     layout_transform_control_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&visual_layer_manager_0).upcast::<::ferroui_controls::Control>()));
     // Controls/MacOSControls.xaml(23,31) Name
     visual_layer_manager_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_VisualLayerManager")));
-    rt::register_name(name_scope.as_ref(), "PART_VisualLayerManager", ::core::clone::Clone::clone(&visual_layer_manager_0).upcast::<::ferroui_base::FerroObject>(), 23, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_VisualLayerManager", ::std::rc::Rc::new(::core::clone::Clone::clone(&visual_layer_manager_0)), 23, 31)?;
     // Controls/MacOSControls.xaml(24,14) Child
     // Controls/MacOSControls.xaml(24,14) ContentPresenter
     let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
@@ -71272,7 +71272,7 @@ fn build_controls_macoscontrols_xaml_deferred_5(
     visual_layer_manager_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/MacOSControls.xaml(24,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 24, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 24, 31)?;
     // Controls/MacOSControls.xaml(25,31) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 25, 31)?;
     // Controls/MacOSControls.xaml(26,31) ContentTemplate
@@ -71372,7 +71372,7 @@ fn build_controls_macoscontrols_xaml_deferred_7(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(28,21) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TransparencyFallback")));
-    rt::register_name(name_scope.as_ref(), "PART_TransparencyFallback", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 28, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TransparencyFallback", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 28, 21)?;
     // Controls/MacOSControls.xaml(28,14) IsHitTestVisible
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_base::input::InputElement::is_hit_test_visible_property(), ::core::clone::Clone::clone(&false), priority_0);
@@ -71385,7 +71385,7 @@ fn build_controls_macoscontrols_xaml_deferred_7(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&visual_layer_manager_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(29,33) Name
     visual_layer_manager_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_VisualLayerManager")));
-    rt::register_name(name_scope.as_ref(), "PART_VisualLayerManager", ::core::clone::Clone::clone(&visual_layer_manager_0).upcast::<::ferroui_base::FerroObject>(), 29, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_VisualLayerManager", ::std::rc::Rc::new(::core::clone::Clone::clone(&visual_layer_manager_0)), 29, 33)?;
     // Controls/MacOSControls.xaml(30,16) Child
     // Controls/MacOSControls.xaml(30,16) ContentPresenter
     let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
@@ -71393,7 +71393,7 @@ fn build_controls_macoscontrols_xaml_deferred_7(
     visual_layer_manager_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/MacOSControls.xaml(30,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 30, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 30, 33)?;
     // Controls/MacOSControls.xaml(31,33) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 31, 33)?;
     // Controls/MacOSControls.xaml(32,33) ContentTemplate
@@ -71502,7 +71502,7 @@ fn build_controls_macoscontrols_xaml_deferred_10(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(20,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TransparencyFallback")));
-    rt::register_name(name_scope.as_ref(), "PART_TransparencyFallback", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 20, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TransparencyFallback", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 20, 19)?;
     // Controls/MacOSControls.xaml(20,12) IsHitTestVisible
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_base::input::InputElement::is_hit_test_visible_property(), ::core::clone::Clone::clone(&false), priority_0);
@@ -71539,7 +71539,7 @@ fn build_controls_macoscontrols_xaml_deferred_10(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&visual_layer_manager_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(23,31) Name
     visual_layer_manager_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_VisualLayerManager")));
-    rt::register_name(name_scope.as_ref(), "PART_VisualLayerManager", ::core::clone::Clone::clone(&visual_layer_manager_0).upcast::<::ferroui_base::FerroObject>(), 23, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_VisualLayerManager", ::std::rc::Rc::new(::core::clone::Clone::clone(&visual_layer_manager_0)), 23, 31)?;
     // Controls/MacOSControls.xaml(24,14) Child
     // Controls/MacOSControls.xaml(24,14) ContentPresenter
     let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
@@ -71547,7 +71547,7 @@ fn build_controls_macoscontrols_xaml_deferred_10(
     visual_layer_manager_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/MacOSControls.xaml(24,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 24, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 24, 31)?;
     // Controls/MacOSControls.xaml(24,60) ContentTemplate
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_template_property(), rt::property(::ferroui_controls::ContentControl::content_template_property()), 24, 60)?;
     // Controls/MacOSControls.xaml(24,112) Content (setter chosen at run time)
@@ -71701,7 +71701,7 @@ fn build_controls_macoscontrols_xaml_deferred_12(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(23,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Background")));
-    rt::register_name(name_scope.as_ref(), "Background", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 23, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "Background", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 23, 19)?;
     // Controls/MacOSControls.xaml(24,19) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 24, 19)?;
     // Controls/MacOSControls.xaml(25,19) BorderBrush
@@ -71723,7 +71723,7 @@ fn build_controls_macoscontrols_xaml_deferred_12(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(29,19) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("BackgroundPointerOver")));
-    rt::register_name(name_scope.as_ref(), "BackgroundPointerOver", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 29, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "BackgroundPointerOver", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 29, 19)?;
     // Controls/MacOSControls.xaml(30,19) Background
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "ThumbBackgroundPointerOver", 30, 19)?;
     // Controls/MacOSControls.xaml(31,19) BorderBrush
@@ -71749,7 +71749,7 @@ fn build_controls_macoscontrols_xaml_deferred_12(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/MacOSControls.xaml(36,19) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("BackgroundPressed")));
-    rt::register_name(name_scope.as_ref(), "BackgroundPressed", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 36, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "BackgroundPressed", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 36, 19)?;
     // Controls/MacOSControls.xaml(37,19) Background
     rt::bind_dynamic_resource(&context, border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "ThumbBackgroundPressed", 37, 19)?;
     // Controls/MacOSControls.xaml(38,19) BorderBrush
@@ -71870,7 +71870,7 @@ fn build_controls_macoscontrols_xaml_deferred_16(
     text_block_0.begin_init();
     // Controls/MacOSControls.xaml(39,20) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Text")));
-    rt::register_name(name_scope.as_ref(), "PART_Text", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 39, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Text", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 39, 20)?;
     // Controls/MacOSControls.xaml(39,10) HorizontalAlignment
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Stretch, priority_0);
@@ -71924,7 +71924,7 @@ fn build_controls_macoscontrols_xaml_deferred_18(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/MacOSControls.xaml(34,20) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Text")));
-    rt::register_name(name_scope.as_ref(), "PART_Text", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 34, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Text", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 34, 20)?;
     // Controls/MacOSControls.xaml(34,10) HorizontalAlignment
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Stretch, priority_0);
@@ -71990,7 +71990,7 @@ fn build_controls_macoscontrols_xaml_deferred_20(
     content_presenter_0.begin_init();
     // Controls/MacOSControls.xaml(43,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 43, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 43, 27)?;
     // Controls/MacOSControls.xaml(44,27) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 44, 27)?;
     // Controls/MacOSControls.xaml(45,27) BackgroundSizing
@@ -72076,7 +72076,7 @@ fn build_controls_macoscontrols_xaml_deferred_22(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/MacOSControls.xaml(33,27) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 33, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 33, 27)?;
     // Controls/MacOSControls.xaml(34,27) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 34, 27)?;
     rt::invoked(items_presenter_0.try_end_init(), 33, 12)?;
@@ -72137,7 +72137,7 @@ fn build_controls_macoscontrols_xaml_deferred_24(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(35,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 35, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 35, 17)?;
     // Controls/MacOSControls.xaml(36,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 36, 17)?;
     // Controls/MacOSControls.xaml(37,17) BackgroundSizing
@@ -72175,7 +72175,7 @@ fn build_controls_macoscontrols_xaml_deferred_24(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/MacOSControls.xaml(43,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HeaderPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_HeaderPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 43, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HeaderPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 43, 31)?;
     // Controls/MacOSControls.xaml(43,14) Row
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 0_i32, priority_0);
@@ -72229,7 +72229,7 @@ fn build_controls_macoscontrols_xaml_deferred_24(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(56,31) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 56, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 56, 31)?;
     // Controls/MacOSControls.xaml(56,14) Row
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_6);
@@ -72353,7 +72353,7 @@ fn build_controls_macoscontrols_xaml_deferred_26(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/MacOSControls.xaml(29,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootGrid")));
-    rt::register_name(name_scope.as_ref(), "RootGrid", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 29, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 29, 15)?;
     // Controls/MacOSControls.xaml(29,10) RowDefinitions
     let row_definitions_0 = ::ferroui_controls::RowDefinitions::__markup_new_0();
     rt::invoked(<::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::RowDefinition>>>::__markup_set_Capacity(&row_definitions_0, 2_i32), 29, 33)?;
@@ -72373,7 +72373,7 @@ fn build_controls_macoscontrols_xaml_deferred_26(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(30,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ToggleButtonGrid")));
-    rt::register_name(name_scope.as_ref(), "ToggleButtonGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 30, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "ToggleButtonGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 30, 19)?;
     // Controls/MacOSControls.xaml(30,12) Row
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 0_i32, priority_0);
@@ -72404,7 +72404,7 @@ fn build_controls_macoscontrols_xaml_deferred_26(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/MacOSControls.xaml(31,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HeaderPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_HeaderPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 31, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HeaderPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 31, 31)?;
     // Controls/MacOSControls.xaml(31,61) Content (setter chosen at run time)
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_1 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::HeaderedContentControl::header_property()));
@@ -72465,7 +72465,7 @@ fn build_controls_macoscontrols_xaml_deferred_26(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(33,19) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ExpanderContent")));
-    rt::register_name(name_scope.as_ref(), "ExpanderContent", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 33, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "ExpanderContent", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 33, 19)?;
     // Controls/MacOSControls.xaml(33,12) Row
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_12);
@@ -72491,7 +72491,7 @@ fn build_controls_macoscontrols_xaml_deferred_26(
     border_1.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>()));
     // Controls/MacOSControls.xaml(34,31) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 34, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 34, 31)?;
     // Controls/MacOSControls.xaml(34,62) Content (setter chosen at run time)
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_9 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -72589,7 +72589,7 @@ fn build_controls_macoscontrols_xaml_deferred_29(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(36,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 36, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 36, 29)?;
     // Controls/MacOSControls.xaml(37,29) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 37, 29)?;
     // Controls/MacOSControls.xaml(38,29) BackgroundSizing
@@ -72617,7 +72617,7 @@ fn build_controls_macoscontrols_xaml_deferred_29(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(46,29) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter2")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter2", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 46, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter2", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 46, 29)?;
     // Controls/MacOSControls.xaml(47,29) Background
     rt::bind_template_binding(content_presenter_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 47, 29)?;
     // Controls/MacOSControls.xaml(48,29) BackgroundSizing
@@ -72680,7 +72680,7 @@ fn build_controls_macoscontrols_xaml_deferred_31(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/MacOSControls.xaml(34,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HitTestBox")));
-    rt::register_name(name_scope.as_ref(), "HitTestBox", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 34, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "HitTestBox", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 34, 15)?;
     // Controls/MacOSControls.xaml(34,10) Width
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     grid_0.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 30.24_f64, priority_0);
@@ -72698,7 +72698,7 @@ fn build_controls_macoscontrols_xaml_deferred_31(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(35,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Indicator")));
-    rt::register_name(name_scope.as_ref(), "PART_Indicator", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 35, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Indicator", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 35, 19)?;
     // Controls/MacOSControls.xaml(35,12) Width
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 1.0_f64, priority_3);
@@ -72721,7 +72721,7 @@ fn build_controls_macoscontrols_xaml_deferred_31(
     context.push_parent(rt::to_value(ellipse_0.clone()));
     // Controls/MacOSControls.xaml(40,20) Name
     ellipse_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("EllipseExternal")));
-    rt::register_name(name_scope.as_ref(), "EllipseExternal", ::core::clone::Clone::clone(&ellipse_0).upcast::<::ferroui_base::FerroObject>(), 40, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "EllipseExternal", ::std::rc::Rc::new(::core::clone::Clone::clone(&ellipse_0)), 40, 20)?;
     // Controls/MacOSControls.xaml(40,12) Width
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     ellipse_0.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 18.14_f64, priority_7);
@@ -72747,7 +72747,7 @@ fn build_controls_macoscontrols_xaml_deferred_31(
     context.push_parent(rt::to_value(ellipse_1.clone()));
     // Controls/MacOSControls.xaml(46,20) Name
     ellipse_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("EllipseInternal")));
-    rt::register_name(name_scope.as_ref(), "EllipseInternal", ::core::clone::Clone::clone(&ellipse_1).upcast::<::ferroui_base::FerroObject>(), 46, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "EllipseInternal", ::std::rc::Rc::new(::core::clone::Clone::clone(&ellipse_1)), 46, 20)?;
     // Controls/MacOSControls.xaml(46,12) Width
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     ellipse_1.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 13.98_f64, priority_11);
@@ -72860,7 +72860,7 @@ fn build_controls_macoscontrols_xaml_deferred_34(
     border_0.begin_init();
     // Controls/MacOSControls.xaml(36,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SplitterBorder")));
-    rt::register_name(name_scope.as_ref(), "SplitterBorder", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 36, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "SplitterBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 36, 17)?;
     // Controls/MacOSControls.xaml(37,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 37, 17)?;
     // Controls/MacOSControls.xaml(38,17) BorderBrush
@@ -73669,7 +73669,7 @@ fn build_controls_macoscontrols_xaml_deferred_36(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(74,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("OuterBorder")));
-    rt::register_name(name_scope.as_ref(), "OuterBorder", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 74, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "OuterBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 74, 19)?;
     // Controls/MacOSControls.xaml(75,19) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 75, 19)?;
     // Controls/MacOSControls.xaml(76,19) BorderBrush
@@ -73693,7 +73693,7 @@ fn build_controls_macoscontrols_xaml_deferred_36(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(81,19) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("InnerBorder")));
-    rt::register_name(name_scope.as_ref(), "InnerBorder", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 81, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "InnerBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 81, 19)?;
     // Controls/MacOSControls.xaml(82,19) Margin
     rt::bind_template_binding(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()), 82, 19)?;
     // Controls/MacOSControls.xaml(81,12) BorderThickness
@@ -73724,7 +73724,7 @@ fn build_controls_macoscontrols_xaml_deferred_36(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/MacOSControls.xaml(87,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 87, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 87, 31)?;
     // Controls/MacOSControls.xaml(88,31) Content (setter chosen at run time)
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_6 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -73760,7 +73760,7 @@ fn build_controls_macoscontrols_xaml_deferred_36(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/MacOSControls.xaml(97,17) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("BlackoutStrikethrough")));
-    rt::register_name(name_scope.as_ref(), "BlackoutStrikethrough", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 97, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "BlackoutStrikethrough", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 97, 17)?;
     // Controls/MacOSControls.xaml(97,12) Data
     let value_1 = rt::invoked(::ferroui_base::media::Geometry::__markup_parse(::std::string::String::from("M 0,0 L 18,18")), 98, 17)?;
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
@@ -73793,7 +73793,7 @@ fn build_controls_macoscontrols_xaml_deferred_36(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/MacOSControls.xaml(105,19) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("FocusVisual")));
-    rt::register_name(name_scope.as_ref(), "FocusVisual", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 105, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "FocusVisual", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 105, 19)?;
     // Controls/MacOSControls.xaml(105,12) Margin
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(-3.0_f64, -3.0_f64, -3.0_f64, -3.0_f64), priority_12);
@@ -74277,7 +74277,7 @@ fn build_controls_macoscontrols_xaml_deferred_38(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(62,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("OuterBorder")));
-    rt::register_name(name_scope.as_ref(), "OuterBorder", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 62, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "OuterBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 62, 19)?;
     // Controls/MacOSControls.xaml(63,19) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 63, 19)?;
     // Controls/MacOSControls.xaml(64,19) BorderBrush
@@ -74311,7 +74311,7 @@ fn build_controls_macoscontrols_xaml_deferred_38(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/MacOSControls.xaml(70,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 70, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 70, 31)?;
     // Controls/MacOSControls.xaml(71,31) Content (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_5 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -74347,7 +74347,7 @@ fn build_controls_macoscontrols_xaml_deferred_38(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(79,19) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("FocusVisual")));
-    rt::register_name(name_scope.as_ref(), "FocusVisual", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 79, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "FocusVisual", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 79, 19)?;
     // Controls/MacOSControls.xaml(79,12) Margin
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(-3.0_f64, -3.0_f64, -3.0_f64, -3.0_f64), priority_3);
@@ -74535,7 +74535,7 @@ fn build_controls_macoscontrols_xaml_deferred_40(
     context.push_parent(rt::to_value(reversible_stack_panel_0.clone()));
     // Controls/MacOSControls.xaml(30,31) Name
     reversible_stack_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Items")));
-    rt::register_name(name_scope.as_ref(), "PART_Items", ::core::clone::Clone::clone(&reversible_stack_panel_0).upcast::<::ferroui_base::FerroObject>(), 30, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Items", ::std::rc::Rc::new(::core::clone::Clone::clone(&reversible_stack_panel_0)), 30, 31)?;
     // Controls/MacOSControls.xaml(30,10) Margin
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     reversible_stack_panel_0.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(12.0_f64, 12.0_f64, 12.0_f64, 12.0_f64), priority_0);
@@ -74877,7 +74877,7 @@ fn build_controls_macoscontrols_xaml_deferred_44(
     border_0.begin_init();
     // Controls/MacOSControls.xaml(31,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("CellWrapper")));
-    rt::register_name(name_scope.as_ref(), "CellWrapper", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 31, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "CellWrapper", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 31, 17)?;
     // Controls/MacOSControls.xaml(32,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 32, 17)?;
     // Controls/MacOSControls.xaml(33,17) BorderBrush
@@ -74896,7 +74896,7 @@ fn build_controls_macoscontrols_xaml_deferred_44(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/MacOSControls.xaml(37,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 37, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 37, 29)?;
     // Controls/MacOSControls.xaml(38,29) Content (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_4 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -75237,7 +75237,7 @@ fn build_controls_macoscontrols_xaml_deferred_46(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(43,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_RootBorder")));
-    rt::register_name(name_scope.as_ref(), "PART_RootBorder", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 43, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_RootBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 43, 19)?;
     // Controls/MacOSControls.xaml(44,19) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 44, 19)?;
     // Controls/MacOSControls.xaml(45,19) BorderThickness
@@ -75264,7 +75264,7 @@ fn build_controls_macoscontrols_xaml_deferred_46(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&panel_2).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(52,22) Name
     panel_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_CellForegroundPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_CellForegroundPresenter", ::core::clone::Clone::clone(&panel_2).upcast::<::ferroui_base::FerroObject>(), 52, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_CellForegroundPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_2)), 52, 22)?;
     // Controls/MacOSControls.xaml(53,18) Children
     let children_collection_2 = ::ferroui_controls::Panel::__markup_get_Children(&panel_2);
     // Controls/MacOSControls.xaml(53,18) TableViewCellsPresenter
@@ -75273,7 +75273,7 @@ fn build_controls_macoscontrols_xaml_deferred_46(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&table_view_cells_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(53,42) Name
     table_view_cells_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_CellsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_CellsPresenter", ::core::clone::Clone::clone(&table_view_cells_presenter_0).upcast::<::ferroui_base::FerroObject>(), 53, 42)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_CellsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&table_view_cells_presenter_0)), 53, 42)?;
     // Controls/MacOSControls.xaml(53,18) HorizontalAlignment
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     table_view_cells_presenter_0.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Left, priority_0);
@@ -75288,7 +75288,7 @@ fn build_controls_macoscontrols_xaml_deferred_46(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/MacOSControls.xaml(58,26) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SelectionIndicator")));
-    rt::register_name(name_scope.as_ref(), "PART_SelectionIndicator", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 58, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SelectionIndicator", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 58, 26)?;
     // Controls/MacOSControls.xaml(58,16) Width
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_0.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 3.0_f64, priority_1);
@@ -75348,7 +75348,7 @@ fn build_controls_macoscontrols_xaml_deferred_46(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(78,19) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_GridLineBorder")));
-    rt::register_name(name_scope.as_ref(), "PART_GridLineBorder", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 78, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_GridLineBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 78, 19)?;
     // Controls/MacOSControls.xaml(79,19) BorderBrush
     rt::bind_template_binding(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::border_brush_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()), 79, 19)?;
     // Controls/MacOSControls.xaml(80,19) BorderThickness
@@ -75538,7 +75538,7 @@ fn build_controls_macoscontrols_xaml_deferred_48(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(28,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TabContainer")));
-    rt::register_name(name_scope.as_ref(), "TabContainer", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 28, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "TabContainer", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 28, 17)?;
     // Controls/MacOSControls.xaml(28,39) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 28, 39)?;
     // Controls/MacOSControls.xaml(28,81) BorderBrush
@@ -75594,7 +75594,7 @@ fn build_controls_macoscontrols_xaml_deferred_48(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(35,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("IconControl")));
-    rt::register_name(name_scope.as_ref(), "IconControl", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 35, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "IconControl", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 35, 31)?;
     // Controls/MacOSControls.xaml(35,52) Content (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_5 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TabItem::icon_property()));
@@ -75637,7 +75637,7 @@ fn build_controls_macoscontrols_xaml_deferred_48(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(36,31) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 36, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 36, 31)?;
     // Controls/MacOSControls.xaml(36,14) Column
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_7);
@@ -75740,7 +75740,7 @@ fn build_controls_macoscontrols_xaml_deferred_51(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(30,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TopCommandBar")));
-    rt::register_name(name_scope.as_ref(), "PART_TopCommandBar", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 30, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TopCommandBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 30, 29)?;
     // Controls/MacOSControls.xaml(30,12) Dock
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Top, priority_0);
@@ -75759,7 +75759,7 @@ fn build_controls_macoscontrols_xaml_deferred_51(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(34,29) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_BottomCommandBar")));
-    rt::register_name(name_scope.as_ref(), "PART_BottomCommandBar", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 34, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_BottomCommandBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 34, 29)?;
     // Controls/MacOSControls.xaml(34,12) Dock
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Bottom, priority_3);
@@ -75778,7 +75778,7 @@ fn build_controls_macoscontrols_xaml_deferred_51(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(38,29) Name
     content_presenter_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_base::FerroObject>(), 38, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_2)), 38, 29)?;
     // Controls/MacOSControls.xaml(39,29) HorizontalContentAlignment
     rt::bind_template_binding(content_presenter_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::horizontal_content_alignment_property(), rt::property(::ferroui_controls::ContentPage::horizontal_content_alignment_property()), 39, 29)?;
     // Controls/MacOSControls.xaml(40,29) VerticalContentAlignment
@@ -75848,7 +75848,7 @@ fn build_controls_macoscontrols_xaml_deferred_53(
     carousel_0.begin_init();
     // Controls/MacOSControls.xaml(33,19) Name
     carousel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Carousel")));
-    rt::register_name(name_scope.as_ref(), "PART_Carousel", ::core::clone::Clone::clone(&carousel_0).upcast::<::ferroui_base::FerroObject>(), 33, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Carousel", ::std::rc::Rc::new(::core::clone::Clone::clone(&carousel_0)), 33, 19)?;
     // Controls/MacOSControls.xaml(34,19) Background
     rt::bind_template_binding(carousel_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 34, 19)?;
     // Controls/MacOSControls.xaml(35,19) ItemTemplate
@@ -76097,7 +76097,7 @@ fn build_controls_macoscontrols_xaml_deferred_56(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(47,21) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("BorderElement")));
-    rt::register_name(name_scope.as_ref(), "BorderElement", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 47, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "BorderElement", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 47, 21)?;
     // Controls/MacOSControls.xaml(48,21) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 48, 21)?;
     // Controls/MacOSControls.xaml(49,21) BorderBrush
@@ -76135,7 +76135,7 @@ fn build_controls_macoscontrols_xaml_deferred_56(
     context.push_parent(rt::to_value(stack_panel_0.clone()));
     // Controls/MacOSControls.xaml(57,27) Name
     stack_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SpinButtons")));
-    rt::register_name(name_scope.as_ref(), "SpinButtons", ::core::clone::Clone::clone(&stack_panel_0).upcast::<::ferroui_base::FerroObject>(), 57, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "SpinButtons", ::std::rc::Rc::new(::core::clone::Clone::clone(&stack_panel_0)), 57, 27)?;
     // Controls/MacOSControls.xaml(57,16) Dock
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     stack_panel_0.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Right, priority_2);
@@ -76159,7 +76159,7 @@ fn build_controls_macoscontrols_xaml_deferred_56(
     context.push_parent(rt::to_value(repeat_button_0.clone()));
     // Controls/MacOSControls.xaml(63,31) Name
     repeat_button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_IncreaseButton")));
-    rt::register_name(name_scope.as_ref(), "PART_IncreaseButton", ::core::clone::Clone::clone(&repeat_button_0).upcast::<::ferroui_base::FerroObject>(), 63, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_IncreaseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_0)), 63, 31)?;
     // Controls/MacOSControls.xaml(64,31) Theme (setter chosen at run time)
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NumericUpDownSpinButtonStyle"));
@@ -76229,7 +76229,7 @@ fn build_controls_macoscontrols_xaml_deferred_56(
     context.push_parent(rt::to_value(repeat_button_1.clone()));
     // Controls/MacOSControls.xaml(74,31) Name
     repeat_button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DecreaseButton")));
-    rt::register_name(name_scope.as_ref(), "PART_DecreaseButton", ::core::clone::Clone::clone(&repeat_button_1).upcast::<::ferroui_base::FerroObject>(), 74, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DecreaseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_1)), 74, 31)?;
     // Controls/MacOSControls.xaml(75,31) Theme (setter chosen at run time)
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NumericUpDownSpinButtonStyle"));
@@ -76300,7 +76300,7 @@ fn build_controls_macoscontrols_xaml_deferred_56(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(86,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 86, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 86, 33)?;
     // Controls/MacOSControls.xaml(87,33) Content (setter chosen at run time)
     let priority_22 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_8 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -76450,7 +76450,7 @@ fn build_controls_macoscontrols_xaml_deferred_59(
     grid_0.begin_init();
     // Controls/MacOSControls.xaml(46,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Root")));
-    rt::register_name(name_scope.as_ref(), "PART_Root", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 46, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 46, 15)?;
     // Controls/MacOSControls.xaml(46,10) MinHeight
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     grid_0.set_value_with_priority(::ferroui_base::layout::Layoutable::min_height_property(), 80.0_f64, priority_0);
@@ -76548,7 +76548,7 @@ fn build_controls_macoscontrols_xaml_deferred_62(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(35,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ThemeShadowWrapper")));
-    rt::register_name(name_scope.as_ref(), "ThemeShadowWrapper", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 35, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "ThemeShadowWrapper", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 35, 17)?;
     // Controls/MacOSControls.xaml(35,45) BoxShadow
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::box_shadow_property(), "MacOSMenuShadow", 35, 45)?;
     // Controls/MacOSControls.xaml(35,91) CornerRadius
@@ -76601,7 +76601,7 @@ fn build_controls_macoscontrols_xaml_deferred_62(
     context.push_parent(rt::to_value(scroll_viewer_0.clone()));
     // Controls/MacOSControls.xaml(39,29) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("MenuFlyoutPresenterScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "MenuFlyoutPresenterScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 39, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "MenuFlyoutPresenterScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 39, 29)?;
     // Controls/MacOSControls.xaml(39,70) Theme (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MenuFlyoutPresenterScrollViewer"));
@@ -76629,7 +76629,7 @@ fn build_controls_macoscontrols_xaml_deferred_62(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&items_presenter_0)));
     // Controls/MacOSControls.xaml(40,33) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 40, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 40, 33)?;
     // Controls/MacOSControls.xaml(40,62) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 40, 62)?;
     // Controls/MacOSControls.xaml(40,18) TabNavigation
@@ -76998,7 +76998,7 @@ fn build_controls_macoscontrols_xaml_deferred_64(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(55,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentRoot")));
-    rt::register_name(name_scope.as_ref(), "ContentRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 55, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 55, 17)?;
     // Controls/MacOSControls.xaml(55,10) VerticalAlignment
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Top, priority_0);
@@ -77078,7 +77078,7 @@ fn build_controls_macoscontrols_xaml_deferred_64(
     context.push_parent(rt::to_value(grid_1.clone()));
     // Controls/MacOSControls.xaml(70,21) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("StandardIconArea")));
-    rt::register_name(name_scope.as_ref(), "StandardIconArea", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 70, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "StandardIconArea", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 70, 21)?;
     // Controls/MacOSControls.xaml(70,16) IsVisible
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     grid_1.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_4);
@@ -77091,7 +77091,7 @@ fn build_controls_macoscontrols_xaml_deferred_64(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/MacOSControls.xaml(71,28) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("IconBackground")));
-    rt::register_name(name_scope.as_ref(), "IconBackground", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 71, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "IconBackground", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 71, 28)?;
     // Controls/MacOSControls.xaml(71,18) VerticalAlignment
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Top, priority_5);
@@ -77148,7 +77148,7 @@ fn build_controls_macoscontrols_xaml_deferred_64(
     context.push_parent(rt::to_value(text_block_1.clone()));
     // Controls/MacOSControls.xaml(78,28) Name
     text_block_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("StandardIcon")));
-    rt::register_name(name_scope.as_ref(), "StandardIcon", ::core::clone::Clone::clone(&text_block_1).upcast::<::ferroui_base::FerroObject>(), 78, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "StandardIcon", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_1)), 78, 28)?;
     // Controls/MacOSControls.xaml(78,18) VerticalAlignment
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     text_block_1.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Top, priority_9);
@@ -77207,7 +77207,7 @@ fn build_controls_macoscontrols_xaml_deferred_64(
     context.push_parent(rt::to_value(viewbox_0.clone()));
     // Controls/MacOSControls.xaml(86,24) Name
     viewbox_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("UserIconBox")));
-    rt::register_name(name_scope.as_ref(), "UserIconBox", ::core::clone::Clone::clone(&viewbox_0).upcast::<::ferroui_base::FerroObject>(), 86, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "UserIconBox", ::std::rc::Rc::new(::core::clone::Clone::clone(&viewbox_0)), 86, 24)?;
     // Controls/MacOSControls.xaml(86,16) Column
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     viewbox_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_13);
@@ -77290,7 +77290,7 @@ fn build_controls_macoscontrols_xaml_deferred_64(
     context.push_parent(rt::to_value(text_block_2.clone()));
     // Controls/MacOSControls.xaml(98,28) Name
     text_block_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Title")));
-    rt::register_name(name_scope.as_ref(), "Title", ::core::clone::Clone::clone(&text_block_2).upcast::<::ferroui_base::FerroObject>(), 98, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "Title", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_2)), 98, 28)?;
     // Controls/MacOSControls.xaml(99,28) Text
     rt::bind_template_binding(text_block_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), rt::property(::ferroui_controls::InfoBar::title_property()), 99, 28)?;
     // Controls/MacOSControls.xaml(100,28) Foreground
@@ -77357,7 +77357,7 @@ fn build_controls_macoscontrols_xaml_deferred_64(
     context.push_parent(rt::to_value(text_block_3.clone()));
     // Controls/MacOSControls.xaml(106,28) Name
     text_block_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Message")));
-    rt::register_name(name_scope.as_ref(), "Message", ::core::clone::Clone::clone(&text_block_3).upcast::<::ferroui_base::FerroObject>(), 106, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "Message", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_3)), 106, 28)?;
     // Controls/MacOSControls.xaml(107,28) Text
     rt::bind_template_binding(text_block_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), rt::property(::ferroui_controls::InfoBar::message_property()), 107, 28)?;
     // Controls/MacOSControls.xaml(108,28) Foreground
@@ -77490,7 +77490,7 @@ fn build_controls_macoscontrols_xaml_deferred_64(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_8, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(126,33) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 126, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 126, 33)?;
     // Controls/MacOSControls.xaml(126,16) Column
     let priority_34 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_34);
@@ -77522,7 +77522,7 @@ fn build_controls_macoscontrols_xaml_deferred_64(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/MacOSControls.xaml(132,23) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("CloseButton")));
-    rt::register_name(name_scope.as_ref(), "CloseButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 132, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "CloseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 132, 23)?;
     // Controls/MacOSControls.xaml(132,16) Column
     let priority_38 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_38);
@@ -77680,7 +77680,7 @@ fn build_controls_macoscontrols_xaml_deferred_66(
     grid_0.begin_init();
     // Controls/MacOSControls.xaml(56,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 56, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 56, 15)?;
     // Controls/MacOSControls.xaml(56,10) Background
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     grid_0.set_value_with_priority(::ferroui_controls::Panel::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_0);
@@ -77692,7 +77692,7 @@ fn build_controls_macoscontrols_xaml_deferred_66(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&viewbox_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(58,20) Name
     viewbox_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LottiePlayer")));
-    rt::register_name(name_scope.as_ref(), "LottiePlayer", ::core::clone::Clone::clone(&viewbox_0).upcast::<::ferroui_base::FerroObject>(), 58, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "LottiePlayer", ::std::rc::Rc::new(::core::clone::Clone::clone(&viewbox_0)), 58, 20)?;
     // Controls/MacOSControls.xaml(58,12) Stretch
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     viewbox_0.set_value_with_priority(::ferroui_controls::Viewbox::stretch_property(), ::ferroui_base::media::Stretch::Fill, priority_1);
@@ -77715,7 +77715,7 @@ fn build_controls_macoscontrols_xaml_deferred_66(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&arc_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(60,20) Name
     arc_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Track")));
-    rt::register_name(name_scope.as_ref(), "PART_Track", ::core::clone::Clone::clone(&arc_0).upcast::<::ferroui_base::FerroObject>(), 60, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Track", ::std::rc::Rc::new(::core::clone::Clone::clone(&arc_0)), 60, 20)?;
     // Controls/MacOSControls.xaml(60,16) Width
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     arc_0.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 77.5_f64, priority_4);
@@ -77745,7 +77745,7 @@ fn build_controls_macoscontrols_xaml_deferred_66(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&arc_1).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(68,20) Name
     arc_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Indicator")));
-    rt::register_name(name_scope.as_ref(), "PART_Indicator", ::core::clone::Clone::clone(&arc_1).upcast::<::ferroui_base::FerroObject>(), 68, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Indicator", ::std::rc::Rc::new(::core::clone::Clone::clone(&arc_1)), 68, 20)?;
     // Controls/MacOSControls.xaml(68,16) Width
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
     arc_1.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 77.5_f64, priority_10);
@@ -77961,7 +77961,7 @@ fn build_controls_macoscontrols_xaml_deferred_69(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/MacOSControls.xaml(80,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 80, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 80, 15)?;
     // Controls/MacOSControls.xaml(80,35) Background
     rt::bind_template_binding(grid_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Panel::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 80, 35)?;
     // Controls/MacOSControls.xaml(81,12) Children
@@ -77973,7 +77973,7 @@ fn build_controls_macoscontrols_xaml_deferred_69(
     context.push_parent(rt::to_value(stack_panel_0.clone()));
     // Controls/MacOSControls.xaml(81,23) Name
     stack_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("CaptionStackPanel")));
-    rt::register_name(name_scope.as_ref(), "CaptionStackPanel", ::core::clone::Clone::clone(&stack_panel_0).upcast::<::ferroui_base::FerroObject>(), 81, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "CaptionStackPanel", ::std::rc::Rc::new(::core::clone::Clone::clone(&stack_panel_0)), 81, 23)?;
     // Controls/MacOSControls.xaml(81,12) Orientation
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     stack_panel_0.set_value_with_priority(::ferroui_controls::StackPanel::orientation_property(), ::ferroui_base::layout::Orientation::Horizontal, priority_0);
@@ -77989,7 +77989,7 @@ fn build_controls_macoscontrols_xaml_deferred_69(
     context.push_parent(rt::to_value(stack_panel_1.clone()));
     // Controls/MacOSControls.xaml(82,25) Name
     stack_panel_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RatingBackgroundStackPanel")));
-    rt::register_name(name_scope.as_ref(), "RatingBackgroundStackPanel", ::core::clone::Clone::clone(&stack_panel_1).upcast::<::ferroui_base::FerroObject>(), 82, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "RatingBackgroundStackPanel", ::std::rc::Rc::new(::core::clone::Clone::clone(&stack_panel_1)), 82, 25)?;
     // Controls/MacOSControls.xaml(82,14) Orientation
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     stack_panel_1.set_value_with_priority(::ferroui_controls::StackPanel::orientation_property(), ::ferroui_base::layout::Orientation::Horizontal, priority_2);
@@ -78036,7 +78036,7 @@ fn build_controls_macoscontrols_xaml_deferred_69(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/MacOSControls.xaml(89,24) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Caption")));
-    rt::register_name(name_scope.as_ref(), "Caption", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 89, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "Caption", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 89, 24)?;
     // Controls/MacOSControls.xaml(90,24) Theme (setter chosen at run time)
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("CaptionTextBlockStyle"));
@@ -78083,7 +78083,7 @@ fn build_controls_macoscontrols_xaml_deferred_69(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/MacOSControls.xaml(100,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ForegroundContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "ForegroundContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 100, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "ForegroundContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 100, 29)?;
     // Controls/MacOSControls.xaml(100,12) IsHitTestVisible
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_base::input::InputElement::is_hit_test_visible_property(), ::core::clone::Clone::clone(&false), priority_13);
@@ -78108,7 +78108,7 @@ fn build_controls_macoscontrols_xaml_deferred_69(
     context.push_parent(rt::to_value(stack_panel_3.clone()));
     // Controls/MacOSControls.xaml(102,27) Name
     stack_panel_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RatingForegroundStackPanel")));
-    rt::register_name(name_scope.as_ref(), "RatingForegroundStackPanel", ::core::clone::Clone::clone(&stack_panel_3).upcast::<::ferroui_base::FerroObject>(), 102, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "RatingForegroundStackPanel", ::std::rc::Rc::new(::core::clone::Clone::clone(&stack_panel_3)), 102, 27)?;
     // Controls/MacOSControls.xaml(102,16) Orientation
     let priority_16 = ::ferroui_base::data::BindingPriority::Template;
     stack_panel_3.set_value_with_priority(::ferroui_controls::StackPanel::orientation_property(), ::ferroui_base::layout::Orientation::Horizontal, priority_16);
@@ -78191,7 +78191,7 @@ fn build_controls_macoscontrols_xaml_deferred_71(
     content_presenter_0.begin_init();
     // Controls/MacOSControls.xaml(35,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 35, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 35, 27)?;
     // Controls/MacOSControls.xaml(36,27) Content (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_0 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -79024,7 +79024,7 @@ fn build_controls_macoscontrols_xaml_deferred_86(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/MacOSControls.xaml(50,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 50, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 50, 27)?;
     // Controls/MacOSControls.xaml(51,27) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 51, 27)?;
     // Controls/MacOSControls.xaml(52,27) Foreground
@@ -79310,7 +79310,7 @@ fn build_controls_macoscontrols_xaml_deferred_92(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/MacOSControls.xaml(202,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 202, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 202, 27)?;
     // Controls/MacOSControls.xaml(203,27) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 203, 27)?;
     // Controls/MacOSControls.xaml(204,27) BackgroundSizing
@@ -79618,7 +79618,7 @@ fn build_controls_macoscontrols_xaml_deferred_95(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(290,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 290, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 290, 29)?;
     // Controls/MacOSControls.xaml(291,29) Content (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_2 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -79989,7 +79989,7 @@ fn build_controls_macoscontrols_xaml_deferred_101(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/MacOSControls.xaml(48,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 48, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 48, 27)?;
     // Controls/MacOSControls.xaml(49,27) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 49, 27)?;
     // Controls/MacOSControls.xaml(50,27) Foreground
@@ -80750,7 +80750,7 @@ fn build_controls_macoscontrols_xaml_deferred_109(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/MacOSControls.xaml(50,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 50, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 50, 27)?;
     // Controls/MacOSControls.xaml(51,27) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 51, 27)?;
     // Controls/MacOSControls.xaml(52,27) Foreground
@@ -81096,7 +81096,7 @@ fn build_controls_macoscontrols_xaml_deferred_117(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/MacOSControls.xaml(47,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 47, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 47, 27)?;
     // Controls/MacOSControls.xaml(48,27) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 48, 27)?;
     // Controls/MacOSControls.xaml(49,27) BackgroundSizing
@@ -82171,7 +82171,7 @@ fn build_controls_macoscontrols_xaml_deferred_121(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(47,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootGrid")));
-    rt::register_name(name_scope.as_ref(), "RootGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 47, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 47, 17)?;
     // Controls/MacOSControls.xaml(48,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 48, 17)?;
     // Controls/MacOSControls.xaml(49,17) BorderBrush
@@ -82228,7 +82228,7 @@ fn build_controls_macoscontrols_xaml_deferred_121(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/MacOSControls.xaml(59,26) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("NormalRectangle")));
-    rt::register_name(name_scope.as_ref(), "NormalRectangle", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 59, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "NormalRectangle", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 59, 26)?;
     // Controls/MacOSControls.xaml(60,26) Fill
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "CheckBoxCheckBackgroundFillUnchecked", 60, 26)?;
     // Controls/MacOSControls.xaml(61,26) Stroke
@@ -82309,7 +82309,7 @@ fn build_controls_macoscontrols_xaml_deferred_121(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/MacOSControls.xaml(76,21) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("CheckGlyph")));
-    rt::register_name(name_scope.as_ref(), "CheckGlyph", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 76, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "CheckGlyph", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 76, 21)?;
     // Controls/MacOSControls.xaml(77,21) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "CheckBoxCheckGlyphForegroundUnchecked", 77, 21)?;
     // Controls/MacOSControls.xaml(78,21) Data (setter chosen at run time)
@@ -82375,7 +82375,7 @@ fn build_controls_macoscontrols_xaml_deferred_121(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(93,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 93, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 93, 31)?;
     // Controls/MacOSControls.xaml(93,14) Column
     let priority_16 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_16);
@@ -82952,7 +82952,7 @@ fn build_controls_macoscontrols_xaml_deferred_125(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(45,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootGrid")));
-    rt::register_name(name_scope.as_ref(), "RootGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 45, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 45, 17)?;
     // Controls/MacOSControls.xaml(46,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 46, 17)?;
     // Controls/MacOSControls.xaml(47,17) BorderBrush
@@ -83005,7 +83005,7 @@ fn build_controls_macoscontrols_xaml_deferred_125(
     context.push_parent(rt::to_value(ellipse_0.clone()));
     // Controls/MacOSControls.xaml(53,24) Name
     ellipse_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("OuterEllipse")));
-    rt::register_name(name_scope.as_ref(), "OuterEllipse", ::core::clone::Clone::clone(&ellipse_0).upcast::<::ferroui_base::FerroObject>(), 53, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "OuterEllipse", ::std::rc::Rc::new(::core::clone::Clone::clone(&ellipse_0)), 53, 24)?;
     // Controls/MacOSControls.xaml(53,16) Width
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     ellipse_0.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 14.0_f64, priority_4);
@@ -83032,7 +83032,7 @@ fn build_controls_macoscontrols_xaml_deferred_125(
     context.push_parent(rt::to_value(ellipse_1.clone()));
     // Controls/MacOSControls.xaml(61,24) Name
     ellipse_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("CheckOuterEllipse")));
-    rt::register_name(name_scope.as_ref(), "CheckOuterEllipse", ::core::clone::Clone::clone(&ellipse_1).upcast::<::ferroui_base::FerroObject>(), 61, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "CheckOuterEllipse", ::std::rc::Rc::new(::core::clone::Clone::clone(&ellipse_1)), 61, 24)?;
     // Controls/MacOSControls.xaml(61,16) Width
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     ellipse_1.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 14.0_f64, priority_7);
@@ -83062,7 +83062,7 @@ fn build_controls_macoscontrols_xaml_deferred_125(
     context.push_parent(rt::to_value(ellipse_2.clone()));
     // Controls/MacOSControls.xaml(69,24) Name
     ellipse_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("CheckGlyph")));
-    rt::register_name(name_scope.as_ref(), "CheckGlyph", ::core::clone::Clone::clone(&ellipse_2).upcast::<::ferroui_base::FerroObject>(), 69, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "CheckGlyph", ::std::rc::Rc::new(::core::clone::Clone::clone(&ellipse_2)), 69, 24)?;
     // Controls/MacOSControls.xaml(70,24) Width
     rt::bind_dynamic_resource(&context, ellipse_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), "RadioButtonCheckGlyphSize", 70, 24)?;
     // Controls/MacOSControls.xaml(71,24) Height
@@ -83120,7 +83120,7 @@ fn build_controls_macoscontrols_xaml_deferred_125(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(84,23) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PressedCheckGlyph")));
-    rt::register_name(name_scope.as_ref(), "PressedCheckGlyph", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 84, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PressedCheckGlyph", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 84, 23)?;
     // Controls/MacOSControls.xaml(84,16) Width
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 4.0_f64, priority_14);
@@ -83187,7 +83187,7 @@ fn build_controls_macoscontrols_xaml_deferred_125(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(101,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 101, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 101, 31)?;
     // Controls/MacOSControls.xaml(101,14) Column
     let priority_21 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_21);
@@ -83288,7 +83288,7 @@ fn build_controls_macoscontrols_xaml_deferred_129(
     grid_0.begin_init();
     // Controls/MacOSControls.xaml(19,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Root")));
-    rt::register_name(name_scope.as_ref(), "Root", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 19, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 19, 15)?;
     // Controls/MacOSControls.xaml(19,10) Background
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     grid_0.set_value_with_priority(::ferroui_controls::Panel::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_0);
@@ -83386,7 +83386,7 @@ fn build_controls_macoscontrols_xaml_deferred_131(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(26,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Root")));
-    rt::register_name(name_scope.as_ref(), "Root", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 26, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 26, 17)?;
     // Controls/MacOSControls.xaml(26,31) Background
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "ScrollBarButtonBackground", 26, 31)?;
     // Controls/MacOSControls.xaml(26,88) BorderBrush
@@ -83404,7 +83404,7 @@ fn build_controls_macoscontrols_xaml_deferred_131(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/MacOSControls.xaml(27,17) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Arrow")));
-    rt::register_name(name_scope.as_ref(), "Arrow", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 27, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Arrow", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 27, 17)?;
     // Controls/MacOSControls.xaml(27,12) RenderTransformOrigin
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     path_0.set_value_with_priority(::ferroui_base::Visual::render_transform_origin_property(), ::ferroui_base::RelativePoint::__markup_new_1(0.5_f64, 0.5_f64, ::ferroui_base::RelativeUnit::Relative), priority_1);
@@ -83542,7 +83542,7 @@ fn build_controls_macoscontrols_xaml_deferred_133(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(45,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Root")));
-    rt::register_name(name_scope.as_ref(), "Root", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 45, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 45, 17)?;
     // Controls/MacOSControls.xaml(45,31) Background
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "ScrollBarButtonBackground", 45, 31)?;
     // Controls/MacOSControls.xaml(45,88) BorderBrush
@@ -83560,7 +83560,7 @@ fn build_controls_macoscontrols_xaml_deferred_133(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/MacOSControls.xaml(46,17) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Arrow")));
-    rt::register_name(name_scope.as_ref(), "Arrow", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 46, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Arrow", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 46, 17)?;
     // Controls/MacOSControls.xaml(46,12) RenderTransformOrigin
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     path_0.set_value_with_priority(::ferroui_base::Visual::render_transform_origin_property(), ::ferroui_base::RelativePoint::__markup_new_1(0.5_f64, 0.5_f64, ::ferroui_base::RelativeUnit::Relative), priority_1);
@@ -83698,7 +83698,7 @@ fn build_controls_macoscontrols_xaml_deferred_135(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(64,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Root")));
-    rt::register_name(name_scope.as_ref(), "Root", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 64, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 64, 17)?;
     // Controls/MacOSControls.xaml(64,31) Background
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "ScrollBarButtonBackground", 64, 31)?;
     // Controls/MacOSControls.xaml(64,88) BorderBrush
@@ -83716,7 +83716,7 @@ fn build_controls_macoscontrols_xaml_deferred_135(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/MacOSControls.xaml(65,17) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Arrow")));
-    rt::register_name(name_scope.as_ref(), "Arrow", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 65, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Arrow", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 65, 17)?;
     // Controls/MacOSControls.xaml(65,12) RenderTransformOrigin
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     path_0.set_value_with_priority(::ferroui_base::Visual::render_transform_origin_property(), ::ferroui_base::RelativePoint::__markup_new_1(0.5_f64, 0.5_f64, ::ferroui_base::RelativeUnit::Relative), priority_1);
@@ -83854,7 +83854,7 @@ fn build_controls_macoscontrols_xaml_deferred_137(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(83,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Root")));
-    rt::register_name(name_scope.as_ref(), "Root", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 83, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 83, 17)?;
     // Controls/MacOSControls.xaml(83,31) Background
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "ScrollBarButtonBackground", 83, 31)?;
     // Controls/MacOSControls.xaml(83,88) BorderBrush
@@ -83872,7 +83872,7 @@ fn build_controls_macoscontrols_xaml_deferred_137(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/MacOSControls.xaml(84,17) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Arrow")));
-    rt::register_name(name_scope.as_ref(), "Arrow", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 84, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Arrow", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 84, 17)?;
     // Controls/MacOSControls.xaml(84,12) RenderTransformOrigin
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     path_0.set_value_with_priority(::ferroui_base::Visual::render_transform_origin_property(), ::ferroui_base::RelativePoint::__markup_new_1(0.5_f64, 0.5_f64, ::ferroui_base::RelativeUnit::Relative), priority_1);
@@ -83975,7 +83975,7 @@ fn build_controls_macoscontrols_xaml_deferred_139(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/MacOSControls.xaml(102,20) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ThumbVisual")));
-    rt::register_name(name_scope.as_ref(), "ThumbVisual", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 102, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "ThumbVisual", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 102, 20)?;
     // Controls/MacOSControls.xaml(102,41) Fill
     rt::bind_template_binding(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 102, 41)?;
     // Controls/MacOSControls.xaml(102,77) Stroke
@@ -84064,7 +84064,7 @@ fn build_controls_macoscontrols_xaml_deferred_141(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/MacOSControls.xaml(119,20) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ThumbVisual")));
-    rt::register_name(name_scope.as_ref(), "ThumbVisual", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 119, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "ThumbVisual", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 119, 20)?;
     // Controls/MacOSControls.xaml(119,41) Fill
     rt::bind_template_binding(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 119, 41)?;
     // Controls/MacOSControls.xaml(119,77) Stroke
@@ -84342,7 +84342,7 @@ fn build_controls_macoscontrols_xaml_deferred_143(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(146,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Root")));
-    rt::register_name(name_scope.as_ref(), "Root", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 146, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 146, 19)?;
     // Controls/MacOSControls.xaml(147,14) Child
     // Controls/MacOSControls.xaml(147,14) Border
     let border_1 = ::ferroui_controls::Border::new();
@@ -84351,7 +84351,7 @@ fn build_controls_macoscontrols_xaml_deferred_143(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(147,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("VerticalRoot")));
-    rt::register_name(name_scope.as_ref(), "VerticalRoot", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 147, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "VerticalRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 147, 21)?;
     // Controls/MacOSControls.xaml(147,14) Background
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Border::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_0);
@@ -84388,7 +84388,7 @@ fn build_controls_macoscontrols_xaml_deferred_143(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/MacOSControls.xaml(149,25) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("VerticalTrackRect")));
-    rt::register_name(name_scope.as_ref(), "VerticalTrackRect", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 149, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "VerticalTrackRect", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 149, 25)?;
     // Controls/MacOSControls.xaml(149,18) RowSpan
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_controls::Grid::row_span_property(), 3_i32, priority_2);
@@ -84441,7 +84441,7 @@ fn build_controls_macoscontrols_xaml_deferred_143(
     context.push_parent(rt::to_value(repeat_button_0.clone()));
     // Controls/MacOSControls.xaml(156,31) Name
     repeat_button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_LineUpButton")));
-    rt::register_name(name_scope.as_ref(), "PART_LineUpButton", ::core::clone::Clone::clone(&repeat_button_0).upcast::<::ferroui_base::FerroObject>(), 156, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_LineUpButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_0)), 156, 31)?;
     // Controls/MacOSControls.xaml(156,18) Row
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     repeat_button_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 0_i32, priority_6);
@@ -84547,7 +84547,7 @@ fn build_controls_macoscontrols_xaml_deferred_143(
     context.push_parent(rt::to_value(repeat_button_1.clone()));
     // Controls/MacOSControls.xaml(165,35) Name
     repeat_button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PageUpButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PageUpButton", ::core::clone::Clone::clone(&repeat_button_1).upcast::<::ferroui_base::FerroObject>(), 165, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PageUpButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_1)), 165, 35)?;
     // Controls/MacOSControls.xaml(165,22) Focusable
     let priority_22 = ::ferroui_base::data::BindingPriority::Template;
     repeat_button_1.set_value_with_priority(::ferroui_base::input::InputElement::focusable_property(), ::core::clone::Clone::clone(&false), priority_22);
@@ -84579,7 +84579,7 @@ fn build_controls_macoscontrols_xaml_deferred_143(
     context.push_parent(rt::to_value(repeat_button_2.clone()));
     // Controls/MacOSControls.xaml(168,35) Name
     repeat_button_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PageDownButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PageDownButton", ::core::clone::Clone::clone(&repeat_button_2).upcast::<::ferroui_base::FerroObject>(), 168, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PageDownButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_2)), 168, 35)?;
     // Controls/MacOSControls.xaml(168,22) Focusable
     let priority_26 = ::ferroui_base::data::BindingPriority::Template;
     repeat_button_2.set_value_with_priority(::ferroui_base::input::InputElement::focusable_property(), ::core::clone::Clone::clone(&false), priority_26);
@@ -84610,7 +84610,7 @@ fn build_controls_macoscontrols_xaml_deferred_143(
     context.push_parent(rt::to_value(thumb_0.clone()));
     // Controls/MacOSControls.xaml(170,26) Name
     thumb_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("VerticalThumb")));
-    rt::register_name(name_scope.as_ref(), "VerticalThumb", ::core::clone::Clone::clone(&thumb_0).upcast::<::ferroui_base::FerroObject>(), 170, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "VerticalThumb", ::std::rc::Rc::new(::core::clone::Clone::clone(&thumb_0)), 170, 26)?;
     // Controls/MacOSControls.xaml(170,49) Background
     rt::bind_dynamic_resource(&context, thumb_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::background_property(), "ScrollBarPanningThumbBackground", 170, 49)?;
     // Controls/MacOSControls.xaml(170,112) BorderBrush
@@ -84701,7 +84701,7 @@ fn build_controls_macoscontrols_xaml_deferred_143(
     context.push_parent(rt::to_value(repeat_button_3.clone()));
     // Controls/MacOSControls.xaml(179,31) Name
     repeat_button_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_LineDownButton")));
-    rt::register_name(name_scope.as_ref(), "PART_LineDownButton", ::core::clone::Clone::clone(&repeat_button_3).upcast::<::ferroui_base::FerroObject>(), 179, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_LineDownButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_3)), 179, 31)?;
     // Controls/MacOSControls.xaml(179,18) Row
     let priority_36 = ::ferroui_base::data::BindingPriority::Template;
     repeat_button_3.set_value_with_priority(::ferroui_controls::Grid::row_property(), 2_i32, priority_36);
@@ -84791,7 +84791,7 @@ fn build_controls_macoscontrols_xaml_deferred_144(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(195,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Root")));
-    rt::register_name(name_scope.as_ref(), "Root", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 195, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 195, 19)?;
     // Controls/MacOSControls.xaml(196,14) Child
     // Controls/MacOSControls.xaml(196,14) Border
     let border_1 = ::ferroui_controls::Border::new();
@@ -84800,7 +84800,7 @@ fn build_controls_macoscontrols_xaml_deferred_144(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(196,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HorizontalRoot")));
-    rt::register_name(name_scope.as_ref(), "HorizontalRoot", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 196, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "HorizontalRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 196, 21)?;
     // Controls/MacOSControls.xaml(196,14) Background
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Border::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_0);
@@ -84839,7 +84839,7 @@ fn build_controls_macoscontrols_xaml_deferred_144(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/MacOSControls.xaml(198,25) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HorizontalTrackRect")));
-    rt::register_name(name_scope.as_ref(), "HorizontalTrackRect", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 198, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "HorizontalTrackRect", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 198, 25)?;
     // Controls/MacOSControls.xaml(198,18) ColumnSpan
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 3_i32, priority_2);
@@ -84892,7 +84892,7 @@ fn build_controls_macoscontrols_xaml_deferred_144(
     context.push_parent(rt::to_value(repeat_button_0.clone()));
     // Controls/MacOSControls.xaml(205,31) Name
     repeat_button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_LineUpButton")));
-    rt::register_name(name_scope.as_ref(), "PART_LineUpButton", ::core::clone::Clone::clone(&repeat_button_0).upcast::<::ferroui_base::FerroObject>(), 205, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_LineUpButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_0)), 205, 31)?;
     // Controls/MacOSControls.xaml(205,18) Column
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     repeat_button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_6);
@@ -84995,7 +84995,7 @@ fn build_controls_macoscontrols_xaml_deferred_144(
     context.push_parent(rt::to_value(repeat_button_1.clone()));
     // Controls/MacOSControls.xaml(214,35) Name
     repeat_button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PageUpButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PageUpButton", ::core::clone::Clone::clone(&repeat_button_1).upcast::<::ferroui_base::FerroObject>(), 214, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PageUpButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_1)), 214, 35)?;
     // Controls/MacOSControls.xaml(214,22) Focusable
     let priority_21 = ::ferroui_base::data::BindingPriority::Template;
     repeat_button_1.set_value_with_priority(::ferroui_base::input::InputElement::focusable_property(), ::core::clone::Clone::clone(&false), priority_21);
@@ -85027,7 +85027,7 @@ fn build_controls_macoscontrols_xaml_deferred_144(
     context.push_parent(rt::to_value(repeat_button_2.clone()));
     // Controls/MacOSControls.xaml(217,35) Name
     repeat_button_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PageDownButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PageDownButton", ::core::clone::Clone::clone(&repeat_button_2).upcast::<::ferroui_base::FerroObject>(), 217, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PageDownButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_2)), 217, 35)?;
     // Controls/MacOSControls.xaml(217,22) Focusable
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
     repeat_button_2.set_value_with_priority(::ferroui_base::input::InputElement::focusable_property(), ::core::clone::Clone::clone(&false), priority_25);
@@ -85058,7 +85058,7 @@ fn build_controls_macoscontrols_xaml_deferred_144(
     context.push_parent(rt::to_value(thumb_0.clone()));
     // Controls/MacOSControls.xaml(219,26) Name
     thumb_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HorizontalThumb")));
-    rt::register_name(name_scope.as_ref(), "HorizontalThumb", ::core::clone::Clone::clone(&thumb_0).upcast::<::ferroui_base::FerroObject>(), 219, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "HorizontalThumb", ::std::rc::Rc::new(::core::clone::Clone::clone(&thumb_0)), 219, 26)?;
     // Controls/MacOSControls.xaml(219,51) Background
     rt::bind_dynamic_resource(&context, thumb_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::background_property(), "ScrollBarPanningThumbBackground", 219, 51)?;
     // Controls/MacOSControls.xaml(219,114) BorderBrush
@@ -85149,7 +85149,7 @@ fn build_controls_macoscontrols_xaml_deferred_144(
     context.push_parent(rt::to_value(repeat_button_3.clone()));
     // Controls/MacOSControls.xaml(228,31) Name
     repeat_button_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_LineDownButton")));
-    rt::register_name(name_scope.as_ref(), "PART_LineDownButton", ::core::clone::Clone::clone(&repeat_button_3).upcast::<::ferroui_base::FerroObject>(), 228, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_LineDownButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_3)), 228, 31)?;
     // Controls/MacOSControls.xaml(228,18) Column
     let priority_35 = ::ferroui_base::data::BindingPriority::Template;
     repeat_button_3.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_35);
@@ -85346,7 +85346,7 @@ fn build_controls_macoscontrols_xaml_deferred_147(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(76,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Root")));
-    rt::register_name(name_scope.as_ref(), "Root", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 76, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 76, 17)?;
     // Controls/MacOSControls.xaml(77,17) BorderBrush
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::border_brush_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()), 77, 17)?;
     // Controls/MacOSControls.xaml(78,17) BorderThickness
@@ -85390,7 +85390,7 @@ fn build_controls_macoscontrols_xaml_deferred_147(
     context.push_parent(rt::to_value(scroll_content_presenter_0.clone()));
     // Controls/MacOSControls.xaml(83,37) Name
     scroll_content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&scroll_content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 83, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_content_presenter_0)), 83, 37)?;
     // Controls/MacOSControls.xaml(83,14) Background
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     scroll_content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_0);
@@ -85483,7 +85483,7 @@ fn build_controls_macoscontrols_xaml_deferred_147(
     context.push_parent(rt::to_value(scroll_bar_0.clone()));
     // Controls/MacOSControls.xaml(105,24) Name
     scroll_bar_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_VerticalScrollBar")));
-    rt::register_name(name_scope.as_ref(), "PART_VerticalScrollBar", ::core::clone::Clone::clone(&scroll_bar_0).upcast::<::ferroui_base::FerroObject>(), 105, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_VerticalScrollBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_bar_0)), 105, 24)?;
     // Controls/MacOSControls.xaml(105,14) Column
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     scroll_bar_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_5);
@@ -85528,7 +85528,7 @@ fn build_controls_macoscontrols_xaml_deferred_147(
     context.push_parent(rt::to_value(scroll_bar_1.clone()));
     // Controls/MacOSControls.xaml(118,24) Name
     scroll_bar_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HorizontalScrollBar")));
-    rt::register_name(name_scope.as_ref(), "PART_HorizontalScrollBar", ::core::clone::Clone::clone(&scroll_bar_1).upcast::<::ferroui_base::FerroObject>(), 118, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HorizontalScrollBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_bar_1)), 118, 24)?;
     // Controls/MacOSControls.xaml(118,14) Row
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     scroll_bar_1.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_11);
@@ -85570,7 +85570,7 @@ fn build_controls_macoscontrols_xaml_deferred_147(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(130,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ScrollBarSeparator")));
-    rt::register_name(name_scope.as_ref(), "ScrollBarSeparator", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 130, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "ScrollBarSeparator", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 130, 21)?;
     // Controls/MacOSControls.xaml(130,14) Row
     let priority_16 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_16);
@@ -85663,7 +85663,7 @@ fn build_controls_macoscontrols_xaml_deferred_150(
     context.push_parent(rt::to_value(scroll_content_presenter_0.clone()));
     // Controls/MacOSControls.xaml(165,31) Name
     scroll_content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&scroll_content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 165, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_content_presenter_0)), 165, 31)?;
     // Controls/MacOSControls.xaml(165,8) Background
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     scroll_content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_0);
@@ -85869,7 +85869,7 @@ fn build_controls_macoscontrols_xaml_deferred_152(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(26,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ButtonLayoutGrid")));
-    rt::register_name(name_scope.as_ref(), "ButtonLayoutGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 26, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "ButtonLayoutGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 26, 17)?;
     // Controls/MacOSControls.xaml(27,17) Margin
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "TextBoxInnerButtonMargin", 27, 17)?;
     // Controls/MacOSControls.xaml(28,17) BorderBrush
@@ -85890,7 +85890,7 @@ fn build_controls_macoscontrols_xaml_deferred_152(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/MacOSControls.xaml(34,17) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("GlyphElement")));
-    rt::register_name(name_scope.as_ref(), "GlyphElement", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 34, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "GlyphElement", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 34, 17)?;
     // Controls/MacOSControls.xaml(35,17) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "TextControlButtonForeground", 35, 17)?;
     // Controls/MacOSControls.xaml(34,12) Data
@@ -86055,7 +86055,7 @@ fn build_controls_macoscontrols_xaml_deferred_154(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(76,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ButtonLayoutGrid")));
-    rt::register_name(name_scope.as_ref(), "ButtonLayoutGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 76, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "ButtonLayoutGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 76, 17)?;
     // Controls/MacOSControls.xaml(77,17) Margin
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "TextBoxInnerButtonMargin", 77, 17)?;
     // Controls/MacOSControls.xaml(78,17) BorderBrush
@@ -86077,7 +86077,7 @@ fn build_controls_macoscontrols_xaml_deferred_154(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/MacOSControls.xaml(84,17) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("GlyphElement")));
-    rt::register_name(name_scope.as_ref(), "GlyphElement", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 84, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "GlyphElement", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 84, 17)?;
     // Controls/MacOSControls.xaml(85,17) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "TextControlButtonForeground", 85, 17)?;
     // Controls/MacOSControls.xaml(86,17) Data (setter chosen at run time)
@@ -86926,7 +86926,7 @@ fn build_controls_macoscontrols_xaml_deferred_159(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(223,21) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("BorderElement")));
-    rt::register_name(name_scope.as_ref(), "BorderElement", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 223, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "BorderElement", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 223, 21)?;
     // Controls/MacOSControls.xaml(223,14) Column
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_0);
@@ -86987,7 +86987,7 @@ fn build_controls_macoscontrols_xaml_deferred_159(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(241,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("MacOSPointerFocusRing")));
-    rt::register_name(name_scope.as_ref(), "MacOSPointerFocusRing", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 241, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "MacOSPointerFocusRing", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 241, 21)?;
     // Controls/MacOSControls.xaml(241,14) ColumnSpan
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 5_i32, priority_4);
@@ -87033,7 +87033,7 @@ fn build_controls_macoscontrols_xaml_deferred_159(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(253,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("InnerLeftContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "InnerLeftContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 253, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "InnerLeftContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 253, 31)?;
     // Controls/MacOSControls.xaml(254,31) IsVisible
     let template_binding_8 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TextBox::inner_left_content_property()));
     // Controls/MacOSControls.xaml(254,31) Converter
@@ -87067,7 +87067,7 @@ fn build_controls_macoscontrols_xaml_deferred_159(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(259,27) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "PART_ScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 259, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 259, 27)?;
     // Controls/MacOSControls.xaml(259,14) Column
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
     scroll_viewer_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_12);
@@ -87107,7 +87107,7 @@ fn build_controls_macoscontrols_xaml_deferred_159(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&text_presenter_0)));
     // Controls/MacOSControls.xaml(268,30) Name
     text_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TextPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_TextPresenter", ::core::clone::Clone::clone(&text_presenter_0).upcast::<::ferroui_base::FerroObject>(), 268, 30)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TextPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_presenter_0)), 268, 30)?;
     // Controls/MacOSControls.xaml(269,30) Text
     let template_binding_18 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TextBox::text_property()));
     // Controls/MacOSControls.xaml(269,30) Mode
@@ -87155,7 +87155,7 @@ fn build_controls_macoscontrols_xaml_deferred_159(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/MacOSControls.xaml(291,24) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PlaceholderTextContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PlaceholderTextContentPresenter", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 291, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "PlaceholderTextContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 291, 24)?;
     // Controls/MacOSControls.xaml(291,14) Column
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_14);
@@ -87226,7 +87226,7 @@ fn build_controls_macoscontrols_xaml_deferred_159(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/MacOSControls.xaml(309,21) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("DeleteButton")));
-    rt::register_name(name_scope.as_ref(), "DeleteButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 309, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "DeleteButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 309, 21)?;
     // Controls/MacOSControls.xaml(309,14) Column
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_17);
@@ -87279,7 +87279,7 @@ fn build_controls_macoscontrols_xaml_deferred_159(
     context.push_parent(rt::to_value(toggle_button_0.clone()));
     // Controls/MacOSControls.xaml(323,27) Name
     toggle_button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RevealButton")));
-    rt::register_name(name_scope.as_ref(), "RevealButton", ::core::clone::Clone::clone(&toggle_button_0).upcast::<::ferroui_base::FerroObject>(), 323, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "RevealButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&toggle_button_0)), 323, 27)?;
     // Controls/MacOSControls.xaml(323,14) Column
     let priority_23 = ::ferroui_base::data::BindingPriority::Template;
     toggle_button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 3_i32, priority_23);
@@ -87333,7 +87333,7 @@ fn build_controls_macoscontrols_xaml_deferred_159(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_7, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(336,31) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("InnerRightContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "InnerRightContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 336, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "InnerRightContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 336, 31)?;
     // Controls/MacOSControls.xaml(337,31) IsVisible
     let template_binding_48 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TextBox::inner_right_content_property()));
     // Controls/MacOSControls.xaml(337,31) Converter
@@ -87535,7 +87535,7 @@ fn build_controls_macoscontrols_xaml_deferred_163(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(33,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ThemeShadowWrapper")));
-    rt::register_name(name_scope.as_ref(), "ThemeShadowWrapper", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 33, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "ThemeShadowWrapper", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 33, 17)?;
     // Controls/MacOSControls.xaml(33,45) CornerRadius
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::corner_radius_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()), 33, 45)?;
     // Controls/MacOSControls.xaml(33,91) BoxShadow
@@ -87547,7 +87547,7 @@ fn build_controls_macoscontrols_xaml_deferred_163(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/MacOSControls.xaml(34,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 34, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 34, 29)?;
     // Controls/MacOSControls.xaml(34,60) BorderThickness
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::border_thickness_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()), 34, 60)?;
     // Controls/MacOSControls.xaml(34,112) Background
@@ -87949,7 +87949,7 @@ fn build_controls_macoscontrols_xaml_deferred_167(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/MacOSControls.xaml(36,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 36, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 36, 15)?;
     // Controls/MacOSControls.xaml(36,10) ColumnDefinitions
     let column_definitions_0 = ::ferroui_controls::ColumnDefinitions::__markup_new_0();
     rt::invoked(<::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::ColumnDefinition>>>::__markup_set_Capacity(&column_definitions_0, 2_i32), 36, 35)?;
@@ -87979,7 +87979,7 @@ fn build_controls_macoscontrols_xaml_deferred_167(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(37,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ProgressBarRoot")));
-    rt::register_name(name_scope.as_ref(), "ProgressBarRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 37, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "ProgressBarRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 37, 19)?;
     // Controls/MacOSControls.xaml(37,44) BorderBrush
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::border_brush_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()), 37, 44)?;
     // Controls/MacOSControls.xaml(37,88) BorderThickness
@@ -87996,7 +87996,7 @@ fn build_controls_macoscontrols_xaml_deferred_167(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(38,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ProgressBarClip")));
-    rt::register_name(name_scope.as_ref(), "ProgressBarClip", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 38, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "ProgressBarClip", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 38, 21)?;
     // Controls/MacOSControls.xaml(38,14) ClipToBounds
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_base::Visual::clip_to_bounds_property(), ::core::clone::Clone::clone(&true), priority_0);
@@ -88010,7 +88010,7 @@ fn build_controls_macoscontrols_xaml_deferred_167(
     context.push_parent(rt::to_value(grid_1.clone()));
     // Controls/MacOSControls.xaml(39,21) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ProgressBarGrid")));
-    rt::register_name(name_scope.as_ref(), "ProgressBarGrid", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 39, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "ProgressBarGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 39, 21)?;
     // Controls/MacOSControls.xaml(40,18) Children
     let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(grid_1.upcast_ref::<::ferroui_controls::Panel>());
     // Controls/MacOSControls.xaml(40,18) Border
@@ -88019,7 +88019,7 @@ fn build_controls_macoscontrols_xaml_deferred_167(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(40,25) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ProgressBarTrack")));
-    rt::register_name(name_scope.as_ref(), "ProgressBarTrack", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 40, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "ProgressBarTrack", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 40, 25)?;
     // Controls/MacOSControls.xaml(40,51) Background
     rt::bind_template_binding(border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 40, 51)?;
     // Controls/MacOSControls.xaml(40,18) CornerRadius
@@ -88034,7 +88034,7 @@ fn build_controls_macoscontrols_xaml_deferred_167(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&border_3).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(41,25) Name
     border_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Indicator")));
-    rt::register_name(name_scope.as_ref(), "PART_Indicator", ::core::clone::Clone::clone(&border_3).upcast::<::ferroui_base::FerroObject>(), 41, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Indicator", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_3)), 41, 25)?;
     // Controls/MacOSControls.xaml(41,49) Background
     rt::bind_template_binding(border_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 41, 49)?;
     // Controls/MacOSControls.xaml(41,91) CornerRadius
@@ -88049,7 +88049,7 @@ fn build_controls_macoscontrols_xaml_deferred_167(
     context.push_parent(rt::to_value(border_4.clone()));
     // Controls/MacOSControls.xaml(42,25) Name
     border_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("MacOSIndeterminateFill")));
-    rt::register_name(name_scope.as_ref(), "MacOSIndeterminateFill", ::core::clone::Clone::clone(&border_4).upcast::<::ferroui_base::FerroObject>(), 42, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "MacOSIndeterminateFill", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_4)), 42, 25)?;
     // Controls/MacOSControls.xaml(42,57) Background
     rt::bind_template_binding(border_4.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 42, 57)?;
     // Controls/MacOSControls.xaml(42,99) CornerRadius
@@ -88073,7 +88073,7 @@ fn build_controls_macoscontrols_xaml_deferred_167(
     context.push_parent(rt::to_value(border_5.clone()));
     // Controls/MacOSControls.xaml(44,25) Name
     border_5.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("MacOSIndeterminateStaticFill")));
-    rt::register_name(name_scope.as_ref(), "MacOSIndeterminateStaticFill", ::core::clone::Clone::clone(&border_5).upcast::<::ferroui_base::FerroObject>(), 44, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "MacOSIndeterminateStaticFill", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_5)), 44, 25)?;
     // Controls/MacOSControls.xaml(44,63) Background
     rt::bind_template_binding(border_5.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 44, 63)?;
     // Controls/MacOSControls.xaml(44,105) CornerRadius
@@ -88103,7 +88103,7 @@ fn build_controls_macoscontrols_xaml_deferred_167(
     context.push_parent(rt::to_value(layout_transform_control_0.clone()));
     // Controls/MacOSControls.xaml(49,35) Name
     layout_transform_control_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ProgressTextRoot")));
-    rt::register_name(name_scope.as_ref(), "ProgressTextRoot", ::core::clone::Clone::clone(&layout_transform_control_0).upcast::<::ferroui_base::FerroObject>(), 49, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "ProgressTextRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&layout_transform_control_0)), 49, 35)?;
     // Controls/MacOSControls.xaml(49,12) Column
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     layout_transform_control_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_6);
@@ -88123,7 +88123,7 @@ fn build_controls_macoscontrols_xaml_deferred_167(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/MacOSControls.xaml(50,24) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ProgressText")));
-    rt::register_name(name_scope.as_ref(), "ProgressText", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 50, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "ProgressText", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 50, 24)?;
     // Controls/MacOSControls.xaml(50,46) Foreground
     rt::bind_dynamic_resource(&context, text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::foreground_property(), "TextFillColorPrimaryBrush", 50, 46)?;
     // Controls/MacOSControls.xaml(52,18) Text
@@ -88236,7 +88236,7 @@ fn build_controls_macoscontrols_xaml_deferred_170(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&path_0).upcast::<::ferroui_controls::Control>()));
     // Controls/MacOSControls.xaml(38,13) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Path")));
-    rt::register_name(name_scope.as_ref(), "Path", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 38, 13)?;
+    rt::register_name_value(name_scope.as_ref(), "Path", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 38, 13)?;
     // Controls/MacOSControls.xaml(39,13) Data
     rt::bind_template_binding(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), rt::property(::ferroui_controls::PathIcon::data_property()), 39, 13)?;
     // Controls/MacOSControls.xaml(40,13) Fill
@@ -88298,7 +88298,7 @@ fn build_controls_macoscontrols_xaml_deferred_172(
     viewbox_0.set_value(::ferroui_controls::Viewbox::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&path_0).upcast::<::ferroui_controls::Control>()));
     // Controls/MacOSControls.xaml(53,19) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Path")));
-    rt::register_name(name_scope.as_ref(), "Path", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 53, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "Path", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 53, 19)?;
     // Controls/MacOSControls.xaml(54,19) Data
     rt::bind_template_binding(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Path::data_property(), rt::property(::ferroui_controls::PathIcon::data_property()), 54, 19)?;
     // Controls/MacOSControls.xaml(55,19) Fill
@@ -88371,7 +88371,7 @@ fn build_controls_macoscontrols_xaml_deferred_174(
     context.push_parent(rt::to_value(content_control_0.clone()));
     // Controls/MacOSControls.xaml(30,27) Name
     content_control_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("InlineDataValidationContentControl")));
-    rt::register_name(name_scope.as_ref(), "InlineDataValidationContentControl", ::core::clone::Clone::clone(&content_control_0).upcast::<::ferroui_base::FerroObject>(), 30, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "InlineDataValidationContentControl", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_0)), 30, 27)?;
     // Controls/MacOSControls.xaml(30,12) Margin
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     content_control_0.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(0.0_f64, 4.0_f64, 0.0_f64, 0.0_f64), priority_1);
@@ -88414,7 +88414,7 @@ fn build_controls_macoscontrols_xaml_deferred_174(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(37,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 37, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 37, 29)?;
     // Controls/MacOSControls.xaml(38,29) Padding
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::padding_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), 38, 29)?;
     // Controls/MacOSControls.xaml(39,29) Background
@@ -88536,7 +88536,7 @@ fn build_controls_macoscontrols_xaml_deferred_177(
     context.push_parent(rt::to_value(content_control_0.clone()));
     // Controls/MacOSControls.xaml(68,27) Name
     content_control_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("InlineDataValidationContentControl")));
-    rt::register_name(name_scope.as_ref(), "InlineDataValidationContentControl", ::core::clone::Clone::clone(&content_control_0).upcast::<::ferroui_base::FerroObject>(), 68, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "InlineDataValidationContentControl", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_0)), 68, 27)?;
     // Controls/MacOSControls.xaml(69,27) Content (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     let reflection_binding_extension_0 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("(DataValidationErrors.Errors)"));
@@ -88576,7 +88576,7 @@ fn build_controls_macoscontrols_xaml_deferred_177(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(74,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 74, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 74, 29)?;
     // Controls/MacOSControls.xaml(75,29) Padding
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::padding_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), 75, 29)?;
     // Controls/MacOSControls.xaml(76,29) Background
@@ -88621,7 +88621,7 @@ fn build_controls_macoscontrols_xaml_deferred_178(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/MacOSControls.xaml(88,16) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("InlineErrorIcon")));
-    rt::register_name(name_scope.as_ref(), "InlineErrorIcon", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 88, 16)?;
+    rt::register_name_value(name_scope.as_ref(), "InlineErrorIcon", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 88, 16)?;
     // Controls/MacOSControls.xaml(88,10) Width
     panel_0.set_value(::ferroui_base::layout::Layoutable::width_property(), 16.0_f64);
     // Controls/MacOSControls.xaml(88,10) Height
@@ -88897,7 +88897,7 @@ fn build_controls_macoscontrols_xaml_deferred_181(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/MacOSControls.xaml(46,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 46, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 46, 29)?;
     // Controls/MacOSControls.xaml(47,29) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 47, 29)?;
     // Controls/MacOSControls.xaml(48,29) BackgroundSizing
@@ -89089,7 +89089,7 @@ fn build_controls_macoscontrols_xaml_deferred_183(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(99,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootBorder")));
-    rt::register_name(name_scope.as_ref(), "RootBorder", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 99, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "RootBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 99, 19)?;
     // Controls/MacOSControls.xaml(100,19) BackgroundSizing
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_sizing_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_sizing_property()), 100, 19)?;
     // Controls/MacOSControls.xaml(101,19) Padding
@@ -89101,7 +89101,7 @@ fn build_controls_macoscontrols_xaml_deferred_183(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/MacOSControls.xaml(102,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 102, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 102, 31)?;
     // Controls/MacOSControls.xaml(103,31) Foreground
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::foreground_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 103, 31)?;
     // Controls/MacOSControls.xaml(104,31) Content (setter chosen at run time)
@@ -89575,7 +89575,7 @@ fn build_controls_macoscontrols_xaml_deferred_189(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(206,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Root")));
-    rt::register_name(name_scope.as_ref(), "Root", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 206, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 206, 17)?;
     // Controls/MacOSControls.xaml(206,10) Background
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_controls::Border::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_0);
@@ -89600,7 +89600,7 @@ fn build_controls_macoscontrols_xaml_deferred_189(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/MacOSControls.xaml(210,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 210, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 210, 29)?;
     // Controls/MacOSControls.xaml(211,29) Foreground
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::foreground_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 211, 29)?;
     // Controls/MacOSControls.xaml(212,29) Content (setter chosen at run time)
@@ -89834,7 +89834,7 @@ fn build_controls_macoscontrols_xaml_deferred_193(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/MacOSControls.xaml(99,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 99, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 99, 27)?;
     // Controls/MacOSControls.xaml(100,27) Foreground
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::foreground_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 100, 27)?;
     // Controls/MacOSControls.xaml(101,27) Background
@@ -90071,7 +90071,7 @@ fn build_controls_macoscontrols_xaml_deferred_196(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/MacOSControls.xaml(160,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 160, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 160, 27)?;
     // Controls/MacOSControls.xaml(161,27) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 161, 27)?;
     // Controls/MacOSControls.xaml(162,27) BackgroundSizing
@@ -90250,7 +90250,7 @@ fn build_controls_macoscontrols_xaml_deferred_199(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(212,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootBorder")));
-    rt::register_name(name_scope.as_ref(), "RootBorder", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 212, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "RootBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 212, 17)?;
     // Controls/MacOSControls.xaml(213,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 213, 17)?;
     // Controls/MacOSControls.xaml(214,17) BorderBrush
@@ -90312,7 +90312,7 @@ fn build_controls_macoscontrols_xaml_deferred_199(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/MacOSControls.xaml(220,23) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HeaderButton")));
-    rt::register_name(name_scope.as_ref(), "PART_HeaderButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 220, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HeaderButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 220, 23)?;
     // Controls/MacOSControls.xaml(221,23) Theme (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("CalendarItemHeaderNavigationButtonStyle"));
@@ -90343,7 +90343,7 @@ fn build_controls_macoscontrols_xaml_deferred_199(
     context.push_parent(rt::to_value(button_1.clone()));
     // Controls/MacOSControls.xaml(224,23) Name
     button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PreviousButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PreviousButton", ::core::clone::Clone::clone(&button_1).upcast::<::ferroui_base::FerroObject>(), 224, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PreviousButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_1)), 224, 23)?;
     // Controls/MacOSControls.xaml(224,16) Column
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     button_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_3);
@@ -90432,7 +90432,7 @@ fn build_controls_macoscontrols_xaml_deferred_199(
     context.push_parent(rt::to_value(button_2.clone()));
     // Controls/MacOSControls.xaml(240,23) Name
     button_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_NextButton")));
-    rt::register_name(name_scope.as_ref(), "PART_NextButton", ::core::clone::Clone::clone(&button_2).upcast::<::ferroui_base::FerroObject>(), 240, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_NextButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_2)), 240, 23)?;
     // Controls/MacOSControls.xaml(240,16) Column
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     button_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_13);
@@ -90537,7 +90537,7 @@ fn build_controls_macoscontrols_xaml_deferred_199(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_7, ::core::clone::Clone::clone(&grid_2).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(260,19) Name
     grid_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Views")));
-    rt::register_name(name_scope.as_ref(), "Views", ::core::clone::Clone::clone(&grid_2).upcast::<::ferroui_base::FerroObject>(), 260, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "Views", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_2)), 260, 19)?;
     // Controls/MacOSControls.xaml(260,14) Row
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
     grid_2.set_value_with_priority(::ferroui_controls::Grid::row_property(), 2_i32, priority_25);
@@ -90568,7 +90568,7 @@ fn build_controls_macoscontrols_xaml_deferred_199(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_8, ::core::clone::Clone::clone(&grid_3).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(266,21) Name
     grid_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ElementWeekNumberLabels")));
-    rt::register_name(name_scope.as_ref(), "PART_ElementWeekNumberLabels", ::core::clone::Clone::clone(&grid_3).upcast::<::ferroui_base::FerroObject>(), 266, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ElementWeekNumberLabels", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_3)), 266, 21)?;
     // Controls/MacOSControls.xaml(266,16) Column
     let priority_29 = ::ferroui_base::data::BindingPriority::Template;
     grid_3.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_29);
@@ -90664,7 +90664,7 @@ fn build_controls_macoscontrols_xaml_deferred_199(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_9, ::core::clone::Clone::clone(&grid_4).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(280,21) Name
     grid_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MonthView")));
-    rt::register_name(name_scope.as_ref(), "PART_MonthView", ::core::clone::Clone::clone(&grid_4).upcast::<::ferroui_base::FerroObject>(), 280, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MonthView", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_4)), 280, 21)?;
     // Controls/MacOSControls.xaml(280,16) Column
     let priority_46 = ::ferroui_base::data::BindingPriority::Template;
     grid_4.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_46);
@@ -90819,7 +90819,7 @@ fn build_controls_macoscontrols_xaml_deferred_199(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_10, ::core::clone::Clone::clone(&grid_5).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(304,21) Name
     grid_5.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_YearView")));
-    rt::register_name(name_scope.as_ref(), "PART_YearView", ::core::clone::Clone::clone(&grid_5).upcast::<::ferroui_base::FerroObject>(), 304, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_YearView", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_5)), 304, 21)?;
     // Controls/MacOSControls.xaml(304,16) ColumnSpan
     let priority_71 = ::ferroui_base::data::BindingPriority::Template;
     grid_5.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 2_i32, priority_71);
@@ -90956,7 +90956,7 @@ fn build_controls_macoscontrols_xaml_deferred_201(
     panel_0.begin_init();
     // Controls/MacOSControls.xaml(48,16) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Root")));
-    rt::register_name(name_scope.as_ref(), "PART_Root", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 48, 16)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 48, 16)?;
     // Controls/MacOSControls.xaml(49,12) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(&panel_0);
     // Controls/MacOSControls.xaml(49,12) CalendarItem
@@ -90965,7 +90965,7 @@ fn build_controls_macoscontrols_xaml_deferred_201(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&calendar_item_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(49,25) Name
     calendar_item_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_CalendarItem")));
-    rt::register_name(name_scope.as_ref(), "PART_CalendarItem", ::core::clone::Clone::clone(&calendar_item_0).upcast::<::ferroui_base::FerroObject>(), 49, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_CalendarItem", ::std::rc::Rc::new(::core::clone::Clone::clone(&calendar_item_0)), 49, 25)?;
     // Controls/MacOSControls.xaml(50,25) Foreground
     rt::bind_template_binding(calendar_item_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::foreground_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 50, 25)?;
     // Controls/MacOSControls.xaml(51,25) Background
@@ -91097,7 +91097,7 @@ fn build_controls_macoscontrols_xaml_deferred_204(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(40,24) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_FloatingPlaceholder")));
-    rt::register_name(name_scope.as_ref(), "PART_FloatingPlaceholder", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 40, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_FloatingPlaceholder", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 40, 24)?;
     // Controls/MacOSControls.xaml(40,14) Dock
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Top, priority_0);
@@ -91118,7 +91118,7 @@ fn build_controls_macoscontrols_xaml_deferred_204(
     context.push_parent(rt::to_value(scroll_viewer_0.clone()));
     // Controls/MacOSControls.xaml(45,27) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "PART_ScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 45, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 45, 27)?;
     // Controls/MacOSControls.xaml(46,27) HorizontalScrollBarVisibility
     rt::bind_template_binding(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(::ferroui_controls::ScrollViewer::horizontal_scroll_bar_visibility_property()), 46, 27)?;
     // Controls/MacOSControls.xaml(47,27) VerticalScrollBarVisibility
@@ -91157,7 +91157,7 @@ fn build_controls_macoscontrols_xaml_deferred_204(
     context.push_parent(rt::to_value(text_block_1.clone()));
     // Controls/MacOSControls.xaml(51,28) Name
     text_block_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PlaceholderTextContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PlaceholderTextContentPresenter", ::core::clone::Clone::clone(&text_block_1).upcast::<::ferroui_base::FerroObject>(), 51, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "PlaceholderTextContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_1)), 51, 28)?;
     // Controls/MacOSControls.xaml(52,28) Foreground
     rt::bind_template_binding(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::foreground_property(), rt::property(::ferroui_controls::TextBox::placeholder_foreground_property()), 52, 28)?;
     // Controls/MacOSControls.xaml(53,28) Text
@@ -91219,7 +91219,7 @@ fn build_controls_macoscontrols_xaml_deferred_204(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&text_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(66,32) Name
     text_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TextPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_TextPresenter", ::core::clone::Clone::clone(&text_presenter_0).upcast::<::ferroui_base::FerroObject>(), 66, 32)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TextPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_presenter_0)), 66, 32)?;
     // Controls/MacOSControls.xaml(67,32) Text
     let template_binding_13 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TextBox::text_property()));
     // Controls/MacOSControls.xaml(67,32) Mode
@@ -91314,7 +91314,7 @@ fn build_controls_macoscontrols_xaml_deferred_206(
     content_presenter_0.begin_init();
     // Controls/MacOSControls.xaml(111,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 111, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 111, 27)?;
     // Controls/MacOSControls.xaml(112,27) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 112, 27)?;
     // Controls/MacOSControls.xaml(113,27) Content (setter chosen at run time)
@@ -91631,7 +91631,7 @@ fn build_controls_macoscontrols_xaml_deferred_208(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/MacOSControls.xaml(144,17) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Root")));
-    rt::register_name(name_scope.as_ref(), "Root", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 144, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 144, 17)?;
     // Controls/MacOSControls.xaml(144,12) ColumnDefinitions
     let column_definitions_0 = ::ferroui_controls::ColumnDefinitions::__markup_new_0();
     rt::invoked(<::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::ColumnDefinition>>>::__markup_set_Capacity(&column_definitions_0, 2_i32), 144, 31)?;
@@ -91651,7 +91651,7 @@ fn build_controls_macoscontrols_xaml_deferred_208(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(145,21) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Background")));
-    rt::register_name(name_scope.as_ref(), "Background", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 145, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "Background", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 145, 21)?;
     // Controls/MacOSControls.xaml(145,14) ColumnSpan
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 2_i32, priority_0);
@@ -91682,7 +91682,7 @@ fn build_controls_macoscontrols_xaml_deferred_208(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(154,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("MacOSInputFocusRing")));
-    rt::register_name(name_scope.as_ref(), "MacOSInputFocusRing", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 154, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "MacOSInputFocusRing", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 154, 21)?;
     // Controls/MacOSControls.xaml(154,14) ColumnSpan
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 2_i32, priority_3);
@@ -91729,7 +91729,7 @@ fn build_controls_macoscontrols_xaml_deferred_208(
     context.push_parent(rt::to_value(text_box_0.clone()));
     // Controls/MacOSControls.xaml(164,22) Name
     text_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TextBox")));
-    rt::register_name(name_scope.as_ref(), "PART_TextBox", ::core::clone::Clone::clone(&text_box_0).upcast::<::ferroui_base::FerroObject>(), 164, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TextBox", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_box_0)), 164, 22)?;
     // Controls/MacOSControls.xaml(164,14) Column
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     text_box_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_9);
@@ -91778,7 +91778,7 @@ fn build_controls_macoscontrols_xaml_deferred_208(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/MacOSControls.xaml(176,21) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Button")));
-    rt::register_name(name_scope.as_ref(), "PART_Button", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 176, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Button", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 176, 21)?;
     // Controls/MacOSControls.xaml(176,14) Column
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_13);
@@ -91804,7 +91804,7 @@ fn build_controls_macoscontrols_xaml_deferred_208(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/MacOSControls.xaml(180,21) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("CalendarGlyph")));
-    rt::register_name(name_scope.as_ref(), "CalendarGlyph", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 180, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "CalendarGlyph", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 180, 21)?;
     // Controls/MacOSControls.xaml(181,21) Data (setter chosen at run time)
     let priority_15 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE787"));
@@ -91846,7 +91846,7 @@ fn build_controls_macoscontrols_xaml_deferred_208(
     context.push_parent(rt::to_value(popup_0.clone()));
     // Controls/MacOSControls.xaml(188,20) Name
     popup_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Popup")));
-    rt::register_name(name_scope.as_ref(), "PART_Popup", ::core::clone::Clone::clone(&popup_0).upcast::<::ferroui_base::FerroObject>(), 188, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Popup", ::std::rc::Rc::new(::core::clone::Clone::clone(&popup_0)), 188, 20)?;
     // Controls/MacOSControls.xaml(188,14) WindowManagerAddShadowHint
     let priority_20 = ::ferroui_base::data::BindingPriority::Template;
     popup_0.set_value_with_priority(::ferroui_controls::primitives::Popup::window_manager_add_shadow_hint_property(), ::core::clone::Clone::clone(&false), priority_20);
@@ -91868,7 +91868,7 @@ fn build_controls_macoscontrols_xaml_deferred_208(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/MacOSControls.xaml(193,23) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("CalendarShadow")));
-    rt::register_name(name_scope.as_ref(), "CalendarShadow", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 193, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "CalendarShadow", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 193, 23)?;
     // Controls/MacOSControls.xaml(194,23) BoxShadow
     rt::bind_dynamic_resource(&context, border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::box_shadow_property(), "ThemeShadowFlyoutBoxShadow", 194, 23)?;
     // Controls/MacOSControls.xaml(195,23) CornerRadius
@@ -91893,7 +91893,7 @@ fn build_controls_macoscontrols_xaml_deferred_208(
     context.push_parent(rt::to_value(calendar_0.clone()));
     // Controls/MacOSControls.xaml(197,27) Name
     calendar_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Calendar")));
-    rt::register_name(name_scope.as_ref(), "PART_Calendar", ::core::clone::Clone::clone(&calendar_0).upcast::<::ferroui_base::FerroObject>(), 197, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Calendar", ::std::rc::Rc::new(::core::clone::Clone::clone(&calendar_0)), 197, 27)?;
     // Controls/MacOSControls.xaml(198,27) CornerRadius
     rt::bind_dynamic_resource(&context, calendar_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::corner_radius_property(), "OverlayCornerRadius", 198, 27)?;
     // Controls/MacOSControls.xaml(199,27) FirstDayOfWeek
@@ -92096,7 +92096,7 @@ fn build_controls_macoscontrols_xaml_deferred_212(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(32,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 32, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 32, 29)?;
     // Controls/MacOSControls.xaml(33,29) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 33, 29)?;
     // Controls/MacOSControls.xaml(34,29) Foreground
@@ -92338,7 +92338,7 @@ fn build_controls_macoscontrols_xaml_deferred_215(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/MacOSControls.xaml(95,17) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 95, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 95, 17)?;
     // Controls/MacOSControls.xaml(95,37) Margin
     rt::bind_template_binding(grid_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), 95, 37)?;
     // Controls/MacOSControls.xaml(96,14) Children
@@ -92350,7 +92350,7 @@ fn build_controls_macoscontrols_xaml_deferred_215(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/MacOSControls.xaml(96,21) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_FlyoutButton")));
-    rt::register_name(name_scope.as_ref(), "PART_FlyoutButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 96, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_FlyoutButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 96, 21)?;
     // Controls/MacOSControls.xaml(97,21) Theme (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DatePickerFlyoutButtonStyle"));
@@ -92403,7 +92403,7 @@ fn build_controls_macoscontrols_xaml_deferred_215(
     context.push_parent(rt::to_value(grid_1.clone()));
     // Controls/MacOSControls.xaml(111,21) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ButtonContentGrid")));
-    rt::register_name(name_scope.as_ref(), "PART_ButtonContentGrid", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 111, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ButtonContentGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 111, 21)?;
     // Controls/MacOSControls.xaml(111,16) ColumnDefinitions
     let column_definitions_0 = ::ferroui_controls::ColumnDefinitions::__markup_new_0();
     rt::invoked(<::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::ColumnDefinition>>>::__markup_set_Capacity(&column_definitions_0, 5_i32), 111, 53)?;
@@ -92432,7 +92432,7 @@ fn build_controls_macoscontrols_xaml_deferred_215(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/MacOSControls.xaml(112,28) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DayTextBlock")));
-    rt::register_name(name_scope.as_ref(), "PART_DayTextBlock", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 112, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DayTextBlock", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 112, 28)?;
     // Controls/MacOSControls.xaml(113,28) Text
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_controls::TextBlock::text_property(), ::core::option::Option::Some(::std::string::String::from("day")), priority_5);
@@ -92458,7 +92458,7 @@ fn build_controls_macoscontrols_xaml_deferred_215(
     context.push_parent(rt::to_value(text_block_1.clone()));
     // Controls/MacOSControls.xaml(119,28) Name
     text_block_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MonthTextBlock")));
-    rt::register_name(name_scope.as_ref(), "PART_MonthTextBlock", ::core::clone::Clone::clone(&text_block_1).upcast::<::ferroui_base::FerroObject>(), 119, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MonthTextBlock", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_1)), 119, 28)?;
     // Controls/MacOSControls.xaml(120,28) Text
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     text_block_1.set_value_with_priority(::ferroui_controls::TextBlock::text_property(), ::core::option::Option::Some(::std::string::String::from("month")), priority_7);
@@ -92487,7 +92487,7 @@ fn build_controls_macoscontrols_xaml_deferred_215(
     context.push_parent(rt::to_value(text_block_2.clone()));
     // Controls/MacOSControls.xaml(127,28) Name
     text_block_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_YearTextBlock")));
-    rt::register_name(name_scope.as_ref(), "PART_YearTextBlock", ::core::clone::Clone::clone(&text_block_2).upcast::<::ferroui_base::FerroObject>(), 127, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_YearTextBlock", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_2)), 127, 28)?;
     // Controls/MacOSControls.xaml(128,28) Text
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
     text_block_2.set_value_with_priority(::ferroui_controls::TextBlock::text_property(), ::core::option::Option::Some(::std::string::String::from("year")), priority_10);
@@ -92513,7 +92513,7 @@ fn build_controls_macoscontrols_xaml_deferred_215(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/MacOSControls.xaml(134,28) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_FirstSpacer")));
-    rt::register_name(name_scope.as_ref(), "PART_FirstSpacer", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 134, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_FirstSpacer", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 134, 28)?;
     // Controls/MacOSControls.xaml(135,28) Fill
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "DatePickerSpacerFill", 135, 28)?;
     // Controls/MacOSControls.xaml(134,18) HorizontalAlignment
@@ -92535,7 +92535,7 @@ fn build_controls_macoscontrols_xaml_deferred_215(
     context.push_parent(rt::to_value(rectangle_1.clone()));
     // Controls/MacOSControls.xaml(139,28) Name
     rectangle_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SecondSpacer")));
-    rt::register_name(name_scope.as_ref(), "PART_SecondSpacer", ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_base::FerroObject>(), 139, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SecondSpacer", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_1)), 139, 28)?;
     // Controls/MacOSControls.xaml(140,28) Fill
     rt::bind_dynamic_resource(&context, rectangle_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "DatePickerSpacerFill", 140, 28)?;
     // Controls/MacOSControls.xaml(139,18) HorizontalAlignment
@@ -92561,7 +92561,7 @@ fn build_controls_macoscontrols_xaml_deferred_215(
     context.push_parent(rt::to_value(popup_0.clone()));
     // Controls/MacOSControls.xaml(146,20) Name
     popup_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Popup")));
-    rt::register_name(name_scope.as_ref(), "PART_Popup", ::core::clone::Clone::clone(&popup_0).upcast::<::ferroui_base::FerroObject>(), 146, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Popup", ::std::rc::Rc::new(::core::clone::Clone::clone(&popup_0)), 146, 20)?;
     // Controls/MacOSControls.xaml(146,14) WindowManagerAddShadowHint
     let priority_16 = ::ferroui_base::data::BindingPriority::Template;
     popup_0.set_value_with_priority(::ferroui_controls::primitives::Popup::window_manager_add_shadow_hint_property(), ::core::clone::Clone::clone(&false), priority_16);
@@ -92583,7 +92583,7 @@ fn build_controls_macoscontrols_xaml_deferred_215(
     context.push_parent(rt::to_value(date_picker_presenter_0.clone()));
     // Controls/MacOSControls.xaml(151,36) Name
     date_picker_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PickerPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_PickerPresenter", ::core::clone::Clone::clone(&date_picker_presenter_0).upcast::<::ferroui_base::FerroObject>(), 151, 36)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PickerPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&date_picker_presenter_0)), 151, 36)?;
     // Controls/MacOSControls.xaml(151,66) Margin (setter chosen at run time)
     let priority_19 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeShadowFlyoutMargin"));
@@ -92740,7 +92740,7 @@ fn build_controls_macoscontrols_xaml_deferred_218(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(200,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Background")));
-    rt::register_name(name_scope.as_ref(), "Background", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 200, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Background", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 200, 17)?;
     // Controls/MacOSControls.xaml(201,17) BoxShadow
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::box_shadow_property(), "ThemeShadowFlyoutBoxShadow", 201, 17)?;
     // Controls/MacOSControls.xaml(202,17) Background
@@ -92764,7 +92764,7 @@ fn build_controls_macoscontrols_xaml_deferred_218(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/MacOSControls.xaml(208,17) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentPanel")));
-    rt::register_name(name_scope.as_ref(), "ContentPanel", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 208, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentPanel", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 208, 17)?;
     // Controls/MacOSControls.xaml(208,12) RowDefinitions
     let row_definitions_0 = ::ferroui_controls::RowDefinitions::__markup_new_0();
     rt::invoked(<::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::RowDefinition>>>::__markup_set_Capacity(&row_definitions_0, 2_i32), 208, 39)?;
@@ -92784,7 +92784,7 @@ fn build_controls_macoscontrols_xaml_deferred_218(
     context.push_parent(rt::to_value(grid_1.clone()));
     // Controls/MacOSControls.xaml(209,19) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PickerContainer")));
-    rt::register_name(name_scope.as_ref(), "PART_PickerContainer", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 209, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PickerContainer", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 209, 19)?;
     // Controls/MacOSControls.xaml(211,18) Styles
     let styles_collection_0 = ::ferroui_base::StyledElement::__markup_get_Styles(grid_1.upcast_ref::<::ferroui_base::StyledElement>());
     // Controls/MacOSControls.xaml(211,18) Style
@@ -92812,7 +92812,7 @@ fn build_controls_macoscontrols_xaml_deferred_218(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(216,23) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HighlightRect")));
-    rt::register_name(name_scope.as_ref(), "HighlightRect", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 216, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "HighlightRect", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 216, 23)?;
     // Controls/MacOSControls.xaml(216,16) ZIndex
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_base::Visual::z_index_property(), -1_i32, priority_1);
@@ -92848,7 +92848,7 @@ fn build_controls_macoscontrols_xaml_deferred_218(
     context.push_parent(rt::to_value(grid_2.clone()));
     // Controls/MacOSControls.xaml(226,21) Name
     grid_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MonthHost")));
-    rt::register_name(name_scope.as_ref(), "PART_MonthHost", ::core::clone::Clone::clone(&grid_2).upcast::<::ferroui_base::FerroObject>(), 226, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MonthHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_2)), 226, 21)?;
     // Controls/MacOSControls.xaml(227,18) Children
     let children_collection_3 = ::ferroui_controls::Panel::__markup_get_Children(grid_2.upcast_ref::<::ferroui_controls::Panel>());
     // Controls/MacOSControls.xaml(227,18) ScrollViewer
@@ -92884,7 +92884,7 @@ fn build_controls_macoscontrols_xaml_deferred_218(
     context.push_parent(rt::to_value(date_time_picker_panel_0.clone()));
     // Controls/MacOSControls.xaml(230,40) Name
     date_time_picker_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MonthSelector")));
-    rt::register_name(name_scope.as_ref(), "PART_MonthSelector", ::core::clone::Clone::clone(&date_time_picker_panel_0).upcast::<::ferroui_base::FerroObject>(), 230, 40)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MonthSelector", ::std::rc::Rc::new(::core::clone::Clone::clone(&date_time_picker_panel_0)), 230, 40)?;
     // Controls/MacOSControls.xaml(230,20) PanelType
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
     date_time_picker_panel_0.set_value_with_priority(::ferroui_controls::date_time_pickers::DateTimePickerPanel::panel_type_property(), ::ferroui_controls::date_time_pickers::DateTimePickerPanelType::Month, priority_10);
@@ -92906,7 +92906,7 @@ fn build_controls_macoscontrols_xaml_deferred_218(
     context.push_parent(rt::to_value(repeat_button_0.clone()));
     // Controls/MacOSControls.xaml(235,31) Name
     repeat_button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MonthUpButton")));
-    rt::register_name(name_scope.as_ref(), "PART_MonthUpButton", ::core::clone::Clone::clone(&repeat_button_0).upcast::<::ferroui_base::FerroObject>(), 235, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MonthUpButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_0)), 235, 31)?;
     // Controls/MacOSControls.xaml(235,59) Theme (setter chosen at run time)
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorUpButtonStyle"));
@@ -92932,7 +92932,7 @@ fn build_controls_macoscontrols_xaml_deferred_218(
     context.push_parent(rt::to_value(repeat_button_1.clone()));
     // Controls/MacOSControls.xaml(236,31) Name
     repeat_button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MonthDownButton")));
-    rt::register_name(name_scope.as_ref(), "PART_MonthDownButton", ::core::clone::Clone::clone(&repeat_button_1).upcast::<::ferroui_base::FerroObject>(), 236, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MonthDownButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_1)), 236, 31)?;
     // Controls/MacOSControls.xaml(236,61) Theme (setter chosen at run time)
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorDownButtonStyle"));
@@ -92960,7 +92960,7 @@ fn build_controls_macoscontrols_xaml_deferred_218(
     context.push_parent(rt::to_value(grid_3.clone()));
     // Controls/MacOSControls.xaml(238,21) Name
     grid_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DayHost")));
-    rt::register_name(name_scope.as_ref(), "PART_DayHost", ::core::clone::Clone::clone(&grid_3).upcast::<::ferroui_base::FerroObject>(), 238, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DayHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_3)), 238, 21)?;
     // Controls/MacOSControls.xaml(239,18) Children
     let children_collection_7 = ::ferroui_controls::Panel::__markup_get_Children(grid_3.upcast_ref::<::ferroui_controls::Panel>());
     // Controls/MacOSControls.xaml(239,18) ScrollViewer
@@ -92996,7 +92996,7 @@ fn build_controls_macoscontrols_xaml_deferred_218(
     context.push_parent(rt::to_value(date_time_picker_panel_1.clone()));
     // Controls/MacOSControls.xaml(242,40) Name
     date_time_picker_panel_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DaySelector")));
-    rt::register_name(name_scope.as_ref(), "PART_DaySelector", ::core::clone::Clone::clone(&date_time_picker_panel_1).upcast::<::ferroui_base::FerroObject>(), 242, 40)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DaySelector", ::std::rc::Rc::new(::core::clone::Clone::clone(&date_time_picker_panel_1)), 242, 40)?;
     // Controls/MacOSControls.xaml(242,20) PanelType
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
     date_time_picker_panel_1.set_value_with_priority(::ferroui_controls::date_time_pickers::DateTimePickerPanel::panel_type_property(), ::ferroui_controls::date_time_pickers::DateTimePickerPanelType::Day, priority_17);
@@ -93018,7 +93018,7 @@ fn build_controls_macoscontrols_xaml_deferred_218(
     context.push_parent(rt::to_value(repeat_button_2.clone()));
     // Controls/MacOSControls.xaml(247,31) Name
     repeat_button_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DayUpButton")));
-    rt::register_name(name_scope.as_ref(), "PART_DayUpButton", ::core::clone::Clone::clone(&repeat_button_2).upcast::<::ferroui_base::FerroObject>(), 247, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DayUpButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_2)), 247, 31)?;
     // Controls/MacOSControls.xaml(247,57) Theme (setter chosen at run time)
     let priority_19 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorUpButtonStyle"));
@@ -93044,7 +93044,7 @@ fn build_controls_macoscontrols_xaml_deferred_218(
     context.push_parent(rt::to_value(repeat_button_3.clone()));
     // Controls/MacOSControls.xaml(248,31) Name
     repeat_button_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DayDownButton")));
-    rt::register_name(name_scope.as_ref(), "PART_DayDownButton", ::core::clone::Clone::clone(&repeat_button_3).upcast::<::ferroui_base::FerroObject>(), 248, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DayDownButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_3)), 248, 31)?;
     // Controls/MacOSControls.xaml(248,59) Theme (setter chosen at run time)
     let priority_20 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorDownButtonStyle"));
@@ -93072,7 +93072,7 @@ fn build_controls_macoscontrols_xaml_deferred_218(
     context.push_parent(rt::to_value(grid_4.clone()));
     // Controls/MacOSControls.xaml(250,21) Name
     grid_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_YearHost")));
-    rt::register_name(name_scope.as_ref(), "PART_YearHost", ::core::clone::Clone::clone(&grid_4).upcast::<::ferroui_base::FerroObject>(), 250, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_YearHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_4)), 250, 21)?;
     // Controls/MacOSControls.xaml(251,18) Children
     let children_collection_11 = ::ferroui_controls::Panel::__markup_get_Children(grid_4.upcast_ref::<::ferroui_controls::Panel>());
     // Controls/MacOSControls.xaml(251,18) ScrollViewer
@@ -93108,7 +93108,7 @@ fn build_controls_macoscontrols_xaml_deferred_218(
     context.push_parent(rt::to_value(date_time_picker_panel_2.clone()));
     // Controls/MacOSControls.xaml(254,40) Name
     date_time_picker_panel_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_YearSelector")));
-    rt::register_name(name_scope.as_ref(), "PART_YearSelector", ::core::clone::Clone::clone(&date_time_picker_panel_2).upcast::<::ferroui_base::FerroObject>(), 254, 40)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_YearSelector", ::std::rc::Rc::new(::core::clone::Clone::clone(&date_time_picker_panel_2)), 254, 40)?;
     // Controls/MacOSControls.xaml(254,20) PanelType
     let priority_24 = ::ferroui_base::data::BindingPriority::Template;
     date_time_picker_panel_2.set_value_with_priority(::ferroui_controls::date_time_pickers::DateTimePickerPanel::panel_type_property(), ::ferroui_controls::date_time_pickers::DateTimePickerPanelType::Year, priority_24);
@@ -93130,7 +93130,7 @@ fn build_controls_macoscontrols_xaml_deferred_218(
     context.push_parent(rt::to_value(repeat_button_4.clone()));
     // Controls/MacOSControls.xaml(259,31) Name
     repeat_button_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_YearUpButton")));
-    rt::register_name(name_scope.as_ref(), "PART_YearUpButton", ::core::clone::Clone::clone(&repeat_button_4).upcast::<::ferroui_base::FerroObject>(), 259, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_YearUpButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_4)), 259, 31)?;
     // Controls/MacOSControls.xaml(259,58) Theme (setter chosen at run time)
     let priority_26 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_8 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorUpButtonStyle"));
@@ -93156,7 +93156,7 @@ fn build_controls_macoscontrols_xaml_deferred_218(
     context.push_parent(rt::to_value(repeat_button_5.clone()));
     // Controls/MacOSControls.xaml(260,31) Name
     repeat_button_5.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_YearDownButton")));
-    rt::register_name(name_scope.as_ref(), "PART_YearDownButton", ::core::clone::Clone::clone(&repeat_button_5).upcast::<::ferroui_base::FerroObject>(), 260, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_YearDownButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_5)), 260, 31)?;
     // Controls/MacOSControls.xaml(260,60) Theme (setter chosen at run time)
     let priority_27 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_9 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorDownButtonStyle"));
@@ -93184,7 +93184,7 @@ fn build_controls_macoscontrols_xaml_deferred_218(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/MacOSControls.xaml(262,26) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_FirstSpacer")));
-    rt::register_name(name_scope.as_ref(), "PART_FirstSpacer", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 262, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_FirstSpacer", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 262, 26)?;
     // Controls/MacOSControls.xaml(262,16) ZIndex
     let priority_28 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_0.set_value_with_priority(::ferroui_base::Visual::z_index_property(), 10000_i32, priority_28);
@@ -93209,7 +93209,7 @@ fn build_controls_macoscontrols_xaml_deferred_218(
     context.push_parent(rt::to_value(rectangle_1.clone()));
     // Controls/MacOSControls.xaml(268,26) Name
     rectangle_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SecondSpacer")));
-    rt::register_name(name_scope.as_ref(), "PART_SecondSpacer", ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_base::FerroObject>(), 268, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SecondSpacer", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_1)), 268, 26)?;
     // Controls/MacOSControls.xaml(268,16) ZIndex
     let priority_31 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_1.set_value_with_priority(::ferroui_base::Visual::z_index_property(), 10000_i32, priority_31);
@@ -93236,7 +93236,7 @@ fn build_controls_macoscontrols_xaml_deferred_218(
     context.push_parent(rt::to_value(grid_5.clone()));
     // Controls/MacOSControls.xaml(275,19) Name
     grid_5.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("AcceptDismissHostGrid")));
-    rt::register_name(name_scope.as_ref(), "AcceptDismissHostGrid", ::core::clone::Clone::clone(&grid_5).upcast::<::ferroui_base::FerroObject>(), 275, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "AcceptDismissHostGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_5)), 275, 19)?;
     // Controls/MacOSControls.xaml(275,14) Row
     let priority_34 = ::ferroui_base::data::BindingPriority::Template;
     grid_5.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_34);
@@ -93280,7 +93280,7 @@ fn build_controls_macoscontrols_xaml_deferred_218(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/MacOSControls.xaml(283,23) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_AcceptButton")));
-    rt::register_name(name_scope.as_ref(), "PART_AcceptButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 283, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_AcceptButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 283, 23)?;
     // Controls/MacOSControls.xaml(283,16) Column
     let priority_37 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_37);
@@ -93371,7 +93371,7 @@ fn build_controls_macoscontrols_xaml_deferred_218(
     context.push_parent(rt::to_value(button_1.clone()));
     // Controls/MacOSControls.xaml(299,23) Name
     button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DismissButton")));
-    rt::register_name(name_scope.as_ref(), "PART_DismissButton", ::core::clone::Clone::clone(&button_1).upcast::<::ferroui_base::FerroObject>(), 299, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DismissButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_1)), 299, 23)?;
     // Controls/MacOSControls.xaml(299,16) Column
     let priority_49 = ::ferroui_base::data::BindingPriority::Template;
     button_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_49);
@@ -93621,7 +93621,7 @@ fn build_controls_macoscontrols_xaml_deferred_222(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(32,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 32, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 32, 29)?;
     // Controls/MacOSControls.xaml(33,29) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 33, 29)?;
     // Controls/MacOSControls.xaml(34,29) Foreground
@@ -93876,7 +93876,7 @@ fn build_controls_macoscontrols_xaml_deferred_225(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/MacOSControls.xaml(92,17) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 92, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 92, 17)?;
     // Controls/MacOSControls.xaml(92,37) Margin
     rt::bind_template_binding(grid_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), 92, 37)?;
     // Controls/MacOSControls.xaml(93,14) Children
@@ -93888,7 +93888,7 @@ fn build_controls_macoscontrols_xaml_deferred_225(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/MacOSControls.xaml(93,21) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_FlyoutButton")));
-    rt::register_name(name_scope.as_ref(), "PART_FlyoutButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 93, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_FlyoutButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 93, 21)?;
     // Controls/MacOSControls.xaml(94,21) Theme (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TimePickerFlyoutButtonStyle"));
@@ -93941,7 +93941,7 @@ fn build_controls_macoscontrols_xaml_deferred_225(
     context.push_parent(rt::to_value(grid_1.clone()));
     // Controls/MacOSControls.xaml(109,21) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_FlyoutButtonContentGrid")));
-    rt::register_name(name_scope.as_ref(), "PART_FlyoutButtonContentGrid", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 109, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_FlyoutButtonContentGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 109, 21)?;
     // Controls/MacOSControls.xaml(110,18) Children
     let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(grid_1.upcast_ref::<::ferroui_controls::Panel>());
     // Controls/MacOSControls.xaml(110,18) Border
@@ -93951,7 +93951,7 @@ fn build_controls_macoscontrols_xaml_deferred_225(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(110,25) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_FirstPickerHost")));
-    rt::register_name(name_scope.as_ref(), "PART_FirstPickerHost", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 110, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_FirstPickerHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 110, 25)?;
     // Controls/MacOSControls.xaml(110,18) Column
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_5);
@@ -93963,7 +93963,7 @@ fn build_controls_macoscontrols_xaml_deferred_225(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/MacOSControls.xaml(111,30) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HourTextBlock")));
-    rt::register_name(name_scope.as_ref(), "PART_HourTextBlock", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 111, 30)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HourTextBlock", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 111, 30)?;
     // Controls/MacOSControls.xaml(112,30) Text
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_controls::TextBlock::text_property(), ::core::option::Option::Some(::std::string::String::from("hour")), priority_6);
@@ -93991,7 +93991,7 @@ fn build_controls_macoscontrols_xaml_deferred_225(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/MacOSControls.xaml(119,28) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_FirstColumnDivider")));
-    rt::register_name(name_scope.as_ref(), "PART_FirstColumnDivider", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 119, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_FirstColumnDivider", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 119, 28)?;
     // Controls/MacOSControls.xaml(120,28) Fill
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "TimePickerSpacerFill", 120, 28)?;
     // Controls/MacOSControls.xaml(119,18) HorizontalAlignment
@@ -94013,7 +94013,7 @@ fn build_controls_macoscontrols_xaml_deferred_225(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(124,25) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SecondPickerHost")));
-    rt::register_name(name_scope.as_ref(), "PART_SecondPickerHost", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 124, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SecondPickerHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 124, 25)?;
     // Controls/MacOSControls.xaml(124,18) Column
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_10);
@@ -94025,7 +94025,7 @@ fn build_controls_macoscontrols_xaml_deferred_225(
     context.push_parent(rt::to_value(text_block_1.clone()));
     // Controls/MacOSControls.xaml(125,30) Name
     text_block_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MinuteTextBlock")));
-    rt::register_name(name_scope.as_ref(), "PART_MinuteTextBlock", ::core::clone::Clone::clone(&text_block_1).upcast::<::ferroui_base::FerroObject>(), 125, 30)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MinuteTextBlock", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_1)), 125, 30)?;
     // Controls/MacOSControls.xaml(126,30) Text
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     text_block_1.set_value_with_priority(::ferroui_controls::TextBlock::text_property(), ::core::option::Option::Some(::std::string::String::from("minute")), priority_11);
@@ -94053,7 +94053,7 @@ fn build_controls_macoscontrols_xaml_deferred_225(
     context.push_parent(rt::to_value(rectangle_1.clone()));
     // Controls/MacOSControls.xaml(133,28) Name
     rectangle_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SecondColumnDivider")));
-    rt::register_name(name_scope.as_ref(), "PART_SecondColumnDivider", ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_base::FerroObject>(), 133, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SecondColumnDivider", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_1)), 133, 28)?;
     // Controls/MacOSControls.xaml(134,28) Fill
     rt::bind_dynamic_resource(&context, rectangle_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "TimePickerSpacerFill", 134, 28)?;
     // Controls/MacOSControls.xaml(133,18) HorizontalAlignment
@@ -94075,7 +94075,7 @@ fn build_controls_macoscontrols_xaml_deferred_225(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/MacOSControls.xaml(138,25) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ThirdPickerHost")));
-    rt::register_name(name_scope.as_ref(), "PART_ThirdPickerHost", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 138, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ThirdPickerHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 138, 25)?;
     // Controls/MacOSControls.xaml(138,18) Column
     let priority_15 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 4_i32, priority_15);
@@ -94087,7 +94087,7 @@ fn build_controls_macoscontrols_xaml_deferred_225(
     context.push_parent(rt::to_value(text_block_2.clone()));
     // Controls/MacOSControls.xaml(139,30) Name
     text_block_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SecondTextBlock")));
-    rt::register_name(name_scope.as_ref(), "PART_SecondTextBlock", ::core::clone::Clone::clone(&text_block_2).upcast::<::ferroui_base::FerroObject>(), 139, 30)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SecondTextBlock", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_2)), 139, 30)?;
     // Controls/MacOSControls.xaml(140,30) Text
     let priority_16 = ::ferroui_base::data::BindingPriority::Template;
     text_block_2.set_value_with_priority(::ferroui_controls::TextBlock::text_property(), ::core::option::Option::Some(::std::string::String::from("second")), priority_16);
@@ -94115,7 +94115,7 @@ fn build_controls_macoscontrols_xaml_deferred_225(
     context.push_parent(rt::to_value(rectangle_2.clone()));
     // Controls/MacOSControls.xaml(147,28) Name
     rectangle_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ThirdColumnDivider")));
-    rt::register_name(name_scope.as_ref(), "PART_ThirdColumnDivider", ::core::clone::Clone::clone(&rectangle_2).upcast::<::ferroui_base::FerroObject>(), 147, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ThirdColumnDivider", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_2)), 147, 28)?;
     // Controls/MacOSControls.xaml(148,28) Fill
     rt::bind_dynamic_resource(&context, rectangle_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "TimePickerSpacerFill", 148, 28)?;
     // Controls/MacOSControls.xaml(147,18) HorizontalAlignment
@@ -94137,7 +94137,7 @@ fn build_controls_macoscontrols_xaml_deferred_225(
     context.push_parent(rt::to_value(border_3.clone()));
     // Controls/MacOSControls.xaml(152,25) Name
     border_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_FourthPickerHost")));
-    rt::register_name(name_scope.as_ref(), "PART_FourthPickerHost", ::core::clone::Clone::clone(&border_3).upcast::<::ferroui_base::FerroObject>(), 152, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_FourthPickerHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_3)), 152, 25)?;
     // Controls/MacOSControls.xaml(152,18) Column
     let priority_20 = ::ferroui_base::data::BindingPriority::Template;
     border_3.set_value_with_priority(::ferroui_controls::Grid::column_property(), 6_i32, priority_20);
@@ -94149,7 +94149,7 @@ fn build_controls_macoscontrols_xaml_deferred_225(
     context.push_parent(rt::to_value(text_block_3.clone()));
     // Controls/MacOSControls.xaml(153,30) Name
     text_block_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PeriodTextBlock")));
-    rt::register_name(name_scope.as_ref(), "PART_PeriodTextBlock", ::core::clone::Clone::clone(&text_block_3).upcast::<::ferroui_base::FerroObject>(), 153, 30)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PeriodTextBlock", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_3)), 153, 30)?;
     // Controls/MacOSControls.xaml(153,20) TextAlignment
     let priority_21 = ::ferroui_base::data::BindingPriority::Template;
     text_block_3.set_value_with_priority(::ferroui_controls::TextBlock::text_alignment_property(), ::ferroui_base::media::TextAlignment::Center, priority_21);
@@ -94178,7 +94178,7 @@ fn build_controls_macoscontrols_xaml_deferred_225(
     context.push_parent(rt::to_value(popup_0.clone()));
     // Controls/MacOSControls.xaml(162,20) Name
     popup_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Popup")));
-    rt::register_name(name_scope.as_ref(), "PART_Popup", ::core::clone::Clone::clone(&popup_0).upcast::<::ferroui_base::FerroObject>(), 162, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Popup", ::std::rc::Rc::new(::core::clone::Clone::clone(&popup_0)), 162, 20)?;
     // Controls/MacOSControls.xaml(162,14) WindowManagerAddShadowHint
     let priority_22 = ::ferroui_base::data::BindingPriority::Template;
     popup_0.set_value_with_priority(::ferroui_controls::primitives::Popup::window_manager_add_shadow_hint_property(), ::core::clone::Clone::clone(&false), priority_22);
@@ -94200,7 +94200,7 @@ fn build_controls_macoscontrols_xaml_deferred_225(
     context.push_parent(rt::to_value(time_picker_presenter_0.clone()));
     // Controls/MacOSControls.xaml(167,36) Name
     time_picker_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PickerPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_PickerPresenter", ::core::clone::Clone::clone(&time_picker_presenter_0).upcast::<::ferroui_base::FerroObject>(), 167, 36)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PickerPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&time_picker_presenter_0)), 167, 36)?;
     // Controls/MacOSControls.xaml(167,66) Margin (setter chosen at run time)
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ThemeShadowFlyoutMargin"));
@@ -94351,7 +94351,7 @@ fn build_controls_macoscontrols_xaml_deferred_227(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(216,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Background")));
-    rt::register_name(name_scope.as_ref(), "Background", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 216, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Background", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 216, 17)?;
     // Controls/MacOSControls.xaml(217,17) BoxShadow
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::box_shadow_property(), "ThemeShadowFlyoutBoxShadow", 217, 17)?;
     // Controls/MacOSControls.xaml(218,17) Background
@@ -94375,7 +94375,7 @@ fn build_controls_macoscontrols_xaml_deferred_227(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/MacOSControls.xaml(224,17) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentPanel")));
-    rt::register_name(name_scope.as_ref(), "ContentPanel", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 224, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentPanel", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 224, 17)?;
     // Controls/MacOSControls.xaml(224,12) RowDefinitions
     let row_definitions_0 = ::ferroui_controls::RowDefinitions::__markup_new_0();
     rt::invoked(<::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::RowDefinition>>>::__markup_set_Capacity(&row_definitions_0, 2_i32), 224, 39)?;
@@ -94395,7 +94395,7 @@ fn build_controls_macoscontrols_xaml_deferred_227(
     context.push_parent(rt::to_value(grid_1.clone()));
     // Controls/MacOSControls.xaml(226,19) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PickerContainer")));
-    rt::register_name(name_scope.as_ref(), "PART_PickerContainer", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 226, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PickerContainer", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 226, 19)?;
     // Controls/MacOSControls.xaml(228,18) Styles
     let styles_collection_0 = ::ferroui_base::StyledElement::__markup_get_Styles(grid_1.upcast_ref::<::ferroui_base::StyledElement>());
     // Controls/MacOSControls.xaml(228,18) Style
@@ -94423,7 +94423,7 @@ fn build_controls_macoscontrols_xaml_deferred_227(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(232,23) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HighlightRect")));
-    rt::register_name(name_scope.as_ref(), "HighlightRect", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 232, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "HighlightRect", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 232, 23)?;
     // Controls/MacOSControls.xaml(232,16) ZIndex
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_base::Visual::z_index_property(), -1_i32, priority_1);
@@ -94459,7 +94459,7 @@ fn build_controls_macoscontrols_xaml_deferred_227(
     context.push_parent(rt::to_value(grid_2.clone()));
     // Controls/MacOSControls.xaml(242,21) Name
     grid_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HourHost")));
-    rt::register_name(name_scope.as_ref(), "PART_HourHost", ::core::clone::Clone::clone(&grid_2).upcast::<::ferroui_base::FerroObject>(), 242, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HourHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_2)), 242, 21)?;
     // Controls/MacOSControls.xaml(242,16) Column
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     grid_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_7);
@@ -94498,7 +94498,7 @@ fn build_controls_macoscontrols_xaml_deferred_227(
     context.push_parent(rt::to_value(date_time_picker_panel_0.clone()));
     // Controls/MacOSControls.xaml(246,40) Name
     date_time_picker_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HourSelector")));
-    rt::register_name(name_scope.as_ref(), "PART_HourSelector", ::core::clone::Clone::clone(&date_time_picker_panel_0).upcast::<::ferroui_base::FerroObject>(), 246, 40)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HourSelector", ::std::rc::Rc::new(::core::clone::Clone::clone(&date_time_picker_panel_0)), 246, 40)?;
     // Controls/MacOSControls.xaml(246,20) PanelType
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     date_time_picker_panel_0.set_value_with_priority(::ferroui_controls::date_time_pickers::DateTimePickerPanel::panel_type_property(), ::ferroui_controls::date_time_pickers::DateTimePickerPanelType::Hour, priority_11);
@@ -94520,7 +94520,7 @@ fn build_controls_macoscontrols_xaml_deferred_227(
     context.push_parent(rt::to_value(repeat_button_0.clone()));
     // Controls/MacOSControls.xaml(251,31) Name
     repeat_button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HourUpButton")));
-    rt::register_name(name_scope.as_ref(), "PART_HourUpButton", ::core::clone::Clone::clone(&repeat_button_0).upcast::<::ferroui_base::FerroObject>(), 251, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HourUpButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_0)), 251, 31)?;
     // Controls/MacOSControls.xaml(251,58) Theme (setter chosen at run time)
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorUpButtonStyle"));
@@ -94546,7 +94546,7 @@ fn build_controls_macoscontrols_xaml_deferred_227(
     context.push_parent(rt::to_value(repeat_button_1.clone()));
     // Controls/MacOSControls.xaml(252,31) Name
     repeat_button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HourDownButton")));
-    rt::register_name(name_scope.as_ref(), "PART_HourDownButton", ::core::clone::Clone::clone(&repeat_button_1).upcast::<::ferroui_base::FerroObject>(), 252, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HourDownButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_1)), 252, 31)?;
     // Controls/MacOSControls.xaml(252,60) Theme (setter chosen at run time)
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorDownButtonStyle"));
@@ -94574,7 +94574,7 @@ fn build_controls_macoscontrols_xaml_deferred_227(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/MacOSControls.xaml(254,26) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_FirstSpacer")));
-    rt::register_name(name_scope.as_ref(), "PART_FirstSpacer", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 254, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_FirstSpacer", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 254, 26)?;
     // Controls/MacOSControls.xaml(254,16) ZIndex
     let priority_15 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_0.set_value_with_priority(::ferroui_base::Visual::z_index_property(), 10000_i32, priority_15);
@@ -94599,7 +94599,7 @@ fn build_controls_macoscontrols_xaml_deferred_227(
     context.push_parent(rt::to_value(grid_3.clone()));
     // Controls/MacOSControls.xaml(260,21) Name
     grid_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MinuteHost")));
-    rt::register_name(name_scope.as_ref(), "PART_MinuteHost", ::core::clone::Clone::clone(&grid_3).upcast::<::ferroui_base::FerroObject>(), 260, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MinuteHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_3)), 260, 21)?;
     // Controls/MacOSControls.xaml(260,16) Column
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
     grid_3.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_18);
@@ -94638,7 +94638,7 @@ fn build_controls_macoscontrols_xaml_deferred_227(
     context.push_parent(rt::to_value(date_time_picker_panel_1.clone()));
     // Controls/MacOSControls.xaml(264,40) Name
     date_time_picker_panel_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MinuteSelector")));
-    rt::register_name(name_scope.as_ref(), "PART_MinuteSelector", ::core::clone::Clone::clone(&date_time_picker_panel_1).upcast::<::ferroui_base::FerroObject>(), 264, 40)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MinuteSelector", ::std::rc::Rc::new(::core::clone::Clone::clone(&date_time_picker_panel_1)), 264, 40)?;
     // Controls/MacOSControls.xaml(264,20) PanelType
     let priority_22 = ::ferroui_base::data::BindingPriority::Template;
     date_time_picker_panel_1.set_value_with_priority(::ferroui_controls::date_time_pickers::DateTimePickerPanel::panel_type_property(), ::ferroui_controls::date_time_pickers::DateTimePickerPanelType::Minute, priority_22);
@@ -94660,7 +94660,7 @@ fn build_controls_macoscontrols_xaml_deferred_227(
     context.push_parent(rt::to_value(repeat_button_2.clone()));
     // Controls/MacOSControls.xaml(269,31) Name
     repeat_button_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MinuteUpButton")));
-    rt::register_name(name_scope.as_ref(), "PART_MinuteUpButton", ::core::clone::Clone::clone(&repeat_button_2).upcast::<::ferroui_base::FerroObject>(), 269, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MinuteUpButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_2)), 269, 31)?;
     // Controls/MacOSControls.xaml(269,60) Theme (setter chosen at run time)
     let priority_24 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorUpButtonStyle"));
@@ -94686,7 +94686,7 @@ fn build_controls_macoscontrols_xaml_deferred_227(
     context.push_parent(rt::to_value(repeat_button_3.clone()));
     // Controls/MacOSControls.xaml(270,31) Name
     repeat_button_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MinuteDownButton")));
-    rt::register_name(name_scope.as_ref(), "PART_MinuteDownButton", ::core::clone::Clone::clone(&repeat_button_3).upcast::<::ferroui_base::FerroObject>(), 270, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MinuteDownButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_3)), 270, 31)?;
     // Controls/MacOSControls.xaml(270,62) Theme (setter chosen at run time)
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorDownButtonStyle"));
@@ -94714,7 +94714,7 @@ fn build_controls_macoscontrols_xaml_deferred_227(
     context.push_parent(rt::to_value(rectangle_1.clone()));
     // Controls/MacOSControls.xaml(272,26) Name
     rectangle_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SecondSpacer")));
-    rt::register_name(name_scope.as_ref(), "PART_SecondSpacer", ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_base::FerroObject>(), 272, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SecondSpacer", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_1)), 272, 26)?;
     // Controls/MacOSControls.xaml(272,16) ZIndex
     let priority_26 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_1.set_value_with_priority(::ferroui_base::Visual::z_index_property(), 10000_i32, priority_26);
@@ -94739,7 +94739,7 @@ fn build_controls_macoscontrols_xaml_deferred_227(
     context.push_parent(rt::to_value(grid_4.clone()));
     // Controls/MacOSControls.xaml(278,21) Name
     grid_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SecondHost")));
-    rt::register_name(name_scope.as_ref(), "PART_SecondHost", ::core::clone::Clone::clone(&grid_4).upcast::<::ferroui_base::FerroObject>(), 278, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SecondHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_4)), 278, 21)?;
     // Controls/MacOSControls.xaml(278,16) Column
     let priority_29 = ::ferroui_base::data::BindingPriority::Template;
     grid_4.set_value_with_priority(::ferroui_controls::Grid::column_property(), 4_i32, priority_29);
@@ -94778,7 +94778,7 @@ fn build_controls_macoscontrols_xaml_deferred_227(
     context.push_parent(rt::to_value(date_time_picker_panel_2.clone()));
     // Controls/MacOSControls.xaml(282,40) Name
     date_time_picker_panel_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SecondSelector")));
-    rt::register_name(name_scope.as_ref(), "PART_SecondSelector", ::core::clone::Clone::clone(&date_time_picker_panel_2).upcast::<::ferroui_base::FerroObject>(), 282, 40)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SecondSelector", ::std::rc::Rc::new(::core::clone::Clone::clone(&date_time_picker_panel_2)), 282, 40)?;
     // Controls/MacOSControls.xaml(282,20) PanelType
     let priority_33 = ::ferroui_base::data::BindingPriority::Template;
     date_time_picker_panel_2.set_value_with_priority(::ferroui_controls::date_time_pickers::DateTimePickerPanel::panel_type_property(), ::ferroui_controls::date_time_pickers::DateTimePickerPanelType::Second, priority_33);
@@ -94800,7 +94800,7 @@ fn build_controls_macoscontrols_xaml_deferred_227(
     context.push_parent(rt::to_value(repeat_button_4.clone()));
     // Controls/MacOSControls.xaml(287,31) Name
     repeat_button_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SecondUpButton")));
-    rt::register_name(name_scope.as_ref(), "PART_SecondUpButton", ::core::clone::Clone::clone(&repeat_button_4).upcast::<::ferroui_base::FerroObject>(), 287, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SecondUpButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_4)), 287, 31)?;
     // Controls/MacOSControls.xaml(287,60) Theme (setter chosen at run time)
     let priority_35 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_8 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorUpButtonStyle"));
@@ -94826,7 +94826,7 @@ fn build_controls_macoscontrols_xaml_deferred_227(
     context.push_parent(rt::to_value(repeat_button_5.clone()));
     // Controls/MacOSControls.xaml(288,31) Name
     repeat_button_5.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SecondDownButton")));
-    rt::register_name(name_scope.as_ref(), "PART_SecondDownButton", ::core::clone::Clone::clone(&repeat_button_5).upcast::<::ferroui_base::FerroObject>(), 288, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SecondDownButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_5)), 288, 31)?;
     // Controls/MacOSControls.xaml(288,62) Theme (setter chosen at run time)
     let priority_36 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_9 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorDownButtonStyle"));
@@ -94854,7 +94854,7 @@ fn build_controls_macoscontrols_xaml_deferred_227(
     context.push_parent(rt::to_value(rectangle_2.clone()));
     // Controls/MacOSControls.xaml(290,26) Name
     rectangle_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ThirdSpacer")));
-    rt::register_name(name_scope.as_ref(), "PART_ThirdSpacer", ::core::clone::Clone::clone(&rectangle_2).upcast::<::ferroui_base::FerroObject>(), 290, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ThirdSpacer", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_2)), 290, 26)?;
     // Controls/MacOSControls.xaml(290,16) ZIndex
     let priority_37 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_2.set_value_with_priority(::ferroui_base::Visual::z_index_property(), 10000_i32, priority_37);
@@ -94879,7 +94879,7 @@ fn build_controls_macoscontrols_xaml_deferred_227(
     context.push_parent(rt::to_value(grid_5.clone()));
     // Controls/MacOSControls.xaml(296,21) Name
     grid_5.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PeriodHost")));
-    rt::register_name(name_scope.as_ref(), "PART_PeriodHost", ::core::clone::Clone::clone(&grid_5).upcast::<::ferroui_base::FerroObject>(), 296, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PeriodHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_5)), 296, 21)?;
     // Controls/MacOSControls.xaml(296,16) Column
     let priority_40 = ::ferroui_base::data::BindingPriority::Template;
     grid_5.set_value_with_priority(::ferroui_controls::Grid::column_property(), 6_i32, priority_40);
@@ -94918,7 +94918,7 @@ fn build_controls_macoscontrols_xaml_deferred_227(
     context.push_parent(rt::to_value(date_time_picker_panel_3.clone()));
     // Controls/MacOSControls.xaml(300,40) Name
     date_time_picker_panel_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PeriodSelector")));
-    rt::register_name(name_scope.as_ref(), "PART_PeriodSelector", ::core::clone::Clone::clone(&date_time_picker_panel_3).upcast::<::ferroui_base::FerroObject>(), 300, 40)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PeriodSelector", ::std::rc::Rc::new(::core::clone::Clone::clone(&date_time_picker_panel_3)), 300, 40)?;
     // Controls/MacOSControls.xaml(300,20) PanelType
     let priority_44 = ::ferroui_base::data::BindingPriority::Template;
     date_time_picker_panel_3.set_value_with_priority(::ferroui_controls::date_time_pickers::DateTimePickerPanel::panel_type_property(), ::ferroui_controls::date_time_pickers::DateTimePickerPanelType::TimePeriod, priority_44);
@@ -94940,7 +94940,7 @@ fn build_controls_macoscontrols_xaml_deferred_227(
     context.push_parent(rt::to_value(repeat_button_6.clone()));
     // Controls/MacOSControls.xaml(305,31) Name
     repeat_button_6.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PeriodUpButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PeriodUpButton", ::core::clone::Clone::clone(&repeat_button_6).upcast::<::ferroui_base::FerroObject>(), 305, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PeriodUpButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_6)), 305, 31)?;
     // Controls/MacOSControls.xaml(305,60) Theme (setter chosen at run time)
     let priority_46 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_11 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorUpButtonStyle"));
@@ -94966,7 +94966,7 @@ fn build_controls_macoscontrols_xaml_deferred_227(
     context.push_parent(rt::to_value(repeat_button_7.clone()));
     // Controls/MacOSControls.xaml(306,31) Name
     repeat_button_7.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PeriodDownButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PeriodDownButton", ::core::clone::Clone::clone(&repeat_button_7).upcast::<::ferroui_base::FerroObject>(), 306, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PeriodDownButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_7)), 306, 31)?;
     // Controls/MacOSControls.xaml(306,62) Theme (setter chosen at run time)
     let priority_47 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_12 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DateTimePickerLoopingSelectorDownButtonStyle"));
@@ -94996,7 +94996,7 @@ fn build_controls_macoscontrols_xaml_deferred_227(
     context.push_parent(rt::to_value(grid_6.clone()));
     // Controls/MacOSControls.xaml(309,19) Name
     grid_6.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("AcceptDismissHostGrid")));
-    rt::register_name(name_scope.as_ref(), "AcceptDismissHostGrid", ::core::clone::Clone::clone(&grid_6).upcast::<::ferroui_base::FerroObject>(), 309, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "AcceptDismissHostGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_6)), 309, 19)?;
     // Controls/MacOSControls.xaml(309,14) Row
     let priority_48 = ::ferroui_base::data::BindingPriority::Template;
     grid_6.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_48);
@@ -95040,7 +95040,7 @@ fn build_controls_macoscontrols_xaml_deferred_227(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/MacOSControls.xaml(317,23) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_AcceptButton")));
-    rt::register_name(name_scope.as_ref(), "PART_AcceptButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 317, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_AcceptButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 317, 23)?;
     // Controls/MacOSControls.xaml(317,16) Column
     let priority_51 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_51);
@@ -95131,7 +95131,7 @@ fn build_controls_macoscontrols_xaml_deferred_227(
     context.push_parent(rt::to_value(button_1.clone()));
     // Controls/MacOSControls.xaml(333,23) Name
     button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DismissButton")));
-    rt::register_name(name_scope.as_ref(), "PART_DismissButton", ::core::clone::Clone::clone(&button_1).upcast::<::ferroui_base::FerroObject>(), 333, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DismissButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_1)), 333, 23)?;
     // Controls/MacOSControls.xaml(333,16) Column
     let priority_63 = ::ferroui_base::data::BindingPriority::Template;
     button_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_63);
@@ -95359,7 +95359,7 @@ fn build_controls_macoscontrols_xaml_deferred_233(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(29,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 29, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 29, 17)?;
     // Controls/MacOSControls.xaml(29,37) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 29, 37)?;
     // Controls/MacOSControls.xaml(29,79) BackgroundSizing
@@ -95410,7 +95410,7 @@ fn build_controls_macoscontrols_xaml_deferred_233(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/MacOSControls.xaml(35,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 35, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 35, 29)?;
     // Controls/MacOSControls.xaml(35,60) Content (setter chosen at run time)
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_6 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -95657,7 +95657,7 @@ fn build_controls_macoscontrols_xaml_deferred_238(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(66,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootGrid")));
-    rt::register_name(name_scope.as_ref(), "RootGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 66, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 66, 17)?;
     // Controls/MacOSControls.xaml(66,35) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 66, 35)?;
     // Controls/MacOSControls.xaml(66,77) CornerRadius
@@ -95670,7 +95670,7 @@ fn build_controls_macoscontrols_xaml_deferred_238(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/MacOSControls.xaml(67,17) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Content")));
-    rt::register_name(name_scope.as_ref(), "Content", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 67, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Content", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 67, 17)?;
     // Controls/MacOSControls.xaml(67,34) Data (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE72B"));
@@ -95861,7 +95861,7 @@ fn build_controls_macoscontrols_xaml_deferred_240(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(101,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootGrid")));
-    rt::register_name(name_scope.as_ref(), "RootGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 101, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 101, 17)?;
     // Controls/MacOSControls.xaml(101,35) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 101, 35)?;
     // Controls/MacOSControls.xaml(101,77) CornerRadius
@@ -95874,7 +95874,7 @@ fn build_controls_macoscontrols_xaml_deferred_240(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/MacOSControls.xaml(102,17) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Content")));
-    rt::register_name(name_scope.as_ref(), "Content", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 102, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Content", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 102, 17)?;
     // Controls/MacOSControls.xaml(102,34) Data (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE700"));
@@ -95940,7 +95940,7 @@ fn build_controls_macoscontrols_xaml_deferred_242(
     content_presenter_0.begin_init();
     // Controls/MacOSControls.xaml(128,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 128, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 128, 27)?;
     // Controls/MacOSControls.xaml(128,58) Content (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_0 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -96323,7 +96323,7 @@ fn build_controls_macoscontrols_xaml_deferred_244(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/MacOSControls.xaml(140,20) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_UnderlayWrapper")));
-    rt::register_name(name_scope.as_ref(), "PART_UnderlayWrapper", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 140, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_UnderlayWrapper", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 140, 20)?;
     // Controls/MacOSControls.xaml(141,16) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(&panel_0);
     // Controls/MacOSControls.xaml(141,16) Border
@@ -96333,7 +96333,7 @@ fn build_controls_macoscontrols_xaml_deferred_244(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(141,23) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_WindowBorder")));
-    rt::register_name(name_scope.as_ref(), "PART_WindowBorder", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 141, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_WindowBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 141, 23)?;
     // Controls/MacOSControls.xaml(141,50) Background
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "SystemControlTransparentBrush", 141, 50)?;
     // Controls/MacOSControls.xaml(141,111) BorderThickness
@@ -96356,7 +96356,7 @@ fn build_controls_macoscontrols_xaml_deferred_244(
     context.push_parent(rt::to_value(panel_1.clone()));
     // Controls/MacOSControls.xaml(142,22) Name
     panel_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TitleBar")));
-    rt::register_name(name_scope.as_ref(), "PART_TitleBar", ::core::clone::Clone::clone(&panel_1).upcast::<::ferroui_base::FerroObject>(), 142, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TitleBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_1)), 142, 22)?;
     // Controls/MacOSControls.xaml(142,16) VerticalAlignment
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     panel_1.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Top, priority_1);
@@ -96398,7 +96398,7 @@ fn build_controls_macoscontrols_xaml_deferred_244(
     context.push_parent(rt::to_value(panel_2.clone()));
     // Controls/MacOSControls.xaml(148,20) Name
     panel_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_OverlayWrapper")));
-    rt::register_name(name_scope.as_ref(), "PART_OverlayWrapper", ::core::clone::Clone::clone(&panel_2).upcast::<::ferroui_base::FerroObject>(), 148, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_OverlayWrapper", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_2)), 148, 20)?;
     // Controls/MacOSControls.xaml(149,16) Children
     let children_collection_3 = ::ferroui_controls::Panel::__markup_get_Children(&panel_2);
     // Controls/MacOSControls.xaml(149,16) Panel
@@ -96408,7 +96408,7 @@ fn build_controls_macoscontrols_xaml_deferred_244(
     context.push_parent(rt::to_value(panel_3.clone()));
     // Controls/MacOSControls.xaml(149,22) Name
     panel_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TitleTextPanel")));
-    rt::register_name(name_scope.as_ref(), "PART_TitleTextPanel", ::core::clone::Clone::clone(&panel_3).upcast::<::ferroui_base::FerroObject>(), 149, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TitleTextPanel", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_3)), 149, 22)?;
     // Controls/MacOSControls.xaml(149,16) VerticalAlignment
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     panel_3.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Top, priority_5);
@@ -96428,7 +96428,7 @@ fn build_controls_macoscontrols_xaml_deferred_244(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/MacOSControls.xaml(150,28) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TitleText")));
-    rt::register_name(name_scope.as_ref(), "PART_TitleText", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 150, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TitleText", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 150, 28)?;
     // Controls/MacOSControls.xaml(150,52) Theme (setter chosen at run time)
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("CaptionTextBlockStyle"));
@@ -96480,7 +96480,7 @@ fn build_controls_macoscontrols_xaml_deferred_244(
     context.push_parent(rt::to_value(stack_panel_0.clone()));
     // Controls/MacOSControls.xaml(152,27) Name
     stack_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_OverlayPanel")));
-    rt::register_name(name_scope.as_ref(), "PART_OverlayPanel", ::core::clone::Clone::clone(&stack_panel_0).upcast::<::ferroui_base::FerroObject>(), 152, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_OverlayPanel", ::std::rc::Rc::new(::core::clone::Clone::clone(&stack_panel_0)), 152, 27)?;
     // Controls/MacOSControls.xaml(152,16) VerticalAlignment
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     stack_panel_0.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Top, priority_13);
@@ -96506,7 +96506,7 @@ fn build_controls_macoscontrols_xaml_deferred_244(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/MacOSControls.xaml(153,25) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_CloseButton")));
-    rt::register_name(name_scope.as_ref(), "PART_CloseButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 153, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_CloseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 153, 25)?;
     // Controls/MacOSControls.xaml(153,51) Theme (setter chosen at run time)
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("WindowDrawnDecorationsCloseButton"));
@@ -96570,7 +96570,7 @@ fn build_controls_macoscontrols_xaml_deferred_244(
     context.push_parent(rt::to_value(button_1.clone()));
     // Controls/MacOSControls.xaml(156,25) Name
     button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MinimizeButton")));
-    rt::register_name(name_scope.as_ref(), "PART_MinimizeButton", ::core::clone::Clone::clone(&button_1).upcast::<::ferroui_base::FerroObject>(), 156, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MinimizeButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_1)), 156, 25)?;
     // Controls/MacOSControls.xaml(156,54) Theme (setter chosen at run time)
     let priority_23 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MacOSMinimizeCaptionButton"));
@@ -96634,7 +96634,7 @@ fn build_controls_macoscontrols_xaml_deferred_244(
     context.push_parent(rt::to_value(button_2.clone()));
     // Controls/MacOSControls.xaml(159,25) Name
     button_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_FullScreenButton")));
-    rt::register_name(name_scope.as_ref(), "PART_FullScreenButton", ::core::clone::Clone::clone(&button_2).upcast::<::ferroui_base::FerroObject>(), 159, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_FullScreenButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_2)), 159, 25)?;
     // Controls/MacOSControls.xaml(159,56) Theme (setter chosen at run time)
     let priority_29 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MacOSZoomCaptionButton"));
@@ -96698,7 +96698,7 @@ fn build_controls_macoscontrols_xaml_deferred_244(
     context.push_parent(rt::to_value(button_3.clone()));
     // Controls/MacOSControls.xaml(162,25) Name
     button_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MaximizeButton")));
-    rt::register_name(name_scope.as_ref(), "PART_MaximizeButton", ::core::clone::Clone::clone(&button_3).upcast::<::ferroui_base::FerroObject>(), 162, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MaximizeButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_3)), 162, 25)?;
     // Controls/MacOSControls.xaml(162,54) Theme (setter chosen at run time)
     let priority_35 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_7 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MacOSZoomCaptionButton"));
@@ -96724,7 +96724,7 @@ fn build_controls_macoscontrols_xaml_deferred_244(
     context.push_parent(rt::to_value(path_3.clone()));
     // Controls/MacOSControls.xaml(163,25) Name
     path_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RestoreButtonPath")));
-    rt::register_name(name_scope.as_ref(), "RestoreButtonPath", ::core::clone::Clone::clone(&path_3).upcast::<::ferroui_base::FerroObject>(), 163, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "RestoreButtonPath", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_3)), 163, 25)?;
     // Controls/MacOSControls.xaml(163,52) Data (setter chosen at run time)
     let priority_37 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_8 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MacOSTrafficZoomGeometry"));
@@ -96785,7 +96785,7 @@ fn build_controls_macoscontrols_xaml_deferred_244(
     context.push_parent(rt::to_value(text_block_1.clone()));
     // Controls/MacOSControls.xaml(170,26) Name
     text_block_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PopoverTitleText")));
-    rt::register_name(name_scope.as_ref(), "PART_PopoverTitleText", ::core::clone::Clone::clone(&text_block_1).upcast::<::ferroui_base::FerroObject>(), 170, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PopoverTitleText", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_1)), 170, 26)?;
     // Controls/MacOSControls.xaml(170,57) Theme (setter chosen at run time)
     let priority_43 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_9 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("CaptionTextBlockStyle"));
@@ -96851,7 +96851,7 @@ fn build_controls_macoscontrols_xaml_deferred_244(
     context.push_parent(rt::to_value(button_4.clone()));
     // Controls/MacOSControls.xaml(172,25) Name
     button_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PopoverCloseButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PopoverCloseButton", ::core::clone::Clone::clone(&button_4).upcast::<::ferroui_base::FerroObject>(), 172, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PopoverCloseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_4)), 172, 25)?;
     // Controls/MacOSControls.xaml(172,58) Theme (setter chosen at run time)
     let priority_52 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_10 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("WindowDrawnDecorationsCloseButton"));
@@ -96915,7 +96915,7 @@ fn build_controls_macoscontrols_xaml_deferred_244(
     context.push_parent(rt::to_value(button_5.clone()));
     // Controls/MacOSControls.xaml(175,25) Name
     button_5.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PopoverFullScreenButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PopoverFullScreenButton", ::core::clone::Clone::clone(&button_5).upcast::<::ferroui_base::FerroObject>(), 175, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PopoverFullScreenButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_5)), 175, 25)?;
     // Controls/MacOSControls.xaml(175,63) Theme (setter chosen at run time)
     let priority_58 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_12 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MacOSZoomCaptionButton"));
@@ -97417,7 +97417,7 @@ fn build_controls_macoscontrols_xaml_deferred_248(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(107,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentRoot")));
-    rt::register_name(name_scope.as_ref(), "ContentRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 107, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 107, 17)?;
     // Controls/MacOSControls.xaml(107,10) VerticalAlignment
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Top, priority_0);
@@ -97503,7 +97503,7 @@ fn build_controls_macoscontrols_xaml_deferred_248(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/MacOSControls.xaml(126,22) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("StandardIconArea")));
-    rt::register_name(name_scope.as_ref(), "StandardIconArea", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 126, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "StandardIconArea", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 126, 22)?;
     // Controls/MacOSControls.xaml(127,22) Width (setter chosen at run time)
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("InfoBarIconFontSize"));
@@ -97552,7 +97552,7 @@ fn build_controls_macoscontrols_xaml_deferred_248(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/MacOSControls.xaml(131,23) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("IconBackground")));
-    rt::register_name(name_scope.as_ref(), "IconBackground", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 131, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "IconBackground", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 131, 23)?;
     // Controls/MacOSControls.xaml(132,23) Data (setter chosen at run time)
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryF136"));
@@ -97592,7 +97592,7 @@ fn build_controls_macoscontrols_xaml_deferred_248(
     context.push_parent(rt::to_value(path_1.clone()));
     // Controls/MacOSControls.xaml(138,23) Name
     path_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("StandardIcon")));
-    rt::register_name(name_scope.as_ref(), "StandardIcon", ::core::clone::Clone::clone(&path_1).upcast::<::ferroui_base::FerroObject>(), 138, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "StandardIcon", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_1)), 138, 23)?;
     // Controls/MacOSControls.xaml(139,23) Data (setter chosen at run time)
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryF13F"));
@@ -97634,7 +97634,7 @@ fn build_controls_macoscontrols_xaml_deferred_248(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/MacOSControls.xaml(146,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 146, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 146, 33)?;
     // Controls/MacOSControls.xaml(146,16) Column
     let priority_19 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_19);
@@ -97677,7 +97677,7 @@ fn build_controls_macoscontrols_xaml_deferred_248(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/MacOSControls.xaml(153,23) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("CloseButton")));
-    rt::register_name(name_scope.as_ref(), "CloseButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 153, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "CloseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 153, 23)?;
     // Controls/MacOSControls.xaml(153,16) Column
     let priority_22 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_22);
@@ -97788,7 +97788,7 @@ fn build_controls_macoscontrols_xaml_deferred_250(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(49,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Root")));
-    rt::register_name(name_scope.as_ref(), "Root", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 49, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 49, 17)?;
     // Controls/MacOSControls.xaml(50,17) BorderBrush
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::border_brush_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()), 50, 17)?;
     // Controls/MacOSControls.xaml(51,17) BorderThickness
@@ -97835,7 +97835,7 @@ fn build_controls_macoscontrols_xaml_deferred_250(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(56,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HeaderRow")));
-    rt::register_name(name_scope.as_ref(), "PART_HeaderRow", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 56, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HeaderRow", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 56, 21)?;
     // Controls/MacOSControls.xaml(56,14) ColumnSpan
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 2_i32, priority_0);
@@ -97859,7 +97859,7 @@ fn build_controls_macoscontrols_xaml_deferred_250(
     border_1.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&table_view_column_headers_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/MacOSControls.xaml(63,48) Name
     table_view_column_headers_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HeaderHost")));
-    rt::register_name(name_scope.as_ref(), "PART_HeaderHost", ::core::clone::Clone::clone(&table_view_column_headers_presenter_0).upcast::<::ferroui_base::FerroObject>(), 63, 48)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HeaderHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&table_view_column_headers_presenter_0)), 63, 48)?;
     rt::invoked(table_view_column_headers_presenter_0.try_end_init(), 63, 16)?;
     context.pop_parent();
     rt::invoked(border_1.try_end_init(), 56, 14)?;
@@ -97872,7 +97872,7 @@ fn build_controls_macoscontrols_xaml_deferred_250(
     context.push_parent(rt::to_value(scroll_content_presenter_0.clone()));
     // Controls/MacOSControls.xaml(65,37) Name
     scroll_content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&scroll_content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 65, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_content_presenter_0)), 65, 37)?;
     // Controls/MacOSControls.xaml(65,14) Row
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     scroll_content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_4);
@@ -97952,7 +97952,7 @@ fn build_controls_macoscontrols_xaml_deferred_250(
     context.push_parent(rt::to_value(scroll_bar_0.clone()));
     // Controls/MacOSControls.xaml(87,24) Name
     scroll_bar_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_VerticalScrollBar")));
-    rt::register_name(name_scope.as_ref(), "PART_VerticalScrollBar", ::core::clone::Clone::clone(&scroll_bar_0).upcast::<::ferroui_base::FerroObject>(), 87, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_VerticalScrollBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_bar_0)), 87, 24)?;
     // Controls/MacOSControls.xaml(87,14) Row
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     scroll_bar_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_7);
@@ -98000,7 +98000,7 @@ fn build_controls_macoscontrols_xaml_deferred_250(
     context.push_parent(rt::to_value(scroll_bar_1.clone()));
     // Controls/MacOSControls.xaml(101,24) Name
     scroll_bar_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HorizontalScrollBar")));
-    rt::register_name(name_scope.as_ref(), "PART_HorizontalScrollBar", ::core::clone::Clone::clone(&scroll_bar_1).upcast::<::ferroui_base::FerroObject>(), 101, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HorizontalScrollBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_bar_1)), 101, 24)?;
     // Controls/MacOSControls.xaml(101,14) Row
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
     scroll_bar_1.set_value_with_priority(::ferroui_controls::Grid::row_property(), 2_i32, priority_14);
@@ -98042,7 +98042,7 @@ fn build_controls_macoscontrols_xaml_deferred_250(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/MacOSControls.xaml(113,21) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ScrollBarSeparator")));
-    rt::register_name(name_scope.as_ref(), "ScrollBarSeparator", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 113, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "ScrollBarSeparator", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 113, 21)?;
     // Controls/MacOSControls.xaml(113,14) Row
     let priority_19 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_controls::Grid::row_property(), 2_i32, priority_19);
@@ -98145,7 +98145,7 @@ fn build_controls_macoscontrols_xaml_deferred_252(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(148,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Root")));
-    rt::register_name(name_scope.as_ref(), "Root", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 148, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 148, 17)?;
     // Controls/MacOSControls.xaml(149,17) ClipToBounds
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::clip_to_bounds_property(), rt::property(::ferroui_base::Visual::clip_to_bounds_property()), 149, 17)?;
     // Controls/MacOSControls.xaml(150,17) Background
@@ -98167,7 +98167,7 @@ fn build_controls_macoscontrols_xaml_deferred_252(
     context.push_parent(rt::to_value(scroll_viewer_0.clone()));
     // Controls/MacOSControls.xaml(155,25) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "PART_ScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 155, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 155, 25)?;
     // Controls/MacOSControls.xaml(156,25) Theme (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TableViewScrollViewerStyle"));
@@ -98207,7 +98207,7 @@ fn build_controls_macoscontrols_xaml_deferred_252(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&items_presenter_0)));
     // Controls/MacOSControls.xaml(166,29) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 166, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 166, 29)?;
     // Controls/MacOSControls.xaml(167,29) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 167, 29)?;
     // Controls/MacOSControls.xaml(168,29) Margin
@@ -98288,7 +98288,7 @@ fn build_controls_macoscontrols_xaml_deferred_254(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(46,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 46, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 46, 17)?;
     // Controls/MacOSControls.xaml(47,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 47, 17)?;
     // Controls/MacOSControls.xaml(46,10) HorizontalAlignment
@@ -98305,7 +98305,7 @@ fn build_controls_macoscontrols_xaml_deferred_254(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(50,19) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Separator")));
-    rt::register_name(name_scope.as_ref(), "Separator", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 50, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "Separator", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 50, 19)?;
     // Controls/MacOSControls.xaml(51,19) BorderBrush
     rt::bind_template_binding(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::border_brush_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()), 51, 19)?;
     // Controls/MacOSControls.xaml(52,19) BorderThickness
@@ -98402,7 +98402,7 @@ fn build_controls_macoscontrols_xaml_deferred_256(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/MacOSControls.xaml(85,16) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HeaderCell")));
-    rt::register_name(name_scope.as_ref(), "HeaderCell", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 85, 16)?;
+    rt::register_name_value(name_scope.as_ref(), "HeaderCell", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 85, 16)?;
     // Controls/MacOSControls.xaml(88,12) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(&panel_0);
     // Controls/MacOSControls.xaml(88,12) ContentPresenter
@@ -98411,7 +98411,7 @@ fn build_controls_macoscontrols_xaml_deferred_256(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(88,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 88, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 88, 29)?;
     // Controls/MacOSControls.xaml(89,29) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 89, 29)?;
     // Controls/MacOSControls.xaml(90,29) BorderBrush
@@ -98451,7 +98451,7 @@ fn build_controls_macoscontrols_xaml_deferred_256(
     context.push_parent(rt::to_value(thumb_0.clone()));
     // Controls/MacOSControls.xaml(99,18) Name
     thumb_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Resizer")));
-    rt::register_name(name_scope.as_ref(), "PART_Resizer", ::core::clone::Clone::clone(&thumb_0).upcast::<::ferroui_base::FerroObject>(), 99, 18)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Resizer", ::std::rc::Rc::new(::core::clone::Clone::clone(&thumb_0)), 99, 18)?;
     // Controls/MacOSControls.xaml(100,18) Theme (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TableViewColumnHeaderResizerStyle"));
@@ -98539,7 +98539,7 @@ fn build_controls_macoscontrols_xaml_deferred_258(
     border_0.begin_init();
     // Controls/MacOSControls.xaml(79,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("border")));
-    rt::register_name(name_scope.as_ref(), "border", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 79, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "border", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 79, 17)?;
     // Controls/MacOSControls.xaml(80,17) ClipToBounds
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::clip_to_bounds_property(), rt::property(::ferroui_base::Visual::clip_to_bounds_property()), 80, 17)?;
     // Controls/MacOSControls.xaml(81,17) Background
@@ -98560,7 +98560,7 @@ fn build_controls_macoscontrols_xaml_deferred_258(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_controls::Control>()));
     // Controls/MacOSControls.xaml(86,25) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "PART_ScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 86, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 86, 25)?;
     // Controls/MacOSControls.xaml(87,25) VerticalSnapPointsType
     rt::bind_template_binding(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ScrollViewer::vertical_snap_points_type_property(), rt::property(::ferroui_controls::ScrollViewer::vertical_snap_points_type_property()), 87, 25)?;
     // Controls/MacOSControls.xaml(88,25) HorizontalSnapPointsType
@@ -98586,7 +98586,7 @@ fn build_controls_macoscontrols_xaml_deferred_258(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&items_presenter_0)));
     // Controls/MacOSControls.xaml(96,29) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 96, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 96, 29)?;
     // Controls/MacOSControls.xaml(97,29) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 97, 29)?;
     // Controls/MacOSControls.xaml(98,29) Margin
@@ -98962,7 +98962,7 @@ fn build_controls_macoscontrols_xaml_deferred_261(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(136,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Backplate")));
-    rt::register_name(name_scope.as_ref(), "Backplate", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 136, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "Backplate", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 136, 19)?;
     // Controls/MacOSControls.xaml(136,12) Margin
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(4.0_f64, 2.0_f64, 4.0_f64, 2.0_f64), priority_0);
@@ -98986,7 +98986,7 @@ fn build_controls_macoscontrols_xaml_deferred_261(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(143,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 143, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 143, 29)?;
     // Controls/MacOSControls.xaml(144,29) Content (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_4 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -99017,7 +99017,7 @@ fn build_controls_macoscontrols_xaml_deferred_261(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(150,19) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SelectionIndicator")));
-    rt::register_name(name_scope.as_ref(), "SelectionIndicator", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 150, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "SelectionIndicator", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 150, 19)?;
     // Controls/MacOSControls.xaml(150,12) Width
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 3.0_f64, priority_3);
@@ -99116,7 +99116,7 @@ fn build_controls_macoscontrols_xaml_deferred_263(
     context.push_parent(rt::to_value(list_box_0.clone()));
     // Controls/MacOSControls.xaml(234,22) Name
     list_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_QuickLinks")));
-    rt::register_name(name_scope.as_ref(), "PART_QuickLinks", ::core::clone::Clone::clone(&list_box_0).upcast::<::ferroui_base::FerroObject>(), 234, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_QuickLinks", ::std::rc::Rc::new(::core::clone::Clone::clone(&list_box_0)), 234, 22)?;
     // Controls/MacOSControls.xaml(234,14) Dock
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     list_box_0.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Left, priority_1);
@@ -99184,7 +99184,7 @@ fn build_controls_macoscontrols_xaml_deferred_263(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/MacOSControls.xaml(274,19) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("NavBar")));
-    rt::register_name(name_scope.as_ref(), "NavBar", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 274, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "NavBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 274, 19)?;
     // Controls/MacOSControls.xaml(274,14) Dock
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     grid_0.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Top, priority_7);
@@ -99264,7 +99264,7 @@ fn build_controls_macoscontrols_xaml_deferred_263(
     context.push_parent(rt::to_value(text_box_0.clone()));
     // Controls/MacOSControls.xaml(285,24) Name
     text_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Location")));
-    rt::register_name(name_scope.as_ref(), "Location", ::core::clone::Clone::clone(&text_box_0).upcast::<::ferroui_base::FerroObject>(), 285, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "Location", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_box_0)), 285, 24)?;
     // Controls/MacOSControls.xaml(285,16) Column
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
     text_box_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_14);
@@ -99466,7 +99466,7 @@ fn build_controls_macoscontrols_xaml_deferred_263(
     context.push_parent(rt::to_value(stack_panel_0.clone()));
     // Controls/MacOSControls.xaml(317,27) Name
     stack_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Finalize")));
-    rt::register_name(name_scope.as_ref(), "Finalize", ::core::clone::Clone::clone(&stack_panel_0).upcast::<::ferroui_base::FerroObject>(), 317, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "Finalize", ::std::rc::Rc::new(::core::clone::Clone::clone(&stack_panel_0)), 317, 27)?;
     // Controls/MacOSControls.xaml(317,16) Row
     let priority_29 = ::ferroui_base::data::BindingPriority::Template;
     stack_panel_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_29);
@@ -99794,7 +99794,7 @@ fn build_controls_macoscontrols_xaml_deferred_263(
     context.push_parent(rt::to_value(list_box_1.clone()));
     // Controls/MacOSControls.xaml(369,24) Name
     list_box_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Files")));
-    rt::register_name(name_scope.as_ref(), "PART_Files", ::core::clone::Clone::clone(&list_box_1).upcast::<::ferroui_base::FerroObject>(), 369, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Files", ::std::rc::Rc::new(::core::clone::Clone::clone(&list_box_1)), 369, 24)?;
     // Controls/MacOSControls.xaml(369,16) Margin
     let priority_69 = ::ferroui_base::data::BindingPriority::Template;
     list_box_1.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(0.0_f64, 5.0_f64, 0.0_f64, 5.0_f64), priority_69);
@@ -100598,7 +100598,7 @@ fn build_controls_macoscontrols_xaml_deferred_268(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(444,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("BackgroundElement")));
-    rt::register_name(name_scope.as_ref(), "BackgroundElement", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 444, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "BackgroundElement", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 444, 17)?;
     // Controls/MacOSControls.xaml(445,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 445, 17)?;
     // Controls/MacOSControls.xaml(446,17) BorderThickness
@@ -100637,7 +100637,7 @@ fn build_controls_macoscontrols_xaml_deferred_268(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(458,19) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("DialogSpace")));
-    rt::register_name(name_scope.as_ref(), "DialogSpace", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 458, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "DialogSpace", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 458, 19)?;
     // Controls/MacOSControls.xaml(458,12) ClipToBounds
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_base::Visual::clip_to_bounds_property(), ::core::clone::Clone::clone(&true), priority_4);
@@ -100685,7 +100685,7 @@ fn build_controls_macoscontrols_xaml_deferred_268(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/MacOSControls.xaml(467,28) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Content")));
-    rt::register_name(name_scope.as_ref(), "Content", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 467, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "Content", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 467, 28)?;
     // Controls/MacOSControls.xaml(468,28) FontSize (setter chosen at run time)
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("ControlContentThemeFontSize"));
@@ -100758,7 +100758,7 @@ fn build_controls_macoscontrols_xaml_deferred_268(
     context.push_parent(rt::to_value(border_3.clone()));
     // Controls/MacOSControls.xaml(485,23) Name
     border_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("CommandSpace")));
-    rt::register_name(name_scope.as_ref(), "CommandSpace", ::core::clone::Clone::clone(&border_3).upcast::<::ferroui_base::FerroObject>(), 485, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "CommandSpace", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_3)), 485, 23)?;
     // Controls/MacOSControls.xaml(485,16) Row
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     border_3.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_9);
@@ -100800,7 +100800,7 @@ fn build_controls_macoscontrols_xaml_deferred_268(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/MacOSControls.xaml(492,27) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PrimaryButton")));
-    rt::register_name(name_scope.as_ref(), "PrimaryButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 492, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PrimaryButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 492, 27)?;
     // Controls/MacOSControls.xaml(492,20) Column
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_12);
@@ -100858,7 +100858,7 @@ fn build_controls_macoscontrols_xaml_deferred_268(
     context.push_parent(rt::to_value(button_1.clone()));
     // Controls/MacOSControls.xaml(500,27) Name
     button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("CloseButton")));
-    rt::register_name(name_scope.as_ref(), "CloseButton", ::core::clone::Clone::clone(&button_1).upcast::<::ferroui_base::FerroObject>(), 500, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "CloseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_1)), 500, 27)?;
     // Controls/MacOSControls.xaml(500,20) Column
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
     button_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_18);
@@ -101011,7 +101011,7 @@ fn build_controls_macoscontrols_xaml_deferred_272(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/MacOSControls.xaml(32,27) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 32, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 32, 27)?;
     // Controls/MacOSControls.xaml(32,54) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 32, 54)?;
     // Controls/MacOSControls.xaml(32,96) Margin
@@ -101228,7 +101228,7 @@ fn build_controls_macoscontrols_xaml_deferred_276(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(40,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContainerRoot")));
-    rt::register_name(name_scope.as_ref(), "PART_ContainerRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 40, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContainerRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 40, 17)?;
     // Controls/MacOSControls.xaml(40,45) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 40, 45)?;
     // Controls/MacOSControls.xaml(40,87) CornerRadius
@@ -101263,7 +101263,7 @@ fn build_controls_macoscontrols_xaml_deferred_276(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/MacOSControls.xaml(46,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 46, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 46, 29)?;
     // Controls/MacOSControls.xaml(46,60) Content (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_4 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -101493,7 +101493,7 @@ fn build_controls_macoscontrols_xaml_deferred_279(
     content_presenter_0.begin_init();
     // Controls/MacOSControls.xaml(33,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 33, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 33, 27)?;
     // Controls/MacOSControls.xaml(33,58) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 33, 58)?;
     // Controls/MacOSControls.xaml(33,100) BorderBrush
@@ -101669,7 +101669,7 @@ fn build_controls_macoscontrols_xaml_deferred_281(
     content_presenter_0.begin_init();
     // Controls/MacOSControls.xaml(76,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 76, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 76, 27)?;
     // Controls/MacOSControls.xaml(76,58) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 76, 58)?;
     // Controls/MacOSControls.xaml(76,100) BackgroundSizing
@@ -101852,7 +101852,7 @@ fn build_controls_macoscontrols_xaml_deferred_283(
     content_presenter_0.begin_init();
     // Controls/MacOSControls.xaml(110,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 110, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 110, 27)?;
     // Controls/MacOSControls.xaml(110,58) BackgroundSizing
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_sizing_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_sizing_property()), 110, 58)?;
     // Controls/MacOSControls.xaml(110,112) Background
@@ -101922,7 +101922,7 @@ fn build_controls_macoscontrols_xaml_deferred_285(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(132,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Root")));
-    rt::register_name(name_scope.as_ref(), "Root", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 132, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 132, 17)?;
     // Controls/MacOSControls.xaml(132,10) BackgroundSizing
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_controls::Border::background_sizing_property(), ::ferroui_base::media::BackgroundSizing::InnerBorderEdge, priority_0);
@@ -101974,7 +101974,7 @@ fn build_controls_macoscontrols_xaml_deferred_285(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(139,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LeftBottomBorderLine")));
-    rt::register_name(name_scope.as_ref(), "LeftBottomBorderLine", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 139, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "LeftBottomBorderLine", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 139, 21)?;
     // Controls/MacOSControls.xaml(139,51) Background
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "TabViewBorderBrush", 139, 51)?;
     // Controls/MacOSControls.xaml(139,14) Height
@@ -101997,7 +101997,7 @@ fn build_controls_macoscontrols_xaml_deferred_285(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/MacOSControls.xaml(140,21) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RightBottomBorderLine")));
-    rt::register_name(name_scope.as_ref(), "RightBottomBorderLine", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 140, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "RightBottomBorderLine", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 140, 21)?;
     // Controls/MacOSControls.xaml(140,14) Column
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_8);
@@ -102023,7 +102023,7 @@ fn build_controls_macoscontrols_xaml_deferred_285(
     context.push_parent(rt::to_value(border_3.clone()));
     // Controls/MacOSControls.xaml(141,21) Name
     border_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ScrollDecreaseButtonContainer")));
-    rt::register_name(name_scope.as_ref(), "ScrollDecreaseButtonContainer", ::core::clone::Clone::clone(&border_3).upcast::<::ferroui_base::FerroObject>(), 141, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "ScrollDecreaseButtonContainer", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_3)), 141, 21)?;
     // Controls/MacOSControls.xaml(141,60) Padding
     rt::bind_dynamic_resource(&context, border_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Decorator::padding_property(), "TabViewItemLeftScrollButtonContainerPadding", 141, 60)?;
     // Controls/MacOSControls.xaml(141,14) VerticalAlignment
@@ -102099,7 +102099,7 @@ fn build_controls_macoscontrols_xaml_deferred_285(
     context.push_parent(rt::to_value(repeat_button_0.clone()));
     // Controls/MacOSControls.xaml(150,29) Name
     repeat_button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ScrollDecreaseButton")));
-    rt::register_name(name_scope.as_ref(), "ScrollDecreaseButton", ::core::clone::Clone::clone(&repeat_button_0).upcast::<::ferroui_base::FerroObject>(), 150, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "ScrollDecreaseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_0)), 150, 29)?;
     // Controls/MacOSControls.xaml(150,59) Theme (setter chosen at run time)
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TabViewScrollButtonStyle"));
@@ -102249,7 +102249,7 @@ fn build_controls_macoscontrols_xaml_deferred_285(
     context.push_parent(rt::to_value(scroll_content_presenter_0.clone()));
     // Controls/MacOSControls.xaml(162,37) Name
     scroll_content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&scroll_content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 162, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_content_presenter_0)), 162, 37)?;
     // Controls/MacOSControls.xaml(162,14) Column
     let priority_20 = ::ferroui_base::data::BindingPriority::Template;
     scroll_content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_20);
@@ -102308,7 +102308,7 @@ fn build_controls_macoscontrols_xaml_deferred_285(
     context.push_parent(rt::to_value(border_4.clone()));
     // Controls/MacOSControls.xaml(167,21) Name
     border_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ScrollIncreaseButtonContainer")));
-    rt::register_name(name_scope.as_ref(), "ScrollIncreaseButtonContainer", ::core::clone::Clone::clone(&border_4).upcast::<::ferroui_base::FerroObject>(), 167, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "ScrollIncreaseButtonContainer", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_4)), 167, 21)?;
     // Controls/MacOSControls.xaml(167,14) Column
     let priority_22 = ::ferroui_base::data::BindingPriority::Template;
     border_4.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_22);
@@ -102387,7 +102387,7 @@ fn build_controls_macoscontrols_xaml_deferred_285(
     context.push_parent(rt::to_value(repeat_button_1.clone()));
     // Controls/MacOSControls.xaml(176,29) Name
     repeat_button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ScrollIncreaseButton")));
-    rt::register_name(name_scope.as_ref(), "ScrollIncreaseButton", ::core::clone::Clone::clone(&repeat_button_1).upcast::<::ferroui_base::FerroObject>(), 176, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "ScrollIncreaseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_1)), 176, 29)?;
     // Controls/MacOSControls.xaml(176,59) Theme (setter chosen at run time)
     let priority_24 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TabViewScrollButtonStyle"));
@@ -102848,7 +102848,7 @@ fn build_controls_macoscontrols_xaml_deferred_288(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(206,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TabContainerGrid")));
-    rt::register_name(name_scope.as_ref(), "TabContainerGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 206, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "TabContainerGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 206, 19)?;
     // Controls/MacOSControls.xaml(206,45) Dock
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::DockPanel::dock_property(), rt::property(::ferroui_controls::TabControl::tab_strip_placement_property()), 206, 45)?;
     // Controls/MacOSControls.xaml(206,98) Background
@@ -102896,7 +102896,7 @@ fn build_controls_macoscontrols_xaml_deferred_288(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(212,23) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LeftBottomBorderLine")));
-    rt::register_name(name_scope.as_ref(), "LeftBottomBorderLine", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 212, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "LeftBottomBorderLine", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 212, 23)?;
     // Controls/MacOSControls.xaml(212,53) Background
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "TabViewBorderBrush", 212, 53)?;
     // Controls/MacOSControls.xaml(212,16) Height
@@ -102919,7 +102919,7 @@ fn build_controls_macoscontrols_xaml_deferred_288(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/MacOSControls.xaml(213,23) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TabListView")));
-    rt::register_name(name_scope.as_ref(), "TabListView", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 213, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "TabListView", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 213, 23)?;
     // Controls/MacOSControls.xaml(213,16) Column
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_9);
@@ -102937,7 +102937,7 @@ fn build_controls_macoscontrols_xaml_deferred_288(
     context.push_parent(rt::to_value(scroll_viewer_0.clone()));
     // Controls/MacOSControls.xaml(214,31) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "ScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 214, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "ScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 214, 31)?;
     // Controls/MacOSControls.xaml(214,53) Theme (setter chosen at run time)
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TabScrollViewerStyle"));
@@ -102972,7 +102972,7 @@ fn build_controls_macoscontrols_xaml_deferred_288(
     context.push_parent(rt::to_value(dock_panel_1.clone()));
     // Controls/MacOSControls.xaml(215,30) Name
     dock_panel_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TabsItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "TabsItemsPresenter", ::core::clone::Clone::clone(&dock_panel_1).upcast::<::ferroui_base::FerroObject>(), 215, 30)?;
+    rt::register_name_value(name_scope.as_ref(), "TabsItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&dock_panel_1)), 215, 30)?;
     // Controls/MacOSControls.xaml(215,58) Margin
     rt::bind_template_binding(dock_panel_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), 215, 58)?;
     // Controls/MacOSControls.xaml(216,22) Children
@@ -102984,7 +102984,7 @@ fn build_controls_macoscontrols_xaml_deferred_288(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/MacOSControls.xaml(216,28) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TabsItemsPresenterHeader")));
-    rt::register_name(name_scope.as_ref(), "TabsItemsPresenterHeader", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 216, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "TabsItemsPresenterHeader", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 216, 28)?;
     // Controls/MacOSControls.xaml(216,22) Dock
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
     panel_0.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Left, priority_17);
@@ -103000,7 +103000,7 @@ fn build_controls_macoscontrols_xaml_deferred_288(
     context.push_parent(rt::to_value(border_3.clone()));
     // Controls/MacOSControls.xaml(217,31) Name
     border_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HeaderBottomBorderLine")));
-    rt::register_name(name_scope.as_ref(), "HeaderBottomBorderLine", ::core::clone::Clone::clone(&border_3).upcast::<::ferroui_base::FerroObject>(), 217, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "HeaderBottomBorderLine", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_3)), 217, 31)?;
     // Controls/MacOSControls.xaml(217,63) Background
     rt::bind_dynamic_resource(&context, border_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "TabViewBorderBrush", 217, 63)?;
     // Controls/MacOSControls.xaml(217,24) Width
@@ -103030,7 +103030,7 @@ fn build_controls_macoscontrols_xaml_deferred_288(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(219,37) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 219, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 219, 37)?;
     // Controls/MacOSControls.xaml(219,22) Dock
     let priority_24 = ::ferroui_base::data::BindingPriority::Template;
     items_presenter_0.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Left, priority_24);
@@ -103046,7 +103046,7 @@ fn build_controls_macoscontrols_xaml_deferred_288(
     context.push_parent(rt::to_value(panel_1.clone()));
     // Controls/MacOSControls.xaml(220,28) Name
     panel_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TabsItemsPresenterFooter")));
-    rt::register_name(name_scope.as_ref(), "TabsItemsPresenterFooter", ::core::clone::Clone::clone(&panel_1).upcast::<::ferroui_base::FerroObject>(), 220, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "TabsItemsPresenterFooter", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_1)), 220, 28)?;
     // Controls/MacOSControls.xaml(220,22) MinWidth
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
     panel_1.set_value_with_priority(::ferroui_base::layout::Layoutable::min_width_property(), 4.0_f64, priority_25);
@@ -103059,7 +103059,7 @@ fn build_controls_macoscontrols_xaml_deferred_288(
     context.push_parent(rt::to_value(border_4.clone()));
     // Controls/MacOSControls.xaml(221,31) Name
     border_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("FooterBottomBorderLine")));
-    rt::register_name(name_scope.as_ref(), "FooterBottomBorderLine", ::core::clone::Clone::clone(&border_4).upcast::<::ferroui_base::FerroObject>(), 221, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "FooterBottomBorderLine", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_4)), 221, 31)?;
     // Controls/MacOSControls.xaml(221,63) Background
     rt::bind_dynamic_resource(&context, border_4.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "TabViewBorderBrush", 221, 63)?;
     // Controls/MacOSControls.xaml(221,24) Height
@@ -103093,7 +103093,7 @@ fn build_controls_macoscontrols_xaml_deferred_288(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_8, ::core::clone::Clone::clone(&border_5).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(228,19) Name
     border_5.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TabContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "TabContentPresenter", ::core::clone::Clone::clone(&border_5).upcast::<::ferroui_base::FerroObject>(), 228, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "TabContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_5)), 228, 19)?;
     // Controls/MacOSControls.xaml(228,48) BorderBrush
     rt::bind_template_binding(border_5.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::border_brush_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()), 228, 48)?;
     // Controls/MacOSControls.xaml(228,92) BorderThickness
@@ -103116,7 +103116,7 @@ fn build_controls_macoscontrols_xaml_deferred_288(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_9, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(230,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SelectedContentHost2")));
-    rt::register_name(name_scope.as_ref(), "PART_SelectedContentHost2", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 230, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SelectedContentHost2", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 230, 33)?;
     // Controls/MacOSControls.xaml(230,66) HorizontalContentAlignment
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::horizontal_content_alignment_property(), rt::property(::ferroui_controls::TabControl::horizontal_content_alignment_property()), 230, 66)?;
     // Controls/MacOSControls.xaml(230,140) VerticalContentAlignment
@@ -103133,7 +103133,7 @@ fn build_controls_macoscontrols_xaml_deferred_288(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_10, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(231,33) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SelectedContentHost")));
-    rt::register_name(name_scope.as_ref(), "PART_SelectedContentHost", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 231, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SelectedContentHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 231, 33)?;
     // Controls/MacOSControls.xaml(231,65) HorizontalContentAlignment
     rt::bind_template_binding(content_presenter_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::horizontal_content_alignment_property(), rt::property(::ferroui_controls::TabControl::horizontal_content_alignment_property()), 231, 65)?;
     // Controls/MacOSControls.xaml(231,139) VerticalContentAlignment
@@ -103981,7 +103981,7 @@ fn build_controls_macoscontrols_xaml_deferred_293(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/MacOSControls.xaml(33,18) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PaneRoot")));
-    rt::register_name(name_scope.as_ref(), "PART_PaneRoot", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 33, 18)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PaneRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 33, 18)?;
     // Controls/MacOSControls.xaml(33,12) ClipToBounds
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     panel_0.set_value_with_priority(::ferroui_base::Visual::clip_to_bounds_property(), ::core::clone::Clone::clone(&true), priority_1);
@@ -104000,7 +104000,7 @@ fn build_controls_macoscontrols_xaml_deferred_293(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(34,21) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PaneRoot")));
-    rt::register_name(name_scope.as_ref(), "PaneRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 34, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PaneRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 34, 21)?;
     // Controls/MacOSControls.xaml(34,39) Width
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), rt::property(::ferroui_controls::SplitView::open_pane_length_property()), 34, 39)?;
     // Controls/MacOSControls.xaml(34,14) HorizontalAlignment
@@ -104093,7 +104093,7 @@ fn build_controls_macoscontrols_xaml_deferred_293(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(44,39) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PanePresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_PanePresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 44, 39)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PanePresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 44, 39)?;
     // Controls/MacOSControls.xaml(44,67) Content (setter chosen at run time)
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_9 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::SplitView::pane_property()));
@@ -104116,7 +104116,7 @@ fn build_controls_macoscontrols_xaml_deferred_293(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/MacOSControls.xaml(45,32) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HCPaneBorder")));
-    rt::register_name(name_scope.as_ref(), "HCPaneBorder", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 45, 32)?;
+    rt::register_name_value(name_scope.as_ref(), "HCPaneBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 45, 32)?;
     // Controls/MacOSControls.xaml(45,22) IsVisible
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_0.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_13);
@@ -104148,7 +104148,7 @@ fn build_controls_macoscontrols_xaml_deferred_293(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_6, ::core::clone::Clone::clone(&panel_3).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(51,18) Name
     panel_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentRoot")));
-    rt::register_name(name_scope.as_ref(), "ContentRoot", ::core::clone::Clone::clone(&panel_3).upcast::<::ferroui_base::FerroObject>(), 51, 18)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_3)), 51, 18)?;
     // Controls/MacOSControls.xaml(51,12) Column
     let priority_16 = ::ferroui_base::data::BindingPriority::Template;
     panel_3.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_16);
@@ -104160,7 +104160,7 @@ fn build_controls_macoscontrols_xaml_deferred_293(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_7, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(52,31) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 52, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 52, 31)?;
     // Controls/MacOSControls.xaml(52,62) Content (setter chosen at run time)
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_11 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -104186,7 +104186,7 @@ fn build_controls_macoscontrols_xaml_deferred_293(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_8, ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(53,24) Name
     rectangle_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LightDismissLayer")));
-    rt::register_name(name_scope.as_ref(), "LightDismissLayer", ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_base::FerroObject>(), 53, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "LightDismissLayer", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_1)), 53, 24)?;
     // Controls/MacOSControls.xaml(53,14) Fill
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_1.set_value_with_priority(::ferroui_controls::shapes::Shape::fill_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_18);
@@ -104249,7 +104249,7 @@ fn build_controls_macoscontrols_xaml_deferred_294(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/MacOSControls.xaml(84,20) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PaneRoot")));
-    rt::register_name(name_scope.as_ref(), "PART_PaneRoot", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 84, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PaneRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 84, 20)?;
     // Controls/MacOSControls.xaml(84,14) Column
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     panel_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_1);
@@ -104271,7 +104271,7 @@ fn build_controls_macoscontrols_xaml_deferred_294(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(85,23) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PaneRoot")));
-    rt::register_name(name_scope.as_ref(), "PaneRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 85, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PaneRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 85, 23)?;
     // Controls/MacOSControls.xaml(85,41) Width
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), rt::property(::ferroui_controls::SplitView::open_pane_length_property()), 85, 41)?;
     // Controls/MacOSControls.xaml(85,16) HorizontalAlignment
@@ -104364,7 +104364,7 @@ fn build_controls_macoscontrols_xaml_deferred_294(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(95,41) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PanePresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_PanePresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 95, 41)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PanePresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 95, 41)?;
     // Controls/MacOSControls.xaml(95,69) Content (setter chosen at run time)
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_9 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::SplitView::pane_property()));
@@ -104387,7 +104387,7 @@ fn build_controls_macoscontrols_xaml_deferred_294(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/MacOSControls.xaml(96,34) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HCPaneBorder")));
-    rt::register_name(name_scope.as_ref(), "HCPaneBorder", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 96, 34)?;
+    rt::register_name_value(name_scope.as_ref(), "HCPaneBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 96, 34)?;
     // Controls/MacOSControls.xaml(96,24) IsVisible
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_0.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_14);
@@ -104419,7 +104419,7 @@ fn build_controls_macoscontrols_xaml_deferred_294(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_6, ::core::clone::Clone::clone(&panel_3).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(102,20) Name
     panel_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentRoot")));
-    rt::register_name(name_scope.as_ref(), "ContentRoot", ::core::clone::Clone::clone(&panel_3).upcast::<::ferroui_base::FerroObject>(), 102, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_3)), 102, 20)?;
     // Controls/MacOSControls.xaml(102,14) Column
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
     panel_3.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_17);
@@ -104431,7 +104431,7 @@ fn build_controls_macoscontrols_xaml_deferred_294(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_7, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(103,33) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 103, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 103, 33)?;
     // Controls/MacOSControls.xaml(103,64) Content (setter chosen at run time)
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_11 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -104457,7 +104457,7 @@ fn build_controls_macoscontrols_xaml_deferred_294(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_8, ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(104,26) Name
     rectangle_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LightDismissLayer")));
-    rt::register_name(name_scope.as_ref(), "LightDismissLayer", ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_base::FerroObject>(), 104, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "LightDismissLayer", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_1)), 104, 26)?;
     // Controls/MacOSControls.xaml(104,16) Fill
     let priority_19 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_1.set_value_with_priority(::ferroui_controls::shapes::Shape::fill_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_19);
@@ -104520,7 +104520,7 @@ fn build_controls_macoscontrols_xaml_deferred_295(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/MacOSControls.xaml(134,20) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PaneRoot")));
-    rt::register_name(name_scope.as_ref(), "PART_PaneRoot", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 134, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PaneRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 134, 20)?;
     // Controls/MacOSControls.xaml(134,14) ClipToBounds
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     panel_0.set_value_with_priority(::ferroui_base::Visual::clip_to_bounds_property(), ::core::clone::Clone::clone(&true), priority_1);
@@ -104539,7 +104539,7 @@ fn build_controls_macoscontrols_xaml_deferred_295(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(135,23) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PaneRoot")));
-    rt::register_name(name_scope.as_ref(), "PaneRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 135, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PaneRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 135, 23)?;
     // Controls/MacOSControls.xaml(135,41) Height
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), rt::property(::ferroui_controls::SplitView::open_pane_length_property()), 135, 41)?;
     // Controls/MacOSControls.xaml(135,16) VerticalAlignment
@@ -104632,7 +104632,7 @@ fn build_controls_macoscontrols_xaml_deferred_295(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(145,41) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PanePresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_PanePresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 145, 41)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PanePresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 145, 41)?;
     // Controls/MacOSControls.xaml(145,69) Content (setter chosen at run time)
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_9 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::SplitView::pane_property()));
@@ -104655,7 +104655,7 @@ fn build_controls_macoscontrols_xaml_deferred_295(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/MacOSControls.xaml(146,34) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HCPaneBorder")));
-    rt::register_name(name_scope.as_ref(), "HCPaneBorder", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 146, 34)?;
+    rt::register_name_value(name_scope.as_ref(), "HCPaneBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 146, 34)?;
     // Controls/MacOSControls.xaml(146,24) IsVisible
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_0.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_13);
@@ -104687,7 +104687,7 @@ fn build_controls_macoscontrols_xaml_deferred_295(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_6, ::core::clone::Clone::clone(&panel_3).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(152,20) Name
     panel_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentRoot")));
-    rt::register_name(name_scope.as_ref(), "ContentRoot", ::core::clone::Clone::clone(&panel_3).upcast::<::ferroui_base::FerroObject>(), 152, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_3)), 152, 20)?;
     // Controls/MacOSControls.xaml(152,14) Row
     let priority_16 = ::ferroui_base::data::BindingPriority::Template;
     panel_3.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_16);
@@ -104699,7 +104699,7 @@ fn build_controls_macoscontrols_xaml_deferred_295(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_7, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(153,33) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 153, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 153, 33)?;
     // Controls/MacOSControls.xaml(153,64) Content (setter chosen at run time)
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_11 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -104725,7 +104725,7 @@ fn build_controls_macoscontrols_xaml_deferred_295(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_8, ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(154,26) Name
     rectangle_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LightDismissLayer")));
-    rt::register_name(name_scope.as_ref(), "LightDismissLayer", ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_base::FerroObject>(), 154, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "LightDismissLayer", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_1)), 154, 26)?;
     // Controls/MacOSControls.xaml(154,16) Fill
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_1.set_value_with_priority(::ferroui_controls::shapes::Shape::fill_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_18);
@@ -104788,7 +104788,7 @@ fn build_controls_macoscontrols_xaml_deferred_296(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/MacOSControls.xaml(184,20) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PaneRoot")));
-    rt::register_name(name_scope.as_ref(), "PART_PaneRoot", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 184, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PaneRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 184, 20)?;
     // Controls/MacOSControls.xaml(184,14) Row
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     panel_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_1);
@@ -104810,7 +104810,7 @@ fn build_controls_macoscontrols_xaml_deferred_296(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(185,23) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PaneRoot")));
-    rt::register_name(name_scope.as_ref(), "PaneRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 185, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PaneRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 185, 23)?;
     // Controls/MacOSControls.xaml(185,41) Height
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), rt::property(::ferroui_controls::SplitView::open_pane_length_property()), 185, 41)?;
     // Controls/MacOSControls.xaml(185,16) VerticalAlignment
@@ -104903,7 +104903,7 @@ fn build_controls_macoscontrols_xaml_deferred_296(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(195,41) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PanePresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_PanePresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 195, 41)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PanePresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 195, 41)?;
     // Controls/MacOSControls.xaml(195,69) Content (setter chosen at run time)
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_9 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::SplitView::pane_property()));
@@ -104926,7 +104926,7 @@ fn build_controls_macoscontrols_xaml_deferred_296(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/MacOSControls.xaml(196,34) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HCPaneBorder")));
-    rt::register_name(name_scope.as_ref(), "HCPaneBorder", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 196, 34)?;
+    rt::register_name_value(name_scope.as_ref(), "HCPaneBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 196, 34)?;
     // Controls/MacOSControls.xaml(196,24) IsVisible
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_0.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_14);
@@ -104958,7 +104958,7 @@ fn build_controls_macoscontrols_xaml_deferred_296(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_6, ::core::clone::Clone::clone(&panel_3).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(202,20) Name
     panel_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentRoot")));
-    rt::register_name(name_scope.as_ref(), "ContentRoot", ::core::clone::Clone::clone(&panel_3).upcast::<::ferroui_base::FerroObject>(), 202, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_3)), 202, 20)?;
     // Controls/MacOSControls.xaml(202,14) Row
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
     panel_3.set_value_with_priority(::ferroui_controls::Grid::row_property(), 0_i32, priority_17);
@@ -104970,7 +104970,7 @@ fn build_controls_macoscontrols_xaml_deferred_296(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_7, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(203,33) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 203, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 203, 33)?;
     // Controls/MacOSControls.xaml(203,64) Content (setter chosen at run time)
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_11 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -104996,7 +104996,7 @@ fn build_controls_macoscontrols_xaml_deferred_296(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_8, ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(204,26) Name
     rectangle_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LightDismissLayer")));
-    rt::register_name(name_scope.as_ref(), "LightDismissLayer", ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_base::FerroObject>(), 204, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "LightDismissLayer", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_1)), 204, 26)?;
     // Controls/MacOSControls.xaml(204,16) Fill
     let priority_19 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_1.set_value_with_priority(::ferroui_controls::shapes::Shape::fill_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_19);
@@ -105216,7 +105216,7 @@ fn build_controls_macoscontrols_xaml_deferred_300(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(74,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TopNavArea")));
-    rt::register_name(name_scope.as_ref(), "TopNavArea", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 74, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "TopNavArea", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 74, 19)?;
     // Controls/MacOSControls.xaml(75,19) Dock
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::DockPanel::dock_property(), rt::property(::ferroui_controls::TabControl::tab_strip_placement_property()), 75, 19)?;
     // Controls/MacOSControls.xaml(76,19) Background
@@ -105229,7 +105229,7 @@ fn build_controls_macoscontrols_xaml_deferred_300(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(77,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TopNavGrid")));
-    rt::register_name(name_scope.as_ref(), "TopNavGrid", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 77, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "TopNavGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 77, 21)?;
     // Controls/MacOSControls.xaml(78,21) MinHeight
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_height_property(), "NavigationViewTopPaneHeight", 78, 21)?;
     // Controls/MacOSControls.xaml(79,21) Margin
@@ -105243,7 +105243,7 @@ fn build_controls_macoscontrols_xaml_deferred_300(
     border_1.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/MacOSControls.xaml(81,31) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 81, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 81, 31)?;
     // Controls/MacOSControls.xaml(82,31) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 82, 31)?;
     // Controls/MacOSControls.xaml(81,16) VerticalAlignment
@@ -105263,7 +105263,7 @@ fn build_controls_macoscontrols_xaml_deferred_300(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/MacOSControls.xaml(86,19) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentGrid")));
-    rt::register_name(name_scope.as_ref(), "ContentGrid", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 86, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 86, 19)?;
     // Controls/MacOSControls.xaml(87,19) BorderBrush
     rt::bind_dynamic_resource(&context, border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::border_brush_property(), "NavigationViewContentGridBorderBrush", 87, 19)?;
     // Controls/MacOSControls.xaml(86,12) BackgroundSizing
@@ -105293,7 +105293,7 @@ fn build_controls_macoscontrols_xaml_deferred_300(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(95,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SelectedContentHost2")));
-    rt::register_name(name_scope.as_ref(), "PART_SelectedContentHost2", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 95, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SelectedContentHost2", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 95, 33)?;
     // Controls/MacOSControls.xaml(95,16) HorizontalContentAlignment
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::horizontal_content_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Stretch, priority_3);
@@ -105312,7 +105312,7 @@ fn build_controls_macoscontrols_xaml_deferred_300(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(99,33) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SelectedContentHost")));
-    rt::register_name(name_scope.as_ref(), "PART_SelectedContentHost", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 99, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SelectedContentHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 99, 33)?;
     // Controls/MacOSControls.xaml(99,16) HorizontalContentAlignment
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::horizontal_content_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Stretch, priority_6);
@@ -105700,7 +105700,7 @@ fn build_controls_macoscontrols_xaml_deferred_303(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(158,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 158, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 158, 17)?;
     // Controls/MacOSControls.xaml(159,17) Margin (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationViewItemButtonMargin"));
@@ -105732,7 +105732,7 @@ fn build_controls_macoscontrols_xaml_deferred_303(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/MacOSControls.xaml(163,19) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentGrid")));
-    rt::register_name(name_scope.as_ref(), "ContentGrid", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 163, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 163, 19)?;
     // Controls/MacOSControls.xaml(163,14) ColumnDefinitions
     let column_definitions_0 = ::ferroui_controls::ColumnDefinitions::__markup_new_0();
     rt::invoked(<::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::ColumnDefinition>>>::__markup_set_Capacity(&column_definitions_0, 2_i32), 163, 40)?;
@@ -105765,7 +105765,7 @@ fn build_controls_macoscontrols_xaml_deferred_303(
     context.push_parent(rt::to_value(viewbox_0.clone()));
     // Controls/MacOSControls.xaml(165,26) Name
     viewbox_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("IconBox")));
-    rt::register_name(name_scope.as_ref(), "IconBox", ::core::clone::Clone::clone(&viewbox_0).upcast::<::ferroui_base::FerroObject>(), 165, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "IconBox", ::std::rc::Rc::new(::core::clone::Clone::clone(&viewbox_0)), 165, 26)?;
     // Controls/MacOSControls.xaml(165,18) Height
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     viewbox_0.set_value_with_priority(::ferroui_base::layout::Layoutable::height_property(), 16.0_f64, priority_3);
@@ -105793,7 +105793,7 @@ fn build_controls_macoscontrols_xaml_deferred_303(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/MacOSControls.xaml(171,37) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Icon")));
-    rt::register_name(name_scope.as_ref(), "Icon", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 171, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "Icon", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 171, 37)?;
     // Controls/MacOSControls.xaml(172,37) Content (setter chosen at run time)
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_3 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TabItem::icon_property()));
@@ -105859,7 +105859,7 @@ fn build_controls_macoscontrols_xaml_deferred_303(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(188,33) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 188, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 188, 33)?;
     // Controls/MacOSControls.xaml(188,16) Column
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_9);
@@ -105902,7 +105902,7 @@ fn build_controls_macoscontrols_xaml_deferred_303(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(199,31) Name
     content_presenter_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SelectionIndicator")));
-    rt::register_name(name_scope.as_ref(), "SelectionIndicator", ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_base::FerroObject>(), 199, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "SelectionIndicator", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_2)), 199, 31)?;
     // Controls/MacOSControls.xaml(199,14) Margin
     let priority_15 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_2.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(12.0_f64, 0.0_f64, 12.0_f64, 4.0_f64), priority_15);
@@ -105984,7 +105984,7 @@ fn build_controls_macoscontrols_xaml_deferred_305(
     context.push_parent(rt::to_value(tab_control_0.clone()));
     // Controls/MacOSControls.xaml(276,23) Name
     tab_control_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TabControl")));
-    rt::register_name(name_scope.as_ref(), "PART_TabControl", ::core::clone::Clone::clone(&tab_control_0).upcast::<::ferroui_base::FerroObject>(), 276, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TabControl", ::std::rc::Rc::new(::core::clone::Clone::clone(&tab_control_0)), 276, 23)?;
     // Controls/MacOSControls.xaml(277,23) Theme (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("TabbedPageTabControlTheme"));
@@ -106329,7 +106329,7 @@ fn build_controls_macoscontrols_xaml_deferred_308(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(78,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootGrid")));
-    rt::register_name(name_scope.as_ref(), "RootGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 78, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 78, 17)?;
     // Controls/MacOSControls.xaml(79,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 79, 17)?;
     // Controls/MacOSControls.xaml(80,17) CornerRadius
@@ -106349,7 +106349,7 @@ fn build_controls_macoscontrols_xaml_deferred_308(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/MacOSControls.xaml(82,19) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Content")));
-    rt::register_name(name_scope.as_ref(), "Content", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 82, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "Content", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 82, 19)?;
     // Controls/MacOSControls.xaml(83,19) Data (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE72B"));
@@ -106396,7 +106396,7 @@ fn build_controls_macoscontrols_xaml_deferred_308(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(91,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 91, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 91, 31)?;
     // Controls/MacOSControls.xaml(92,31) Content (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_6 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -106550,7 +106550,7 @@ fn build_controls_macoscontrols_xaml_deferred_311(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(166,21) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_NavBarSpacer")));
-    rt::register_name(name_scope.as_ref(), "PART_NavBarSpacer", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 166, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_NavBarSpacer", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 166, 21)?;
     // Controls/MacOSControls.xaml(167,21) Height
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), rt::property(::ferroui_controls::NavigationPage::effective_bar_height_property()), 167, 21)?;
     // Controls/MacOSControls.xaml(166,14) IsVisible
@@ -106569,7 +106569,7 @@ fn build_controls_macoscontrols_xaml_deferred_311(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/MacOSControls.xaml(171,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_BottomCommandBar")));
-    rt::register_name(name_scope.as_ref(), "PART_BottomCommandBar", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 171, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_BottomCommandBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 171, 31)?;
     // Controls/MacOSControls.xaml(171,14) Dock
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Bottom, priority_3);
@@ -106606,7 +106606,7 @@ fn build_controls_macoscontrols_xaml_deferred_311(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(178,19) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentHost")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentHost", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 178, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 178, 19)?;
     // Controls/MacOSControls.xaml(179,19) Background
     rt::bind_template_binding(grid_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Panel::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 179, 19)?;
     // Controls/MacOSControls.xaml(178,14) ClipToBounds
@@ -106620,7 +106620,7 @@ fn build_controls_macoscontrols_xaml_deferred_311(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(181,33) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PageBackPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_PageBackPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 181, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PageBackPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 181, 33)?;
     // Controls/MacOSControls.xaml(181,16) HorizontalAlignment
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Stretch, priority_7);
@@ -106636,7 +106636,7 @@ fn build_controls_macoscontrols_xaml_deferred_311(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(184,33) Name
     content_presenter_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PagePresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_PagePresenter", ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_base::FerroObject>(), 184, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PagePresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_2)), 184, 33)?;
     // Controls/MacOSControls.xaml(184,16) HorizontalAlignment
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_2.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Stretch, priority_9);
@@ -106656,7 +106656,7 @@ fn build_controls_macoscontrols_xaml_deferred_311(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(191,19) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_NavigationBar")));
-    rt::register_name(name_scope.as_ref(), "PART_NavigationBar", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 191, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_NavigationBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 191, 19)?;
     // Controls/MacOSControls.xaml(191,12) ZIndex
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_base::Visual::z_index_property(), 1_i32, priority_11);
@@ -106696,7 +106696,7 @@ fn build_controls_macoscontrols_xaml_deferred_311(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/MacOSControls.xaml(197,23) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_BackButton")));
-    rt::register_name(name_scope.as_ref(), "PART_BackButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 197, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_BackButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 197, 23)?;
     // Controls/MacOSControls.xaml(197,16) Column
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_14);
@@ -106737,7 +106737,7 @@ fn build_controls_macoscontrols_xaml_deferred_311(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/MacOSControls.xaml(204,25) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_BackButtonDefaultIcon")));
-    rt::register_name(name_scope.as_ref(), "PART_BackButtonDefaultIcon", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 204, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_BackButtonDefaultIcon", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 204, 25)?;
     // Controls/MacOSControls.xaml(205,25) Data (setter chosen at run time)
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE72B"));
@@ -106781,7 +106781,7 @@ fn build_controls_macoscontrols_xaml_deferred_311(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_9, ::core::clone::Clone::clone(&content_presenter_3).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(212,37) Name
     content_presenter_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_BackButtonContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_BackButtonContentPresenter", ::core::clone::Clone::clone(&content_presenter_3).upcast::<::ferroui_base::FerroObject>(), 212, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_BackButtonContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_3)), 212, 37)?;
     // Controls/MacOSControls.xaml(212,20) VerticalAlignment
     let priority_24 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_3.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Center, priority_24);
@@ -106802,7 +106802,7 @@ fn build_controls_macoscontrols_xaml_deferred_311(
     context.push_parent(rt::to_value(content_presenter_4.clone()));
     // Controls/MacOSControls.xaml(218,33) Name
     content_presenter_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Header")));
-    rt::register_name(name_scope.as_ref(), "PART_Header", ::core::clone::Clone::clone(&content_presenter_4).upcast::<::ferroui_base::FerroObject>(), 218, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Header", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_4)), 218, 33)?;
     // Controls/MacOSControls.xaml(218,16) Column
     let priority_26 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_4.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_26);
@@ -106877,7 +106877,7 @@ fn build_controls_macoscontrols_xaml_deferred_311(
     context.push_parent(rt::to_value(content_presenter_5.clone()));
     // Controls/MacOSControls.xaml(230,33) Name
     content_presenter_5.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TopCommandBar")));
-    rt::register_name(name_scope.as_ref(), "PART_TopCommandBar", ::core::clone::Clone::clone(&content_presenter_5).upcast::<::ferroui_base::FerroObject>(), 230, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TopCommandBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_5)), 230, 33)?;
     // Controls/MacOSControls.xaml(230,16) Column
     let priority_34 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_5.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_34);
@@ -106934,7 +106934,7 @@ fn build_controls_macoscontrols_xaml_deferred_311(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/MacOSControls.xaml(247,19) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_NavBarShadow")));
-    rt::register_name(name_scope.as_ref(), "PART_NavBarShadow", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 247, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_NavBarShadow", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 247, 19)?;
     // Controls/MacOSControls.xaml(247,12) ZIndex
     let priority_38 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_base::Visual::z_index_property(), 1_i32, priority_38);
@@ -106962,7 +106962,7 @@ fn build_controls_macoscontrols_xaml_deferred_311(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_13, ::core::clone::Clone::clone(&content_presenter_6).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(257,29) Name
     content_presenter_6.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ModalBackPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ModalBackPresenter", ::core::clone::Clone::clone(&content_presenter_6).upcast::<::ferroui_base::FerroObject>(), 257, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ModalBackPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_6)), 257, 29)?;
     // Controls/MacOSControls.xaml(257,12) ZIndex
     let priority_43 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_6.set_value_with_priority(::ferroui_base::Visual::z_index_property(), 99_i32, priority_43);
@@ -106980,7 +106980,7 @@ fn build_controls_macoscontrols_xaml_deferred_311(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_14, ::core::clone::Clone::clone(&content_presenter_7).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(261,29) Name
     content_presenter_7.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ModalPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ModalPresenter", ::core::clone::Clone::clone(&content_presenter_7).upcast::<::ferroui_base::FerroObject>(), 261, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ModalPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_7)), 261, 29)?;
     // Controls/MacOSControls.xaml(261,12) ZIndex
     let priority_45 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_7.set_value_with_priority(::ferroui_base::Visual::z_index_property(), 100_i32, priority_45);
@@ -107297,7 +107297,7 @@ fn build_controls_macoscontrols_xaml_deferred_315(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(115,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 115, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 115, 17)?;
     // Controls/MacOSControls.xaml(116,17) Height
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), rt::property(::ferroui_base::layout::Layoutable::min_height_property()), 116, 17)?;
     // Controls/MacOSControls.xaml(117,17) Margin
@@ -107342,7 +107342,7 @@ fn build_controls_macoscontrols_xaml_deferred_315(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/MacOSControls.xaml(123,21) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Icon")));
-    rt::register_name(name_scope.as_ref(), "Icon", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 123, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "Icon", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 123, 21)?;
     // Controls/MacOSControls.xaml(124,21) Data (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE700"));
@@ -107385,7 +107385,7 @@ fn build_controls_macoscontrols_xaml_deferred_315(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(132,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 132, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 132, 31)?;
     // Controls/MacOSControls.xaml(132,14) Column
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_6);
@@ -107463,7 +107463,7 @@ fn build_controls_macoscontrols_xaml_deferred_317(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(192,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 192, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 192, 17)?;
     // Controls/MacOSControls.xaml(193,17) Height
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), rt::property(::ferroui_base::layout::Layoutable::min_height_property()), 193, 17)?;
     // Controls/MacOSControls.xaml(194,17) Margin
@@ -107498,7 +107498,7 @@ fn build_controls_macoscontrols_xaml_deferred_317(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/MacOSControls.xaml(200,21) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Icon")));
-    rt::register_name(name_scope.as_ref(), "Icon", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 200, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "Icon", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 200, 21)?;
     // Controls/MacOSControls.xaml(201,21) Data (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE700"));
@@ -107546,7 +107546,7 @@ fn build_controls_macoscontrols_xaml_deferred_317(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(209,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 209, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 209, 33)?;
     // Controls/MacOSControls.xaml(209,16) HorizontalAlignment
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Center, priority_6);
@@ -107886,7 +107886,7 @@ fn build_controls_macoscontrols_xaml_deferred_319(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(243,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 243, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 243, 17)?;
     // Controls/MacOSControls.xaml(244,17) MinHeight
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_height_property(), "NavigationViewItemOnLeftMinHeight", 244, 17)?;
     // Controls/MacOSControls.xaml(245,17) Background
@@ -107903,7 +107903,7 @@ fn build_controls_macoscontrols_xaml_deferred_319(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/MacOSControls.xaml(248,18) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PresenterContentRootGrid")));
-    rt::register_name(name_scope.as_ref(), "PresenterContentRootGrid", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 248, 18)?;
+    rt::register_name_value(name_scope.as_ref(), "PresenterContentRootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 248, 18)?;
     // Controls/MacOSControls.xaml(249,14) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(&panel_0);
     // Controls/MacOSControls.xaml(249,14) Panel
@@ -107926,7 +107926,7 @@ fn build_controls_macoscontrols_xaml_deferred_319(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/MacOSControls.xaml(250,26) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SelectionIndicator")));
-    rt::register_name(name_scope.as_ref(), "SelectionIndicator", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 250, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "SelectionIndicator", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 250, 26)?;
     // Controls/MacOSControls.xaml(251,26) Width
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), "NavigationViewSelectionIndicatorWidth", 251, 26)?;
     // Controls/MacOSControls.xaml(252,26) Height
@@ -107973,7 +107973,7 @@ fn build_controls_macoscontrols_xaml_deferred_319(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/MacOSControls.xaml(258,19) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentGrid")));
-    rt::register_name(name_scope.as_ref(), "ContentGrid", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 258, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 258, 19)?;
     // Controls/MacOSControls.xaml(259,19) MinHeight
     rt::bind_dynamic_resource(&context, grid_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_height_property(), "NavigationViewItemOnLeftMinHeight", 259, 19)?;
     // Controls/MacOSControls.xaml(258,14) Margin
@@ -108001,7 +108001,7 @@ fn build_controls_macoscontrols_xaml_deferred_319(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/MacOSControls.xaml(263,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 263, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 263, 33)?;
     // Controls/MacOSControls.xaml(263,16) Column
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_7);
@@ -108139,7 +108139,7 @@ fn build_controls_macoscontrols_xaml_deferred_322(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_controls::Control>()));
     // Controls/MacOSControls.xaml(362,25) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "PART_ScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 362, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 362, 25)?;
     // Controls/MacOSControls.xaml(363,25) Padding
     rt::bind_template_binding(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::padding_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), 363, 25)?;
     // Controls/MacOSControls.xaml(364,25) HorizontalScrollBarVisibility
@@ -108153,7 +108153,7 @@ fn build_controls_macoscontrols_xaml_deferred_322(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&items_presenter_0)));
     // Controls/MacOSControls.xaml(366,29) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 366, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 366, 29)?;
     // Controls/MacOSControls.xaml(367,29) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 367, 29)?;
     rt::invoked(items_presenter_0.try_end_init(), 366, 14)?;
@@ -108533,7 +108533,7 @@ fn build_controls_macoscontrols_xaml_deferred_324(
     context.push_parent(rt::to_value(split_view_0.clone()));
     // Controls/MacOSControls.xaml(378,20) Name
     split_view_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SplitView")));
-    rt::register_name(name_scope.as_ref(), "PART_SplitView", ::core::clone::Clone::clone(&split_view_0).upcast::<::ferroui_base::FerroObject>(), 378, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SplitView", ::std::rc::Rc::new(::core::clone::Clone::clone(&split_view_0)), 378, 20)?;
     // Controls/MacOSControls.xaml(379,20) Background
     rt::bind_template_binding(split_view_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 379, 20)?;
     // Controls/MacOSControls.xaml(380,20) BorderThickness
@@ -108575,7 +108575,7 @@ fn build_controls_macoscontrols_xaml_deferred_324(
     context.push_parent(rt::to_value(dock_panel_0.clone()));
     // Controls/MacOSControls.xaml(388,24) Name
     dock_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PaneContentGrid")));
-    rt::register_name(name_scope.as_ref(), "PaneContentGrid", ::core::clone::Clone::clone(&dock_panel_0).upcast::<::ferroui_base::FerroObject>(), 388, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "PaneContentGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&dock_panel_0)), 388, 24)?;
     // Controls/MacOSControls.xaml(388,49) Margin
     rt::bind_dynamic_resource(&context, dock_panel_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "NavigationViewPaneContentGridMargin", 388, 49)?;
     // Controls/MacOSControls.xaml(390,16) Children
@@ -108587,7 +108587,7 @@ fn build_controls_macoscontrols_xaml_deferred_324(
     context.push_parent(rt::to_value(toggle_button_0.clone()));
     // Controls/MacOSControls.xaml(390,29) Name
     toggle_button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_CompactPaneToggle")));
-    rt::register_name(name_scope.as_ref(), "PART_CompactPaneToggle", ::core::clone::Clone::clone(&toggle_button_0).upcast::<::ferroui_base::FerroObject>(), 390, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_CompactPaneToggle", ::std::rc::Rc::new(::core::clone::Clone::clone(&toggle_button_0)), 390, 29)?;
     // Controls/MacOSControls.xaml(390,16) Dock
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     toggle_button_0.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Top, priority_1);
@@ -108647,7 +108647,7 @@ fn build_controls_macoscontrols_xaml_deferred_324(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(402,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DrawerHeader")));
-    rt::register_name(name_scope.as_ref(), "PART_DrawerHeader", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 402, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DrawerHeader", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 402, 33)?;
     // Controls/MacOSControls.xaml(402,16) Dock
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Top, priority_8);
@@ -108687,7 +108687,7 @@ fn build_controls_macoscontrols_xaml_deferred_324(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(411,33) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DrawerFooter")));
-    rt::register_name(name_scope.as_ref(), "PART_DrawerFooter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 411, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DrawerFooter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 411, 33)?;
     // Controls/MacOSControls.xaml(411,16) Dock
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Bottom, priority_12);
@@ -108730,7 +108730,7 @@ fn build_controls_macoscontrols_xaml_deferred_324(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(421,33) Name
     content_presenter_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DrawerPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_DrawerPresenter", ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_base::FerroObject>(), 421, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DrawerPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_2)), 421, 33)?;
     // Controls/MacOSControls.xaml(421,16) HorizontalContentAlignment
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_2.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::horizontal_content_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Stretch, priority_17);
@@ -108773,7 +108773,7 @@ fn build_controls_macoscontrols_xaml_deferred_324(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(431,21) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentGrid")));
-    rt::register_name(name_scope.as_ref(), "ContentGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 431, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 431, 21)?;
     // Controls/MacOSControls.xaml(432,21) BorderBrush
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::border_brush_property(), "NavigationViewContentGridBorderBrush", 432, 21)?;
     // Controls/MacOSControls.xaml(431,14) BackgroundSizing
@@ -108798,7 +108798,7 @@ fn build_controls_macoscontrols_xaml_deferred_324(
     context.push_parent(rt::to_value(dock_panel_1.clone()));
     // Controls/MacOSControls.xaml(439,26) Name
     dock_panel_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentDock")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentDock", ::core::clone::Clone::clone(&dock_panel_1).upcast::<::ferroui_base::FerroObject>(), 439, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentDock", ::std::rc::Rc::new(::core::clone::Clone::clone(&dock_panel_1)), 439, 26)?;
     // Controls/MacOSControls.xaml(441,18) Children
     let children_collection_5 = ::ferroui_controls::Panel::__markup_get_Children(dock_panel_1.upcast_ref::<::ferroui_controls::Panel>());
     // Controls/MacOSControls.xaml(441,18) Border
@@ -108808,7 +108808,7 @@ fn build_controls_macoscontrols_xaml_deferred_324(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(441,25) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TopBar")));
-    rt::register_name(name_scope.as_ref(), "PART_TopBar", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 441, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TopBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 441, 25)?;
     // Controls/MacOSControls.xaml(441,18) Dock
     let priority_24 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Top, priority_24);
@@ -108832,7 +108832,7 @@ fn build_controls_macoscontrols_xaml_deferred_324(
     context.push_parent(rt::to_value(toggle_button_1.clone()));
     // Controls/MacOSControls.xaml(445,35) Name
     toggle_button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PaneButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PaneButton", ::core::clone::Clone::clone(&toggle_button_1).upcast::<::ferroui_base::FerroObject>(), 445, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PaneButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&toggle_button_1)), 445, 35)?;
     // Controls/MacOSControls.xaml(446,35) Theme (setter chosen at run time)
     let priority_26 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DrawerPagePaneToggleButton"));
@@ -108885,7 +108885,7 @@ fn build_controls_macoscontrols_xaml_deferred_324(
     context.push_parent(rt::to_value(content_control_0.clone()));
     // Controls/MacOSControls.xaml(453,37) Name
     content_control_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TitlePresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_TitlePresenter", ::core::clone::Clone::clone(&content_control_0).upcast::<::ferroui_base::FerroObject>(), 453, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TitlePresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_0)), 453, 37)?;
     // Controls/MacOSControls.xaml(454,37) Theme (setter chosen at run time)
     let priority_31 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationViewTitleHeaderContentControlTextStyle"));
@@ -108943,7 +108943,7 @@ fn build_controls_macoscontrols_xaml_deferred_324(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/MacOSControls.xaml(464,25) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_BottomBar")));
-    rt::register_name(name_scope.as_ref(), "PART_BottomBar", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 464, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_BottomBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 464, 25)?;
     // Controls/MacOSControls.xaml(464,18) Dock
     let priority_36 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Bottom, priority_36);
@@ -108970,7 +108970,7 @@ fn build_controls_macoscontrols_xaml_deferred_324(
     context.push_parent(rt::to_value(toggle_button_2.clone()));
     // Controls/MacOSControls.xaml(469,35) Name
     toggle_button_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_BottomPaneButton")));
-    rt::register_name(name_scope.as_ref(), "PART_BottomPaneButton", ::core::clone::Clone::clone(&toggle_button_2).upcast::<::ferroui_base::FerroObject>(), 469, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_BottomPaneButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&toggle_button_2)), 469, 35)?;
     // Controls/MacOSControls.xaml(470,35) Theme (setter chosen at run time)
     let priority_39 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DrawerPagePaneToggleButton"));
@@ -109023,7 +109023,7 @@ fn build_controls_macoscontrols_xaml_deferred_324(
     context.push_parent(rt::to_value(content_control_1.clone()));
     // Controls/MacOSControls.xaml(477,37) Name
     content_control_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_BottomTitlePresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_BottomTitlePresenter", ::core::clone::Clone::clone(&content_control_1).upcast::<::ferroui_base::FerroObject>(), 477, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_BottomTitlePresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_1)), 477, 37)?;
     // Controls/MacOSControls.xaml(478,37) Theme (setter chosen at run time)
     let priority_44 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationViewTitleHeaderContentControlTextStyle"));
@@ -109081,7 +109081,7 @@ fn build_controls_macoscontrols_xaml_deferred_324(
     context.push_parent(rt::to_value(content_presenter_3.clone()));
     // Controls/MacOSControls.xaml(487,35) Name
     content_presenter_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_3).upcast::<::ferroui_base::FerroObject>(), 487, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_3)), 487, 35)?;
     // Controls/MacOSControls.xaml(488,35) Margin
     rt::bind_dynamic_resource(&context, content_presenter_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "NavigationViewContentPresenterMargin", 488, 35)?;
     // Controls/MacOSControls.xaml(489,35) HorizontalContentAlignment
@@ -109123,7 +109123,7 @@ fn build_controls_macoscontrols_xaml_deferred_324(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_12, ::core::clone::Clone::clone(&border_3).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(499,21) Name
     border_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Backdrop")));
-    rt::register_name(name_scope.as_ref(), "PART_Backdrop", ::core::clone::Clone::clone(&border_3).upcast::<::ferroui_base::FerroObject>(), 499, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Backdrop", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_3)), 499, 21)?;
     // Controls/MacOSControls.xaml(500,21) Background
     rt::bind_template_binding(border_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::DrawerPage::backdrop_brush_property()), 500, 21)?;
     // Controls/MacOSControls.xaml(499,14) IsVisible
@@ -109235,7 +109235,7 @@ fn build_controls_macoscontrols_xaml_deferred_327(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_controls::Control>()));
     // Controls/MacOSControls.xaml(68,25) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "PART_ScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 68, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 68, 25)?;
     // Controls/MacOSControls.xaml(69,25) HorizontalScrollBarVisibility
     rt::bind_template_binding(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(::ferroui_controls::ScrollViewer::horizontal_scroll_bar_visibility_property()), 69, 25)?;
     // Controls/MacOSControls.xaml(70,25) VerticalScrollBarVisibility
@@ -109253,7 +109253,7 @@ fn build_controls_macoscontrols_xaml_deferred_327(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&items_presenter_0)));
     // Controls/MacOSControls.xaml(73,29) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 73, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 73, 29)?;
     // Controls/MacOSControls.xaml(74,29) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 74, 29)?;
     // Controls/MacOSControls.xaml(75,29) Margin
@@ -109835,7 +109835,7 @@ fn build_controls_macoscontrols_xaml_deferred_331(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/MacOSControls.xaml(49,16) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Root")));
-    rt::register_name(name_scope.as_ref(), "Root", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 49, 16)?;
+    rt::register_name_value(name_scope.as_ref(), "Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 49, 16)?;
     // Controls/MacOSControls.xaml(49,10) Background
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     panel_0.set_value_with_priority(::ferroui_controls::Panel::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_0);
@@ -109848,7 +109848,7 @@ fn build_controls_macoscontrols_xaml_deferred_331(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(50,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("AppBarButtonInnerBorder")));
-    rt::register_name(name_scope.as_ref(), "AppBarButtonInnerBorder", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 50, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "AppBarButtonInnerBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 50, 19)?;
     // Controls/MacOSControls.xaml(50,52) Margin
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "AppBarButtonInnerBorderMargin", 50, 52)?;
     // Controls/MacOSControls.xaml(50,109) Background
@@ -109888,7 +109888,7 @@ fn build_controls_macoscontrols_xaml_deferred_331(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/MacOSControls.xaml(57,17) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentRoot")));
-    rt::register_name(name_scope.as_ref(), "ContentRoot", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 57, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 57, 17)?;
     // Controls/MacOSControls.xaml(57,38) MinHeight
     rt::bind_dynamic_resource(&context, grid_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_height_property(), "AppBarThemeMinHeight", 57, 38)?;
     // Controls/MacOSControls.xaml(57,12) ColumnDefinitions
@@ -109922,7 +109922,7 @@ fn build_controls_macoscontrols_xaml_deferred_331(
     context.push_parent(rt::to_value(viewbox_0.clone()));
     // Controls/MacOSControls.xaml(58,22) Name
     viewbox_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentViewbox")));
-    rt::register_name(name_scope.as_ref(), "ContentViewbox", ::core::clone::Clone::clone(&viewbox_0).upcast::<::ferroui_base::FerroObject>(), 58, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentViewbox", ::std::rc::Rc::new(::core::clone::Clone::clone(&viewbox_0)), 58, 22)?;
     // Controls/MacOSControls.xaml(58,46) Height
     rt::bind_dynamic_resource(&context, viewbox_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), "AppBarButtonContentHeight", 58, 46)?;
     // Controls/MacOSControls.xaml(58,99) Margin
@@ -109938,7 +109938,7 @@ fn build_controls_macoscontrols_xaml_deferred_331(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/MacOSControls.xaml(59,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Content")));
-    rt::register_name(name_scope.as_ref(), "Content", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 59, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "Content", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 59, 33)?;
     // Controls/MacOSControls.xaml(59,50) Content (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_6 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::CommandBarButton::icon_property()));
@@ -109984,7 +109984,7 @@ fn build_controls_macoscontrols_xaml_deferred_331(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/MacOSControls.xaml(69,24) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TextLabel")));
-    rt::register_name(name_scope.as_ref(), "TextLabel", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 69, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "TextLabel", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 69, 24)?;
     // Controls/MacOSControls.xaml(69,14) Row
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_4);
@@ -110015,7 +110015,7 @@ fn build_controls_macoscontrols_xaml_deferred_331(
     context.push_parent(rt::to_value(text_block_1.clone()));
     // Controls/MacOSControls.xaml(70,24) Name
     text_block_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("OverflowTextLabel")));
-    rt::register_name(name_scope.as_ref(), "OverflowTextLabel", ::core::clone::Clone::clone(&text_block_1).upcast::<::ferroui_base::FerroObject>(), 70, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "OverflowTextLabel", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_1)), 70, 24)?;
     // Controls/MacOSControls.xaml(70,51) Text
     rt::bind_template_binding(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), rt::property(::ferroui_controls::CommandBarButton::label_property()), 70, 51)?;
     // Controls/MacOSControls.xaml(70,82) Foreground
@@ -111519,7 +111519,7 @@ fn build_controls_macoscontrols_xaml_deferred_336(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/MacOSControls.xaml(199,16) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Root")));
-    rt::register_name(name_scope.as_ref(), "Root", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 199, 16)?;
+    rt::register_name_value(name_scope.as_ref(), "Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 199, 16)?;
     // Controls/MacOSControls.xaml(199,10) Background
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     panel_0.set_value_with_priority(::ferroui_controls::Panel::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_0);
@@ -111532,7 +111532,7 @@ fn build_controls_macoscontrols_xaml_deferred_336(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(200,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("AppBarToggleButtonInnerBorder")));
-    rt::register_name(name_scope.as_ref(), "AppBarToggleButtonInnerBorder", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 200, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "AppBarToggleButtonInnerBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 200, 19)?;
     // Controls/MacOSControls.xaml(200,58) Margin
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "AppBarButtonInnerBorderMargin", 200, 58)?;
     // Controls/MacOSControls.xaml(200,115) Background
@@ -111572,7 +111572,7 @@ fn build_controls_macoscontrols_xaml_deferred_336(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/MacOSControls.xaml(207,17) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentRoot")));
-    rt::register_name(name_scope.as_ref(), "ContentRoot", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 207, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 207, 17)?;
     // Controls/MacOSControls.xaml(207,38) MinHeight
     rt::bind_dynamic_resource(&context, grid_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_height_property(), "AppBarThemeMinHeight", 207, 38)?;
     // Controls/MacOSControls.xaml(207,12) ColumnDefinitions
@@ -111606,7 +111606,7 @@ fn build_controls_macoscontrols_xaml_deferred_336(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/MacOSControls.xaml(208,19) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("OverflowCheckGlyph")));
-    rt::register_name(name_scope.as_ref(), "OverflowCheckGlyph", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 208, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "OverflowCheckGlyph", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 208, 19)?;
     // Controls/MacOSControls.xaml(208,47) Data (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE73E"));
@@ -111654,7 +111654,7 @@ fn build_controls_macoscontrols_xaml_deferred_336(
     context.push_parent(rt::to_value(viewbox_0.clone()));
     // Controls/MacOSControls.xaml(209,22) Name
     viewbox_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentViewbox")));
-    rt::register_name(name_scope.as_ref(), "ContentViewbox", ::core::clone::Clone::clone(&viewbox_0).upcast::<::ferroui_base::FerroObject>(), 209, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentViewbox", ::std::rc::Rc::new(::core::clone::Clone::clone(&viewbox_0)), 209, 22)?;
     // Controls/MacOSControls.xaml(209,46) Height
     rt::bind_dynamic_resource(&context, viewbox_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), "AppBarButtonContentHeight", 209, 46)?;
     // Controls/MacOSControls.xaml(209,99) Margin
@@ -111670,7 +111670,7 @@ fn build_controls_macoscontrols_xaml_deferred_336(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/MacOSControls.xaml(210,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Content")));
-    rt::register_name(name_scope.as_ref(), "Content", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 210, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "Content", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 210, 33)?;
     // Controls/MacOSControls.xaml(210,50) Content (setter chosen at run time)
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_6 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::CommandBarToggleButton::icon_property()));
@@ -111716,7 +111716,7 @@ fn build_controls_macoscontrols_xaml_deferred_336(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/MacOSControls.xaml(220,24) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TextLabel")));
-    rt::register_name(name_scope.as_ref(), "TextLabel", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 220, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "TextLabel", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 220, 24)?;
     // Controls/MacOSControls.xaml(220,14) Row
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_11);
@@ -111748,7 +111748,7 @@ fn build_controls_macoscontrols_xaml_deferred_336(
     context.push_parent(rt::to_value(text_block_1.clone()));
     // Controls/MacOSControls.xaml(221,24) Name
     text_block_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("OverflowTextLabel")));
-    rt::register_name(name_scope.as_ref(), "OverflowTextLabel", ::core::clone::Clone::clone(&text_block_1).upcast::<::ferroui_base::FerroObject>(), 221, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "OverflowTextLabel", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_1)), 221, 24)?;
     // Controls/MacOSControls.xaml(221,51) Text
     rt::bind_template_binding(text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), rt::property(::ferroui_controls::CommandBarToggleButton::label_property()), 221, 51)?;
     // Controls/MacOSControls.xaml(221,82) Foreground
@@ -111933,7 +111933,7 @@ fn build_controls_macoscontrols_xaml_deferred_340(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/MacOSControls.xaml(512,16) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootGrid")));
-    rt::register_name(name_scope.as_ref(), "RootGrid", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 512, 16)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 512, 16)?;
     // Controls/MacOSControls.xaml(513,12) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(&panel_0);
     // Controls/MacOSControls.xaml(513,12) Rectangle
@@ -111943,7 +111943,7 @@ fn build_controls_macoscontrols_xaml_deferred_340(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/MacOSControls.xaml(513,22) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SeparatorRectangle")));
-    rt::register_name(name_scope.as_ref(), "SeparatorRectangle", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 513, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "SeparatorRectangle", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 513, 22)?;
     // Controls/MacOSControls.xaml(513,50) RadiusX (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("AppBarSeparatorCornerRadius"));
@@ -112205,7 +112205,7 @@ fn build_controls_macoscontrols_xaml_deferred_343(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/MacOSControls.xaml(551,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 551, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 551, 29)?;
     // Controls/MacOSControls.xaml(551,60) Background
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 551, 60)?;
     // Controls/MacOSControls.xaml(551,102) BorderBrush
@@ -112315,7 +112315,7 @@ fn build_controls_macoscontrols_xaml_deferred_345(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(591,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 591, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 591, 17)?;
     // Controls/MacOSControls.xaml(591,37) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 591, 37)?;
     // Controls/MacOSControls.xaml(591,10) BackgroundSizing
@@ -112347,7 +112347,7 @@ fn build_controls_macoscontrols_xaml_deferred_345(
     context.push_parent(rt::to_value(items_presenter_0.clone()));
     // Controls/MacOSControls.xaml(593,29) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 593, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 593, 29)?;
     // Controls/MacOSControls.xaml(593,56) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 593, 56)?;
     // Controls/MacOSControls.xaml(593,98) Margin
@@ -112493,7 +112493,7 @@ fn build_controls_macoscontrols_xaml_deferred_347(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/MacOSControls.xaml(611,16) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 611, 16)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 611, 16)?;
     // Controls/MacOSControls.xaml(612,12) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(&panel_0);
     // Controls/MacOSControls.xaml(612,12) Border
@@ -112503,7 +112503,7 @@ fn build_controls_macoscontrols_xaml_deferred_347(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(612,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentRoot")));
-    rt::register_name(name_scope.as_ref(), "ContentRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 612, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 612, 19)?;
     // Controls/MacOSControls.xaml(612,12) VerticalAlignment
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Top, priority_0);
@@ -112600,7 +112600,7 @@ fn build_controls_macoscontrols_xaml_deferred_347(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(621,37) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 621, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 621, 37)?;
     // Controls/MacOSControls.xaml(621,68) Margin
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), 621, 68)?;
     // Controls/MacOSControls.xaml(621,103) Content (setter chosen at run time)
@@ -112637,7 +112637,7 @@ fn build_controls_macoscontrols_xaml_deferred_347(
     context.push_parent(rt::to_value(items_control_0.clone()));
     // Controls/MacOSControls.xaml(622,33) Name
     items_control_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PrimaryItemsControl")));
-    rt::register_name(name_scope.as_ref(), "PrimaryItemsControl", ::core::clone::Clone::clone(&items_control_0).upcast::<::ferroui_base::FerroObject>(), 622, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PrimaryItemsControl", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_control_0)), 622, 33)?;
     // Controls/MacOSControls.xaml(622,20) Column
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     items_control_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_11);
@@ -112679,7 +112679,7 @@ fn build_controls_macoscontrols_xaml_deferred_347(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/MacOSControls.xaml(630,25) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_OverflowButton")));
-    rt::register_name(name_scope.as_ref(), "PART_OverflowButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 630, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_OverflowButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 630, 25)?;
     // Controls/MacOSControls.xaml(630,18) Column
     let priority_15 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_15);
@@ -112714,7 +112714,7 @@ fn build_controls_macoscontrols_xaml_deferred_347(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/MacOSControls.xaml(631,25) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("EllipsisIcon")));
-    rt::register_name(name_scope.as_ref(), "EllipsisIcon", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 631, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "EllipsisIcon", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 631, 25)?;
     // Controls/MacOSControls.xaml(631,47) Data (setter chosen at run time)
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE712"));
@@ -112757,7 +112757,7 @@ fn build_controls_macoscontrols_xaml_deferred_347(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/MacOSControls.xaml(633,28) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HighContrastBorder")));
-    rt::register_name(name_scope.as_ref(), "HighContrastBorder", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 633, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "HighContrastBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 633, 28)?;
     // Controls/MacOSControls.xaml(633,18) ColumnSpan
     let priority_22 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_0.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 2_i32, priority_22);
@@ -112783,7 +112783,7 @@ fn build_controls_macoscontrols_xaml_deferred_347(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(634,25) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("OpenBorder")));
-    rt::register_name(name_scope.as_ref(), "OpenBorder", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 634, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "OpenBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 634, 25)?;
     // Controls/MacOSControls.xaml(634,18) ColumnSpan
     let priority_26 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 2_i32, priority_26);
@@ -112816,7 +112816,7 @@ fn build_controls_macoscontrols_xaml_deferred_347(
     context.push_parent(rt::to_value(popup_0.clone()));
     // Controls/MacOSControls.xaml(638,18) Name
     popup_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_OverflowPopup")));
-    rt::register_name(name_scope.as_ref(), "PART_OverflowPopup", ::core::clone::Clone::clone(&popup_0).upcast::<::ferroui_base::FerroObject>(), 638, 18)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_OverflowPopup", ::std::rc::Rc::new(::core::clone::Clone::clone(&popup_0)), 638, 18)?;
     // Controls/MacOSControls.xaml(638,46) IsOpen
     let template_binding_9 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::CommandBar::is_open_property()));
     // Controls/MacOSControls.xaml(638,46) Mode
@@ -112844,7 +112844,7 @@ fn build_controls_macoscontrols_xaml_deferred_347(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/MacOSControls.xaml(639,21) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SecondaryItemsControlShadowWrapper")));
-    rt::register_name(name_scope.as_ref(), "SecondaryItemsControlShadowWrapper", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 639, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "SecondaryItemsControlShadowWrapper", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 639, 21)?;
     // Controls/MacOSControls.xaml(639,65) BoxShadow
     rt::bind_dynamic_resource(&context, border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::box_shadow_property(), "MacOSMenuShadow", 639, 65)?;
     // Controls/MacOSControls.xaml(639,111) Margin (setter chosen at run time)
@@ -112869,7 +112869,7 @@ fn build_controls_macoscontrols_xaml_deferred_347(
     context.push_parent(rt::to_value(items_control_1.clone()));
     // Controls/MacOSControls.xaml(640,29) Name
     items_control_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_OverflowPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_OverflowPresenter", ::core::clone::Clone::clone(&items_control_1).upcast::<::ferroui_base::FerroObject>(), 640, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_OverflowPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_control_1)), 640, 29)?;
     // Controls/MacOSControls.xaml(640,61) Theme (setter chosen at run time)
     let priority_33 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DefaultCommandBarOverflowPresenterStyle"));
@@ -113365,7 +113365,7 @@ fn build_controls_macoscontrols_xaml_deferred_353(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(48,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootGrid")));
-    rt::register_name(name_scope.as_ref(), "RootGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 48, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 48, 17)?;
     // Controls/MacOSControls.xaml(49,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 49, 17)?;
     // Controls/MacOSControls.xaml(50,17) Padding
@@ -113418,7 +113418,7 @@ fn build_controls_macoscontrols_xaml_deferred_353(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(61,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 61, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 61, 31)?;
     // Controls/MacOSControls.xaml(62,31) Content (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_6 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -113469,7 +113469,7 @@ fn build_controls_macoscontrols_xaml_deferred_353(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/MacOSControls.xaml(73,21) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ChevronIcon")));
-    rt::register_name(name_scope.as_ref(), "ChevronIcon", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 73, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "ChevronIcon", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 73, 21)?;
     // Controls/MacOSControls.xaml(74,21) Data (setter chosen at run time)
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE96E"));
@@ -113765,7 +113765,7 @@ fn build_controls_macoscontrols_xaml_deferred_361(
     grid_0.begin_init();
     // Controls/MacOSControls.xaml(47,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootGrid")));
-    rt::register_name(name_scope.as_ref(), "RootGrid", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 47, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 47, 15)?;
     // Controls/MacOSControls.xaml(47,10) Background
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     grid_0.set_value_with_priority(::ferroui_controls::Panel::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_0);
@@ -113777,7 +113777,7 @@ fn build_controls_macoscontrols_xaml_deferred_361(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(48,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 48, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 48, 29)?;
     // Controls/MacOSControls.xaml(49,29) Foreground
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::foreground_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 49, 29)?;
     // Controls/MacOSControls.xaml(50,29) BorderBrush
@@ -114486,7 +114486,7 @@ fn build_controls_macoscontrols_xaml_deferred_364(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(103,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootGrid")));
-    rt::register_name(name_scope.as_ref(), "RootGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 103, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 103, 17)?;
     // Controls/MacOSControls.xaml(103,10) Background
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_controls::Border::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_0);
@@ -114537,7 +114537,7 @@ fn build_controls_macoscontrols_xaml_deferred_364(
     context.push_parent(rt::to_value(grid_1.clone()));
     // Controls/MacOSControls.xaml(115,19) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PrimaryBackgroundGrid")));
-    rt::register_name(name_scope.as_ref(), "PrimaryBackgroundGrid", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 115, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PrimaryBackgroundGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 115, 19)?;
     // Controls/MacOSControls.xaml(115,14) ColumnSpan
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     grid_1.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 2_i32, priority_6);
@@ -114556,7 +114556,7 @@ fn build_controls_macoscontrols_xaml_deferred_364(
     context.push_parent(rt::to_value(grid_2.clone()));
     // Controls/MacOSControls.xaml(118,19) Name
     grid_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("DividerBackgroundGrid")));
-    rt::register_name(name_scope.as_ref(), "DividerBackgroundGrid", ::core::clone::Clone::clone(&grid_2).upcast::<::ferroui_base::FerroObject>(), 118, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "DividerBackgroundGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_2)), 118, 19)?;
     // Controls/MacOSControls.xaml(118,14) Column
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     grid_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_7);
@@ -114576,7 +114576,7 @@ fn build_controls_macoscontrols_xaml_deferred_364(
     context.push_parent(rt::to_value(grid_3.clone()));
     // Controls/MacOSControls.xaml(122,19) Name
     grid_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SecondaryBackgroundGrid")));
-    rt::register_name(name_scope.as_ref(), "SecondaryBackgroundGrid", ::core::clone::Clone::clone(&grid_3).upcast::<::ferroui_base::FerroObject>(), 122, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "SecondaryBackgroundGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_3)), 122, 19)?;
     // Controls/MacOSControls.xaml(122,14) Column
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     grid_3.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_9);
@@ -114595,7 +114595,7 @@ fn build_controls_macoscontrols_xaml_deferred_364(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/MacOSControls.xaml(125,21) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PrimaryButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PrimaryButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 125, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PrimaryButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 125, 21)?;
     // Controls/MacOSControls.xaml(125,14) Column
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_10);
@@ -114681,7 +114681,7 @@ fn build_controls_macoscontrols_xaml_deferred_364(
     context.push_parent(rt::to_value(button_1.clone()));
     // Controls/MacOSControls.xaml(146,21) Name
     button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SecondaryButton")));
-    rt::register_name(name_scope.as_ref(), "PART_SecondaryButton", ::core::clone::Clone::clone(&button_1).upcast::<::ferroui_base::FerroObject>(), 146, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SecondaryButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_1)), 146, 21)?;
     // Controls/MacOSControls.xaml(146,14) Column
     let priority_19 = ::ferroui_base::data::BindingPriority::Template;
     button_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_19);
@@ -114799,7 +114799,7 @@ fn build_controls_macoscontrols_xaml_deferred_364(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(173,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PrimaryButtonBorder")));
-    rt::register_name(name_scope.as_ref(), "PrimaryButtonBorder", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 173, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PrimaryButtonBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 173, 21)?;
     // Controls/MacOSControls.xaml(173,14) Column
     let priority_38 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_38);
@@ -114831,7 +114831,7 @@ fn build_controls_macoscontrols_xaml_deferred_364(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/MacOSControls.xaml(178,21) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SecondaryButtonBorder")));
-    rt::register_name(name_scope.as_ref(), "SecondaryButtonBorder", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 178, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "SecondaryButtonBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 178, 21)?;
     // Controls/MacOSControls.xaml(178,14) Column
     let priority_40 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_40);
@@ -115013,7 +115013,7 @@ fn build_controls_macoscontrols_xaml_deferred_368(
     grid_0.begin_init();
     // Controls/MacOSControls.xaml(354,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootGrid")));
-    rt::register_name(name_scope.as_ref(), "RootGrid", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 354, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 354, 15)?;
     // Controls/MacOSControls.xaml(354,10) Background
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     grid_0.set_value_with_priority(::ferroui_controls::Panel::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_0);
@@ -115025,7 +115025,7 @@ fn build_controls_macoscontrols_xaml_deferred_368(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(355,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 355, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 355, 29)?;
     // Controls/MacOSControls.xaml(356,29) Foreground
     rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::foreground_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 356, 29)?;
     // Controls/MacOSControls.xaml(357,29) BorderBrush
@@ -115746,7 +115746,7 @@ fn build_controls_macoscontrols_xaml_deferred_371(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(412,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootGrid")));
-    rt::register_name(name_scope.as_ref(), "RootGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 412, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 412, 17)?;
     // Controls/MacOSControls.xaml(412,10) Background
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_controls::Border::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_0);
@@ -115777,7 +115777,7 @@ fn build_controls_macoscontrols_xaml_deferred_371(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(418,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PrimaryBackgroundGrid")));
-    rt::register_name(name_scope.as_ref(), "PrimaryBackgroundGrid", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 418, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PrimaryBackgroundGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 418, 21)?;
     // Controls/MacOSControls.xaml(419,21) Background
     let reflection_binding_extension_0 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("#PART_PrimaryButton.Background"));
     let provided_1 = rt::provide_value(&context, rt::property_value(::ferroui_controls::Border::background_property()), &reflection_binding_extension_0, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
@@ -115803,7 +115803,7 @@ fn build_controls_macoscontrols_xaml_deferred_371(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/MacOSControls.xaml(421,21) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SecondaryBackgroundGrid")));
-    rt::register_name(name_scope.as_ref(), "SecondaryBackgroundGrid", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 421, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "SecondaryBackgroundGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 421, 21)?;
     // Controls/MacOSControls.xaml(421,14) Column
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_1);
@@ -115831,7 +115831,7 @@ fn build_controls_macoscontrols_xaml_deferred_371(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&border_3).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(425,21) Name
     border_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Border")));
-    rt::register_name(name_scope.as_ref(), "Border", ::core::clone::Clone::clone(&border_3).upcast::<::ferroui_base::FerroObject>(), 425, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "Border", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_3)), 425, 21)?;
     // Controls/MacOSControls.xaml(425,14) ColumnSpan
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     border_3.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 2_i32, priority_2);
@@ -115851,7 +115851,7 @@ fn build_controls_macoscontrols_xaml_deferred_371(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/MacOSControls.xaml(430,21) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PrimaryButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PrimaryButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 430, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PrimaryButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 430, 21)?;
     // Controls/MacOSControls.xaml(430,14) Column
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_3);
@@ -115937,7 +115937,7 @@ fn build_controls_macoscontrols_xaml_deferred_371(
     context.push_parent(rt::to_value(button_1.clone()));
     // Controls/MacOSControls.xaml(451,21) Name
     button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SecondaryButton")));
-    rt::register_name(name_scope.as_ref(), "PART_SecondaryButton", ::core::clone::Clone::clone(&button_1).upcast::<::ferroui_base::FerroObject>(), 451, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SecondaryButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_1)), 451, 21)?;
     // Controls/MacOSControls.xaml(451,14) Column
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
     button_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_12);
@@ -116402,7 +116402,7 @@ fn build_controls_macoscontrols_xaml_deferred_374(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(40,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SwitchTrack")));
-    rt::register_name(name_scope.as_ref(), "SwitchTrack", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 40, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "SwitchTrack", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 40, 21)?;
     // Controls/MacOSControls.xaml(40,14) Width
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 38.0_f64, priority_0);
@@ -116459,7 +116459,7 @@ fn build_controls_macoscontrols_xaml_deferred_374(
     context.push_parent(rt::to_value(canvas_0.clone()));
     // Controls/MacOSControls.xaml(52,23) Name
     canvas_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SwitchKnob")));
-    rt::register_name(name_scope.as_ref(), "PART_SwitchKnob", ::core::clone::Clone::clone(&canvas_0).upcast::<::ferroui_base::FerroObject>(), 52, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SwitchKnob", ::std::rc::Rc::new(::core::clone::Clone::clone(&canvas_0)), 52, 23)?;
     // Controls/MacOSControls.xaml(52,16) Width
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     canvas_0.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 16.0_f64, priority_7);
@@ -116481,7 +116481,7 @@ fn build_controls_macoscontrols_xaml_deferred_374(
     context.push_parent(rt::to_value(grid_1.clone()));
     // Controls/MacOSControls.xaml(54,23) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MovingKnobs")));
-    rt::register_name(name_scope.as_ref(), "PART_MovingKnobs", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 54, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_MovingKnobs", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 54, 23)?;
     // Controls/MacOSControls.xaml(54,18) Width
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     grid_1.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 22.0_f64, priority_11);
@@ -116497,7 +116497,7 @@ fn build_controls_macoscontrols_xaml_deferred_374(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/MacOSControls.xaml(55,27) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SwitchKnob")));
-    rt::register_name(name_scope.as_ref(), "SwitchKnob", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 55, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "SwitchKnob", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 55, 27)?;
     // Controls/MacOSControls.xaml(55,20) Width
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 18.0_f64, priority_13);
@@ -116568,7 +116568,7 @@ fn build_controls_macoscontrols_xaml_deferred_374(
     context.push_parent(rt::to_value(stack_panel_0.clone()));
     // Controls/MacOSControls.xaml(71,25) Name
     stack_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SwitchLabels")));
-    rt::register_name(name_scope.as_ref(), "SwitchLabels", ::core::clone::Clone::clone(&stack_panel_0).upcast::<::ferroui_base::FerroObject>(), 71, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "SwitchLabels", ::std::rc::Rc::new(::core::clone::Clone::clone(&stack_panel_0)), 71, 25)?;
     // Controls/MacOSControls.xaml(71,14) Column
     let priority_20 = ::ferroui_base::data::BindingPriority::Template;
     stack_panel_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_20);
@@ -116648,7 +116648,7 @@ fn build_controls_macoscontrols_xaml_deferred_374(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(80,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 80, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 80, 33)?;
     // Controls/MacOSControls.xaml(81,33) Content (setter chosen at run time)
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_3 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -116682,7 +116682,7 @@ fn build_controls_macoscontrols_xaml_deferred_374(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(87,33) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_OffContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_OffContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 87, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_OffContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 87, 33)?;
     // Controls/MacOSControls.xaml(88,33) Content (setter chosen at run time)
     let priority_28 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_8 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ToggleSwitch::off_content_property()));
@@ -116715,7 +116715,7 @@ fn build_controls_macoscontrols_xaml_deferred_374(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_6, ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(93,33) Name
     content_presenter_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_OnContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_OnContentPresenter", ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_base::FerroObject>(), 93, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_OnContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_2)), 93, 33)?;
     // Controls/MacOSControls.xaml(94,33) Content (setter chosen at run time)
     let priority_32 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_11 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ToggleSwitch::on_content_property()));
@@ -116877,7 +116877,7 @@ fn build_controls_macoscontrols_xaml_deferred_377(
     context.push_parent(rt::to_value(ellipse_0.clone()));
     // Controls/MacOSControls.xaml(35,20) Name
     ellipse_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SliderInnerThumb")));
-    rt::register_name(name_scope.as_ref(), "SliderInnerThumb", ::core::clone::Clone::clone(&ellipse_0).upcast::<::ferroui_base::FerroObject>(), 35, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "SliderInnerThumb", ::std::rc::Rc::new(::core::clone::Clone::clone(&ellipse_0)), 35, 20)?;
     // Controls/MacOSControls.xaml(35,12) RenderTransformOrigin
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     ellipse_0.set_value_with_priority(::ferroui_base::Visual::render_transform_origin_property(), ::ferroui_base::RelativePoint::__markup_new_1(0.5_f64, 0.5_f64, ::ferroui_base::RelativeUnit::Relative), priority_2);
@@ -116964,7 +116964,7 @@ fn build_controls_macoscontrols_xaml_deferred_379(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/MacOSControls.xaml(70,22) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HorizontalDecreaseRect")));
-    rt::register_name(name_scope.as_ref(), "HorizontalDecreaseRect", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 70, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "HorizontalDecreaseRect", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 70, 22)?;
     // Controls/MacOSControls.xaml(71,22) Fill
     rt::bind_template_binding(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 71, 22)?;
     // Controls/MacOSControls.xaml(72,22) Height
@@ -117046,7 +117046,7 @@ fn build_controls_macoscontrols_xaml_deferred_381(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/MacOSControls.xaml(86,22) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("VerticalDecreaseRect")));
-    rt::register_name(name_scope.as_ref(), "VerticalDecreaseRect", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 86, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "VerticalDecreaseRect", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 86, 22)?;
     // Controls/MacOSControls.xaml(87,22) Fill
     rt::bind_template_binding(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 87, 22)?;
     // Controls/MacOSControls.xaml(88,22) Width
@@ -117612,7 +117612,7 @@ fn build_controls_macoscontrols_xaml_deferred_386(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(130,23) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("FocusBorder")));
-    rt::register_name(name_scope.as_ref(), "FocusBorder", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 130, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "FocusBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 130, 23)?;
     // Controls/MacOSControls.xaml(131,23) CornerRadius
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::corner_radius_property(), "ControlCornerRadius", 131, 23)?;
     // Controls/MacOSControls.xaml(130,16) IsTemplateFocusTarget
@@ -117629,7 +117629,7 @@ fn build_controls_macoscontrols_xaml_deferred_386(
     context.push_parent(rt::to_value(grid_1.clone()));
     // Controls/MacOSControls.xaml(133,21) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SliderContainer")));
-    rt::register_name(name_scope.as_ref(), "SliderContainer", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 133, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "SliderContainer", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 133, 21)?;
     // Controls/MacOSControls.xaml(133,46) Background
     rt::bind_dynamic_resource(&context, grid_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Panel::background_property(), "SliderContainerBackground", 133, 46)?;
     // Controls/MacOSControls.xaml(135,20) Styles
@@ -117657,7 +117657,7 @@ fn build_controls_macoscontrols_xaml_deferred_386(
     context.push_parent(rt::to_value(grid_2.clone()));
     // Controls/MacOSControls.xaml(139,23) Name
     grid_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HorizontalTemplate")));
-    rt::register_name(name_scope.as_ref(), "HorizontalTemplate", ::core::clone::Clone::clone(&grid_2).upcast::<::ferroui_base::FerroObject>(), 139, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "HorizontalTemplate", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_2)), 139, 23)?;
     // Controls/MacOSControls.xaml(140,23) MinHeight
     rt::bind_dynamic_resource(&context, grid_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_height_property(), "SliderHorizontalHeight", 140, 23)?;
     // Controls/MacOSControls.xaml(139,18) ColumnDefinitions
@@ -117706,7 +117706,7 @@ fn build_controls_macoscontrols_xaml_deferred_386(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/MacOSControls.xaml(148,30) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HorizontalTrackRect")));
-    rt::register_name(name_scope.as_ref(), "HorizontalTrackRect", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 148, 30)?;
+    rt::register_name_value(name_scope.as_ref(), "HorizontalTrackRect", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 148, 30)?;
     // Controls/MacOSControls.xaml(149,30) Fill
     rt::bind_template_binding(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 149, 30)?;
     // Controls/MacOSControls.xaml(150,30) Height
@@ -117748,7 +117748,7 @@ fn build_controls_macoscontrols_xaml_deferred_386(
     context.push_parent(rt::to_value(tick_bar_0.clone()));
     // Controls/MacOSControls.xaml(155,28) Name
     tick_bar_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TopTickBar")));
-    rt::register_name(name_scope.as_ref(), "TopTickBar", ::core::clone::Clone::clone(&tick_bar_0).upcast::<::ferroui_base::FerroObject>(), 155, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "TopTickBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&tick_bar_0)), 155, 28)?;
     // Controls/MacOSControls.xaml(155,20) IsVisible
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     tick_bar_0.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_6);
@@ -117791,7 +117791,7 @@ fn build_controls_macoscontrols_xaml_deferred_386(
     context.push_parent(rt::to_value(tick_bar_1.clone()));
     // Controls/MacOSControls.xaml(169,28) Name
     tick_bar_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("BottomTickBar")));
-    rt::register_name(name_scope.as_ref(), "BottomTickBar", ::core::clone::Clone::clone(&tick_bar_1).upcast::<::ferroui_base::FerroObject>(), 169, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "BottomTickBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&tick_bar_1)), 169, 28)?;
     // Controls/MacOSControls.xaml(169,20) IsVisible
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     tick_bar_1.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_11);
@@ -117837,7 +117837,7 @@ fn build_controls_macoscontrols_xaml_deferred_386(
     context.push_parent(rt::to_value(track_0.clone()));
     // Controls/MacOSControls.xaml(184,26) Name
     track_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Track")));
-    rt::register_name(name_scope.as_ref(), "PART_Track", ::core::clone::Clone::clone(&track_0).upcast::<::ferroui_base::FerroObject>(), 184, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Track", ::std::rc::Rc::new(::core::clone::Clone::clone(&track_0)), 184, 26)?;
     // Controls/MacOSControls.xaml(184,20) Row
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
     track_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 0_i32, priority_17);
@@ -117871,7 +117871,7 @@ fn build_controls_macoscontrols_xaml_deferred_386(
     context.push_parent(rt::to_value(repeat_button_0.clone()));
     // Controls/MacOSControls.xaml(194,37) Name
     repeat_button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DecreaseButton")));
-    rt::register_name(name_scope.as_ref(), "PART_DecreaseButton", ::core::clone::Clone::clone(&repeat_button_0).upcast::<::ferroui_base::FerroObject>(), 194, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DecreaseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_0)), 194, 37)?;
     // Controls/MacOSControls.xaml(195,37) Theme (setter chosen at run time)
     let priority_22 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SliderHorizontalDecreaseButtonStyle"));
@@ -117904,7 +117904,7 @@ fn build_controls_macoscontrols_xaml_deferred_386(
     context.push_parent(rt::to_value(repeat_button_1.clone()));
     // Controls/MacOSControls.xaml(201,37) Name
     repeat_button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_IncreaseButton")));
-    rt::register_name(name_scope.as_ref(), "PART_IncreaseButton", ::core::clone::Clone::clone(&repeat_button_1).upcast::<::ferroui_base::FerroObject>(), 201, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_IncreaseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_1)), 201, 37)?;
     // Controls/MacOSControls.xaml(202,37) Theme (setter chosen at run time)
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SliderIncreaseButtonStyle"));
@@ -117932,7 +117932,7 @@ fn build_controls_macoscontrols_xaml_deferred_386(
     context.push_parent(rt::to_value(thumb_0.clone()));
     // Controls/MacOSControls.xaml(205,28) Name
     thumb_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HorizontalThumb")));
-    rt::register_name(name_scope.as_ref(), "HorizontalThumb", ::core::clone::Clone::clone(&thumb_0).upcast::<::ferroui_base::FerroObject>(), 205, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "HorizontalThumb", ::std::rc::Rc::new(::core::clone::Clone::clone(&thumb_0)), 205, 28)?;
     // Controls/MacOSControls.xaml(206,28) Theme (setter chosen at run time)
     let priority_27 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SliderThumbStyle"));
@@ -118007,7 +118007,7 @@ fn build_controls_macoscontrols_xaml_deferred_387(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(227,23) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("FocusBorder")));
-    rt::register_name(name_scope.as_ref(), "FocusBorder", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 227, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "FocusBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 227, 23)?;
     // Controls/MacOSControls.xaml(228,23) CornerRadius
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::corner_radius_property(), "ControlCornerRadius", 228, 23)?;
     // Controls/MacOSControls.xaml(227,16) IsTemplateFocusTarget
@@ -118024,7 +118024,7 @@ fn build_controls_macoscontrols_xaml_deferred_387(
     context.push_parent(rt::to_value(grid_1.clone()));
     // Controls/MacOSControls.xaml(230,21) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SliderContainer")));
-    rt::register_name(name_scope.as_ref(), "SliderContainer", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 230, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "SliderContainer", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 230, 21)?;
     // Controls/MacOSControls.xaml(230,46) Background
     rt::bind_dynamic_resource(&context, grid_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Panel::background_property(), "SliderContainerBackground", 230, 46)?;
     // Controls/MacOSControls.xaml(232,20) Styles
@@ -118052,7 +118052,7 @@ fn build_controls_macoscontrols_xaml_deferred_387(
     context.push_parent(rt::to_value(grid_2.clone()));
     // Controls/MacOSControls.xaml(236,23) Name
     grid_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("VerticalTemplate")));
-    rt::register_name(name_scope.as_ref(), "VerticalTemplate", ::core::clone::Clone::clone(&grid_2).upcast::<::ferroui_base::FerroObject>(), 236, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "VerticalTemplate", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_2)), 236, 23)?;
     // Controls/MacOSControls.xaml(237,23) MinWidth
     rt::bind_dynamic_resource(&context, grid_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_width_property(), "SliderVerticalWidth", 237, 23)?;
     // Controls/MacOSControls.xaml(236,18) RowDefinitions
@@ -118101,7 +118101,7 @@ fn build_controls_macoscontrols_xaml_deferred_387(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/MacOSControls.xaml(245,30) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("VerticalTrackRect")));
-    rt::register_name(name_scope.as_ref(), "VerticalTrackRect", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 245, 30)?;
+    rt::register_name_value(name_scope.as_ref(), "VerticalTrackRect", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 245, 30)?;
     // Controls/MacOSControls.xaml(246,30) Fill
     rt::bind_template_binding(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 246, 30)?;
     // Controls/MacOSControls.xaml(247,30) Width
@@ -118143,7 +118143,7 @@ fn build_controls_macoscontrols_xaml_deferred_387(
     context.push_parent(rt::to_value(tick_bar_0.clone()));
     // Controls/MacOSControls.xaml(252,28) Name
     tick_bar_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LeftTickBar")));
-    rt::register_name(name_scope.as_ref(), "LeftTickBar", ::core::clone::Clone::clone(&tick_bar_0).upcast::<::ferroui_base::FerroObject>(), 252, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "LeftTickBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&tick_bar_0)), 252, 28)?;
     // Controls/MacOSControls.xaml(252,20) IsVisible
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     tick_bar_0.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_6);
@@ -118186,7 +118186,7 @@ fn build_controls_macoscontrols_xaml_deferred_387(
     context.push_parent(rt::to_value(tick_bar_1.clone()));
     // Controls/MacOSControls.xaml(266,28) Name
     tick_bar_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RightTickBar")));
-    rt::register_name(name_scope.as_ref(), "RightTickBar", ::core::clone::Clone::clone(&tick_bar_1).upcast::<::ferroui_base::FerroObject>(), 266, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "RightTickBar", ::std::rc::Rc::new(::core::clone::Clone::clone(&tick_bar_1)), 266, 28)?;
     // Controls/MacOSControls.xaml(266,20) IsVisible
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     tick_bar_1.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_11);
@@ -118232,7 +118232,7 @@ fn build_controls_macoscontrols_xaml_deferred_387(
     context.push_parent(rt::to_value(track_0.clone()));
     // Controls/MacOSControls.xaml(281,26) Name
     track_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Track")));
-    rt::register_name(name_scope.as_ref(), "PART_Track", ::core::clone::Clone::clone(&track_0).upcast::<::ferroui_base::FerroObject>(), 281, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Track", ::std::rc::Rc::new(::core::clone::Clone::clone(&track_0)), 281, 26)?;
     // Controls/MacOSControls.xaml(281,20) Column
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
     track_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_17);
@@ -118266,7 +118266,7 @@ fn build_controls_macoscontrols_xaml_deferred_387(
     context.push_parent(rt::to_value(repeat_button_0.clone()));
     // Controls/MacOSControls.xaml(291,37) Name
     repeat_button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DecreaseButton")));
-    rt::register_name(name_scope.as_ref(), "PART_DecreaseButton", ::core::clone::Clone::clone(&repeat_button_0).upcast::<::ferroui_base::FerroObject>(), 291, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DecreaseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_0)), 291, 37)?;
     // Controls/MacOSControls.xaml(292,37) Theme (setter chosen at run time)
     let priority_22 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SliderVerticalDecreaseButtonStyle"));
@@ -118299,7 +118299,7 @@ fn build_controls_macoscontrols_xaml_deferred_387(
     context.push_parent(rt::to_value(repeat_button_1.clone()));
     // Controls/MacOSControls.xaml(298,37) Name
     repeat_button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_IncreaseButton")));
-    rt::register_name(name_scope.as_ref(), "PART_IncreaseButton", ::core::clone::Clone::clone(&repeat_button_1).upcast::<::ferroui_base::FerroObject>(), 298, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_IncreaseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_1)), 298, 37)?;
     // Controls/MacOSControls.xaml(299,37) Theme (setter chosen at run time)
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SliderIncreaseButtonStyle"));
@@ -118327,7 +118327,7 @@ fn build_controls_macoscontrols_xaml_deferred_387(
     context.push_parent(rt::to_value(thumb_0.clone()));
     // Controls/MacOSControls.xaml(302,28) Name
     thumb_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("VerticalThumb")));
-    rt::register_name(name_scope.as_ref(), "VerticalThumb", ::core::clone::Clone::clone(&thumb_0).upcast::<::ferroui_base::FerroObject>(), 302, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "VerticalThumb", ::std::rc::Rc::new(::core::clone::Clone::clone(&thumb_0)), 302, 28)?;
     // Controls/MacOSControls.xaml(303,28) Theme (setter chosen at run time)
     let priority_27 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("SliderThumbStyle"));
@@ -118717,7 +118717,7 @@ fn build_controls_macoscontrols_xaml_deferred_393(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(89,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("BorderElement")));
-    rt::register_name(name_scope.as_ref(), "BorderElement", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 89, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "BorderElement", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 89, 19)?;
     // Controls/MacOSControls.xaml(89,12) Column
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_0);
@@ -118752,7 +118752,7 @@ fn build_controls_macoscontrols_xaml_deferred_393(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(100,19) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("MacOSPointerFocusRing")));
-    rt::register_name(name_scope.as_ref(), "MacOSPointerFocusRing", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 100, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "MacOSPointerFocusRing", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 100, 19)?;
     // Controls/MacOSControls.xaml(100,12) ColumnSpan
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 6_i32, priority_4);
@@ -118798,7 +118798,7 @@ fn build_controls_macoscontrols_xaml_deferred_393(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(111,19) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SpinButtonsSpaceLeft")));
-    rt::register_name(name_scope.as_ref(), "SpinButtonsSpaceLeft", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 111, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "SpinButtonsSpaceLeft", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 111, 19)?;
     // Controls/MacOSControls.xaml(111,12) Column
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_10);
@@ -118817,7 +118817,7 @@ fn build_controls_macoscontrols_xaml_deferred_393(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(115,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("InnerLeftContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "InnerLeftContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 115, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "InnerLeftContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 115, 29)?;
     // Controls/MacOSControls.xaml(116,29) IsVisible
     let template_binding_7 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TextBox::inner_left_content_property()));
     // Controls/MacOSControls.xaml(116,29) Converter
@@ -118851,7 +118851,7 @@ fn build_controls_macoscontrols_xaml_deferred_393(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(121,25) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "PART_ScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 121, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 121, 25)?;
     // Controls/MacOSControls.xaml(121,12) Column
     let priority_15 = ::ferroui_base::data::BindingPriority::Template;
     scroll_viewer_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_15);
@@ -118891,7 +118891,7 @@ fn build_controls_macoscontrols_xaml_deferred_393(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&text_presenter_0)));
     // Controls/MacOSControls.xaml(130,28) Name
     text_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TextPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_TextPresenter", ::core::clone::Clone::clone(&text_presenter_0).upcast::<::ferroui_base::FerroObject>(), 130, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TextPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_presenter_0)), 130, 28)?;
     // Controls/MacOSControls.xaml(131,28) Text
     let template_binding_17 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TextBox::text_property()));
     // Controls/MacOSControls.xaml(131,28) Mode
@@ -118939,7 +118939,7 @@ fn build_controls_macoscontrols_xaml_deferred_393(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/MacOSControls.xaml(153,22) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PlaceholderTextContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PlaceholderTextContentPresenter", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 153, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PlaceholderTextContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 153, 22)?;
     // Controls/MacOSControls.xaml(153,12) Column
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_17);
@@ -119007,7 +119007,7 @@ fn build_controls_macoscontrols_xaml_deferred_393(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_6, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(170,29) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("InnerRightContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "InnerRightContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 170, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "InnerRightContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 170, 29)?;
     // Controls/MacOSControls.xaml(171,29) IsVisible
     let template_binding_39 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TextBox::inner_right_content_property()));
     // Controls/MacOSControls.xaml(171,29) Converter
@@ -119042,7 +119042,7 @@ fn build_controls_macoscontrols_xaml_deferred_393(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/MacOSControls.xaml(176,19) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("DeleteButton")));
-    rt::register_name(name_scope.as_ref(), "DeleteButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 176, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "DeleteButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 176, 19)?;
     // Controls/MacOSControls.xaml(176,12) Column
     let priority_22 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 4_i32, priority_22);
@@ -119097,7 +119097,7 @@ fn build_controls_macoscontrols_xaml_deferred_393(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_8, ::core::clone::Clone::clone(&border_3).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(190,19) Name
     border_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SpinButtonsSpace")));
-    rt::register_name(name_scope.as_ref(), "SpinButtonsSpace", ::core::clone::Clone::clone(&border_3).upcast::<::ferroui_base::FerroObject>(), 190, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "SpinButtonsSpace", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_3)), 190, 19)?;
     // Controls/MacOSControls.xaml(190,12) Column
     let priority_29 = ::ferroui_base::data::BindingPriority::Template;
     border_3.set_value_with_priority(::ferroui_controls::Grid::column_property(), 5_i32, priority_29);
@@ -119117,7 +119117,7 @@ fn build_controls_macoscontrols_xaml_deferred_393(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/MacOSControls.xaml(195,17) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PopupIndicator")));
-    rt::register_name(name_scope.as_ref(), "PopupIndicator", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 195, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "PopupIndicator", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 195, 17)?;
     // Controls/MacOSControls.xaml(195,12) Column
     let priority_32 = ::ferroui_base::data::BindingPriority::Template;
     path_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 5_i32, priority_32);
@@ -119231,7 +119231,7 @@ fn build_controls_macoscontrols_xaml_deferred_395(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(234,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 234, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 234, 29)?;
     // Controls/MacOSControls.xaml(235,29) Content (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_0 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -119258,7 +119258,7 @@ fn build_controls_macoscontrols_xaml_deferred_395(
     context.push_parent(rt::to_value(stack_panel_0.clone()));
     // Controls/MacOSControls.xaml(239,23) Name
     stack_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SpinButtons")));
-    rt::register_name(name_scope.as_ref(), "SpinButtons", ::core::clone::Clone::clone(&stack_panel_0).upcast::<::ferroui_base::FerroObject>(), 239, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "SpinButtons", ::std::rc::Rc::new(::core::clone::Clone::clone(&stack_panel_0)), 239, 23)?;
     // Controls/MacOSControls.xaml(239,12) Orientation
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     stack_panel_0.set_value_with_priority(::ferroui_controls::StackPanel::orientation_property(), ::ferroui_base::layout::Orientation::Vertical, priority_1);
@@ -119282,7 +119282,7 @@ fn build_controls_macoscontrols_xaml_deferred_395(
     context.push_parent(rt::to_value(repeat_button_0.clone()));
     // Controls/MacOSControls.xaml(245,27) Name
     repeat_button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_IncreaseButton")));
-    rt::register_name(name_scope.as_ref(), "PART_IncreaseButton", ::core::clone::Clone::clone(&repeat_button_0).upcast::<::ferroui_base::FerroObject>(), 245, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_IncreaseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_0)), 245, 27)?;
     // Controls/MacOSControls.xaml(246,27) Theme (setter chosen at run time)
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NumericUpDownSpinButtonStyle"));
@@ -119352,7 +119352,7 @@ fn build_controls_macoscontrols_xaml_deferred_395(
     context.push_parent(rt::to_value(repeat_button_1.clone()));
     // Controls/MacOSControls.xaml(256,27) Name
     repeat_button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_DecreaseButton")));
-    rt::register_name(name_scope.as_ref(), "PART_DecreaseButton", ::core::clone::Clone::clone(&repeat_button_1).upcast::<::ferroui_base::FerroObject>(), 256, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_DecreaseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_1)), 256, 27)?;
     // Controls/MacOSControls.xaml(257,27) Theme (setter chosen at run time)
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NumericUpDownSpinButtonStyle"));
@@ -119546,7 +119546,7 @@ fn build_controls_macoscontrols_xaml_deferred_397(
     context.push_parent(rt::to_value(button_spinner_0.clone()));
     // Controls/MacOSControls.xaml(296,26) Name
     button_spinner_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Spinner")));
-    rt::register_name(name_scope.as_ref(), "PART_Spinner", ::core::clone::Clone::clone(&button_spinner_0).upcast::<::ferroui_base::FerroObject>(), 296, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Spinner", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_spinner_0)), 296, 26)?;
     // Controls/MacOSControls.xaml(297,26) Theme (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NumericUpDownButtonSpinnerStyle"));
@@ -119583,7 +119583,7 @@ fn build_controls_macoscontrols_xaml_deferred_397(
     context.push_parent(rt::to_value(text_box_0.clone()));
     // Controls/MacOSControls.xaml(304,22) Name
     text_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TextBox")));
-    rt::register_name(name_scope.as_ref(), "PART_TextBox", ::core::clone::Clone::clone(&text_box_0).upcast::<::ferroui_base::FerroObject>(), 304, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TextBox", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_box_0)), 304, 22)?;
     // Controls/MacOSControls.xaml(305,22) Theme (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NumberBoxTextBoxStyle"));
@@ -120007,7 +120007,7 @@ fn build_controls_macoscontrols_xaml_deferred_400(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(52,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ToggleButtonGrid")));
-    rt::register_name(name_scope.as_ref(), "ToggleButtonGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 52, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "ToggleButtonGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 52, 17)?;
     // Controls/MacOSControls.xaml(53,17) CornerRadius
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::corner_radius_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()), 53, 17)?;
     // Controls/MacOSControls.xaml(54,17) BackgroundSizing
@@ -120053,7 +120053,7 @@ fn build_controls_macoscontrols_xaml_deferred_400(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/MacOSControls.xaml(64,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 64, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 64, 31)?;
     // Controls/MacOSControls.xaml(64,14) Column
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_0);
@@ -120089,7 +120089,7 @@ fn build_controls_macoscontrols_xaml_deferred_400(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(72,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ExpandCollapseChevronBorder")));
-    rt::register_name(name_scope.as_ref(), "ExpandCollapseChevronBorder", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 72, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "ExpandCollapseChevronBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 72, 21)?;
     // Controls/MacOSControls.xaml(72,14) Column
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_3);
@@ -120142,7 +120142,7 @@ fn build_controls_macoscontrols_xaml_deferred_400(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/MacOSControls.xaml(87,23) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ExpandCollapseChevron")));
-    rt::register_name(name_scope.as_ref(), "ExpandCollapseChevron", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 87, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "ExpandCollapseChevron", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 87, 23)?;
     // Controls/MacOSControls.xaml(87,18) Data
     let value_1 = rt::invoked(::ferroui_base::media::Geometry::__markup_parse(::std::string::String::from("M 0,0 L 6,4 L 0,8 Z")), 88, 23)?;
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
@@ -120266,7 +120266,7 @@ fn build_controls_macoscontrols_xaml_deferred_402(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(174,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ToggleButtonGrid")));
-    rt::register_name(name_scope.as_ref(), "ToggleButtonGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 174, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "ToggleButtonGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 174, 17)?;
     // Controls/MacOSControls.xaml(175,17) CornerRadius
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::corner_radius_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::corner_radius_property()), 175, 17)?;
     // Controls/MacOSControls.xaml(176,17) BackgroundSizing
@@ -120312,7 +120312,7 @@ fn build_controls_macoscontrols_xaml_deferred_402(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/MacOSControls.xaml(186,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 186, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 186, 31)?;
     // Controls/MacOSControls.xaml(186,14) Column
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_0);
@@ -120348,7 +120348,7 @@ fn build_controls_macoscontrols_xaml_deferred_402(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(194,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ExpandCollapseChevronBorder")));
-    rt::register_name(name_scope.as_ref(), "ExpandCollapseChevronBorder", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 194, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "ExpandCollapseChevronBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 194, 21)?;
     // Controls/MacOSControls.xaml(194,14) Column
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_3);
@@ -120401,7 +120401,7 @@ fn build_controls_macoscontrols_xaml_deferred_402(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/MacOSControls.xaml(209,23) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ExpandCollapseChevron")));
-    rt::register_name(name_scope.as_ref(), "ExpandCollapseChevron", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 209, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "ExpandCollapseChevron", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 209, 23)?;
     // Controls/MacOSControls.xaml(209,18) Data
     let value_1 = rt::invoked(::ferroui_base::media::Geometry::__markup_parse(::std::string::String::from("M 0,0 L 6,4 L 0,8 Z")), 210, 23)?;
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
@@ -120912,7 +120912,7 @@ fn build_controls_macoscontrols_xaml_deferred_406(
     context.push_parent(rt::to_value(toggle_button_0.clone()));
     // Controls/MacOSControls.xaml(279,25) Name
     toggle_button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ExpanderHeader")));
-    rt::register_name(name_scope.as_ref(), "ExpanderHeader", ::core::clone::Clone::clone(&toggle_button_0).upcast::<::ferroui_base::FerroObject>(), 279, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "ExpanderHeader", ::std::rc::Rc::new(::core::clone::Clone::clone(&toggle_button_0)), 279, 25)?;
     // Controls/MacOSControls.xaml(279,12) Dock
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     toggle_button_0.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Top, priority_0);
@@ -121005,7 +121005,7 @@ fn build_controls_macoscontrols_xaml_deferred_406(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(297,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ExpanderContentClip")));
-    rt::register_name(name_scope.as_ref(), "ExpanderContentClip", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 297, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "ExpanderContentClip", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 297, 19)?;
     // Controls/MacOSControls.xaml(297,12) ClipToBounds
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_base::Visual::clip_to_bounds_property(), ::core::clone::Clone::clone(&true), priority_9);
@@ -121017,7 +121017,7 @@ fn build_controls_macoscontrols_xaml_deferred_406(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(298,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ExpanderContent")));
-    rt::register_name(name_scope.as_ref(), "ExpanderContent", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 298, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "ExpanderContent", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 298, 21)?;
     // Controls/MacOSControls.xaml(299,21) IsVisible
     rt::bind_template_binding(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::is_visible_property(), rt::property(::ferroui_controls::Expander::is_expanded_property()), 299, 21)?;
     // Controls/MacOSControls.xaml(300,21) Background
@@ -121056,7 +121056,7 @@ fn build_controls_macoscontrols_xaml_deferred_406(
     border_1.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/MacOSControls.xaml(309,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 309, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 309, 33)?;
     // Controls/MacOSControls.xaml(310,33) Content (setter chosen at run time)
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_16 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -121375,7 +121375,7 @@ fn build_controls_macoscontrols_xaml_deferred_410(
     border_0.begin_init();
     // Controls/MacOSControls.xaml(85,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootGrid")));
-    rt::register_name(name_scope.as_ref(), "RootGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 85, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 85, 17)?;
     // Controls/MacOSControls.xaml(86,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 86, 17)?;
     // Controls/MacOSControls.xaml(87,17) BorderBrush
@@ -121394,7 +121394,7 @@ fn build_controls_macoscontrols_xaml_deferred_410(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&border_1).upcast::<::ferroui_controls::Control>()));
     // Controls/MacOSControls.xaml(91,19) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ScaleTransform")));
-    rt::register_name(name_scope.as_ref(), "ScaleTransform", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 91, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "ScaleTransform", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 91, 19)?;
     // Controls/MacOSControls.xaml(91,12) RenderTransformOrigin
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_base::Visual::render_transform_origin_property(), ::ferroui_base::RelativePoint::__markup_new_1(0.5_f64, 0.5_f64, ::ferroui_base::RelativeUnit::Relative), priority_1);
@@ -121405,7 +121405,7 @@ fn build_controls_macoscontrols_xaml_deferred_410(
     border_1.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&path_0).upcast::<::ferroui_controls::Control>()));
     // Controls/MacOSControls.xaml(93,19) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Content")));
-    rt::register_name(name_scope.as_ref(), "Content", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 93, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "Content", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 93, 19)?;
     // Controls/MacOSControls.xaml(94,19) Fill
     rt::bind_template_binding(path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 94, 19)?;
     // Controls/MacOSControls.xaml(93,14) Stretch
@@ -121747,7 +121747,7 @@ fn build_controls_macoscontrols_xaml_deferred_415(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(177,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootGrid")));
-    rt::register_name(name_scope.as_ref(), "RootGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 177, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 177, 17)?;
     // Controls/MacOSControls.xaml(178,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 178, 17)?;
     // Controls/MacOSControls.xaml(179,17) BorderBrush
@@ -121791,7 +121791,7 @@ fn build_controls_macoscontrols_xaml_deferred_415(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/MacOSControls.xaml(186,17) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Content")));
-    rt::register_name(name_scope.as_ref(), "Content", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 186, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Content", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 186, 17)?;
     // Controls/MacOSControls.xaml(187,17) Data (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryEA3B"));
@@ -122162,7 +122162,7 @@ fn build_controls_macoscontrols_xaml_deferred_420(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(280,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootGrid")));
-    rt::register_name(name_scope.as_ref(), "RootGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 280, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 280, 17)?;
     // Controls/MacOSControls.xaml(281,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 281, 17)?;
     // Controls/MacOSControls.xaml(282,17) BorderBrush
@@ -122182,7 +122182,7 @@ fn build_controls_macoscontrols_xaml_deferred_420(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/MacOSControls.xaml(286,17) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Content")));
-    rt::register_name(name_scope.as_ref(), "Content", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 286, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "Content", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 286, 17)?;
     // Controls/MacOSControls.xaml(287,17) Data (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryEA3B"));
@@ -122255,7 +122255,7 @@ fn build_controls_macoscontrols_xaml_deferred_422(
     scroll_viewer_0.begin_init();
     // Controls/MacOSControls.xaml(348,23) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "PART_ScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 348, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 348, 23)?;
     // Controls/MacOSControls.xaml(348,10) HorizontalScrollBarVisibility
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     scroll_viewer_0.set_value_with_priority(::ferroui_controls::ScrollViewer::horizontal_scroll_bar_visibility_property(), ::ferroui_controls::primitives::ScrollBarVisibility::Hidden, priority_0);
@@ -122272,7 +122272,7 @@ fn build_controls_macoscontrols_xaml_deferred_422(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&items_presenter_0)));
     // Controls/MacOSControls.xaml(352,27) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 352, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 352, 27)?;
     // Controls/MacOSControls.xaml(352,56) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 352, 56)?;
     rt::invoked(items_presenter_0.try_end_init(), 352, 12)?;
@@ -122430,7 +122430,7 @@ fn build_controls_macoscontrols_xaml_deferred_424(
     context.push_parent(rt::to_value(stack_panel_0.clone()));
     // Controls/MacOSControls.xaml(367,21) Name
     stack_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootPanel")));
-    rt::register_name(name_scope.as_ref(), "RootPanel", ::core::clone::Clone::clone(&stack_panel_0).upcast::<::ferroui_base::FerroObject>(), 367, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "RootPanel", ::std::rc::Rc::new(::core::clone::Clone::clone(&stack_panel_0)), 367, 21)?;
     // Controls/MacOSControls.xaml(368,21) Orientation
     rt::bind_template_binding(stack_panel_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::StackPanel::orientation_property(), rt::property(::ferroui_controls::PipsPager::orientation_property()), 368, 21)?;
     // Controls/MacOSControls.xaml(369,21) Background
@@ -122443,7 +122443,7 @@ fn build_controls_macoscontrols_xaml_deferred_424(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(370,19) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PreviousButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PreviousButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 370, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PreviousButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 370, 19)?;
     // Controls/MacOSControls.xaml(371,19) Theme
     rt::bind_template_binding(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), rt::property(::ferroui_controls::PipsPager::previous_button_theme_property()), 371, 19)?;
     // Controls/MacOSControls.xaml(372,19) IsVisible
@@ -122467,7 +122467,7 @@ fn build_controls_macoscontrols_xaml_deferred_424(
     context.push_parent(rt::to_value(list_box_0.clone()));
     // Controls/MacOSControls.xaml(376,20) Name
     list_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PipsPagerList")));
-    rt::register_name(name_scope.as_ref(), "PART_PipsPagerList", ::core::clone::Clone::clone(&list_box_0).upcast::<::ferroui_base::FerroObject>(), 376, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PipsPagerList", ::std::rc::Rc::new(::core::clone::Clone::clone(&list_box_0)), 376, 20)?;
     // Controls/MacOSControls.xaml(377,20) Theme (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("PipsPagerListStyle"));
@@ -122546,7 +122546,7 @@ fn build_controls_macoscontrols_xaml_deferred_424(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&button_1).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(391,19) Name
     button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_NextButton")));
-    rt::register_name(name_scope.as_ref(), "PART_NextButton", ::core::clone::Clone::clone(&button_1).upcast::<::ferroui_base::FerroObject>(), 391, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_NextButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_1)), 391, 19)?;
     // Controls/MacOSControls.xaml(392,19) Theme
     rt::bind_template_binding(button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), rt::property(::ferroui_controls::PipsPager::next_button_theme_property()), 392, 19)?;
     // Controls/MacOSControls.xaml(393,19) IsVisible
@@ -122637,7 +122637,7 @@ fn build_controls_macoscontrols_xaml_deferred_427(
     grid_0.begin_init();
     // Controls/MacOSControls.xaml(24,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Root")));
-    rt::register_name(name_scope.as_ref(), "Root", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 24, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 24, 15)?;
     // Controls/MacOSControls.xaml(24,29) Background
     rt::bind_template_binding(grid_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Panel::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 24, 29)?;
     // Controls/MacOSControls.xaml(25,12) Children
@@ -122648,7 +122648,7 @@ fn build_controls_macoscontrols_xaml_deferred_427(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(25,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 25, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 25, 29)?;
     // Controls/MacOSControls.xaml(26,29) Content (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_1 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -122688,7 +122688,7 @@ fn build_controls_macoscontrols_xaml_deferred_427(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(36,17) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_RefreshVisualizerPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_RefreshVisualizerPresenter", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 36, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_RefreshVisualizerPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 36, 17)?;
     rt::invoked(grid_1.try_end_init(), 36, 12)?;
     rt::invoked(grid_0.try_end_init(), 24, 10)?;
     ::core::result::Result::Ok(rt::to_value(grid_0.clone()))
@@ -122787,7 +122787,7 @@ fn build_controls_macoscontrols_xaml_deferred_430(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(37,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ThemeShadowWrapper")));
-    rt::register_name(name_scope.as_ref(), "ThemeShadowWrapper", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 37, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "ThemeShadowWrapper", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 37, 17)?;
     // Controls/MacOSControls.xaml(37,45) BoxShadow
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::box_shadow_property(), "MacOSMenuShadow", 37, 45)?;
     // Controls/MacOSControls.xaml(37,91) CornerRadius
@@ -122839,7 +122839,7 @@ fn build_controls_macoscontrols_xaml_deferred_430(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(41,29) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "ScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 41, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "ScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 41, 29)?;
     // Controls/MacOSControls.xaml(41,51) HorizontalScrollBarVisibility
     rt::bind_template_binding(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(::ferroui_controls::ScrollViewer::horizontal_scroll_bar_visibility_property()), 41, 51)?;
     // Controls/MacOSControls.xaml(41,146) VerticalScrollBarVisibility
@@ -122851,7 +122851,7 @@ fn build_controls_macoscontrols_xaml_deferred_430(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&content_presenter_0)));
     // Controls/MacOSControls.xaml(42,35) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 42, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 42, 35)?;
     // Controls/MacOSControls.xaml(42,66) Content (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_8 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -122961,7 +122961,7 @@ fn build_controls_macoscontrols_xaml_deferred_433(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(31,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ThemeShadowWrapper")));
-    rt::register_name(name_scope.as_ref(), "ThemeShadowWrapper", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 31, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "ThemeShadowWrapper", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 31, 17)?;
     // Controls/MacOSControls.xaml(31,45) BoxShadow
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::box_shadow_property(), "MacOSMenuShadow", 31, 45)?;
     // Controls/MacOSControls.xaml(31,91) CornerRadius
@@ -123014,7 +123014,7 @@ fn build_controls_macoscontrols_xaml_deferred_433(
     context.push_parent(rt::to_value(scroll_viewer_0.clone()));
     // Controls/MacOSControls.xaml(35,29) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("MenuFlyoutPresenterScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "MenuFlyoutPresenterScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 35, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "MenuFlyoutPresenterScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 35, 29)?;
     // Controls/MacOSControls.xaml(35,70) Theme (setter chosen at run time)
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MenuFlyoutPresenterScrollViewer"));
@@ -123042,7 +123042,7 @@ fn build_controls_macoscontrols_xaml_deferred_433(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&items_presenter_0)));
     // Controls/MacOSControls.xaml(36,33) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 36, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 36, 33)?;
     // Controls/MacOSControls.xaml(36,62) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 36, 62)?;
     // Controls/MacOSControls.xaml(36,18) TabNavigation
@@ -124195,7 +124195,7 @@ fn build_controls_macoscontrols_xaml_deferred_437(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(36,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 36, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 36, 19)?;
     // Controls/MacOSControls.xaml(36,39) Padding
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Decorator::padding_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), 36, 39)?;
     // Controls/MacOSControls.xaml(36,75) Background
@@ -124279,7 +124279,7 @@ fn build_controls_macoscontrols_xaml_deferred_437(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/MacOSControls.xaml(45,21) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("CheckGlyph")));
-    rt::register_name(name_scope.as_ref(), "CheckGlyph", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 45, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "CheckGlyph", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 45, 21)?;
     // Controls/MacOSControls.xaml(45,16) Column
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     path_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_11);
@@ -124327,7 +124327,7 @@ fn build_controls_macoscontrols_xaml_deferred_437(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&viewbox_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(46,24) Name
     viewbox_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("IconRoot")));
-    rt::register_name(name_scope.as_ref(), "IconRoot", ::core::clone::Clone::clone(&viewbox_0).upcast::<::ferroui_base::FerroObject>(), 46, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "IconRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&viewbox_0)), 46, 24)?;
     // Controls/MacOSControls.xaml(46,16) Column
     let priority_19 = ::ferroui_base::data::BindingPriority::Template;
     viewbox_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_19);
@@ -124356,7 +124356,7 @@ fn build_controls_macoscontrols_xaml_deferred_437(
     viewbox_0.set_value(::ferroui_controls::Viewbox::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/MacOSControls.xaml(47,35) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("IconContent")));
-    rt::register_name(name_scope.as_ref(), "IconContent", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 47, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "IconContent", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 47, 35)?;
     // Controls/MacOSControls.xaml(47,56) Content (setter chosen at run time)
     let priority_26 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_5 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::MenuItem::icon_property()));
@@ -124379,7 +124379,7 @@ fn build_controls_macoscontrols_xaml_deferred_437(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(49,33) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HeaderPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_HeaderPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 49, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HeaderPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 49, 33)?;
     // Controls/MacOSControls.xaml(49,16) Column
     let priority_27 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_27);
@@ -124420,7 +124420,7 @@ fn build_controls_macoscontrols_xaml_deferred_437(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/MacOSControls.xaml(50,26) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("KeyboardAcceleratorTextBlock")));
-    rt::register_name(name_scope.as_ref(), "KeyboardAcceleratorTextBlock", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 50, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "KeyboardAcceleratorTextBlock", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 50, 26)?;
     // Controls/MacOSControls.xaml(50,16) Column
     let priority_33 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 3_i32, priority_33);
@@ -124482,7 +124482,7 @@ fn build_controls_macoscontrols_xaml_deferred_437(
     context.push_parent(rt::to_value(path_1.clone()));
     // Controls/MacOSControls.xaml(51,21) Name
     path_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SubItemChevron")));
-    rt::register_name(name_scope.as_ref(), "SubItemChevron", ::core::clone::Clone::clone(&path_1).upcast::<::ferroui_base::FerroObject>(), 51, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "SubItemChevron", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_1)), 51, 21)?;
     // Controls/MacOSControls.xaml(51,16) Column
     let priority_39 = ::ferroui_base::data::BindingPriority::Template;
     path_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 4_i32, priority_39);
@@ -124532,7 +124532,7 @@ fn build_controls_macoscontrols_xaml_deferred_437(
     context.push_parent(rt::to_value(popup_0.clone()));
     // Controls/MacOSControls.xaml(54,18) Name
     popup_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Popup")));
-    rt::register_name(name_scope.as_ref(), "PART_Popup", ::core::clone::Clone::clone(&popup_0).upcast::<::ferroui_base::FerroObject>(), 54, 18)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Popup", ::std::rc::Rc::new(::core::clone::Clone::clone(&popup_0)), 54, 18)?;
     // Controls/MacOSControls.xaml(54,12) WindowManagerAddShadowHint
     let priority_46 = ::ferroui_base::data::BindingPriority::Template;
     popup_0.set_value_with_priority(::ferroui_controls::primitives::Popup::window_manager_add_shadow_hint_property(), ::core::clone::Clone::clone(&false), priority_46);
@@ -124559,7 +124559,7 @@ fn build_controls_macoscontrols_xaml_deferred_437(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(55,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ThemeShadowWrapper")));
-    rt::register_name(name_scope.as_ref(), "ThemeShadowWrapper", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 55, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "ThemeShadowWrapper", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 55, 21)?;
     // Controls/MacOSControls.xaml(55,49) BoxShadow
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::box_shadow_property(), "MacOSMenuShadow", 55, 49)?;
     // Controls/MacOSControls.xaml(55,95) Margin (setter chosen at run time)
@@ -124639,7 +124639,7 @@ fn build_controls_macoscontrols_xaml_deferred_437(
     context.push_parent(rt::to_value(scroll_viewer_0.clone()));
     // Controls/MacOSControls.xaml(59,33) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("MenuFlyoutPresenterScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "MenuFlyoutPresenterScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 59, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "MenuFlyoutPresenterScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 59, 33)?;
     // Controls/MacOSControls.xaml(59,74) Theme (setter chosen at run time)
     let priority_55 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_6 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MenuFlyoutPresenterScrollViewer"));
@@ -124673,7 +124673,7 @@ fn build_controls_macoscontrols_xaml_deferred_437(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&items_presenter_0)));
     // Controls/MacOSControls.xaml(60,37) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 60, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 60, 37)?;
     // Controls/MacOSControls.xaml(60,66) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 60, 66)?;
     // Controls/MacOSControls.xaml(60,22) TabNavigation
@@ -124711,7 +124711,7 @@ fn build_controls_macoscontrols_xaml_deferred_438(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/MacOSControls.xaml(241,22) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SeparatorRectangle")));
-    rt::register_name(name_scope.as_ref(), "SeparatorRectangle", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 241, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "SeparatorRectangle", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 241, 22)?;
     // Controls/MacOSControls.xaml(241,50) Fill
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "MenuFlyoutSeparatorBackground", 241, 50)?;
     // Controls/MacOSControls.xaml(241,105) Margin (setter chosen at run time)
@@ -125209,7 +125209,7 @@ fn build_controls_macoscontrols_xaml_deferred_446(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(35,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentRoot")));
-    rt::register_name(name_scope.as_ref(), "ContentRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 35, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 35, 19)?;
     // Controls/MacOSControls.xaml(35,40) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 35, 40)?;
     // Controls/MacOSControls.xaml(35,82) CornerRadius
@@ -125228,7 +125228,7 @@ fn build_controls_macoscontrols_xaml_deferred_446(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(37,23) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Background")));
-    rt::register_name(name_scope.as_ref(), "Background", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 37, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "Background", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 37, 23)?;
     // Controls/MacOSControls.xaml(37,43) Background
     rt::bind_template_binding(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 37, 43)?;
     // Controls/MacOSControls.xaml(37,85) CornerRadius
@@ -125250,7 +125250,7 @@ fn build_controls_macoscontrols_xaml_deferred_446(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/MacOSControls.xaml(38,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HeaderPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_HeaderPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 38, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HeaderPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 38, 33)?;
     // Controls/MacOSControls.xaml(38,63) Content (setter chosen at run time)
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_6 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::HeaderedSelectingItemsControl::header_property()));
@@ -125308,7 +125308,7 @@ fn build_controls_macoscontrols_xaml_deferred_446(
     context.push_parent(rt::to_value(popup_0.clone()));
     // Controls/MacOSControls.xaml(41,18) Name
     popup_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Popup")));
-    rt::register_name(name_scope.as_ref(), "PART_Popup", ::core::clone::Clone::clone(&popup_0).upcast::<::ferroui_base::FerroObject>(), 41, 18)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Popup", ::std::rc::Rc::new(::core::clone::Clone::clone(&popup_0)), 41, 18)?;
     // Controls/MacOSControls.xaml(41,12) WindowManagerAddShadowHint
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     popup_0.set_value_with_priority(::ferroui_controls::primitives::Popup::window_manager_add_shadow_hint_property(), ::core::clone::Clone::clone(&false), priority_9);
@@ -125336,7 +125336,7 @@ fn build_controls_macoscontrols_xaml_deferred_446(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/MacOSControls.xaml(42,21) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ThemeShadowWrapper")));
-    rt::register_name(name_scope.as_ref(), "ThemeShadowWrapper", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 42, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "ThemeShadowWrapper", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 42, 21)?;
     // Controls/MacOSControls.xaml(42,49) BoxShadow
     rt::bind_dynamic_resource(&context, border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::box_shadow_property(), "MacOSMenuShadow", 42, 49)?;
     // Controls/MacOSControls.xaml(42,95) Margin (setter chosen at run time)
@@ -125416,7 +125416,7 @@ fn build_controls_macoscontrols_xaml_deferred_446(
     context.push_parent(rt::to_value(scroll_viewer_0.clone()));
     // Controls/MacOSControls.xaml(46,33) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("MenuFlyoutPresenterScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "MenuFlyoutPresenterScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 46, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "MenuFlyoutPresenterScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 46, 33)?;
     // Controls/MacOSControls.xaml(46,74) Theme (setter chosen at run time)
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MenuFlyoutPresenterScrollViewer"));
@@ -125450,7 +125450,7 @@ fn build_controls_macoscontrols_xaml_deferred_446(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&items_presenter_0)));
     // Controls/MacOSControls.xaml(47,37) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 47, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 47, 37)?;
     // Controls/MacOSControls.xaml(47,66) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 47, 66)?;
     // Controls/MacOSControls.xaml(47,22) TabNavigation
@@ -125524,7 +125524,7 @@ fn build_controls_macoscontrols_xaml_deferred_448(
     border_0.begin_init();
     // Controls/MacOSControls.xaml(88,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 88, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 88, 17)?;
     // Controls/MacOSControls.xaml(88,37) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 88, 37)?;
     // Controls/MacOSControls.xaml(88,79) BorderBrush
@@ -125548,7 +125548,7 @@ fn build_controls_macoscontrols_xaml_deferred_448(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_controls::Control>()));
     // Controls/MacOSControls.xaml(89,27) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 89, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 89, 27)?;
     // Controls/MacOSControls.xaml(89,56) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 89, 56)?;
     // Controls/MacOSControls.xaml(89,12) VerticalAlignment
@@ -125881,7 +125881,7 @@ fn build_controls_macoscontrols_xaml_deferred_451(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(33,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 33, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 33, 17)?;
     // Controls/MacOSControls.xaml(33,37) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 33, 37)?;
     // Controls/MacOSControls.xaml(33,79) BorderBrush
@@ -125910,7 +125910,7 @@ fn build_controls_macoscontrols_xaml_deferred_451(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(35,24) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PressedBackground")));
-    rt::register_name(name_scope.as_ref(), "PressedBackground", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 35, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "PressedBackground", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 35, 24)?;
     // Controls/MacOSControls.xaml(35,14) Fill
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_0.set_value_with_priority(::ferroui_controls::shapes::Shape::fill_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_2);
@@ -125933,7 +125933,7 @@ fn build_controls_macoscontrols_xaml_deferred_451(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/MacOSControls.xaml(36,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 36, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 36, 31)?;
     // Controls/MacOSControls.xaml(36,62) Content (setter chosen at run time)
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_4 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -126340,7 +126340,7 @@ fn build_controls_macoscontrols_xaml_deferred_455(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/MacOSControls.xaml(110,16) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Root")));
-    rt::register_name(name_scope.as_ref(), "Root", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 110, 16)?;
+    rt::register_name_value(name_scope.as_ref(), "Root", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 110, 16)?;
     // Controls/MacOSControls.xaml(111,12) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(&panel_0);
     // Controls/MacOSControls.xaml(111,12) Border
@@ -126350,7 +126350,7 @@ fn build_controls_macoscontrols_xaml_deferred_455(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(111,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Backplate")));
-    rt::register_name(name_scope.as_ref(), "Backplate", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 111, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "Backplate", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 111, 19)?;
     // Controls/MacOSControls.xaml(111,12) Margin
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(4.0_f64, 2.0_f64, 4.0_f64, 2.0_f64), priority_0);
@@ -126381,7 +126381,7 @@ fn build_controls_macoscontrols_xaml_deferred_455(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(112,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 112, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 112, 29)?;
     // Controls/MacOSControls.xaml(112,12) Margin
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_4);
@@ -126706,7 +126706,7 @@ fn build_controls_macoscontrols_xaml_deferred_457(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(181,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentBorder")));
-    rt::register_name(name_scope.as_ref(), "ContentBorder", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 181, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 181, 17)?;
     // Controls/MacOSControls.xaml(181,40) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 181, 40)?;
     // Controls/MacOSControls.xaml(181,82) BorderBrush
@@ -126736,7 +126736,7 @@ fn build_controls_macoscontrols_xaml_deferred_457(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/MacOSControls.xaml(183,24) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("BorderBackground")));
-    rt::register_name(name_scope.as_ref(), "BorderBackground", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 183, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "BorderBackground", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 183, 24)?;
     // Controls/MacOSControls.xaml(183,14) IsHitTestVisible
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_0.set_value_with_priority(::ferroui_base::input::InputElement::is_hit_test_visible_property(), ::core::clone::Clone::clone(&false), priority_2);
@@ -126764,7 +126764,7 @@ fn build_controls_macoscontrols_xaml_deferred_457(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&panel_1).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(184,20) Name
     panel_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentPresenterGrid")));
-    rt::register_name(name_scope.as_ref(), "ContentPresenterGrid", ::core::clone::Clone::clone(&panel_1).upcast::<::ferroui_base::FerroObject>(), 184, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentPresenterGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_1)), 184, 20)?;
     // Controls/MacOSControls.xaml(184,14) Background
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     panel_1.set_value_with_priority(::ferroui_controls::Panel::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_7);
@@ -126776,7 +126776,7 @@ fn build_controls_macoscontrols_xaml_deferred_457(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(185,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 185, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 185, 33)?;
     // Controls/MacOSControls.xaml(185,64) Content (setter chosen at run time)
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_4 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -126889,7 +126889,7 @@ fn build_controls_macoscontrols_xaml_deferred_460(
     border_0.begin_init();
     // Controls/MacOSControls.xaml(51,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 51, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 51, 17)?;
     // Controls/MacOSControls.xaml(52,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 52, 17)?;
     // Controls/MacOSControls.xaml(53,17) BorderBrush
@@ -126910,7 +126910,7 @@ fn build_controls_macoscontrols_xaml_deferred_460(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_controls::Control>()));
     // Controls/MacOSControls.xaml(58,25) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "PART_ScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 58, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 58, 25)?;
     // Controls/MacOSControls.xaml(59,25) Padding
     rt::bind_template_binding(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::padding_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), 59, 25)?;
     // Controls/MacOSControls.xaml(60,25) HorizontalScrollBarVisibility
@@ -126938,7 +126938,7 @@ fn build_controls_macoscontrols_xaml_deferred_460(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&items_presenter_0)));
     // Controls/MacOSControls.xaml(69,29) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 69, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 69, 29)?;
     // Controls/MacOSControls.xaml(70,29) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 70, 29)?;
     rt::invoked(items_presenter_0.try_end_init(), 69, 14)?;
@@ -127422,7 +127422,7 @@ fn build_controls_macoscontrols_xaml_deferred_465(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(40,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 40, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 40, 17)?;
     // Controls/MacOSControls.xaml(40,37) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 40, 37)?;
     // Controls/MacOSControls.xaml(40,79) BorderBrush
@@ -127455,7 +127455,7 @@ fn build_controls_macoscontrols_xaml_deferred_465(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/MacOSControls.xaml(42,19) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("MacOSSelectionCheck")));
-    rt::register_name(name_scope.as_ref(), "MacOSSelectionCheck", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 42, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "MacOSSelectionCheck", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 42, 19)?;
     // Controls/MacOSControls.xaml(42,48) Data (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE73E"));
@@ -127506,7 +127506,7 @@ fn build_controls_macoscontrols_xaml_deferred_465(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(43,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 43, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 43, 31)?;
     // Controls/MacOSControls.xaml(43,62) Content (setter chosen at run time)
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_5 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
@@ -127766,7 +127766,7 @@ fn build_controls_macoscontrols_xaml_deferred_468(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(34,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("BorderElement")));
-    rt::register_name(name_scope.as_ref(), "BorderElement", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 34, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "BorderElement", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 34, 19)?;
     // Controls/MacOSControls.xaml(35,19) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 35, 19)?;
     // Controls/MacOSControls.xaml(36,19) BorderBrush
@@ -127791,7 +127791,7 @@ fn build_controls_macoscontrols_xaml_deferred_468(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(41,19) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("MacOSPointerFocusRing")));
-    rt::register_name(name_scope.as_ref(), "MacOSPointerFocusRing", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 41, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "MacOSPointerFocusRing", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 41, 19)?;
     // Controls/MacOSControls.xaml(41,12) Margin
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(-3.0_f64, -3.0_f64, -3.0_f64, -3.0_f64), priority_2);
@@ -127834,7 +127834,7 @@ fn build_controls_macoscontrols_xaml_deferred_468(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(52,25) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "PART_ScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 52, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 52, 25)?;
     // Controls/MacOSControls.xaml(53,25) HorizontalScrollBarVisibility
     rt::bind_template_binding(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(::ferroui_controls::ScrollViewer::horizontal_scroll_bar_visibility_property()), 53, 25)?;
     // Controls/MacOSControls.xaml(54,25) VerticalScrollBarVisibility
@@ -127871,7 +127871,7 @@ fn build_controls_macoscontrols_xaml_deferred_468(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&text_presenter_0)));
     // Controls/MacOSControls.xaml(60,28) Name
     text_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TextPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_TextPresenter", ::core::clone::Clone::clone(&text_presenter_0).upcast::<::ferroui_base::FerroObject>(), 60, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TextPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_presenter_0)), 60, 28)?;
     // Controls/MacOSControls.xaml(61,28) Text
     let template_binding_11 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TextBox::text_property()));
     // Controls/MacOSControls.xaml(61,28) Mode
@@ -127919,7 +127919,7 @@ fn build_controls_macoscontrols_xaml_deferred_468(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/MacOSControls.xaml(83,22) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PlaceholderTextContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PlaceholderTextContentPresenter", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 83, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PlaceholderTextContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 83, 22)?;
     // Controls/MacOSControls.xaml(84,22) Foreground
     rt::bind_template_binding(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::foreground_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 84, 22)?;
     // Controls/MacOSControls.xaml(85,22) Margin
@@ -128508,7 +128508,7 @@ fn build_controls_macoscontrols_xaml_deferred_471(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/MacOSControls.xaml(174,17) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 174, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 174, 17)?;
     // Controls/MacOSControls.xaml(174,12) ColumnDefinitions
     let column_definitions_0 = ::ferroui_controls::ColumnDefinitions::__markup_new_0();
     rt::invoked(<::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::ColumnDefinition>>>::__markup_set_Capacity(&column_definitions_0, 2_i32), 174, 37)?;
@@ -128528,7 +128528,7 @@ fn build_controls_macoscontrols_xaml_deferred_471(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(175,21) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Background")));
-    rt::register_name(name_scope.as_ref(), "Background", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 175, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "Background", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 175, 21)?;
     // Controls/MacOSControls.xaml(175,14) Column
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_0);
@@ -128589,7 +128589,7 @@ fn build_controls_macoscontrols_xaml_deferred_471(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_control_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(193,29) Name
     content_control_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "ContentPresenter", ::core::clone::Clone::clone(&content_control_0).upcast::<::ferroui_base::FerroObject>(), 193, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_0)), 193, 29)?;
     // Controls/MacOSControls.xaml(193,14) Column
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     content_control_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_5);
@@ -128630,7 +128630,7 @@ fn build_controls_macoscontrols_xaml_deferred_471(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/MacOSControls.xaml(202,24) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PlaceholderTextBlock")));
-    rt::register_name(name_scope.as_ref(), "PlaceholderTextBlock", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 202, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "PlaceholderTextBlock", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 202, 24)?;
     // Controls/MacOSControls.xaml(202,14) Column
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_7);
@@ -128692,7 +128692,7 @@ fn build_controls_macoscontrols_xaml_deferred_471(
     context.push_parent(rt::to_value(text_box_0.clone()));
     // Controls/MacOSControls.xaml(216,22) Name
     text_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_EditableTextBox")));
-    rt::register_name(name_scope.as_ref(), "PART_EditableTextBox", ::core::clone::Clone::clone(&text_box_0).upcast::<::ferroui_base::FerroObject>(), 216, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_EditableTextBox", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_box_0)), 216, 22)?;
     // Controls/MacOSControls.xaml(216,14) Column
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
     text_box_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_8);
@@ -128747,7 +128747,7 @@ fn build_controls_macoscontrols_xaml_deferred_471(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(229,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("DropDownOverlay")));
-    rt::register_name(name_scope.as_ref(), "DropDownOverlay", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 229, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "DropDownOverlay", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 229, 21)?;
     // Controls/MacOSControls.xaml(229,14) Column
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_12);
@@ -128817,7 +128817,7 @@ fn build_controls_macoscontrols_xaml_deferred_471(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/MacOSControls.xaml(245,21) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("DropDownGlyph")));
-    rt::register_name(name_scope.as_ref(), "DropDownGlyph", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 245, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "DropDownGlyph", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 245, 21)?;
     // Controls/MacOSControls.xaml(245,16) Data
     let value_6 = rt::invoked(::ferroui_base::media::Geometry::__markup_parse(::std::string::String::from("M 0,3 L 3,0 L 6,3 L 5,4 L 3,2 L 1,4 Z M 0,7 L 1,6 L 3,8 L 5,6 L 6,7 L 3,10 Z")), 246, 21)?;
     let priority_26 = ::ferroui_base::data::BindingPriority::Template;
@@ -128852,7 +128852,7 @@ fn build_controls_macoscontrols_xaml_deferred_471(
     context.push_parent(rt::to_value(popup_0.clone()));
     // Controls/MacOSControls.xaml(254,20) Name
     popup_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Popup")));
-    rt::register_name(name_scope.as_ref(), "PART_Popup", ::core::clone::Clone::clone(&popup_0).upcast::<::ferroui_base::FerroObject>(), 254, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Popup", ::std::rc::Rc::new(::core::clone::Clone::clone(&popup_0)), 254, 20)?;
     // Controls/MacOSControls.xaml(254,14) WindowManagerAddShadowHint
     let priority_32 = ::ferroui_base::data::BindingPriority::Template;
     popup_0.set_value_with_priority(::ferroui_controls::primitives::Popup::window_manager_add_shadow_hint_property(), ::core::clone::Clone::clone(&false), priority_32);
@@ -128890,7 +128890,7 @@ fn build_controls_macoscontrols_xaml_deferred_471(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/MacOSControls.xaml(262,23) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ThemeShadowWrapper")));
-    rt::register_name(name_scope.as_ref(), "ThemeShadowWrapper", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 262, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "ThemeShadowWrapper", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 262, 23)?;
     // Controls/MacOSControls.xaml(263,23) BoxShadow
     rt::bind_dynamic_resource(&context, border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::box_shadow_property(), "ThemeShadowFlyoutBoxShadow", 263, 23)?;
     // Controls/MacOSControls.xaml(262,16) Margin
@@ -128909,7 +128909,7 @@ fn build_controls_macoscontrols_xaml_deferred_471(
     context.push_parent(rt::to_value(border_3.clone()));
     // Controls/MacOSControls.xaml(267,25) Name
     border_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PopupBorder")));
-    rt::register_name(name_scope.as_ref(), "PopupBorder", ::core::clone::Clone::clone(&border_3).upcast::<::ferroui_base::FerroObject>(), 267, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "PopupBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_3)), 267, 25)?;
     // Controls/MacOSControls.xaml(268,25) MinWidth
     let reflection_binding_extension_2 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("Bounds.Width"));
     context.push_parent(rt::to_value(reflection_binding_extension_2.clone()));
@@ -128943,7 +128943,7 @@ fn build_controls_macoscontrols_xaml_deferred_471(
     context.push_parent(rt::to_value(scroll_viewer_0.clone()));
     // Controls/MacOSControls.xaml(276,33) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "ScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 276, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "ScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 276, 33)?;
     // Controls/MacOSControls.xaml(277,33) Foreground
     rt::bind_dynamic_resource(&context, scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::foreground_property(), "ComboBoxDropDownForeground", 277, 33)?;
     // Controls/MacOSControls.xaml(278,33) HorizontalScrollBarVisibility
@@ -128965,7 +128965,7 @@ fn build_controls_macoscontrols_xaml_deferred_471(
     context.push_parent(rt::to_value(items_presenter_0.clone()));
     // Controls/MacOSControls.xaml(283,37) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 283, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 283, 37)?;
     // Controls/MacOSControls.xaml(284,37) Margin
     rt::bind_dynamic_resource(&context, items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "ComboBoxDropdownContentMargin", 284, 37)?;
     // Controls/MacOSControls.xaml(285,37) ItemsPanel
@@ -129126,7 +129126,7 @@ fn build_controls_macoscontrols_xaml_deferred_475(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/MacOSControls.xaml(31,19) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("CollapsedGlyph")));
-    rt::register_name(name_scope.as_ref(), "CollapsedGlyph", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 31, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "CollapsedGlyph", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 31, 19)?;
     // Controls/MacOSControls.xaml(31,43) Data (setter chosen at run time)
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE76C"));
@@ -129169,7 +129169,7 @@ fn build_controls_macoscontrols_xaml_deferred_475(
     context.push_parent(rt::to_value(path_1.clone()));
     // Controls/MacOSControls.xaml(32,19) Name
     path_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ExpandedGlyph")));
-    rt::register_name(name_scope.as_ref(), "ExpandedGlyph", ::core::clone::Clone::clone(&path_1).upcast::<::ferroui_base::FerroObject>(), 32, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "ExpandedGlyph", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_1)), 32, 19)?;
     // Controls/MacOSControls.xaml(32,42) Data (setter chosen at run time)
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("GlyphGeometryE70D"));
@@ -129682,7 +129682,7 @@ fn build_controls_macoscontrols_xaml_deferred_478(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(66,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Header")));
-    rt::register_name(name_scope.as_ref(), "PART_Header", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 66, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Header", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 66, 19)?;
     // Controls/MacOSControls.xaml(66,40) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 66, 40)?;
     // Controls/MacOSControls.xaml(66,82) BorderBrush
@@ -129719,7 +129719,7 @@ fn build_controls_macoscontrols_xaml_deferred_478(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(68,23) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("MultiSelectGrid")));
-    rt::register_name(name_scope.as_ref(), "MultiSelectGrid", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 68, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "MultiSelectGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 68, 23)?;
     // Controls/MacOSControls.xaml(68,48) Margin
     rt::bind_dynamic_resource(&context, border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "TreeViewItemMultiSelectSelectedItemBorderMargin", 68, 48)?;
     // Controls/MacOSControls.xaml(68,123) Padding
@@ -129764,7 +129764,7 @@ fn build_controls_macoscontrols_xaml_deferred_478(
     context.push_parent(rt::to_value(toggle_button_0.clone()));
     // Controls/MacOSControls.xaml(70,33) Name
     toggle_button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ExpandCollapseChevron")));
-    rt::register_name(name_scope.as_ref(), "ExpandCollapseChevron", ::core::clone::Clone::clone(&toggle_button_0).upcast::<::ferroui_base::FerroObject>(), 70, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "ExpandCollapseChevron", ::std::rc::Rc::new(::core::clone::Clone::clone(&toggle_button_0)), 70, 33)?;
     // Controls/MacOSControls.xaml(70,20) Column
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     toggle_button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_4);
@@ -129798,7 +129798,7 @@ fn build_controls_macoscontrols_xaml_deferred_478(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(71,37) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HeaderPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_HeaderPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 71, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HeaderPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 71, 37)?;
     // Controls/MacOSControls.xaml(71,20) Column
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_6);
@@ -129847,7 +129847,7 @@ fn build_controls_macoscontrols_xaml_deferred_478(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(76,27) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 76, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 76, 27)?;
     // Controls/MacOSControls.xaml(76,56) IsVisible
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::is_visible_property(), rt::property(::ferroui_controls::TreeViewItem::is_expanded_property()), 76, 56)?;
     // Controls/MacOSControls.xaml(76,97) ItemsPanel
@@ -129936,7 +129936,7 @@ fn build_controls_macoscontrols_xaml_deferred_481(
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_controls::Control>()));
     // Controls/MacOSControls.xaml(51,25) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "ScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 51, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "ScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 51, 25)?;
     // Controls/MacOSControls.xaml(52,25) HorizontalScrollBarVisibility
     rt::bind_template_binding(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ScrollViewer::horizontal_scroll_bar_visibility_property(), rt::property(::ferroui_controls::ScrollViewer::horizontal_scroll_bar_visibility_property()), 52, 25)?;
     // Controls/MacOSControls.xaml(53,25) VerticalScrollBarVisibility
@@ -129956,7 +129956,7 @@ fn build_controls_macoscontrols_xaml_deferred_481(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&items_presenter_0)));
     // Controls/MacOSControls.xaml(58,29) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 58, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 58, 29)?;
     // Controls/MacOSControls.xaml(59,29) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 59, 29)?;
     // Controls/MacOSControls.xaml(60,29) Margin
@@ -130127,7 +130127,7 @@ fn build_controls_macoscontrols_xaml_deferred_484(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(24,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ButtonLayoutGrid")));
-    rt::register_name(name_scope.as_ref(), "ButtonLayoutGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 24, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "ButtonLayoutGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 24, 17)?;
     // Controls/MacOSControls.xaml(25,17) BorderBrush
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::border_brush_property(), "TextControlButtonBorderBrush", 25, 17)?;
     // Controls/MacOSControls.xaml(24,10) BackgroundSizing
@@ -130159,7 +130159,7 @@ fn build_controls_macoscontrols_xaml_deferred_484(
     context.push_parent(rt::to_value(path_0.clone()));
     // Controls/MacOSControls.xaml(33,17) Name
     path_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("GlyphElement")));
-    rt::register_name(name_scope.as_ref(), "GlyphElement", ::core::clone::Clone::clone(&path_0).upcast::<::ferroui_base::FerroObject>(), 33, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "GlyphElement", ::std::rc::Rc::new(::core::clone::Clone::clone(&path_0)), 33, 17)?;
     // Controls/MacOSControls.xaml(34,17) Fill
     rt::bind_dynamic_resource(&context, path_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "TextControlButtonForeground", 34, 17)?;
     // Controls/MacOSControls.xaml(33,12) Data
@@ -130462,7 +130462,7 @@ fn build_controls_macoscontrols_xaml_deferred_486(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(90,21) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("BorderElement")));
-    rt::register_name(name_scope.as_ref(), "BorderElement", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 90, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "BorderElement", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 90, 21)?;
     // Controls/MacOSControls.xaml(90,14) Column
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_0);
@@ -130493,7 +130493,7 @@ fn build_controls_macoscontrols_xaml_deferred_486(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(99,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("MacOSPointerFocusRing")));
-    rt::register_name(name_scope.as_ref(), "MacOSPointerFocusRing", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 99, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "MacOSPointerFocusRing", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 99, 21)?;
     // Controls/MacOSControls.xaml(99,14) ColumnSpan
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 5_i32, priority_4);
@@ -130539,7 +130539,7 @@ fn build_controls_macoscontrols_xaml_deferred_486(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(111,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("InnerLeftContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "InnerLeftContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 111, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "InnerLeftContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 111, 31)?;
     // Controls/MacOSControls.xaml(112,31) IsVisible
     let template_binding_5 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TextBox::inner_left_content_property()));
     // Controls/MacOSControls.xaml(112,31) Converter
@@ -130573,7 +130573,7 @@ fn build_controls_macoscontrols_xaml_deferred_486(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(117,27) Name
     scroll_viewer_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "PART_ScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_base::FerroObject>(), 117, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_0)), 117, 27)?;
     // Controls/MacOSControls.xaml(117,14) Column
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
     scroll_viewer_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_12);
@@ -130617,7 +130617,7 @@ fn build_controls_macoscontrols_xaml_deferred_486(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&text_presenter_0)));
     // Controls/MacOSControls.xaml(128,30) Name
     text_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TextPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_TextPresenter", ::core::clone::Clone::clone(&text_presenter_0).upcast::<::ferroui_base::FerroObject>(), 128, 30)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TextPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_presenter_0)), 128, 30)?;
     // Controls/MacOSControls.xaml(129,30) Text
     let template_binding_17 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TextBox::text_property()));
     // Controls/MacOSControls.xaml(129,30) Mode
@@ -130661,7 +130661,7 @@ fn build_controls_macoscontrols_xaml_deferred_486(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/MacOSControls.xaml(149,24) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PlaceholderTextContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PlaceholderTextContentPresenter", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 149, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "PlaceholderTextContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 149, 24)?;
     // Controls/MacOSControls.xaml(149,14) Column
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_14);
@@ -130730,7 +130730,7 @@ fn build_controls_macoscontrols_xaml_deferred_486(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/MacOSControls.xaml(166,21) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("DeleteButton")));
-    rt::register_name(name_scope.as_ref(), "DeleteButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 166, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "DeleteButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 166, 21)?;
     // Controls/MacOSControls.xaml(166,14) Column
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_17);
@@ -130782,7 +130782,7 @@ fn build_controls_macoscontrols_xaml_deferred_486(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_6, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(179,31) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("InnerRightContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "InnerRightContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 179, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "InnerRightContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 179, 31)?;
     // Controls/MacOSControls.xaml(180,31) IsVisible
     let template_binding_40 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TextBox::inner_right_content_property()));
     // Controls/MacOSControls.xaml(180,31) Converter
@@ -130888,7 +130888,7 @@ fn build_controls_macoscontrols_xaml_deferred_488(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/MacOSControls.xaml(246,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 246, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 246, 15)?;
     // Controls/MacOSControls.xaml(247,12) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
     // Controls/MacOSControls.xaml(247,12) TextBox
@@ -130898,7 +130898,7 @@ fn build_controls_macoscontrols_xaml_deferred_488(
     context.push_parent(rt::to_value(text_box_0.clone()));
     // Controls/MacOSControls.xaml(247,20) Name
     text_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TextBox")));
-    rt::register_name(name_scope.as_ref(), "PART_TextBox", ::core::clone::Clone::clone(&text_box_0).upcast::<::ferroui_base::FerroObject>(), 247, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TextBox", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_box_0)), 247, 20)?;
     // Controls/MacOSControls.xaml(248,20) Theme (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("AutoSuggestBoxTextBoxStyle"));
@@ -130994,7 +130994,7 @@ fn build_controls_macoscontrols_xaml_deferred_488(
     context.push_parent(rt::to_value(popup_0.clone()));
     // Controls/MacOSControls.xaml(272,18) Name
     popup_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Popup")));
-    rt::register_name(name_scope.as_ref(), "PART_Popup", ::core::clone::Clone::clone(&popup_0).upcast::<::ferroui_base::FerroObject>(), 272, 18)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Popup", ::std::rc::Rc::new(::core::clone::Clone::clone(&popup_0)), 272, 18)?;
     // Controls/MacOSControls.xaml(272,12) WindowManagerAddShadowHint
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     popup_0.set_value_with_priority(::ferroui_controls::primitives::Popup::window_manager_add_shadow_hint_property(), ::core::clone::Clone::clone(&false), priority_7);
@@ -131013,7 +131013,7 @@ fn build_controls_macoscontrols_xaml_deferred_488(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(276,21) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SuggestionsContainer")));
-    rt::register_name(name_scope.as_ref(), "SuggestionsContainer", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 276, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "SuggestionsContainer", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 276, 21)?;
     // Controls/MacOSControls.xaml(277,21) BoxShadow
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::box_shadow_property(), "ThemeShadowFlyoutBoxShadow", 277, 21)?;
     // Controls/MacOSControls.xaml(278,21) Margin (setter chosen at run time)
@@ -131058,7 +131058,7 @@ fn build_controls_macoscontrols_xaml_deferred_488(
     context.push_parent(rt::to_value(list_box_0.clone()));
     // Controls/MacOSControls.xaml(286,24) Name
     list_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SelectingItemsControl")));
-    rt::register_name(name_scope.as_ref(), "PART_SelectingItemsControl", ::core::clone::Clone::clone(&list_box_0).upcast::<::ferroui_base::FerroObject>(), 286, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SelectingItemsControl", ::std::rc::Rc::new(::core::clone::Clone::clone(&list_box_0)), 286, 24)?;
     // Controls/MacOSControls.xaml(287,24) ItemTemplate
     rt::bind_template_binding(list_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ItemsControl::item_template_property(), rt::property(::ferroui_controls::AutoCompleteBox::item_template_property()), 287, 24)?;
     // Controls/MacOSControls.xaml(288,24) ItemContainerTheme (setter chosen at run time)
@@ -131226,7 +131226,7 @@ fn build_controls_macoscontrols_xaml_deferred_491(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(47,17) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootGrid")));
-    rt::register_name(name_scope.as_ref(), "RootGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 47, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 47, 17)?;
     // Controls/MacOSControls.xaml(48,17) Background
     rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 48, 17)?;
     // Controls/MacOSControls.xaml(49,17) CornerRadius
@@ -131256,7 +131256,7 @@ fn build_controls_macoscontrols_xaml_deferred_491(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/MacOSControls.xaml(52,24) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ValueTextBlock")));
-    rt::register_name(name_scope.as_ref(), "ValueTextBlock", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 52, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "ValueTextBlock", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 52, 24)?;
     // Controls/MacOSControls.xaml(53,24) Text
     let reflection_binding_extension_1 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("Value"));
     context.push_parent(rt::to_value(reflection_binding_extension_1.clone()));
@@ -131289,7 +131289,7 @@ fn build_controls_macoscontrols_xaml_deferred_491(
     context.push_parent(rt::to_value(viewbox_0.clone()));
     // Controls/MacOSControls.xaml(58,22) Name
     viewbox_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("IconPresenter")));
-    rt::register_name(name_scope.as_ref(), "IconPresenter", ::core::clone::Clone::clone(&viewbox_0).upcast::<::ferroui_base::FerroObject>(), 58, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "IconPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&viewbox_0)), 58, 22)?;
     // Controls/MacOSControls.xaml(58,14) IsVisible
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     viewbox_0.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_3);
@@ -132050,7 +132050,7 @@ fn build_controls_macoscontrols_xaml_deferred_510(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/MacOSControls.xaml(112,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HeaderContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "HeaderContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 112, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "HeaderContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 112, 29)?;
     // Controls/MacOSControls.xaml(112,12) ColumnSpan
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 3_i32, priority_0);
@@ -132098,7 +132098,7 @@ fn build_controls_macoscontrols_xaml_deferred_510(
     context.push_parent(rt::to_value(text_box_0.clone()));
     // Controls/MacOSControls.xaml(124,20) Name
     text_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("InputBox")));
-    rt::register_name(name_scope.as_ref(), "InputBox", ::core::clone::Clone::clone(&text_box_0).upcast::<::ferroui_base::FerroObject>(), 124, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "InputBox", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_box_0)), 124, 20)?;
     // Controls/MacOSControls.xaml(124,12) Row
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     text_box_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_6);
@@ -132158,7 +132158,7 @@ fn build_controls_macoscontrols_xaml_deferred_510(
     context.push_parent(rt::to_value(popup_0.clone()));
     // Controls/MacOSControls.xaml(141,18) Name
     popup_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("UpDownPopup")));
-    rt::register_name(name_scope.as_ref(), "UpDownPopup", ::core::clone::Clone::clone(&popup_0).upcast::<::ferroui_base::FerroObject>(), 141, 18)?;
+    rt::register_name_value(name_scope.as_ref(), "UpDownPopup", ::std::rc::Rc::new(::core::clone::Clone::clone(&popup_0)), 141, 18)?;
     // Controls/MacOSControls.xaml(141,12) Row
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     popup_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_11);
@@ -132208,7 +132208,7 @@ fn build_controls_macoscontrols_xaml_deferred_510(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(151,23) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PopupContentRoot")));
-    rt::register_name(name_scope.as_ref(), "PopupContentRoot", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 151, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PopupContentRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 151, 23)?;
     // Controls/MacOSControls.xaml(151,16) Padding
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Decorator::padding_property(), ::ferroui_base::Thickness::__markup_new_3(6.0_f64, 6.0_f64, 6.0_f64, 6.0_f64), priority_17);
@@ -132247,7 +132247,7 @@ fn build_controls_macoscontrols_xaml_deferred_510(
     context.push_parent(rt::to_value(repeat_button_0.clone()));
     // Controls/MacOSControls.xaml(159,33) Name
     repeat_button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PopupUpSpinButton")));
-    rt::register_name(name_scope.as_ref(), "PopupUpSpinButton", ::core::clone::Clone::clone(&repeat_button_0).upcast::<::ferroui_base::FerroObject>(), 159, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PopupUpSpinButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_0)), 159, 33)?;
     // Controls/MacOSControls.xaml(160,33) Theme (setter chosen at run time)
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NumberBoxPopupContentRootButtonStyle"));
@@ -132314,7 +132314,7 @@ fn build_controls_macoscontrols_xaml_deferred_510(
     context.push_parent(rt::to_value(repeat_button_1.clone()));
     // Controls/MacOSControls.xaml(169,33) Name
     repeat_button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PopupDownSpinButton")));
-    rt::register_name(name_scope.as_ref(), "PopupDownSpinButton", ::core::clone::Clone::clone(&repeat_button_1).upcast::<::ferroui_base::FerroObject>(), 169, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PopupDownSpinButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_1)), 169, 33)?;
     // Controls/MacOSControls.xaml(169,20) Row
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
     repeat_button_1.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_25);
@@ -132388,7 +132388,7 @@ fn build_controls_macoscontrols_xaml_deferred_510(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(183,19) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("InputEater")));
-    rt::register_name(name_scope.as_ref(), "InputEater", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 183, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "InputEater", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 183, 19)?;
     // Controls/MacOSControls.xaml(183,12) Row
     let priority_32 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_32);
@@ -132423,7 +132423,7 @@ fn build_controls_macoscontrols_xaml_deferred_510(
     context.push_parent(rt::to_value(repeat_button_2.clone()));
     // Controls/MacOSControls.xaml(192,25) Name
     repeat_button_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("UpSpinButton")));
-    rt::register_name(name_scope.as_ref(), "UpSpinButton", ::core::clone::Clone::clone(&repeat_button_2).upcast::<::ferroui_base::FerroObject>(), 192, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "UpSpinButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_2)), 192, 25)?;
     // Controls/MacOSControls.xaml(192,12) Row
     let priority_40 = ::ferroui_base::data::BindingPriority::Template;
     repeat_button_2.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_40);
@@ -132503,7 +132503,7 @@ fn build_controls_macoscontrols_xaml_deferred_510(
     context.push_parent(rt::to_value(repeat_button_3.clone()));
     // Controls/MacOSControls.xaml(207,25) Name
     repeat_button_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("DownSpinButton")));
-    rt::register_name(name_scope.as_ref(), "DownSpinButton", ::core::clone::Clone::clone(&repeat_button_3).upcast::<::ferroui_base::FerroObject>(), 207, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "DownSpinButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&repeat_button_3)), 207, 25)?;
     // Controls/MacOSControls.xaml(207,12) Row
     let priority_50 = ::ferroui_base::data::BindingPriority::Template;
     repeat_button_3.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_50);
@@ -132583,7 +132583,7 @@ fn build_controls_macoscontrols_xaml_deferred_510(
     context.push_parent(rt::to_value(content_presenter_1.clone()));
     // Controls/MacOSControls.xaml(222,29) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("DescriptionPresenter")));
-    rt::register_name(name_scope.as_ref(), "DescriptionPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 222, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "DescriptionPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 222, 29)?;
     // Controls/MacOSControls.xaml(222,12) Row
     let priority_60 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_controls::Grid::row_property(), 2_i32, priority_60);
@@ -132703,7 +132703,7 @@ fn build_controls_macoscontrols_xaml_deferred_512(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/MacOSControls.xaml(72,27) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 72, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 72, 27)?;
     // Controls/MacOSControls.xaml(73,27) Background
     rt::bind_dynamic_resource(&context, content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::background_property(), "TextControlButtonBackground", 73, 27)?;
     // Controls/MacOSControls.xaml(74,27) BackgroundSizing
@@ -132772,7 +132772,7 @@ fn build_controls_macoscontrols_xaml_deferred_514(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/MacOSControls.xaml(110,16) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Text")));
-    rt::register_name(name_scope.as_ref(), "PART_Text", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 110, 16)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Text", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 110, 16)?;
     // Controls/MacOSControls.xaml(110,6) HorizontalAlignment
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Stretch, priority_0);
@@ -132885,7 +132885,7 @@ fn build_controls_macoscontrols_xaml_deferred_516(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/MacOSControls.xaml(139,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 139, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 139, 15)?;
     // Controls/MacOSControls.xaml(139,10) RowDefinitions
     let row_definitions_0 = ::ferroui_controls::RowDefinitions::__markup_new_0();
     rt::invoked(<::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::RowDefinition>>>::__markup_set_Capacity(&row_definitions_0, 3_i32), 139, 35)?;
@@ -132908,7 +132908,7 @@ fn build_controls_macoscontrols_xaml_deferred_516(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/MacOSControls.xaml(140,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HeaderPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_HeaderPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 140, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HeaderPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 140, 29)?;
     // Controls/MacOSControls.xaml(140,12) Row
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 0_i32, priority_0);
@@ -132953,7 +132953,7 @@ fn build_controls_macoscontrols_xaml_deferred_516(
     context.push_parent(rt::to_value(text_box_0.clone()));
     // Controls/MacOSControls.xaml(149,20) Name
     text_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TextBox")));
-    rt::register_name(name_scope.as_ref(), "TextBox", ::core::clone::Clone::clone(&text_box_0).upcast::<::ferroui_base::FerroObject>(), 149, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "TextBox", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_box_0)), 149, 20)?;
     // Controls/MacOSControls.xaml(149,12) Row
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     text_box_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_4);
@@ -133008,7 +133008,7 @@ fn build_controls_macoscontrols_xaml_deferred_516(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/MacOSControls.xaml(166,23) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("QueryButton")));
-    rt::register_name(name_scope.as_ref(), "QueryButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 166, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "QueryButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 166, 23)?;
     // Controls/MacOSControls.xaml(167,23) Theme (setter chosen at run time)
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("AutoSuggestBoxQueryButtonStyle"));
@@ -133065,7 +133065,7 @@ fn build_controls_macoscontrols_xaml_deferred_516(
     context.push_parent(rt::to_value(popup_0.clone()));
     // Controls/MacOSControls.xaml(181,18) Name
     popup_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SuggestionsPopup")));
-    rt::register_name(name_scope.as_ref(), "SuggestionsPopup", ::core::clone::Clone::clone(&popup_0).upcast::<::ferroui_base::FerroObject>(), 181, 18)?;
+    rt::register_name_value(name_scope.as_ref(), "SuggestionsPopup", ::std::rc::Rc::new(::core::clone::Clone::clone(&popup_0)), 181, 18)?;
     // Controls/MacOSControls.xaml(181,12) WindowManagerAddShadowHint
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
     popup_0.set_value_with_priority(::ferroui_controls::primitives::Popup::window_manager_add_shadow_hint_property(), ::core::clone::Clone::clone(&false), priority_17);
@@ -133087,7 +133087,7 @@ fn build_controls_macoscontrols_xaml_deferred_516(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(186,21) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SuggestionsContainer")));
-    rt::register_name(name_scope.as_ref(), "SuggestionsContainer", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 186, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "SuggestionsContainer", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 186, 21)?;
     // Controls/MacOSControls.xaml(187,21) BoxShadow
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::box_shadow_property(), "ThemeShadowFlyoutBoxShadow", 187, 21)?;
     // Controls/MacOSControls.xaml(188,21) Margin (setter chosen at run time)
@@ -133120,7 +133120,7 @@ fn build_controls_macoscontrols_xaml_deferred_516(
     context.push_parent(rt::to_value(list_box_0.clone()));
     // Controls/MacOSControls.xaml(194,24) Name
     list_box_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SuggestionsList")));
-    rt::register_name(name_scope.as_ref(), "SuggestionsList", ::core::clone::Clone::clone(&list_box_0).upcast::<::ferroui_base::FerroObject>(), 194, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "SuggestionsList", ::std::rc::Rc::new(::core::clone::Clone::clone(&list_box_0)), 194, 24)?;
     // Controls/MacOSControls.xaml(195,24) ItemTemplate
     rt::bind_template_binding(list_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ItemsControl::item_template_property(), rt::property(::ferroui_controls::ItemsControl::item_template_property()), 195, 24)?;
     // Controls/MacOSControls.xaml(196,24) ItemContainerTheme (setter chosen at run time)
@@ -133168,7 +133168,7 @@ fn build_controls_macoscontrols_xaml_deferred_516(
     context.push_parent(rt::to_value(content_presenter_1.clone()));
     // Controls/MacOSControls.xaml(205,29) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("DescriptionPresenter")));
-    rt::register_name(name_scope.as_ref(), "DescriptionPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 205, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "DescriptionPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 205, 29)?;
     // Controls/MacOSControls.xaml(205,12) Row
     let priority_26 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_controls::Grid::row_property(), 2_i32, priority_26);
@@ -133291,7 +133291,7 @@ fn build_controls_macoscontrols_xaml_deferred_519(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/MacOSControls.xaml(61,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_HeaderPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_HeaderPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 61, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_HeaderPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 61, 29)?;
     // Controls/MacOSControls.xaml(62,29) Content (setter chosen at run time)
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_0 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::primitives::HeaderedSelectingItemsControl::header_property()));
@@ -133318,7 +133318,7 @@ fn build_controls_macoscontrols_xaml_deferred_519(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(66,27) Name
     items_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ItemsPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ItemsPresenter", ::core::clone::Clone::clone(&items_presenter_0).upcast::<::ferroui_base::FerroObject>(), 66, 27)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ItemsPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&items_presenter_0)), 66, 27)?;
     // Controls/MacOSControls.xaml(67,27) ItemsPanel
     rt::bind_template_binding(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ItemsPresenter::items_panel_property(), rt::property(::ferroui_controls::ItemsControl::items_panel_property()), 67, 27)?;
     rt::invoked(items_presenter_0.try_end_init(), 66, 12)?;
@@ -133948,7 +133948,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/MacOSControls.xaml(156,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootGrid")));
-    rt::register_name(name_scope.as_ref(), "RootGrid", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 156, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "RootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 156, 15)?;
     // Controls/MacOSControls.xaml(158,12) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
     // Controls/MacOSControls.xaml(158,12) Grid
@@ -133958,7 +133958,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     context.push_parent(rt::to_value(grid_1.clone()));
     // Controls/MacOSControls.xaml(158,17) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PaneToggleButtonGrid")));
-    rt::register_name(name_scope.as_ref(), "PaneToggleButtonGrid", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 158, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "PaneToggleButtonGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 158, 17)?;
     // Controls/MacOSControls.xaml(158,12) HorizontalAlignment
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     grid_1.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Left, priority_0);
@@ -133987,7 +133987,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/MacOSControls.xaml(163,20) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TogglePaneTopPadding")));
-    rt::register_name(name_scope.as_ref(), "TogglePaneTopPadding", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 163, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "TogglePaneTopPadding", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 163, 20)?;
     // Controls/MacOSControls.xaml(164,20) Height
     let reflection_binding_extension_0 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("TemplateSettings.TopPadding"));
     context.push_parent(rt::to_value(reflection_binding_extension_0.clone()));
@@ -134009,7 +134009,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     context.push_parent(rt::to_value(grid_2.clone()));
     // Controls/MacOSControls.xaml(165,19) Name
     grid_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ButtonHolderGrid")));
-    rt::register_name(name_scope.as_ref(), "ButtonHolderGrid", ::core::clone::Clone::clone(&grid_2).upcast::<::ferroui_base::FerroObject>(), 165, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "ButtonHolderGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_2)), 165, 19)?;
     // Controls/MacOSControls.xaml(165,14) Row
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     grid_2.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_3);
@@ -134034,7 +134034,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/MacOSControls.xaml(166,23) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("NavigationViewBackButton")));
-    rt::register_name(name_scope.as_ref(), "NavigationViewBackButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 166, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "NavigationViewBackButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 166, 23)?;
     // Controls/MacOSControls.xaml(167,23) Theme (setter chosen at run time)
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationBackButtonNormalStyle"));
@@ -134088,7 +134088,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     context.push_parent(rt::to_value(button_1.clone()));
     // Controls/MacOSControls.xaml(173,23) Name
     button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("NavigationViewCloseButton")));
-    rt::register_name(name_scope.as_ref(), "NavigationViewCloseButton", ::core::clone::Clone::clone(&button_1).upcast::<::ferroui_base::FerroObject>(), 173, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "NavigationViewCloseButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_1)), 173, 23)?;
     // Controls/MacOSControls.xaml(174,23) Theme (setter chosen at run time)
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     let static_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("NavigationBackButtonNormalStyle"));
@@ -134120,7 +134120,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     context.push_parent(rt::to_value(button_2.clone()));
     // Controls/MacOSControls.xaml(177,23) Name
     button_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TogglePaneButton")));
-    rt::register_name(name_scope.as_ref(), "TogglePaneButton", ::core::clone::Clone::clone(&button_2).upcast::<::ferroui_base::FerroObject>(), 177, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "TogglePaneButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_2)), 177, 23)?;
     // Controls/MacOSControls.xaml(178,23) Theme
     rt::bind_template_binding(button_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::StyledElement::theme_property(), rt::property(::ferroui_controls::NavigationView::pane_toggle_button_style_property()), 178, 23)?;
     // Controls/MacOSControls.xaml(179,23) IsVisible
@@ -134154,7 +134154,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/MacOSControls.xaml(182,28) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PaneTitleTextBlock")));
-    rt::register_name(name_scope.as_ref(), "PaneTitleTextBlock", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 182, 28)?;
+    rt::register_name_value(name_scope.as_ref(), "PaneTitleTextBlock", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 182, 28)?;
     // Controls/MacOSControls.xaml(182,18) Margin
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(0.0_f64, -2.0_f64, 0.0_f64, 0.0_f64), priority_11);
@@ -134193,7 +134193,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     context.push_parent(rt::to_value(grid_3.clone()));
     // Controls/MacOSControls.xaml(189,21) Name
     grid_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PaneTitleHolder")));
-    rt::register_name(name_scope.as_ref(), "PaneTitleHolder", ::core::clone::Clone::clone(&grid_3).upcast::<::ferroui_base::FerroObject>(), 189, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "PaneTitleHolder", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_3)), 189, 21)?;
     // Controls/MacOSControls.xaml(189,16) Height
     let priority_15 = ::ferroui_base::data::BindingPriority::Template;
     grid_3.set_value_with_priority(::ferroui_base::layout::Layoutable::height_property(), 40.0_f64, priority_15);
@@ -134209,7 +134209,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     context.push_parent(rt::to_value(content_control_0.clone()));
     // Controls/MacOSControls.xaml(190,33) Name
     content_control_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PaneTitlePresenter")));
-    rt::register_name(name_scope.as_ref(), "PaneTitlePresenter", ::core::clone::Clone::clone(&content_control_0).upcast::<::ferroui_base::FerroObject>(), 190, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PaneTitlePresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_0)), 190, 33)?;
     // Controls/MacOSControls.xaml(191,33) Margin
     rt::bind_dynamic_resource(&context, content_control_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "NavigationViewPaneTitlePresenterMargin", 191, 33)?;
     // Controls/MacOSControls.xaml(190,18) IsTabStop
@@ -134255,7 +134255,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     context.push_parent(rt::to_value(stack_panel_0.clone()));
     // Controls/MacOSControls.xaml(201,25) Name
     stack_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TopNavArea")));
-    rt::register_name(name_scope.as_ref(), "TopNavArea", ::core::clone::Clone::clone(&stack_panel_0).upcast::<::ferroui_base::FerroObject>(), 201, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "TopNavArea", ::std::rc::Rc::new(::core::clone::Clone::clone(&stack_panel_0)), 201, 25)?;
     // Controls/MacOSControls.xaml(202,25) Background
     rt::bind_dynamic_resource(&context, stack_panel_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Panel::background_property(), "NavigationViewTopPaneBackground", 202, 25)?;
     // Controls/MacOSControls.xaml(201,14) Row
@@ -134279,7 +134279,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     context.push_parent(rt::to_value(panel_1.clone()));
     // Controls/MacOSControls.xaml(207,22) Name
     panel_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TopNavTopPadding")));
-    rt::register_name(name_scope.as_ref(), "TopNavTopPadding", ::core::clone::Clone::clone(&panel_1).upcast::<::ferroui_base::FerroObject>(), 207, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "TopNavTopPadding", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_1)), 207, 22)?;
     // Controls/MacOSControls.xaml(208,22) Height
     let reflection_binding_extension_5 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("TemplateSettings.TopPadding"));
     context.push_parent(rt::to_value(reflection_binding_extension_5.clone()));
@@ -134311,7 +134311,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     context.push_parent(rt::to_value(grid_5.clone()));
     // Controls/MacOSControls.xaml(210,21) Name
     grid_5.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TopNavGrid")));
-    rt::register_name(name_scope.as_ref(), "TopNavGrid", ::core::clone::Clone::clone(&grid_5).upcast::<::ferroui_base::FerroObject>(), 210, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "TopNavGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_5)), 210, 21)?;
     // Controls/MacOSControls.xaml(211,21) Height
     rt::bind_dynamic_resource(&context, grid_5.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), "NavigationViewTopPaneHeight", 211, 21)?;
     // Controls/MacOSControls.xaml(212,21) Margin
@@ -134366,7 +134366,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     context.push_parent(rt::to_value(panel_2.clone()));
     // Controls/MacOSControls.xaml(215,24) Name
     panel_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("BackButtonPlaceholderOnTopNav")));
-    rt::register_name(name_scope.as_ref(), "BackButtonPlaceholderOnTopNav", ::core::clone::Clone::clone(&panel_2).upcast::<::ferroui_base::FerroObject>(), 215, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "BackButtonPlaceholderOnTopNav", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_2)), 215, 24)?;
     // Controls/MacOSControls.xaml(215,63) Width
     rt::bind_dynamic_resource(&context, panel_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), "NavigationBackButtonWidth", 215, 63)?;
     context.pop_parent();
@@ -134379,7 +134379,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_13, ::core::clone::Clone::clone(&panel_3).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(216,24) Name
     panel_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TopNavLeftPadding")));
-    rt::register_name(name_scope.as_ref(), "TopNavLeftPadding", ::core::clone::Clone::clone(&panel_3).upcast::<::ferroui_base::FerroObject>(), 216, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "TopNavLeftPadding", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_3)), 216, 24)?;
     // Controls/MacOSControls.xaml(216,18) Column
     let priority_24 = ::ferroui_base::data::BindingPriority::Template;
     panel_3.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_24);
@@ -134395,7 +134395,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_14, ::core::clone::Clone::clone(&content_control_1).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(217,33) Name
     content_control_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PaneHeaderOnTopPane")));
-    rt::register_name(name_scope.as_ref(), "PaneHeaderOnTopPane", ::core::clone::Clone::clone(&content_control_1).upcast::<::ferroui_base::FerroObject>(), 217, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PaneHeaderOnTopPane", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_1)), 217, 33)?;
     // Controls/MacOSControls.xaml(217,18) IsTabStop
     let priority_26 = ::ferroui_base::data::BindingPriority::Template;
     content_control_1.set_value_with_priority(::ferroui_base::input::InputElement::is_tab_stop_property(), ::core::clone::Clone::clone(&false), priority_26);
@@ -134418,7 +134418,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     context.push_parent(rt::to_value(content_control_2.clone()));
     // Controls/MacOSControls.xaml(222,33) Name
     content_control_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PaneTitleOnTopPane")));
-    rt::register_name(name_scope.as_ref(), "PaneTitleOnTopPane", ::core::clone::Clone::clone(&content_control_2).upcast::<::ferroui_base::FerroObject>(), 222, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PaneTitleOnTopPane", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_2)), 222, 33)?;
     // Controls/MacOSControls.xaml(222,18) IsTabStop
     let priority_30 = ::ferroui_base::data::BindingPriority::Template;
     content_control_2.set_value_with_priority(::ferroui_base::input::InputElement::is_tab_stop_property(), ::core::clone::Clone::clone(&false), priority_30);
@@ -134457,7 +134457,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&stack_panel_1)));
     // Controls/MacOSControls.xaml(232,31) Name
     stack_panel_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TopNavMenuItemsHost")));
-    rt::register_name(name_scope.as_ref(), "TopNavMenuItemsHost", ::core::clone::Clone::clone(&stack_panel_1).upcast::<::ferroui_base::FerroObject>(), 232, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "TopNavMenuItemsHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&stack_panel_1)), 232, 31)?;
     // Controls/MacOSControls.xaml(232,20) Orientation
     let priority_37 = ::ferroui_base::data::BindingPriority::Template;
     stack_panel_1.set_value_with_priority(::ferroui_controls::StackPanel::orientation_property(), ::ferroui_base::layout::Orientation::Horizontal, priority_37);
@@ -134472,7 +134472,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     context.push_parent(rt::to_value(content_control_3.clone()));
     // Controls/MacOSControls.xaml(234,33) Name
     content_control_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PaneCustomContentOnTopPane")));
-    rt::register_name(name_scope.as_ref(), "PaneCustomContentOnTopPane", ::core::clone::Clone::clone(&content_control_3).upcast::<::ferroui_base::FerroObject>(), 234, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PaneCustomContentOnTopPane", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_3)), 234, 33)?;
     // Controls/MacOSControls.xaml(234,18) IsTabStop
     let priority_38 = ::ferroui_base::data::BindingPriority::Template;
     content_control_3.set_value_with_priority(::ferroui_base::input::InputElement::is_tab_stop_property(), ::core::clone::Clone::clone(&false), priority_38);
@@ -134498,7 +134498,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     context.push_parent(rt::to_value(grid_6.clone()));
     // Controls/MacOSControls.xaml(240,23) Name
     grid_6.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TopPaneAutoSuggestArea")));
-    rt::register_name(name_scope.as_ref(), "TopPaneAutoSuggestArea", ::core::clone::Clone::clone(&grid_6).upcast::<::ferroui_base::FerroObject>(), 240, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "TopPaneAutoSuggestArea", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_6)), 240, 23)?;
     // Controls/MacOSControls.xaml(240,55) Height
     rt::bind_dynamic_resource(&context, grid_6.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), "NavigationViewTopPaneHeight", 240, 55)?;
     // Controls/MacOSControls.xaml(240,18) Column
@@ -134513,7 +134513,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     context.push_parent(rt::to_value(content_control_4.clone()));
     // Controls/MacOSControls.xaml(241,35) Name
     content_control_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TopPaneAutoSuggestBoxPresenter")));
-    rt::register_name(name_scope.as_ref(), "TopPaneAutoSuggestBoxPresenter", ::core::clone::Clone::clone(&content_control_4).upcast::<::ferroui_base::FerroObject>(), 241, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "TopPaneAutoSuggestBoxPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_4)), 241, 35)?;
     // Controls/MacOSControls.xaml(242,35) Margin
     rt::bind_dynamic_resource(&context, content_control_4.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "TopNavigationViewAutoSuggestBoxMargin", 242, 35)?;
     // Controls/MacOSControls.xaml(241,20) MinWidth
@@ -134540,7 +134540,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_20, ::core::clone::Clone::clone(&content_control_5).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(248,33) Name
     content_control_5.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PaneFooterOnTopPane")));
-    rt::register_name(name_scope.as_ref(), "PaneFooterOnTopPane", ::core::clone::Clone::clone(&content_control_5).upcast::<::ferroui_base::FerroObject>(), 248, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "PaneFooterOnTopPane", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_5)), 248, 33)?;
     // Controls/MacOSControls.xaml(248,18) IsTabStop
     let priority_47 = ::ferroui_base::data::BindingPriority::Template;
     content_control_5.set_value_with_priority(::ferroui_base::input::InputElement::is_tab_stop_property(), ::core::clone::Clone::clone(&false), priority_47);
@@ -134562,7 +134562,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_21, ::core::clone::Clone::clone(&stack_panel_2).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(254,29) Name
     stack_panel_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TopFooterMenuItemsHost")));
-    rt::register_name(name_scope.as_ref(), "TopFooterMenuItemsHost", ::core::clone::Clone::clone(&stack_panel_2).upcast::<::ferroui_base::FerroObject>(), 254, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "TopFooterMenuItemsHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&stack_panel_2)), 254, 29)?;
     // Controls/MacOSControls.xaml(254,18) Column
     let priority_51 = ::ferroui_base::data::BindingPriority::Template;
     stack_panel_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 8_i32, priority_51);
@@ -134580,7 +134580,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_22, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(256,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("TopNavContentOverlayAreaGrid")));
-    rt::register_name(name_scope.as_ref(), "TopNavContentOverlayAreaGrid", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 256, 33)?;
+    rt::register_name_value(name_scope.as_ref(), "TopNavContentOverlayAreaGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 256, 33)?;
     // Controls/MacOSControls.xaml(256,71) Content (setter chosen at run time)
     let priority_53 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_3 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::NavigationView::content_overlay_property()));
@@ -134603,7 +134603,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     context.push_parent(rt::to_value(split_view_0.clone()));
     // Controls/MacOSControls.xaml(259,24) Name
     split_view_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RootSplitView")));
-    rt::register_name(name_scope.as_ref(), "RootSplitView", ::core::clone::Clone::clone(&split_view_0).upcast::<::ferroui_base::FerroObject>(), 259, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "RootSplitView", ::std::rc::Rc::new(::core::clone::Clone::clone(&split_view_0)), 259, 24)?;
     // Controls/MacOSControls.xaml(260,24) Background
     rt::bind_template_binding(split_view_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::TemplatedControl::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 260, 24)?;
     // Controls/MacOSControls.xaml(261,24) BorderBrush
@@ -134652,7 +134652,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     context.push_parent(rt::to_value(grid_7.clone()));
     // Controls/MacOSControls.xaml(271,23) Name
     grid_7.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PaneContentGrid")));
-    rt::register_name(name_scope.as_ref(), "PaneContentGrid", ::core::clone::Clone::clone(&grid_7).upcast::<::ferroui_base::FerroObject>(), 271, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "PaneContentGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_7)), 271, 23)?;
     // Controls/MacOSControls.xaml(272,23) Margin
     rt::bind_dynamic_resource(&context, grid_7.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "NavigationViewPaneContentGridMargin", 272, 23)?;
     // Controls/MacOSControls.xaml(273,23) IsVisible
@@ -134699,7 +134699,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     context.push_parent(rt::to_value(panel_4.clone()));
     // Controls/MacOSControls.xaml(275,26) Name
     panel_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentPaneTopPadding")));
-    rt::register_name(name_scope.as_ref(), "ContentPaneTopPadding", ::core::clone::Clone::clone(&panel_4).upcast::<::ferroui_base::FerroObject>(), 275, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentPaneTopPadding", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_4)), 275, 26)?;
     // Controls/MacOSControls.xaml(276,26) Height
     let reflection_binding_extension_10 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("TemplateSettings.TopPadding"));
     context.push_parent(rt::to_value(reflection_binding_extension_10.clone()));
@@ -134720,7 +134720,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_25, ::core::clone::Clone::clone(&panel_5).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(278,26) Name
     panel_5.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("BackButtonRowSpacer")));
-    rt::register_name(name_scope.as_ref(), "BackButtonRowSpacer", ::core::clone::Clone::clone(&panel_5).upcast::<::ferroui_base::FerroObject>(), 278, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "BackButtonRowSpacer", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_5)), 278, 26)?;
     // Controls/MacOSControls.xaml(278,20) Row
     let priority_58 = ::ferroui_base::data::BindingPriority::Template;
     panel_5.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_58);
@@ -134736,7 +134736,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_26, ::core::clone::Clone::clone(&panel_6).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(279,26) Name
     panel_6.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PaneContentGridToggleButtonRow")));
-    rt::register_name(name_scope.as_ref(), "PaneContentGridToggleButtonRow", ::core::clone::Clone::clone(&panel_6).upcast::<::ferroui_base::FerroObject>(), 279, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "PaneContentGridToggleButtonRow", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_6)), 279, 26)?;
     // Controls/MacOSControls.xaml(279,20) Row
     let priority_60 = ::ferroui_base::data::BindingPriority::Template;
     panel_6.set_value_with_priority(::ferroui_controls::Grid::row_property(), 2_i32, priority_60);
@@ -134748,7 +134748,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_27, ::core::clone::Clone::clone(&content_control_6).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(280,37) Name
     content_control_6.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PaneHeaderContentBorder")));
-    rt::register_name(name_scope.as_ref(), "PaneHeaderContentBorder", ::core::clone::Clone::clone(&content_control_6).upcast::<::ferroui_base::FerroObject>(), 280, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PaneHeaderContentBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_6)), 280, 37)?;
     // Controls/MacOSControls.xaml(280,22) IsTabStop
     let priority_61 = ::ferroui_base::data::BindingPriority::Template;
     content_control_6.set_value_with_priority(::ferroui_base::input::InputElement::is_tab_stop_property(), ::core::clone::Clone::clone(&false), priority_61);
@@ -134769,7 +134769,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     context.push_parent(rt::to_value(grid_8.clone()));
     // Controls/MacOSControls.xaml(285,25) Name
     grid_8.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("AutoSuggestArea")));
-    rt::register_name(name_scope.as_ref(), "AutoSuggestArea", ::core::clone::Clone::clone(&grid_8).upcast::<::ferroui_base::FerroObject>(), 285, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "AutoSuggestArea", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_8)), 285, 25)?;
     // Controls/MacOSControls.xaml(285,20) Row
     let priority_64 = ::ferroui_base::data::BindingPriority::Template;
     grid_8.set_value_with_priority(::ferroui_controls::Grid::row_property(), 3_i32, priority_64);
@@ -134790,7 +134790,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     context.push_parent(rt::to_value(content_control_7.clone()));
     // Controls/MacOSControls.xaml(290,37) Name
     content_control_7.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PaneAutoSuggestBoxPresenter")));
-    rt::register_name(name_scope.as_ref(), "PaneAutoSuggestBoxPresenter", ::core::clone::Clone::clone(&content_control_7).upcast::<::ferroui_base::FerroObject>(), 290, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PaneAutoSuggestBoxPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_7)), 290, 37)?;
     // Controls/MacOSControls.xaml(291,37) Margin
     rt::bind_dynamic_resource(&context, content_control_7.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), "NavigationViewAutoSuggestBoxMargin", 291, 37)?;
     // Controls/MacOSControls.xaml(290,22) IsTabStop
@@ -134813,7 +134813,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     context.push_parent(rt::to_value(button_3.clone()));
     // Controls/MacOSControls.xaml(295,29) Name
     button_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PaneAutoSuggestButton")));
-    rt::register_name(name_scope.as_ref(), "PaneAutoSuggestButton", ::core::clone::Clone::clone(&button_3).upcast::<::ferroui_base::FerroObject>(), 295, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PaneAutoSuggestButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_3)), 295, 29)?;
     // Controls/MacOSControls.xaml(295,22) IsVisible
     let priority_70 = ::ferroui_base::data::BindingPriority::Template;
     button_3.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_70);
@@ -134853,7 +134853,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_31, ::core::clone::Clone::clone(&content_control_8).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(300,35) Name
     content_control_8.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PaneCustomContentBorder")));
-    rt::register_name(name_scope.as_ref(), "PaneCustomContentBorder", ::core::clone::Clone::clone(&content_control_8).upcast::<::ferroui_base::FerroObject>(), 300, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "PaneCustomContentBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_8)), 300, 35)?;
     // Controls/MacOSControls.xaml(300,20) IsTabStop
     let priority_72 = ::ferroui_base::data::BindingPriority::Template;
     content_control_8.set_value_with_priority(::ferroui_base::input::InputElement::is_tab_stop_property(), ::core::clone::Clone::clone(&false), priority_72);
@@ -134875,7 +134875,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_32, ::core::clone::Clone::clone(&grid_9).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(306,25) Name
     grid_9.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ItemsContainerGrid")));
-    rt::register_name(name_scope.as_ref(), "ItemsContainerGrid", ::core::clone::Clone::clone(&grid_9).upcast::<::ferroui_base::FerroObject>(), 306, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "ItemsContainerGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_9)), 306, 25)?;
     // Controls/MacOSControls.xaml(306,20) Row
     let priority_76 = ::ferroui_base::data::BindingPriority::Template;
     grid_9.set_value_with_priority(::ferroui_controls::Grid::row_property(), 6_i32, priority_76);
@@ -134903,7 +134903,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_33, ::core::clone::Clone::clone(&scroll_viewer_1).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(308,35) Name
     scroll_viewer_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("MenuItemsScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "MenuItemsScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_1).upcast::<::ferroui_base::FerroObject>(), 308, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "MenuItemsScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_1)), 308, 35)?;
     // Controls/MacOSControls.xaml(308,22) TabNavigation
     let priority_77 = ::ferroui_base::data::BindingPriority::Template;
     scroll_viewer_1.set_value_with_priority(::ferroui_base::input::KeyboardNavigation::tab_navigation_property(), ::ferroui_base::input::KeyboardNavigationMode::Local, priority_77);
@@ -134920,7 +134920,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     scroll_viewer_1.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&stack_panel_3)));
     // Controls/MacOSControls.xaml(312,35) Name
     stack_panel_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("MenuItemsHost")));
-    rt::register_name(name_scope.as_ref(), "MenuItemsHost", ::core::clone::Clone::clone(&stack_panel_3).upcast::<::ferroui_base::FerroObject>(), 312, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "MenuItemsHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&stack_panel_3)), 312, 35)?;
     rt::invoked(stack_panel_3.try_end_init(), 312, 24)?;
     rt::invoked(scroll_viewer_1.try_end_init(), 308, 22)?;
     // Controls/MacOSControls.xaml(314,22) Children
@@ -134931,7 +134931,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_34, ::core::clone::Clone::clone(&navigation_view_item_separator_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(314,50) Name
     navigation_view_item_separator_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("VisualItemsSeparator")));
-    rt::register_name(name_scope.as_ref(), "VisualItemsSeparator", ::core::clone::Clone::clone(&navigation_view_item_separator_0).upcast::<::ferroui_base::FerroObject>(), 314, 50)?;
+    rt::register_name_value(name_scope.as_ref(), "VisualItemsSeparator", ::std::rc::Rc::new(::core::clone::Clone::clone(&navigation_view_item_separator_0)), 314, 50)?;
     // Controls/MacOSControls.xaml(314,22) Row
     let priority_80 = ::ferroui_base::data::BindingPriority::Template;
     navigation_view_item_separator_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_80);
@@ -134956,7 +134956,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_35, ::core::clone::Clone::clone(&content_control_9).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(321,37) Name
     content_control_9.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("FooterContentBorder")));
-    rt::register_name(name_scope.as_ref(), "FooterContentBorder", ::core::clone::Clone::clone(&content_control_9).upcast::<::ferroui_base::FerroObject>(), 321, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "FooterContentBorder", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_9)), 321, 37)?;
     // Controls/MacOSControls.xaml(321,22) IsTabStop
     let priority_85 = ::ferroui_base::data::BindingPriority::Template;
     content_control_9.set_value_with_priority(::ferroui_base::input::InputElement::is_tab_stop_property(), ::core::clone::Clone::clone(&false), priority_85);
@@ -134981,7 +134981,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_36, ::core::clone::Clone::clone(&scroll_viewer_2).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(328,35) Name
     scroll_viewer_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("FooterItemsScrollViewer")));
-    rt::register_name(name_scope.as_ref(), "FooterItemsScrollViewer", ::core::clone::Clone::clone(&scroll_viewer_2).upcast::<::ferroui_base::FerroObject>(), 328, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "FooterItemsScrollViewer", ::std::rc::Rc::new(::core::clone::Clone::clone(&scroll_viewer_2)), 328, 35)?;
     // Controls/MacOSControls.xaml(328,22) Row
     let priority_90 = ::ferroui_base::data::BindingPriority::Template;
     scroll_viewer_2.set_value_with_priority(::ferroui_controls::Grid::row_property(), 3_i32, priority_90);
@@ -134998,7 +134998,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     scroll_viewer_2.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&stack_panel_4)));
     // Controls/MacOSControls.xaml(332,35) Name
     stack_panel_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("FooterMenuItemsHost")));
-    rt::register_name(name_scope.as_ref(), "FooterMenuItemsHost", ::core::clone::Clone::clone(&stack_panel_4).upcast::<::ferroui_base::FerroObject>(), 332, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "FooterMenuItemsHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&stack_panel_4)), 332, 35)?;
     rt::invoked(stack_panel_4.try_end_init(), 332, 24)?;
     rt::invoked(scroll_viewer_2.try_end_init(), 328, 22)?;
     rt::invoked(grid_9.try_end_init(), 306, 20)?;
@@ -135012,7 +135012,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(337,23) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentGrid")));
-    rt::register_name(name_scope.as_ref(), "ContentGrid", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 337, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 337, 23)?;
     // Controls/MacOSControls.xaml(338,23) BorderBrush
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::border_brush_property(), "NavigationViewContentGridBorderBrush", 338, 23)?;
     // Controls/MacOSControls.xaml(339,23) BorderThickness
@@ -135064,7 +135064,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     context.push_parent(rt::to_value(panel_7.clone()));
     // Controls/MacOSControls.xaml(345,26) Name
     panel_7.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentTopPadding")));
-    rt::register_name(name_scope.as_ref(), "ContentTopPadding", ::core::clone::Clone::clone(&panel_7).upcast::<::ferroui_base::FerroObject>(), 345, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentTopPadding", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_7)), 345, 26)?;
     // Controls/MacOSControls.xaml(345,20) ColumnSpan
     let priority_94 = ::ferroui_base::data::BindingPriority::Template;
     panel_7.set_value_with_priority(::ferroui_controls::Grid::column_span_property(), 2_i32, priority_94);
@@ -135098,7 +135098,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_38, ::core::clone::Clone::clone(&panel_8).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(349,26) Name
     panel_8.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentLeftPadding")));
-    rt::register_name(name_scope.as_ref(), "ContentLeftPadding", ::core::clone::Clone::clone(&panel_8).upcast::<::ferroui_base::FerroObject>(), 349, 26)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentLeftPadding", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_8)), 349, 26)?;
     // Controls/MacOSControls.xaml(349,20) Row
     let priority_95 = ::ferroui_base::data::BindingPriority::Template;
     panel_8.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_95);
@@ -135112,7 +135112,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     context.push_parent(rt::to_value(content_control_10.clone()));
     // Controls/MacOSControls.xaml(350,35) Name
     content_control_10.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HeaderContent")));
-    rt::register_name(name_scope.as_ref(), "HeaderContent", ::core::clone::Clone::clone(&content_control_10).upcast::<::ferroui_base::FerroObject>(), 350, 35)?;
+    rt::register_name_value(name_scope.as_ref(), "HeaderContent", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_control_10)), 350, 35)?;
     // Controls/MacOSControls.xaml(350,20) Row
     let priority_96 = ::ferroui_base::data::BindingPriority::Template;
     content_control_10.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_96);
@@ -135177,7 +135177,7 @@ fn build_controls_macoscontrols_xaml_deferred_524(
     context.push_parent(rt::to_value(content_presenter_1.clone()));
     // Controls/MacOSControls.xaml(360,37) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 360, 37)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 360, 37)?;
     // Controls/MacOSControls.xaml(360,20) Row
     let priority_104 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_controls::Grid::row_property(), 2_i32, priority_104);
@@ -136351,7 +136351,7 @@ fn build_controls_macoscontrols_xaml_deferred_526(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/MacOSControls.xaml(501,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("NVIRootGrid")));
-    rt::register_name(name_scope.as_ref(), "NVIRootGrid", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 501, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "NVIRootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 501, 15)?;
     // Controls/MacOSControls.xaml(501,10) RowDefinitions
     let row_definitions_0 = ::ferroui_controls::RowDefinitions::__markup_new_0();
     rt::invoked(<::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::RowDefinition>>>::__markup_set_Capacity(&row_definitions_0, 2_i32), 501, 36)?;
@@ -136371,7 +136371,7 @@ fn build_controls_macoscontrols_xaml_deferred_526(
     context.push_parent(rt::to_value(panel_0.clone()));
     // Controls/MacOSControls.xaml(503,18) Name
     panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("NavigationViewItemPresenter")));
-    rt::register_name(name_scope.as_ref(), "NavigationViewItemPresenter", ::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_base::FerroObject>(), 503, 18)?;
+    rt::register_name_value(name_scope.as_ref(), "NavigationViewItemPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_0)), 503, 18)?;
     // Controls/MacOSControls.xaml(504,14) Children
     let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(&panel_0);
     // Controls/MacOSControls.xaml(504,14) Border
@@ -136381,7 +136381,7 @@ fn build_controls_macoscontrols_xaml_deferred_526(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(504,21) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "LayoutRoot", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 504, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 504, 21)?;
     // Controls/MacOSControls.xaml(505,21) MinHeight
     rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_height_property(), "NavigationViewItemOnLeftMinHeight", 505, 21)?;
     // Controls/MacOSControls.xaml(506,21) Background
@@ -136398,7 +136398,7 @@ fn build_controls_macoscontrols_xaml_deferred_526(
     context.push_parent(rt::to_value(panel_1.clone()));
     // Controls/MacOSControls.xaml(509,22) Name
     panel_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PresenterContentRootGrid")));
-    rt::register_name(name_scope.as_ref(), "PresenterContentRootGrid", ::core::clone::Clone::clone(&panel_1).upcast::<::ferroui_base::FerroObject>(), 509, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PresenterContentRootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_1)), 509, 22)?;
     // Controls/MacOSControls.xaml(511,18) Children
     let children_collection_2 = ::ferroui_controls::Panel::__markup_get_Children(&panel_1);
     // Controls/MacOSControls.xaml(511,18) Panel
@@ -136408,7 +136408,7 @@ fn build_controls_macoscontrols_xaml_deferred_526(
     context.push_parent(rt::to_value(panel_2.clone()));
     // Controls/MacOSControls.xaml(511,24) Name
     panel_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SelectionIndicatorGrid")));
-    rt::register_name(name_scope.as_ref(), "SelectionIndicatorGrid", ::core::clone::Clone::clone(&panel_2).upcast::<::ferroui_base::FerroObject>(), 511, 24)?;
+    rt::register_name_value(name_scope.as_ref(), "SelectionIndicatorGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&panel_2)), 511, 24)?;
     // Controls/MacOSControls.xaml(511,18) HorizontalAlignment
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     panel_2.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Left, priority_0);
@@ -136424,7 +136424,7 @@ fn build_controls_macoscontrols_xaml_deferred_526(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/MacOSControls.xaml(512,30) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SelectionIndicator")));
-    rt::register_name(name_scope.as_ref(), "SelectionIndicator", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 512, 30)?;
+    rt::register_name_value(name_scope.as_ref(), "SelectionIndicator", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 512, 30)?;
     // Controls/MacOSControls.xaml(513,30) Width
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::width_property(), "NavigationViewSelectionIndicatorWidth", 513, 30)?;
     // Controls/MacOSControls.xaml(514,30) Height
@@ -136471,7 +136471,7 @@ fn build_controls_macoscontrols_xaml_deferred_526(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(520,25) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentGridHost")));
-    rt::register_name(name_scope.as_ref(), "ContentGridHost", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 520, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentGridHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 520, 25)?;
     // Controls/MacOSControls.xaml(520,18) Margin
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 14.0_f64, 0.0_f64), priority_5);
@@ -136483,7 +136483,7 @@ fn build_controls_macoscontrols_xaml_deferred_526(
     context.push_parent(rt::to_value(grid_1.clone()));
     // Controls/MacOSControls.xaml(521,25) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ContentGrid")));
-    rt::register_name(name_scope.as_ref(), "ContentGrid", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 521, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "ContentGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 521, 25)?;
     // Controls/MacOSControls.xaml(522,25) MinHeight
     rt::bind_dynamic_resource(&context, grid_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::min_height_property(), "NavigationViewItemOnLeftMinHeight", 522, 25)?;
     // Controls/MacOSControls.xaml(521,20) HorizontalAlignment
@@ -136514,7 +136514,7 @@ fn build_controls_macoscontrols_xaml_deferred_526(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/MacOSControls.xaml(525,29) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("IconColumn")));
-    rt::register_name(name_scope.as_ref(), "IconColumn", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 525, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "IconColumn", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 525, 29)?;
     // Controls/MacOSControls.xaml(526,29) Width
     let reflection_binding_extension_0 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("$parent[NavigationView].TemplateSettings.SmallerPaneToggleButtonWidth"));
     let provided_10 = rt::provide_value(&context, rt::property_value(::ferroui_base::layout::Layoutable::width_property()), &reflection_binding_extension_0, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
@@ -136527,7 +136527,7 @@ fn build_controls_macoscontrols_xaml_deferred_526(
     context.push_parent(rt::to_value(viewbox_0.clone()));
     // Controls/MacOSControls.xaml(527,32) Name
     viewbox_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("IconBox")));
-    rt::register_name(name_scope.as_ref(), "IconBox", ::core::clone::Clone::clone(&viewbox_0).upcast::<::ferroui_base::FerroObject>(), 527, 32)?;
+    rt::register_name_value(name_scope.as_ref(), "IconBox", ::std::rc::Rc::new(::core::clone::Clone::clone(&viewbox_0)), 527, 32)?;
     // Controls/MacOSControls.xaml(528,32) Height
     rt::bind_dynamic_resource(&context, viewbox_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), "NavigationViewItemOnLeftIconBoxHeight", 528, 32)?;
     // Controls/MacOSControls.xaml(527,24) HorizontalAlignment
@@ -136543,7 +136543,7 @@ fn build_controls_macoscontrols_xaml_deferred_526(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/MacOSControls.xaml(531,43) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("Icon")));
-    rt::register_name(name_scope.as_ref(), "Icon", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 531, 43)?;
+    rt::register_name_value(name_scope.as_ref(), "Icon", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 531, 43)?;
     // Controls/MacOSControls.xaml(532,43) Content (setter chosen at run time)
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_2 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::NavigationViewItem::icon_property()));
@@ -136593,7 +136593,7 @@ fn build_controls_macoscontrols_xaml_deferred_526(
     context.push_parent(rt::to_value(content_presenter_1.clone()));
     // Controls/MacOSControls.xaml(546,39) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 546, 39)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 546, 39)?;
     // Controls/MacOSControls.xaml(546,22) Column
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_9);
@@ -136630,7 +136630,7 @@ fn build_controls_macoscontrols_xaml_deferred_526(
     context.push_parent(rt::to_value(border_3.clone()));
     // Controls/MacOSControls.xaml(555,29) Name
     border_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ExpandCollapseChevron")));
-    rt::register_name(name_scope.as_ref(), "ExpandCollapseChevron", ::core::clone::Clone::clone(&border_3).upcast::<::ferroui_base::FerroObject>(), 555, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "ExpandCollapseChevron", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_3)), 555, 29)?;
     // Controls/MacOSControls.xaml(555,22) Column
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     border_3.set_value_with_priority(::ferroui_controls::Grid::column_property(), 3_i32, priority_11);
@@ -136656,7 +136656,7 @@ fn build_controls_macoscontrols_xaml_deferred_526(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/MacOSControls.xaml(562,34) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ExpandCollapseChevronIcon")));
-    rt::register_name(name_scope.as_ref(), "ExpandCollapseChevronIcon", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 562, 34)?;
+    rt::register_name_value(name_scope.as_ref(), "ExpandCollapseChevronIcon", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 562, 34)?;
     // Controls/MacOSControls.xaml(562,24) Width
     let priority_16 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 12.0_f64, priority_16);
@@ -136713,7 +136713,7 @@ fn build_controls_macoscontrols_xaml_deferred_526(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_8, ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(576,39) Name
     content_presenter_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("InfoBadgePresenter")));
-    rt::register_name(name_scope.as_ref(), "InfoBadgePresenter", ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_base::FerroObject>(), 576, 39)?;
+    rt::register_name_value(name_scope.as_ref(), "InfoBadgePresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_2)), 576, 39)?;
     // Controls/MacOSControls.xaml(576,22) Column
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_25);
@@ -136750,7 +136750,7 @@ fn build_controls_macoscontrols_xaml_deferred_526(
     context.push_parent(rt::to_value(popup_0.clone()));
     // Controls/MacOSControls.xaml(586,18) Name
     popup_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ChildrenFlyout")));
-    rt::register_name(name_scope.as_ref(), "ChildrenFlyout", ::core::clone::Clone::clone(&popup_0).upcast::<::ferroui_base::FerroObject>(), 586, 18)?;
+    rt::register_name_value(name_scope.as_ref(), "ChildrenFlyout", ::std::rc::Rc::new(::core::clone::Clone::clone(&popup_0)), 586, 18)?;
     // Controls/MacOSControls.xaml(587,18) PlacementTarget
     let reflection_binding_extension_1 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_1(::std::string::String::from("#NavigationViewItemPresenter"));
     let provided_30 = rt::provide_value(&context, rt::property_value(::ferroui_controls::primitives::Popup::placement_target_property()), &reflection_binding_extension_1, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
@@ -136772,7 +136772,7 @@ fn build_controls_macoscontrols_xaml_deferred_526(
     context.push_parent(rt::to_value(border_4.clone()));
     // Controls/MacOSControls.xaml(591,21) Name
     border_4.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("ChildrenFlyoutPresenter")));
-    rt::register_name(name_scope.as_ref(), "ChildrenFlyoutPresenter", ::core::clone::Clone::clone(&border_4).upcast::<::ferroui_base::FerroObject>(), 591, 21)?;
+    rt::register_name_value(name_scope.as_ref(), "ChildrenFlyoutPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_4)), 591, 21)?;
     // Controls/MacOSControls.xaml(592,21) Background
     rt::bind_dynamic_resource(&context, border_4.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "FlyoutPresenterBackground", 592, 21)?;
     // Controls/MacOSControls.xaml(593,21) BorderBrush
@@ -136815,7 +136815,7 @@ fn build_controls_macoscontrols_xaml_deferred_526(
     scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&grid_2)));
     // Controls/MacOSControls.xaml(604,23) Name
     grid_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("FlyoutRootGrid")));
-    rt::register_name(name_scope.as_ref(), "FlyoutRootGrid", ::core::clone::Clone::clone(&grid_2).upcast::<::ferroui_base::FerroObject>(), 604, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "FlyoutRootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_2)), 604, 23)?;
     // Controls/MacOSControls.xaml(605,20) Children
     let children_collection_10 = ::ferroui_controls::Panel::__markup_get_Children(grid_2.upcast_ref::<::ferroui_controls::Panel>());
     // Controls/MacOSControls.xaml(605,20) Grid
@@ -136824,7 +136824,7 @@ fn build_controls_macoscontrols_xaml_deferred_526(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_10, ::core::clone::Clone::clone(&grid_3).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(605,25) Name
     grid_3.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("FlyoutContentGrid")));
-    rt::register_name(name_scope.as_ref(), "FlyoutContentGrid", ::core::clone::Clone::clone(&grid_3).upcast::<::ferroui_base::FerroObject>(), 605, 25)?;
+    rt::register_name_value(name_scope.as_ref(), "FlyoutContentGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_3)), 605, 25)?;
     rt::invoked(grid_3.try_end_init(), 605, 20)?;
     rt::invoked(grid_2.try_end_init(), 604, 18)?;
     rt::invoked(scroll_viewer_0.try_end_init(), 603, 16)?;
@@ -136840,7 +136840,7 @@ fn build_controls_macoscontrols_xaml_deferred_526(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_11, ::core::clone::Clone::clone(&stack_panel_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(611,23) Name
     stack_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("NavigationViewItemMenuItemsHost")));
-    rt::register_name(name_scope.as_ref(), "NavigationViewItemMenuItemsHost", ::core::clone::Clone::clone(&stack_panel_0).upcast::<::ferroui_base::FerroObject>(), 611, 23)?;
+    rt::register_name_value(name_scope.as_ref(), "NavigationViewItemMenuItemsHost", ::std::rc::Rc::new(::core::clone::Clone::clone(&stack_panel_0)), 611, 23)?;
     // Controls/MacOSControls.xaml(611,12) Row
     let priority_35 = ::ferroui_base::data::BindingPriority::Template;
     stack_panel_0.set_value_with_priority(::ferroui_controls::Grid::row_property(), 1_i32, priority_35);
@@ -136951,7 +136951,7 @@ fn build_controls_macoscontrols_xaml_deferred_528(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/MacOSControls.xaml(872,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("NavigationViewItemHeaderRootGrid")));
-    rt::register_name(name_scope.as_ref(), "NavigationViewItemHeaderRootGrid", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 872, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "NavigationViewItemHeaderRootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 872, 15)?;
     // Controls/MacOSControls.xaml(873,12) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
     // Controls/MacOSControls.xaml(873,12) Grid
@@ -136961,7 +136961,7 @@ fn build_controls_macoscontrols_xaml_deferred_528(
     context.push_parent(rt::to_value(grid_1.clone()));
     // Controls/MacOSControls.xaml(873,17) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("InnerHeaderGrid")));
-    rt::register_name(name_scope.as_ref(), "InnerHeaderGrid", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 873, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "InnerHeaderGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 873, 17)?;
     // Controls/MacOSControls.xaml(873,12) Height
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     grid_1.set_value_with_priority(::ferroui_base::layout::Layoutable::height_property(), 40.0_f64, priority_0);
@@ -136978,7 +136978,7 @@ fn build_controls_macoscontrols_xaml_deferred_528(
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
     // Controls/MacOSControls.xaml(878,31) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("HeaderText")));
-    rt::register_name(name_scope.as_ref(), "HeaderText", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 878, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "HeaderText", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 878, 31)?;
     // Controls/MacOSControls.xaml(878,14) VerticalAlignment
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Center, priority_2);
@@ -137105,7 +137105,7 @@ fn build_controls_macoscontrols_xaml_deferred_530(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/MacOSControls.xaml(914,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("NavigationViewItemSeparatorRootGrid")));
-    rt::register_name(name_scope.as_ref(), "NavigationViewItemSeparatorRootGrid", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 914, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "NavigationViewItemSeparatorRootGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 914, 15)?;
     // Controls/MacOSControls.xaml(915,12) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
     // Controls/MacOSControls.xaml(915,12) Rectangle
@@ -137115,7 +137115,7 @@ fn build_controls_macoscontrols_xaml_deferred_530(
     context.push_parent(rt::to_value(rectangle_0.clone()));
     // Controls/MacOSControls.xaml(915,22) Name
     rectangle_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SeparatorLine")));
-    rt::register_name(name_scope.as_ref(), "SeparatorLine", ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_base::FerroObject>(), 915, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "SeparatorLine", ::std::rc::Rc::new(::core::clone::Clone::clone(&rectangle_0)), 915, 22)?;
     // Controls/MacOSControls.xaml(916,22) Height
     rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), "NavigationViewItemSeparatorHeight", 916, 22)?;
     // Controls/MacOSControls.xaml(917,22) Fill
@@ -137489,7 +137489,7 @@ fn build_controls_macoscontrols_xaml_deferred_532(
     context.push_parent(rt::to_value(grid_0.clone()));
     // Controls/MacOSControls.xaml(49,15) Name
     grid_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_LayoutRoot")));
-    rt::register_name(name_scope.as_ref(), "PART_LayoutRoot", ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_base::FerroObject>(), 49, 15)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_LayoutRoot", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_0)), 49, 15)?;
     // Controls/MacOSControls.xaml(49,40) Height
     rt::bind_dynamic_resource(&context, grid_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::height_property(), "TitleBarCompactHeight", 49, 40)?;
     // Controls/MacOSControls.xaml(49,89) Background
@@ -137600,7 +137600,7 @@ fn build_controls_macoscontrols_xaml_deferred_532(
     context.push_parent(rt::to_value(border_0.clone()));
     // Controls/MacOSControls.xaml(80,19) Name
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LeftPaddingColumn")));
-    rt::register_name(name_scope.as_ref(), "LeftPaddingColumn", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 80, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "LeftPaddingColumn", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_0)), 80, 19)?;
     // Controls/MacOSControls.xaml(80,12) Column
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 0_i32, priority_11);
@@ -137617,7 +137617,7 @@ fn build_controls_macoscontrols_xaml_deferred_532(
     context.push_parent(rt::to_value(border_1.clone()));
     // Controls/MacOSControls.xaml(81,19) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("LeftHeaderPaddingColumn")));
-    rt::register_name(name_scope.as_ref(), "LeftHeaderPaddingColumn", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 81, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "LeftHeaderPaddingColumn", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_1)), 81, 19)?;
     // Controls/MacOSControls.xaml(81,12) Column
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 4_i32, priority_12);
@@ -137634,7 +137634,7 @@ fn build_controls_macoscontrols_xaml_deferred_532(
     context.push_parent(rt::to_value(border_2.clone()));
     // Controls/MacOSControls.xaml(82,19) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("RightPaddingColumn")));
-    rt::register_name(name_scope.as_ref(), "RightPaddingColumn", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 82, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "RightPaddingColumn", ::std::rc::Rc::new(::core::clone::Clone::clone(&border_2)), 82, 19)?;
     // Controls/MacOSControls.xaml(82,12) Column
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 11_i32, priority_13);
@@ -137651,7 +137651,7 @@ fn build_controls_macoscontrols_xaml_deferred_532(
     context.push_parent(rt::to_value(button_0.clone()));
     // Controls/MacOSControls.xaml(84,19) Name
     button_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_BackButton")));
-    rt::register_name(name_scope.as_ref(), "PART_BackButton", ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_base::FerroObject>(), 84, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_BackButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_0)), 84, 19)?;
     // Controls/MacOSControls.xaml(84,12) Column
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_14);
@@ -137685,7 +137685,7 @@ fn build_controls_macoscontrols_xaml_deferred_532(
     context.push_parent(rt::to_value(button_1.clone()));
     // Controls/MacOSControls.xaml(90,19) Name
     button_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_PaneToggleButton")));
-    rt::register_name(name_scope.as_ref(), "PART_PaneToggleButton", ::core::clone::Clone::clone(&button_1).upcast::<::ferroui_base::FerroObject>(), 90, 19)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_PaneToggleButton", ::std::rc::Rc::new(::core::clone::Clone::clone(&button_1)), 90, 19)?;
     // Controls/MacOSControls.xaml(90,12) Column
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
     button_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_17);
@@ -137717,7 +137717,7 @@ fn build_controls_macoscontrols_xaml_deferred_532(
     context.push_parent(rt::to_value(content_presenter_0.clone()));
     // Controls/MacOSControls.xaml(95,29) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_LeftHeaderPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_LeftHeaderPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 95, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_LeftHeaderPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_0)), 95, 29)?;
     // Controls/MacOSControls.xaml(95,12) Column
     let priority_20 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 3_i32, priority_20);
@@ -137749,7 +137749,7 @@ fn build_controls_macoscontrols_xaml_deferred_532(
     context.push_parent(rt::to_value(viewbox_0.clone()));
     // Controls/MacOSControls.xaml(102,20) Name
     viewbox_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_Icon")));
-    rt::register_name(name_scope.as_ref(), "PART_Icon", ::core::clone::Clone::clone(&viewbox_0).upcast::<::ferroui_base::FerroObject>(), 102, 20)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_Icon", ::std::rc::Rc::new(::core::clone::Clone::clone(&viewbox_0)), 102, 20)?;
     // Controls/MacOSControls.xaml(102,12) Column
     let priority_23 = ::ferroui_base::data::BindingPriority::Template;
     viewbox_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 5_i32, priority_23);
@@ -137786,7 +137786,7 @@ fn build_controls_macoscontrols_xaml_deferred_532(
     context.push_parent(rt::to_value(text_block_0.clone()));
     // Controls/MacOSControls.xaml(111,22) Name
     text_block_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_TitleText")));
-    rt::register_name(name_scope.as_ref(), "PART_TitleText", ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_base::FerroObject>(), 111, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_TitleText", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_0)), 111, 22)?;
     // Controls/MacOSControls.xaml(111,12) Column
     let priority_26 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 6_i32, priority_26);
@@ -137839,7 +137839,7 @@ fn build_controls_macoscontrols_xaml_deferred_532(
     context.push_parent(rt::to_value(text_block_1.clone()));
     // Controls/MacOSControls.xaml(124,22) Name
     text_block_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SubtitleText")));
-    rt::register_name(name_scope.as_ref(), "PART_SubtitleText", ::core::clone::Clone::clone(&text_block_1).upcast::<::ferroui_base::FerroObject>(), 124, 22)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_SubtitleText", ::std::rc::Rc::new(::core::clone::Clone::clone(&text_block_1)), 124, 22)?;
     // Controls/MacOSControls.xaml(124,12) Column
     let priority_33 = ::ferroui_base::data::BindingPriority::Template;
     text_block_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 7_i32, priority_33);
@@ -137892,7 +137892,7 @@ fn build_controls_macoscontrols_xaml_deferred_532(
     context.push_parent(rt::to_value(grid_1.clone()));
     // Controls/MacOSControls.xaml(137,17) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenterGrid")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenterGrid", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 137, 17)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenterGrid", ::std::rc::Rc::new(::core::clone::Clone::clone(&grid_1)), 137, 17)?;
     // Controls/MacOSControls.xaml(137,12) Column
     let priority_40 = ::ferroui_base::data::BindingPriority::Template;
     grid_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 8_i32, priority_40);
@@ -137908,7 +137908,7 @@ fn build_controls_macoscontrols_xaml_deferred_532(
     context.push_parent(rt::to_value(content_presenter_1.clone()));
     // Controls/MacOSControls.xaml(138,31) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 138, 31)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_ContentPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_1)), 138, 31)?;
     // Controls/MacOSControls.xaml(139,31) Content (setter chosen at run time)
     let priority_42 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_6 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::TitleBar::content_property()));
@@ -137936,7 +137936,7 @@ fn build_controls_macoscontrols_xaml_deferred_532(
     context.push_parent(rt::to_value(content_presenter_2.clone()));
     // Controls/MacOSControls.xaml(144,29) Name
     content_presenter_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_RightHeaderPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_RightHeaderPresenter", ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_base::FerroObject>(), 144, 29)?;
+    rt::register_name_value(name_scope.as_ref(), "PART_RightHeaderPresenter", ::std::rc::Rc::new(::core::clone::Clone::clone(&content_presenter_2)), 144, 29)?;
     // Controls/MacOSControls.xaml(144,12) Column
     let priority_43 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 9_i32, priority_43);

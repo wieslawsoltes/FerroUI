@@ -137,6 +137,14 @@ impl EmitMarkup for RuntimeMarkup {
     fn handle_is_shared(&self) -> bool {
         self.0.handle().is_some_and(|handle| handle.name().starts_with("alloc::rc::Rc<"))
     }
+    fn value_is_shared(&self) -> bool {
+        self.0.value.is_some_and(|value| value().name().starts_with("alloc::rc::Rc<"))
+    }
+    fn handle_is_own_trait(&self) -> bool {
+        if !self.0.rust_path_is_trait() { return false; }
+        let (Some(handle), Some(owner)) = (self.0.handle(), self.0.owner_rust_name) else { return false };
+        handle.name() == format!("alloc::rc::Rc<{}>", owner())
+    }
     fn nullable(&self) -> Option<TypeKey<'_>> {
         self.0.nullable.map(|nullable| TypeKey::Id(nullable().id()))
     }
@@ -152,12 +160,25 @@ impl EmitMarkup for RuntimeMarkup {
     fn value(&self) -> Option<TypeKey<'_>> {
         self.0.value.map(|value| TypeKey::Id(value().id()))
     }
+    fn value_rust_type(&self) -> Option<String> {
+        let value = self.0.value?();
+        if let Some(path) = rust_path_of_type(value.id()) {
+            return Some(format!("::{}", path.trim_start_matches("::")));
+        }
+        let owner = self.0.owner_rust_name?();
+        let path = match self.0.rust_path_is_trait() {
+            true => format!("dyn {}", self.0.rust_path()?),
+            false => self.0.rust_path()?.to_string(),
+        };
+        super::emit_types::markup_value_rust_type(value.name(), owner, &path)
+    }
     fn is_flags(&self) -> bool {
         self.0.is_flags
     }
     fn enum_members(&self) -> Vec<EnumMember<'_>> {
         self.0.enum_members.iter().map(|member| EnumMember { name: member.name, value: member.value, rust_variant: member.rust_variant }).collect()
     }
+    fn enum_i32_factory(&self) -> Option<&str> { self.0.enum_i32_factory }
     fn flags_compose(&self, value: i64) -> bool {
         self.0.enum_from_value.is_some_and(|from_value| from_value(value).is_some())
     }

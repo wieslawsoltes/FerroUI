@@ -1,0 +1,127 @@
+[
+  {
+    "Input": "{\u0022Content\u0022:null}",
+    "Kind": "null",
+    "Replay": "{\n  \u0022$id\u0022: \u00221\u0022\n}"
+  },
+  {
+    "Input": "{\u0022Content\u0022:true}",
+    "Kind": "raw",
+    "Replay": "{\n  \u0022$id\u0022: \u00221\u0022,\n  \u0022Content\u0022: true\n}"
+  },
+  {
+    "Input": "{\u0022Content\u0022:1e\u002B02}",
+    "Kind": "raw",
+    "Replay": "{\n  \u0022$id\u0022: \u00221\u0022,\n  \u0022Content\u0022: 1e\u002B02\n}"
+  },
+  {
+    "Input": "{\u0022Content\u0022:\u0022plain\u0022}",
+    "Kind": "raw",
+    "Replay": "{\n  \u0022$id\u0022: \u00221\u0022,\n  \u0022Content\u0022: \u0022plain\u0022\n}"
+  },
+  {
+    "Input": "{\u0022Content\u0022:[1,null,{\u0022x\u0022:2}]}",
+    "Kind": "raw",
+    "Replay": "{\n  \u0022$id\u0022: \u00221\u0022,\n  \u0022Content\u0022: [\n    1,\n    null,\n    {\n      \u0022x\u0022: 2\n    }\n  ]\n}"
+  },
+  {
+    "Input": "{\u0022Content\u0022:{}}",
+    "Kind": "raw",
+    "Replay": "{\n  \u0022$id\u0022: \u00221\u0022,\n  \u0022Content\u0022: {}\n}"
+  },
+  {
+    "Input": "{\u0022Content\u0022:{\u0022$ref\u0022:\u0022outer\u0022}}",
+    "Kind": "raw",
+    "Replay": "{\n  \u0022$id\u0022: \u00221\u0022,\n  \u0022Content\u0022: {\n    \u0022$ref\u0022: \u0022outer\u0022\n  }\n}"
+  },
+  {
+    "Input": "{\u0022Content\u0022:{\u0022$type\u0022:\u0022unknown\u0022,\u0022Name\u0022:\u0022x\u0022}}",
+    "Kind": "raw",
+    "Replay": "{\n  \u0022$id\u0022: \u00221\u0022,\n  \u0022Content\u0022: {\n    \u0022$type\u0022: \u0022unknown\u0022,\n    \u0022Name\u0022: \u0022x\u0022\n  }\n}"
+  },
+  {
+    "Input": "{\u0022Content\u0022:{\u0022$type\u0022:\u0022  \u0022,\u0022Name\u0022:\u0022x\u0022}}",
+    "Kind": "raw",
+    "Replay": "{\n  \u0022$id\u0022: \u00221\u0022,\n  \u0022Content\u0022: {\n    \u0022$type\u0022: \u0022  \u0022,\n    \u0022Name\u0022: \u0022x\u0022\n  }\n}"
+  },
+  {
+    "Input": "{\u0022Content\u0022:{\u0022$type\u0022:3,\u0022Name\u0022:\u0022x\u0022}}",
+    "Kind": "raw",
+    "Replay": "{\n  \u0022$id\u0022: \u00221\u0022,\n  \u0022Content\u0022: {\n    \u0022$type\u0022: 3,\n    \u0022Name\u0022: \u0022x\u0022\n  }\n}"
+  },
+  {
+    "Input": "{\u0022Content\u0022:{\u0022$type\u0022:\u0022GeneratedPayload\u0022,\u0022Name\u0022:\u0022known\u0022}}",
+    "Kind": "payload",
+    "Replay": "{\n  \u0022$id\u0022: \u00221\u0022,\n  \u0022Content\u0022: {\n    \u0022$type\u0022: \u0022GeneratedPayload\u0022,\n    \u0022$id\u0022: \u00221\u0022,\n    \u0022Name\u0022: \u0022known\u0022\n  }\n}"
+  },
+  {
+    "Input": "{\u0022Content\u0022:{\u0022Name\u0022:\u0022late\u0022,\u0022$type\u0022:\u0022GeneratedPayload\u0022}}",
+    "Kind": "payload",
+    "Replay": "{\n  \u0022$id\u0022: \u00221\u0022,\n  \u0022Content\u0022: {\n    \u0022$type\u0022: \u0022GeneratedPayload\u0022,\n    \u0022$id\u0022: \u00221\u0022,\n    \u0022Name\u0022: \u0022late\u0022\n  }\n}"
+  },
+  {
+    "Input": "{\u0022Content\u0022:{\u0022$id\u0022:\u0022a\u0022,\u0022$type\u0022:\u0022GeneratedPayload\u0022,\u0022Name\u0022:\u0022self\u0022,\u0022Self\u0022:{\u0022$ref\u0022:\u0022a\u0022}}}",
+    "Kind": "payload",
+    "Replay": "{\n  \u0022$id\u0022: \u00221\u0022,\n  \u0022Content\u0022: {\n    \u0022$type\u0022: \u0022GeneratedPayload\u0022,\n    \u0022$id\u0022: \u00221\u0022,\n    \u0022Name\u0022: \u0022self\u0022,\n    \u0022Self\u0022: {\n      \u0022$ref\u0022: \u00221\u0022\n    }\n  }\n}"
+  },
+  {
+    "Input": "{\u0022Content\u0022:{\u0022$type\u0022:\u0022unknown\u0022,\u0022$type\u0022:\u0022GeneratedPayload\u0022,\u0022Name\u0022:\u0022duplicate\u0022}}",
+    "Kind": "raw",
+    "Replay": "{\n  \u0022$id\u0022: \u00221\u0022,\n  \u0022Content\u0022: {\n    \u0022$type\u0022: \u0022unknown\u0022,\n    \u0022$type\u0022: \u0022GeneratedPayload\u0022,\n    \u0022Name\u0022: \u0022duplicate\u0022\n  }\n}"
+  },
+  {
+    "Input": "{\u0022Content\u0022:{\u0022$type\u0022:\u0022GeneratedPayload\u0022,\u0022$type\u0022:false,\u0022Name\u0022:\u0022nonstring\u0022}}",
+    "Kind": "error-json",
+    "Replay": ""
+  },
+  {
+    "Input": "{\u0022Content\u0022:{\u0022$type\u0022:\u0022GeneratedPayload\u0022,\u0022Name\u0022:false}}",
+    "Kind": "error-json",
+    "Replay": ""
+  },
+  {
+    "Input": "{\u0022Content\u0022:{\u0022Name\u0022:\u0022lateid\u0022,\u0022$id\u0022:\u0022a\u0022,\u0022$type\u0022:\u0022GeneratedPayload\u0022}}",
+    "Kind": "error-json",
+    "Replay": ""
+  },
+  {
+    "Input": "{\u0022Content\u0022:{\u0022$type\u0022:\u0022GeneratedPayload\u0022,\u0022$foo\u0022:1}}",
+    "Kind": "error-json",
+    "Replay": ""
+  },
+  {
+    "Input": "{\u0022Content\u0022:{\u0022$type\u0022:\u0022GeneratedPayload\u0022,\u0022$values\u0022:[]}}",
+    "Kind": "error-json",
+    "Replay": ""
+  },
+  {
+    "Input": "{\u0022Content\u0022:{\u0022$type\u0022:\u0022GeneratedPayload\u0022,\u0022$id\u0022:\u0022a\u0022,\u0022$ref\u0022:\u0022a\u0022}}",
+    "Kind": "error-json",
+    "Replay": ""
+  },
+  {
+    "Input": "{\u0022Content\u0022:{\u0022$type\u0022:\u0022GeneratedPayload\u0022,\u0022$Type\u0022:1}}",
+    "Kind": "error-json",
+    "Replay": ""
+  },
+  {
+    "Input": "{\u0022Content\u0022:{\u0022$type\u0022:\u0022GeneratedPayload\u0022,\u0022$$\u0022:1}}",
+    "Kind": "error-json",
+    "Replay": ""
+  },
+  {
+    "Input": "{\u0022Content\u0022:{\u0022$foo\u0022:1}}",
+    "Kind": "raw",
+    "Replay": "{\n  \u0022$id\u0022: \u00221\u0022,\n  \u0022Content\u0022: {\n    \u0022$foo\u0022: 1\n  }\n}"
+  },
+  {
+    "Input": "{\u0022Content\u0022:{\u0022$type\u0022:\u0022\u0022,\u0022$type\u0022:\u0022GeneratedPayload\u0022,\u0022Name\u0022:\u0022two\u0022}}",
+    "Kind": "raw",
+    "Replay": "{\n  \u0022$id\u0022: \u00221\u0022,\n  \u0022Content\u0022: {\n    \u0022$type\u0022: \u0022\u0022,\n    \u0022$type\u0022: \u0022GeneratedPayload\u0022,\n    \u0022Name\u0022: \u0022two\u0022\n  }\n}"
+  },
+  {
+    "Input": "{\u0022Content\u0022:{\u0022$type\u0022:false,\u0022$type\u0022:\u0022GeneratedPayload\u0022,\u0022Name\u0022:\u0022nonstring-first\u0022}}",
+    "Kind": "error-json",
+    "Replay": ""
+  }
+]

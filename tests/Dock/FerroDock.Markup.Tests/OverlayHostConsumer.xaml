@@ -1,0 +1,20 @@
+<o:OverlayHost xmlns="https://github.com/ferroui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+               xmlns:o="using:FerroDock.Ferro.Controls.Overlays"
+               x:DataType="o:OverlayHost" x:CompileBindings="True"
+               UseServiceLayers="False">
+  <o:OverlayHost.Overlays>
+    <Border />
+  </o:OverlayHost.Overlays>
+  <o:OverlayHost.OverlayLayers>
+    <o:OverlayLayerCollection>
+      <o:OverlayLayer ZIndex="4" BlocksInput="False" StyleKey="{x:Static o:OverlayLayerStyleKeys.BusyLayerThemeKey}">
+        <Control />
+      </o:OverlayLayer>
+      <o:OverlayLayer ZIndex="10">
+        <Border />
+      </o:OverlayLayer>
+    </o:OverlayLayerCollection>
+  </o:OverlayHost.OverlayLayers>
+  <Border />
+</o:OverlayHost>

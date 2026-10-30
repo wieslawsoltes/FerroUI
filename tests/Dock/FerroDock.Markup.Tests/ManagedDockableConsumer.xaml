@@ -1,0 +1,9 @@
+<Panel xmlns="https://github.com/ferroui"
+       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+       xmlns:d="using:FerroDock.Ferro.Controls"
+       x:DataType="d:ManagedDockableBase" x:CompileBindings="True">
+  <TextBlock Name="TitleText" Text="{Binding Title}" />
+  <TextBlock Name="IdText" Text="{Binding Id}" />
+  <Button Name="CloseAvailability" IsEnabled="{Binding CanClose}" />
+  <TextBox Name="EditedTitle" Text="{Binding Title, Mode=TwoWay}" />
+</Panel>

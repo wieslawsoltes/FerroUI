@@ -1,0 +1,20 @@
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:d="using:FerroDock.Ferro.Controls"
+                    xmlns:s="using:FerroDock.Settings"
+                    xmlns:p="using:FerroDock.Controls.ProportionalStackPanel"
+                    x:CompileBindings="True">
+  <ControlTheme x:Key="{x:Type d:DockAdornerWindow}" TargetType="d:DockAdornerWindow" x:DataType="d:DockAdornerWindow"
+                BasedOn="{StaticResource {x:Type Window}}">
+    <Setter Property="WindowDecorations" Value="None" />
+    <Setter Property="ShowInTaskbar" Value="False" />
+    <Setter Property="CanResize" Value="False" />
+    <Setter Property="ShowActivated" Value="False" />
+    <Setter Property="Background" Value="{x:Null}" />
+    <Setter Property="TransparencyLevelHint" Value="Transparent" />
+    <Setter Property="SizeToContent" Value="WidthAndHeight" />
+    <!-- Preview window should appear above the adorner so leave Topmost disabled -->
+    <Setter Property="Topmost" Value="False" />
+    <Setter Property="IsHitTestVisible" Value="False" />
+  </ControlTheme>
+</ResourceDictionary>

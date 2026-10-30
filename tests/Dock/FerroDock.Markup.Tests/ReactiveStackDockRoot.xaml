@@ -1,0 +1,3 @@
+<m:StackDock xmlns="https://github.com/ferroui"
+ xmlns:m="clr-namespace:FerroDock.Model.ReactiveUI.Controls;assembly=FerroDock.Model.ReactiveUI"
+ Title="Source StackDock" Orientation="Vertical" Spacing="8.5" />
