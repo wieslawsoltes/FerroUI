@@ -1,0 +1,4 @@
+<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <TextBlock Text="Display" FontSize="68" FontWeight="SemiBold"/><TextBlock Text="Title large" FontSize="40" FontWeight="SemiBold"/><TextBlock Text="Title" FontSize="28" FontWeight="SemiBold"/><TextBlock Text="Subtitle" FontSize="20" FontWeight="SemiBold"/><TextBlock Text="Body large" FontSize="18"/><TextBlock Text="Body" FontSize="14"/><TextBlock Text="Caption" FontSize="12"/>
+</StackPanel>

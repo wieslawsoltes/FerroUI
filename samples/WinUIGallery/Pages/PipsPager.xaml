@@ -1,0 +1,4 @@
+<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <TextBlock Text="Horizontal pager"/><PipsPager NumberOfPages="10" SelectedPageIndex="2" MaxVisiblePips="5" IsNextButtonVisible="True" IsPreviousButtonVisible="True"/><TextBlock Text="Vertical pager"/><PipsPager NumberOfPages="5" Orientation="Vertical" HorizontalAlignment="Left"/>
+</StackPanel>

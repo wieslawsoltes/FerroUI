@@ -1,0 +1,4 @@
+<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <TextBox x:Name="Primary" Width="320" HorizontalAlignment="Left" PlaceholderText="Enter your name" AutomationProperties.Name="Enter your name"/><TextBox Width="320" HorizontalAlignment="Left" Text="A read-only text box" IsReadOnly="True"/><TextBox Width="320" Height="100" HorizontalAlignment="Left" AcceptsReturn="True" TextWrapping="Wrap" PlaceholderText="Multiple lines"/><TextBlock x:Name="Output" Text="0 characters"/>
+</StackPanel>

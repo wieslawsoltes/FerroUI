@@ -1,0 +1,4 @@
+<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <StackPanel><StackPanel.Resources><SolidColorBrush x:Key="AccentBrush" Color="#0078D4"/></StackPanel.Resources><TextBlock Foreground="{StaticResource AccentBrush}" Text="A shared static resource" FontSize="20"/><TextBlock Foreground="{DynamicResource AccentBrush}" Text="A dynamic resource reference" FontSize="20"/></StackPanel>
+</StackPanel>

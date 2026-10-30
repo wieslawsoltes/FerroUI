@@ -1,0 +1,4 @@
+<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <Slider x:Name="Spacing" Minimum="0" Maximum="32" Value="8" Width="300" HorizontalAlignment="Left"/><StackPanel Orientation="Horizontal" Spacing="{Binding #Spacing.Value, Mode=OneWay}"><Button Content="First"/><Button Content="Second"/><Button Content="Third"/></StackPanel>
+</StackPanel>
