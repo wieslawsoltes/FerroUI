@@ -29,7 +29,8 @@ on:
         default: windows-latest
 
 concurrency:
-  group: rich-text-${{ github.event.pull_request.number || github.ref }}-${{ github.event_name }}
+  # A run of the oracle on one runner does not cancel a run on the other.
+  group: rich-text-${{ github.event.pull_request.number || github.ref }}-${{ github.event_name }}-${{ inputs.runner }}
   cancel-in-progress: true
 
 permissions:
