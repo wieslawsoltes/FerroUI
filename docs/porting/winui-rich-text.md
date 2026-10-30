@@ -220,3 +220,10 @@ What remains outside the port (RT-P of #243): the exact LineServices metrics, th
 
 Not taken from #243 in R8: its manager tests for a client without exact editing whose cursor query moves focus or replaces the client (`rich_edit_input_geometry_tests.rs`). Such a client keeps the upstream manager (D5), which has no such guarantees. While a connection client's flyout has focus, the manager keeps the input method of the owner's root, also when the flyout is in a popup root of its own.
 
+### 11.4 The WinUI host's CoreText input (R9c)
+
+| WinUI | FerroUI | Why |
+|---|---|---|
+| RichEdit applies the IME's format requests (`FormatUpdating`: the conversion clauses and their underlines). | The request is answered `Failed` and not applied. | The clause formats are not projected onto the rich document yet. |
+
+The differences from the upstream-ported adapter (`WinUITextInputMethod`) are in `DEVIATIONS.md`, "WinUI integration": they apply to connection clients only (D5).
