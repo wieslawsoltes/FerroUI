@@ -20,7 +20,8 @@ use std::rc::Rc;
 
 use xamlx::ast::{
     IXamlAstNode, IXamlAstPropertyReference, IXamlAstTypeReference, IXamlAstValueNode, XamlAstClrProperty,
-    XamlAstClrTypeReference, XamlAstNodeExtensions, XamlAstObjectNode, XamlAstPropertyReferenceExtensions,
+    XamlAstClrTypeReference, XamlAstExtensions, XamlAstNodeExtensions, XamlAstObjectNode,
+    XamlAstPropertyReferenceExtensions,
     XamlAstTextNode, XamlAstXamlPropertyValueNode,
 };
 use xamlx::exceptions::{XamlError, XamlResult};
@@ -106,7 +107,7 @@ impl IXamlAstTransformer for FerroXamlIlVisualStateSetterTransformer {
         let property_value: Rc<dyn IXamlAstNode> = XamlAstXamlPropertyValueNode::new(
             &*text,
             property_property,
-            XamlAstTextNode::new(&*text, &property_text, true),
+            string_node(context, &*text, &property_text),
             true,
         );
         on.children.borrow_mut().push(property_value);
@@ -121,14 +122,14 @@ impl IXamlAstTransformer for FerroXamlIlVisualStateSetterTransformer {
             let target: Rc<dyn IXamlAstNode> = XamlAstXamlPropertyValueNode::new(
                 &*text,
                 clr_property(context, &*text, &path_type, "Target")?,
-                XamlAstTextNode::new(&*text, &element_name, true),
+                string_node(context, &*text, &element_name),
                 true,
             );
             children.push(target);
             let path_value: Rc<dyn IXamlAstNode> = XamlAstXamlPropertyValueNode::new(
                 &*text,
                 clr_property(context, &*text, &path_type, "Path")?,
-                XamlAstTextNode::new(&*text, &path, true),
+                string_node(context, &*text, &path),
                 true,
             );
             children.push(path_value);
@@ -298,4 +299,10 @@ mod tests {
         assert_eq!(split("Root.(Row)"), None);
         assert_eq!(split("Root.(Grid.Row"), None);
     }
+}
+
+/// A text value created after the type references were resolved: typed as the CLR string, which
+/// the resolver would have given a text of the document.
+fn string_node(context: &AstTransformationContext, line: &dyn xamlx::ast::IXamlLineInfo, text: &str) -> Rc<XamlAstTextNode> {
+    XamlAstTextNode::with_type(line, text, true, Some(context.configuration().well_known_types().string.clone()))
 }

@@ -1,0 +1,38 @@
+<!--
+  Not ported from a style: WinUI has no SelectableTextBlock; a TextBlock of WinUI with
+  IsTextSelectionEnabled="True" is selectable, and it has no style in microsoft-ui-xaml
+  (https://github.com/microsoft/microsoft-ui-xaml, commit
+  7e4b0c2096be402f51cc8f7d203ebf67cff183d0). Its selection is drawn by the text selection
+  manager of the framework (dxaml/xcp/core/text/common/TextSelectionManager.cpp): the background
+  is the SelectionHighlightColor of the TextBlock, whose default is the accent colour of the
+  system (GetDefaultSelectionHighlightColor), and in a high contrast theme the highlight colour
+  of the system; the selected text is drawn in the highlight text colour of the system
+  (GetSystemTextSelectionForegroundBrush). Over selectable text the pointer is the I-beam.
+
+  This theme gives FerroUI's SelectableTextBlock those values: SelectionBrush is
+  SystemControlHighlightAccentBrush (SystemAccentColor, and SystemColorHighlightColor in the
+  HighContrast dictionary), SelectionForegroundBrush is SystemColorHighlightTextColor, and the
+  cursor of an enabled block is IBeam.
+
+  Pending (docs/porting/winui-theme.md, section 7, batch B3): the context flyout. WinUI's is the
+  TextCommandBarFlyout of the text controls (waived); FerroUI's text controls get a menu flyout
+  of the same commands with the menu flyouts of batch B3, the text box and this block together.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <SelectableTextBlock Text="A selectable text block." SelectionStart="2" SelectionEnd="12" />
+    </Border>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="{x:Type SelectableTextBlock}" TargetType="SelectableTextBlock">
+    <Setter Property="SelectionBrush" Value="{DynamicResource SystemControlHighlightAccentBrush}" />
+    <Setter Property="SelectionForegroundBrush" Value="{DynamicResource SystemColorHighlightTextColor}" />
+
+    <Style Selector="^[IsEnabled=True]">
+      <Setter Property="Cursor" Value="IBeam" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

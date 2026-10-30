@@ -1,0 +1,57 @@
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:material="using:FerroUI.Themes.Material" x:ClassModifier="internal">
+  <ControlTheme x:Key="MaterialSearchInput" TargetType="TextBox" BasedOn="{StaticResource MaterialSearchBar}">
+    <Setter Property="MinWidth" Value="0" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Padding" Value="0,0" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Style Selector="^ /template/ Border#BorderElement">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type material:MaterialSearchView}" TargetType="material:MaterialSearchView">
+    <Setter Property="MinWidth" Value="360" />
+    <Setter Property="MaxWidth" Value="720" />
+    <Setter Property="MinHeight" Value="56" />
+    <Setter Property="Background" Value="{DynamicResource MaterialSurfaceContainerHighBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceBrush}" />
+    <Setter Property="CornerRadius" Value="28" />
+    <Setter Property="ReducedMotion" Value="{DynamicResource MaterialReducedMotion}" />
+    <Setter Property="MotionScheme" Value="{DynamicResource MaterialMotionScheme}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}" ClipToBounds="True">
+          <Grid RowDefinitions="56,Auto">
+            <Grid ColumnDefinitions="56,*,56">
+              <PathIcon Theme="{StaticResource MaterialSymbolIcon}" Name="SearchIcon" FlowDirection="LeftToRight" Width="24" Height="24" Foreground="{DynamicResource MaterialOnSurfaceVariantBrush}"
+                        Data="M9.5 3 C13.09 3 16 5.91 16 9.5 C16 10.89 15.56 12.18 14.82 13.24 L21 19.41 L19.41 21 L13.24 14.82 C12.18 15.56 10.89 16 9.5 16 C5.91 16 3 13.09 3 9.5 C3 5.91 5.91 3 9.5 3 Z M9.5 5 C7.01 5 5 7.01 5 9.5 C5 11.99 7.01 14 9.5 14 C11.99 14 14 11.99 14 9.5 C14 7.01 11.99 5 9.5 5 Z" />
+              <Button Name="PART_BackButton" Width="48" MinWidth="48" Height="48" Theme="{StaticResource MaterialTextButton}" Padding="12"
+                      IsVisible="False" AutomationProperties.Name="Close search results">
+                <PathIcon Theme="{StaticResource MaterialSymbolIcon}" Width="24" Height="24" Data="M20 11 L7.83 11 L13.42 5.41 L12 4 L4 12 L12 20 L13.42 18.59 L7.83 13 L20 13 Z" />
+              </Button>
+              <TextBox Name="PART_QueryBox" Grid.Column="1" Theme="{StaticResource MaterialSearchInput}"
+                       PlaceholderText="{TemplateBinding PlaceholderText}" AcceptsReturn="False" TextWrapping="NoWrap"
+                       AutomationProperties.Name="Search" />
+              <Button Name="PART_ClearButton" Grid.Column="2" Width="48" MinWidth="48" Height="48" Padding="12"
+                      Theme="{StaticResource MaterialTextButton}" IsVisible="False" AutomationProperties.Name="Clear search">
+                <PathIcon Theme="{StaticResource MaterialSymbolIcon}" Width="24" Height="24" Data="M19 6.41 L17.59 5 L12 10.59 L6.41 5 L5 6.41 L10.59 12 L5 17.59 L6.41 19 L12 13.41 L17.59 19 L19 17.59 L13.41 12 Z" />
+              </Button>
+            </Grid>
+            <ScrollViewer Name="PART_Results" Grid.Row="1" Height="0" Opacity="0" ClipToBounds="True"
+                          HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+              <Border BorderBrush="{DynamicResource MaterialOutlineVariantBrush}" BorderThickness="0,1,0,0">
+                <ContentPresenter Name="PART_ContentPresenter" Content="{TemplateBinding Content}"
+                                  ContentTemplate="{TemplateBinding ContentTemplate}" Padding="{TemplateBinding Padding}" />
+              </Border>
+            </ScrollViewer>
+          </Grid>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:expanded /template/ Button#PART_BackButton"><Setter Property="IsVisible" Value="True" /></Style>
+    <Style Selector="^:expanded /template/ PathIcon#SearchIcon"><Setter Property="IsVisible" Value="False" /></Style>
+    <Style Selector="^:query /template/ Button#PART_ClearButton"><Setter Property="IsVisible" Value="True" /></Style>
+  </ControlTheme>
+</ResourceDictionary>

@@ -1,0 +1,46 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="MaterialThemeGallery.Pages.DateTimePage">
+  <!-- Calendar (with its items, month and day buttons), CalendarDatePicker, DatePicker and
+       TimePicker, without a selected date or time and disabled. The calendar shows the month of
+       the day the page is shown, without the highlight of today, and nothing is selected: the
+       native counterpart (DateTimePage.winui.xml) cannot set a date in markup (WinUI XAML has
+       no conversion of a text to a date), so both sides show what they show without one. The
+       pickers' popups (DatePickerPresenter, TimePickerPresenter) open in the window. The time
+       pickers name their clock (12HourClock, the clock of the native side's en-US system), as
+       the framework's TimePicker otherwise takes it from the culture of the process (a 24-hour
+       clock in the invariant culture) and would leave out the AM/PM column. The header of the
+       calendar is in the date patterns of en-US, the culture of the native side, which the
+       application sets (app.rs, native_date_culture). -->
+  <StackPanel Margin="24" Spacing="12">
+    <TextBlock Text="Date and time" FontSize="28" FontWeight="SemiBold" />
+
+    <Grid ColumnSpacing="24" HorizontalAlignment="Left">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="320" />
+        <ColumnDefinition Width="320" />
+      </Grid.ColumnDefinitions>
+
+      <StackPanel Grid.Column="0" Spacing="12">
+        <TextBlock Text="Calendar" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+        <Calendar HorizontalAlignment="Left" IsTodayHighlighted="False" />
+        <TextBlock Text="Disabled calendar" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+        <Calendar HorizontalAlignment="Left" IsTodayHighlighted="False" IsEnabled="False" />
+      </StackPanel>
+
+      <StackPanel Grid.Column="1" Spacing="12">
+        <TextBlock Text="CalendarDatePicker" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+        <CalendarDatePicker Width="240" HorizontalAlignment="Left" PlaceholderText="Pick a date" IsTodayHighlighted="False" />
+        <CalendarDatePicker Width="240" HorizontalAlignment="Left" PlaceholderText="Disabled" IsEnabled="False" />
+
+        <TextBlock Text="DatePicker" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+        <DatePicker HorizontalAlignment="Left" />
+        <DatePicker HorizontalAlignment="Left" IsEnabled="False" />
+
+        <TextBlock Text="TimePicker" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+        <TimePicker HorizontalAlignment="Left" ClockIdentifier="12HourClock" />
+        <TimePicker HorizontalAlignment="Left" ClockIdentifier="12HourClock" IsEnabled="False" />
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+</UserControl>

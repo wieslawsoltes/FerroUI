@@ -1,0 +1,3 @@
+<test:ContractConsumer xmlns="https://github.com/ferroui" xmlns:test="using:FerroDock.Markup.Tests.Carriers">
+ <test:ContractConsumer.Native><test:MultiHandleValue CanClose="False" /></test:ContractConsumer.Native>
+</test:ContractConsumer>

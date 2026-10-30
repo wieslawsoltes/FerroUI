@@ -1,0 +1,49 @@
+[package]
+name = "ferrodock-reactiveui-sample"
+description = "Original ReactiveUI docking sample port for FerroDock"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+build = "build.rs"
+links = "ferrodock_reactiveui_sample_metadata"
+[features]
+default = ["desktop"]
+desktop = ["dep:ferroui-desktop"]
+[[bin]]
+name = "ferrodock-reactiveui-sample"
+path = "program.rs"
+required-features = ["desktop"]
+[lib]
+path = "lib.rs"
+[dependencies]
+ferrodock-serializer-system-text-json-reactiveui = { path = "../../../src/Dock/FerroDock.Serializer.SystemTextJson.ReactiveUI" }
+ferrodock-serializer-system-text-json = { path = "../../../src/Dock/FerroDock.Serializer.SystemTextJson" }
+ferrodock-model-ferro.workspace = true
+ferrodock-model-reactiveui-ferro = { path = "../../../src/Dock/FerroDock.Model.ReactiveUI.Ferro" }
+ferroui-desktop = { workspace = true, optional = true }
+ferrodock-ferro-themes-fluent = { path = "../../../src/Dock/FerroDock.Ferro.Themes.Fluent" }
+ferrodock-ferro-themes-browser = { path = "../../../src/Dock/FerroDock.Ferro.Themes.Browser" }
+ferroui-themes-fluent.workspace = true
+ferroui-reactiveui-controls.workspace = true
+ferrodock-model.workspace = true
+ferrodock-controls-recycling = { path = "../../../src/Dock/FerroDock.Controls.Recycling" }
+ferrodock-model-reactiveui = { path = "../../../src/Dock/FerroDock.Model.ReactiveUI" }
+ferrodock-ferro = { path = "../../../src/Dock/FerroDock.Ferro" }
+ferrodock-ferro-diagnostics = { path = "../../../src/Dock/FerroDock.Ferro.Diagnostics" }
+ferrodock-settings.workspace = true
+ferroui-base.workspace = true
+ferroui-fonts-inter.workspace = true
+ferroui-controls.workspace = true
+ferroui-markup-xaml.workspace = true
+ferroui-system.workspace = true
+ferroui-reactive.workspace = true
+ferroui-reactiveui.workspace = true
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "deny"
+[build-dependencies]
+ferroui-build.workspace = true
+[dev-dependencies]
+ferroui-headless = { workspace = true, features = ["testing"] }

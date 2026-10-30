@@ -1,0 +1,13 @@
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            xmlns:original="clr-namespace:FerroUI.MarkupExtension;assembly=FerroDock.MarkupExtension"
+            x:CompileBindings="True">
+  <TextBlock x:Name="Named" Text="Original named object" />
+  <Border Tag="{Reference Named}" />
+  <Border Tag="{original:Reference Name=Named}" />
+  <ContentControl Content="{Load LoadedExtensionView.xaml}" />
+  <ContentControl Content="{original:Load Source=ferres://ferrodock_markup_tests/LoadedExtensionView.xaml}" />
+  <Border Tag="{Reference Missing}" />
+  <ContentControl Content="{Load}" />
+  <Border Tag="{Reference}" />
+</StackPanel>

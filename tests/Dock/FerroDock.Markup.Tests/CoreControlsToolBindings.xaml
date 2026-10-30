@@ -1,0 +1,3 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:m="clr-namespace:FerroDock.Model.Controls;assembly=FerroDock.Model" x:DataType="m:IToolDock">
+<TextBlock Text="{Binding ActiveDockable.Title}"/><CheckBox IsChecked="{Binding AutoHide, Mode=TwoWay}"/><Button Command="{Binding AddTool}" CommandParameter="{Binding DefaultDockable}"/>
+</StackPanel>

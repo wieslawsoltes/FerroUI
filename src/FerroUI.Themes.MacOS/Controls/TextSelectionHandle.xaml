@@ -1,0 +1,59 @@
+<!--
+  Not ported from a style: the selection handles of the text controls of WinUI 3 (the grippers)
+  are drawn in code by the framework, without a template, in microsoft-ui-xaml
+  (https://github.com/microsoft/microsoft-ui-xaml, commit
+  7e4b0c2096be402f51cc8f7d203ebf67cff183d0): CTextSelectionGripper of
+  dxaml/xcp/core/text/common/Gripper.cpp, with the sizes of
+  dxaml/xcp/core/text/common/TextSelectionSettings.cpp in millimetres at 96 dots per inch. A
+  gripper is an outer circle of 4.8 mm (18.14 px) in the gripper fill, white, or the window
+  colour of a high contrast theme (CCoreServices::GetTextSelectionGripperBrush), with an inner
+  circle of 3.7 mm (13.98 px) in the same fill, outlined 0.4 mm (1.51 px) in the selection
+  colour of the text control made opaque, and a pole of 0.6 mm (2.27 px) in the selection colour
+  from the top of the text line down into the circles. The hit area is 8 mm by 9.3 mm (30.24 px
+  by 35.15 px), centred under the selection point, from the top of the circles. The start, end
+  and caret grippers are the same.
+
+  This is that gripper as the template FerroUI's TextSelectionHandle requires: the circles
+  centred under PART_Indicator, the point of the selection (FerroUI places the top of the handle
+  at the bottom of the text line, at the x of the centre of PART_Indicator), in the hit area.
+  The fill is SystemColorWindowColor (white in the light and dark dictionaries, the window colour
+  in the high contrast one) and the outline TextControlSelectionHighlightColor, the selection
+  colour of FerroUI's text box (its alpha is not removed).
+
+  The pole is left out: WinUI draws it through the height of the text line above the gripper,
+  which FerroUI's handle does not know. The start and end handles are the circle of the caret,
+  as in WinUI (FerroUI's :start and :end pseudo-classes change nothing).
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <ControlTheme x:Key="{x:Type TextSelectionHandle}" TargetType="TextSelectionHandle">
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid x:Name="HitTestBox" Width="30.24" Height="35.15" Background="Transparent">
+          <Border x:Name="PART_Indicator"
+                  Width="1"
+                  Height="1"
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Top" />
+          <Ellipse x:Name="EllipseExternal"
+                   Width="18.14"
+                   Height="18.14"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Top"
+                   Fill="{DynamicResource SystemColorWindowColor}" />
+          <Ellipse x:Name="EllipseInternal"
+                   Width="13.98"
+                   Height="13.98"
+                   Margin="0,2.08,0,0"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Top"
+                   Fill="{DynamicResource SystemColorWindowColor}"
+                   Stroke="{DynamicResource TextControlSelectionHighlightColor}"
+                   StrokeThickness="1.51" />
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

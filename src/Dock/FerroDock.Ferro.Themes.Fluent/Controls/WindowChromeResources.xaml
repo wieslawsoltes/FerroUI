@@ -1,0 +1,9 @@
+<ResourceDictionary xmlns:fd="using:FerroDock.Ferro.Controls"
+                    xmlns:pc="using:FerroDock.Ferro.Converters"
+                    xmlns:settingsp="using:FerroDock.Settings" xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <StaticResource x:Key="DockWindowChromeBackgroundBrush" ResourceKey="DockSurfaceEditorBrush" />
+  <StaticResource x:Key="DockWindowChromeBorderBrush" ResourceKey="DockBorderSubtleBrush" />
+  <StaticResource x:Key="DockWindowChromeTitleBarBackgroundBrush" ResourceKey="DockSurfaceHeaderBrush" />
+  <StaticResource x:Key="DockWindowChromeForegroundBrush" ResourceKey="DockTabForegroundBrush" />
+</ResourceDictionary>

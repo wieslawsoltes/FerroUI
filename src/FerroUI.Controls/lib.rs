@@ -191,6 +191,8 @@ pub use repeat_button::RepeatButton;
 #[cfg(test)]
 mod button_tests;
 #[cfg(test)]
+mod property_defaults_tests;
+#[cfg(test)]
 mod control_focus_adorner_tests;
 #[cfg(test)]
 mod hotkey_manager_tests;
@@ -271,6 +273,100 @@ pub use icon_element::IconElement;
 pub use image::Image;
 pub use label::Label;
 pub use path_icon::PathIcon;
+// WinUI's icons (docs/porting/winui-controls.md).
+mod font_icon;
+mod icon_source;
+mod symbol_icon;
+pub use font_icon::FontIcon;
+pub use icon_source::{
+    FontIconSource, IconSource, IconSourceImpl, IconSourceImplExt, IconSourceVTable, PathIconSource, SymbolIconSource,
+};
+pub use symbol_icon::{Symbol, SymbolIcon};
+#[cfg(test)]
+mod font_icon_tests;
+#[cfg(test)]
+mod icon_source_tests;
+#[cfg(test)]
+mod icon_test_support;
+#[cfg(test)]
+mod symbol_icon_tests;
+// WinUI's status controls (docs/porting/winui-controls.md).
+mod info_badge;
+mod info_bar;
+mod progress_ring;
+pub use info_badge::InfoBadge;
+pub use info_bar::{
+    InfoBar, InfoBarCloseReason, InfoBarClosedEventArgs, InfoBarClosingEventArgs, InfoBarOpenedEventArgs,
+    InfoBarSeverity,
+};
+pub use progress_ring::ProgressRing;
+#[cfg(test)]
+mod info_badge_tests;
+#[cfg(test)]
+mod info_bar_tests;
+#[cfg(test)]
+mod progress_ring_tests;
+// WinUI's title bar (docs/porting/winui-controls.md).
+mod title_bar;
+pub use title_bar::TitleBar;
+#[cfg(test)]
+mod title_bar_tests;
+// WinUI's input controls (docs/porting/winui-controls.md).
+mod auto_suggest_box;
+mod number_box;
+mod radio_buttons;
+mod rating_control;
+mod rating_item_info;
+pub use auto_suggest_box::{
+    AutoSuggestBox, AutoSuggestBoxQuerySubmittedEventArgs, AutoSuggestBoxSuggestionChosenEventArgs,
+    AutoSuggestBoxTextChangedEventArgs, AutoSuggestionBoxTextChangeReason,
+};
+pub use number_box::{
+    INumberBoxNumberFormatter, InvariantNumberBoxNumberFormatter, NumberBox, NumberBoxSpinButtonPlacementMode,
+    NumberBoxValidationMode, NumberBoxValueChangedEventArgs,
+};
+pub use radio_buttons::RadioButtons;
+pub use rating_control::RatingControl;
+pub use rating_item_info::{RatingItemFontInfo, RatingItemImageInfo, RatingItemInfo};
+#[cfg(test)]
+mod auto_suggest_box_tests;
+#[cfg(test)]
+mod input_test_support;
+#[cfg(test)]
+mod number_box_tests;
+#[cfg(test)]
+mod radio_buttons_tests;
+#[cfg(test)]
+mod rating_control_tests;
+// WinUI's navigation: Frame, its pages and the navigation model in the namespace
+// FerroUI.Navigation (docs/porting/winui-controls.md, section 7).
+pub mod navigation;
+mod frame;
+mod frame_page;
+pub use frame::{Frame, PageFactory};
+pub use frame_page::{FramePage, FramePageImpl, FramePageImplExt, FramePageVTable};
+// WinUI's NavigationView and its items (docs/porting/winui-controls.md, section 10.4).
+mod navigation_view;
+mod navigation_view_events;
+mod navigation_view_item;
+pub use navigation_view::NavigationView;
+pub use navigation_view_events::{
+    NavigationViewBackButtonVisible, NavigationViewBackRequestedEventArgs, NavigationViewDisplayMode,
+    NavigationViewDisplayModeChangedEventArgs, NavigationViewItemCollapsedEventArgs,
+    NavigationViewItemExpandingEventArgs, NavigationViewItemInvokedEventArgs, NavigationViewPaneClosingEventArgs,
+    NavigationViewPaneDisplayMode, NavigationViewSelectionChangedEventArgs, NavigationViewSelectionFollowsFocus,
+};
+pub use navigation_view_item::{
+    NavigationViewItem, NavigationViewItemBase, NavigationViewItemHeader, NavigationViewItemSeparator,
+};
+#[cfg(test)]
+mod frame_tests;
+#[cfg(test)]
+mod navigation_test_support;
+#[cfg(test)]
+mod navigation_view_item_tests;
+#[cfg(test)]
+mod navigation_view_tests;
 #[cfg(test)]
 mod image_tests;
 #[cfg(test)]
@@ -431,7 +527,7 @@ pub use pasting_from_clipboard_event_args::PastingFromClipboardEventArgs;
 pub use selectable_text_block::SelectableTextBlock;
 pub use text_block::{InlinesTextSource, SimpleTextSource, TextBlock, TextBlockImpl, TextBlockImplExt, TextBlockVTable};
 pub use text_changed_event_args::TextChangedEventArgs;
-pub use text_changing_event_args::TextChangingEventArgs;
+pub use text_changing_event_args::{TextBoxTextChange, TextChangingEventArgs};
 pub use text_layout_rounding_placement::TextLayoutRoundingPlacement;
 
 #[cfg(test)]
@@ -664,7 +760,7 @@ pub use pull_to_refresh::{
 mod calendar;
 mod calendar_date_picker;
 pub use calendar::{
-    Calendar, CalendarDateChangedEventArgs, CalendarDateRange, CalendarMode, CalendarModeChangedEventArgs,
+    Calendar, CalendarBlackoutDatesCollection, CalendarDateChangedEventArgs, CalendarDateRange, CalendarMode, CalendarModeChangedEventArgs,
     CalendarSelectionMode,
 };
 pub use calendar_date_picker::{
@@ -720,7 +816,7 @@ pub use table_view_row::TableViewRow;
 pub mod visual_state;
 pub use visual_state::{
     VisualState, VisualStateChangedEventArgs, VisualStateGroup, VisualStateGroupCollection, VisualStateManager,
-    VisualStateManagerImpl,
+    VisualStateManagerImpl, VisualStateManagerImplExt, VisualStateManagerVTable,
 };
 #[cfg(test)]
 mod table_view_column_header_tests;

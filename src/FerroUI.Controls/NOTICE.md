@@ -105,6 +105,59 @@ the WinUI project directly (`controls/dev/Repeater` at commit
 `7e4b0c2096be402f51cc8f7d203ebf67cff183d0`, the revision the WinUI theme is
 ported from), under the same license.
 
+`font_icon.rs`, `symbol_icon.rs` and `icon_source.rs` (WinUI's `FontIcon`, `Symbol`,
+`SymbolIcon` and the icon sources) are ported from the WinUI project directly
+(`dxaml/xcp/core/core/elements/icon.cpp`, `dxaml/xcp/dxaml/lib/*IconSource_Partial.cpp` and the
+type model `dxaml/xcp/tools/XCPTypesAutoGen/XamlOM/Model/Microsoft.UI.Xaml.Controls.cs` at the
+same commit), under the same license.
+
+`info_bar.rs`, `info_badge.rs`, `progress_ring.rs`, `primitives/info_bar_panel.rs`,
+`primitives/info_bar_template_settings.rs`, `primitives/info_badge_template_settings.rs`,
+`primitives/progress_ring_template_settings.rs`,
+`automation/peers/info_bar_automation_peer.rs` and
+`automation/peers/progress_ring_automation_peer.rs` (WinUI's `InfoBar` with its panel, template
+settings, arguments and peer, `InfoBadge` and `ProgressRing`) are ported from the WinUI project
+directly (`controls/dev/InfoBar`, `controls/dev/InfoBadge` and `controls/dev/ProgressRing`, with
+the animated visuals of `controls/dev/ProgressRing/AnimatedVisuals` and the English texts of their
+`Strings/en-us/Resources.resw`, at the same commit), under the same license.
+`number_box.rs`, `utils/number_expression.rs` and
+`automation/peers/number_box_automation_peer.rs` (WinUI's `NumberBox`, its expression parser and
+its automation peer) are ported from the WinUI project directly (`controls/dev/NumberBox` at the
+same commit), under the same license.
+
+`auto_suggest_box.rs` and `automation/peers/auto_suggest_box_automation_peer.rs` (WinUI's
+`AutoSuggestBox`, its arguments and its automation peer) are ported from the WinUI project
+directly (`dxaml/xcp/dxaml/lib/AutoSuggestBox_Partial.cpp`,
+`AutoSuggestBoxAutomationPeer_Partial.cpp` and the type model
+`dxaml/xcp/tools/XCPTypesAutoGen/Modules/AutoSuggestBox/AutoSuggestBox.cs` at the same commit),
+under the same license.
+
+`radio_buttons.rs`, `primitives/radio_buttons_panel.rs`, `rating_control.rs`,
+`rating_item_info.rs`, `automation/peers/radio_buttons_automation_peer.rs` and
+`automation/peers/rating_control_automation_peer.rs` (WinUI's `RadioButtons` with the layout
+`ColumnMajorUniformToLargestGridLayout`, `RatingControl`, `RatingItemInfo`, `RatingItemFontInfo`,
+`RatingItemImageInfo` and their automation peers) are ported from the WinUI project directly
+(`controls/dev/RadioButtons` and `controls/dev/RatingControl` at the same commit), under the
+same license.
+
+`frame.rs`, `frame_page.rs`, `navigation.rs` and `navigation/page_stack_entry.rs` (WinUI's
+`Frame`, `Page` as `FramePage`, and the navigation model of `Microsoft.UI.Xaml.Navigation`: the
+navigation and cache modes, the arguments of the navigation events, `PageStackEntry` and the
+journal) are ported from the WinUI project directly (`dxaml/xcp/dxaml/lib/Frame_Partial.cpp`,
+`Page_Partial.cpp`, `NavigationHistory.cpp`, `NavigationCache.cpp`, `PageStackEntry_Partial.cpp`
+and the type model `dxaml/xcp/tools/XCPTypesAutoGen/XamlOM/Model/Microsoft.UI.Xaml.Navigation.cs`
+at the same commit), under the same license.
+
+`navigation_view.rs`, `navigation_view_events.rs`, `navigation_view_item.rs`,
+`primitives/navigation_view_template_settings.rs`,
+`automation/peers/navigation_view_automation_peer.rs` and
+`automation/peers/navigation_view_item_automation_peer.rs` (WinUI's `NavigationView`, its
+enumerations, arguments and template settings, `NavigationViewItemBase`, `NavigationViewItem`
+with the behaviour of `NavigationViewItemPresenter`, `NavigationViewItemHeader`,
+`NavigationViewItemSeparator` and their automation peers) are ported from the WinUI project
+directly (`controls/dev/NavigationView` with the English texts of its
+`Strings/en-us/Resources.resw`, at the same commit), under the same license.
+
 ## Silverlight Toolkit
 
 The files under `auto_complete_box/` (`auto_complete_box.rs`,

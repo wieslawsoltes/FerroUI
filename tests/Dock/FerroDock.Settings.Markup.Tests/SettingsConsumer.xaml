@@ -1,0 +1,24 @@
+<Grid xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:s="using:FerroDock.Settings" xmlns:core="using:FerroDock.Model.Core"
+      x:CompileBindings="True" x:DataType="Grid"
+      Tag="{x:Static s:DockSettings.MinimumHorizontalDragDistance}"
+      s:DockProperties.IsDragEnabled="False" s:DockProperties.IsDropEnabled="False"
+      s:DockProperties.DockGroup="Workspace">
+  <Grid.Resources>
+    <ResourceDictionary>
+      <s:DockSettingsOptions x:Key="Options" MinimumHorizontalDragDistance="13"
+          FloatingWindowHostMode="Managed" FloatingWindowOwnerPolicy="NeverOwned"
+          DefaultFloatingWindowOwnerMode="RootWindow" SelectorEnabled="False"
+          DocumentSelectorKeyGesture="Ctrl+Shift+F9" CommandBarMergingScope="ActiveDockable" />
+      <Border x:Key="Model" IsVisible="True" />
+      <core:DockOperation x:Key="Operation">OuterBottom</core:DockOperation>
+      <s:DockCommandBarMergingScope x:Key="Scope">ActiveDocument</s:DockCommandBarMergingScope>
+      <DockProperties x:Key="PropertyOwner" />
+    </ResourceDictionary>
+  </Grid.Resources>
+  <Border x:DataType="Border" DataContext="{StaticResource Model}"
+      s:DockProperties.IsDragArea="{Binding IsVisible}"
+      s:DockProperties.IndicatorDockOperation="OuterLeft">
+    <s:DockProperties.DockAdornerHost><Border /></s:DockProperties.DockAdornerHost>
+  </Border>
+</Grid>

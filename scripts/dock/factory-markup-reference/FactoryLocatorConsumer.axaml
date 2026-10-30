@@ -1,0 +1,4 @@
+<local:LocatorFactory xmlns="https://github.com/avaloniaui"
+    xmlns:local="clr-namespace:DockFactoryMarkupReference"
+    DefaultContextLocator="CreateContext"
+    DefaultHostWindowLocator="CreateHost" />

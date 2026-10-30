@@ -106,3 +106,39 @@ fn create_target() -> Box<dyn IDrawingContextImpl> {
         .create_render_target_bitmap(PixelSize::new(100, 100), Vector::new(96.0, 96.0))
         .create_drawing_context()
 }
+
+#[test]
+fn geometry_path_data_retains_curves_fill_rules_and_affine_transform() {
+    use ferroui_base::media::GeometryPathSegment;
+    let mut path = BezPath::new();
+    path.move_to((1.0, 2.0));
+    path.quad_to((3.0, 4.0), (5.0, 6.0));
+    path.curve_to((7.0, 8.0), (9.0, 10.0), (11.0, 12.0));
+    path.close_path();
+    let geometry = crate::SimpleGeometryImpl::new(VelloPath::new(path, FillRule::EvenOdd), FillPath::SameAsStroke, None);
+    let original = geometry.try_get_path_data().unwrap();
+    assert_eq!(original.fill, original.stroke);
+    assert_eq!(original.fill.as_ref().unwrap().fill_rule, FillRule::EvenOdd);
+    let matrix = ferroui_base::Matrix::new(2.0, 0.0, 0.5, 3.0, 10.0, 20.0);
+    let transformed = geometry.with_transform(matrix).try_get_path_data().unwrap();
+    let result = transformed.fill.unwrap();
+    assert_eq!(result.fill_rule, FillRule::EvenOdd);
+    assert_eq!(result.segments, vec![
+        GeometryPathSegment::MoveTo(Point::new(13.0, 26.0)),
+        GeometryPathSegment::QuadraticTo { control: Point::new(18.0, 32.0), point: Point::new(23.0, 38.0) },
+        GeometryPathSegment::CubicTo { control1: Point::new(28.0, 44.0), control2: Point::new(33.0, 50.0), point: Point::new(38.0, 56.0) },
+        GeometryPathSegment::Close,
+    ]);
+}
+
+#[test]
+fn geometry_path_data_distinguishes_independent_fill_and_stroke_and_empty_geometry() {
+    let mut stroke = BezPath::new(); stroke.move_to((0.0, 0.0)); stroke.line_to((20.0, 0.0));
+    let mut fill = stroke.clone(); fill.line_to((20.0, 10.0)); fill.close_path();
+    let geometry = crate::SimpleGeometryImpl::new(VelloPath::new(stroke, FillRule::NonZero), FillPath::Separate(VelloPath::new(fill, FillRule::EvenOdd)), None);
+    let data = geometry.try_get_path_data().unwrap();
+    assert_ne!(data.fill, data.stroke);
+    assert_eq!(data.fill.unwrap().fill_rule, FillRule::EvenOdd);
+    let empty = CombinedGeometryImpl::new(None, FillPath::None).try_get_path_data().unwrap();
+    assert!(empty.fill.is_none()); assert!(empty.stroke.is_none());
+}

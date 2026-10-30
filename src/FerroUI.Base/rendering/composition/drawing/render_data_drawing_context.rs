@@ -8,9 +8,10 @@ use crate::media::{
     RenderOptions, TextOptions,
 };
 use crate::platform::IGeometryImpl;
+use crate::media::imaging::BitmapBlendingMode;
 use crate::rendering::composition::Compositor;
 use crate::rendering::scene_graph::ICustomDrawOperation;
-use crate::{Matrix, Point, Rect, Ref, RoundedRect};
+use crate::{FerroLocator, LocatorExtensions, Matrix, Point, Rect, Ref, RoundedRect};
 use std::collections::HashSet;
 use std::rc::Rc;
 use std::sync::Arc;
@@ -53,11 +54,12 @@ pub struct RenderDataDrawingContext {
     resources: Vec<RecordedResource>,
     resources_hash_set: HashSet<usize>,
     push_stack: Vec<PushEntry>,
+    compositing_layers: Option<bool>,
 }
 
 impl RenderDataDrawingContext {
     pub fn new(compositor: Option<Rc<Compositor>>) -> Self {
-        Self { compositor, stream: None, resources: Vec::new(), resources_hash_set: HashSet::new(), push_stack: Vec::new() }
+        Self { compositor, stream: None, resources: Vec::new(), resources_hash_set: HashSet::new(), push_stack: Vec::new(), compositing_layers: None }
     }
 
     fn stream(&mut self) -> &mut RenderDataStream {
@@ -195,6 +197,7 @@ impl RenderDataDrawingContext {
 
     /// Discards what has been recorded so far.
     pub fn reset(&mut self) {
+        self.compositing_layers = None;
         if let Some(mut stream) = self.stream.take() {
             stream.dispose_resources();
             stream.dispose();
@@ -386,6 +389,24 @@ impl IDrawingContextCore for RenderDataDrawingContext {
         let effect = EffectExtensions::to_immutable(effect);
         self.stream().push_effect(Some(effect), bounds.inflate_thickness(padding));
         self.pushed_scope(before);
+    }
+
+    fn try_push_compositing_layer_core(&mut self, blend: BitmapBlendingMode, opacity: f64, bounds: Rect) -> bool {
+        let supported = *self.compositing_layers.get_or_insert_with(|| {
+            FerroLocator::current().get_service::<dyn crate::platform::IPlatformRenderInterface>()
+                .is_some_and(|backend| backend.supports_compositing_layers())
+        });
+        if !supported {
+            return false;
+        }
+        let before = self.stream().opcode_length();
+        self.stream().push_compositing_layer(blend, opacity, bounds);
+        self.pushed_scope(before);
+        true
+    }
+
+    fn pop_compositing_layer_core(&mut self) {
+        self.pop_core();
     }
 
     fn pop_clip_core(&mut self) {

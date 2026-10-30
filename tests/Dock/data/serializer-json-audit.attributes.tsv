@@ -1,0 +1,7 @@
+attribute-activation-shared-alias	1
+attribute-activation-distinct-instances	1
+attribute-registration-exact-closed-type	1
+attribute-registration-shared-alias	1
+attribute-registration-distinct-instances	1
+attribute-registration-null-retained	1
+attribute-registration-no-type-construction	1

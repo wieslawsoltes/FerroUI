@@ -1,0 +1,394 @@
+<!--
+  macOS 26 control theme adapted from FerroUI's compiled WinUI foundation.
+  Foundation: microsoft-ui-xaml 7e4b0c2096be402f51cc8f7d203ebf67cff183d0.
+  Copyright (c) Microsoft Corporation. MIT License; see NOTICE.md.
+  Geometry and timing are calibrated theme values, pending native capture.
+  FerroUI template parts, keyboard handling, editing and popup contracts are preserved.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <StackPanel Spacing="10">
+        <ComboBox PlaceholderText="Select an item" Width="200">
+          <ComboBoxItem>Item 1</ComboBoxItem>
+          <ComboBoxItem>Item 2</ComboBoxItem>
+        </ComboBox>
+        <ComboBox SelectedIndex="1" Width="200" IsEnabled="False">
+          <ComboBoxItem>Item 1</ComboBoxItem>
+          <ComboBoxItem>Item 2</ComboBoxItem>
+        </ComboBox>
+        <ComboBox IsEditable="True" Text="Editable" Width="200">
+          <ComboBoxItem>Item 1</ComboBoxItem>
+        </ComboBox>
+      </StackPanel>
+    </Border>
+  </Design.PreviewWith>
+
+  <!-- ComboBoxTextBoxStyle: the TextBoxStyle of an editable combo box. -->
+  <ControlTheme x:Key="ComboBoxTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource DefaultTextBoxStyle}">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <Border x:Name="BorderElement"
+                  Background="{TemplateBinding Background}"
+                  BorderBrush="{TemplateBinding BorderBrush}"
+                  BackgroundSizing="InnerBorderEdge"
+                  BorderThickness="{TemplateBinding BorderThickness}"
+                  CornerRadius="{TemplateBinding CornerRadius}"
+                  TemplatedControl.IsTemplateFocusTarget="True" />
+          <Border x:Name="MacOSPointerFocusRing"
+                  Margin="-3" BorderThickness="3" Opacity="0"
+                  BorderBrush="{DynamicResource MacOSFocusBrush}"
+                  CornerRadius="{TemplateBinding CornerRadius}"
+                  IsHitTestVisible="False">
+            <Border.Transitions>
+              <Transitions>
+                <DoubleTransition Property="Opacity" Duration="{DynamicResource MacOSMotionFastDuration}" />
+              </Transitions>
+            </Border.Transitions>
+          </Border>
+          <ScrollViewer x:Name="PART_ScrollViewer"
+                        HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}"
+                        VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}"
+                        IsDeferredScrollingEnabled="{TemplateBinding (ScrollViewer.IsDeferredScrollingEnabled)}"
+                        Margin="{TemplateBinding BorderThickness}"
+                        Padding="{TemplateBinding Padding}"
+                        Foreground="{TemplateBinding Foreground}"
+                        Focusable="False">
+            <TextPresenter x:Name="PART_TextPresenter"
+                           Text="{TemplateBinding Text, Mode=TwoWay}"
+                           CaretBlinkInterval="{TemplateBinding CaretBlinkInterval}"
+                           CaretIndex="{TemplateBinding CaretIndex}"
+                           SelectionStart="{TemplateBinding SelectionStart}"
+                           SelectionEnd="{TemplateBinding SelectionEnd}"
+                           TextAlignment="{TemplateBinding TextAlignment}"
+                           TextWrapping="{TemplateBinding TextWrapping}"
+                           LineHeight="{TemplateBinding LineHeight}"
+                           LetterSpacing="{TemplateBinding LetterSpacing}"
+                           PasswordChar="{TemplateBinding PasswordChar}"
+                           RevealPassword="{TemplateBinding RevealPassword}"
+                           SelectionBrush="{TemplateBinding SelectionBrush}"
+                           SelectionForegroundBrush="{TemplateBinding SelectionForegroundBrush}"
+                           CaretBrush="{TemplateBinding CaretBrush}"
+                           HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                           VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+            <ScrollViewer.Styles>
+              <Style Selector="ScrollContentPresenter#PART_ContentPresenter">
+                <Setter Property="Cursor" Value="IBeam" />
+              </Style>
+            </ScrollViewer.Styles>
+          </ScrollViewer>
+          <TextBlock x:Name="PlaceholderTextContentPresenter"
+                     Foreground="{TemplateBinding Foreground}"
+                     Margin="{TemplateBinding BorderThickness}"
+                     Padding="{TemplateBinding Padding}"
+                     Text="{TemplateBinding PlaceholderText}"
+                     TextAlignment="{TemplateBinding TextAlignment}"
+                     TextWrapping="{TemplateBinding TextWrapping}"
+                     IsHitTestVisible="False">
+            <TextBlock.IsVisible>
+              <MultiBinding Converter="{x:Static BoolConverters.And}">
+                <Binding ElementName="PART_TextPresenter" Path="PreeditText" Converter="{x:Static StringConverters.IsNullOrEmpty}" />
+                <Binding RelativeSource="{RelativeSource TemplatedParent}" Path="Text" Converter="{x:Static StringConverters.IsNullOrEmpty}" />
+              </MultiBinding>
+            </TextBlock.IsVisible>
+          </TextBlock>
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- Disabled -->
+    <Style Selector="^:disabled">
+      <Setter Property="PlaceholderForeground" Value="{DynamicResource TextControlPlaceholderForegroundDisabled}" />
+      <Style Selector="^ /template/ Border#BorderElement">
+        <Setter Property="Background" Value="{DynamicResource TextControlBackgroundDisabled}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrushDisabled}" />
+      </Style>
+      <Style Selector="^ /template/ ScrollViewer#PART_ScrollViewer">
+        <Setter Property="Foreground" Value="{DynamicResource TextControlForegroundDisabled}" />
+      </Style>
+    </Style>
+    <!-- PointerOver -->
+    <Style Selector="^:not(TextBox:disabled):pointerover">
+      <Setter Property="PlaceholderForeground" Value="{DynamicResource TextControlPlaceholderForegroundPointerOver}" />
+      <Style Selector="^ /template/ Border#BorderElement">
+        <Setter Property="Background" Value="{DynamicResource TextControlBackgroundPointerOver}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrushPointerOver}" />
+      </Style>
+      <Style Selector="^ /template/ ScrollViewer#PART_ScrollViewer">
+        <Setter Property="Foreground" Value="{DynamicResource TextControlForegroundPointerOver}" />
+      </Style>
+    </Style>
+    <!-- Focused -->
+    <Style Selector="^:not(TextBox:disabled):focus">
+      <Setter Property="PlaceholderForeground" Value="{DynamicResource TextControlPlaceholderForegroundFocused}" />
+      <Style Selector="^ /template/ Border#BorderElement">
+        <Setter Property="Background" Value="{DynamicResource TextControlBackgroundFocused}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrushFocused}" />
+        <Setter Property="BorderThickness" Value="{DynamicResource TextControlBorderThemeThickness}" />
+      </Style>
+      <Style Selector="^ /template/ ScrollViewer#PART_ScrollViewer">
+        <Setter Property="Foreground" Value="{DynamicResource TextControlForegroundFocused}" />
+      </Style>
+    </Style>
+    <!-- Text editing retains a focus ring for pointer focus as well as keyboard focus. -->
+    <Style Selector="^:focus:not(TextBox:focus-visible):not(TextBox:disabled) /template/ Border#MacOSPointerFocusRing">
+      <Setter Property="Opacity" Value="1" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="DefaultComboBoxStyle" TargetType="ComboBox">
+    <!-- The defaults of a WinUI 3 control, which its style leaves unset and its template binds
+         (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27). -->
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Padding" Value="{DynamicResource ComboBoxPadding}" />
+    <Setter Property="MaxDropDownHeight" Value="504" />
+    <Setter Property="Foreground" Value="{DynamicResource ComboBoxForeground}" />
+    <Setter Property="Background" Value="{DynamicResource ComboBoxBackground}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource ComboBoxBorderBrush}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource ComboBoxBorderThemeThickness}" />
+    <Setter Property="PlaceholderForeground" Value="{DynamicResource ComboBoxPlaceHolderForeground}" />
+    <Setter Property="KeyboardNavigation.TabNavigation" Value="Once" />
+    <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+    <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+    <Setter Property="ScrollViewer.IsDeferredScrollingEnabled" Value="False" />
+    <Setter Property="ScrollViewer.BringIntoViewOnFocusChange" Value="True" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border IsHitTestVisible="False" Margin="-3" BorderThickness="3"
+                BorderBrush="{DynamicResource MacOSFocusBrush}"
+                CornerRadius="{DynamicResource MacOSControlCornerRadius}" />
+      </FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="CornerRadius" Value="{DynamicResource MacOSControlCornerRadius}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <DataValidationErrors>
+          <Grid x:Name="LayoutRoot" ColumnDefinitions="*,26">
+            <Border x:Name="Background"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="2"
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BackgroundSizing="InnerBorderEdge"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="{TemplateBinding CornerRadius}"
+                    MinWidth="{DynamicResource ComboBoxThemeMinWidth}"
+                    MinHeight="{DynamicResource MacOSControlHeight}"
+                    TemplatedControl.IsTemplateFocusTarget="True">
+              <Border.Transitions>
+                <Transitions>
+                  <BrushTransition Property="Background" Duration="{DynamicResource MacOSMotionFastDuration}" />
+                  <BrushTransition Property="BorderBrush" Duration="{DynamicResource MacOSMotionFastDuration}" />
+                </Transitions>
+              </Border.Transitions>
+            </Border>
+            <ContentControl x:Name="ContentPresenter"
+                            Grid.Column="0"
+                            Content="{TemplateBinding SelectionBoxItem}"
+                            ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                            Foreground="{TemplateBinding Foreground}"
+                            Margin="{TemplateBinding Padding}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                            IsVisible="{TemplateBinding IsEditable, Converter={x:Static BoolConverters.Not}}" />
+            <TextBlock x:Name="PlaceholderTextBlock"
+                       Grid.Column="0"
+                       Text="{TemplateBinding PlaceholderText}"
+                       Foreground="{TemplateBinding Foreground}"
+                       Margin="{TemplateBinding Padding}"
+                       HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                       VerticalAlignment="{TemplateBinding VerticalContentAlignment}">
+              <TextBlock.IsVisible>
+                <MultiBinding Converter="{x:Static BoolConverters.And}">
+                  <Binding Path="SelectionBoxItem" RelativeSource="{RelativeSource TemplatedParent}" Converter="{x:Static ObjectConverters.IsNull}" />
+                  <Binding Path="!IsEditable" RelativeSource="{RelativeSource TemplatedParent}" />
+                </MultiBinding>
+              </TextBlock.IsVisible>
+            </TextBlock>
+            <TextBox x:Name="PART_EditableTextBox"
+                     Grid.Column="0"
+                     Grid.ColumnSpan="2"
+                     Theme="{StaticResource ComboBoxTextBoxStyle}"
+                     Padding="{DynamicResource ComboBoxEditableTextPadding}"
+                     BorderBrush="Transparent"
+                     HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                     VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                     PlaceholderText="{TemplateBinding PlaceholderText}"
+                     Foreground="{TemplateBinding Foreground}"
+                     Text="{TemplateBinding Text, Mode=TwoWay}"
+                     CornerRadius="{TemplateBinding CornerRadius}"
+                     IsVisible="{TemplateBinding IsEditable}" />
+            <Border x:Name="DropDownOverlay"
+                    Grid.Column="1"
+                    Background="Transparent"
+                    Margin="3"
+                    CornerRadius="{StaticResource ComboBoxDropDownButtonBackgroundCornerRadius}"
+                    Width="20"
+                    HorizontalAlignment="Right"
+                    IsVisible="False" />
+            <!-- Paired chevrons identify a popup selector; the editable variant uses a down chevron. -->
+            <Panel Grid.Column="1"
+                   Width="12"
+                   Height="12"
+                   Margin="0,0,8,0"
+                   HorizontalAlignment="Right"
+                   VerticalAlignment="Center"
+                   IsHitTestVisible="False">
+              <Path x:Name="DropDownGlyph"
+                    Data="M 0,3 L 3,0 L 6,3 L 5,4 L 3,2 L 1,4 Z M 0,7 L 1,6 L 3,8 L 5,6 L 6,7 L 3,10 Z"
+                    Fill="{DynamicResource ComboBoxDropDownGlyphForeground}"
+                    Stretch="Uniform"
+                    Width="6"
+                    Height="10"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center" />
+            </Panel>
+            <Popup x:Name="PART_Popup"
+                   WindowManagerAddShadowHint="False"
+                   IsOpen="{TemplateBinding IsDropDownOpen, Mode=TwoWay}"
+                   PlacementTarget="Background"
+                   IsLightDismissEnabled="True"
+                   InheritsTransform="True">
+              <!-- The shadow on a border of its own (G-24). Margin: ThemeShadowFlyoutMargin
+                   (16,8,16,24) and the 0,-0.5,0,-1 of the source. -->
+              <Border x:Name="ThemeShadowWrapper"
+                      BoxShadow="{DynamicResource ThemeShadowFlyoutBoxShadow}"
+                      Margin="16,7.5,16,23"
+                      HorizontalAlignment="Stretch"
+                      CornerRadius="{DynamicResource OverlayCornerRadius}">
+                <Border x:Name="PopupBorder"
+                        MinWidth="{Binding Bounds.Width, RelativeSource={RelativeSource TemplatedParent}}"
+                        MaxHeight="{TemplateBinding MaxDropDownHeight}"
+                        Background="{DynamicResource ComboBoxDropDownBackground}"
+                        BackgroundSizing="InnerBorderEdge"
+                        BorderBrush="{DynamicResource ComboBoxDropDownBorderBrush}"
+                        BorderThickness="{DynamicResource ComboBoxDropdownBorderThickness}"
+                        Padding="{DynamicResource ComboBoxDropdownBorderPadding}"
+                        CornerRadius="{DynamicResource OverlayCornerRadius}">
+                  <ScrollViewer x:Name="ScrollViewer"
+                                Foreground="{DynamicResource ComboBoxDropDownForeground}"
+                                HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}"
+                                VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}"
+                                IsDeferredScrollingEnabled="{TemplateBinding (ScrollViewer.IsDeferredScrollingEnabled)}"
+                                BringIntoViewOnFocusChange="{TemplateBinding (ScrollViewer.BringIntoViewOnFocusChange)}"
+                                IsScrollChainingEnabled="False">
+                    <ItemsPresenter x:Name="PART_ItemsPresenter"
+                                    Margin="{DynamicResource ComboBoxDropdownContentMargin}"
+                                    ItemsPanel="{TemplateBinding ItemsPanel}" />
+                  </ScrollViewer>
+                </Border>
+              </Border>
+            </Popup>
+          </Grid>
+        </DataValidationErrors>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- PointerOver -->
+    <Style Selector="^:not(ComboBox:disabled):pointerover">
+      <Setter Property="PlaceholderForeground" Value="{DynamicResource ComboBoxPlaceHolderForegroundPointerOver}" />
+      <Style Selector="^ /template/ Border#Background">
+        <Setter Property="Background" Value="{DynamicResource ComboBoxBackgroundPointerOver}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ComboBoxBorderBrushPointerOver}" />
+      </Style>
+      <Style Selector="^ /template/ ContentControl#ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource ComboBoxForegroundPointerOver}" />
+      </Style>
+    </Style>
+    <!-- Pressed -->
+    <Style Selector="^:not(ComboBox:disabled):pressed">
+      <Setter Property="PlaceholderForeground" Value="{DynamicResource ComboBoxPlaceHolderForegroundPressed}" />
+      <Style Selector="^ /template/ Border#Background">
+        <Setter Property="Background" Value="{DynamicResource ComboBoxBackgroundPressed}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ComboBoxBorderBrushPressed}" />
+      </Style>
+      <Style Selector="^ /template/ ContentControl#ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource ComboBoxForegroundPressed}" />
+      </Style>
+    </Style>
+    <!-- Disabled -->
+    <Style Selector="^:disabled">
+      <Setter Property="PlaceholderForeground" Value="{DynamicResource ComboBoxPlaceHolderForegroundDisabled}" />
+      <Style Selector="^ /template/ Border#Background">
+        <Setter Property="Background" Value="{DynamicResource ComboBoxBackgroundDisabled}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ComboBoxBorderBrushDisabled}" />
+      </Style>
+      <Style Selector="^ /template/ ContentControl#ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource ComboBoxForegroundDisabled}" />
+      </Style>
+      <Style Selector="^ /template/ Path#DropDownGlyph">
+        <Setter Property="Fill" Value="{DynamicResource ComboBoxDropDownGlyphForegroundDisabled}" />
+      </Style>
+    </Style>
+
+    <!-- Focused (FocusStates) -->
+    <Style Selector="^:not(ComboBox:disabled):focus-visible:not(ComboBox:dropdownopen)">
+      <Setter Property="PlaceholderForeground" Value="{DynamicResource ComboBoxPlaceHolderForegroundFocused}" />
+      <Style Selector="^ /template/ ContentControl#ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource ComboBoxForegroundFocused}" />
+      </Style>
+      <Style Selector="^ /template/ Path#DropDownGlyph">
+        <Setter Property="Fill" Value="{DynamicResource ComboBoxDropDownGlyphForegroundFocused}" />
+      </Style>
+    </Style>
+    <!-- FocusedPressed -->
+    <Style Selector="^:not(ComboBox:disabled):focus-visible:pressed:not(ComboBox:dropdownopen)">
+      <Setter Property="PlaceholderForeground" Value="{DynamicResource ComboBoxPlaceHolderForegroundFocusedPressed}" />
+      <Style Selector="^ /template/ ContentControl#ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource ComboBoxForegroundFocusedPressed}" />
+      </Style>
+      <Style Selector="^ /template/ Path#DropDownGlyph">
+        <Setter Property="Fill" Value="{DynamicResource ComboBoxDropDownGlyphForegroundFocusedPressed}" />
+      </Style>
+    </Style>
+
+    <Style Selector="^[IsEditable=true] /template/ Path#DropDownGlyph">
+      <Setter Property="Data" Value="{StaticResource GlyphGeometryE96E}" />
+      <Setter Property="Height" Value="4" />
+      <Setter Property="Width" Value="7" />
+    </Style>
+    <!-- EditableModeStates -->
+    <Style Selector="^[IsEditable=true] /template/ Border#DropDownOverlay">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <!-- TextBoxFocused -->
+    <Style Selector="^[IsEditable=true]:not(ComboBox:disabled):focus-within /template/ Path#DropDownGlyph">
+      <Setter Property="Fill" Value="{DynamicResource ComboBoxEditableDropDownGlyphForeground}" />
+    </Style>
+    <!-- TextBoxOverlayPointerOver, TextBoxFocusedOverlayPointerOver -->
+    <Style Selector="^[IsEditable=true]:not(ComboBox:disabled) /template/ Border#DropDownOverlay:pointerover">
+      <Setter Property="Background" Value="{DynamicResource ComboBoxDropDownBackgroundPointerOver}" />
+    </Style>
+    <!-- TextBoxOverlayPressed -->
+    <Style Selector="^[IsEditable=true]:not(ComboBox:disabled):pressed /template/ Border#DropDownOverlay:pointerover">
+      <Setter Property="Background" Value="{DynamicResource ComboBoxDropDownBackgroundPointerPressed}" />
+    </Style>
+    <!-- TextBoxFocusedOverlayPressed -->
+    <Style Selector="^[IsEditable=true]:not(ComboBox:disabled):focus-within:pressed /template/ Border#DropDownOverlay:pointerover">
+      <Setter Property="Background" Value="{DynamicResource ComboBoxFocusedDropDownBackgroundPointerPressed}" />
+    </Style>
+
+    <!-- A validation error (FerroUI's DataValidationErrors, which WinUI 3 does not have): the
+         border in the critical fill, as for TextBox. -->
+    <Style Selector="^:error /template/ Border#Background">
+      <Setter Property="BorderBrush" Value="{DynamicResource SystemFillColorCriticalBrush}" />
+    </Style>
+
+    <!-- An editable combo box is not a tab stop of its own: its text box is (as the other themes
+         of FerroUI). -->
+    <Style Selector="^[IsEditable=true]">
+      <Setter Property="IsTabStop" Value="False" />
+      <Setter Property="KeyboardNavigation.TabNavigation" Value="Local" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type ComboBox}" TargetType="ComboBox" BasedOn="{StaticResource DefaultComboBoxStyle}" />
+</ResourceDictionary>

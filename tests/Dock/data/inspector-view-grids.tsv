@@ -1,0 +1,70 @@
+# Original unchanged compiled inspector views; .NET 10.0.13
+GridDockDebugView	2	2	TextBlock,0,0,1,0;TextBox,0,1,1,0;TextBlock,1,0,1,0;TextBox,1,1,1,0
+UniformGridDockDebugView	2	2	TextBlock,0,0,1,0;TextBox,0,1,1,0;TextBlock,1,0,1,0;TextBox,1,1,1,0
+DocumentContentDebugView	1	2	TextBlock,0,0,1,0;TextBox,0,1,1,1
+DocumentDockContentDebugView	1	2	TextBlock,0,0,1,0;TextBox,0,1,1,1
+ToolDockDebugView	4	2	TextBlock,0,0,1,0;TextBox,0,1,1,0;TextBlock,1,0,1,0;CheckBox,1,1,1,0;TextBlock,2,0,1,0;CheckBox,2,1,1,0;TextBlock,3,0,1,0;TextBox,3,1,1,0
+DockableDebugView	29	2	TextBlock,0,0,1,0;TextBox,0,1,1,0;TextBlock,1,0,1,0;TextBox,1,1,1,0;TextBlock,2,0,1,0;TextBox,2,1,1,1;TextBlock,3,0,1,0;TextBox,3,1,1,1;TextBlock,4,0,1,0;TextBox,4,1,1,1;TextBlock,5,0,1,0;TextBox,5,1,1,1;TextBlock,6,0,1,0;CheckBox,6,1,1,0;TextBlock,7,0,1,0;CheckBox,7,1,1,0;TextBlock,8,0,1,0;TextBox,8,1,1,0;TextBlock,9,0,1,0;TextBox,9,1,1,0;TextBlock,10,0,1,0;TextBox,10,1,1,0;TextBlock,11,0,1,0;TextBox,11,1,1,0;TextBlock,12,0,1,0;TextBox,12,1,1,0;TextBlock,13,0,1,0;TextBox,13,1,1,0;TextBlock,14,0,1,0;CheckBox,14,1,1,0;TextBlock,15,0,1,0;TextBox,15,1,1,0;TextBlock,16,0,1,0;TextBox,16,1,1,0;TextBlock,17,0,1,0;TextBox,17,1,1,0;TextBlock,18,0,1,0;TextBox,18,1,1,0;TextBlock,19,0,1,0;TextBox,19,1,1,0;TextBlock,20,0,1,0;CheckBox,20,1,1,0;TextBlock,21,0,1,0;CheckBox,21,1,1,0;TextBlock,22,0,1,0;CheckBox,22,1,1,0;TextBlock,23,0,1,0;TextBox,23,1,1,0;TextBlock,24,0,1,0;CheckBox,24,1,1,0;TextBlock,25,0,1,0;CheckBox,25,1,1,0;TextBlock,26,0,1,0;CheckBox,26,1,1,0;TextBlock,27,0,1,0;CheckBox,27,1,1,0;TextBlock,28,0,1,0;CheckBox,28,1,1,0
+ToolContentDebugView	1	2	TextBlock,0,0,1,0;TextBox,0,1,1,1
+DocumentDockDebugView	4	2	TextBlock,0,0,1,0;CheckBox,0,1,1,0;TextBlock,1,0,1,0;TextBox,1,1,1,1;TextBlock,2,0,1,0;CheckBox,2,1,1,0;TextBlock,3,0,1,0;TextBox,3,1,1,0
+DockDockDebugView	1	2	TextBlock,0,0,1,0;CheckBox,0,1,1,0
+GridDockSplitterDebugView	1	2	TextBlock,0,0,1,0;TextBox,0,1,1,0
+DocumentTemplateDebugView	1	2	TextBlock,0,0,1,0;TextBox,0,1,1,1
+DockWindowDebugView	11	2	TextBlock,0,0,1,0;TextBox,0,1,1,0;TextBlock,1,0,1,0;TextBox,1,1,1,0;TextBlock,2,0,1,0;TextBox,2,1,1,0;TextBlock,3,0,1,0;TextBox,3,1,1,0;TextBlock,4,0,1,0;TextBox,4,1,1,0;TextBlock,5,0,1,0;CheckBox,5,1,1,0;TextBlock,6,0,1,0;TextBox,6,1,1,0;TextBlock,7,0,1,0;TextBox,7,1,1,1;TextBlock,8,0,1,0;TextBox,8,1,1,1;TextBlock,9,0,1,0;TextBox,9,1,1,1;TextBlock,10,0,1,0;TextBox,10,1,1,1
+WrapDockDebugView	1	2	TextBlock,0,0,1,0;TextBox,0,1,1,0
+RootDockInfoDebugView	8	2	TextBlock,0,0,1,0;CheckBox,0,1,1,0;TextBlock,1,0,1,0;TextBox,1,1,1,1;TextBlock,2,0,1,0;TextBox,2,1,1,1;TextBlock,3,0,1,0;TextBox,3,1,1,1;TextBlock,4,0,1,0;TextBox,4,1,1,1;TextBlock,5,0,1,0;TextBox,5,1,1,1;TextBlock,6,0,1,0;TextBox,6,1,1,1;TextBlock,7,0,1,0;TextBox,7,1,1,1
+ProportionalDockDebugView	1	2	TextBlock,0,0,1,0;TextBox,0,1,1,0
+StackDockDebugView	2	2	TextBlock,0,0,1,0;TextBox,0,1,1,0;TextBlock,1,0,1,0;TextBox,1,1,1,0
+DockDebugView	16	2	TextBlock,0,0,1,0;TextBox,0,1,1,0;TextBlock,1,0,1,0;TextBox,1,1,1,0;TextBlock,2,0,1,0;TextBox,2,1,1,1;TextBlock,3,0,1,0;TextBox,3,1,1,1;TextBlock,4,0,1,0;TextBox,4,1,1,1;TextBlock,5,0,1,0;TextBox,5,1,1,1;TextBlock,6,0,1,0;TextBox,6,1,1,1;TextBlock,7,0,1,0;TextBox,7,1,1,0;TextBlock,8,0,1,0;CheckBox,8,1,1,0;TextBlock,9,0,1,0;CheckBox,9,1,1,0;TextBlock,10,0,1,0;CheckBox,10,1,0,0;TextBlock,11,0,1,0;CheckBox,11,1,0,0;TextBlock,12,0,1,0;TextBox,12,1,1,0;TextBlock,13,0,1,0;CheckBox,13,1,1,0;TextBlock,14,0,1,0;TextBox,14,1,1,0;TextBlock,15,0,1,0;TextBox,15,1,1,0
+ProportionalDockSplitterDebugView	1	2	TextBlock,0,0,1,0;CheckBox,0,1,1,0
+# edit	GridSplitter	Rows	1
+# edit	GridSplitter	rows	1
+# edit	GridSplitter	 Rows 	1
+# edit	GridSplitter	1	1
+# edit	GridSplitter	Columns, Rows	1
+# edit	GridSplitter	invalid	0
+# edit	GridSplitter		0
+# edit	GridSplitter	2147483648	0
+# edit	DocumentDock	Right	2
+# edit	DocumentDock	right	2
+# edit	DocumentDock	 Right 	2
+# edit	DocumentDock	2	2
+# edit	DocumentDock	Top, Right	2
+# edit	DocumentDock	invalid	0
+# edit	DocumentDock		0
+# edit	DocumentDock	2147483648	0
+# edit	StackDock	Vertical	1
+# edit	StackDock	vertical	1
+# edit	StackDock	 Vertical 	1
+# edit	StackDock	1	1
+# edit	StackDock	Horizontal, Vertical	1
+# edit	StackDock	invalid	0
+# edit	StackDock		0
+# edit	StackDock	2147483648	0
+# log	ActiveDockableChanged Tool
+# log	FocusedDockableChanged Tool
+# log	DockableInit Tool
+# log	DockableAdded Tool
+# log	DockableRemoved Tool
+# log	DockableClosed Tool
+# log	DockableMoved Tool
+# log	DockableDocked Tool Right
+# log	DockableUndocked Tool Left
+# log	DockableSwapped Tool
+# log	DockablePinned Tool
+# log	DockableUnpinned Tool
+# log	DockableHidden Tool
+# log	DockableRestored Tool
+# log	WindowOpened Window
+# log	WindowClosing Window
+# log	WindowClosed Window
+# log	WindowAdded Window
+# log	WindowRemoved Window
+# log	WindowMoveDragBegin Window
+# log	WindowMoveDrag Window
+# log	WindowMoveDragEnd Window
+# log	WindowActivated Window
+# log	DockableActivated Tool
+# log	WindowDeactivated Window
+# log	DockableDeactivated Tool
+# main	filtered-clear-count	0

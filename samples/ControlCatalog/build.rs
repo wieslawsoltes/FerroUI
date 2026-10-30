@@ -231,9 +231,11 @@ fn substitute_placeholders(root: &Path, assets: &mut [(String, PathBuf)]) {
 
 /// Replaces the path data of the `StreamGeometry` resources named by the
 /// files of `PlaceholderAssets/StreamGeometry` in the documents; a changed
-/// document is written below `$OUT_DIR/placeholder` and embedded from there.
+/// document is written below `$OUT_DIR/placeholder` for the markup compiler.
+/// Returns the transformed text by asset name, so the asset table can embed it
+/// without making a generated intermediate file an input of its own build.
 /// Every file must replace at least one resource.
-fn substitute_placeholder_geometries(root: &Path, out_dir: &Path, assets: &mut [(String, PathBuf)]) {
+fn substitute_placeholder_geometries(root: &Path, out_dir: &Path, assets: &mut [(String, PathBuf)]) -> BTreeMap<String, String> {
     let directory = root.join(PLACEHOLDER_DIRECTORY).join("StreamGeometry");
     println!("cargo::rerun-if-changed={}", directory.display());
     let mut geometries: Vec<(String, String)> = fs::read_dir(&directory)
@@ -248,6 +250,7 @@ fn substitute_placeholder_geometries(root: &Path, out_dir: &Path, assets: &mut [
     geometries.sort();
 
     let mut replaced = vec![0usize; geometries.len()];
+    let mut substituted = BTreeMap::new();
     for (asset_path, path) in assets.iter_mut().filter(|(asset_path, _)| asset_path.ends_with(".xaml")) {
         let mut content = fs::read_to_string(&*path).unwrap_or_else(|e| panic!("cannot read {}: {e}", path.display()));
         let mut changed = false;
@@ -258,6 +261,7 @@ fn substitute_placeholder_geometries(root: &Path, out_dir: &Path, assets: &mut [
             changed |= occurrences != 0;
         }
         if changed {
+            println!("cargo::rerun-if-changed={}", path.display());
             let target = out_dir.join("placeholder").join(asset_path.trim_start_matches('/'));
             fs::create_dir_all(target.parent().expect("a parent directory"))
                 .unwrap_or_else(|e| panic!("cannot create the directory of {}: {e}", target.display()));
@@ -265,11 +269,13 @@ fn substitute_placeholder_geometries(root: &Path, out_dir: &Path, assets: &mut [
                 fs::write(&target, &content).unwrap_or_else(|e| panic!("cannot write {}: {e}", target.display()));
             }
             *path = target;
+            substituted.insert(asset_path.clone(), content);
         }
     }
     for ((key, _), count) in geometries.iter().zip(&replaced) {
         assert!(*count > 0, "{PLACEHOLDER_DIRECTORY}/StreamGeometry/{key}.txt replaces no StreamGeometry resource of a document");
     }
+    substituted
 }
 
 /// What the build of the documents wrote for the crate.
@@ -390,10 +396,12 @@ fn main() {
         assets.retain(|(path, _)| path != CLASSIC_THEMES_DOCUMENT);
     }
 
-    if env::var_os("CARGO_FEATURE_PLACEHOLDER_BRANDING").is_some() {
+    let substituted_documents = if env::var_os("CARGO_FEATURE_PLACEHOLDER_BRANDING").is_some() {
         substitute_placeholders(&root, &mut assets);
-        substitute_placeholder_geometries(&root, &out_dir, &mut assets);
-    }
+        substitute_placeholder_geometries(&root, &out_dir, &mut assets)
+    } else {
+        BTreeMap::new()
+    };
 
     // The application the tests of a document start: `<file> | <application>` per line.
     let test_applications_path = root.join(TEST_APPLICATION_LIST);
@@ -470,7 +478,11 @@ fn main() {
     let mut document_assets = String::new();
     for (asset_path, path) in &assets {
         let path = path.canonicalize().unwrap_or_else(|e| panic!("cannot resolve {}: {e}", path.display()));
-        println!("cargo::rerun-if-changed={}", path.display());
+        // The original document and geometry sources are watched. Watching a
+        // transformed output would invalidate the build that just created it.
+        if !substituted_documents.contains_key(asset_path) {
+            println!("cargo::rerun-if-changed={}", path.display());
+        }
         if separate_assets && !asset_path.ends_with(".xaml") {
             let out = site.join(&asset_directory).join(asset_path.trim_start_matches('/'));
             write_if_changed(&out, &fs::read(&path).unwrap_or_else(|e| panic!("cannot read {}: {e}", path.display())));
@@ -478,7 +490,11 @@ fn main() {
             continue;
         }
         let table = if compiled.documents.contains(asset_path) { &mut document_assets } else { &mut text };
-        writeln!(table, "    ({asset_path:?}, include_bytes!({:?})),", path.display().to_string()).expect("write");
+        if let Some(content) = substituted_documents.get(asset_path) {
+            writeln!(table, "    ({asset_path:?}, {content:?}.as_bytes()),").expect("write");
+        } else {
+            writeln!(table, "    ({asset_path:?}, include_bytes!({:?})),", path.display().to_string()).expect("write");
+        }
     }
     text.push_str("];\n");
     text.push_str("#[cfg(test)]\npub(crate) static DOCUMENT_ASSETS: &[(&str, &[u8])] = &[\n");

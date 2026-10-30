@@ -1,0 +1,60 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="MaterialThemeGallery.Pages.ListsPage">
+  <!-- ListBox with its items in their states, ItemsControl, and TreeView with expanded and
+       collapsed items. The native counterpart is ListsPage.winui.xml (ListBox, ItemsControl,
+       TreeView). -->
+  <StackPanel Margin="24" Spacing="12">
+    <TextBlock Text="Lists and trees" FontSize="28" FontWeight="SemiBold" />
+
+    <Grid ColumnSpacing="24" HorizontalAlignment="Left">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="300" />
+        <ColumnDefinition Width="300" />
+      </Grid.ColumnDefinitions>
+
+      <StackPanel Grid.Column="0" Spacing="12">
+        <TextBlock Text="ListBox" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+        <ListBox Height="240">
+          <ListBoxItem Content="Normal" />
+          <ListBoxItem Content="Selected" IsSelected="True" />
+          <ListBoxItem Content="Pointer over" Classes="force-pointerover" />
+          <ListBoxItem Content="Pressed" Classes="force-pressed" />
+          <ListBoxItem Content="Disabled" IsEnabled="False" />
+          <ListBoxItem Content="Another item" />
+        </ListBox>
+
+        <TextBlock Text="Disabled ListBox" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+        <ListBox Height="120" IsEnabled="False">
+          <ListBoxItem Content="First item" />
+          <ListBoxItem Content="Selected item" IsSelected="True" />
+          <ListBoxItem Content="Third item" />
+        </ListBox>
+      </StackPanel>
+
+      <StackPanel Grid.Column="1" Spacing="12">
+        <TextBlock Text="ItemsControl" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+        <ItemsControl>
+          <x:String>The first item of an items control</x:String>
+          <x:String>The second item</x:String>
+          <x:String>The third item</x:String>
+        </ItemsControl>
+
+        <TextBlock Text="TreeView" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+        <TreeView Height="260">
+          <TreeViewItem Header="Documents" IsExpanded="True">
+            <TreeViewItem Header="Report.docx" />
+            <TreeViewItem Header="Notes.txt" />
+            <TreeViewItem Header="Archive" IsExpanded="True">
+              <TreeViewItem Header="2025.zip" />
+            </TreeViewItem>
+          </TreeViewItem>
+          <TreeViewItem Header="Pictures">
+            <TreeViewItem Header="Holiday.jpg" />
+          </TreeViewItem>
+          <TreeViewItem Header="Music" />
+        </TreeView>
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+</UserControl>

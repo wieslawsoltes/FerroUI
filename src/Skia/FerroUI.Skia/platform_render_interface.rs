@@ -141,6 +141,10 @@ impl Default for PlatformRenderInterface {
 }
 
 impl IPlatformRenderInterface for PlatformRenderInterface {
+    fn supports_compositing_layers(&self) -> bool {
+        true
+    }
+
     fn create_ellipse_geometry(&self, rect: Rect) -> Arc<dyn IGeometryImpl> {
         EllipseGeometryImpl::new(rect)
     }

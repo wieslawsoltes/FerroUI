@@ -1,0 +1,3 @@
+<settings:DockSettingsOptions xmlns="https://github.com/ferroui"
+ xmlns:settings="clr-namespace:FerroDock.Settings;assembly=FerroDock.Settings"
+ DefaultFloatingWindowOwnerMode="-19" />

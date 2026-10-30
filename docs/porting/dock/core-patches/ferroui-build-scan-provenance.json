@@ -1,0 +1,67 @@
+{
+  "package": "ferroui-build-scan",
+  "version": "0.3.0",
+  "registry_source": "ferroui-build-scan-0.3.0",
+  "original_vcs": {
+    "git": {
+      "sha1": "0116724da88df86fa4e4575f7e9a0d78708f2204"
+    },
+    "path_in_vcs": "src/Dock/FerroUI.Build.Scan"
+  },
+  "modified_files": [
+    "model.rs",
+    "scanner/source.rs"
+  ],
+  "original_sha256": {
+    ".cargo_vcs_info.json": "00e563ef1789286234fe103706749236116a1c19e295287681d0211e671c7053",
+    "Cargo.lock": "c0a034087e068703f1bc448bc3f8b768ccd13e479d392cffd47ff7bf9473f2a6",
+    "Cargo.toml": "02b767d982c728d3c7e3ea11419d67f4a6243ed2eed8fd38756e413ae409ec80",
+    "Cargo.toml.orig": "e34695b91397991e12125ddecbe6a46c5650ff8bfaa97afb848015aef2f8469e",
+    "LICENSE": "2b3a10daf2350f7b900bd7b989cdff149b6b4bd07358db9e5c112bd9560b6b46",
+    "NOTICE-PROJECT.md": "3620991f97d43324a80b6137dbaeb4f23d35c5b036e7485021654f597495be87",
+    "README.md": "619c6d173776f77ff0f40a38a304560d14cb5f37f0b6e5a40f5af711d02228c0",
+    "call_forms.rs": "c338639eff03aea6c2502002eaa8bc20f27824db30748932018aeaf3c5dca70b",
+    "export.rs": "b1e1b700a285ea01e36788c9e56e287bb55ac14e313641a53a04384531abbe54",
+    "json.rs": "672d0fc27a6c73914d592cf963e5e9b12f8736fc8dc4192bc920fe1424912a89",
+    "lib.rs": "14edaf343469016d049a35f126cd312ba526a5a8516ac9b27fb690b618fd6167",
+    "model.rs": "260ac6efbb0721ebe575ed16f3a0c1f9f83f2db11ab6964b0f4eff65c2397e69",
+    "model_set.rs": "642cd21597b4fe535750c1ee22d9479013cd57ef08fecdfc180262567889c710",
+    "scanner/constants.rs": "3a3ec7638fff477176a20078a24f4e5fe896f06862fc0faec892892fcad064ec",
+    "scanner/declarations.rs": "a1b48e27eaada25f004eff7bf18d61da417be7215787f4fd49793f3da85e3b35",
+    "scanner/mod.rs": "dd5949d8a0e79047f2bcf6cf64754f3573f7ee647780214ab628534feca7de97",
+    "scanner/modules.rs": "9c629ea036b950bb36ca2b67ec7cae78d8f1e744239f008d95f46800198c3b1e",
+    "scanner/source.rs": "ded0bfafcda269f3b1fa887463602b111417802998a08da0d684222c5b143e79",
+    "scanner/tests.rs": "43039fc9394574183aa8abf036030a7635a021a8756d1455cb117e2cf352ec38",
+    "scanner/tokens.rs": "664e68ab48740acc3b83aa5d5be57aa7ca1f691a1480fbac56fbc862fb09b15b",
+    "tests/fixtures/dependent/lib.rs": "c5d08d206bd36c2799ada71b3789a07e106f47c6976a7d54c0a7e204a98d64f4",
+    "tests/fixtures/dependent/panel.rs": "802b7d3149aca75b0cd50936fd659eb930839ab678a420fd82efeb43fd997c35",
+    "tests/fixtures/registration/keys.rs": "266c171766ee431df79156fa3c9088748efbe368849f024d05184247ed2d5050",
+    "tests/fixtures/registration/lib.rs": "a78e5401d024d983d83fe3509c67cd9ba0918245293e48befef581e65dd94937",
+    "tests/fixtures/registration/panel.rs": "a2e188b32460f28997381574cc1fbe78ffe0b37b5e295e7be73a6fc1ded8a0a2",
+    "tests/fixtures/registration/register_types.rs": "8a46d659cc452c5e66d7e1986d055751cf5e64c1e452104dcafb5fe60ee52915",
+    "tests/fixtures/scanner/controls/border.rs": "27b747c5cc9414114815a0c521e7abc0204b04781f5ca9390deb8f5c88b91ef1",
+    "tests/fixtures/scanner/controls/decorator.rs": "b3774f53dd2aa280bcfd743b54019e8d1cfa9bea0c1013cdb46df130b79b7fa7",
+    "tests/fixtures/scanner/controls/grid.rs": "1b5fbc705df7ccfb6e6b17000932d1ca06129c75a1e3553f600688c40e687598",
+    "tests/fixtures/scanner/controls/mod.rs": "c08452ac863acdaa6cc603476feb7ab04e99853ec36cd53e8cf200e0288e5dd5",
+    "tests/fixtures/scanner/controls/text_block.rs": "21bf419703784aad21b0b8e2f47731438ad91c3b2b0976d7ec7cbb67fa1127a8",
+    "tests/fixtures/scanner/lib.rs": "390a561b439e8ca02ca2f8938d529b972628958ac22177cbcf189a3e9e7aef2e",
+    "tests/fixtures/scanner/macros.rs": "66792e10993dd1001c2ddc702ee4a539cb117fe73277a1aa97b7a4ff6bdb35b9",
+    "tests/fixtures/scanner/markup_types/classes.rs": "c5f40198dd5237b6d47505e0ea6333660b8f54a3075c788053ecf59818489349",
+    "tests/fixtures/scanner/markup_types/mod.rs": "930c743f4aa9b6f172d9e2476f0048ea3dbd077854aa2a00982dad5a1db64f24",
+    "tests/fixtures/scanner/markup_types/plain.rs": "576f833563b5443eb8b82fe4cbd482d6229eea025abb3dff865f4df5ca506d4d",
+    "tests/fixtures/scanner/media/brush.rs": "b589ece787e406379ede46efd0f75600312ecb351dbd43b9873d7f5a2f5da1ea",
+    "tests/fixtures/scanner/media/mod.rs": "98a453b0be1f15f695cc9187fc61415a4937a9093ddca8141ed2019b5d11ba16",
+    "tests/fixtures/scanner/not_read.rs": "fab2f3b1157ce8db0cd3f77e454246bb7828fce78b9c0a9797a5441cef5a4dca",
+    "tests/fixtures/scanner/odd/inner.rs": "9e4d9dd55529922fc83c6b314044f3c2385c5ce89fa67674c2aae1b447e35067",
+    "tests/fixtures/scanner/odd/placed_elsewhere.rs": "277fbc583fd363e03ccbb03b9c53ba6bd96f22516c9190181d9dc443e7fd2f1c",
+    "tests/fixtures/scanner/register_types.rs": "38bc31e60fe7e1f131c1dc3e9682fd20e38038539c2a8b12a4c8ce83c2d1fb06",
+    "tests/fixtures/scanner/rust_paths.rs": "eb609d06b8def6fbfa9389e6878f7f4a350eba1f3535d24e9cb2c5dae1a874ee",
+    "xaml_metadata.rs": "c07446f870e65f170796632a3327f2ae01d5aaf83c9bde9804426f04b0021fc1"
+  },
+  "modified_sha256": {
+    "model.rs": "65561fae5dccddc14645f80e674eb0e2ee56b680029c89e4d0ef76db6e7cb720",
+    "scanner/source.rs": "d94f58c551bf166e6a6a4ac6fcfde1d3c4c4ec76914b873df652f571d5561a14"
+  },
+  "patch_file": "ferroui-build-scan-boxed-casts.patch",
+  "patch_sha256": "6adad286e7ba6c1df1c0b552b74d3978b131df163ee47ec3bde85c84db56ca08"
+}

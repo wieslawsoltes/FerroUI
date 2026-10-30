@@ -1,0 +1,159 @@
+<!-- Material DatePicker.kt / DateRangePicker.kt at AndroidX
+     e4d933c98df7baa7ea2b83eea6e086915961e0ff. Single header120; range header128-60. -->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:material="using:FerroUI.Themes.Material"
+                    x:ClassModifier="internal">
+  <SolidColorBrush x:Key="MaterialDateDisabledYearBrush" Color="{DynamicResource MaterialOnSurfaceVariantColor}" Opacity="0.38"/>
+  <SolidColorBrush x:Key="MaterialDateDisabledSelectedBrush" Color="{DynamicResource MaterialPrimaryColor}" Opacity="0.38"/>
+  <SolidColorBrush x:Key="MaterialDateDisabledSelectedContentBrush" Color="{DynamicResource MaterialOnPrimaryColor}" Opacity="0.38"/>
+  <ControlTheme x:Key="{x:Type material:MaterialDateCell}" TargetType="material:MaterialDateCell">
+    <Setter Property="Width" Value="48"/><Setter Property="Height" Value="48"/>
+    <Setter Property="MinWidth" Value="0"/><Setter Property="MinHeight" Value="0"/>
+    <Setter Property="HorizontalAlignment" Value="Center"/><Setter Property="VerticalAlignment" Value="Center"/>
+    <Setter Property="HorizontalContentAlignment" Value="Center"/><Setter Property="VerticalContentAlignment" Value="Center"/>
+    <Setter Property="Padding" Value="0"/><Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="Background" Value="Transparent"/><Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceBrush}"/>
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}"/>
+    <Setter Property="FontSize" Value="16"/><Setter Property="FontWeight" Value="Normal"/>
+    <Setter Property="TextBlock.LineHeight" Value="24"/><Setter Property="LetterSpacing" Value="0.5"/>
+    <Setter Property="FocusAdorner" Value="{x:Null}"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel Background="Transparent">
+          <Border x:Name="FocusRing" Width="46" Height="46" CornerRadius="23" HorizontalAlignment="Center" VerticalAlignment="Center"
+                  BorderBrush="{DynamicResource MaterialSecondaryBrush}" BorderThickness="3" IsVisible="False" IsHitTestVisible="False"/>
+          <Border x:Name="DateSurface" Width="40" Height="40" CornerRadius="20" HorizontalAlignment="Center" VerticalAlignment="Center"
+                  Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+            <Panel>
+              <Border x:Name="StateLayer" CornerRadius="20" Background="{TemplateBinding Foreground}" Opacity="0" IsHitTestVisible="False">
+                <Border.Transitions><Transitions>
+                  <material:MaterialDoubleTransition Property="Opacity" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}"/>
+                </Transitions></Border.Transitions>
+              </Border>
+              <material:MaterialRipple Fill="{TemplateBinding Foreground}" CornerRadius="20" ReducedMotion="{DynamicResource MaterialReducedMotion}"/>
+              <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Content}" Foreground="{TemplateBinding Foreground}"
+                                HorizontalContentAlignment="Center" VerticalContentAlignment="Center" IsHitTestVisible="False"
+                                AutomationProperties.AccessibilityView="Raw"/>
+            </Panel>
+          </Border>
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:year"><Setter Property="Width" Value="72"/><Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}"/></Style>
+    <Style Selector="^:year /template/ Border#DateSurface"><Setter Property="Width" Value="72"/><Setter Property="Height" Value="36"/><Setter Property="CornerRadius" Value="18"/></Style>
+    <Style Selector="^:year /template/ Border#FocusRing"><Setter Property="Width" Value="78"/><Setter Property="Height" Value="42"/><Setter Property="CornerRadius" Value="21"/></Style>
+    <Style Selector="^:today"><Setter Property="Foreground" Value="{DynamicResource MaterialPrimaryBrush}"/><Setter Property="BorderBrush" Value="{DynamicResource MaterialPrimaryBrush}"/><Setter Property="BorderThickness" Value="1"/></Style>
+    <Style Selector="^:in-range"><Setter Property="Foreground" Value="{DynamicResource MaterialOnSecondaryContainerBrush}"/></Style>
+    <Style Selector="^:selected"><Setter Property="Background" Value="{DynamicResource MaterialPrimaryBrush}"/><Setter Property="Foreground" Value="{DynamicResource MaterialOnPrimaryBrush}"/><Setter Property="BorderThickness" Value="0"/></Style>
+    <Style Selector="^:pointerover /template/ Border#StateLayer"><Setter Property="Opacity" Value="0.08"/></Style>
+    <Style Selector="^:focus-visible /template/ Border#StateLayer, ^:pressed /template/ Border#StateLayer"><Setter Property="Opacity" Value="0.10"/></Style>
+    <Style Selector="^:focus-visible /template/ Border#FocusRing"><Setter Property="IsVisible" Value="True"/></Style>
+    <Style Selector="^:disabled"><Setter Property="Foreground" Value="{DynamicResource MaterialDisabledContentBrush}"/></Style>
+    <Style Selector="^:year:disabled"><Setter Property="Foreground" Value="{DynamicResource MaterialDateDisabledYearBrush}"/></Style>
+    <Style Selector="^:selected:disabled"><Setter Property="Background" Value="{DynamicResource MaterialDateDisabledSelectedBrush}"/><Setter Property="Foreground" Value="{DynamicResource MaterialDateDisabledSelectedContentBrush}"/></Style>
+    <Style Selector="^:disabled /template/ Border#StateLayer"><Setter Property="Opacity" Value="0"/></Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type material:MaterialDatePicker}" TargetType="material:MaterialDatePicker">
+    <Setter Property="MinWidth" Value="360"/><Setter Property="Width" Value="360"/>
+    <Setter Property="HorizontalAlignment" Value="Left"/><Setter Property="VerticalAlignment" Value="Top"/>
+    <Setter Property="CornerRadius" Value="28"/>
+    <Setter Property="Background" Value="{DynamicResource MaterialSurfaceContainerHighBrush}"/>
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceBrush}"/>
+    <Setter Property="SubheadForeground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}"/>
+    <Setter Property="RangeBackground" Value="{DynamicResource MaterialSecondaryContainerBrush}"/>
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}"/>
+    <Setter Property="MotionScheme" Value="{DynamicResource MaterialMotionScheme}"/>
+    <Setter Property="ReducedMotion" Value="{DynamicResource MaterialReducedMotion}"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="PART_Container" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}" ClipToBounds="True">
+          <StackPanel>
+            <Grid x:Name="PART_Header" RowDefinitions="Auto,*" MinHeight="120">
+              <TextBlock x:Name="PART_Title" FontSize="14" FontWeight="Medium" LineHeight="20" LetterSpacing="0.1"
+                         Foreground="{TemplateBinding SubheadForeground}" Margin="24,16,12,0"/>
+              <Grid Grid.Row="1" RowDefinitions="Auto,1" ColumnDefinitions="*,60" VerticalAlignment="Bottom">
+              <TextBlock x:Name="PART_Headline" FontSize="32" FontWeight="Normal" LineHeight="40" LetterSpacing="0"
+                         Foreground="{TemplateBinding SubheadForeground}" Margin="24,0,12,12" VerticalAlignment="Center"
+                         TextWrapping="NoWrap" AutomationProperties.HeadingLevel="1"/>
+              <!-- The native Row measures each successive date with the width remaining.
+                   DockPanel preserves that contract so a complete range can wrap its end date. -->
+              <DockPanel x:Name="PART_RangeHeadline" HorizontalSpacing="4" LastChildFill="True" Margin="64,0,12,12" VerticalAlignment="Center" IsVisible="False"
+                         AutomationProperties.HeadingLevel="1">
+                <TextBlock x:Name="PART_RangeHeadlineStart" DockPanel.Dock="Left" FontSize="22" LineHeight="28" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="{TemplateBinding SubheadForeground}" AutomationProperties.AccessibilityView="Raw"/>
+                <TextBlock DockPanel.Dock="Left" Text="-" FontSize="22" LineHeight="28" VerticalAlignment="Center" Foreground="{TemplateBinding SubheadForeground}" AutomationProperties.AccessibilityView="Raw"/>
+                <TextBlock x:Name="PART_RangeHeadlineEnd" FontSize="22" LineHeight="28" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="{TemplateBinding SubheadForeground}" AutomationProperties.AccessibilityView="Raw"/>
+              </DockPanel>
+              <Button x:Name="PART_ModeToggle" Grid.Column="1" Theme="{StaticResource MaterialIconButton}" Width="48" Height="48"
+                      Margin="0,0,12,12" VerticalAlignment="Center" Foreground="{TemplateBinding SubheadForeground}">
+                <Panel Width="24" Height="24" IsHitTestVisible="False" AutomationProperties.AccessibilityView="Raw">
+                  <PathIcon x:Name="PART_EditIcon" Theme="{StaticResource MaterialSymbolIcon}" FlowDirection="LeftToRight"
+                            Data="M3,17.25 V21 H6.75 L17.81,9.94 L14.06,6.19 Z M20.71,7.04 C21.10,6.65 21.10,6.02 20.71,5.63 L18.37,3.29 C17.98,2.90 17.35,2.90 16.96,3.29 L15.13,5.12 L18.88,8.87 Z"/>
+                  <PathIcon x:Name="PART_CalendarIcon" Theme="{StaticResource MaterialSymbolIcon}" FlowDirection="LeftToRight" IsVisible="False"
+                            Data="M9,11 H7 V13 H9 Z M13,11 H11 V13 H13 Z M17,11 H15 V13 H17 Z M19,4 H18 V2 H16 V4 H8 V2 H6 V4 H5 C3.89,4 3.01,4.9 3.01,6 L3,20 C3,21.1 3.89,22 5,22 H19 C20.1,22 21,21.1 21,20 V6 C21,4.9 20.1,4 19,4 Z M19,20 H5 V9 H19 Z"/>
+                </Panel>
+              </Button>
+              <Border Grid.Row="1" Grid.ColumnSpan="2" Height="1" Background="{DynamicResource MaterialOutlineVariantBrush}"/>
+              </Grid>
+            </Grid>
+            <Panel x:Name="PART_Body" Height="392" ClipToBounds="True">
+              <StackPanel x:Name="PART_Calendar" VerticalAlignment="Top">
+                <Grid x:Name="PART_Navigation" Height="56" ColumnDefinitions="*,48,48" Margin="12,0">
+                  <Button x:Name="PART_YearToggle" Theme="{StaticResource MaterialTextButton}" HorizontalAlignment="Left" Padding="12,0" MinHeight="48"
+                          Foreground="{TemplateBinding SubheadForeground}" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" Spacing="8" IsHitTestVisible="False">
+                      <TextBlock x:Name="PART_MonthLabel" FontSize="14" FontWeight="Medium" LineHeight="20" LetterSpacing="0.1" VerticalAlignment="Center"/>
+                      <PathIcon x:Name="PART_YearArrow" Theme="{StaticResource MaterialSymbolIcon}" RenderTransformOrigin="50%,50%" Data="M7,10 L12,15 L17,10 Z"/>
+                    </StackPanel>
+                  </Button>
+                  <Button x:Name="PART_Previous" Grid.Column="1" Theme="{StaticResource MaterialIconButton}" Width="48" Height="48" VerticalAlignment="Center"
+                          Foreground="{TemplateBinding SubheadForeground}" AutomationProperties.Name="Previous month">
+                    <PathIcon x:Name="PART_PreviousIcon" Theme="{StaticResource MaterialSymbolIcon}" Data="M15.41,16.59 L10.83,12 L15.41,7.41 L14,6 L8,12 L14,18 Z"/>
+                  </Button>
+                  <Button x:Name="PART_Next" Grid.Column="2" Theme="{StaticResource MaterialIconButton}" Width="48" Height="48" VerticalAlignment="Center"
+                          Foreground="{TemplateBinding SubheadForeground}" AutomationProperties.Name="Next month">
+                    <PathIcon x:Name="PART_NextIcon" Theme="{StaticResource MaterialSymbolIcon}" Data="M8.59,16.59 L13.17,12 L8.59,7.41 L10,6 L16,12 L10,18 Z"/>
+                  </Button>
+                </Grid>
+                <Panel>
+                  <StackPanel Margin="12,0">
+                    <UniformGrid x:Name="PART_Weekdays" Rows="1" Columns="7" Height="48"/>
+                    <Panel x:Name="PART_MonthViewport" Height="288" ClipToBounds="True" Background="Transparent">
+                      <material:MaterialDateMonthView x:Name="PART_PreviousMonth"/>
+                      <material:MaterialDateMonthView x:Name="PART_Month"/>
+                      <material:MaterialDateMonthView x:Name="PART_NextMonth"/>
+                    </Panel>
+                    <ScrollViewer x:Name="PART_Range" Height="336" IsVisible="False" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Hidden">
+                      <material:MaterialDateMonthsPanel x:Name="PART_RangeMonths"/>
+                    </ScrollViewer>
+                  </StackPanel>
+                  <ScrollViewer x:Name="PART_Years" Height="336" VerticalAlignment="Top" Background="{TemplateBinding Background}" IsVisible="False"
+                                HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Hidden"
+                                AutomationProperties.Name="Year picker">
+                    <UniformGrid x:Name="PART_YearGrid" Columns="3" RowSpacing="16" Margin="12,0" KeyboardNavigation.TabNavigation="Once"/>
+                  </ScrollViewer>
+                </Panel>
+              </StackPanel>
+              <Grid x:Name="PART_Input" ColumnDefinitions="*,*" Margin="24,10,24,16" VerticalAlignment="Top" IsVisible="False">
+                <TextBox x:Name="PART_StartInput" Grid.ColumnSpan="2" Theme="{StaticResource MaterialOutlinedTextField}" MinWidth="0"
+                         TextWrapping="NoWrap" MaxLength="10"/>
+                <TextBox x:Name="PART_EndInput" Grid.Column="1" Theme="{StaticResource MaterialOutlinedTextField}" MinWidth="0"
+                         TextWrapping="NoWrap" MaxLength="10" IsVisible="False"/>
+              </Grid>
+            </Panel>
+            <StackPanel x:Name="PART_Actions" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="12,0,12,12" IsVisible="False">
+              <Button x:Name="PART_Cancel" Theme="{StaticResource MaterialTextButton}" Content="Cancel" MinHeight="40"/>
+              <Button x:Name="PART_Confirm" Theme="{StaticResource MaterialTextButton}" Content="OK" MinHeight="40" IsEnabled="False"/>
+            </StackPanel>
+          </StackPanel>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:range"><Setter Property="CornerRadius" Value="0"/></Style>
+    <Style Selector="^:years /template/ PathIcon#PART_YearArrow"><Setter Property="RenderTransform"><RotateTransform Angle="180"/></Setter></Style>
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialDateRangePicker" TargetType="material:MaterialDatePicker" BasedOn="{StaticResource {x:Type material:MaterialDatePicker}}">
+    <Setter Property="SelectionMode" Value="Range"/>
+  </ControlTheme>
+</ResourceDictionary>

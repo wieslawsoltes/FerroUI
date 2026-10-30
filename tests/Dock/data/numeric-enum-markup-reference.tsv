@@ -1,0 +1,13 @@
+numeric-enum-negative-overflow-narrowing	1
+numeric-enum-nullable-option	1
+numeric-enum-options-owner-and-flags	1
+numeric-enum-original-apply-parent	1
+numeric-enum-parent-boundaries	1
+numeric-enum-positive-overflow-narrowing	1
+numeric-enum-window-values	1
+numeric-dock-enum-original-model-values	1
+numeric-dock-enum-nullable-host-option	1
+numeric-host-mode-root-override	1
+numeric-host-mode-global-override	1
+numeric-host-mode-original-fallback	1
+numeric-dock-mode-converter-source-fallback	1

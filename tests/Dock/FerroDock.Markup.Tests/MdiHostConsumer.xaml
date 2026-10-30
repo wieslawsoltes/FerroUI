@@ -1,0 +1,25 @@
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            xmlns:d="using:FerroDock.Ferro.Controls"
+            xmlns:core="using:FerroDock.Model.Core"
+            xmlns:mdi="using:FerroDock.Ferro.Mdi"
+            x:DataType="d:ManagedWindowDock" x:CompileBindings="True">
+  <StackPanel.Resources>
+    <DataTemplate x:Key="HostHeader" x:DataType="core:IDockable">
+      <TextBlock Text="{Binding Title}" />
+    </DataTemplate>
+    <DataTemplate x:Key="HostEmpty" x:DataType="x:Object">
+      <TextBlock Text="Compiled empty host" />
+    </DataTemplate>
+    <ControlTheme x:Key="HostCloseTheme" TargetType="Button" />
+  </StackPanel.Resources>
+  <d:MdiDocumentControl Name="Host" IsActive="{Binding IsActive}"
+                        LayoutManager="{x:Static mdi:ClassicMdiLayoutManager.Instance}"
+                        IconTemplate="{StaticResource HostHeader}"
+                        HeaderTemplate="{StaticResource HostHeader}"
+                        ModifiedTemplate="{StaticResource HostHeader}"
+                        CloseTemplate="{StaticResource HostHeader}"
+                        EmptyContentTemplate="{StaticResource HostEmpty}"
+                        CloseButtonTheme="{StaticResource HostCloseTheme}" />
+  <Border Name="EmptyHost" IsVisible="{Binding !#Host.HasVisibleDocuments}" />
+</StackPanel>

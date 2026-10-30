@@ -136,7 +136,9 @@ def exercise(binary, http=False, writable=True):
             return
         for tree in ("visual", "logical", "automation"):
             assert catalog.tool("get_tree", {"tree": tree, "depth": 4, "properties": ["Width"]})
-        editor = catalog.tool("find_elements", {"selector": "TextBox#SearchBox"})[0]["node_id"]
+        # The search box of the shell is the AutoSuggestBox `SearchBox` of the pane; its text box is
+        # the template part `TextBox` (the only one on the home page).
+        editor = catalog.tool("find_elements", {"selector": "TextBox#TextBox"})[0]["node_id"]
         catalog.tool("get_properties", {"node_id": editor, "properties": ["Text", "IsVisible"]})
         catalog.tool("click", {"node_id": editor})
         catalog.tool("type_text", {"node_id": editor, "text": "Button"})

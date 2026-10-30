@@ -164,8 +164,8 @@ fn a_setter_value_can_be_a_dynamic_resource() {
     let root = Control::from_boxed(&control.content().unwrap()).unwrap().cast::<Border>().unwrap();
     assert!(VisualStateManager::go_to_state(&control, "Pressed", false));
     let brush = root.background().expect("the brush of the resource");
-    let solid = brush.as_any().and_then(|any| any.downcast_ref::<ferroui_base::media::SolidColorBrush>()).map(|brush| brush.color());
-    assert_eq!(solid, Some(ferroui_base::media::Colors::blue()));
+    let solid = brush.as_any().downcast_ref::<ferroui_base::media::SolidColorBrush>().map(|brush| brush.color());
+    assert_eq!(solid, Some(ferroui_base::media::Colors::BLUE));
 }
 
 #[test]
