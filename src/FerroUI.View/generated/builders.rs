@@ -8646,6 +8646,15 @@ pub trait VisualBrushProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_base::media::VisualBrush>> VisualBrushProps for El<T> {}
 
+/// The properties and routed events of [`VisualStateManager`](ferroui_controls::VisualStateManager).
+pub trait VisualStateManagerProps: ElementBuilder {
+    /// Sets [`VisualStateManager::custom_visual_state_manager_property`](ferroui_controls::VisualStateManager::custom_visual_state_manager_property).
+    fn custom_visual_state_manager<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::VisualStateManager>>, M>) -> Self {
+        self.prop(<ferroui_controls::VisualStateManager>::custom_visual_state_manager_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::VisualStateManager>> VisualStateManagerProps for El<T> {}
+
 /// The properties and routed events of [`Window`](ferroui_controls::Window).
 pub trait WindowProps: ElementBuilder {
     /// Sets [`Window::size_to_content_property`](ferroui_controls::Window::size_to_content_property).
@@ -9621,6 +9630,11 @@ pub trait AttachedProps: ElementBuilder {
     /// Sets the attached [`Visual::flow_direction_property`](ferroui_base::Visual::flow_direction_property).
     fn visual_flow_direction<M>(self, value: impl IntoProp<ferroui_base::media::FlowDirection, M>) -> Self {
         self.prop(<ferroui_base::Visual>::flow_direction_property(), value)
+    }
+
+    /// Sets the attached [`VisualStateManager::custom_visual_state_manager_property`](ferroui_controls::VisualStateManager::custom_visual_state_manager_property).
+    fn visual_state_manager_custom_visual_state_manager<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::VisualStateManager>>, M>) -> Self {
+        self.prop(<ferroui_controls::VisualStateManager>::custom_visual_state_manager_property(), value)
     }
 
     /// Sets the attached [`Win32Properties::non_client_hit_test_result_property`](ferroui_controls::Win32Properties::non_client_hit_test_result_property).

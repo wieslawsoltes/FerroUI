@@ -121,6 +121,8 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add("/Pages/RelativePanelPage.xaml", "RelativePanel", Icons::LAYOUT, "Arrange children relative to each other");
             s.add("/Pages/ScrollViewerPage.xaml", "ScrollViewer", Icons::SCROLL, "Scrollable viewport over large content");
             s.add("/Pages/ViewboxPage.xaml", "Viewbox", Icons::VIEWBOX, "Scale content to fit available space");
+            // Not from upstream: WinUI's visual state manager.
+            s.add("/Pages/VisualStatesPage.xaml", "Visual States", Icons::LAYOUT, "WinUI visual state groups, states and setters");
             s.add("/Pages/WrapPanelPage.xaml", "WrapPanel", Icons::LAYOUT, "Wrap children onto multiple lines");
         }),
         section("Media & Graphics", Icons::MEDIA, &mut unavailable, |s| {

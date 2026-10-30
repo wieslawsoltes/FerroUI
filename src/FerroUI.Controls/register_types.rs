@@ -464,6 +464,13 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
     // FerroUI.Controls.Primitives
     crate::primitives::TextSelectionHandle,
     crate::primitives::TextSelectionHandleCanvas,
+    // --- visualstates (WinUI, docs/porting/winui-calculator-gaps.md) ---
+    crate::visual_state::VisualStateManager,
+    crate::visual_state::VisualStateGroup,
+    crate::visual_state::VisualState,
+    crate::visual_state::StateTriggerBase,
+    crate::visual_state::StateTrigger,
+    crate::visual_state::AdaptiveTrigger,
     // --- leftovers ---
 ];
 
