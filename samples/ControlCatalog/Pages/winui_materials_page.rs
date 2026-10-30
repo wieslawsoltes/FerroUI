@@ -319,8 +319,16 @@ fn effect_tile(name: &str, effect: GraphicsEffect) -> Ref<StackPanel> {
                 let Some(compositor) = compositor_of(&host) else { return };
                 let factory = compositor.create_effect_factory((*effect).clone());
                 let effect_brush = factory.create_brush();
-                effect_brush.set_source_parameter("image", Some(surface_brush(&compositor, &gradient_bitmap(150, 100))));
-                effect_brush.set_source_parameter("rings", Some(surface_brush(&compositor, &rings_bitmap(100))));
+                // Only the parameters the effect has: a single-input effect has no `rings`, and
+                // binding a parameter the graph does not have is an error, as in WinUI.
+                let names = effect_brush.source_parameter_names();
+                let names: Vec<&str> = names.iter().map(String::as_str).collect();
+                if names.contains(&"image") {
+                    effect_brush.set_source_parameter("image", Some(surface_brush(&compositor, &gradient_bitmap(150, 100))));
+                }
+                if names.contains(&"rings") {
+                    effect_brush.set_source_parameter("rings", Some(surface_brush(&compositor, &rings_bitmap(100))));
+                }
                 let sprite = compositor.create_sprite_visual();
                 sprite.set_size(Vector::new(150.0, 100.0));
                 sprite.set_brush(Some((*effect_brush).clone()));
