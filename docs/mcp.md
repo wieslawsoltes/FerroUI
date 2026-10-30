@@ -103,6 +103,27 @@ reserves stdout when called. Start only one stdio server per process. Stdio EOF 
 dropping the handle stops HTTP acceptance, invalidates queued operations, and releases inspection
 state. An OS-blocked stdio reader remains parked until EOF or process exit.
 
+## Application tools and background services
+
+An application adds its own tools to the same transport, permissions, cancellation and dispatcher:
+
+- `serve_with_tools(options, provider)` takes a `UiToolProvider`, whose methods run on the UI
+  thread that started the server, so it may hold controls and other thread-affine state. Its tool
+  descriptions are read once when the server starts. A tool must not shadow an inspector tool. A
+  tool not marked `readOnlyHint: true` also needs `Permissions::allow_property_writes`, and a tool
+  that synthesizes input must check `allow_input` itself. Keep the returned `UiServerHandle` on
+  that thread; dropping it cancels queued requests before the provider is disposed.
+- `serve_service(options, provider)` serves a `ServiceToolProvider` without the inspector: its
+  state is `Send + Sync` and it runs on the transport threads, with a `RequestContext` that
+  carries the permissions, cancellation and deadline of each request. `serve_service_with_token`
+  uses a persisted 256-bit bearer (64 hexadecimal digits) instead of a fresh one, so peers keep
+  their endpoint across restarts; the provider stays responsible for its own identity and access
+  rules.
+
+HTTP binds to loopback only, for these servers as for the inspector. A service server prints
+nothing at startup, so a persisted bearer never reaches a log; only an inspector server prints its
+URL and its fresh token to stderr.
+
 ## Tools and resources
 
 | Tool | Behavior |

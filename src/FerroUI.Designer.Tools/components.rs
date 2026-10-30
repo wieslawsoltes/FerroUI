@@ -1,0 +1,703 @@
+//! Portable component definitions and scope-aware resource authoring. The catalog and
+//! planners read the original document; native preview objects never become edit authority.
+use crate::{Result, ToolError, error, require};
+use ferroui_designer_core::{Document, Edit, MarkupValue, Node, NodeId, NodeKind};
+use serde::{Deserialize, Serialize};
+use std::collections::{BTreeMap, BTreeSet};
+
+#[path = "component_authoring.rs"]
+mod authoring;
+#[path = "component_resource_refs.rs"]
+mod references;
+pub use authoring::{
+    plan_component_action, plan_component_action_in_context, plan_property_object,
+};
+pub use references::{
+    ComponentResourceContext, ComponentResourceResolution, component_resource_references,
+    component_resource_resolution, resolve_component_resource,
+    resolve_component_resource_in_context,
+};
+
+/// Build a scope-qualified StaticResource/DynamicResource expression without treating
+/// punctuation, quotes or a leading brace in the key as markup syntax.
+pub fn component_resource_expression(
+    document: &Document,
+    at: NodeId,
+    key: &str,
+    dynamic: bool,
+) -> Result<String> {
+    valid_document(document)?;
+    element(document, at)?;
+    authoring::validate_key(key)?;
+    references::reference_expression(document, at, key, dynamic)
+}
+
+pub(crate) const FRAMEWORK: &str = "https://github.com/ferroui";
+pub(crate) const XAML: &str = "http://schemas.microsoft.com/winfx/2006/xaml";
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub enum ComponentKind {
+    UserControl,
+    CustomControl,
+    ControlTemplate,
+    DataTemplate,
+    ControlTheme,
+    Style,
+    Resource,
+    ResourceDictionary,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ComponentEntry {
+    pub node: NodeId,
+    pub kind: ComponentKind,
+    pub display_name: String,
+    /// Canonical expanded type identity; it is independent of the source prefix.
+    pub type_name: String,
+    /// The authored key, including a type-key expression for implicit themes.
+    pub key: Option<String>,
+    pub target_type: Option<String>,
+    /// The nearest resource owner when this is a resource entry.
+    pub owner: Option<NodeId>,
+    pub scope: NodeId,
+    /// Possible references in this document, including theme-dependent uses. External
+    /// documents themselves are indexed by the host.
+    pub usages: usize,
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ComponentCatalog {
+    pub entries: Vec<ComponentEntry>,
+}
+impl ComponentCatalog {
+    pub fn from_document(document: &Document) -> Result<Self> {
+        valid_document(document)?;
+        let mut entries = Vec::new();
+        for node in document.ast().nodes_in_source_order() {
+            if node.kind != NodeKind::Element {
+                continue;
+            }
+            let key = literal_key(node)
+                .or_else(|| key_attribute(node).map(|attribute| attribute.value.clone()));
+            let kind = if framework(node) {
+                match node.local_name() {
+                    "UserControl" => Some(ComponentKind::UserControl),
+                    "ControlTemplate" => Some(ComponentKind::ControlTemplate),
+                    "DataTemplate" | "TreeDataTemplate" => Some(ComponentKind::DataTemplate),
+                    "ControlTheme" => Some(ComponentKind::ControlTheme),
+                    "Style" => Some(ComponentKind::Style),
+                    "ResourceDictionary" => Some(ComponentKind::ResourceDictionary),
+                    _ => key.as_ref().map(|_| ComponentKind::Resource),
+                }
+            } else if key.is_some() {
+                Some(ComponentKind::Resource)
+            } else if !matches!(node.namespace_uri.as_deref(), Some(XAML) | None)
+                && !matches!(
+                    node.local_name(),
+                    "Binding" | "StaticResource" | "DynamicResource"
+                )
+            {
+                Some(ComponentKind::CustomControl)
+            } else {
+                None
+            };
+            let Some(kind) = kind else { continue };
+            let owner = resource_owner(document, node.id);
+            let mut target_type = None;
+            for property in ["TargetType", "DataType", "Selector"] {
+                if let Some(attribute) = component_property_attribute(document, node.id, property)?
+                {
+                    target_type = Some(attribute.value.clone());
+                    break;
+                }
+            }
+            let display_name = key
+                .as_deref()
+                .or_else(|| node.xaml_name())
+                .or_else(|| directive(node, "Class"))
+                .or(target_type.as_deref())
+                .unwrap_or(node.local_name())
+                .to_owned();
+            entries.push(ComponentEntry {
+                node: node.id,
+                kind,
+                display_name,
+                type_name: format!(
+                    "{{{}}}{}",
+                    node.namespace_uri.as_deref().unwrap_or(""),
+                    node.local_name()
+                ),
+                key,
+                target_type,
+                owner,
+                scope: owner.unwrap_or_else(|| document.ast().name_scope(node.id)),
+                usages: 0,
+            });
+        }
+        let mut usages = BTreeMap::<NodeId, usize>::new();
+        for (_, _, _, resource) in references::all_references(document)? {
+            *usages.entry(resource).or_default() += 1;
+        }
+        for entry in &mut entries {
+            entry.usages = usages.get(&entry.node).copied().unwrap_or(0);
+        }
+        Ok(Self { entries })
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ComponentReference {
+    pub node: NodeId,
+    pub property: String,
+    pub dynamic: bool,
+}
+
+/// Semantic commands suitable for UI controls, automation and alternative designer hosts.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub enum ComponentAction {
+    CreateResource {
+        owner: NodeId,
+        key: String,
+        source: String,
+    },
+    DuplicateResource {
+        resource: NodeId,
+        key: String,
+    },
+    RenameResource {
+        resource: NodeId,
+        key: String,
+    },
+    RemoveResource {
+        resource: NodeId,
+    },
+    ApplyResource {
+        resource: NodeId,
+        targets: Vec<NodeId>,
+        property: String,
+        dynamic: bool,
+    },
+    SetProperty {
+        node: NodeId,
+        property: String,
+        value: Option<String>,
+    },
+    SetObjectProperty {
+        node: NodeId,
+        property: String,
+        source: Option<String>,
+    },
+    SetSetter {
+        owner: NodeId,
+        property: String,
+        value: Option<String>,
+    },
+    SetSetterObject {
+        owner: NodeId,
+        property: String,
+        source: Option<String>,
+    },
+    SetResourceValue {
+        resource: NodeId,
+        value: String,
+    },
+    ReplaceDefinition {
+        node: NodeId,
+        source: String,
+    },
+    CreateTheme {
+        owner: NodeId,
+        key: String,
+        target_type: String,
+        based_on: Option<NodeId>,
+    },
+    CreateTemplate {
+        owner: NodeId,
+        key: String,
+        target_type: Option<String>,
+        content: String,
+        data_template: bool,
+    },
+    CopyTemplate {
+        template: NodeId,
+        owner: NodeId,
+        key: String,
+    },
+    ExtractProperty {
+        node: NodeId,
+        property: String,
+        owner: NodeId,
+        key: String,
+    },
+}
+
+/// A self-contained source fragment retaining original trivia and all inherited namespaces.
+/// Explicit namespace declarations on the element are kept exactly as authored.
+pub fn component_fragment(document: &Document, node: NodeId) -> Result<String> {
+    valid_document(document)?;
+    let element = element(document, node)?;
+    let mut source = document.source()[element.span.range()].to_owned();
+    let namespaces = document.ast().namespaces(node);
+    let mut declarations = String::new();
+    for (prefix, uri) in namespaces {
+        if prefix == "xml" {
+            continue;
+        }
+        let name = if prefix.is_empty() {
+            "xmlns".to_owned()
+        } else {
+            format!("xmlns:{prefix}")
+        };
+        if element.attribute(&name).is_none() {
+            declarations.push_str(&format!(" {name}=\"{}\"", escape(&uri)));
+        }
+    }
+    source.insert_str(element.name_span.end - element.span.start, &declarations);
+    Ok(source)
+}
+
+/// Export a property's object/collection content with independent namespace closure.
+pub fn component_property_object(
+    document: &Document,
+    node: NodeId,
+    property: &str,
+) -> Result<Option<String>> {
+    valid_document(document)?;
+    let element = element(document, node)?;
+    let properties = property_elements(document, element, property)?;
+    let implicit = implicit_property_children(document, element, property);
+    if !implicit.is_empty() {
+        require(
+            properties.is_empty(),
+            "The property has both explicit and implicit object values",
+        )?;
+        return implicit
+            .into_iter()
+            .map(|child| component_fragment(document, child.id))
+            .collect::<Result<Vec<_>>>()
+            .map(|parts| Some(parts.join("\n")));
+    }
+    let Some(property) = properties.first() else {
+        return Ok(None);
+    };
+    let mut result = String::new();
+    for child in &property.children {
+        let child = document
+            .ast()
+            .node(*child)
+            .ok_or_else(|| ToolError("Missing property child".into()))?;
+        if child.is_element() {
+            result.push_str(&component_fragment(document, child.id)?);
+        } else {
+            result.push_str(&document.source()[child.span.range()]);
+        }
+    }
+    Ok(Some(result))
+}
+
+pub(crate) fn implicit_property_children<'a>(
+    document: &'a Document,
+    node: &Node,
+    property: &str,
+) -> Vec<&'a Node> {
+    if !framework(node) || node.local_name() != "Setter" {
+        return Vec::new();
+    }
+    let Ok(identity) = PropertyIdentity::query(document, node.id, property) else {
+        return Vec::new();
+    };
+    let native_value = identity.member == "Value"
+        && match identity.owner.as_deref() {
+            Some("Setter") => same_owner_namespace(
+                "Setter",
+                identity.namespace.as_deref(),
+                node.namespace_uri.as_deref(),
+            ),
+            None => identity.namespace.is_none(),
+            _ => false,
+        };
+    if !native_value {
+        return Vec::new();
+    }
+    document
+        .ast()
+        .element_children(node.id)
+        .into_iter()
+        .filter_map(|id| document.ast().node(id))
+        .filter(|child| child.kind == NodeKind::Element)
+        .collect()
+}
+
+/// Visible string-key resources, with nearest scope and merge order already resolved.
+pub fn visible_component_resources(
+    document: &Document,
+    target: NodeId,
+) -> Result<Vec<ComponentEntry>> {
+    element(document, target)?;
+    Ok(ComponentCatalog::from_document(document)?
+        .entries
+        .into_iter()
+        .filter(|entry| {
+            entry.key.as_deref().is_some_and(|key| {
+                resolve_component_resource(document, target, key) == Some(entry.node)
+            })
+        })
+        .collect())
+}
+
+/// Visible string-key resources for one concrete runtime theme, using the same
+/// resolution contract as `plan_component_action_in_context` resource application.
+pub fn visible_component_resources_in_context(
+    document: &Document,
+    target: NodeId,
+    context: &ComponentResourceContext,
+) -> Result<Vec<ComponentEntry>> {
+    element(document, target)?;
+    let mut entries = Vec::new();
+    for entry in ComponentCatalog::from_document(document)?.entries {
+        if let Some(key) = entry.key.as_deref() {
+            if component_resource_resolution(document, target, key, Some(context))?.resolved()
+                == Some(entry.node)
+            {
+                entries.push(entry);
+            }
+        }
+    }
+    Ok(entries)
+}
+
+pub(crate) fn element(document: &Document, node: NodeId) -> Result<&Node> {
+    document
+        .ast()
+        .node(node)
+        .filter(|node| node.is_element())
+        .ok_or_else(|| ToolError("The component element no longer exists".into()))
+}
+pub(crate) fn valid_document(document: &Document) -> Result<()> {
+    require(
+        document.is_valid(),
+        "Repair the source before editing component definitions",
+    )
+}
+pub(crate) fn framework(node: &Node) -> bool {
+    node.namespace_uri
+        .as_deref()
+        .is_some_and(|namespace| framework_type_namespace(node.local_name(), namespace))
+}
+
+/// Match concrete framework type identities, not local names or arbitrary namespaces
+/// that happen to start with FerroUI. This permits using:/CLR aliases without claiming
+/// an application's similarly named template, theme or resource extension.
+pub(crate) fn framework_type_namespace(name: &str, namespace: &str) -> bool {
+    if namespace == FRAMEWORK {
+        return true;
+    }
+    let (expected_namespace, assembly) = match name {
+        "UserControl" => ("FerroUI.Controls", "FerroUI.Controls"),
+        "ResourceDictionary" => ("FerroUI.Controls", "FerroUI.Base"),
+        "ControlTheme" | "Style" | "Styles" | "Setter" | "ThemeVariant" => {
+            ("FerroUI.Styling", "FerroUI.Base")
+        }
+        "ControlTemplate" | "DataTemplate" | "TreeDataTemplate" => {
+            ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml")
+        }
+        "StaticResource"
+        | "DynamicResource"
+        | "StaticResourceExtension"
+        | "DynamicResourceExtension" => (
+            "FerroUI.Markup.Xaml.MarkupExtensions",
+            "FerroUI.Markup.Xaml",
+        ),
+        "ResourceInclude" | "MergeResourceInclude" | "StyleInclude" => {
+            ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml")
+        }
+        _ => return false,
+    };
+    namespace.strip_prefix("using:") == Some(expected_namespace)
+        || namespace
+            .strip_prefix("clr-namespace:")
+            .is_some_and(|value| {
+                value
+                    .split_once(";assembly=")
+                    .is_some_and(|(name, actual_assembly)| {
+                        name == expected_namespace && actual_assembly == assembly
+                    })
+            })
+}
+pub(crate) fn directive<'a>(node: &'a Node, name: &str) -> Option<&'a str> {
+    node.attributes
+        .iter()
+        .find(|attribute| {
+            attribute.namespace_uri.as_deref() == Some(XAML)
+                && attribute.name.rsplit(':').next() == Some(name)
+        })
+        .map(|attribute| attribute.value.as_str())
+}
+pub(crate) fn key_attribute(node: &Node) -> Option<&ferroui_designer_core::Attribute> {
+    node.attributes.iter().find(|attribute| {
+        attribute.namespace_uri.as_deref() == Some(XAML)
+            && attribute.name.rsplit(':').next() == Some("Key")
+    })
+}
+pub(crate) fn literal_key(node: &Node) -> Option<String> {
+    match key_attribute(node)?.markup().ok()? {
+        MarkupValue::Literal(key) => Some(key),
+        _ => None,
+    }
+}
+/// An external dictionary cannot be inspected through its local syntax. Qualified
+/// Source aliases and object-form Source values carry the same uncertainty.
+pub(crate) fn external_dictionary(document: &Document, node: &Node) -> bool {
+    !matches!(
+        component_property_attribute(document, node.id, "Source"),
+        Ok(None)
+    ) || !matches!(property_elements(document, node, "Source"), Ok(values) if values.is_empty())
+}
+
+pub(crate) fn resource_owner(document: &Document, node: NodeId) -> Option<NodeId> {
+    let parent = document
+        .ast()
+        .node(node)?
+        .parent
+        .and_then(|id| document.ast().node(id))?;
+    if framework(parent) && parent.local_name() == "ResourceDictionary" {
+        return Some(parent.id);
+    }
+    if parent.kind == NodeKind::PropertyElement && parent.local_name().ends_with(".Resources") {
+        let owner = document.ast().node(parent.parent?)?;
+        return property_elements(document, owner, "Resources")
+            .ok()?
+            .iter()
+            .any(|property| property.id == parent.id)
+            .then_some(owner.id);
+    }
+    None
+}
+pub(crate) fn escape(value: &str) -> String {
+    value
+        .replace('&', "&amp;")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;")
+        .replace('"', "&quot;")
+}
+pub(crate) fn property_name(property: &str) -> Result<()> {
+    require(
+        !property.is_empty()
+            && property.len() <= 1024
+            && property
+                .chars()
+                .all(|c| c.is_alphanumeric() || matches!(c, '_' | '.' | ':' | '-')),
+        "Invalid XAML property name",
+    )
+}
+pub(crate) fn property_elements<'a>(
+    document: &'a Document,
+    node: &Node,
+    property: &str,
+) -> Result<Vec<&'a Node>> {
+    property_name(property)?;
+    let query = PropertyIdentity::query(document, node.id, property)?;
+    let result = document
+        .ast()
+        .element_children(node.id)
+        .into_iter()
+        .filter_map(|id| document.ast().node(id))
+        .filter(|child| {
+            child.kind == NodeKind::PropertyElement && query.matches_element(node, child)
+        })
+        .collect::<Vec<_>>();
+    require(
+        result.len() <= 1,
+        "The property has multiple authored object values",
+    )?;
+    Ok(result)
+}
+pub(crate) fn attributes_for<'a>(
+    document: &Document,
+    node: &'a Node,
+    property: &str,
+) -> Result<Vec<&'a ferroui_designer_core::Attribute>> {
+    property_name(property)?;
+    let query = PropertyIdentity::query(document, node.id, property)?;
+    let values = node
+        .attributes
+        .iter()
+        .filter(|attribute| {
+            !attribute.is_namespace() && query.matches_attribute(document, node, attribute)
+        })
+        .collect::<Vec<_>>();
+    require(
+        values.len() <= 1,
+        "The property has duplicate namespace aliases",
+    )?;
+    Ok(values)
+}
+
+/// Resolve a property's authored object container by its expanded owner/member identity.
+/// Different application namespaces and attached-property owners remain independent.
+pub fn component_property_elements(
+    document: &Document,
+    node: NodeId,
+    property: &str,
+) -> Result<Vec<NodeId>> {
+    valid_document(document)?;
+    property_elements(document, element(document, node)?, property)
+        .map(|nodes| nodes.into_iter().map(|node| node.id).collect())
+}
+
+/// Read the authored scalar/expression while preserving a qualified attribute's prefix.
+pub fn component_property_attribute<'a>(
+    document: &'a Document,
+    node: NodeId,
+    property: &str,
+) -> Result<Option<&'a ferroui_designer_core::Attribute>> {
+    valid_document(document)?;
+    attributes_for(document, element(document, node)?, property)
+        .map(|values| values.first().copied())
+}
+
+struct PropertyIdentity {
+    namespace: Option<String>,
+    owner: Option<String>,
+    member: String,
+}
+impl PropertyIdentity {
+    fn query(document: &Document, node: NodeId, property: &str) -> Result<Self> {
+        property_name(property)?;
+        let (prefix, local) = property
+            .split_once(':')
+            .map_or((None, property), |(prefix, local)| (Some(prefix), local));
+        let (owner, member) = local
+            .rsplit_once('.')
+            .map_or((None, local), |(owner, member)| {
+                (Some(owner.to_owned()), member)
+            });
+        let namespace = if prefix.is_some() || owner.is_some() {
+            let namespaces = document.ast().namespaces(node);
+            match namespaces.get(prefix.unwrap_or("")) {
+                Some(namespace) => Some(namespace.clone()),
+                None if prefix.is_none() => None,
+                None => {
+                    return Err(ToolError(
+                        "The property namespace prefix is not declared".into(),
+                    ));
+                }
+            }
+        } else {
+            None
+        };
+        Ok(Self {
+            namespace,
+            owner,
+            member: member.into(),
+        })
+    }
+    fn matches_attribute(
+        &self,
+        document: &Document,
+        node: &Node,
+        attribute: &ferroui_designer_core::Attribute,
+    ) -> bool {
+        let Ok(other) = Self::query(document, node.id, &attribute.name) else {
+            return false;
+        };
+        self.member == other.member
+            && match (self.owner.as_deref(), other.owner.as_deref()) {
+                (Some(left), Some(right)) => {
+                    left == right
+                        && same_owner_namespace(
+                            left,
+                            self.namespace.as_deref(),
+                            other.namespace.as_deref(),
+                        )
+                }
+                (None, None) => self.namespace == other.namespace,
+                (None, Some(owner)) => {
+                    self.namespace.is_none()
+                        && owner == node.local_name()
+                        && same_owner_namespace(
+                            owner,
+                            node.namespace_uri.as_deref(),
+                            other.namespace.as_deref(),
+                        )
+                }
+                (Some(owner), None) => {
+                    other.namespace.is_none()
+                        && owner == node.local_name()
+                        && same_owner_namespace(
+                            owner,
+                            self.namespace.as_deref(),
+                            node.namespace_uri.as_deref(),
+                        )
+                }
+            }
+    }
+    fn matches_element(&self, target: &Node, candidate: &Node) -> bool {
+        let Some((owner, member)) = candidate.local_name().rsplit_once('.') else {
+            return false;
+        };
+        if member != self.member {
+            return false;
+        }
+        let expected_owner = self.owner.as_deref().unwrap_or(target.local_name());
+        let namespace = if self.owner.is_some() || self.namespace.is_some() {
+            self.namespace.as_deref()
+        } else {
+            target.namespace_uri.as_deref()
+        };
+        expected_owner == owner
+            && same_owner_namespace(owner, namespace, candidate.namespace_uri.as_deref())
+    }
+}
+
+fn same_owner_namespace(owner: &str, left: Option<&str>, right: Option<&str>) -> bool {
+    if left == right {
+        return true;
+    }
+    let native = |namespace: Option<&str>| {
+        namespace.is_some_and(|namespace| {
+            framework_type_namespace(owner, namespace)
+                || matches!(
+                    namespace,
+                    "using:FerroUI.Controls"
+                        | "using:FerroUI.Controls.Primitives"
+                        | "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+                        | "clr-namespace:FerroUI.Controls.Primitives;assembly=FerroUI.Controls"
+                        | "using:FerroUI"
+                        | "using:FerroUI.Layout"
+                        | "using:FerroUI.Input"
+                        | "using:FerroUI.Media"
+                        | "clr-namespace:FerroUI;assembly=FerroUI.Base"
+                        | "clr-namespace:FerroUI.Layout;assembly=FerroUI.Base"
+                        | "clr-namespace:FerroUI.Input;assembly=FerroUI.Base"
+                        | "clr-namespace:FerroUI.Media;assembly=FerroUI.Base"
+                )
+        })
+    };
+    native(left) && native(right)
+}
+pub(crate) fn validated(document: &Document, edits: Vec<Edit>) -> Result<Vec<Edit>> {
+    valid_document(document)?;
+    let mut candidate = document.clone();
+    candidate
+        .apply("Validate component edit", edits.clone())
+        .map_err(error)?;
+    Ok(edits)
+}
+pub(crate) fn unique_targets(document: &Document, nodes: &[NodeId]) -> Result<Vec<NodeId>> {
+    let mut unique = BTreeSet::new();
+    for id in nodes {
+        element(document, *id)?;
+        unique.insert(*id);
+    }
+    require(!unique.is_empty(), "Select at least one target")?;
+    Ok(unique.into_iter().collect())
+}
+
+#[cfg(test)]
+#[path = "component_tests.rs"]
+mod tests;
+
+#[cfg(test)]
+#[path = "component_theme_tests.rs"]
+mod theme_tests;

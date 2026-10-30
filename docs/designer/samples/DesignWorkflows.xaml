@@ -1,0 +1,49 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="680">
+  <Grid RowDefinitions="Auto,*,Auto" Margin="24" RowSpacing="20">
+    <StackPanel Spacing="5">
+      <TextBlock Text="Workspace preferences" FontSize="25" FontWeight="SemiBold" />
+      <TextBlock Text="Review data, keyboard access and responsive layout."
+                 TextWrapping="Wrap" Opacity="0.7" />
+    </StackPanel>
+    <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
+      <StackPanel Name="Preferences" Spacing="12" KeyboardNavigation.TabNavigation="Local">
+        <Label Name="DisplayNameLabel" Content="_Display name" Target="{Binding ElementName=DisplayName}" />
+        <TextBox Name="DisplayName" Text="{Binding DisplayName}" d:Text="Alex Morgan" TabIndex="0" />
+        <Label Name="EmailLabel" Content="_Email address" Target="{Binding ElementName=Email}" />
+        <TextBox Name="Email" Text="{Binding Email}" d:Text="alex@example.com" TabIndex="1" />
+        <CheckBox Name="Notifications" Content="Receive project updates" IsChecked="{Binding Notifications}"
+                  d:IsChecked="True" TabIndex="2" />
+        <Border Name="ProjectCard" Padding="14" BorderBrush="#66808080" BorderThickness="1" CornerRadius="8">
+          <StackPanel Spacing="10">
+            <TextBlock Text="Recent projects" FontWeight="SemiBold" />
+            <ListBox Name="Projects" ItemsSource="{Binding Projects}" d:ItemsSource="{d:SampleData ItemCount=4}"
+                     Height="184" TabIndex="3">
+              <ListBox.ItemTemplate>
+                <DataTemplate>
+                  <Grid ColumnDefinitions="*,Auto" Margin="4,6">
+                    <StackPanel Spacing="3">
+                      <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                      <TextBlock Text="{Binding Owner.Name}" FontSize="11" Opacity="0.7" />
+                    </StackPanel>
+                    <TextBlock Grid.Column="1" Text="{Binding Count}" Margin="12,0,0,0" VerticalAlignment="Center" />
+                  </Grid>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+          </StackPanel>
+        </Border>
+        <d:TextBlock Text="Preview-only note · hide or isolate ProjectCard from Layers."
+                     FontSize="11" TextWrapping="Wrap" Opacity="0.65" />
+      </StackPanel>
+    </ScrollViewer>
+    <StackPanel Grid.Row="2" Name="Actions" Orientation="Horizontal" Spacing="8"
+                HorizontalAlignment="Right" KeyboardNavigation.TabNavigation="Local">
+      <Button Name="Cancel" Content="Cancel" TabIndex="0" />
+      <Button Name="Save" Content="Save preferences" TabIndex="1" />
+    </StackPanel>
+  </Grid>
+</UserControl>
