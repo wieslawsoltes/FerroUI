@@ -243,6 +243,7 @@ control_tests! {
     navigation_view => "NavigationView";
     frame => "Frame";
     rating_control => "RatingControl";
+    rich_edit_box => "RichEditBox";
     radio_buttons => "RadioButtons";
     auto_suggest_box => "AutoSuggestBox";
     number_box => "NumberBox";

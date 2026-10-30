@@ -457,12 +457,27 @@ impl TextInputMethodManager {
             *self.visual_root.borrow_mut() = Some((visual_root, token));
         }
 
-        let input_method =
-            element.as_ref().and_then(|element| element.get_input_root()).and_then(|root| root.input_method());
+        // Focus inside the editing UI of a connection client (its flyout, possibly in a
+        // popup root without an input method) keeps the input method of the owner's
+        // root; try_find_and_apply_client then keeps the binding. A legacy client
+        // follows the focused root, as upstream.
+        if !element.as_ref().is_some_and(|element| self.connection_client_retains(element)) {
+            let input_method =
+                element.as_ref().and_then(|element| element.get_input_root()).and_then(|root| root.input_method());
 
-        self.replace_input_method(input_method);
+            self.replace_input_method(input_method);
+        }
 
         self.try_find_and_apply_client();
+    }
+
+    /// Whether the bound connection client keeps the input method while `focused`
+    /// has keyboard focus.
+    fn connection_client_retains(&self, focused: &InputElement) -> bool {
+        let (Some(client), Some(_)) = (self.client(), self.owner()) else {
+            return false;
+        };
+        uses_connection(&*client) && self.im().is_some() && client.retains_input_method_focus(focused)
     }
 
     fn replace_input_method(&self, input_method: Option<Rc<dyn ITextInputMethodImpl>>) {

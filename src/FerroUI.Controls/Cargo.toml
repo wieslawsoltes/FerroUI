@@ -29,6 +29,8 @@ ferroui-system = { workspace = true }
 # The messages and the connections of remote rendering (`remote`).
 ferroui-remote-protocol.workspace = true
 bitflags.workspace = true
+# The legacy code pages of RTF text, with the feature `rtf-codepages`.
+encoding_rs = { workspace = true, optional = true }
 
 [features]
 # Test doubles (mock windowing platform, unit-test application) for the tests
@@ -37,6 +39,10 @@ testing = ["ferroui-base/testing"]
 # The performance counters of the base crate, which the counting sites of this crate (container
 # recycling, the child of a content presenter) count into.
 perf-counters = ["ferroui-base/perf-counters"]
+# The legacy code pages of RTF (Shift-JIS, GBK, Big5, the Windows and Mac code pages)
+# through `encoding_rs`. Without it RTF text bytes are read in the code page 1252 only
+# (docs/porting/winui-rich-text.md, decision D2).
+rtf-codepages = ["dep:encoding_rs"]
 
 [dev-dependencies]
 ferroui-base = { workspace = true, features = ["testing"] }

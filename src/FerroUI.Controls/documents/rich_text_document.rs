@@ -215,6 +215,11 @@ struct RichTextDocumentData {
     range_position_changed: Rc<HandlerList<RangePositionHandler>>,
     range_positions: RefCell<Vec<RangeTrackingReference>>,
     pending_range_change: RefCell<Option<PendingRangeTextChange>>,
+    /// The replacement an edit of the model is making (its range and its normalized
+    /// text). The next text observation reports it as the change when it explains the
+    /// new text, so live positions follow the real edit and not a diff, which cannot
+    /// tell where a repeated character was inserted (#243 review, S2).
+    pending_edit: RefCell<Option<(Range<usize>, String)>>,
     range_change_generation: Cell<u64>,
     cached_text: RefCell<Rc<str>>,
     observed_text: RefCell<Rc<str>>,
@@ -295,6 +300,7 @@ impl RichTextDocument {
             range_position_changed: Rc::new(HandlerList::new()),
             range_positions: RefCell::new(Vec::new()),
             pending_range_change: RefCell::new(None),
+            pending_edit: RefCell::new(None),
             range_change_generation: Cell::new(0),
             cached_text: RefCell::new(text.clone()),
             observed_text: RefCell::new(text),
@@ -601,6 +607,12 @@ impl RichTextDocument {
             return Ok(());
         }
         let normalized = normalize_paragraph_breaks(text);
+        // The explicit range SetText reports its own operation span (paired tracking);
+        // every other replacement reports its real range instead of a text diff.
+        if !paired_tracking {
+            *self.0.pending_edit.borrow_mut() = Some((range.clone(), normalized.clone()));
+        }
+        let _clear_pending_edit = PendingEditScope(self);
         if !normalized.contains('\n') && self.0.link_fields.borrow().is_empty() {
             if let Some(found) = self.find_splice_run(range.clone()) {
                 let mut value = found.run.text().unwrap_or_default();
@@ -1186,6 +1198,7 @@ impl RichTextDocument {
         // Take the hint before virtual text reads. A nested application mutation
         // cannot consume it, and the post-read identity check rejects stale text.
         let tracked = self.0.pending_range_change.borrow_mut().take();
+        let pending_edit = self.0.pending_edit.borrow_mut().take();
         let range_handlers = tracked.as_ref().map_or_else(
             || self.0.range_position_changed.snapshot(),
             |tracked| tracked.handlers.clone(),
@@ -1203,7 +1216,10 @@ impl RichTextDocument {
         }
         let previous = self.0.observed_text.replace(Rc::from(text.as_str()));
         let change = (previous.as_ref() != text).then(|| {
-            let (range, inserted_length) = changed_range(&previous, &text);
+            let (range, inserted_length) = pending_edit
+                .as_ref()
+                .and_then(|(range, inserted)| explained_change(&previous, &text, range, inserted))
+                .unwrap_or_else(|| changed_range(&previous, &text));
             DocumentTextChange {
                 range,
                 inserted_length,
@@ -1428,6 +1444,57 @@ fn validate_text_range(text: &str, range: Range<usize>) -> Result<(), DocumentEr
 
 fn segment_is_whitespace(text: &[u16]) -> bool {
     char::decode_utf16(text.iter().copied()).all(|value| value.is_ok_and(char::is_whitespace))
+}
+
+/// Clears the pending edit of a replacement when it ends, whatever way it ends.
+struct PendingEditScope<'a>(&'a RichTextDocument);
+
+impl Drop for PendingEditScope<'_> {
+    fn drop(&mut self) {
+        self.0 .0.pending_edit.borrow_mut().take();
+    }
+}
+
+/// The change of a replacement of `range` (UTF-16) by `inserted` when it turns `before`
+/// into `after`, else `None` (the edit was normalized, or something else changed).
+/// Text the replacement keeps at either end of the range is not part of the change,
+/// so replacing "ab" by "abX" inserts at the end of "ab"; outside the range the real
+/// edit wins over a text diff (#243 review, S2).
+fn explained_change(before: &str, after: &str, range: &Range<usize>, inserted: &str) -> Option<(Range<usize>, usize)> {
+    let start = utf16_to_byte(before, range.start)?;
+    let end = utf16_to_byte(before, range.end)?;
+    let explains = after.len() == before.len() - (end - start) + inserted.len()
+        && after.starts_with(&before[..start])
+        && after[start..].starts_with(inserted)
+        && after.ends_with(&before[end..]);
+    if !explains {
+        return None;
+    }
+    let (prefix, replaced, inserted) = trim_common(&before[start..end], inserted);
+    let prefix = before[start..start + prefix].encode_utf16().count();
+    let replaced_length = replaced.encode_utf16().count();
+    let changed_start = range.start + prefix;
+    Some((changed_start..changed_start + replaced_length, inserted.encode_utf16().count()))
+}
+
+/// Removes the common prefix and then the common suffix (whole characters) of two
+/// strings, returning the length of the prefix in bytes and what is left of each.
+fn trim_common<'a>(left: &'a str, right: &'a str) -> (usize, &'a str, &'a str) {
+    let prefix: usize = left
+        .chars()
+        .zip(right.chars())
+        .take_while(|(a, b)| a == b)
+        .map(|(c, _)| c.len_utf8())
+        .sum();
+    let (left, right) = (&left[prefix..], &right[prefix..]);
+    let suffix: usize = left
+        .chars()
+        .rev()
+        .zip(right.chars().rev())
+        .take_while(|(a, b)| a == b)
+        .map(|(c, _)| c.len_utf8())
+        .sum();
+    (prefix, &left[..left.len() - suffix], &right[..right.len() - suffix])
 }
 
 fn changed_range(before: &str, after: &str) -> (Range<usize>, usize) {
