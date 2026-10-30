@@ -1,0 +1,31 @@
+[package]
+name = "ferroui-livecharts"
+description = "LiveCharts2 chart calculation, geometry, interaction and animation for FerroUI"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+build = "build.rs"
+links = "ferroui_livecharts_xaml"
+
+[lib]
+path = "lib.rs"
+
+[features]
+markup-functions = ["ferroui-base/markup-functions"]
+compiler-metadata = ["markup-functions", "ferroui-base/compiler-metadata"]
+
+[dependencies]
+ferroui-base.workspace = true
+serde_json = "1"
+
+[build-dependencies]
+ferroui-build-scan.workspace = true
+
+[package.metadata.release]
+group = "controls"
