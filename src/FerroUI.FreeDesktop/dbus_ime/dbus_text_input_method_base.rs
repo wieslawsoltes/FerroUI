@@ -93,12 +93,22 @@ pub struct DBusTextInputMethodBase {
     weak_self: Weak<DBusTextInputMethodBase>,
     core: Rc<dyn DBusTextInputMethodCore>,
     disposables: RefCell<Vec<Rc<dyn IDisposable>>>,
-    online_names_queue: RefCell<VecDeque<String>>,
+    /// The names that came online, each with the unique name of the owner it came with.
+    online_names_queue: RefCell<VecDeque<(String, String)>>,
     connection: Connection,
     known_names: Vec<String>,
     watch_cts: RefCell<Option<CancellationFlag>>,
     connecting: Cell<bool>,
+    /// The name and owner a connect is in progress for.
+    connecting_owner: RefCell<Option<(String, String)>>,
+    /// Advanced whenever a context is retired (its owner was replaced or lost, a call
+    /// failed, the input method was disposed) and with every connect: a connect or a
+    /// signal of an older context is not published.
+    connection_generation: Cell<u64>,
+    disposed: Cell<bool>,
     current_name: RefCell<Option<String>>,
+    /// The unique name of the owner of `current_name` the context was created at.
+    current_owner: RefCell<Option<String>>,
     queue: DBusCallQueue,
     window_active: Cell<bool>,
     ime_active: Cell<Option<bool>>,
@@ -109,6 +119,41 @@ pub struct DBusTextInputMethodBase {
     client: RefCell<Option<Rc<dyn TextInputMethodClient>>>,
     on_commit: Event<String>,
     on_forward: Event<X11InputMethodForwardedKey>,
+}
+
+/// The fence of the signals of one context (the port's own; DEVIATIONS.md, X11 platform).
+/// A subscription can be made after its context was retired, and one of its callbacks can be
+/// queued before the subscription is disposed: a callback is delivered only while the
+/// context it was made for is current, and a late subscription is disposed at once.
+pub(crate) struct DBusSignalGuard {
+    owner: Weak<DBusTextInputMethodBase>,
+    generation: u64,
+}
+
+impl DBusSignalGuard {
+    fn is_current(&self, owner: &DBusTextInputMethodBase) -> bool {
+        !owner.disposed.get() && owner.connection_generation.get() == self.generation
+    }
+
+    /// `handler`, called only while the context of this guard is current.
+    pub(crate) fn handler<T>(&self, mut handler: impl FnMut(T) + 'static) -> impl FnMut(T) + 'static {
+        let guard = Self { owner: self.owner.clone(), generation: self.generation };
+        move |item| {
+            if guard.owner.upgrade().is_some_and(|owner| guard.is_current(&owner)) {
+                handler(item);
+            }
+        }
+    }
+
+    /// Keeps `subscription` until the input method disconnects (`AddDisposable`), or disposes
+    /// it at once when its context was retired meanwhile.
+    pub(crate) fn register(&self, subscription: Rc<dyn IDisposable>) {
+        if let Some(owner) = self.owner.upgrade().filter(|owner| self.is_current(owner)) {
+            owner.add_disposable(subscription);
+        } else {
+            subscription.dispose();
+        }
+    }
 }
 
 /// Runs an `async void` of the reference: a task of the UI dispatcher
@@ -146,7 +191,11 @@ impl DBusTextInputMethodBase {
                 known_names: known_names.iter().map(|name| name.to_string()).collect(),
                 watch_cts: RefCell::new(None),
                 connecting: Cell::new(false),
+                connecting_owner: RefCell::new(None),
+                connection_generation: Cell::new(0),
+                disposed: Cell::new(false),
                 current_name: RefCell::new(None),
+                current_owner: RefCell::new(None),
                 queue: DBusCallQueue::new(move |e| {
                     let owner = queue_owner.upgrade();
                     Box::pin(async move {
@@ -175,7 +224,11 @@ impl DBusTextInputMethodBase {
     }
 
     pub fn is_connected(&self) -> bool {
-        self.current_name.borrow().is_some()
+        !self.disposed.get() && self.current_name.borrow().is_some()
+    }
+
+    fn retire_connection(&self) {
+        self.connection_generation.set(self.connection_generation.get().wrapping_add(1));
     }
 
     pub fn client(&self) -> Option<Rc<dyn TextInputMethodClient>> {
@@ -257,8 +310,41 @@ impl DBusTextInputMethodBase {
     }
 
     fn on_owner_changed(&self, service_name: &str, new_owner: Option<&str>) {
-        if new_owner.is_some() && self.current_name.borrow().is_none() {
-            self.online_names_queue.borrow_mut().push_back(service_name.to_string());
+        // Deviation (DEVIATIONS.md, X11 platform): upstream reacts only to the owner going
+        // away, and only after a connect published its name. Here a context belongs to the
+        // owner it was created at: a connect in progress for another owner is retired by the
+        // generation, and a context whose owner was lost or replaced (also directly, without
+        // an empty owner in between) is disconnected before the new owner is connected to.
+        if self.disposed.get() {
+            return;
+        }
+        self.online_names_queue
+            .borrow_mut()
+            .retain(|(name, owner)| name != service_name || new_owner == Some(owner.as_str()));
+        if self
+            .connecting_owner
+            .borrow()
+            .as_ref()
+            .is_some_and(|(name, owner)| name == service_name && new_owner != Some(owner.as_str()))
+        {
+            self.retire_connection();
+        }
+
+        // IME has crashed (or its name has another owner now)
+        if self.current_name.borrow().as_deref() == Some(service_name)
+            && self.current_owner.borrow().as_deref() != new_owner
+        {
+            self.retire_connection();
+            *self.current_name.borrow_mut() = None;
+            *self.current_owner.borrow_mut() = None;
+            self.dispose_disposables();
+
+            self.core.on_disconnected();
+            self.reset_state();
+        }
+
+        if let Some(new_owner) = new_owner.filter(|_| self.current_name.borrow().is_none()) {
+            self.online_names_queue.borrow_mut().push_back((service_name.to_string(), new_owner.to_string()));
             if !self.connecting.get() {
                 self.connecting.set(true);
                 let Some(this) = self.weak_self.upgrade() else {
@@ -270,19 +356,44 @@ impl DBusTextInputMethodBase {
                     impl Drop for ResetConnecting {
                         fn drop(&mut self) {
                             self.0.connecting.set(false);
+                            self.0.connecting_owner.borrow_mut().take();
                         }
                     }
                     let guard = ResetConnecting(this);
                     let this = &guard.0;
 
                     loop {
-                        let Some(name) = this.online_names_queue.borrow_mut().pop_front() else {
+                        let Some((name, owner)) = this.online_names_queue.borrow_mut().pop_front() else {
                             break;
                         };
-                        match this.core.connect(name.clone()).await {
+                        if this.disposed.get() {
+                            return;
+                        }
+                        this.retire_connection();
+                        let generation = this.connection_generation.get();
+                        *this.connecting_owner.borrow_mut() = Some((name.clone(), owner.clone()));
+                        let result = this.core.connect(name.clone()).await;
+                        if this.disposed.get() || this.connection_generation.get() != generation {
+                            // The owner was replaced or lost, or the input method was disposed,
+                            // while the context was created: it is destroyed and never published.
+                            let disconnect = this.core.disconnect_async();
+                            this.core.on_disconnected();
+                            this.dispose_disposables();
+                            if let Err(ex) = disconnect.await {
+                                log_error("IME", &format!("Error while destroying a retired context:\n{ex}"));
+                            }
+                            if this.disposed.get() {
+                                this.online_names_queue.borrow_mut().clear();
+                                return;
+                            }
+                            continue;
+                        }
+                        this.connecting_owner.borrow_mut().take();
+                        match result {
                             Ok(true) => {
                                 this.online_names_queue.borrow_mut().clear();
                                 *this.current_name.borrow_mut() = Some(name);
+                                *this.current_owner.borrow_mut() = Some(owner);
                                 return;
                             }
                             Ok(false) => {}
@@ -293,15 +404,6 @@ impl DBusTextInputMethodBase {
                     }
                 });
             }
-        }
-
-        // IME has crashed
-        if new_owner.is_none() && self.current_name.borrow().as_deref() == Some(service_name) {
-            *self.current_name.borrow_mut() = None;
-            self.dispose_disposables();
-
-            self.core.on_disconnected();
-            self.reset_state();
         }
     }
 
@@ -322,11 +424,19 @@ impl DBusTextInputMethodBase {
 
     async fn queue_on_error_async(&self, e: DBusCallError) {
         log_error("IME", &format!("Error:\n{e}"));
-        if let Err(ex) = self.core.disconnect_async().await {
+        // Deviation (DEVIATIONS.md, X11 platform): upstream awaits DisconnectAsync with the
+        // context still connected and its signals still delivered, and clears the name after.
+        // Here the context is retired first: its signals are fenced and its subscriptions
+        // disposed, and calls queued meanwhile see no connection.
+        self.retire_connection();
+        *self.current_name.borrow_mut() = None;
+        *self.current_owner.borrow_mut() = None;
+        let disconnect = self.core.disconnect_async();
+        self.core.on_disconnected();
+        self.dispose_disposables();
+        if let Err(ex) = disconnect.await {
             log_error("IME", &format!("Error while destroying the context:\n{ex}"));
         }
-        self.core.on_disconnected();
-        *self.current_name.borrow_mut() = None;
     }
 
     /// Queues a call behind the calls already queued (`Enqueue`).
@@ -340,15 +450,28 @@ impl DBusTextInputMethodBase {
     /// Keeps a subscription until the input method disconnects
     /// (`AddDisposable`).
     pub fn add_disposable(&self, d: Rc<dyn IDisposable>) {
-        self.disposables.borrow_mut().push(d);
+        if self.disposed.get() {
+            d.dispose();
+        } else {
+            self.disposables.borrow_mut().push(d);
+        }
+    }
+
+    /// The fence of the signals of the context that is being created now.
+    pub(crate) fn signal_guard(&self) -> DBusSignalGuard {
+        DBusSignalGuard { owner: self.weak_self.clone(), generation: self.connection_generation.get() }
     }
 
     pub fn fire_commit(&self, s: String) {
-        self.on_commit.invoke(s);
+        if !self.disposed.get() {
+            self.on_commit.invoke(s);
+        }
     }
 
     pub fn fire_forward(&self, k: X11InputMethodForwardedKey) {
-        self.on_forward.invoke(k);
+        if !self.disposed.get() {
+            self.on_forward.invoke(k);
+        }
     }
 
     fn update_active(&self) {
@@ -467,22 +590,27 @@ impl IX11InputMethodControl for DBusTextInputMethodBase {
     }
 
     fn dispose(&self) {
+        // Deviation (DEVIATIONS.md, X11 platform): disposed once; a connect in progress is
+        // retired by its generation when it returns (upstream publishes it), and the context
+        // is disconnected at once rather than after its Destroy call returned.
+        if self.disposed.replace(true) {
+            return;
+        }
+        self.retire_connection();
         if let Some(watch_cts) = self.watch_cts.borrow().as_ref() {
             watch_cts.cancel();
         }
         self.dispose_disposables();
-        if !self.is_connected() {
+        if self.current_name.borrow_mut().take().is_none() {
             return;
         }
-        let Some(this) = self.weak_self.upgrade() else {
-            return;
-        };
+        *self.current_owner.borrow_mut() = None;
+        let disconnect = self.core.disconnect_async();
+        self.core.on_disconnected();
         spawn(async move {
-            if let Err(ex) = this.core.disconnect_async().await {
+            if let Err(ex) = disconnect.await {
                 log_error("IME", &format!("Error while destroying the context:\n{ex}"));
             }
-
-            *this.current_name.borrow_mut() = None;
         });
     }
 }

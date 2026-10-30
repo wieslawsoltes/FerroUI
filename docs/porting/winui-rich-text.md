@@ -220,3 +220,12 @@ What remains outside the port (RT-P of #243): the exact LineServices metrics, th
 
 Not taken from #243 in R8: its manager tests for a client without exact editing whose cursor query moves focus or replaces the client (`rich_edit_input_geometry_tests.rs`). Such a client keeps the upstream manager (D5), which has no such guarantees. While a connection client's flyout has focus, the manager keeps the input method of the owner's root, also when the flyout is in a popup root of its own.
 
+### 11.4 Input methods on Linux: IBus, Fcitx, Wayland (R11)
+
+| WinUI | FerroUI | Why |
+|---|---|---|
+| `InputScope` is the hint of the touch keyboard and the IME of Windows. | For RichEditBox (a client of the exact-edit connection) the first input scope becomes the IBus `ContentType` purpose, the Fcitx capability flags and the `zwp_text_input_v3` content purpose; without a scope, the content type. TextBox keeps upstream behaviour: IBus gets no `ContentType`. | Decision D5. |
+| Scopes select width and script (`AlphanumericFullWidth`, `Hiragana`, `KatakanaHalfWidth`, `Hangul*`). | IBus, Fcitx and the Wayland protocol have no width or script selector: these scopes are free-form; only `AlphanumericHalfWidth` asks Wayland for Latin. | No counterpart in the protocols. |
+| The IME accepts every scope. | An IBus that refuses `ContentType` (older than 1.5.32 or a portal without it) keeps the IME connected without the hint; a warning is logged. | #243 review P24. |
+
+

@@ -14,6 +14,7 @@ use crate::server::transient::i_wayland_text_input_v3_events::WaylandTextInputV3
 use crate::server::wayland_dispatch_priority::WaylandDispatchPriority;
 use crate::text_input_options_converter;
 use ferroui_base::input::text_input::TextInputOptions;
+use ferroui_base::input::InputScopeNameValue;
 use ferroui_base::Rect;
 use crate::server::wayland_worker::{WaylandWorkerState, WaylandWorkerThread, WorkerMarshaller};
 
@@ -90,6 +91,14 @@ impl WSurfaceProxy {
         let id = self.id;
         (self.marshaller)(Box::new(move |worker| call(worker, id)), priority);
     }
+
+    /// `set_text_input_options` with the input scope of a client of the exact-edit connection
+    /// (not in the reference; `docs/porting/winui-rich-text.md`, decisions D5 and D8). Without a
+    /// scope it is `set_text_input_options`.
+    pub(crate) fn set_text_input_options_with_input_scope(&self, options: &TextInputOptions, scope: Option<InputScopeNameValue>) {
+        let options = text_input_options_converter::convert_with_input_scope(options, scope);
+        self.post(move |worker, id| worker.state.set_text_input_options(id, options));
+    }
 }
 
 impl IWSurface for WSurfaceProxy {
@@ -126,8 +135,7 @@ impl IWSurface for WSurfaceProxy {
     }
 
     fn set_text_input_options(&self, options: &TextInputOptions) {
-        let options = text_input_options_converter::convert(options);
-        self.post(move |worker, id| worker.state.set_text_input_options(id, options));
+        self.set_text_input_options_with_input_scope(options, None);
     }
 
     fn set_text_input_surrounding_text(&self, text: &str, cursor_char: i32, anchor_char: i32) {
