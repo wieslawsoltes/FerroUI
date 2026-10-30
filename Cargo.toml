@@ -115,6 +115,7 @@ members = [
     "src/Vello/FerroUI.Vello",
     "src/HarfBuzz/FerroUI.HarfBuzz",
     "src/tools/MicroCom.CodeGenerator",
+    "src/tools/RichTextOracle",
     "external/XamlX/src/XamlX",
     "tests/FerroUI.Markup.Xaml.UnitTests",
     "tests/FerroUI.Reactive.Tests",
