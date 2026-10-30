@@ -29,6 +29,10 @@ members = [
     "tests/Dock/FerroDock.Markup.Tests",
     "tests/Dock/FerroDock.Serializer.Generated.Tests",
     "tests/Dock/FerroDock.Settings.Markup.Tests",
+    "src/Pretext/FerroUI.Pretext.Contracts",
+    "src/Pretext/FerroUI.Pretext",
+    "src/Pretext/FerroUI.Pretext.Layout",
+    "src/Pretext/FerroUI.Pretext.Media",
     "samples/HotReload",
     "src/FerroUI.HotReload",
     "src/FerroUI.HotPatch",
@@ -228,6 +232,10 @@ ryu = "1.0"
 serde = "1.0"
 serde_json = { version = "1.0", features = ["raw_value"] }
 
+ferroui-pretext-contracts = { version = "=0.4.0", path = "src/Pretext/FerroUI.Pretext.Contracts" }
+ferroui-pretext = { version = "=0.4.0", path = "src/Pretext/FerroUI.Pretext" }
+ferroui-pretext-layout = { version = "=0.4.0", path = "src/Pretext/FerroUI.Pretext.Layout" }
+ferroui-pretext-media = { version = "=0.4.0", path = "src/Pretext/FerroUI.Pretext.Media" }
 ferroui-hot-reload = { version = "=0.4.0", path = "src/FerroUI.HotReload" }
 ferroui-hot-patch = { version = "=0.4.0", path = "src/FerroUI.HotPatch" }
 ferroui-inspect = { version = "=0.4.0", path = "src/FerroUI.Inspect" }

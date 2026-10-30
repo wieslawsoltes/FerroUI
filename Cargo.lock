@@ -1369,6 +1369,9 @@ dependencies = [
  "ferroui-metal",
  "ferroui-native",
  "ferroui-opengl",
+ "ferroui-pretext",
+ "ferroui-pretext-layout",
+ "ferroui-pretext-media",
  "ferroui-reactive",
  "ferroui-reactiveui",
  "ferroui-reactiveui-controls",
@@ -1936,6 +1939,38 @@ dependencies = [
  "ferroui-controls",
  "libc",
  "paste",
+]
+
+[[package]]
+name = "ferroui-pretext"
+version = "0.4.0"
+dependencies = [
+ "ferroui-pretext-contracts",
+ "icu_locale_core",
+ "icu_properties",
+ "icu_segmenter",
+ "serde_json",
+ "unicode-general-category",
+ "unicode-segmentation",
+]
+
+[[package]]
+name = "ferroui-pretext-contracts"
+version = "0.4.0"
+
+[[package]]
+name = "ferroui-pretext-layout"
+version = "0.4.0"
+dependencies = [
+ "ferroui-pretext",
+]
+
+[[package]]
+name = "ferroui-pretext-media"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-pretext",
 ]
 
 [[package]]
@@ -3267,6 +3302,29 @@ dependencies = [
  "zerotrie",
  "zerovec",
 ]
+
+[[package]]
+name = "icu_segmenter"
+version = "2.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "61b195dc605f81aa181bec9b3bd14e26cc71b903e4644f6af578ca9772c7a710"
+dependencies = [
+ "icu_collections",
+ "icu_locale_fallback",
+ "icu_provider",
+ "icu_segmenter_data",
+ "potential_utf",
+ "smallvec",
+ "utf8_iter",
+ "zerotrie",
+ "zerovec",
+]
+
+[[package]]
+name = "icu_segmenter_data"
+version = "2.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "913a7d294ad056474749152107309fdee3ec17d2482d1ab70fdc61a81c64b9a3"
 
 [[package]]
 name = "icu_time"
@@ -5644,6 +5702,12 @@ dependencies = [
  "tempfile",
  "windows-sys 0.61.2",
 ]
+
+[[package]]
+name = "unicode-general-category"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0b993bddc193ae5bd0d623b49ec06ac3e9312875fdae725a975c51db1cc1677f"
 
 [[package]]
 name = "unicode-ident"
