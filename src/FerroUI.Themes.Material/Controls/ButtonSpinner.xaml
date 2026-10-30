@@ -1,0 +1,134 @@
+<!--
+  Not ported from a document: WinUI 3 has no ButtonSpinner. Built from microsoft-ui-xaml
+  (https://github.com/microsoft/microsoft-ui-xaml), commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/NumberBox/NumberBox.xaml (the spin buttons UpSpinButton and DownSpinButton of
+    the NumberBox template and NumberBoxSpinButtonStyle, ported in NumericUpDown.xaml)
+    controls/dev/CommonStyles/TextBox_themeresources.xaml (the box: the resources and the visual
+    states of BorderElement of DefaultTextBoxStyle)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  The spinner looks as a NumberBox with inline spin buttons: a box with the background, the
+  border and the states of a text box (PointerOver, Focused as :focus-within, Disabled), its
+  content, and the spin buttons PART_IncreaseButton and PART_DecreaseButton of the NumberBox
+  template (the keyed theme NumericUpDownSpinButtonStyle of NumericUpDown.xaml, the margins 4 and
+  0,4,4,4, the glyphs E70E and E70D at 14 px as Paths). NumericUpDown uses the keyed theme
+  NumericUpDownButtonSpinnerStyle of NumericUpDown.xaml instead, in which the text box draws the
+  box. The FerroUI contract: ButtonSpinnerLocation="Left" (:left) docks the buttons at the left,
+  ShowButtonSpinner hides them, AllowSpin disables them (the control sets IsEnabled), and :error
+  (data validation) gives the border the critical brush; the template is wrapped in
+  DataValidationErrors, which shows the errors under the box, as the Fluent theme wraps it. As the text box of WinUI, the spinner
+  shows no focus rectangle (its focused state is the border of the box).
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <StackPanel Spacing="20" Width="220">
+        <ButtonSpinner Content="Right spinner" />
+        <ButtonSpinner ButtonSpinnerLocation="Left" Content="Left spinner" />
+        <ButtonSpinner AllowSpin="False" Content="Spinning not allowed" />
+      </StackPanel>
+    </Border>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="{x:Type ButtonSpinner}" TargetType="ButtonSpinner">
+    <Setter Property="Foreground" Value="{DynamicResource TextControlForeground}" />
+    <Setter Property="Background" Value="{DynamicResource TextControlBackground}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource TextControlBorderThemeThickness}" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
+    <Setter Property="MinHeight" Value="{DynamicResource TextControlThemeMinHeight}" />
+    <Setter Property="MinWidth" Value="{DynamicResource TextControlThemeMinWidth}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Focusable" Value="True" />
+    <Setter Property="FocusAdorner" Value="{x:Null}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <!-- The errors of FerroUI's data validation under the box (DataValidationErrors.xaml). -->
+        <DataValidationErrors>
+          <Grid>
+            <Border x:Name="BorderElement"
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="{TemplateBinding CornerRadius}"
+                    BackgroundSizing="InnerBorderEdge"
+                    MinWidth="{TemplateBinding MinWidth}"
+                    MinHeight="{TemplateBinding MinHeight}" />
+            <DockPanel Margin="{TemplateBinding BorderThickness}">
+              <StackPanel x:Name="SpinButtons"
+                          DockPanel.Dock="Right"
+                          Orientation="Horizontal"
+                          IsVisible="{TemplateBinding ShowButtonSpinner}">
+                <RepeatButton x:Name="PART_IncreaseButton"
+                              Theme="{StaticResource NumericUpDownSpinButtonStyle}"
+                              Margin="4"
+                              CornerRadius="{TemplateBinding CornerRadius}">
+                  <Path Data="{StaticResource GlyphGeometryE70E}"
+                        Fill="{Binding $parent[RepeatButton].Foreground}"
+                        Stretch="Uniform"
+                        Width="12"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center" />
+                </RepeatButton>
+                <RepeatButton x:Name="PART_DecreaseButton"
+                              Theme="{StaticResource NumericUpDownSpinButtonStyle}"
+                              Margin="0,4,4,4"
+                              CornerRadius="{TemplateBinding CornerRadius}">
+                  <Path Data="{StaticResource GlyphGeometryE70D}"
+                        Fill="{Binding $parent[RepeatButton].Foreground}"
+                        Stretch="Uniform"
+                        Width="12"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center" />
+                </RepeatButton>
+              </StackPanel>
+              <ContentPresenter x:Name="PART_ContentPresenter"
+                                Content="{TemplateBinding Content}"
+                                ContentTemplate="{TemplateBinding ContentTemplate}"
+                                Foreground="{TemplateBinding Foreground}"
+                                Padding="{TemplateBinding Padding}"
+                                HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+            </DockPanel>
+          </Grid>
+        </DataValidationErrors>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- The buttons at the left. -->
+    <Style Selector="^:left /template/ StackPanel#SpinButtons">
+      <Setter Property="DockPanel.Dock" Value="Left" />
+    </Style>
+
+    <!-- The states of BorderElement of DefaultTextBoxStyle: PointerOver -->
+    <Style Selector="^:pointerover /template/ Border#BorderElement">
+      <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrushPointerOver}" />
+      <Setter Property="Background" Value="{DynamicResource TextControlBackgroundPointerOver}" />
+    </Style>
+    <!-- Focused -->
+    <Style Selector="^:focus-within /template/ Border#BorderElement">
+      <Setter Property="Background" Value="{DynamicResource TextControlBackgroundFocused}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrushFocused}" />
+      <Setter Property="BorderThickness" Value="{DynamicResource TextControlBorderThemeThicknessFocused}" />
+    </Style>
+    <!-- Disabled -->
+    <Style Selector="^:disabled">
+      <Style Selector="^ /template/ Border#BorderElement">
+        <Setter Property="Background" Value="{DynamicResource TextControlBackgroundDisabled}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrushDisabled}" />
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource TextControlForegroundDisabled}" />
+      </Style>
+    </Style>
+    <!-- Data validation (FerroUI). -->
+    <Style Selector="^:error /template/ Border#BorderElement">
+      <Setter Property="BorderBrush" Value="{DynamicResource SystemFillColorCriticalBrush}" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

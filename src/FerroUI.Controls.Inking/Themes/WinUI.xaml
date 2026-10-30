@@ -1,0 +1,22 @@
+<!--
+  The WinUI theme of the inking controls: the resources of InkToolbar (Themes/WinUI/InkToolbarResources.xaml,
+  written by scripts/winui-theme/convert.py), the outlines of its icons (Themes/WinUI/InkToolbarGlyphs.xaml)
+  and its control themes (Themes/WinUI/InkToolbar.xaml), ported from controls/dev/InkToolbar of
+  microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml), commit
+  7e4b0c2096be402f51cc8f7d203ebf67cff183d0; MIT License, see NOTICE.md.
+  An application on the WinUI theme includes it:
+    <StyleInclude Source="ferres://FerroUI.Controls.Inking/Themes/WinUI.xaml" />
+-->
+<Styles xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Styles.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <MergeResourceInclude Source="/Themes/WinUI/InkToolbarRevealFallbacks.xaml" />
+        <MergeResourceInclude Source="/Themes/WinUI/InkToolbarResources.xaml" />
+        <MergeResourceInclude Source="/Themes/WinUI/InkToolbarGlyphs.xaml" />
+        <MergeResourceInclude Source="/Themes/WinUI/InkToolbar.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </Styles.Resources>
+</Styles>

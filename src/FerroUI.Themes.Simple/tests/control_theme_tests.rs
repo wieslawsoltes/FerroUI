@@ -100,8 +100,14 @@ fn should_define_control_theme_for_built_in_templated_controls() {
     assert!(templated_controls.len() > 1);
     // Every templated control has a control theme, except the ones whose document is left out of
     // the theme for now (`Controls/excluded.txt`); a control with a theme is not in that list.
+    // The WinUI controls of ferroui-controls have their templates in the WinUI theme only
+    // (docs/porting/winui-controls.md, section 5.1): this theme has none for them.
     for control in &templated_controls {
         let themed = default_control_themes.iter().any(|themed| std::ptr::eq(*themed, *control));
+        if ferroui_controls::testing::is_winui_only(control) {
+            assert!(!themed, "{} is styled by the WinUI theme only (WINUI_ONLY_CONTROLS)", control.name());
+            continue;
+        }
         let excluded = crate::assets::is_excluded(&format!("/Controls/{}.xaml", control.name()));
         assert_eq!(!excluded, themed, "{}", control.name());
     }

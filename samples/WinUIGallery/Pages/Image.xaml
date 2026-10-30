@@ -1,0 +1,61 @@
+<!-- Adapted from all six original Image page compositions; see ../NOTICE.md.
+     Decode size uses Bitmap::decode_to_height; nine-grid uses native drawing objects.
+     SVG and animated playback remain explicit unsupported source features. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="20">
+  <StackPanel x:Name="ImageExample1" Spacing="8">
+    <TextBlock Text="An image from a local file" FontSize="18" />
+    <Image x:Name="BasicImage" Height="100" AutomationProperties.Name="Tree tops" />
+  </StackPanel>
+  <StackPanel x:Name="ImageExample2" Spacing="8">
+    <TextBlock Text="An image decoded to its rendering size" FontSize="18" />
+    <Image x:Name="DecodedImage" Height="100" AutomationProperties.Name="Tree tops decoded to 100 pixels high" />
+    <TextBlock x:Name="DecodedImageDimensions" TextWrapping="Wrap" />
+  </StackPanel>
+  <StackPanel x:Name="ImageExample3" Spacing="8">
+    <TextBlock Text="Image stretching" FontSize="18" />
+    <Image x:Name="StretchImage" Width="100" Height="100" Stretch="None"
+           AutomationProperties.Name="Valley" />
+    <RadioButtons x:Name="ImageStretchModes" Header="Image stretch mode" SelectedIndex="0"
+                  AutomationProperties.Name="Image stretch mode">
+      <x:String>None</x:String><x:String>Fill</x:String>
+      <x:String>Uniform</x:String><x:String>UniformToFill</x:String>
+    </RadioButtons>
+  </StackPanel>
+  <StackPanel x:Name="ImageExample4" Spacing="8">
+    <TextBlock Text="Nine-grid images" FontSize="18" />
+    <TextBlock Text="The normal image" />
+    <Image x:Name="NineGridNormal" Width="82" Height="82" AutomationProperties.Name="Normal image" />
+    <TextBlock Text="Image stretched evenly" />
+    <Image x:Name="NineGridSmallInsets" Width="164" Height="164"
+           AutomationProperties.Name="Image with 3 pixel nine-grid insets" />
+    <TextBlock Text="Image stretched using nine grid" />
+    <Image x:Name="NineGridLargeInsets" Width="164" Height="164"
+           AutomationProperties.Name="Image with 30 and 20 pixel nine-grid insets" />
+  </StackPanel>
+  <StackPanel x:Name="ImageExample5" Spacing="8">
+    <TextBlock Text="An SVG image" FontSize="18" />
+    <Image x:Name="SvgImage" Height="100" AutomationProperties.Name="Mirror PC consent SVG, unavailable" />
+    <TextBlock x:Name="SvgImageDiagnostic" TextWrapping="Wrap"
+               Text="The original MirrorPCConsent.svg is preserved. SVG image decoding is not available in this Gallery host." />
+  </StackPanel>
+  <StackPanel x:Name="ImageExample6" Spacing="12">
+    <TextBlock Text="An animated GIF image" FontSize="18" />
+    <TextBlock x:Name="GifPlaybackDiagnostic" TextWrapping="Wrap"
+               Text="The original WinUI playback examples below are static first-frame previews here. Animated BitmapImage playback, AutoPlay, Play, Stop and ImageOpened are not implemented here." />
+    <TextBlock Text="An Image element automatically plays an animated GIF source." TextWrapping="Wrap" />
+    <Image x:Name="GifAutoPreview" Height="40" HorizontalAlignment="Left"
+           AutomationProperties.Name="Animated GIF, static first-frame preview" />
+    <TextBlock Text="Set AutoPlay to False to prevent the GIF from playing automatically." TextWrapping="Wrap" />
+    <Image x:Name="GifPausedPreview" Height="40" HorizontalAlignment="Left"
+           AutomationProperties.Name="Paused GIF, static first-frame preview" />
+    <TextBlock Text="Control playback manually using BitmapImage.Play() and Stop()." TextWrapping="Wrap" />
+    <Image x:Name="GifManualPreview" Height="40" HorizontalAlignment="Left"
+           AutomationProperties.Name="Manual GIF, static first-frame preview" />
+    <StackPanel x:Name="PlaybackButtons" Orientation="Horizontal" Spacing="8">
+      <Button x:Name="PlayGif" Content="Play" IsEnabled="False" />
+      <Button x:Name="StopGif" Content="Stop" IsEnabled="False" />
+    </StackPanel>
+  </StackPanel>
+  <TextBlock x:Name="ImageLoadError" IsVisible="False" TextWrapping="Wrap" />
+</StackPanel>

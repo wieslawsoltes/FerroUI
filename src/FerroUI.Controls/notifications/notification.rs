@@ -112,7 +112,7 @@ impl Notification {
 
     /// Makes the binding metadata of the class and its cast to
     /// [`INotification`] known on the current thread, once.
-    fn ensure_registered() {
+    pub(crate) fn ensure_registered() {
         ferroui_base::ferro_thread_local! {
             static REGISTERED: Cell<bool> = const { Cell::new(false) };
         }
@@ -125,6 +125,11 @@ impl Notification {
         ValueTypes::register_boxed_cast::<Notification, Rc<dyn INotification>>(|object| {
             let any: Rc<dyn std::any::Any> = object.clone();
             any.downcast::<Notification>().ok().map(|notification| notification as Rc<dyn INotification>)
+        });
+        // The handle of the markup type (`Rc<Notification>`) is a notification of the
+        // contract too.
+        ValueTypes::register_cast::<Rc<Notification>, Rc<dyn INotification>>(|notification| {
+            notification.clone() as Rc<dyn INotification>
         });
     }
 

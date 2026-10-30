@@ -1,0 +1,38 @@
+<!-- macOS 26 adaptation; see docs/porting/macos26-theme.md.
+     Derived from FerroUI WinUI templates and microsoft-ui-xaml commit
+     7e4b0c2096be402f51cc8f7d203ebf67cff183d0. Copyright (c) Microsoft Corporation.
+     Licensed under the MIT License; see NOTICE.md.
+     Acrylic backing is the portable fallback for native Liquid Glass. -->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <TabStrip>
+        <TabStripItem>Recent</TabStripItem>
+        <TabStripItem>Shared</TabStripItem>
+        <TabStripItem IsEnabled="False">Disabled</TabStripItem>
+      </TabStrip>
+    </Border>
+  </Design.PreviewWith>
+  <ControlTheme x:Key="DefaultSelectorBarStyle" TargetType="TabStrip">
+    <Setter Property="CornerRadius" Value="8"/>
+    <Setter Property="Background" Value="{DynamicResource MacOSSegmentBackgroundBrush}"/>
+    <Setter Property="HorizontalAlignment" Value="Left"/>
+    <Setter Property="VerticalAlignment" Value="Top"/>
+    <Setter Property="IsTabStop" Value="False"/>
+    <Setter Property="KeyboardNavigation.TabNavigation" Value="Once"/>
+    <Setter Property="Padding" Value="2"/>
+    <Setter Property="ItemsPanel">
+      <ItemsPanelTemplate>
+        <StackPanel Orientation="Horizontal"/>
+      </ItemsPanelTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border BorderBrush="{TemplateBinding BorderBrush}" BackgroundSizing="InnerBorderEdge" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}">
+          <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" Margin="{TemplateBinding Padding}"/>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type TabStrip}" TargetType="TabStrip" BasedOn="{StaticResource DefaultSelectorBarStyle}"/>
+</ResourceDictionary>

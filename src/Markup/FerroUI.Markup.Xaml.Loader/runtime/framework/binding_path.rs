@@ -49,6 +49,8 @@ struct RuntimePropertyAccessors {
     /// (`XamlIlClrPropertyGetterResult::CachedBoxedBoolean`), so that reading a boolean
     /// property does not allocate a box per read.
     cached_boxed_boolean: bool,
+    /// The setter receives the contents of a value typed as System.Object.
+    object_value: bool,
 }
 
 /// The owner in the form invokers take it. A member receives the handle of
@@ -85,7 +87,12 @@ impl RuntimePropertyAccessors {
         }
         arguments.extend(self.indexer_arguments.iter().cloned());
         if let Some(value) = value {
-            arguments.push(value.cloned());
+            let value = if self.object_value {
+                ferroui_markup_xaml::xaml_il::runtime::compiled::object_assignment_value(value.cloned())
+            } else {
+                value.cloned()
+            };
+            arguments.push(value);
         }
         Ok(arguments)
     }
@@ -199,6 +206,7 @@ pub(crate) fn property_info(
         indexer_arguments: arguments,
         is_static: property.getter().or_else(|| property.setter()).is_some_and(|accessor| accessor.is_static()),
         cached_boxed_boolean: property.getter().is_some_and(|getter| getter.return_type().is("System", "Boolean")),
+        object_value: property.property_type().is("System", "Object"),
     };
     Ok(Rc::new(accessors.into_property_info(handle_of(&property.property_type()))))
 }

@@ -27,9 +27,8 @@
   - The flyout of a MenuBarItem (a MenuFlyout) is the popup PART_Popup with the template of
     MenuFlyoutPresenter, below the item and aligned to its left edge (MenuBarItem::ShowMenuFlyout
     shows it at the bottom left corner of the button). The shadow of the menu flyout (a ThemeShadow
-    at a Translation.Z of 32) is the BoxShadow ThemeShadowFlyoutBoxShadow of the border
-    ThemeShadowWrapper around the border of the popup (a border of its own: a border whose
-    background is sized to the inner edge of its border draws no box shadow), with the margin
+    at a Translation.Z of 32) is a ThemeShadow (the shared WinUIThemeShadow, Translation.Z as in WinUI) on the border
+    ThemeShadowWrapper around the border of the popup (a border of its own), with the margin
     ThemeShadowFlyoutMargin as the room for it in the popup
     (Resources/ThemeShadows.xaml; DEVIATIONS.md, G-24).
   - States: PointerOver is the :selected state of FerroUI's menus (the item under the pointer or
@@ -115,7 +114,7 @@
                  OverlayInputPassThroughElement="{Binding $parent[Menu]}">
             <!-- The shadow on a border of its own (G-24). -->
             <Border x:Name="ThemeShadowWrapper"
-                    BoxShadow="{DynamicResource ThemeShadowFlyoutBoxShadow}"
+                    Translation="0,0,32" Shadow="{StaticResource WinUIThemeShadow}"
                     Margin="{StaticResource ThemeShadowFlyoutMargin}"
                     CornerRadius="{DynamicResource OverlayCornerRadius}">
               <Border Background="{DynamicResource MenuFlyoutPresenterBackground}"

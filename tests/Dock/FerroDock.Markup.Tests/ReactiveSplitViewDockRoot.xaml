@@ -1,0 +1,6 @@
+<m:SplitViewDock xmlns="https://github.com/ferroui"
+ xmlns:m="clr-namespace:FerroDock.Model.ReactiveUI.Controls;assembly=FerroDock.Model.ReactiveUI"
+ Title="Source SplitViewDock" CompactPaneLength="56" DisplayMode="CompactOverlay" IsPaneOpen="True" OpenPaneLength="400" PanePlacement="Bottom" UseLightDismissOverlayMode="True">
+ <m:SplitViewDock.PaneDockable><m:Tool Title="Pane" /></m:SplitViewDock.PaneDockable>
+ <m:SplitViewDock.ContentDockable><m:Document Title="Content" /></m:SplitViewDock.ContentDockable>
+</m:SplitViewDock>

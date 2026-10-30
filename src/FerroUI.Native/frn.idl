@@ -1379,6 +1379,17 @@ interface IFrnPlatformSettings : IUnknown
     void RegisterLanguageChange(IFrnActionCallback* callback);
 }
 
+// Optional extension: keep IFrnPlatformSettings and its existing IID/vtable
+// unchanged so a host can still use an older native library.
+[uuid(56b3638d-e693-4784-92ba-351be9cbf68e)]
+interface IFrnAccessibilitySettings : IUnknown
+{
+    bool GetReduceMotion();
+    bool GetReduceTransparency();
+    // A null callback unregisters the previous observer.
+    void RegisterAccessibilityChange(IFrnActionCallback* callback);
+}
+
 [uuid(12edf00d-5803-4d3f-9947-b4840e5e9372)]
 interface IFrnPlatformBehaviorInhibition : IUnknown
 {

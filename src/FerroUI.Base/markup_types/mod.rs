@@ -20,6 +20,7 @@ mod contracts;
 mod enums;
 mod named_values;
 mod plain;
+mod rich_text;
 mod values;
 mod well_known;
 
@@ -28,7 +29,7 @@ mod markup_types_tests;
 
 /// The lists of the types declared in this module, by area.
 pub(crate) const TYPE_LISTS: &[&[&MarkupType]] = 
-    &[enums::TYPES, values::TYPES, named_values::TYPES, contracts::TYPES, plain::TYPES, classes::TYPES, well_known::TYPES, animation::TYPES];
+    &[enums::TYPES, values::TYPES, named_values::TYPES, contracts::TYPES, plain::TYPES, classes::TYPES, well_known::TYPES, animation::TYPES, rich_text::TYPES];
 
 /// Adds the types declared in this module to the process-wide table of
 /// types with markup metadata. Called once by `register_types()`.
@@ -51,4 +52,5 @@ fn register_value_types() {
     classes::register_value_types();
     well_known::register_value_types();
     animation::register_value_types();
+    rich_text::register_value_types();
 }

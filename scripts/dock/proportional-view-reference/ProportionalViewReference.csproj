@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <AvaloniaNameGeneratorBehavior>InitializeComponent</AvaloniaNameGeneratorBehavior>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="12.1.3" />
+    <PackageReference Include="Avalonia.Headless" Version="12.1.3" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.3" />
+    <Compile Include="../../../../Dock/src/Dock.Controls.ProportionalStackPanel/**/*.cs" Exclude="../../../../Dock/src/Dock.Controls.ProportionalStackPanel/**/obj/**;../../../../Dock/src/Dock.Controls.ProportionalStackPanel/**/bin/**" LinkBase="OriginalControls" />
+    <Compile Include="../../../../Dock/samples/DockReactiveUISample/Views/ProportionalStackPanelView.axaml.cs" Link="ProportionalStackPanelView.axaml.cs" />
+    <AvaloniaXaml Include="../../../../Dock/samples/DockReactiveUISample/Views/ProportionalStackPanelView.axaml" Link="ProportionalStackPanelView.axaml" />
+  </ItemGroup>
+</Project>

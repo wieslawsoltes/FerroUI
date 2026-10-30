@@ -1,0 +1,7 @@
+<ContentControl xmlns="https://github.com/ferroui"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:b="using:FerroDock.Ferro.Behaviors"
+                x:DataType="ContentControl" x:CompileBindings="True"
+                b:VisualTreeLifecycleBehavior.IsEnabled="True">
+  <Border />
+</ContentControl>

@@ -1,0 +1,29 @@
+<UserControl xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:material="using:FerroUI.Themes.Material" x:Class="MaterialThemeGallery.Pages.DatePickersPage">
+  <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+    <StackPanel Margin="28" Spacing="20">
+      <StackPanel Spacing="8">
+        <TextBlock Text="Choose a date" FontSize="32" LineHeight="40"/>
+        <TextBlock Text="Browse months, jump to a year, or type a date. Switch to a date range for plans that span several days."
+                   FontSize="16" LineHeight="24" TextWrapping="Wrap" Foreground="{DynamicResource MaterialOnSurfaceVariantBrush}"/>
+      </StackPanel>
+      <WrapPanel Orientation="Horizontal">
+        <Button x:Name="ToggleRange" Content="Choose a date range" Theme="{StaticResource MaterialTonalButton}" Margin="0,0,8,8"/>
+        <Button x:Name="ToggleCulture" Content="Use day/month/year" Theme="{StaticResource MaterialOutlinedButton}" Margin="0,0,8,8"/>
+        <Button x:Name="ToggleDirection" Content="Change reading direction" Theme="{StaticResource MaterialOutlinedButton}" Margin="0,0,0,8"/>
+      </WrapPanel>
+      <material:MaterialDatePicker x:Name="DemoPicker" ShowActions="True" HorizontalAlignment="Center"/>
+      <Border Background="{DynamicResource MaterialSurfaceContainerBrush}" CornerRadius="20" Padding="20">
+        <StackPanel Spacing="10">
+          <TextBlock Text="Your selection" FontSize="14" FontWeight="Medium" LineHeight="20"/>
+          <TextBlock x:Name="SelectionSummary" FontSize="22" LineHeight="28" TextWrapping="Wrap"/>
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button x:Name="ChooseToday" Content="Start today" Theme="{StaticResource MaterialTextButton}"/>
+            <Button x:Name="ClearSelection" Content="Clear" Theme="{StaticResource MaterialTextButton}"/>
+          </StackPanel>
+          <TextBlock x:Name="Confirmation" FontSize="14" LineHeight="20" Foreground="{DynamicResource MaterialPrimaryBrush}" AutomationProperties.LiveSetting="Polite"/>
+        </StackPanel>
+      </Border>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

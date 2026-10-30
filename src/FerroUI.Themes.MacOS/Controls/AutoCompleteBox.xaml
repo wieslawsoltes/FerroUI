@@ -1,0 +1,301 @@
+<!--
+  macOS 26 control theme adapted from FerroUI's compiled WinUI foundation.
+  Foundation: microsoft-ui-xaml 7e4b0c2096be402f51cc8f7d203ebf67cff183d0.
+  Copyright (c) Microsoft Corporation. MIT License; see NOTICE.md.
+  Geometry and timing are calibrated theme values, pending native capture.
+  FerroUI template parts, keyboard handling, editing and popup contracts are preserved.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <StackPanel Spacing="12">
+        <AutoCompleteBox Width="200" PlaceholderText="Search" />
+        <AutoCompleteBox Width="200" Text="Disabled" IsEnabled="False" />
+      </StackPanel>
+    </Border>
+  </Design.PreviewWith>
+
+  <!-- DeleteButtonStyle of the template of AutoSuggestBoxTextBoxStyle. -->
+  <ControlTheme x:Key="AutoSuggestBoxDeleteButtonStyle" TargetType="Button">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="ButtonLayoutGrid"
+                BorderBrush="{DynamicResource TextControlButtonBorderBrush}"
+                BackgroundSizing="InnerBorderEdge"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                Background="{DynamicResource TextControlButtonBackground}"
+                Margin="{StaticResource AutoSuggestBoxDeleteButtonMargin}"
+                CornerRadius="{DynamicResource MacOSControlCornerRadius}">
+          <!-- E894 at AutoSuggestBoxIconFontSize (12 px): the glyph is drawn at the size of its
+               ink, as the delete button of TextBox. -->
+          <Path x:Name="GlyphElement"
+                Fill="{DynamicResource TextControlButtonForeground}"
+                Data="F0 M 7,0 A 7,7 0 1 1 7,14 A 7,7 0 1 1 7,0 Z M 4.25,3.25 L 7,6 L 9.75,3.25 L 10.75,4.25 L 8,7 L 10.75,9.75 L 9.75,10.75 L 7,8 L 4.25,10.75 L 3.25,9.75 L 6,7 L 3.25,4.25 Z"
+                Stretch="Uniform"
+                Width="13"
+                Height="13"
+                VerticalAlignment="Center"
+                HorizontalAlignment="Center" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- PointerOver -->
+    <Style Selector="^:not(Button:disabled):pointerover">
+      <Style Selector="^ /template/ Border#ButtonLayoutGrid">
+        <Setter Property="Background" Value="{DynamicResource TextControlButtonBackgroundPointerOver}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource TextControlButtonBorderBrushPointerOver}" />
+      </Style>
+      <Style Selector="^ /template/ Path#GlyphElement">
+        <Setter Property="Fill" Value="{DynamicResource TextControlButtonForegroundPointerOver}" />
+      </Style>
+    </Style>
+    <!-- Pressed -->
+    <Style Selector="^:not(Button:disabled):pressed">
+      <Style Selector="^ /template/ Border#ButtonLayoutGrid">
+        <Setter Property="Background" Value="{DynamicResource TextControlButtonBackgroundPressed}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource TextControlButtonBorderBrushPressed}" />
+      </Style>
+      <Style Selector="^ /template/ Path#GlyphElement">
+        <Setter Property="Fill" Value="{DynamicResource TextControlButtonForegroundPressed}" />
+      </Style>
+    </Style>
+    <!-- Disabled -->
+    <Style Selector="^:disabled /template/ Border#ButtonLayoutGrid">
+      <Setter Property="Opacity" Value="0" />
+    </Style>
+  </ControlTheme>
+
+  <!-- AutoSuggestBoxTextBoxStyle: the TextBoxStyle of an auto-complete box. -->
+  <ControlTheme x:Key="AutoSuggestBoxTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource DefaultTextBoxStyle}">
+    <Setter Property="MinWidth" Value="{DynamicResource TextControlThemeMinWidth}" />
+    <Setter Property="MinHeight" Value="{DynamicResource MacOSControlHeight}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextControlForeground}" />
+    <Setter Property="Background" Value="{DynamicResource TextControlBackground}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}" />
+    <Setter Property="SelectionBrush" Value="{DynamicResource TextControlSelectionHighlightColor}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource TextControlBorderThemeThickness}" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
+    <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Hidden" />
+    <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Hidden" />
+    <Setter Property="ScrollViewer.IsDeferredScrollingEnabled" Value="False" />
+    <Setter Property="Padding" Value="{DynamicResource TextControlThemePadding}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <DataValidationErrors>
+          <Grid ColumnDefinitions="Auto,*,Auto,4,Auto">
+            <Border x:Name="BorderElement"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="5"
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BackgroundSizing="InnerBorderEdge"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="{TemplateBinding CornerRadius}"
+                    TemplatedControl.IsTemplateFocusTarget="True" />
+            <Border x:Name="MacOSPointerFocusRing" Grid.ColumnSpan="5"
+                    Margin="-3" BorderThickness="3" Opacity="0"
+                    BorderBrush="{DynamicResource MacOSFocusBrush}"
+                    CornerRadius="{TemplateBinding CornerRadius}"
+                    IsHitTestVisible="False">
+              <Border.Transitions>
+                <Transitions>
+                  <DoubleTransition Property="Opacity" Duration="{DynamicResource MacOSMotionFastDuration}" />
+                </Transitions>
+              </Border.Transitions>
+            </Border>
+            <!-- InnerLeftContent of FerroUI's text box. -->
+            <ContentPresenter x:Name="InnerLeftContentPresenter"
+                              IsVisible="{TemplateBinding InnerLeftContent, Converter={x:Static ObjectConverters.IsNotNull}}"
+                              Grid.Column="0"
+                              Margin="{TemplateBinding BorderThickness}"
+                              Content="{TemplateBinding InnerLeftContent}"
+                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+            <ScrollViewer x:Name="PART_ScrollViewer"
+                          Grid.Column="1"
+                          HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}"
+                          VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}"
+                          IsDeferredScrollingEnabled="{TemplateBinding (ScrollViewer.IsDeferredScrollingEnabled)}"
+                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                          Margin="{TemplateBinding BorderThickness}"
+                          Padding="{TemplateBinding Padding}"
+                          Foreground="{TemplateBinding Foreground}"
+                          Focusable="False">
+              <TextPresenter x:Name="PART_TextPresenter"
+                             Text="{TemplateBinding Text, Mode=TwoWay}"
+                             CaretBlinkInterval="{TemplateBinding CaretBlinkInterval}"
+                             CaretIndex="{TemplateBinding CaretIndex}"
+                             SelectionStart="{TemplateBinding SelectionStart}"
+                             SelectionEnd="{TemplateBinding SelectionEnd}"
+                             TextAlignment="{TemplateBinding TextAlignment}"
+                             TextWrapping="{TemplateBinding TextWrapping}"
+                             LineHeight="{TemplateBinding LineHeight}"
+                             LetterSpacing="{TemplateBinding LetterSpacing}"
+                             PasswordChar="{TemplateBinding PasswordChar}"
+                             RevealPassword="{TemplateBinding RevealPassword}"
+                             SelectionBrush="{TemplateBinding SelectionBrush}"
+                             SelectionForegroundBrush="{TemplateBinding SelectionForegroundBrush}"
+                             CaretBrush="{TemplateBinding CaretBrush}" />
+              <ScrollViewer.Styles>
+                <Style Selector="ScrollContentPresenter#PART_ContentPresenter">
+                  <Setter Property="Cursor" Value="IBeam" />
+                </Style>
+              </ScrollViewer.Styles>
+            </ScrollViewer>
+            <TextBlock x:Name="PlaceholderTextContentPresenter"
+                       Grid.Column="1"
+                       Grid.ColumnSpan="2"
+                       Foreground="{TemplateBinding PlaceholderForeground}"
+                       Margin="{TemplateBinding BorderThickness}"
+                       Padding="{TemplateBinding Padding}"
+                       Text="{TemplateBinding PlaceholderText}"
+                       VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                       HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                       IsHitTestVisible="False">
+              <TextBlock.IsVisible>
+                <MultiBinding Converter="{x:Static BoolConverters.And}">
+                  <Binding ElementName="PART_TextPresenter" Path="PreeditText" Converter="{x:Static StringConverters.IsNullOrEmpty}" />
+                  <Binding RelativeSource="{RelativeSource TemplatedParent}" Path="Text" Converter="{x:Static StringConverters.IsNullOrEmpty}" />
+                </MultiBinding>
+              </TextBlock.IsVisible>
+            </TextBlock>
+            <Button x:Name="DeleteButton"
+                    Grid.Column="2"
+                    Theme="{StaticResource AutoSuggestBoxDeleteButtonStyle}"
+                    Command="{Binding $parent[TextBox].Clear}"
+                    CornerRadius="{TemplateBinding CornerRadius}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    Padding="{DynamicResource HelperButtonThemePadding}"
+                    Focusable="False"
+                    IsVisible="False"
+                    FontSize="{TemplateBinding FontSize}"
+                    Width="24"
+                    VerticalAlignment="Stretch" />
+            <!-- InnerRightContent of FerroUI's text box. -->
+            <ContentPresenter x:Name="InnerRightContentPresenter"
+                              IsVisible="{TemplateBinding InnerRightContent, Converter={x:Static ObjectConverters.IsNotNull}}"
+                              Grid.Column="4"
+                              Margin="{TemplateBinding BorderThickness}"
+                              Content="{TemplateBinding InnerRightContent}"
+                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+          </Grid>
+        </DataValidationErrors>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- Disabled -->
+    <Style Selector="^:disabled">
+      <Setter Property="PlaceholderForeground" Value="{DynamicResource TextControlPlaceholderForegroundDisabled}" />
+      <Style Selector="^ /template/ Border#BorderElement">
+        <Setter Property="Background" Value="{DynamicResource TextControlBackgroundDisabled}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrushDisabled}" />
+      </Style>
+      <Style Selector="^ /template/ ScrollViewer#PART_ScrollViewer">
+        <Setter Property="Foreground" Value="{DynamicResource TextControlForegroundDisabled}" />
+      </Style>
+    </Style>
+    <!-- PointerOver -->
+    <Style Selector="^:not(TextBox:disabled):pointerover">
+      <Setter Property="PlaceholderForeground" Value="{DynamicResource TextControlPlaceholderForegroundPointerOver}" />
+      <Style Selector="^ /template/ Border#BorderElement">
+        <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrushPointerOver}" />
+        <Setter Property="Background" Value="{DynamicResource TextControlBackgroundPointerOver}" />
+      </Style>
+      <Style Selector="^ /template/ ScrollViewer#PART_ScrollViewer">
+        <Setter Property="Foreground" Value="{DynamicResource TextControlForegroundPointerOver}" />
+      </Style>
+    </Style>
+    <!-- Focused -->
+    <Style Selector="^:not(TextBox:disabled):focus">
+      <Setter Property="PlaceholderForeground" Value="{DynamicResource TextControlPlaceholderForegroundFocused}" />
+      <Style Selector="^ /template/ Border#BorderElement">
+        <Setter Property="Background" Value="{DynamicResource TextControlBackgroundFocused}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrushFocused}" />
+        <Setter Property="BorderThickness" Value="{DynamicResource TextControlBorderThemeThickness}" />
+      </Style>
+      <Style Selector="^ /template/ ScrollViewer#PART_ScrollViewer">
+        <Setter Property="Foreground" Value="{DynamicResource TextControlForegroundFocused}" />
+      </Style>
+    </Style>
+    <!-- Text editing retains a focus ring for pointer focus as well as keyboard focus. -->
+    <Style Selector="^:focus:not(TextBox:focus-visible):not(TextBox:disabled) /template/ Border#MacOSPointerFocusRing">
+      <Setter Property="Opacity" Value="1" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="DefaultAutoSuggestBoxStyle" TargetType="AutoCompleteBox">
+    <Setter Property="VerticalAlignment" Value="Stretch" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="Foreground" Value="{DynamicResource TextControlForeground}" />
+    <Setter Property="Background" Value="{DynamicResource TextControlBackground}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource TextControlBorderThemeThickness}" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
+    <Setter Property="PlaceholderForeground" Value="{DynamicResource TextControlPlaceholderForeground}" />
+    <Setter Property="Padding" Value="{DynamicResource TextControlThemePadding}" />
+    <Setter Property="MaxDropDownHeight" Value="{DynamicResource AutoSuggestListMaxHeight}" />
+    <Setter Property="FocusAdorner" Value="{x:Null}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource MacOSControlCornerRadius}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid x:Name="LayoutRoot">
+          <TextBox x:Name="PART_TextBox"
+                   Theme="{StaticResource AutoSuggestBoxTextBoxStyle}"
+                   PlaceholderText="{TemplateBinding PlaceholderText}"
+                   PlaceholderForeground="{TemplateBinding PlaceholderForeground}"
+                   Width="{TemplateBinding Width}"
+                   Foreground="{TemplateBinding Foreground}"
+                   Background="{TemplateBinding Background}"
+                   BorderBrush="{TemplateBinding BorderBrush}"
+                   BorderThickness="{TemplateBinding BorderThickness}"
+                   FontSize="{TemplateBinding FontSize}"
+                   FontFamily="{TemplateBinding FontFamily}"
+                   FontWeight="{TemplateBinding FontWeight}"
+                   FontStretch="{TemplateBinding FontStretch}"
+                   VerticalContentAlignment="Center"
+                   HorizontalContentAlignment="Stretch"
+                   ScrollViewer.BringIntoViewOnFocusChange="False"
+                   Margin="0"
+                   CornerRadius="{TemplateBinding CornerRadius}"
+                   Padding="{TemplateBinding Padding}"
+                   CaretIndex="{TemplateBinding CaretIndex, Mode=TwoWay}"
+                   ClearSelectionOnLostFocus="{TemplateBinding ClearSelectionOnLostFocus}"
+                   MaxLength="{TemplateBinding MaxLength}"
+                   DataValidationErrors.Errors="{TemplateBinding (DataValidationErrors.Errors)}"
+                   InnerLeftContent="{TemplateBinding InnerLeftContent}"
+                   InnerRightContent="{TemplateBinding InnerRightContent}" />
+          <Popup x:Name="PART_Popup"
+                 WindowManagerAddShadowHint="False"
+                 IsLightDismissEnabled="True"
+                 PlacementTarget="{TemplateBinding}">
+            <Border x:Name="SuggestionsContainer"
+                    BoxShadow="{DynamicResource ThemeShadowFlyoutBoxShadow}"
+                    Margin="{StaticResource ThemeShadowFlyoutMargin}"
+                    MinWidth="{Binding Bounds.Width, RelativeSource={RelativeSource TemplatedParent}}"
+                    MaxHeight="{TemplateBinding MaxDropDownHeight}"
+                    Padding="{DynamicResource AutoSuggestListMargin}"
+                    BorderThickness="{DynamicResource AutoSuggestListBorderThemeThickness}"
+                    BorderBrush="{DynamicResource AutoSuggestBoxSuggestionsListBorderBrush}"
+                    Background="{DynamicResource AutoSuggestBoxSuggestionsListBackground}"
+                    CornerRadius="{DynamicResource OverlayCornerRadius}">
+              <ListBox x:Name="PART_SelectingItemsControl"
+                       ItemTemplate="{TemplateBinding ItemTemplate}"
+                       ItemContainerTheme="{StaticResource DefaultListViewItemStyle}"
+                       Margin="{DynamicResource AutoSuggestListPadding}"
+                       Background="Transparent"
+                       BorderThickness="0"
+                       ScrollViewer.IsScrollChainingEnabled="False" />
+            </Border>
+          </Popup>
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type AutoCompleteBox}" TargetType="AutoCompleteBox" BasedOn="{StaticResource DefaultAutoSuggestBoxStyle}" />
+</ResourceDictionary>

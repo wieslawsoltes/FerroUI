@@ -1,0 +1,712 @@
+--- a/controls/child_name_scope.rs
++++ b/controls/child_name_scope.rs
+@@ -1,8 +1,9 @@
+ use super::{INameScope, NameScope, NameScopeError, NameScopeRef};
+ use crate::utilities::{SynchronousCompletionAsyncResult, SynchronousCompletionAsyncResultSource};
+-use crate::{FerroObject, Ref};
++use crate::{BoxedValue, FerroObject, Ref};
++use crate::data::core::ValueTypes;
+ 
+-type FindResult = Option<Ref<FerroObject>>;
++type FindResult = Option<BoxedValue>;
+ 
+ /// A name scope nested in another one: names that are not found once the
+ /// scope is complete are looked up in the parent scope.
+@@ -24,7 +25,7 @@
+             name: &str,
+             src: SynchronousCompletionAsyncResultSource<FindResult>,
+         ) {
+-            let parent_search = parent_scope.find_async(name);
++            let parent_search = parent_scope.find_value_async(name);
+             if parent_search.is_completed() {
+                 src.set_result(parent_search.get_result());
+             } else {
+@@ -35,7 +36,7 @@
+ 
+         if !self.inner.is_completed() {
+             // Guaranteed to be incomplete at this point.
+-            let inner_search = self.inner.find_async(name);
++            let inner_search = self.inner.find_value_async(name);
+             let search = inner_search.clone();
+             let src = src.clone();
+             let parent_scope = self.parent_scope.clone();
+@@ -61,8 +62,16 @@
+         self.inner.try_register(name, element)
+     }
+ 
+-    fn find_async(&self, name: &str) -> SynchronousCompletionAsyncResult<FindResult> {
+-        let found = self.find(name);
++    fn try_register_value(&self, name: &str, value: BoxedValue) -> Result<(), NameScopeError> {
++        self.inner.try_register_value(name, value)
++    }
++
++    fn find_async(&self, name: &str) -> SynchronousCompletionAsyncResult<Option<Ref<FerroObject>>> {
++        super::i_name_scope::map_result(self.find_value_async(name), |value| value.and_then(|value| ValueTypes::as_object(&*value)))
++    }
++
++    fn find_value_async(&self, name: &str) -> SynchronousCompletionAsyncResult<FindResult> {
++        let found = self.find_value(name);
+         if found.is_some() {
+             return SynchronousCompletionAsyncResult::new(found);
+         }
+@@ -73,13 +82,27 @@
+         self.do_find_async(name)
+     }
+ 
+-    fn find(&self, name: &str) -> FindResult {
+-        let found = self.inner.find(name);
++    fn find(&self, name: &str) -> Option<Ref<FerroObject>> {
++        if let Some(element) = self.inner.find(name) {
++            return Some(element);
++        }
++        // A local plain object shadows a parent's native object as well.
++        if self.inner.find_value(name).is_some() {
++            return None;
++        }
++        if self.inner.is_completed() {
++            return self.parent_scope.find(name);
++        }
++        None
++    }
++
++    fn find_value(&self, name: &str) -> FindResult {
++        let found = self.inner.find_value(name);
+         if found.is_some() {
+             return found;
+         }
+         if self.inner.is_completed() {
+-            return self.parent_scope.find(name);
++            return self.parent_scope.find_value(name);
+         }
+         None
+     }
+--- a/controls/i_name_scope.rs
++++ b/controls/i_name_scope.rs
+@@ -1,5 +1,6 @@
+-use crate::utilities::SynchronousCompletionAsyncResult;
+-use crate::{FerroObject, Ref};
++use crate::utilities::{SynchronousCompletionAsyncResult, SynchronousCompletionAsyncResultSource};
++use crate::data::core::ValueTypes;
++use crate::{BoxedValue, FerroObject, Ref};
+ use std::ops::Deref;
+ use std::rc::Rc;
+ 
+@@ -10,6 +11,10 @@
+     Completed,
+     /// Another element is registered with the name.
+     DuplicateName(String),
++    /// A legacy custom scope only implements native-object registration.
++    UnsupportedValue,
++    /// The supplied boxed nullable represents null.
++    NullValue,
+ }
+ 
+ impl std::fmt::Display for NameScopeError {
+@@ -17,6 +22,8 @@
+         match self {
+             Self::Completed => f.write_str("NameScope is completed, no further registrations are allowed"),
+             Self::DuplicateName(name) => write!(f, "Control with the name '{name}' already registered."),
++            Self::NullValue => f.write_str("Value cannot be null. (Parameter 'element')"),
++            Self::UnsupportedValue => f.write_str("This custom name scope only supports native objects."),
+         }
+     }
+ }
+@@ -25,6 +32,35 @@
+ 
+ /// Defines a name scope.
+ pub trait INameScope {
++    /// Registers any non-null object, retaining its identity. The value form
++    /// corresponds to the managed `object` parameter. Existing native-only
++    /// custom scopes can override this method to accept plain objects too.
++    fn try_register_value(&self, name: &str, value: BoxedValue) -> Result<(), NameScopeError> {
++        if self.is_completed() {
++            return Err(NameScopeError::Completed);
++        }
++        let value = ValueTypes::normalize(value).ok_or(NameScopeError::NullValue)?;
++        let element = ValueTypes::as_object(&*value).ok_or(NameScopeError::UnsupportedValue)?;
++        self.try_register(name, element)
++    }
++
++    /// Registers any object; panics on the same errors as `try_register_value`.
++    fn register_value(&self, name: &str, value: BoxedValue) {
++        if let Err(error) = self.try_register_value(name, value) {
++            panic!("{error}");
++        }
++    }
++
++    /// Finds any named object immediately, without traversing incomplete scopes.
++    fn find_value(&self, name: &str) -> Option<BoxedValue> {
++        self.find(name).map(|element| Rc::new(element) as BoxedValue)
++    }
++
++    /// Finds any named object, completing synchronously on registration or completion.
++    fn find_value_async(&self, name: &str) -> SynchronousCompletionAsyncResult<Option<BoxedValue>> {
++        map_result(self.find_async(name), |element| element.map(|element| Rc::new(element) as BoxedValue))
++    }
++
+     /// Registers an element in the name scope. Panics if the scope is
+     /// completed or another element is registered with the name: see
+     /// [`try_register`](Self::try_register) for the form that reports these
+@@ -70,6 +106,21 @@
+     fn detached_from(&self, _owner: &Ref<FerroObject>) {}
+ }
+ 
++/// Projects a result without holding a scope borrow across synchronous callbacks.
++pub(crate) fn map_result<T: Clone + 'static, U: Clone + 'static>(
++    result: SynchronousCompletionAsyncResult<T>,
++    map: impl FnOnce(T) -> U + 'static,
++) -> SynchronousCompletionAsyncResult<U> {
++    if result.is_completed() {
++        return SynchronousCompletionAsyncResult::new(map(result.get_result()));
++    }
++    let source = SynchronousCompletionAsyncResultSource::new();
++    let output = source.async_result();
++    let pending = result.clone();
++    result.on_completed(move || source.set_result(map(pending.get_result())));
++    output
++}
++
+ /// A shared handle to a name scope, compared by identity so that it can be a
+ /// property value.
+ #[derive(Clone)]
+--- a/controls/i_resource_dictionary.rs
++++ b/controls/i_resource_dictionary.rs
+@@ -1,9 +1,13 @@
+ use super::{IResourceProvider, IThemeVariantProvider, ResourceKey, ResourceValue};
++use crate::collections::FerroList;
+ use crate::styling::ThemeVariant;
+ use std::rc::Rc;
+ 
+ /// An indexed dictionary of resources.
+ pub trait IResourceDictionary: IResourceProvider {
++    /// The original mutable merged-provider collection, shared with the dictionary.
++    fn merged_dictionaries(&self) -> FerroList<Rc<dyn IResourceProvider>>;
++
+     /// A snapshot of the collection of child resource dictionaries.
+     fn merged_dictionaries_snapshot(&self) -> Rc<Vec<Rc<dyn IResourceProvider>>>;
+ 
+--- a/controls/i_resource_provider.rs
++++ b/controls/i_resource_provider.rs
+@@ -1,6 +1,7 @@
+-use super::{IResourceNode, ResourceHostRef};
++use super::{IResourceDictionary, IResourceNode, ResourceHostRef};
+ use crate::reactive::IDisposable;
+ use crate::FerroObject;
++use std::any::Any;
+ use std::rc::Rc;
+ 
+ /// Represents an object that can be queried for resources but does not appear
+@@ -8,7 +9,13 @@
+ ///
+ /// The interface represented by this trait is implemented by resource
+ /// dictionaries, styles and the like.
+-pub trait IResourceProvider: IResourceNode {
++pub trait IResourceProvider: IResourceNode + Any {
++    /// Views this provider through its dictionary contract when it implements one.
++    /// Plain providers return `None`; dictionaries return their actual interface.
++    fn as_resource_dictionary(&self) -> Option<&dyn IResourceDictionary> {
++        None
++    }
++
+     /// The owner of the resource provider.
+     ///
+     /// If the resource provider is, or is a child of, a resource dictionary or
+--- a/controls/name_scope.rs
++++ b/controls/name_scope.rs
+@@ -1,10 +1,11 @@
+ use super::{INameScope, NameScopeError, NameScopeRef};
+ use crate::utilities::{SynchronousCompletionAsyncResult, SynchronousCompletionAsyncResultSource};
+-use crate::{ferro_property, AttachedProperty, FerroObject, FerroProperty, Ref, StyledElement, WeakRef};
++use crate::data::core::ValueTypes;
++use crate::{BoxedValue, ferro_property, AttachedProperty, FerroObject, FerroProperty, Ref, StyledElement, WeakRef};
+ use std::cell::{Cell, RefCell};
+ use std::collections::HashMap;
+ 
+-type FindResult = Option<Ref<FerroObject>>;
++type FindResult = Option<BoxedValue>;
+ 
+ /// An element of a name scope. Deviation (DEVIATIONS.md, Name scopes): the
+ /// element the scope is attached to holds the scope, so the scope holds that
+@@ -12,23 +13,36 @@
+ /// the managed original holds every element for its collector, an element
+ /// with a name of its own and its scope would keep each other alive. Every
+ /// other element is held as a reference.
++#[derive(Clone)]
+ enum Named {
+     Element(Ref<FerroObject>),
+     Owner(WeakRef<FerroObject>),
++    Value(BoxedValue),
+ }
+ 
+ impl Named {
++    // Keep existing typed native lookup allocation-free.
+     fn element(&self) -> Option<Ref<FerroObject>> {
+         match self {
+             Named::Element(element) => Some(element.clone()),
+             Named::Owner(owner) => owner.upgrade(),
+-        }
+-    }
+-
+-    fn is(&self, element: &Ref<FerroObject>) -> bool {
++            Named::Value(_) => None,
++        }
++    }
++
++    fn value(&self) -> FindResult {
+         match self {
+-            Named::Element(named) => named == element,
+-            Named::Owner(owner) => owner.points_to(element),
++            Named::Element(element) => Some(std::rc::Rc::new(element.clone())),
++            Named::Owner(owner) => owner.upgrade().map(|element| std::rc::Rc::new(element) as BoxedValue),
++            Named::Value(value) => Some(value.clone()),
++        }
++    }
++
++    fn is(&self, value: &BoxedValue) -> bool {
++        match self {
++            Named::Element(named) => ValueTypes::as_object(&**value).as_ref() == Some(named),
++            Named::Owner(owner) => ValueTypes::as_object(&**value).is_some_and(|element| owner.points_to(&element)),
++            Named::Value(named) => ValueTypes::reference_equals(named, value),
+         }
+     }
+ }
+@@ -90,13 +104,20 @@
+ 
+ impl INameScope for NameScope {
+     fn try_register(&self, name: &str, element: Ref<FerroObject>) -> Result<(), NameScopeError> {
++        self.try_register_value(name, std::rc::Rc::new(element))
++    }
++
++    fn try_register_value(&self, name: &str, value: BoxedValue) -> Result<(), NameScopeError> {
+         if self.is_completed.get() {
+             return Err(NameScopeError::Completed);
+         }
+ 
++        let value = ValueTypes::normalize(value).ok_or(NameScopeError::NullValue)?;
++
+         // A name whose element was dropped (the element the scope was
+         // attached to) stays taken, as it is while the element is alive.
+-        let existing = self.inner.borrow().get(name).map(|existing| existing.is(&element));
++        let existing = self.inner.borrow().get(name).cloned();
++        let existing = existing.map(|existing| existing.is(&value));
+         match existing {
+             Some(is_element) => {
+                 if !is_element {
+@@ -104,20 +125,33 @@
+                 }
+             }
+             None => {
+-                let named =
+-                    if self.is_owner(&element) { Named::Owner(element.downgrade()) } else { Named::Element(element.clone()) };
++                let named = match ValueTypes::as_object(&*value) {
++                    Some(element) if self.is_owner(&element) => Named::Owner(element.downgrade()),
++                    Some(element) => Named::Element(element),
++                    None => Named::Value(value.clone()),
++                };
+                 self.inner.borrow_mut().insert(name.to_string(), named);
+                 let pending = self.pending_searches.borrow_mut().remove(name);
+                 if let Some(tcs) = pending {
+-                    tcs.set_result(Some(element));
++                    tcs.set_result(Some(value));
+                 }
+             }
+         }
+         Ok(())
+     }
+ 
+-    fn find_async(&self, name: &str) -> SynchronousCompletionAsyncResult<FindResult> {
+-        let found = self.find(name);
++    fn find_async(&self, name: &str) -> SynchronousCompletionAsyncResult<Option<Ref<FerroObject>>> {
++        if let Some(element) = self.find(name) {
++            return SynchronousCompletionAsyncResult::new(Some(element));
++        }
++        if self.is_completed.get() || self.find_value(name).is_some() {
++            return SynchronousCompletionAsyncResult::new(None);
++        }
++        super::i_name_scope::map_result(self.find_value_async(name), |value| value.and_then(|value| ValueTypes::as_object(&*value)))
++    }
++
++    fn find_value_async(&self, name: &str) -> SynchronousCompletionAsyncResult<FindResult> {
++        let found = self.find_value(name);
+         if found.is_some() {
+             return SynchronousCompletionAsyncResult::new(found);
+         }
+@@ -128,8 +162,12 @@
+         self.pending_searches.borrow_mut().entry(name.to_string()).or_default().async_result()
+     }
+ 
+-    fn find(&self, name: &str) -> FindResult {
++    fn find(&self, name: &str) -> Option<Ref<FerroObject>> {
+         self.inner.borrow().get(name).and_then(Named::element)
++    }
++
++    fn find_value(&self, name: &str) -> FindResult {
++        self.inner.borrow().get(name).and_then(Named::value)
+     }
+ 
+     fn complete(&self) {
+--- a/controls/name_scope_locator.rs
++++ b/controls/name_scope_locator.rs
+@@ -1,7 +1,7 @@
+ use super::NameScopeRef;
+ use crate::reactive::{Disposable, IDisposable, IObservable, IObserver};
+ use crate::utilities::SynchronousCompletionAsyncResult;
+-use crate::{FerroObject, Ref};
++use crate::{BoxedValue, FerroObject, Ref};
+ use std::cell::RefCell;
+ use std::rc::Rc;
+ 
+@@ -15,25 +15,33 @@
+     /// produces the element once it is registered (or `None` once the scope
+     /// completes without it) and never completes.
+     pub fn track(scope: &NameScopeRef, name: &str) -> Rc<dyn IObservable<FindResult>> {
+-        let task = scope.find_async(name);
++        Self::observe(scope.find_async(name))
++    }
++
++    /// Tracks any named object, including a plain model, without completing the observable.
++    pub fn track_value(scope: &NameScopeRef, name: &str) -> Rc<dyn IObservable<Option<BoxedValue>>> {
++        Self::observe(scope.find_value_async(name))
++    }
++
++    fn observe<T: Clone + 'static>(task: SynchronousCompletionAsyncResult<T>) -> Rc<dyn IObservable<T>> {
+         let state = if task.is_completed() { State::Value(task.get_result()) } else { State::Pending(task) };
+         Rc::new(NeverEndingSynchronousCompletionAsyncResultObservable { state: RefCell::new(state) })
+     }
+ }
+ 
+-enum State {
+-    Value(FindResult),
+-    Pending(SynchronousCompletionAsyncResult<FindResult>),
++enum State<T: Clone> {
++    Value(T),
++    Pending(SynchronousCompletionAsyncResult<T>),
+ }
+ 
+ // The binding system treats completion of a source as the end of the binding,
+ // so this observable never completes.
+-struct NeverEndingSynchronousCompletionAsyncResultObservable {
+-    state: RefCell<State>,
++struct NeverEndingSynchronousCompletionAsyncResultObservable<T: Clone> {
++    state: RefCell<State<T>>,
+ }
+ 
+-impl IObservable<FindResult> for NeverEndingSynchronousCompletionAsyncResultObservable {
+-    fn subscribe(&self, observer: Rc<dyn IObserver<FindResult>>) -> Rc<dyn IDisposable> {
++impl<T: Clone + 'static> IObservable<T> for NeverEndingSynchronousCompletionAsyncResultObservable<T> {
++    fn subscribe(&self, observer: Rc<dyn IObserver<T>>) -> Rc<dyn IDisposable> {
+         let pending = {
+             let mut state = self.state.borrow_mut();
+             if let State::Pending(task) = &*state {
+--- a/controls/resource_dictionary.rs
++++ b/controls/resource_dictionary.rs
+@@ -499,6 +499,10 @@
+ }
+ 
+ impl IResourceProvider for ResourceDictionaryHandle {
++    fn as_resource_dictionary(&self) -> Option<&dyn IResourceDictionary> {
++        Some(self)
++    }
++
+     fn owner(&self) -> Option<ResourceHostRef> {
+         self.0.owner()
+     }
+@@ -531,6 +535,10 @@
+ }
+ 
+ impl IResourceDictionary for ResourceDictionaryHandle {
++    fn merged_dictionaries(&self) -> FerroList<Rc<dyn IResourceProvider>> {
++        self.0.merged_dictionaries()
++    }
++
+     fn merged_dictionaries_snapshot(&self) -> Rc<Vec<Rc<dyn IResourceProvider>>> {
+         self.0.merged_dictionaries().snapshot()
+     }
+--- a/data/core/expression_nodes/named_element_node.rs
++++ b/data/core/expression_nodes/named_element_node.rs
+@@ -2,7 +2,7 @@
+ use crate::controls::{NameScopeLocator, NameScopeRef};
+ use crate::data::BindingError;
+ use crate::reactive::{IDisposable, IObserver};
+-use crate::{BoxedValue, FerroObject, Ref, StyledElement};
++use crate::{BoxedValue, FerroObject, StyledElement};
+ use std::cell::RefCell;
+ use std::rc::{Rc, Weak};
+ 
+@@ -29,10 +29,10 @@
+ 
+ struct WeakObserver(Weak<NamedElementNode>);
+ 
+-impl IObserver<Option<Ref<FerroObject>>> for WeakObserver {
+-    fn on_next(&self, value: Option<Ref<FerroObject>>) {
++impl IObserver<Option<BoxedValue>> for WeakObserver {
++    fn on_next(&self, value: Option<BoxedValue>) {
+         if let Some(node) = self.0.upgrade() {
+-            node.state.set_value(value.map(|v| Rc::new(v) as BoxedValue), None);
++            node.state.set_value(value, None);
+         }
+     }
+ }
+@@ -60,7 +60,7 @@
+         }
+         match self.name_scope.as_ref().and_then(Weak::upgrade) {
+             Some(scope) => {
+-                let subscription = NameScopeLocator::track(&NameScopeRef(scope), &self.name)
++                let subscription = NameScopeLocator::track_value(&NameScopeRef(scope), &self.name)
+                     .subscribe(Rc::new(WeakObserver(self.this.clone())));
+                 self.subscription.replace(Some(subscription));
+             }
+--- a/data/core/value_type.rs
++++ b/data/core/value_type.rs
+@@ -136,6 +136,7 @@
+ type ObjectFn = fn(&dyn AnyValue) -> Option<Ref<FerroObject>>;
+ type FromObjectFn = fn(Ref<FerroObject>) -> Option<BoxedValue>;
+ type InterfaceFn = Rc<dyn Fn(&Ref<FerroObject>) -> Option<BoxedValue>>;
++type ReferenceIdentityFn = Rc<dyn Fn(&dyn AnyValue) -> Option<*const ()>>;
+ type InterfaceObjectFn = Rc<dyn Fn(&dyn AnyValue) -> Option<Ref<FerroObject>>>;
+ 
+ #[derive(Default)]
+@@ -152,6 +153,8 @@
+     reference_handles: IdMap<TypeId, TypeId>,
+     /// A model type `T` → `Rc<T>`.
+     reference_objects: IdMap<TypeId, TypeId>,
++    /// Typed interface/class views of an enclosing reference object's identity.
++    reference_identities: IdMap<TypeId, ReferenceIdentityFn>,
+     conversions: IdMap<(TypeId, TypeId), ConvertFn>,
+     /// The conversions that are assignability casts: the value is the same
+     /// value, seen as a wider type.
+@@ -565,20 +568,24 @@
+     /// Converts an object to the interface handle type `target` (or its
+     /// nullable form), if the class of the object declares the interface.
+     fn object_to_interface(object: &Ref<FerroObject>, target: ValueType) -> Option<BoxedValue> {
++        Self::object_to_interface_id(object, target.id())
++    }
++
++    fn object_to_interface_id(object: &Ref<FerroObject>, target: TypeId) -> Option<BoxedValue> {
+         let class = object.get_type();
+         let (cast, wrap) = with_registry(|r| {
+-            if let Some(cast) = r.interface_cast(target.id(), class) {
++            if let Some(cast) = r.interface_cast(target, class) {
+                 return (Some(cast.clone()), None);
+             }
+-            let Some(inner) = r.nullable_inner.get(&target.id()) else {
++            let Some(inner) = r.nullable_inner.get(&target) else {
+                 return (None, None);
+             };
+-            (r.interface_cast(inner.id(), class).cloned(), r.casts.get(&(inner.id(), target.id())).cloned())
++            (r.interface_cast(inner.id(), class).cloned(), r.casts.get(&(inner.id(), target)).cloned())
+         });
+         let value = cast?(object)?;
+         match wrap {
+             Some(wrap) => wrap(&value),
+-            None if value_type_id(&*value) == target.id() => Some(value),
++            None if value_type_id(&*value) == target => Some(value),
+             None => None,
+         }
+     }
+@@ -700,6 +707,51 @@
+             r.reference_handles.get(&handle).and_then(|object| r.casts.get(&(handle, *object)).cloned())
+         })?;
+         cast(value)
++    }
++
++    /// Registers the enclosing object identity of a typed view. `identity`
++    /// returns the address of the shared object which the view keeps alive,
++    /// never a temporary adapter or a value-derived hash. The address is only
++    /// compared, never dereferenced. Registration does not change conversions.
++    pub fn register_reference_identity<T: 'static>(identity: fn(&T) -> *const ()) {
++        let identity: ReferenceIdentityFn = Rc::new(move |value| value.downcast_ref::<T>().map(identity));
++        with_registry(|r| { r.reference_identities.insert(TypeId::of::<T>(), identity); });
++    }
++
++    /// The identity of the object an untyped value represents. Native objects,
++    /// registered interface/class views and Rc<T> handles use their enclosing
++    /// object; other boxes retain their own identity, never value equality.
++    pub fn reference_identity(value: &BoxedValue) -> *const () {
++        if let Some(object) = Self::as_object(&**value) {
++            return &*object as *const FerroObject as *const ();
++        }
++        Self::boxed_reference_identity(value)
++    }
++
++    fn boxed_reference_identity(value: &BoxedValue) -> *const () {
++        let identity = with_registry(|r| r.reference_identities.get(&value_type_id(&**value)).cloned());
++        if let Some(identity) = identity.and_then(|identity| identity(&**value)) {
++            return identity;
++        }
++        let object = Self::reference_object(value).unwrap_or_else(|| value.clone());
++        Rc::as_ptr(&object) as *const ()
++    }
++
++    /// Whether two non-null boxed values represent the same object instance.
++    /// Equal value-type boxes remain distinct objects.
++    pub fn reference_equals(first: &BoxedValue, other: &BoxedValue) -> bool {
++        if Rc::ptr_eq(first, other) {
++            return true;
++        }
++        // Keep native objects alive through both lookups, including weak element
++        // references, and invoke each native projection only once.
++        let first_native = Self::as_object(&**first);
++        let other_native = Self::as_object(&**other);
++        let first_identity = first_native.as_ref().map(|object| &**object as *const FerroObject as *const ())
++            .unwrap_or_else(|| Self::boxed_reference_identity(first));
++        let other_identity = other_native.as_ref().map(|object| &**object as *const FerroObject as *const ())
++            .unwrap_or_else(|| Self::boxed_reference_identity(other));
++        first_identity == other_identity
+     }
+ 
+     /// The class `T` of a registered element reference type
+@@ -778,6 +830,7 @@
+         if registered {
+             return;
+         }
++        Self::register_reference_identity::<Rc<T>>(|value| Rc::as_ptr(value) as *const ());
+         with_registry(|r| {
+             r.nullable.insert(TypeId::of::<Option<Rc<T>>>(), unwrap::<T>);
+             r.null_values.insert(TypeId::of::<Option<Rc<T>>>(), null::<T>);
+@@ -820,7 +873,13 @@
+             return Some(Rc::new(object));
+         }
+         let f = with_registry(|r| r.objects.get(&id).map(|o| o.1).or_else(|| r.element_ref_objects.get(&id).map(|e| e.1)));
+-        f.and_then(|f| f(object))
++        match f {
++            Some(restore) => restore(object),
++            // Weak binding sources retain the original interface handle type.
++            // Restore it through the class's declared interface facts, including
++            // inherited and nullable views, without retaining a strong source.
++            None => Self::object_to_interface_id(&object, id),
++        }
+     }
+ 
+     /// The type a registered nullable form holds: `T` for `Option<T>` and for
+@@ -877,7 +936,15 @@
+         if target.is::<BoxedValue>() {
+             return Some(Some(Rc::new(value.clone())));
+         }
+-        if let Some(v) = Self::try_convert_registered(value, target) {
++        let conversion = with_registry(|r| r.conversions.get(&(id, target.id())).cloned());
++        if let Some(convert) = conversion {
++            if let Some(v) = convert(value) {
++                return Some(Some(v));
++            }
++        } else if let Some(v) = Self::try_cast(value, target) {
++            // Assignability includes the object/handle form of a reference and
++            // lifting an interface handle to its nullable target. Do not run a
++            // registered failing converter twice while looking for that path.
+             return Some(Some(v));
+         }
+         // A nullable source: convert its contents.
+--- a/markup_types/contracts.rs
++++ b/markup_types/contracts.rs
+@@ -313,16 +313,16 @@
+         IsCompleted: bool { get: |scope: &crate::controls::NameScopeRef| scope.is_completed() },
+     ],
+     methods: [
+-        // The element is any object in the managed original; the port registers objects of the object model.
++        // The original accepts arbitrary non-null objects, including plain models.
+         try fn Register(String, Option<crate::BoxedValue>) =>
+             |scope: &crate::controls::NameScopeRef, name: String, element: Option<crate::BoxedValue>| {
+-                match element.as_ref().and_then(|element| ValueTypes::as_object(&**element)) {
+-                    Some(element) => scope.try_register(&name, element).map_err(|error| error.to_string()),
+-                    None => Err("Only an object of the object model can be registered in a name scope.".to_string()),
++                match element {
++                    Some(element) => scope.try_register_value(&name, element).map_err(|error| error.to_string()),
++                    None => Err("Value cannot be null. (Parameter 'element')".to_string()),
+                 }
+             },
+-        fn Find(String) -> Option<crate::Ref<crate::FerroObject>> =>
+-            |scope: &crate::controls::NameScopeRef, name: String| scope.find(&name),
++        fn Find(String) -> Option<crate::BoxedValue> =>
++            |scope: &crate::controls::NameScopeRef, name: String| scope.find_value(&name),
+         fn Complete() => |scope: &crate::controls::NameScopeRef| scope.complete(),
+     ],
+ });
+--- a/markup_types/markup_types_tests.rs
++++ b/markup_types/markup_types_tests.rs
+@@ -807,11 +807,13 @@
+     (name_scope.find_methods("SetNameScope").next().unwrap().invoke)(&[element.clone(), scope.clone()]).unwrap();
+     let read = (name_scope.find_methods("GetNameScope").next().unwrap().invoke)(&[element]).unwrap();
+     assert!(unbox::<NameScopeRef>(&read) == unbox::<NameScopeRef>(&scope));
+-    // Only objects are registered.
++    // Object registration includes boxed scalar values and retains their identity.
+     let register = find("FerroUI.Controls", "INameScope").find_methods("Register").next().unwrap();
+-    assert!((register.invoke)(&[scope.clone(), text("n"), boxed(1i32)]).is_err());
++    let scalar=boxed(1i32);
++    (register.invoke)(&[scope.clone(), text("n"), scalar.clone()]).unwrap();
++    let stored=(find("FerroUI.Controls","INameScope").find_methods("Find").next().unwrap().invoke)(&[scope.clone(),text("n")]).unwrap();
++    assert!(Rc::ptr_eq(stored.as_ref().unwrap(),scalar.as_ref().unwrap()));
+     // A name that is taken, or a completed scope, is an error and not a panic.
+-    (register.invoke)(&[scope.clone(), text("n"), into_markup_value(StyledElement::new())]).unwrap();
+     let taken = (register.invoke)(&[scope.clone(), text("n"), into_markup_value(StyledElement::new())]).unwrap_err();
+     assert_eq!(taken.to_string(), "Control with the name 'n' already registered.");
+     (find("FerroUI.Controls", "INameScope").find_methods("Complete").next().unwrap().invoke)(&[scope.clone()]).unwrap();
+--- a/metadata/markup_macros.rs
++++ b/metadata/markup_macros.rs
+@@ -200,6 +200,7 @@
+                     $crate::__ferro_compiler_metadata!(
+                         $crate::ferro_markup_type!(@this $kind $form markup, $this);
+                         markup.value = ::std::option::Option::Some(<$type_>::__MARKUP_VALUE);
++                        markup.owner_rust_name = ::std::option::Option::Some(|| ::std::any::type_name::<$type_>());
+                     );
+                     $crate::__ferro_markup_items!(markup, $this; $($body)*);
+                     markup
+--- a/metadata/markup_type.rs
++++ b/metadata/markup_type.rs
+@@ -792,6 +792,11 @@
+     /// `(int)value` of the managed original. `None` for a value that is not
+     /// of the enumeration type.
+     pub enum_to_value: Option<fn(&dyn crate::AnyValue) -> Option<i64>>,
++    /// Explicit associated function `fn(i32) -> enum value` on the public metadata
++    /// carrier, for unnamed numeric literals of an open plain enumeration.
++    /// Declares support for every signed Int32 value; absent for closed enums.
++    /// Compiler metadata names the typed function; it never guesses a constructor.
++    pub enum_i32_factory: CompilerMetadata<Option<&'static str>>,
+     pub attributes: &'static [MarkupAttribute],
+     /// Views an untyped value of this type as a source of property change
+     /// notifications (the `INotifyPropertyChanged` of the managed original),
+@@ -811,6 +816,10 @@
+     /// first of its handles, else the declared type (`Rc<dyn Trait>` for a
+     /// contract). `Ref<Class>` for a class.
+     pub value: CompilerMetadata<Option<TypeOf>>,
++    /// The actual Rust declaration that owns the typed metadata functions.
++    /// It can differ from `this`/`value` for external-model descriptor carriers.
++    /// Compiler-only, like the typed function and public-path tables.
++    pub owner_rust_name: CompilerMetadata<Option<fn() -> &'static str>>,
+ }
+ 
+ impl MarkupType {
+@@ -841,10 +850,12 @@
+             is_flags: false,
+             enum_from_value: None,
+             enum_to_value: None,
++            enum_i32_factory: not_recorded(),
+             attributes: &[],
+             notify_property_changed: None,
+             this: not_recorded(),
+             value: not_recorded(),
++            owner_rust_name: not_recorded(),
+         }
+     }
+ 
+--- a/metadata/markup_type_tests.rs
++++ b/metadata/markup_type_tests.rs
+@@ -16,6 +16,19 @@
+ 
+ fn unbox<T: Clone + 'static>(value: &MarkupValue) -> T {
+     from_markup_value::<T>(value).expect("value of the expected type")
++}
++
++#[test]
++fn numeric_enum_factory_is_explicit_compiler_metadata_and_empty_by_default() {
++    let value=MarkupType::new("Numeric",MarkupTypeKind::Enum,"fixture");
++    crate::__ferro_compiler_metadata! {
++        assert!(value.enum_i32_factory.is_none());
++        let mut declared=MarkupType::new("Numeric",MarkupTypeKind::Enum,"fixture");
++        declared.enum_i32_factory=Some("__from_i32");
++        assert_eq!(declared.enum_i32_factory,Some("__from_i32"));
++    }
++    assert!(value.enum_members.is_empty());
++    assert!(!value.is_flags);
+ }
+ 
+ // A value type: handle, parse, constructors, read-only properties.

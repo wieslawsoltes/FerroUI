@@ -1,0 +1,76 @@
+<!-- AndroidX Material3 1.5.0-beta02 Slider.kt / SliderTokens.kt.
+     Two real focusable range controls; the panel paints track segments and gaps. -->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:material="using:FerroUI.Themes.Material">
+  <ControlTheme x:Key="{x:Type material:MaterialRangeSliderThumb}" TargetType="material:MaterialRangeSliderThumb">
+    <Setter Property="Width" Value="48" />
+    <Setter Property="Height" Value="48" />
+    <Setter Property="HandleThickness" Value="4" />
+    <Setter Property="Background" Value="{DynamicResource MaterialPrimaryBrush}" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <material:MaterialDoubleTransition Property="HandleThickness"
+            Duration="{DynamicResource MaterialMotionFastSpatialDuration}"
+            Easing="{DynamicResource MaterialMotionFastSpatialEasing}" />
+      </Transitions>
+    </Setter>
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border BorderBrush="{DynamicResource MaterialSecondaryBrush}" BorderThickness="3"
+                CornerRadius="12" Margin="-3" />
+      </FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid Background="Transparent">
+          <Border Name="PART_Handle" Width="{TemplateBinding HandleThickness}" Height="44"
+                  Background="{TemplateBinding Background}" CornerRadius="2"
+                  HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:pressed, ^:focus-visible">
+      <Setter Property="HandleThickness" Value="2" />
+    </Style>
+    <Style Selector="^[Orientation=Vertical] /template/ Border#PART_Handle">
+      <Setter Property="Width" Value="44" />
+      <Setter Property="Height" Value="{Binding $parent[MaterialRangeSliderThumb].HandleThickness}" />
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type material:MaterialRangeSlider}" TargetType="material:MaterialRangeSlider">
+    <Setter Property="MinWidth" Value="144" />
+    <Setter Property="MinHeight" Value="48" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Foreground" Value="{DynamicResource MaterialPrimaryBrush}" />
+    <Setter Property="Background" Value="{DynamicResource MaterialSecondaryContainerBrush}" />
+    <Setter Property="ActiveTickBrush" Value="{DynamicResource MaterialOnPrimaryBrush}" />
+    <Setter Property="InactiveTickBrush" Value="{DynamicResource MaterialOnSecondaryContainerBrush}" />
+    <Setter Property="ClipToBounds" Value="False" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <material:MaterialRangeSliderLayout Name="PART_Layout" Background="Transparent" ClipToBounds="False">
+          <material:MaterialRangeSliderThumb Name="PART_StartThumb" Background="{TemplateBinding Foreground}"
+              ToolTip.Tip="{TemplateBinding RangeStart}" ToolTip.Placement="Top" ToolTip.ServiceEnabled="False" />
+          <material:MaterialRangeSliderThumb Name="PART_EndThumb" Background="{TemplateBinding Foreground}"
+              ToolTip.Tip="{TemplateBinding RangeEnd}" ToolTip.Placement="Top" ToolTip.ServiceEnabled="False" />
+        </material:MaterialRangeSliderLayout>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:vertical">
+      <Setter Property="MinWidth" Value="48" />
+      <Setter Property="MinHeight" Value="144" />
+      <Setter Property="HorizontalAlignment" Value="Center" />
+      <Setter Property="VerticalAlignment" Value="Stretch" />
+    </Style>
+    <Style Selector="^ /template/ material|MaterialRangeSliderThumb:pressed, ^ /template/ material|MaterialRangeSliderThumb:focus-visible">
+      <Setter Property="ToolTip.IsOpen" Value="True" />
+    </Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Foreground" Value="{DynamicResource MaterialDisabledOnSurfaceBrush}" />
+      <Setter Property="Background" Value="{DynamicResource MaterialDisabledOutlineBrush}" />
+      <Setter Property="ActiveTickBrush" Value="{DynamicResource MaterialSurfaceBrush}" />
+      <Setter Property="InactiveTickBrush" Value="{DynamicResource MaterialDisabledOnSurfaceBrush}" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

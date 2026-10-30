@@ -1,0 +1,36 @@
+<ResourceDictionary xmlns:fd="using:FerroDock.Ferro.Controls"
+                    xmlns:pc="using:FerroDock.Ferro.Converters"
+                    xmlns:settingsp="using:FerroDock.Settings" xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:dmc="using:FerroDock.Model.Controls"
+                    xmlns:core="using:FerroDock.Model.Core"
+                    x:DataType="dmc:IRootDock"
+                    x:CompileBindings="True">
+  <Design.PreviewWith>
+    <fd:ToolPinnedControl Width="30" Height="400" />
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="{x:Type fd:ToolPinnedControl}" TargetType="fd:ToolPinnedControl">
+
+    <Setter Property="(settingsp:DockProperties.IsDragEnabled)" Value="{Binding CanDrag}" />
+    <Setter Property="(settingsp:DockProperties.IsDropEnabled)" Value="{Binding CanDrop}" />
+    <Setter Property="(settingsp:DockProperties.DockGroup)" Value="{Binding DockGroup}" />
+
+    <Setter Property="Orientation" Value="Vertical" />
+
+    <Setter Property="Template">
+      <ControlTemplate>
+        <ItemsPresenter ItemsPanel="{TemplateBinding ItemsPanel}" />
+      </ControlTemplate>
+    </Setter>
+
+    <Setter Property="ItemsPanel">
+      <ItemsPanelTemplate>
+        <StackPanel Orientation="{Binding $parent[fd:ToolPinnedControl].Orientation}"
+                    settingsp:DockProperties.IsDropArea="True" />
+      </ItemsPanelTemplate>
+    </Setter>
+
+  </ControlTheme>
+
+</ResourceDictionary>

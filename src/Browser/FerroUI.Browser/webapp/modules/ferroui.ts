@@ -14,6 +14,7 @@ import { ScreenHelper } from "./ferroui/screens";
 import { NavigationHelper } from "./ferroui/navigationHelper";
 import { StreamHelper } from "./ferroui/stream";
 import { NativeControlHost } from "./ferroui/nativeControlHost";
+import { FerroAccessibility } from "./ferroui/accessibility";
 
 function getModuleUrl(): string {
     return import.meta.url;
@@ -57,6 +58,7 @@ export {
     NavigationHelper,
     StreamHelper,
     NativeControlHost,
+    FerroAccessibility,
     StorageModule,
     registerServiceWorker,
     getModuleUrl,

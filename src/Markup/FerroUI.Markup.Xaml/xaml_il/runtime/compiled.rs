@@ -15,7 +15,7 @@ use std::collections::HashMap;
 use std::fmt::Display;
 use std::rc::Rc;
 
-use ferroui_base::controls::{INameScope, NameScope, NameScopeError, NameScopeRef};
+use ferroui_base::controls::{INameScope, NameScope, NameScopeRef, NameScopeValueError};
 use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::metadata::{
     from_markup_value, into_markup_value, service, IServiceProvider, MarkupInvokeError, MarkupValue,
@@ -185,6 +185,11 @@ pub fn markup_handle(markup: &'static MarkupType) -> ValueType {
 /// declares); generated code asks the assignability of the untyped value
 /// conversions ([`ValueTypes::is_assignable`]), which the declarations of
 /// that metadata register.
+///
+/// A value held in another handle of the markup type of `target` (the nullable form
+/// `Option<Rc<dyn Contract>>`, which `ResolveByName` provides for a property of that type:
+/// it brings the element to the type the property stores) is an instance of it, as the
+/// run-time loader takes the type of a value from the metadata that declares its handle.
 pub fn is_instance(value: &MarkupValue, target: ValueType) -> bool {
     let Some(value) = value else { return false };
     if let Some(object) = ValueTypes::as_object(&**value) {
@@ -197,7 +202,13 @@ pub fn is_instance(value: &MarkupValue, target: ValueType) -> bool {
             None => false,
         };
     }
-    ValueTypes::is_assignable(ValueType::of_value(&**value), target)
+    if ValueTypes::is_assignable(ValueType::of_value(&**value), target) {
+        return true;
+    }
+    // Not the null of the form: the null of a nullable form is no instance (`isinst`).
+    MarkupType::find_by_handle(value.value_type_id())
+        .filter(|markup| markup.handles.iter().any(|handle| handle().id() == target.id()))
+        .is_some_and(|_| ValueTypes::normalize(value.clone()).is_some())
 }
 
 /// The value `value` as the Rust type `T` a member declares, with the
@@ -781,7 +792,7 @@ impl DeclaredAccessors {
         if let Some(value) = value {
             // An object passed to a property of type `object` is handed over in the untyped form.
             let value = match value {
-                Some(value) if (self.property.type_)().is_object() => untyped_object_form(value).or(Some(value.clone())),
+                Some(value) if (self.property.type_)().is_object() => object_assignment_value(Some(value.clone())),
                 other => other.cloned(),
             };
             arguments.push(value);
@@ -1052,13 +1063,27 @@ pub fn register_name(
     line: i32,
     position: i32,
 ) -> Result<(), XamlLoadException> {
+    register_name_value(scope, name, Rc::new(element), line, position)
+}
+
+/// Registers any non-null named object in the shared context scope, including
+/// plain models which do not derive from FerroObject.
+pub fn register_name_value(
+    scope: Option<&Rc<dyn INameScope>>,
+    name: &str,
+    value: BoxedValue,
+    line: i32,
+    position: i32,
+) -> Result<(), XamlLoadException> {
     let scope = scope.ok_or_else(|| {
         at("NullReferenceException", "The runtime context has no name scope to register a name in", line, position)
     })?;
-    scope.try_register(name, element).map_err(|error: NameScopeError| {
+    scope.try_register_value(name, value).map_err(|error: NameScopeValueError| {
         let type_name = match error {
-            NameScopeError::Completed => "InvalidOperationException",
-            NameScopeError::DuplicateName(_) => "ArgumentException",
+            NameScopeValueError::Completed => "InvalidOperationException",
+            NameScopeValueError::DuplicateName(_) => "ArgumentException",
+            NameScopeValueError::UnsupportedValue => "NotSupportedException",
+            NameScopeValueError::NullValue => "ArgumentNullException",
         };
         at(type_name, error, line, position)
     })
@@ -1111,6 +1136,13 @@ pub fn untyped_object_form(value: &BoxedValue) -> Option<BoxedValue> {
     }
     let root: BoxedValue = Rc::new(object);
     ValueTypes::try_convert_registered(&root, control_handle)
+}
+
+/// The value a member typed `object` receives: nullable and object-value
+/// transport boxes are unwrapped, null remains null, and a native control
+/// keeps its enclosing object identity in the canonical untyped handle.
+pub fn object_assignment_value(value: MarkupValue) -> MarkupValue {
+    ValueTypes::normalize(value?).map(|value| untyped_object_form(&value).unwrap_or(value))
 }
 
 /// `value` as the value of a member of type `object` (`System.Object`):
@@ -1278,6 +1310,28 @@ pub fn cast<T: Clone + 'static, V: PartialEq + 'static>(value: V, line: i32, pos
     };
     match converted.as_ref().and_then(|converted| converted.downcast_ref::<T>()) {
         Some(value) => Ok(value.clone()),
+        None => Err(at("InvalidCastException", format!("Unable to cast the value to {}.", target.name()), line, position)),
+    }
+}
+
+/// `value` cast to the type with the handle `target`, then held untyped as the run-time
+/// loader holds the value of a node ([`to_untyped`]): [`cast`] for a target that generated
+/// code names by its handle, not by a Rust type (the element type of a list of the runtime
+/// library, `List<T>`, which the adder of the list states). A value it does not convert is
+/// the `InvalidCastException` of the loader at `line`, `position`.
+pub fn cast_untyped<V: PartialEq + 'static>(
+    value: V,
+    target: ValueType,
+    line: i32,
+    position: i32,
+) -> Result<MarkupValue, XamlLoadException> {
+    let converted = match into_markup_value(value) {
+        Some(boxed) if boxed.value_type_id() == target.id() => Some(boxed),
+        Some(boxed) => ValueTypes::try_cast(&boxed, target),
+        None => ValueTypes::try_convert(None, target).flatten(),
+    };
+    match converted {
+        Some(converted) => Ok(to_untyped(converted)),
         None => Err(at("InvalidCastException", format!("Unable to cast the value to {}.", target.name()), line, position)),
     }
 }

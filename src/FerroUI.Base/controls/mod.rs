@@ -25,7 +25,7 @@ mod resources_changed_event_args;
 pub use child_name_scope::ChildNameScope;
 pub use classes::{Classes, IPseudoClasses};
 pub use i_deferred_content::IDeferredContent;
-pub use i_name_scope::{INameScope, NameScopeError, NameScopeRef};
+pub use i_name_scope::{INameScope, NameScopeError, NameScopeRef, NameScopeValueError};
 pub use i_resource_dictionary::IResourceDictionary;
 pub use i_resource_host::{IResourceHost, ResourceHostRef, WeakResourceHost};
 pub use i_resource_node::{IResourceNode, ResourceValue};

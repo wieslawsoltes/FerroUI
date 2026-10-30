@@ -1,0 +1,286 @@
+<!-- macOS 26 adaptation; see docs/porting/macos26-theme.md.
+     Derived from FerroUI WinUI templates and microsoft-ui-xaml commit
+     7e4b0c2096be402f51cc8f7d203ebf67cff183d0. Copyright (c) Microsoft Corporation.
+     Licensed under the MIT License; see NOTICE.md.
+     Acrylic backing is the portable fallback for native Liquid Glass. -->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:converters="using:FerroUI.Controls.Converters" x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20" Width="320">
+      <MenuFlyoutPresenter>
+        <MenuItem Header="_Standard" InputGesture="Ctrl+S"/>
+        <MenuItem Header="Selected" IsSelected="True"/>
+        <MenuItem Header="Toggle" ToggleType="CheckBox" IsChecked="True"/>
+        <MenuItem Header="Radio" ToggleType="Radio" IsChecked="True"/>
+        <MenuItem Header="-"/>
+        <MenuItem Header="Disabled" IsEnabled="False"/>
+        <MenuItem Header="Parent">
+          <MenuItem Header="Child 1"/>
+          <MenuItem Header="Child 2"/>
+        </MenuItem>
+      </MenuFlyoutPresenter>
+    </Border>
+  </Design.PreviewWith>
+  <converters:PlatformKeyGestureConverter x:Key="MenuItemKeyGestureConverter"/>
+  <ControlTheme x:Key="DefaultMenuFlyoutItemStyle" TargetType="MenuItem">
+    <Setter Property="MinHeight" Value="24"/>
+    <Setter Property="Background" Value="{DynamicResource MenuFlyoutItemBackground}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource MenuFlyoutItemBackgroundBrush}"/>
+    <Setter Property="BorderThickness" Value="{DynamicResource MenuFlyoutItemBorderThickness}"/>
+    <Setter Property="Foreground" Value="{DynamicResource MenuFlyoutItemForeground}"/>
+    <Setter Property="Padding" Value="6,3"/>
+    <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}"/>
+    <Setter Property="CornerRadius" Value="5"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <Border x:Name="LayoutRoot" Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BackgroundSizing="InnerBorderEdge" BorderThickness="{TemplateBinding BorderThickness}" Margin="4,1" CornerRadius="{TemplateBinding CornerRadius}">
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="MenuFlyoutItemCheckPlaceholder"/>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="MenuFlyoutItemIconPlaceholder" MinWidth="22"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="MenuFlyoutItemKeyboardAcceleratorText"/>
+                <ColumnDefinition Width="Auto"/>
+              </Grid.ColumnDefinitions>
+              <Path x:Name="CheckGlyph" Grid.Column="0" Data="{StaticResource GlyphGeometryE73E}" Fill="{DynamicResource MenuFlyoutSubItemChevron}" Stretch="Uniform" Width="9" Margin="0,0,5,0" VerticalAlignment="Center" Opacity="0" IsVisible="False"/>
+              <Viewbox x:Name="IconRoot" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Width="14" Height="14" Margin="0,0,8,0" IsVisible="False">
+                <ContentPresenter x:Name="IconContent" Content="{TemplateBinding Icon}" Foreground="{TemplateBinding Foreground}"/>
+              </Viewbox>
+              <ContentPresenter x:Name="PART_HeaderPresenter" Grid.Column="2" Content="{TemplateBinding Header}" ContentTemplate="{TemplateBinding HeaderTemplate}" Foreground="{TemplateBinding Foreground}" TextTrimming="None" HorizontalAlignment="Stretch" VerticalAlignment="Center" RecognizesAccessKey="True"/>
+              <TextBlock x:Name="KeyboardAcceleratorTextBlock" Grid.Column="3" Theme="{StaticResource CaptionTextBlockStyle}" Text="{TemplateBinding InputGesture, Converter={StaticResource MenuItemKeyGestureConverter}}" Margin="20,0,0,0" Foreground="{DynamicResource MenuFlyoutItemKeyboardAcceleratorTextForeground}" TextAlignment="Right" HorizontalAlignment="Right" VerticalAlignment="Center" IsVisible="{TemplateBinding InputGesture, Converter={x:Static ObjectConverters.IsNotNull}}" FontSize="{DynamicResource ControlContentThemeFontSize}"/>
+              <Path x:Name="SubItemChevron" Grid.Column="4" Data="{StaticResource GlyphGeometryE974}" Fill="{DynamicResource MenuFlyoutSubItemChevron}" Stretch="Uniform" Width="5" Margin="12,0,0,0" VerticalAlignment="Center" IsVisible="False"/>
+            </Grid>
+          </Border>
+          <Popup x:Name="PART_Popup" WindowManagerAddShadowHint="False" Placement="RightEdgeAlignedTop" HorizontalOffset="-2" IsLightDismissEnabled="False" IsOpen="{TemplateBinding IsSubMenuOpen, Mode=TwoWay}">
+            <Border x:Name="ThemeShadowWrapper" BoxShadow="{DynamicResource MacOSMenuShadow}" Margin="{StaticResource ThemeShadowSubMenuMargin}" CornerRadius="{DynamicResource OverlayCornerRadius}">
+              <Border Background="Transparent" BorderBrush="{DynamicResource MenuFlyoutPresenterBorderBrush}" BorderThickness="{DynamicResource MenuFlyoutPresenterBorderThemeThickness}" CornerRadius="{DynamicResource OverlayCornerRadius}" MinWidth="{DynamicResource FlyoutThemeMinWidth}" MinHeight="{StaticResource MenuFlyoutThemeMinHeight}" BackgroundSizing="InnerBorderEdge">
+                <Panel>
+                  <ExperimentalAcrylicBorder Material="{DynamicResource MacOSMenuGlassMaterial}" IsHitTestVisible="False" CornerRadius="{DynamicResource OverlayCornerRadius}"/>
+                  <ScrollViewer x:Name="MenuFlyoutPresenterScrollViewer" Theme="{StaticResource MenuFlyoutPresenterScrollViewer}" Margin="{StaticResource MenuFlyoutPresenterThemePadding}">
+                    <ItemsPresenter x:Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" KeyboardNavigation.TabNavigation="Continue" Grid.IsSharedSizeScope="True"/>
+                  </ScrollViewer>
+                </Panel>
+              </Border>
+            </Border>
+          </Popup>
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:selected">
+      <Style Selector="^ /template/ Border#LayoutRoot">
+        <Setter Property="Background" Value="{DynamicResource MenuFlyoutItemBackgroundPointerOver}"/>
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#PART_HeaderPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource MenuFlyoutItemForegroundPointerOver}"/>
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#IconContent">
+        <Setter Property="Foreground" Value="{DynamicResource MenuFlyoutItemForegroundPointerOver}"/>
+      </Style>
+      <Style Selector="^ /template/ TextBlock#KeyboardAcceleratorTextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource MenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOver}"/>
+      </Style>
+    </Style>
+    <Style Selector="^:pressed /template/ Border#LayoutRoot:pointerover">
+      <Setter Property="Background" Value="{DynamicResource MenuFlyoutItemBackgroundPressed}"/>
+      <Style Selector="^ ContentPresenter#PART_HeaderPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource MenuFlyoutItemForegroundPressed}"/>
+      </Style>
+      <Style Selector="^ ContentPresenter#IconContent">
+        <Setter Property="Foreground" Value="{DynamicResource MenuFlyoutItemForegroundPressed}"/>
+      </Style>
+      <Style Selector="^ TextBlock#KeyboardAcceleratorTextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource MenuFlyoutItemKeyboardAcceleratorTextForegroundPressed}"/>
+      </Style>
+    </Style>
+    <Style Selector="^:disabled">
+      <Style Selector="^ /template/ Border#LayoutRoot">
+        <Setter Property="Background" Value="{DynamicResource MenuFlyoutItemBackgroundDisabled}"/>
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#PART_HeaderPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource MenuFlyoutItemForegroundDisabled}"/>
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#IconContent">
+        <Setter Property="Foreground" Value="{DynamicResource MenuFlyoutItemForegroundDisabled}"/>
+      </Style>
+      <Style Selector="^ /template/ TextBlock#KeyboardAcceleratorTextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource MenuFlyoutItemKeyboardAcceleratorTextForegroundDisabled}"/>
+      </Style>
+    </Style>
+    <Style Selector="^:icon /template/ Viewbox#IconRoot">
+      <Setter Property="IsVisible" Value="True"/>
+    </Style>
+    <Style Selector="^:toggle /template/ Path#CheckGlyph, ^:radio /template/ Path#CheckGlyph">
+      <Setter Property="IsVisible" Value="True"/>
+    </Style>
+    <Style Selector="^:radio /template/ Path#CheckGlyph">
+      <Setter Property="Data" Value="{StaticResource GlyphGeometryE915}"/>
+      <Setter Property="Width" Value="6"/>
+      <Setter Property="Margin" Value="3,0,19,0"/>
+    </Style>
+    <Style Selector="^:toggle /template/ TextBlock#KeyboardAcceleratorTextBlock, ^:radio /template/ TextBlock#KeyboardAcceleratorTextBlock">
+      <Setter Property="Margin" Value="24,0,0,0"/>
+      <Setter Property="Foreground" Value="{DynamicResource ToggleMenuFlyoutItemKeyboardAcceleratorTextForeground}"/>
+    </Style>
+    <Style Selector="^:checked /template/ Path#CheckGlyph">
+      <Setter Property="Opacity" Value="1"/>
+    </Style>
+    <Style Selector="^:toggle:selected /template/ Border#LayoutRoot, ^:radio:selected /template/ Border#LayoutRoot">
+      <Setter Property="Background" Value="{DynamicResource MenuFlyoutSubItemBackgroundPointerOver}"/>
+    </Style>
+    <Style Selector="^:toggle:selected /template/ ContentPresenter#PART_HeaderPresenter, ^:radio:selected /template/ ContentPresenter#PART_HeaderPresenter">
+      <Setter Property="Foreground" Value="{DynamicResource MenuFlyoutItemForegroundPointerOver}"/>
+    </Style>
+    <Style Selector="^:toggle:selected /template/ Path#CheckGlyph, ^:radio:selected /template/ Path#CheckGlyph">
+      <Setter Property="Fill" Value="{DynamicResource MenuFlyoutItemForegroundPointerOver}"/>
+    </Style>
+    <Style Selector="^:toggle:selected /template/ ContentPresenter#IconContent, ^:radio:selected /template/ ContentPresenter#IconContent">
+      <Setter Property="Foreground" Value="{DynamicResource MenuFlyoutItemForegroundPointerOver}"/>
+    </Style>
+    <Style Selector="^:toggle:selected /template/ TextBlock#KeyboardAcceleratorTextBlock, ^:radio:selected /template/ TextBlock#KeyboardAcceleratorTextBlock">
+      <Setter Property="Foreground" Value="{DynamicResource ToggleMenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOver}"/>
+    </Style>
+    <Style Selector="^:toggle:pressed /template/ Border#LayoutRoot:pointerover, ^:radio:pressed /template/ Border#LayoutRoot:pointerover">
+      <Setter Property="Background" Value="{DynamicResource MenuFlyoutSubItemBackgroundPressed}"/>
+    </Style>
+    <Style Selector="^:toggle:pressed /template/ Border#LayoutRoot:pointerover ContentPresenter#PART_HeaderPresenter, ^:radio:pressed /template/ Border#LayoutRoot:pointerover ContentPresenter#PART_HeaderPresenter">
+      <Setter Property="Foreground" Value="{DynamicResource MenuFlyoutSubItemForegroundPressed}"/>
+    </Style>
+    <Style Selector="^:toggle:pressed /template/ Border#LayoutRoot:pointerover Path#CheckGlyph, ^:radio:pressed /template/ Border#LayoutRoot:pointerover Path#CheckGlyph">
+      <Setter Property="Fill" Value="{DynamicResource MenuFlyoutSubItemForegroundPressed}"/>
+    </Style>
+    <Style Selector="^:toggle:pressed /template/ Border#LayoutRoot:pointerover ContentPresenter#IconContent, ^:radio:pressed /template/ Border#LayoutRoot:pointerover ContentPresenter#IconContent">
+      <Setter Property="Foreground" Value="{DynamicResource MenuFlyoutSubItemForegroundPressed}"/>
+    </Style>
+    <Style Selector="^:toggle:pressed /template/ Border#LayoutRoot:pointerover TextBlock#KeyboardAcceleratorTextBlock, ^:radio:pressed /template/ Border#LayoutRoot:pointerover TextBlock#KeyboardAcceleratorTextBlock">
+      <Setter Property="Foreground" Value="{DynamicResource ToggleMenuFlyoutItemKeyboardAcceleratorTextForegroundPressed}"/>
+    </Style>
+    <Style Selector="^:toggle:disabled /template/ Border#LayoutRoot">
+      <Setter Property="Background" Value="{TemplateBinding Background}"/>
+    </Style>
+    <Style Selector="^:radio:disabled /template/ Border#LayoutRoot">
+      <Setter Property="Background" Value="{TemplateBinding Background}"/>
+    </Style>
+    <Style Selector="^:toggle:disabled /template/ ContentPresenter#PART_HeaderPresenter, ^:radio:disabled /template/ ContentPresenter#PART_HeaderPresenter">
+      <Setter Property="Foreground" Value="{DynamicResource MenuFlyoutSubItemForegroundDisabled}"/>
+    </Style>
+    <Style Selector="^:toggle:disabled /template/ Path#CheckGlyph, ^:radio:disabled /template/ Path#CheckGlyph">
+      <Setter Property="Fill" Value="{DynamicResource MenuFlyoutSubItemForegroundDisabled}"/>
+    </Style>
+    <Style Selector="^:toggle:disabled /template/ ContentPresenter#IconContent, ^:radio:disabled /template/ ContentPresenter#IconContent">
+      <Setter Property="Foreground" Value="{DynamicResource MenuFlyoutSubItemForegroundDisabled}"/>
+    </Style>
+    <Style Selector="^:toggle:disabled /template/ TextBlock#KeyboardAcceleratorTextBlock, ^:radio:disabled /template/ TextBlock#KeyboardAcceleratorTextBlock">
+      <Setter Property="Foreground" Value="{DynamicResource ToggleMenuFlyoutItemKeyboardAcceleratorTextForegroundDisabled}"/>
+    </Style>
+    <Style Selector="^:not(MenuItem:empty)">
+      <Setter Property="Background" Value="{DynamicResource MenuFlyoutSubItemBackground}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource MenuFlyoutSubItemBackgroundBrush}"/>
+      <Setter Property="BorderThickness" Value="{DynamicResource MenuFlyoutSubItemBorderThickness}"/>
+      <Setter Property="Foreground" Value="{DynamicResource MenuFlyoutSubItemForeground}"/>
+      <Style Selector="^ /template/ Path#SubItemChevron">
+        <Setter Property="IsVisible" Value="True"/>
+      </Style>
+    </Style>
+    <Style Selector="^:selected:not(MenuItem:empty)">
+      <Style Selector="^ /template/ Border#LayoutRoot">
+        <Setter Property="Background" Value="{DynamicResource MenuFlyoutSubItemBackgroundPointerOver}"/>
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#PART_HeaderPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource MenuFlyoutSubItemForegroundPointerOver}"/>
+      </Style>
+      <Style Selector="^ /template/ Path#SubItemChevron">
+        <Setter Property="Fill" Value="{DynamicResource MenuFlyoutSubItemChevronPointerOver}"/>
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#IconContent">
+        <Setter Property="Foreground" Value="{DynamicResource MenuFlyoutSubItemForegroundPointerOver}"/>
+      </Style>
+    </Style>
+    <Style Selector="^:pressed:not(MenuItem:empty) /template/ Border#LayoutRoot:pointerover">
+      <Setter Property="Background" Value="{DynamicResource MenuFlyoutSubItemBackgroundPressed}"/>
+      <Style Selector="^ ContentPresenter#PART_HeaderPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource MenuFlyoutSubItemForegroundPressed}"/>
+      </Style>
+      <Style Selector="^ Path#SubItemChevron">
+        <Setter Property="Fill" Value="{DynamicResource MenuFlyoutSubItemChevronPressed}"/>
+      </Style>
+      <Style Selector="^ ContentPresenter#IconContent">
+        <Setter Property="Foreground" Value="{DynamicResource MenuFlyoutSubItemForegroundPressed}"/>
+      </Style>
+    </Style>
+    <Style Selector="^:open:not(MenuItem:empty)">
+      <Style Selector="^ /template/ Border#LayoutRoot">
+        <Setter Property="Background" Value="{DynamicResource MenuFlyoutSubItemBackgroundSubMenuOpened}"/>
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#PART_HeaderPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource MenuFlyoutSubItemForegroundSubMenuOpened}"/>
+      </Style>
+      <Style Selector="^ /template/ Path#SubItemChevron">
+        <Setter Property="Fill" Value="{DynamicResource MenuFlyoutSubItemChevronSubMenuOpened}"/>
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#IconContent">
+        <Setter Property="Foreground" Value="{DynamicResource MenuFlyoutSubItemForegroundSubMenuOpened}"/>
+      </Style>
+    </Style>
+    <Style Selector="^:disabled:not(MenuItem:empty)">
+      <Style Selector="^ /template/ Border#LayoutRoot">
+        <Setter Property="Background" Value="{DynamicResource MenuFlyoutSubItemBackgroundDisabled}"/>
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#PART_HeaderPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource MenuFlyoutSubItemForegroundDisabled}"/>
+      </Style>
+      <Style Selector="^ /template/ Path#SubItemChevron">
+        <Setter Property="Fill" Value="{DynamicResource MenuFlyoutSubItemChevronDisabled}"/>
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#IconContent">
+        <Setter Property="Foreground" Value="{DynamicResource MenuFlyoutSubItemForegroundDisabled}"/>
+      </Style>
+    </Style>
+    <Style Selector="^:separator">
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Rectangle x:Name="SeparatorRectangle" Fill="{DynamicResource MenuFlyoutSeparatorBackground}" Margin="{StaticResource MenuFlyoutSeparatorThemePadding}" Height="{StaticResource MenuFlyoutSeparatorHeight}"/>
+        </ControlTemplate>
+      </Setter>
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="DefaultToggleMenuFlyoutItemStyle" TargetType="MenuItem" BasedOn="{StaticResource DefaultMenuFlyoutItemStyle}">
+    <Setter Property="ToggleType" Value="CheckBox"/>
+    <Setter Property="Background" Value="Transparent"/>
+  </ControlTheme>
+  <ControlTheme x:Key="DefaultRadioMenuFlyoutItemStyle" TargetType="MenuItem" BasedOn="{StaticResource DefaultMenuFlyoutItemStyle}">
+    <Setter Property="ToggleType" Value="Radio"/>
+  </ControlTheme>
+  <ControlTheme x:Key="DefaultMenuFlyoutSubItemStyle" TargetType="MenuItem" BasedOn="{StaticResource DefaultMenuFlyoutItemStyle}">
+    <Setter Property="Background" Value="{DynamicResource MenuFlyoutSubItemBackground}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource MenuFlyoutSubItemBackgroundBrush}"/>
+    <Setter Property="BorderThickness" Value="{DynamicResource MenuFlyoutSubItemBorderThickness}"/>
+    <Setter Property="Foreground" Value="{DynamicResource MenuFlyoutSubItemForeground}"/>
+  </ControlTheme>
+  <ControlTheme x:Key="RadioMenuFlyoutSubItemStyle" TargetType="MenuItem" BasedOn="{StaticResource DefaultMenuFlyoutSubItemStyle}">
+    <Setter Property="BorderThickness" Value="0"/>
+    <Style Selector="^ /template/ Path#CheckGlyph">
+      <Setter Property="IsVisible" Value="True"/>
+      <Setter Property="Data" Value="{StaticResource GlyphGeometryE915}"/>
+      <Setter Property="Width" Value="6"/>
+      <Setter Property="Margin" Value="3,0,18,0"/>
+    </Style>
+    <Style Selector="^ /template/ Path#SubItemChevron">
+      <Setter Property="Data" Value="{StaticResource GlyphGeometryE76C}"/>
+      <Setter Property="Width" Value="6.4"/>
+      <Setter Property="Margin" Value="26.8,0,2.8,-1"/>
+    </Style>
+    <Style Selector="^:selected /template/ Path#CheckGlyph">
+      <Setter Property="Fill" Value="{DynamicResource MenuFlyoutSubItemForegroundPointerOver}"/>
+    </Style>
+    <Style Selector="^:pressed /template/ Border#LayoutRoot:pointerover Path#CheckGlyph">
+      <Setter Property="Fill" Value="{DynamicResource MenuFlyoutSubItemForegroundPressed}"/>
+    </Style>
+    <Style Selector="^:open /template/ Path#CheckGlyph">
+      <Setter Property="Fill" Value="{DynamicResource MenuFlyoutSubItemForegroundSubMenuOpened}"/>
+    </Style>
+    <Style Selector="^:disabled /template/ Path#CheckGlyph">
+      <Setter Property="Fill" Value="{DynamicResource MenuFlyoutSubItemForegroundDisabled}"/>
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type MenuItem}" TargetType="MenuItem" BasedOn="{StaticResource DefaultMenuFlyoutItemStyle}"/>
+</ResourceDictionary>

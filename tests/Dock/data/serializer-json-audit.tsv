@@ -1,0 +1,13 @@
+json-readonly-property-is-included	1	MATCHED
+json-self-reference-preserved-on-wire	1	MATCHED
+json-null-property-omitted	1	MATCHED
+json-self-reference-restored	1	MATCHED
+json-save-closes-stream	1	MATCHED
+json-save-emits-utf8-preamble	1	MATCHED
+json-load-closes-stream	1	MATCHED
+json-empty-load-throws	1	MATCHED
+json-empty-load-still-closes	1	MATCHED
+json-malformed-load-throws	1	MATCHED
+json-malformed-load-still-closes	1	MATCHED
+json-null-load-rejected	1	MATCHED
+json-null-save-rejected	1	MATCHED

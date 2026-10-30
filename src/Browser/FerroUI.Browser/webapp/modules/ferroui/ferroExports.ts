@@ -113,6 +113,7 @@ export class FerroExports {
             OnKeyDown: "InputHelper_OnKeyDown",
             OnKeyUp: "InputHelper_OnKeyUp",
             OnBeforeInput: "InputHelper_OnBeforeInput",
+            OnTextInput: "InputHelper_OnTextInput",
             OnCompositionStart: "InputHelper_OnCompositionStart",
             OnCompositionUpdate: "InputHelper_OnCompositionUpdate",
             OnCompositionEnd: "InputHelper_OnCompositionEnd",
@@ -124,6 +125,14 @@ export class FerroExports {
             OnKeyboardGeometryChange: "InputHelper_OnKeyboardGeometryChange",
             OnLostFocus: "InputHelper_OnLostFocus",
             OnDragDrop: "InputHelper_OnDragDrop"
+        });
+    }
+
+    // Not in the original: the accessibility tree of the views (accessibility.ts).
+    public static get AccessibilityHelper() {
+        return FerroExports.group("AccessibilityHelper", {
+            OnFrame: "AccessibilityHelper_OnFrame",
+            OnAction: "AccessibilityHelper_OnAction"
         });
     }
 

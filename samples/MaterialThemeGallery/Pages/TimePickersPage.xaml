@@ -1,0 +1,42 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:material="using:FerroUI.Themes.Material"
+             x:Class="MaterialThemeGallery.Pages.TimePickersPage">
+  <StackPanel Margin="24" Spacing="20">
+    <StackPanel Spacing="4">
+      <TextBlock Theme="{StaticResource MaterialHeadlineMedium}" Text="Choose a time" />
+      <TextBlock Theme="{StaticResource MaterialBodyMedium}" Text="Move around the clock or type a time. Your selection stays with you when you switch." TextWrapping="Wrap" />
+    </StackPanel>
+    <WrapPanel ItemSpacing="8" LineSpacing="8">
+      <Button Name="ToggleMode" Content="Use keyboard" Theme="{StaticResource MaterialTonalButton}" />
+      <Button Name="ToggleFormat" Content="Use 24-hour format" Theme="{StaticResource MaterialOutlinedButton}" />
+    </WrapPanel>
+    <WrapPanel ItemSpacing="20" LineSpacing="20">
+      <Border Background="{DynamicResource MaterialSurfaceContainerHighBrush}" CornerRadius="28" Padding="24">
+        <StackPanel Spacing="20">
+          <TextBlock Text="Select time" Theme="{StaticResource MaterialLabelMedium}" Foreground="{DynamicResource MaterialOnSurfaceVariantBrush}" />
+          <material:MaterialTimePicker Name="ClassicTime" Hour="9" Minute="30" />
+        </StackPanel>
+      </Border>
+      <Border Background="{DynamicResource MaterialSurfaceContainerBrush}" CornerRadius="28" Padding="24">
+        <StackPanel Spacing="20">
+          <TextBlock Text="Expressive" Theme="{StaticResource MaterialLabelMedium}" Foreground="{DynamicResource MaterialOnSurfaceVariantBrush}" />
+          <material:MaterialTimePicker Name="ExpressiveTime" Hour="14" Minute="45" IsVibrant="True" />
+        </StackPanel>
+      </Border>
+    </WrapPanel>
+    <TextBlock Name="TimeStatus" Text="Selected time: 09:30" Theme="{StaticResource MaterialBodyMedium}" AutomationProperties.LiveSetting="Polite" />
+    <Border Background="{DynamicResource MaterialSurfaceContainerHighBrush}" CornerRadius="28" Padding="24" HorizontalAlignment="Left">
+      <StackPanel Spacing="20">
+        <TextBlock Text="Enter time" Theme="{StaticResource MaterialLabelMedium}" Foreground="{DynamicResource MaterialOnSurfaceVariantBrush}" />
+        <material:MaterialTimePicker Name="InputTime" DisplayMode="Input" Hour="17" Minute="15" Is24Hour="True" />
+      </StackPanel>
+    </Border>
+    <Border Background="{DynamicResource MaterialSurfaceContainerBrush}" CornerRadius="28" Padding="24" HorizontalAlignment="Left">
+      <StackPanel Spacing="20">
+        <TextBlock Text="A wider layout" Theme="{StaticResource MaterialLabelMedium}" Foreground="{DynamicResource MaterialOnSurfaceVariantBrush}" />
+        <material:MaterialTimePicker Name="LandscapeTime" Orientation="Horizontal" Hour="20" Minute="10" IsVibrant="True" />
+      </StackPanel>
+    </Border>
+  </StackPanel>
+</UserControl>

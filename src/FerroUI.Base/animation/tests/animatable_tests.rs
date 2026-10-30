@@ -781,6 +781,92 @@ fn try_get_transition_instance_returns_the_running_instance() {
     assert!(border.try_get_transition_instance(&handle).is_none());
 }
 
+/// A transition definition can be shared; its interruption state belongs to each target.
+struct StatefulTransition {
+    property: &'static crate::FerroProperty,
+    received: RefCell<Vec<Option<usize>>>,
+    fail: Cell<bool>,
+    nested_property: Cell<Option<&'static crate::FerroProperty>>,
+}
+
+impl crate::animation::ITransition for StatefulTransition {
+    fn apply(&self, control: &Animatable, _clock: Rc<dyn crate::animation::IClock>, _old: &BoxedValue, _new: &BoxedValue) -> Rc<dyn IDisposable> {
+        let previous = control.take_transition_interruption_state::<Cell<usize>>().map(|state| state.get());
+        self.received.borrow_mut().push(previous);
+        control.report_transition_interruption_state(Rc::new(Cell::new(previous.unwrap_or(0) + 1)));
+        if let Some(property) = self.nested_property.take() {
+            control.set_value_untyped(property, &25.0_f64, BindingPriority::LocalValue);
+        }
+        assert!(!self.fail.get(), "test transition failure");
+        Disposable::empty()
+    }
+    fn property(&self) -> &'static crate::FerroProperty { self.property }
+    fn set_property(&self, _: &'static crate::FerroProperty) { unreachable!() }
+}
+
+impl StatefulTransition {
+    fn new(property: &'static crate::FerroProperty) -> Rc<Self> {
+        Rc::new(Self { property, received: RefCell::new(Vec::new()), fail: Cell::new(false), nested_property: Cell::new(None) })
+    }
+}
+
+#[test]
+fn transition_interruption_state_is_per_target_and_is_discarded_on_detach() {
+    start();
+    let transition = StatefulTransition::new(Visual::opacity_property());
+    let a = Border::new();
+    let b = Border::new();
+    let root = TestRoot::with_child(&a);
+    root.set_child(&b);
+    a.set_transitions(Some(Transitions::from_items([transition.clone() as Rc<dyn crate::animation::ITransition>])));
+    b.set_transitions(Some(Transitions::from_items([transition.clone() as Rc<dyn crate::animation::ITransition>])));
+    a.set_opacity(0.25);
+    b.set_opacity(0.5);
+    a.set_opacity(0.75);
+    root.remove_child(&a);
+    root.set_child(&a);
+    a.set_opacity(0.5);
+    assert_eq!(*transition.received.borrow(), vec![None, None, Some(1), None]);
+    assert!(a.take_transition_interruption_state::<Cell<usize>>().is_none());
+    a.report_transition_interruption_state(Rc::new(Cell::new(100_usize)));
+    assert!(a.take_transition_interruption_state::<Cell<usize>>().is_none());
+}
+
+#[test]
+fn nested_transition_applications_restore_each_context() {
+    start();
+    let outer = StatefulTransition::new(Visual::opacity_property());
+    let inner = StatefulTransition::new(Layoutable::width_property());
+    let target = Border::new();
+    target.set_width(10.0);
+    target.set_transitions(Some(Transitions::from_items([
+        outer.clone() as Rc<dyn crate::animation::ITransition>,
+        inner.clone() as Rc<dyn crate::animation::ITransition>,
+    ])));
+    let _root = TestRoot::with_child(&target);
+    outer.nested_property.set(Some(Layoutable::width_property()));
+    target.set_opacity(0.5);
+    target.set_opacity(0.25);
+    target.set_width(50.0);
+    assert_eq!(*outer.received.borrow(), vec![None, Some(1)]);
+    assert_eq!(*inner.received.borrow(), vec![None, Some(1)]);
+}
+
+#[test]
+fn panicking_transition_does_not_leave_an_application_context() {
+    start();
+    let transition = StatefulTransition::new(Visual::opacity_property());
+    let target = Border::new();
+    target.set_transitions(Some(Transitions::from_items([transition.clone() as Rc<dyn crate::animation::ITransition>])));
+    let _root = TestRoot::with_child(&target);
+    transition.fail.set(true);
+    assert_panics(|| target.set_opacity(0.5));
+    assert!(target.take_transition_interruption_state::<Cell<usize>>().is_none());
+    transition.fail.set(false);
+    target.set_opacity(0.25);
+    assert_eq!(*transition.received.borrow(), vec![None, None]);
+}
+
 fn width_transitions() -> Transitions {
     let transition = DoubleTransition::new();
     transition.set_property(Some(Layoutable::width_property()));

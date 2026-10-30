@@ -413,6 +413,27 @@ impl WindowDrawnDecorations {
     }
 
     /// The built template content.
+    /// The width the visible caption buttons (minimize, maximize, full screen, close) take at the
+    /// right of the title bar, from the left edge of the leftmost of them to the right edge of the
+    /// decorations; 0 without a visible caption button. Not in upstream: the caption-button inset
+    /// of a `TitleBar` drawn in the title bar of the window (WinUI's `AppWindowTitleBar.RightInset`).
+    pub fn caption_buttons_width(&self) -> f64 {
+        let Some(window) = self.host_window.borrow().as_ref().and_then(|window| window.upgrade()) else { return 0.0 };
+        let width = window.bounds().width;
+        let mut left = width;
+        for button in [&self.close_button, &self.minimize_button, &self.maximize_button, &self.full_screen_button] {
+            if let Some((button, _)) = button.borrow().as_ref() {
+                if !button.is_effectively_visible() || button.bounds().width <= 0.0 {
+                    continue;
+                }
+                if let Some(origin) = button.translate_point(ferroui_base::Point::new(0.0, 0.0), &window) {
+                    left = left.min(origin.x);
+                }
+            }
+        }
+        (width - left).max(0.0)
+    }
+
     pub fn content(&self) -> Option<Ref<WindowDrawnDecorationsContent>> {
         self.content.borrow().clone()
     }

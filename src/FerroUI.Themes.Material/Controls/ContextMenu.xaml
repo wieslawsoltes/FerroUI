@@ -1,0 +1,47 @@
+<!--
+  Android Material 3 Expressive visual system (AndroidX Material3 1.5.0-beta02,
+  e4d933c98df7baa7ea2b83eea6e086915961e0ff), adapted to FerroUI control contracts.
+  Derived structural templates: FerroUI WinUI theme, Copyright (c) Microsoft
+  Corporation, MIT; retained notices in NOTICE.md. See docs/porting/material-theme.md.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="48" Width="400" Height="200">
+      <Border.ContextMenu>
+        <ContextMenu>
+          <MenuItem Header="Cut" InputGesture="Ctrl+X"/>
+          <MenuItem Header="Copy" InputGesture="Ctrl+C"/>
+          <MenuItem Header="Paste" InputGesture="Ctrl+V" IsEnabled="False"/>
+        </ContextMenu>
+      </Border.ContextMenu>
+      <TextBlock Text="Right-click here"/>
+    </Border>
+  </Design.PreviewWith>
+  <ControlTheme x:Key="{x:Type ContextMenu}" TargetType="ContextMenu">
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceBrush}"/>
+    <Setter Property="ClipToBounds" Value="False"/>
+    <Setter Property="Background" Value="{DynamicResource MaterialSurfaceContainerBrush}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource MenuFlyoutPresenterBorderBrush}"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="Padding" Value="0,8"/>
+    <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+    <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
+    <Setter Property="MinWidth" Value="112"/>
+    <Setter Property="MinHeight" Value="48"/>
+    <Setter Property="CornerRadius" Value="4"/>
+    <Setter Property="Margin" Value="8"/>
+    <Setter Property="Focusable" Value="True"/>
+    <Setter Property="WindowManagerAddShadowHint" Value="False"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="ThemeShadowWrapper" BoxShadow="{DynamicResource MaterialElevation2BoxShadow}" CornerRadius="{TemplateBinding CornerRadius}">
+          <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" BackgroundSizing="InnerBorderEdge">
+            <ScrollViewer x:Name="MenuFlyoutPresenterScrollViewer" Theme="{StaticResource MenuFlyoutPresenterScrollViewer}" Margin="{TemplateBinding Padding}" HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}" VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}">
+              <ItemsPresenter x:Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" KeyboardNavigation.TabNavigation="Continue" Grid.IsSharedSizeScope="True"/>
+            </ScrollViewer>
+          </Border>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

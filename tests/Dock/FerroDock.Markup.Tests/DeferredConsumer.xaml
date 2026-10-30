@@ -1,0 +1,17 @@
+<Grid xmlns="https://github.com/ferroui"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:dc="using:FerroDock.Controls.DeferredContentControl"
+      Tag="{x:Static dc:DeferredContentPresentationSettings.DefaultTimeline}"
+      x:DataType="Grid" x:CompileBindings="True">
+  <dc:DeferredContentScheduling.Timeline>
+    <dc:DeferredContentPresentationTimeline BudgetMode="ItemCount"
+        MaxPresentationsPerPass="1" InitialDelay="00:00:00.020"
+        FollowUpDelay="00:00:00.001" RevealDuration="00:00:00" />
+  </dc:DeferredContentScheduling.Timeline>
+  <DeferredContentControl x:DataType="dc:DeferredContentControl" dc:DeferredContentScheduling.Order="10">
+    <TextBlock Text="First" />
+  </DeferredContentControl>
+  <dc:DeferredContentControl x:DataType="dc:DeferredContentControl" dc:DeferredContentScheduling.Order="-10">
+    <TextBlock Text="Second" />
+  </dc:DeferredContentControl>
+</Grid>

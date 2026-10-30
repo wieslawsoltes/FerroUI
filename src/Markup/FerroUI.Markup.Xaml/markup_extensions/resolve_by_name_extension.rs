@@ -4,7 +4,7 @@ use crate::object_casts::{box_object, TargetProperty};
 use crate::{IProvideValueTarget, ServiceProviderExtensions};
 use ferroui_base::metadata::IServiceProvider;
 use ferroui_base::data::core::{ValueType, ValueTypes};
-use ferroui_base::{ferro_markup_type, BoxedValue, FerroObject, FerroProperty, Ref};
+use ferroui_base::{ferro_markup_type, BoxedValue, FerroProperty};
 use std::rc::Rc;
 
 /// Resolves a named control of the name scope: what text assigned to a
@@ -36,8 +36,8 @@ impl ResolveByNameExtension {
     /// reference to an element it does not own), so the element is brought
     /// to that type where it is one. For a property of any object, or a
     /// plain property, it is the handle of the element's own class.
-    fn element_value(element: Ref<FerroObject>, stored_as: Option<ValueType>) -> BoxedValue {
-        let boxed = box_object(element);
+    fn element_value(value: BoxedValue, stored_as: Option<ValueType>) -> BoxedValue {
+        let boxed = ValueTypes::as_object(&*value).map(box_object).unwrap_or(value);
         match stored_as {
             Some(type_) if !type_.is_object() => match ValueTypes::try_convert(Some(&boxed), type_) {
                 Some(Some(stored)) => stored,
@@ -50,7 +50,7 @@ impl ResolveByNameExtension {
     fn provide_value_for(service_provider: &Rc<dyn IServiceProvider>, name: &str) -> Option<BoxedValue> {
         let name_scope = service_provider.get_name_scope()?;
 
-        let value = name_scope.find_async(name);
+        let value = name_scope.find_value_async(name);
 
         let provide_value_target = service_provider.get_service_of::<Rc<dyn IProvideValueTarget>>();
         let target_property =

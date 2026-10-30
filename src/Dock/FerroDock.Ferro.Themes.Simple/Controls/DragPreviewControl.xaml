@@ -1,0 +1,95 @@
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:core="using:FerroDock.Model.Core"
+                    xmlns:controls="using:FerroDock.Ferro.Controls"
+                    xmlns:converters="using:FerroDock.Ferro.Converters"
+                    xmlns:recycling="using:FerroUI.Controls.Recycling"
+                    x:CompileBindings="True">
+  <ControlTheme x:Key="{x:Type controls:DragPreviewControl}" TargetType="controls:DragPreviewControl" x:DataType="controls:DragPreviewControl">
+    <Setter Property="Template">
+      <ControlTemplate x:DataType="controls:DragPreviewControl">
+        <Border Background="{DynamicResource DockTabActiveBackgroundBrush}"
+                CornerRadius="{DynamicResource DockDragPreviewCornerRadius}">
+          <DockPanel>
+            <Border DockPanel.Dock="Top"
+                    Padding="{DynamicResource DockDragPreviewHeaderPadding}">
+              <StackPanel Orientation="Horizontal" Spacing="{DynamicResource DockDragPreviewHeaderSpacing}" VerticalAlignment="Center">
+                <ContentPresenter ContentTemplate="{TemplateBinding ContentTemplate}"
+                                  Content="{TemplateBinding DataContext}"
+                                  VerticalAlignment="Center"
+                                  VerticalContentAlignment="Center" />
+                <StackPanel Orientation="Horizontal" Spacing="{DynamicResource DockDragPreviewStatusSpacing}" VerticalAlignment="Center">
+                  <Path x:Name="PART_StatusIcon" />
+                  <TextBlock x:Name="PART_StatusText"
+                             Text="{TemplateBinding Status}"
+                             FontSize="{DynamicResource DockDragPreviewFontSize}"
+                             VerticalAlignment="Center"/>
+                </StackPanel>
+              </StackPanel>
+            </Border>
+            <Border x:Name="PART_ContentHost"
+                    Background="{DynamicResource DockSurfaceWorkbenchBrush}"
+                    IsVisible="{TemplateBinding ShowContent}">
+              <Grid>
+                <ContentControl x:Name="PART_PreviewContentPresenter"
+                                Width="{TemplateBinding PreviewContentWidth}"
+                                Height="{TemplateBinding PreviewContentHeight}"
+                                Content="{TemplateBinding PreviewContent}"
+                                IsVisible="{Binding $parent[controls:DragPreviewControl].PreviewContent, Converter={x:Static converters:NotNullConverter.Instance}}"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch" />
+                <ContentControl x:Name="PART_ContentPresenter"
+                                Width="{TemplateBinding PreviewContentWidth}"
+                                Height="{TemplateBinding PreviewContentHeight}"
+                                Content="{TemplateBinding DataContext}"
+                                IsVisible="{Binding $parent[controls:DragPreviewControl].PreviewContent, Converter={x:Static converters:NotNullConverter.Instance}, ConverterParameter=Not}"
+                                recycling:ControlRecyclingDataTemplate.ControlRecycling="{Binding $parent[controls:DragPreviewControl].ControlRecycling}"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch">
+                  <ContentControl.ContentTemplate>
+                    <recycling:ControlRecyclingDataTemplate Parent="{Binding #PART_ContentPresenter}" />
+                  </ContentControl.ContentTemplate>
+                </ContentControl>
+              </Grid>
+            </Border>
+          </DockPanel>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+
+    <Setter Property="ContentTemplate">
+      <DataTemplate DataType="core:IDockable" x:DataType="core:IDockable">
+        <TextBlock Text="{Binding Title}"
+                   Padding="{DynamicResource DockHeaderContentPadding}"  />
+      </DataTemplate>
+    </Setter>
+
+    <Style Selector="^/template/ Path#PART_StatusIcon">
+      <Setter Property="Width" Value="{DynamicResource DockDragPreviewStatusIconSize}" />
+      <Setter Property="Height" Value="{DynamicResource DockDragPreviewStatusIconSize}" />
+      <Setter Property="Stretch" Value="Uniform" />
+      <Setter Property="Fill" Value="{DynamicResource DockTabForegroundBrush}" />
+    </Style>
+
+    <Style Selector="^[Status=Dock]/template/ Path#PART_StatusIcon">
+      <Setter Property="Data" Value="{DynamicResource DockIconStatusDockGeometry}" />
+    </Style>
+    <Style Selector="^[Status=Dock]/template/ TextBlock#PART_StatusText">
+      <Setter Property="Text" Value="{DynamicResource DragPreviewControlDockString}" />
+    </Style>
+
+    <Style Selector="^[Status=Float]/template/ Path#PART_StatusIcon">
+      <Setter Property="Data" Value="{DynamicResource DockIconStatusFloatGeometry}" />
+    </Style>
+    <Style Selector="^[Status=Float]/template/ TextBlock#PART_StatusText">
+      <Setter Property="Text" Value="{DynamicResource DragPreviewControlFloatString}" />
+    </Style>
+
+    <Style Selector="^[Status=None]/template/ Path#PART_StatusIcon">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^[Status=None]/template/ TextBlock#PART_StatusText">
+      <Setter Property="Text" Value="{DynamicResource DragPreviewControlNoneString}" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

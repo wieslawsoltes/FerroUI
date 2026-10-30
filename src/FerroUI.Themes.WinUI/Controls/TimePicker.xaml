@@ -47,7 +47,7 @@
     are the selected state of the items (Controls/DateTimePickerShared.xaml).
   - The accept button has the margin DatePickerFlyoutPresenterDismissMargin, as in the source.
   - The ThemeShadow of the flyout (a Translation.Z of 32, as DatePickerFlyoutPresenter) is the
-    BoxShadow ThemeShadowFlyoutBoxShadow of the border Background of the presenter, and the margin
+    ThemeShadow (the shared WinUIThemeShadow, Translation.Z 32) on the border Background of the presenter, and the margin
     ThemeShadowFlyoutMargin of PART_PickerPresenter is the room for it in the popup
     (Resources/ThemeShadows.xaml; DEVIATIONS.md, G-24).
 -->
@@ -256,7 +256,7 @@
     <Setter Property="Template">
       <ControlTemplate>
         <Border x:Name="Background"
-                BoxShadow="{DynamicResource ThemeShadowFlyoutBoxShadow}"
+                Translation="0,0,32" Shadow="{StaticResource WinUIThemeShadow}"
                 Background="{TemplateBinding Background}"
                 BorderBrush="{TemplateBinding BorderBrush}"
                 BorderThickness="{TemplateBinding BorderThickness}"

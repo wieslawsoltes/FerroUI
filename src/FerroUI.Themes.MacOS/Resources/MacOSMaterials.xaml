@@ -1,0 +1,73 @@
+<!-- Authored macOS 26 semantic resources. See docs/porting/macos26-theme.md.
+     The theme's preference resource provider supplies the live material, accent,
+     control-size and motion values. All geometry is measured in logical points.
+     Calibrated metrics are not claimed to be private AppKit constants. -->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="using:System"
+                    xmlns:macos="using:FerroUI.Themes.MacOS"
+                    x:ClassModifier="internal">
+  <!-- A fixed, eagerly resolved pulse period. Reduce Motion removes the animated
+       style instead of making an infinite animation have a zero duration. -->
+  <sys:TimeSpan x:Key="MacOSProgressPulseDuration">0:0:1.2</sys:TimeSpan>
+
+  <ResourceDictionary.ThemeDictionaries>
+    <ResourceDictionary x:Key="Default">
+      <SolidColorBrush x:Key="MacOSTrafficLightInactiveBrush" Color="#FF5A5A5A" />
+      <SolidColorBrush x:Key="MacOSSegmentBackgroundBrush" Color="#22FFFFFF" />
+      <SolidColorBrush x:Key="MacOSSegmentSelectedBrush" Color="#FF626262" />
+      <SolidColorBrush x:Key="MacOSSelectionBrush" Color="{DynamicResource SystemAccentColor}" />
+      <SolidColorBrush x:Key="MacOSSelectionForegroundBrush" Color="White" />
+      <SolidColorBrush x:Key="MacOSContentBackgroundBrush" Color="#FF1E1E20" />
+      <SolidColorBrush x:Key="MacOSSidebarBackgroundBrush" Color="#A62C2C2E" />
+      <SolidColorBrush x:Key="MacOSSeparatorBrush" Color="{DynamicResource DividerStrokeColorDefault}" />
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="Light">
+      <SolidColorBrush x:Key="MacOSTrafficLightInactiveBrush" Color="#FFD0D0D0" />
+      <SolidColorBrush x:Key="MacOSSegmentBackgroundBrush" Color="#14000000" />
+      <SolidColorBrush x:Key="MacOSSegmentSelectedBrush" Color="White" />
+      <SolidColorBrush x:Key="MacOSSelectionBrush" Color="{DynamicResource SystemAccentColor}" />
+      <SolidColorBrush x:Key="MacOSSelectionForegroundBrush" Color="White" />
+      <SolidColorBrush x:Key="MacOSContentBackgroundBrush" Color="White" />
+      <SolidColorBrush x:Key="MacOSSidebarBackgroundBrush" Color="#A6F5F5F7" />
+      <SolidColorBrush x:Key="MacOSSeparatorBrush" Color="{DynamicResource DividerStrokeColorDefault}" />
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="{x:Static macos:MacOSTheme.HighContrast}">
+      <SolidColorBrush x:Key="MacOSTrafficLightInactiveBrush" Color="{DynamicResource SystemColorGrayTextColor}" />
+      <SolidColorBrush x:Key="MacOSSegmentBackgroundBrush" Color="{DynamicResource SystemColorWindowColor}" />
+      <SolidColorBrush x:Key="MacOSSegmentSelectedBrush" Color="{DynamicResource SystemColorButtonFaceColor}" />
+      <SolidColorBrush x:Key="MacOSSelectionBrush" Color="{DynamicResource SystemColorHighlightColor}" />
+      <SolidColorBrush x:Key="MacOSSelectionForegroundBrush" Color="{DynamicResource SystemColorHighlightTextColor}" />
+      <SolidColorBrush x:Key="MacOSContentBackgroundBrush" Color="{DynamicResource SystemColorWindowColor}" />
+      <SolidColorBrush x:Key="MacOSSidebarBackgroundBrush" Color="{DynamicResource SystemColorWindowColor}" />
+      <SolidColorBrush x:Key="MacOSSeparatorBrush" Color="{DynamicResource SystemColorWindowTextColor}" />
+    </ResourceDictionary>
+  </ResourceDictionary.ThemeDictionaries>
+
+  <SolidColorBrush x:Key="MacOSTrafficLightGlyphBrush" Color="#80000000" />
+  <SolidColorBrush x:Key="MacOSTrafficLightBorderBrush" Color="#26000000" />
+  <CornerRadius x:Key="MacOSWindowCornerRadius">20</CornerRadius>
+  <x:Double x:Key="MacOSWindowTitleBarHeight">44</x:Double>
+  <x:Double x:Key="MacOSWindowTitleFontSize">13</x:Double>
+  <FontWeight x:Key="MacOSWindowTitleFontWeight">SemiBold</FontWeight>
+  <BoxShadows x:Key="MacOSWindowShadow">0 12 36 0 #40000000, 0 1 4 0 #33000000</BoxShadows>
+  <BoxShadows x:Key="MacOSSegmentShadow">0 1 3 0 #26000000</BoxShadows>
+  <BoxShadows x:Key="MacOSMenuShadow">0 8 24 0 #33000000, 0 1 3 0 #26000000</BoxShadows>
+  <BoxShadows x:Key="MacOSControlShadow">0 1 2 0 #26000000</BoxShadows>
+  <BoxShadows x:Key="MacOSSwitchKnobShadow">0 1 2 0 #30000000</BoxShadows>
+  <BoxShadows x:Key="MacOSToolTipShadow">0 2 6 0 #26000000</BoxShadows>
+  <!-- Public fallback values; the live provider computes insets from the
+       corresponding effective theme shadow, including contrast suppression. -->
+  <Thickness x:Key="MacOSMenuShadowMargin">24,16,24,32</Thickness>
+  <Thickness x:Key="MacOSWindowShadowMargin">36,24,36,48</Thickness>
+  <Thickness x:Key="MacOSToolTipShadowMargin">6,4,6,8</Thickness>
+
+  <!-- Semantic application-level roles, available without requiring SF Symbols. -->
+  <FontFamily x:Key="MacOSSystemFontFamily">SF Pro Text, .AppleSystemUIFont, SF Pro, Helvetica Neue, Arial, $Default</FontFamily>
+  <FontFamily x:Key="MacOSDisplayFontFamily">SF Pro Display, .AppleSystemUIFont, SF Pro, Helvetica Neue, Arial, $Default</FontFamily>
+  <FontFamily x:Key="MacOSMonospaceFontFamily">SF Mono, Menlo, Consolas, monospace</FontFamily>
+  <x:Double x:Key="MacOSCaptionFontSize">11</x:Double>
+  <x:Double x:Key="MacOSBodyFontSize">13</x:Double>
+  <x:Double x:Key="MacOSHeadlineFontSize">17</x:Double>
+  <x:Double x:Key="MacOSTitleFontSize">22</x:Double>
+</ResourceDictionary>

@@ -26,6 +26,32 @@ use crate::scanner::{scan_crate, ScanOptions};
 const CONTROL: &str = "Option<::ferroui_base::Ref<::ferroui_base::Control>>";
 const BRUSHES: &str = "Vec<::ferroui_base::Ref<::fixture::media::brush::Brush>>";
 
+#[test]
+fn explicit_numeric_enum_factory_survives_model_export_without_changing_closed_members() {
+    use ferroui_markup_xaml_loader::rust_emitter::emit_types::EmitTypes;
+    let mut assembly=AssemblyModel::new("Example","fixture");
+    for (name,factory) in [("Open",Some("__from_i32")),("Closed",None)] {
+        let mut model=TypeModel::new(name,TypeKind::Enum,RustType::resolved(&format!("::fixture::{name}")),"fixture");
+        model.namespace="Example".to_string();
+        model.public_path=Some(format!("::fixture::{name}Metadata"));
+        model.enum_members=vec![EnumMemberModel{name:"Zero".into(),rust_variant:Some("Zero".into()),value:Some(0),..Default::default()}];
+        model.enum_i32_factory=factory.map(str::to_owned);
+        assembly.types.push(model);
+    }
+    let assembly=AssemblyModel::parse(&assembly.to_json()).unwrap();
+    let system=ModelTypeSystem::new(vec![assembly]);
+    let emitter=ModelEmitTypes::new(system.clone(),Vec::new());
+    for (name,factory) in [("Open",Some("__from_i32")),("Closed",None)] {
+        let type_=the(&system,&format!("Example.{name}"));
+        let markup=emitter.markup_of(&*type_).unwrap();
+        assert_eq!(markup.enum_i32_factory(),factory);
+        assert_eq!(markup.rust_path().unwrap().trim_start_matches("::"),format!("fixture::{name}Metadata"));
+        assert!(!markup.is_flags());
+        assert_eq!(markup.enum_members().len(),1);
+        assert_eq!(markup.enum_members()[0].value,0);
+    }
+}
+
 /// The type system over the scan of the fixture crate.
 fn fixture() -> Rc<ModelTypeSystem> {
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).with_file_name("FerroUI.Build.Scan").join("tests").join("fixtures").join("scanner").join("lib.rs");

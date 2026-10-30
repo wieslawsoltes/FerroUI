@@ -1,0 +1,25 @@
+<!-- macOS 26 adaptation; see docs/porting/macos26-theme.md.
+     Derived from FerroUI WinUI templates and microsoft-ui-xaml commit
+     7e4b0c2096be402f51cc8f7d203ebf67cff183d0. Copyright (c) Microsoft Corporation.
+     Licensed under the MIT License; see NOTICE.md.
+     Acrylic backing is the portable fallback for native Liquid Glass. -->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20" Width="200">
+      <StackPanel Spacing="8">
+        <TextBlock Text="Above"/>
+        <Separator/>
+        <TextBlock Text="Below"/>
+      </StackPanel>
+    </Border>
+  </Design.PreviewWith>
+  <ControlTheme x:Key="{x:Type Separator}" TargetType="Separator">
+    <Setter Property="Background" Value="{DynamicResource MenuFlyoutSeparatorBackground}"/>
+    <Setter Property="Padding" Value="8,4"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Rectangle Fill="{TemplateBinding Background}" Margin="{TemplateBinding Padding}" Height="{StaticResource MenuFlyoutSeparatorHeight}"/>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

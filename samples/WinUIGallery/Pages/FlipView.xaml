@@ -1,0 +1,39 @@
+<!-- All three original FlipView compositions use the native Carousel.
+     PageSlide selects horizontal/vertical layout and input; native PipsPager
+     supplies explicit navigation. See media_samples.rs for differences. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="FlipViewExample1" Spacing="8">
+    <TextBlock Text="A simple FlipView with items declared inline" FontSize="18" />
+    <Carousel x:Name="DeclaredFlipView" Height="270" MaxWidth="400"
+              AutomationProperties.Name="Landscape images" />
+    <PipsPager x:Name="DeclaredFlipViewPager" HorizontalAlignment="Center"
+               IsPreviousButtonVisible="True" IsNextButtonVisible="True"
+               AutomationProperties.Name="Landscape image pages" />
+    <TextBlock x:Name="DeclaredFlipViewSelection" HorizontalAlignment="Center" />
+  </StackPanel>
+  <StackPanel x:Name="FlipViewExample2" Spacing="8">
+    <TextBlock Text="A FlipView showing bound data with a data template" FontSize="18" />
+    <Carousel x:Name="BoundFlipView" Height="180" MaxWidth="400"
+              BorderBrush="Black" BorderThickness="1"
+              AutomationProperties.Name="Controls from the first three Gallery groups" />
+    <PipsPager x:Name="BoundFlipViewPager" HorizontalAlignment="Center" MaxVisiblePips="5"
+               IsPreviousButtonVisible="True" IsNextButtonVisible="True"
+               AutomationProperties.Name="Control pages" />
+    <TextBlock x:Name="BoundFlipViewSelection" HorizontalAlignment="Center" />
+  </StackPanel>
+  <StackPanel x:Name="FlipViewExample3" Spacing="8">
+    <TextBlock Text="A vertical FlipView" FontSize="18" />
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" MaxWidth="440">
+      <Carousel x:Name="VerticalFlipView" Height="270" MaxWidth="400"
+                AutomationProperties.Name="Vertical landscape images" />
+      <PipsPager Grid.Column="1" x:Name="VerticalFlipViewPager" Orientation="Vertical"
+                 VerticalAlignment="Center" IsPreviousButtonVisible="True"
+                 IsNextButtonVisible="True" AutomationProperties.Name="Vertical image pages" />
+    </Grid>
+    <TextBlock x:Name="VerticalFlipViewSelection" HorizontalAlignment="Center" />
+  </StackPanel>
+  <TextBlock x:Name="FlipViewAdaptation" TextWrapping="Wrap"
+             Text="These examples use FerroUI Carousel and PipsPager. Use Left/Right for horizontal pages and Up/Down for vertical pages; Home/End selects the first/last page. Swiping uses native Carousel gestures, including mouse dragging. WinUI FlipView button overlays, focus transfer, RTL gestures and exact transition behavior remain separate parity work." />
+  <TextBlock x:Name="FlipViewLoadError" IsVisible="False" TextWrapping="Wrap" />
+</StackPanel>

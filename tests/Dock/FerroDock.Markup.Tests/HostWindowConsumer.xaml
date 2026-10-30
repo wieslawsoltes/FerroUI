@@ -1,0 +1,5 @@
+<d:HostWindow xmlns="https://github.com/ferroui"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              xmlns:d="using:FerroDock.Ferro.Controls"
+              x:DataType="d:HostWindow" x:CompileBindings="True"
+              Title="Source host" Width="640" Height="480" />

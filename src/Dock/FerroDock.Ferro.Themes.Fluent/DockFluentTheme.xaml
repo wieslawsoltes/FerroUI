@@ -1,0 +1,76 @@
+<Styles xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:FerroDock.Ferro.Controls"
+        x:Class="FerroDock.Ferro.Themes.Fluent.DockFluentTheme">
+  <Styles.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="ferres://FerroDock.Controls.ProportionalStackPanel/ProportionalStackPanelSplitter.xaml" />
+        <ResourceInclude Source="/Controls/ControlStrings.xaml" />
+        <ResourceInclude Source="/Accents/Fluent.xaml" />
+        <ResourceInclude Source="/Controls/WindowChromeResources.xaml" />
+        <ResourceInclude Source="/Controls/WindowDrawnDecorations.xaml" />
+        <ResourceInclude Source="/Controls/ScrollViewer.xaml" />
+        <ResourceInclude Source="/Controls/DocumentTabStripItem.xaml" />
+        <ResourceInclude Source="/Controls/DocumentTabStrip.xaml" />
+        <ResourceInclude Source="/Controls/DockCommandBarHost.xaml" />
+        <ResourceInclude Source="/Controls/DockSelectorOverlay.xaml" />
+        <ResourceInclude Source="/Controls/MdiDocumentWindow.xaml" />
+        <ResourceInclude Source="/Controls/MdiDocumentControl.xaml" />
+        <ResourceInclude Source="/Controls/ToolTabStripItem.xaml" />
+        <ResourceInclude Source="/Controls/ToolTabStrip.xaml" />
+        <ResourceInclude Source="/Controls/DockTarget.xaml" />
+        <ResourceInclude Source="/Controls/GlobalDockTarget.xaml" />
+        <ResourceInclude Source="/Controls/DocumentControl.xaml" />
+        <ResourceInclude Source="/Controls/ToolChromeControl.xaml" />
+        <ResourceInclude Source="/Controls/ToolControl.xaml" />
+        <ResourceInclude Source="/Controls/ToolPinItemControl.xaml" />
+        <ResourceInclude Source="/Controls/ToolPinnedControl.xaml" />
+        <ResourceInclude Source="/Controls/DockDockControl.xaml" />
+        <ResourceInclude Source="/Controls/DocumentContentControl.xaml" />
+        <ResourceInclude Source="/Controls/DocumentDockControl.xaml" />
+        <ResourceInclude Source="/Controls/PinnedDockControl.xaml" />
+        <ResourceInclude Source="/Controls/ProportionalDockControl.xaml" />
+        <ResourceInclude Source="/Controls/StackDockControl.xaml" />
+        <ResourceInclude Source="/Controls/GridDockControl.xaml" />
+        <ResourceInclude Source="/Controls/WrapDockControl.xaml" />
+        <ResourceInclude Source="/Controls/UniformGridDockControl.xaml" />
+        <ResourceInclude Source="/Controls/RootDockControl.xaml" />
+        <ResourceInclude Source="/Controls/ToolContentControl.xaml" />
+        <ResourceInclude Source="/Controls/ToolDockControl.xaml" />
+        <ResourceInclude Source="/Controls/SplitViewDockControl.xaml" />
+        <ResourceInclude Source="/Controls/DockControl.xaml" />
+        <ResourceInclude Source="/Controls/ManagedWindowLayer.xaml" />
+        <ResourceInclude Source="/Controls/HostWindowTitleBar.xaml" />
+        <ResourceInclude Source="/Controls/HostWindow.xaml" />
+        <ResourceInclude Source="/Controls/BusyOverlayControl.xaml" />
+        <ResourceInclude Source="/Controls/DialogOverlayControl.xaml" />
+        <ResourceInclude Source="/Controls/ConfirmationOverlayControl.xaml" />
+        <ResourceInclude Source="/Controls/OverlayLayerStyles.xaml" />
+        <ResourceInclude Source="/Controls/OverlayLayerDefaults.xaml" />
+        <ResourceInclude Source="/Controls/OverlayDataTemplates.xaml" />
+        <ResourceInclude Source="/Controls/DialogShellControl.xaml" />
+        <ResourceInclude Source="/Controls/ConfirmationDialogControl.xaml" />
+        <ResourceInclude Source="/Controls/DragPreviewControl.xaml" />
+        <ResourceInclude Source="/Controls/DragPreviewWindow.xaml" />
+        <ResourceInclude Source="/Controls/PinnedDockWindow.xaml" />
+        <ResourceInclude Source="/Controls/DockAdornerWindow.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+
+      <!-- Keep compact density styles outside merged dictionaries so they can be activated by theme API. -->
+      <ResourceInclude x:Key="CompactStyles" Source="/DensityStyles/Compact.xaml" />
+    </ResourceDictionary>
+  </Styles.Resources>
+
+  <Style Selector="controls|ManagedWindowLayer controls|ToolChromeControl" x:DataType="controls:ToolChromeControl">
+    <Setter Property="Template">
+      <ControlTemplate x:DataType="controls:ToolChromeControl">
+        <ContentPresenter Background="{TemplateBinding Background}"
+                          BorderBrush="{TemplateBinding BorderBrush}"
+                          BorderThickness="{TemplateBinding BorderThickness}"
+                          Content="{TemplateBinding Content}"
+                          Padding="{TemplateBinding Padding}" />
+      </ControlTemplate>
+    </Setter>
+  </Style>
+</Styles>

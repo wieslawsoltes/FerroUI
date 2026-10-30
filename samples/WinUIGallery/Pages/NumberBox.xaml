@@ -1,0 +1,6 @@
+<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <NumberBox x:Name="Number" Header="Enter an integer:" Value="1" SpinButtonPlacementMode="Inline" SmallChange="10" LargeChange="100"/>
+  <NumberBox x:Name="Expression" Header="Enter an expression:" Value="NaN" PlaceholderText="1 + 2^2" AcceptsExpression="True"/>
+  <TextBlock x:Name="Output" Text="Value: 1"/>
+</StackPanel>

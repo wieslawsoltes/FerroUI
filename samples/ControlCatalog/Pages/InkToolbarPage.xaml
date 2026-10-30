@@ -1,0 +1,66 @@
+<ContentPage xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:generic="clr-namespace:System.Collections.Generic;assembly=netstandard"
+             x:Class="ControlCatalog.Pages.InkToolbarPage"
+             Header="InkToolbar">
+  <!-- Not from upstream: the page of the port's InkToolbar (docs/porting/winui-inking.md), after
+       WinUI's InkToolbar test page: its selectors and toggles drive the toolbar live. -->
+  <Grid RowDefinitions="Auto,Auto,Auto,*" RowSpacing="12" Margin="20">
+    <StackPanel Spacing="6">
+      <TextBlock Classes="h2" Text="InkToolbar" />
+      <TextBlock TextWrapping="Wrap" Text="An InkToolbar sets the tool of its target InkCanvas: the ballpoint pen, pencil and highlighter (select a pen again to change its colour and width), the eraser, and the ruler and protractor stencils (drag a stencil with touch or the mouse; two fingers or Shift-drag rotate it)." />
+    </StackPanel>
+    <WrapPanel Grid.Row="1" Orientation="Horizontal" ItemSpacing="16" LineSpacing="8">
+      <StackPanel Orientation="Horizontal" Spacing="6">
+        <TextBlock VerticalAlignment="Center" Text="InitialControls:" />
+        <ComboBox x:Name="InitialControls" SelectedIndex="0">
+          <ComboBox.ItemsSource>
+            <generic:List x:TypeArguments="InkToolbarInitialControls">
+              <InkToolbarInitialControls>All</InkToolbarInitialControls>
+              <InkToolbarInitialControls>PensOnly</InkToolbarInitialControls>
+              <InkToolbarInitialControls>AllExceptPens</InkToolbarInitialControls>
+              <InkToolbarInitialControls>None</InkToolbarInitialControls>
+            </generic:List>
+          </ComboBox.ItemsSource>
+        </ComboBox>
+      </StackPanel>
+      <StackPanel Orientation="Horizontal" Spacing="6">
+        <TextBlock VerticalAlignment="Center" Text="Orientation:" />
+        <ComboBox x:Name="ToolbarOrientation" SelectedIndex="0">
+          <ComboBox.ItemsSource>
+            <generic:List x:TypeArguments="Orientation">
+              <Orientation>Horizontal</Orientation>
+              <Orientation>Vertical</Orientation>
+            </generic:List>
+          </ComboBox.ItemsSource>
+        </ComboBox>
+      </StackPanel>
+      <StackPanel Orientation="Horizontal" Spacing="6">
+        <TextBlock VerticalAlignment="Center" Text="ButtonFlyoutPlacement:" />
+        <ComboBox x:Name="FlyoutPlacement" SelectedIndex="0">
+          <ComboBox.ItemsSource>
+            <generic:List x:TypeArguments="InkToolbarButtonFlyoutPlacement">
+              <InkToolbarButtonFlyoutPlacement>Auto</InkToolbarButtonFlyoutPlacement>
+              <InkToolbarButtonFlyoutPlacement>Top</InkToolbarButtonFlyoutPlacement>
+              <InkToolbarButtonFlyoutPlacement>Bottom</InkToolbarButtonFlyoutPlacement>
+              <InkToolbarButtonFlyoutPlacement>Left</InkToolbarButtonFlyoutPlacement>
+              <InkToolbarButtonFlyoutPlacement>Right</InkToolbarButtonFlyoutPlacement>
+            </generic:List>
+          </ComboBox.ItemsSource>
+        </ComboBox>
+      </StackPanel>
+      <CheckBox VerticalAlignment="Center" Content="Ruler" IsChecked="{Binding #Toolbar.IsRulerButtonChecked, Mode=TwoWay}" />
+      <CheckBox VerticalAlignment="Center" Content="Protractor" IsChecked="{Binding #Toolbar.IsStencilButtonChecked, Mode=TwoWay}" />
+      <TextBlock x:Name="ActiveTool" VerticalAlignment="Center" Text="Active tool: none" />
+    </WrapPanel>
+    <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+      <InkToolbar x:Name="Toolbar" HorizontalAlignment="Left"
+                  InitialControls="{Binding #InitialControls.SelectedItem}"
+                  Orientation="{Binding #ToolbarOrientation.SelectedItem}"
+                  ButtonFlyoutPlacement="{Binding #FlyoutPlacement.SelectedItem}" />
+    </ScrollViewer>
+    <Border Grid.Row="3" MinHeight="320" BorderBrush="Gray" BorderThickness="1" Background="White">
+      <InkCanvas x:Name="InkSurface" />
+    </Border>
+  </Grid>
+</ContentPage>

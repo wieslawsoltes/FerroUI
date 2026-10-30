@@ -9,7 +9,7 @@
 // This file holds both parts of the upstream partial class: the control and
 // its properties.
 
-use super::{AutoCompleteFilterMode, PopulatedEventArgs, PopulatingEventArgs};
+use super::{AutoCompleteBoxQuerySubmittedEventArgs, AutoCompleteFilterMode, PopulatedEventArgs, PopulatingEventArgs};
 use crate::primitives::{
     Popup, SelectingItemsControl, TemplateAppliedEventArgs, TemplatedControl, TemplatedControlImpl,
     TemplatedControlImplExt,
@@ -367,44 +367,15 @@ impl InputElementImpl for AutoCompleteBox {
             return;
         }
 
-        // The drop down is open, pass along the key event arguments to the
-        // selection adapter. If it isn't handled by the adapter's logic,
-        // then we handle some simple navigation scenarios for controlling
-        // the drop down.
-        if this.is_drop_down_open() {
-            if let Some(adapter) = this.selection_adapter() {
-                adapter.handle_key_down(e);
-                if e.handled() {
-                    return;
-                }
-            }
-
-            if e.key == Key::Escape {
-                this.on_adapter_selection_canceled();
-                e.set_handled(true);
-            }
-        } else {
-            // The drop down is not open, the Down key will toggle it open.
-            // Ignore key buttons, if they are used for XY focus.
-            if e.key == Key::Down && !XYFocusHelpers::is_allowed_xy_navigation_mode(this, Some(e.key_device_type)) {
-                this.set_current_value(Self::is_drop_down_open_property(), true);
-                e.set_handled(true);
-            }
-        }
-
-        // Standard drop down navigation.
-        match e.key {
-            Key::F4 => {
-                this.set_current_value(Self::is_drop_down_open_property(), !this.is_drop_down_open());
-                e.set_handled(true);
-            }
-            Key::Enter => {
-                if this.is_drop_down_open() {
-                    this.on_adapter_selection_complete();
-                    e.set_handled(true);
-                }
-            }
-            _ => {}
+        // Addition after WinUI's AutoSuggestBox (DEVIATIONS.md, "WinUI additions to upstream
+        // controls"): Enter submits the query after upstream's handling of the key, which is
+        // unchanged (it marks Enter handled only when the drop-down is open).
+        let submit = e.key == Key::Enter;
+        let was_open = this.is_drop_down_open();
+        this.handle_key_down(e);
+        if submit {
+            let chosen = if was_open { this.selected_item() } else { None };
+            this.raise_query_submitted(chosen);
         }
     }
 
@@ -735,6 +706,14 @@ impl AutoCompleteBox {
         /// Defines the `SelectionChanged` event.
         pub fn selection_changed_event() -> RoutedEvent<SelectionChangedEventArgs> {
             RoutedEvent::register::<AutoCompleteBox, _>("SelectionChanged", RoutingStrategies::BUBBLE)
+        }
+    );
+
+    ferro_routed_event!(
+        /// Defines the `QuerySubmitted` event: a FerroUI addition after WinUI's
+        /// `AutoSuggestBox.QuerySubmitted`, raised when Enter submits the text of the box.
+        pub fn query_submitted_event() -> RoutedEvent<AutoCompleteBoxQuerySubmittedEventArgs> {
+            RoutedEvent::register::<AutoCompleteBox, _>("QuerySubmitted", RoutingStrategies::BUBBLE)
         }
     );
 
@@ -1471,6 +1450,69 @@ impl AutoCompleteBox {
                 list(&this).remove(token);
             }
         })
+    }
+
+    /// Occurs when Enter submits the text of the box (a WinUI addition, see
+    /// [`query_submitted_event`](Self::query_submitted_event)).
+    pub fn query_submitted(
+        &self,
+        handler: impl Fn(&Interactive, &AutoCompleteBoxQuerySubmittedEventArgs) + 'static,
+    ) -> RoutedEventHandlerToken {
+        self.add_handler(Self::query_submitted_event(), handler)
+    }
+
+    /// Upstream's handling of a key (`OnKeyDown` after its guard).
+    fn handle_key_down(&self, e: &KeyEventArgs) {
+        let this = self;
+
+        // The drop down is open, pass along the key event arguments to the
+        // selection adapter. If it isn't handled by the adapter's logic,
+        // then we handle some simple navigation scenarios for controlling
+        // the drop down.
+        if this.is_drop_down_open() {
+            if let Some(adapter) = this.selection_adapter() {
+                adapter.handle_key_down(e);
+                if e.handled() {
+                    return;
+                }
+            }
+
+            if e.key == Key::Escape {
+                this.on_adapter_selection_canceled();
+                e.set_handled(true);
+            }
+        } else {
+            // The drop down is not open, the Down key will toggle it open.
+            // Ignore key buttons, if they are used for XY focus.
+            if e.key == Key::Down && !XYFocusHelpers::is_allowed_xy_navigation_mode(this, Some(e.key_device_type)) {
+                this.set_current_value(Self::is_drop_down_open_property(), true);
+                e.set_handled(true);
+            }
+        }
+
+        // Standard drop down navigation.
+        match e.key {
+            Key::F4 => {
+                this.set_current_value(Self::is_drop_down_open_property(), !this.is_drop_down_open());
+                e.set_handled(true);
+            }
+            Key::Enter => {
+                if this.is_drop_down_open() {
+                    this.on_adapter_selection_complete();
+                    e.set_handled(true);
+                }
+            }
+            _ => {}
+        }
+    }
+
+    fn raise_query_submitted(&self, chosen_suggestion: Option<BoxedValue>) {
+        let e = AutoCompleteBoxQuerySubmittedEventArgs::new(
+            Some(Self::query_submitted_event()),
+            self.text().unwrap_or_default(),
+            chosen_suggestion,
+        );
+        self.raise_event(&e);
     }
 
     /// Occurs asynchronously when the text in the text box portion of the

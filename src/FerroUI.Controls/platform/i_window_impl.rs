@@ -99,6 +99,15 @@ pub trait IWindowImpl: IWindowBaseImpl {
     /// non-client area extends into the client area.
     fn extended_margins(&self) -> Thickness;
 
+    /// Gets the room the caption buttons of the system take in the title bar when the client area
+    /// is extended into the decorations (the traffic lights of macOS at the left): the left and
+    /// right of the thickness, or `None` when the system draws no caption buttons over the client
+    /// area (the toolkit then measures the caption buttons it draws itself). Not in upstream: the
+    /// insets of WinUI's `AppWindowTitleBar` (`LeftInset`, `RightInset`) for a `TitleBar`.
+    fn caption_button_insets(&self) -> Option<Thickness> {
+        None
+    }
+
     /// Gets a thickness that describes the margin around the window that is
     /// offscreen.
     fn off_screen_margin(&self) -> Thickness;

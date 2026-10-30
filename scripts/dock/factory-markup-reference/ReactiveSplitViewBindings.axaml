@@ -1,0 +1,7 @@
+<StackPanel xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:m="clr-namespace:Dock.Model.ReactiveUI.Controls;assembly=Dock.Model.ReactiveUI"
+ x:CompileBindings="True" x:DataType="m:SplitViewDock">
+ <CheckBox IsChecked="{Binding IsPaneOpen, Mode=TwoWay}" />
+ <Slider Minimum="0" Maximum="640" Value="{Binding OpenPaneLength, Mode=TwoWay}" />
+ <ContentControl Content="{Binding PaneDockable}" />
+</StackPanel>

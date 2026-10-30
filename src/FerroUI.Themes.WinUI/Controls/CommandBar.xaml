@@ -58,8 +58,8 @@
     translations of the bar and of the overflow content, their transitions and the Minimal and
     Hidden display modes are left out (FerroUI's CommandBar has no closed display modes). The
     drop shadow of the overflow content (ApplyElevationEffect on SecondaryItemsControlShadowWrapper,
-    CommandBar_Partial.cpp: a ThemeShadow at a Translation.Z of 32) is the BoxShadow
-    ThemeShadowFlyoutBoxShadow of SecondaryItemsControlShadowWrapper, with the margin
+    CommandBar_Partial.cpp: a ThemeShadow at a Translation.Z of 32) is a ThemeShadow (the shared
+    WinUIThemeShadow, Translation.Z as in WinUI) on SecondaryItemsControlShadowWrapper, with the margin
     ThemeShadowFlyoutMargin as its room in the popup (Resources/ThemeShadows.xaml; DEVIATIONS.md,
     G-24). AvailableCommandsStates and DynamicOverflowStates are left
     out: FerroUI's CommandBar computes its visible and overflow items in code.
@@ -931,7 +931,7 @@
                  IsLightDismissEnabled="True"
                  WindowManagerAddShadowHint="False">
             <Border x:Name="SecondaryItemsControlShadowWrapper"
-                    BoxShadow="{DynamicResource ThemeShadowFlyoutBoxShadow}"
+                    Translation="0,0,32" Shadow="{StaticResource WinUIThemeShadow}"
                     Margin="{StaticResource ThemeShadowFlyoutMargin}"
                     CornerRadius="{DynamicResource OverlayCornerRadius}">
               <ItemsControl x:Name="PART_OverflowPresenter"

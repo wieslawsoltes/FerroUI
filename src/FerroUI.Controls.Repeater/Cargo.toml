@@ -1,0 +1,47 @@
+[package]
+name = "ferroui-controls-repeater"
+description = "The ItemsRepeater of FerroUI, a port of the Repeater of WinUI: virtualizing stack, uniform grid, flow and lined-flow layouts, element factories, recycling, phasing, transitions and selection"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+# The build script exports the type model of the crate; Cargo hands its path to the build
+# scripts of the crates that depend on this one (docs/porting/xaml.md, 9.5.13 and 9.6.3).
+links = "ferroui_controls_repeater_xaml"
+# Unit tests live next to the code, not as integration test targets.
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[features]
+# The test hooks of WinUI's repeater tests (`RepeaterTestHooks`, `LayoutsTestHooks`) as public
+# types, registered for markup.
+testing = []
+
+[dependencies]
+ferroui-base = { workspace = true, features = ["markup-functions"] }
+ferroui-controls = { workspace = true }
+bitflags = { workspace = true }
+# The hasher of the element pools.
+rustc-hash = { workspace = true }
+
+[build-dependencies]
+ferroui-build-scan = { workspace = true }
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "testing"] }
+xamlx = { workspace = true }
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "controls"

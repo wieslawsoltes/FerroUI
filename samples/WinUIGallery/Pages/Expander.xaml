@@ -1,0 +1,4 @@
+<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <Expander Header="This text is in the header" Content="This is in the content"/><Expander Header="Expanded example" IsExpanded="True"><StackPanel Spacing="8"><TextBlock Text="The content can contain controls."/><Button Content="Button in the content"/></StackPanel></Expander>
+</StackPanel>

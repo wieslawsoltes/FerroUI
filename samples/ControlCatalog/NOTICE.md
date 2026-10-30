@@ -15,6 +15,13 @@ This sample is a port of the ControlCatalog sample of the upstream project
   which the sample embeds in place of the assets that carry the brand of the upstream project
   (feature `placeholder-branding`, on by default; see `PlaceholderAssets/README.md`).
 
+- `Assets/Fonts/FerroUICatalogSymbols.ttf` is this project's own, MIT like the rest of it: the
+  symbol font of the WinUI controls of the catalog off Windows (`app.rs`), written by
+  `scripts/winui-controls/catalog_symbol_font.py` from the glyph outlines of the WinUI theme of this
+  project (`src/FerroUI.Themes.WinUI/Resources/Glyphs.xaml`) and outlines drawn for the font. No
+  outline of Segoe Fluent Icons or of another font is in it; only the code points are those of
+  Segoe Fluent Icons.
+
 ## Assets with a licence of their own
 
 The upstream repository ships these files without separate licence files; the licences below are

@@ -1,0 +1,7 @@
+<m:DockWindow xmlns="https://github.com/ferroui"
+ xmlns:m="clr-namespace:FerroDock.Model.ReactiveUI.Core;assembly=FerroDock.Model.ReactiveUI"
+ xmlns:c="clr-namespace:FerroDock.Model.ReactiveUI.Controls;assembly=FerroDock.Model.ReactiveUI"
+ Id="source-window" Title="Source window" X="42.25" Y="-12" Width="800" Height="600"
+ WindowState="Maximized" Topmost="True" OwnerMode="RootWindow" IsModal="True" ShowInTaskbar="False">
+ <m:DockWindow.Layout><c:RootDock Title="Window layout" /></m:DockWindow.Layout>
+</m:DockWindow>

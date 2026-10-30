@@ -1,0 +1,4 @@
+<m:RootDock xmlns="https://github.com/ferroui"
+ xmlns:m="clr-namespace:FerroDock.Model.ReactiveUI.Controls;assembly=FerroDock.Model.ReactiveUI"
+ Dock="-19" PinnedDockDisplayMode="123" PinnedDockDisplayModeOverride="-2147483648"
+ FloatingWindowHostMode="-17" />

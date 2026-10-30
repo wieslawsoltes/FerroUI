@@ -237,7 +237,7 @@ impl Tour {
     }
 
     fn navigation_page(&self) -> Ref<NavigationPage> {
-        self.main_view.get_control::<NavigationPage>("NavPage")
+        self.main_view.current_navigation_page().expect("the frame shows a navigation page")
     }
 
     /// Selects the page as the drawer does and runs the frames of the

@@ -1,0 +1,7 @@
+<!-- Adapted from AppbarbuttonPathIcon.txt in the pinned Gallery; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <CommandBarButton x:Name="Primary" Label="PathIcon" HorizontalAlignment="Left">
+    <CommandBarButton.Icon><PathIcon Data="F1 M 20,20L 24,10L 24,24L 5,24"/></CommandBarButton.Icon>
+  </CommandBarButton>
+  <TextBlock x:Name="Output" Text="Clicked 0 times"/>
+</StackPanel>

@@ -26,11 +26,17 @@ desktop = ["dep:ferroui-desktop", "dep:ferroui-skia", "dep:ferroui-harfbuzz", "d
 fluent = ["dep:ferroui-themes-fluent"]
 simple = ["dep:ferroui-themes-simple"]
 winui-theme = ["dep:ferroui-themes-winui"]
+macos-theme = ["dep:ferroui-themes-macos"]
+material-theme = ["dep:ferroui-themes-material"]
 # The XAML run-time library and the run-time loader of markup.
 xaml = ["dep:ferroui-markup-xaml", "dep:ferroui-markup-xaml-loader"]
+# The WinUI XAML compatibility: the importer, its loading entry points and x:Bind.
+winui-xaml = ["xaml", "dep:ferroui-markup-xaml-winui"]
 # The libraries of controls beside the control set.
 color-picker = ["dep:ferroui-controls-color-picker"]
 charts = ["dep:ferroui-controls-charts"]
+repeater = ["dep:ferroui-controls-repeater"]
+inking = ["dep:ferroui-controls-inking"]
 pretext = ["dep:ferroui-pretext", "dep:ferroui-pretext-layout", "dep:ferroui-pretext-media"]
 treedatagrid = ["dep:ferroui-controls-treedatagrid", "dep:ferroui-treedatagrid-core"]
 dialogs = ["dep:ferroui-dialogs"]
@@ -68,10 +74,15 @@ ferroui-harfbuzz = { workspace = true, optional = true }
 ferroui-themes-fluent = { workspace = true, optional = true }
 ferroui-themes-simple = { workspace = true, optional = true }
 ferroui-themes-winui = { workspace = true, optional = true }
+ferroui-themes-macos = { workspace = true, optional = true }
+ferroui-themes-material = { workspace = true, optional = true }
 ferroui-markup-xaml = { workspace = true, optional = true }
 ferroui-markup-xaml-loader = { workspace = true, optional = true, features = ["runtime"] }
 ferroui-controls-color-picker = { workspace = true, optional = true }
 ferroui-controls-charts = { workspace = true, optional = true }
+ferroui-controls-repeater = { workspace = true, optional = true }
+ferroui-markup-xaml-winui = { workspace = true, optional = true }
+ferroui-controls-inking = { workspace = true, optional = true }
 ferroui-pretext = { workspace = true, optional = true }
 ferroui-pretext-layout = { workspace = true, optional = true }
 ferroui-pretext-media = { workspace = true, optional = true }
@@ -111,7 +122,7 @@ required-features = ["desktop", "fluent"]
 # docs.rs documents the default features with the libraries that need no more than the host
 # (docs/release.md, section 7).
 [package.metadata.docs.rs]
-features = ["simple", "winui-theme", "xaml", "color-picker", "charts", "treedatagrid", "dialogs", "diagnostics", "reactive", "dynamic-data", "reactiveui", "headless", "opengl", "metal", "vulkan"]
+features = ["simple", "winui-theme", "xaml", "winui-xaml", "color-picker", "charts", "inking", "repeater", "treedatagrid", "dialogs", "diagnostics", "reactive", "dynamic-data", "reactiveui", "headless", "opengl", "metal", "vulkan"]
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]

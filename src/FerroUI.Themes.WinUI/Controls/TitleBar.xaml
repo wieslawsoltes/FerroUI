@@ -1,0 +1,230 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/TitleBar/TitleBar.xaml (DefaultTitleBarStyle and the implicit style)
+    controls/dev/TitleBar/TitleBar_themeresources.xaml (its resources are
+    Resources/TitleBar_themeresources.xaml; the button styles are in WindowDrawnDecorations.xaml)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  The template of WinUI's TitleBar, which FerroUI ports as a control (ferroui-controls,
+  docs/porting/winui-controls.md); the Fluent theme has no document for it.
+  Translation notes (docs/porting/winui-theme.md, section 4):
+  - The visual states are the pseudo-classes the control sets (TitleBar.cpp calls GoToState): the
+    Visible state of each group is :back-button-visible, :pane-toggle-button-visible,
+    :left-header-visible, :icon-visible, :title-text-visible, :subtitle-text-visible,
+    :content-visible and :right-header-visible; the Deactivated state of every group is the
+    Visible state with :deactivated (the window is not active); ExpandedHeight is
+    :expanded-height, Compact is :compact and NegativeInsetSpacing is :negative-inset-spacing.
+  - x:DeferLoadStrategy="Lazy" is left out: the parts are in the template, hidden (IsVisible
+    False) until their state shows them.
+  - TitleBarBackButtonStyle and TitleBarPaneToggleButtonStyle are the ones of
+    WindowDrawnDecorations.xaml, which ports them for the title bar the toolkit draws; the style of
+    the control is DefaultTitleBarControlStyle, as WindowDrawnDecorations.xaml has the key
+    DefaultTitleBarStyle for that title bar.
+  - The text styles: PART_TitleText and PART_SubtitleText are CaptionTextBlockStyle.
+  - LeftPaddingColumn, LeftHeaderPaddingColumn and RightPaddingColumn are Borders of those names in
+    Auto columns (a ColumnDefinition has no name in FerroUI); the control sets the widths of the
+    outer two to the caption-button insets of the window, the NegativeInsetSpacing state the width
+    of the middle one.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Width="640">
+      <TitleBar Title="App" Subtitle="Preview" IsBackButtonVisible="True" IsPaneToggleButtonVisible="True">
+        <TextBox Width="300" PlaceholderText="Search" />
+      </TitleBar>
+    </Border>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="DefaultTitleBarControlStyle" TargetType="TitleBar">
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="Foreground" Value="{DynamicResource TitleBarForegroundBrush}" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid x:Name="PART_LayoutRoot" Height="{DynamicResource TitleBarCompactHeight}" Background="{TemplateBinding Background}">
+          <Grid.ColumnDefinitions>
+            <!-- 0: Left Padding Column -->
+            <ColumnDefinition Width="Auto" />
+            <!-- 1: Back Button -->
+            <ColumnDefinition Width="Auto" />
+            <!-- 2: Pane Toggle Button -->
+            <ColumnDefinition Width="Auto" />
+            <!-- 3: Left Header Presenter -->
+            <ColumnDefinition Width="Auto" />
+            <!-- 4: Left Header Padding Column -->
+            <ColumnDefinition Width="Auto" />
+            <!-- 5: Icon -->
+            <ColumnDefinition Width="Auto" />
+            <!-- 6: Title -->
+            <ColumnDefinition Width="Auto" />
+            <!-- 7: Subtitle -->
+            <ColumnDefinition Width="Auto" />
+            <!-- 8: Content Presenter -->
+            <ColumnDefinition Width="*" />
+            <!-- 9: Right Header Presenter -->
+            <ColumnDefinition Width="Auto" />
+            <!-- 10: Min Drag Region -->
+            <ColumnDefinition Width="{DynamicResource TitleBarMinDragRegionWidth}" />
+            <!-- 11: Right Padding Column -->
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+
+          <!-- The padding columns of WinUI are Auto columns that hold these borders: a column
+               definition has no name in FerroUI. The control sets the width of the outer two to the
+               caption-button insets of the window. -->
+          <Border x:Name="LeftPaddingColumn" Grid.Column="0" Width="{DynamicResource TitleBarLeftPaddingWidth}" />
+          <Border x:Name="LeftHeaderPaddingColumn" Grid.Column="4" Width="{DynamicResource TitleBarLeftHeaderPaddingWidth}" />
+          <Border x:Name="RightPaddingColumn" Grid.Column="11" Width="{DynamicResource TitleBarRightPaddingWidth}" />
+
+          <Button x:Name="PART_BackButton"
+                  Grid.Column="1"
+                  IsVisible="False"
+                  Theme="{StaticResource TitleBarBackButtonStyle}"
+                  IsEnabled="{TemplateBinding IsBackButtonEnabled}" />
+
+          <Button x:Name="PART_PaneToggleButton"
+                  Grid.Column="2"
+                  IsVisible="False"
+                  Theme="{StaticResource TitleBarPaneToggleButtonStyle}" />
+
+          <ContentPresenter x:Name="PART_LeftHeaderPresenter"
+                            Grid.Column="3"
+                            IsVisible="False"
+                            Content="{TemplateBinding LeftHeader}"
+                            HorizontalAlignment="{DynamicResource TitleBarLeftHeaderHorizontalAlignment}"
+                            VerticalAlignment="{DynamicResource TitleBarLeftHeaderVerticalAlignment}" />
+
+          <Viewbox x:Name="PART_Icon"
+                   Grid.Column="5"
+                   IsVisible="False"
+                   VerticalAlignment="Center"
+                   MaxWidth="{DynamicResource TitleBarIconMaxWidth}"
+                   MaxHeight="{DynamicResource TitleBarIconMaxHeight}"
+                   Margin="{DynamicResource TitleBarIconMargin}"
+                   Child="{Binding TemplateSettings.IconElement, RelativeSource={RelativeSource TemplatedParent}}" />
+
+          <TextBlock x:Name="PART_TitleText"
+                     Grid.Column="6"
+                     IsVisible="False"
+                     Text="{TemplateBinding Title}"
+                     Theme="{StaticResource CaptionTextBlockStyle}"
+                     Foreground="{TemplateBinding Foreground}"
+                     Margin="{DynamicResource TitleBarTitleMargin}"
+                     TextTrimming="CharacterEllipsis"
+                     TextWrapping="NoWrap"
+                     HorizontalAlignment="Left"
+                     VerticalAlignment="Center"
+                     MinWidth="{DynamicResource TitleBarTitleMinWidth}" />
+
+          <TextBlock x:Name="PART_SubtitleText"
+                     Grid.Column="7"
+                     IsVisible="False"
+                     Text="{TemplateBinding Subtitle}"
+                     Theme="{StaticResource CaptionTextBlockStyle}"
+                     Foreground="{DynamicResource TitleBarSubtitleForegroundBrush}"
+                     Margin="{DynamicResource TitleBarSubtitleMargin}"
+                     TextTrimming="CharacterEllipsis"
+                     TextWrapping="NoWrap"
+                     HorizontalAlignment="Left"
+                     VerticalAlignment="Center"
+                     MinWidth="{DynamicResource TitleBarSubtitleMinWidth}" />
+
+          <Grid x:Name="PART_ContentPresenterGrid" Grid.Column="8" IsVisible="False">
+            <ContentPresenter x:Name="PART_ContentPresenter"
+                              Content="{TemplateBinding Content}"
+                              HorizontalAlignment="{DynamicResource TitleBarContentHorizontalAlignment}"
+                              VerticalAlignment="{DynamicResource TitleBarContentVerticalAlignment}" />
+          </Grid>
+
+          <ContentPresenter x:Name="PART_RightHeaderPresenter"
+                            Grid.Column="9"
+                            IsVisible="False"
+                            Content="{TemplateBinding RightHeader}"
+                            HorizontalAlignment="{DynamicResource TitleBarRightHeaderHorizontalAlignment}"
+                            VerticalAlignment="{DynamicResource TitleBarRightHeaderVerticalAlignment}" />
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- BackButtonGroup -->
+    <Style Selector="^:back-button-visible /template/ Button#PART_BackButton">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^:back-button-visible:deactivated /template/ Button#PART_BackButton">
+      <Setter Property="Foreground" Value="{DynamicResource TitleBarDeactivatedForegroundBrush}" />
+    </Style>
+    <!-- PaneToggleButtonGroup -->
+    <Style Selector="^:pane-toggle-button-visible /template/ Button#PART_PaneToggleButton">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^:pane-toggle-button-visible:deactivated /template/ Button#PART_PaneToggleButton">
+      <Setter Property="Foreground" Value="{DynamicResource TitleBarDeactivatedForegroundBrush}" />
+    </Style>
+    <!-- LeftHeaderGroup -->
+    <Style Selector="^:left-header-visible /template/ ContentPresenter#PART_LeftHeaderPresenter">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^:left-header-visible:deactivated /template/ ContentPresenter#PART_LeftHeaderPresenter">
+      <Setter Property="Opacity" Value="{DynamicResource TitleBarDeactivatedOpacity}" />
+    </Style>
+    <!-- IconGroup -->
+    <Style Selector="^:icon-visible /template/ Viewbox#PART_Icon">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^:icon-visible:deactivated /template/ Viewbox#PART_Icon">
+      <Setter Property="Opacity" Value="{DynamicResource TitleBarDeactivatedOpacity}" />
+    </Style>
+    <!-- TitleTextGroup -->
+    <Style Selector="^:title-text-visible /template/ TextBlock#PART_TitleText">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^:title-text-visible:deactivated /template/ TextBlock#PART_TitleText">
+      <Setter Property="Foreground" Value="{DynamicResource TitleBarDeactivatedForegroundBrush}" />
+    </Style>
+    <!-- SubtitleTextGroup -->
+    <Style Selector="^:subtitle-text-visible /template/ TextBlock#PART_SubtitleText">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^:subtitle-text-visible:deactivated /template/ TextBlock#PART_SubtitleText">
+      <Setter Property="Foreground" Value="{DynamicResource TitleBarSubtitleDeactivatedForegroundBrush}" />
+    </Style>
+    <!-- ContentGroup -->
+    <Style Selector="^:content-visible /template/ Grid#PART_ContentPresenterGrid">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^:content-visible:deactivated /template/ Grid#PART_ContentPresenterGrid">
+      <Setter Property="Opacity" Value="{DynamicResource TitleBarDeactivatedOpacity}" />
+    </Style>
+    <!-- RightHeaderGroup -->
+    <Style Selector="^:right-header-visible /template/ ContentPresenter#PART_RightHeaderPresenter">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^:right-header-visible:deactivated /template/ ContentPresenter#PART_RightHeaderPresenter">
+      <Setter Property="Opacity" Value="{DynamicResource TitleBarDeactivatedOpacity}" />
+    </Style>
+    <!-- LeftHeaderSpacingGroup -->
+    <Style Selector="^:negative-inset-spacing /template/ Border#LeftHeaderPaddingColumn">
+      <Setter Property="Width" Value="{DynamicResource TitleBarHeaderNegativeInsetPaddingWidth}" />
+    </Style>
+    <!-- HeightGroup -->
+    <Style Selector="^:expanded-height /template/ Grid#PART_LayoutRoot">
+      <Setter Property="Height" Value="{DynamicResource TitleBarExpandedHeight}" />
+    </Style>
+    <!-- DisplayModeGroup: Compact (after the Visible states, which it overrides) -->
+    <Style Selector="^:compact /template/ TextBlock#PART_TitleText">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:compact /template/ TextBlock#PART_SubtitleText">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:compact /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="HorizontalAlignment" Value="Left" />
+      <Setter Property="Margin" Value="{DynamicResource TitleBarCompactContentMargin}" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type TitleBar}" TargetType="TitleBar" BasedOn="{StaticResource DefaultTitleBarControlStyle}" />
+</ResourceDictionary>

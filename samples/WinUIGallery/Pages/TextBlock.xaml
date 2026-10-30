@@ -1,0 +1,4 @@
+<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <TextBlock Text="I am a TextBlock"/><TextBlock Text="I am a styled TextBlock" FontStyle="Italic" FontSize="24"/><TextBlock Width="360" HorizontalAlignment="Left" TextWrapping="Wrap" Text="This TextBlock wraps its content to the available width. Text is laid out and rendered by FerroUI."/><TextBlock><Run Text="Inline "/><Run Text="bold" FontWeight="Bold"/><Run Text=" and "/><Run Text="italic" FontStyle="Italic"/><Run Text=" text."/></TextBlock>
+</StackPanel>

@@ -22,10 +22,12 @@ pub enum RenderDataOpcode {
     PushTextOptions,
     PushEffect,
     Pop,
+    // Append new opcodes so existing byte values remain stable.
+    PushCompositingLayer,
 }
 
 impl RenderDataOpcode {
-    const ALL: [RenderDataOpcode; 17] = [
+    const ALL: [RenderDataOpcode; 18] = [
         Self::Invalid,
         Self::DrawLine,
         Self::DrawRectangle,
@@ -43,6 +45,7 @@ impl RenderDataOpcode {
         Self::PushTextOptions,
         Self::PushEffect,
         Self::Pop,
+        Self::PushCompositingLayer,
     ];
 }
 

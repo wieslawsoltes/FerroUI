@@ -1,0 +1,199 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/MenuBar/MenuBar.xaml (the style DefaultMenuBarStyle)
+    controls/dev/MenuBar/MenuBarItem.xaml (the implicit style of MenuBarItem)
+    controls/dev/MenuBar/MenuBar_themeresources.xaml (the resources, Resources/MenuBar_themeresources.xaml)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  Translation notes (docs/porting/winui-theme.md, section 4):
+  - FerroUI's Menu is WinUI's MenuBar; its items are MenuItem, which WinUI's MenuBarItem is for the
+    top level. The implicit style of MenuBarItem is the keyed theme DefaultMenuBarItemStyle, the
+    ItemContainerTheme of the menu; the items of the open menus have the default theme of MenuItem
+    (Controls/MenuItem.xaml).
+  - MenuBar: the ItemsControl ContentRoot of the source is the items presenter PART_ItemsPresenter
+    (FerroUI's menu hosts its items itself), left aligned in the layout root; the horizontal
+    StackPanel of the source is the default items panel of FerroUI's Menu. Grid LayoutRoot is a
+    Border that also draws the border, corner radius and padding of the menu, which FerroUI's
+    Menu honours in its other themes (WinUI's MenuBar template has none of them).
+  - MenuBarItem: the Button ContentButton of the source, which shows the Title and opens the
+    flyout, is the content presenter of the Header, PART_HeaderPresenter (the part a headered
+    items control hosts its header in, with FerroUI's access keys): the menu item itself handles
+    the pointer, so a button inside it would take its clicks. The
+    content presenter has the setters and the foreground states of that button
+    (DefaultButtonStyle with its background resources made transparent by the template:
+    ButtonForegroundPointerOver, ButtonForegroundPressed, ButtonForegroundDisabled). Grid
+    ContentRoot is a Border (it has a corner radius).
+  - The flyout of a MenuBarItem (a MenuFlyout) is the popup PART_Popup with the template of
+    MenuFlyoutPresenter, below the item and aligned to its left edge (MenuBarItem::ShowMenuFlyout
+    shows it at the bottom left corner of the button). The shadow of the menu flyout (a ThemeShadow
+    at a Translation.Z of 32) is the BoxShadow ThemeShadowFlyoutBoxShadow of the border
+    ThemeShadowWrapper around the border of the popup (a border of its own: a border whose
+    background is sized to the inner edge of its border draws no box shadow), with the margin
+    ThemeShadowFlyoutMargin as the room for it in the popup
+    (Resources/ThemeShadows.xaml; DEVIATIONS.md, G-24).
+  - States: PointerOver is the :selected state of FerroUI's menus (the item under the pointer or
+    reached with the keyboard), Selected (the flyout is open) is :open, Pressed is :pressed. As
+    MenuBarItem::UpdateVisualStates, pressed comes before pointer over and pointer over before
+    open, so an open item under the pointer shows PointerOver (:open:pointerover).
+  - FocusVisualMargin="-3" is the FocusAdorner with that margin; Title, ExitDisplayModeOnAccessKeyInvoked
+    and the AutomationProperties of the source have no counterpart.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <Menu>
+        <MenuItem Header="_File">
+          <MenuItem Header="_Open" />
+        </MenuItem>
+        <MenuItem Header="_Edit" />
+        <MenuItem Header="Disabled" IsEnabled="False" />
+      </Menu>
+    </Border>
+  </Design.PreviewWith>
+
+  <!-- The implicit style of MenuBarItem (MenuBarItem.xaml). -->
+  <ControlTheme x:Key="DefaultMenuBarItemStyle" TargetType="MenuItem">
+    <Setter Property="Foreground" Value="{DynamicResource MenuBarItemForeground}" />
+    <Setter Property="Background" Value="{DynamicResource MenuBarItemBackground}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource MenuBarItemBorderThickness}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource MenuBarItemBorderBrush}" />
+    <Setter Property="Margin" Value="{DynamicResource MenuBarItemMargin}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="IsTabStop" Value="True" />
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border Margin="-3"
+                BorderThickness="2"
+                BorderBrush="{DynamicResource SystemControlFocusVisualPrimaryBrush}"
+                CornerRadius="{DynamicResource ControlCornerRadius}">
+          <Border BorderThickness="1"
+                  BorderBrush="{DynamicResource SystemControlFocusVisualSecondaryBrush}"
+                  CornerRadius="{DynamicResource ControlCornerRadius}" />
+        </Border>
+      </FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <Border x:Name="ContentRoot"
+                  Background="{TemplateBinding Background}"
+                  CornerRadius="{TemplateBinding CornerRadius}">
+            <Panel>
+              <Border x:Name="Background"
+                      Background="{TemplateBinding Background}"
+                      CornerRadius="{TemplateBinding CornerRadius}"
+                      BorderThickness="{TemplateBinding BorderThickness}"
+                      BorderBrush="{TemplateBinding BorderBrush}"
+                      BackgroundSizing="InnerBorderEdge" />
+              <!-- ContentButton: a Button of DefaultButtonStyle with a transparent background, no
+                   border and the padding MenuBarItemButtonPadding. -->
+              <ContentPresenter x:Name="PART_HeaderPresenter"
+                                Content="{TemplateBinding Header}"
+                                ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                Foreground="{TemplateBinding Foreground}"
+                                Background="Transparent"
+                                Padding="{StaticResource MenuBarItemButtonPadding}"
+                                CornerRadius="{DynamicResource ControlCornerRadius}"
+                                FontFamily="{DynamicResource ContentControlThemeFontFamily}"
+                                FontSize="{DynamicResource ControlContentThemeFontSize}"
+                                FontWeight="Normal"
+                                HorizontalContentAlignment="Center"
+                                VerticalContentAlignment="Center"
+                                VerticalAlignment="Stretch"
+                                RecognizesAccessKey="True" />
+            </Panel>
+          </Border>
+          <!-- The flyout of the item: a MenuFlyoutPresenter (DefaultMenuFlyoutPresenterStyle). -->
+          <Popup x:Name="PART_Popup"
+                 WindowManagerAddShadowHint="False"
+                 Placement="BottomEdgeAlignedLeft"
+                 IsLightDismissEnabled="True"
+                 IsOpen="{TemplateBinding IsSubMenuOpen, Mode=TwoWay}"
+                 OverlayInputPassThroughElement="{Binding $parent[Menu]}">
+            <!-- The shadow on a border of its own (G-24). -->
+            <Border x:Name="ThemeShadowWrapper"
+                    BoxShadow="{DynamicResource MaterialElevation2BoxShadow}"
+                    Margin="{StaticResource ThemeShadowFlyoutMargin}"
+                    CornerRadius="{DynamicResource OverlayCornerRadius}">
+              <Border Background="{DynamicResource MenuFlyoutPresenterBackground}"
+                      BorderBrush="{DynamicResource MenuFlyoutPresenterBorderBrush}"
+                      BorderThickness="{DynamicResource MenuFlyoutPresenterBorderThemeThickness}"
+                      CornerRadius="{DynamicResource OverlayCornerRadius}"
+                      MinWidth="{DynamicResource FlyoutThemeMinWidth}"
+                      MinHeight="{StaticResource MenuFlyoutThemeMinHeight}"
+                      BackgroundSizing="InnerBorderEdge">
+                <ScrollViewer x:Name="MenuFlyoutPresenterScrollViewer"
+                              Theme="{StaticResource MenuFlyoutPresenterScrollViewer}"
+                              Margin="{StaticResource MenuFlyoutPresenterThemePadding}">
+                  <ItemsPresenter x:Name="PART_ItemsPresenter"
+                                  ItemsPanel="{TemplateBinding ItemsPanel}"
+                                  KeyboardNavigation.TabNavigation="Continue"
+                                  Grid.IsSharedSizeScope="True" />
+                </ScrollViewer>
+              </Border>
+            </Border>
+          </Popup>
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- Selected (the flyout is open) -->
+    <Style Selector="^:open /template/ Border#Background">
+      <Setter Property="Background" Value="{DynamicResource MenuBarItemBackgroundSelected}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource MenuBarItemBorderBrushSelected}" />
+    </Style>
+    <!-- PointerOver -->
+    <Style Selector="^:selected:not(MenuItem:open) /template/ Border#Background, ^:open /template/ Border#ContentRoot:pointerover Border#Background">
+      <Setter Property="Background" Value="{DynamicResource MenuBarItemBackgroundPointerOver}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource MenuBarItemBorderBrushPointerOver}" />
+    </Style>
+    <Style Selector="^:selected:not(MenuItem:open) /template/ ContentPresenter#PART_HeaderPresenter, ^:open /template/ Border#ContentRoot:pointerover ContentPresenter#PART_HeaderPresenter">
+      <Setter Property="Foreground" Value="{DynamicResource ButtonForegroundPointerOver}" />
+    </Style>
+    <!-- Pressed -->
+    <Style Selector="^:pressed /template/ Border#ContentRoot:pointerover">
+      <Style Selector="^ Border#Background">
+        <Setter Property="Background" Value="{DynamicResource MenuBarItemBackgroundPressed}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource MenuBarItemBorderBrushPressed}" />
+      </Style>
+      <Style Selector="^ ContentPresenter#PART_HeaderPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource ButtonForegroundPressed}" />
+      </Style>
+    </Style>
+    <!-- Disabled of ContentButton -->
+    <Style Selector="^:disabled /template/ ContentPresenter#PART_HeaderPresenter">
+      <Setter Property="Foreground" Value="{DynamicResource ButtonForegroundDisabled}" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="DefaultMenuBarStyle" TargetType="Menu">
+    <Setter Property="Background" Value="{DynamicResource MenuBarBackground}" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="MinHeight" Value="{StaticResource MenuBarHeight}" />
+    <Setter Property="KeyboardNavigation.TabNavigation" Value="Once" />
+    <Setter Property="ItemContainerTheme" Value="{StaticResource DefaultMenuBarItemStyle}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="LayoutRoot"
+                Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BackgroundSizing="InnerBorderEdge"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}"
+                Padding="{TemplateBinding Padding}"
+                HorizontalAlignment="Stretch">
+          <ItemsPresenter x:Name="PART_ItemsPresenter"
+                          ItemsPanel="{TemplateBinding ItemsPanel}"
+                          VerticalAlignment="Stretch"
+                          HorizontalAlignment="Left"
+                          KeyboardNavigation.TabNavigation="Continue" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type Menu}" TargetType="Menu" BasedOn="{StaticResource DefaultMenuBarStyle}" />
+</ResourceDictionary>

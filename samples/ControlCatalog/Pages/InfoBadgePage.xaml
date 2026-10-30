@@ -1,0 +1,55 @@
+<ContentPage Theme="{StaticResource ScrollPage}" xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Header="InfoBadge"
+             x:Class="ControlCatalog.Pages.InfoBadgePage">
+  <!-- Not from upstream: WinUI's InfoBadge (docs/porting/winui-controls.md). Its template and the
+       styles of its severities are in the WinUI theme and the macOS and Material themes derived
+       from it. -->
+  <StackPanel Orientation="Vertical" Spacing="4" MaxWidth="800">
+    <TextBlock Margin="2" Classes="h2" TextWrapping="Wrap">An InfoBadge draws attention to a part of the app: a dot, a number or an icon.</TextBlock>
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">Dot, value and icon</TextBlock>
+    <StackPanel Margin="2" Orientation="Horizontal" Spacing="24">
+      <InfoBadge VerticalAlignment="Center" />
+      <InfoBadge VerticalAlignment="Center" Value="{Binding #BadgeValue.Value}" />
+      <InfoBadge VerticalAlignment="Center">
+        <InfoBadge.IconSource>
+          <SymbolIconSource Symbol="Important" />
+        </InfoBadge.IconSource>
+      </InfoBadge>
+      <Slider x:Name="BadgeValue" Width="200" Minimum="0" Maximum="120" Value="8" />
+    </StackPanel>
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">The styles of the severities</TextBlock>
+    <Grid Margin="2" ColumnDefinitions="120,60,60,60" RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="8">
+      <TextBlock Grid.Row="0" Text="Attention" />
+      <InfoBadge Grid.Row="0" Grid.Column="1" Theme="{DynamicResource AttentionDotInfoBadgeStyle}" HorizontalAlignment="Left" VerticalAlignment="Center" />
+      <InfoBadge Grid.Row="0" Grid.Column="2" Theme="{DynamicResource AttentionValueInfoBadgeStyle}" Value="3" HorizontalAlignment="Left" />
+      <InfoBadge Grid.Row="0" Grid.Column="3" Theme="{DynamicResource AttentionIconInfoBadgeStyle}" HorizontalAlignment="Left" />
+      <TextBlock Grid.Row="1" Text="Informational" />
+      <InfoBadge Grid.Row="1" Grid.Column="1" Theme="{DynamicResource InformationalDotInfoBadgeStyle}" HorizontalAlignment="Left" VerticalAlignment="Center" />
+      <InfoBadge Grid.Row="1" Grid.Column="2" Theme="{DynamicResource InformationalValueInfoBadgeStyle}" Value="12" HorizontalAlignment="Left" />
+      <InfoBadge Grid.Row="1" Grid.Column="3" Theme="{DynamicResource InformationalIconInfoBadgeStyle}" HorizontalAlignment="Left" />
+      <TextBlock Grid.Row="2" Text="Success" />
+      <InfoBadge Grid.Row="2" Grid.Column="1" Theme="{DynamicResource SuccessDotInfoBadgeStyle}" HorizontalAlignment="Left" VerticalAlignment="Center" />
+      <InfoBadge Grid.Row="2" Grid.Column="2" Theme="{DynamicResource SuccessValueInfoBadgeStyle}" Value="5" HorizontalAlignment="Left" />
+      <InfoBadge Grid.Row="2" Grid.Column="3" Theme="{DynamicResource SuccessIconInfoBadgeStyle}" HorizontalAlignment="Left" />
+      <TextBlock Grid.Row="3" Text="Caution" />
+      <InfoBadge Grid.Row="3" Grid.Column="1" Theme="{DynamicResource CautionDotInfoBadgeStyle}" HorizontalAlignment="Left" VerticalAlignment="Center" />
+      <InfoBadge Grid.Row="3" Grid.Column="2" Theme="{DynamicResource CautionValueInfoBadgeStyle}" Value="42" HorizontalAlignment="Left" />
+      <InfoBadge Grid.Row="3" Grid.Column="3" Theme="{DynamicResource CautionIconInfoBadgeStyle}" HorizontalAlignment="Left" />
+      <TextBlock Grid.Row="4" Text="Critical" />
+      <InfoBadge Grid.Row="4" Grid.Column="1" Theme="{DynamicResource CriticalDotInfoBadgeStyle}" HorizontalAlignment="Left" VerticalAlignment="Center" />
+      <InfoBadge Grid.Row="4" Grid.Column="2" Theme="{DynamicResource CriticalValueInfoBadgeStyle}" Value="99" HorizontalAlignment="Left" />
+      <InfoBadge Grid.Row="4" Grid.Column="3" Theme="{DynamicResource CriticalIconInfoBadgeStyle}" HorizontalAlignment="Left" />
+    </Grid>
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">On a button</TextBlock>
+    <Button Margin="2" Padding="12,6">
+      <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="8">
+        <SymbolIcon Symbol="Mail" />
+        <InfoBadge Grid.Column="1" Value="4" VerticalAlignment="Center" />
+      </Grid>
+    </Button>
+  </StackPanel>
+</ContentPage>

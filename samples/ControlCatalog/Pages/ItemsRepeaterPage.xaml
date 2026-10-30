@@ -1,0 +1,46 @@
+<ContentPage xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="ControlCatalog.Pages.ItemsRepeaterPage"
+             Header="ItemsRepeater">
+  <Grid RowDefinitions="Auto,Auto,Auto,*" RowSpacing="12">
+    <TextBlock Text="Virtualize 10,000 items with native FerroUI layouts and recycling. Scroll, change the layout, or edit the collection."
+               TextWrapping="Wrap" />
+    <WrapPanel Grid.Row="1" ItemSpacing="8" LineSpacing="8">
+      <Button Name="StackLayoutButton" Content="Stack">
+        <Button.Tag><StackLayout Spacing="8"/></Button.Tag>
+      </Button>
+      <Button Name="UniformGridLayoutButton" Content="Uniform grid">
+        <Button.Tag>
+          <UniformGridLayout MinItemWidth="128" MinItemHeight="64" MinRowSpacing="8"
+                             MinColumnSpacing="8" ItemsStretch="Fill"/>
+        </Button.Tag>
+      </Button>
+      <Button Name="FlowLayoutButton" Content="Flow">
+        <Button.Tag><FlowLayout LineSpacing="8" MinItemSpacing="8" LineAlignment="Start"/></Button.Tag>
+      </Button>
+      <Button Name="LinedFlowLayoutButton" Content="Lined flow">
+        <Button.Tag><LinedFlowLayout LineHeight="64" LineSpacing="8" MinItemSpacing="8" ItemsStretch="Fill"/></Button.Tag>
+      </Button>
+      <Button Name="InsertItemButton" Content="Insert first"/>
+      <Button Name="RemoveItemButton" Content="Remove first"/>
+      <Button Name="MoveItemButton" Content="Move first to end"/>
+      <Button Name="ResetItemsButton" Content="Reset 10,000"/>
+    </WrapPanel>
+    <TextBlock Name="RealizationStatus" Grid.Row="2"/>
+    <Border Grid.Row="3" BorderThickness="1" BorderBrush="{DynamicResource CatalogBaseLowColor}"
+            Padding="12" CornerRadius="4">
+      <ScrollViewer Name="RepeaterScroller" HorizontalScrollBarVisibility="Disabled"
+                    VerticalScrollBarVisibility="Auto">
+        <ItemsRepeater Name="Repeater" HorizontalCacheLength="1" VerticalCacheLength="2">
+          <ItemsRepeater.Layout><StackLayout Spacing="8"/></ItemsRepeater.Layout>
+          <DataTemplate>
+            <Border MinWidth="128" Height="64" Padding="16,8" CornerRadius="4"
+                    Background="#244C8BF5" BorderBrush="#4C8BF5" BorderThickness="1">
+              <TextBlock Text="{Binding}" VerticalAlignment="Center"/>
+            </Border>
+          </DataTemplate>
+        </ItemsRepeater>
+      </ScrollViewer>
+    </Border>
+  </Grid>
+</ContentPage>

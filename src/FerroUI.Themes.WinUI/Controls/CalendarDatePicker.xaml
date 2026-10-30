@@ -26,7 +26,7 @@
     source; the FlyoutPresenterStyle of the source (no padding, no border) leaves the calendar as
     it is, so the popup has no presenter. CalendarViewStyle is the default theme of Calendar.
     The shadow of that style (IsDefaultShadowEnabled: a ThemeShadow at a Translation.Z of 32) is
-    the BoxShadow ThemeShadowFlyoutBoxShadow of the Border CalendarShadow around the calendar,
+    a ThemeShadow (the shared WinUIThemeShadow, Translation.Z 32) on the Border CalendarShadow around the calendar,
     with the margin ThemeShadowFlyoutMargin as the room for it in the popup
     (Resources/ThemeShadows.xaml; DEVIATIONS.md, G-24).
   - The Border Background is the focus target (Control.IsTemplateFocusTarget) of the focus visual,
@@ -226,7 +226,7 @@
                    Placement="Bottom"
                    IsLightDismissEnabled="True">
               <Border x:Name="CalendarShadow"
-                      BoxShadow="{DynamicResource ThemeShadowFlyoutBoxShadow}"
+                      Translation="0,0,32" Shadow="{StaticResource WinUIThemeShadow}"
                       CornerRadius="{DynamicResource OverlayCornerRadius}"
                       Margin="{StaticResource ThemeShadowFlyoutMargin}">
                 <Calendar x:Name="PART_Calendar"

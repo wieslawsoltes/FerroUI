@@ -1,0 +1,69 @@
+<!-- Material 3 Expressive templates using FerroUI controls and bounded MaterialRipple.
+     Reference AndroidX Material3 1.5.0-beta02, e4d933c98df7baa7ea2b83eea6e086915961e0ff.
+     Structural heritage: FerroUI WinUI theme, Microsoft Corporation, MIT; see NOTICE.md. -->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:material="using:FerroUI.Themes.Material" x:ClassModifier="internal">
+  <ControlTheme x:Key="DefaultSelectorBarItemStyle" TargetType="TabStripItem">
+    <Setter Property="MinHeight" Value="48"/>
+    <Setter Property="MinWidth" Value="48"/>
+    <Setter Property="Padding" Value="16,0"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="CornerRadius" Value="0"/>
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}"/>
+    <Setter Property="FontSize" Value="14"/>
+    <Setter Property="FontWeight" Value="Medium"/>
+    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    <Setter Property="VerticalContentAlignment" Value="Center"/>
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border BorderBrush="{DynamicResource MaterialSecondaryBrush}" BorderThickness="3" CornerRadius="4" Margin="-3"/>
+      </FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="LayoutRoot" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}">
+          <Panel>
+            <Border x:Name="StateLayer" Background="Transparent" CornerRadius="{TemplateBinding CornerRadius}" IsHitTestVisible="False">
+              <Border.Transitions>
+                <Transitions>
+                  <BrushTransition Property="Background" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}"/>
+                </Transitions>
+              </Border.Transitions>
+            </Border>
+            <material:MaterialRipple x:Name="Ripple" Fill="{TemplateBinding Foreground}" CornerRadius="{TemplateBinding CornerRadius}" ReducedMotion="{DynamicResource MaterialReducedMotion}"/>
+            <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Foreground="{TemplateBinding Foreground}" FontSize="{TemplateBinding FontSize}" Padding="{TemplateBinding Padding}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" RecognizesAccessKey="True"/>
+            <Border x:Name="SelectionIndicator" Height="3" MinWidth="24" CornerRadius="3,3,0,0" Background="{DynamicResource MaterialPrimaryBrush}" Opacity="0" IsHitTestVisible="False" HorizontalAlignment="Center" VerticalAlignment="Bottom" RenderTransformOrigin="50%,50%" RenderTransform="scaleX(0.5)">
+              <Border.Transitions>
+                <Transitions>
+                  <material:MaterialDoubleTransition Property="Opacity" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}"/>
+                  <TransformOperationsTransition Property="RenderTransform" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}"/>
+                </Transitions>
+              </Border.Transitions>
+            </Border>
+          </Panel>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:selected">
+      <Setter Property="Foreground" Value="{DynamicResource MaterialPrimaryBrush}"/>
+      <Style Selector="^ /template/ Border#SelectionIndicator">
+        <Setter Property="Opacity" Value="1"/>
+        <Setter Property="RenderTransform" Value="scaleX(1)"/>
+      </Style>
+    </Style>
+    <Style Selector="^:pointerover /template/ Border#StateLayer">
+      <Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceHoverBrush}"/>
+    </Style>
+    <Style Selector="^:focus-visible /template/ Border#StateLayer">
+      <Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceFocusBrush}"/>
+    </Style>
+    <Style Selector="^:disabled /template/ Border#StateLayer">
+      <Setter Property="Background" Value="Transparent"/>
+    </Style>
+    <Style Selector="^:disabled /template/ ContentPresenter">
+      <Setter Property="Opacity" Value="0.38"/>
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type TabStripItem}" TargetType="TabStripItem" BasedOn="{StaticResource DefaultSelectorBarItemStyle}"/>
+</ResourceDictionary>

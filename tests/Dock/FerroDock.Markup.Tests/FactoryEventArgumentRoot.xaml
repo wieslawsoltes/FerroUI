@@ -1,0 +1,10 @@
+<events:DockableClosingEventArgs
+    xmlns="https://github.com/ferroui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:events="clr-namespace:FerroDock.Model.Core.Events;assembly=FerroDock.Model"
+    xmlns:models="clr-namespace:FerroDock.Model.ReactiveUI.Controls;assembly=FerroDock.Model.ReactiveUI"
+    Cancel="True">
+  <x:Arguments>
+    <models:Document Title="Event document" />
+  </x:Arguments>
+</events:DockableClosingEventArgs>

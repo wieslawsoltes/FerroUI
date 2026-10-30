@@ -4,7 +4,7 @@ use crate::media::text_formatting::{
     FormattedTextSource, FormattingObjectPool, GenericTextParagraphProperties, GenericTextRunProperties,
     ITextDrawingSink, ITextSource, InterWordJustification, TextCollapsingProperties, TextEndOfParagraph,
     TextFormatter, TextFormatterImpl, TextLine, TextLineImpl, TextParagraphProperties, TextRun, TextRunCache,
-    TextRunProperties,
+    TextRunProperties, TextParagraphStyle, TextParagraphStyles,
 };
 use crate::media::{
     BaselineAlignment, CharacterHit, FlowDirection, FontFeatureCollection, IBrush, TextAlignment,
@@ -77,6 +77,8 @@ pub struct TextLayout {
     paragraph_properties: Rc<dyn TextParagraphProperties>,
     text_trimming: Rc<dyn TextTrimming>,
     text_lines: Vec<Rc<dyn TextLine>>,
+    paragraph_styles: Option<TextParagraphStyles>,
+    line_placements: Vec<LinePlacement>,
     metrics: CachedMetrics,
     text_run_cache: Option<Rc<TextRunCache>>,
 
@@ -97,9 +99,27 @@ impl TextLayout {
         Self::from_utf16(ReadOnlyMemory::<u16>::from_str(text), typeface, options)
     }
 
+    /// Formats independent paragraphs without changing the existing options or
+    /// constructor contract. Style ranges use UTF-16 positions, including a
+    /// paragraph's terminator. Caret, range geometry and drawing share the same
+    /// line origins, including first-line indentation and paragraph spacing.
+    pub fn new_with_paragraph_styles(
+        text: &str, typeface: Typeface, options: TextLayoutOptions, styles: Option<TextParagraphStyles>,
+    ) -> Self {
+        Self::from_utf16_with_paragraph_styles(ReadOnlyMemory::<u16>::from_str(text), typeface, options, styles)
+    }
+
     /// Initializes a new instance of the `TextLayout` class from UTF-16 text
     /// (no transcoding).
     pub fn from_utf16(text: ReadOnlyMemory<u16>, typeface: Typeface, options: TextLayoutOptions) -> Self {
+        Self::from_utf16_with_paragraph_styles(text, typeface, options, None)
+    }
+
+    /// UTF-16 variant of [`Self::new_with_paragraph_styles`].
+    pub fn from_utf16_with_paragraph_styles(
+        text: ReadOnlyMemory<u16>, typeface: Typeface, options: TextLayoutOptions,
+        styles: Option<TextParagraphStyles>,
+    ) -> Self {
         let paragraph_properties = Self::create_text_paragraph_properties(
             typeface,
             options.font_size,
@@ -119,7 +139,7 @@ impl TextLayout {
             options.text_style_overrides,
         ));
 
-        Self::from_text_source(
+        Self::from_text_source_with_paragraph_styles(
             text_source,
             paragraph_properties,
             options.text_trimming,
@@ -127,6 +147,7 @@ impl TextLayout {
             options.max_height,
             options.max_lines,
             options.text_run_cache,
+            styles,
         )
     }
 
@@ -148,12 +169,29 @@ impl TextLayout {
         max_lines: i32,
         text_run_cache: Option<Rc<TextRunCache>>,
     ) -> Self {
+        Self::from_text_source_with_paragraph_styles(text_source, paragraph_properties, text_trimming,
+            max_width, max_height, max_lines, text_run_cache, None)
+    }
+
+    /// Formats a custom text source with paragraph overrides. A style is chosen
+    /// at each required line break, never at a soft wrap.
+    #[allow(clippy::too_many_arguments)]
+    pub fn from_text_source_with_paragraph_styles(
+        text_source: Rc<dyn ITextSource>,
+        paragraph_properties: Rc<dyn TextParagraphProperties>,
+        text_trimming: Option<Rc<dyn TextTrimming>>,
+        max_width: f64, max_height: f64, max_lines: i32,
+        text_run_cache: Option<Rc<TextRunCache>>,
+        paragraph_styles: Option<TextParagraphStyles>,
+    ) -> Self {
         crate::perf_count!(TextLayoutsCreated);
         let mut text_layout = Self {
             text_source,
             paragraph_properties,
             text_trimming: text_trimming.unwrap_or_else(<dyn TextTrimming>::none),
             text_lines: Vec::new(),
+            paragraph_styles: TextParagraphStyle::normalize(paragraph_styles),
+            line_placements: Vec::new(),
             metrics: CachedMetrics::default(),
             text_run_cache,
             text_source_length: 0,
@@ -199,6 +237,17 @@ impl TextLayout {
     /// Gets the text lines.
     pub fn text_lines(&self) -> &[Rc<dyn TextLine>] {
         &self.text_lines
+    }
+
+    /// The actual line origin used for drawing, hit testing and native carets.
+    pub fn line_origin(&self, index: usize) -> Point {
+        self.line_placements.get(index).map_or(Point::default(), |line| line.origin)
+    }
+
+    /// The base flow direction of the paragraph containing this line.
+    pub fn line_flow_direction(&self, index: usize) -> FlowDirection {
+        self.line_placements.get(index).map_or_else(|| self.paragraph_properties.flow_direction(),
+            |line| line.properties.flow_direction())
     }
 
     /// The distance from the top of the first line to the bottom of the last line.
@@ -255,13 +304,37 @@ impl TextLayout {
             return;
         }
 
-        let (current_x, mut current_y) = (origin.x, origin.y);
-
-        for text_line in &self.text_lines {
-            text_line.draw(context, Point::new(current_x, current_y));
-
-            current_y += text_line.height();
+        for (index, text_line) in self.text_lines.iter().enumerate() {
+            let offset = self.line_origin(index);
+            text_line.draw(context, Point::new(origin.x + offset.x, origin.y + offset.y));
         }
+    }
+
+    /// Obtains the scalable contours of this already shaped layout at `origin`.
+    ///
+    /// The geometry follows the same line positions, bidi ordering, style runs,
+    /// letter spacing and decoration strokes as [`Self::draw`], without shaping
+    /// or measuring the text again. An empty layout produces an empty geometry.
+    /// Glyph paints are not retained; callers can fill or stroke the returned
+    /// geometry. Bitmap-only glyphs contribute no contours, and colour glyphs
+    /// contribute only outlines exposed by the platform glyph-run contract.
+    pub fn build_geometry(&self, origin: Point) -> crate::Ref<crate::media::Geometry> {
+        let mut sink = super::text_geometry_sink::TextGeometrySink::new();
+        self.draw(&mut sink, origin);
+        sink.into_geometry()
+    }
+
+    /// Obtains all contours at `origin` without accepting a partial glyph
+    /// outline. Positions and decorations are the same as `build_geometry`.
+    ///
+    /// Returns `None` when the platform cannot verify completeness or any run
+    /// contains bitmap or colour-font glyphs. Glyph paints are not represented
+    /// by geometry; callers must preserve or validate those separately before
+    /// replacing text with a path. An empty layout succeeds with empty geometry.
+    pub fn try_build_geometry(&self, origin: Point) -> Option<crate::Ref<crate::media::Geometry>> {
+        let mut sink = super::text_geometry_sink::TextGeometrySink::complete();
+        self.draw(&mut sink, origin);
+        sink.into_complete_geometry()
     }
 
     /// Get the pixel location relative to the top-left of the layout box given the text position.
@@ -276,14 +349,10 @@ impl TextLayout {
             text_position = self.text_source_length;
         }
 
-        let mut current_y = 0.0;
-
         for (i, text_line) in self.text_lines.iter().enumerate() {
             let end = text_line.first_text_source_index() + text_line.length();
 
             if end <= text_position && i + 1 < self.text_lines.len() {
-                current_y += text_line.height();
-
                 continue;
             }
 
@@ -295,7 +364,8 @@ impl TextLayout {
 
             let end_x = text_line.get_distance_from_character_hit(next_character_hit);
 
-            return Rect::new(start_x, current_y, end_x - start_x, text_line.height());
+            let origin = self.line_origin(i);
+            return Rect::new(origin.x + start_x, origin.y, end_x - start_x, text_line.height());
         }
 
         Rect::default()
@@ -310,13 +380,10 @@ impl TextLayout {
 
         let mut result: Vec<Rect> = Vec::with_capacity(self.text_lines.len());
 
-        let mut current_y = 0.0;
-
-        for text_line in &self.text_lines {
+        for (index, text_line) in self.text_lines.iter().enumerate() {
+            let origin = self.line_origin(index);
             // Current line isn't covered.
             if text_line.first_text_source_index() + text_line.length() <= start {
-                current_y += text_line.height();
-
                 continue;
             }
 
@@ -324,16 +391,18 @@ impl TextLayout {
 
             for bounds in &text_bounds {
                 let rectangle = bounds.rectangle();
+                let rectangle = Rect::new(rectangle.x + origin.x, rectangle.y + origin.y,
+                    rectangle.width, rectangle.height);
 
                 match result.last_mut() {
                     Some(last)
                         if MathUtilities::are_close(last.right(), rectangle.left())
-                            && MathUtilities::are_close(last.top(), current_y) =>
+                            && MathUtilities::are_close(last.top(), rectangle.top()) =>
                     {
                         *last = last.with_width(last.width + rectangle.width);
                     }
                     _ => {
-                        result.push(rectangle.with_y(current_y));
+                        result.push(rectangle);
                     }
                 }
 
@@ -346,8 +415,6 @@ impl TextLayout {
             if text_line.first_text_source_index() + text_line.length() >= start + length {
                 break;
             }
-
-            current_y += text_line.height();
         }
 
         result
@@ -355,29 +422,17 @@ impl TextLayout {
 
     /// Gets the character hit of a point relative to the top-left of the layout box.
     pub fn hit_test_point(&self, point: Point) -> TextHitTestResult {
-        let mut current_y = 0.0;
-
-        let mut current_line: Option<&Rc<dyn TextLine>> = None;
-
-        for text_line in &self.text_lines {
-            current_line = Some(text_line);
-
-            if current_y + text_line.height() > point.y {
-                let character_hit = text_line.get_character_hit_from_distance(point.x);
-
-                return self.get_hit_test_result(&**text_line, character_hit, point);
-            }
-
-            current_y += text_line.height();
-        }
-
-        let Some(current_line) = current_line else {
+        if self.text_lines.is_empty() {
             return TextHitTestResult::default();
-        };
-
-        let character_hit = current_line.get_character_hit_from_distance(point.x);
-
-        self.get_hit_test_result(&**current_line, character_hit, point)
+        }
+        let index = self.text_lines.iter().enumerate()
+            .find(|(index, line)| self.line_origin(*index).y + line.height() > point.y)
+            .map_or(self.text_lines.len() - 1, |(index, _)| index);
+        let line = &self.text_lines[index];
+        let origin = self.line_origin(index);
+        let relative = Point::new(point.x - origin.x, point.y - origin.y);
+        let hit = line.get_character_hit_from_distance(relative.x);
+        self.get_hit_test_result(&**line, hit, relative, self.line_flow_direction(index), point.y > self.height())
     }
 
     /// Gets the index of the line that contains a character index.
@@ -411,8 +466,10 @@ impl TextLayout {
         text_line: &dyn TextLine,
         mut character_hit: CharacterHit,
         point: Point,
+        flow_direction: FlowDirection,
+        below_layout: bool,
     ) -> TextHitTestResult {
-        let (x, y) = (point.x, point.y);
+        let (x, y) = (point.x - text_line.start(), point.y);
 
         let is_inside = x >= 0.0 && x <= text_line.width() && y >= 0.0 && y <= text_line.height();
 
@@ -425,7 +482,7 @@ impl TextLayout {
                 .map(|text_end_of_line| text_end_of_line.length())
         });
 
-        if self.paragraph_properties.flow_direction() == FlowDirection::LeftToRight {
+        if flow_direction == FlowDirection::LeftToRight {
             last_trailing_index = text_line.first_text_source_index() + text_line.length();
 
             if x >= text_line.width() && text_line.length() > 0 && text_line.new_line_length() > 0 {
@@ -451,7 +508,7 @@ impl TextLayout {
         let mut text_position = character_hit.first_character_index() + character_hit.trailing_length();
 
         let is_trailing =
-            last_trailing_index == text_position && character_hit.trailing_length() > 0 || y > self.height();
+            last_trailing_index == text_position && character_hit.trailing_length() > 0 || below_layout;
 
         if text_position == text_line.first_text_source_index() + text_line.length() {
             text_position -= text_line.new_line_length();
@@ -516,181 +573,138 @@ impl TextLayout {
         ))
     }
 
+    fn paragraph_style_at(&self, index: i32) -> Option<&TextParagraphStyle> {
+        let styles = self.paragraph_styles.as_ref()?;
+        let after = styles.partition_point(|style| style.start() <= index);
+        let span = styles.get(after.checked_sub(1)?)?;
+        (span.start() == index || index < span.start().saturating_add(span.length()))
+            .then(|| span.value())
+    }
+
+    fn required_break(line: &dyn TextLine) -> bool {
+        line.new_line_length() > 0 || line.text_line_break()
+            .is_some_and(|value| value.text_end_of_line().is_some())
+    }
+
     fn create_text_lines(&mut self) -> Vec<Rc<dyn TextLine>> {
         let object_pool = FormattingObjectPool::instance();
-
         let mut first = true;
-
-        if MathUtilities::is_zero(self.max_width) || MathUtilities::is_zero(self.max_height) {
-            let text_line: Rc<dyn TextLine> =
-                TextFormatterImpl::create_empty_text_line(0, f64::INFINITY, &self.paragraph_properties);
-
-            self.update_metrics(&*text_line, &mut first);
-
-            return vec![text_line];
-        }
-
         let mut text_lines = object_pool.text_lines.rent();
-
         self.text_source_length = 0;
-
+        self.line_placements.clear();
         let mut previous_line: Option<Rc<dyn TextLine>> = None;
-
         let text_formatter = <dyn TextFormatter>::current();
+        let mut style = self.paragraph_style_at(0).cloned();
+        let mut closed_paragraph = false;
+
+        // Preserve the existing zero-constraint contract: an empty line is
+        // measurable even though no text can be displayed.
+        let zero_constraint = MathUtilities::is_zero(self.max_width) || MathUtilities::is_zero(self.max_height);
 
         loop {
+            let first_in_paragraph = previous_line.as_ref().is_none_or(|line| Self::required_break(&**line));
+            if first_in_paragraph { style = self.paragraph_style_at(self.text_source_length).cloned(); }
+            let properties = style.as_ref().map_or_else(|| self.paragraph_properties.clone(),
+                |style| style.properties(&self.paragraph_properties, first_in_paragraph));
+            let before = if first_in_paragraph {
+                style.as_ref().map_or(0.0, |style| TextParagraphStyle::nonnegative(style.space_before))
+            } else { 0.0 };
+            let indent = if first_in_paragraph {
+                style.as_ref().map_or(0.0, |style| TextParagraphStyle::nonnegative(style.indent))
+            } else { 0.0 };
+            // Do not permit an indentation larger than the column to create a
+            // negative available width or a line that cannot consume text.
+            let indent = if self.max_width.is_finite() { indent.min(self.max_width.max(0.0)) } else { indent };
+            let width = if zero_constraint { f64::INFINITY } else { (self.max_width - indent).max(0.0) };
+            let origin = Point::new(if properties.flow_direction() == FlowDirection::LeftToRight { indent } else { 0.0 },
+                self.metrics.height + before);
+            let after = style.as_ref().map_or(0.0, |style| TextParagraphStyle::nonnegative(style.space_after));
             let previous_line_break = previous_line.as_ref().and_then(|line| line.text_line_break());
-
-            // Upstream: `FormatLine(..) as TextLineImpl`.
-            let text_line = text_formatter
-                .format_line_with_cache(
-                    &*self.text_source,
-                    self.text_source_length,
-                    self.max_width,
-                    &self.paragraph_properties,
-                    previous_line_break.as_ref(),
-                    self.text_run_cache.as_deref(),
-                )
-                .filter(|text_line| text_line.as_any().is::<TextLineImpl>());
-
-            let Some(mut text_line) = text_line else {
-                if previous_line.as_ref().is_some_and(|previous_line| previous_line.new_line_length() > 0) {
-                    let empty_text_line: Rc<dyn TextLine> = TextFormatterImpl::create_empty_text_line(
-                        self.text_source_length,
-                        self.max_width,
-                        &self.paragraph_properties,
-                    );
-
-                    text_lines.push(empty_text_line.clone());
-
-                    self.update_metrics(&*empty_text_line, &mut first);
-                }
-
-                break;
+            let candidate: Option<Rc<dyn TextLine>> = if zero_constraint {
+                Some(TextFormatterImpl::create_empty_text_line(0, width, &properties))
+            } else {
+                text_formatter.format_line_with_cache(&*self.text_source, self.text_source_length,
+                    width, &properties, previous_line_break.as_ref(), self.text_run_cache.as_deref())
+                    .filter(|line| line.as_any().is::<TextLineImpl>())
             };
 
-            self.text_source_length += text_line.length();
+            let Some(mut line) = candidate else {
+                if previous_line.as_ref().is_none_or(|line| line.new_line_length() > 0) {
+                    let line = TextFormatterImpl::create_empty_text_line(self.text_source_length, width, &properties);
+                    self.line_placements.push(LinePlacement { origin, width, properties });
+                    self.update_metrics(&*line, origin, indent, &mut first);
+                    self.metrics.height += after;
+                    text_lines.push(line);
+                } else if !closed_paragraph {
+                    self.metrics.height += after;
+                }
+                break;
+            };
+            self.text_source_length += line.length();
+            let has_real_content = line.length() > line.new_line_length();
 
-            // Whether this freshly fetched candidate line represents real, visible content rather
-            // than just a trailing line-break sentinel (some text sources emit an explicit
-            // TextEndOfLine/TextEndOfParagraph run object at end-of-text with no visible content).
-            let has_real_content = text_line.length() > text_line.new_line_length();
-
-            // Fulfill max height constraint. The mere existence of this next candidate line (which
-            // hasn't been added yet) proves there is more content than fits. Only add an ellipsis
-            // if the last visible line was cut by word-wrap (is_split). If it ended at a hard break
-            // the line itself was not trimmed, and hiding the following paragraph is clipped
-            // silently like CSS max-height with overflow:hidden.
-            if !text_lines.is_empty()
-                && self.max_height != f64::INFINITY
-                && MathUtilities::greater_than(self.height() + text_line.height(), self.max_height)
+            if !text_lines.is_empty() && self.max_height != f64::INFINITY
+                && MathUtilities::greater_than(origin.y + line.height(), self.max_height)
             {
                 let last = text_lines.len() - 1;
-                let last_line = text_lines[last].clone();
-
-                if !self.is_trimming_none()
-                    && has_real_content
-                    && last_line.text_line_break().is_some_and(|text_line_break| text_line_break.is_split())
+                if !self.is_trimming_none() && has_real_content
+                    && text_lines[last].text_line_break().is_some_and(|value| value.is_split())
                 {
-                    text_lines[last] = self.collapse_for_truncation(last_line);
+                    text_lines[last] = self.collapse_for_truncation(text_lines[last].clone(),
+                        &self.line_placements[last].properties);
                 }
-
                 break;
             }
-
-            // Fulfill max lines constraint. The next candidate line's existence proves the previously
-            // added (Max-th) line hides real content. Unlike the height limit this ellipsizes after a
-            // hard break too, like CSS line-clamp.
             if self.max_lines > 0 && text_lines.len() as i32 >= self.max_lines {
                 if !self.is_trimming_none() && has_real_content {
                     let last = text_lines.len() - 1;
-                    let last_line = text_lines[last].clone();
-
-                    text_lines[last] = self.collapse_for_truncation(last_line);
+                    text_lines[last] = self.collapse_for_truncation(text_lines[last].clone(),
+                        &self.line_placements[last].properties);
                 }
-
                 break;
             }
-
-            let has_overflowed = text_line.has_overflowed();
-
-            if has_overflowed && !self.is_trimming_none() {
-                text_line = text_line.collapse(&[self.get_collapsing_properties(self.max_width)]);
+            if line.has_overflowed() && !self.is_trimming_none() {
+                line = line.collapse(&[self.get_collapsing_properties(width, &properties)]);
             }
 
-            text_lines.push(text_line.clone());
-
-            self.update_metrics(&*text_line, &mut first);
-
-            previous_line = Some(text_line.clone());
-
-            let is_end_of_paragraph = text_line.text_line_break().is_some_and(|text_line_break| {
-                text_line_break
-                    .text_end_of_line()
-                    .is_some_and(|text_end_of_line| text_end_of_line.is::<TextEndOfParagraph>())
-            });
-
-            if is_end_of_paragraph {
+            self.line_placements.push(LinePlacement { origin, width, properties });
+            self.update_metrics(&*line, origin, indent, &mut first);
+            closed_paragraph = Self::required_break(&*line);
+            if closed_paragraph { self.metrics.height += after; }
+            text_lines.push(line.clone());
+            previous_line = Some(line.clone());
+            let end_of_source = line.text_line_break().is_some_and(|value| value.text_end_of_line()
+                .is_some_and(|value| value.is::<TextEndOfParagraph>()));
+            if end_of_source || zero_constraint {
+                if !closed_paragraph { self.metrics.height += after; }
                 break;
             }
         }
 
-        if text_lines.is_empty() {
-            let text_line: Rc<dyn TextLine> =
-                TextFormatterImpl::create_empty_text_line(0, self.max_width, &self.paragraph_properties);
-
-            text_lines.push(text_line.clone());
-
-            self.update_metrics(&*text_line, &mut first);
+        // Each paragraph may choose its own alignment and its first line may
+        // have a different available width. Hard-break and final lines retain
+        // their start alignment, as with the existing whole-layout formatter.
+        for (index, line) in text_lines.iter().enumerate() {
+            let placement = &self.line_placements[index];
+            if placement.properties.text_alignment() != TextAlignment::Justify
+                || !placement.width.is_finite() || placement.width <= 0.0
+                || index + 1 == text_lines.len() || Self::required_break(&**line) { continue; }
+            line.justify(&InterWordJustification::new(placement.width));
         }
-
-        if self.paragraph_properties.text_alignment() == TextAlignment::Justify {
-            // Justify fills each line to the column width, which is MaxWidth for both
-            // wrapped and non-wrapped text. Targeting the widest produced line instead
-            // (the previous behaviour for wrapping) leaves wrapped text short of the
-            // margin, since the full non-last lines already equal that width. When
-            // MaxWidth is infinite there is no column to fill, so skip.
-            let justification_width = self.max_width;
-
-            if !justification_width.is_infinite() && justification_width > 0.0 {
-                let justification_properties = InterWordJustification::new(justification_width);
-
-                for (i, line) in text_lines.iter().enumerate() {
-                    // Only width-driven wrapped lines are stretched to the column. Skip
-                    // the last line of the layout, any line ended by a newline
-                    // (NewLineLength > 0), and any line ended by a source-provided required
-                    // break (TextEndOfLine) - these stay start-aligned per standard
-                    // typographic convention.
-                    if i == text_lines.len() - 1
-                        || line.new_line_length() > 0
-                        || line
-                            .text_line_break()
-                            .is_some_and(|text_line_break| text_line_break.text_end_of_line().is_some())
-                    {
-                        continue;
-                    }
-
-                    line.justify(&justification_properties);
-                }
-            }
-        }
-
         let result = text_lines.to_vec();
-
         object_pool.text_lines.return_list(text_lines);
-
         result
     }
 
-    fn update_metrics(&mut self, current_line: &dyn TextLine, first: &mut bool) {
+    fn update_metrics(&mut self, current_line: &dyn TextLine, origin: Point, indent: f64, first: &mut bool) {
         let metrics = &mut self.metrics;
 
         // 1) Accumulate total layout height by adding the line's Height.
-        metrics.height += current_line.height();
+        metrics.height = origin.y + current_line.height();
 
         // 2) For the layout's Width and WidthIncludingTrailingWhitespace,
         //    use the maximum of the line widths rather than the bounding box.
-        metrics.width = metrics.width.max(current_line.width());
+        metrics.width = metrics.width.max(indent + current_line.width());
 
         // 3) Extent is the max black-pixel extent among lines.
         metrics.extent = metrics.extent.max(current_line.extent());
@@ -700,10 +714,10 @@ impl TextLayout {
         // WidthIncludingTrailingWhitespace, OverhangTrailing) if the current line has a
         // larger text width.
         let previous_text_width = metrics.width_including_trailing_whitespace;
-        let text_width = current_line.width_including_trailing_whitespace();
+        let text_width = indent + current_line.width_including_trailing_whitespace();
 
         if previous_text_width < text_width {
-            metrics.width_including_trailing_whitespace = current_line.width_including_trailing_whitespace();
+            metrics.width_including_trailing_whitespace = text_width;
             metrics.overhang_leading = current_line.overhang_leading();
             metrics.overhang_trailing = current_line.overhang_trailing();
         }
@@ -713,7 +727,7 @@ impl TextLayout {
 
         // 6) Capture the baseline from the first line.
         if *first {
-            metrics.baseline = current_line.baseline();
+            metrics.baseline = origin.y + current_line.baseline();
             *first = false;
         }
     }
@@ -726,23 +740,23 @@ impl TextLayout {
     /// Gets the `TextCollapsingProperties` for current text trimming mode.
     ///
     /// * `width` — the collapsing width.
-    fn get_collapsing_properties(&self, width: f64) -> Option<Rc<dyn TextCollapsingProperties>> {
+    fn get_collapsing_properties(&self, width: f64, properties: &Rc<dyn TextParagraphProperties>) -> Option<Rc<dyn TextCollapsingProperties>> {
         if self.is_trimming_none() {
             return None;
         }
 
         Some(self.text_trimming.create_collapsing_properties(&TextCollapsingCreateInfo::new(
             width,
-            self.paragraph_properties.default_text_run_properties().clone(),
-            self.paragraph_properties.flow_direction(),
+            properties.default_text_run_properties().clone(),
+            properties.flow_direction(),
         )))
     }
 
-    fn collapse_for_truncation(&self, line: Rc<dyn TextLine>) -> Rc<dyn TextLine> {
+    fn collapse_for_truncation(&self, line: Rc<dyn TextLine>, properties: &Rc<dyn TextParagraphProperties>) -> Rc<dyn TextLine> {
         // Collapse against the line's own rendered width rather than max_width, so there's
         // always room reserved for the ellipsis symbol and a trailing ellipsis is reliably
         // produced, even if the line already fits within max_width on its own.
-        let collapsing_properties = self.get_collapsing_properties(line.width_including_trailing_whitespace());
+        let collapsing_properties = self.get_collapsing_properties(line.width_including_trailing_whitespace(), properties);
 
         if collapsing_properties.is_none() {
             return line;
@@ -757,6 +771,12 @@ impl TextLayout {
             line.dispose();
         }
     }
+}
+
+struct LinePlacement {
+    origin: Point,
+    width: f64,
+    properties: Rc<dyn TextParagraphProperties>,
 }
 
 #[derive(Default)]

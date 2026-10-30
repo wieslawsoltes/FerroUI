@@ -19,14 +19,14 @@
   the bars at the top or the bottom, the compact pane toggle, the backdrop and the conditions that
   hide the top bar.
 
-  The decision on the NavigationView styles (docs/porting/winui-theme.md, section 7, B5):
-  NavigationView has no FerroUI control. The styles DrawerPage and the pages are built from are
-  ported: PaneToggleButtonStyle (the pane toggle buttons of DrawerPage), the two text styles of
-  this document, NavigationBackButtonNormalStyle and NavigationBackButtonSmallStyle
-  (Controls/NavigationPage.xaml); the items of the left and the top pane are written into the
-  themes of TabItem and TabbedPage (Controls/TabItem.xaml, Controls/TabbedPage.xaml). The styles
-  of NavigationView itself, its items, item headers and separators, the item presenter styles,
-  the overflow and search buttons are waived (scripts/winui-theme/waivers.json).
+  The NavigationView styles (docs/porting/winui-theme.md, section 7, B5): DrawerPage keeps its
+  look, drawn after the left pane of NavigationView. PaneToggleButtonStyle (the pane toggle
+  buttons of DrawerPage and of NavigationView) and the two text styles are in this document,
+  NavigationBackButtonNormalStyle and NavigationBackButtonSmallStyle in
+  Controls/NavigationPage.xaml; the items of the left and the top pane are also written into the
+  themes of TabItem and TabbedPage (Controls/TabItem.xaml, Controls/TabbedPage.xaml). WinUI's
+  NavigationView itself, its items, item headers and separators and the item presenter styles are
+  the templates of FerroUI's NavigationView (Controls/NavigationView.xaml).
 
   Translation notes (docs/porting/winui-theme.md, section 4):
   - PaneToggleButtonStyle: the Grid LayoutRoot is a Border of the same name around a Grid. The

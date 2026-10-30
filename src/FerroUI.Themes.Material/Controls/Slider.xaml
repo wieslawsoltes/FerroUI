@@ -1,0 +1,228 @@
+<!--
+  Material 3 Expressive, AndroidX Compose Material3 1.5.0-beta02,
+  source e4d933c98df7baa7ea2b83eea6e086915961e0ff.
+  Component measurements and interaction states follow the Android Open Source Project
+  token definitions (Apache-2.0; see NOTICE.md). FerroUI template contracts are adapted
+  from the WinUI theme, Copyright (c) Microsoft Corporation, MIT license.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:material="using:FerroUI.Themes.Material"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <ControlTheme x:Key="MaterialHorizontalSliderThumb" TargetType="Thumb">
+    <Setter Property="MinWidth" Value="4" />
+    <Setter Property="Background" Value="{DynamicResource MaterialPrimaryBrush}" />
+    <Setter Property="Template"><ControlTemplate>
+      <Grid Background="Transparent">
+        <Border x:Name="MaterialHandle" Background="{TemplateBinding Background}"
+                CornerRadius="2" Width="{TemplateBinding MinWidth}" Height="44"
+                HorizontalAlignment="Center" VerticalAlignment="Center">
+          <Border.Transitions><Transitions><material:MaterialDoubleTransition Property="Width" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" /></Transitions></Border.Transitions>
+        </Border>
+      </Grid>
+    </ControlTemplate></Setter>
+    <Style Selector="^:pressed">
+    <Setter Property="MinWidth" Value="2" />
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialHorizontalSliderDecrease" TargetType="RepeatButton">
+    <Setter Property="CornerRadius" Value="8,2,2,8" />
+    <Setter Property="Template"><ControlTemplate>
+      <Grid Background="Transparent">
+        <Border x:Name="MaterialTrackSegment" Background="{TemplateBinding Background}"
+                Height="16" VerticalAlignment="Center" CornerRadius="{TemplateBinding CornerRadius}" />
+      </Grid>
+    </ControlTemplate></Setter>
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialHorizontalSliderIncrease" TargetType="RepeatButton">
+    <Setter Property="Foreground" Value="{DynamicResource MaterialPrimaryBrush}" />
+    <Setter Property="HorizontalContentAlignment" Value="Right" />
+    <Setter Property="Padding" Value="0,0,6,0" />
+    <Setter Property="CornerRadius" Value="2,8,8,2" />
+    <Setter Property="Template"><ControlTemplate>
+      <Grid Background="Transparent">
+        <Border x:Name="MaterialTrackSegment" Background="{TemplateBinding Background}"
+                Height="16" VerticalAlignment="Center" CornerRadius="{TemplateBinding CornerRadius}" />
+        <Ellipse x:Name="MaterialSliderStop" Width="4" Height="4" Fill="{TemplateBinding Foreground}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="Center" Margin="{TemplateBinding Padding}" />
+      </Grid>
+    </ControlTemplate></Setter>
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialVerticalSliderThumb" TargetType="Thumb">
+    <Setter Property="MinHeight" Value="4" />
+    <Setter Property="Background" Value="{DynamicResource MaterialPrimaryBrush}" />
+    <Setter Property="Template"><ControlTemplate>
+      <Grid Background="Transparent">
+        <Border x:Name="MaterialHandle" Background="{TemplateBinding Background}"
+                CornerRadius="2" Width="44" Height="{TemplateBinding MinHeight}"
+                HorizontalAlignment="Center" VerticalAlignment="Center">
+          <Border.Transitions><Transitions><material:MaterialDoubleTransition Property="Height" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" /></Transitions></Border.Transitions>
+        </Border>
+      </Grid>
+    </ControlTemplate></Setter>
+    <Style Selector="^:pressed">
+    <Setter Property="MinHeight" Value="2" />
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialVerticalSliderDecrease" TargetType="RepeatButton">
+    <Setter Property="CornerRadius" Value="2,2,8,8" />
+    <Setter Property="Template"><ControlTemplate>
+      <Grid Background="Transparent">
+        <Border x:Name="MaterialTrackSegment" Background="{TemplateBinding Background}"
+                Width="16" HorizontalAlignment="Center" CornerRadius="{TemplateBinding CornerRadius}" />
+      </Grid>
+    </ControlTemplate></Setter>
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialVerticalSliderIncrease" TargetType="RepeatButton">
+    <Setter Property="Foreground" Value="{DynamicResource MaterialPrimaryBrush}" />
+    <Setter Property="VerticalContentAlignment" Value="Top" />
+    <Setter Property="Padding" Value="0,6,0,0" />
+    <Setter Property="CornerRadius" Value="8,8,2,2" />
+    <Setter Property="Template"><ControlTemplate>
+      <Grid Background="Transparent">
+        <Border x:Name="MaterialTrackSegment" Background="{TemplateBinding Background}"
+                Width="16" HorizontalAlignment="Center" CornerRadius="{TemplateBinding CornerRadius}" />
+        <Ellipse x:Name="MaterialSliderStop" Width="4" Height="4" Fill="{TemplateBinding Foreground}" HorizontalAlignment="Center" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Margin="{TemplateBinding Padding}" />
+      </Grid>
+    </ControlTemplate></Setter>
+  </ControlTheme>
+  <ControlTheme x:Key="DefaultSliderStyle" TargetType="Slider">
+    <Setter Property="Foreground" Value="{DynamicResource MaterialPrimaryBrush}" />
+    <Setter Property="Background" Value="{DynamicResource MaterialSecondaryContainerBrush}" />
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border BorderBrush="{DynamicResource MaterialSecondaryBrush}"
+                BorderThickness="3" CornerRadius="12" Margin="-3" />
+      </FocusAdornerTemplate>
+    </Setter>
+    <Style Selector="^:horizontal">
+    <Setter Property="MinHeight" Value="48" />
+      <Setter Property="Template"><ControlTemplate>
+        <DataValidationErrors>
+          <Grid Background="Transparent" Margin="{TemplateBinding Padding}" RowDefinitions="Auto,48,Auto">
+            <Grid.Styles><Style Selector="TickBar"><Setter Property="ReservedSpace" Value="{Binding #PART_Track.Thumb.Bounds}" /></Style></Grid.Styles>
+            <TickBar x:Name="TopTickBar" IsVisible="False"
+                     Fill="{DynamicResource MaterialOnSurfaceVariantBrush}"
+                     Height="4" Grid.Row="0" Placement="Top" Orientation="Horizontal"
+                     Ticks="{TemplateBinding Ticks}" TickFrequency="{TemplateBinding TickFrequency}"
+                     Minimum="{TemplateBinding Minimum}" Maximum="{TemplateBinding Maximum}"
+                     IsDirectionReversed="{TemplateBinding IsDirectionReversed}" />
+            <TickBar x:Name="BottomTickBar" IsVisible="False"
+                     Fill="{DynamicResource MaterialOnSurfaceVariantBrush}"
+                     Height="4" Grid.Row="2" Placement="Bottom" Orientation="Horizontal"
+                     Ticks="{TemplateBinding Ticks}" TickFrequency="{TemplateBinding TickFrequency}"
+                     Minimum="{TemplateBinding Minimum}" Maximum="{TemplateBinding Maximum}"
+                     IsDirectionReversed="{TemplateBinding IsDirectionReversed}" />
+            <Track x:Name="PART_Track" Grid.Row="1" Orientation="Horizontal"
+                   Minimum="{TemplateBinding Minimum}" Maximum="{TemplateBinding Maximum}"
+                   Value="{TemplateBinding Value, Mode=TwoWay}"
+                   IsDirectionReversed="{TemplateBinding IsDirectionReversed}">
+              <Track.DecreaseButton>
+                <RepeatButton x:Name="PART_DecreaseButton" Theme="{StaticResource MaterialHorizontalSliderDecrease}"
+                              Background="{TemplateBinding Foreground}" Focusable="False" />
+              </Track.DecreaseButton>
+              <Track.IncreaseButton>
+                <RepeatButton x:Name="PART_IncreaseButton" Theme="{StaticResource MaterialHorizontalSliderIncrease}"
+                              Background="{TemplateBinding Background}" Focusable="False" />
+              </Track.IncreaseButton>
+              <Thumb x:Name="MaterialSliderThumb" Theme="{StaticResource MaterialHorizontalSliderThumb}"
+                     Background="{TemplateBinding Foreground}"
+                     Width="16" Height="48"
+                     ToolTip.Tip="{Binding $parent[Slider].Value}" ToolTip.Placement="Top"
+                     ToolTip.VerticalOffset="-12" ToolTip.ServiceEnabled="False" />
+            </Track>
+          </Grid>
+        </DataValidationErrors>
+      </ControlTemplate></Setter>
+    </Style>
+    <Style Selector="^:vertical">
+    <Setter Property="MinWidth" Value="48" />
+      <Setter Property="Template"><ControlTemplate>
+        <DataValidationErrors>
+          <Grid Background="Transparent" Margin="{TemplateBinding Padding}" ColumnDefinitions="Auto,48,Auto">
+            <Grid.Styles><Style Selector="TickBar"><Setter Property="ReservedSpace" Value="{Binding #PART_Track.Thumb.Bounds}" /></Style></Grid.Styles>
+            <TickBar x:Name="LeftTickBar" IsVisible="False"
+                     Fill="{DynamicResource MaterialOnSurfaceVariantBrush}"
+                     Width="4" Grid.Column="0" Placement="Left" Orientation="Vertical"
+                     Ticks="{TemplateBinding Ticks}" TickFrequency="{TemplateBinding TickFrequency}"
+                     Minimum="{TemplateBinding Minimum}" Maximum="{TemplateBinding Maximum}"
+                     IsDirectionReversed="{TemplateBinding IsDirectionReversed}" />
+            <TickBar x:Name="RightTickBar" IsVisible="False"
+                     Fill="{DynamicResource MaterialOnSurfaceVariantBrush}"
+                     Width="4" Grid.Column="2" Placement="Right" Orientation="Vertical"
+                     Ticks="{TemplateBinding Ticks}" TickFrequency="{TemplateBinding TickFrequency}"
+                     Minimum="{TemplateBinding Minimum}" Maximum="{TemplateBinding Maximum}"
+                     IsDirectionReversed="{TemplateBinding IsDirectionReversed}" />
+            <Track x:Name="PART_Track" Grid.Column="1" Orientation="Vertical"
+                   Minimum="{TemplateBinding Minimum}" Maximum="{TemplateBinding Maximum}"
+                   Value="{TemplateBinding Value, Mode=TwoWay}"
+                   IsDirectionReversed="{TemplateBinding IsDirectionReversed}">
+              <Track.DecreaseButton>
+                <RepeatButton x:Name="PART_DecreaseButton" Theme="{StaticResource MaterialVerticalSliderDecrease}"
+                              Background="{TemplateBinding Foreground}" Focusable="False" />
+              </Track.DecreaseButton>
+              <Track.IncreaseButton>
+                <RepeatButton x:Name="PART_IncreaseButton" Theme="{StaticResource MaterialVerticalSliderIncrease}"
+                              Background="{TemplateBinding Background}" Focusable="False" />
+              </Track.IncreaseButton>
+              <Thumb x:Name="MaterialSliderThumb" Theme="{StaticResource MaterialVerticalSliderThumb}"
+                     Background="{TemplateBinding Foreground}"
+                     Width="48" Height="16"
+                     ToolTip.Tip="{Binding $parent[Slider].Value}" ToolTip.Placement="Top"
+                     ToolTip.VerticalOffset="-12" ToolTip.ServiceEnabled="False" />
+            </Track>
+          </Grid>
+        </DataValidationErrors>
+      </ControlTemplate></Setter>
+    </Style>
+    <Style Selector="^[TickPlacement=TopLeft] /template/ TickBar#TopTickBar, ^[TickPlacement=Outside] /template/ TickBar#TopTickBar">
+    <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^[TickPlacement=BottomRight] /template/ TickBar#BottomTickBar, ^[TickPlacement=Outside] /template/ TickBar#BottomTickBar">
+    <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^[TickPlacement=TopLeft] /template/ TickBar#LeftTickBar, ^[TickPlacement=Outside] /template/ TickBar#LeftTickBar">
+    <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^[TickPlacement=BottomRight] /template/ TickBar#RightTickBar, ^[TickPlacement=Outside] /template/ TickBar#RightTickBar">
+    <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^ /template/ Thumb#MaterialSliderThumb:pressed">
+    <Setter Property="ToolTip.IsOpen" Value="True" />
+    </Style>
+    <Style Selector="^:horizontal:focus-visible /template/ Thumb#MaterialSliderThumb">
+    <Setter Property="MinWidth" Value="2" />
+    </Style>
+    <Style Selector="^:vertical:focus-visible /template/ Thumb#MaterialSliderThumb">
+    <Setter Property="MinHeight" Value="2" />
+    </Style>
+    <Style Selector="^:disabled /template/ RepeatButton#PART_DecreaseButton, ^:disabled /template/ Thumb#MaterialSliderThumb">
+    <Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceBrush}" />
+    <Setter Property="Opacity" Value="0.38" />
+    </Style>
+    <Style Selector="^:disabled /template/ RepeatButton#PART_IncreaseButton">
+      <Setter Property="Background" Value="{DynamicResource MaterialDisabledOutlineBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource MaterialDisabledOnSurfaceBrush}" />
+    </Style>
+    <Style Selector="^[IsDirectionReversed=True]:horizontal /template/ RepeatButton#PART_DecreaseButton">
+      <Setter Property="CornerRadius" Value="2,8,8,2" />
+    </Style>
+    <Style Selector="^[IsDirectionReversed=True]:horizontal /template/ RepeatButton#PART_IncreaseButton">
+      <Setter Property="CornerRadius" Value="8,2,2,8" />
+    </Style>
+    <Style Selector="^[IsDirectionReversed=True]:horizontal /template/ RepeatButton#PART_IncreaseButton">
+      <Setter Property="HorizontalContentAlignment" Value="Left" /><Setter Property="Padding" Value="6,0,0,0" />
+    </Style>
+    <Style Selector="^[IsDirectionReversed=True]:vertical /template/ RepeatButton#PART_DecreaseButton">
+      <Setter Property="CornerRadius" Value="8,8,2,2" />
+    </Style>
+    <Style Selector="^[IsDirectionReversed=True]:vertical /template/ RepeatButton#PART_IncreaseButton">
+      <Setter Property="CornerRadius" Value="2,2,8,8" />
+    </Style>
+    <Style Selector="^[IsDirectionReversed=True]:vertical /template/ RepeatButton#PART_IncreaseButton">
+      <Setter Property="VerticalContentAlignment" Value="Bottom" /><Setter Property="Padding" Value="0,0,0,6" />
+    </Style>
+    <Style Selector="^:error">
+    <Setter Property="Foreground" Value="{DynamicResource MaterialErrorBrush}" />
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type Slider}" TargetType="Slider" BasedOn="{StaticResource DefaultSliderStyle}" />
+</ResourceDictionary>

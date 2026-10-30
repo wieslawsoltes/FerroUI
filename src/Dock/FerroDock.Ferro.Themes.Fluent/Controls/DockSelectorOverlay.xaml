@@ -1,0 +1,90 @@
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="using:FerroDock.Ferro.Controls"
+                    xmlns:selectors="using:FerroDock.Ferro.Selectors" x:CompileBindings="True">
+  <ControlTheme x:Key="{x:Type controls:DockSelectorOverlay}" TargetType="controls:DockSelectorOverlay" x:DataType="controls:DockSelectorOverlay">
+    <Setter Property="Template">
+      <ControlTemplate x:DataType="controls:DockSelectorOverlay">
+        <Border Background="{DynamicResource DockSelectorOverlayBackdropBrush}"
+                IsVisible="{TemplateBinding IsOpen}"
+                IsHitTestVisible="{TemplateBinding IsOpen}">
+          <Border HorizontalAlignment="Center"
+                  VerticalAlignment="Center"
+                  Background="{DynamicResource DockSurfacePanelBrush}"
+                  BorderBrush="{DynamicResource DockBorderSubtleBrush}"
+                  BorderThickness="1"
+                  CornerRadius="{DynamicResource DockSelectorOverlayCornerRadius}"
+                  Padding="{DynamicResource DockSelectorOverlayPadding}"
+                  MinWidth="{DynamicResource DockSelectorOverlayMinWidth}"
+                  MaxWidth="{DynamicResource DockSelectorOverlayMaxWidth}">
+            <StackPanel Spacing="{DynamicResource DockSelectorOverlaySpacing}">
+              <TextBlock Text="{TemplateBinding Mode}"
+                         FontWeight="SemiBold" />
+              <ListBox x:Name="PART_ItemsList"
+                       ItemsSource="{TemplateBinding Items}"
+                       SelectedItem="{TemplateBinding SelectedItem}"
+                       Background="Transparent"
+                       BorderThickness="0"
+                       MinHeight="{DynamicResource DockSelectorOverlayListMinHeight}"
+                       MaxHeight="{DynamicResource DockSelectorOverlayListMaxHeight}">
+                <ListBox.ItemTemplate>
+                  <DataTemplate DataType="selectors:DockSelectorItem" x:DataType="selectors:DockSelectorItem">
+                    <Border Background="Transparent"
+                            Padding="{DynamicResource DockSelectorOverlayItemPadding}"
+                            CornerRadius="{DynamicResource DockSelectorOverlayItemCornerRadius}">
+                      <DockPanel LastChildFill="True">
+                        <StackPanel DockPanel.Dock="Right"
+                                    Orientation="Horizontal"
+                                    Spacing="{DynamicResource DockSelectorOverlayBadgeSpacing}"
+                                    Margin="{DynamicResource DockSelectorOverlayBadgeMargin}">
+                          <Border Background="{DynamicResource DockSurfaceHeaderBrush}"
+                                  CornerRadius="{DynamicResource DockSelectorOverlayBadgeCornerRadius}"
+                                  Padding="{DynamicResource DockSelectorOverlayBadgePadding}"
+                                  IsVisible="{Binding IsDocument}">
+                            <TextBlock Text="DOC"
+                                       FontSize="{DynamicResource DockSelectorOverlayBadgeFontSize}" />
+                          </Border>
+                          <Border Background="{DynamicResource DockSurfaceHeaderBrush}"
+                                  CornerRadius="{DynamicResource DockSelectorOverlayBadgeCornerRadius}"
+                                  Padding="{DynamicResource DockSelectorOverlayBadgePadding}"
+                                  IsVisible="{Binding IsTool}">
+                            <TextBlock Text="TOOL"
+                                       FontSize="{DynamicResource DockSelectorOverlayBadgeFontSize}" />
+                          </Border>
+                          <Border Background="{DynamicResource DockSurfaceHeaderBrush}"
+                                  CornerRadius="{DynamicResource DockSelectorOverlayBadgeCornerRadius}"
+                                  Padding="{DynamicResource DockSelectorOverlayBadgePadding}"
+                                  IsVisible="{Binding IsPinned}">
+                            <TextBlock Text="PIN"
+                                       FontSize="{DynamicResource DockSelectorOverlayBadgeFontSize}" />
+                          </Border>
+                          <Border Background="{DynamicResource DockSurfaceHeaderBrush}"
+                                  CornerRadius="{DynamicResource DockSelectorOverlayBadgeCornerRadius}"
+                                  Padding="{DynamicResource DockSelectorOverlayBadgePadding}"
+                                  IsVisible="{Binding IsFloating}">
+                            <TextBlock Text="FLOAT"
+                                       FontSize="{DynamicResource DockSelectorOverlayBadgeFontSize}" />
+                          </Border>
+                          <Border Background="{DynamicResource DockSurfaceHeaderBrush}"
+                                  CornerRadius="{DynamicResource DockSelectorOverlayBadgeCornerRadius}"
+                                  Padding="{DynamicResource DockSelectorOverlayBadgePadding}"
+                                  IsVisible="{Binding IsHidden}">
+                            <TextBlock Text="HIDDEN"
+                                       FontSize="{DynamicResource DockSelectorOverlayBadgeFontSize}" />
+                          </Border>
+                        </StackPanel>
+                        <TextBlock Text="{Binding Title}"
+                                   TextTrimming="CharacterEllipsis"
+                                   VerticalAlignment="Center" />
+                      </DockPanel>
+                    </Border>
+                  </DataTemplate>
+                </ListBox.ItemTemplate>
+              </ListBox>
+            </StackPanel>
+          </Border>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

@@ -1,0 +1,57 @@
+<Project Sdk="Microsoft.NET.Sdk">
+ <PropertyGroup>
+  <OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework><Nullable>enable</Nullable>
+  <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+  <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+  <AvaloniaNameGeneratorBehavior>InitializeComponent</AvaloniaNameGeneratorBehavior>
+ </PropertyGroup>
+ <ItemGroup>
+  <Compile Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Helpers/SelectionOverlayHelper.cs" Link="SelectionOverlayHelper.cs" />
+  <Compile Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/SelectionOverlayAdorner.cs" Link="SelectionOverlayAdorner.cs" />
+  <Compile Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/RootDockDebug.axaml.cs" Link="RootDockDebug.axaml.cs" />
+  <Compile Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/RootDockDebugExtensions.cs" Link="RootDockDebugExtensions.cs" />
+  <AvaloniaXaml Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/RootDockDebug.axaml" Link="RootDockDebug.axaml" />
+  <PackageReference Include="Avalonia" Version="12.1.3" />
+  <PackageReference Include="Avalonia.Headless" Version="12.1.3" />
+  <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.3" />
+  <ProjectReference Include="../../../../Dock/src/Dock.Model.ReactiveUI/Dock.Model.ReactiveUI.csproj" />
+  <ProjectReference Include="../../../../Dock/src/Dock.Avalonia/Dock.Avalonia.csproj" />
+  <ProjectReference Include="../../../../Dock/src/Dock.Avalonia.Themes.Fluent/Dock.Avalonia.Themes.Fluent.csproj" />
+  <Compile Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/GridDockDebugView.axaml.cs" Link="GridDockDebugView.axaml.cs" />
+  <AvaloniaXaml Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/GridDockDebugView.axaml" Link="GridDockDebugView.axaml" />
+  <Compile Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/UniformGridDockDebugView.axaml.cs" Link="UniformGridDockDebugView.axaml.cs" />
+  <AvaloniaXaml Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/UniformGridDockDebugView.axaml" Link="UniformGridDockDebugView.axaml" />
+  <Compile Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/DocumentContentDebugView.axaml.cs" Link="DocumentContentDebugView.axaml.cs" />
+  <AvaloniaXaml Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/DocumentContentDebugView.axaml" Link="DocumentContentDebugView.axaml" />
+  <Compile Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/DocumentDockContentDebugView.axaml.cs" Link="DocumentDockContentDebugView.axaml.cs" />
+  <AvaloniaXaml Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/DocumentDockContentDebugView.axaml" Link="DocumentDockContentDebugView.axaml" />
+  <Compile Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/ToolDockDebugView.axaml.cs" Link="ToolDockDebugView.axaml.cs" />
+  <AvaloniaXaml Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/ToolDockDebugView.axaml" Link="ToolDockDebugView.axaml" />
+  <Compile Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/DockableDebugView.axaml.cs" Link="DockableDebugView.axaml.cs" />
+  <AvaloniaXaml Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/DockableDebugView.axaml" Link="DockableDebugView.axaml" />
+  <Compile Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/ToolContentDebugView.axaml.cs" Link="ToolContentDebugView.axaml.cs" />
+  <AvaloniaXaml Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/ToolContentDebugView.axaml" Link="ToolContentDebugView.axaml" />
+  <Compile Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/DocumentDockDebugView.axaml.cs" Link="DocumentDockDebugView.axaml.cs" />
+  <AvaloniaXaml Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/DocumentDockDebugView.axaml" Link="DocumentDockDebugView.axaml" />
+  <Compile Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/DockDockDebugView.axaml.cs" Link="DockDockDebugView.axaml.cs" />
+  <AvaloniaXaml Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/DockDockDebugView.axaml" Link="DockDockDebugView.axaml" />
+  <Compile Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/GridDockSplitterDebugView.axaml.cs" Link="GridDockSplitterDebugView.axaml.cs" />
+  <AvaloniaXaml Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/GridDockSplitterDebugView.axaml" Link="GridDockSplitterDebugView.axaml" />
+  <Compile Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/DocumentTemplateDebugView.axaml.cs" Link="DocumentTemplateDebugView.axaml.cs" />
+  <AvaloniaXaml Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/DocumentTemplateDebugView.axaml" Link="DocumentTemplateDebugView.axaml" />
+  <Compile Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/DockWindowDebugView.axaml.cs" Link="DockWindowDebugView.axaml.cs" />
+  <AvaloniaXaml Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/DockWindowDebugView.axaml" Link="DockWindowDebugView.axaml" />
+  <Compile Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/WrapDockDebugView.axaml.cs" Link="WrapDockDebugView.axaml.cs" />
+  <AvaloniaXaml Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/WrapDockDebugView.axaml" Link="WrapDockDebugView.axaml" />
+  <Compile Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/RootDockInfoDebugView.axaml.cs" Link="RootDockInfoDebugView.axaml.cs" />
+  <AvaloniaXaml Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/RootDockInfoDebugView.axaml" Link="RootDockInfoDebugView.axaml" />
+  <Compile Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/ProportionalDockDebugView.axaml.cs" Link="ProportionalDockDebugView.axaml.cs" />
+  <AvaloniaXaml Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/ProportionalDockDebugView.axaml" Link="ProportionalDockDebugView.axaml" />
+  <Compile Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/StackDockDebugView.axaml.cs" Link="StackDockDebugView.axaml.cs" />
+  <AvaloniaXaml Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/StackDockDebugView.axaml" Link="StackDockDebugView.axaml" />
+  <Compile Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/DockDebugView.axaml.cs" Link="DockDebugView.axaml.cs" />
+  <AvaloniaXaml Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/DockDebugView.axaml" Link="DockDebugView.axaml" />
+  <Compile Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/ProportionalDockSplitterDebugView.axaml.cs" Link="ProportionalDockSplitterDebugView.axaml.cs" />
+  <AvaloniaXaml Include="../../../../Dock/src/Dock.Avalonia.Diagnostics/Controls/ProportionalDockSplitterDebugView.axaml" Link="ProportionalDockSplitterDebugView.axaml" />
+ </ItemGroup>
+</Project>

@@ -897,6 +897,63 @@ fn initial_binding_of_selected_items_should_not_cause_write_to_selected_items() 
     assert_eq!(expected, strings(target.selection().selected_items().to_vec()));
 }
 
+// Not from upstream (DEVIATIONS.md, Selection): select all of a list box that has no items
+// source yet (`ListBoxSelectAllBehavior` of a list whose items are not bound) selected the
+// range 0..i32::MAX, and the selected items of the list box, which copy the selection, never
+// finished. Guarded by a timeout.
+#[test]
+fn select_all_of_a_list_box_without_items_finishes() {
+    let (done, finished) = std::sync::mpsc::channel();
+    let thread = std::thread::spawn(move || {
+        let _app = start();
+        let target = ListBox::new();
+        target.set_selection_mode(SelectionMode::MULTIPLE);
+        // The selected items of the list box, which the selection changed event updates.
+        let selected_items = target.selected_items().expect("the selected items");
+
+        target.select_all();
+
+        assert_eq!(target.selected_index(), -1);
+        assert_eq!(selected_items.count(), 0);
+
+        target.set_items_source(strs(&["Foo", "Bar"]));
+        target.select_all();
+        assert_eq!(selected_items.count(), 2);
+        let _ = done.send(());
+    });
+    match finished.recv_timeout(std::time::Duration::from_secs(10)) {
+        Ok(()) => thread.join().unwrap(),
+        Err(std::sync::mpsc::RecvTimeoutError::Disconnected) => {
+            std::panic::resume_unwind(thread.join().expect_err("the test thread panicked"))
+        }
+        Err(std::sync::mpsc::RecvTimeoutError::Timeout) => panic!("select all did not finish within ten seconds"),
+    }
+}
+
+// Not from upstream (DEVIATIONS.md, Selection): the selected items of a list box are a list
+// (upstream `IList`), so a binding delivers them to an items source as they are: the items
+// source shares the list.
+#[test]
+fn selected_items_are_bound_to_an_items_source() {
+    let _app = start();
+    crate::register_types();
+    let list_box = ListBox::new();
+    list_box.set_selection_mode(SelectionMode::MULTIPLE);
+    list_box.set_items_source(strs(&["Foo", "Bar", "Baz"]));
+    let target = ItemsControl::new();
+    let data_context: BoxedValue = Rc::new(list_box.clone());
+    target.set_data_context(Some(data_context));
+    target.bind_binding(ItemsControl::items_source_property().as_property(), &ReflectionBinding::new("SelectedItems"));
+
+    let source = target.items_source().expect("the selected items as the items source");
+    let selected_items = list_box.selected_items().expect("the selected items");
+    assert!(source.downcast_ref::<FerroList<Option<BoxedValue>>>().is_some_and(|items| std::ptr::eq(items, &*selected_items.0)));
+    assert_eq!(source.count(), 0);
+    list_box.selection().select(1);
+    assert_eq!(source.count(), 1);
+    assert_eq!(source.get_at(0).as_ref().and_then(string_of).as_deref(), Some("Bar"));
+}
+
 #[test]
 fn content_can_be_bound_in_item_container_theme() {
     let _app = start();

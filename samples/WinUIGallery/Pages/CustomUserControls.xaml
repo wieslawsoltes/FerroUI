@@ -1,0 +1,4 @@
+<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <UserControl><StackPanel Spacing="12"><TextBlock Text="A reusable counter control"/><Button x:Name="Primary" Content="Increment"/><TextBlock x:Name="Output" Text="Clicked 0 times"/></StackPanel></UserControl>
+</StackPanel>

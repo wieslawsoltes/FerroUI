@@ -1,0 +1,77 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/RadioButtons/RadioButtons.xaml (DefaultRadioButtonsStyle and the implicit style;
+    the resources of controls/dev/RadioButtons/RadioButtons_themeresources.xaml are
+    Resources/RadioButtons_themeresources.xaml)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  Translation notes (docs/porting/winui-theme.md, section 4):
+  - FerroUI's RadioButtons is WinUI's RadioButtons (a WinUI control in ferroui-controls,
+    docs/porting/winui-controls.md), an items control whose containers are RadioButtons, themed by
+    RadioButton.xaml.
+  - The ItemsRepeater InnerRepeater with the layout ColumnMajorUniformToLargestGridLayout is the
+    ItemsPresenter PART_ItemsPresenter of the items control, and the layout is its items panel,
+    the RadioButtonsPanel of FerroUI.Controls.Primitives (a port of the layout), with the spacing
+    RadioButtonsColumnSpacing and RadioButtonsRowSpacing; the panel reads MaxColumns from the
+    group (the binding of MaxColumns to the templated parent in the source).
+  - HeaderContentPresenter is PART_HeaderPresenter, the part of the headered selecting items
+    control the group derives from.
+  - CommonStates: Disabled is :disabled; Normal sets nothing.
+  - TabNavigation Once is KeyboardNavigation.TabNavigation; IsTabStop False is kept.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <StackPanel Spacing="20">
+        <RadioButtons Header="Options" SelectedIndex="1">
+          <x:String>Option 1</x:String>
+          <x:String>Option 2</x:String>
+          <x:String>Option 3</x:String>
+        </RadioButtons>
+        <RadioButtons Header="Two columns" MaxColumns="2">
+          <x:String>Red</x:String>
+          <x:String>Green</x:String>
+          <x:String>Blue</x:String>
+        </RadioButtons>
+        <RadioButtons Header="Disabled" IsEnabled="False" SelectedIndex="0">
+          <x:String>Option 1</x:String>
+          <x:String>Option 2</x:String>
+        </RadioButtons>
+      </StackPanel>
+    </Border>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="DefaultRadioButtonsStyle" TargetType="RadioButtons">
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="KeyboardNavigation.TabNavigation" Value="Once" />
+    <Setter Property="ItemsPanel">
+      <ItemsPanelTemplate>
+        <RadioButtonsPanel ColumnSpacing="{DynamicResource RadioButtonsColumnSpacing}"
+                           RowSpacing="{DynamicResource RadioButtonsRowSpacing}" />
+      </ItemsPanelTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <StackPanel>
+          <ContentPresenter x:Name="PART_HeaderPresenter"
+                            Content="{TemplateBinding Header}"
+                            ContentTemplate="{TemplateBinding HeaderTemplate}"
+                            Foreground="{DynamicResource RadioButtonsHeaderForeground}"
+                            Margin="{DynamicResource RadioButtonsTopHeaderMargin}" />
+          <ItemsPresenter x:Name="PART_ItemsPresenter"
+                          ItemsPanel="{TemplateBinding ItemsPanel}" />
+        </StackPanel>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- CommonStates -->
+    <Style Selector="^:disabled /template/ ContentPresenter#PART_HeaderPresenter">
+      <Setter Property="Foreground" Value="{DynamicResource RadioButtonsHeaderForegroundDisabled}" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type RadioButtons}" TargetType="RadioButtons" BasedOn="{StaticResource DefaultRadioButtonsStyle}" />
+</ResourceDictionary>

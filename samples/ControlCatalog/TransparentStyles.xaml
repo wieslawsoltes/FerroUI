@@ -11,11 +11,14 @@
     <SolidColorBrush x:Key="ExpanderHeaderBackground" Color="Transparent" />
     <SolidColorBrush x:Key="ExpanderHeaderBackgroundPointerOver" Color="#33808080" />
     <SolidColorBrush x:Key="ExpanderHeaderBackgroundPressed" Color="#66808080" />
+    <!-- Not in upstream: the pane of the NavigationView shell, where upstream's drawer page had its
+         DrawerBackground. -->
+    <SolidColorBrush x:Key="NavigationViewDefaultPaneBackground" Color="Transparent" />
+    <SolidColorBrush x:Key="NavigationViewExpandedPaneBackground" Color="Transparent" />
   </Styles.Resources>
 
   <Style Selector="local|MainView">
     <Setter Property="Background" Value="Transparent" />
-    <Setter Property="DrawerBackground" Value="Transparent" />
 
     <Style Selector="^ TabbedPage">
       <Setter Property="Background" Value="Transparent" />

@@ -1,0 +1,42 @@
+<UserControl xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:material="using:FerroUI.Themes.Material" x:Class="MaterialThemeGallery.Pages.MaterialInteractionsPage">
+  <StackPanel Margin="24" Spacing="16">
+    <StackPanel Spacing="4">
+      <TextBlock Theme="{StaticResource MaterialHeadlineLarge}" Text="Search, share, respond" />
+      <TextBlock Theme="{StaticResource MaterialBodyMedium}" TextWrapping="Wrap"
+                 Text="Search with a persistent editor. Queue messages. Pull a sheet into view." />
+    </StackPanel>
+    <material:MaterialSearchView Name="Search" PlaceholderText="Find a component" IsExpanded="True" MaxExpandedHeight="240">
+      <StackPanel Margin="16,12" Spacing="8">
+        <TextBlock Theme="{StaticResource MaterialLabelLarge}" Text="RECENT SEARCHES" Foreground="{DynamicResource MaterialPrimaryBrush}" />
+        <Button Theme="{StaticResource MaterialTextButton}" Content="Expressive buttons" HorizontalAlignment="Left" />
+        <Button Theme="{StaticResource MaterialTextButton}" Content="Text fields and input" HorizontalAlignment="Left" />
+        <TextBlock Name="SearchStatus" Theme="{StaticResource MaterialBodySmall}" Text="Press Enter to submit your query." />
+      </StackPanel>
+    </material:MaterialSearchView>
+    <material:MaterialSnackbar Message="Ready when you are." ActionLabel="Got it" WithDismissAction="True" />
+    <Button Name="QueueMessages" Content="Queue two snackbars" Theme="{StaticResource MaterialTonalButton}" HorizontalAlignment="Left" />
+    <Grid Height="360">
+      <ContentControl Theme="{StaticResource MaterialFilledCard}">
+        <StackPanel Spacing="16" VerticalAlignment="Center">
+          <TextBlock Theme="{StaticResource MaterialTitleLarge}" Text="A sheet for the next step" />
+          <TextBlock Theme="{StaticResource MaterialBodyMedium}" TextWrapping="Wrap"
+                     Text="Drag the handle, tap the scrim, or use Escape. Focus returns to the control that opened the sheet." />
+          <Button Name="OpenSheet" Content="Open bottom sheet" HorizontalAlignment="Left" />
+        </StackPanel>
+      </ContentControl>
+      <material:MaterialBottomSheetHost Name="DemoSheet" State="PartiallyExpanded" Padding="24,0,24,24">
+        <StackPanel Height="264" Spacing="12">
+          <TextBlock Theme="{StaticResource MaterialHeadlineSmall}" Text="Make room for more" />
+          <TextBlock Theme="{StaticResource MaterialBodyMedium}" TextWrapping="Wrap"
+                     Text="The sheet responds to changing content and keeps its semantic state as the window resizes." />
+          <WrapPanel ItemSpacing="8">
+            <Button Name="ExpandSheet" Content="Expand" />
+            <Button Name="CloseSheet" Content="Done" Theme="{StaticResource MaterialTextButton}" />
+          </WrapPanel>
+        </StackPanel>
+      </material:MaterialBottomSheetHost>
+      <material:MaterialSnackbarHost Name="SnackbarHost" />
+    </Grid>
+  </StackPanel>
+</UserControl>

@@ -21,10 +21,7 @@
             <renderers:RotatingSquareRenderer />
           </RenderTargetBitmapBehavior.Renderer>
         </RenderTargetBitmapBehavior>
-        <!-- Deviation (DEVIATIONS.md, Behaviors gallery): markup cannot assign the behavior named
-             AnimatedRenderTarget to the Target of the trigger (a render host); the code-behind
-             sets it. -->
-        <RenderTargetBitmapTrigger x:Name="AnimatedRenderTrigger"
+        <RenderTargetBitmapTrigger Target="AnimatedRenderTarget"
                                    MillisecondsPerTick="250"
                                    IsEnabled="{Binding IsRenderTriggerEnabled}">
           <InvokeCommandAction Command="{Binding UpdateRenderTimestampCommand}" />
@@ -46,9 +43,7 @@
     <Button Content="Render Static">
       <Interaction.Behaviors>
         <EventTriggerBehavior EventName="Click">
-          <!-- Deviation (DEVIATIONS.md, Behaviors gallery): the code-behind sets the Target
-               (StaticBehavior) of the action, as for the trigger above. -->
-          <RenderRenderTargetBitmapAction x:Name="RenderStaticAction" />
+          <RenderRenderTargetBitmapAction Target="StaticBehavior" />
         </EventTriggerBehavior>
       </Interaction.Behaviors>
     </Button>

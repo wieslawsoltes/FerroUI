@@ -37,6 +37,8 @@
       <WinUITheme x:Key="WinUITheme" />
       <StyleInclude x:Key="ColorPickerFluent" Source="ferres://FerroUI.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />
       <StyleInclude x:Key="TreeDataGridFluent" Source="ferres://FerroUI.Controls.TreeDataGrid/Themes/Fluent.xaml" />
+      <!-- Not in the original: the WinUI styles of the inking controls of the port (the page Inking). -->
+      <StyleInclude x:Key="InkingWinUI" Source="ferres://FerroUI.Controls.Inking/Themes/WinUI.xaml" />
     </ResourceDictionary>
   </Application.Resources>
   <Application.Styles>

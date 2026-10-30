@@ -1,0 +1,8 @@
+<StackPanel xmlns="https://github.com/ferroui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:core="clr-namespace:FerroDock.Model.Core;assembly=FerroDock.Model"
+ x:DataType="core:DockWindowOptions">
+ <TextBlock Text="{Binding ParentWindow.Title}" />
+ <CheckBox IsChecked="{Binding IsModal, Mode=TwoWay}" />
+ <CheckBox IsThreeState="True" IsChecked="{Binding ShowInTaskbar, Mode=TwoWay}" />
+</StackPanel>

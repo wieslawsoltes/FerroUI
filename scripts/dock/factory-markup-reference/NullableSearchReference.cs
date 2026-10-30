@@ -1,0 +1,36 @@
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using Dock.Model.Core;
+using Dock.Model.Controls;
+using Dock.Model.ReactiveUI;
+using Dock.Model.ReactiveUI.Controls;
+using Dock.Avalonia.Controls;
+namespace DockFactoryMarkupReference;
+internal static class NullableSearchReference
+{
+ private static bool NullFailure(Action action){try{action();return false;}catch(NullReferenceException){return true;}}
+ private static bool Unsupported(Action action){try{action();return false;}catch(NotSupportedException){return true;}}
+ private static NullableWindowsReference.ProbeWindow Sequence(RootDock root,params IRootDock?[] values){var window=new NullableWindowsReference.ProbeWindow{Sequence=new Queue<IRootDock?>(values)};root.Windows=new ObservableCollection<IDockWindow>{window};return window;}
+ internal static void Run(Action<string,bool> check)
+ {
+  var f=new Factory();for(int mode=0;mode<2;mode++){bool match=mode==1;int calls=0;Func<IDockable,bool> p=item=>{check("nullable-search-immediate-null-argument-"+mode,item is null);calls++;return match;};if(match)check("nullable-search-immediate-true-null-return",f.FindDockable(null!,p)is null&&calls==1);else check("nullable-search-immediate-false-visible-failure",NullFailure(()=>f.FindDockable(null!,p))&&calls==1);}
+  foreach(var pair in new (string,IDock?)[]{("null",null),("root",new RootDock())})check("nullable-search-null-callable-immediate-"+pair.Item1,NullFailure(()=>f.FindDockable(pair.Item2!,null!)));
+  int count=0;var query=f.Find(null!,item=>{count++;return item is null;});check("nullable-search-lazy-create-no-call",count==0);var first=query.GetEnumerator();check("nullable-search-lazy-enumerator-no-call",count==0);check("nullable-search-lazy-first-null",first.MoveNext()&&first.Current is null&&count==1);check("nullable-search-lazy-later-visible-failure",NullFailure(()=>first.MoveNext())&&count==1);check("nullable-search-lazy-after-fault-current-end",!first.MoveNext()&&first.Current is null);first.Dispose();check("nullable-search-lazy-reset-unsupported",Unsupported(()=>first.Reset()));var second=query.GetEnumerator();check("nullable-search-lazy-repeatable-null",second.MoveNext()&&second.Current is null&&count==2);second.Dispose();
+  foreach(var pair in new (string,IDock?)[]{("null",null),("root",new RootDock())}){var q=f.Find(pair.Item2!,null!);var e=q.GetEnumerator();check("nullable-search-null-callable-deferred-"+pair.Item1,NullFailure(()=>e.MoveNext())&&!e.MoveNext()&&e.Current is null);}
+  var all=f.Find((Func<IDockable,bool>)null!);check("nullable-search-null-callable-empty-controls",!all.GetEnumerator().MoveNext());f.DockControls.Add(new DockControl{InitializeLayout=false});check("nullable-search-null-callable-null-layout-control",!all.GetEnumerator().MoveNext());f.DockControls.Add(new DockControl{InitializeLayout=false,Layout=new RootDock()});var allCursor=all.GetEnumerator();check("nullable-search-null-callable-live-control-before-first-move",NullFailure(()=>allCursor.MoveNext())&&!allCursor.MoveNext());
+  var sentinel=new InvalidOperationException("predicate aborted");count=0;Func<IDockable,bool> abort=item=>{count++;throw sentinel;};Exception? observed=null;try{f.FindDockable(null!,abort);}catch(Exception e){observed=e;}check("nullable-search-predicate-abort-immediate",ReferenceEquals(observed,sentinel)&&count==1);var aborted=f.Find(null!,abort).GetEnumerator();observed=null;try{aborted.MoveNext();}catch(Exception e){observed=e;}check("nullable-search-predicate-abort-deferred",ReferenceEquals(observed,sentinel)&&count==2&&!aborted.MoveNext());
+  var custom=new SearchFactory();check("nullable-search-override-null-callable",ReferenceEquals(custom.FindDockable(null!,null!),custom.Result)&&custom.Calls.Count==1&&custom.Calls[0].Dock is null&&custom.Calls[0].Predicate is null);Func<IDockable,bool> never=_=>throw new InvalidOperationException("not evaluated");check("nullable-search-override-original-callable",ReferenceEquals(custom.FindDockable(null!,never),custom.Result)&&ReferenceEquals(custom.Calls[1].Predicate,never));
+  for(int mode=0;mode<2;mode++){f=new Factory();var root=new RootDock();var a=new RootDock();var b=new RootDock();var window=Sequence(root,a,null,mode==0?b:null);var last=new NullableWindowsReference.ProbeWindow();root.Windows!.Add(last);var seen=new List<IDockable?>();var result=f.FindDockable(root,item=>{seen.Add(item);return item is null;});check("nullable-search-layout-null-predicate-and-return-"+mode,window.Reads==3&&seen.Count==2&&seen[1]is null&&ReferenceEquals(result,mode==0?b:null));check("nullable-search-layout-return-does-not-visit-later-"+mode,last.Reads==0);}
+  custom=new SearchFactory();var outer=new RootDock();var layout=new RootDock();var sequence=Sequence(outer,layout,layout,null);count=0;Func<IDockable,bool> original=_=>{count++;return false;};var found=custom.BaseFind(outer,original);check("nullable-search-layout-recursive-null-override",ReferenceEquals(found,custom.Result)&&sequence.Reads==3&&count==2&&custom.Calls.Count==1&&custom.Calls[0].Dock is null);check("nullable-search-layout-recursive-original-predicate",ReferenceEquals(custom.Calls[0].Predicate,original));
+  f=new Factory();outer=new RootDock();layout=new RootDock();sequence=Sequence(outer,layout,layout,null);var nulls=new List<bool>();check("nullable-search-layout-default-recursive-null-failure",NullFailure(()=>f.FindDockable(outer,item=>{nulls.Add(item is null);return false;}))&&sequence.Reads==3&&string.Join(",",nulls)=="False,False,True");
+  custom=new SearchFactory();var lazy=custom.Find(null!,_=>true).GetEnumerator();check("nullable-search-fixed-null-query-not-virtual-search",lazy.MoveNext()&&lazy.Current is null&&NullFailure(()=>lazy.MoveNext())&&custom.Calls.Count==0);outer=new RootDock();custom.DockControls.Add(new DockControl{InitializeLayout=false,Layout=outer});var fixedAll=custom.Find(_=>true).GetEnumerator();check("nullable-search-fixed-all-query-not-virtual-search",fixedAll.MoveNext()&&ReferenceEquals(fixedAll.Current,outer)&&!fixedAll.MoveNext()&&custom.Calls.Count==0);
+  f=new Factory();outer=new RootDock();var child=new Document();outer.VisibleDockables=new List<IDockable>{child};IEnumerator<IDockable>? reentrant=null;var nested=new List<bool>();var currents=new List<IDockable?>();var reentry=f.Find(outer,_=>{currents.Add(reentrant!.Current);nested.Add(reentrant.MoveNext());return true;});reentrant=reentry.GetEnumerator();check("nullable-search-reentrant-first-move",reentrant.MoveNext()&&ReferenceEquals(reentrant.Current,outer)&&nested.Count==1&&!nested[0]&&currents[0]is null);check("nullable-search-reentrant-child-move",reentrant.MoveNext()&&ReferenceEquals(reentrant.Current,child)&&nested.Count==2&&!nested[1]&&ReferenceEquals(currents[1],outer));check("nullable-search-reentrant-query-end",!reentrant.MoveNext());reentrant.Dispose();
+ }
+ private sealed class SearchFactory:Factory
+ {
+  internal readonly IDockable Result=new Document();internal readonly List<(IDock? Dock,Func<IDockable,bool>? Predicate)> Calls=new();
+  public override IDockable? FindDockable(IDock dock,Func<IDockable,bool> predicate){Calls.Add((dock,predicate));return Result;}
+  internal IDockable? BaseFind(IDock? dock,Func<IDockable,bool>? predicate)=>base.FindDockable(dock!,predicate!);
+ }
+}

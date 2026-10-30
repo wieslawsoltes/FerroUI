@@ -18,6 +18,12 @@
 #                          iPhone application needs to render above 60 Hz on a ProMotion display
 #
 # The build directory is CARGO_TARGET_DIR when it is set, else `target` of the workspace.
+#
+# An application of another cargo workspace (a repository with this one as a submodule,
+# docs/apps.md) is built in the workspace of FERROUI_IOS_WORKSPACE:
+#
+#   FERROUI_IOS_WORKSPACE=$PWD FerroUI/scripts/ios/bundle.sh --package ember-ios --bin ember-ios \
+#       --name Ember --bundle-id org.ferroui.ember
 # The last line of the output is the path of the bundle.
 #
 # A bundle for the simulator is signed ad hoc, which is all the simulator asks for. A bundle for a
@@ -51,7 +57,7 @@ while [ $# -gt 0 ]; do
     --out) out="$2"; shift 2 ;;
     --no-build) build=0; shift ;;
     --high-refresh-rate) high_refresh_rate=1; shift ;;
-    -h|--help) sed -n '2,25p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,31p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "bundle.sh: unknown argument: $1" >&2; exit 2 ;;
   esac
 done
@@ -67,7 +73,9 @@ if [ "$features_set" = 0 ] && [ "$package" = ferroui-ios ] && [ "$kind" = exampl
 fi
 
 root="$(cd "$(dirname "$0")/../.." && pwd)"
-target_dir="${CARGO_TARGET_DIR:-$root/target}"
+# The cargo workspace of the application: this repository, or that of FERROUI_IOS_WORKSPACE.
+workspace="$(cd "${FERROUI_IOS_WORKSPACE:-$root}" && pwd)"
+target_dir="${CARGO_TARGET_DIR:-$workspace/target}"
 case "$profile" in
   dev) profile_dir=debug ;;
   *) profile_dir="$profile" ;;
@@ -77,7 +85,7 @@ if [ "$build" = 1 ]; then
   args=(build --locked -p "$package" --target "$target" --profile "$profile")
   if [ "$kind" = example ]; then args+=(--example "$executable"); else args+=(--bin "$executable"); fi
   if [ -n "$features" ]; then args+=(--features "$features"); fi
-  (cd "$root" && cargo "${args[@]}") >&2
+  (cd "$workspace" && cargo "${args[@]}") >&2
 fi
 
 if [ "$kind" = example ]; then

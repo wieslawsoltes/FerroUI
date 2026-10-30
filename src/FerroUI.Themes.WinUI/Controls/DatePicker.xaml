@@ -52,7 +52,7 @@
   - The glyphs of the buttons (E8FB Accept, E711 Cancel at 16 px) are GlyphGeometryE8FB (14 px
     wide) and GlyphGeometryE711 (12 px wide).
   - The ThemeShadow of the flyout (ApplyElevationEffect of DatePickerFlyoutPresenter at a
-    Translation.Z of 32) is the BoxShadow ThemeShadowFlyoutBoxShadow of the border Background of
+    Translation.Z of 32) is a ThemeShadow (the shared WinUIThemeShadow, Translation.Z as in WinUI) on the border Background of
     the presenter, and the margin ThemeShadowFlyoutMargin of PART_PickerPresenter is the room for
     it in the popup (Resources/ThemeShadows.xaml; DEVIATIONS.md, G-24); WindowManagerAddShadowHint
     is off, as in the Fluent theme.
@@ -246,7 +246,7 @@
     <Setter Property="Template">
       <ControlTemplate>
         <Border x:Name="Background"
-                BoxShadow="{DynamicResource ThemeShadowFlyoutBoxShadow}"
+                Translation="0,0,32" Shadow="{StaticResource WinUIThemeShadow}"
                 Background="{TemplateBinding Background}"
                 BorderBrush="{TemplateBinding BorderBrush}"
                 BorderThickness="{TemplateBinding BorderThickness}"

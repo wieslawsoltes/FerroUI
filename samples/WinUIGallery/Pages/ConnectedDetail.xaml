@@ -1,0 +1,18 @@
+<!-- Native adaptation of SampleSupport/SamplePages/DetailedInfoPage.xaml. -->
+<Grid xmlns="https://github.com/ferroui"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      RowDefinitions="Auto,Auto,*" RowSpacing="16" Margin="12">
+  <Button x:Name="GoBackButton" Content="Go Back" HorizontalAlignment="Left" />
+  <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="20">
+    <StackPanel Spacing="8" VerticalAlignment="Top">
+      <Image x:Name="DetailedImage" MaxHeight="400" Stretch="Uniform" />
+      <TextBlock x:Name="DetailImageError" TextWrapping="Wrap" IsVisible="False" />
+    </StackPanel>
+    <StackPanel x:Name="CoordinatedPanel" Grid.Column="1" Spacing="10" VerticalAlignment="Top">
+      <TextBlock x:Name="DetailTitle" FontSize="26" TextWrapping="Wrap" />
+      <TextBlock x:Name="DetailViews" FontSize="18" />
+      <TextBlock x:Name="DetailLikes" FontSize="18" />
+    </StackPanel>
+  </Grid>
+  <TextBlock x:Name="DetailDescription" Grid.Row="2" FontSize="16" TextWrapping="Wrap" />
+</Grid>

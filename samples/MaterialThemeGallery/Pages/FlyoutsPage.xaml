@@ -1,0 +1,102 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:primitives="using:FerroUI.Themes.Material.Primitives"
+             x:Class="MaterialThemeGallery.Pages.FlyoutsPage">
+  <!-- The content of a flyout (FlyoutPresenter) and of tool tips (ToolTip), shown in the page
+       because a picture of a page does not hold its popups (PopupRoot and OverlayPopupHost host
+       them in the window); the tool tips are opaque, as an open one is. NotificationCard of
+       each type. WindowNotificationManager is the host of such cards: it shows the cards an
+       application sends it, and is empty here. The content of a card is a title and a message
+       in the InfoBarPanel of the theme, with the paddings and margins of InfoBar's template, as
+       WindowNotificationManager presents a notification: on one line when they fit (both 14
+       down, the message 12 after the title, so that a card of one line is the 48 of InfoBar),
+       else the message 4 below the title, 14 above and 18 below. The native
+       counterpart is FlyoutsPage.winui.xml (FlyoutPresenter, ToolTip, InfoBar). The flyout
+       content has no margin: the theme gives the presenter the margin of its shadow, the room
+       for the shadow in a popup, which in the page would move it; its shadow is drawn outside its
+       bounds, as WinUI draws the shadow of a presenter in a page. -->
+  <StackPanel Margin="24" Spacing="12">
+    <TextBlock Text="Flyouts, tool tips and notifications" FontSize="28" FontWeight="SemiBold" />
+
+    <Grid ColumnSpacing="24" HorizontalAlignment="Left">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="320" />
+        <ColumnDefinition Width="320" />
+      </Grid.ColumnDefinitions>
+
+      <StackPanel Grid.Column="0" Spacing="12">
+        <TextBlock Text="Flyout content" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+        <FlyoutPresenter Width="300" HorizontalAlignment="Left" Margin="0">
+          <StackPanel Spacing="12">
+            <TextBlock Text="A flyout" FontWeight="SemiBold" />
+            <TextBlock Text="A flyout shows content over the page, next to the control that opened it."
+                       TextWrapping="Wrap" />
+            <Button Content="Got it" />
+          </StackPanel>
+        </FlyoutPresenter>
+      </StackPanel>
+
+      <StackPanel Grid.Column="1" Spacing="12">
+        <TextBlock Text="Tool tips" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+        <ToolTip HorizontalAlignment="Left" Opacity="1" Content="A short tool tip" />
+        <ToolTip HorizontalAlignment="Left" Opacity="1" MaxWidth="300">
+          <TextBlock Text="A longer tool tip, whose text wraps onto a second line within its width."
+                     TextWrapping="Wrap" />
+        </ToolTip>
+      </StackPanel>
+    </Grid>
+
+    <TextBlock Text="Notifications" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+    <Grid ColumnSpacing="16" RowSpacing="12" HorizontalAlignment="Left">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="320" />
+        <ColumnDefinition Width="320" />
+      </Grid.ColumnDefinitions>
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+      </Grid.RowDefinitions>
+      <NotificationCard Grid.Row="0" Grid.Column="0" Width="320" NotificationType="Information">
+        <primitives:InfoBarPanel HorizontalOrientationPadding="0" VerticalOrientationPadding="0,14,0,18">
+          <TextBlock Text="Information" FontWeight="SemiBold" TextWrapping="Wrap"
+                     primitives:InfoBarPanel.HorizontalOrientationMargin="0,14,0,0"
+                     primitives:InfoBarPanel.VerticalOrientationMargin="0,14,0,0" />
+          <TextBlock Text="A new version is available." TextWrapping="Wrap"
+                     primitives:InfoBarPanel.HorizontalOrientationMargin="12,14,0,0"
+                     primitives:InfoBarPanel.VerticalOrientationMargin="0,4,0,0" />
+        </primitives:InfoBarPanel>
+      </NotificationCard>
+      <NotificationCard Grid.Row="0" Grid.Column="1" Width="320" NotificationType="Success">
+        <primitives:InfoBarPanel HorizontalOrientationPadding="0" VerticalOrientationPadding="0,14,0,18">
+          <TextBlock Text="Success" FontWeight="SemiBold" TextWrapping="Wrap"
+                     primitives:InfoBarPanel.HorizontalOrientationMargin="0,14,0,0"
+                     primitives:InfoBarPanel.VerticalOrientationMargin="0,14,0,0" />
+          <TextBlock Text="The document was saved." TextWrapping="Wrap"
+                     primitives:InfoBarPanel.HorizontalOrientationMargin="12,14,0,0"
+                     primitives:InfoBarPanel.VerticalOrientationMargin="0,4,0,0" />
+        </primitives:InfoBarPanel>
+      </NotificationCard>
+      <NotificationCard Grid.Row="1" Grid.Column="0" Width="320" NotificationType="Warning">
+        <primitives:InfoBarPanel HorizontalOrientationPadding="0" VerticalOrientationPadding="0,14,0,18">
+          <TextBlock Text="Warning" FontWeight="SemiBold" TextWrapping="Wrap"
+                     primitives:InfoBarPanel.HorizontalOrientationMargin="0,14,0,0"
+                     primitives:InfoBarPanel.VerticalOrientationMargin="0,14,0,0" />
+          <TextBlock Text="The disk is almost full." TextWrapping="Wrap"
+                     primitives:InfoBarPanel.HorizontalOrientationMargin="12,14,0,0"
+                     primitives:InfoBarPanel.VerticalOrientationMargin="0,4,0,0" />
+        </primitives:InfoBarPanel>
+      </NotificationCard>
+      <NotificationCard Grid.Row="1" Grid.Column="1" Width="320" NotificationType="Error">
+        <primitives:InfoBarPanel HorizontalOrientationPadding="0" VerticalOrientationPadding="0,14,0,18">
+          <TextBlock Text="Error" FontWeight="SemiBold" TextWrapping="Wrap"
+                     primitives:InfoBarPanel.HorizontalOrientationMargin="0,14,0,0"
+                     primitives:InfoBarPanel.VerticalOrientationMargin="0,14,0,0" />
+          <TextBlock Text="The file could not be opened." TextWrapping="Wrap"
+                     primitives:InfoBarPanel.HorizontalOrientationMargin="12,14,0,0"
+                     primitives:InfoBarPanel.VerticalOrientationMargin="0,4,0,0" />
+        </primitives:InfoBarPanel>
+      </NotificationCard>
+    </Grid>
+    <WindowNotificationManager MaxItems="3" />
+  </StackPanel>
+</UserControl>

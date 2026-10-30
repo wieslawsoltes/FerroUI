@@ -5,7 +5,7 @@
 //! the failure behaviour of the managed type.
 //!
 //! Only the members the controls use exist: construction and conversion
-//! from integers, addition, subtraction, division, comparison, and the
+//! from integers, addition, subtraction, multiplication, division, comparison, and the
 //! formatting and parsing of [`number_format`](super::number_format).
 //!
 //! The scale is part of the value's representation, as in .NET: `1.10` and
@@ -148,6 +148,14 @@ impl Decimal {
     #[inline]
     pub fn checked_sub(self, other: Decimal) -> Option<Decimal> {
         self.0.checked_sub(other.0).map(|result| Self::at_scale_of(result, self, other))
+    }
+
+    /// The product, or `None` when it is out of range. The scale is the sum
+    /// of the scales, rounded to 28 digits after the point when it is larger,
+    /// as the managed type multiplies.
+    #[inline]
+    pub fn checked_mul(self, other: Decimal) -> Option<Decimal> {
+        self.0.checked_mul(other.0).map(Decimal)
     }
 
     /// The quotient, or `None` when it is out of range. Panics when `other`
@@ -724,6 +732,14 @@ mod tests {
         assert_eq!(Decimal::MIN_VALUE.checked_sub(Decimal::ONE), None);
         assert_eq!(Decimal::MAX_VALUE.checked_div(d("0.1")), None);
         assert_eq!(Decimal::MAX_VALUE.checked_add(Decimal::MIN_VALUE), Some(Decimal::ZERO));
+        assert_eq!(Decimal::MAX_VALUE.checked_mul(d("2")), None);
+    }
+
+    #[test]
+    fn multiplication_adds_the_scales() {
+        assert_eq!(d("1.10").checked_mul(d("2")).map(|value| value.to_string()).as_deref(), Some("2.20"));
+        assert_eq!(d("1.5").checked_mul(d("-0.5")).map(|value| value.to_string()).as_deref(), Some("-0.75"));
+        assert_eq!(d("7").checked_mul(Decimal::ZERO), Some(Decimal::ZERO));
     }
 
     #[test]

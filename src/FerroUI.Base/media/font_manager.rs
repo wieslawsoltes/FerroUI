@@ -4,6 +4,7 @@ use std::rc::Rc;
 
 use crate::logging::{LogArea, LogEventLevel, Logger};
 use crate::media::composite_font_family_key::CompositeFontFamilyKey;
+use crate::media::font_fallback_mapping::FontFallbackMappingResult;
 use crate::media::fonts::font_collection_base::compare_ordinal_ignore_case;
 use crate::media::fonts::{
     EmbeddedFontCollection, EmptySystemFontCollection, FontCollectionBase, FontFamilyKey, IFontCollection,
@@ -227,6 +228,39 @@ impl FontManager {
 
         // Nothing was found so use the default
         self.try_get_glyph_typeface(&self.default_typeface(typeface))
+    }
+
+    /// Queries only a provider's supported system-family mapping domain.
+    /// Configured fallbacks and keyed/aliased families retain the framework
+    /// resolver until a provider explicitly supports those collection rules.
+    pub(crate) fn map_characters(
+        &self,
+        text: &[u16],
+        typeface: &Typeface,
+        culture: Option<&CultureInfo>,
+    ) -> FontFallbackMappingResult {
+        if self.font_fallbacks.as_ref().is_some_and(|fallbacks| !fallbacks.is_empty()) {
+            return FontFallbackMappingResult::Unavailable;
+        }
+        let requested = if typeface.font_family().name() == FontFamily::DEFAULT_FONT_FAMILY_NAME {
+            self.default_typeface(typeface)
+        } else {
+            typeface.clone()
+        };
+        if requested.font_family().key().is_some()
+            || self.try_get_font_family_mapping(requested.font_family().name()).is_some()
+        {
+            return FontFallbackMappingResult::Unavailable;
+        }
+        let Some(mapper) = self.platform_impl.font_fallback_mapper() else {
+            return FontFallbackMappingResult::Unavailable;
+        };
+        // No collection/cache borrow crosses the provider callback. Its face
+        // and scale belong to this mapped range, not the script fallback cache.
+        match mapper.try_map_characters(text, &requested, culture) {
+            Some(mapping) => FontFallbackMappingResult::Mapped(mapping),
+            None => FontFallbackMappingResult::Fallback,
+        }
     }
 
     /// The typeface of the default font family with the style of `typeface`.

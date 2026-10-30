@@ -1,0 +1,139 @@
+--- a/model.rs
++++ b/model.rs
+@@ -710,6 +710,9 @@
+     pub events: Vec<MemberModel>,
+     pub enum_members: Vec<EnumMemberModel>,
+     pub is_flags: bool,
++    /// Explicit associated `fn(i32) -> value` for unnamed plain-enum literals.
++    /// The function belongs to the public metadata carrier; None retains closed enums.
++    pub enum_i32_factory: Option<String>,
+     pub attributes: Vec<AttributeModel>,
+     /// The attributes of registered properties, by the name of the property.
+     pub property_attributes: Vec<(String, Vec<AttributeModel>)>,
+@@ -753,6 +756,7 @@
+             events: Vec::new(),
+             enum_members: Vec::new(),
+             is_flags: false,
++            enum_i32_factory: None,
+             attributes: Vec::new(),
+             property_attributes: Vec::new(),
+             notify_property_changed: None,
+@@ -917,7 +921,8 @@
+             .list("fields", &self.fields, MemberModel::to_json)
+             .list("events", &self.events, MemberModel::to_json)
+             .list("enum_members", &self.enum_members, EnumMemberModel::to_json)
+-            .flag("is_flags", self.is_flags);
++            .flag("is_flags", self.is_flags)
++            .optional_text("enum_i32_factory", &self.enum_i32_factory);
+         Json::object(
+             attributes_to_json(members, &self.attributes)
+                 .list("property_attributes", &self.property_attributes, |(name, attributes)| {
+@@ -965,6 +970,7 @@
+             events: fields.list("events", MemberModel::from_json)?,
+             enum_members: fields.list("enum_members", EnumMemberModel::from_json)?,
+             is_flags: fields.flag("is_flags")?,
++            enum_i32_factory: fields.optional_text("enum_i32_factory")?,
+             attributes: fields.list("attributes", AttributeModel::from_json)?,
+             property_attributes: fields.list("property_attributes", |pair| match pair {
+                 Json::Array(pair) if pair.len() == 2 => {
+@@ -1071,7 +1077,7 @@
+ /// The registration functions of the untyped value conversions the scanner reads
+ /// ([`ValueTypeModel`], and `cast` for [`CastModel`]), with the number of type arguments.
+ pub const VALUE_REGISTRATIONS: &[(&str, usize)] =
+-    &[("nullable", 1), ("reference", 1), ("object", 1), ("element_ref", 1), ("interface", 2), ("upcast", 2), ("cast", 2), ("deref", 2)];
++    &[("nullable", 1), ("reference", 1), ("object", 1), ("element_ref", 1), ("interface", 2), ("upcast", 2), ("cast", 2), ("boxed_cast", 2), ("deref", 2)];
+ 
+ /// A public function of an inherent `impl` block of a type of a crate, as far as the choice
+ /// of a call form reads it (9.5.3, form B).
+@@ -1546,6 +1552,7 @@
+             EnumMemberModel { name: "Direct".to_string(), rust_variant: None, rust_value: Some("Routing::DIRECT".to_string()), value: None },
+         ];
+         type_.is_flags = true;
++        type_.enum_i32_factory=Some("__enum_from_i32".to_string());
+         type_.attributes = vec![attribute.clone()];
+         type_.property_attributes = vec![("Row".to_string(), vec![attribute])];
+         type_.notify_property_changed = Some(unresolved);
+--- a/scanner/source.rs
++++ b/scanner/source.rs
+@@ -22,6 +22,12 @@
+ };
+ use super::{codes, Diagnostic, InvocationCounts, ScanOptions, ScannedFile, Severity};
+ use crate::model::VALUE_REGISTRATIONS;
++
++// Both APIs insert the same assignability pair into ValueTypes. The boxed form
++// only gives the runtime predicate access to the actual shared box.
++fn canonical_registration(name: &str) -> &str {
++    if name == "boxed_cast" { "cast" } else { name }
++}
+ 
+ /// Where a declaration is written.
+ #[derive(Clone)]
+@@ -349,7 +355,7 @@
+                 // declarations, which are read where the macro is invoked.
+                 calls_of(&tokens, "ValueTypes", DECLARATION_MACROS, &mut |function| {
+                     if let Some(registration) = function.strip_prefix("register_").filter(|name| VALUE_REGISTRATIONS.iter().any(|(known, _)| known == name)) {
+-                        self.value_calls.entry(registration.to_string()).or_default().0 += 1;
++                        self.value_calls.entry(canonical_registration(registration).to_string()).or_default().0 += 1;
+                     }
+                 });
+             }
+@@ -1568,7 +1574,7 @@
+             return;
+         }
+         match (*registration, types.as_slice()) {
+-            ("cast", [from, to]) => self.casts.push(((from.clone(), to.clone()), line)),
++            ("cast" | "boxed_cast", [from, to]) => self.casts.push(((from.clone(), to.clone()), line)),
+             _ => self.value_types.push(((registration.to_string(), types), line)),
+         }
+     }
+@@ -1657,9 +1663,9 @@
+                 continue;
+             }
+             let site = Site { line, ..site.clone() };
+-            self.value_calls.entry(registration.to_string()).or_default().1 += 1;
++            self.value_calls.entry(canonical_registration(registration).to_string()).or_default().1 += 1;
+             match (*registration, types.as_slice()) {
+-                ("cast", [from, to]) => self.casts.push(Located { site, value: RawCast { from: from.clone(), to: to.clone(), imports: Vec::new() } }),
++                ("cast" | "boxed_cast", [from, to]) => self.casts.push(Located { site, value: RawCast { from: from.clone(), to: to.clone(), imports: Vec::new() } }),
+                 _ => self.value_types.push(Located { site, value: RawValueType { registration: registration.to_string(), types, imports: Vec::new() } }),
+             }
+         }
+@@ -1723,7 +1729,7 @@
+                     for (_, transcriber) in &rules {
+                         calls_of(transcriber, "ValueTypes", &[], &mut |function| {
+                             if let Some(registration) = function.strip_prefix("register_").filter(|name| VALUE_REGISTRATIONS.iter().any(|(known, _)| known == name)) {
+-                                *calls.entry(registration.to_string()).or_default() += 1;
++                                *calls.entry(canonical_registration(registration).to_string()).or_default() += 1;
+                             }
+                         });
+                     }
+@@ -1823,3 +1829,29 @@
+         evaluate(&expression, &Scope { type_name: &declared.1, member: &member, all: &all })
+     }
+ }
++
++#[cfg(test)]
++mod boxed_cast_tests {
++    use super::*;
++    #[test]
++    fn boxed_and_typed_casts_keep_the_same_declared_assignability_pairs() {
++        let block: syn::Block = syn::parse_str("{ ValueTypes::register_cast::<A,B>(f); ValueTypes::register_boxed_cast::<A,C>(|_|None); ValueTypes::register_boxed_cast::<A,_>(f); }").unwrap();
++        let mut finder=RegistrationFinder::default();finder.visit_block(&block);
++        assert_eq!(finder.casts.len(),2);
++        assert_eq!(text_of(&finder.casts[0].0.0),"A");assert_eq!(text_of(&finder.casts[0].0.1),"B");
++        assert_eq!(text_of(&finder.casts[1].0.0),"A");assert_eq!(text_of(&finder.casts[1].0.1),"C");
++        assert!(finder.value_types.is_empty());
++        assert_eq!(canonical_registration("boxed_cast"),"cast");assert_eq!(canonical_registration("reference"),"reference");
++    }
++    #[test]
++    fn boxed_casts_in_declaration_tokens_are_casts_not_other_value_registrations() {
++        let fixture=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/registration/lib.rs");
++        let mut source=Source::read(&ScanOptions::new("registration",fixture));
++        let casts=source.casts.len();let values=source.value_types.len();let read=source.value_calls.get("cast").map_or(0,|value|value.1);
++        let tokens=tokens_of("ValueTypes::register_boxed_cast::<A,B>(f);".parse().unwrap());
++        let site=Site{module:0,file:0,line:1,cfg:Vec::new(),expanded:false};
++        source.read_registrations_of_tokens(&tokens,&site);
++        assert_eq!(source.casts.len(),casts+1);assert_eq!(source.value_types.len(),values);
++        assert_eq!(source.value_calls.get("cast").unwrap().1,read+1);
++    }
++}

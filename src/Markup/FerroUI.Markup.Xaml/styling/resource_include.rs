@@ -129,6 +129,10 @@ impl IResourceNode for ResourceInclude {
 }
 
 impl IResourceProvider for ResourceInclude {
+    fn as_any(&self) -> Option<&dyn std::any::Any> {
+        Some(self)
+    }
+
     #[cfg(all(debug_assertions, feature = "hot-reload"))]
     fn development_source(&self) -> Option<String> {
         let source = self.source()?;

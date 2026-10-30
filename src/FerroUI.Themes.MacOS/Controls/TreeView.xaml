@@ -1,0 +1,68 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/TreeView/TreeView.xaml (the style DefaultTreeViewStyle; the resources of
+    controls/dev/TreeView/TreeView_themeresources.xaml are Resources/TreeView_themeresources.xaml)
+    dxaml/xcp/dxaml/themes/generic.xaml (the implicit style of ListView, the style of the
+    TreeViewList the template of TreeView consists of)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  Translation notes (docs/porting/winui-theme.md, section 4):
+  - WinUI's TreeView is a TreeViewList, a ListView that shows the visible nodes of the tree as a
+    flat list. FerroUI's TreeView hosts its items, which host their own children, so the template
+    is the template of that list: a Border around the ScrollViewer ScrollViewer and the items
+    presenter PART_ItemsPresenter, with the setters of the list (no horizontal scrolling, a
+    vertical scroll bar when needed, TabNavigation Once, not a tab stop of its own) and of
+    DefaultTreeViewStyle.
+  - CanDragItems, CanReorderItems, AllowDrop and the ItemContainerTransitions (content, reorder
+    and entrance theme transitions) have no counterpart: FerroUI's tree view does not reorder its
+    items by drag and drop and has no theme transitions.
+  - The padding, border and corner radius of the tree view are drawn, as FerroUI's other themes
+    do (the defaults draw nothing, as WinUI); the scroll chaining and automatic hiding of the bars
+    are passed to the scroll viewer.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <TreeView Width="240">
+        <TreeViewItem Header="Root" IsExpanded="True">
+          <TreeViewItem Header="Child 1" />
+          <TreeViewItem Header="Child 2" />
+        </TreeViewItem>
+      </TreeView>
+    </Border>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="DefaultTreeViewStyle" TargetType="TreeView">
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="KeyboardNavigation.TabNavigation" Value="Once" />
+    <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+    <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+    <Setter Property="ScrollViewer.IsDeferredScrollingEnabled" Value="False" />
+    <Setter Property="ScrollViewer.BringIntoViewOnFocusChange" Value="True" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border BorderBrush="{TemplateBinding BorderBrush}" BackgroundSizing="InnerBorderEdge"
+                Background="{TemplateBinding Background}"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}">
+          <ScrollViewer x:Name="ScrollViewer"
+                        HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}"
+                        VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}"
+                        IsDeferredScrollingEnabled="{TemplateBinding (ScrollViewer.IsDeferredScrollingEnabled)}"
+                        BringIntoViewOnFocusChange="{TemplateBinding (ScrollViewer.BringIntoViewOnFocusChange)}"
+                        IsScrollChainingEnabled="{TemplateBinding (ScrollViewer.IsScrollChainingEnabled)}"
+                        AllowAutoHide="{TemplateBinding (ScrollViewer.AllowAutoHide)}">
+            <ItemsPresenter x:Name="PART_ItemsPresenter"
+                            ItemsPanel="{TemplateBinding ItemsPanel}"
+                            Margin="{TemplateBinding Padding}" />
+          </ScrollViewer>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type TreeView}" TargetType="TreeView" BasedOn="{StaticResource DefaultTreeViewStyle}" />
+</ResourceDictionary>

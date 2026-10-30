@@ -168,6 +168,12 @@ pub trait EmitMarkup {
     fn handles(&self) -> Vec<TypeKey<'_>>;
     /// The first handle is a shared reference (`Rc<T>`).
     fn handle_is_shared(&self) -> bool;
+    /// The actual constructor/Parse value is a shared reference, which can be
+    /// a later handle when a declaration also exposes its unshared value form.
+    fn value_is_shared(&self) -> bool { false }
+    /// The first handle is Rc of the actual declaring trait, not a foreign
+    /// contract described by a separate metadata carrier.
+    fn handle_is_own_trait(&self) -> bool { false }
     /// The nullable form of the handle of a value type (`Option<T>`).
     fn nullable(&self) -> Option<TypeKey<'_>>;
     /// The handles of the contracts the declaration lists.
@@ -178,8 +184,19 @@ pub trait EmitMarkup {
     fn this(&self) -> Option<TypeKey<'_>>;
     /// The type of a value of the type: what constructors and `Parse` return.
     fn value(&self) -> Option<TypeKey<'_>>;
+    /// The exact public Rust type returned by constructors, when it can be
+    /// stated from the declaration. Native class roots use their class handle.
+    fn value_rust_type(&self) -> Option<String> {
+        let TypeKey::Text(value) = self.value()? else { return None };
+        // The model host has the actual, import-resolved Rust declaration.
+        // A metadata carrier's own path is NOT the returned model's type.
+        Some(format!("::{}", value.trim_start_matches("::")))
+    }
     fn is_flags(&self) -> bool;
     fn enum_members(&self) -> Vec<EnumMember<'_>>;
+    /// Explicit associated `fn(i32) -> value` for unnamed plain-enum literals.
+    /// Closed enumerations retain their existing member-only emission.
+    fn enum_i32_factory(&self) -> Option<&str> { None }
     /// The members of the set of flags make up `value`.
     fn flags_compose(&self, value: i64) -> bool;
     /// `other` is this metadata.
@@ -414,4 +431,32 @@ pub trait EmitTypes {
     fn take_unanswered(&self) -> Vec<String> {
         Vec::new()
     }
+}
+
+/// Render a value containing the actual metadata owner's type through its
+/// public alias. Only complete type components may be substituted: Foo must
+/// never rewrite FooImpl, nor may a descriptor's path stand for another model.
+#[cfg(any(feature = "emitter", all(test, feature = "runtime")))]
+pub(super) fn markup_value_rust_type(value: &str, owner: &str, public_path: &str) -> Option<String> {
+    fn is_type_boundary(character: char) -> bool {
+        character.is_whitespace() || matches!(character, '<' | '>' | ',' | '(' | ')' | '[' | ']' | '&')
+    }
+    if owner.is_empty() { return None; }
+    let mut result = String::new();
+    let mut copied = 0;
+    let mut matched = false;
+    for (start, _) in value.match_indices(owner) {
+        let end = start + owner.len();
+        if value[..start].chars().next_back().is_some_and(|character| !is_type_boundary(character))
+            || value[end..].chars().next().is_some_and(|character| !is_type_boundary(character)) {
+            continue;
+        }
+        result.push_str(&value[copied..start]);
+        result.push_str(public_path.trim_start_matches("::"));
+        copied = end;
+        matched = true;
+    }
+    if !matched { return None; }
+    result.push_str(&value[copied..]);
+    Some(format!("::{}", result.trim_start_matches("::").replace("alloc::", "std::")))
 }

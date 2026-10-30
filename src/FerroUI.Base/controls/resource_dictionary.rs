@@ -533,6 +533,14 @@ impl IResourceNode for ResourceDictionaryHandle {
 }
 
 impl IResourceProvider for ResourceDictionaryHandle {
+    fn as_any(&self) -> Option<&dyn std::any::Any> {
+        Some(self)
+    }
+
+    fn as_resource_dictionary(&self) -> Option<&dyn IResourceDictionary> {
+        Some(self)
+    }
+
     fn owner(&self) -> Option<ResourceHostRef> {
         self.0.owner()
     }
@@ -565,6 +573,10 @@ impl IThemeVariantProvider for ResourceDictionaryHandle {
 }
 
 impl IResourceDictionary for ResourceDictionaryHandle {
+    fn merged_dictionaries(&self) -> FerroList<Rc<dyn IResourceProvider>> {
+        self.0.merged_dictionaries()
+    }
+
     fn merged_dictionaries_snapshot(&self) -> Rc<Vec<Rc<dyn IResourceProvider>>> {
         self.0.merged_dictionaries().snapshot()
     }

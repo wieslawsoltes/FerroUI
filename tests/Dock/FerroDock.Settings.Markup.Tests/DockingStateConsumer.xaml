@@ -1,0 +1,11 @@
+<Grid xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:core="using:FerroDock.Model.Core" x:DataType="x:Object" x:CompileBindings="True"
+      Tag="{x:Static core:DockingWindowState.Document}">
+  <Grid.Resources>
+    <core:DockingWindowState x:Key="None">None</core:DockingWindowState>
+    <core:DockingWindowState x:Key="DockedFloating">Docked, Floating</core:DockingWindowState>
+    <core:DockingWindowState x:Key="PinnedDocument">Pinned, Document</core:DockingWindowState>
+    <core:DockingWindowState x:Key="All">Docked, Pinned, Document, Floating, Hidden</core:DockingWindowState>
+    <core:DockingWindowState x:Key="Numeric">9</core:DockingWindowState>
+  </Grid.Resources>
+</Grid>

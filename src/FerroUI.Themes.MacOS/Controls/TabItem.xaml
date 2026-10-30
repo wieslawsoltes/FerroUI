@@ -1,0 +1,67 @@
+<!-- macOS 26 adaptation; see docs/porting/macos26-theme.md.
+     Derived from FerroUI WinUI templates and microsoft-ui-xaml commit
+     7e4b0c2096be402f51cc8f7d203ebf67cff183d0. Copyright (c) Microsoft Corporation.
+     Licensed under the MIT License; see NOTICE.md.
+     Acrylic backing is the portable fallback for native Liquid Glass. -->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <StackPanel Orientation="Horizontal">
+        <TabItem Header="Normal"/>
+        <TabItem Header="Selected" IsSelected="True"/>
+        <TabItem Header="Disabled" IsEnabled="False"/>
+      </StackPanel>
+    </Border>
+  </Design.PreviewWith>
+  <ControlTheme x:Key="{x:Type TabItem}" TargetType="TabItem">
+    <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}"/>
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}"/>
+    <Setter Property="VerticalContentAlignment" Value="Center"/>
+    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    <Setter Property="CornerRadius" Value="6"/>
+    <Setter Property="MinHeight" Value="28"/>
+    <Setter Property="Padding" Value="12,5"/>
+    <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="TabContainer" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" Margin="2">
+          <Border.Transitions>
+            <Transitions>
+              <BrushTransition Property="Background" Duration="{DynamicResource MacOSMotionFastDuration}" Easing="CubicEaseOut"/>
+            </Transitions>
+          </Border.Transitions>
+          <Grid ColumnDefinitions="Auto,*" Margin="{TemplateBinding Padding}">
+            <ContentPresenter x:Name="IconControl" Content="{TemplateBinding Icon}" ContentTemplate="{TemplateBinding IconTemplate}" Foreground="{TemplateBinding Foreground}" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center" IsVisible="{TemplateBinding Icon, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+            <ContentPresenter x:Name="PART_ContentPresenter" Grid.Column="1" Content="{TemplateBinding Header}" ContentTemplate="{TemplateBinding HeaderTemplate}" Foreground="{TemplateBinding Foreground}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" RecognizesAccessKey="True"/>
+          </Grid>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:pointerover /template/ Border#TabContainer">
+      <Setter Property="Background" Value="{DynamicResource NavigationViewItemBackgroundPointerOver}"/>
+    </Style>
+    <Style Selector="^:pressed /template/ Border#TabContainer">
+      <Setter Property="Background" Value="{DynamicResource NavigationViewItemBackgroundPressed}"/>
+    </Style>
+    <Style Selector="^:selected /template/ Border#TabContainer">
+      <Setter Property="Background" Value="{DynamicResource MacOSSegmentSelectedBrush}"/>
+      <Setter Property="BoxShadow" Value="{DynamicResource MacOSSegmentShadow}"/>
+    </Style>
+    <Style Selector="^[TabStripPlacement=Left], ^[TabStripPlacement=Right]">
+      <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+    </Style>
+    <Style Selector="^[TabStripPlacement=Left]:selected /template/ Border#TabContainer, ^[TabStripPlacement=Right]:selected /template/ Border#TabContainer">
+      <Setter Property="Background" Value="{DynamicResource NavigationViewItemBackgroundSelected}"/>
+      <Setter Property="BoxShadow" Value="none"/>
+    </Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Foreground" Value="{DynamicResource TextFillColorDisabledBrush}"/>
+    </Style>
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border Margin="-3" BorderThickness="3" BorderBrush="{DynamicResource SystemControlFocusVisualPrimaryBrush}" CornerRadius="8" IsHitTestVisible="False"/>
+      </FocusAdornerTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

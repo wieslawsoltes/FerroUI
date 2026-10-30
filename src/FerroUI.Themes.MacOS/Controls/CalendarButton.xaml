@@ -1,0 +1,175 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/CommonStyles/CalendarView_themeresources.xaml (the brushes and the month and year
+    item properties DefaultCalendarViewStyle gives the items of the year and decade views; its
+    resources are Resources/CalendarView_themeresources.xaml)
+    dxaml/xcp/core/core/elements/CalendarViewBaseItemChrome.cpp (the chrome WinUI draws for an
+    item: no document, the rules of its states)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  Translation notes (docs/porting/winui-theme.md, section 4):
+  - FerroUI's CalendarButton is a month of the year view or a year of the decade view: WinUI's
+    CalendarViewItem, which has no style; CalendarViewBaseItemChrome draws it in native code as it
+    draws a day (Controls/CalendarDayButton.xaml): with the rounded chrome a circle of half the size
+    of the item, here the corner radius 36.75 of the 73.5 by 74 px of an item of the year view of
+    the calendar (Controls/CalendarItem.xaml).
+  - The states of the chrome map to the pseudo-classes of the button: hovered :pointerover, pressed
+    :pressed, out of scope :inactive (the years outside the decade), disabled :disabled. A month or
+    a year has no selected state in WinUI; the item of the current month or year is "today" (the
+    accent background). FerroUI's button has no today state: its :selected marks the month or the
+    year of the date the calendar displays, which is the current one unless the application moves
+    it, and takes the today look.
+  - The text: MonthYearItemFontSize (CalendarViewMonthYearItemFontSize), MonthYearItemFontFamily
+    (XamlAutoFontFamily), the margin MonthYearItemMargin (CalendarViewMonthYearItemMargin), centred;
+    the labels of the first month of a year and the first year of a decade (IsGroupLabelVisible,
+    False by default) are not ported.
+  - The focus visual of the item is the Border FocusVisual, shown in the :btnfocused state, as the
+    days' (CalendarDayButton).
+  - ClickMode="Release" is the one FerroUI's calendar needs.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <Calendar DisplayMode="Year" />
+    </Border>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="{x:Type CalendarButton}" TargetType="CalendarButton">
+    <Setter Property="ClickMode" Value="Release" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Foreground" Value="{DynamicResource CalendarViewCalendarItemForeground}" />
+    <Setter Property="Background" Value="{DynamicResource CalendarViewCalendarItemBackground}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource CalendarViewCalendarItemBorderBrush}" />
+    <!-- CalendarItemBorderThickness of DefaultCalendarViewStyle. -->
+    <Setter Property="BorderThickness" Value="1" />
+    <!-- MonthYearItemFontFamily (XamlAutoFontFamily) and MonthYearItemFontSize of DefaultCalendarViewStyle. -->
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontSize" Value="{DynamicResource CalendarViewMonthYearItemFontSize}" />
+    <Setter Property="FontWeight" Value="Normal" />
+    <Setter Property="CornerRadius" Value="36.75" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="VerticalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="ClipToBounds" Value="False" />
+    <Setter Property="FocusAdorner" Value="{x:Null}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <Border x:Name="OuterBorder"
+                  Background="{TemplateBinding Background}"
+                  BorderBrush="{TemplateBinding BorderBrush}"
+                  BackgroundSizing="InnerBorderEdge"
+                  BorderThickness="{TemplateBinding BorderThickness}"
+                  CornerRadius="{TemplateBinding CornerRadius}"
+                  IsHitTestVisible="False" />
+          <Panel Margin="{TemplateBinding BorderThickness}">
+            <ContentPresenter x:Name="PART_ContentPresenter"
+                              Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                              Foreground="{TemplateBinding Foreground}"
+                              Margin="{TemplateBinding Padding}"
+                              Padding="{DynamicResource CalendarViewMonthYearItemMargin}"
+                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+          </Panel>
+          <Border x:Name="FocusVisual"
+                  Margin="-3"
+                  BorderThickness="2"
+                  BorderBrush="{DynamicResource CalendarViewFocusVisualPrimaryBrush}"
+                  CornerRadius="39.75"
+                  IsHitTestVisible="False"
+                  IsVisible="False">
+            <Border BorderThickness="1"
+                    BorderBrush="{DynamicResource CalendarViewFocusVisualSecondaryBrush}"
+                    CornerRadius="37.75" />
+          </Border>
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- Hovered -->
+    <Style Selector="^:pointerover /template/ Border#OuterBorder">
+      <Setter Property="Background" Value="{DynamicResource CalendarViewCalendarItemHoverBackground}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource CalendarViewHoverBorderBrush}" />
+    </Style>
+    <!-- Pressed -->
+    <Style Selector="^:pressed">
+      <Style Selector="^ /template/ Border#OuterBorder">
+        <Setter Property="Background" Value="{DynamicResource CalendarViewCalendarItemPressedBackground}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource CalendarViewPressedBorderBrush}" />
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource CalendarViewPressedForeground}" />
+      </Style>
+    </Style>
+    <!-- Out of scope (the years outside the decade) -->
+    <Style Selector="^:inactive">
+      <Style Selector="^ /template/ Border#OuterBorder">
+        <Setter Property="Background" Value="{DynamicResource CalendarViewOutOfScopeBackground}" />
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource CalendarViewOutOfScopeForeground}" />
+      </Style>
+    </Style>
+    <Style Selector="^:inactive:pointerover">
+      <Style Selector="^ /template/ Border#OuterBorder">
+        <Setter Property="Background" Value="{DynamicResource CalendarViewCalendarItemHoverBackground}" />
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource CalendarViewOutOfScopeHoverForeground}" />
+      </Style>
+    </Style>
+    <Style Selector="^:inactive:pressed">
+      <Style Selector="^ /template/ Border#OuterBorder">
+        <Setter Property="Background" Value="{DynamicResource CalendarViewCalendarItemPressedBackground}" />
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource CalendarViewOutOfScopePressedForeground}" />
+      </Style>
+    </Style>
+    <!-- The month or year of the displayed date: the today state of the chrome; no border while enabled. -->
+    <Style Selector="^:selected">
+      <Style Selector="^ /template/ Border#OuterBorder">
+        <Setter Property="Background" Value="{DynamicResource CalendarViewTodayBackground}" />
+        <Setter Property="BorderBrush" Value="{x:Null}" />
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource CalendarViewTodayForeground}" />
+        <Setter Property="FontWeight" Value="{DynamicResource CalendarViewTodayFontWeight}" />
+      </Style>
+    </Style>
+    <Style Selector="^:selected:pointerover /template/ Border#OuterBorder">
+      <Setter Property="Background" Value="{DynamicResource CalendarViewTodayHoverBackground}" />
+    </Style>
+    <Style Selector="^:selected:pressed /template/ Border#OuterBorder">
+      <Setter Property="Background" Value="{DynamicResource CalendarViewTodayPressedBackground}" />
+    </Style>
+    <!-- Disabled -->
+    <Style Selector="^:disabled">
+      <Style Selector="^ /template/ Border#OuterBorder">
+        <Setter Property="Background" Value="{DynamicResource CalendarViewCalendarItemDisabledBackground}" />
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource CalendarViewDisabledForeground}" />
+      </Style>
+    </Style>
+    <Style Selector="^:selected:disabled">
+      <Style Selector="^ /template/ Border#OuterBorder">
+        <Setter Property="Background" Value="{DynamicResource CalendarViewTodayDisabledBackground}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource CalendarViewSelectedDisabledBorderBrush}" />
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource CalendarViewTodayForeground}" />
+      </Style>
+    </Style>
+
+    <!-- The focus visual of the item that has the focus of the calendar. -->
+    <Style Selector="^:btnfocused /template/ Border#FocusVisual">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

@@ -332,7 +332,12 @@ fn collect(root: &Path, directory: &Path, found: &mut Vec<(String, PathBuf)>) {
 
 fn read_excluded(root: &Path, assets: &[(String, PathBuf)]) -> Vec<Excluded> {
     let excluded_path = root.join(EXCLUDED_LIST);
-    println!("cargo::rerun-if-changed={}", excluded_path.display());
+    // Cargo treats a missing watched file as dirty on every invocation. `collect`
+    // already watches the crate directory, so creating the optional list is still
+    // detected; an existing list remains an explicit input for edits and deletion.
+    if excluded_path.exists() {
+        println!("cargo::rerun-if-changed={}", excluded_path.display());
+    }
     let mut excluded = Vec::new();
     for line in fs::read_to_string(&excluded_path).unwrap_or_default().lines() {
         let line = line.trim();

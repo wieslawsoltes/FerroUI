@@ -1,0 +1,36 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Grid RowDefinitions="Auto,*" ColumnDefinitions="280,*">
+    <Border Grid.ColumnSpan="2" Padding="20,14" BorderThickness="0,0,0,1"
+            BorderBrush="{DynamicResource DividerStrokeColorDefaultBrush}">
+      <Grid ColumnDefinitions="*,Auto">
+        <StackPanel Orientation="Horizontal" Spacing="12">
+          <TextBlock Text="WinUI Gallery" FontSize="24" FontWeight="SemiBold" />
+          <TextBlock Text="FerroUI" VerticalAlignment="Center" Opacity="0.7" />
+        </StackPanel>
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+          <Button x:Name="Back" Content="Back" AutomationProperties.Name="Go back" />
+          <Button x:Name="Forward" Content="Forward" AutomationProperties.Name="Go forward" />
+          <ComboBox x:Name="Theme" Width="112" AutomationProperties.Name="Application theme">
+            <x:String>System</x:String><x:String>Light</x:String><x:String>Dark</x:String>
+          </ComboBox>
+        </StackPanel>
+      </Grid>
+    </Border>
+    <Border Grid.Row="1" BorderThickness="0,0,1,0"
+            BorderBrush="{DynamicResource DividerStrokeColorDefaultBrush}">
+      <Grid RowDefinitions="Auto,Auto,Auto,*" Margin="12">
+        <TextBox x:Name="Search" PlaceholderText="Search controls and features"
+                 AutomationProperties.Name="Search the WinUI Gallery" />
+        <ComboBox x:Name="Category" Grid.Row="1" Margin="0,10,0,6"
+                  HorizontalAlignment="Stretch" AutomationProperties.Name="Gallery category" />
+        <TextBlock x:Name="ResultCount" Grid.Row="2" Margin="4,4,4,8" Opacity="0.7" />
+        <ListBox x:Name="Pages" Grid.Row="3" AutomationProperties.Name="Gallery pages" />
+      </Grid>
+    </Border>
+    <ScrollViewer x:Name="PageScroll" Grid.Row="1" Grid.Column="1" HorizontalScrollBarVisibility="Disabled"
+                  VerticalScrollBarVisibility="Auto">
+      <StackPanel x:Name="PageBody" Margin="32,24" Spacing="16" />
+    </ScrollViewer>
+  </Grid>
+</UserControl>

@@ -1,0 +1,28 @@
+<!-- Native adaptation of SampleSupport/SamplePages/CardPage.xaml. -->
+<Grid xmlns="https://github.com/ferroui"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" RowDefinitions="Auto,*">
+  <TextBlock x:Name="CardImageErrors" TextWrapping="Wrap" MaxLines="3"
+             Margin="0,0,0,12" IsVisible="False" />
+  <ScrollViewer x:Name="CardScroll" Grid.Row="1">
+    <WrapPanel x:Name="CardItems" ItemWidth="166" ItemHeight="126" />
+  </ScrollViewer>
+  <Grid x:Name="SmokeGrid" Grid.Row="1" Background="#66000000" IsVisible="False">
+    <Border x:Name="DestinationElement" Width="400" Height="320"
+            HorizontalAlignment="Center" VerticalAlignment="Center"
+            BorderBrush="#70808080" BorderThickness="1" CornerRadius="8"
+            Background="{DynamicResource CardBackgroundFillColorDefaultBrush}">
+      <Grid RowDefinitions="*,Auto">
+        <Image x:Name="DetailImage" Stretch="UniformToFill" />
+        <TextBlock x:Name="DetailImageError" TextWrapping="Wrap" Margin="16,48,16,16"
+                   VerticalAlignment="Center" IsVisible="False" />
+        <Button x:Name="CloseCard" Content="×" Width="36" Height="36" Margin="8"
+                HorizontalAlignment="Right" VerticalAlignment="Top"
+                AutomationProperties.Name="Close" ToolTip.Tip="Close" />
+        <StackPanel Grid.Row="1" Margin="16,12" Spacing="4">
+          <TextBlock x:Name="CardTitle" FontSize="20" />
+          <TextBlock x:Name="CardDescription" MaxLines="3" TextWrapping="Wrap" />
+        </StackPanel>
+      </Grid>
+    </Border>
+  </Grid>
+</Grid>

@@ -118,6 +118,17 @@ impl IVelloSceneSink for VelloWebGlSceneSink {
         self.images.clear();
     }
 
+    fn fill_glyph_outline(
+        &mut self,
+        path: &BezPath,
+        transform: Affine,
+        paint: &VelloScenePaint,
+        anti_alias: bool,
+        prepare: &dyn Fn(Affine) -> Option<(std::sync::Arc<BezPath>, Affine)>,
+    ) {
+        super::fill_cached_glyph_outline(self, path, transform, paint, anti_alias, prepare);
+    }
+
     fn fill(
         &mut self,
         path: &BezPath,

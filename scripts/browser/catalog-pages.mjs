@@ -22,6 +22,11 @@ export const STATE_TIMEOUT = 20_000;
 export const DRAWER_EDGE = 260;
 export const inDrawer = (e) => e.hit && e.x + e.width <= DRAWER_EDGE;
 export const inContent = (e) => e.hit && e.x >= DRAWER_EDGE;
+// The top row of the shell: the title bar of the catalog (WinUI's TitleBar), with the toggle
+// button of the pane and the search box, is shown in a browser, which has no window title bar.
+export const TITLE_BAR_HEIGHT = 48;
+// The toggle button of the pane: the one of the title bar of the shell.
+export const isPaneToggle = (e) => e.name === "PART_PaneToggleButton" && e.hit;
 
 /** The `name=value` pairs of a line an export of the host answers with. */
 export const pairs = (line) => Object.fromEntries(line.split(";").map((pair) => {
@@ -120,8 +125,9 @@ export async function navigate(page, text, header = text) {
     await page.clickElement(await page.find(text, inDrawer));
     // The navigation page ignores a navigation while it runs one (as upstream): wait until it has finished.
     await page.until(`the page "${header}" is shown`, (s) => s.page === header && !s.navigating
-        // The title bar of the navigation page shows the header of the page.
-        && s.elements.some((e) => e.type === "TextBlock" && e.text === header && e.hit && e.y < 48 && e.x >= DRAWER_EDGE));
+        // The title bar of the navigation page shows the header of the page, below the title bar
+        // of the shell (TITLE_BAR_HEIGHT).
+        && s.elements.some((e) => e.type === "TextBlock" && e.text === header && e.hit && e.y < TITLE_BAR_HEIGHT + 48 && e.x >= DRAWER_EDGE));
 }
 
 /** Waits until no frame has been drawn for `quiet` ms and returns what the view reports then; null when it keeps drawing. */

@@ -1,0 +1,52 @@
+<!--
+  Android Material 3 Expressive visual system (AndroidX Material3 1.5.0-beta02,
+  e4d933c98df7baa7ea2b83eea6e086915961e0ff), adapted to FerroUI control contracts.
+  Derived structural templates: FerroUI WinUI theme, Copyright (c) Microsoft
+  Corporation, MIT; retained notices in NOTICE.md. See docs/porting/material-theme.md.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Margin="20" Width="200">
+      <TableViewColumnHeader Content="Header"/>
+    </Border>
+  </Design.PreviewWith>
+  <ControlTheme x:Key="TableViewColumnHeaderResizerStyle" TargetType="Thumb">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource ResizeGripperSeparatorBrush}"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="LayoutRoot" Background="{TemplateBinding Background}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+          <Border x:Name="Separator" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{DynamicResource ResizeGripperSeparatorThickness}" Opacity="0" IsHitTestVisible="False" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:pointerover /template/ Border#Separator">
+      <Setter Property="Opacity" Value="1"/>
+    </Style>
+    <Style Selector="^:pressed /template/ Border#Separator">
+      <Setter Property="Opacity" Value="1"/>
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type TableViewColumnHeader}" TargetType="TableViewColumnHeader">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource TabularSurfaceGridLineBrush}"/>
+    <Setter Property="BorderThickness" Value="0,0,1,0"/>
+    <Setter Property="Padding" Value="{DynamicResource TableViewHeaderCellPadding}"/>
+    <Setter Property="MinHeight" Value="48"/>
+    <Setter Property="FontSize" Value="{DynamicResource TableViewHeaderFontSize}"/>
+    <Setter Property="FontWeight" Value="{DynamicResource TableViewHeaderFontWeight}"/>
+    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+    <Setter Property="VerticalContentAlignment" Value="Center"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel x:Name="HeaderCell">
+          <ContentPresenter x:Name="PART_ContentPresenter" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BackgroundSizing="InnerBorderEdge" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Padding="{TemplateBinding Padding}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+          <Thumb x:Name="PART_Resizer" Theme="{StaticResource TableViewColumnHeaderResizerStyle}" Width="{DynamicResource TableViewResizeGripperWidth}" HorizontalAlignment="Right" Cursor="SizeWestEast" IsEnabled="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Column?.CanUserEffectivelyResize, FallbackValue=False}"/>
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:nth-last-child(1) /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="BorderBrush" Value="Transparent"/>
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

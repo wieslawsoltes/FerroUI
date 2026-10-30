@@ -1,0 +1,4 @@
+<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <ScrollViewer Width="400" Height="200" HorizontalAlignment="Left" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"><StackPanel Width="600" Spacing="16"><TextBlock Text="Scroll to see all content" FontSize="24"/><Rectangle Fill="DodgerBlue" Height="150"/><Rectangle Fill="OrangeRed" Height="150"/><Rectangle Fill="SeaGreen" Height="150"/><TextBlock Text="End of content"/></StackPanel></ScrollViewer>
+</StackPanel>

@@ -1,0 +1,13 @@
+<!-- Adapted from CommandBarLabelsSide.txt in the pinned Gallery; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <CheckBox x:Name="Open" Content="Open command bar"/>
+  <CommandBar x:Name="Bar" Background="Transparent" IsOpen="{Binding IsChecked, ElementName=Open, Mode=TwoWay}" DefaultLabelPosition="Right">
+    <CommandBar.PrimaryCommands>
+      <CommandBarButton x:Name="Primary" Label="Add"><CommandBarButton.Icon><PathIcon Data="M 4,0 L 6,0 L 6,4 L 10,4 L 10,6 L 6,6 L 6,10 L 4,10 L 4,6 L 0,6 L 0,4 L 4,4 Z"/></CommandBarButton.Icon></CommandBarButton>
+      <CommandBarButton Label="Edit"/>
+      <CommandBarButton Label="Share"/>
+    </CommandBar.PrimaryCommands>
+    <CommandBar.SecondaryCommands><CommandBarButton Label="Settings" HotKey="Ctrl+I"/></CommandBar.SecondaryCommands>
+  </CommandBar>
+  <TextBlock x:Name="Output" Text="Clicked 0 times"/>
+</StackPanel>

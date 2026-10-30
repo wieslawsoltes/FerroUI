@@ -53,12 +53,16 @@ mod edge_mode;
 mod ellipse_geometry;
 mod fill_rule;
 mod geometry;
+mod geometry_path_data;
 mod geometry_builder;
 mod geometry_collection;
 mod geometry_group;
 mod gradient_brush;
 mod gradient_spread_method;
 mod gradient_stop;
+mod theme_shadow;
+#[cfg(test)]
+mod theme_shadow_tests;
 mod gradient_stops;
 mod i_brush;
 mod shared_brush;
@@ -133,12 +137,16 @@ pub use edge_mode::EdgeMode;
 pub use ellipse_geometry::EllipseGeometry;
 pub use fill_rule::FillRule;
 pub use geometry::{Geometry, GeometryImpl, GeometryImplExt, GeometryVTable};
+pub use geometry_path_data::{GeometryPath, GeometryPathData, GeometryPathSegment};
 pub use geometry_builder::{GeometryBuilder, RoundedRectKeypoints};
 pub use geometry_collection::GeometryCollection;
 pub use geometry_group::GeometryGroup;
 pub use gradient_brush::{GradientBrush, GradientBrushImpl, GradientBrushImplExt, GradientBrushVTable};
 pub use gradient_spread_method::GradientSpreadMethod;
 pub use gradient_stop::GradientStop;
+pub use theme_shadow::{
+    DropShadowRecipe, Shadow, ThemeShadow, ThemeShadowError, ThemeShadowTheme, UIElementWeakCollection,
+};
 pub use gradient_stops::GradientStops;
 pub use i_brush::IBrush;
 pub use shared_brush::{shared_brush_of, shared_pen_of, SharedBrush, SharedPen};
@@ -242,6 +250,7 @@ pub use effects::{
     BlurEffect, DropShadowDirectionEffect, DropShadowEffect, DropShadowEffectBase, Effect, EffectExtensions,
     IBlurEffect, IDirectionDropShadowEffect, IDropShadowEffect, IEffect, IImmutableEffect, IMutableEffect,
     ImmutableBlurEffect, ImmutableDropShadowDirectionEffect, ImmutableDropShadowEffect,
+    ImmutableLuminanceToAlphaEffect,
 };
 pub use experimental_acrylic_material::ExperimentalAcrylicMaterial;
 pub use geometry_drawing::GeometryDrawing;
@@ -272,6 +281,7 @@ mod baseline_pixel_alignment;
 mod character_hit;
 mod composite_font_family_key;
 mod font_fallback;
+mod font_fallback_mapping;
 mod font_family;
 mod font_feature;
 mod font_feature_collection;
@@ -288,6 +298,7 @@ mod font_simulations;
 mod font_source_identifier;
 mod font_stretch;
 mod font_style;
+mod font_typography;
 mod font_variation_settings;
 mod font_weight;
 mod glyph_bounds;
@@ -325,6 +336,7 @@ pub use baseline_alignment::BaselineAlignment;
 pub use baseline_pixel_alignment::BaselinePixelAlignment;
 pub use character_hit::CharacterHit;
 pub use font_fallback::FontFallback;
+pub use font_fallback_mapping::FontFallbackMapping;
 pub use font_family::FontFamily;
 pub use font_feature::FontFeature;
 pub use font_feature_collection::FontFeatureCollection;
@@ -334,6 +346,10 @@ pub use font_metrics::FontMetrics;
 pub use font_simulations::FontSimulations;
 pub use font_stretch::FontStretch;
 pub use font_style::FontStyle;
+pub use font_typography::{
+    FontCapitals, FontEastAsianLanguage, FontEastAsianWidths, FontFraction, FontNumeralAlignment, FontNumeralStyle,
+    FontVariants,
+};
 pub use font_variation_settings::{FontVariation, FontVariationSettings};
 pub use font_weight::FontWeight;
 pub(crate) use glyph_bounds::GlyphBounds;

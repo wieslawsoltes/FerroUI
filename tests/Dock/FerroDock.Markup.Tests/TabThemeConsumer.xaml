@@ -1,0 +1,29 @@
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            xmlns:d="using:FerroDock.Ferro.Controls"
+            x:DataType="Panel" x:CompileBindings="True">
+  <StackPanel.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="ferres://FerroDock.Ferro.Themes.Fluent/Accents/Fluent.xaml" />
+        <ResourceInclude Source="ferres://FerroDock.Ferro.Themes.Fluent/Controls/ControlStrings.xaml" />
+        <ResourceInclude Source="ferres://FerroDock.Ferro.Themes.Fluent/Controls/WindowChromeResources.xaml" />
+        <ResourceInclude Source="ferres://FerroDock.Ferro.Themes.Fluent/Controls/ScrollViewer.xaml" />
+        <ResourceInclude Source="ferres://FerroDock.Ferro.Themes.Fluent/Controls/ToolChromeControl.xaml" />
+        <ResourceInclude Source="ferres://FerroDock.Ferro.Themes.Fluent/Controls/DocumentControl.xaml" />
+        <ResourceInclude Source="ferres://FerroDock.Ferro.Themes.Fluent/Controls/ToolControl.xaml" />
+        <ResourceInclude Source="ferres://FerroDock.Ferro.Themes.Fluent/Controls/DocumentDockControl.xaml" />
+        <ResourceInclude Source="ferres://FerroDock.Ferro.Themes.Fluent/Controls/ToolDockControl.xaml" />
+        <ResourceInclude Source="ferres://FerroDock.Ferro.Themes.Fluent/Controls/DocumentTabStripItem.xaml" />
+        <ResourceInclude Source="ferres://FerroDock.Ferro.Themes.Fluent/Controls/DocumentTabStrip.xaml" />
+        <ResourceInclude Source="ferres://FerroDock.Ferro.Themes.Fluent/Controls/ToolTabStripItem.xaml" />
+        <ResourceInclude Source="ferres://FerroDock.Ferro.Themes.Fluent/Controls/ToolTabStrip.xaml" />
+        <ResourceInclude Source="ferres://FerroDock.Ferro.Themes.Fluent/Controls/ToolPinItemControl.xaml" />
+        <ResourceInclude Source="ferres://FerroDock.Ferro.Themes.Fluent/Controls/ToolPinnedControl.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </StackPanel.Resources>
+  <d:DocumentTabStrip Height="40" />
+  <d:ToolTabStrip Height="40" />
+  <d:ToolPinnedControl Height="100" />
+</StackPanel>

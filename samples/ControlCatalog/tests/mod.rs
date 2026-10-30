@@ -32,6 +32,7 @@ mod frame_benchmark;
 mod hot_reload;
 mod interaction_controls;
 mod interaction_tour;
+mod items_repeater_page;
 mod navigation_pages_b;
 mod navigation_pages_a;
 mod numeric_up_down_page;
@@ -46,3 +47,6 @@ mod view_models;
 mod documents {
     include!(concat!(env!("OUT_DIR"), "/document_tests.rs"));
 }
+
+#[cfg(feature = "macos-theme")]
+mod macos_theme_review;

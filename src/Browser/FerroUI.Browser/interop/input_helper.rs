@@ -282,6 +282,14 @@ pub fn on_before_input(top_level_id: i32, input_type: &str, start: i32, end: i32
     }
 }
 
+/// Text inserted by the browser without a keydown, for example by an emoji
+/// picker, dictation, or a virtual keyboard.
+#[wasm_bindgen(js_name = InputHelper_OnTextInput)]
+pub fn on_text_input(top_level_id: i32, data: Option<String>) -> bool {
+    BrowserTopLevelImpl::try_get_top_level(top_level_id)
+        .is_some_and(|top_level| top_level.input_handler().text_input_method().on_text_input(data.as_deref()))
+}
+
 #[wasm_bindgen(js_name = InputHelper_OnCompositionStart)]
 pub fn on_composition_start(top_level_id: i32) {
     if let Some(top_level) = BrowserTopLevelImpl::try_get_top_level(top_level_id) {

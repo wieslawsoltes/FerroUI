@@ -1,0 +1,89 @@
+<ResourceDictionary xmlns:fd="using:FerroDock.Ferro.Controls"
+                    xmlns:pc="using:FerroDock.Ferro.Converters"
+                    xmlns:sp="using:FerroDock.Settings" xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:dmc="using:FerroDock.Model.Controls"
+                    xmlns:core="using:FerroDock.Model.Core"
+                    x:DataType="dmc:IToolDock"
+                    x:CompileBindings="True">
+  <Design.PreviewWith>
+    <fd:ToolControl Width="300" Height="400" />
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="{x:Type fd:ToolControl}" TargetType="fd:ToolControl" x:DataType="dmc:IToolDock">
+
+    <Setter Property="(sp:DockProperties.IsDragEnabled)" Value="{Binding CanDrag}" />
+    <Setter Property="(sp:DockProperties.IsDropEnabled)" Value="{Binding CanDrop}" />
+    <Setter Property="(sp:DockProperties.DockGroup)" Value="{Binding DockGroup}" />
+    <Setter Property="MinWidth" Value="{Binding MinWidth}" />
+    <Setter Property="MaxWidth" Value="{Binding MaxWidth}" />
+    <Setter Property="MinHeight" Value="{Binding MinHeight}" />
+    <Setter Property="MaxHeight" Value="{Binding MaxHeight}" />
+
+    <Setter Property="IconTemplate">
+      <DataTemplate DataType="core:IDockable" x:DataType="core:IDockable">
+        <Panel />
+      </DataTemplate>
+    </Setter>
+
+    <Setter Property="HeaderTemplate">
+      <DataTemplate DataType="core:IDockable" x:DataType="core:IDockable">
+        <TextBlock Text="{Binding Title}" Padding="{DynamicResource DockHeaderContentPadding}" />
+      </DataTemplate>
+    </Setter>
+
+    <Setter Property="ModifiedTemplate">
+      <DataTemplate DataType="core:IDockable" x:DataType="core:IDockable">
+        <TextBlock VerticalAlignment="Center"
+                   Text="*"
+                   Margin="{DynamicResource DockModifiedIndicatorMargin}" />
+      </DataTemplate>
+    </Setter>
+
+    <Setter Property="Template">
+      <ControlTemplate>
+        <DockPanel x:Name="PART_DockPanel"
+                   sp:DockProperties.IsDropArea="True"
+                   sp:DockProperties.IsDockTarget="True">
+          <fd:ToolTabStrip x:Name="PART_TabStrip"
+                        ItemsSource="{Binding VisibleDockables}"
+                        SelectedItem="{Binding ActiveDockable, Mode=TwoWay}"
+                        IconTemplate="{TemplateBinding IconTemplate}"
+                        HeaderTemplate="{TemplateBinding HeaderTemplate}"
+                        ModifiedTemplate="{TemplateBinding ModifiedTemplate}"
+                        DockPanel.Dock="Bottom"
+                        sp:DockProperties.IsDropArea="True"
+                        sp:DockProperties.DockAdornerHost="{Binding #PART_DockPanel}" />
+          <Border x:Name="PART_Border">
+            <fd:DockableControl DataContext="{Binding ActiveDockable}"
+                             TrackingMode="Visible">
+              <DeferredContentControl x:Name="PART_ContentPresenter"
+                                      Content="{Binding}"
+                                      HorizontalAlignment="Stretch"
+                                      VerticalAlignment="Stretch">
+                <DeferredContentControl.ContentTemplate>
+                  <ControlRecyclingDataTemplate Parent="{Binding #PART_ContentPresenter}" />
+                </DeferredContentControl.ContentTemplate>
+              </DeferredContentControl>
+            </fd:DockableControl>
+          </Border>
+        </DockPanel>
+      </ControlTemplate>
+    </Setter>
+
+    <Style Selector="^/template/ DockPanel#PART_DockPanel">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="ZIndex" Value="1" />
+    </Style>
+
+    <Style Selector="^/template/ Border#PART_Border">
+      <Setter Property="ZIndex" Value="-1" />
+      <Setter Property="Background" Value="{DynamicResource DockSurfacePanelBrush}" />
+      <Setter Property="Margin" Value="0" />
+      <Setter Property="BorderBrush" Value="{DynamicResource DockBorderSubtleBrush}" />
+      <Setter Property="BorderThickness" Value="1 0 1 0" />
+    </Style>
+
+  </ControlTheme>
+
+</ResourceDictionary>

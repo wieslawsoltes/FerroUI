@@ -22,6 +22,7 @@ use xamlx::type_system::{IXamlConstructor, IXamlField, IXamlMethod, IXamlType};
 
 use crate::runtime::type_system::{
     DeclaredMember, RuntimeConstructor, RuntimeField, RuntimeFieldValue, RuntimeInvoker, RuntimeMethod, RuntimeType,
+    RuntimeTypeOrigin,
 };
 
 use super::emit_types::{
@@ -137,6 +138,14 @@ impl EmitMarkup for RuntimeMarkup {
     fn handle_is_shared(&self) -> bool {
         self.0.handle().is_some_and(|handle| handle.name().starts_with("alloc::rc::Rc<"))
     }
+    fn value_is_shared(&self) -> bool {
+        self.0.value.is_some_and(|value| value().name().starts_with("alloc::rc::Rc<"))
+    }
+    fn handle_is_own_trait(&self) -> bool {
+        if !self.0.rust_path_is_trait() { return false; }
+        let (Some(handle), Some(owner)) = (self.0.handle(), self.0.owner_rust_name) else { return false };
+        handle.name() == format!("alloc::rc::Rc<{}>", owner())
+    }
     fn nullable(&self) -> Option<TypeKey<'_>> {
         self.0.nullable.map(|nullable| TypeKey::Id(nullable().id()))
     }
@@ -152,12 +161,25 @@ impl EmitMarkup for RuntimeMarkup {
     fn value(&self) -> Option<TypeKey<'_>> {
         self.0.value.map(|value| TypeKey::Id(value().id()))
     }
+    fn value_rust_type(&self) -> Option<String> {
+        let value = self.0.value?();
+        if let Some(path) = rust_path_of_type(value.id()) {
+            return Some(format!("::{}", path.trim_start_matches("::")));
+        }
+        let owner = self.0.owner_rust_name?();
+        let path = match self.0.rust_path_is_trait() {
+            true => format!("dyn {}", self.0.rust_path()?),
+            false => self.0.rust_path()?.to_string(),
+        };
+        super::emit_types::markup_value_rust_type(value.name(), owner, &path)
+    }
     fn is_flags(&self) -> bool {
         self.0.is_flags
     }
     fn enum_members(&self) -> Vec<EnumMember<'_>> {
         self.0.enum_members.iter().map(|member| EnumMember { name: member.name, value: member.value, rust_variant: member.rust_variant }).collect()
     }
+    fn enum_i32_factory(&self) -> Option<&str> { self.0.enum_i32_factory }
     fn flags_compose(&self, value: i64) -> bool {
         self.0.enum_from_value.is_some_and(|from_value| from_value(value).is_some())
     }
@@ -198,6 +220,17 @@ impl EmitProperty for RuntimeEmitProperty {
 
 fn runtime_type(type_: &dyn IXamlType) -> Option<&RuntimeType> {
     type_.as_any().downcast_ref::<RuntimeType>()
+}
+
+/// The metadata a crate declares for a type of the table of runtime library types
+/// (`System.Collections.IList`, the items source handle): the type is that metadata, with
+/// its handles, as the build-time type system answers.
+fn table_type_markup(runtime: &RuntimeType, type_: &dyn IXamlType) -> Option<&'static MarkupType> {
+    if !matches!(runtime.origin(), RuntimeTypeOrigin::Synthetic) {
+        return None;
+    }
+    let namespace = type_.namespace().filter(|namespace| namespace.starts_with("System"))?;
+    MarkupType::find(&namespace, &type_.name()).filter(|found| found.generic.is_none())
 }
 
 fn emit_function(emit: ferroui_base::metadata::MarkupEmit) -> EmitFunction {
@@ -306,12 +339,19 @@ impl EmitTypes for RuntimeEmitTypes {
 
     fn metadata_of(&self, type_: &dyn IXamlType) -> Option<&dyn EmitMarkup> {
         let runtime = runtime_type(type_)?;
-        let found = runtime.markup().or_else(|| MarkupType::find_by_handle(runtime.handle()?.id()))?;
+        let found = runtime
+            .markup()
+            .or_else(|| MarkupType::find_by_handle(runtime.handle()?.id()))
+            .or_else(|| table_type_markup(runtime, type_))?;
         Some(markup(found))
     }
 
     fn handle_of(&self, type_: &dyn IXamlType) -> Option<Handle<'_>> {
-        runtime_type(type_).and_then(RuntimeType::handle).map(handle_of)
+        let runtime = runtime_type(type_)?;
+        match runtime.handle() {
+            Some(handle) => Some(handle_of(handle)),
+            None => table_type_markup(runtime, type_).and_then(|found| found.handles.first()).map(|handle| handle_of(handle())),
+        }
     }
 
     fn class_by_handle(&self, key: TypeKey<'_>) -> Option<(&dyn EmitClass, bool)> {

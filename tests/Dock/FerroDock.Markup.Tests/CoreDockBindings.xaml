@@ -1,0 +1,10 @@
+<StackPanel xmlns="https://github.com/ferroui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:core="clr-namespace:FerroDock.Model.Core;assembly=FerroDock.Model"
+ x:DataType="core:IDock">
+ <TextBlock Text="{Binding Title}" />
+ <TextBlock Text="{Binding ActiveDockable.Title}" />
+ <TextBlock Text="{Binding VisibleDockables.Count}" />
+ <CheckBox IsChecked="{Binding IsActive, Mode=TwoWay}" />
+ <Button Command="{Binding Navigate}" CommandParameter="{Binding DefaultDockable}" />
+</StackPanel>

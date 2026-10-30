@@ -92,6 +92,19 @@ impl SliderTests {
         let current_thumb_rect = thumb.rect();
         assert!(current_thumb_rect.left() < initial_thumb_rect.left());
     }
+
+    /// Not in upstream (DEVIATIONS.md, Automation tests): UI Automation reads the small and the
+    /// large change of the slider (1 and 10, the defaults of `RangeBase`), where the reference
+    /// answers 1 for both.
+    pub fn horizontal_reports_its_small_and_large_change(&self) {
+        let slider = self.session().find_element_by_accessibility_id("HorizontalSlider");
+        let read = |name: &str| {
+            parse_double(&slider.get_attribute(name).unwrap_or_else(|| panic!("the slider has no {name}")))
+        };
+
+        assert_eq!(1.0, read("RangeValue.SmallChange"));
+        assert_eq!(10.0, read("RangeValue.LargeChange"));
+    }
 }
 
 pub fn tests(tests: &mut Tests) {
@@ -117,5 +130,11 @@ pub fn tests(tests: &mut Tests) {
         .fact(
             "horizontal_changes_value_when_clicking_decrease_button",
             SliderTests::horizontal_changes_value_when_clicking_decrease_button,
+        )
+        .add(
+            "horizontal_reports_its_small_and_large_change",
+            TestPlatforms::WINDOWS,
+            None,
+            SliderTests::horizontal_reports_its_small_and_large_change,
         );
 }

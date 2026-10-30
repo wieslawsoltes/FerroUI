@@ -1,0 +1,580 @@
+// The COM interfaces of the Windows Runtime the ink services of Windows (`windows_ink_services.rs`)
+// call, for the MicroCom generator (src/tools/MicroCom.CodeGenerator), as the WinUI integration
+// declares its own in `src/Windows/FerroUI.WinUI/interop/winui.idl`. WinUI has no such file: its
+// ink control calls the ink engine of the system in C++/WinRT.
+//
+// Every interface below is the one of the metadata (`Windows.Foundation.UniversalApiContract.winmd`
+// and `Windows.Foundation.FoundationContract.winmd` of the Windows SDK 10.0.19041), with its
+// identifier and its methods in the order of the vtable: the ink engine
+// (`Windows.UI.Input.Inking`), the in-memory stream and its reader and writer
+// (`Windows.Storage.Streams`), and the collections and asynchronous operations of
+// `Windows.Foundation` the services use. The clipboard is the ink engine's own
+// (`InkStrokeContainer.CopySelectedToClipboard` and `PasteFromClipboard`), so no interface of
+// `Windows.ApplicationModel.DataTransfer` is needed.
+//
+// A property is a `[propget]` and a `[propput]` method; a runtime class is passed as its default
+// interface; a method the services do not call keeps its slot with `void*` for an interface and
+// `INT32` for an enumeration the file does not declare. A parameterized interface or delegate is
+// declared for each instance the services use, under a name of its own, with the identifier the
+// Windows Runtime derives from its signature (the comment above it; a test of the crate derives
+// it again).
+@rust-types-from super
+@rust-map HSTRING isize
+@rust-map GUID Guid
+@rust-map boolean u8
+@rust-map BYTE u8
+@rust-map INT16 i16
+@rust-map UINT16 u16
+@rust-map INT32 i32
+@rust-map UINT32 u32
+@rust-map INT64 i64
+@rust-map UINT64 u64
+@rust-map FLOAT f32
+@rust-map DOUBLE f64
+
+enum TrustLevel
+{
+    BaseTrust,
+    PartialTrust,
+    FullTrust
+}
+
+// Enumerations
+
+// Windows.Foundation.AsyncStatus (int32)
+enum AsyncStatus
+{
+    Canceled = 2,
+    Completed = 1,
+    Error = 3,
+    Started = 0,
+}
+// Windows.UI.Input.Inking.PenTipShape (int32)
+enum PenTipShape
+{
+    Circle = 0,
+    Rectangle = 1,
+}
+// Windows.UI.Input.Inking.InkDrawingAttributesKind (int32)
+enum InkDrawingAttributesKind
+{
+    Default = 0,
+    Pencil = 1,
+}
+// Windows.UI.Input.Inking.InkPersistenceFormat (int32)
+enum InkPersistenceFormat
+{
+    GifWithEmbeddedIsf = 0,
+    Isf = 1,
+}
+// Windows.UI.Input.Inking.InkRecognitionTarget (int32)
+enum InkRecognitionTarget
+{
+    All = 0,
+    Selected = 1,
+    Recent = 2,
+}
+
+// Structures
+
+// Windows.Foundation.Point
+struct Point
+{
+    FLOAT X;
+    FLOAT Y;
+}
+// Windows.Foundation.Size
+struct Size
+{
+    FLOAT Width;
+    FLOAT Height;
+}
+// Windows.Foundation.Rect
+struct Rect
+{
+    FLOAT X;
+    FLOAT Y;
+    FLOAT Width;
+    FLOAT Height;
+}
+// Windows.UI.Color
+struct Color
+{
+    BYTE A;
+    BYTE R;
+    BYTE G;
+    BYTE B;
+}
+// Windows.Foundation.Numerics.Matrix3x2
+struct Matrix3x2
+{
+    FLOAT M11;
+    FLOAT M12;
+    FLOAT M21;
+    FLOAT M22;
+    FLOAT M31;
+    FLOAT M32;
+}
+
+// Interfaces and delegates
+
+[uuid(AF86E2E0-B12D-4c6a-9C5A-D7AA65101E90)]
+interface IInspectable : IUnknown
+{
+    HRESULT GetIids([out] UINT32* iidCount, [out] GUID** iids);
+    HRESULT GetRuntimeClassName([out] HSTRING* className);
+    HRESULT GetTrustLevel([out] TrustLevel* trustLevel);
+}
+
+// objidl.h: an object that may be called on any thread without marshaling. The handlers of the
+// completion of an asynchronous operation answer to it: the operation calls them on the thread it
+// completes on.
+[uuid(94ea2b94-e9cc-49e0-c0ff-ee64ca8f5b90)]
+interface IAgileObject : IUnknown
+{
+}
+
+// Windows.Foundation.IAsyncInfo
+[uuid(00000036-0000-0000-C000-000000000046)]
+interface IAsyncInfo : IInspectable
+{
+    [propget] HRESULT Id([out, retval] UINT32* result);
+    [propget] HRESULT Status([out, retval] AsyncStatus* result);
+    [propget] HRESULT ErrorCode([out, retval] INT32* result);
+    HRESULT Cancel();
+    HRESULT Close();
+}
+
+// Windows.UI.Input.Inking.IInkPoint
+[uuid(9F87272B-858C-46A5-9B41-D195970459FD)]
+interface IInkPoint : IInspectable
+{
+    [propget] HRESULT Position([out, retval] Point* result);
+    [propget] HRESULT Pressure([out, retval] FLOAT* result);
+}
+
+// Windows.UI.Input.Inking.IInkPoint2
+[uuid(FBA9C3F7-AE56-4D5C-BD2F-0AC45F5E4AF9)]
+interface IInkPoint2 : IInspectable
+{
+    [propget] HRESULT TiltX([out, retval] FLOAT* result);
+    [propget] HRESULT TiltY([out, retval] FLOAT* result);
+    [propget] HRESULT Timestamp([out, retval] UINT64* result);
+}
+
+// Windows.UI.Input.Inking.IInkPointFactory2
+[uuid(E0145E85-DAFF-45F2-AD69-050D8256A209)]
+interface IInkPointFactory2 : IInspectable
+{
+    HRESULT CreateInkPointWithTiltAndTimestamp(Point position, FLOAT pressure, FLOAT tiltX, FLOAT tiltY, UINT64 timestamp, [out, retval] IInkPoint** result);
+}
+
+// Windows.UI.Input.Inking.IInkDrawingAttributesPencilProperties
+[uuid(4F2534CB-2D86-41BB-B0E8-E4C2A0253C52)]
+interface IInkDrawingAttributesPencilProperties : IInspectable
+{
+    [propget] HRESULT Opacity([out, retval] DOUBLE* result);
+    [propput] HRESULT Opacity(DOUBLE value);
+}
+
+// Windows.UI.Input.Inking.IInkDrawingAttributes
+[uuid(97A2176C-6774-48AD-84F0-48F5A9BE74F9)]
+interface IInkDrawingAttributes : IInspectable
+{
+    [propget] HRESULT Color([out, retval] Color* result);
+    [propput] HRESULT Color(Color value);
+    [propget] HRESULT PenTip([out, retval] PenTipShape* result);
+    [propput] HRESULT PenTip(PenTipShape value);
+    [propget] HRESULT Size([out, retval] Size* result);
+    [propput] HRESULT Size(Size value);
+    [propget] HRESULT IgnorePressure([out, retval] boolean* result);
+    [propput] HRESULT IgnorePressure(boolean value);
+    [propget] HRESULT FitToCurve([out, retval] boolean* result);
+    [propput] HRESULT FitToCurve(boolean value);
+}
+
+// Windows.UI.Input.Inking.IInkDrawingAttributes2
+[uuid(7CAB6508-8EC4-42FD-A5A5-E4B7D1D5316D)]
+interface IInkDrawingAttributes2 : IInspectable
+{
+    [propget] HRESULT PenTipTransform([out, retval] Matrix3x2* result);
+    [propput] HRESULT PenTipTransform(Matrix3x2 value);
+    [propget] HRESULT DrawAsHighlighter([out, retval] boolean* result);
+    [propput] HRESULT DrawAsHighlighter(boolean value);
+}
+
+// Windows.UI.Input.Inking.IInkDrawingAttributes3
+[uuid(72020002-7D5B-4690-8AF4-E664CBE2B74F)]
+interface IInkDrawingAttributes3 : IInspectable
+{
+    [propget] HRESULT Kind([out, retval] InkDrawingAttributesKind* result);
+    [propget] HRESULT PencilProperties([out, retval] IInkDrawingAttributesPencilProperties** result);
+}
+
+// Windows.UI.Input.Inking.IInkDrawingAttributes4
+[uuid(EF65DC25-9F19-456D-91A3-BC3A3D91C5FB)]
+interface IInkDrawingAttributes4 : IInspectable
+{
+    [propget] HRESULT IgnoreTilt([out, retval] boolean* result);
+    [propput] HRESULT IgnoreTilt(boolean value);
+}
+
+// Windows.UI.Input.Inking.IInkDrawingAttributesStatics
+[uuid(F731E03F-1A65-4862-96CB-6E1665E17F6D)]
+interface IInkDrawingAttributesStatics : IInspectable
+{
+    HRESULT CreateForPencil([out, retval] IInkDrawingAttributes** result);
+}
+
+// Windows.UI.Input.Inking.IInkStroke
+[uuid(15144D60-CCE3-4FCF-9D52-11518AB6AFD4)]
+interface IInkStroke : IInspectable
+{
+    [propget] HRESULT DrawingAttributes([out, retval] IInkDrawingAttributes** result);
+    [propput] HRESULT DrawingAttributes(IInkDrawingAttributes* value);
+    [propget] HRESULT BoundingRect([out, retval] Rect* result);
+    [propget] HRESULT Selected([out, retval] boolean* result);
+    [propput] HRESULT Selected(boolean value);
+    [propget] HRESULT Recognized([out, retval] boolean* result);
+    HRESULT GetRenderingSegments([out, retval] void** result);
+    HRESULT Clone([out, retval] IInkStroke** result);
+}
+
+// Windows.UI.Input.Inking.IInkStroke2
+[uuid(5DB9E4F4-BAFA-4DE1-89D3-201B1ED7D89B)]
+interface IInkStroke2 : IInspectable
+{
+    [propget] HRESULT PointTransform([out, retval] Matrix3x2* result);
+    [propput] HRESULT PointTransform(Matrix3x2 value);
+    HRESULT GetInkPoints([out, retval] IVectorViewInkPoint** result);
+}
+
+// Windows.UI.Input.Inking.IInkStroke3
+[uuid(4A807374-9499-411D-A1C4-68855D03D65F)]
+interface IInkStroke3 : IInspectable
+{
+    [propget] HRESULT Id([out, retval] UINT32* result);
+    [propget] HRESULT StrokeStartedTime([out, retval] void** result);
+    [propput] HRESULT StrokeStartedTime(void* value);
+    [propget] HRESULT StrokeDuration([out, retval] void** result);
+    [propput] HRESULT StrokeDuration(void* value);
+}
+
+// Windows.UI.Input.Inking.IInkStrokeBuilder
+[uuid(82BBD1DC-1C63-41DC-9E07-4B4A70CED801)]
+interface IInkStrokeBuilder : IInspectable
+{
+    HRESULT BeginStroke(void* pointerPoint);
+    HRESULT AppendToStroke(void* pointerPoint, [out, retval] void** result);
+    HRESULT EndStroke(void* pointerPoint, [out, retval] IInkStroke** result);
+    HRESULT CreateStroke(void* points, [out, retval] IInkStroke** result);
+    HRESULT SetDefaultDrawingAttributes(IInkDrawingAttributes* drawingAttributes);
+}
+
+// Windows.UI.Input.Inking.IInkStrokeBuilder2
+[uuid(BD82BC27-731F-4CBC-BBBF-6D468044F1E5)]
+interface IInkStrokeBuilder2 : IInspectable
+{
+    HRESULT CreateStrokeFromInkPoints(IIterableInkPoint* inkPoints, Matrix3x2 transform, [out, retval] IInkStroke** result);
+}
+
+// Windows.UI.Input.Inking.IInkStrokeContainer
+[uuid(22ACCBC6-FAA9-4F14-B68C-F6CEE670AE16)]
+interface IInkStrokeContainer : IInspectable
+{
+    [propget] HRESULT BoundingRect([out, retval] Rect* result);
+    HRESULT AddStroke(IInkStroke* stroke);
+    HRESULT DeleteSelected([out, retval] Rect* result);
+    HRESULT MoveSelected(Point translation, [out, retval] Rect* result);
+    HRESULT SelectWithPolyLine(void* polyline, [out, retval] Rect* result);
+    HRESULT SelectWithLine(Point from, Point to, [out, retval] Rect* result);
+    HRESULT CopySelectedToClipboard();
+    HRESULT PasteFromClipboard(Point position, [out, retval] Rect* result);
+    HRESULT CanPasteFromClipboard([out, retval] boolean* result);
+    HRESULT LoadAsync(IInputStream* inputStream, [out, retval] IAsyncActionWithProgressUInt64** result);
+    HRESULT SaveAsync(IOutputStream* outputStream, [out, retval] IAsyncOperationWithProgressUInt32UInt32** result);
+    HRESULT UpdateRecognitionResults(void* recognitionResults);
+    HRESULT GetStrokes([out, retval] IVectorViewInkStroke** result);
+    HRESULT GetRecognitionResults([out, retval] IVectorViewInkRecognitionResult** result);
+}
+
+// Windows.UI.Input.Inking.IInkStrokeContainer3
+[uuid(3D07BEA5-BAEA-4C82-A719-7B83DA1067D2)]
+interface IInkStrokeContainer3 : IInspectable
+{
+    HRESULT SaveWithFormatAsync(IOutputStream* outputStream, InkPersistenceFormat inkPersistenceFormat, [out, retval] IAsyncOperationWithProgressUInt32UInt32** result);
+    HRESULT GetStrokeById(UINT32 id, [out, retval] IInkStroke** result);
+}
+
+// Windows.UI.Input.Inking.IInkRecognizer
+[uuid(077CCEA3-904D-442A-B151-AACA3631C43B)]
+interface IInkRecognizer : IInspectable
+{
+    [propget] HRESULT Name([out, retval] HSTRING* result);
+}
+
+// Windows.UI.Input.Inking.IInkRecognitionResult
+[uuid(36461A94-5068-40EF-8A05-2C2FB60908A2)]
+interface IInkRecognitionResult : IInspectable
+{
+    [propget] HRESULT BoundingRect([out, retval] Rect* result);
+    HRESULT GetTextCandidates([out, retval] IVectorViewString** result);
+    HRESULT GetStrokes([out, retval] IVectorViewInkStroke** result);
+}
+
+// Windows.UI.Input.Inking.IInkRecognizerContainer
+[uuid(A74D9A31-8047-4698-A912-F82A5085012F)]
+interface IInkRecognizerContainer : IInspectable
+{
+    HRESULT SetDefaultRecognizer(IInkRecognizer* recognizer);
+    HRESULT RecognizeAsync(IInkStrokeContainer* strokeCollection, InkRecognitionTarget recognitionTarget, [out, retval] IAsyncOperationVectorViewInkRecognitionResult** result);
+    HRESULT GetRecognizers([out, retval] IVectorViewInkRecognizer** result);
+}
+
+// Windows.Storage.Streams.IInputStream
+[uuid(905A0FE2-BC53-11DF-8C49-001E4FC686DA)]
+interface IInputStream : IInspectable
+{
+    HRESULT ReadAsync(void* buffer, UINT32 count, INT32 options, [out, retval] void** result);
+}
+
+// Windows.Storage.Streams.IOutputStream
+[uuid(905A0FE6-BC53-11DF-8C49-001E4FC686DA)]
+interface IOutputStream : IInspectable
+{
+    HRESULT WriteAsync(void* buffer, [out, retval] void** result);
+    HRESULT FlushAsync([out, retval] void** result);
+}
+
+// Windows.Storage.Streams.IRandomAccessStream
+[uuid(905A0FE1-BC53-11DF-8C49-001E4FC686DA)]
+interface IRandomAccessStream : IInspectable
+{
+    [propget] HRESULT Size([out, retval] UINT64* result);
+    [propput] HRESULT Size(UINT64 value);
+    HRESULT GetInputStreamAt(UINT64 position, [out, retval] IInputStream** result);
+    HRESULT GetOutputStreamAt(UINT64 position, [out, retval] IOutputStream** result);
+    [propget] HRESULT Position([out, retval] UINT64* result);
+    HRESULT Seek(UINT64 position);
+    HRESULT CloneStream([out, retval] IRandomAccessStream** result);
+    [propget] HRESULT CanRead([out, retval] boolean* result);
+    [propget] HRESULT CanWrite([out, retval] boolean* result);
+}
+
+// Windows.Storage.Streams.IDataReader
+[uuid(E2B50029-B4C1-4314-A4B8-FB813A2F275E)]
+interface IDataReader : IInspectable
+{
+    [propget] HRESULT UnconsumedBufferLength([out, retval] UINT32* result);
+    [propget] HRESULT UnicodeEncoding([out, retval] INT32* result);
+    [propput] HRESULT UnicodeEncoding(INT32 value);
+    [propget] HRESULT ByteOrder([out, retval] INT32* result);
+    [propput] HRESULT ByteOrder(INT32 value);
+    [propget] HRESULT InputStreamOptions([out, retval] UINT32* result);
+    [propput] HRESULT InputStreamOptions(UINT32 value);
+    HRESULT ReadByte([out, retval] BYTE* result);
+    HRESULT ReadBytes(UINT32 valueSize, BYTE* value);
+    HRESULT ReadBuffer(UINT32 length, [out, retval] void** result);
+    HRESULT ReadBoolean([out, retval] boolean* result);
+    HRESULT ReadGuid([out, retval] GUID* result);
+    HRESULT ReadInt16([out, retval] INT16* result);
+    HRESULT ReadInt32([out, retval] INT32* result);
+    HRESULT ReadInt64([out, retval] INT64* result);
+    HRESULT ReadUInt16([out, retval] UINT16* result);
+    HRESULT ReadUInt32([out, retval] UINT32* result);
+    HRESULT ReadUInt64([out, retval] UINT64* result);
+    HRESULT ReadSingle([out, retval] FLOAT* result);
+    HRESULT ReadDouble([out, retval] DOUBLE* result);
+    HRESULT ReadString(UINT32 codeUnitCount, [out, retval] HSTRING* result);
+    HRESULT ReadDateTime([out, retval] INT64* result);
+    HRESULT ReadTimeSpan([out, retval] INT64* result);
+    HRESULT LoadAsync(UINT32 count, [out, retval] IAsyncOperationUInt32** result);
+    HRESULT DetachBuffer([out, retval] void** result);
+    HRESULT DetachStream([out, retval] IInputStream** result);
+}
+
+// Windows.Storage.Streams.IDataReaderFactory
+[uuid(D7527847-57DA-4E15-914C-06806699A098)]
+interface IDataReaderFactory : IInspectable
+{
+    HRESULT CreateDataReader(IInputStream* inputStream, [out, retval] IDataReader** result);
+}
+
+// Windows.Storage.Streams.IDataWriter
+[uuid(64B89265-D341-4922-B38A-DD4AF8808C4E)]
+interface IDataWriter : IInspectable
+{
+    [propget] HRESULT UnstoredBufferLength([out, retval] UINT32* result);
+    [propget] HRESULT UnicodeEncoding([out, retval] INT32* result);
+    [propput] HRESULT UnicodeEncoding(INT32 value);
+    [propget] HRESULT ByteOrder([out, retval] INT32* result);
+    [propput] HRESULT ByteOrder(INT32 value);
+    HRESULT WriteByte(BYTE value);
+    HRESULT WriteBytes(UINT32 valueSize, [const] BYTE* value);
+    HRESULT WriteBuffer(void* buffer);
+    HRESULT WriteBufferRange(void* buffer, UINT32 start, UINT32 count);
+    HRESULT WriteBoolean(boolean value);
+    HRESULT WriteGuid(GUID value);
+    HRESULT WriteInt16(INT16 value);
+    HRESULT WriteInt32(INT32 value);
+    HRESULT WriteInt64(INT64 value);
+    HRESULT WriteUInt16(UINT16 value);
+    HRESULT WriteUInt32(UINT32 value);
+    HRESULT WriteUInt64(UINT64 value);
+    HRESULT WriteSingle(FLOAT value);
+    HRESULT WriteDouble(DOUBLE value);
+    HRESULT WriteDateTime(INT64 value);
+    HRESULT WriteTimeSpan(INT64 value);
+    HRESULT WriteString(HSTRING value, [out, retval] UINT32* result);
+    HRESULT MeasureString(HSTRING value, [out, retval] UINT32* result);
+    HRESULT StoreAsync([out, retval] IAsyncOperationUInt32** result);
+    HRESULT FlushAsync([out, retval] void** result);
+    HRESULT DetachBuffer([out, retval] void** result);
+    HRESULT DetachStream([out, retval] IOutputStream** result);
+}
+
+// Windows.Storage.Streams.IDataWriterFactory
+[uuid(338C67C2-8B84-4C2B-9C50-7B8767847A1F)]
+interface IDataWriterFactory : IInspectable
+{
+    HRESULT CreateDataWriter(IOutputStream* outputStream, [out, retval] IDataWriter** result);
+}
+
+// Collections
+
+// Windows.Foundation.Collections.IVectorView`1<Windows.UI.Input.Inking.InkStroke>: pinterface({bbe1fa4c-b0e3-4583-baef-1f1b2e483e56};rc(Windows.UI.Input.Inking.InkStroke;{15144d60-cce3-4fcf-9d52-11518ab6afd4}))
+[uuid(6744F458-B242-5767-A643-996E01DFF0E4)]
+interface IVectorViewInkStroke : IInspectable
+{
+    HRESULT GetAt(UINT32 index, [out, retval] IInkStroke** result);
+    [propget] HRESULT Size([out, retval] UINT32* result);
+    HRESULT IndexOf(IInkStroke* value, [out] UINT32* index, [out, retval] boolean* result);
+    HRESULT GetMany(UINT32 startIndex, UINT32 itemsSize, IInkStroke** items, [out, retval] UINT32* result);
+}
+
+// Windows.Foundation.Collections.IVectorView`1<Windows.UI.Input.Inking.InkPoint>: pinterface({bbe1fa4c-b0e3-4583-baef-1f1b2e483e56};rc(Windows.UI.Input.Inking.InkPoint;{9f87272b-858c-46a5-9b41-d195970459fd}))
+[uuid(D1AC414B-C87D-540F-8AB1-4E0D09D9D283)]
+interface IVectorViewInkPoint : IInspectable
+{
+    HRESULT GetAt(UINT32 index, [out, retval] IInkPoint** result);
+    [propget] HRESULT Size([out, retval] UINT32* result);
+    HRESULT IndexOf(IInkPoint* value, [out] UINT32* index, [out, retval] boolean* result);
+    HRESULT GetMany(UINT32 startIndex, UINT32 itemsSize, IInkPoint** items, [out, retval] UINT32* result);
+}
+
+// Windows.Foundation.Collections.IIterable`1<Windows.UI.Input.Inking.InkPoint>: pinterface({faa585ea-6214-4217-afda-7f46de5869b3};rc(Windows.UI.Input.Inking.InkPoint;{9f87272b-858c-46a5-9b41-d195970459fd}))
+[uuid(0630C0EF-A4E2-5AF6-B2E9-8E042E294E17)]
+interface IIterableInkPoint : IInspectable
+{
+    HRESULT First([out, retval] IIteratorInkPoint** result);
+}
+
+// Windows.Foundation.Collections.IIterator`1<Windows.UI.Input.Inking.InkPoint>: pinterface({6a79e863-4300-459a-9966-cbb660963ee1};rc(Windows.UI.Input.Inking.InkPoint;{9f87272b-858c-46a5-9b41-d195970459fd}))
+[uuid(47415452-DB79-567E-84D5-E9912330F944)]
+interface IIteratorInkPoint : IInspectable
+{
+    [propget] HRESULT Current([out, retval] IInkPoint** result);
+    [propget] HRESULT HasCurrent([out, retval] boolean* result);
+    HRESULT MoveNext([out, retval] boolean* result);
+    HRESULT GetMany(UINT32 itemsSize, IInkPoint** items, [out, retval] UINT32* result);
+}
+
+// Windows.Foundation.Collections.IVectorView`1<Windows.UI.Input.Inking.InkRecognizer>: pinterface({bbe1fa4c-b0e3-4583-baef-1f1b2e483e56};rc(Windows.UI.Input.Inking.InkRecognizer;{077ccea3-904d-442a-b151-aaca3631c43b}))
+[uuid(8EADFA4F-27EF-5A5D-B0B8-7FD5C0CE6B39)]
+interface IVectorViewInkRecognizer : IInspectable
+{
+    HRESULT GetAt(UINT32 index, [out, retval] IInkRecognizer** result);
+    [propget] HRESULT Size([out, retval] UINT32* result);
+    HRESULT IndexOf(IInkRecognizer* value, [out] UINT32* index, [out, retval] boolean* result);
+    HRESULT GetMany(UINT32 startIndex, UINT32 itemsSize, IInkRecognizer** items, [out, retval] UINT32* result);
+}
+
+// Windows.Foundation.Collections.IVectorView`1<Windows.UI.Input.Inking.InkRecognitionResult>: pinterface({bbe1fa4c-b0e3-4583-baef-1f1b2e483e56};rc(Windows.UI.Input.Inking.InkRecognitionResult;{36461a94-5068-40ef-8a05-2c2fb60908a2}))
+[uuid(ECFC4F0B-112C-5CD3-ACF0-D746D6BDFEB5)]
+interface IVectorViewInkRecognitionResult : IInspectable
+{
+    HRESULT GetAt(UINT32 index, [out, retval] IInkRecognitionResult** result);
+    [propget] HRESULT Size([out, retval] UINT32* result);
+    HRESULT IndexOf(IInkRecognitionResult* value, [out] UINT32* index, [out, retval] boolean* result);
+    HRESULT GetMany(UINT32 startIndex, UINT32 itemsSize, IInkRecognitionResult** items, [out, retval] UINT32* result);
+}
+
+// Windows.Foundation.Collections.IVectorView`1<string>: pinterface({bbe1fa4c-b0e3-4583-baef-1f1b2e483e56};string)
+[uuid(2F13C006-A03A-5F69-B090-75A43E33423E)]
+interface IVectorViewString : IInspectable
+{
+    HRESULT GetAt(UINT32 index, [out, retval] HSTRING* result);
+    [propget] HRESULT Size([out, retval] UINT32* result);
+    HRESULT IndexOf(HSTRING value, [out] UINT32* index, [out, retval] boolean* result);
+    HRESULT GetMany(UINT32 startIndex, UINT32 itemsSize, HSTRING* items, [out, retval] UINT32* result);
+}
+
+// Asynchronous operations
+
+// Windows.Foundation.IAsyncOperation`1<UInt32>: pinterface({9fc2b0bb-e446-44e2-aa61-9cab8f636af2};u4)
+[uuid(EF60385F-BE78-584B-AAEF-7829ADA2B0DE)]
+interface IAsyncOperationUInt32 : IInspectable
+{
+    [propput] HRESULT Completed(AsyncOperationCompletedHandlerUInt32* handler);
+    [propget] HRESULT Completed([out, retval] AsyncOperationCompletedHandlerUInt32** result);
+    HRESULT GetResults([out, retval] UINT32* result);
+}
+
+// Windows.Foundation.AsyncOperationCompletedHandler`1<UInt32>: pinterface({fcdcf02c-e5d8-4478-915a-4d90b74b83a5};u4)
+[uuid(9343B6E7-E3D2-5E4A-AB2D-2BCE4919A6A4)]
+interface AsyncOperationCompletedHandlerUInt32 : IUnknown
+{
+    HRESULT Invoke(IAsyncOperationUInt32* asyncInfo, AsyncStatus asyncStatus);
+}
+
+// Windows.Foundation.IAsyncOperationWithProgress`2<UInt32, UInt32>: pinterface({b5d036d7-e297-498f-ba60-0289e76e23dd};u4;u4)
+[uuid(ECCB574A-C684-5572-A679-6B0842CFB57F)]
+interface IAsyncOperationWithProgressUInt32UInt32 : IInspectable
+{
+    [propput] HRESULT Progress(void* handler);
+    [propget] HRESULT Progress([out, retval] void** result);
+    [propput] HRESULT Completed(AsyncOperationWithProgressCompletedHandlerUInt32UInt32* handler);
+    [propget] HRESULT Completed([out, retval] AsyncOperationWithProgressCompletedHandlerUInt32UInt32** result);
+    HRESULT GetResults([out, retval] UINT32* result);
+}
+
+// Windows.Foundation.AsyncOperationWithProgressCompletedHandler`2<UInt32, UInt32>: pinterface({e85df41d-6aa7-46e3-a8e2-f009d840c627};u4;u4)
+[uuid(1E466DC5-840F-54F9-B877-5E3A9F4B6C74)]
+interface AsyncOperationWithProgressCompletedHandlerUInt32UInt32 : IUnknown
+{
+    HRESULT Invoke(IAsyncOperationWithProgressUInt32UInt32* asyncInfo, AsyncStatus asyncStatus);
+}
+
+// Windows.Foundation.IAsyncActionWithProgress`1<UInt64>: pinterface({1f6db258-e803-48a1-9546-eb7353398884};u8)
+[uuid(43F713D0-C49D-5E55-AEBF-AF395768351E)]
+interface IAsyncActionWithProgressUInt64 : IInspectable
+{
+    [propput] HRESULT Progress(void* handler);
+    [propget] HRESULT Progress([out, retval] void** result);
+    [propput] HRESULT Completed(AsyncActionWithProgressCompletedHandlerUInt64* handler);
+    [propget] HRESULT Completed([out, retval] AsyncActionWithProgressCompletedHandlerUInt64** result);
+    HRESULT GetResults();
+}
+
+// Windows.Foundation.AsyncActionWithProgressCompletedHandler`1<UInt64>: pinterface({9c029f91-cc84-44fd-ac26-0a6c4e555281};u8)
+[uuid(E6FF857B-F160-571A-A934-2C61F98C862D)]
+interface AsyncActionWithProgressCompletedHandlerUInt64 : IUnknown
+{
+    HRESULT Invoke(IAsyncActionWithProgressUInt64* asyncInfo, AsyncStatus asyncStatus);
+}
+
+// Windows.Foundation.IAsyncOperation`1<Windows.Foundation.Collections.IVectorView`1<Windows.UI.Input.Inking.InkRecognitionResult>>: pinterface({9fc2b0bb-e446-44e2-aa61-9cab8f636af2};pinterface({bbe1fa4c-b0e3-4583-baef-1f1b2e483e56};rc(Windows.UI.Input.Inking.InkRecognitionResult;{36461a94-5068-40ef-8a05-2c2fb60908a2})))
+[uuid(B1923F59-D674-5365-B99A-3F1E52268C7F)]
+interface IAsyncOperationVectorViewInkRecognitionResult : IInspectable
+{
+    [propput] HRESULT Completed(AsyncOperationCompletedHandlerVectorViewInkRecognitionResult* handler);
+    [propget] HRESULT Completed([out, retval] AsyncOperationCompletedHandlerVectorViewInkRecognitionResult** result);
+    HRESULT GetResults([out, retval] IVectorViewInkRecognitionResult** result);
+}
+
+// Windows.Foundation.AsyncOperationCompletedHandler`1<Windows.Foundation.Collections.IVectorView`1<Windows.UI.Input.Inking.InkRecognitionResult>>: pinterface({fcdcf02c-e5d8-4478-915a-4d90b74b83a5};pinterface({bbe1fa4c-b0e3-4583-baef-1f1b2e483e56};rc(Windows.UI.Input.Inking.InkRecognitionResult;{36461a94-5068-40ef-8a05-2c2fb60908a2})))
+[uuid(ECE8567F-8080-5CED-8988-BB0364C803D4)]
+interface AsyncOperationCompletedHandlerVectorViewInkRecognitionResult : IUnknown
+{
+    HRESULT Invoke(IAsyncOperationVectorViewInkRecognitionResult* asyncInfo, AsyncStatus asyncStatus);
+}

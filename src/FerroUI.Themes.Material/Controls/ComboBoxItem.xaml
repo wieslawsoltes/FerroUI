@@ -1,0 +1,18 @@
+<!--
+  Android Material 3 Expressive, pinned to AndroidX Compose Material3 1.5.0-beta02,
+  revision e4d933c98df7baa7ea2b83eea6e086915961e0ff. Geometry and color roles follow
+  androidx/compose/material3/tokens; FerroUI template contracts are retained from
+  its WinUI theme (Microsoft copyright, MIT; see NOTICE.md).
+  Material design/source references: https://developer.android.com/develop/ui/compose/designsystems/material3
+  See docs/porting/material-theme.md for measured fidelity and platform differences.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <ControlTheme x:Key="DefaultComboBoxItemStyle" TargetType="ComboBoxItem" BasedOn="{StaticResource DefaultListBoxItemStyle}">
+    <Setter Property="MinHeight" Value="48" />
+    <Setter Property="Padding" Value="12,8" />
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type ComboBoxItem}" TargetType="ComboBoxItem" BasedOn="{StaticResource DefaultComboBoxItemStyle}" />
+
+</ResourceDictionary>

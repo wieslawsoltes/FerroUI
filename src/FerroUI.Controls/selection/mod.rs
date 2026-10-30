@@ -46,6 +46,9 @@ mod selection_model_tests_multiple;
 #[cfg(test)]
 mod selection_model_tests_single;
 
+// The interval arithmetic of the selection, shared with the selection model of the repeater
+// (`ferroui-controls-repeater`); upstream keeps it internal to its assembly.
+pub use index_range::{IndexRange, IndexRangeIndices};
 pub use i_selection_model::{selection_model_ptr_eq, BatchUpdateOperation, ISelectionModel, SelectionModelExtensions};
 pub use internal_selection_model::{InternalSelectionModel, WritableSelectedItems};
 pub use read_only_selection_list_base::{IReadOnlySelectionList, ReadOnlySelectionList, ReadOnlySelectionListBase};

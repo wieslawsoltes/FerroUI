@@ -1,0 +1,14 @@
+<core:DockCapabilityEvaluation xmlns="https://github.com/avaloniaui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:core="clr-namespace:Dock.Model.Core;assembly=Dock.Model">
+ <x:Arguments>
+  <x:Static Member="core:DockCapability.Pin" />
+  <x:Boolean>False</x:Boolean>
+  <x:Null />
+  <x:Boolean>True</x:Boolean>
+  <x:Boolean>False</x:Boolean>
+  <x:Boolean>True</x:Boolean>
+  <x:Static Member="core:DockCapabilityValueSource.DockPolicy" />
+  <x:String>Supplied diagnostics</x:String>
+ </x:Arguments>
+</core:DockCapabilityEvaluation>

@@ -1,7 +1,7 @@
 use super::PlatformColorValues;
 use crate::input::platform::PlatformHotkeyConfiguration;
 use crate::input::PointerType;
-use crate::reactive::IDisposable;
+use crate::reactive::{Disposable, IDisposable};
 use crate::Size;
 use std::rc::Rc;
 use std::time::Duration;
@@ -43,6 +43,25 @@ pub trait IPlatformSettings {
     /// A FerroUI addition for the ports of WinUI controls (DEVIATIONS.md, Platform settings).
     fn animations_enabled(&self) -> bool {
         true
+    }
+
+    /// Whether the system permits translucent materials and backdrop effects.
+    ///
+    /// A backend that does not expose a transparency preference preserves the
+    /// application's normal materials. Backends should query the current
+    /// preference rather than cache it for the process lifetime.
+    fn transparency_enabled(&self) -> bool {
+        true
+    }
+
+    /// Raised when motion, transparency, or other display accessibility
+    /// preferences change. The callback runs on the UI thread; consumers read
+    /// the current values and invalidate any derived resources.
+    ///
+    /// The default is an empty subscription so existing platform backends and
+    /// external implementations remain source-compatible.
+    fn accessibility_settings_changed(&self, _handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
+        Disposable::empty()
     }
 
     /// Gets current system color values including dark mode and accent

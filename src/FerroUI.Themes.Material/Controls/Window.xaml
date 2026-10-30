@@ -1,0 +1,42 @@
+<!--
+  Not ported from a style: Window is not a control in WinUI 3 and has no style in
+  microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml, commit
+  7e4b0c2096be402f51cc8f7d203ebf67cff183d0). The template is the one FerroUI's Window requires
+  (src/FerroUI.Themes.Fluent/Controls/Window.xaml); the values are the resources a WinUI 3 window
+  shows (docs/porting/winui-theme.md, section 6): the background of a window without its Mica
+  backdrop (SolidBackgroundFillColorBaseBrush, which WinUI's MicaBackdrop falls back to), the
+  primary text colour, and the font of the controls (ContentControlThemeFontFamily,
+  ControlContentThemeFontSize of dxaml/xcp/dxaml/themes/generic.xaml). The text blocks of the window
+  put the height layout rounding adds to them above their text, as WinUI's TextBlock does
+  (TextBlock.LayoutRoundingPlacement, inherited; docs/porting/text-rendering.md, section 6).
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <ControlTheme x:Key="{x:Type Window}" TargetType="Window">
+    <Setter Property="Background" Value="{DynamicResource SolidBackgroundFillColorBaseBrush}" />
+    <Setter Property="TransparencyBackgroundFallback" Value="{DynamicResource SolidBackgroundFillColorBaseBrush}" />
+    <Setter Property="TopLevel.SystemBarColor" Value="{DynamicResource SolidBackgroundFillColorBaseBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+    <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="TextBlock.LayoutRoundingPlacement" Value="Above" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <Border Name="PART_TransparencyFallback" IsHitTestVisible="False" />
+          <Border Background="{TemplateBinding Background}" IsHitTestVisible="False" />
+          <Panel Background="Transparent" Margin="{TemplateBinding WindowDecorationMargin}" />
+          <VisualLayerManager Name="PART_VisualLayerManager">
+            <ContentPresenter Name="PART_ContentPresenter"
+                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                              Content="{TemplateBinding Content}"
+                              Margin="{TemplateBinding Padding}"
+                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+          </VisualLayerManager>
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

@@ -66,9 +66,30 @@ export class FerroDOM {
         nativeHost.classList.add("ferroui-native-host");
         nativeHost.style.left = "0px";
         nativeHost.style.top = "0px";
-        nativeHost.style.width = "100%";
-        nativeHost.style.height = "100%";
+        // Not in the original, whose host covers the view (100% by 100%): the element picker of the
+        // browser's developer tools then found the host at every point of the view, over the canvas,
+        // and `pointer-events: none` would not help (the picker hit-tests through it). The host has
+        // no size of its own; its native controls are positioned absolutely from its corner, the
+        // corner of the view, and overflow it, so they are where they were and the rest of the view
+        // is the canvas.
+        nativeHost.style.width = "0px";
+        nativeHost.style.height = "0px";
+        nativeHost.style.overflow = "visible";
         nativeHost.style.position = "absolute";
+
+        // Not in the original: the accessibility host, where the automation tree of the view is
+        // mirrored (accessibility.ts). Like the native host it has no size of its own; its elements
+        // are positioned from its corner, the corner of the view. It lies over the canvas and under
+        // the native controls.
+        const accessibilityHost = document.createElement("div");
+        accessibilityHost.id = `accessibilityHost${containerId}`;
+        accessibilityHost.classList.add("ferroui-accessibility-host");
+        accessibilityHost.style.left = "0px";
+        accessibilityHost.style.top = "0px";
+        accessibilityHost.style.width = "0px";
+        accessibilityHost.style.height = "0px";
+        accessibilityHost.style.overflow = "visible";
+        accessibilityHost.style.position = "absolute";
 
         // IME
         const inputElement = document.createElement("input");
@@ -104,10 +125,12 @@ export class FerroDOM {
 
         host.prepend(inputElement);
         host.prepend(nativeHost);
+        host.prepend(accessibilityHost);
 
         return {
             host,
             nativeHost,
+            accessibilityHost,
             inputElement
         };
     }

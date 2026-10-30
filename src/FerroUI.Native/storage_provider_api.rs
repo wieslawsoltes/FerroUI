@@ -558,6 +558,47 @@ mod tests {
 
     use super::*;
 
+    /// Exercise the real Objective-C++ boundary with a caller-owned COM input.
+    #[test]
+    fn native_security_scopes_preserve_borrowed_uri_ownership() {
+        use std::cell::Cell;
+        use std::mem::ManuallyDrop;
+
+        struct TrackedString {
+            value: FrnString,
+            dropped: Rc<Cell<bool>>,
+        }
+        impl IFrnStringImpl for TrackedString {
+            fn pointer(&self) -> Result<*mut c_void, HResult> { self.value.pointer() }
+            fn length(&self) -> Result<i32, HResult> { self.value.length() }
+        }
+        impl Drop for TrackedString {
+            fn drop(&mut self) { self.dropped.set(true); }
+        }
+
+        let factory = create_ferro_native().expect("native factory");
+        let native = factory.create_storage_provider().check().expect("native storage provider");
+        for opening in [true, false] {
+            let dropped = Rc::new(Cell::new(false));
+            // Avoid releasing an already consumed pointer if the assertion fails.
+            let uri = ManuallyDrop::new(IFrnString::from_impl(TrackedString {
+                value: FrnString::new("file:///Volumes/SSD/temp/ferrodock-port/"),
+                dropped: dropped.clone(),
+            }));
+            if opening { native.open_security_scope(Some(&uri)); }
+            else { native.close_security_scope(Some(&uri)); }
+            assert!(!dropped.get(), "native scope call consumed its borrowed URI");
+            assert_eq!(frn_string_to_string(&uri).as_deref(), Some("file:///Volumes/SSD/temp/ferrodock-port/"));
+            drop(ManuallyDrop::into_inner(uri));
+            assert!(dropped.get(), "the caller must release the final URI reference");
+        }
+        let api = StorageProviderApi::new(native, false);
+        let uri = Uri::try_create("file:///Volumes/SSD/temp/ferrodock-port/", UriKind::Absolute).unwrap();
+        // Non-sandboxed hosts may decline bookmarks, but must preserve the input.
+        let _ = api.save_bookmark(&uri);
+        let _ = api.try_resolve_file_reference_uri(&uri);
+    }
+
     fn completed(events: &SystemDialogEvents) -> Option<DialogResult> {
         events.completion.borrow_mut().result.take()
     }

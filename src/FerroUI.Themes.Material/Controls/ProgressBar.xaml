@@ -1,0 +1,98 @@
+<!--
+  Material 3 Expressive progress indicators. Colors, dimensions and timing are
+  pinned to AndroidX Compose Material3 1.5.0-beta02, e4d933c98df7baa7ea2b83eea6e086915961e0ff.
+  Native drawing is provided by MaterialProgressIndicator; the enclosing FerroUI
+  ProgressBar retains range automation, percentage calculation and template parts.
+  Based on the WinUI template contracts (Microsoft Corporation, MIT). Android
+  token/timing sources are Copyright The Android Open Source Project, Apache-2.0.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:material="using:FerroUI.Themes.Material"
+                    xmlns:converters="using:FerroUI.Controls.Converters"
+                    x:ClassModifier="internal">
+  <converters:StringFormatConverter x:Key="ProgressBarTextFormatConverter" />
+  <ControlTheme x:Key="DefaultProgressBarStyle" TargetType="ProgressBar">
+    <Setter Property="Foreground" Value="{DynamicResource MaterialPrimaryBrush}" />
+    <Setter Property="Background" Value="{DynamicResource MaterialSecondaryContainerBrush}" />
+    <Setter Property="BorderThickness" Value="0" /><Setter Property="MinHeight" Value="4" />
+    <Setter Property="CornerRadius" Value="2" /><Setter Property="Maximum" Value="100" />
+    <Setter Property="IsTabStop" Value="False" /><Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Template"><ControlTemplate>
+      <Grid ColumnDefinitions="*,Auto" RowDefinitions="*,Auto">
+        <Grid x:Name="MaterialProgressRoot" Margin="{TemplateBinding Padding}">
+          <!-- The core calculates Percentage and range values from this part.
+               It remains a child of the full-size track, independently of the
+               path renderer; it never paints an extra WinUI indicator. -->
+          <Border x:Name="PART_Indicator" Background="Transparent" IsHitTestVisible="False"
+                  HorizontalAlignment="Left" />
+          <material:MaterialProgressIndicator x:Name="MaterialIndicator"
+                     Percentage="{TemplateBinding Percentage}" IsIndeterminate="{TemplateBinding IsIndeterminate}"
+                     Orientation="{TemplateBinding Orientation}" ActiveBrush="{TemplateBinding Foreground}"
+                     TrackBrush="{TemplateBinding Background}" ReducedMotion="{DynamicResource MaterialReducedMotion}"
+                     ClipToBounds="True" />
+        </Grid>
+        <TextBlock x:Name="ProgressText" Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center"
+                   IsVisible="{TemplateBinding ShowProgressText}" Foreground="{DynamicResource MaterialOnSurfaceBrush}"
+                   FontSize="12">
+          <TextBlock.Text><MultiBinding Converter="{StaticResource ProgressBarTextFormatConverter}">
+            <TemplateBinding Property="ProgressTextFormat" />
+            <TemplateBinding Property="Value" /><TemplateBinding Property="Percentage" />
+            <TemplateBinding Property="Minimum" /><TemplateBinding Property="Maximum" />
+          </MultiBinding></TextBlock.Text>
+        </TextBlock>
+      </Grid>
+    </ControlTemplate></Setter>
+    <Style Selector="^:vertical">
+      <Setter Property="MinWidth" Value="4" /><Setter Property="HorizontalAlignment" Value="Center" />
+      <Setter Property="VerticalAlignment" Value="Stretch" />
+    </Style>
+    <Style Selector="^:vertical /template/ Border#PART_Indicator">
+      <Setter Property="HorizontalAlignment" Value="Stretch" /><Setter Property="VerticalAlignment" Value="Bottom" />
+    </Style>
+    <Style Selector="^:vertical /template/ TextBlock#ProgressText">
+      <Setter Property="Grid.Column" Value="0" /><Setter Property="Grid.Row" Value="1" />
+      <Setter Property="Margin" Value="0,8,0,0" />
+    </Style>
+    <Style Selector="^.wavy /template/ material|MaterialProgressIndicator#MaterialIndicator">
+      <Setter Property="IsWavy" Value="True" />
+    </Style>
+    <Style Selector="^.circular /template/ material|MaterialProgressIndicator#MaterialIndicator">
+      <Setter Property="IsCircular" Value="True" />
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialLinearProgress" TargetType="ProgressBar" BasedOn="{StaticResource DefaultProgressBarStyle}" />
+  <ControlTheme x:Key="MaterialWavyLinearProgress" TargetType="ProgressBar" BasedOn="{StaticResource DefaultProgressBarStyle}">
+    <Setter Property="MinHeight" Value="10" />
+    <Style Selector="^ /template/ material|MaterialProgressIndicator#MaterialIndicator"><Setter Property="IsWavy" Value="True" /></Style>
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialCircularProgress" TargetType="ProgressBar" BasedOn="{StaticResource DefaultProgressBarStyle}">
+    <Setter Property="MinHeight" Value="40" /><Setter Property="MinWidth" Value="40" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Style Selector="^ /template/ material|MaterialProgressIndicator#MaterialIndicator"><Setter Property="IsCircular" Value="True" /></Style>
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialWavyCircularProgress" TargetType="ProgressBar" BasedOn="{StaticResource MaterialCircularProgress}">
+    <Setter Property="MinHeight" Value="48" /><Setter Property="MinWidth" Value="48" />
+    <Style Selector="^ /template/ material|MaterialProgressIndicator#MaterialIndicator"><Setter Property="IsWavy" Value="True" /></Style>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type ProgressBar}" TargetType="ProgressBar" BasedOn="{StaticResource DefaultProgressBarStyle}" />
+  <!-- Loading is a RangeBase with native range automation and percentage alias.
+       The indeterminate mode follows the Android seven-polygon spring sequence. -->
+  <ControlTheme x:Key="DefaultMaterialLoadingIndicatorStyle" TargetType="material:MaterialLoadingIndicator">
+    <Setter Property="ActiveBrush" Value="{DynamicResource MaterialPrimaryBrush}" />
+    <Setter Property="ContainerBrush" Value="Transparent" />
+    <Setter Property="ReducedMotion" Value="{DynamicResource MaterialReducedMotion}" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="Width" Value="48" /><Setter Property="Height" Value="48" />
+    <!-- RangeBase retains the themed-control contract while the indicator's
+         native renderer draws its shape, container, and continuous morph. -->
+    <Setter Property="Template"><ControlTemplate><Panel IsHitTestVisible="False" /></ControlTemplate></Setter>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type material:MaterialLoadingIndicator}" TargetType="material:MaterialLoadingIndicator"
+                BasedOn="{StaticResource DefaultMaterialLoadingIndicatorStyle}" />
+  <ControlTheme x:Key="MaterialContainedLoadingIndicator" TargetType="material:MaterialLoadingIndicator"
+                BasedOn="{StaticResource DefaultMaterialLoadingIndicatorStyle}">
+    <Setter Property="ContainerBrush" Value="{DynamicResource MaterialPrimaryContainerBrush}" />
+    <Setter Property="ActiveBrush" Value="{DynamicResource MaterialOnPrimaryContainerBrush}" />
+  </ControlTheme>
+</ResourceDictionary>

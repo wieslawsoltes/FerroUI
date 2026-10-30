@@ -1,0 +1,202 @@
+<!-- Native Material chips: AndroidX Chip.kt and effective token defaults at
+     e4d933c98df7baa7ea2b83eea6e086915961e0ff (Apache-2.0; see NOTICE.md).
+     ChipLayout keeps a 48 dp target around the 32 dp minimum painted surface,
+     independent 18 dp icon slots, 24 dp input avatars, and native slot springs.
+     Dismissal is a separate 48 dp action, so this optional trailing content
+     increases the painted height just as a native interactive trailing composable does. -->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:material="using:FerroUI.Themes.Material"
+                    x:ClassModifier="internal">
+  <ControlTemplate x:Key="MaterialChipDismissTemplate" TargetType="material:MaterialChipDismissButton">
+    <Panel Background="Transparent">
+      <Border x:Name="DismissStateLayer" Background="{TemplateBinding Foreground}" CornerRadius="24" Opacity="0" IsHitTestVisible="False">
+        <Border.Transitions><Transitions><material:MaterialDoubleTransition Property="Opacity" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" /></Transitions></Border.Transitions>
+      </Border>
+      <material:MaterialRipple x:Name="DismissRipple" Fill="{TemplateBinding Foreground}" CornerRadius="24" ReducedMotion="{DynamicResource MaterialReducedMotion}" />
+      <Viewbox Width="18" Height="18" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False" AutomationProperties.AccessibilityView="Raw">
+        <Canvas Width="24" Height="24">
+          <Path x:Name="DismissGlyph" FlowDirection="LeftToRight" Data="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12Z" Width="24" Height="24" Stretch="None" Fill="{TemplateBinding Foreground}" />
+        </Canvas>
+      </Viewbox>
+      <Border x:Name="DismissFocusRing" BorderBrush="{DynamicResource MaterialSecondaryBrush}" BorderThickness="3" CornerRadius="24" Margin="2" IsVisible="False" IsHitTestVisible="False" />
+    </Panel>
+  </ControlTemplate>
+  <ControlTheme x:Key="MaterialChipDismissAction" TargetType="material:MaterialChipDismissButton">
+    <Setter Property="Width" Value="48" /><Setter Property="Height" Value="48" />
+    <Setter Property="MinWidth" Value="48" /><Setter Property="MinHeight" Value="48" />
+    <Setter Property="Padding" Value="0" /><Setter Property="CornerRadius" Value="24" />
+    <Setter Property="Background" Value="Transparent" /><Setter Property="BorderThickness" Value="0" />
+    <Setter Property="FocusAdorner" Value="{x:Null}" />
+    <Setter Property="Template" Value="{StaticResource MaterialChipDismissTemplate}" />
+    <Style Selector="^:pointerover /template/ Border#DismissStateLayer"><Setter Property="Opacity" Value="0.08" /></Style>
+    <Style Selector="^:focus-visible /template/ Border#DismissStateLayer"><Setter Property="Opacity" Value="0.10" /></Style>
+    <Style Selector="^:focus-visible /template/ Border#DismissFocusRing"><Setter Property="IsVisible" Value="True" /></Style>
+    <Style Selector="^:disabled"><Setter Property="Foreground" Value="{DynamicResource MaterialDisabledOnSurfaceBrush}" /></Style>
+    <Style Selector="^:disabled /template/ Path#DismissGlyph"><Setter Property="Fill" Value="{DynamicResource MaterialDisabledOnSurfaceBrush}" /></Style>
+    <Style Selector="^:disabled /template/ Border#DismissStateLayer"><Setter Property="Opacity" Value="0" /></Style>
+    <Style Selector="^:disabled /template/ Border#DismissFocusRing"><Setter Property="IsVisible" Value="False" /></Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="MaterialChipBase" TargetType="Button">
+    <Setter Property="MinWidth" Value="48" /><Setter Property="MinHeight" Value="48" />
+    <Setter Property="HorizontalAlignment" Value="Left" /><Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Padding" Value="0" /><Setter Property="CornerRadius" Value="8" />
+    <Setter Property="BorderThickness" Value="1" /><Setter Property="BorderBrush" Value="{DynamicResource MaterialOutlineVariantBrush}" />
+    <Setter Property="Background" Value="Transparent" /><Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceBrush}" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontSize" Value="14" /><Setter Property="FontWeight" Value="Medium" />
+    <Setter Property="TextBlock.LineHeight" Value="20" /><Setter Property="LetterSpacing" Value="0.1" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" /><Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="FocusAdorner" Value="{x:Null}" /><Setter Property="ClipToBounds" Value="False" />
+    <Setter Property="Template"><ControlTemplate>
+      <material:MaterialChipLayout x:Name="ChipLayout" Background="Transparent"
+          Kind="{TemplateBinding (material:MaterialChip.Kind)}"
+          LeadingIcon="{TemplateBinding (material:MaterialChip.LeadingIcon)}"
+          TrailingIcon="{TemplateBinding (material:MaterialChip.TrailingIcon)}"
+          Avatar="{TemplateBinding (material:MaterialChip.Avatar)}"
+          ShowSelectedIcon="{TemplateBinding (material:MaterialChip.ShowSelectedIcon)}"
+          IsExpressive="{TemplateBinding (material:MaterialChip.IsExpressive)}"
+          IsDismissible="{TemplateBinding (material:MaterialChip.IsDismissible)}"
+          MotionScheme="{DynamicResource MaterialMotionScheme}" ReducedMotion="{DynamicResource MaterialReducedMotion}">
+        <Border x:Name="ChipContainer" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}">
+          <Border.Transitions><Transitions>
+            <material:MaterialCornerRadiusTransition Property="CornerRadius" Duration="{DynamicResource MaterialMotionFastSpatialDuration}" Easing="{DynamicResource MaterialMotionFastSpatialEasing}" />
+            <BrushTransition Property="Background" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" />
+            <BoxShadowsTransition Property="BoxShadow" Duration="{DynamicResource MaterialMotionFastSpatialDuration}" Easing="{DynamicResource MaterialMotionFastSpatialEasing}" />
+          </Transitions></Border.Transitions>
+          <Panel>
+            <Border x:Name="StateLayer" Background="{TemplateBinding Foreground}" CornerRadius="{Binding #ChipContainer.CornerRadius}" Opacity="0" IsHitTestVisible="False">
+              <Border.Transitions><Transitions><material:MaterialDoubleTransition Property="Opacity" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" /></Transitions></Border.Transitions>
+            </Border>
+            <material:MaterialRipple x:Name="Ripple" Fill="{TemplateBinding Foreground}" CornerRadius="{Binding #ChipContainer.CornerRadius}" ReducedMotion="{DynamicResource MaterialReducedMotion}" />
+            <Border x:Name="ChipFocusRing" BorderBrush="{DynamicResource MaterialSecondaryBrush}" BorderThickness="3" CornerRadius="{Binding #ChipContainer.CornerRadius}" Margin="-4" IsVisible="False" IsHitTestVisible="False" />
+          </Panel>
+        </Border>
+        <Border x:Name="LeadingSlot" ClipToBounds="True">
+          <Panel Width="{Binding #ChipLayout.LeadingContentWidth}" HorizontalAlignment="Left">
+            <Viewbox Width="18" Height="18" IsVisible="{Binding #ChipLayout.ShowLeadingIcon}" VerticalAlignment="Center" IsHitTestVisible="False" AutomationProperties.AccessibilityView="Raw">
+              <ContentPresenter x:Name="LeadingIcon" Content="{Binding #ChipLayout.DisplayedLeadingIcon}" />
+            </Viewbox>
+            <Border x:Name="AvatarFrame" Width="24" Height="24" IsVisible="{Binding #ChipLayout.ShowAvatar}" IsHitTestVisible="False" AutomationProperties.AccessibilityView="Raw">
+              <Border.Clip><EllipseGeometry Rect="0,0,24,24" /></Border.Clip>
+              <ContentPresenter x:Name="Avatar" Content="{Binding #ChipLayout.DisplayedAvatar}" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" />
+            </Border>
+            <Viewbox x:Name="CheckIcon" Width="18" Height="18" IsVisible="{Binding #ChipLayout.ShowCheck}" VerticalAlignment="Center" IsHitTestVisible="False" AutomationProperties.AccessibilityView="Raw">
+              <Path FlowDirection="LeftToRight" Data="M9 16.17 4.83 12 3.41 13.41 9 19 21 7 19.59 5.59Z" Width="24" Height="24" Stretch="None" Fill="{Binding #LeadingIcon.Foreground}" />
+            </Viewbox>
+          </Panel>
+        </Border>
+        <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"
+                          Foreground="{TemplateBinding Foreground}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                          VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" RecognizesAccessKey="True" />
+        <Border x:Name="TrailingSlot" ClipToBounds="True">
+          <Panel Width="{Binding #ChipLayout.TrailingContentWidth}" HorizontalAlignment="Right">
+            <Viewbox Width="18" Height="18" IsVisible="{Binding #ChipLayout.ShowTrailingIcon}" VerticalAlignment="Center" IsHitTestVisible="False" AutomationProperties.AccessibilityView="Raw">
+              <ContentPresenter x:Name="TrailingIcon" Content="{Binding #ChipLayout.DisplayedTrailingIcon}" />
+            </Viewbox>
+            <!-- An enclosing Button theme also styles Button template children; pin this independent action template. -->
+            <material:MaterialChipDismissButton x:Name="PART_DismissButton" Theme="{StaticResource MaterialChipDismissAction}"
+                Template="{StaticResource MaterialChipDismissTemplate}"
+                IsVisible="{Binding #ChipLayout.ShowDismiss}" IsEnabled="{TemplateBinding (material:MaterialChip.IsDismissible)}"
+                Foreground="{Binding #TrailingIcon.Foreground}"
+                Command="{TemplateBinding (material:MaterialChip.DismissCommand)}"
+                CommandParameter="{TemplateBinding (material:MaterialChip.DismissCommandParameter)}"
+                AutomationProperties.Name="{TemplateBinding (material:MaterialChip.DismissLabel)}" />
+          </Panel>
+        </Border>
+      </material:MaterialChipLayout>
+    </ControlTemplate></Setter>
+    <Style Selector="^ /template/ Border#ChipContainer"><Setter Property="BoxShadow" Value="{DynamicResource MaterialElevation0BoxShadow}" /></Style>
+    <Style Selector="^ /template/ ContentPresenter#LeadingIcon, ^ /template/ ContentPresenter#TrailingIcon"><Setter Property="Foreground" Value="{DynamicResource MaterialPrimaryBrush}" /></Style>
+    <Style Selector="^:pointerover /template/ Border#StateLayer"><Setter Property="Opacity" Value="0.08" /></Style>
+    <Style Selector="^:focus-visible /template/ Border#StateLayer"><Setter Property="Opacity" Value="0.10" /></Style>
+    <Style Selector="^:focus-visible /template/ Border#ChipFocusRing"><Setter Property="IsVisible" Value="True" /></Style>
+    <Style Selector="^:dragging /template/ Border#ChipContainer"><Setter Property="BoxShadow" Value="{DynamicResource MaterialElevation4BoxShadow}" /></Style>
+    <Style Selector="^:disabled"><Setter Property="Foreground" Value="{DynamicResource MaterialDisabledOnSurfaceBrush}" /><Setter Property="Background" Value="Transparent" /><Setter Property="BorderBrush" Value="{DynamicResource MaterialDisabledOutlineBrush}" /></Style>
+    <Style Selector="^:disabled /template/ ContentPresenter#LeadingIcon, ^:disabled /template/ ContentPresenter#TrailingIcon"><Setter Property="Foreground" Value="{DynamicResource MaterialDisabledOnSurfaceBrush}" /></Style>
+    <Style Selector="^:disabled /template/ Border#AvatarFrame"><Setter Property="Opacity" Value="0.38" /></Style>
+    <Style Selector="^:disabled /template/ Border#ChipContainer"><Setter Property="BoxShadow" Value="{DynamicResource MaterialElevation0BoxShadow}" /></Style>
+    <Style Selector="^:disabled /template/ Border#StateLayer"><Setter Property="Opacity" Value="0" /></Style>
+    <Style Selector="^:disabled /template/ Border#ChipFocusRing"><Setter Property="IsVisible" Value="False" /></Style>
+    <Style Selector="^:disabled /template/ material|MaterialRipple#Ripple"><Setter Property="IsVisible" Value="False" /></Style>
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialAssistChip" TargetType="Button" BasedOn="{StaticResource MaterialChipBase}">
+    <Setter Property="material:MaterialChip.Kind" Value="Assist" />
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialSuggestionChip" TargetType="Button" BasedOn="{StaticResource MaterialChipBase}">
+    <Setter Property="material:MaterialChip.Kind" Value="Suggestion" />
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}" />
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialFilterChip" TargetType="ToggleButton" BasedOn="{StaticResource MaterialChipBase}">
+    <Setter Property="material:MaterialChip.Kind" Value="Filter" />
+    <Setter Property="AutomationProperties.ControlTypeOverride" Value="CheckBox" />
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}" />
+    <Style Selector="^ /template/ ContentPresenter#TrailingIcon"><Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}" /></Style>
+    <!-- Chip.kt's effective default hoveredElevation is the selected-hover token (1 dp) for both states. -->
+    <Style Selector="^:pointerover /template/ Border#ChipContainer"><Setter Property="BoxShadow" Value="{DynamicResource MaterialElevation1BoxShadow}" /></Style>
+    <Style Selector="^:focus-visible /template/ Border#ChipContainer, ^:pressed /template/ Border#ChipContainer"><Setter Property="BoxShadow" Value="{DynamicResource MaterialElevation0BoxShadow}" /></Style>
+    <Style Selector="^:checked"><Setter Property="Background" Value="{DynamicResource MaterialSecondaryContainerBrush}" /><Setter Property="Foreground" Value="{DynamicResource MaterialOnSecondaryContainerBrush}" /><Setter Property="BorderBrush" Value="Transparent" /><Setter Property="BorderThickness" Value="0" /></Style>
+    <Style Selector="^:checked /template/ material|MaterialChipLayout#ChipLayout"><Setter Property="IsSelected" Value="True" /></Style>
+    <Style Selector="^:checked /template/ ContentPresenter#LeadingIcon, ^:checked /template/ ContentPresenter#TrailingIcon"><Setter Property="Foreground" Value="{DynamicResource MaterialOnSecondaryContainerBrush}" /></Style>
+    <Style Selector="^:dragging /template/ Border#ChipContainer"><Setter Property="BoxShadow" Value="{DynamicResource MaterialElevation4BoxShadow}" /></Style>
+    <Style Selector="^:disabled:checked"><Setter Property="Foreground" Value="{DynamicResource MaterialDisabledOnSurfaceBrush}" /><Setter Property="Background" Value="{DynamicResource MaterialChipDisabledContainerBrush}" /><Setter Property="BorderBrush" Value="Transparent" /></Style>
+    <Style Selector="^:disabled /template/ ContentPresenter#LeadingIcon, ^:disabled /template/ ContentPresenter#TrailingIcon"><Setter Property="Foreground" Value="{DynamicResource MaterialDisabledOnSurfaceBrush}" /></Style>
+    <Style Selector="^:disabled /template/ Border#ChipContainer"><Setter Property="BoxShadow" Value="{DynamicResource MaterialElevation0BoxShadow}" /></Style>
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialInputChip" TargetType="ToggleButton" BasedOn="{StaticResource MaterialFilterChip}">
+    <Setter Property="material:MaterialChip.Kind" Value="Input" />
+    <Style Selector="^ /template/ ContentPresenter#LeadingIcon"><Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}" /></Style>
+    <Style Selector="^:checked /template/ ContentPresenter#LeadingIcon"><Setter Property="Foreground" Value="{DynamicResource MaterialPrimaryBrush}" /></Style>
+    <Style Selector="^:pointerover /template/ Border#ChipContainer"><Setter Property="BoxShadow" Value="{DynamicResource MaterialElevation0BoxShadow}" /></Style>
+    <Style Selector="^:dragging /template/ Border#ChipContainer"><Setter Property="BoxShadow" Value="{DynamicResource MaterialElevation4BoxShadow}" /></Style>
+    <Style Selector="^:disabled /template/ ContentPresenter#LeadingIcon"><Setter Property="Foreground" Value="{DynamicResource MaterialDisabledOnSurfaceBrush}" /></Style>
+    <Style Selector="^:disabled /template/ Border#ChipContainer"><Setter Property="BoxShadow" Value="{DynamicResource MaterialElevation0BoxShadow}" /></Style>
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialElevatedAssistChip" TargetType="Button" BasedOn="{StaticResource MaterialAssistChip}">
+    <Setter Property="Background" Value="{DynamicResource MaterialSurfaceContainerLowBrush}" /><Setter Property="BorderThickness" Value="0" />
+    <Style Selector="^ /template/ Border#ChipContainer"><Setter Property="BoxShadow" Value="{DynamicResource MaterialElevation1BoxShadow}" /></Style>
+    <Style Selector="^:pointerover /template/ Border#ChipContainer"><Setter Property="BoxShadow" Value="{DynamicResource MaterialElevation2BoxShadow}" /></Style>
+    <Style Selector="^:focus-visible /template/ Border#ChipContainer, ^:pressed /template/ Border#ChipContainer"><Setter Property="BoxShadow" Value="{DynamicResource MaterialElevation1BoxShadow}" /></Style>
+    <Style Selector="^:dragging /template/ Border#ChipContainer"><Setter Property="BoxShadow" Value="{DynamicResource MaterialElevation4BoxShadow}" /></Style>
+    <Style Selector="^:disabled"><Setter Property="Background" Value="{DynamicResource MaterialChipDisabledContainerBrush}" /></Style>
+    <Style Selector="^:disabled /template/ Border#ChipContainer"><Setter Property="BoxShadow" Value="{DynamicResource MaterialElevation0BoxShadow}" /></Style>
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialElevatedSuggestionChip" TargetType="Button" BasedOn="{StaticResource MaterialSuggestionChip}">
+    <Setter Property="Background" Value="{DynamicResource MaterialSurfaceContainerLowBrush}" /><Setter Property="BorderThickness" Value="0" />
+    <Style Selector="^ /template/ Border#ChipContainer"><Setter Property="BoxShadow" Value="{DynamicResource MaterialElevation1BoxShadow}" /></Style>
+    <Style Selector="^:pointerover /template/ Border#ChipContainer"><Setter Property="BoxShadow" Value="{DynamicResource MaterialElevation2BoxShadow}" /></Style>
+    <Style Selector="^:focus-visible /template/ Border#ChipContainer, ^:pressed /template/ Border#ChipContainer"><Setter Property="BoxShadow" Value="{DynamicResource MaterialElevation1BoxShadow}" /></Style>
+    <Style Selector="^:dragging /template/ Border#ChipContainer"><Setter Property="BoxShadow" Value="{DynamicResource MaterialElevation4BoxShadow}" /></Style>
+    <Style Selector="^:disabled"><Setter Property="Background" Value="{DynamicResource MaterialChipDisabledContainerBrush}" /></Style>
+    <Style Selector="^:disabled /template/ Border#ChipContainer"><Setter Property="BoxShadow" Value="{DynamicResource MaterialElevation0BoxShadow}" /></Style>
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialElevatedFilterChip" TargetType="ToggleButton" BasedOn="{StaticResource MaterialFilterChip}">
+    <Setter Property="Background" Value="{DynamicResource MaterialSurfaceContainerLowBrush}" /><Setter Property="BorderThickness" Value="0" />
+    <Style Selector="^ /template/ Border#ChipContainer"><Setter Property="BoxShadow" Value="{DynamicResource MaterialElevation1BoxShadow}" /></Style>
+    <Style Selector="^:pointerover /template/ Border#ChipContainer"><Setter Property="BoxShadow" Value="{DynamicResource MaterialElevation2BoxShadow}" /></Style>
+    <Style Selector="^:focus-visible /template/ Border#ChipContainer, ^:pressed /template/ Border#ChipContainer"><Setter Property="BoxShadow" Value="{DynamicResource MaterialElevation1BoxShadow}" /></Style>
+    <Style Selector="^:dragging /template/ Border#ChipContainer"><Setter Property="BoxShadow" Value="{DynamicResource MaterialElevation4BoxShadow}" /></Style>
+    <Style Selector="^:disabled"><Setter Property="Background" Value="{DynamicResource MaterialChipDisabledContainerBrush}" /></Style>
+    <Style Selector="^:disabled /template/ Border#ChipContainer"><Setter Property="BoxShadow" Value="{DynamicResource MaterialElevation0BoxShadow}" /></Style>
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialExpressiveFilterChip" TargetType="ToggleButton" BasedOn="{StaticResource MaterialFilterChip}">
+    <Setter Property="material:MaterialChip.IsExpressive" Value="True" /><Setter Property="CornerRadius" Value="12" />
+    <Style Selector="^ /template/ ContentPresenter#LeadingIcon"><Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}" /></Style>
+    <Style Selector="^:checked"><Setter Property="CornerRadius" Value="{Binding $self.(MaterialChip.FullCornerRadius)}" /></Style>
+    <Style Selector="^:pressed"><Setter Property="CornerRadius" Value="8" /></Style>
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialExpressiveInputChip" TargetType="ToggleButton" BasedOn="{StaticResource MaterialInputChip}">
+    <Setter Property="material:MaterialChip.IsExpressive" Value="True" /><Setter Property="CornerRadius" Value="12" />
+    <Style Selector="^ /template/ ContentPresenter#LeadingIcon"><Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}" /></Style>
+    <Style Selector="^:checked"><Setter Property="CornerRadius" Value="{Binding $self.(MaterialChip.FullCornerRadius)}" /></Style>
+    <Style Selector="^:pressed"><Setter Property="CornerRadius" Value="8" /></Style>
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialExpressiveElevatedFilterChip" TargetType="ToggleButton" BasedOn="{StaticResource MaterialElevatedFilterChip}">
+    <Setter Property="material:MaterialChip.IsExpressive" Value="True" /><Setter Property="CornerRadius" Value="12" />
+    <Style Selector="^ /template/ ContentPresenter#LeadingIcon"><Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}" /></Style>
+    <Style Selector="^:checked"><Setter Property="CornerRadius" Value="{Binding $self.(MaterialChip.FullCornerRadius)}" /></Style>
+    <Style Selector="^:pressed"><Setter Property="CornerRadius" Value="8" /></Style>
+  </ControlTheme>
+</ResourceDictionary>

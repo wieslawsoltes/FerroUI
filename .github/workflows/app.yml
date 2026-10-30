@@ -1,0 +1,407 @@
+name: Application
+
+# The CI of an application in a repository of its own, with FerroUI as a git submodule at FerroUI/
+# (docs/apps.md; the browser job uses the action of the submodule at that path). The repository of the application calls it from a workflow of its own:
+#
+#   permissions:
+#     contents: read
+#     pages: write
+#     id-token: write
+#   jobs:
+#     app:
+#       uses: wieslawsoltes/FerroUI/.github/workflows/app.yml@main
+#       with:
+#         test: --workspace
+#         browser-package: my-app-browser
+#
+# Every job runs on ubuntu-latest, the fastest runner, except the optional iOS bundle (macOS): the conventions of FerroUI (no upstream name,
+# ferro_thread_local!, the FerroUI blocks of Cargo.toml up to date with the submodule), the tests
+# under a virtual X server, the browser site, optional browser tests of the site (one job per line),
+# optional Android and iOS packages, and the deployment of the site to GitHub Pages from main.
+# The Rust build caches are saved by runs of main only, as in FerroUI (.github/workflows/ci.yml).
+
+on:
+  workflow_call:
+    inputs:
+      test:
+        description: >
+          The tests: one invocation of `cargo test --locked` per line, with the arguments of the line
+          (for example `--workspace` or `-p my-app --features render-tests`). Empty: no tests.
+        type: string
+        default: --workspace
+      check:
+        description: >
+          Packages that are only compiled: one invocation of `cargo check --locked` per line, with the
+          arguments of the line (for example `-p my-app-desktop`). Empty: none.
+        type: string
+        default: ''
+      apt-packages:
+        description: Ubuntu packages the tests need beyond the default ones (fonts, X server, Mesa).
+        type: string
+        default: ''
+      script:
+        description: Commands run after the tests in the test job (bash, in the root of the repository).
+        type: string
+        default: ''
+      browser-package:
+        description: The binary package of the browser host (with its wwwroot/); empty for no browser site.
+        type: string
+        default: ''
+      browser-features:
+        description: Features of the browser package (`--features` of scripts/build-browser.sh).
+        type: string
+        default: ''
+      browser-script:
+        description: >
+          Commands run after the site is built and before it is uploaded (bash, in the root of the
+          repository); SITE is the directory of the site.
+        type: string
+        default: ''
+      smoke:
+        description: >
+          Open the built site in headless Chrome and fail on a request that fails or answers with an
+          error status, an error the page logs or throws, or a view that does not draw
+          (FerroUI/scripts/apps/smoke-site.mjs).
+        type: boolean
+        default: true
+      smoke-ignore:
+        description: Regular expressions, one per line, of smoke run errors to leave out.
+        type: string
+        default: ''
+      browser-tests:
+        description: >
+          Tests of the built site in a real browser: one job per line, run in parallel after the site
+          is built, each a bash command in the root of the repository with SITE set to the directory
+          of the site (for example `node tests/browser.mjs`, with Playwright from the package.json of
+          the repository). Empty: none.
+        type: string
+        default: ''
+      browser-tests-pull-request:
+        description: >
+          The lines of browser-tests for pull requests, when they differ (for example a shorter set of
+          the slow ones); empty: browser-tests. Pushes, schedules and manual runs take browser-tests.
+        type: string
+        default: ''
+      browser-tests-setup:
+        description: Commands run before each line of browser-tests (bash, in the root of the repository).
+        type: string
+        default: |
+          npm ci
+          npx playwright install --with-deps chromium
+      android:
+        description: >
+          Arguments of `FerroUI/scripts/android/apk.sh package` for the Android package of the
+          application (for example `--package my-app-android --label "My App" --application-id
+          org.example.myapp`). The APK is uploaded as an artifact. Empty: no Android package.
+        type: string
+        default: ''
+      ios:
+        description: >
+          Arguments of `FerroUI/scripts/ios/bundle.sh` for the iOS application bundle for the simulator
+          (for example `--package my-app-ios --bin my-app-ios`). The bundle is uploaded as an artifact.
+          Empty: no iOS bundle.
+        type: string
+        default: ''
+      pages:
+        description: Deploy the browser site to GitHub Pages from runs of main (not from pull requests).
+        type: boolean
+        default: true
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  CARGO_PROFILE_DEV_DEBUG: 0
+  CARGO_PROFILE_TEST_DEBUG: 0
+  RUST_BACKTRACE: 1
+
+jobs:
+  conventions:
+    name: Conventions
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          submodules: true
+      - name: Upstream project name stays out of the sources
+        run: |
+          # Only docs/, scripts/ and NOTICE.md files may name it, as in FerroUI.
+          found="$(git ls-files -z | grep -zv -E '^(FerroUI|docs|scripts)(/|$)|(^|/)NOTICE\.md$' \
+            | xargs -0 -r grep -Ili -E 'avalonia|axaml|avares|\bavn' -- || true)"
+          if [ -n "$found" ]; then
+            echo "$found"
+            echo "::error::the files above name the upstream project; only docs/, scripts/ and NOTICE.md may"
+            exit 1
+          fi
+      - name: No thread_local! outside of ferro_thread_local!
+        run: |
+          # On Android every thread_local! takes one of the 128 keys of the C library: FerroUI code
+          # declares thread-local variables with ferroui_base::ferro_thread_local! (docs/apps.md).
+          found="$(git ls-files -z -- '*.rs' | grep -zv '^FerroUI/' \
+            | xargs -0 -r grep -nE '(^|[^_[:alnum:]:$])((::)?std::)?thread_local!' -- || true)"
+          if [ -n "$found" ]; then
+            echo "$found"
+            echo "::error::declare thread-local variables with ferroui_base::ferro_thread_local!"
+            exit 1
+          fi
+      - name: The FerroUI blocks of Cargo.toml match the submodule
+        run: python3 FerroUI/scripts/apps/sync-workspace.py --check .
+      - name: The submodule is a commit of FerroUI
+        run: git -C FerroUI log -1 --format='FerroUI %H %s'
+
+  test:
+    name: Build and test
+    if: inputs.test != '' || inputs.check != '' || inputs.script != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          submodules: true
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: test
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
+      # mold links the test executables of a UI application several times faster than the default
+      # linker.
+      - uses: rui314/setup-mold@339e96b4ff1f3bd865856ba4cbbe8818a7acb038 # v1
+      # The X libraries are opened at run time; Skia links FreeType and Fontconfig and needs a font
+      # for the default family.
+      - name: System packages
+        env:
+          EXTRA: ${{ inputs.apt-packages }}
+        run: |
+          sudo apt-get update
+          # shellcheck disable=SC2086
+          sudo apt-get install -y --no-install-recommends \
+            xvfb xauth libx11-6 libxi6 libxrandr2 libxcursor1 libxfixes3 libxext6 \
+            libgl1 libegl1 libgl1-mesa-dri \
+            libfontconfig1-dev libfreetype6-dev fonts-dejavu-core pkg-config $EXTRA
+      - name: Compile
+        if: inputs.check != ''
+        env:
+          LINES: ${{ inputs.check }}
+        run: |
+          while IFS= read -r line; do
+            [ -n "${line// }" ] || continue
+            echo "::group::cargo check --locked $line"
+            # shellcheck disable=SC2086
+            cargo check --locked $line
+            echo "::endgroup::"
+          done <<< "$LINES"
+      - name: Test
+        if: inputs.test != ''
+        env:
+          LINES: ${{ inputs.test }}
+        run: |
+          while IFS= read -r line; do
+            [ -n "${line// }" ] || continue
+            echo "::group::cargo test --locked $line"
+            # shellcheck disable=SC2086
+            xvfb-run -a --server-args="-screen 0 1280x1024x24" cargo test --locked $line
+            echo "::endgroup::"
+          done <<< "$LINES"
+      - name: Script
+        if: inputs.script != ''
+        env:
+          SCRIPT: ${{ inputs.script }}
+        run: xvfb-run -a --server-args="-screen 0 1280x1024x24" bash -euo pipefail -c "$SCRIPT"
+
+  browser:
+    name: Browser site
+    if: inputs.browser-package != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    outputs:
+      tests: ${{ steps.tests.outputs.lines }}
+    steps:
+      - name: The lines of browser-tests
+        id: tests
+        env:
+          LINES: >-
+            ${{ github.event_name == 'pull_request' && inputs.browser-tests-pull-request != ''
+            && inputs.browser-tests-pull-request || inputs.browser-tests }}
+        run: |
+          python3 -c 'import json, os; print("lines=" + json.dumps([l.strip() for l in os.environ["LINES"].splitlines() if l.strip()]))' \
+            >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          submodules: true
+      - uses: ./FerroUI/.github/actions/browser-toolchain
+        with:
+          cache-key: browser
+          ferroui: FerroUI
+      - name: Build the site
+        id: site
+        env:
+          PACKAGE: ${{ inputs.browser-package }}
+          FEATURES: ${{ inputs.browser-features }}
+        run: |
+          site="$GITHUB_WORKSPACE/target/site"
+          FERROUI_BROWSER_WORKSPACE="$GITHUB_WORKSPACE" FerroUI/scripts/build-browser.sh "$PACKAGE" \
+            --out "$site" ${FEATURES:+--features "$FEATURES"}
+          echo "dir=$site" >> "$GITHUB_OUTPUT"
+      - name: Script
+        if: inputs.browser-script != ''
+        env:
+          SITE: ${{ steps.site.outputs.dir }}
+          SCRIPT: ${{ inputs.browser-script }}
+        run: bash -euo pipefail -c "$SCRIPT"
+      - name: Smoke run of the site in headless Chrome
+        if: inputs.smoke
+        env:
+          SITE: ${{ steps.site.outputs.dir }}
+          IGNORE: ${{ inputs.smoke-ignore }}
+        run: |
+          # The script comes with the submodule: a submodule older than this workflow has none.
+          if [ ! -f FerroUI/scripts/apps/smoke-site.mjs ]; then
+            echo "::warning::FerroUI/scripts/apps/smoke-site.mjs is missing: update the FerroUI submodule for the smoke run"
+            exit 0
+          fi
+          args=()
+          while IFS= read -r pattern; do
+            [ -n "$pattern" ] && args+=(--ignore "$pattern")
+          done <<< "$IGNORE"
+          node FerroUI/scripts/apps/smoke-site.mjs "$SITE" --screenshot "$RUNNER_TEMP/smoke/site.png" "${args[@]}"
+      - name: Upload the screenshot of the smoke run
+        if: always() && inputs.smoke
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: site-screenshot
+          path: ${{ runner.temp }}/smoke
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Sizes of the module
+        run: node FerroUI/scripts/browser/module-sizes.mjs "${{ steps.site.outputs.dir }}" | tee -a "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
+        with:
+          path: ${{ steps.site.outputs.dir }}
+
+  browser-tests:
+    name: Browser tests (${{ matrix.line }})
+    needs: browser
+    if: inputs.browser-tests != '' && needs.browser.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        line: ${{ fromJSON(needs.browser.outputs.tests) }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          submodules: true
+      # The site of the browser job: its GitHub Pages artifact (a tar archive).
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: github-pages
+          path: ${{ runner.temp }}/pages
+      - name: Unpack the site
+        run: |
+          mkdir -p "$RUNNER_TEMP/site"
+          tar -xf "$RUNNER_TEMP/pages/artifact.tar" -C "$RUNNER_TEMP/site"
+          echo "SITE=$RUNNER_TEMP/site" >> "$GITHUB_ENV"
+      - name: Setup
+        if: inputs.browser-tests-setup != ''
+        env:
+          SCRIPT: ${{ inputs.browser-tests-setup }}
+        run: bash -euo pipefail -c "$SCRIPT"
+      - name: Test
+        env:
+          LINE: ${{ matrix.line }}
+        run: bash -euo pipefail -c "$LINE"
+
+  android:
+    name: Android package
+    if: inputs.android != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          submodules: true
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+        with:
+          targets: aarch64-linux-android
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: android
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
+      - name: The pinned packages of the Android SDK (FerroUI/scripts/android/env.sh)
+        run: |
+          version() { sed -n "s/^$1=\"\(.*\)\"/\1/p" FerroUI/scripts/android/env.sh; }
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$ANDROID_HOME" \
+            "ndk;$(version FERROUI_ANDROID_NDK_VERSION)" "build-tools;$(version FERROUI_ANDROID_BUILD_TOOLS_VERSION)" \
+            "platforms;$(version FERROUI_ANDROID_PLATFORM)" > /dev/null
+      - name: Package
+        id: apk
+        env:
+          ARGS: ${{ inputs.android }}
+        run: |
+          eval "args=($ARGS)"
+          FERROUI_ANDROID_WORKSPACE="$GITHUB_WORKSPACE" FerroUI/scripts/android/apk.sh package "${args[@]}" | tee "$RUNNER_TEMP/apk.out"
+          echo "path=$(sed -n 's/^APK: //p' "$RUNNER_TEMP/apk.out" | tail -n 1)" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: android-apk
+          path: ${{ steps.apk.outputs.path }}
+          retention-days: 7
+
+  ios:
+    name: iOS bundle (simulator)
+    if: inputs.ios != ''
+    runs-on: macos-15
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          submodules: true
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+        with:
+          targets: aarch64-apple-ios-sim
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: ios
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
+      - name: Bundle
+        id: bundle
+        env:
+          ARGS: ${{ inputs.ios }}
+        run: |
+          eval "args=($ARGS)"
+          app="$(FERROUI_IOS_WORKSPACE="$GITHUB_WORKSPACE" FerroUI/scripts/ios/bundle.sh "${args[@]}" | tail -n 1)"
+          plutil -p "$app/Info.plist"
+          codesign --verify --verbose "$app"
+          ditto -c -k --keepParent "$app" "$RUNNER_TEMP/ios-app.zip"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ios-app
+          path: ${{ runner.temp }}/ios-app.zip
+          retention-days: 7
+
+  deploy:
+    name: Deploy to GitHub Pages
+    # After every other job passed (the tests may be left out); only main is published.
+    needs: [conventions, test, browser, browser-tests, android, ios]
+    if: >-
+      !cancelled() && inputs.pages && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+      && needs.conventions.result == 'success' && needs.browser.result == 'success'
+      && (needs.test.result == 'success' || needs.test.result == 'skipped')
+      && (needs.browser-tests.result == 'success' || needs.browser-tests.result == 'skipped')
+      && (needs.android.result == 'success' || needs.android.result == 'skipped')
+      && (needs.ios.result == 'success' || needs.ios.result == 'skipped')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4

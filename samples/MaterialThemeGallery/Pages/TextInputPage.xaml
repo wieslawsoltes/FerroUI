@@ -1,0 +1,56 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:material="using:FerroUI.Themes.Material"
+             x:Class="MaterialThemeGallery.Pages.TextInputPage">
+  <StackPanel Margin="24" Spacing="12">
+    <TextBlock Text="Text fields" FontSize="28" FontWeight="SemiBold" />
+    <TextBlock Text="Focus a field to float its label. Type to update the character counter."
+               TextWrapping="Wrap" Foreground="{DynamicResource MaterialOnSurfaceVariantBrush}" />
+    <Grid ColumnDefinitions="128,*" ColumnSpacing="16" RowSpacing="12" MaxWidth="560"
+          RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" HorizontalAlignment="Left">
+      <TextBlock Grid.Row="0" Text="Label + hint" VerticalAlignment="Center" />
+      <TextBox Grid.Row="0" Grid.Column="1" Width="320"
+               material:MaterialTextField.Label="Project name"
+               PlaceholderText="e.g. Material gallery" />
+      <TextBlock Grid.Row="1" Text="Icon + affixes" VerticalAlignment="Center" />
+      <TextBox Grid.Row="1" Grid.Column="1" Width="320" Text="125.00"
+               material:MaterialTextField.Label="Amount"
+               material:MaterialTextField.Prefix="$" material:MaterialTextField.Suffix="USD"
+               material:MaterialTextField.SupportingText="Before tax">
+        <material:MaterialTextField.LeadingIcon>
+          <PathIcon Theme="{StaticResource MaterialSymbolIcon}" FlowDirection="LeftToRight" Width="24" Height="24" Data="M20,4 H4 C2.89,4 2.01,4.89 2.01,6 L2,18 C2,19.11 2.89,20 4,20 H20 C21.11,20 22,19.11 22,18 V6 C22,4.89 21.11,4 20,4 Z M20,18 H4 V12 H20 Z M20,8 H4 V6 H20 Z" />
+        </material:MaterialTextField.LeadingIcon>
+      </TextBox>
+      <TextBlock Grid.Row="2" Text="Outlined" VerticalAlignment="Center" />
+      <TextBox Grid.Row="2" Grid.Column="1" Width="320" Classes="outlined" Text="hello@example.com"
+               material:MaterialTextField.Label="Email address">
+        <material:MaterialTextField.LeadingIcon>
+          <PathIcon Theme="{StaticResource MaterialSymbolIcon}" FlowDirection="LeftToRight" Width="24" Height="24" Data="M20,4 H4 C2.9,4 2.01,4.9 2.01,6 L2,18 C2,19.1 2.9,20 4,20 H20 C21.1,20 22,19.1 22,18 V6 C22,4.9 21.1,4 20,4 Z M20,8 L12,13 L4,8 V6 L12,11 L20,6 Z" />
+        </material:MaterialTextField.LeadingIcon>
+      </TextBox>
+      <TextBlock Grid.Row="3" Text="Character count" VerticalAlignment="Center" />
+      <TextBox Grid.Row="3" Grid.Column="1" Width="320" Text="FerroUI"
+               material:MaterialTextField.Label="Display name"
+               material:MaterialTextField.SupportingText="Visible to your team"
+               material:MaterialTextField.ShowCharacterCount="True"
+               material:MaterialTextField.CharacterLimit="24" />
+      <TextBlock Grid.Row="4" Text="Validation" VerticalAlignment="Center" />
+      <TextBox Grid.Row="4" Grid.Column="1" Width="320" Classes="outlined" Text="not an address"
+               material:MaterialTextField.Label="Email address"
+               material:MaterialTextField.ErrorText="Enter a valid email address." />
+      <TextBlock Grid.Row="5" Text="Disabled" VerticalAlignment="Center" />
+      <TextBox Grid.Row="5" Grid.Column="1" Width="320" Text="Archived project" IsEnabled="False"
+               material:MaterialTextField.Label="Project name"
+               material:MaterialTextField.SupportingText="This project is read-only" />
+      <TextBlock Grid.Row="6" Text="Password" VerticalAlignment="Center" />
+      <TextBox Grid.Row="6" Grid.Column="1" Width="320" Text="password"
+               Theme="{StaticResource DefaultPasswordBoxStyle}"
+               material:MaterialTextField.Label="Password" />
+      <TextBlock Grid.Row="7" Text="Multiple lines" VerticalAlignment="Top" Margin="0,16,0,0" />
+      <TextBox Grid.Row="7" Grid.Column="1" Width="320" Classes="outlined" Height="96"
+               AcceptsReturn="True" TextWrapping="Wrap"
+               material:MaterialTextField.Label="Notes"
+               Text="A first line of notes.&#xA;A second line with more detail." />
+    </Grid>
+  </StackPanel>
+</UserControl>

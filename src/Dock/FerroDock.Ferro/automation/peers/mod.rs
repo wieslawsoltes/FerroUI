@@ -1,0 +1,71 @@
+//! Source docking automation peers and their shared algorithms.
+pub(crate) mod dock_automation_peer_helper;
+mod root_dock_control_automation_peer;
+pub(crate) use root_dock_control_automation_peer::RootDockControlAutomationPeer;
+
+mod dock_target_automation_peer;
+pub(crate) use dock_target_automation_peer::DockTargetAutomationPeer;
+
+mod dock_adorner_window_automation_peer;
+pub(crate) use dock_adorner_window_automation_peer::DockAdornerWindowAutomationPeer;
+
+mod drag_preview_control_automation_peer;
+pub(crate) use drag_preview_control_automation_peer::DragPreviewControlAutomationPeer;
+mod drag_preview_window_automation_peer;
+pub(crate) use drag_preview_window_automation_peer::DragPreviewWindowAutomationPeer;
+mod dock_selector_overlay_automation_peer;
+pub(crate) use dock_selector_overlay_automation_peer::DockSelectorOverlayAutomationPeer;
+mod dock_command_bar_host_automation_peer;
+pub(crate) use dock_command_bar_host_automation_peer::DockCommandBarHostAutomationPeer;
+
+mod pinned_dock_window_automation_peer;
+pub(crate) use pinned_dock_window_automation_peer::PinnedDockWindowAutomationPeer;
+
+mod mdi_document_window_automation_peer;
+pub(crate) use mdi_document_window_automation_peer::MdiDocumentWindowAutomationPeer;
+
+mod mdi_document_control_automation_peer;
+pub(crate) use mdi_document_control_automation_peer::MdiDocumentControlAutomationPeer;
+
+mod dock_tab_strip_automation_peer;
+
+mod dock_tab_strip_item_automation_peer;
+
+mod dock_control_automation_peer;
+pub(crate) use dock_control_automation_peer::DockControlAutomationPeer;
+
+mod host_window_automation_peer;
+pub(crate) use host_window_automation_peer::HostWindowAutomationPeer;
+
+mod tool_chrome_control_automation_peer;
+pub(crate) use tool_chrome_control_automation_peer::ToolChromeControlAutomationPeer;
+
+mod tool_pin_item_control_automation_peer;
+pub(crate) use tool_pin_item_control_automation_peer::ToolPinItemControlAutomationPeer;
+
+mod tool_pinned_control_automation_peer;
+pub(crate) use tool_pinned_control_automation_peer::ToolPinnedControlAutomationPeer;
+
+mod document_tab_strip_automation_peer;
+pub(crate) use document_tab_strip_automation_peer::DocumentTabStripAutomationPeer;
+
+mod document_tab_strip_item_automation_peer;
+pub(crate) use document_tab_strip_item_automation_peer::DocumentTabStripItemAutomationPeer;
+
+mod tool_tab_strip_automation_peer;
+pub(crate) use tool_tab_strip_automation_peer::ToolTabStripAutomationPeer;
+
+mod tool_tab_strip_item_automation_peer;
+pub(crate) use tool_tab_strip_item_automation_peer::ToolTabStripItemAutomationPeer;
+
+mod document_control_automation_peer;
+pub(crate) use document_control_automation_peer::DocumentControlAutomationPeer;
+
+mod tool_control_automation_peer;
+pub(crate) use tool_control_automation_peer::ToolControlAutomationPeer;
+
+mod pinned_dock_control_automation_peer;
+pub(crate) use pinned_dock_control_automation_peer::PinnedDockControlAutomationPeer;
+
+mod host_window_title_bar_automation_peer;
+pub(crate) use host_window_title_bar_automation_peer::HostWindowTitleBarAutomationPeer;

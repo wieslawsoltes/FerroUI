@@ -33,6 +33,35 @@ pub use vello_web_gl_scene_sink::VelloWebGlSceneSink;
 
 use crate::vello_options::VelloRenderingMode;
 
+/// Keep glyph preparation at exactly the same device tolerance as geometry.
+pub(crate) const fn glyph_curve_tolerance() -> f64 { vello_cpu_scene_sink::CURVE_TOLERANCE }
+
+/// Concrete renderers opt into the run's bounded curve cache. Aliased drawing
+/// retains the canonical route because its sink may snap individual contours.
+fn fill_cached_glyph_outline(
+    sink: &mut dyn IVelloSceneSink,
+    path: &kurbo::BezPath,
+    transform: kurbo::Affine,
+    paint: &VelloScenePaint,
+    anti_alias: bool,
+    prepare: &dyn Fn(kurbo::Affine) -> Option<(std::sync::Arc<kurbo::BezPath>, kurbo::Affine)>,
+) {
+    if anti_alias {
+        if let Some((prepared, placement)) = prepare(transform) {
+            let [a, b, c, d, _, _] = transform.as_coeffs();
+            let mut prepared_paint = paint.clone();
+            // placement * linear * brush is the original transform * brush.
+            // The brush is not part of the geometry cache and can change on
+            // every draw, including translucent, gradient and image paints.
+            prepared_paint.transform = kurbo::Affine::new([a, b, c, d, 0.0, 0.0]) * paint.transform;
+            sink.fill(&prepared, peniko::Fill::NonZero, placement, &prepared_paint,
+                peniko::BlendMode::default(), anti_alias);
+            return;
+        }
+    }
+    sink.fill(path, peniko::Fill::NonZero, transform, paint, peniko::BlendMode::default(), anti_alias);
+}
+
 /// A rendering mode that cannot draw, with the reason.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct VelloRenderingModeUnavailable {

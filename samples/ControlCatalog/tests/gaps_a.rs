@@ -6,8 +6,7 @@
 #[allow(unused_imports)]
 use super::support::*;
 use crate::controls::{
-    CodeBlock, HomeItemExpander, SampleGalleryPage, SampleGroup, SampleGroups, SampleInfo, SampleSection,
-    SelectableButton,
+    CodeBlock, SampleGalleryPage, SampleGroup, SampleGroups, SampleInfo, SampleSection,
 };
 use ferroui_base::collections::FerroList;
 use ferroui_base::layout::ILayoutManager;
@@ -195,31 +194,6 @@ fn sample_gallery_page_shows_a_card_per_sample_under_its_theme() {
 }
 
 #[test]
-fn home_item_expander_shows_its_content_when_it_can_expand_under_its_theme() {
-    let _app = start_catalog_application();
-    let xaml = format!(
-        "<controls:HomeItemExpander {XMLNS} xmlns:controls='using:ControlCatalog.Controls' \
-         Theme='{{StaticResource HomeSectionExpander}}' Header='Section' IsSelected='True'>\
-         <Border /></controls:HomeItemExpander>"
-    );
-    let expander = from_markup_value::<Ref<HomeItemExpander>>(&Some(load_text(&xaml))).expect("an expander");
-    let window = show(&expander.clone().upcast(), 400.0);
-
-    let header: Ref<SelectableButton> = named(&expander, "ExpanderHeader");
-    let content: Ref<Border> = named(&expander, "ExpanderContent");
-    assert!(header.is_selected());
-    assert!(header.classes().contains(":selected"));
-    assert!(!content.is_visible());
-
-    header.set_is_checked(Some(true));
-    assert!(expander.is_expanded());
-    assert!(!content.is_visible());
-    expander.set_can_expand(true);
-    assert!(content.is_visible());
-    window.close();
-}
-
-#[test]
 fn sample_gallery_page_opens_a_sample_on_its_navigation_host() {
     let _app = start_application();
     let navigation = NavigationPage::new();
@@ -254,10 +228,10 @@ fn sample_gallery_page_opens_a_sample_on_its_navigation_host() {
 }
 
 #[test]
-fn the_header_of_a_section_of_the_drawer_navigates_to_the_page_of_the_section() {
-    // Not from upstream (the sample has no tests): the expander of a section passes the page item
-    // of the section, which a binding reads from a typed property, to the navigation command; the
-    // command must convert it (a click on the header panicked in the browser host).
+fn the_item_of_a_section_in_the_pane_navigates_to_the_page_of_the_section() {
+    // Not from upstream (the sample has no tests): the item of a section in the pane of the shell
+    // opens the page of the section (its cards) and the section (a click on the header of a section
+    // panicked in the browser host when the shell was a drawer).
     use crate::view_models::MainWindowViewModel;
     use crate::MainView;
     use ferroui_controls::{Page, PageNavigationHost};
@@ -268,14 +242,14 @@ fn the_header_of_a_section_of_the_drawer_navigates_to_the_page_of_the_section() 
     let host = PageNavigationHost::new();
     host.set_page(view.clone().upcast::<Page>());
     let window = show(&host.upcast(), 1100.0);
-
-    let expander = descendants::<HomeItemExpander>(&view)[0].clone();
-    let header: Ref<SelectableButton> = named(&expander, "ExpanderHeader");
-    let command = header.command().expect("the navigation command");
-    command.execute(header.command_parameter().as_ref());
     Dispatcher::ui_thread().run_jobs(None);
 
     let section = view_model.home_sections()[0].clone();
+    let entry = view.entry_of(&section.page_item()).expect("the item of the section");
+    view.navigation_view().set_selected_item(Some(Control::boxed(&entry)));
+    Dispatcher::ui_thread().run_jobs(None);
+
     assert_eq!(Some(section.page_item().header()), view_model.current_page_item().map(|item| item.header()));
+    assert_eq!(section.is_expanded(), view.navigation_view().is_pane_open(), "the open pane opens the section");
     window.close();
 }

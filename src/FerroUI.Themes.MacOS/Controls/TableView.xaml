@@ -1,0 +1,174 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/TableView/TableView.xaml (the implicit TableView style)
+    controls/dev/TableView/TableView.cpp (RebuildHeaders: the header band)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  WinUI's TableView belongs to the tabular library of microsoft-ui-xaml, not to the merged theme of
+  XamlControlsResources; its resources (TabularSurface*, TableView*, ResizeGripper*) are converted
+  from its own documents into Resources/TabularSurfaces_themeresources.xaml,
+  Resources/TableView_themeresources.xaml and Resources/ResizeGripper_themeresources.xaml
+  (scripts/winui-theme/convert.py, OUTSIDE_THE_MERGE). The rows, the cells and the column headers
+  are TableViewRow.xaml, TableViewCell.xaml and TableViewColumnHeader.xaml.
+  Translation notes (docs/porting/winui-theme.md, section 4):
+  - FerroUI's TableView is a ListBox: the template is the border of the source around the
+    PART_ScrollViewer and the PART_ItemsPresenter of a ListBox; the rows are the items. The header
+    band (PART_HeaderRow with PART_HeaderHost, the column headers FerroUI's
+    TableViewColumnHeadersPresenter builds) is the first row of the template of the scroll viewer
+    (TableViewScrollViewerStyle), above the rows and the vertical scroll bar as above
+    PART_BodyScroller in the source; the header presenter follows the horizontal offset of the
+    scroll viewer itself, so PART_HeaderScroller has no counterpart.
+  - The border of the table clips its content to its corner radius, as the rounded border of WinUI
+    does: ClipToBounds is set by the theme and honoured by the border (as in the Fluent theme).
+  - The padding of the table is the margin of the items presenter and the padding of the scroll
+    viewer is the padding of its presenter, as FerroUI's templates honour them.
+  - PART_EmptyStatePresenter, the frozen columns, the sorting, the grouping and the hierarchy of
+    WinUI's TableView have no counterpart in FerroUI's TableView. IsTabStop="False" (the table is a
+    focus scope of two tab stops) is left out: FerroUI's ListBox keeps its own keyboard handling.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <TableView Height="200" Width="400">
+        <TableView.Columns>
+          <TableViewColumn Header="Name" Width="*" />
+          <TableViewColumn Header="Value" Width="120" />
+        </TableView.Columns>
+      </TableView>
+    </Border>
+  </Design.PreviewWith>
+
+  <!-- The scroll viewer of the table: DefaultScrollViewerStyle with the header band of the table
+       above the rows. -->
+  <ControlTheme x:Key="TableViewScrollViewerStyle" TargetType="ScrollViewer" BasedOn="{StaticResource DefaultScrollViewerStyle}">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="Root"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}">
+          <Grid Background="{TemplateBinding Background}"
+                ColumnDefinitions="*,Auto"
+                RowDefinitions="Auto,*,Auto">
+            <Border x:Name="PART_HeaderRow"
+                    Grid.ColumnSpan="2"
+                    ClipToBounds="True"
+                    Background="{DynamicResource TabularSurfaceHeaderBackgroundBrush}"
+                    BorderBrush="{DynamicResource TabularSurfaceGridLineBrush}"
+                    BackgroundSizing="InnerBorderEdge"
+                    BorderThickness="0,0,0,1">
+              <TableViewColumnHeadersPresenter x:Name="PART_HeaderHost" />
+            </Border>
+            <ScrollContentPresenter x:Name="PART_ContentPresenter"
+                                    Grid.Row="1"
+                                    Grid.RowSpan="2"
+                                    Grid.ColumnSpan="2"
+                                    ContentTemplate="{TemplateBinding ContentTemplate}"
+                                    Padding="{TemplateBinding Padding}"
+                                    HorizontalSnapPointsType="{TemplateBinding HorizontalSnapPointsType}"
+                                    VerticalSnapPointsType="{TemplateBinding VerticalSnapPointsType}"
+                                    HorizontalSnapPointsAlignment="{TemplateBinding HorizontalSnapPointsAlignment}"
+                                    VerticalSnapPointsAlignment="{TemplateBinding VerticalSnapPointsAlignment}"
+                                    ScrollViewer.IsScrollInertiaEnabled="{TemplateBinding IsScrollInertiaEnabled}">
+              <ScrollContentPresenter.GestureRecognizers>
+                <ScrollGestureRecognizer CanHorizontallyScroll="{Binding CanHorizontallyScroll, ElementName=PART_ContentPresenter}"
+                                         CanVerticallyScroll="{Binding CanVerticallyScroll, ElementName=PART_ContentPresenter}"
+                                         IsScrollInertiaEnabled="{Binding (ScrollViewer.IsScrollInertiaEnabled), ElementName=PART_ContentPresenter}"
+                                         Offset="{Binding Offset, ElementName=PART_ContentPresenter}"
+                                         Viewport="{Binding Viewport, ElementName=PART_ContentPresenter}"
+                                         Extent="{Binding Extent, ElementName=PART_ContentPresenter}" />
+              </ScrollContentPresenter.GestureRecognizers>
+            </ScrollContentPresenter>
+            <!-- Opacity 0: NoIndicator until the pointer is over the table, as the bars of
+                 DefaultScrollViewerStyle (its nested styles show them). -->
+            <ScrollBar x:Name="PART_VerticalScrollBar"
+                       Grid.Row="1"
+                       Grid.Column="1"
+                       Margin="{DynamicResource ScrollViewerScrollBarMargin}"
+                       IsTabStop="False"
+                       Orientation="Vertical"
+                       HorizontalAlignment="Right"
+                       Opacity="0">
+              <ScrollBar.Transitions>
+                <Transitions>
+                  <DoubleTransition Property="Opacity" Duration="{DynamicResource MacOSMotionFastDuration}" />
+                </Transitions>
+              </ScrollBar.Transitions>
+            </ScrollBar>
+            <ScrollBar x:Name="PART_HorizontalScrollBar"
+                       Grid.Row="2"
+                       Margin="{DynamicResource ScrollViewerScrollBarMargin}"
+                       IsTabStop="False"
+                       Orientation="Horizontal"
+                       Opacity="0">
+              <ScrollBar.Transitions>
+                <Transitions>
+                  <DoubleTransition Property="Opacity" Duration="{DynamicResource MacOSMotionFastDuration}" />
+                </Transitions>
+              </ScrollBar.Transitions>
+            </ScrollBar>
+            <Border x:Name="ScrollBarSeparator"
+                    Grid.Row="2"
+                    Grid.Column="1"
+                    Opacity="0"
+                    Background="{DynamicResource ScrollViewerScrollBarSeparatorBackground}">
+              <Border.Transitions>
+                <Transitions>
+                  <DoubleTransition Property="Opacity" Duration="{DynamicResource MacOSMotionFastDuration}" />
+                </Transitions>
+              </Border.Transitions>
+            </Border>
+          </Grid>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type TableView}" TargetType="TableView">
+    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="Background" Value="{DynamicResource TabularSurfaceRowBackgroundBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource TabularSurfaceRowForegroundBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource TabularSurfaceGridLineBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <!-- The rounded border of WinUI clips the table to its corner radius. -->
+    <Setter Property="ClipToBounds" Value="True" />
+    <!-- PART_BodyScroller: both scroll bars Auto. -->
+    <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto" />
+    <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+    <Setter Property="ScrollViewer.IsScrollChainingEnabled" Value="True" />
+    <Setter Property="ScrollViewer.IsScrollInertiaEnabled" Value="True" />
+    <!-- The text of the cells and the headers is trimmed (TextTrimming="CharacterEllipsis" of the
+         text blocks TableView creates). -->
+    <Setter Property="TextBlock.TextTrimming" Value="{x:Static TextTrimming.CharacterEllipsis}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="Root"
+                ClipToBounds="{TemplateBinding ClipToBounds}"
+                Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BackgroundSizing="InnerBorderEdge"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}">
+          <ScrollViewer x:Name="PART_ScrollViewer"
+                        Theme="{StaticResource TableViewScrollViewerStyle}"
+                        VerticalSnapPointsType="{TemplateBinding (ScrollViewer.VerticalSnapPointsType)}"
+                        HorizontalSnapPointsType="{TemplateBinding (ScrollViewer.HorizontalSnapPointsType)}"
+                        HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}"
+                        VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}"
+                        IsScrollChainingEnabled="{TemplateBinding (ScrollViewer.IsScrollChainingEnabled)}"
+                        IsScrollInertiaEnabled="{TemplateBinding (ScrollViewer.IsScrollInertiaEnabled)}"
+                        IsDeferredScrollingEnabled="{TemplateBinding (ScrollViewer.IsDeferredScrollingEnabled)}"
+                        AllowAutoHide="{TemplateBinding (ScrollViewer.AllowAutoHide)}"
+                        BringIntoViewOnFocusChange="{TemplateBinding (ScrollViewer.BringIntoViewOnFocusChange)}">
+            <ItemsPresenter x:Name="PART_ItemsPresenter"
+                            ItemsPanel="{TemplateBinding ItemsPanel}"
+                            Margin="{TemplateBinding Padding}" />
+          </ScrollViewer>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

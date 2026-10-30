@@ -1,4 +1,7 @@
+use crate::browser_accessibility::BrowserAccessibility;
 use crate::browser_top_level_impl::BrowserTopLevelImpl;
+use crate::BrowserPlatformOptions;
+use ferroui_base::{FerroLocator, LocatorExtensions};
 use crate::interop::{dom_helper, input_helper, JsObject};
 use crate::windowing_platform::BrowserWindowingPlatform;
 use ferroui_base::input::{FocusChangedEventArgs, InputElement};
@@ -12,6 +15,7 @@ use std::rc::Rc;
 /// Shows content in an element of the web page.
 pub struct FerroView {
     top_level: Ref<EmbeddableControlRoot>,
+    accessibility: Option<Rc<BrowserAccessibility>>,
 }
 
 impl FerroView {
@@ -55,7 +59,10 @@ impl FerroView {
             None => panic!("InputElement cannot be null"),
         };
 
+        let accessibility_host = host_content.accessibility_host();
+
         let browser_top_level = BrowserTopLevelImpl::new(host.clone(), native_controls_container, input_element);
+        let top_level_id = browser_top_level.top_level_id();
         let surface = browser_top_level.surface();
         let top_level_impl: Rc<dyn ITopLevelImpl> = browser_top_level;
         let top_level = EmbeddableControlRoot::with_impl(top_level_impl);
@@ -74,6 +81,15 @@ impl FerroView {
         // which the page would show an empty canvas that input cannot hit.
         // The splash screen is closed when the first frame has been drawn
         // to the canvas of the view, whichever thread drew it.
+        // Not in the original: the automation tree of the view in the page, on demand by default.
+        let mode = FerroLocator::current()
+            .get_service::<BrowserPlatformOptions>()
+            .map(|options| options.accessibility)
+            .unwrap_or_default();
+        let accessibility = accessibility_host.map(|accessibility_host| {
+            BrowserAccessibility::new(top_level.clone().upcast(), top_level_id, accessibility_host, &host, mode)
+        });
+
         if let Some(surface) = surface {
             surface.shared().on_first_frame(Box::new(move || {
                 // Try to get local splash-screen of the specific host.
@@ -87,7 +103,7 @@ impl FerroView {
             }));
         }
 
-        Rc::new(Self { top_level })
+        Rc::new(Self { top_level, accessibility })
     }
 
     /// The content of the view.
@@ -108,6 +124,27 @@ impl FerroView {
         self.top_level.set_content(value.map(Control::boxed));
     }
 
+    /// Whether the view mirrors the automation tree of its controls into the
+    /// page (for screen readers, the element picker of the developer tools
+    /// and automation by role). Not in the original.
+    pub fn is_accessibility_enabled(&self) -> bool {
+        self.accessibility.as_ref().is_some_and(|accessibility| accessibility.is_enabled())
+    }
+
+    /// Turns the mirror of the automation tree of the view on or off,
+    /// whatever [`BrowserPlatformOptions::accessibility`] chose. Not in the
+    /// original.
+    pub fn set_accessibility_enabled(&self, enabled: bool) {
+        if let Some(accessibility) = &self.accessibility {
+            accessibility.set_enabled(enabled);
+        }
+    }
+
+    /// The mirror of the automation tree of the view. Not in the original.
+    pub fn accessibility(&self) -> Option<&Rc<BrowserAccessibility>> {
+        self.accessibility.as_ref()
+    }
+
     pub(crate) fn top_level(&self) -> Ref<TopLevel> {
         self.top_level.clone().upcast()
     }
@@ -123,6 +160,9 @@ impl FerroView {
     /// views would otherwise keep the canvas and the graphics context of
     /// every view it ever had.
     pub fn dispose(&self) {
+        if let Some(accessibility) = &self.accessibility {
+            accessibility.set_enabled(false);
+        }
         self.top_level.dispose();
     }
 }

@@ -1,10 +1,11 @@
-use super::{INameScope, NameScopeError, NameScopeRef};
+use super::{INameScope, NameScopeError, NameScopeRef, NameScopeValueError};
 use crate::utilities::{SynchronousCompletionAsyncResult, SynchronousCompletionAsyncResultSource};
-use crate::{ferro_property, AttachedProperty, FerroObject, FerroProperty, Ref, StyledElement, WeakRef};
+use crate::data::core::ValueTypes;
+use crate::{BoxedValue, ferro_property, AttachedProperty, FerroObject, FerroProperty, Ref, StyledElement, WeakRef};
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 
-type FindResult = Option<Ref<FerroObject>>;
+type FindResult = Option<BoxedValue>;
 
 /// An element of a name scope. Deviation (DEVIATIONS.md, Name scopes): the
 /// element the scope is attached to holds the scope, so the scope holds that
@@ -12,23 +13,36 @@ type FindResult = Option<Ref<FerroObject>>;
 /// the managed original holds every element for its collector, an element
 /// with a name of its own and its scope would keep each other alive. Every
 /// other element is held as a reference.
+#[derive(Clone)]
 enum Named {
     Element(Ref<FerroObject>),
     Owner(WeakRef<FerroObject>),
+    Value(BoxedValue),
 }
 
 impl Named {
+    // Keep existing typed native lookup allocation-free.
     fn element(&self) -> Option<Ref<FerroObject>> {
         match self {
             Named::Element(element) => Some(element.clone()),
             Named::Owner(owner) => owner.upgrade(),
+            Named::Value(_) => None,
         }
     }
 
-    fn is(&self, element: &Ref<FerroObject>) -> bool {
+    fn value(&self) -> FindResult {
         match self {
-            Named::Element(named) => named == element,
-            Named::Owner(owner) => owner.points_to(element),
+            Named::Element(element) => Some(std::rc::Rc::new(element.clone())),
+            Named::Owner(owner) => owner.upgrade().map(|element| std::rc::Rc::new(element) as BoxedValue),
+            Named::Value(value) => Some(value.clone()),
+        }
+    }
+
+    fn is(&self, value: &BoxedValue) -> bool {
+        match self {
+            Named::Element(named) => ValueTypes::as_object(&**value).as_ref() == Some(named),
+            Named::Owner(owner) => ValueTypes::as_object(&**value).is_some_and(|element| owner.points_to(&element)),
+            Named::Value(named) => ValueTypes::reference_equals(named, value),
         }
     }
 }
@@ -90,34 +104,61 @@ impl NameScope {
 
 impl INameScope for NameScope {
     fn try_register(&self, name: &str, element: Ref<FerroObject>) -> Result<(), NameScopeError> {
+        // An element of the object model is neither null nor unsupported.
+        self.try_register_value(name, std::rc::Rc::new(element)).map_err(|error| match error {
+            NameScopeValueError::Completed => NameScopeError::Completed,
+            NameScopeValueError::DuplicateName(name) => NameScopeError::DuplicateName(name),
+            NameScopeValueError::UnsupportedValue | NameScopeValueError::NullValue => {
+                unreachable!("an element of the object model is a supported, non-null value")
+            }
+        })
+    }
+
+    fn try_register_value(&self, name: &str, value: BoxedValue) -> Result<(), NameScopeValueError> {
         if self.is_completed.get() {
-            return Err(NameScopeError::Completed);
+            return Err(NameScopeValueError::Completed);
         }
+
+        let value = ValueTypes::normalize(value).ok_or(NameScopeValueError::NullValue)?;
 
         // A name whose element was dropped (the element the scope was
         // attached to) stays taken, as it is while the element is alive.
-        let existing = self.inner.borrow().get(name).map(|existing| existing.is(&element));
+        let existing = self.inner.borrow().get(name).cloned();
+        let existing = existing.map(|existing| existing.is(&value));
         match existing {
             Some(is_element) => {
                 if !is_element {
-                    return Err(NameScopeError::DuplicateName(name.to_string()));
+                    return Err(NameScopeValueError::DuplicateName(name.to_string()));
                 }
             }
             None => {
-                let named =
-                    if self.is_owner(&element) { Named::Owner(element.downgrade()) } else { Named::Element(element.clone()) };
+                let named = match ValueTypes::as_object(&*value) {
+                    Some(element) if self.is_owner(&element) => Named::Owner(element.downgrade()),
+                    Some(element) => Named::Element(element),
+                    None => Named::Value(value.clone()),
+                };
                 self.inner.borrow_mut().insert(name.to_string(), named);
                 let pending = self.pending_searches.borrow_mut().remove(name);
                 if let Some(tcs) = pending {
-                    tcs.set_result(Some(element));
+                    tcs.set_result(Some(value));
                 }
             }
         }
         Ok(())
     }
 
-    fn find_async(&self, name: &str) -> SynchronousCompletionAsyncResult<FindResult> {
-        let found = self.find(name);
+    fn find_async(&self, name: &str) -> SynchronousCompletionAsyncResult<Option<Ref<FerroObject>>> {
+        if let Some(element) = self.find(name) {
+            return SynchronousCompletionAsyncResult::new(Some(element));
+        }
+        if self.is_completed.get() || self.find_value(name).is_some() {
+            return SynchronousCompletionAsyncResult::new(None);
+        }
+        super::i_name_scope::map_result(self.find_value_async(name), |value| value.and_then(|value| ValueTypes::as_object(&*value)))
+    }
+
+    fn find_value_async(&self, name: &str) -> SynchronousCompletionAsyncResult<FindResult> {
+        let found = self.find_value(name);
         if found.is_some() {
             return SynchronousCompletionAsyncResult::new(found);
         }
@@ -128,8 +169,12 @@ impl INameScope for NameScope {
         self.pending_searches.borrow_mut().entry(name.to_string()).or_default().async_result()
     }
 
-    fn find(&self, name: &str) -> FindResult {
+    fn find(&self, name: &str) -> Option<Ref<FerroObject>> {
         self.inner.borrow().get(name).and_then(Named::element)
+    }
+
+    fn find_value(&self, name: &str) -> FindResult {
+        self.inner.borrow().get(name).and_then(Named::value)
     }
 
     fn complete(&self) {

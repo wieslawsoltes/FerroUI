@@ -1,0 +1,36 @@
+<!--
+  Android Material 3 Expressive, pinned to AndroidX Compose Material3 1.5.0-beta02,
+  revision e4d933c98df7baa7ea2b83eea6e086915961e0ff. Geometry and color roles follow
+  androidx/compose/material3/tokens; FerroUI template contracts are retained from
+  its WinUI theme (Microsoft copyright, MIT; see NOTICE.md).
+  Material design/source references: https://developer.android.com/develop/ui/compose/designsystems/material3
+  See docs/porting/material-theme.md for measured fidelity and platform differences.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <ControlTheme x:Key="{x:Type GroupBox}" TargetType="GroupBox">
+    <Setter Property="Background" Value="{DynamicResource MaterialSurfaceContainerHighestBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceBrush}" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="CornerRadius" Value="12" />
+    <Setter Property="Padding" Value="16" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}"
+                BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">
+          <Grid RowDefinitions="Auto,*">
+            <ContentPresenter x:Name="PART_HeaderPresenter" Content="{TemplateBinding Header}" ContentTemplate="{TemplateBinding HeaderTemplate}"
+                              Foreground="{DynamicResource MaterialOnSurfaceBrush}" FontSize="16" FontWeight="Medium" Margin="0,0,0,12"
+                              IsVisible="{TemplateBinding Header, Converter={x:Static ObjectConverters.IsNotNull}}" RecognizesAccessKey="True" />
+            <ContentPresenter x:Name="PART_ContentPresenter" Grid.Row="1" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"
+                              Foreground="{TemplateBinding Foreground}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+          </Grid>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:disabled"><Setter Property="Opacity" Value="0.38" /></Style>
+  </ControlTheme>
+
+</ResourceDictionary>

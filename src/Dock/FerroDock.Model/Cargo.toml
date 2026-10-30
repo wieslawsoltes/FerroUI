@@ -1,0 +1,25 @@
+[package]
+name = "ferrodock-model"
+description = "The framework-independent docking model and engine of FerroDock"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+bitflags.workspace = true
+ryu.workspace = true
+ferroui-system.workspace = true
+ferroui-reactiveui.workspace = true
+ferrodock-controls-recycling-model.workspace = true
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "deny"
+
+[dev-dependencies]
+ferroui-reactive.workspace = true

@@ -93,9 +93,8 @@ fn every_declaration_of_this_module_is_registered() {
         .filter(|line| line.starts_with("ferro_markup_type!(") || line.starts_with("ferro_markup_enum!("))
         .count();
     let types = declared_types();
-    // `TextLayoutRoundingPlacement` declares its metadata next to the type and is registered
-    // with the values.
-    assert_eq!(types.len(), declared + 1);
+    // The types that declare their metadata next to the type are registered with the values.
+    assert_eq!(types.len(), declared + DECLARED_NEXT_TO_THE_TYPE.len());
 
     for type_ in &types {
         // The collection handle of the items controls is published as the enumerable of
@@ -196,11 +195,33 @@ fn template_parts_name_classes() {
     assert!(parts > 20, "{parts}");
 }
 
+/// The types of this crate that declare their markup metadata next to the type rather than in
+/// this module, and are listed in the `TYPES` of `values.rs`: FerroUI additions, and the WinUI
+/// controls (docs/porting/winui-controls.md).
+const DECLARED_NEXT_TO_THE_TYPE: &[&str] = &[
+    "TextLayoutRoundingPlacement",
+    "Symbol",
+    "InfoBarSeverity",
+    "ZoomMode",
+    "InfoBarCloseReason",
+    "InfoBarClosingEventArgs",
+    "InfoBarClosedEventArgs",
+    "InfoBarOpenedEventArgs",
+    "NumberBoxSpinButtonPlacementMode",
+    "NumberBoxValidationMode",
+    "NumberBoxValueChangedEventArgs",
+    "AutoSuggestionBoxTextChangeReason",
+    "AutoSuggestBoxTextChangedEventArgs",
+    "AutoSuggestBoxSuggestionChosenEventArgs",
+    "AutoSuggestBoxQuerySubmittedEventArgs",
+];
+
 #[test]
 fn enumeration_members_are_found_by_name() {
     let enums: Vec<_> = declared_types().into_iter().filter(|t| t.kind == MarkupTypeKind::Enum).collect();
-    // `TextLayoutRoundingPlacement` is declared next to the type.
-    assert_eq!(enums.len(), super::enums::TYPES.len() + 1);
+    // Some enumerations are declared next to the type (DECLARED_NEXT_TO_THE_TYPE).
+    let next_to_the_type = enums.iter().filter(|t| DECLARED_NEXT_TO_THE_TYPE.contains(&t.name)).count();
+    assert_eq!(enums.len(), super::enums::TYPES.len() + next_to_the_type);
     for type_ in enums {
         assert!(!type_.enum_members.is_empty(), "{type_:?}");
         for member in type_.enum_members {
@@ -773,14 +794,14 @@ fn the_collection_handles_of_items_controls_are_known_to_the_value_conversions()
 }
 
 #[test]
-fn the_collection_handle_of_items_controls_is_the_enumerable_of_the_runtime_library() {
+fn the_collection_handle_of_items_controls_is_the_list_of_the_runtime_library() {
     use ferroui_base::collections::FerroList;
 
     crate::register_types();
-    let enumerable = MarkupType::find("System.Collections", "IEnumerable").expect("the enumerable");
-    assert!(enumerable.kind == MarkupTypeKind::Interface);
-    assert!(std::ptr::eq(enumerable, <crate::ItemsSource as MarkupTyped>::MARKUP));
-    assert!(std::ptr::eq(MarkupType::find_by_handle(std::any::TypeId::of::<crate::ItemsSource>()).unwrap(), enumerable));
+    let list = MarkupType::find("System.Collections", "IList").expect("the list");
+    assert!(list.kind == MarkupTypeKind::Interface);
+    assert!(std::ptr::eq(list, <crate::ItemsSource as MarkupTyped>::MARKUP));
+    assert!(std::ptr::eq(MarkupType::find_by_handle(std::any::TypeId::of::<crate::ItemsSource>()).unwrap(), list));
 
     // A list of untyped items (what the run-time loader creates for a `List<T>` or an
     // `ArrayList` of markup) is assignable to an items source, which shares the list.
@@ -980,4 +1001,89 @@ fn the_delegate_of_a_method_is_a_custom_popup_placement_callback() {
     let shared = Rc::new(RefCell::new(placement));
     (invoke[0].invoke)(&[boxed(callback.clone()), boxed(shared.clone())]).unwrap();
     assert_eq!(shared.borrow().offset, Point::new(1.0, 2.0));
+}
+
+#[test]
+fn an_items_source_is_indexed_and_counted_through_its_metadata() {
+    crate::register_types();
+    let markup = <crate::ItemsSource as MarkupTyped>::MARKUP;
+    let source = boxed(crate::ItemsSource::from_strs(["a", "b"]));
+    let count = markup.find_property("Count").expect("Count");
+    assert_eq!(unbox::<i32>(&(count.get.expect("a getter"))(&[source.clone()]).expect("the count")), 2);
+    let indexer = markup.find_indexer(1).expect("the indexer");
+    assert!((indexer.parameters[0])().is::<i32>());
+    let get = indexer.get.expect("a getter");
+    assert_eq!(unbox::<String>(&get(&[source.clone(), boxed(1i32)]).expect("the item")), "b");
+    // An index that is not the index of an item is an error of the call, not a panic.
+    assert!(get(&[source.clone(), boxed(2i32)]).is_err());
+    assert!(get(&[source.clone(), boxed(-1i32)]).is_err());
+    assert!(indexer.set.is_none());
+}
+
+#[test]
+fn a_binding_path_indexes_an_items_source() {
+    use ferroui_base::data::ReflectionBinding;
+
+    crate::register_types();
+    let _app = crate::testing::UnitTestApplication::start(crate::testing::TestServices::styled_window());
+    // `{Binding Items[1]}` over a data context whose `Items` is an items source.
+    let data_context = boxed(crate::ItemsSource::from_strs(["first", "second"]));
+    let target = crate::TextBlock::new();
+    target.set_data_context(data_context);
+    let expression = target.bind_binding(crate::TextBlock::text_property(), &ReflectionBinding::new("[1]"));
+    assert_eq!(target.text().as_deref(), Some("second"));
+    let count = target.bind_binding(Control::tag_property(), &ReflectionBinding::new("Count"));
+    assert_eq!(target.tag().and_then(|tag| tag.downcast_ref::<i32>().copied()), Some(2));
+    expression.dispose();
+    count.dispose();
+}
+
+#[test]
+fn a_notification_is_created_and_set_through_its_metadata() {
+    use crate::notifications::{INotification, Notification, NotificationType};
+    use ferroui_base::animation::TimeSpan;
+
+    crate::register_types();
+    let markup = MarkupType::find("FerroUI.Controls.Notifications", "Notification").expect("the notification");
+    assert!(std::ptr::eq(markup, <Notification as MarkupTyped>::MARKUP));
+    let notification = (markup.constructors[0].invoke)(&[]).expect("a notification");
+    for (name, value) in [("Title", text("Hello")), ("Message", text("Custom notification"))] {
+        let property = markup.find_property(name).expect(name);
+        (property.set.expect("a setter"))(&[notification.clone(), value]).expect("the value is set");
+    }
+    let type_ = markup.find_property("Type").expect("Type");
+    (type_.set.expect("a setter"))(&[notification.clone(), boxed(NotificationType::Warning)]).expect("the type is set");
+    let expiration = markup.find_property("Expiration").expect("Expiration");
+    let set_expiration = expiration.set.expect("a setter");
+    set_expiration(&[notification.clone(), boxed(TimeSpan::from_seconds(2.0))]).expect("the expiration is set");
+    assert!(set_expiration(&[notification.clone(), boxed(TimeSpan::from_seconds(-1.0))]).is_err());
+
+    // The value is the notification, and a notification of the contract (the content of an
+    // action that shows it).
+    let contract = unbox::<Rc<dyn INotification>>(&notification);
+    assert_eq!(contract.title().as_deref(), Some("Hello"));
+    assert_eq!(contract.message().as_deref(), Some("Custom notification"));
+    assert_eq!(contract.type_(), NotificationType::Warning);
+    assert_eq!(contract.expiration(), std::time::Duration::from_secs(2));
+    assert!(ValueTypes::is_assignable(ValueType::of::<Rc<Notification>>(), ValueType::of::<Rc<dyn INotification>>()));
+    let title = markup.find_property("Title").expect("Title");
+    assert_eq!(unbox::<Option<String>>(&(title.get.expect("a getter"))(&[notification]).expect("the title")).as_deref(), Some("Hello"));
+}
+
+#[test]
+fn the_storage_provider_of_a_top_level_is_read_through_its_metadata() {
+    use ferroui_base::platform::storage::IStorageProvider;
+
+    let _app = crate::testing::UnitTestApplication::start(crate::testing::TestServices::styled_window());
+    crate::register_types();
+    let contract = MarkupType::find("FerroUI.Platform.Storage", "IStorageProvider").expect("the contract");
+    assert!(std::ptr::eq(contract, <dyn IStorageProvider as MarkupTyped>::MARKUP));
+    assert!(ValueTypes::accepts_null(ValueType::of::<Option<Rc<dyn IStorageProvider>>>()));
+
+    let window = Window::new();
+    let property = find_plain_property(<Window as StaticType>::TYPE, "StorageProvider").expect("TopLevel.StorageProvider");
+    assert!(property.set.is_none());
+    let value = (property.get.expect("a getter"))(&[boxed(window.clone().upcast::<crate::TopLevel>())]).expect("the provider");
+    let provider = unbox::<Rc<dyn IStorageProvider>>(&value);
+    assert!(std::ptr::addr_eq(Rc::as_ptr(&provider), Rc::as_ptr(&window.storage_provider())));
 }

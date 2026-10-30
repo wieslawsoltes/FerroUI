@@ -1,0 +1,51 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/TableView/TableViewRow.cpp (the cell wrappers TableViewRow builds in code for the
+    columns, RefreshGridLines)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  A cell of WinUI's TableView is a Grid TableViewRow creates for a column: TableViewCellPadding
+  around the content of the cell, at least TableViewRowMinHeight high, the text in
+  TableViewCellFontSize, centred vertically, and a vertical grid line of 1 px in
+  TabularSurfaceGridLineBrush at its trailing edge (GridLinesVisibility All, the default), whose
+  brush the last cell leaves out where it meets the border of the table. FerroUI's TableViewCell
+  is that cell as a content control; the resources are Resources/TableView_themeresources.xaml and
+  Resources/TabularSurfaces_themeresources.xaml (TableView.xaml). The foreground of the cell is the
+  one of its row (TableViewRow.xaml). The editing, the focus and the automation of the cells of
+  WinUI have no counterpart in FerroUI's read-only TableView.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <ControlTheme x:Key="{x:Type TableViewCell}" TargetType="TableViewCell">
+    <Setter Property="Padding" Value="{DynamicResource TableViewCellPadding}" />
+    <Setter Property="MinHeight" Value="{DynamicResource TableViewRowMinHeight}" />
+    <Setter Property="FontSize" Value="{DynamicResource TableViewCellFontSize}" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <!-- The vertical grid line at the trailing edge. -->
+    <Setter Property="BorderBrush" Value="{DynamicResource TabularSurfaceGridLineBrush}" />
+    <Setter Property="BorderThickness" Value="0,0,1,0" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="CellWrapper"
+                Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BackgroundSizing="InnerBorderEdge"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                Padding="{TemplateBinding Padding}">
+          <ContentPresenter x:Name="PART_ContentPresenter"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- The last cell meets the border of the table: its grid line keeps its width without a brush. -->
+    <Style Selector="^:nth-last-child(1) /template/ Border#CellWrapper">
+      <Setter Property="BorderBrush" Value="Transparent" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

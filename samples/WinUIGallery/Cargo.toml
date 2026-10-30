@@ -1,0 +1,48 @@
+[package]
+name = "winui-gallery"
+default-run = "winui-gallery"
+description = "The pinned WinUI Gallery catalog and its native FerroUI sample port"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+autotests = false
+autobins = false
+
+[lib]
+path = "lib.rs"
+
+[[bin]]
+name = "winui-gallery"
+path = "main.rs"
+required-features = ["desktop"]
+
+[[bin]]
+name = "winui-gallery-capture"
+path = "capture.rs"
+required-features = ["capture"]
+
+[features]
+default = []
+desktop = ["dep:ferroui-desktop", "theme"]
+theme = ["dep:ferroui-themes-winui"]
+capture = ["dep:ferroui-headless", "dep:ferroui-skia", "dep:ferroui-harfbuzz", "theme"]
+
+[dependencies]
+ferroui-base = { workspace = true }
+ferroui-controls = { workspace = true }
+ferroui-controls-color-picker = { workspace = true, features = ["document-assets"] }
+ferroui-markup-xaml = { workspace = true }
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime"] }
+ferroui-markup-xaml-winui = { workspace = true }
+ferroui-desktop = { workspace = true, optional = true }
+ferroui-themes-winui = { workspace = true, optional = true }
+ferroui-headless = { workspace = true, optional = true }
+ferroui-skia = { workspace = true, optional = true }
+ferroui-harfbuzz = { workspace = true, optional = true }
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }

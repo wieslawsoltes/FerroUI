@@ -1,0 +1,123 @@
+<!-- Material 3 menu templates, AndroidX Material3 1.5.0-beta02.
+     Structural heritage: FerroUI WinUI, Microsoft Corporation, MIT; see NOTICE.md. -->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:converters="using:FerroUI.Controls.Converters"
+                    xmlns:material="using:FerroUI.Themes.Material" x:ClassModifier="internal">
+  <converters:PlatformKeyGestureConverter x:Key="MenuItemKeyGestureConverter"/>
+  <ControlTheme x:Key="DefaultMenuFlyoutItemStyle" TargetType="MenuItem">
+    <Setter Property="MinHeight" Value="48"/>
+    <Setter Property="MinWidth" Value="112"/>
+    <Setter Property="MaxWidth" Value="280"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceBrush}"/>
+    <Setter Property="Padding" Value="12,8"/>
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}"/>
+    <Setter Property="FontSize" Value="16"/>
+    <Setter Property="FontWeight" Value="Normal"/>
+    <Setter Property="CornerRadius" Value="0"/>
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border BorderBrush="{DynamicResource MaterialSecondaryBrush}" BorderThickness="3" Margin="-3" CornerRadius="4"/>
+      </FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel>
+          <Border x:Name="LayoutRoot" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}">
+            <Panel>
+              <Border x:Name="StateLayer" Background="Transparent" CornerRadius="{TemplateBinding CornerRadius}" IsHitTestVisible="False">
+                <Border.Transitions>
+                  <Transitions><BrushTransition Property="Background" Duration="{DynamicResource MaterialMotionFastEffectsDuration}"/></Transitions>
+                </Border.Transitions>
+              </Border>
+              <material:MaterialRipple Fill="{TemplateBinding Foreground}" CornerRadius="{TemplateBinding CornerRadius}" ReducedMotion="{DynamicResource MaterialReducedMotion}"/>
+              <Grid Margin="{TemplateBinding Padding}">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="Auto" SharedSizeGroup="MenuFlyoutItemCheckPlaceholder"/>
+                  <ColumnDefinition Width="Auto" SharedSizeGroup="MenuFlyoutItemIconPlaceholder"/>
+                  <ColumnDefinition Width="*"/>
+                  <ColumnDefinition Width="Auto" SharedSizeGroup="MenuFlyoutItemKeyboardAcceleratorText"/>
+                  <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Path x:Name="CheckGlyph" Grid.Column="0" FlowDirection="LeftToRight" Data="M9 16.17 4.83 12 3.41 13.41 9 19 21 7 19.59 5.59Z"
+                      Fill="{TemplateBinding Foreground}" Stretch="None" Width="24" Height="24" Margin="0,0,12,0" VerticalAlignment="Center" Opacity="0" IsVisible="False"/>
+                <Viewbox x:Name="IconRoot" Grid.Column="1" Width="24" Height="24" Margin="0,0,12,0" HorizontalAlignment="Left" VerticalAlignment="Center" IsVisible="False">
+                  <ContentPresenter x:Name="IconContent" Content="{TemplateBinding Icon}" Foreground="{DynamicResource MaterialOnSurfaceVariantBrush}"/>
+                </Viewbox>
+                <ContentPresenter x:Name="PART_HeaderPresenter" Grid.Column="2" Content="{TemplateBinding Header}" ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                  Foreground="{TemplateBinding Foreground}" FontSize="{TemplateBinding FontSize}" TextTrimming="CharacterEllipsis" HorizontalAlignment="Stretch" VerticalAlignment="Center" RecognizesAccessKey="True"/>
+                <TextBlock x:Name="KeyboardAcceleratorTextBlock" Grid.Column="3" Text="{TemplateBinding InputGesture, Converter={StaticResource MenuItemKeyGestureConverter}}"
+                           Margin="24,0,0,0" Foreground="{DynamicResource MaterialOnSurfaceVariantBrush}" FontSize="14" TextAlignment="Right" HorizontalAlignment="Right" VerticalAlignment="Center"
+                           IsVisible="{TemplateBinding InputGesture, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                <Path x:Name="SubItemChevron" Grid.Column="4" Data="M9.29 6.71 10.71 5.29 17.41 12 10.71 18.71 9.29 17.29 14.59 12Z"
+                      Fill="{DynamicResource MaterialOnSurfaceVariantBrush}" Stretch="None" Width="24" Height="24" Margin="12,0,0,0" VerticalAlignment="Center" IsVisible="False"/>
+              </Grid>
+            </Panel>
+          </Border>
+          <Popup x:Name="PART_Popup" WindowManagerAddShadowHint="False" Placement="RightEdgeAlignedTop" HorizontalOffset="0"
+                 IsLightDismissEnabled="False" IsOpen="{TemplateBinding IsSubMenuOpen, Mode=TwoWay}">
+            <Border x:Name="ThemeShadowWrapper" BoxShadow="{DynamicResource MaterialElevation2BoxShadow}" Margin="8" CornerRadius="4">
+              <Border Background="{DynamicResource MaterialSurfaceContainerBrush}" CornerRadius="4" MinWidth="112" MaxWidth="280">
+                <ScrollViewer x:Name="MenuFlyoutPresenterScrollViewer" Theme="{StaticResource MenuFlyoutPresenterScrollViewer}" Margin="0,8">
+                  <ItemsPresenter x:Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" KeyboardNavigation.TabNavigation="Continue" Grid.IsSharedSizeScope="True"/>
+                </ScrollViewer>
+              </Border>
+            </Border>
+          </Popup>
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:selected /template/ Border#StateLayer, ^:pointerover /template/ Border#StateLayer">
+      <Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceHoverBrush}"/>
+    </Style>
+    <Style Selector="^:focus-visible /template/ Border#StateLayer, ^:open /template/ Border#StateLayer">
+      <Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceFocusBrush}"/>
+    </Style>
+    <Style Selector="^:checked">
+      <Setter Property="Background" Value="{DynamicResource MaterialSecondaryContainerBrush}"/>
+      <Setter Property="Foreground" Value="{DynamicResource MaterialOnSecondaryContainerBrush}"/>
+      <Style Selector="^ /template/ Path#CheckGlyph"><Setter Property="Opacity" Value="1"/></Style>
+      <Style Selector="^ /template/ ContentPresenter#IconContent">
+        <Setter Property="Foreground" Value="{DynamicResource MaterialOnSecondaryContainerBrush}"/>
+      </Style>
+      <Style Selector="^ /template/ TextBlock#KeyboardAcceleratorTextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource MaterialOnSecondaryContainerBrush}"/>
+      </Style>
+      <Style Selector="^ /template/ Path#SubItemChevron"><Setter Property="Fill" Value="{DynamicResource MaterialOnSecondaryContainerBrush}"/></Style>
+    </Style>
+    <Style Selector="^:checked:selected /template/ Border#StateLayer, ^:checked:pointerover /template/ Border#StateLayer">
+      <Setter Property="Background" Value="{DynamicResource MaterialOnSecondaryContainerHoverBrush}"/>
+    </Style>
+    <Style Selector="^:checked:focus-visible /template/ Border#StateLayer, ^:checked:open /template/ Border#StateLayer">
+      <Setter Property="Background" Value="{DynamicResource MaterialOnSecondaryContainerFocusBrush}"/>
+    </Style>
+    <Style Selector="^:icon /template/ Viewbox#IconRoot"><Setter Property="IsVisible" Value="True"/></Style>
+    <Style Selector="^:toggle /template/ Path#CheckGlyph, ^:radio /template/ Path#CheckGlyph">
+      <Setter Property="IsVisible" Value="True"/>
+    </Style>
+    <Style Selector="^:radio /template/ Path#CheckGlyph">
+      <Setter Property="Data" Value="M12 8A4 4 0 1 0 12 16A4 4 0 1 0 12 8Z"/>
+      <Setter Property="Stretch" Value="None"/>
+    </Style>
+    <Style Selector="^:not(MenuItem:empty) /template/ Path#SubItemChevron"><Setter Property="IsVisible" Value="True"/></Style>
+    <Style Selector="^:disabled /template/ Border#LayoutRoot"><Setter Property="Opacity" Value="0.38"/></Style>
+    <Style Selector="^:disabled /template/ Border#StateLayer"><Setter Property="Background" Value="Transparent"/></Style>
+    <Style Selector="^:separator">
+      <Setter Property="MinHeight" Value="0"/>
+      <Setter Property="Focusable" Value="False"/>
+      <Setter Property="Template">
+        <ControlTemplate><Rectangle Height="1" Margin="0,8" Fill="{DynamicResource MaterialOutlineVariantBrush}"/></ControlTemplate>
+      </Setter>
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="DefaultToggleMenuFlyoutItemStyle" TargetType="MenuItem" BasedOn="{StaticResource DefaultMenuFlyoutItemStyle}">
+    <Setter Property="ToggleType" Value="CheckBox"/>
+  </ControlTheme>
+  <ControlTheme x:Key="DefaultRadioMenuFlyoutItemStyle" TargetType="MenuItem" BasedOn="{StaticResource DefaultMenuFlyoutItemStyle}">
+    <Setter Property="ToggleType" Value="Radio"/>
+  </ControlTheme>
+  <ControlTheme x:Key="DefaultMenuFlyoutSubItemStyle" TargetType="MenuItem" BasedOn="{StaticResource DefaultMenuFlyoutItemStyle}"/>
+  <ControlTheme x:Key="RadioMenuFlyoutSubItemStyle" TargetType="MenuItem" BasedOn="{StaticResource DefaultRadioMenuFlyoutItemStyle}"/>
+  <ControlTheme x:Key="{x:Type MenuItem}" TargetType="MenuItem" BasedOn="{StaticResource DefaultMenuFlyoutItemStyle}"/>
+</ResourceDictionary>

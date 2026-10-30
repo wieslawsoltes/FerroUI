@@ -36,6 +36,7 @@
 use crate::media::immutable::ImmutableSolidColorBrush;
 use crate::media::text_formatting::ITextDrawingSink;
 use crate::media::IEffect;
+use crate::media::imaging::BitmapBlendingMode;
 use crate::media::{
     BoxShadows, FormattedText, Geometry, GlyphRun, IBrush, IExperimentalAcrylicMaterial, IImage, IPen, RenderOptions,
     TextOptions,
@@ -122,6 +123,15 @@ pub trait IDrawingContextCore {
     fn push_text_options_core(&mut self, text_options: TextOptions);
     fn push_effect_core(&mut self, effect: &Rc<dyn IEffect>, bounds: Rect);
 
+    /// Optional isolated compositing support. False leaves the core unchanged.
+    fn try_push_compositing_layer_core(&mut self, _blend: BitmapBlendingMode, _opacity: f64, _bounds: Rect) -> bool {
+        false
+    }
+
+    fn pop_compositing_layer_core(&mut self) {
+        panic!("This drawing context does not support isolated compositing layers");
+    }
+
     fn pop_clip_core(&mut self);
     fn pop_geometry_clip_core(&mut self);
     fn pop_opacity_core(&mut self);
@@ -147,6 +157,7 @@ enum PushedStateType {
     RenderOptions,
     TextOptions,
     Effect,
+    CompositingLayer,
 }
 
 /// A token for a pushed state. Pop it with [`DrawingContext::pop`], in the
@@ -403,6 +414,7 @@ impl<'a> DrawingContext<'a> {
             PushedStateType::RenderOptions => core.pop_render_options_core(),
             PushedStateType::TextOptions => core.pop_text_options_core(),
             PushedStateType::Effect => core.pop_effect_core(),
+            PushedStateType::CompositingLayer => core.pop_compositing_layer_core(),
         }
     }
 
@@ -451,6 +463,35 @@ impl<'a> DrawingContext<'a> {
     pub fn push_opacity(&mut self, opacity: f64) -> PushedState {
         self.core().push_opacity_core(opacity);
         self.pushed(PushedStateType::Opacity)
+    }
+
+    /// Draws subsequent vectors, text and images into one isolated group, then
+    /// blends that group with the content beneath it when the state is popped.
+    /// Opacity applies once to the complete group, including overlapping draws.
+    ///
+    /// `bounds` is a conservative content/effect bound in the current coordinate
+    /// space. It is an allocation hint, not a clip. Blend modes reuse the same
+    /// enumeration as bitmap compositing but apply here to the entire group.
+    ///
+    /// Returns None without pushing a state when the backend lacks compositing
+    /// layers or arguments are non-finite/invalid. Recording contexts consult
+    /// the registered backend capability; a caller can choose an explicit
+    /// bitmap fallback instead of silently accepting a different blend mode.
+    pub fn try_push_compositing_layer(
+        &mut self,
+        blend: BitmapBlendingMode,
+        opacity: f64,
+        bounds: Rect,
+    ) -> Option<PushedState> {
+        if ![bounds.x, bounds.y, bounds.width, bounds.height, opacity].iter().all(|value| value.is_finite())
+            || bounds.width < 0.0 || bounds.height < 0.0 || !(0.0..=1.0).contains(&opacity)
+        {
+            return None;
+        }
+        if !self.core().try_push_compositing_layer_core(blend, opacity, bounds) {
+            return None;
+        }
+        Some(self.pushed(PushedStateType::CompositingLayer))
     }
 
     /// Pushes an opacity mask.

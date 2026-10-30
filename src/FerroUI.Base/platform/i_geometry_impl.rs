@@ -57,6 +57,13 @@ pub trait IGeometryImpl: Send + Sync + 'static {
         start_on_begin_figure: bool,
     ) -> Option<Arc<dyn IGeometryImpl>>;
 
+    /// Exports the exact Bezier commands used to fill and stroke this geometry.
+    /// Transformed implementations include their transform. Unsupported
+    /// backends return `None`; an empty geometry returns present, empty data.
+    fn try_get_path_data(&self) -> Option<crate::media::GeometryPathData> {
+        None
+    }
+
     /// Lets the backend recover its concrete type.
     fn as_any(&self) -> &dyn std::any::Any;
 

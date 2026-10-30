@@ -89,6 +89,14 @@ pub fn register_types() {
     });
 }
 
+/// The types [`register_types`] registers. For tests only: the snapshot of the property defaults
+/// of `ferroui-controls` walks them (a type a test registers by using it is not among them).
+#[cfg(feature = "testing")]
+#[doc(hidden)]
+pub fn registered_type_list() -> &'static [&'static TypeInfo] {
+    TYPES
+}
+
 const TYPES: &[&TypeInfo] = types![
     // FerroUI
     crate::FerroObject,
@@ -127,6 +135,8 @@ const TYPES: &[&TypeInfo] = types![
     crate::input::Gestures,
     crate::input::InputElement,
     crate::input::InputMethod,
+    crate::input::InputScope,
+    crate::input::InputScopeName,
     crate::input::KeyBinding,
     crate::input::KeyboardNavigation,
     crate::input::navigation::XYFocus,
@@ -184,10 +194,12 @@ const TYPES: &[&TypeInfo] = types![
     crate::media::Rotate3DTransform,
     crate::media::RotateTransform,
     crate::media::ScaleTransform,
+    crate::media::Shadow,
     crate::media::SkewTransform,
     crate::media::SolidColorBrush,
     crate::media::StreamGeometry,
     crate::media::TextDecoration,
+    crate::media::ThemeShadow,
     crate::media::TileBrush,
     crate::media::Transform,
     crate::media::TransformGroup,

@@ -1,0 +1,5 @@
+<test:ContractConsumer xmlns="https://github.com/ferroui"
+ xmlns:test="using:FerroDock.Markup.Tests.Carriers" xmlns:core="using:FerroDock.Model.Core">
+ <test:ContractConsumer.Policy><core:DockCapabilityOverrides CanClose="False" /></test:ContractConsumer.Policy>
+ <test:ContractConsumer.Optional><core:DockCapabilityOverrides CanFloat="False" /></test:ContractConsumer.Optional>
+</test:ContractConsumer>

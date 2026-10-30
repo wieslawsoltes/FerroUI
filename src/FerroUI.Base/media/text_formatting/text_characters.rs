@@ -2,11 +2,12 @@ use std::rc::Rc;
 
 use crate::logging::{LogArea, LogEventLevel, Logger};
 use crate::media::fonts::FontFallbackScriptHints;
+use crate::media::font_fallback_mapping::FontFallbackMappingResult;
 use crate::media::text_formatting::text_run::{text_run_any, TextRun};
 use crate::media::text_formatting::unicode::{
     Codepoint, CodepointEnumerator, GeneralCategory, GraphemeEnumerator, Script,
 };
-use crate::media::text_formatting::{TextRunProperties, UnshapedTextRun};
+use crate::media::text_formatting::{TextLineMetricsMode, TextRunProperties, UnshapedTextRun};
 use crate::media::{FontManager, GlyphTypeface, Typeface};
 use crate::utilities::ReadOnlyMemory;
 
@@ -57,17 +58,32 @@ impl TextCharacters {
     // Internal upstream; public so the Skia unit tests reach it.
     pub fn get_shapeable_characters(
         &self,
+        text: ReadOnlyMemory<u16>,
+        bidi_level: i8,
+        font_manager: &FontManager,
+        previous_properties: &mut Option<Rc<dyn TextRunProperties>>,
+        results: &mut Vec<Rc<dyn TextRun>>,
+    ) {
+        self.get_shapeable_characters_with_metrics_mode(
+            text, bidi_level, font_manager, TextLineMetricsMode::GlyphTypeface, previous_properties, results,
+        );
+    }
+
+    pub(crate) fn get_shapeable_characters_with_metrics_mode(
+        &self,
         mut text: ReadOnlyMemory<u16>,
         bidi_level: i8,
         font_manager: &FontManager,
+        mode: TextLineMetricsMode,
         previous_properties: &mut Option<Rc<dyn TextRunProperties>>,
         results: &mut Vec<Rc<dyn TextRun>>,
     ) {
         let properties = &self.properties;
 
         while !text.is_empty() {
-            let shapeable_run =
-                Self::create_shapeable_run(&text, properties, bidi_level, font_manager, previous_properties.as_ref());
+            let (shapeable_run, remember_font) = Self::create_shapeable_run_with_mapping(
+                &text, properties, bidi_level, font_manager, mode, previous_properties.as_ref(),
+            );
 
             text = text.slice_from(shapeable_run.length() as usize);
 
@@ -75,12 +91,62 @@ impl TextCharacters {
             // the default typeface whenever that covers it - so a run of pure whitespace must not
             // become the anti-thrashing bias for what follows. Otherwise the words on either side
             // of a space each resolve their fallback from scratch and can land on different fonts.
-            if !Self::is_white_space_only(shapeable_run.text_span()) {
+            if !remember_font {
+                // A mapped face/scale belongs to its explicit range. It cannot
+                // become a shortcut around the next provider query.
+                *previous_properties = None;
+            } else if !Self::is_white_space_only(shapeable_run.text_span()) {
                 *previous_properties = shapeable_run.properties().cloned();
             }
 
             results.push(Rc::new(shapeable_run));
         }
+    }
+
+    fn create_shapeable_run_with_mapping(
+        text: &ReadOnlyMemory<u16>,
+        properties: &Rc<dyn TextRunProperties>,
+        bidi_level: i8,
+        font_manager: &FontManager,
+        mode: TextLineMetricsMode,
+        previous_properties: Option<&Rc<dyn TextRunProperties>>,
+    ) -> (UnshapedTextRun, bool) {
+        // Keep the default policy and NUL replacement on their existing path.
+        if mode == TextLineMetricsMode::GlyphTypeface || text.span()[0] == 0 {
+            return (Self::create_shapeable_run(text, properties, bidi_level, font_manager, previous_properties), true);
+        }
+        let mapping = font_manager.map_characters(text.span(), properties.typeface(), properties.culture_info());
+        match mapping {
+            FontFallbackMappingResult::Unavailable => {
+                return (Self::create_shapeable_run(text, properties, bidi_level, font_manager, previous_properties), true);
+            }
+            FontFallbackMappingResult::Mapped(mapping) => {
+                let length = mapping.mapped_length();
+                let effective_em = properties.font_rendering_em_size() * mapping.scale();
+                let whole_prefix = length <= text.len()
+                    && GraphemeEnumerator::new(text.span())
+                        .any(|cluster| cluster.offset() + cluster.length() == length);
+                if whole_prefix && effective_em.is_finite() && effective_em > 0.0 {
+                    // Coverage and script segmentation still belong to the
+                    // shared formatter. A provider cannot split a grapheme or
+                    // make an uncovered character disappear.
+                    let prefix = &text.span()[..length];
+                    if let Some(shapeable) = Self::try_get_shapeable_length(
+                        prefix, mapping.glyph_typeface(), None, false, true,
+                    ) {
+                        return (UnshapedTextRun::new(
+                            text.slice(0, shapeable), properties.with_font_mapping(&mapping), bidi_level,
+                        ), false);
+                    }
+                }
+            }
+            FontFallbackMappingResult::Fallback => {}
+        }
+        // An available mapper declined or supplied an invalid range. Limit
+        // the legacy fallback to one whole grapheme so later ranges still get
+        // their own query, and malformed providers cannot stall the loop.
+        let length = GraphemeEnumerator::new(text.span()).next().expect("nonempty text has a grapheme").length();
+        (Self::create_shapeable_run(&text.slice(0, length), properties, bidi_level, font_manager, None), false)
     }
 
     /// Returns whether every codepoint in `text` is whitespace. Returns on the

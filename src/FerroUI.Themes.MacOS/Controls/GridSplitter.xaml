@@ -1,0 +1,50 @@
+<!--
+  Not ported from a style: the merged theme of WinUI 3 in microsoft-ui-xaml
+  (https://github.com/microsoft/microsoft-ui-xaml, commit
+  7e4b0c2096be402f51cc8f7d203ebf67cff183d0) has no grid splitter. The theme is built from the
+  control fills of the WinUI palette (controls/dev/CommonStyles/Common_themeresources_any.xaml):
+  the bar is ControlStrongFillColorDefaultBrush, the fill of the strong parts of the controls
+  (the thumb of a scroll bar, the knob of a toggle switch), 4 px thick, and
+  ControlStrongFillColorDisabledBrush when the splitter is disabled, as those controls are; the
+  preview of a drag (ShowsPreview) is a bar of AccentFillColorDefaultBrush. The splitter is
+  focusable and shows the default focus visual of the theme; FerroUI's GridSplitter sets its
+  resize cursor itself.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Grid Width="200" Height="80" ColumnDefinitions="*,Auto,*">
+      <TextBlock Grid.Column="0" Text="Left" VerticalAlignment="Center" HorizontalAlignment="Center" />
+      <GridSplitter Grid.Column="1" ResizeDirection="Columns" />
+      <TextBlock Grid.Column="2" Text="Right" VerticalAlignment="Center" HorizontalAlignment="Center" />
+    </Grid>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="{x:Type GridSplitter}" TargetType="GridSplitter">
+    <Setter Property="Focusable" Value="True" />
+    <Setter Property="MinWidth" Value="4" />
+    <Setter Property="MinHeight" Value="4" />
+    <Setter Property="Background" Value="{DynamicResource ControlStrongFillColorDefaultBrush}" />
+    <Setter Property="PreviewContent">
+      <Template>
+        <Rectangle Fill="{DynamicResource AccentFillColorDefaultBrush}" />
+      </Template>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="SplitterBorder"
+                Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BackgroundSizing="InnerBorderEdge"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}" />
+      </ControlTemplate>
+    </Setter>
+
+    <!-- Disabled -->
+    <Style Selector="^:disabled">
+      <Setter Property="Background" Value="{DynamicResource ControlStrongFillColorDisabledBrush}" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

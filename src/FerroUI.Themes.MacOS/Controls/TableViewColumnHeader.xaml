@@ -1,0 +1,115 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/TableView/TableView.cpp (RebuildHeaders, AppendResizeGripperVisual,
+    ApplyGridLinesToHeader: the header cells, which TableView builds in code)
+    controls/dev/ResizeGripper/ResizeGripper.xaml (the implicit ResizeGripper style)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  A header cell of WinUI's TableView is a Grid TableView creates for a column: a content presenter
+  in TableViewHeaderFontSize and TableViewHeaderFontWeight with TableViewHeaderCellPadding, at
+  least TableViewRowMinHeight high, on a transparent fill; a grid line of 1 px in
+  TabularSurfaceGridLineBrush at its trailing edge, which the last header leaves out where it meets
+  the border of the table; and, for a column the user can resize, a ResizeGripper of
+  TableViewResizeGripperWidth at the trailing edge. FerroUI's TableViewColumnHeader is that cell as
+  a control (its resizer is the part PART_Resizer, a Thumb). Its resources are
+  Resources/TableView_themeresources.xaml, Resources/TabularSurfaces_themeresources.xaml and
+  Resources/ResizeGripper_themeresources.xaml (TableView.xaml).
+  Translation notes (docs/porting/winui-theme.md, section 4):
+  - The PointerOver and Pressed fills of a header (TabularSurfaceHeader*PointerOver/Pressed) are
+    the states of a header WinUI's TableView can sort by; FerroUI's TableView does not sort, so a
+    header has only the Normal state, as a header of a column WinUI does not sort by.
+  - The ResizeGripper is the keyed Thumb theme TableViewColumnHeaderResizerStyle: its separator
+    (ResizeGripperSeparatorBrush, ResizeGripperSeparatorThickness) shows on pointer over and press
+    (the states PointerOver and Pressed of the source).
+  - The grid line, a Border of 1 px TableView adds to the cell, is the trailing border of the content
+    presenter (BorderThickness 0,0,1,0), which the last header draws without a brush; the
+    presenter honours the background, the border, the corner radius and the padding of the header
+    as the Fluent template of FerroUI does.
+  - The sort indicator, the tool tip of the header and the automation view are left out.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Margin="20" Width="200">
+      <TableViewColumnHeader Content="Header" />
+    </Border>
+  </Design.PreviewWith>
+
+  <!-- The ResizeGripper of a header (ResizeGripper.xaml), horizontal. -->
+  <ControlTheme x:Key="TableViewColumnHeaderResizerStyle" TargetType="Thumb">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="{DynamicResource ResizeGripperSeparatorBrush}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="LayoutRoot"
+                Background="{TemplateBinding Background}"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch">
+          <Border x:Name="Separator"
+                  BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{DynamicResource ResizeGripperSeparatorThickness}"
+                  Opacity="0"
+                  IsHitTestVisible="False"
+                  HorizontalAlignment="Stretch"
+                  VerticalAlignment="Stretch" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- PointerOver -->
+    <Style Selector="^:pointerover /template/ Border#Separator">
+      <Setter Property="Opacity" Value="1" />
+    </Style>
+    <!-- Pressed -->
+    <Style Selector="^:pressed /template/ Border#Separator">
+      <Setter Property="Opacity" Value="1" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type TableViewColumnHeader}" TargetType="TableViewColumnHeader">
+    <!-- The fill of a header cell: transparent, so that the padding takes pointer input. -->
+    <Setter Property="Background" Value="Transparent" />
+    <!-- The grid line at the trailing edge. -->
+    <Setter Property="BorderBrush" Value="{DynamicResource TabularSurfaceGridLineBrush}" />
+    <Setter Property="BorderThickness" Value="0,0,1,0" />
+    <Setter Property="Padding" Value="{DynamicResource TableViewHeaderCellPadding}" />
+    <Setter Property="MinHeight" Value="{DynamicResource TableViewRowMinHeight}" />
+    <Setter Property="FontSize" Value="{DynamicResource TableViewHeaderFontSize}" />
+    <Setter Property="FontWeight" Value="{DynamicResource TableViewHeaderFontWeight}" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel x:Name="HeaderCell">
+          <!-- The content presenter draws the fill and the grid line (the border at the trailing
+               edge) and honours the corner radius, as in the Fluent template of FerroUI. -->
+          <ContentPresenter x:Name="PART_ContentPresenter"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BackgroundSizing="InnerBorderEdge"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Padding="{TemplateBinding Padding}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+          <Thumb x:Name="PART_Resizer"
+                 Theme="{StaticResource TableViewColumnHeaderResizerStyle}"
+                 Width="{DynamicResource TableViewResizeGripperWidth}"
+                 HorizontalAlignment="Right"
+                 Cursor="SizeWestEast"
+                 IsEnabled="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Column?.CanUserEffectivelyResize, FallbackValue=False}" />
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- The last header meets the border of the table: its grid line keeps its width without a
+         brush. -->
+    <Style Selector="^:nth-last-child(1) /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="BorderBrush" Value="Transparent" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

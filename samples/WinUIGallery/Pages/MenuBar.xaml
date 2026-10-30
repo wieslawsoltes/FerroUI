@@ -1,0 +1,4 @@
+<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <Menu><MenuItem Header="File"><MenuItem Header="New" InputGesture="Ctrl+N"/><MenuItem Header="Open"/><Separator/><MenuItem Header="Exit"/></MenuItem><MenuItem Header="Edit"><MenuItem Header="Undo"/><MenuItem Header="Redo"/><Separator/><MenuItem Header="Copy"/><MenuItem Header="Paste"/></MenuItem><MenuItem Header="Help"><MenuItem Header="About"/></MenuItem></Menu>
+</StackPanel>

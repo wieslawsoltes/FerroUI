@@ -795,6 +795,12 @@ pub struct MarkupGeneric {
 
 /// The markup metadata of a type. Built by the declaration macros as
 /// constant data; see the [module documentation](self).
+///
+/// A `MarkupType` is built only through [`MarkupType::new`] and the struct
+/// update syntax (`MarkupType { events: .., ..MarkupType::new(name, kind, module_path!()) }`):
+/// its fields grow with the compiler metadata of the markup compiler, and an
+/// added field is not a breaking change of the API (docs/release.md, "API
+/// stability").
 #[derive(Clone, Copy)]
 pub struct MarkupType {
     /// The type name, without namespace, as markup spells it.
@@ -864,6 +870,11 @@ pub struct MarkupType {
     /// `(int)value` of the managed original. `None` for a value that is not
     /// of the enumeration type.
     pub enum_to_value: Option<fn(&dyn crate::AnyValue) -> Option<i64>>,
+    /// Explicit associated function `fn(i32) -> enum value` on the public metadata
+    /// carrier, for unnamed numeric literals of an open plain enumeration.
+    /// Declares support for every signed Int32 value; absent for closed enums.
+    /// Compiler metadata names the typed function; it never guesses a constructor.
+    pub enum_i32_factory: CompilerMetadata<Option<&'static str>>,
     pub attributes: &'static [MarkupAttribute],
     /// Views an untyped value of this type as a source of property change
     /// notifications (the `INotifyPropertyChanged` of the managed original),
@@ -883,6 +894,10 @@ pub struct MarkupType {
     /// first of its handles, else the declared type (`Rc<dyn Trait>` for a
     /// contract). `Ref<Class>` for a class.
     pub value: CompilerMetadata<Option<TypeOf>>,
+    /// The actual Rust declaration that owns the typed metadata functions.
+    /// It can differ from `this`/`value` for external-model descriptor carriers.
+    /// Compiler-only, like the typed function and public-path tables.
+    pub owner_rust_name: CompilerMetadata<Option<fn() -> &'static str>>,
 }
 
 impl MarkupType {
@@ -913,10 +928,12 @@ impl MarkupType {
             is_flags: false,
             enum_from_value: None,
             enum_to_value: None,
+            enum_i32_factory: not_recorded(),
             attributes: &[],
             notify_property_changed: None,
             this: not_recorded(),
             value: not_recorded(),
+            owner_rust_name: not_recorded(),
         }
     }
 

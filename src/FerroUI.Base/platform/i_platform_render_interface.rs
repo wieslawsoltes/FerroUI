@@ -47,6 +47,17 @@ pub trait IPlatformRenderInterface: 'static {
     /// Builds a glyph run geometry.
     fn build_glyph_run_geometry(&self, glyph_run: &crate::media::GlyphRun) -> Arc<dyn IGeometryImpl>;
 
+    /// Builds all glyph contours without silently omitting unavailable glyphs.
+    ///
+    /// Returns `None` if the backend cannot verify a complete monochrome
+    /// outline, or if any glyph requires bitmap or colour-font rendering.
+    /// Whitespace with an available empty outline is supported. This capability
+    /// is separate from `build_glyph_run_geometry`, whose traditional contract
+    /// permits partial outlines for effects and clipping.
+    fn try_build_glyph_run_geometry(&self, _glyph_run: &crate::media::GlyphRun) -> Option<Arc<dyn IGeometryImpl>> {
+        None
+    }
+
     /// Creates a platform implementation of a glyph run.
     ///
     /// * `glyph_typeface` — the glyph typeface.
@@ -150,6 +161,13 @@ pub trait IPlatformRenderInterface: 'static {
     /// Whether the backend supports individual corner radii on rounded
     /// rectangles.
     fn supports_individual_round_rects(&self) -> bool;
+
+    /// Whether drawing contexts created by this backend support isolated
+    /// compositing layers for all drawing primitives. Recording contexts use
+    /// this capability before accepting a compositing-layer push.
+    fn supports_compositing_layers(&self) -> bool {
+        false
+    }
 
     /// The default alpha format of the backend.
     fn default_alpha_format(&self) -> AlphaFormat;

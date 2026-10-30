@@ -32,10 +32,19 @@ pub(crate) fn observe_visual_resource(
 }
 
 /// The drop shadow of the alpha of pushed content that draws `shadow`: its
-/// offset (X and Y), blur radius, colour and opacity.
+/// offset (X and Y), blur radius, colour and opacity. The offset is the one of
+/// the shadow, outside the plane of any visual
+/// ([`drop_shadow_effect_in`] projects it into the plane of a visual).
 pub fn drop_shadow_effect(shadow: &ServerDropShadow) -> ImmutableDropShadowEffect {
+    drop_shadow_effect_in(shadow, None)
+}
+
+/// The drop shadow of the alpha of pushed content that draws `shadow` for
+/// `visual`: its offset in the plane of the visual
+/// ([`ServerDropShadow::plane_offset`]), blur radius, colour and opacity.
+pub fn drop_shadow_effect_in(shadow: &ServerDropShadow, visual: Option<&ServerCompositionVisual>) -> ImmutableDropShadowEffect {
     let props = shadow.props();
-    let offset = props.offset();
+    let offset = shadow.plane_offset(visual);
     let color: Color = props.color();
     ImmutableDropShadowEffect::new(
         offset.x,
@@ -64,8 +73,8 @@ enum LayerMode {
 /// when the drawing context has effects, so the shadow follows the alpha of
 /// the composed content; otherwise the box shadow of the rectangle of the
 /// visual is drawn under the layer. A shadow with a `Mask` (and the
-/// `Default` source policy) is the shadow of the mask over the rectangle of
-/// the visual, drawn under the layer
+/// `Default` source policy) is the shadow of the alpha of the mask over the
+/// rectangle of the visual, drawn under the layer
 /// ([`ServerDropShadow::render_under_rect`]).
 ///
 /// With an effect (an effect brush), the composed children are the first
@@ -106,7 +115,7 @@ impl ServerLayerVisual {
 
     /// The shadow, when it is visible.
     fn visible_shadow(&self) -> Option<Rc<ServerDropShadow>> {
-        self.shadow().filter(|shadow| shadow.box_shadows().count() > 0)
+        self.shadow().filter(|shadow| shadow.is_visible())
     }
 
     fn rect(visual: &ServerCompositionVisual) -> Rect {
@@ -125,7 +134,7 @@ impl ServerLayerVisual {
             Some(shadow)
                 if shadow.effective_mask().is_none() && canvas.as_drawing_context_impl_with_effects().is_some() =>
             {
-                LayerMode::Shadow(drop_shadow_effect(&shadow))
+                LayerMode::Shadow(drop_shadow_effect_in(&shadow, Some(visual)))
             }
             _ => LayerMode::Layer,
         };
@@ -180,7 +189,7 @@ impl IServerVisualContent for ServerLayerVisual {
     fn compute_own_content_bounds(&self, visual: &ServerCompositionVisual) -> Option<LtrbRect> {
         let shadow = self.visible_shadow()?;
         let bounds = ServerSizeDependantVisual::compute_own_content_bounds(visual)?;
-        Some(LtrbRect::from_rect(shadow.bounds(bounds.to_rect())))
+        Some(LtrbRect::from_rect(shadow.bounds_in(Some(visual), bounds.to_rect())))
     }
 
     fn size_changed(&self, visual: &ServerCompositionVisual) {
@@ -190,9 +199,9 @@ impl IServerVisualContent for ServerLayerVisual {
     /// The shadow of the composed children extends the subtree as the drop
     /// shadow effect does, and the blurs of the effect around the layer as
     /// the blur effect does.
-    fn sub_tree_bounds_padding(&self, _visual: &ServerCompositionVisual) -> Option<Thickness> {
+    fn sub_tree_bounds_padding(&self, visual: &ServerCompositionVisual) -> Option<Thickness> {
         let shadow = self.visible_shadow().map(|shadow| {
-            let effect = drop_shadow_effect(&shadow);
+            let effect = drop_shadow_effect_in(&shadow, Some(visual));
             EffectExtensions::get_effect_output_padding(Some(&effect as &dyn IEffect))
         });
         let effect = self.effect_brush().map(|effect| effect.layer_padding());
@@ -224,7 +233,7 @@ impl IServerVisualContent for ServerLayerVisual {
             }
             LayerMode::Layer => {
                 if let Some(shadow) = self.visible_shadow() {
-                    shadow.render_under_rect(canvas, Self::rect(visual));
+                    shadow.render_under_rect_in(canvas, Some(visual), Self::rect(visual));
                 }
                 canvas.push_layer(bounds);
             }

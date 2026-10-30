@@ -1,0 +1,39 @@
+<!--
+  Not ported from a style: ItemsControl has no style in the merged theme of microsoft-ui-xaml
+  (https://github.com/microsoft/microsoft-ui-xaml, commit
+  7e4b0c2096be402f51cc8f7d203ebf67cff183d0); its default template is built in by the framework
+  and is an ItemsPresenter of the items in the ItemsPanel of the control, without background or
+  border. This is that template as FerroUI's ItemsControl requires it: PART_ItemsPresenter with
+  the ItemsPanel of the control, in a border of the Background, BorderBrush, BorderThickness,
+  CornerRadius and Padding of the control (none of them is set, so the border draws nothing by
+  default; a FerroUI application may set them, as for the ItemsControl of FerroUI's other
+  themes).
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <ItemsControl>
+        <x:String>The first item</x:String>
+        <x:String>The second item</x:String>
+      </ItemsControl>
+    </Border>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="{x:Type ItemsControl}" TargetType="ItemsControl">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BackgroundSizing="InnerBorderEdge"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}"
+                Padding="{TemplateBinding Padding}">
+          <ItemsPresenter x:Name="PART_ItemsPresenter"
+                          ItemsPanel="{TemplateBinding ItemsPanel}" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

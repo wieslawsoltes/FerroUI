@@ -41,6 +41,11 @@ pub(crate) fn register() {
     for types in TYPE_LISTS {
         MarkupType::register_all(types);
     }
+    // The navigation model of WinUI's Frame, declared next to its types (namespace
+    // FerroUI.Navigation, docs/porting/winui-controls.md, section 7).
+    MarkupType::register_all(crate::navigation::MARKUP_TYPES);
+    // The enumerations and the event arguments of WinUI's NavigationView, declared next to them.
+    MarkupType::register_all(crate::navigation_view_events::MARKUP_TYPES);
     // A binding a property holds as its value is a binding: the wrapper is one more handle of
     // the binding type, so that a property of that type is a property of binding type.
     let binding = <dyn ferroui_base::data::BindingBase as ferroui_base::metadata::MarkupTyped>::MARKUP;

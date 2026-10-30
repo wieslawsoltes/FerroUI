@@ -1,0 +1,27 @@
+<!-- The source's two forms share controls and copy state on each navigation.
+     Header is composed; PasswordBox is the explicit native TextBox adaptation. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            Spacing="16" MaxWidth="420" HorizontalAlignment="Left">
+  <TextBlock x:Name="SizingHeader" Text="Standard Size" FontSize="18" />
+  <StackPanel Spacing="4">
+    <TextBlock Text="First Name:" />
+    <TextBox x:Name="FirstName" MinWidth="320" AutomationProperties.Name="First Name" />
+  </StackPanel>
+  <StackPanel Spacing="4">
+    <TextBlock Text="Last Name:" />
+    <TextBox x:Name="LastName" MinWidth="320" AutomationProperties.Name="Last Name" />
+  </StackPanel>
+  <StackPanel Spacing="4">
+    <TextBlock Text="Password:" />
+    <TextBox x:Name="Password" MinWidth="320" PasswordChar="●" AutomationProperties.Name="Password" />
+  </StackPanel>
+  <StackPanel Spacing="4">
+    <TextBlock Text="Confirm Password:" />
+    <TextBox x:Name="ConfirmPassword" MinWidth="320" PasswordChar="●" AutomationProperties.Name="Confirm Password" />
+  </StackPanel>
+  <StackPanel Spacing="4">
+    <TextBlock Text="Pick a date" />
+    <DatePicker x:Name="ChosenDate" AutomationProperties.Name="Pick a date" />
+  </StackPanel>
+</StackPanel>

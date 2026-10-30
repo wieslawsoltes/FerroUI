@@ -1,0 +1,4 @@
+<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <Line StartPoint="0,0" EndPoint="240,80" Stroke="DodgerBlue" StrokeThickness="5"/><Polyline Points="0,80 60,0 120,60 180,10 240,80" Stroke="OrangeRed" StrokeThickness="4"/>
+</StackPanel>

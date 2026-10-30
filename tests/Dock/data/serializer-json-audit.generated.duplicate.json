@@ -1,0 +1,9 @@
+{
+  "$id": "1",
+  "Content": {
+    "$type": "GeneratedTypeNamed",
+    "$id": "1",
+    "$type": "payload-type",
+    "Name": "named"
+  }
+}

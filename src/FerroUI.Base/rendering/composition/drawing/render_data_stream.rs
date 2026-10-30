@@ -4,12 +4,13 @@
 
 use super::{
     DrawBitmapPayload, DrawCustomPayload, DrawEllipsePayload, DrawGeometryPayload, DrawGlyphRunPayload,
-    DrawLinePayload, DrawRectanglePayload, IRenderDataVisitor, PushClipPayload,
+    DrawLinePayload, DrawRectanglePayload, IRenderDataVisitor, PushClipPayload, PushCompositingLayerPayload,
     PushEffectPayload, PushGeometryClipPayload, PushOpacityMaskPayload, PushOpacityPayload,
     PushRenderOptionsPayload, PushTextOptionsPayload, PushTransformPayload, RenderDataOpcode, RenderDataReader,
     RenderDataResource, RenderDataResources, RenderDataWriter,
 };
 use crate::media::{BoxShadow, BoxShadows, RenderOptions, TextOptions};
+use crate::media::imaging::BitmapBlendingMode;
 use crate::platform::IGlyphRunImpl;
 use crate::rendering::composition::server::{IServerObject, ServerObjectId};
 use crate::rendering::composition::transport::{BatchObject, BatchStreamReader, BatchStreamWriter};
@@ -221,6 +222,11 @@ impl RenderDataStream {
 
     pub fn push_opacity(&mut self, opacity: f64) {
         self.writer.write_payload(PushOpacityPayload { opacity });
+        self.enter_scope();
+    }
+
+    pub fn push_compositing_layer(&mut self, blend: BitmapBlendingMode, opacity: f64, bounds: Rect) {
+        self.writer.write_payload(PushCompositingLayerPayload { blend, opacity, bounds });
         self.enter_scope();
     }
 
@@ -450,6 +456,10 @@ impl RenderDataStream {
                 RenderDataOpcode::PushOpacity => {
                     let p = reader.read_payload::<PushOpacityPayload>();
                     scopes.push(visitor.on_push_opacity(p.opacity));
+                }
+                RenderDataOpcode::PushCompositingLayer => {
+                    let p = reader.read_payload::<PushCompositingLayerPayload>();
+                    scopes.push(visitor.on_push_compositing_layer(p.blend, p.opacity, p.bounds));
                 }
                 RenderDataOpcode::PushOpacityMask => {
                     let p = reader.read_payload::<PushOpacityMaskPayload>();

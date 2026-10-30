@@ -1,0 +1,23 @@
+[package]
+name = "ferrodock-model-reactiveui-services"
+description = "ReactiveUI lifecycle, navigation, and overlay services for FerroDock"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferrodock-model-reactiveui = { path = "../FerroDock.Model.ReactiveUI" }
+ferrodock-model.workspace = true
+ferroui-system.workspace = true
+ferroui-reactive.workspace = true
+ferroui-reactiveui.workspace = true
+ferroui-splat.workspace = true
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "deny"

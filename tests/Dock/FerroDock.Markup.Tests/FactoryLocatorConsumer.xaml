@@ -1,0 +1,4 @@
+<local:LocatorFactory xmlns="https://github.com/ferroui"
+    xmlns:local="using:FerroDock.Markup.Tests"
+    DefaultContextLocator="CreateContext"
+    DefaultHostWindowLocator="CreateHost" />

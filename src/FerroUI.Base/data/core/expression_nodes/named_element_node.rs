@@ -2,7 +2,7 @@ use super::{ExpressionNode, NodeState, SourceNode};
 use crate::controls::{NameScopeLocator, NameScopeRef};
 use crate::data::BindingError;
 use crate::reactive::{IDisposable, IObserver};
-use crate::{BoxedValue, FerroObject, Ref, StyledElement};
+use crate::{BoxedValue, FerroObject, StyledElement};
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
@@ -29,10 +29,10 @@ impl NamedElementNode {
 
 struct WeakObserver(Weak<NamedElementNode>);
 
-impl IObserver<Option<Ref<FerroObject>>> for WeakObserver {
-    fn on_next(&self, value: Option<Ref<FerroObject>>) {
+impl IObserver<Option<BoxedValue>> for WeakObserver {
+    fn on_next(&self, value: Option<BoxedValue>) {
         if let Some(node) = self.0.upgrade() {
-            node.state.set_value(value.map(|v| Rc::new(v) as BoxedValue), None);
+            node.state.set_value(value, None);
         }
     }
 }
@@ -60,7 +60,7 @@ impl ExpressionNode for NamedElementNode {
         }
         match self.name_scope.as_ref().and_then(Weak::upgrade) {
             Some(scope) => {
-                let subscription = NameScopeLocator::track(&NameScopeRef(scope), &self.name)
+                let subscription = NameScopeLocator::track_value(&NameScopeRef(scope), &self.name)
                     .subscribe(Rc::new(WeakObserver(self.this.clone())));
                 self.subscription.replace(Some(subscription));
             }

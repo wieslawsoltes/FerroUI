@@ -1,0 +1,11 @@
+<!-- Adapted from AppbarbuttonsSeparatedAppbarseparators.txt in the pinned Gallery; see ../NOTICE.md. -->
+<CommandBar xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <CommandBar.PrimaryCommands>
+    <CommandBarButton Label="Attach Camera"/>
+    <CommandBarSeparator/>
+    <CommandBarButton Label="Like"/>
+    <CommandBarButton Label="Dislike"/>
+    <CommandBarSeparator/>
+    <CommandBarButton Label="Orientation"/>
+  </CommandBar.PrimaryCommands>
+</CommandBar>

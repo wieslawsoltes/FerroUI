@@ -1,0 +1,4 @@
+<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <Button Content="Empty cart"><Button.Flyout><Flyout><StackPanel Spacing="12"><TextBlock Text="All items will be removed. Do you want to continue?"/><Button Content="Yes, empty my cart"/></StackPanel></Flyout></Button.Flyout></Button>
+</StackPanel>

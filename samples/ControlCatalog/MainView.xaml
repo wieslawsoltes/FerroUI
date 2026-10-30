@@ -1,225 +1,86 @@
-<DrawerPage x:Class="ControlCatalog.MainView"
-            xmlns="https://github.com/ferroui"
-            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-            xmlns:controls="using:ControlCatalog.Controls"
-            xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-            xmlns:local="using:ControlCatalog"
-            xmlns:models="using:ControlCatalog.Models"
-            xmlns:viewModels="using:ControlCatalog.ViewModels"
-            d:DesignWidth="1200"
-            d:DesignHeight="720"
-            x:DataType="viewModels:MainWindowViewModel"
-            DrawerLayoutBehavior="Split"
-            IsOpen="{Binding IsDrawerOpened , Mode=TwoWay}"
-            DisplayMode="{Binding DisplayMode, Mode=TwoWay}"
-            DrawerLength="260"
-            CompactDrawerLength="52"
-            DrawerFooter="{Binding}"
-            Drawer="{Binding}"
-            DrawerHeader="{Binding}">
+<!-- Not as in upstream: the shell of the catalog is a NavigationView (docs/porting/winui-controls.md,
+     "The ControlCatalog shell"), where upstream's MainView is a DrawerPage with a drawer of
+     buttons and expanders. The sections are top-level items with their pages as child items, the
+     search box is the AutoSuggestBox of the pane, the settings page is the settings item, the logo
+     is the pane header, and the content is a Frame whose journal drives the back button. The class
+     (main_view.rs) builds the items from the page list of the view model. -->
+<ContentPage x:Class="ControlCatalog.MainView"
+             xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="using:ControlCatalog"
+             xmlns:viewModels="using:ControlCatalog.ViewModels"
+             d:DesignWidth="1200"
+             d:DesignHeight="720"
+             x:DataType="viewModels:MainWindowViewModel">
   <Design.DataContext>
     <viewModels:MainWindowViewModel/>
   </Design.DataContext>
-  <DrawerPage.Resources>
+  <ContentPage.Resources>
     <ResourceDictionary>
       <x:Double x:Key="TabbedPageTabItemHeaderFontSize">20</x:Double>
       <Thickness x:Key="TabbedPageTabStripPadding">10</Thickness>
       <ControlTheme x:Key="{x:Type local:MainView}"
                     TargetType="local:MainView"
-                    BasedOn="{StaticResource {x:Type DrawerPage}}" />
+                    BasedOn="{StaticResource {x:Type ContentPage}}" />
     </ResourceDictionary>
-  </DrawerPage.Resources>
-  <DrawerPage.Styles>
+  </ContentPage.Resources>
+  <ContentPage.Styles>
     <Style Selector="TextBlock.h2">
       <Setter Property="TextWrapping" Value="Wrap" />
       <Setter Property="MaxWidth" Value="400" />
       <Setter Property="HorizontalAlignment" Value="Left" />
     </Style>
-    <Style Selector="FlexPanel.navItemFlex">
-      <Setter Property="Direction" Value="Row"/>
-      <Setter Property="AlignItems" Value="Center"/>
-      <Setter Property="Wrap" Value="NoWrap"/>
-    </Style>
-  </DrawerPage.Styles>
-  <DrawerPage.DrawerTemplate>
-    <DataTemplate x:DataType="viewModels:MainWindowViewModel">
-      <ScrollViewer HorizontalScrollBarVisibility="Disabled"
-                    VerticalScrollBarVisibility="Auto">
-        <Grid RowDefinitions="Auto,*" Margin="5,0">
-          <controls:SelectableButton Margin="1"
-                                     Command="{Binding HomeCommand}"
-                                     Theme="{StaticResource SelectableItemButton}">
-            <controls:SelectableButton.IsSelected>
-              <MultiBinding Converter="{x:Static ObjectConverters.AreAllEqual}">
-                <Binding Path="$parent[local:MainView].ViewModel.CurrentPageItem.Header"/>
-                <Binding Path="$parent[local:MainView].ViewModel.HomeItem.Header"/>
-              </MultiBinding>
-            </controls:SelectableButton.IsSelected>
-            <FlexPanel Classes="navItemFlex">
-              <PathIcon Width="16" Height="16"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        Data="{Binding HomeItem.IconData}"/>
-              <TextBlock DockPanel.Dock="Right" Text="{Binding HomeItem.Header}"
-                         VerticalAlignment="Center"
-                         Flex.Grow="1"
-                         Margin="12,0,0,0"
-                         IsVisible="{Binding IsDrawerOpened}"
-                         TextTrimming="CharacterEllipsis"/>
-            </FlexPanel>
-          </controls:SelectableButton>
-          <ItemsControl ItemsSource="{Binding HomeSections}"
-                        Grid.Row="1">
-            <ItemsControl.ItemsPanel>
-              <ItemsPanelTemplate>
-                <StackPanel Orientation="Vertical"/>
-              </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-              <DataTemplate x:DataType="models:HomeSection">
-                <controls:HomeItemExpander Theme="{StaticResource HomeSectionExpander}" Margin="1"
-                                           IsVisible="{Binding IsSectionVisible}"
-                                           IsExpanded="{Binding IsExpanded, Mode=TwoWay}"
-                                           Command="{Binding $parent[local:MainView].ViewModel.NavigateToPageCommand}"
-                                           CommandParameter="{Binding PageItem}"
-                                           CanExpand="{Binding $parent[local:MainView].ViewModel.IsDrawerOpened}">
-                  <controls:HomeItemExpander.IsSelected>
-                    <Binding Path="ShowsSelection" Mode="OneWay"/>
-                  </controls:HomeItemExpander.IsSelected>
-                  <controls:HomeItemExpander.Header>
-                    <FlexPanel Classes="navItemFlex">
-                      <PathIcon Width="16" Height="16"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Data="{Binding IconData}"/>
-                      <TextBlock Text="{Binding Title}"
-                                 VerticalAlignment="Center"
-                                 Margin="12,0,0,0"
-                                 Flex.Grow="1"
-                                 IsVisible="{Binding $parent[local:MainView].ViewModel.IsDrawerOpened}"
-                                 TextTrimming="CharacterEllipsis"/>
-                    </FlexPanel>
-                  </controls:HomeItemExpander.Header>
-                  <controls:HomeItemExpander.Content>
-                    <ItemsControl ItemsSource="{Binding Items}" Margin="22,2,0,4">
-                      <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                          <StackPanel Orientation="Vertical"/>
-                        </ItemsPanelTemplate>
-                      </ItemsControl.ItemsPanel>
-                      <ItemsControl.ItemTemplate>
-                        <DataTemplate x:DataType="models:PageItem">
-                          <controls:SelectableButton Margin="1,2"
-                                                     IsVisible="{Binding IsVisible}"
-                                                     Theme="{StaticResource SelectableItemButton}"
-                                                     Command="{Binding $parent[local:MainView].ViewModel.NavigateToPageCommand}"
-                                                     CommandParameter="{Binding}">
-                            <controls:SelectableButton.IsSelected>
-                              <MultiBinding Mode="OneWay" Converter="{x:Static ObjectConverters.AreAllEqual}">
-                                <Binding Path="$parent[local:MainView].ViewModel.CurrentPageItem.Header"/>
-                                <Binding Path="Header"/>
-                              </MultiBinding>
-                            </controls:SelectableButton.IsSelected>
-                            <FlexPanel Classes="navItemFlex">
-                              <PathIcon Width="16" Height="16"
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
-                                        Data="{Binding IconData}"/>
-                              <TextBlock Text="{Binding Header}"
-                                         VerticalAlignment="Center"
-                                         Margin="12,0,0,0"
-                                         Flex.Grow="1"
-                                         IsVisible="{Binding $parent[local:MainView].ViewModel.IsDrawerOpened}"
-                                         TextTrimming="CharacterEllipsis"/>
-                            </FlexPanel>
-                          </controls:SelectableButton>
-                        </DataTemplate>
-                      </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                  </controls:HomeItemExpander.Content>
-                </controls:HomeItemExpander>
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
-          </ItemsControl>
-        </Grid>
-      </ScrollViewer>
-    </DataTemplate>
-  </DrawerPage.DrawerTemplate>
-  <DrawerPage.DrawerHeaderTemplate>
-    <DataTemplate x:DataType="viewModels:MainWindowViewModel">
-      <DockPanel LastChildFill="True" Margin="6">
-        <DockPanel.Styles>
-          <Style Selector="PathIcon#Icon">
-            <Setter Property="Width">32</Setter>
-            <Setter Property="Height">32</Setter>
-          </Style>
-          <ContainerQuery Name="IconHost" Query="min-width:60">
-            <Style Selector="PathIcon#Icon">
-              <Setter Property="Width">50</Setter>
-              <Setter Property="Height">50</Setter>
-            </Style>
-          </ContainerQuery>
-          <ContainerQuery Name="IconHost" Query="min-width:120">
-            <Style Selector="PathIcon#Icon">
-              <Setter Property="Width">100</Setter>
-              <Setter Property="Height">100</Setter>
-            </Style>
-          </ContainerQuery>
-        </DockPanel.Styles>
-        <TextBox Name="SearchBox"
-                 DockPanel.Dock="Bottom"
-                 PlaceholderText="Search..."
-                 Text="{Binding Query, Mode=TwoWay}"
-                 Margin="4,0,8,4"
-                 IsVisible="{Binding IsDrawerOpened}"
-                 VerticalContentAlignment="Center">
-          <TextBox.InnerLeftContent>
-            <PathIcon Width="14" Height="14" Margin="6,0,0,0"
-                      VerticalAlignment="Center"
-                      Data="{StaticResource SearchIcon}" />
-          </TextBox.InnerLeftContent>
-        </TextBox>
-        <Border HorizontalAlignment="Center" Margin="0,10"
-                Background="Transparent"
-                Cursor="Hand"
-                Container.Name="IconHost"
-                Container.Sizing="Width"
-                Tapped="FerroIcon_OnTapped">
-          <PathIcon VerticalAlignment="Stretch"
-                    HorizontalAlignment="Stretch"
-                    Foreground="#007DF9"
-                    Name="Icon"
-                    Data="{StaticResource AppIcon}" />
-        </Border>
-      </DockPanel>
-    </DataTemplate>
-  </DrawerPage.DrawerHeaderTemplate>
-  <DrawerPage.DrawerFooterTemplate>
-    <DataTemplate x:DataType="viewModels:MainWindowViewModel">
-      <controls:SelectableButton Margin="10"
-                                 Command="{Binding SettingsCommand}"
-                                 Theme="{StaticResource SelectableItemButton}">
-        <controls:SelectableButton.IsSelected>
-          <MultiBinding Converter="{x:Static ObjectConverters.AreAllEqual}">
-            <Binding Path="$parent[local:MainView].ViewModel.CurrentPageItem.Header"/>
-            <Binding Path="$parent[local:MainView].ViewModel.SettingsItem.Header"/>
-          </MultiBinding>
-        </controls:SelectableButton.IsSelected>
-        <FlexPanel Classes="navItemFlex">
-          <PathIcon Width="16" Height="16"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Data="{Binding SettingsItem.IconData}"/>
-          <TextBlock Text="{Binding SettingsItem.Header}"
-                     VerticalAlignment="Center"
-                     Margin="12,0,0,0"
-                     Flex.Grow="1"
-                     IsVisible="{Binding IsDrawerOpened}"
-                     TextTrimming="CharacterEllipsis"/>
-        </FlexPanel>
-      </controls:SelectableButton>
-    </DataTemplate>
-  </DrawerPage.DrawerFooterTemplate>
+  </ContentPage.Styles>
 
-  <NavigationPage Name="NavPage"/>
-</DrawerPage>
+  <Grid RowDefinitions="Auto,*">
+  <!-- The title bar of the shell, as in WinUI Gallery: drawn in the title bar of the window while
+       its client area extends into it (desktop), a plain top row where there is no window chrome
+       (mobile, browser), collapsed otherwise; the class moves the search box into it and hides
+       the back and toggle buttons and the logo of the pane header of the navigation view while it
+       is shown (WinUI Gallery has no pane header; the logo stays for the classic chrome). -->
+  <TitleBar x:Name="AppTitleBar"
+            Title="FerroUI Control Gallery"
+            IsPaneToggleButtonVisible="True"
+            IsVisible="False">
+    <TitleBar.Resources>
+      <!-- As WinUI Gallery: the search box stretches up to its maximum width, centred. -->
+      <HorizontalAlignment x:Key="TitleBarContentHorizontalAlignment">Stretch</HorizontalAlignment>
+    </TitleBar.Resources>
+  </TitleBar>
+  <NavigationView x:Name="Navigation"
+                  Grid.Row="1"
+                  PaneDisplayMode="Auto"
+                  CompactModeThresholdWidth="640"
+                  ExpandedModeThresholdWidth="1008"
+                  OpenPaneLength="260"
+                  IsSettingsVisible="True"
+                  IsBackButtonVisible="Visible"
+                  IsBackEnabled="False"
+                  AlwaysShowHeader="False">
+    <NavigationView.PaneHeader>
+      <Border x:Name="Logo"
+              Margin="4,0"
+              Background="Transparent"
+              Cursor="Hand"
+              VerticalAlignment="Center"
+              Tapped="FerroIcon_OnTapped">
+        <StackPanel Orientation="Horizontal" Spacing="10">
+          <PathIcon Width="28" Height="28"
+                    Foreground="#007DF9"
+                    Data="{StaticResource AppIcon}" />
+          <TextBlock Text="FerroUI" VerticalAlignment="Center" FontWeight="SemiBold" />
+        </StackPanel>
+      </Border>
+    </NavigationView.PaneHeader>
+    <NavigationView.AutoSuggestBox>
+      <AutoSuggestBox x:Name="SearchBox" PlaceholderText="Search..." VerticalAlignment="Center">
+        <AutoSuggestBox.QueryIcon>
+          <PathIcon Data="{StaticResource SearchIcon}" />
+        </AutoSuggestBox.QueryIcon>
+      </AutoSuggestBox>
+    </NavigationView.AutoSuggestBox>
+    <Frame x:Name="ContentFrame" />
+  </NavigationView>
+  </Grid>
+</ContentPage>

@@ -1,0 +1,121 @@
+name: Linux framebuffer
+
+# The Linux framebuffer backend on virtual devices, and the headless catalog over MCP.
+# Split from ci.yml so that a pull request that does not touch this area shows no check for it
+# (a skipped job is still a check). It runs every night on main and by hand:
+# gh workflow run linuxfb.yml --ref <branch>
+
+on:
+  pull_request:
+    paths:
+      - 'src/Linux/**'
+      - 'src/FerroUI.Mcp/**'
+      - 'scripts/linuxfb/**'
+      - 'scripts/test-mcp.py'
+      - '.github/workflows/linuxfb.yml'
+  schedule:
+    - cron: '41 3 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: linuxfb-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  RUST_BACKTRACE: 1
+
+jobs:
+  # The Linux framebuffer platform (docs/porting/linux-framebuffer-platform.md, section 10). The crate
+  # is developed on a Mac; this job builds and tests it on Linux (the dispatcher's loop on a real event
+  # poll among the tests) and runs the smoke mode of its example: against a plain file as the
+  # framebuffer always, and against the kernel's virtual devices where the runner has them: a virtual
+  # framebuffer (the module vfb, or the framebuffer emulation of vkms) and virtual input devices
+  # (uinput). The step that looks for them says what the kernel of the runner has; what is missing is
+  # skipped with a reason. A real board with a panel and a touch screen is not covered by any of this.
+  linuxfb:
+    name: Build and test (Linux framebuffer, virtual devices)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      CARGO_PROFILE_DEV_DEBUG: 0
+      CARGO_PROFILE_TEST_DEBUG: 0
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: linuxfb
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
+      # Skia links FreeType and Fontconfig, and needs a font to answer for the default family.
+      # The DRM output opens libdrm, libgbm and libEGL at run time; Mesa renders on the card of
+      # vkms in software (its kms_swrast driver, in libgl1-mesa-dri).
+      - name: System packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libfontconfig1-dev libfreetype6-dev fonts-dejavu-core pkg-config kmod libinput10 \
+            libdrm2 libgbm1 libegl1 libegl-mesa0 libgl1-mesa-dri
+      - name: Tests of the crate
+        run: cargo test --locked -p ferroui-linuxframebuffer --no-fail-fast
+      - name: Build the example
+        run: cargo build --locked -p ferroui-linuxframebuffer --features example --example linuxfb_smoke
+      # The modules of a virtual framebuffer and of the virtual KMS driver are not part of the base
+      # kernel package of the runner; the package with the extra modules of the running kernel is
+      # asked for, and its absence is not an error.
+      - name: Virtual devices of the runner's kernel
+        run: |
+          echo "kernel $(uname -r)"
+          sudo apt-get install -y --no-install-recommends "linux-modules-extra-$(uname -r)" \
+            || echo "::notice::no linux-modules-extra package for the kernel of the runner"
+          sudo sh scripts/linuxfb/virtual-devices.sh up "$RUNNER_TEMP/linuxfb-devices" | tee "$RUNNER_TEMP/linuxfb-devices.log"
+          . "$RUNNER_TEMP/linuxfb-devices"
+          if [ -n "$FB_NODE" ]; then echo "::notice::virtual framebuffer device: $FB_NODE ($FB_ID)"; else echo "::notice::no virtual framebuffer device on this runner: the output is exercised against a file only"; fi
+          if [ -n "$DRM_CARD" ]; then echo "::notice::virtual card: $DRM_CARD (vkms): the DRM output runs on it"; else echo "::notice::no virtual card on this runner: the DRM output is covered by its host tests only"; fi
+          if [ -n "$UINPUT" ]; then echo "::notice::uinput is available: the evdev backend reads virtual devices"; else echo "::notice::uinput is not available on this runner: the evdev backend is covered by its host tests only"; fi
+      - name: The smoke runs (a file; the virtual framebuffer, the virtual card and virtual input devices where available)
+        run: |
+          sudo sh scripts/linuxfb/smoke.sh target/debug/examples/linuxfb_smoke "$RUNNER_TEMP/linuxfb-smoke" "$RUNNER_TEMP/linuxfb-devices"
+      # The catalog on the virtual framebuffer: the content of the device per page, as pictures
+      # (the memory of the framebuffer device, read from its node).
+      - name: Build the ControlCatalog
+        run: cargo build --locked -p control-catalog-desktop --features mcp,cdp
+      - name: Inspect and drive the headless ControlCatalog over MCP
+        timeout-minutes: 5
+        run: python3 scripts/test-mcp.py
+      - name: The ControlCatalog on the virtual framebuffer
+        run: |
+          . "$RUNNER_TEMP/linuxfb-devices"
+          if [ -z "$FB_NODE" ]; then
+            echo "::notice::no virtual framebuffer device on this runner: the catalog was not run on the framebuffer platform"
+            exit 0
+          fi
+          sudo sh scripts/linuxfb/catalog-pictures.sh target/debug/control-catalog-desktop "$FB_NODE" "$FB_ID" "$RUNNER_TEMP/linuxfb-smoke/catalog"
+      # The catalog on a KMS output of the virtual card, drawn with OpenGL: the framebuffer the CRTC
+      # scans out per page, as pictures.
+      - name: The ControlCatalog on the virtual card (DRM output)
+        run: |
+          . "$RUNNER_TEMP/linuxfb-devices"
+          if [ -z "$DRM_CARD" ]; then
+            echo "::notice::no virtual card on this runner: the catalog was not run on the DRM output"
+            exit 0
+          fi
+          sudo sh scripts/linuxfb/catalog-pictures.sh target/debug/control-catalog-desktop "$DRM_CARD" vkms "$RUNNER_TEMP/linuxfb-smoke/catalog-drm"
+      - name: A frame of the file framebuffer as a picture
+        if: always()
+        run: |
+          sudo python3 scripts/linuxfb/fb-to-png.py "$RUNNER_TEMP/linuxfb-smoke/fb-bgra.raw" "$RUNNER_TEMP/linuxfb-smoke/fb-bgra.png" 640x400 32 bgra || true
+      - name: Unload the virtual devices
+        if: always()
+        run: sudo sh scripts/linuxfb/virtual-devices.sh down "$RUNNER_TEMP/linuxfb-devices" || true
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: linuxfb-smoke
+          path: ${{ runner.temp }}/linuxfb-smoke
+          if-no-files-found: ignore

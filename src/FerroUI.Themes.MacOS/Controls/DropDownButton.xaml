@@ -1,0 +1,178 @@
+<!--
+  macOS 26 control theme, adapted from the FerroUI WinUI template foundation.
+  Foundation: microsoft-ui-xaml 7e4b0c2096be402f51cc8f7d203ebf67cff183d0.
+  Copyright (c) Microsoft Corporation. MIT License; see NOTICE.md.
+  macOS geometry and states are theme calibrations against Apple's WWDC25
+  AppKit design guidance; exact native rendering remains a comparison gate.
+  FerroUI template parts, bindings and routed interaction are preserved.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <StackPanel Spacing="20">
+        <DropDownButton Content="Drop down" />
+        <DropDownButton Content="Disabled" IsEnabled="False" />
+      </StackPanel>
+    </Border>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="DefaultDropDownButtonStyle" TargetType="DropDownButton">
+    <Setter Property="MinHeight" Value="{DynamicResource MacOSControlHeight}" />
+    <!-- The defaults of a WinUI 3 control, which its style leaves unset and its template binds
+         (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27). -->
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Background" Value="{DynamicResource ButtonBackground}" />
+    <Setter Property="Foreground" Value="{DynamicResource ButtonForeground}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource ButtonBorderBrush}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource ButtonBorderThemeThickness}" />
+    <Setter Property="Padding" Value="{DynamicResource MacOSControlPadding}" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontWeight" Value="Normal" />
+    <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource MacOSControlCornerRadius}" />
+    <Setter Property="BackgroundSizing" Value="InnerBorderEdge" />
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border IsHitTestVisible="False" Margin="-3" BorderThickness="3"
+                BorderBrush="{DynamicResource MacOSFocusBrush}"
+                CornerRadius="{DynamicResource MacOSControlCornerRadius}" />
+      </FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="RootGrid"
+                Background="{TemplateBinding Background}"
+                Padding="{TemplateBinding Padding}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}"
+                BackgroundSizing="{TemplateBinding BackgroundSizing}">
+          <Border.Transitions>
+            <Transitions>
+              <BrushTransition Property="Background" Duration="{DynamicResource MacOSMotionFastDuration}" />
+            </Transitions>
+          </Border.Transitions>
+          <Grid ColumnDefinitions="*,Auto">
+            <ContentPresenter x:Name="PART_ContentPresenter"
+                              Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                              Foreground="{TemplateBinding Foreground}"
+                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                              RecognizesAccessKey="True" />
+            <!-- The AnimatedIcon ChevronIcon (12 x 12) with its fallback glyph E96E at 8 px. -->
+            <Grid Grid.Column="1"
+                  Margin="8,0,0,0"
+                  Width="12"
+                  Height="12">
+              <Path x:Name="ChevronIcon"
+                    Data="{StaticResource GlyphGeometryE96E}"
+                    Fill="{DynamicResource DropDownButtonForegroundSecondary}"
+                    Stretch="Uniform"
+                    Width="8"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center" />
+            </Grid>
+          </Grid>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- PointerOver -->
+    <Style Selector="^:pointerover">
+      <Style Selector="^ /template/ Border#RootGrid">
+        <Setter Property="Background" Value="{DynamicResource ButtonBackgroundPointerOver}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ButtonBorderBrushPointerOver}" />
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource ButtonForegroundPointerOver}" />
+      </Style>
+      <Style Selector="^ /template/ Path#ChevronIcon">
+        <Setter Property="Fill" Value="{DynamicResource DropDownButtonForegroundSecondaryPointerOver}" />
+      </Style>
+    </Style>
+    <!-- Pressed -->
+    <Style Selector="^:pressed">
+      <Style Selector="^ /template/ Border#RootGrid">
+        <Setter Property="Background" Value="{DynamicResource ButtonBackgroundPressed}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ButtonBorderBrushPressed}" />
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource ButtonForegroundPressed}" />
+      </Style>
+      <Style Selector="^ /template/ Path#ChevronIcon">
+        <Setter Property="Fill" Value="{DynamicResource DropDownButtonForegroundSecondaryPressed}" />
+      </Style>
+    </Style>
+    <!-- Disabled -->
+    <Style Selector="^:disabled">
+      <Style Selector="^ /template/ Border#RootGrid">
+        <Setter Property="Background" Value="{DynamicResource ButtonBackgroundDisabled}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ButtonBorderBrushDisabled}" />
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource ButtonForegroundDisabled}" />
+      </Style>
+      <Style Selector="^ /template/ Path#ChevronIcon">
+        <Setter Property="Fill" Value="{DynamicResource ButtonForegroundDisabled}" />
+      </Style>
+    </Style>
+
+    <!-- macOS 26 mini/small/regular rectangles; large sizes use capsules. -->
+    <Style Selector="^.mini">
+      <Setter Property="MinHeight" Value="18" />
+      <Setter Property="Padding" Value="7,1" />
+      <Setter Property="FontSize" Value="9" />
+      <Setter Property="CornerRadius" Value="4" />
+      <Setter Property="FocusAdorner">
+        <FocusAdornerTemplate>
+          <Border IsHitTestVisible="False" Margin="-3" BorderThickness="3"
+                  BorderBrush="{DynamicResource MacOSFocusBrush}" CornerRadius="4" />
+        </FocusAdornerTemplate>
+      </Setter>
+    </Style>
+    <Style Selector="^.small">
+      <Setter Property="MinHeight" Value="22" />
+      <Setter Property="Padding" Value="8,2" />
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="CornerRadius" Value="5" />
+      <Setter Property="FocusAdorner">
+        <FocusAdornerTemplate>
+          <Border IsHitTestVisible="False" Margin="-3" BorderThickness="3"
+                  BorderBrush="{DynamicResource MacOSFocusBrush}" CornerRadius="5" />
+        </FocusAdornerTemplate>
+      </Setter>
+    </Style>
+    <Style Selector="^.large">
+      <Setter Property="MinHeight" Value="34" />
+      <Setter Property="Padding" Value="15,5" />
+      <Setter Property="FontSize" Value="15" />
+      <Setter Property="CornerRadius" Value="999" />
+      <Setter Property="FocusAdorner">
+        <FocusAdornerTemplate>
+          <Border IsHitTestVisible="False" Margin="-3" BorderThickness="3"
+                  BorderBrush="{DynamicResource MacOSFocusBrush}" CornerRadius="999" />
+        </FocusAdornerTemplate>
+      </Setter>
+    </Style>
+    <Style Selector="^.extra-large">
+      <Setter Property="MinHeight" Value="42" />
+      <Setter Property="Padding" Value="19,7" />
+      <Setter Property="FontSize" Value="17" />
+      <Setter Property="CornerRadius" Value="999" />
+      <Setter Property="FocusAdorner">
+        <FocusAdornerTemplate>
+          <Border IsHitTestVisible="False" Margin="-3" BorderThickness="3"
+                  BorderBrush="{DynamicResource MacOSFocusBrush}" CornerRadius="999" />
+        </FocusAdornerTemplate>
+      </Setter>
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type DropDownButton}" TargetType="DropDownButton" BasedOn="{StaticResource DefaultDropDownButtonStyle}" />
+</ResourceDictionary>

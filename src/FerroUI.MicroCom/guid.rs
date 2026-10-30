@@ -39,13 +39,13 @@ impl Guid {
         u128::from_str_radix(&hex, 16).ok().map(Guid::from_u128)
     }
 
-    /// The value the native library actually materializes for this IID.
+    /// The value native libraries built before the `com.h` fix materialize for this IID.
     ///
-    /// `com.h`'s `__IID_DEF` macro (kept as it is in the native sources) initializes
-    /// `Data4` as `{d41, d42, d42, d42, d42, d42, d42, d42}` — the second
-    /// byte is repeated instead of using bytes 3..8. Native `QueryInterface`
-    /// implementations `memcmp` against those constants, so when talking to
-    /// the native side this is the IID that matches.
+    /// The `__IID_DEF` macro of `com.h` used to initialize `Data4` as
+    /// `{d41, d42, d42, d42, d42, d42, d42, d42}`: the second byte was repeated
+    /// instead of using bytes 3..8. Native `QueryInterface` implementations
+    /// `memcmp` against those constants, so an older native library answers this
+    /// form; current ones answer the IDL value. Both are accepted and tried.
     pub const fn as_com_h_materialized(&self) -> Guid {
         let d = self.data4;
         Guid {

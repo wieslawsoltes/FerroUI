@@ -332,12 +332,30 @@ impl IInputDevice for KeyboardDevice {
         }
 
         if let Some(text) = e.downcast_ref::<RawTextInputEventArgs>() {
+            // A commit of the exact-edit connection goes to the owner it was made
+            // for, not to whatever has focus now; a stale commit is dropped. Text
+            // without a commit (every legacy client) goes to the focused element.
+            let target = if let Some(commit) = text.input_method_commit() {
+                if !commit.is_current() {
+                    commit.complete(Err(super::text_input::TextInputMethodError::StateChanged));
+                    e.set_handled(true);
+                    return;
+                }
+                let Some(owner) = commit.owner() else {
+                    e.set_handled(true);
+                    return;
+                };
+                owner
+            } else {
+                element.clone()
+            };
             let mut ev = TextInputEventArgs::new();
             ev.text = Some(text.text().to_string());
-            ev.set_source(&element);
+            ev.input_method_commit = text.input_method_commit().cloned();
+            ev.set_source(&target);
             ev.set_routed_event(Some(InputElement::text_input_event()));
 
-            element.raise_event(&ev);
+            target.raise_event(&ev);
             e.set_handled(ev.handled());
         }
     }

@@ -1,0 +1,15 @@
+[package]
+name = "ferrodock-runtime"
+description = "Shared native object interop for UI-independent FerroDock contracts"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+[lib]
+path = "lib.rs"
+[dependencies]
+ferroui-base.workspace = true
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "deny"

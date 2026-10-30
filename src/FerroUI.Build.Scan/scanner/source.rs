@@ -23,6 +23,12 @@ use super::tokens::{
 use super::{codes, Diagnostic, InvocationCounts, ScanOptions, ScannedFile, Severity};
 use crate::model::VALUE_REGISTRATIONS;
 
+// Both APIs insert the same assignability pair into ValueTypes. The boxed form
+// only gives the runtime predicate access to the actual shared box.
+fn canonical_registration(name: &str) -> &str {
+    if name == "boxed_cast" { "cast" } else { name }
+}
+
 /// Where a declaration is written.
 #[derive(Clone)]
 pub(crate) struct Site {
@@ -349,7 +355,7 @@ impl Source {
                 // declarations, which are read where the macro is invoked.
                 calls_of(&tokens, "ValueTypes", DECLARATION_MACROS, &mut |function| {
                     if let Some(registration) = function.strip_prefix("register_").filter(|name| VALUE_REGISTRATIONS.iter().any(|(known, _)| known == name)) {
-                        self.value_calls.entry(registration.to_string()).or_default().0 += 1;
+                        self.value_calls.entry(canonical_registration(registration).to_string()).or_default().0 += 1;
                     }
                 });
             }
@@ -1568,7 +1574,7 @@ impl<'ast> Visit<'ast> for RegistrationFinder {
             return;
         }
         match (*registration, types.as_slice()) {
-            ("cast", [from, to]) => self.casts.push(((from.clone(), to.clone()), line)),
+            ("cast" | "boxed_cast", [from, to]) => self.casts.push(((from.clone(), to.clone()), line)),
             _ => self.value_types.push(((registration.to_string(), types), line)),
         }
     }
@@ -1657,9 +1663,9 @@ impl Source {
                 continue;
             }
             let site = Site { line, ..site.clone() };
-            self.value_calls.entry(registration.to_string()).or_default().1 += 1;
+            self.value_calls.entry(canonical_registration(registration).to_string()).or_default().1 += 1;
             match (*registration, types.as_slice()) {
-                ("cast", [from, to]) => self.casts.push(Located { site, value: RawCast { from: from.clone(), to: to.clone(), imports: Vec::new() } }),
+                ("cast" | "boxed_cast", [from, to]) => self.casts.push(Located { site, value: RawCast { from: from.clone(), to: to.clone(), imports: Vec::new() } }),
                 _ => self.value_types.push(Located { site, value: RawValueType { registration: registration.to_string(), types, imports: Vec::new() } }),
             }
         }
@@ -1723,7 +1729,7 @@ impl Source {
                     for (_, transcriber) in &rules {
                         calls_of(transcriber, "ValueTypes", &[], &mut |function| {
                             if let Some(registration) = function.strip_prefix("register_").filter(|name| VALUE_REGISTRATIONS.iter().any(|(known, _)| known == name)) {
-                                *calls.entry(registration.to_string()).or_default() += 1;
+                                *calls.entry(canonical_registration(registration).to_string()).or_default() += 1;
                             }
                         });
                     }
@@ -1831,5 +1837,31 @@ impl Source {
             constants.iter().try_fold(0i64, |union, (constant, _)| Some(union | self.member_value(declared, constant, depth + 1)?))
         };
         evaluate(&expression, &Scope { type_name: &declared.1, member: &member, all: &all })
+    }
+}
+
+#[cfg(test)]
+mod boxed_cast_tests {
+    use super::*;
+    #[test]
+    fn boxed_and_typed_casts_keep_the_same_declared_assignability_pairs() {
+        let block: syn::Block = syn::parse_str("{ ValueTypes::register_cast::<A,B>(f); ValueTypes::register_boxed_cast::<A,C>(|_|None); ValueTypes::register_boxed_cast::<A,_>(f); }").unwrap();
+        let mut finder=RegistrationFinder::default();finder.visit_block(&block);
+        assert_eq!(finder.casts.len(),2);
+        assert_eq!(text_of(&finder.casts[0].0.0),"A");assert_eq!(text_of(&finder.casts[0].0.1),"B");
+        assert_eq!(text_of(&finder.casts[1].0.0),"A");assert_eq!(text_of(&finder.casts[1].0.1),"C");
+        assert!(finder.value_types.is_empty());
+        assert_eq!(canonical_registration("boxed_cast"),"cast");assert_eq!(canonical_registration("reference"),"reference");
+    }
+    #[test]
+    fn boxed_casts_in_declaration_tokens_are_casts_not_other_value_registrations() {
+        let fixture=std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/registration/lib.rs");
+        let mut source=Source::read(&ScanOptions::new("registration",fixture));
+        let casts=source.casts.len();let values=source.value_types.len();let read=source.value_calls.get("cast").map_or(0,|value|value.1);
+        let tokens=tokens_of("ValueTypes::register_boxed_cast::<A,B>(f);".parse().unwrap());
+        let site=Site{module:0,file:0,line:1,cfg:Vec::new(),expanded:false};
+        source.read_registrations_of_tokens(&tokens,&site);
+        assert_eq!(source.casts.len(),casts+1);assert_eq!(source.value_types.len(),values);
+        assert_eq!(source.value_calls.get("cast").unwrap().1,read+1);
     }
 }

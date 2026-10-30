@@ -159,6 +159,7 @@ fn draw_into(sink: Box<dyn IVelloSceneSink>, f: impl FnOnce(&mut DrawingContextI
 /// interface has them for a sink that does not say otherwise.
 struct SinkWithoutFilters {
     inner: VelloCpuSceneSink,
+    blend_layers: bool,
     /// Whether the sink says it has edges without anti-aliasing.
     aliased_edges: bool,
     /// What was asked of the sink, for the tests to see: fills with an
@@ -173,6 +174,7 @@ impl SinkWithoutFilters {
         let fills_with_an_image = Rc::new(RefCell::new(0));
         let sink = Self {
             inner: VelloCpuSceneSink::new(width, height),
+            blend_layers: true,
             aliased_edges: true,
             fills_with_an_image: fills_with_an_image.clone(),
             aliased_calls: Rc::new(RefCell::new(0)),
@@ -186,6 +188,7 @@ impl SinkWithoutFilters {
         let aliased_calls = Rc::new(RefCell::new(0));
         let sink = Self {
             inner: VelloCpuSceneSink::new(width, height),
+            blend_layers: true,
             aliased_edges: false,
             fills_with_an_image: Rc::new(RefCell::new(0)),
             aliased_calls: aliased_calls.clone(),
@@ -206,6 +209,7 @@ impl IVelloSceneSink for SinkWithoutFilters {
     }
     fn capabilities(&self) -> VelloSceneCapabilities {
         VelloSceneCapabilities {
+            blend_layers: self.blend_layers,
             aliased_edges: self.aliased_edges,
             aliased_rectangles: self.aliased_edges,
             ..self.inner.capabilities()
@@ -268,6 +272,43 @@ impl IVelloSceneSink for SinkWithoutFilters {
 
 fn cpu_sink(width: u16, height: u16) -> Box<dyn IVelloSceneSink> {
     Box::new(VelloCpuSceneSink::new(width, height))
+}
+
+#[test]
+fn compositing_layer_unsupported_sink_keeps_existing_opacity_transform_and_clip() {
+    use ferroui_base::media::imaging::BitmapBlendingMode;
+    use ferroui_base::{FerroLocator, Matrix};
+
+    let scope = FerroLocator::enter_scope();
+    FerroLocator::current_mutable().bind_to_self(Rc::new(VelloOptions {
+        use_opacity_save_layer: false, ..VelloOptions::default()
+    }));
+    let sink = SinkWithoutFilters {
+        inner: VelloCpuSceneSink::new(100, 100),
+        blend_layers: false,
+        aliased_edges: true,
+        fills_with_an_image: Rc::new(RefCell::new(0)),
+        aliased_calls: Rc::new(RefCell::new(0)),
+    };
+    let rendered = draw_into(Box::new(sink), |context| {
+        context.push_opacity(0.5, None);
+        let transform = Matrix::create_translation(10.0, 10.0);
+        context.set_transform(transform);
+        context.push_clip(Rect::new(0.0, 0.0, 20.0, 20.0));
+        assert!(!context.try_push_compositing_layer(
+            BitmapBlendingMode::Multiply, 0.25, Rect::new(0.0, 0.0, 40.0, 40.0),
+        ));
+        assert_eq!(context.transform(), transform);
+        context.draw_rectangle(Some(&solid(Colors::RED)), None, rect(0.0, 0.0, 40.0, 40.0), &no_shadows());
+        context.pop_clip();
+        context.pop_opacity();
+        context.set_transform(Matrix::IDENTITY);
+        context.draw_rectangle(Some(&solid(Colors::BLUE)), None, rect(0.0, 0.0, 5.0, 5.0), &no_shadows());
+    });
+    assert_eq!(rendered.pixel(15, 15), (127, 0, 0, 127));
+    assert_eq!(rendered.pixel(45, 15), TRANSPARENT);
+    assert_eq!(rendered.pixel(2, 2), BLUE);
+    scope.dispose();
 }
 
 // ---------------------------------------------------------------------------

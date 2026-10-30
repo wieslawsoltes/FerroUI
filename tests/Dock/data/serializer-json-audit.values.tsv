@@ -1,0 +1,10 @@
+point-readonly-source-default-construction	1
+point-write-getters-no-reference-id	1
+point-readonly-input-values-skipped	1
+manager-read-constructor-retains-enabled-default	1
+manager-shared-original-instance	1
+manager-shared-original-mutation	1
+flags-undefined-signed-bits-retained	1
+flags-default-format-is-numeric	1
+nullable-point-source-null	1
+flags-independent-of-int32-codec	1

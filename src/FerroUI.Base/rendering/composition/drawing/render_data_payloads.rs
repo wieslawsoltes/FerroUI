@@ -1,5 +1,6 @@
 use super::RenderDataOpcode;
 use crate::media::{RenderOptions, TextOptions};
+use crate::media::imaging::BitmapBlendingMode;
 use crate::rendering::composition::transport::{BatchValue, BatchValueReader};
 use crate::{Matrix, Point, Rect, RoundedRect};
 
@@ -173,3 +174,14 @@ pub struct PushEffectPayload {
 }
 
 render_data_payload!(PushEffectPayload => PushEffect { effect: i32, bounds: Rect });
+
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct PushCompositingLayerPayload {
+    pub blend: BitmapBlendingMode,
+    pub opacity: f64,
+    pub bounds: Rect,
+}
+
+render_data_payload!(PushCompositingLayerPayload => PushCompositingLayer {
+    blend: BitmapBlendingMode, opacity: f64, bounds: Rect,
+});

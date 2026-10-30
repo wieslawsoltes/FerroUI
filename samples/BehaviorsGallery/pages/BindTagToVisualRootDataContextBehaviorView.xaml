@@ -13,10 +13,7 @@
   <StackPanel Spacing="5" HorizontalAlignment="Center">
     <Button x:Name="IncrementButton" Content="Increment Count" />
     <TextBlock Text="{Binding Count, StringFormat={}Count: {0}}" />
-    <!-- Deviation (DEVIATIONS.md, Behaviors gallery): the items of the view model are an
-         enumerable without an indexer for markup (`Items[0]`); the code-behind sets the data
-         context of the text block to the first item. -->
-    <TextBlock x:Name="ItemText"
+    <TextBlock DataContext="{Binding Items[0]}"
                Text="{Binding $self.((vm:MainWindowViewModel)Tag).Count}"
                x:DataType="vm:ItemViewModel">
       <Interaction.Behaviors>

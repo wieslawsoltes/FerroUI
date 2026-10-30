@@ -233,6 +233,10 @@ impl IResourceNode for StyleResourceProvider {
 }
 
 impl IResourceProvider for StyleResourceProvider {
+    fn as_any(&self) -> Option<&dyn std::any::Any> {
+        Some(self)
+    }
+
     fn owner(&self) -> Option<ResourceHostRef> {
         self.provider().owner()
     }

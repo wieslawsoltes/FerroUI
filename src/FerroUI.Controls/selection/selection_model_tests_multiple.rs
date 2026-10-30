@@ -237,6 +237,66 @@ mod no_source {
         assert_eq!(selected_item_raised.get(), 1);
         assert_eq!(selected_items_raised.get(), 1);
     }
+
+    /// Runs `test` on a thread of its own and fails when it does not finish within ten
+    /// seconds: a guard for a test that hung before its fix.
+    fn finishes_in_time(test: impl FnOnce() + Send + 'static) {
+        let (done, finished) = std::sync::mpsc::channel();
+        let thread = std::thread::spawn(move || {
+            test();
+            let _ = done.send(());
+        });
+        match finished.recv_timeout(std::time::Duration::from_secs(10)) {
+            Ok(()) => thread.join().unwrap(),
+            Err(std::sync::mpsc::RecvTimeoutError::Disconnected) => {
+                std::panic::resume_unwind(thread.join().expect_err("the test thread panicked"))
+            }
+            Err(std::sync::mpsc::RecvTimeoutError::Timeout) => panic!("the test did not finish within ten seconds"),
+        }
+    }
+
+    // Not from upstream (DEVIATIONS.md, Selection): `SelectAll` before a source is assigned
+    // selected the range 0..i32::MAX, and enumerating the selection of the event never
+    // finished.
+    #[test]
+    fn select_all_without_a_source_finishes_and_selects_nothing() {
+        finishes_in_time(|| {
+            let target = create_target(false);
+            let raised = counter();
+            let r = raised.clone();
+            target.selection_changed(move |e| {
+                // What the selecting controls do with the event: enumerate the selection.
+                let _ = e.selected_indexes().to_vec();
+                let _ = e.selected_items().to_vec();
+                inc(&r);
+            });
+
+            target.select_all();
+
+            assert_eq!(raised.get(), 0);
+            assert_eq!(target.selected_index(), -1);
+            assert!(target.selected_indexes().is_empty());
+
+            // A selection made before the source is still kept, and select all selects the
+            // items once there is a source.
+            target.select(1);
+            target.set_source(source(&["foo", "bar", "baz"]));
+            assert_eq!(target.selected_indexes().to_vec(), vec![1]);
+            target.select_all();
+            assert_eq!(target.selected_indexes().to_vec(), vec![0, 1, 2]);
+        });
+    }
+
+    #[test]
+    fn select_all_of_an_empty_source_selects_nothing() {
+        finishes_in_time(|| {
+            let target = create_target(false);
+            target.set_source(source(&[]));
+            target.select_all();
+            assert_eq!(target.selected_index(), -1);
+            assert!(target.selected_indexes().is_empty());
+        });
+    }
 }
 
 mod selected_index {

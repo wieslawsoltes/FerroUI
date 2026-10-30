@@ -1,0 +1,38 @@
+<!-- Ported from both pinned ProgressRing examples; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <TextBlock Text="An indeterminate ProgressRing" FontSize="18" />
+  <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
+    <ProgressRing x:Name="ProgressRing1" Width="60" Height="60"
+                        Margin="10,10,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"
+                        AutomationProperties.Name="Progress image"
+                        IsActive="{Binding #ProgressToggle.IsChecked, Mode=OneWay}" />
+    <StackPanel Grid.Column="1" Spacing="12">
+      <ToggleSwitch x:Name="ProgressToggle" Content="Progress Options" IsChecked="True"
+                    OffContent="Do work" OnContent="Working"
+                    AutomationProperties.Name="Progress Options" />
+      <TextBlock Text="Background color" />
+      <ComboBox x:Name="BackgroundComboBox1" Width="200" SelectedIndex="0"
+                AutomationProperties.Name="Indeterminate background color">
+        <x:String>Transparent</x:String><x:String>LightGray</x:String>
+      </ComboBox>
+    </StackPanel>
+  </Grid>
+  <TextBlock Text="A determinate ProgressRing" FontSize="18" />
+  <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
+    <StackPanel Orientation="Horizontal" Spacing="40">
+      <ProgressRing x:Name="ProgressRing2" Width="60" Height="60"
+                          IsIndeterminate="False" AutomationProperties.Name="Progress image" />
+      <NumberBox x:Name="ProgressValue" MinWidth="120" VerticalAlignment="Center"
+                       Header="Progress" Minimum="0" Maximum="100" Value="0"
+                       SpinButtonPlacementMode="Inline" AutomationProperties.Name="Progress amount" />
+    </StackPanel>
+    <StackPanel Grid.Column="1" Spacing="12">
+      <TextBlock Text="Background color" />
+      <ComboBox x:Name="BackgroundComboBox2" Width="200" SelectedIndex="0"
+                AutomationProperties.Name="Determinate background color">
+        <x:String>Transparent</x:String><x:String>LightGray</x:String>
+      </ComboBox>
+    </StackPanel>
+  </Grid>
+</StackPanel>

@@ -18,7 +18,7 @@ use crate::media::text_formatting::{
     TextLine, TextLineBreak, TextParagraphProperties, TextRunProperties,
 };
 use crate::media::{FlowDirection, TextAlignment, TextWrapping, Typeface};
-use crate::platform::{IFontManagerImpl, IPlatformRenderInterface, ITextShaperImpl};
+use crate::platform::{IFontFallbackMapper, IFontManagerImpl, IPlatformRenderInterface, ITextShaperImpl};
 use crate::rendering::testing::{DrawingLog, MockPlatformRenderInterface};
 use crate::reactive::IDisposable;
 use crate::FerroLocator;
@@ -92,9 +92,19 @@ impl TextTestScope {
 
     /// A scope with the given fonts; the first one is the default family.
     pub fn with_fonts(fonts: Vec<TestFont>) -> Self {
+        Self::with_font_backend(TestFontManagerImpl::new(fonts), false)
+    }
+
+    /// A fresh font manager with a controlled range mapper. This deliberately
+    /// replaces any inherited font manager so the tested capability is active.
+    pub fn with_fonts_and_fallback_mapper(fonts: Vec<TestFont>, mapper: Rc<dyn IFontFallbackMapper>) -> Self {
+        Self::with_font_backend(TestFontManagerImpl::new(fonts).with_fallback_mapper(mapper), true)
+    }
+
+    fn with_font_backend(backend: TestFontManagerImpl, replace_inherited_manager: bool) -> Self {
         let scope = FerroLocator::enter_scope();
 
-        let font_manager = Rc::new(TestFontManagerImpl::new(fonts));
+        let font_manager = Rc::new(backend);
         let shaper = Rc::new(TestTextShaperImpl::new());
 
         let locator = FerroLocator::current_mutable();
@@ -106,7 +116,13 @@ impl TextTestScope {
         // Load every font into the system font collection, as an installed
         // font set is: the character fallback first considers the fonts the
         // collection already knows before it asks the platform.
-        let manager = crate::media::FontManager::current();
+        let manager = if replace_inherited_manager {
+            let manager = crate::media::FontManager::new(font_manager.clone());
+            locator.bind::<crate::media::FontManager>().to_constant(manager.clone());
+            manager
+        } else {
+            crate::media::FontManager::current()
+        };
         for family in font_manager.get_installed_font_family_names(false) {
             let _ = manager.try_get_glyph_typeface(&Typeface::from_name(&family));
         }

@@ -1,0 +1,8 @@
+<StackPanel xmlns="https://github.com/ferroui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:model="clr-namespace:FerroDock.Model.Controls;assembly=FerroDock.Model"
+ x:DataType="model:IRootDock">
+ <TextBlock Text="{Binding Windows.Count}" />
+ <ContentControl Content="{Binding Windows[0]}" />
+ <ItemsControl ItemsSource="{Binding Windows}" />
+</StackPanel>

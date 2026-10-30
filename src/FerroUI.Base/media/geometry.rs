@@ -161,6 +161,13 @@ impl Geometry {
         Ok(StreamGeometry::parse(s)?.upcast())
     }
 
+    /// Exports the backend's actual fill and stroke curves, including this
+    /// geometry's transform, without flattening Beziers into line segments.
+    /// Returns `None` when the active backend cannot expose its path data.
+    pub fn try_get_path_data(&self) -> Option<crate::media::GeometryPathData> {
+        self.platform_impl()?.try_get_path_data()
+    }
+
     /// Gets the geometry's bounding rectangle with the specified pen.
     pub fn get_render_bounds(&self, pen: &dyn IPen) -> Rect {
         self.platform_impl().map(|g| g.get_render_bounds(Some(pen))).unwrap_or_default()

@@ -1,0 +1,14 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:f="clr-namespace:FerroDock.Model.ReactiveUI;assembly=FerroDock.Model.ReactiveUI"
+ xmlns:w="clr-namespace:FerroDock.Model.ReactiveUI.Core;assembly=FerroDock.Model.ReactiveUI"
+ xmlns:c="clr-namespace:FerroDock.Model.ReactiveUI.Controls;assembly=FerroDock.Model.ReactiveUI">
+ <StackPanel.Resources>
+  <f:Factory x:Key="engine" HideToolsOnClose="True" />
+  <w:DockWindow x:Key="parent" Title="Parent window" />
+  <c:RootDock x:Key="owner" Title="Owner layout" />
+ </StackPanel.Resources>
+ <ContentControl Content="{StaticResource engine}" />
+ <ContentControl Content="{StaticResource parent}" />
+ <ContentControl Content="{StaticResource owner}" />
+ <ContentControl><w:DockWindow Title="Child window" Factory="{StaticResource engine}" ParentWindow="{StaticResource parent}" Owner="{StaticResource owner}" Layout="{StaticResource owner}" /></ContentControl>
+</StackPanel>

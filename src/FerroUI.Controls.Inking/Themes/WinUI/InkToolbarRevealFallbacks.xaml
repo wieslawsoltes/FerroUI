@@ -1,0 +1,29 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/Materials/Reveal/RevealBrush_themeresources.xaml
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+  The two Reveal brushes the resources of the toolbar name, as the plain brushes they are in
+  WinUI 3. The WinUI theme waives the Reveal brushes it has no use for (scripts/winui-theme/waivers.json),
+  so the toolbar keeps these itself.
+  WinUI: SystemControlHighlightListMediumRevealListLowBackgroundBrush, SystemControlTransparentRevealListLowBorderBrush
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:winui="using:FerroUI.Themes.WinUI"
+                    x:ClassModifier="internal">
+  <ResourceDictionary.ThemeDictionaries>
+    <ResourceDictionary x:Key="Default">
+      <SolidColorBrush x:Key="SystemControlHighlightListMediumRevealListLowBackgroundBrush" Color="{StaticResource SystemListMediumColor}" />
+      <SolidColorBrush x:Key="SystemControlTransparentRevealListLowBorderBrush" Color="Transparent" />
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="Light">
+      <SolidColorBrush x:Key="SystemControlHighlightListMediumRevealListLowBackgroundBrush" Color="{StaticResource SystemListMediumColor}" />
+      <SolidColorBrush x:Key="SystemControlTransparentRevealListLowBorderBrush" Color="Transparent" />
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="{x:Static winui:WinUITheme.HighContrast}">
+      <SolidColorBrush x:Key="SystemControlHighlightListMediumRevealListLowBackgroundBrush" Color="{DynamicResource SystemColorHighlightColor}" />
+      <SolidColorBrush x:Key="SystemControlTransparentRevealListLowBorderBrush" Color="Transparent" />
+    </ResourceDictionary>
+  </ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>

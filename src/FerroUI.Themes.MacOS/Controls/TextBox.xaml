@@ -1,0 +1,428 @@
+<!--
+  macOS 26 control theme, adapted from the FerroUI WinUI template foundation.
+  Foundation: microsoft-ui-xaml 7e4b0c2096be402f51cc8f7d203ebf67cff183d0.
+  Copyright (c) Microsoft Corporation. MIT License; see NOTICE.md.
+  macOS geometry and states are theme calibrations against Apple's WWDC25
+  AppKit design guidance; exact native rendering remains a comparison gate.
+  FerroUI template parts, bindings and routed interaction are preserved.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <StackPanel Spacing="20">
+        <TextBox>Text</TextBox>
+        <TextBox PlaceholderText="Placeholder" />
+        <TextBox IsEnabled="False">Disabled</TextBox>
+      </StackPanel>
+    </Border>
+  </Design.PreviewWith>
+
+  <!-- DeleteButtonStyle of the template of DefaultTextBoxStyle. -->
+  <ControlTheme x:Key="TextBoxDeleteButtonStyle" TargetType="Button">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="ButtonLayoutGrid"
+                Margin="{DynamicResource TextBoxInnerButtonMargin}"
+                BorderBrush="{DynamicResource TextControlButtonBorderBrush}"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                Background="{DynamicResource TextControlButtonBackground}"
+                BackgroundSizing="{TemplateBinding BackgroundSizing}"
+                CornerRadius="{TemplateBinding CornerRadius}">
+          <!-- Original circular clear glyph; independent of platform symbol fonts. -->
+          <Path x:Name="GlyphElement"
+                Fill="{DynamicResource TextControlButtonForeground}"
+                Data="F0 M 7,0 A 7,7 0 1 1 7,14 A 7,7 0 1 1 7,0 Z M 4.25,3.25 L 7,6 L 9.75,3.25 L 10.75,4.25 L 8,7 L 10.75,9.75 L 9.75,10.75 L 7,8 L 4.25,10.75 L 3.25,9.75 L 6,7 L 3.25,4.25 Z"
+                Stretch="Uniform"
+                Width="13"
+                Height="13"
+                VerticalAlignment="Center"
+                HorizontalAlignment="Center" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- PointerOver -->
+    <Style Selector="^:pointerover">
+      <Style Selector="^ /template/ Border#ButtonLayoutGrid">
+        <Setter Property="Background" Value="{DynamicResource TextControlButtonBackgroundPointerOver}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource TextControlButtonBorderBrushPointerOver}" />
+      </Style>
+      <Style Selector="^ /template/ Path#GlyphElement">
+        <Setter Property="Fill" Value="{DynamicResource TextControlButtonForegroundPointerOver}" />
+      </Style>
+    </Style>
+    <!-- Pressed -->
+    <Style Selector="^:pressed">
+      <Style Selector="^ /template/ Border#ButtonLayoutGrid">
+        <Setter Property="Background" Value="{DynamicResource TextControlButtonBackgroundPressed}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource TextControlButtonBorderBrushPressed}" />
+      </Style>
+      <Style Selector="^ /template/ Path#GlyphElement">
+        <Setter Property="Fill" Value="{DynamicResource TextControlButtonForegroundPressed}" />
+      </Style>
+    </Style>
+    <!-- Disabled -->
+    <Style Selector="^:disabled /template/ Border#ButtonLayoutGrid">
+      <Setter Property="Opacity" Value="0" />
+    </Style>
+  </ControlTheme>
+
+  <!-- RevealButtonStyle of the template of DefaultPasswordBoxStyle. -->
+  <ControlTheme x:Key="PasswordBoxRevealButtonStyle" TargetType="ToggleButton">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="ButtonLayoutGrid"
+                Margin="{DynamicResource TextBoxInnerButtonMargin}"
+                BorderBrush="{DynamicResource TextControlButtonBorderBrush}"
+                BackgroundSizing="InnerBorderEdge"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                Background="{DynamicResource TextControlButtonBackground}"
+                CornerRadius="{TemplateBinding CornerRadius}">
+          <!-- F78D at PasswordBoxIconFontSize (12 px): the glyph is drawn at the size of its ink. -->
+          <Path x:Name="GlyphElement"
+                Fill="{DynamicResource TextControlButtonForeground}"
+                Data="{StaticResource GlyphGeometryF78D}"
+                Stretch="Uniform"
+                Width="11"
+                VerticalAlignment="Center"
+                HorizontalAlignment="Center" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- PointerOver -->
+    <Style Selector="^:pointerover">
+      <Style Selector="^ /template/ Border#ButtonLayoutGrid">
+        <Setter Property="Background" Value="{DynamicResource TextControlButtonBackgroundPointerOver}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource TextControlButtonBorderBrushPointerOver}" />
+      </Style>
+      <Style Selector="^ /template/ Path#GlyphElement">
+        <Setter Property="Fill" Value="{DynamicResource TextControlButtonForegroundPointerOver}" />
+      </Style>
+    </Style>
+    <!-- Pressed, CheckedPressed, IndeterminatePressed -->
+    <Style Selector="^:pressed">
+      <Style Selector="^ /template/ Border#ButtonLayoutGrid">
+        <Setter Property="Background" Value="{DynamicResource TextControlButtonBackgroundPressed}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource TextControlButtonBorderBrushPressed}" />
+      </Style>
+      <Style Selector="^ /template/ Path#GlyphElement">
+        <Setter Property="Fill" Value="{DynamicResource TextControlButtonForegroundPressed}" />
+      </Style>
+    </Style>
+    <!-- Disabled -->
+    <Style Selector="^:disabled /template/ Border#ButtonLayoutGrid">
+      <Setter Property="Opacity" Value="0" />
+    </Style>
+  </ControlTheme>
+
+  <!-- The context flyout of a text box: the commands TextCommandBarFlyout shows for a TextBox
+       (TextCommandBarFlyout::GetTextBoxButtonsToAdd), each while the text box can do it. -->
+  <MenuFlyout x:Key="TextBoxContextFlyout">
+    <MenuItem Header="{DynamicResource StringTextFlyoutCutText}"
+              Command="{Binding $parent[TextBox].Cut}"
+              IsEnabled="{Binding $parent[TextBox].CanCut}"
+              IsVisible="{Binding $parent[TextBox].CanCut}"
+              InputGesture="{x:Static TextBox.CutGesture}">
+      <MenuItem.Icon>
+        <PathIcon Data="{StaticResource GlyphGeometryE8C6}" />
+      </MenuItem.Icon>
+    </MenuItem>
+    <MenuItem Header="{DynamicResource StringTextFlyoutCopyText}"
+              Command="{Binding $parent[TextBox].Copy}"
+              IsEnabled="{Binding $parent[TextBox].CanCopy}"
+              IsVisible="{Binding $parent[TextBox].CanCopy}"
+              InputGesture="{x:Static TextBox.CopyGesture}">
+      <MenuItem.Icon>
+        <PathIcon Data="{StaticResource GlyphGeometryE8C8}" />
+      </MenuItem.Icon>
+    </MenuItem>
+    <MenuItem Header="{DynamicResource StringTextFlyoutPasteText}"
+              Command="{Binding $parent[TextBox].Paste}"
+              IsEnabled="{Binding $parent[TextBox].CanPaste}"
+              IsVisible="{Binding $parent[TextBox].CanPaste}"
+              InputGesture="{x:Static TextBox.PasteGesture}">
+      <MenuItem.Icon>
+        <PathIcon Data="{StaticResource GlyphGeometryE77F}" />
+      </MenuItem.Icon>
+    </MenuItem>
+    <MenuItem Header="{DynamicResource StringTextFlyoutUndoText}"
+              Command="{Binding $parent[TextBox].Undo}"
+              IsEnabled="{Binding $parent[TextBox].CanUndo}"
+              IsVisible="{Binding $parent[TextBox].CanUndo}">
+      <MenuItem.Icon>
+        <PathIcon Data="{StaticResource GlyphGeometryE7A7}" />
+      </MenuItem.Icon>
+    </MenuItem>
+    <MenuItem Header="{DynamicResource StringTextFlyoutRedoText}"
+              Command="{Binding $parent[TextBox].Redo}"
+              IsEnabled="{Binding $parent[TextBox].CanRedo}"
+              IsVisible="{Binding $parent[TextBox].CanRedo}">
+      <MenuItem.Icon>
+        <PathIcon Data="{StaticResource GlyphGeometryE7A6}" />
+      </MenuItem.Icon>
+    </MenuItem>
+    <MenuItem Header="{DynamicResource StringTextFlyoutSelectAllText}"
+              Command="{Binding $parent[TextBox].SelectAll}"
+              IsVisible="{Binding $parent[TextBox].Text, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+  </MenuFlyout>
+
+  <!-- The context flyout of a password box (TextCommandBarFlyout::GetPasswordBoxButtonsToAdd). -->
+  <MenuFlyout x:Key="PasswordBoxContextFlyout">
+    <MenuItem Header="{DynamicResource StringTextFlyoutPasteText}"
+              Command="{Binding $parent[TextBox].Paste}"
+              IsEnabled="{Binding $parent[TextBox].CanPaste}"
+              IsVisible="{Binding $parent[TextBox].CanPaste}"
+              InputGesture="{x:Static TextBox.PasteGesture}">
+      <MenuItem.Icon>
+        <PathIcon Data="{StaticResource GlyphGeometryE77F}" />
+      </MenuItem.Icon>
+    </MenuItem>
+    <MenuItem Header="{DynamicResource StringTextFlyoutSelectAllText}"
+              Command="{Binding $parent[TextBox].SelectAll}"
+              IsVisible="{Binding $parent[TextBox].Text, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+  </MenuFlyout>
+
+  <ControlTheme x:Key="DefaultTextBoxStyle" TargetType="TextBox">
+    <!-- The line of a single-line box centred in its height. WinUI places it by the padding and
+         the line height of Segoe UI, which fill MinHeight; with another font (macOS, Linux) the
+         line was higher than the middle. A box of several lines keeps its text at the top (below).
+         Deviation (winui-theme/DEVIATIONS.md, G-28). -->
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Foreground" Value="{DynamicResource TextControlForeground}" />
+    <Setter Property="Background" Value="{DynamicResource TextControlBackground}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}" />
+    <Setter Property="SelectionBrush" Value="{DynamicResource TextControlSelectionHighlightColor}" />
+    <Setter Property="CaretBrush" Value="{DynamicResource TextControlForegroundFocused}" />
+    <Setter Property="PlaceholderForeground" Value="{DynamicResource TextControlPlaceholderForeground}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource TextControlBorderThemeThickness}" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
+    <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Hidden" />
+    <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Hidden" />
+    <Setter Property="ScrollViewer.IsDeferredScrollingEnabled" Value="False" />
+    <Setter Property="MinHeight" Value="{DynamicResource MacOSControlHeight}" />
+    <Setter Property="MinWidth" Value="{DynamicResource TextControlThemeMinWidth}" />
+    <Setter Property="Padding" Value="{DynamicResource TextControlThemePadding}" />
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border IsHitTestVisible="False" Margin="-3" BorderThickness="3"
+                BorderBrush="{DynamicResource MacOSFocusBrush}"
+                CornerRadius="{DynamicResource MacOSControlCornerRadius}" />
+      </FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="CornerRadius" Value="{DynamicResource MacOSControlCornerRadius}" />
+    <Setter Property="BackgroundSizing" Value="InnerBorderEdge" />
+    <Setter Property="ContextFlyout" Value="{StaticResource TextBoxContextFlyout}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <DataValidationErrors>
+          <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto">
+            <Border x:Name="BorderElement"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="5"
+                    Background="{TemplateBinding Background}"
+                    BackgroundSizing="{TemplateBinding BackgroundSizing}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="{TemplateBinding CornerRadius}"
+                    MinWidth="{TemplateBinding MinWidth}"
+                    MinHeight="{TemplateBinding MinHeight}"
+                    TemplatedControl.IsTemplateFocusTarget="True">
+              <Border.Transitions>
+                <Transitions>
+                  <BrushTransition Property="Background" Duration="{DynamicResource MacOSMotionFastDuration}" />
+                  <BrushTransition Property="BorderBrush" Duration="{DynamicResource MacOSMotionFastDuration}" />
+                </Transitions>
+              </Border.Transitions>
+            </Border>
+            <Border x:Name="MacOSPointerFocusRing" Grid.ColumnSpan="5"
+                    Margin="-3" BorderThickness="3" Opacity="0"
+                    BorderBrush="{DynamicResource MacOSFocusBrush}"
+                    CornerRadius="{TemplateBinding CornerRadius}"
+                    IsHitTestVisible="False">
+              <Border.Transitions>
+                <Transitions>
+                  <DoubleTransition Property="Opacity" Duration="{DynamicResource MacOSMotionFastDuration}" />
+                </Transitions>
+              </Border.Transitions>
+            </Border>
+            <!-- InnerLeftContent of FerroUI's text box. -->
+            <ContentPresenter x:Name="InnerLeftContentPresenter"
+                              IsVisible="{TemplateBinding InnerLeftContent, Converter={x:Static ObjectConverters.IsNotNull}}"
+                              Grid.Column="0"
+                              Margin="{TemplateBinding BorderThickness}"
+                              Content="{TemplateBinding InnerLeftContent}"
+                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+            <ScrollViewer x:Name="PART_ScrollViewer"
+                          Grid.Column="1"
+                          HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}"
+                          VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}"
+                          IsDeferredScrollingEnabled="{TemplateBinding (ScrollViewer.IsDeferredScrollingEnabled)}"
+                          Margin="{TemplateBinding BorderThickness}"
+                          Padding="{TemplateBinding Padding}"
+                          Foreground="{TemplateBinding Foreground}"
+                          Focusable="False">
+              <TextPresenter x:Name="PART_TextPresenter"
+                             Text="{TemplateBinding Text, Mode=TwoWay}"
+                             CaretBlinkInterval="{TemplateBinding CaretBlinkInterval}"
+                             CaretIndex="{TemplateBinding CaretIndex}"
+                             SelectionStart="{TemplateBinding SelectionStart}"
+                             SelectionEnd="{TemplateBinding SelectionEnd}"
+                             TextAlignment="{TemplateBinding TextAlignment}"
+                             TextWrapping="{TemplateBinding TextWrapping}"
+                             LineHeight="{TemplateBinding LineHeight}"
+                             LetterSpacing="{TemplateBinding LetterSpacing}"
+                             PasswordChar="{TemplateBinding PasswordChar}"
+                             RevealPassword="{TemplateBinding RevealPassword}"
+                             SelectionBrush="{TemplateBinding SelectionBrush}"
+                             SelectionForegroundBrush="{TemplateBinding SelectionForegroundBrush}"
+                             CaretBrush="{TemplateBinding CaretBrush}"
+                             HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                             VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+              <ScrollViewer.Styles>
+                <Style Selector="ScrollContentPresenter#PART_ContentPresenter">
+                  <Setter Property="Cursor" Value="IBeam" />
+                </Style>
+              </ScrollViewer.Styles>
+            </ScrollViewer>
+            <TextBlock x:Name="PlaceholderTextContentPresenter"
+                       Grid.Column="1"
+                       Grid.ColumnSpan="2"
+                       VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                       Foreground="{TemplateBinding PlaceholderForeground}"
+                       Margin="{TemplateBinding BorderThickness}"
+                       Padding="{TemplateBinding Padding}"
+                       Text="{TemplateBinding PlaceholderText}"
+                       TextAlignment="{TemplateBinding TextAlignment}"
+                       TextWrapping="{TemplateBinding TextWrapping}"
+                       IsHitTestVisible="False">
+              <TextBlock.IsVisible>
+                <MultiBinding Converter="{x:Static BoolConverters.And}">
+                  <Binding ElementName="PART_TextPresenter" Path="PreeditText" Converter="{x:Static StringConverters.IsNullOrEmpty}" />
+                  <Binding RelativeSource="{RelativeSource TemplatedParent}" Path="Text" Converter="{x:Static StringConverters.IsNullOrEmpty}" />
+                </MultiBinding>
+              </TextBlock.IsVisible>
+            </TextBlock>
+            <Button x:Name="DeleteButton"
+                    Grid.Column="2"
+                    Theme="{StaticResource TextBoxDeleteButtonStyle}"
+                    Command="{Binding $parent[TextBox].Clear}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="{TemplateBinding CornerRadius}"
+                    Padding="{DynamicResource HelperButtonThemePadding}"
+                    Focusable="False"
+                    IsVisible="False"
+                    FontSize="{TemplateBinding FontSize}"
+                    Width="24"
+                    VerticalAlignment="Stretch" />
+            <!-- RevealButton of DefaultPasswordBoxStyle, also shown by the style class
+                 revealPasswordButton. -->
+            <ToggleButton x:Name="RevealButton"
+                          Grid.Column="3"
+                          Theme="{StaticResource PasswordBoxRevealButtonStyle}"
+                          IsChecked="{TemplateBinding RevealPassword, Mode=TwoWay}"
+                          BorderThickness="{TemplateBinding BorderThickness}"
+                          CornerRadius="{TemplateBinding CornerRadius}"
+                          Padding="{DynamicResource HelperButtonThemePadding}"
+                          Focusable="False"
+                          IsVisible="False"
+                          FontSize="{TemplateBinding FontSize}"
+                          Width="24"
+                          VerticalAlignment="Stretch" />
+            <!-- InnerRightContent of FerroUI's text box. -->
+            <ContentPresenter x:Name="InnerRightContentPresenter"
+                              IsVisible="{TemplateBinding InnerRightContent, Converter={x:Static ObjectConverters.IsNotNull}}"
+                              Grid.Column="4"
+                              Margin="{TemplateBinding BorderThickness}"
+                              Content="{TemplateBinding InnerRightContent}"
+                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+          </Grid>
+        </DataValidationErrors>
+      </ControlTemplate>
+    </Setter>
+    <!-- A box of several lines: its text at the top, as in WinUI (G-28). -->
+    <Style Selector="^[AcceptsReturn=True]">
+      <Setter Property="VerticalContentAlignment" Value="Top" />
+    </Style>
+
+    <!-- PointerOver -->
+    <Style Selector="^:pointerover">
+      <Setter Property="PlaceholderForeground" Value="{DynamicResource TextControlPlaceholderForegroundPointerOver}" />
+      <Style Selector="^ /template/ Border#BorderElement">
+        <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrushPointerOver}" />
+        <Setter Property="Background" Value="{DynamicResource TextControlBackgroundPointerOver}" />
+      </Style>
+      <Style Selector="^ /template/ ScrollViewer#PART_ScrollViewer">
+        <Setter Property="Foreground" Value="{DynamicResource TextControlForegroundPointerOver}" />
+      </Style>
+    </Style>
+    <!-- Focused -->
+    <Style Selector="^:focus">
+      <Setter Property="PlaceholderForeground" Value="{DynamicResource TextControlPlaceholderForegroundFocused}" />
+      <Style Selector="^ /template/ Border#BorderElement">
+        <Setter Property="Background" Value="{DynamicResource TextControlBackgroundFocused}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrushFocused}" />
+        <Setter Property="BorderThickness" Value="{DynamicResource TextControlBorderThemeThickness}" />
+      </Style>
+      <Style Selector="^ /template/ ScrollViewer#PART_ScrollViewer">
+        <Setter Property="Foreground" Value="{DynamicResource TextControlForegroundFocused}" />
+      </Style>
+    </Style>
+    <!-- Disabled -->
+    <Style Selector="^:disabled">
+      <Setter Property="PlaceholderForeground" Value="{DynamicResource TextControlPlaceholderForegroundDisabled}" />
+      <Style Selector="^ /template/ Border#BorderElement">
+        <Setter Property="Background" Value="{DynamicResource TextControlBackgroundDisabled}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrushDisabled}" />
+      </Style>
+      <Style Selector="^ /template/ ScrollViewer#PART_ScrollViewer">
+        <Setter Property="Foreground" Value="{DynamicResource TextControlForegroundDisabled}" />
+      </Style>
+    </Style>
+    <!-- A validation error (FerroUI's DataValidationErrors, which WinUI 3 does not have): the
+         border in the critical fill, as a WinUI application shows an error of a field. -->
+    <Style Selector="^:error /template/ Border#BorderElement">
+      <Setter Property="BorderBrush" Value="{DynamicResource SystemFillColorCriticalBrush}" />
+    </Style>
+    <!-- ButtonVisible of the group ButtonStates. -->
+    <Style Selector="^[AcceptsReturn=False][IsReadOnly=False][TextWrapping=NoWrap]:focus:not(TextBox:empty) /template/ Button#DeleteButton">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <!-- The style class clearButton of FerroUI's text box: the delete button while the box is
+         focused and not empty, whether or not its text wraps. -->
+    <Style Selector="^.clearButton[AcceptsReturn=False][IsReadOnly=False]:focus:not(TextBox:empty) /template/ Button#DeleteButton">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <!-- The style class revealPasswordButton of FerroUI's text box: the reveal button while the
+         box is not empty. -->
+    <Style Selector="^.revealPasswordButton[AcceptsReturn=False][IsReadOnly=False]:not(TextBox:empty) /template/ ToggleButton#RevealButton">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <!-- Text editing retains a focus ring for pointer focus as well as keyboard focus. -->
+    <Style Selector="^:focus:not(TextBox:focus-visible):not(TextBox:disabled) /template/ Border#MacOSPointerFocusRing">
+      <Setter Property="Opacity" Value="1" />
+    </Style>
+  </ControlTheme>
+
+  <!-- DefaultPasswordBoxStyle (PasswordBox_themeresources.xaml): a text box with the password
+       character of WinUI's PasswordBox, the reveal button instead of the delete button and the
+       context flyout of a password box. Its other setters and its states are those of
+       DefaultTextBoxStyle, as the source repeats them. -->
+  <ControlTheme x:Key="DefaultPasswordBoxStyle" TargetType="TextBox" BasedOn="{StaticResource DefaultTextBoxStyle}">
+    <Setter Property="PasswordChar" Value="&#x25CF;" />
+    <Setter Property="ContextFlyout" Value="{StaticResource PasswordBoxContextFlyout}" />
+    <!-- ButtonCollapsed: a password box has no delete button. -->
+    <Style Selector="^[AcceptsReturn=False][IsReadOnly=False][TextWrapping=NoWrap]:focus:not(TextBox:empty) /template/ Button#DeleteButton">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <!-- ButtonVisible (PasswordBox::CanInvokeRevealButton: focused, not empty). -->
+    <Style Selector="^[AcceptsReturn=False][IsReadOnly=False]:focus:not(TextBox:empty) /template/ ToggleButton#RevealButton">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type TextBox}" TargetType="TextBox" BasedOn="{StaticResource DefaultTextBoxStyle}" />
+</ResourceDictionary>

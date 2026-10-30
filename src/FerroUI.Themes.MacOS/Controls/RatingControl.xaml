@@ -1,0 +1,134 @@
+<!-- macOS 26 theme: the control theme of the WinUI theme (src/FerroUI.Themes.WinUI/Controls/RatingControl.xaml),
+     as docs/porting/macos26-theme.md derives every control theme of the WinUI theme; the resources are this theme's. -->
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/RatingControl/RatingControl.xaml (the implicit style of RatingControl)
+    controls/dev/RatingControl/RatingControl_themeresources.xaml (the item templates and the default
+    item info; its resources are Resources/RatingControl_themeresources.xaml)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  Translation notes (docs/porting/winui-theme.md, section 4):
+  - FerroUI's RatingControl is WinUI's RatingControl (a WinUI control in ferroui-controls,
+    docs/porting/winui-controls.md). The parts keep WinUI's names: RatingBackgroundStackPanel and
+    RatingForegroundStackPanel, which the control fills with its items, and Caption.
+  - WinUI's control creates its items from the DataTemplates BackgroundGlyphDefaultTemplate,
+    ForegroundGlyphDefaultTemplate, BackgroundImageDefaultTemplate and ForegroundImageDefaultTemplate,
+    which it looks up in the resources of the application, and reads the resources
+    RatingControlFontSizeForRendering and RatingControlItemSpacing in code. FerroUI's control looks
+    up no resource: it creates the text blocks and images of the items itself, and the template
+    gives the stack panels what the item templates and the resources give in WinUI: the font size
+    RatingControlFontSizeForRendering and the spacing RatingControlItemSpacing of the items, and,
+    for the background panel, the foreground RatingControlUnselectedForeground of
+    BackgroundGlyphDefaultTemplate. The -8,-8 margins of the item templates, which compensate the
+    scale of the items in WinUI's layout, have no counterpart in the layout of the port (each item
+    is drawn at half its size in a cell of half its width).
+    WinUI: BackgroundGlyphDefaultTemplate, ForegroundGlyphDefaultTemplate, BackgroundImageDefaultTemplate, ForegroundImageDefaultTemplate
+  - The default ItemInfo of the style, the resource MUX_RatingControlDefaultFontInfo (the glyphs
+    E735 and E734), is created by each control, so that a change of the glyphs of one control
+    changes no other; the style does not set it.
+    WinUI: Default/MUX_RatingControlDefaultFontInfo, Light/MUX_RatingControlDefaultFontInfo, HighContrast/MUX_RatingControlDefaultFontInfo
+  - CommonStates are the pseudo-classes the control sets: Placeholder is :placeholder,
+    PointerOverPlaceholder :pointeroverplaceholder, PointerOverUnselected :pointeroverunselected,
+    Set :set, PointerOverSet :pointeroverset and Disabled :disabled (written last: WinUI goes to
+    Disabled after the other states). They set the foreground of ForegroundContentPresenter, which
+    the glyphs of the foreground items inherit.
+  - The caption: WinUI's control sets its left margin to 12 less the spacing of the items that the
+    item templates make (c_captionSpacing); the cells of the items of the port have none, so the
+    margin is 12,0,20,0. The TranslateTransforms of the stack panels, which the control sets to
+    centre the items vertically in WinUI, are left out: the cells of the items are as high as the
+    rendering font size, the MinHeight of the control.
+  - The composition animations of the scale of the items (ApplyScaleExpressionAnimation) are a
+    scale the control sets as the pointer moves. UseSystemFocusVisuals with FocusVisualMargin
+    -8,-7,-8,0 is the focus adorner with that margin (section 4.6). IsFocusEngagementEnabled has no
+    counterpart. AutomationProperties.AccessibilityView and AutomationProperties.Name of the caption
+    are left out.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <StackPanel Spacing="20">
+        <RatingControl />
+        <RatingControl Value="3" Caption="Your rating" />
+        <RatingControl PlaceholderValue="3.5" Caption="Community rating" />
+        <RatingControl Value="2" IsEnabled="False" />
+      </StackPanel>
+    </Border>
+  </Design.PreviewWith>
+
+  <!-- The implicit style of RatingControl (it has no key in WinUI). -->
+  <ControlTheme x:Key="{x:Type RatingControl}" TargetType="RatingControl">
+    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="Foreground" Value="{DynamicResource RatingControlCaptionForeground}" />
+    <Setter Property="FontFamily" Value="{DynamicResource SymbolThemeFontFamily}" />
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border Margin="-8,-7,-8,0"
+                BorderThickness="2"
+                BorderBrush="{DynamicResource SystemControlFocusVisualPrimaryBrush}"
+                CornerRadius="{DynamicResource ControlCornerRadius}">
+          <Border BorderThickness="1"
+                  BorderBrush="{DynamicResource SystemControlFocusVisualSecondaryBrush}"
+                  CornerRadius="{DynamicResource ControlCornerRadius}" />
+        </Border>
+      </FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid x:Name="LayoutRoot" Background="{TemplateBinding Background}">
+          <StackPanel x:Name="CaptionStackPanel" Orientation="Horizontal" Margin="-20,-20,-20,-20">
+            <StackPanel x:Name="RatingBackgroundStackPanel"
+                        Orientation="Horizontal"
+                        Background="Transparent"
+                        Margin="20,20,0,20"
+                        Spacing="{StaticResource RatingControlItemSpacing}"
+                        TextElement.FontSize="{StaticResource RatingControlFontSizeForRendering}"
+                        TextElement.Foreground="{DynamicResource RatingControlUnselectedForeground}" />
+            <TextBlock x:Name="Caption"
+                       Theme="{StaticResource CaptionTextBlockStyle}"
+                       Margin="12,0,20,0"
+                       TextLineBounds="Tight"
+                       FontSize="12"
+                       Foreground="{TemplateBinding Foreground}"
+                       VerticalAlignment="Center"
+                       IsHitTestVisible="False"
+                       Text="{TemplateBinding Caption}" />
+          </StackPanel>
+          <!-- The margin is on the stack panel, which the content presenter does not clip. -->
+          <ContentPresenter x:Name="ForegroundContentPresenter" IsHitTestVisible="False">
+            <StackPanel Orientation="Horizontal" Margin="-40,-40,-40,-40">
+              <StackPanel x:Name="RatingForegroundStackPanel"
+                          Orientation="Horizontal"
+                          IsHitTestVisible="False"
+                          Margin="40,40,40,40"
+                          Spacing="{StaticResource RatingControlItemSpacing}"
+                          TextElement.FontSize="{StaticResource RatingControlFontSizeForRendering}" />
+            </StackPanel>
+          </ContentPresenter>
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- CommonStates -->
+    <Style Selector="^:placeholder /template/ ContentPresenter#ForegroundContentPresenter">
+      <Setter Property="Foreground" Value="{DynamicResource RatingControlPlaceholderForeground}" />
+    </Style>
+    <Style Selector="^:pointeroverplaceholder /template/ ContentPresenter#ForegroundContentPresenter">
+      <Setter Property="Foreground" Value="{DynamicResource RatingControlPointerOverPlaceholderForeground}" />
+    </Style>
+    <Style Selector="^:pointeroverunselected /template/ ContentPresenter#ForegroundContentPresenter">
+      <Setter Property="Foreground" Value="{DynamicResource RatingControlPointerOverUnselectedForeground}" />
+    </Style>
+    <Style Selector="^:set /template/ ContentPresenter#ForegroundContentPresenter">
+      <Setter Property="Foreground" Value="{DynamicResource RatingControlSelectedForeground}" />
+    </Style>
+    <Style Selector="^:pointeroverset /template/ ContentPresenter#ForegroundContentPresenter">
+      <Setter Property="Foreground" Value="{DynamicResource RatingControlSelectedForeground}" />
+    </Style>
+    <Style Selector="^:disabled /template/ ContentPresenter#ForegroundContentPresenter">
+      <Setter Property="Foreground" Value="{DynamicResource RatingControlDisabledSelectedForeground}" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

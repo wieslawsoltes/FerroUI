@@ -60,6 +60,8 @@
         <MergeResourceInclude Source="/Resources/Slider_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/TimePicker_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/ToolTip_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/RatingControl_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/InfoBadge_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/NavigationView_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/NavigationBackButton_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/RefreshContainer_themeresources.xaml" />
@@ -68,11 +70,13 @@
         <MergeResourceInclude Source="/Resources/TreeView_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/SplitButton_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/DropDownButton_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/RadioButtons_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/TabView_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/AutoSuggestBox_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/ComboBox_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/SplitView_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/ProgressBar_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/ProgressRing_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/NumberBox_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/Expander_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/InfoBar_themeresources.xaml" />

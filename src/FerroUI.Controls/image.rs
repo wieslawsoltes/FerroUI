@@ -7,6 +7,7 @@ use ferroui_base::media::{
     DrawingContext, DrawingImage, IImage, MediaExtensions, RenderOptions, Stretch, StretchDirection,
 };
 use ferroui_base::reactive::IDisposable;
+use ferroui_base::rendering::composition::{AlphaMask, CompositionBrush};
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, instantiate, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
     FerroPropertyChangedEventArgs, Rect, Ref, Size, StyledElementImpl, StyledProperty, Upcast, Visual, VisualImpl,
@@ -22,6 +23,9 @@ pub struct Image {
     current_drawing_bounds: Cell<Rect>,
     subscribed_to_drawing_image_source: Cell<bool>,
     source_invalidated_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    /// The alpha mask of [`get_alpha_mask`](Image::get_alpha_mask), created
+    /// on the first request.
+    alpha_mask: std::cell::OnceCell<Box<AlphaMask>>,
 }
 
 ferro_class!(Image: Control);
@@ -90,6 +94,12 @@ impl VisualImpl for Image {
                 context.draw_image_with_rects(&*source, source_rect, dest_rect);
                 context.pop(state);
             }
+        }
+
+        // The mask follows what the image draws (WinUI's
+        // `CImage::NotifyRenderContent`).
+        if let Some(mask) = this.alpha_mask.get() {
+            mask.update_if_available(this.upcast());
         }
     }
 
@@ -200,7 +210,20 @@ impl Image {
             current_drawing_bounds: Cell::new(Rect::default()),
             subscribed_to_drawing_image_source: Cell::new(false),
             source_invalidated_subscription: RefCell::new(None),
+            alpha_mask: std::cell::OnceCell::new(),
         }
+    }
+
+    /// `Image.GetAlphaMask`: a composition brush that shows the alpha of the
+    /// image as it is drawn (its source, stretched and placed), for the
+    /// `Mask` of a [`DropShadow`](ferroui_base::rendering::composition::DropShadow)
+    /// or another composition effect. The same brush is returned on every
+    /// call; it follows the image as it is drawn again (its source, stretch,
+    /// size and visibility). `None` when no compositor is available.
+    ///
+    /// See [`AlphaMask`] for how the mask is drawn.
+    pub fn get_alpha_mask(&self) -> Option<Rc<CompositionBrush>> {
+        self.alpha_mask.get_or_init(|| Box::new(AlphaMask::new())).get(self.upcast())
     }
 
     pub fn new() -> Ref<Self> {

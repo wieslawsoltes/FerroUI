@@ -10,4 +10,8 @@
   <SimpleTheme x:Key="SimpleTheme" />
   <StyleInclude x:Key="ColorPickerSimple" Source="ferres://FerroUI.Controls.ColorPicker/Themes/Simple/Simple.xaml" />
   <StyleInclude x:Key="TreeDataGridGeneric" Source="ferres://FerroUI.Controls.TreeDataGrid/Themes/Generic.xaml" />
+  <!-- Not in the original: the control themes of the NavigationView shell of the catalog and of its
+       Frame for the two themes, which have none (ClassicShell/Fluent.xaml, ClassicShell/Simple.xaml). -->
+  <StyleInclude x:Key="ClassicShellFluent" Source="ferres://ControlCatalog/ClassicShell/Fluent.xaml" />
+  <StyleInclude x:Key="ClassicShellSimple" Source="ferres://ControlCatalog/ClassicShell/Simple.xaml" />
 </ResourceDictionary>

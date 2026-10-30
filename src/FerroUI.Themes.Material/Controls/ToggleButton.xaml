@@ -1,0 +1,24 @@
+<!--
+  Material 3 Expressive, AndroidX Compose Material3 1.5.0-beta02,
+  source e4d933c98df7baa7ea2b83eea6e086915961e0ff.
+  Component measurements and interaction states follow the Android Open Source Project
+  token definitions (Apache-2.0; see NOTICE.md). FerroUI template contracts are adapted
+  from the WinUI theme, Copyright (c) Microsoft Corporation, MIT license.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <ControlTheme x:Key="DefaultToggleButtonStyle" TargetType="ToggleButton" BasedOn="{StaticResource DefaultButtonStyle}">
+    <Setter Property="Background" Value="{DynamicResource MaterialSurfaceContainerBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}" />
+    <Style Selector="^:checked, ^:indeterminate">
+    <Setter Property="Background" Value="{DynamicResource MaterialPrimaryBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnPrimaryBrush}" />
+    </Style>
+    <Style Selector="^:checked:disabled, ^:indeterminate:disabled">
+    <Setter Property="Background" Value="{DynamicResource MaterialDisabledContainerBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource MaterialDisabledContentBrush}" />
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type ToggleButton}" TargetType="ToggleButton" BasedOn="{StaticResource DefaultToggleButtonStyle}" />
+</ResourceDictionary>

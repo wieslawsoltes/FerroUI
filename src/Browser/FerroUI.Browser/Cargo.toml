@@ -18,18 +18,19 @@ path = "lib.rs"
 ferroui-base.workspace = true
 ferroui-controls.workspace = true
 ferroui-opengl.workspace = true
-ferroui-skia.workspace = true
+ferroui-skia = { workspace = true, optional = true }
 ferroui-harfbuzz.workspace = true
 wasm-bindgen.workspace = true
 # The second render backend (feature `vello`): its CPU mode, and its hybrid mode over the WebGL2
 # context of a canvas.
 ferroui-vello = { workspace = true, optional = true, features = ["hybrid-webgl"] }
 
-# The Vello render backend beside Skia, chosen at start with `BrowserPlatformOptions::renderer`
+# Backends can be selected independently, chosen at start with `BrowserPlatformOptions::renderer`
 # (docs/porting/vello-backend.md, section 12). Off by default: it adds the renderers of the Vello
 # project to the module.
 [features]
-default = []
+default = ["skia"]
+skia = ["dep:ferroui-skia"]
 vello = ["dep:ferroui-vello"]
 
 [dev-dependencies]

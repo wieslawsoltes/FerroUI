@@ -7,7 +7,7 @@ use crate::media::fonts::OpenTypeTag;
 use crate::media::{
     FontSimulations, FontStretch, FontStyle, FontWeight, IFontMemory, IPlatformTypeface, Typeface,
 };
-use crate::platform::IFontManagerImpl;
+use crate::platform::{IFontFallbackMapper, IFontManagerImpl};
 use crate::utilities::{CultureInfo, ReadOnlyMemory};
 
 use super::{ASCENDER, DESCENDER, DESIGN_EM_HEIGHT, GLYPH_ADVANCE, LINE_GAP};
@@ -23,6 +23,9 @@ pub struct TestFont {
     ranges: Vec<(u32, u32)>,
     advance: u16,
     line_gap: i16,
+    ascender: i16,
+    descender: i16,
+    cap_height: Option<i16>,
     script_tags: Vec<&'static str>,
     language: Option<&'static str>,
 }
@@ -30,7 +33,7 @@ pub struct TestFont {
 impl TestFont {
     /// A font without coverage and with the default advance.
     pub fn new(family: &str) -> Self {
-        Self { family: family.to_owned(), ranges: Vec::new(), advance: GLYPH_ADVANCE, line_gap: LINE_GAP, script_tags: Vec::new(), language: None }
+        Self { family: family.to_owned(), ranges: Vec::new(), advance: GLYPH_ADVANCE, line_gap: LINE_GAP, ascender: ASCENDER, descender: DESCENDER, cap_height: None, script_tags: Vec::new(), language: None }
     }
 
     /// The (inclusive) codepoint ranges the font maps.
@@ -55,6 +58,19 @@ impl TestFont {
     /// The line gap, in design units.
     pub fn with_line_gap(mut self, line_gap: i16) -> Self {
         self.line_gap = line_gap;
+        self
+    }
+
+    /// The ascent and signed descent written to `head` and `hhea`, in design units.
+    pub fn with_vertical_metrics(mut self, ascender: i16, descender: i16) -> Self {
+        self.ascender = ascender;
+        self.descender = descender;
+        self
+    }
+
+    /// Adds an OS/2 version 2 cap height. Other line metrics still come from `hhea`.
+    pub fn with_cap_height(mut self, cap_height: i16) -> Self {
+        self.cap_height = Some(cap_height);
         self
     }
 
@@ -83,9 +99,9 @@ impl TestFont {
             .uint16(DESIGN_EM_HEIGHT as i32) // unitsPerEm
             .zeros(16) // created, modified
             .int16(0) // xMin
-            .int16(DESCENDER as i32) // yMin
+            .int16(self.descender as i32) // yMin
             .int16(self.advance as i32) // xMax
-            .int16(ASCENDER as i32) // yMax
+            .int16(self.ascender as i32) // yMax
             .uint16(0) // macStyle
             .uint16(6) // lowestRecPPEM
             .int16(2) // fontDirectionHint
@@ -95,8 +111,8 @@ impl TestFont {
 
         let mut hhea = BigEndianBuffer::new();
         hhea.uint32(0x0001_0000)
-            .int16(ASCENDER as i32)
-            .int16(DESCENDER as i32)
+            .int16(self.ascender as i32)
+            .int16(self.descender as i32)
             .int16(self.line_gap as i32)
             .uint16(self.advance as i32) // advanceWidthMax
             .int16(0) // minLeftSideBearing
@@ -109,6 +125,30 @@ impl TestFont {
             .int16(0) // metricDataFormat
             .uint16(1); // numberOfHMetrics
         font.replace("hhea", hhea.to_array());
+
+        if let Some(cap_height) = self.cap_height {
+            let mut os2 = BigEndianBuffer::new();
+            os2.uint16(2) // version
+                .int16(self.advance as i32) // xAvgCharWidth
+                .uint16(400) // weightClass
+                .uint16(5) // widthClass
+                .zeros(54)
+                .uint16(1 << 6) // regular; retain hhea line metrics
+                .uint16(0x20)
+                .uint16(0xFFFF)
+                .int16(self.ascender as i32)
+                .int16(self.descender as i32)
+                .int16(self.line_gap as i32)
+                .uint16(self.ascender.max(0) as i32)
+                .uint16((-i32::from(self.descender)).max(0))
+                .zeros(8) // code page ranges
+                .int16(0) // xHeight
+                .int16(cap_height as i32)
+                .uint16(0) // defaultChar
+                .uint16(0x20) // breakChar
+                .uint16(0); // maxContext
+            font.replace("OS/2", os2.to_array());
+        }
 
         // One long metric; every other glyph repeats its advance.
         let mut hmtx = BigEndianBuffer::new();
@@ -251,6 +291,7 @@ impl IPlatformTypeface for TestPlatformTypeface {
 pub struct TestFontManagerImpl {
     typefaces: Vec<Rc<TestPlatformTypeface>>,
     match_character_calls: Cell<usize>,
+    fallback_mapper: Option<Rc<dyn IFontFallbackMapper>>,
 }
 
 #[allow(dead_code)] // the full harness API is kept for the tests built on top
@@ -261,7 +302,14 @@ impl TestFontManagerImpl {
         Self {
             typefaces: fonts.into_iter().map(|font| Rc::new(TestPlatformTypeface::new(font))).collect(),
             match_character_calls: Cell::new(0),
+            fallback_mapper: None,
         }
+    }
+
+    /// Adds an explicit range mapper to this synthetic backend.
+    pub fn with_fallback_mapper(mut self, mapper: Rc<dyn IFontFallbackMapper>) -> Self {
+        self.fallback_mapper = Some(mapper);
+        self
     }
 
     /// How often a fallback font was searched.
@@ -271,6 +319,10 @@ impl TestFontManagerImpl {
 }
 
 impl IFontManagerImpl for TestFontManagerImpl {
+    fn font_fallback_mapper(&self) -> Option<&dyn IFontFallbackMapper> {
+        self.fallback_mapper.as_deref()
+    }
+
     fn get_default_font_family_name(&self) -> String {
         self.typefaces[0].font.family.clone()
     }

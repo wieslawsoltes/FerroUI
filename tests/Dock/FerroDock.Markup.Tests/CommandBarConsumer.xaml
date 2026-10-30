@@ -1,0 +1,14 @@
+<Panel xmlns="https://github.com/ferroui"
+       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+       xmlns:d="using:FerroDock.Ferro.Controls"
+       x:DataType="Panel" x:CompileBindings="True">
+  <Panel.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="ferres://FerroDock.Ferro.Themes.Fluent/Accents/Fluent.xaml" />
+        <ResourceInclude Source="ferres://FerroDock.Ferro.Themes.Fluent/Controls/DockCommandBarHost.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </Panel.Resources>
+  <d:DockCommandBarHost />
+</Panel>

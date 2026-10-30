@@ -50,5 +50,10 @@ pub use selecting_items_control_selection_adapter::{
 mod time_utils;
 pub(crate) use time_utils::TimeUtils;
 
+// --- the expressions of WinUI's NumberBox (docs/porting/winui-controls.md) ---
+pub mod number_expression;
+#[cfg(test)]
+mod number_expression_tests;
+
 // --- debug display (native menu, table view) ---
 pub(crate) mod debug_display;

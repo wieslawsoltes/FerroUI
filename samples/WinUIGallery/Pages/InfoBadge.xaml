@@ -1,0 +1,84 @@
+<!-- Ported from all four original InfoBadge examples; see ../NOTICE.md.
+     The original NavigationView composition uses native controls. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="ferres://WinUIGallery/Styles/InfoBadge.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </StackPanel.Resources>
+  <TextBlock Text="InfoBadge embedded in a NavigationView" FontSize="18" />
+  <Grid ColumnDefinitions="*,180" ColumnSpacing="24">
+    <NavigationView x:Name="nvSample1" Height="300" PaneDisplayMode="Left">
+      <NavigationView.MenuItems>
+        <NavigationViewItem Content="Home">
+          <NavigationViewItem.Icon><SymbolIcon Symbol="Home" /></NavigationViewItem.Icon>
+        </NavigationViewItem>
+        <NavigationViewItem Content="Account">
+          <NavigationViewItem.Icon><SymbolIcon Symbol="Contact" /></NavigationViewItem.Icon>
+        </NavigationViewItem>
+        <NavigationViewItem x:Name="InboxPage" Content="Inbox" AutomationProperties.Name="Inbox, 5 notifications">
+          <NavigationViewItem.Icon><SymbolIcon Symbol="Mail" /></NavigationViewItem.Icon>
+          <NavigationViewItem.InfoBadge><InfoBadge x:Name="infoBadge1" Value="5" /></NavigationViewItem.InfoBadge>
+        </NavigationViewItem>
+      </NavigationView.MenuItems>
+      <Frame x:Name="contentFrame" />
+    </NavigationView>
+    <StackPanel Grid.Column="1" Spacing="8">
+      <TextBlock Text="InfoBadge Opacity" />
+      <ToggleSwitch x:Name="ToggleInfoBadgeOpacity" IsChecked="True" AutomationProperties.Name="InfoBadge Opacity" />
+      <TextBlock Text="Display Mode" />
+      <ComboBox x:Name="NavigationViewDisplayMode" SelectedIndex="0" AutomationProperties.Name="Display Mode">
+        <x:String>LeftExpanded</x:String><x:String>LeftCompact</x:String><x:String>Top</x:String>
+      </ComboBox>
+    </StackPanel>
+  </Grid>
+  <TextBlock Text="Different InfoBadge styles" FontSize="18" />
+  <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
+    <StackPanel Orientation="Horizontal" Spacing="20" HorizontalAlignment="Center">
+      <InfoBadge x:Name="StyleIconBadge" HorizontalAlignment="Right"
+                       Theme="{StaticResource AttentionIconInfoBadgeStyle}"
+                       AutomationProperties.Name="Status icon" />
+      <InfoBadge x:Name="StyleValueBadge" Value="10" HorizontalAlignment="Right"
+                       Theme="{StaticResource AttentionValueInfoBadgeStyle}"
+                       AutomationProperties.Name="10 notifications" />
+      <InfoBadge x:Name="StyleDotBadge" VerticalAlignment="Center"
+                       Theme="{StaticResource AttentionDotInfoBadgeStyle}"
+                       AutomationProperties.Name="Status indicator" />
+    </StackPanel>
+    <StackPanel Grid.Column="1" Spacing="8">
+      <TextBlock Text="Styles" />
+      <ComboBox x:Name="InfoBadgeStyleComboBox" SelectedIndex="0" Width="200"
+                AutomationProperties.Name="InfoBadge styles">
+        <x:String>Attention</x:String><x:String>Informational</x:String>
+        <x:String>Success</x:String><x:String>Critical</x:String>
+      </ComboBox>
+    </StackPanel>
+  </Grid>
+  <TextBlock Text="Placing an InfoBadge inside another control" FontSize="18" />
+  <Button x:Name="RefreshButton" Padding="0" Width="200" Height="60"
+          HorizontalAlignment="Center" HorizontalContentAlignment="Stretch"
+          VerticalContentAlignment="Stretch" ToolTip.Tip="Refresh required"
+          AutomationProperties.Name="Refresh required">
+    <Grid>
+      <SymbolIcon Symbol="Sync" HorizontalAlignment="Center" />
+      <InfoBadge x:Name="EmbeddedInfoBadge" Background="#C42B1C"
+                       HorizontalAlignment="Right" VerticalAlignment="Top"
+                       AutomationProperties.Name="Refresh required">
+        <InfoBadge.IconSource>
+          <FontIconSource FontFamily="Segoe Fluent Icons" Glyph="&#xF13C;" />
+        </InfoBadge.IconSource>
+      </InfoBadge>
+    </Grid>
+  </Button>
+  <TextBlock Text="InfoBadge with a dynamic value" FontSize="18" />
+  <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
+    <InfoBadge x:Name="DynamicInfoBadge" Value="1" HorizontalAlignment="Center"
+                     VerticalAlignment="Center" AutomationProperties.Name="Notification count" />
+    <NumberBox Grid.Column="1" x:Name="ValueNumberBox" Header="InfoBadge Value"
+                     Minimum="-1" Value="1" SpinButtonPlacementMode="Inline"
+                     AutomationProperties.Name="InfoBadge Value" />
+  </Grid>
+</StackPanel>

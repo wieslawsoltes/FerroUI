@@ -1,0 +1,68 @@
+<!-- macOS 26 adaptation; see docs/porting/macos26-theme.md.
+     Derived from FerroUI WinUI templates and microsoft-ui-xaml commit
+     7e4b0c2096be402f51cc8f7d203ebf67cff183d0. Copyright (c) Microsoft Corporation.
+     Licensed under the MIT License; see NOTICE.md.
+     Acrylic backing is the portable fallback for native Liquid Glass. -->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <StackPanel Orientation="Horizontal" Spacing="4">
+        <TabStripItem>Normal</TabStripItem>
+        <TabStripItem IsSelected="True">Selected</TabStripItem>
+        <TabStripItem IsEnabled="False">Disabled</TabStripItem>
+      </StackPanel>
+    </Border>
+  </Design.PreviewWith>
+  <ControlTheme x:Key="DefaultSelectorBarItemStyle" TargetType="TabStripItem">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="MinWidth" Value="44"/>
+    <Setter Property="MinHeight" Value="24"/>
+    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    <Setter Property="VerticalContentAlignment" Value="Center"/>
+    <Setter Property="BackgroundSizing" Value="OuterBorderEdge"/>
+    <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource SelectorBarItemBorderBrush}"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="Padding" Value="12,4"/>
+    <Setter Property="CornerRadius" Value="6"/>
+    <Setter Property="HorizontalAlignment" Value="Stretch"/>
+    <Setter Property="VerticalAlignment" Value="Center"/>
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}"/>
+    <Setter Property="FontWeight" Value="Normal"/>
+    <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}"/>
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border Margin="-3" BorderThickness="3" BorderBrush="{DynamicResource SystemControlFocusVisualPrimaryBrush}" CornerRadius="{DynamicResource ControlCornerRadius}" IsHitTestVisible="False"/>
+      </FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="PART_ContainerRoot" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+          <Border.Transitions>
+            <Transitions>
+              <BrushTransition Property="Background" Duration="{DynamicResource MacOSMotionFastDuration}" Easing="CubicEaseOut"/>
+            </Transitions>
+          </Border.Transitions>
+          <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Foreground="{TemplateBinding Foreground}" FontFamily="{TemplateBinding FontFamily}" FontSize="{TemplateBinding FontSize}" FontWeight="{TemplateBinding FontWeight}" Padding="{TemplateBinding Padding}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" RecognizesAccessKey="True"/>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:pointerover /template/ Border#PART_ContainerRoot">
+      <Setter Property="Background" Value="{DynamicResource SelectorBarItemBackgroundPointerOver}"/>
+    </Style>
+    <Style Selector="^:pressed /template/ Border#PART_ContainerRoot">
+      <Setter Property="Background" Value="{DynamicResource SelectorBarItemBackgroundPressed}"/>
+    </Style>
+    <Style Selector="^:selected /template/ Border#PART_ContainerRoot">
+      <Setter Property="Background" Value="{DynamicResource MacOSSegmentSelectedBrush}"/>
+      <Setter Property="BoxShadow" Value="{DynamicResource MacOSSegmentShadow}"/>
+    </Style>
+    <Style Selector="^:selected:pressed /template/ Border#PART_ContainerRoot">
+      <Setter Property="Opacity" Value="0.8"/>
+    </Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Foreground" Value="{DynamicResource TextFillColorDisabledBrush}"/>
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type TabStripItem}" TargetType="TabStripItem" BasedOn="{StaticResource DefaultSelectorBarItemStyle}"/>
+</ResourceDictionary>

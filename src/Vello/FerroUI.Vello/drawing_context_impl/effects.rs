@@ -38,6 +38,9 @@ pub(super) struct EffectFrame {
     /// The scene the effect was pushed in, when what is drawn inside the
     /// effect is recorded into a scene of its own.
     outer: Option<OuterScene>,
+    /// The content is turned into a luminance mask when the effect ends
+    /// (`ImmutableLuminanceToAlphaEffect`), on the processor.
+    luminance_to_alpha: bool,
 }
 
 /// The scene of the context while an effect is recorded into another.
@@ -96,7 +99,7 @@ impl DrawingContextImpl {
     /// filter makes of it: a blur of content that is cut spreads beyond the
     /// cut, as far as a blur reaches, and a shadow lies where its offset
     /// puts it.
-    fn begin_effect_scene(&mut self, clip_rect: Option<Rect>, filter: &VelloSceneFilter) -> OuterScene {
+    fn begin_effect_scene(&mut self, clip_rect: Option<Rect>, filter: &VelloSceneFilter, force_cpu: bool) -> OuterScene {
         let (width, height) = (self.sink().width(), self.sink().height());
         let whole = kurbo::Rect::new(0.0, 0.0, width as f64, height as f64);
 
@@ -123,7 +126,12 @@ impl DrawingContextImpl {
             None => whole,
         };
 
-        let scene = self.create_filter_scene(bounds.width() as u16, bounds.height() as u16);
+        // A scene whose pixels are read back on the processor (the luminance mask) is drawn there.
+        let scene: Box<dyn IVelloSceneSink> = if force_cpu {
+            Box::new(VelloCpuSceneSink::new(bounds.width() as u16, bounds.height() as u16))
+        } else {
+            self.create_filter_scene(bounds.width() as u16, bounds.height() as u16)
+        };
         let sink = match self.sink.replace(scene) {
             Some(sink) => sink,
             None => panic!("The drawing context has been disposed"),
@@ -155,7 +163,23 @@ impl DrawingContextImpl {
         self.sink_origin = outer.origin;
         self.open_clips = outer.open_clips;
 
-        self.draw_filter_scene(&mut *scene, position.x, position.y, crate::perf::Phase::EffectAsImage);
+        if frame.luminance_to_alpha {
+            let (width, height) = (scene.width(), scene.height());
+            crate::perf::count(crate::perf::Phase::EffectAsImage, u64::from(width) * u64::from(height) * 4);
+            let mut rgba = vec![0u8; width as usize * height as usize * 4];
+            scene.render_to_pixels(&mut rgba);
+            for pixel in rgba.chunks_exact_mut(4) {
+                // The pixels are premultiplied: multiplying by alpha again would darken a
+                // translucent luminance mask.
+                let alpha = (0.2126 * f64::from(pixel[0]) + 0.7152 * f64::from(pixel[1]) + 0.0722 * f64::from(pixel[2]))
+                    .round()
+                    .clamp(0.0, 255.0) as u8;
+                pixel.copy_from_slice(&[0, 0, 0, alpha]);
+            }
+            self.draw_image_at_pixels(to_image(rgba, PixelSize::new(width as i32, height as i32)), position.x, position.y);
+        } else {
+            self.draw_filter_scene(&mut *scene, position.x, position.y, crate::perf::Phase::EffectAsImage);
+        }
     }
 
     /// A scene of its own for something that is drawn through a filter and
@@ -253,20 +277,32 @@ impl DrawingContextImpl {
 
 impl IDrawingContextImplWithEffects for DrawingContextImpl {
     fn push_effect(&mut self, clip_rect: Option<Rect>, effect: &dyn IEffect) {
+        // The luminance mask is computed from the pixels of the content, drawn into a scene of
+        // its own on the processor, whatever the rendering mode.
+        if effect.as_any().is::<ferroui_base::media::ImmutableLuminanceToAlphaEffect>() {
+            let outer = self.begin_effect_scene(clip_rect, &VelloSceneFilter::Blur { std_deviation: 0.0 }, true);
+            self.sink().push_layer(BlendMode::default(), 1.0);
+            self.effect_stack.push(EffectFrame { cropped: clip_rect.is_some(), outer: Some(outer), luminance_to_alpha: true });
+            self.save(SavedKind::Effect);
+            if let Some(rect) = clip_rect {
+                self.push_clip(rect);
+            }
+            return;
+        }
         let Some(filter) = self.create_effect(effect) else {
             // An effect that changes nothing is a layer.
             self.sink().push_layer(BlendMode::default(), 1.0);
-            self.effect_stack.push(EffectFrame { cropped: false, outer: None });
+            self.effect_stack.push(EffectFrame { cropped: false, outer: None, luminance_to_alpha: false });
             self.save(SavedKind::Effect);
             return;
         };
 
         let outer =
-            if self.draws_effects_in_the_scene() { None } else { Some(self.begin_effect_scene(clip_rect, &filter)) };
+            if self.draws_effects_in_the_scene() { None } else { Some(self.begin_effect_scene(clip_rect, &filter, false)) };
 
         let transform = self.device_transform();
         self.sink().push_filter_layer(&filter, transform);
-        self.effect_stack.push(EffectFrame { cropped: clip_rect.is_some(), outer });
+        self.effect_stack.push(EffectFrame { cropped: clip_rect.is_some(), outer, luminance_to_alpha: false });
         self.save(SavedKind::Effect);
 
         // The clip rectangle bounds the layer of the effect: Skia draws no

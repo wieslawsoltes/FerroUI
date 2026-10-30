@@ -1,0 +1,39 @@
+[package]
+name = "ferrodock-ferro-diagnostics"
+description = "Original Dock diagnostic controls and helpers for FerroUI"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+build = "build.rs"
+links = "ferrodock_ferro_diagnostics_metadata"
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferrodock-model-ferro.workspace = true
+ferrodock-model.workspace = true
+ferrodock-settings.workspace = true
+ferroui-system.workspace = true
+ferroui-reactiveui.workspace = true
+ferroui-reactiveui-controls.workspace = true
+ferrodock-ferro = { path = "../FerroDock.Ferro" }
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+ferroui-markup-xaml.workspace = true
+
+[build-dependencies]
+ferroui-build.workspace = true
+
+[dev-dependencies]
+ferroui-themes-fluent.workspace = true
+ferroui-fonts-inter.workspace = true
+ferrodock-ferro-themes-fluent = { path = "../FerroDock.Ferro.Themes.Fluent" }
+ferrodock-model-reactiveui = { path = "../FerroDock.Model.ReactiveUI" }
+ferroui-headless = { workspace = true, features = ["testing"] }
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "deny"

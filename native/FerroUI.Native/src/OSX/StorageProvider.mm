@@ -85,7 +85,7 @@ public:
             *ppv = nullptr;
 
             NSError* error = nil;
-            auto fileUri = [NSURL URLWithString: GetNSStringAndRelease(fileUriStr)];
+            auto fileUri = [NSURL URLWithString: GetNSStringWithoutRelease(fileUriStr)];
             auto bookmarkData = [fileUri bookmarkDataWithOptions:NSURLBookmarkCreationWithSecurityScope includingResourceValuesForKeys:nil relativeToURL:nil error:&error];
             if (bookmarkData)
             {
@@ -135,7 +135,7 @@ public:
     ) override {
         @autoreleasepool
         {
-            auto fileUri = [NSURL URLWithString: GetNSStringAndRelease(fileUriStr)];
+            auto fileUri = [NSURL URLWithString: GetNSStringWithoutRelease(fileUriStr)];
             auto success = [fileUri startAccessingSecurityScopedResource];
             return success;
         }
@@ -146,7 +146,7 @@ public:
     ) override {
         @autoreleasepool
         {
-            auto fileUri = [NSURL URLWithString: GetNSStringAndRelease(fileUriStr)];
+            auto fileUri = [NSURL URLWithString: GetNSStringWithoutRelease(fileUriStr)];
             [fileUri stopAccessingSecurityScopedResource];
         }
     }
@@ -398,7 +398,7 @@ public:
             return S_OK;
         }
         
-        auto fileUri = [NSURL URLWithString:GetNSStringAndRelease(fileUriStr)];
+        auto fileUri = [NSURL URLWithString:GetNSStringWithoutRelease(fileUriStr)];
         if (fileUri == nil)
         {
             *ret = nullptr;

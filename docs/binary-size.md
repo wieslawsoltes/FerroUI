@@ -350,6 +350,10 @@ backtrace with names. The release profile is unchanged.
 
 ## 6. The settings applications should use
 
+- `cargo run --profile fast-release -p <application>` to try an application with optimised code:
+  the release optimisation level without link-time optimisation, so the final link takes seconds
+  instead of minutes. Its executables are somewhat larger and slower than release; benchmarks use
+  release, and shipping uses `dist`.
 - `cargo build --profile dist` for what you ship (the workspace defines it; an application crate
   outside the workspace copies it into its own manifest):
 

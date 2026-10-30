@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+ <PropertyGroup>
+  <OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework><Nullable>enable</Nullable>
+  <AssemblyName>DockFactoryMarkupReference</AssemblyName><ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+ </PropertyGroup>
+ <ItemGroup>
+  <Content Include="../../../tests/Dock/data/query-cursor-reference.tsv" Link="query-cursor-reference.tsv" CopyToOutputDirectory="PreserveNewest" />
+  <PackageReference Include="Avalonia" Version="12.1.3" /><PackageReference Include="Avalonia.Headless" Version="12.1.3" />
+  <ProjectReference Include="../../../../Dock/src/Dock.MarkupExtension/Dock.MarkupExtension.csproj" />
+  <ProjectReference Include="../../../../Dock/src/Dock.Model.ReactiveUI/Dock.Model.ReactiveUI.csproj" />
+  <ProjectReference Include="../../../../Dock/src/Dock.Avalonia/Dock.Avalonia.csproj" />
+  <AvaloniaResource Include="LoadedView.axaml" /><AvaloniaResource Include="PlainDocument.axaml" />
+  <AvaloniaResource Include="CapabilityPolicyRoot.axaml" /><AvaloniaResource Include="CapabilityOverridesRoot.axaml" />
+  <AvaloniaResource Include="Reactive*Root.axaml" /><AvaloniaResource Include="ReactiveModelBindings.axaml" />
+  <AvaloniaResource Include="ReactiveLayoutBindings.axaml" /><AvaloniaResource Include="ReactiveSplitViewBindings.axaml" /><AvaloniaResource Include="CoreModelEnumAssembly.axaml" />
+  <AvaloniaResource Include="ContractConsumerRoot.axaml" />
+  <AvaloniaResource Include="ReactiveFactoryBindings.axaml" /><AvaloniaResource Include="ReactiveDockWindowBindings.axaml" /><AvaloniaResource Include="ReactiveFactoryWindowGraph.axaml" />
+  <AvaloniaResource Include="FactoryEventArgumentRoot.axaml" /><AvaloniaResource Include="FactoryTrackingStateRoot.axaml" /><AvaloniaResource Include="FactoryEventConsumer.axaml" />
+  <AvaloniaResource Include="FactoryTrackingEventBindings.axaml" />
+  <AvaloniaResource Include="FactoryLocatorConsumer.axaml" /><AvaloniaResource Include="CoreFactoryBindings.axaml" />
+ <AvaloniaResource Include="FactorySearchConsumer.axaml" /><AvaloniaResource Include="CoreFactoryApiBindings.axaml" />
+ <AvaloniaResource Include="CoreWindowOptionsRoot.axaml" />
+<AvaloniaResource Include="CoreCapabilityPolicyRoot.axaml" />
+<AvaloniaResource Include="CoreCapabilityOverridesRoot.axaml" />
+<AvaloniaResource Include="CoreCapabilityEvaluationRoot.axaml" />
+<AvaloniaResource Include="CoreCapabilityEvaluationBindings.axaml" />
+<AvaloniaResource Include="CoreWindowOptionsBindings.axaml" />
+<AvaloniaResource Include="CoreDockBindings.axaml" /><AvaloniaResource Include="CoreDockableBindings.axaml" />
+<AvaloniaResource Include="CoreHostBindings.axaml" /><AvaloniaResource Include="CoreContainerBindings.axaml" />
+<AvaloniaResource Include="CoreControls*Bindings.axaml" />
+<AvaloniaResource Include="CoreDocumentFactoryBindings.axaml"/><AvaloniaResource Include="NativeDocumentFactoryProducer.axaml"/>
+<AvaloniaResource Include="CoreFactoryAssignmentBindings.axaml"/>
+<AvaloniaResource Include="CoreNullDocumentBindings.axaml"/>
+<AvaloniaResource Include="CoreNullListBindings.axaml"/>
+<AvaloniaResource Include="CoreNullWindowsBindings.axaml"/>
+<AvaloniaResource Include="CoreNumeric*Root.axaml" />
+</ItemGroup>
+</Project>

@@ -1,0 +1,9 @@
+<StackPanel xmlns="https://github.com/ferroui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:vm="using:FerroDockReactiveUISample.ViewModels.Documents"
+ x:DataType="vm:DocumentViewModel" x:CompileBindings="True">
+ <TextBlock Name="TitleText" Text="{Binding Title}" />
+ <TextBlock Name="IdText" Text="{Binding Id}" />
+ <TextBlock Name="StateText" Text="{Binding MdiState}" />
+ <CheckBox Name="CanCloseToggle" IsChecked="{Binding CanClose, Mode=TwoWay}" />
+</StackPanel>

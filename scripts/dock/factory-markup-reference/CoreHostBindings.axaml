@@ -1,0 +1,9 @@
+<StackPanel xmlns="https://github.com/avaloniaui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:core="clr-namespace:Dock.Model.Core;assembly=Dock.Model"
+ x:DataType="core:IHostWindow">
+ <CheckBox IsChecked="{Binding IsTracked, Mode=TwoWay}" />
+ <TextBlock Text="{Binding Window.Title}" />
+ <ContentControl Content="{Binding HostWindowState}" />
+ <Button Command="{Binding SetTitle}" CommandParameter="Core command title" />
+</StackPanel>

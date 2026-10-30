@@ -1,0 +1,64 @@
+<!-- AndroidX AppBar.kt and AppBar*Tokens at e4d933c98df7baa7ea2b83eea6e086915961e0ff.
+     Row heights exclude system insets; SafeInsets comes from the application host. -->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:material="using:FerroUI.Themes.Material"
+                    x:ClassModifier="internal">
+  <ControlTheme x:Key="{x:Type material:MaterialAppBar}" TargetType="material:MaterialAppBar">
+    <Setter Property="HorizontalAlignment" Value="Stretch"/>
+    <Setter Property="VerticalAlignment" Value="Top"/>
+    <Setter Property="Background" Value="{DynamicResource MaterialSurfaceBrush}"/>
+    <Setter Property="ScrolledBackground" Value="{DynamicResource MaterialSurfaceContainerBrush}"/>
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceBrush}"/>
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}"/>
+    <Setter Property="MotionScheme" Value="{DynamicResource MaterialMotionScheme}"/>
+    <Setter Property="ReducedMotion" Value="{DynamicResource MaterialReducedMotion}"/>
+    <Setter Property="ClipToBounds" Value="True"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="PART_Container" Background="{TemplateBinding Background}" ClipToBounds="True">
+          <material:MaterialAppBarLayout x:Name="PART_Layout" Background="Transparent">
+            <ContentPresenter x:Name="PART_Navigation" Margin="4,0,0,0" Content="{TemplateBinding Navigation}"
+                              Foreground="{TemplateBinding Foreground}" VerticalContentAlignment="Center"/>
+            <StackPanel x:Name="PART_CompactTitle" Margin="4,0" IsHitTestVisible="False">
+              <TextBlock x:Name="PART_CompactTitleText" Text="{TemplateBinding Title}" FontSize="22" FontWeight="Normal"
+                         LineHeight="28" LetterSpacing="0" Foreground="{TemplateBinding Foreground}"
+                         TextWrapping="Wrap" AutomationProperties.HeadingLevel="1"/>
+              <TextBlock x:Name="PART_CompactSubtitleText" Text="{TemplateBinding Subtitle}" FontSize="12" FontWeight="Medium"
+                         LineHeight="16" LetterSpacing="0.5" Foreground="{DynamicResource MaterialOnSurfaceVariantBrush}" TextWrapping="Wrap"/>
+            </StackPanel>
+            <ContentPresenter x:Name="PART_Actions" Margin="0,0,4,0" Content="{TemplateBinding Actions}"
+                              Foreground="{DynamicResource MaterialOnSurfaceVariantBrush}" VerticalContentAlignment="Center"/>
+            <Border x:Name="PART_ExpandedClip" ClipToBounds="True" IsHitTestVisible="False">
+              <StackPanel x:Name="PART_ExpandedTitle" Margin="4,0" HorizontalAlignment="Left">
+                <TextBlock x:Name="PART_ExpandedTitleText" Text="{TemplateBinding Title}" FontSize="24" FontWeight="Normal"
+                           LineHeight="32" LetterSpacing="0" Foreground="{TemplateBinding Foreground}"
+                           TextWrapping="Wrap" AutomationProperties.HeadingLevel="1"/>
+                <TextBlock x:Name="PART_ExpandedSubtitleText" Text="{TemplateBinding Subtitle}" FontSize="14" FontWeight="Medium"
+                           LineHeight="20" LetterSpacing="0.1" Foreground="{DynamicResource MaterialOnSurfaceVariantBrush}" TextWrapping="Wrap"/>
+              </StackPanel>
+            </Border>
+          </material:MaterialAppBarLayout>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialSmallAppBar" TargetType="material:MaterialAppBar" BasedOn="{StaticResource {x:Type material:MaterialAppBar}}">
+    <Setter Property="SizeVariant" Value="Small"/>
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialCenterAlignedAppBar" TargetType="material:MaterialAppBar" BasedOn="{StaticResource {x:Type material:MaterialAppBar}}">
+    <Setter Property="SizeVariant" Value="CenterAligned"/>
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialMediumAppBar" TargetType="material:MaterialAppBar" BasedOn="{StaticResource {x:Type material:MaterialAppBar}}">
+    <Setter Property="SizeVariant" Value="Medium"/>
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialLargeAppBar" TargetType="material:MaterialAppBar" BasedOn="{StaticResource {x:Type material:MaterialAppBar}}">
+    <Setter Property="SizeVariant" Value="Large"/>
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialMediumFlexibleAppBar" TargetType="material:MaterialAppBar" BasedOn="{StaticResource {x:Type material:MaterialAppBar}}">
+    <Setter Property="SizeVariant" Value="MediumFlexible"/>
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialLargeFlexibleAppBar" TargetType="material:MaterialAppBar" BasedOn="{StaticResource {x:Type material:MaterialAppBar}}">
+    <Setter Property="SizeVariant" Value="LargeFlexible"/>
+  </ControlTheme>
+</ResourceDictionary>

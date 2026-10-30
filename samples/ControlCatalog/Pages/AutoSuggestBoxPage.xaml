@@ -1,0 +1,21 @@
+<ContentPage Theme="{StaticResource ScrollPage}" xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Header="AutoSuggestBox"
+             x:Class="ControlCatalog.Pages.AutoSuggestBoxPage">
+  <!-- Not from upstream: WinUI's AutoSuggestBox (docs/porting/winui-controls.md); AutoCompleteBox is
+       the upstream control of the catalog. The application filters the suggestions when the user
+       types (the class of this page). Its template is in the WinUI theme and the macOS and Material
+       themes derived from it. -->
+  <StackPanel Orientation="Vertical" Spacing="4" MaxWidth="800">
+    <TextBlock Margin="2" Classes="h2" TextWrapping="Wrap">An AutoSuggestBox shows suggestions while the user types; the application filters them when the text changes, and handles the chosen suggestion and the submitted query.</TextBlock>
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">Search the states of the USA</TextBlock>
+    <AutoSuggestBox x:Name="States" Margin="2" Width="300" HorizontalAlignment="Left"
+                    Header="State" PlaceholderText="Type a name">
+      <AutoSuggestBox.QueryIcon>
+        <SymbolIcon Symbol="Find" />
+      </AutoSuggestBox.QueryIcon>
+    </AutoSuggestBox>
+    <TextBlock x:Name="Submitted" Margin="2" Text="Submit with Enter or the search button." />
+  </StackPanel>
+</ContentPage>

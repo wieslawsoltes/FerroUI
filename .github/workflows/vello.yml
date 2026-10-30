@@ -1,0 +1,70 @@
+name: Vello and classic themes
+
+# The ControlCatalog with its classic themes, the Vello backend and the comparison of the render backends (macOS).
+# Split from ci.yml so that a pull request that does not touch this area shows no check for it
+# (a skipped job is still a check). It runs every night on main and by hand:
+# gh workflow run vello.yml --ref <branch>
+
+on:
+  pull_request:
+    paths:
+      - 'src/Vello/**'
+      - 'tests/FerroUI.RenderBackends.Comparison/**'
+      - 'src/FerroUI.Themes.Fluent/**'
+      - 'src/FerroUI.Themes.Simple/**'
+      - 'samples/ControlCatalog/ClassicShell/**'
+      - '.github/workflows/vello.yml'
+  schedule:
+    - cron: '11 3 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: vello-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  RUST_BACKTRACE: 1
+
+jobs:
+  # The two test steps of the macOS job that build with other features than the workspace tests: a
+  # job of their own, beside that job and not after it. Each builds the crates it tests with the
+  # features its packages select, so as steps of that job they compiled most of their crates again
+  # (about eleven minutes after the 42 of the workspace tests); here they run in parallel with it.
+  # The commands are those the macOS job ran.
+  macos-features:
+    name: Build and test (macOS, the ControlCatalog with classic themes, Vello)
+    runs-on: macos-15
+    timeout-minutes: 120
+    env:
+      CARGO_PROFILE_DEV_DEBUG: 0
+      CARGO_PROFILE_TEST_DEBUG: 0
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
+      # The Simple and Fluent themes of the ControlCatalog are behind its feature `classic-themes`,
+      # off by default (docs/binary-size.md): the tests of the document of the two themes and of
+      # the settings page that switches between the three themes, with the feature.
+      - name: Test (the ControlCatalog with its feature classic-themes)
+        run: cargo test --locked -p control-catalog --features classic-themes --lib -- classic_themes the_settings_page
+      # The tests of the Vello backend and its comparison with the Skia backend, apart from the other tests: on
+      # the runner one scene of a GPU mode now and then comes out wholly different or differs
+      # between two draws (docs/porting/vello-backend.md, section 13). A failure is tried again,
+      # twice at most; a scene that fails three times in a row fails the job.
+      - name: Test (the Vello backend and the render backends compared)
+        run: |
+          for attempt in 1 2 3; do
+            if cargo test --locked -p ferroui-vello -p ferroui-render-backends-comparison --no-fail-fast --lib --tests; then
+              exit 0
+            fi
+            echo "::warning::the tests of the Vello backend or the comparison of the render backends failed in attempt $attempt"
+          done
+          exit 1

@@ -1,0 +1,23 @@
+# Explicit, optional compiler caching with stock Cargo and rustc.
+# Install sccache first, then:
+#   cargo --config .cargo/compiler-cache.toml build --locked -p ferroui-controls
+#   cargo --config .cargo/compiler-cache.toml build --locked --release -p ferroui-controls
+#
+# Cargo does not load this file automatically. No language feature, selected
+# package feature, runtime optimization, debug assertion, overflow check or panic
+# behavior is changed. sccache falls back to rustc for unsupported invocations.
+# The checked build-performance workflow measures this native core graph and
+# exercises invalidation. Cache replay is separate from cold compilation.
+#
+# Rust incremental compilation and sccache cannot cache the same invocation.
+# Developers may prefer ordinary incremental Cargo for their edit/build loop;
+# compare the workload before choosing. These opt-in settings are especially
+# useful when rebuilding identical library inputs after target cleanup or in CI.
+[build]
+rustc-wrapper = "sccache"
+
+[profile.dev]
+incremental = false
+
+[profile.release]
+incremental = false

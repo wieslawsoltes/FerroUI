@@ -1,0 +1,143 @@
+<!--
+  Material 3 Expressive, AndroidX Compose Material3 1.5.0-beta02,
+  source e4d933c98df7baa7ea2b83eea6e086915961e0ff.
+  Component measurements and interaction states follow the Android Open Source Project
+  token definitions (Apache-2.0; see NOTICE.md). FerroUI template contracts are adapted
+  from the WinUI theme, Copyright (c) Microsoft Corporation, MIT license.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:material="using:FerroUI.Themes.Material"
+                    x:ClassModifier="internal">
+  <ControlTheme x:Key="DefaultToggleSwitchStyle" TargetType="ToggleSwitch">
+    <Setter Property="MinHeight" Value="48" /><Setter Property="MinWidth" Value="52" />
+    <Setter Property="HorizontalAlignment" Value="Left" /><Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" /><Setter Property="HorizontalContentAlignment" Value="Left" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontSize" Value="16" /><Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceBrush}" />
+    <Setter Property="OnContent" Value="{x:Null}" /><Setter Property="OffContent" Value="{x:Null}" />
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border BorderBrush="{DynamicResource MaterialSecondaryBrush}"
+                BorderThickness="3" CornerRadius="24" Margin="-3" />
+      </FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="KnobTransitions"><Transitions>
+      <material:MaterialDoubleTransition Property="Canvas.Left" Duration="{DynamicResource MaterialMotionFastSpatialDuration}" Easing="{DynamicResource MaterialMotionFastSpatialEasing}" />
+    </Transitions></Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid Background="Transparent" ColumnDefinitions="52,Auto,*" MinHeight="48">
+          <Grid Width="52" Height="48">
+            <Border x:Name="MaterialSwitchTrack" Width="52" Height="32" CornerRadius="16"
+                    Background="{DynamicResource MaterialSurfaceContainerHighestBrush}"
+                    BorderBrush="{DynamicResource MaterialOutlineBrush}" BorderThickness="2"
+                    VerticalAlignment="Center">
+              <Border.Transitions><Transitions><BrushTransition Property="Background" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" /></Transitions></Border.Transitions>
+            </Border>
+            <!-- FerroUI moves PART_MovingKnobs from 0 to this canvas' width.
+                 Centres therefore move from x=16 to x=36, inside the 52dp track. -->
+            <Canvas x:Name="PART_SwitchKnob" Width="20" Height="32"
+                    HorizontalAlignment="Left" VerticalAlignment="Center">
+              <Grid x:Name="PART_MovingKnobs" Width="32" Height="32" Background="Transparent">
+                <Border x:Name="MaterialStateLayer" Width="40" Height="40" CornerRadius="20"
+                        Margin="-4" Background="{DynamicResource MaterialOnSurfaceBrush}" Opacity="0"
+                        HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False">
+                  <Border.Transitions><Transitions><material:MaterialDoubleTransition Property="Opacity" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" /></Transitions></Border.Transitions>
+                </Border>
+                <material:MaterialRipple x:Name="MaterialRipple" Fill="{DynamicResource MaterialOnSurfaceBrush}"
+                                         Width="40" Height="40" Margin="-4" CornerRadius="20"
+                                         HorizontalAlignment="Center" VerticalAlignment="Center"
+                                         ReducedMotion="{DynamicResource MaterialReducedMotion}" />
+                <Border x:Name="MaterialSwitchThumb" Width="16" Height="16" CornerRadius="14"
+                        Background="{DynamicResource MaterialOutlineBrush}"
+                        HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False">
+                  <Border.Transitions><Transitions>
+                    <material:MaterialDoubleTransition Property="Width" Duration="{DynamicResource MaterialMotionFastSpatialDuration}" Easing="{DynamicResource MaterialMotionFastSpatialEasing}" /><material:MaterialDoubleTransition Property="Height" Duration="{DynamicResource MaterialMotionFastSpatialDuration}" Easing="{DynamicResource MaterialMotionFastSpatialEasing}" /><BrushTransition Property="Background" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" />
+                  </Transitions></Border.Transitions>
+                </Border>
+              </Grid>
+            </Canvas>
+          </Grid>
+          <Grid Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
+            <ContentPresenter x:Name="PART_OnContentPresenter" IsVisible="False"
+                              Content="{TemplateBinding OnContent}" ContentTemplate="{TemplateBinding OnContentTemplate}"
+                              Foreground="{TemplateBinding Foreground}" />
+            <ContentPresenter x:Name="PART_OffContentPresenter" IsVisible="False"
+                              Content="{TemplateBinding OffContent}" ContentTemplate="{TemplateBinding OffContentTemplate}"
+                              Foreground="{TemplateBinding Foreground}" />
+          </Grid>
+          <ContentPresenter x:Name="PART_ContentPresenter" Grid.Column="2" Margin="4,0,0,0"
+                            Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Foreground="{TemplateBinding Foreground}" VerticalContentAlignment="Center"
+                            RecognizesAccessKey="True" TextWrapping="Wrap" />
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:pointerover /template/ Border#MaterialStateLayer">
+    <Setter Property="Opacity" Value="0.08" />
+    </Style>
+    <Style Selector="^:focus-visible /template/ Border#MaterialStateLayer">
+    <Setter Property="Opacity" Value="0.10" />
+    </Style>
+    <Style Selector="^:disabled /template/ Border#MaterialStateLayer">
+    <Setter Property="Opacity" Value="0" />
+    </Style>
+    <Style Selector="^:checked /template/ Border#MaterialSwitchTrack">
+    <Setter Property="Background" Value="{DynamicResource MaterialPrimaryBrush}" />
+    <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style Selector="^:checked /template/ Border#MaterialSwitchThumb">
+    <Setter Property="Background" Value="{DynamicResource MaterialOnPrimaryBrush}" />
+    <Setter Property="Width" Value="24" />
+    <Setter Property="Height" Value="24" />
+    </Style>
+    <Style Selector="^:checked /template/ Border#MaterialStateLayer">
+    <Setter Property="Background" Value="{DynamicResource MaterialPrimaryBrush}" />
+    </Style>
+    <Style Selector="^:pressed /template/ Border#MaterialSwitchThumb, ^:dragging /template/ Border#MaterialSwitchThumb">
+    <Setter Property="Width" Value="28" />
+    <Setter Property="Height" Value="28" />
+    </Style>
+    <Style Selector="^:checked:pressed /template/ Border#MaterialSwitchThumb, ^:checked:dragging /template/ Border#MaterialSwitchThumb">
+    <Setter Property="Width" Value="28" />
+    <Setter Property="Height" Value="28" />
+    <Setter Property="Background" Value="{DynamicResource MaterialPrimaryContainerBrush}" />
+    </Style>
+    <Style Selector="^:dragging /template/ Border#MaterialStateLayer">
+    <Setter Property="Opacity" Value="0.16" />
+    </Style>
+    <Style Selector="^:checked /template/ ContentPresenter#PART_OnContentPresenter, ^:unchecked /template/ ContentPresenter#PART_OffContentPresenter">
+    <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^:pointerover /template/ Border#MaterialSwitchThumb, ^:focus-visible /template/ Border#MaterialSwitchThumb, ^:pressed /template/ Border#MaterialSwitchThumb">
+      <Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceVariantBrush}" />
+    </Style>
+    <Style Selector="^:checked:pointerover /template/ Border#MaterialSwitchThumb, ^:checked:focus-visible /template/ Border#MaterialSwitchThumb, ^:checked:pressed /template/ Border#MaterialSwitchThumb">
+      <Setter Property="Background" Value="{DynamicResource MaterialPrimaryContainerBrush}" />
+    </Style>
+    <Style Selector="^:disabled /template/ Border#MaterialSwitchTrack">
+    <Setter Property="Background" Value="{DynamicResource MaterialSurfaceContainerHighestBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource MaterialOnSurfaceBrush}" />
+    <Setter Property="Opacity" Value="0.12" />
+    </Style>
+    <Style Selector="^:checked:disabled /template/ Border#MaterialSwitchTrack">
+    <Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceBrush}" />
+    </Style>
+    <Style Selector="^:disabled /template/ Border#MaterialSwitchThumb">
+    <Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceBrush}" />
+    <Setter Property="Opacity" Value="0.38" />
+    </Style>
+    <Style Selector="^:checked:disabled /template/ Border#MaterialSwitchThumb">
+    <Setter Property="Background" Value="{DynamicResource MaterialSurfaceBrush}" />
+    <Setter Property="Opacity" Value="1" />
+    </Style>
+    <Style Selector="^:disabled">
+    <Setter Property="Foreground" Value="{DynamicResource MaterialDisabledContentBrush}" />
+    </Style>
+    <Style Selector="^:checked /template/ material|MaterialRipple#MaterialRipple">
+      <Setter Property="Fill" Value="{DynamicResource MaterialPrimaryBrush}" />
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type ToggleSwitch}" TargetType="ToggleSwitch" BasedOn="{StaticResource DefaultToggleSwitchStyle}" />
+</ResourceDictionary>

@@ -10,18 +10,15 @@ use std::rc::Rc;
 
 mod card_grid;
 mod code_block;
-mod home_item_expander;
 mod sample_gallery_page;
 mod sample_group;
 mod sample_info;
 mod sample_page;
 mod sample_section;
 mod section_control;
-mod selectable_button;
 
 pub use card_grid::CardGrid;
 pub use code_block::{CodeBlock, CodeLanguage};
-pub use home_item_expander::HomeItemExpander;
 pub use sample_gallery_page::SampleGalleryPage;
 pub use sample_group::SampleGroup;
 pub use sample_info::{SampleGroups, SampleInfo, SampleInfoGroup};
@@ -30,19 +27,16 @@ pub(crate) use sample_page::sample_page_class;
 pub use sample_page::SamplePage;
 pub use sample_section::{SampleSection, SampleStage};
 pub use section_control::SectionControl;
-pub use selectable_button::{SelectableButton, SelectableButtonImpl};
 
 /// The classes of this namespace (`X::TYPE`).
 pub(crate) const TYPES: &[&TypeInfo] = &[
     CardGrid::TYPE,
     CodeBlock::TYPE,
-    HomeItemExpander::TYPE,
     SampleGalleryPage::TYPE,
     SampleGroup::TYPE,
     SamplePage::TYPE,
     SampleSection::TYPE,
     SectionControl::TYPE,
-    SelectableButton::TYPE,
 ];
 
 /// The classes of this namespace that have a document (`&X::XAML_CLASS`).

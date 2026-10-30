@@ -1,0 +1,8 @@
+<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <TextBlock Text="Toggle work"/>
+  <ToggleSwitch x:Name="Primary" AutomationProperties.Name="Toggle work" OffContent="Do work" OnContent="Working"/>
+  <TextBlock Text="Disabled switch"/>
+  <ToggleSwitch AutomationProperties.Name="Disabled switch" IsEnabled="False"/>
+  <TextBlock x:Name="Output" Text="Unchecked"/>
+</StackPanel>

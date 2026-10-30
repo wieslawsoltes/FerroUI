@@ -7,6 +7,7 @@ use ferroui_base::media::{
     StrokeDashArray,
 };
 use ferroui_base::reactive::IDisposable;
+use ferroui_base::rendering::composition::{AlphaMask, CompositionBrush};
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
     FerroPropertyChangedEventArgs, Matrix, ObjectType, Rect, Ref, Size, StyledElementImpl, StyledProperty, Upcast,
@@ -25,6 +26,9 @@ pub struct Shape {
     rendered_geometry: RefCell<Option<Ref<Geometry>>>,
     stroke_pen: RefCell<Option<Rc<dyn IPen>>>,
     geometry_changed_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    /// The alpha mask of [`get_alpha_mask`](Shape::get_alpha_mask), created
+    /// on the first request.
+    alpha_mask: std::cell::OnceCell<Box<AlphaMask>>,
 }
 
 ferro_class! {
@@ -104,6 +108,12 @@ impl VisualImpl for Shape {
             let fill = this.fill();
             let pen = this.stroke_pen.borrow().clone();
             context.draw_geometry(fill.as_ref(), pen.as_ref(), &geometry);
+        }
+
+        // The mask follows what the shape draws (WinUI's
+        // `CShape::NotifyRenderContent`).
+        if let Some(mask) = this.alpha_mask.get() {
+            mask.update_if_available(this.upcast());
         }
     }
 
@@ -229,7 +239,20 @@ impl Shape {
             rendered_geometry: RefCell::new(None),
             stroke_pen: RefCell::new(None),
             geometry_changed_subscription: RefCell::new(None),
+            alpha_mask: std::cell::OnceCell::new(),
         }
+    }
+
+    /// `Shape.GetAlphaMask`: a composition brush that shows the alpha of the
+    /// shape (its fill and its stroke), for the `Mask` of a
+    /// [`DropShadow`](ferroui_base::rendering::composition::DropShadow) or
+    /// another composition effect. The same brush is returned on every call;
+    /// it follows the shape as the shape is drawn again (its geometry, stroke,
+    /// size and visibility). `None` when no compositor is available.
+    ///
+    /// See [`AlphaMask`] for how the mask is drawn.
+    pub fn get_alpha_mask(&self) -> Option<Rc<CompositionBrush>> {
+        self.alpha_mask.get_or_init(|| Box::new(AlphaMask::new())).get(self.upcast())
     }
 
     /// Gets a value that represents the [`Geometry`] of the shape.

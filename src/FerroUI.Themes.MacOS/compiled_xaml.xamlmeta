@@ -1,0 +1,31 @@
+{
+  "name": "FerroUI.Themes.MacOS",
+  "crate_name": "ferroui_themes_macos",
+  "documents": [
+    {
+      "uri": "ferres://ferroui.themes.macos/MacOSTheme.xaml",
+      "root_type": "FerroUI.Themes.MacOS.MacOSTheme",
+      "class_rust_path": "::ferroui_themes_macos::MacOSTheme",
+      "build_path": null,
+      "populate_path": "::ferroui_themes_macos::compiled_xaml::populate",
+      "public": true
+    },
+    {
+      "uri": "ferres://ferroui.themes.macos/DensityStyles/Compact.xaml",
+      "root_type": "FerroUI.Controls.ResourceDictionary",
+      "class_rust_path": null,
+      "build_path": "::ferroui_themes_macos::compiled_xaml::build_densitystyles_compact_xaml",
+      "populate_path": null,
+      "public": false
+    },
+    {
+      "uri": "ferres://ferroui.themes.macos/Controls/MacOSControls.xaml",
+      "root_type": "FerroUI.Styling.Styles",
+      "class_rust_path": null,
+      "build_path": "::ferroui_themes_macos::compiled_xaml::build_controls_macoscontrols_xaml",
+      "populate_path": null,
+      "public": false
+    }
+  ],
+  "dependencies": []
+}

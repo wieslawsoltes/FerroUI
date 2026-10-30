@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use crate::media::text_formatting::{ShapedTextRun, TextRun};
+use crate::media::text_formatting::{ShapedTextRun, TextLineMetricsMode, TextRun};
 use crate::media::FlowDirection;
 
 /// Caches shaped text runs and bidi processing results to avoid redundant
@@ -167,6 +167,8 @@ pub(crate) struct CachedShapingResult {
     pub text_end_of_line: Option<Rc<dyn TextRun>>,
     /// The total text source length consumed.
     pub text_source_length: i32,
+    /// The grouping policy used when the runs were shaped.
+    pub line_metrics_mode: TextLineMetricsMode,
 }
 
 impl CachedShapingResult {
@@ -176,6 +178,17 @@ impl CachedShapingResult {
         text_end_of_line: Option<Rc<dyn TextRun>>,
         text_source_length: i32,
     ) -> Self {
-        Self { shaped_runs, resolved_flow_direction, text_end_of_line, text_source_length }
+        Self {
+            shaped_runs,
+            resolved_flow_direction,
+            text_end_of_line,
+            text_source_length,
+            line_metrics_mode: TextLineMetricsMode::GlyphTypeface,
+        }
+    }
+
+    pub fn with_line_metrics_mode(mut self, mode: TextLineMetricsMode) -> Self {
+        self.line_metrics_mode = mode;
+        self
     }
 }

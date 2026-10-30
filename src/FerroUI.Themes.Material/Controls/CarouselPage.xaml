@@ -1,0 +1,43 @@
+<!--
+  Not ported from a style: WinUI has no page of pages that flip in microsoft-ui-xaml
+  (https://github.com/microsoft/microsoft-ui-xaml, commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0);
+  an application shows pages one at a time with a FlipView. The template is the one FerroUI's
+  CarouselPage requires (src/FerroUI.Themes.Fluent/Controls/CarouselPage.xaml: the Carousel
+  PART_Carousel with the page template, the page transition and the items panel of the page),
+  and the Carousel is drawn by the theme of Controls/Carousel.xaml, the port of FlipView
+  (DefaultFlipViewStyle of controls/dev/CommonStyles/FlipView_themeresources.xaml). The
+  background of the page is ApplicationPageBackgroundThemeBrush, the background a WinUI page is
+  given (as Controls/ContentPage.xaml).
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Width="400" Height="300">
+      <CarouselPage>
+        <ContentPage Header="Page 1">
+          <TextBlock Text="The first page" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </ContentPage>
+        <ContentPage Header="Page 2">
+          <TextBlock Text="The second page" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </ContentPage>
+      </CarouselPage>
+    </Border>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="{x:Type CarouselPage}" TargetType="CarouselPage">
+    <Setter Property="Background" Value="{DynamicResource ApplicationPageBackgroundThemeBrush}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Carousel Name="PART_Carousel"
+                  Background="{TemplateBinding Background}"
+                  ItemTemplate="{TemplateBinding PageTemplate}"
+                  PageTransition="{TemplateBinding PageTransition}"
+                  ItemsPanel="{TemplateBinding ItemsPanel}"
+                  HorizontalAlignment="Stretch"
+                  VerticalAlignment="Stretch" />
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

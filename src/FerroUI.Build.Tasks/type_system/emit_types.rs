@@ -114,13 +114,16 @@ pub struct ModelMarkup {
     full_name: String,
     rust_path: Option<String>,
     is_trait: bool,
+    handle_is_own_trait: bool,
     handles: Vec<String>,
     nullable: Option<String>,
     interfaces: Vec<String>,
     base: Option<Rc<ModelMarkup>>,
     this: Option<String>,
     value: Option<String>,
+    value_rust_type: Option<String>,
     is_flags: bool,
+    enum_i32_factory: Option<String>,
     /// The members of an enumeration: name, value and Rust variant.
     enum_members: Vec<(String, Option<i64>, Option<String>)>,
     /// The questions the metadata could not answer, for the host.
@@ -143,6 +146,12 @@ impl EmitMarkup for ModelMarkup {
     fn handle_is_shared(&self) -> bool {
         self.handles.first().is_some_and(|handle| handle.starts_with(SHARED))
     }
+    fn value_is_shared(&self) -> bool {
+        self.value.as_ref().is_some_and(|value| value.starts_with(SHARED))
+    }
+    fn handle_is_own_trait(&self) -> bool {
+        self.handle_is_own_trait
+    }
     fn nullable(&self) -> Option<TypeKey<'_>> {
         self.nullable.as_deref().map(TypeKey::Text)
     }
@@ -157,6 +166,9 @@ impl EmitMarkup for ModelMarkup {
     }
     fn value(&self) -> Option<TypeKey<'_>> {
         self.value.as_deref().map(TypeKey::Text)
+    }
+    fn value_rust_type(&self) -> Option<String> {
+        self.value_rust_type.clone()
     }
     fn is_flags(&self) -> bool {
         self.is_flags
@@ -173,6 +185,7 @@ impl EmitMarkup for ModelMarkup {
             })
             .collect()
     }
+    fn enum_i32_factory(&self) -> Option<&str> { self.enum_i32_factory.as_deref() }
     fn flags_compose(&self, value: i64) -> bool {
         let mut rest = value;
         for (name, bits, _) in &self.enum_members {
@@ -352,6 +365,27 @@ fn accessor_type<'a>(set: &'a ModelSet, listed: &'a TypeModel, registered: &Regi
 /// the crate states for an instantiation of a generic type, for a type its crate registers.
 fn public_path(declared: &TypeModel) -> Option<String> {
     declared.public_path.clone().or_else(|| declared.stated_path.clone()).filter(|_| !declared.unregistered)
+}
+
+// Type keys stay canonical for comparisons. Generated public signatures must
+// instead name each declared type through its exported path, including a model
+// reference re-exported from a private module. Split complete Rust type components
+// so a carrier Foo can never rename a different returned model FooValue.
+fn public_value_rust_type(set: &ModelSet, value: &str) -> String {
+    fn separator(character: char) -> bool {
+        character.is_whitespace() || matches!(character, '<' | '>' | ',' | '(' | ')' | '[' | ']' | '&' | ';')
+    }
+    let mut result = String::new();
+    let mut start = 0;
+    for (end, character) in value.char_indices().chain(std::iter::once((value.len(), ' '))) {
+        if !separator(character) { continue; }
+        let component = &value[start..end];
+        let path = set.position_of_rust_type(component).and_then(|position| public_path(set.type_at(position)));
+        result.push_str(path.as_deref().unwrap_or(component));
+        if end < value.len() { result.push(character); }
+        start = end + character.len_utf8();
+    }
+    format!("::{}", result.trim_start_matches("::"))
 }
 
 impl ModelEmitTypes {
@@ -676,13 +710,16 @@ impl ModelEmitTypes {
             // The metadata of a class has no path of its own: the class has it.
             rust_path: if is_class { None } else { public_path(declared) },
             is_trait,
+            handle_is_own_trait: is_trait && handles.first() == Some(&format!("{SHARED}{path}>")),
             handles,
             nullable,
             interfaces: declared.interfaces.iter().map(|interface| set.expanded(&interface.text)).collect(),
             base,
             this,
+            value_rust_type: value.as_deref().map(|value| public_value_rust_type(set, value)),
             value,
             is_flags: declared.is_flags,
+            enum_i32_factory: declared.enum_i32_factory.clone(),
             enum_members: declared.enum_members.iter().map(|member| (member.name.clone(), member.value, member.rust_variant.clone())).collect(),
             unanswered: self.unanswered.clone(),
         });
@@ -985,8 +1022,17 @@ impl EmitTypes for ModelEmitTypes {
         if let Some(found) = self.markup_of(type_) {
             return Some(found);
         }
-        let handle = self.handle_of(type_)?;
-        self.markup_by_handle(handle.key)
+        if let Some(found) = self.handle_of(type_).and_then(|handle| self.markup_by_handle(handle.key)) {
+            return Some(found);
+        }
+        // A type of the table of runtime library types whose metadata a crate declares
+        // (`System.Collections.IList`, the items source handle): the type is that metadata, as
+        // the run-time type system answers.
+        let full_name = type_.full_name();
+        if !full_name.starts_with("System") {
+            return None;
+        }
+        self.markups.values().find(|markup| markup.full_name == full_name).map(|markup| &**markup as &dyn EmitMarkup)
     }
 
     fn handle_of(&self, type_: &dyn IXamlType) -> Option<Handle<'_>> {

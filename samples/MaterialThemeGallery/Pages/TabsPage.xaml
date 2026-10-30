@@ -1,0 +1,49 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="MaterialThemeGallery.Pages.TabsPage">
+  <!-- TabControl with its items in their states (selected, normal, pointer over, disabled), at
+       the top and at the left, and TabStrip with its items. The native counterpart is
+       TabsPage.winui.xml: WinUI has no TabControl; its tab control is TabView, and its strip of
+       selectable items is SelectorBar. The tabs at the left are 160 wide, the OpenPaneLength of
+       the native NavigationView (a strip of tabs at the left has no pane length of its own). -->
+  <StackPanel Margin="24" Spacing="12">
+    <TextBlock Text="Tabs" FontSize="28" FontWeight="SemiBold" />
+
+    <TextBlock Text="TabControl" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+    <TabControl Height="180">
+      <TabItem Header="Selected" IsSelected="True">
+        <TextBlock Text="The content of the selected tab." Margin="12" />
+      </TabItem>
+      <TabItem Header="Normal">
+        <TextBlock Text="The content of the second tab." Margin="12" />
+      </TabItem>
+      <TabItem Header="Pointer over" Classes="force-pointerover">
+        <TextBlock Text="The content of the third tab." Margin="12" />
+      </TabItem>
+      <TabItem Header="Disabled" IsEnabled="False">
+        <TextBlock Text="The content of the fourth tab." Margin="12" />
+      </TabItem>
+    </TabControl>
+
+    <TextBlock Text="TabControl with the tabs at the left" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+    <TabControl Height="180" TabStripPlacement="Left">
+      <TabItem Header="General" Width="160" IsSelected="True">
+        <TextBlock Text="The content of the general tab." Margin="12" />
+      </TabItem>
+      <TabItem Header="Advanced" Width="160">
+        <TextBlock Text="The content of the advanced tab." Margin="12" />
+      </TabItem>
+      <TabItem Header="About" Width="160">
+        <TextBlock Text="The content of the about tab." Margin="12" />
+      </TabItem>
+    </TabControl>
+
+    <TextBlock Text="TabStrip" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+    <TabStrip HorizontalAlignment="Left">
+      <TabStripItem Content="Recent" IsSelected="True" />
+      <TabStripItem Content="Shared" />
+      <TabStripItem Content="Pointer over" Classes="force-pointerover" />
+      <TabStripItem Content="Disabled" IsEnabled="False" />
+    </TabStrip>
+  </StackPanel>
+</UserControl>

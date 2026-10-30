@@ -1,0 +1,430 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/TitleBar/TitleBar.xaml (DefaultTitleBarStyle and the implicit TitleBar style)
+    controls/dev/TitleBar/TitleBar_themeresources.xaml (TitleBarBackButtonStyle,
+    TitleBarPaneToggleButtonStyle; its resources are Resources/TitleBar_themeresources.xaml)
+    dxaml/xcp/dxaml/themes/generic.xaml (WindowCaptionButton, WindowChromeStyle; the resources
+    of the caption buttons are in Resources/Generic.xaml)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  WindowDrawnDecorations is the frame FerroUI draws for a window whose decorations the platform
+  does not draw: the frame, the title bar and the caption buttons. WinUI 3 draws the title bar
+  with its TitleBar control and leaves the frame and the caption buttons to the system
+  (AppWindowTitleBar); the caption buttons of the XAML of WinUI are the WindowCaptionButton style
+  of generic.xaml. The template is the one FerroUI's control requires (the parts, the layers and
+  the pseudo-classes of src/FerroUI.Themes.Fluent/Controls/WindowDrawnDecorations.xaml) with the
+  look of those sources:
+  - The title bar is DefaultTitleBarStyle at TitleBarCompactHeight (32): the title in
+    CaptionTextBlockStyle and TitleBarForegroundBrush, after TitleBarLeftPaddingWidth (2) and
+    TitleBarLeftHeaderPaddingWidth (14), with TitleBarTitleMargin (0,0,8,0). Its background is the
+    background of the window (SolidBackgroundFillColorBaseBrush, the Mica fallback of Window.xaml),
+    which WinUI's transparent title bar shows. The back button, the pane toggle button, the
+    headers, the icon, the subtitle and the content of TitleBar have no counterpart in
+    WindowDrawnDecorations; TitleBarBackButtonStyle and TitleBarPaneToggleButtonStyle are ported as
+    keyed themes of Button for applications. The Deactivated states (the window is not active) are
+    left out: the decorations have no pseudo-class of the activation of the window.
+  - The caption buttons are WindowCaptionButton: 40 x 28 at the top of the title bar, the states
+    Normal, PointerOver and Pressed as pseudo-classes. The close button takes the CloseButton*
+    resources of generic.xaml on pointer over and press. The glyph of a button is the Path of the
+    source drawn with the outline of the glyph of the symbol font the system draws on its caption
+    buttons (GlyphGeometryE921 ChromeMinimize, E922 ChromeMaximize, E923 ChromeRestore, E8BB
+    ChromeClose, E740 FullScreen, E73F BackToWindow; Resources/Glyphs.xaml) at 10 px, filled in the
+    foreground of the button. MinMaxStates (WindowStateNormal, WindowStateMaximized) is the
+    pseudo-class :maximized of the decorations, which shows ChromeRestore.
+  - The frame (1 px, SurfaceStrokeColorDefaultBrush) and the shadow (the shadow of the Fluent theme
+    of FerroUI, WindowDrawnDecorationsWindowBorderBoxShadow) stand for the frame and the shadow the
+    system draws around a WinUI window.
+  AnimatedIcon (AnimatedBackVisualSource, AnimatedGlobalNavigationButtonVisualSource) of the title
+  bar buttons is the fallback glyph (GlyphGeometryE72B Back, GlyphGeometryE700
+  GlobalNavigationButton); x:DeferLoadStrategy, AutomationProperties.AccessibilityView,
+  ToolTipService.ToolTip and ContentTransitions are left out.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+
+  <!-- The shadow of a window with drawn decorations: the value of the Fluent theme of FerroUI. -->
+  <BoxShadows x:Key="WindowDrawnDecorationsWindowBorderBoxShadow">0 2 10 2 #80000000</BoxShadows>
+
+  <!-- WindowCaptionButton (generic.xaml): a caption button. The glyph is the content of the button
+       (a Path filled with the foreground of the button); the states set the background of the
+       template and the foreground of the button, which the source sets on the Path. -->
+  <ControlTheme x:Key="WindowCaptionButton" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Background" Value="{DynamicResource WindowCaptionBackground}" />
+    <Setter Property="Foreground" Value="{DynamicResource WindowCaptionForeground}" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="VerticalAlignment" Value="Top" />
+    <Setter Property="Width" Value="40" />
+    <Setter Property="Height" Value="28" />
+    <Setter Property="(WindowDecorationProperties.ElementRole)" Value="DecorationsElement" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="LayoutRoot"
+                Background="{DynamicResource WindowCaptionButtonBackground}"
+                BackgroundSizing="{TemplateBinding BackgroundSizing}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}"
+                Padding="{TemplateBinding Padding}">
+          <ContentPresenter x:Name="PART_ContentPresenter"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Foreground="{TemplateBinding Foreground}"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- PointerOver -->
+    <Style Selector="^:pointerover">
+      <Setter Property="Foreground" Value="{DynamicResource WindowCaptionForeground}" />
+    </Style>
+    <Style Selector="^:pointerover /template/ Border#LayoutRoot">
+      <Setter Property="Background" Value="{DynamicResource WindowCaptionButtonBackgroundPointerOver}" />
+    </Style>
+    <!-- Pressed -->
+    <Style Selector="^:pressed">
+      <Setter Property="Foreground" Value="{DynamicResource WindowCaptionForegroundDisabled}" />
+    </Style>
+    <Style Selector="^:pressed /template/ Border#LayoutRoot">
+      <Setter Property="Background" Value="{DynamicResource WindowCaptionButtonBackgroundPressed}" />
+    </Style>
+    <!-- Not a state of the source: a caption button of an action the window does not allow. -->
+    <Style Selector="^:disabled">
+      <Setter Property="Foreground" Value="{DynamicResource WindowCaptionForegroundDisabled}" />
+    </Style>
+  </ControlTheme>
+
+  <!-- The close button: CloseButtonPointerOver and CloseButtonPressed of WindowCaptionButton, with
+       the CloseButton* resources of generic.xaml. -->
+  <ControlTheme x:Key="WindowDrawnDecorationsCloseButton" TargetType="Button" BasedOn="{StaticResource WindowCaptionButton}">
+    <Style Selector="^:pointerover">
+      <Setter Property="Foreground" Value="{DynamicResource CloseButtonStrokePointerOver}" />
+    </Style>
+    <Style Selector="^:pointerover /template/ Border#LayoutRoot">
+      <Setter Property="Background" Value="{DynamicResource CloseButtonBackgroundPointerOver}" />
+    </Style>
+    <Style Selector="^:pressed">
+      <Setter Property="Foreground" Value="{DynamicResource CloseButtonStrokePressed}" />
+    </Style>
+    <Style Selector="^:pressed /template/ Border#LayoutRoot">
+      <Setter Property="Background" Value="{DynamicResource CloseButtonBackgroundPressed}" />
+    </Style>
+  </ControlTheme>
+
+  <!-- TitleBarBackButtonStyle (TitleBar_themeresources.xaml). The Content of the source (E72B) is the
+       glyph of the template. -->
+  <ControlTheme x:Key="TitleBarBackButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+    <Setter Property="Background" Value="{DynamicResource TitleBarBackButtonBackground}" />
+    <Setter Property="Foreground" Value="{DynamicResource TitleBarBackButtonForeground}" />
+    <Setter Property="Width" Value="{DynamicResource TitleBarBackButtonWidth}" />
+    <Setter Property="VerticalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Margin" Value="2" />
+    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="RootGrid"
+                Background="{TemplateBinding Background}"
+                CornerRadius="{TemplateBinding CornerRadius}">
+          <!-- The fallback glyph of the AnimatedIcon (16 x 16) at the size of its ink. -->
+          <Path x:Name="Content"
+                Data="{StaticResource GlyphGeometryE72B}"
+                Fill="{TemplateBinding Foreground}"
+                Stretch="Uniform"
+                Width="14"
+                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- PointerOver -->
+    <Style Selector="^:pointerover /template/ Border#RootGrid">
+      <Setter Property="Background" Value="{DynamicResource TitleBarBackButtonBackgroundPointerOver}" />
+    </Style>
+    <Style Selector="^:pointerover /template/ Path#Content">
+      <Setter Property="Fill" Value="{DynamicResource TitleBarBackButtonForegroundPointerOver}" />
+    </Style>
+    <!-- Pressed -->
+    <Style Selector="^:pressed /template/ Border#RootGrid">
+      <Setter Property="Background" Value="{DynamicResource TitleBarBackButtonBackgroundPressed}" />
+    </Style>
+    <Style Selector="^:pressed /template/ Path#Content">
+      <Setter Property="Fill" Value="{DynamicResource TitleBarBackButtonForegroundPressed}" />
+    </Style>
+    <!-- Disabled -->
+    <Style Selector="^:disabled /template/ Border#RootGrid">
+      <Setter Property="Background" Value="{DynamicResource TitleBarBackButtonBackgroundDisabled}" />
+    </Style>
+    <Style Selector="^:disabled /template/ Path#Content">
+      <Setter Property="Fill" Value="{DynamicResource TitleBarBackButtonForegroundDisabled}" />
+    </Style>
+  </ControlTheme>
+
+  <!-- TitleBarPaneToggleButtonStyle (TitleBar_themeresources.xaml). The Content of the source (E700)
+       is the glyph of the template. -->
+  <ControlTheme x:Key="TitleBarPaneToggleButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+    <Setter Property="Background" Value="{DynamicResource TitleBarPaneToggleButtonBackground}" />
+    <Setter Property="Foreground" Value="{DynamicResource TitleBarPaneToggleButtonForeground}" />
+    <Setter Property="Width" Value="{DynamicResource TitleBarPaneToggleButtonWidth}" />
+    <Setter Property="VerticalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Margin" Value="2" />
+    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="RootGrid"
+                Background="{TemplateBinding Background}"
+                CornerRadius="{TemplateBinding CornerRadius}">
+          <!-- The fallback glyph of the AnimatedIcon (16 x 16) at the size of its ink. -->
+          <Path x:Name="Content"
+                Data="{StaticResource GlyphGeometryE700}"
+                Fill="{TemplateBinding Foreground}"
+                Stretch="Uniform"
+                Width="14"
+                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- PointerOver -->
+    <Style Selector="^:pointerover /template/ Border#RootGrid">
+      <Setter Property="Background" Value="{DynamicResource TitleBarPaneToggleButtonBackgroundPointerOver}" />
+    </Style>
+    <Style Selector="^:pointerover /template/ Path#Content">
+      <Setter Property="Fill" Value="{DynamicResource TitleBarPaneToggleButtonForegroundPointerOver}" />
+    </Style>
+    <!-- Pressed -->
+    <Style Selector="^:pressed /template/ Border#RootGrid">
+      <Setter Property="Background" Value="{DynamicResource TitleBarPaneToggleButtonBackgroundPressed}" />
+    </Style>
+    <Style Selector="^:pressed /template/ Path#Content">
+      <Setter Property="Fill" Value="{DynamicResource TitleBarPaneToggleButtonForegroundPressed}" />
+    </Style>
+    <!-- Disabled -->
+    <Style Selector="^:disabled /template/ Border#RootGrid">
+      <Setter Property="Background" Value="{DynamicResource TitleBarPaneToggleButtonBackgroundDisabled}" />
+    </Style>
+    <Style Selector="^:disabled /template/ Path#Content">
+      <Setter Property="Fill" Value="{DynamicResource TitleBarPaneToggleButtonForegroundDisabled}" />
+    </Style>
+  </ControlTheme>
+
+  <!-- WindowChromeStyle (generic.xaml): the style WinUI's window chrome applies to the content of
+       a window with a custom title bar. ClientAreaPresenter is FerroUI's PART_ContentPresenter. -->
+  <ControlTheme x:Key="WindowChromeStyle" TargetType="ContentControl">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <ContentPresenter x:Name="PART_ContentPresenter"
+                          Content="{TemplateBinding Content}"
+                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                          Foreground="{TemplateBinding Foreground}" />
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
+  <!-- DefaultTitleBarStyle (TitleBar.xaml), as the drawn decorations of a window. -->
+  <ControlTheme x:Key="DefaultTitleBarStyle" TargetType="WindowDrawnDecorations">
+    <!-- TitleBarCompactHeight. -->
+    <Setter Property="DefaultTitleBarHeight" Value="32" />
+    <Setter Property="DefaultFrameThickness" Value="1" />
+    <Setter Property="DefaultShadowThickness" Value="8" />
+    <Setter Property="Template">
+      <WindowDrawnDecorationsTemplate>
+        <WindowDrawnDecorationsContent>
+
+          <WindowDrawnDecorationsContent.Underlay>
+            <Panel x:Name="PART_UnderlayWrapper">
+              <Border x:Name="PART_WindowBorder"
+                      Background="{DynamicResource SystemControlTransparentBrush}"
+                      BorderThickness="{TemplateBinding FrameThickness}"
+                      BorderBrush="{DynamicResource SurfaceStrokeColorDefaultBrush}"
+                      IsHitTestVisible="False" />
+              <!-- PART_LayoutRoot of TitleBar: the drag area and the background of the title bar. -->
+              <Panel x:Name="PART_TitleBar"
+                     VerticalAlignment="Top"
+                     Height="{TemplateBinding TitleBarHeight}"
+                     Background="{DynamicResource SolidBackgroundFillColorBaseBrush}"
+                     IsVisible="{TemplateBinding HasTitleBar}"
+                     WindowDecorationProperties.ElementRole="TitleBar" />
+            </Panel>
+          </WindowDrawnDecorationsContent.Underlay>
+
+          <WindowDrawnDecorationsContent.Overlay>
+            <Panel x:Name="PART_OverlayWrapper">
+              <!-- PART_TitleText of TitleBar, above the content of the window. Its left margin is
+                   TitleBarLeftPaddingWidth + TitleBarLeftHeaderPaddingWidth, its right margin
+                   TitleBarTitleMargin. -->
+              <Panel x:Name="PART_TitleTextPanel"
+                     VerticalAlignment="Top"
+                     Height="{TemplateBinding TitleBarHeight}"
+                     IsHitTestVisible="False"
+                     IsVisible="{TemplateBinding HasTitleBar}">
+                <TextBlock x:Name="PART_TitleText"
+                           Theme="{StaticResource CaptionTextBlockStyle}"
+                           Text="{TemplateBinding Title}"
+                           Foreground="{DynamicResource TitleBarForegroundBrush}"
+                           Margin="16,0,8,0"
+                           TextTrimming="CharacterEllipsis"
+                           TextWrapping="NoWrap"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Center" />
+              </Panel>
+              <StackPanel x:Name="PART_OverlayPanel"
+                          VerticalAlignment="Top"
+                          HorizontalAlignment="Right"
+                          Height="{TemplateBinding TitleBarHeight}"
+                          IsVisible="{TemplateBinding HasTitleBar}"
+                          Orientation="Horizontal">
+                <Button x:Name="PART_FullScreenButton"
+                        Theme="{StaticResource WindowCaptionButton}"
+                        WindowDecorationProperties.ElementRole="FullScreenButton">
+                  <Path Data="{StaticResource GlyphGeometryE740}"
+                        Fill="{Binding $parent[Button].Foreground}"
+                        Stretch="Uniform"
+                        Width="10" />
+                </Button>
+                <Button x:Name="PART_MinimizeButton"
+                        Theme="{StaticResource WindowCaptionButton}"
+                        WindowDecorationProperties.ElementRole="MinimizeButton">
+                  <Path Data="{StaticResource GlyphGeometryE921}"
+                        Fill="{Binding $parent[Button].Foreground}"
+                        Stretch="Uniform"
+                        Width="10" />
+                </Button>
+                <Button x:Name="PART_MaximizeButton"
+                        Theme="{StaticResource WindowCaptionButton}"
+                        WindowDecorationProperties.ElementRole="MaximizeButton">
+                  <Path x:Name="RestoreButtonPath"
+                        Data="{StaticResource GlyphGeometryE922}"
+                        Fill="{Binding $parent[Button].Foreground}"
+                        Stretch="Uniform"
+                        Width="10" />
+                </Button>
+                <Button x:Name="PART_CloseButton"
+                        Theme="{StaticResource WindowDrawnDecorationsCloseButton}"
+                        WindowDecorationProperties.ElementRole="CloseButton">
+                  <Path Data="{StaticResource GlyphGeometryE8BB}"
+                        Fill="{Binding $parent[Button].Foreground}"
+                        Stretch="Uniform"
+                        Width="10" />
+                </Button>
+              </StackPanel>
+            </Panel>
+          </WindowDrawnDecorationsContent.Overlay>
+
+          <WindowDrawnDecorationsContent.FullscreenPopover>
+            <Panel Height="{TemplateBinding DefaultTitleBarHeight}"
+                   VerticalAlignment="Top"
+                   Background="{DynamicResource SolidBackgroundFillColorBaseBrush}"
+                   WindowDecorationProperties.ElementRole="DecorationsElement">
+              <TextBlock x:Name="PART_PopoverTitleText"
+                         Theme="{StaticResource CaptionTextBlockStyle}"
+                         Text="{TemplateBinding Title}"
+                         Foreground="{DynamicResource TitleBarForegroundBrush}"
+                         Margin="16,0,8,0"
+                         TextTrimming="CharacterEllipsis"
+                         TextWrapping="NoWrap"
+                         HorizontalAlignment="Left"
+                         VerticalAlignment="Center" />
+              <StackPanel HorizontalAlignment="Right"
+                          Orientation="Horizontal">
+                <Button x:Name="PART_PopoverFullScreenButton"
+                        Theme="{StaticResource WindowCaptionButton}"
+                        WindowDecorationProperties.ElementRole="FullScreenButton">
+                  <Path Data="{StaticResource GlyphGeometryE73F}"
+                        Fill="{Binding $parent[Button].Foreground}"
+                        Stretch="Uniform"
+                        Width="10" />
+                </Button>
+                <Button x:Name="PART_PopoverCloseButton"
+                        Theme="{StaticResource WindowDrawnDecorationsCloseButton}"
+                        WindowDecorationProperties.ElementRole="CloseButton">
+                  <Path Data="{StaticResource GlyphGeometryE8BB}"
+                        Fill="{Binding $parent[Button].Foreground}"
+                        Stretch="Uniform"
+                        Width="10" />
+                </Button>
+              </StackPanel>
+            </Panel>
+          </WindowDrawnDecorationsContent.FullscreenPopover>
+
+        </WindowDrawnDecorationsContent>
+      </WindowDrawnDecorationsTemplate>
+    </Setter>
+
+    <!-- The shadow: the layers are inset by the shadow and the frame draws the shadow. -->
+    <Style Selector="^:has-shadow /template/ Panel#PART_UnderlayWrapper">
+      <Setter Property="Margin" Value="{TemplateBinding ShadowThickness}" />
+    </Style>
+    <Style Selector="^:has-shadow /template/ Border#PART_WindowBorder">
+      <Setter Property="BoxShadow" Value="{DynamicResource WindowDrawnDecorationsWindowBorderBoxShadow}" />
+    </Style>
+    <Style Selector="^:has-shadow /template/ Panel#PART_OverlayWrapper">
+      <Setter Property="Margin" Value="{TemplateBinding ShadowThickness}" />
+    </Style>
+
+    <!-- The frame: the title bar and the caption buttons inside it. -->
+    <Style Selector="^:has-border /template/ Panel#PART_TitleTextPanel">
+      <Setter Property="Margin" Value="1,1,1,0" />
+    </Style>
+    <Style Selector="^:has-border /template/ Panel#PART_TitleBar">
+      <Setter Property="Margin" Value="1,1,1,0" />
+    </Style>
+    <Style Selector="^:has-border /template/ StackPanel#PART_OverlayPanel">
+      <Setter Property="Margin" Value="0,1,1,0" />
+    </Style>
+
+    <!-- WindowStateMaximized of MinMaxStates: the restore glyph. -->
+    <Style Selector="^:maximized /template/ Path#RestoreButtonPath">
+      <Setter Property="Data" Value="{StaticResource GlyphGeometryE923}" />
+    </Style>
+
+    <!-- The elements of the title bar the platform does not support or the hints of the
+         decorations (TitleBarDecorationHints) do not ask for. -->
+    <Style Selector="^:not(:has-minimize) /template/ Button#PART_MinimizeButton">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:not(:has-maximize) /template/ Button#PART_MaximizeButton">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:not(:has-fullscreen) /template/ Button#PART_FullScreenButton">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:not(:has-fullscreen) /template/ Button#PART_PopoverFullScreenButton">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:not(:has-close) /template/ Button#PART_CloseButton">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:not(:has-close) /template/ Button#PART_PopoverCloseButton">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:not(:has-title) /template/ Panel#PART_TitleTextPanel">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:not(:has-title) /template/ TextBlock#PART_PopoverTitleText">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+
+    <!-- Full screen: the popover replaces the title bar. -->
+    <Style Selector="^:fullscreen /template/ Panel#PART_TitleTextPanel">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:fullscreen /template/ StackPanel#PART_OverlayPanel">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:fullscreen /template/ Panel#PART_TitleBar">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type WindowDrawnDecorations}" TargetType="WindowDrawnDecorations" BasedOn="{StaticResource DefaultTitleBarStyle}" />
+</ResourceDictionary>

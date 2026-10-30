@@ -1,0 +1,45 @@
+{
+  "repository": "https://github.com/google/fonts",
+  "revision": "1c627bfa375fc51cf86fabeca4f6e08a95f0aa5c",
+  "files": {
+    "Roboto.ttf": {
+      "url": "https://raw.githubusercontent.com/google/fonts/1c627bfa375fc51cf86fabeca4f6e08a95f0aa5c/ofl/roboto/Roboto%5Bwdth%2Cwght%5D.ttf",
+      "sha256": "d7598e12c5dbef095ff8272cfc55da0250bd07fbdecbac8a530b9b277872a134",
+      "bytes": 488584
+    },
+    "OFL-Roboto.txt": {
+      "url": "https://raw.githubusercontent.com/google/fonts/1c627bfa375fc51cf86fabeca4f6e08a95f0aa5c/ofl/roboto/OFL.txt",
+      "sha256": "061402327a96aadb0bfb694a960ed289ecd38d383e396243831ab81feb109c41",
+      "bytes": 4394
+    }
+  },
+  "static_instances": {
+    "Roboto-Regular.ttf": {
+      "source": "Roboto.ttf",
+      "axes": {
+        "wght": 400,
+        "wdth": 100
+      },
+      "tool": "fontTools 4.61.1",
+      "sha256": "bdc144d49dee7cf60c77a69a1ebc288cb0e8be25e05f2f3b7b3225e8014615f8"
+    },
+    "Roboto-Medium.ttf": {
+      "source": "Roboto.ttf",
+      "axes": {
+        "wght": 500,
+        "wdth": 100
+      },
+      "tool": "fontTools 4.61.1",
+      "sha256": "8e0a054026a63aa2d901ccfd796a848d71efc6a60a8285a98dfce2f4b1122492"
+    },
+    "Roboto-Bold.ttf": {
+      "source": "Roboto.ttf",
+      "axes": {
+        "wght": 700,
+        "wdth": 100
+      },
+      "tool": "fontTools 4.61.1",
+      "sha256": "c84122b6dc2cfa81b702ec0d753b8f794522b8b7f6bbc3284627c1c35ea6f764"
+    }
+  }
+}

@@ -105,6 +105,39 @@ fn an_object_is_an_instance_of_its_class_and_its_bases() {
 }
 
 #[test]
+fn a_value_in_a_nullable_form_is_an_instance_of_what_it_holds() {
+    use super::compiled::{is_instance, markup_handle};
+    use ferroui_base::media::{Brushes, IBrush};
+    use ferroui_base::metadata::MarkupTyped;
+    crate::register_types();
+    // What `ResolveByName` provides for a property of type `Option<Rc<dyn IBrush>>`: the
+    // element in the form the property stores.
+    let brush: Rc<dyn IBrush> = Brushes::red();
+    let stored: BoxedValue = Rc::new(Some(brush));
+    let value = Some(stored);
+    let contract = markup_handle(<dyn IBrush as MarkupTyped>::MARKUP);
+    assert!(is_instance(&value, contract));
+    // The null of the form is not an instance (`isinst` of null).
+    let null: BoxedValue = Rc::new(Option::<Rc<dyn IBrush>>::None);
+    assert!(!is_instance(&Some(null), contract));
+}
+
+#[test]
+fn a_value_cast_to_a_handle_is_held_untyped() {
+    use super::compiled::cast_untyped;
+    use ferroui_base::data::core::ValueType;
+    crate::register_types();
+    // A value of a type with a registered cast: the value as the target, then untyped.
+    let value = cast_untyped(Some(String::from("text")), ValueType::of::<String>(), 1, 2).expect("the text");
+    assert_eq!(value.and_then(|value| value.downcast_ref::<String>().cloned()).as_deref(), Some("text"));
+    let null = cast_untyped(Option::<String>::None, ValueType::of::<Option<String>>(), 1, 2).expect("null");
+    assert!(null.is_none());
+    let error = cast_untyped(1.5_f64, ValueType::of::<String>(), 3, 4).expect_err("a number is no text");
+    assert!(error.message().starts_with("Unable to cast the value to "), "{}", error.message());
+    assert!(error.message().ends_with("Line 3, position 4. (line 3 position 4)"), "{}", error.message());
+}
+
+#[test]
 fn a_value_is_an_instance_of_the_types_it_is_assignable_to() {
     use ferroui_base::data::core::ValueType;
     use super::compiled::is_instance;

@@ -19,6 +19,9 @@ impl EffectExtensions {
     /// Panics for an effect of an unknown kind.
     pub fn get_effect_output_padding(effect: Option<&dyn IEffect>) -> Thickness {
         let Some(effect) = effect else { return Thickness::default() };
+        if effect.as_any().is::<super::ImmutableLuminanceToAlphaEffect>() {
+            return Thickness::default();
+        }
         if let Some(blur) = effect.as_blur_effect() {
             return Thickness::uniform(Self::adjust_padding_radius(blur.radius()));
         }

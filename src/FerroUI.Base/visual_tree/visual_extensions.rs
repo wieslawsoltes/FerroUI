@@ -48,6 +48,11 @@ fn local_render_transform(visual: &Visual) -> Matrix {
         result *= render_transform;
     }
 
+    // Not upstream: the zoom of a scroll presenter (`Visual::manipulation_transform`).
+    if let Some(manipulation) = visual.manipulation_transform() {
+        result *= manipulation;
+    }
+
     result
 }
 

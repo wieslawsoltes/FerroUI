@@ -7,7 +7,12 @@ use ferroui_base::{FerroLocator, LocatorExtensions};
 use ferroui_controls::application_lifetimes::IApplicationLifetime;
 use ferroui_controls::AppBuilder;
 use ferroui_harfbuzz::HarfBuzzApplicationExtensions;
+#[cfg(feature = "skia")]
 use ferroui_skia::SkiaApplicationExtensions;
+
+// A module draws with Skia, Vello or both; one of the two has to be built in.
+#[cfg(not(any(feature = "skia", feature = "vello")))]
+compile_error!("ferroui-browser needs a render backend: the feature `skia` (a default) or `vello`");
 use std::rc::Rc;
 
 /// How a view is rendered.
@@ -55,10 +60,11 @@ impl BrowserRenderingMode {
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
 pub enum BrowserRenderer {
     /// The Skia backend.
-    #[default]
+    #[cfg_attr(feature = "skia", default)]
     Skia,
     /// The Vello backend. The module has to be built with the feature
     /// `vello` of this crate.
+    #[cfg_attr(not(feature = "skia"), default)]
     Vello,
 }
 
@@ -79,7 +85,7 @@ impl BrowserRenderer {
     /// Whether the module was built with the backend.
     pub fn is_available(self) -> bool {
         match self {
-            BrowserRenderer::Skia => true,
+            BrowserRenderer::Skia => cfg!(feature = "skia"),
             BrowserRenderer::Vello => cfg!(feature = "vello"),
         }
     }
@@ -102,6 +108,25 @@ impl BrowserRenderer {
     }
 }
 
+/// When the views of a page mirror their automation tree into the page,
+/// for screen readers, the element picker of the developer tools and
+/// automation by role (docs/porting/browser-accessibility.md).
+///
+/// Not in the original, whose browser backend has no accessibility tree.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum BrowserAccessibilityMode {
+    /// Built when asked for: a visually hidden "Enable accessibility" button,
+    /// which a screen reader finds first, builds it (as Flutter and Uno
+    /// Platform do on the web, since a page cannot tell whether a screen
+    /// reader runs). Nothing is followed until then.
+    #[default]
+    OnDemand,
+    /// Built when the view is made and kept up to date.
+    Enabled,
+    /// Never built, and no enable button.
+    Disabled,
+}
+
 /// Options of the browser backend.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct BrowserPlatformOptions {
@@ -109,7 +134,7 @@ pub struct BrowserPlatformOptions {
     /// highest priority.
     pub rendering_mode: Vec<BrowserRenderingMode>,
 
-    /// The render backend. Skia by default.
+    /// The render backend. Skia by default when enabled, otherwise Vello.
     ///
     /// Not in the original. The Vello backend needs a module built with the
     /// feature `vello` of this crate; the application fails to start
@@ -148,6 +173,13 @@ pub struct BrowserPlatformOptions {
     /// Not in the original, where a build with threads always renders on
     /// its render worker.
     pub render_thread: bool,
+
+    /// When the views mirror their automation tree into the page (on demand
+    /// by default). [`FerroView::set_accessibility_enabled`](crate::FerroView::set_accessibility_enabled)
+    /// turns it on or off for one view at any time.
+    ///
+    /// Not in the original.
+    pub accessibility: BrowserAccessibilityMode,
 }
 
 impl Default for BrowserPlatformOptions {
@@ -158,11 +190,12 @@ impl Default for BrowserPlatformOptions {
                 BrowserRenderingMode::WebGL1,
                 BrowserRenderingMode::Software2D,
             ],
-            renderer: BrowserRenderer::Skia,
+            renderer: BrowserRenderer::default(),
             register_ferro_service_worker: false,
             ferro_service_worker_scope: None,
             prefer_file_dialog_polyfill: false,
             render_thread: true,
+            accessibility: BrowserAccessibilityMode::default(),
         }
     }
 }
@@ -185,7 +218,7 @@ pub trait BrowserAppBuilder {
     fn setup_browser_app(&self, options: Option<BrowserPlatformOptions>);
 
     /// Selects the subsystems of the browser: its runtime platform and
-    /// windowing subsystem, Skia for rendering and HarfBuzz for text
+    /// windowing subsystem, the enabled renderer and HarfBuzz for text
     /// shaping.
     fn use_browser(&self) -> AppBuilder;
 }
@@ -208,9 +241,24 @@ fn pre_setup_browser(builder: &AppBuilder, options: Option<BrowserPlatformOption
     };
 
     match renderer {
-        BrowserRenderer::Skia => builder,
+        BrowserRenderer::Skia => {
+            if !BrowserRenderer::Skia.is_available() {
+                panic!("The browser module was built without the `skia` feature; select BrowserRenderer::Vello");
+            }
+            builder
+        }
         BrowserRenderer::Vello => use_vello_renderer(&builder),
     }
+}
+
+#[cfg(feature = "skia")]
+fn use_skia_renderer(builder: &AppBuilder) -> AppBuilder {
+    builder.use_skia()
+}
+
+#[cfg(not(feature = "skia"))]
+fn use_skia_renderer(_builder: &AppBuilder) -> AppBuilder {
+    panic!("The browser module was built without the `skia` feature; select BrowserRenderer::Vello");
 }
 
 /// The builder with the Vello backend in the place of the render backend it
@@ -270,10 +318,13 @@ impl BrowserAppBuilder for AppBuilder {
     }
 
     fn use_browser(&self) -> AppBuilder {
-        BrowserRuntimePlatformServices::use_browser_runtime_platform_subsystem(self)
+        let builder = BrowserRuntimePlatformServices::use_browser_runtime_platform_subsystem(self)
             .use_windowing_subsystem(BrowserWindowingPlatform::register, "")
-            .use_skia()
-            .use_harfbuzz()
+            .use_harfbuzz();
+        match BrowserRenderer::default() {
+            BrowserRenderer::Skia => use_skia_renderer(&builder),
+            BrowserRenderer::Vello => use_vello_renderer(&builder),
+        }
     }
 }
 
@@ -302,12 +353,21 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "skia")]
     fn skia_is_the_default_renderer_and_draws_every_mode() {
         let options = BrowserPlatformOptions::default();
 
         assert_eq!(BrowserRenderer::Skia, options.renderer);
         assert!(BrowserRenderer::Skia.is_available());
         assert_eq!(options.rendering_mode, BrowserRenderer::Skia.rendering_modes(&options.rendering_mode));
+    }
+
+    #[test]
+    #[cfg(all(feature = "vello", not(feature = "skia")))]
+    fn a_vello_only_module_defaults_to_vello() {
+        assert_eq!(BrowserRenderer::Vello, BrowserPlatformOptions::default().renderer);
+        assert!(BrowserRenderer::Vello.is_available());
+        assert!(!BrowserRenderer::Skia.is_available());
     }
 
     #[test]

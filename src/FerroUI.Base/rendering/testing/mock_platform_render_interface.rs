@@ -543,11 +543,22 @@ type BackendContextFactory = Box<
 pub struct MockPlatformRenderInterface {
     log: DrawingLog,
     backend_context_factory: std::sync::OnceLock<BackendContextFactory>,
+    compositing_layers: std::sync::atomic::AtomicBool,
 }
 
 impl MockPlatformRenderInterface {
     pub fn new(log: DrawingLog) -> Rc<MockPlatformRenderInterface> {
-        Rc::new(MockPlatformRenderInterface { log, backend_context_factory: std::sync::OnceLock::new() })
+        Rc::new(MockPlatformRenderInterface {
+            log,
+            backend_context_factory: std::sync::OnceLock::new(),
+            compositing_layers: std::sync::atomic::AtomicBool::new(false),
+        })
+    }
+
+    /// Enables the recording capability. Tests replaying such recordings must
+    /// also opt their mock drawing context into compositing layer support.
+    pub fn set_supports_compositing_layers(&self, value: bool) {
+        self.compositing_layers.store(value, std::sync::atomic::Ordering::Relaxed);
     }
 
     /// Makes `factory` create the backend contexts, for a test that watches
@@ -759,6 +770,9 @@ impl IPlatformRenderInterface for MockPlatformRenderInterface {
     }
     fn supports_individual_round_rects(&self) -> bool {
         false
+    }
+    fn supports_compositing_layers(&self) -> bool {
+        self.compositing_layers.load(std::sync::atomic::Ordering::Relaxed)
     }
     fn default_alpha_format(&self) -> AlphaFormat {
         AlphaFormat::Premul

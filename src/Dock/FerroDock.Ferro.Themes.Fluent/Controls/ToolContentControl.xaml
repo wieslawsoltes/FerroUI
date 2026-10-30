@@ -1,0 +1,32 @@
+<ResourceDictionary xmlns:fd="using:FerroDock.Ferro.Controls"
+                    xmlns:pc="using:FerroDock.Ferro.Converters"
+                    xmlns:sp="using:FerroDock.Settings" xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="using:FerroDock.Model.Controls"
+                    x:DataType="controls:IToolContent"
+                    x:CompileBindings="True">
+  <Design.PreviewWith>
+    <fd:ToolContentControl Width="300" Height="300" />
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="{x:Type fd:ToolContentControl}" TargetType="fd:ToolContentControl" x:DataType="controls:IToolContent">
+
+    <Setter Property="(sp:DockProperties.IsDragEnabled)" Value="{Binding CanDrag}" />
+    <Setter Property="(sp:DockProperties.IsDropEnabled)" Value="{Binding CanDrop}" />
+    <Setter Property="MinWidth" Value="{Binding MinWidth}" />
+    <Setter Property="MaxWidth" Value="{Binding MaxWidth}" />
+    <Setter Property="MinHeight" Value="{Binding MinHeight}" />
+    <Setter Property="MaxHeight" Value="{Binding MaxHeight}" />
+
+    <Setter Property="Template">
+      <ControlTemplate>
+        <fd:DockableControl TrackingMode="Visible">
+          <DeferredContentControl Content="{Binding}"
+                                  ContentTemplate="{Binding}" />
+        </fd:DockableControl>
+      </ControlTemplate>
+    </Setter>
+
+  </ControlTheme>
+
+</ResourceDictionary>

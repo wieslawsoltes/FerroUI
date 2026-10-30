@@ -1,0 +1,15 @@
+[package]
+name = "ferrodock-controls-recycling-model"
+description = "Framework-independent control recycling contracts for FerroDock"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[lib]
+path = "lib.rs"
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "deny"

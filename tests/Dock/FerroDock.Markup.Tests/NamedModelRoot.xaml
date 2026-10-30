@@ -1,0 +1,4 @@
+<t:NamedDocument xmlns="https://github.com/ferroui"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:t="using:FerroDock.Markup.Tests"
+                 x:Name="RootDocument" Title="Plain root" />

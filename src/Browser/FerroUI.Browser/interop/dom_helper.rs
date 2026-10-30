@@ -16,6 +16,9 @@ extern "C" {
     #[wasm_bindgen(method, getter, js_name = inputElement)]
     fn input_element_raw(this: &HostContent) -> JsObject;
 
+    #[wasm_bindgen(method, getter, js_name = accessibilityHost)]
+    fn accessibility_host_raw(this: &HostContent) -> JsObject;
+
     #[wasm_bindgen(js_namespace = FerroDOM, js_name = getGlobalThis)]
     pub fn get_global_this() -> JsObject;
 
@@ -71,6 +74,12 @@ impl HostContent {
     /// The hidden input element text input goes through.
     pub fn input_element(&self) -> Option<JsObject> {
         non_null(self.input_element_raw())
+    }
+
+    /// The element the automation tree of the view is mirrored into (not in
+    /// the original).
+    pub fn accessibility_host(&self) -> Option<JsObject> {
+        non_null(self.accessibility_host_raw())
     }
 }
 

@@ -1,0 +1,100 @@
+--- a/markup_extensions/resolve_by_name_extension.rs
++++ b/markup_extensions/resolve_by_name_extension.rs
+@@ -4,7 +4,7 @@
+ use crate::{IProvideValueTarget, ServiceProviderExtensions};
+ use ferroui_base::metadata::IServiceProvider;
+ use ferroui_base::data::core::{ValueType, ValueTypes};
+-use ferroui_base::{ferro_markup_type, BoxedValue, FerroObject, FerroProperty, Ref};
++use ferroui_base::{ferro_markup_type, BoxedValue, FerroProperty};
+ use std::rc::Rc;
+ 
+ /// Resolves a named control of the name scope: what text assigned to a
+@@ -36,8 +36,8 @@
+     /// reference to an element it does not own), so the element is brought
+     /// to that type where it is one. For a property of any object, or a
+     /// plain property, it is the handle of the element's own class.
+-    fn element_value(element: Ref<FerroObject>, stored_as: Option<ValueType>) -> BoxedValue {
+-        let boxed = box_object(element);
++    fn element_value(value: BoxedValue, stored_as: Option<ValueType>) -> BoxedValue {
++        let boxed = ValueTypes::as_object(&*value).map(box_object).unwrap_or(value);
+         match stored_as {
+             Some(type_) if !type_.is_object() => match ValueTypes::try_convert(Some(&boxed), type_) {
+                 Some(Some(stored)) => stored,
+@@ -50,7 +50,7 @@
+     fn provide_value_for(service_provider: &Rc<dyn IServiceProvider>, name: &str) -> Option<BoxedValue> {
+         let name_scope = service_provider.get_name_scope()?;
+ 
+-        let value = name_scope.find_async(name);
++        let value = name_scope.find_value_async(name);
+ 
+         let provide_value_target = service_provider.get_service_of::<Rc<dyn IProvideValueTarget>>();
+         let target_property =
+--- a/templates/data_template.rs
++++ b/templates/data_template.rs
+@@ -26,7 +26,11 @@
+     let Some(data) = data else { return false };
+     let actual = ValueType::of_value(&**data);
+     if ValueTypes::is_assignable(actual, data_type) {
+-        return true;
++        // A registered interface downcast is conditional on the actual object.
++        // Its presence alone does not make every source handle an instance.
++        if ValueTypes::try_cast(data, data_type).is_some() {
++            return true;
++        }
+     }
+ 
+     // Plain (non-class) types: the type of the data, the types it derives
+--- a/xaml_il/runtime/compiled.rs
++++ b/xaml_il/runtime/compiled.rs
+@@ -672,7 +672,7 @@
+         if let Some(value) = value {
+             // An object passed to a property of type `object` is handed over in the untyped form.
+             let value = match value {
+-                Some(value) if (self.property.type_)().is_object() => untyped_object_form(value).or(Some(value.clone())),
++                Some(value) if (self.property.type_)().is_object() => object_assignment_value(Some(value.clone())),
+                 other => other.cloned(),
+             };
+             arguments.push(value);
+@@ -937,13 +937,27 @@
+     line: i32,
+     position: i32,
+ ) -> Result<(), XamlLoadException> {
++    register_name_value(scope, name, Rc::new(element), line, position)
++}
++
++/// Registers any non-null named object in the shared context scope, including
++/// plain models which do not derive from FerroObject.
++pub fn register_name_value(
++    scope: Option<&Rc<dyn INameScope>>,
++    name: &str,
++    value: BoxedValue,
++    line: i32,
++    position: i32,
++) -> Result<(), XamlLoadException> {
+     let scope = scope.ok_or_else(|| {
+         at("NullReferenceException", "The runtime context has no name scope to register a name in", line, position)
+     })?;
+-    scope.try_register(name, element).map_err(|error: NameScopeError| {
++    scope.try_register_value(name, value).map_err(|error: NameScopeError| {
+         let type_name = match error {
+             NameScopeError::Completed => "InvalidOperationException",
+             NameScopeError::DuplicateName(_) => "ArgumentException",
++            NameScopeError::UnsupportedValue => "NotSupportedException",
++            NameScopeError::NullValue => "ArgumentNullException",
+         };
+         at(type_name, error, line, position)
+     })
+@@ -996,6 +1010,13 @@
+     }
+     let root: BoxedValue = Rc::new(object);
+     ValueTypes::try_convert_registered(&root, control_handle)
++}
++
++/// The value a member typed `object` receives: nullable and object-value
++/// transport boxes are unwrapped, null remains null, and a native control
++/// keeps its enclosing object identity in the canonical untyped handle.
++pub fn object_assignment_value(value: MarkupValue) -> MarkupValue {
++    ValueTypes::normalize(value?).map(|value| untyped_object_form(&value).unwrap_or(value))
+ }
+ 
+ /// `value` as the value of a member of type `object` (`System.Object`):

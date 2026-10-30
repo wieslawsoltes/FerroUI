@@ -1,0 +1,4 @@
+<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <RepeatButton x:Name="Primary" Content="Click and hold"/><TextBlock x:Name="Output" Text="Press and hold to repeat"/>
+</StackPanel>

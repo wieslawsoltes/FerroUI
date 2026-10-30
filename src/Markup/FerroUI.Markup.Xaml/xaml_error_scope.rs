@@ -58,8 +58,10 @@ pub fn with_xaml_errors<T>(load: impl FnOnce() -> Result<T, XamlLoadException>) 
     }
 }
 
-/// Throws `error`: into the innermost open scope, or else as a panic with its message.
-pub(crate) fn throw(error: XamlLoadException) -> ! {
+/// Throws `error`: into the innermost open scope, or else as a panic with its message. Public
+/// for the members of `ferroui-markup-xaml-winui`, which throw as the runtime does.
+#[doc(hidden)]
+pub fn throw(error: XamlLoadException) -> ! {
     let unthrown = SCOPES.with(|scopes| match scopes.borrow_mut().last_mut() {
         Some(scope) => {
             *scope = Some(error);

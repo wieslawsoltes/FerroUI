@@ -1,0 +1,58 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    dxaml/xcp/dxaml/themes/generic.xaml (the implicit style of ContentControl)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  WinUI has no Label: a WinUI application labels a control with a TextBlock, or with the Header of
+  the control. FerroUI's Label is a content control, so its theme is the default style of
+  ContentControl: the content aligned to the left and the top, presented by a ContentPresenter
+  at the padding. Its text is the text of its container (the font, size and foreground of the
+  window, ContentControlThemeFontFamily, ControlContentThemeFontSize, TextFillColorPrimaryBrush),
+  as for a TextBlock of WinUI.
+
+  Translation notes (docs/porting/winui-theme.md, section 4):
+  - FerroUI's ContentControl has a template of its own (the one of this document without the
+    alignments), so the implicit style of ContentControl is ported here, with Label.
+  - The ContentPresenter is FerroUI's PART_ContentPresenter. WinUI's template places it at the
+    padding (Margin) with the content alignments as its own alignments and draws neither
+    background nor border; the presenter here takes the padding, the alignments, the background
+    and the border, as FerroUI's ContentControl does: the same layout, and the background and
+    border a FerroUI application may set.
+  - ContentTransitions has no counterpart. RecognizesAccessKey is FerroUI's access key of a
+    label (the key that focuses its target).
+-->
+<!-- WinUI: {ContentControl} -->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <StackPanel Spacing="8">
+        <Label Content="A label" />
+        <TextBox Width="200" />
+      </StackPanel>
+    </Border>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="{x:Type Label}" TargetType="Label">
+    <Setter Property="HorizontalContentAlignment" Value="Left" />
+    <Setter Property="VerticalContentAlignment" Value="Top" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <ContentPresenter x:Name="PART_ContentPresenter"
+                          Background="{TemplateBinding Background}"
+                          BackgroundSizing="{TemplateBinding BackgroundSizing}"
+                          BorderBrush="{TemplateBinding BorderBrush}"
+                          BorderThickness="{TemplateBinding BorderThickness}"
+                          CornerRadius="{TemplateBinding CornerRadius}"
+                          Content="{TemplateBinding Content}"
+                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                          Padding="{TemplateBinding Padding}"
+                          HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                          VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                          RecognizesAccessKey="True" />
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

@@ -1,0 +1,11 @@
+<Panel xmlns="https://github.com/ferroui"
+       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+       xmlns:fd="using:FerroDock.Ferro.Controls"
+       xmlns:theme="using:FerroDock.Ferro.Themes.Simple"
+       xmlns:density="using:FerroDock.Ferro.Themes"
+       x:DataType="Panel">
+  <Panel.Styles>
+    <theme:DockSimpleTheme DensityStyle="Compact" CacheDocumentTabContent="True" />
+  </Panel.Styles>
+  <fd:HostWindowTitleBar Focusable="True" />
+</Panel>

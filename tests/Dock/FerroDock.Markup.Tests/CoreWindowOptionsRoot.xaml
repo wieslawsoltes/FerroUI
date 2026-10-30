@@ -1,0 +1,6 @@
+<core:DockWindowOptions xmlns="https://github.com/ferroui"
+ xmlns:core="clr-namespace:FerroDock.Model.Core;assembly=FerroDock.Model"
+ xmlns:model="clr-namespace:FerroDock.Model.ReactiveUI.Core;assembly=FerroDock.Model.ReactiveUI"
+ OwnerMode="ParentWindow" IsModal="True" ShowInTaskbar="False">
+ <core:DockWindowOptions.ParentWindow><model:DockWindow Title="Parent title" /></core:DockWindowOptions.ParentWindow>
+</core:DockWindowOptions>

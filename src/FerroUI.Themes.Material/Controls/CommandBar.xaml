@@ -1,0 +1,421 @@
+<!-- Material 3 Expressive adaptation of the FerroUI WinUI control contract.
+     Source: AndroidX Material3 1.5.0-beta02, e4d933c98df7baa7ea2b83eea6e086915961e0ff.
+     Original structure: Microsoft Corporation, MIT; see NOTICE.md. -->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:material="using:FerroUI.Themes.Material" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20" Width="600">
+      <CommandBar>
+        <CommandBar.PrimaryCommands>
+          <CommandBarButton Label="Add">
+            <CommandBarButton.Icon>
+              <PathIcon Data="M11,5H13V11H19V13H13V19H11V13H5V11H11Z" />
+            </CommandBarButton.Icon>
+          </CommandBarButton>
+          <CommandBarSeparator />
+          <CommandBarToggleButton Label="Checked" IsChecked="True">
+            <CommandBarToggleButton.Icon>
+              <PathIcon Data="M4,12.5L5.5,11L9.5,15L18.5,6L20,7.5L9.5,18Z" />
+            </CommandBarToggleButton.Icon>
+          </CommandBarToggleButton>
+        </CommandBar.PrimaryCommands>
+        <CommandBar.SecondaryCommands>
+          <CommandBarButton Label="Settings" />
+        </CommandBar.SecondaryCommands>
+      </CommandBar>
+    </Border>
+  </Design.PreviewWith>
+  <ControlTheme x:Key="DefaultAppBarButtonStyle" TargetType="CommandBarButton">
+    <Setter Property="MinHeight" Value="48" />
+    <Setter Property="MinWidth" Value="48" />
+    <Setter Property="Width" Value="48" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="FontWeight" Value="Medium" />
+    <Setter Property="CornerRadius" Value="20" />
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border BorderBrush="{DynamicResource MaterialSecondaryBrush}" BorderThickness="3" CornerRadius="20" Margin="-3" />
+      </FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel x:Name="Root" Background="Transparent">
+          <Border x:Name="MaterialContainer" Margin="4" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}" TemplatedControl.IsTemplateFocusTarget="True">
+            <Border.Transitions>
+              <Transitions>
+                <material:MaterialCornerRadiusTransition Property="CornerRadius" Duration="{DynamicResource MaterialMotionDefaultEffectsDuration}" Easing="{DynamicResource MaterialMotionDefaultEffectsEasing}" />
+              </Transitions>
+            </Border.Transitions>
+            <Panel>
+              <Border x:Name="StateLayer" Background="{TemplateBinding Foreground}" CornerRadius="{Binding #MaterialContainer.CornerRadius}" Opacity="0" IsHitTestVisible="False">
+                <Border.Transitions>
+                  <Transitions>
+                    <material:MaterialDoubleTransition Property="Opacity" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" />
+                  </Transitions>
+                </Border.Transitions>
+              </Border>
+              <material:MaterialRipple Fill="{TemplateBinding Foreground}" CornerRadius="{Binding #MaterialContainer.CornerRadius}" ReducedMotion="{DynamicResource MaterialReducedMotion}" />
+              <Grid x:Name="ContentRoot" RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,*" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Viewbox x:Name="ContentViewbox" Width="24" Height="24" HorizontalAlignment="Center" IsVisible="{TemplateBinding Icon, Converter={x:Static ObjectConverters.IsNotNull}}" Grid.ColumnSpan="2">
+                  <Panel Width="24" Height="24">
+                    <ContentPresenter x:Name="Content" Content="{TemplateBinding Icon}" Foreground="{TemplateBinding Foreground}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+                    <Path x:Name="OverflowCheckGlyph" FlowDirection="LeftToRight" Width="24" Height="24" Stretch="None" Data="M9 16.17 4.83 12 3.41 13.41 9 19 21 7 19.59 5.59Z" Fill="{TemplateBinding Foreground}" IsVisible="False" />
+                  </Panel>
+                </Viewbox>
+                <TextBlock x:Name="TextLabel" Grid.Row="1" Text="{TemplateBinding Label}" Foreground="{TemplateBinding Foreground}" FontSize="{TemplateBinding FontSize}" FontWeight="{TemplateBinding FontWeight}" Margin="0,4,0,0" TextAlignment="Center" VerticalAlignment="Center" Grid.ColumnSpan="2" />
+              </Grid>
+            </Panel>
+          </Border>
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^[LabelPosition=Bottom]">
+      <Setter Property="MinHeight" Value="64" />
+    </Style>
+    <Style Selector="^[IsCompact=True], ^[LabelPosition=Collapsed]">
+      <Setter Property="MinHeight" Value="48" />
+    </Style>
+    <Style Selector="^[IsCompact=True] /template/ TextBlock#TextLabel, ^[LabelPosition=Collapsed] /template/ TextBlock#TextLabel">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^[LabelPosition=Right]">
+      <Setter Property="Width" Value="NaN" />
+    </Style>
+    <Style Selector="^[LabelPosition=Right] /template/ Grid#ContentRoot">
+      <Setter Property="Margin" Value="12,0" />
+    </Style>
+    <Style Selector="^[LabelPosition=Right] /template/ Viewbox#ContentViewbox">
+      <Setter Property="Margin" Value="0,0,8,0" />
+      <Setter Property="Grid.ColumnSpan" Value="1" />
+    </Style>
+    <Style Selector="^[LabelPosition=Right] /template/ TextBlock#TextLabel">
+      <Setter Property="Grid.Row" Value="0" />
+      <Setter Property="Grid.Column" Value="1" />
+      <Setter Property="Margin" Value="0" />
+      <Setter Property="FontSize" Value="14" />
+      <Setter Property="IsVisible" Value="True" />
+      <Setter Property="Grid.ColumnSpan" Value="1" />
+    </Style>
+    <Style Selector="^[IsInOverflow=True]">
+      <Setter Property="Width" Value="NaN" />
+      <Setter Property="MinWidth" Value="112" />
+      <Setter Property="MaxWidth" Value="280" />
+      <Setter Property="MinHeight" Value="48" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="CornerRadius" Value="0" />
+      <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceBrush}" />
+    </Style>
+    <Style Selector="^[IsInOverflow=True] /template/ Border#MaterialContainer">
+      <Setter Property="Margin" Value="0" />
+    </Style>
+    <Style Selector="^[IsInOverflow=True] /template/ Grid#ContentRoot">
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="Margin" Value="12,8" />
+    </Style>
+    <Style Selector="^[IsInOverflow=True] /template/ Viewbox#ContentViewbox">
+      <Setter Property="Margin" Value="0,0,12,0" />
+      <Setter Property="Grid.ColumnSpan" Value="1" />
+    </Style>
+    <Style Selector="^[IsInOverflow=True] /template/ TextBlock#TextLabel">
+      <Setter Property="Grid.Row" Value="0" />
+      <Setter Property="Grid.Column" Value="1" />
+      <Setter Property="Margin" Value="0" />
+      <Setter Property="FontSize" Value="16" />
+      <Setter Property="FontWeight" Value="Normal" />
+      <Setter Property="TextAlignment" Value="Left" />
+      <Setter Property="IsVisible" Value="True" />
+      <Setter Property="Grid.ColumnSpan" Value="1" />
+    </Style>
+    <Style Selector="^:pointerover /template/ Border#StateLayer">
+      <Setter Property="Opacity" Value="0.08" />
+    </Style>
+    <Style Selector="^:focus-visible /template/ Border#StateLayer">
+      <Setter Property="Opacity" Value="0.10" />
+    </Style>
+    <Style Selector="^:pressed /template/ Border#MaterialContainer">
+      <Setter Property="CornerRadius" Value="8" />
+    </Style>
+    <Style Selector="^[IsInOverflow=True]:pressed /template/ Border#MaterialContainer">
+      <Setter Property="CornerRadius" Value="0" />
+    </Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Foreground" Value="{DynamicResource MaterialDisabledOnSurfaceBrush}" />
+    </Style>
+    <Style Selector="^:disabled /template/ Border#StateLayer">
+      <Setter Property="Opacity" Value="0" />
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="AppBarButtonOverflowStyle" TargetType="CommandBarButton" BasedOn="{StaticResource DefaultAppBarButtonStyle}">
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="Width" Value="NaN" />
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type CommandBarButton}" TargetType="CommandBarButton" BasedOn="{StaticResource DefaultAppBarButtonStyle}" />
+  <ControlTheme x:Key="DefaultAppBarToggleButtonStyle" TargetType="CommandBarToggleButton">
+    <Setter Property="MinHeight" Value="48" />
+    <Setter Property="MinWidth" Value="48" />
+    <Setter Property="Width" Value="48" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="FontWeight" Value="Medium" />
+    <Setter Property="CornerRadius" Value="20" />
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border BorderBrush="{DynamicResource MaterialSecondaryBrush}" BorderThickness="3" CornerRadius="20" Margin="-3" />
+      </FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel x:Name="Root" Background="Transparent">
+          <Border x:Name="MaterialContainer" Margin="4" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}" TemplatedControl.IsTemplateFocusTarget="True">
+            <Border.Transitions>
+              <Transitions>
+                <material:MaterialCornerRadiusTransition Property="CornerRadius" Duration="{DynamicResource MaterialMotionDefaultEffectsDuration}" Easing="{DynamicResource MaterialMotionDefaultEffectsEasing}" />
+              </Transitions>
+            </Border.Transitions>
+            <Panel>
+              <Border x:Name="StateLayer" Background="{TemplateBinding Foreground}" CornerRadius="{Binding #MaterialContainer.CornerRadius}" Opacity="0" IsHitTestVisible="False">
+                <Border.Transitions>
+                  <Transitions>
+                    <material:MaterialDoubleTransition Property="Opacity" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" />
+                  </Transitions>
+                </Border.Transitions>
+              </Border>
+              <material:MaterialRipple Fill="{TemplateBinding Foreground}" CornerRadius="{Binding #MaterialContainer.CornerRadius}" ReducedMotion="{DynamicResource MaterialReducedMotion}" />
+              <Grid x:Name="ContentRoot" RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,*" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Viewbox x:Name="ContentViewbox" Width="24" Height="24" HorizontalAlignment="Center" IsVisible="{TemplateBinding Icon, Converter={x:Static ObjectConverters.IsNotNull}}" Grid.ColumnSpan="2">
+                  <Panel Width="24" Height="24">
+                    <ContentPresenter x:Name="Content" Content="{TemplateBinding Icon}" Foreground="{TemplateBinding Foreground}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+                    <Path x:Name="OverflowCheckGlyph" FlowDirection="LeftToRight" Width="24" Height="24" Stretch="None" Data="M9 16.17 4.83 12 3.41 13.41 9 19 21 7 19.59 5.59Z" Fill="{TemplateBinding Foreground}" IsVisible="False" />
+                  </Panel>
+                </Viewbox>
+                <TextBlock x:Name="TextLabel" Grid.Row="1" Text="{TemplateBinding Label}" Foreground="{TemplateBinding Foreground}" FontSize="{TemplateBinding FontSize}" FontWeight="{TemplateBinding FontWeight}" Margin="0,4,0,0" TextAlignment="Center" VerticalAlignment="Center" Grid.ColumnSpan="2" />
+              </Grid>
+            </Panel>
+          </Border>
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^[LabelPosition=Bottom]">
+      <Setter Property="MinHeight" Value="64" />
+    </Style>
+    <Style Selector="^[IsCompact=True], ^[LabelPosition=Collapsed]">
+      <Setter Property="MinHeight" Value="48" />
+    </Style>
+    <Style Selector="^[IsCompact=True] /template/ TextBlock#TextLabel, ^[LabelPosition=Collapsed] /template/ TextBlock#TextLabel">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^[LabelPosition=Right]">
+      <Setter Property="Width" Value="NaN" />
+    </Style>
+    <Style Selector="^[LabelPosition=Right] /template/ Grid#ContentRoot">
+      <Setter Property="Margin" Value="12,0" />
+    </Style>
+    <Style Selector="^[LabelPosition=Right] /template/ Viewbox#ContentViewbox">
+      <Setter Property="Margin" Value="0,0,8,0" />
+      <Setter Property="Grid.ColumnSpan" Value="1" />
+    </Style>
+    <Style Selector="^[LabelPosition=Right] /template/ TextBlock#TextLabel">
+      <Setter Property="Grid.Row" Value="0" />
+      <Setter Property="Grid.Column" Value="1" />
+      <Setter Property="Margin" Value="0" />
+      <Setter Property="FontSize" Value="14" />
+      <Setter Property="IsVisible" Value="True" />
+      <Setter Property="Grid.ColumnSpan" Value="1" />
+    </Style>
+    <Style Selector="^[IsInOverflow=True]">
+      <Setter Property="Width" Value="NaN" />
+      <Setter Property="MinWidth" Value="112" />
+      <Setter Property="MaxWidth" Value="280" />
+      <Setter Property="MinHeight" Value="48" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="CornerRadius" Value="0" />
+      <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceBrush}" />
+    </Style>
+    <Style Selector="^[IsInOverflow=True] /template/ Border#MaterialContainer">
+      <Setter Property="Margin" Value="0" />
+    </Style>
+    <Style Selector="^[IsInOverflow=True] /template/ Grid#ContentRoot">
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="Margin" Value="12,8" />
+    </Style>
+    <Style Selector="^[IsInOverflow=True] /template/ Viewbox#ContentViewbox">
+      <Setter Property="Margin" Value="0,0,12,0" />
+      <Setter Property="Grid.ColumnSpan" Value="1" />
+    </Style>
+    <Style Selector="^[IsInOverflow=True] /template/ TextBlock#TextLabel">
+      <Setter Property="Grid.Row" Value="0" />
+      <Setter Property="Grid.Column" Value="1" />
+      <Setter Property="Margin" Value="0" />
+      <Setter Property="FontSize" Value="16" />
+      <Setter Property="FontWeight" Value="Normal" />
+      <Setter Property="TextAlignment" Value="Left" />
+      <Setter Property="IsVisible" Value="True" />
+      <Setter Property="Grid.ColumnSpan" Value="1" />
+    </Style>
+    <Style Selector="^:pointerover /template/ Border#StateLayer">
+      <Setter Property="Opacity" Value="0.08" />
+    </Style>
+    <Style Selector="^:focus-visible /template/ Border#StateLayer">
+      <Setter Property="Opacity" Value="0.10" />
+    </Style>
+    <Style Selector="^:pressed /template/ Border#MaterialContainer">
+      <Setter Property="CornerRadius" Value="8" />
+    </Style>
+    <Style Selector="^[IsInOverflow=True]:pressed /template/ Border#MaterialContainer">
+      <Setter Property="CornerRadius" Value="0" />
+    </Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Foreground" Value="{DynamicResource MaterialDisabledOnSurfaceBrush}" />
+    </Style>
+    <Style Selector="^:disabled /template/ Border#StateLayer">
+      <Setter Property="Opacity" Value="0" />
+    </Style>
+    <Style Selector="^:checked">
+      <Setter Property="Background" Value="{DynamicResource MaterialSecondaryContainerBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource MaterialOnSecondaryContainerBrush}" />
+      <Setter Property="CornerRadius" Value="12" />
+    </Style>
+    <Style Selector="^:checked:disabled">
+      <Setter Property="Background" Value="{DynamicResource MaterialDisabledContainerBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource MaterialDisabledOnSurfaceBrush}" />
+    </Style>
+    <Style Selector="^[IsInOverflow=True] /template/ Viewbox#ContentViewbox">
+      <Setter Property="IsVisible" Value="True" />
+      <Setter Property="Grid.ColumnSpan" Value="1" />
+    </Style>
+    <Style Selector="^[IsInOverflow=True]:checked /template/ Path#OverflowCheckGlyph">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^[IsInOverflow=True]:checked /template/ ContentPresenter#Content">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="AppBarToggleButtonOverflowStyle" TargetType="CommandBarToggleButton" BasedOn="{StaticResource DefaultAppBarToggleButtonStyle}">
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="Width" Value="NaN" />
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type CommandBarToggleButton}" TargetType="CommandBarToggleButton" BasedOn="{StaticResource DefaultAppBarToggleButtonStyle}" />
+  <ControlTheme x:Key="DefaultAppBarSeparatorStyle" TargetType="CommandBarSeparator">
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOutlineVariantBrush}" />
+    <Setter Property="Padding" Value="{DynamicResource AppBarSeparatorMargin}" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel x:Name="RootGrid">
+          <Rectangle x:Name="SeparatorRectangle" RadiusX="{StaticResource AppBarSeparatorCornerRadius}" RadiusY="{StaticResource AppBarSeparatorCornerRadius}" Width="{StaticResource AppBarSeparatorWidth}" VerticalAlignment="Stretch" Fill="{TemplateBinding Foreground}" Margin="{TemplateBinding Padding}" />
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^[IsCompact=True] /template/ Panel#RootGrid">
+      <Setter Property="Height" Value="{DynamicResource AppBarThemeCompactHeight}" />
+      <Setter Property="VerticalAlignment" Value="Top" />
+    </Style>
+    <Style Selector="^[IsInOverflow=True] /template/ Panel#RootGrid">
+      <Setter Property="Height" Value="NaN" />
+      <Setter Property="VerticalAlignment" Value="Stretch" />
+    </Style>
+    <Style Selector="^[IsInOverflow=True] /template/ Rectangle#SeparatorRectangle">
+      <Setter Property="Width" Value="NaN" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="Height" Value="{StaticResource AppBarOverflowSeparatorHeight}" />
+      <Setter Property="Margin" Value="{StaticResource AppBarOverflowSeparatorMargin}" />
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type CommandBarSeparator}" TargetType="CommandBarSeparator" BasedOn="{StaticResource DefaultAppBarSeparatorStyle}" />
+  <ControlTheme x:Key="EllipsisButton" TargetType="Button" BasedOn="{StaticResource NavigationBackButtonNormalStyle}">
+    <Setter Property="Margin" Value="0" />
+  </ControlTheme>
+  <ControlTheme x:Key="DefaultCommandBarOverflowPresenterStyle" TargetType="ItemsControl">
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Background" Value="{DynamicResource MaterialSurfaceContainerBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource CommandBarOverflowPresenterBorderBrush}" />
+    <Setter Property="Padding" Value="0,8" />
+    <Setter Property="MaxWidth" Value="280" />
+    <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+    <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+    <Setter Property="KeyboardNavigation.TabNavigation" Value="Once" />
+    <Setter Property="CornerRadius" Value="4" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="LayoutRoot" Background="{TemplateBinding Background}" BackgroundSizing="InnerBorderEdge" Padding="{TemplateBinding Padding}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="0" CornerRadius="{TemplateBinding CornerRadius}">
+          <ScrollViewer HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}" VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}">
+            <ItemsPresenter Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" Margin="0" />
+          </ScrollViewer>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+  <ControlTheme x:Key="DefaultCommandBarStyle" TargetType="CommandBar">
+    <Setter Property="DefaultLabelPosition" Value="Collapsed" />
+    <Setter Property="MinHeight" Value="64" />
+    <Setter Property="Background" Value="{DynamicResource MaterialSurfaceContainerBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceBrush}" />
+    <Setter Property="Padding" Value="4,8" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="VerticalAlignment" Value="Top" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="CornerRadius" Value="0" />
+    <Setter Property="ItemWidthBottom" Value="48" />
+    <Setter Property="ItemWidthCollapsed" Value="48" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel x:Name="LayoutRoot">
+          <Border x:Name="ContentRoot" VerticalAlignment="Stretch" MinHeight="64" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" MinWidth="{StaticResource AppBarMoreButtonColumnMinWidth}" />
+              </Grid.ColumnDefinitions>
+              <Grid ColumnDefinitions="*,Auto">
+                <ContentPresenter x:Name="PART_ContentPresenter" Margin="0" Content="{TemplateBinding Content}" Foreground="{TemplateBinding Foreground}" HorizontalAlignment="Left" VerticalAlignment="Center" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" />
+                <ItemsControl x:Name="PrimaryItemsControl" Grid.Column="1" HorizontalAlignment="Right" MinHeight="{DynamicResource AppBarThemeCompactHeight}" IsTabStop="False" ItemsSource="{Binding VisiblePrimaryCommands, RelativeSource={RelativeSource TemplatedParent}}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                      <StackPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                </ItemsControl>
+              </Grid>
+              <Button x:Name="PART_OverflowButton" Grid.Column="1" Theme="{StaticResource EllipsisButton}" Foreground="{TemplateBinding Foreground}" MinHeight="48" VerticalAlignment="Center" IsVisible="{TemplateBinding IsOverflowButtonVisible}">
+                <Path x:Name="EllipsisIcon" Data="M12 8A2 2 0 1 0 12 4A2 2 0 1 0 12 8ZM12 14A2 2 0 1 0 12 10A2 2 0 1 0 12 14ZM12 20A2 2 0 1 0 12 16A2 2 0 1 0 12 20Z" Fill="{Binding $parent[Button].Foreground}" Stretch="None" Width="24" Height="24" VerticalAlignment="Center" />
+              </Button>
+              <Rectangle x:Name="HighContrastBorder" Grid.ColumnSpan="2" IsVisible="False" VerticalAlignment="Stretch" Stroke="{DynamicResource CommandBarHighContrastBorder}" StrokeThickness="1" />
+              <Border x:Name="OpenBorder" Grid.ColumnSpan="2" IsVisible="False" VerticalAlignment="Stretch" BorderThickness="0" BorderBrush="Transparent" CornerRadius="{TemplateBinding CornerRadius}" />
+            </Grid>
+          </Border>
+          <Popup x:Name="PART_OverflowPopup" IsOpen="{TemplateBinding IsOpen, Mode=TwoWay}" PlacementTarget="{Binding #ContentRoot}" Placement="BottomEdgeAlignedRight" IsLightDismissEnabled="True" WindowManagerAddShadowHint="False">
+            <Border x:Name="SecondaryItemsControlShadowWrapper" BoxShadow="{DynamicResource MaterialElevation2BoxShadow}" Margin="{StaticResource ThemeShadowFlyoutMargin}" CornerRadius="4">
+              <ItemsControl x:Name="PART_OverflowPresenter" Theme="{StaticResource DefaultCommandBarOverflowPresenterStyle}" IsTabStop="False" ItemsSource="{Binding OverflowItems, RelativeSource={RelativeSource TemplatedParent}}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <StackPanel />
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+              </ItemsControl>
+            </Border>
+          </Popup>
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:disabled /template/ Path#EllipsisIcon">
+      <Setter Property="Fill" Value="{DynamicResource MaterialDisabledOnSurfaceBrush}" />
+    </Style>
+    <Style Selector="^[IsOpen=True]">
+      <Style Selector="^ /template/ Border#ContentRoot">
+        <Setter Property="Background" Value="{DynamicResource MaterialSurfaceContainerBrush}" />
+        <Setter Property="CornerRadius" Value="{TemplateBinding CornerRadius}" />
+      </Style>
+      <Style Selector="^ /template/ Border#OpenBorder, ^ /template/ Rectangle#HighContrastBorder">
+        <Setter Property="IsVisible" Value="False" />
+      </Style>
+      <Style Selector="^ /template/ Button#PART_OverflowButton">
+        <Setter Property="VerticalAlignment" Value="Stretch" />
+      </Style>
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type CommandBar}" TargetType="CommandBar" BasedOn="{StaticResource DefaultCommandBarStyle}" />
+</ResourceDictionary>

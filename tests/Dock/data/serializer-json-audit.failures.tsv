@@ -1,0 +1,12 @@
+load-read-error-identity	1
+load-read-error-closes	1
+load-close-error-overrides-read	1
+load-close-error-overrides-json	1
+save-write-error-identity	1
+save-write-error-closes	1
+save-flush-error-identity	1
+save-flush-error-closes	1
+save-close-error-overrides-write	1
+load-unreadable-constructor-does-not-close	1
+save-unwritable-constructor-does-not-close	1
+save-serialize-precedes-null-stream	1

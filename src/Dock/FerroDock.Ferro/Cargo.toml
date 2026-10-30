@@ -1,0 +1,44 @@
+[package]
+name = "ferrodock-ferro"
+description = "FerroUI docking controls for FerroDock"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+build = "build.rs"
+links = "ferrodock_ferro_metadata"
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferrodock-model-ferro.workspace = true
+ferrodock-controls-proportional-stack-panel = { path = "../FerroDock.Controls.ProportionalStackPanel" }
+bitflags.workspace = true
+ferrodock-settings.workspace = true
+ferrodock-controls-deferred-content-control = { path = "../FerroDock.Controls.DeferredContentControl" }
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+ferroui-markup-xaml.workspace = true
+ferroui-system.workspace = true
+ferroui-reactiveui.workspace = true
+ferroui-reactiveui-controls.workspace = true
+ferrodock-model.workspace = true
+ferrodock-controls-recycling = { path = "../FerroDock.Controls.Recycling" }
+
+[build-dependencies]
+ferroui-build-scan.workspace = true
+
+[dev-dependencies]
+ferrodock-model-reactiveui-ferro = { path = "../FerroDock.Model.ReactiveUI.Ferro" }
+ferroui-themes-fluent.workspace = true
+ferrodock-model-reactiveui = { path = "../FerroDock.Model.ReactiveUI" }
+ferroui-build-scan.workspace = true
+ferroui-reactive.workspace = true
+ferrodock-model-reactiveui-services = { path = "../FerroDock.Model.ReactiveUI.Services" }
+ferroui-headless = { workspace = true, features = ["testing"] }
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "deny"

@@ -9,7 +9,7 @@ use std::rc::Rc;
 /// The arithmetic wraps on overflow, as the managed implementation's does:
 /// "select all" without a source selects the range `0..=i32::MAX`.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub(crate) struct IndexRange {
+pub struct IndexRange {
     begin: i32,
     end: i32,
 }
@@ -329,7 +329,7 @@ impl fmt::Display for IndexRange {
 
 /// The indexes of a list of ranges, in order. Works on a snapshot of the
 /// ranges, so the selection may change while it is enumerated.
-pub(crate) struct IndexRangeIndices {
+pub struct IndexRangeIndices {
     ranges: Rc<Vec<IndexRange>>,
     range: usize,
     next: Option<i32>,

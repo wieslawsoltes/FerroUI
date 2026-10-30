@@ -1,0 +1,4 @@
+<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <TabControl Width="500" Height="220" HorizontalAlignment="Left"><TabItem Header="All"><TextBlock Text="All items" Margin="20"/></TabItem><TabItem Header="Unread"><TextBlock Text="Unread items" Margin="20"/></TabItem><TabItem Header="Flagged"><TextBlock Text="Flagged items" Margin="20"/></TabItem></TabControl>
+</StackPanel>

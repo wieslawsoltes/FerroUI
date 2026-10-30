@@ -1,0 +1,4 @@
+<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <TabControl Width="500" Height="220" HorizontalAlignment="Left"><TabItem Header="Document 1"><TextBlock Text="First document" Margin="20"/></TabItem><TabItem Header="Document 2"><TextBlock Text="Second document" Margin="20"/></TabItem><TabItem Header="Document 3"><TextBlock Text="Third document" Margin="20"/></TabItem></TabControl>
+</StackPanel>

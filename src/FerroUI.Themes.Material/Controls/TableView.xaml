@@ -1,0 +1,79 @@
+<!--
+  Android Material 3 Expressive visual system (AndroidX Material3 1.5.0-beta02,
+  e4d933c98df7baa7ea2b83eea6e086915961e0ff), adapted to FerroUI control contracts.
+  Derived structural templates: FerroUI WinUI theme, Copyright (c) Microsoft
+  Corporation, MIT; retained notices in NOTICE.md. See docs/porting/material-theme.md.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <TableView Height="200" Width="400">
+        <TableView.Columns>
+          <TableViewColumn Header="Name" Width="*"/>
+          <TableViewColumn Header="Value" Width="120"/>
+        </TableView.Columns>
+      </TableView>
+    </Border>
+  </Design.PreviewWith>
+  <ControlTheme x:Key="TableViewScrollViewerStyle" TargetType="ScrollViewer" BasedOn="{StaticResource DefaultScrollViewerStyle}">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="Root" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}">
+          <Grid Background="{TemplateBinding Background}" ColumnDefinitions="*,Auto" RowDefinitions="Auto,*,Auto">
+            <Border x:Name="PART_HeaderRow" Grid.ColumnSpan="2" ClipToBounds="True" Background="{DynamicResource TabularSurfaceHeaderBackgroundBrush}" BorderBrush="{DynamicResource TabularSurfaceGridLineBrush}" BackgroundSizing="InnerBorderEdge" BorderThickness="0,0,0,1">
+              <TableViewColumnHeadersPresenter x:Name="PART_HeaderHost"/>
+            </Border>
+            <ScrollContentPresenter x:Name="PART_ContentPresenter" Grid.Row="1" Grid.RowSpan="2" Grid.ColumnSpan="2" ContentTemplate="{TemplateBinding ContentTemplate}" Padding="{TemplateBinding Padding}" HorizontalSnapPointsType="{TemplateBinding HorizontalSnapPointsType}" VerticalSnapPointsType="{TemplateBinding VerticalSnapPointsType}" HorizontalSnapPointsAlignment="{TemplateBinding HorizontalSnapPointsAlignment}" VerticalSnapPointsAlignment="{TemplateBinding VerticalSnapPointsAlignment}" ScrollViewer.IsScrollInertiaEnabled="{TemplateBinding IsScrollInertiaEnabled}">
+              <ScrollContentPresenter.GestureRecognizers>
+                <ScrollGestureRecognizer CanHorizontallyScroll="{Binding CanHorizontallyScroll, ElementName=PART_ContentPresenter}" CanVerticallyScroll="{Binding CanVerticallyScroll, ElementName=PART_ContentPresenter}" IsScrollInertiaEnabled="{Binding (ScrollViewer.IsScrollInertiaEnabled), ElementName=PART_ContentPresenter}" Offset="{Binding Offset, ElementName=PART_ContentPresenter}" Viewport="{Binding Viewport, ElementName=PART_ContentPresenter}" Extent="{Binding Extent, ElementName=PART_ContentPresenter}"/>
+              </ScrollContentPresenter.GestureRecognizers>
+            </ScrollContentPresenter>
+            <ScrollBar x:Name="PART_VerticalScrollBar" Grid.Row="1" Grid.Column="1" Margin="{DynamicResource ScrollViewerScrollBarMargin}" IsTabStop="False" Orientation="Vertical" HorizontalAlignment="Right" Opacity="0">
+              <ScrollBar.Transitions>
+                <Transitions>
+                  <DoubleTransition Property="Opacity" Duration="0:0:0.083"/>
+                </Transitions>
+              </ScrollBar.Transitions>
+            </ScrollBar>
+            <ScrollBar x:Name="PART_HorizontalScrollBar" Grid.Row="2" Margin="{DynamicResource ScrollViewerScrollBarMargin}" IsTabStop="False" Orientation="Horizontal" Opacity="0">
+              <ScrollBar.Transitions>
+                <Transitions>
+                  <DoubleTransition Property="Opacity" Duration="0:0:0.083"/>
+                </Transitions>
+              </ScrollBar.Transitions>
+            </ScrollBar>
+            <Border x:Name="ScrollBarSeparator" Grid.Row="2" Grid.Column="1" Opacity="0" Background="{DynamicResource ScrollViewerScrollBarSeparatorBackground}">
+              <Border.Transitions>
+                <Transitions>
+                  <DoubleTransition Property="Opacity" Duration="0:0:0.1"/>
+                </Transitions>
+              </Border.Transitions>
+            </Border>
+          </Grid>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type TableView}" TargetType="TableView">
+    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}"/>
+    <Setter Property="Background" Value="{DynamicResource MaterialSurfaceBrush}"/>
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceBrush}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource TabularSurfaceGridLineBrush}"/>
+    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="ClipToBounds" Value="True"/>
+    <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
+    <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
+    <Setter Property="ScrollViewer.IsScrollChainingEnabled" Value="True"/>
+    <Setter Property="ScrollViewer.IsScrollInertiaEnabled" Value="True"/>
+    <Setter Property="TextBlock.TextTrimming" Value="{x:Static TextTrimming.CharacterEllipsis}"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="Root" ClipToBounds="{TemplateBinding ClipToBounds}" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BackgroundSizing="InnerBorderEdge" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}">
+          <ScrollViewer x:Name="PART_ScrollViewer" Theme="{StaticResource TableViewScrollViewerStyle}" VerticalSnapPointsType="{TemplateBinding (ScrollViewer.VerticalSnapPointsType)}" HorizontalSnapPointsType="{TemplateBinding (ScrollViewer.HorizontalSnapPointsType)}" HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}" VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}" IsScrollChainingEnabled="{TemplateBinding (ScrollViewer.IsScrollChainingEnabled)}" IsScrollInertiaEnabled="{TemplateBinding (ScrollViewer.IsScrollInertiaEnabled)}" IsDeferredScrollingEnabled="{TemplateBinding (ScrollViewer.IsDeferredScrollingEnabled)}" AllowAutoHide="{TemplateBinding (ScrollViewer.AllowAutoHide)}" BringIntoViewOnFocusChange="{TemplateBinding (ScrollViewer.BringIntoViewOnFocusChange)}">
+            <ItemsPresenter x:Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" Margin="{TemplateBinding Padding}"/>
+          </ScrollViewer>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

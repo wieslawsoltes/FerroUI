@@ -1,0 +1,8 @@
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            xmlns:core="using:FerroDock.Model.Core"
+            x:CompileBindings="True" x:DataType="core:IDockable">
+  <TextBlock Name="TitleText" Text="{Binding Title}" />
+  <TextBox Name="TitleEditor" Text="{Binding Title, Mode=TwoWay}" />
+  <TextBlock Name="IdText" Text="{Binding Owner.Id}" />
+</StackPanel>

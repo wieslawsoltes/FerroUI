@@ -1,0 +1,3 @@
+<local:LocatorFactory xmlns="https://github.com/avaloniaui"
+    xmlns:local="using:DockFactoryMarkupReference"
+    SearchPredicate="AcceptDockable" RootPredicate="AcceptRoot" />

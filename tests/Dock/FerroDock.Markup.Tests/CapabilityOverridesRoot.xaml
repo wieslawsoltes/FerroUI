@@ -1,0 +1,3 @@
+<m:DockCapabilityOverrides xmlns="https://github.com/ferroui"
+                           xmlns:m="using:FerroDock.Model.Core"
+                           CanPin="False" CanDrop="True" />

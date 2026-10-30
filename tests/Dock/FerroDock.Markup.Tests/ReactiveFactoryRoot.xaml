@@ -1,0 +1,2 @@
+<m:Factory xmlns="https://github.com/ferroui" xmlns:m="clr-namespace:FerroDock.Model.ReactiveUI;assembly=FerroDock.Model.ReactiveUI"
+ HideToolsOnClose="True" HideDocumentsOnClose="False" />

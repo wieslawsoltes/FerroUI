@@ -1,0 +1,41 @@
+<!--
+  Not ported from a style: WinUI's SymbolIcon has no template in microsoft-ui-xaml
+  (https://github.com/microsoft/microsoft-ui-xaml, commit
+  7e4b0c2096be402f51cc8f7d203ebf67cff183d0). The control builds its visual in code
+  (CSymbolIcon::ApplyTemplate, dxaml/xcp/core/core/elements/icon.cpp): one TextBlock, stretched
+  horizontally and centred vertically, its text centred, 20 pixels, normal style and weight, in
+  the font Segoe Fluent Icons, with the accessibility view Raw. FerroUI's SymbolIcon is a
+  templated control (IconElement), so the theme supplies that text block as the part PART_Text,
+  and the control gives it the glyph of its symbol and its foreground. The font is the theme
+  resource SymbolThemeFontFamily (Segoe Fluent Icons, Segoe MDL2 Assets) where WinUI names Segoe
+  Fluent Icons in code, so that an application can supply another symbol font
+  (docs/porting/winui-controls.md, section 5.2).
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <StackPanel Orientation="Horizontal" Spacing="16">
+        <SymbolIcon Symbol="Accept" />
+        <SymbolIcon Symbol="Setting" />
+      </StackPanel>
+    </Border>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="{x:Type SymbolIcon}" TargetType="SymbolIcon">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <TextBlock x:Name="PART_Text"
+                   HorizontalAlignment="Stretch"
+                   VerticalAlignment="Center"
+                   TextAlignment="Center"
+                   FontFamily="{DynamicResource SymbolThemeFontFamily}"
+                   FontSize="20"
+                   FontStyle="Normal"
+                   FontWeight="Normal"
+                   AutomationProperties.AccessibilityView="Raw" />
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

@@ -1,0 +1,60 @@
+<!--
+  Android Material 3 Expressive, pinned to AndroidX Compose Material3 1.5.0-beta02,
+  revision e4d933c98df7baa7ea2b83eea6e086915961e0ff. Geometry and color roles follow
+  androidx/compose/material3/tokens; FerroUI template contracts are retained from
+  its WinUI theme (Microsoft copyright, MIT; see NOTICE.md).
+  Material design/source references: https://developer.android.com/develop/ui/compose/designsystems/material3
+  See docs/porting/material-theme.md for measured fidelity and platform differences.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <ControlTheme x:Key="DefaultTabViewStyle" TargetType="TabControl">
+    <Setter Property="Background" Value="{DynamicResource MaterialSurfaceBrush}" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="VerticalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="VerticalContentAlignment" Value="Stretch" />
+    <Setter Property="ItemsPanel"><ItemsPanelTemplate><UniformGrid Rows="1" /></ItemsPanelTemplate></Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <DockPanel>
+          <Border x:Name="TabContainerGrid" DockPanel.Dock="{TemplateBinding TabStripPlacement}"
+                  Background="{TemplateBinding Background}" BorderBrush="{DynamicResource MaterialOutlineVariantBrush}" BorderThickness="0,0,0,1">
+            <ScrollViewer x:Name="TabScrollViewer" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Disabled"
+                          BringIntoViewOnFocusChange="True" IsTabStop="False">
+              <ItemsPresenter x:Name="PART_ItemsPresenter" ItemsPanel="{TemplateBinding ItemsPanel}" Margin="{TemplateBinding Padding}" />
+            </ScrollViewer>
+          </Border>
+          <Border x:Name="TabContentPresenter" BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}">
+            <Panel ClipToBounds="True">
+              <ContentPresenter x:Name="PART_SelectedContentHost2" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" IsVisible="False" />
+              <ContentPresenter x:Name="PART_SelectedContentHost" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+            </Panel>
+          </Border>
+        </DockPanel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^[TabStripPlacement=Bottom] /template/ Border#TabContainerGrid"><Setter Property="BorderThickness" Value="0,1,0,0" /></Style>
+    <Style Selector="^[TabStripPlacement=Left]">
+      <Setter Property="ItemsPanel"><ItemsPanelTemplate><StackPanel Orientation="Vertical" /></ItemsPanelTemplate></Setter>
+      <Style Selector="^ /template/ Border#TabContainerGrid"><Setter Property="BorderThickness" Value="0" /></Style>
+      <Style Selector="^ /template/ ScrollViewer#TabScrollViewer"><Setter Property="VerticalScrollBarVisibility" Value="Auto" /></Style>
+    </Style>
+    <Style Selector="^[TabStripPlacement=Right]">
+      <Setter Property="ItemsPanel"><ItemsPanelTemplate><StackPanel Orientation="Vertical" /></ItemsPanelTemplate></Setter>
+      <Style Selector="^ /template/ Border#TabContainerGrid"><Setter Property="BorderThickness" Value="0" /></Style>
+      <Style Selector="^ /template/ ScrollViewer#TabScrollViewer"><Setter Property="VerticalScrollBarVisibility" Value="Auto" /></Style>
+    </Style>
+    <Style Selector="^.scrollable">
+      <Setter Property="ItemsPanel"><ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate></Setter>
+      <Style Selector="^ /template/ ScrollViewer#TabScrollViewer"><Setter Property="HorizontalScrollBarVisibility" Value="Auto" /></Style>
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type TabControl}" TargetType="TabControl" BasedOn="{StaticResource DefaultTabViewStyle}" />
+
+</ResourceDictionary>

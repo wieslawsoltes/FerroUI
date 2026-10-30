@@ -4,7 +4,8 @@ use std::rc::Rc;
 use crate::media::glyph_run::GlyphInfoList;
 use crate::media::text_formatting::text_run::{text_run_any, TextRun};
 use crate::media::text_formatting::{
-    DrawableTextRun, ITextDrawingSink, ShapedBuffer, SplitResult, TextMetrics, TextRunProperties,
+    DrawableTextRun, ITextDrawingSink, ShapedBuffer, SplitResult, TabAlignment, TabLeader, TextMetrics,
+    TextRunProperties,
 };
 use crate::media::GlyphRun;
 use crate::utilities::ReadOnlyMemory;
@@ -17,13 +18,69 @@ pub struct ShapedTextRun {
     shaped_buffer: Rc<ShapedBuffer>,
     properties: Rc<dyn TextRunProperties>,
     text_metrics: TextMetrics,
+    tab_leader: TabLeader,
+    tab_alignment: Option<TabAlignment>,
+    tab_presence: Cell<Option<bool>>,
 }
 
 impl ShapedTextRun {
     pub fn new(shaped_buffer: Rc<ShapedBuffer>, properties: Rc<dyn TextRunProperties>) -> Self {
-        let text_metrics = TextMetrics::new(&properties.cached_glyph_typeface(), properties.font_rendering_em_size());
+        let text_metrics = TextMetrics::new(&properties.cached_glyph_typeface(), properties.effective_font_rendering_em_size());
 
-        Self { glyph_run: OnceCell::new(), ref_count: Cell::new(1), shaped_buffer, properties, text_metrics }
+        Self {
+            glyph_run: OnceCell::new(),
+            ref_count: Cell::new(1),
+            shaped_buffer,
+            properties,
+            text_metrics,
+            tab_leader: TabLeader::Spaces,
+            tab_alignment: None,
+            tab_presence: Cell::new(None),
+        }
+    }
+
+    pub(super) fn with_tab_layout(
+        shaped_buffer: Rc<ShapedBuffer>,
+        properties: Rc<dyn TextRunProperties>,
+        leader: TabLeader,
+        alignment: TabAlignment,
+    ) -> Self {
+        let mut result = Self::new(shaped_buffer, properties);
+        result.tab_leader = leader;
+        result.tab_alignment = Some(alignment);
+        result.tab_presence.set(Some(true));
+        result
+    }
+
+    pub(super) fn contains_tab(&self) -> bool {
+        if let Some(value) = self.tab_presence.get() {
+            return value;
+        }
+        let value = self.text_span().contains(&(b'\t' as u16));
+        self.tab_presence.set(Some(value));
+        value
+    }
+
+    pub(super) fn set_tab_presence(&self, value: bool) {
+        self.tab_presence.set(Some(value));
+    }
+
+    pub(super) fn tab_alignment(&self) -> Option<TabAlignment> {
+        self.tab_alignment
+    }
+
+    /// Preserves tab layout when an already shaped run is copied or split. The
+    /// marker belongs only to the one-character tab run, never adjacent text.
+    pub(super) fn with_shaped_buffer(&self, buffer: Rc<ShapedBuffer>) -> Self {
+        let mut result = Self::new(buffer, self.properties.clone());
+        if self.tab_alignment.is_some() && result.text_span() == [b'\t' as u16] {
+            result.tab_leader = self.tab_leader;
+            result.tab_alignment = self.tab_alignment;
+            result.set_tab_presence(true);
+        } else if self.tab_presence.get() == Some(false) {
+            result.set_tab_presence(false);
+        }
+        result
     }
 
     /// The bidi level of the run.
@@ -76,7 +133,9 @@ impl ShapedTextRun {
     ///
     /// Internal upstream; public so that the Skia unit tests reach it.
     pub fn try_measure_characters_backwards(&self, available_width: f64) -> Option<(i32, f64)> {
-        let (length, width) = self.shaped_buffer.find_trailing_char_count_within_width(available_width);
+        let (length, width) = self
+            .shaped_buffer
+            .find_trailing_char_count_within_width(available_width);
 
         (length > 0).then_some((length, width))
     }
@@ -91,10 +150,7 @@ impl ShapedTextRun {
 
         let split_buffer = self.shaped_buffer.split(length);
 
-        let first = Rc::new(ShapedTextRun::new(
-            split_buffer.first.expect("a split always has a first part"),
-            self.properties.clone(),
-        ));
+        let first = Rc::new(self.with_shaped_buffer(split_buffer.first.expect("a split always has a first part")));
 
         if first.length() < length {
             panic!("Split length too small.");
@@ -103,7 +159,7 @@ impl ShapedTextRun {
         match split_buffer.second {
             None => SplitResult::new(Some(first), None),
             Some(second) => {
-                let second = Rc::new(ShapedTextRun::new(second, self.properties.clone()));
+                let second = Rc::new(self.with_shaped_buffer(second));
                 SplitResult::new(Some(first), Some(second))
             }
         }
@@ -156,6 +212,7 @@ impl ShapedTextRun {
         }
 
         drawing_context.draw_glyph_run(Some(foreground_brush), glyph_run);
+        self.draw_tab_leader(drawing_context, foreground_brush);
 
         let Some(text_decorations) = self.properties.text_decorations() else {
             return;
@@ -163,6 +220,55 @@ impl ShapedTextRun {
 
         for text_decoration in text_decorations.iter() {
             text_decoration.draw(drawing_context, glyph_run, &self.text_metrics, foreground_brush);
+        }
+    }
+    fn draw_tab_leader(&self, sink: &mut dyn ITextDrawingSink, brush: &Rc<dyn crate::media::IBrush>) {
+        use crate::media::immutable::ImmutableDashStyle;
+        use crate::media::{IDashStyle, IPen, Pen, PenLineCap, PenLineJoin};
+        if self.tab_leader == TabLeader::Spaces {
+            return;
+        }
+        let width = self.shaped_buffer.total_glyph_advance();
+        if width <= 0.0 || !width.is_finite() {
+            return;
+        }
+        let normal = self
+            .text_metrics
+            .underline_thickness
+            .abs()
+            .max(self.text_metrics.font_rendering_em_size / 16.0);
+        let thickness = if self.tab_leader == TabLeader::ThickLines {
+            normal * 2.0
+        } else {
+            normal
+        };
+        let (pattern, cap): (Option<Rc<dyn IDashStyle>>, _) = match self.tab_leader {
+            TabLeader::Dots => (
+                Some(Rc::new(ImmutableDashStyle::new(Some(&[0.0, 3.0]), 0.0))),
+                PenLineCap::Round,
+            ),
+            TabLeader::Dashes => (
+                Some(Rc::new(ImmutableDashStyle::new(Some(&[3.0, 2.0]), 0.0))),
+                PenLineCap::Flat,
+            ),
+            _ => (None, PenLineCap::Flat),
+        };
+        let pen: Rc<dyn IPen> =
+            Pen::with_all(Some(brush.clone()), thickness, pattern, cap, PenLineJoin::Miter, 10.0).into();
+        let inset = (normal * 1.5).min(width * 0.5);
+        let baseline = self.baseline();
+        let y = if matches!(self.tab_leader, TabLeader::Dashes | TabLeader::Equals) {
+            baseline - self.text_metrics.font_rendering_em_size * 0.3
+        } else {
+            baseline + self.text_metrics.underline_position
+        };
+        sink.draw_line(&pen, Point::new(inset, y), Point::new(width - inset, y));
+        if self.tab_leader == TabLeader::Equals {
+            sink.draw_line(
+                &pen,
+                Point::new(inset, y + normal * 3.0),
+                Point::new(width - inset, y + normal * 3.0),
+            );
         }
     }
 }

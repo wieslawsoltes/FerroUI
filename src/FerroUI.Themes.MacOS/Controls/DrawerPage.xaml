@@ -1,0 +1,595 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/NavigationView/NavigationView_themeresources.xaml (PaneToggleButtonStyle,
+    NavigationViewItemHeaderTextStyle and NavigationViewTitleHeaderContentControlTextStyle; the
+    resources are Resources/NavigationView_themeresources.xaml)
+    controls/dev/NavigationView/NavigationView.xaml (the left pane of the implicit style of
+    NavigationView: RootSplitView, PaneContentGrid, ContentGrid, HeaderContent and the states
+    of the display modes)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  WinUI has no page with a drawer: an application shows its navigation in the pane of a
+  NavigationView. FerroUI's DrawerPage is drawn as that NavigationView with its pane at the left:
+  the SplitView PART_SplitView is RootSplitView (Controls/SplitView.xaml), the drawer with its
+  header and footer is the pane (PaneContentGrid: PaneHeader, the menu items and PaneFooter), and
+  the content is the content grid of NavigationView with its header row (the top bar of
+  FerroUI's DrawerPage, with the pane toggle button and the header). The template keeps the parts
+  and the behaviour of FerroUI's DrawerPage (src/FerroUI.Themes.Fluent/Controls/DrawerPage.xaml):
+  the bars at the top or the bottom, the compact pane toggle, the backdrop and the conditions that
+  hide the top bar.
+
+  The decision on the NavigationView styles (docs/porting/winui-theme.md, section 7, B5):
+  NavigationView has no FerroUI control. The styles DrawerPage and the pages are built from are
+  ported: PaneToggleButtonStyle (the pane toggle buttons of DrawerPage), the two text styles of
+  this document, NavigationBackButtonNormalStyle and NavigationBackButtonSmallStyle
+  (Controls/NavigationPage.xaml); the items of the left and the top pane are written into the
+  themes of TabItem and TabbedPage (Controls/TabItem.xaml, Controls/TabbedPage.xaml). The styles
+  of NavigationView itself, its items, item headers and separators, the item presenter styles,
+  the overflow and search buttons are waived (scripts/winui-theme/waivers.json).
+
+  Translation notes (docs/porting/winui-theme.md, section 4):
+  - PaneToggleButtonStyle: the Grid LayoutRoot is a Border of the same name around a Grid. The
+    AnimatedIcon Icon (AnimatedGlobalNavigationButtonVisualSource with the fallback glyph E700 at
+    the font size of the button, 16) is a path of GlyphGeometryE700, 16 x 16; the
+    AnimatedIcon.State setters are left out. The content presenter is PART_ContentPresenter; the
+    states of DefaultButtonStyle, which the keyed theme is based on (G-15), would draw their
+    backgrounds and borders on it, so the states set them transparent.
+  - DrawerPagePaneToggleButton (a theme of the toggle buttons of DrawerPage, based on
+    PaneToggleButtonStyle) shows DrawerIcon of FerroUI's DrawerPage in the box of the glyph in
+    place of the glyph, and has no title column.
+  - RootSplitView: its pane background is NavigationViewDefaultPaneBackground while the pane
+    overlays the content (PaneOverlaying) and NavigationViewExpandedPaneBackground otherwise
+    (PaneNotOverlaying, which also makes its border transparent): the pane overlays the content
+    while it is open in the Overlay and CompactOverlay modes. DrawerBackground of FerroUI's
+    DrawerPage replaces it (in code). The corner radius is the right corners of the
+    CornerRadius of the page (OverlayCornerRadius, as the style of NavigationView sets).
+  - The shadow of the overlaying pane (ShadowCaster and its transitions) is left out (ThemeShadow).
+  - ContentGrid (border, background, corner radius) is a Border; in the Overlay mode (WinUI's
+    Minimal display mode) it has the Minimal values (NavigationViewMinimalContentGridBorderThickness,
+    NavigationViewMinimalContentGridCornerRadius, NavigationViewMinimalContentMargin). With the
+    drawer at the right the border and the corner are mirrored, at the top or the bottom the
+    content grid has the border of the top pane (TopNavigationViewContentGridBorderThickness),
+    mirrored at the bottom.
+  - The header of the top bar is the HeaderContent of NavigationView with
+    NavigationViewTitleHeaderContentControlTextStyle; it stands beside the pane toggle button,
+    8 px from it, where NavigationView places it under the button (NavigationViewHeaderMargin,
+    NavigationViewMinimalHeaderMargin). The top bar has the padding of the button holder
+    (NavigationViewButtonHolderGridMargin).
+  - The back button, the close button, the pane title, the auto suggest box, the pane custom
+    content, the menu and footer items, the item separator and the top pane of NavigationView are
+    left out: FerroUI's DrawerPage has none of them (its drawer is any content).
+  - The menu items: a drawer is any content, and a control theme styles only its own template, so
+    the theme offers two keyed themes for the usual drawer, a ListBox of destinations:
+    DrawerPageNavigationViewMenu (MenuItemsHost in MenuItemsScrollViewer: a list without a
+    background or a border) and its item container theme DrawerPageNavigationViewItem (the item of
+    the left pane, MUX_NavigationViewItemPresenterStyleWhenOnLeftPane, as the tabs at the left of
+    Controls/TabItem.xaml: the subtle fills of the pointer states and the selection indicator).
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Width="400" Height="300">
+      <DrawerPage Header="Sample" DrawerLength="200" IsOpen="True">
+        <DrawerPage.Drawer>
+          <TextBlock Text="The drawer" Margin="12" />
+        </DrawerPage.Drawer>
+        <ContentPage Header="Content">
+          <TextBlock Text="The content" Margin="12" />
+        </ContentPage>
+      </DrawerPage>
+    </Border>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="NavigationViewItemHeaderTextStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+    <Setter Property="FontSize" Value="14" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="TextWrapping" Value="NoWrap" />
+  </ControlTheme>
+
+  <ControlTheme x:Key="NavigationViewTitleHeaderContentControlTextStyle" TargetType="ContentControl">
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="FontSize" Value="28" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="Margin" Value="{DynamicResource NavigationViewHeaderMargin}" />
+    <Setter Property="VerticalAlignment" Value="Stretch" />
+  </ControlTheme>
+
+  <ControlTheme x:Key="PaneToggleButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+    <Setter Property="FontSize" Value="16" />
+    <Setter Property="FontFamily" Value="{StaticResource SymbolThemeFontFamily}" />
+    <Setter Property="MinHeight" Value="{StaticResource PaneToggleButtonHeight}" />
+    <Setter Property="MinWidth" Value="{StaticResource PaneToggleButtonWidth}" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Top" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Background" Value="{DynamicResource NavigationViewItemBackground}" />
+    <Setter Property="Foreground" Value="{DynamicResource NavigationViewItemForeground}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource NavigationViewToggleBorderThickness}" />
+    <Setter Property="Padding" Value="{DynamicResource NavigationViewItemButtonMargin}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="LayoutRoot"
+                Height="{TemplateBinding MinHeight}"
+                Margin="{TemplateBinding Padding}"
+                Background="{TemplateBinding Background}"
+                HorizontalAlignment="Stretch"
+                CornerRadius="{TemplateBinding CornerRadius}">
+          <Grid ColumnDefinitions="Auto,*">
+            <Border Width="{TemplateBinding MinWidth}">
+              <Path x:Name="Icon"
+                    Data="{StaticResource GlyphGeometryE700}"
+                    Width="16"
+                    Height="16"
+                    Stretch="Uniform"
+                    Fill="{TemplateBinding Foreground}"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+            </Border>
+            <ContentPresenter x:Name="PART_ContentPresenter"
+                              Grid.Column="1"
+                              VerticalContentAlignment="Center"
+                              Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                              Foreground="{TemplateBinding Foreground}"
+                              FontSize="{TemplateBinding FontSize}"
+                              Padding="4,0,0,0"
+                              RecognizesAccessKey="True" />
+          </Grid>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- PointerOver -->
+    <Style Selector="^:pointerover">
+      <Style Selector="^ /template/ Border#LayoutRoot">
+        <Setter Property="Background" Value="{DynamicResource NavigationViewButtonBackgroundPointerOver}" />
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource NavigationViewButtonForegroundPointerOver}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+      </Style>
+      <Style Selector="^ /template/ Path#Icon">
+        <Setter Property="Fill" Value="{DynamicResource NavigationViewButtonForegroundPointerOver}" />
+      </Style>
+    </Style>
+    <!-- Pressed -->
+    <Style Selector="^:pressed">
+      <Style Selector="^ /template/ Border#LayoutRoot">
+        <Setter Property="Background" Value="{DynamicResource NavigationViewButtonBackgroundPressed}" />
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource NavigationViewButtonForegroundPressed}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+      </Style>
+      <Style Selector="^ /template/ Path#Icon">
+        <Setter Property="Fill" Value="{DynamicResource NavigationViewButtonForegroundPressed}" />
+      </Style>
+    </Style>
+    <!-- Disabled (the icon keeps its foreground, as in the source) -->
+    <Style Selector="^:disabled">
+      <Style Selector="^ /template/ Border#LayoutRoot">
+        <Setter Property="Background" Value="{DynamicResource NavigationViewButtonBackgroundDisabled}" />
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource NavigationViewButtonForegroundDisabled}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+      </Style>
+    </Style>
+  </ControlTheme>
+
+  <!-- The pane toggle buttons of DrawerPage: PaneToggleButtonStyle with the DrawerIcon of the page
+       (the content of the button) in place of the glyph. -->
+  <ControlTheme x:Key="DrawerPagePaneToggleButton" TargetType="ToggleButton" BasedOn="{StaticResource PaneToggleButtonStyle}">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="LayoutRoot"
+                Height="{TemplateBinding MinHeight}"
+                Margin="{TemplateBinding Padding}"
+                Background="{TemplateBinding Background}"
+                HorizontalAlignment="Stretch"
+                CornerRadius="{TemplateBinding CornerRadius}">
+          <Border Width="{TemplateBinding MinWidth}">
+            <Panel>
+              <Path x:Name="Icon"
+                    Data="{StaticResource GlyphGeometryE700}"
+                    Width="16"
+                    Height="16"
+                    Stretch="Uniform"
+                    Fill="{TemplateBinding Foreground}"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                    IsVisible="{TemplateBinding Content, Converter={x:Static ObjectConverters.IsNull}}" />
+              <ContentPresenter x:Name="PART_ContentPresenter"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Content="{TemplateBinding Content}"
+                                ContentTemplate="{TemplateBinding ContentTemplate}"
+                                Foreground="{TemplateBinding Foreground}"
+                                IsVisible="{TemplateBinding Content, Converter={x:Static ObjectConverters.IsNotNull}}" />
+            </Panel>
+          </Border>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
+  <!-- An item of the left pane of NavigationView for a ListBoxItem: the template of
+       MUX_NavigationViewItemPresenterStyleWhenOnLeftPane with the values of the implicit style of
+       NavigationViewItem (font, corner radius), as the tabs at the left of Controls/TabItem.xaml:
+       its pointer states, the selection indicator of the selected item and the disabled opacity.
+       A ListBoxItem has no icon: the icon column has the 8 of IconCollapsed. The expand chevron,
+       the info badge and the compact pane states are left out. -->
+  <ControlTheme x:Key="DrawerPageNavigationViewItem" TargetType="ListBoxItem">
+    <Setter Property="Foreground" Value="{DynamicResource NavigationViewItemForeground}" />
+    <Setter Property="Background" Value="{DynamicResource NavigationViewItemBackground}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource NavigationViewItemBorderBrush}" />
+    <Setter Property="BorderThickness" Value="{StaticResource NavigationViewItemBorderThickness}" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontWeight" Value="Normal" />
+    <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="KeyboardNavigation.TabNavigation" Value="Local" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="LayoutRoot"
+                MinHeight="{DynamicResource NavigationViewItemOnLeftMinHeight}"
+                Background="{TemplateBinding Background}"
+                CornerRadius="{TemplateBinding CornerRadius}"
+                Margin="{DynamicResource NavigationViewItemButtonMargin}">
+          <Panel x:Name="PresenterContentRootGrid">
+            <Panel HorizontalAlignment="Left" VerticalAlignment="Center">
+              <Rectangle x:Name="SelectionIndicator"
+                         Width="{DynamicResource NavigationViewSelectionIndicatorWidth}"
+                         Height="{DynamicResource NavigationViewSelectionIndicatorHeight}"
+                         Fill="{DynamicResource NavigationViewSelectionIndicatorForeground}"
+                         Opacity="0"
+                         RadiusX="{StaticResource NavigationViewSelectionIndicatorRadius}"
+                         RadiusY="{StaticResource NavigationViewSelectionIndicatorRadius}" />
+            </Panel>
+            <Grid x:Name="ContentGrid"
+                  MinHeight="{DynamicResource NavigationViewItemOnLeftMinHeight}"
+                  Margin="0,0,14,0"
+                  HorizontalAlignment="Stretch"
+                  ColumnDefinitions="8,*">
+              <ContentPresenter x:Name="PART_ContentPresenter"
+                                Grid.Column="1"
+                                Margin="{DynamicResource NavigationViewItemContentPresenterMargin}"
+                                Content="{TemplateBinding Content}"
+                                ContentTemplate="{TemplateBinding ContentTemplate}"
+                                Foreground="{TemplateBinding Foreground}"
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                Padding="{TemplateBinding Padding}"
+                                TextWrapping="NoWrap" />
+            </Grid>
+          </Panel>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- PointerStates: PointerOver -->
+    <Style Selector="^:pointerover">
+      <Style Selector="^ /template/ Border#LayoutRoot">
+        <Setter Property="Background" Value="{DynamicResource NavigationViewItemBackgroundPointerOver}" />
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource NavigationViewItemForegroundPointerOver}" />
+      </Style>
+    </Style>
+    <!-- Pressed -->
+    <Style Selector="^:pressed">
+      <Style Selector="^ /template/ Border#LayoutRoot">
+        <Setter Property="Background" Value="{DynamicResource NavigationViewItemBackgroundPressed}" />
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource NavigationViewItemForegroundPressed}" />
+      </Style>
+    </Style>
+    <!-- Selected, with the selection indicator NavigationView shows on its selected item -->
+    <Style Selector="^:selected">
+      <Style Selector="^ /template/ Border#LayoutRoot">
+        <Setter Property="Background" Value="{DynamicResource NavigationViewItemBackgroundSelected}" />
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource NavigationViewItemForegroundSelected}" />
+      </Style>
+      <Style Selector="^ /template/ Rectangle#SelectionIndicator">
+        <Setter Property="Opacity" Value="1" />
+      </Style>
+    </Style>
+    <!-- PointerOverSelected -->
+    <Style Selector="^:selected:pointerover">
+      <Style Selector="^ /template/ Border#LayoutRoot">
+        <Setter Property="Background" Value="{DynamicResource NavigationViewItemBackgroundSelectedPointerOver}" />
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource NavigationViewItemForegroundSelectedPointerOver}" />
+      </Style>
+    </Style>
+    <!-- PressedSelected -->
+    <Style Selector="^:selected:pressed">
+      <Style Selector="^ /template/ Border#LayoutRoot">
+        <Setter Property="Background" Value="{DynamicResource NavigationViewItemBackgroundSelectedPressed}" />
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource NavigationViewItemForegroundSelectedPressed}" />
+      </Style>
+    </Style>
+    <!-- DisabledStates: Disabled -->
+    <Style Selector="^:disabled /template/ Border#LayoutRoot">
+      <Setter Property="Opacity" Value="{DynamicResource ListViewItemDisabledThemeOpacity}" />
+    </Style>
+  </ControlTheme>
+
+  <!-- The menu items of the pane (MenuItemsHost of NavigationView.xaml) for a ListBox in the drawer:
+       a list without a background or a border of its own, whose items are the items of the left
+       pane (DrawerPageNavigationViewItem). DrawerPage cannot style the content of its drawer (a
+       control theme reaches only its template), so an application gives its drawer's list this
+       theme: <ListBox Theme="{StaticResource DrawerPageNavigationViewMenu}">. -->
+  <ControlTheme x:Key="DrawerPageNavigationViewMenu" TargetType="ListBox">
+    <Setter Property="Foreground" Value="{DynamicResource NavigationViewItemForeground}" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+    <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+    <Setter Property="KeyboardNavigation.TabNavigation" Value="Once" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
+    <Setter Property="ItemContainerTheme" Value="{StaticResource DrawerPageNavigationViewItem}" />
+    <Setter Property="ItemsPanel">
+      <ItemsPanelTemplate>
+        <StackPanel />
+      </ItemsPanelTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BackgroundSizing="InnerBorderEdge"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}">
+          <!-- MenuItemsScrollViewer -->
+          <ScrollViewer x:Name="PART_ScrollViewer"
+                        Padding="{TemplateBinding Padding}"
+                        HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}"
+                        VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}">
+            <ItemsPresenter x:Name="PART_ItemsPresenter"
+                            ItemsPanel="{TemplateBinding ItemsPanel}" />
+          </ScrollViewer>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type DrawerPage}" TargetType="DrawerPage">
+    <Setter Property="CornerRadius" Value="{DynamicResource OverlayCornerRadius}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <SplitView Name="PART_SplitView"
+                   Background="{TemplateBinding Background}"
+                   BorderThickness="{DynamicResource NavigationViewBorderThickness}"
+                   CornerRadius="{TemplateBinding CornerRadius, Converter={StaticResource RightCornerRadiusFilterConverter}}"
+                   DisplayMode="{TemplateBinding DisplayMode}"
+                   OpenPaneLength="{TemplateBinding DrawerLength}"
+                   CompactPaneLength="{TemplateBinding CompactDrawerLength}"
+                   IsPaneOpen="{Binding IsOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}">
+          <SplitView.Pane>
+            <!-- PaneContentGrid -->
+            <DockPanel x:Name="PaneContentGrid" Margin="{DynamicResource NavigationViewPaneContentGridMargin}">
+              <!-- The pane toggle button in the compact modes. -->
+              <ToggleButton Name="PART_CompactPaneToggle"
+                            DockPanel.Dock="Top"
+                            Theme="{StaticResource DrawerPagePaneToggleButton}"
+                            Margin="{DynamicResource NavigationViewButtonHolderGridMargin}"
+                            IsChecked="{Binding #PART_SplitView.IsPaneOpen, Mode=TwoWay}"
+                            Content="{TemplateBinding DrawerIcon}"
+                            ContentTemplate="{TemplateBinding DrawerIconTemplate}"
+                            IsVisible="False"
+                            HorizontalAlignment="Left"
+                            AutomationProperties.Name="Toggle navigation drawer"
+                            ToolTip.Tip="Toggle navigation drawer" />
+              <!-- PaneHeaderContentBorder -->
+              <ContentPresenter Name="PART_DrawerHeader"
+                                DockPanel.Dock="Top"
+                                HorizontalContentAlignment="Stretch"
+                                VerticalContentAlignment="Stretch"
+                                Content="{TemplateBinding DrawerHeader}"
+                                ContentTemplate="{TemplateBinding DrawerHeaderTemplate}"
+                                Background="{TemplateBinding DrawerHeaderBackground}"
+                                IsVisible="{TemplateBinding DrawerHeader, Converter={x:Static ObjectConverters.IsNotNull}}" />
+              <!-- FooterContentBorder -->
+              <ContentPresenter Name="PART_DrawerFooter"
+                                DockPanel.Dock="Bottom"
+                                Margin="0,0,0,4"
+                                HorizontalContentAlignment="Stretch"
+                                VerticalContentAlignment="Stretch"
+                                Content="{TemplateBinding DrawerFooter}"
+                                ContentTemplate="{TemplateBinding DrawerFooterTemplate}"
+                                Background="{TemplateBinding DrawerFooterBackground}"
+                                IsVisible="{TemplateBinding DrawerFooter, Converter={x:Static ObjectConverters.IsNotNull}}" />
+              <!-- The menu items area -->
+              <ContentPresenter Name="PART_DrawerPresenter"
+                                HorizontalContentAlignment="Stretch"
+                                VerticalContentAlignment="Stretch"
+                                Content="{TemplateBinding Drawer}"
+                                ContentTemplate="{TemplateBinding DrawerTemplate}" />
+            </DockPanel>
+          </SplitView.Pane>
+
+          <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <!-- ContentGrid -->
+            <Border x:Name="ContentGrid"
+                    BorderBrush="{DynamicResource NavigationViewContentGridBorderBrush}"
+                    BackgroundSizing="InnerBorderEdge"
+                    BorderThickness="{DynamicResource NavigationViewContentGridBorderThickness}"
+                    Background="{DynamicResource NavigationViewContentBackground}"
+                    Margin="{DynamicResource NavigationViewContentMargin}"
+                    CornerRadius="{DynamicResource NavigationViewContentGridCornerRadius}"
+                    ClipToBounds="True">
+              <DockPanel Name="PART_ContentDock">
+                <!-- The header row: the pane toggle button and HeaderContent. -->
+                <Border Name="PART_TopBar"
+                        DockPanel.Dock="Top"
+                        Padding="{DynamicResource NavigationViewButtonHolderGridMargin}">
+                  <DockPanel HorizontalAlignment="Stretch">
+                    <ToggleButton x:Name="PART_PaneButton"
+                                  Theme="{StaticResource DrawerPagePaneToggleButton}"
+                                  IsChecked="{Binding #PART_SplitView.IsPaneOpen, Mode=TwoWay}"
+                                  Content="{TemplateBinding DrawerIcon}"
+                                  ContentTemplate="{TemplateBinding DrawerIconTemplate}"
+                                  DockPanel.Dock="Left"
+                                  AutomationProperties.Name="Toggle navigation drawer"
+                                  ToolTip.Tip="Toggle navigation drawer" />
+                    <ContentControl x:Name="PART_TitlePresenter"
+                                    Theme="{StaticResource NavigationViewTitleHeaderContentControlTextStyle}"
+                                    Content="{TemplateBinding Header}"
+                                    ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                    VerticalAlignment="Center"
+                                    VerticalContentAlignment="Center"
+                                    Margin="8,0,0,0"
+                                    IsVisible="{TemplateBinding Header, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                  </DockPanel>
+                </Border>
+                <!-- The same row at the bottom (the drawer at the bottom). -->
+                <Border Name="PART_BottomBar"
+                        DockPanel.Dock="Bottom"
+                        Padding="{DynamicResource NavigationViewButtonHolderGridMargin}"
+                        IsVisible="False">
+                  <DockPanel HorizontalAlignment="Stretch">
+                    <ToggleButton x:Name="PART_BottomPaneButton"
+                                  Theme="{StaticResource DrawerPagePaneToggleButton}"
+                                  IsChecked="{Binding #PART_SplitView.IsPaneOpen, Mode=TwoWay}"
+                                  Content="{TemplateBinding DrawerIcon}"
+                                  ContentTemplate="{TemplateBinding DrawerIconTemplate}"
+                                  DockPanel.Dock="Left"
+                                  AutomationProperties.Name="Toggle navigation drawer"
+                                  ToolTip.Tip="Toggle navigation drawer" />
+                    <ContentControl x:Name="PART_BottomTitlePresenter"
+                                    Theme="{StaticResource NavigationViewTitleHeaderContentControlTextStyle}"
+                                    Content="{TemplateBinding Header}"
+                                    ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                    VerticalAlignment="Center"
+                                    VerticalContentAlignment="Center"
+                                    Margin="8,0,0,0"
+                                    IsVisible="{TemplateBinding Header, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                  </DockPanel>
+                </Border>
+                <ContentPresenter Name="PART_ContentPresenter"
+                                  Margin="{DynamicResource NavigationViewContentPresenterMargin}"
+                                  HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                  VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                  Background="{TemplateBinding Background}"
+                                  BorderBrush="{TemplateBinding BorderBrush}"
+                                  BackgroundSizing="InnerBorderEdge"
+                                  BorderThickness="{TemplateBinding BorderThickness}"
+                                  Content="{TemplateBinding Content}"
+                                  ContentTemplate="{TemplateBinding ContentTemplate}" />
+              </DockPanel>
+            </Border>
+            <Border Name="PART_Backdrop"
+                    Background="{TemplateBinding BackdropBrush}"
+                    IsVisible="False"
+                    IsHitTestVisible="False" />
+          </Grid>
+        </SplitView>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- RootSplitView: PaneOverlaying (the default) and PaneNotOverlaying. -->
+    <Style Selector="^ /template/ SplitView#PART_SplitView">
+      <Setter Property="PaneBackground" Value="{DynamicResource NavigationViewDefaultPaneBackground}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource NavigationViewItemSeparatorForeground}" />
+    </Style>
+    <Style Selector="^[IsOpen=False] /template/ SplitView#PART_SplitView, ^[DisplayMode=Inline] /template/ SplitView#PART_SplitView, ^[DisplayMode=CompactInline] /template/ SplitView#PART_SplitView">
+      <Setter Property="PaneBackground" Value="{DynamicResource NavigationViewExpandedPaneBackground}" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+    </Style>
+
+    <!-- ContentGrid in the Minimal display mode (Overlay) and the other placements. -->
+    <Style Selector="^[DisplayMode=Overlay] /template/ Border#ContentGrid">
+      <Setter Property="BorderThickness" Value="{DynamicResource NavigationViewMinimalContentGridBorderThickness}" />
+      <Setter Property="CornerRadius" Value="{DynamicResource NavigationViewMinimalContentGridCornerRadius}" />
+      <Setter Property="Margin" Value="{DynamicResource NavigationViewMinimalContentMargin}" />
+    </Style>
+    <Style Selector="^:placement-right /template/ Border#ContentGrid">
+      <Setter Property="BorderThickness" Value="0,1,1,0" />
+      <Setter Property="CornerRadius" Value="0,8,0,0" />
+    </Style>
+    <Style Selector="^:placement-top /template/ Border#ContentGrid">
+      <Setter Property="BorderThickness" Value="{DynamicResource TopNavigationViewContentGridBorderThickness}" />
+      <Setter Property="CornerRadius" Value="{DynamicResource TopNavigationViewContentGridCornerRadius}" />
+    </Style>
+    <Style Selector="^:placement-bottom /template/ Border#ContentGrid">
+      <Setter Property="BorderThickness" Value="0,0,0,1" />
+      <Setter Property="CornerRadius" Value="{DynamicResource TopNavigationViewContentGridCornerRadius}" />
+    </Style>
+
+    <!-- The pane toggle button at the right with the drawer at the right. -->
+    <Style Selector="^:placement-right /template/ ToggleButton#PART_PaneButton">
+      <Setter Property="DockPanel.Dock" Value="Right" />
+    </Style>
+
+    <!-- The drawer at the bottom: the bottom bar replaces the top bar. -->
+    <Style Selector="^:placement-bottom /template/ Border#PART_TopBar">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:placement-bottom /template/ Border#PART_BottomBar">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <!-- The drawer at the bottom in the compact modes: the compact strip has the toggle. -->
+    <Style Selector="^[DisplayMode=CompactOverlay]:placement-bottom /template/ Border#PART_BottomBar">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^[DisplayMode=CompactInline]:placement-bottom /template/ Border#PART_BottomBar">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <!-- A horizontal pane (top or bottom): the compact toggle docks left so that the drawer fills
+         the rest. -->
+    <Style Selector="^:placement-bottom /template/ ToggleButton#PART_CompactPaneToggle">
+      <Setter Property="DockPanel.Dock" Value="Left" />
+    </Style>
+    <Style Selector="^:placement-top /template/ ToggleButton#PART_CompactPaneToggle">
+      <Setter Property="DockPanel.Dock" Value="Left" />
+    </Style>
+
+    <!-- The conditions of FerroUI's DrawerPage that hide the top bar. -->
+    <Style Selector="^[DrawerBehavior=Locked] /template/ Border#PART_TopBar">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^[DrawerBehavior=Disabled] /template/ Border#PART_TopBar">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:detail-is-navpage /template/ Border#PART_TopBar">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^[DisplayMode=CompactOverlay] /template/ Border#PART_TopBar">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^[DisplayMode=CompactOverlay] /template/ ToggleButton#PART_CompactPaneToggle">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^[DisplayMode=CompactInline] /template/ Border#PART_TopBar">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^[DisplayMode=CompactInline] /template/ ToggleButton#PART_CompactPaneToggle">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^[IsInNavigationPage=True] /template/ Border#PART_TopBar">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <!-- A NavigationPage in the content has its own drawer toggle. -->
+    <Style Selector="^:detail-is-navpage /template/ ToggleButton#PART_CompactPaneToggle">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

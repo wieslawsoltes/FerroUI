@@ -1,0 +1,42 @@
+<!--
+  Material 3 Expressive navigation and composed components, reference AndroidX Material3
+  1.5.0-beta02 (e4d933c98df7baa7ea2b83eea6e086915961e0ff). Existing FerroUI controls
+  own interaction, navigation and accessibility. Structural contracts derive from the
+  WinUI theme (Microsoft copyright, MIT; see NOTICE.md). Material tokens: Apache-2.0.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:material="using:FerroUI.Themes.Material"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <ControlTheme x:Key="InfoBarCloseButtonStyle" TargetType="Button" BasedOn="{StaticResource SubtleButtonStyle}">
+    <Setter Property="Width" Value="48" /><Setter Property="Height" Value="48" /><Setter Property="MinHeight" Value="48" />
+    <Setter Property="Padding" Value="12" /><Setter Property="CornerRadius" Value="24" />
+    <Setter Property="Foreground" Value="{DynamicResource MaterialInversePrimaryBrush}" />
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type NotificationCard}" TargetType="NotificationCard">
+    <Setter Property="IsTabStop" Value="False" /><Setter Property="MinHeight" Value="48" />
+    <Setter Property="Background" Value="{DynamicResource MaterialInverseSurfaceBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource MaterialInverseOnSurfaceBrush}" />
+    <Setter Property="CornerRadius" Value="4" /><Setter Property="BorderThickness" Value="0" /><Setter Property="Padding" Value="16,0,4,0" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" /><Setter Property="FontSize" Value="14" />
+    <Setter Property="Template"><ControlTemplate>
+      <Border x:Name="ContentRoot" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}"
+              Padding="{TemplateBinding Padding}" BoxShadow="{DynamicResource MaterialElevation3BoxShadow}">
+        <Border.Transitions><Transitions><material:MaterialDoubleTransition Property="Opacity" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" /></Transitions></Border.Transitions>
+        <Grid ColumnDefinitions="*,Auto">
+          <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Foreground="{TemplateBinding Foreground}" VerticalContentAlignment="Center" Margin="0,8,8,8" />
+          <Button x:Name="CloseButton" Grid.Column="1" Theme="{StaticResource InfoBarCloseButtonStyle}" NotificationCard.CloseOnClick="True" AutomationProperties.Name="Dismiss notification">
+            <Path Data="M18.3 5.71 16.89 4.3 12 9.17 7.11 4.3 5.7 5.71 10.59 10.6 5.7 15.49 7.11 16.9 12 12.01 16.89 16.9 18.3 15.49 13.41 10.6Z"
+                  Fill="{Binding $parent[Button].Foreground}" Width="18" Height="18" Stretch="Uniform" />
+          </Button>
+        </Grid>
+      </Border>
+    </ControlTemplate></Setter>
+    <Style Selector="^.two-line"><Setter Property="MinHeight" Value="68" /></Style>
+    <Style Selector="^[IsClosing=true] /template/ Border#ContentRoot"><Setter Property="Opacity" Value="0" /></Style>
+    <Style Selector="^[IsClosing=true]"><Style.Animations>
+      <Animation Duration="{DynamicResource MaterialMotionFastEffectsDuration}" FillMode="Forward"><KeyFrame Cue="100%"><Setter Property="IsClosed" Value="True" /></KeyFrame></Animation>
+    </Style.Animations></Style>
+  </ControlTheme>
+
+</ResourceDictionary>

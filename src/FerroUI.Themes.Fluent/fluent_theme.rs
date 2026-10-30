@@ -225,6 +225,10 @@ impl IResourceNode for FluentThemeHandle {
 }
 
 impl IResourceProvider for FluentThemeHandle {
+    fn as_any(&self) -> Option<&dyn std::any::Any> {
+        Some(self)
+    }
+
     fn owner(&self) -> Option<ResourceHostRef> {
         self.0.owner()
     }

@@ -24,6 +24,9 @@ use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
 
+/// The width the traffic lights of macOS take at the left of the title bar, with their margins.
+const MACOS_TRAFFIC_LIGHTS_WIDTH: f64 = 78.0;
+
 /// A macOS window.
 pub struct WindowImpl {
     weak_self: Weak<WindowImpl>,
@@ -391,6 +394,12 @@ impl IWindowImpl for WindowImpl {
 
     fn extended_margins(&self) -> Thickness {
         self.extended_margins.get()
+    }
+
+    /// The traffic lights of macOS at the left of a title bar the client area extends into (the
+    /// three buttons and their margins, 78 points in the standard and the unified title bars).
+    fn caption_button_insets(&self) -> Option<Thickness> {
+        self.is_client_area_extended_to_decorations().then(|| Thickness::new(MACOS_TRAFFIC_LIGHTS_WIDTH, 0.0, 0.0, 0.0))
     }
 
     fn off_screen_margin(&self) -> Thickness {

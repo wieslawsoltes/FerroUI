@@ -1,0 +1,123 @@
+<!-- Material3 Snackbar/SnackbarHost, pinned to AndroidX e4d933c98df7baa7ea2b83eea6e086915961e0ff.
+     Geometry and role tokens: Snackbar.kt / SnackbarTokens.kt (Apache-2.0). -->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:material="using:FerroUI.Themes.Material"
+                    x:ClassModifier="internal">
+  <ControlTheme x:Key="MaterialSnackbarActionButton" TargetType="Button">
+    <Setter Property="MinWidth" Value="48"/>
+    <Setter Property="MinHeight" Value="48"/>
+    <Setter Property="Padding" Value="12,0"/>
+    <Setter Property="CornerRadius" Value="20"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="Foreground" Value="{DynamicResource MaterialInversePrimaryBrush}"/>
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}"/>
+    <Setter Property="FontSize" Value="14"/>
+    <Setter Property="FontWeight" Value="Medium"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Background="Transparent">
+          <Border x:Name="StateLayer" Height="40" CornerRadius="{TemplateBinding CornerRadius}"
+                  Background="{TemplateBinding Background}" VerticalAlignment="Center">
+            <Panel>
+              <material:MaterialRipple Fill="{TemplateBinding Foreground}" CornerRadius="{TemplateBinding CornerRadius}"
+                                       ReducedMotion="{DynamicResource MaterialReducedMotion}"/>
+              <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Content}"
+                                ContentTemplate="{TemplateBinding ContentTemplate}" Foreground="{TemplateBinding Foreground}"
+                                Padding="{TemplateBinding Padding}" HorizontalContentAlignment="Center"
+                                VerticalContentAlignment="Center" RecognizesAccessKey="True"/>
+            </Panel>
+          </Border>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:pointerover /template/ Border#StateLayer">
+      <Setter Property="Background" Value="{DynamicResource MaterialInversePrimaryHoverBrush}"/>
+    </Style>
+    <Style Selector="^:focus-visible /template/ Border#StateLayer">
+      <Setter Property="Background" Value="{DynamicResource MaterialInversePrimaryFocusBrush}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource MaterialInversePrimaryBrush}"/>
+      <Setter Property="BorderThickness" Value="2"/>
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="MaterialSnackbarDismissButton" TargetType="Button" BasedOn="{StaticResource MaterialSnackbarActionButton}">
+    <Setter Property="Foreground" Value="{DynamicResource MaterialInverseOnSurfaceBrush}"/>
+    <Style Selector="^:pointerover /template/ Border#StateLayer">
+      <Setter Property="Background" Value="{DynamicResource MaterialInverseOnSurfaceHoverBrush}"/>
+    </Style>
+    <Style Selector="^:focus-visible /template/ Border#StateLayer">
+      <Setter Property="Background" Value="{DynamicResource MaterialInverseOnSurfaceFocusBrush}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource MaterialInverseOnSurfaceBrush}"/>
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type material:MaterialSnackbar}" TargetType="material:MaterialSnackbar">
+    <Setter Property="Background" Value="{DynamicResource MaterialInverseSurfaceBrush}"/>
+    <Setter Property="Foreground" Value="{DynamicResource MaterialInverseOnSurfaceBrush}"/>
+    <Setter Property="CornerRadius" Value="4"/>
+    <Setter Property="MinHeight" Value="48"/>
+    <Setter Property="MaxWidth" Value="600"/>
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}"/>
+    <Setter Property="FontSize" Value="14"/>
+    <Setter Property="FontWeight" Value="Normal"/>
+    <Setter Property="ClipToBounds" Value="False"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="PART_Surface" Background="{TemplateBinding Background}"
+                CornerRadius="{TemplateBinding CornerRadius}" MinHeight="48"
+                BoxShadow="{DynamicResource MaterialElevation3BoxShadow}">
+          <Grid x:Name="SnackbarLayout" ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto" Margin="16,0,8,0">
+            <TextBlock x:Name="PART_Message" Grid.Column="0" Text="{TemplateBinding Message}"
+                       Foreground="{TemplateBinding Foreground}" TextWrapping="Wrap"
+                       LineHeight="20" LetterSpacing="0.25" Margin="0,14,8,14" VerticalAlignment="Center"/>
+            <Button x:Name="PART_ActionButton" Grid.Column="1" Theme="{StaticResource MaterialSnackbarActionButton}"
+                    Content="{TemplateBinding ActionLabel}" IsVisible="False" VerticalAlignment="Center"
+                    TabIndex="0"/>
+            <Button x:Name="PART_DismissButton" Grid.Column="2" Theme="{StaticResource MaterialSnackbarDismissButton}"
+                    Width="48" Height="48" Padding="12,0" IsVisible="False" VerticalAlignment="Center"
+                    Foreground="{TemplateBinding Foreground}" TabIndex="1" AutomationProperties.Name="Dismiss notification"
+                    ToolTip.Tip="Dismiss notification">
+              <PathIcon Theme="{StaticResource MaterialSymbolIcon}" Width="24" Height="24" Data="M19,6.41 L17.59,5 L12,10.59 L6.41,5 L5,6.41 L10.59,12 L5,17.59 L6.41,19 L12,13.41 L17.59,19 L19,17.59 L13.41,12 Z"/>
+            </Button>
+          </Grid>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:action /template/ Button#PART_ActionButton">
+      <Setter Property="IsVisible" Value="True"/>
+    </Style>
+    <Style Selector="^:dismiss /template/ Button#PART_DismissButton">
+      <Setter Property="IsVisible" Value="True"/>
+    </Style>
+    <Style Selector="^:dismiss /template/ Grid#SnackbarLayout">
+      <Setter Property="Margin" Value="16,0,0,0"/>
+    </Style>
+    <Style Selector="^:actionnewline /template/ TextBlock#PART_Message">
+      <Setter Property="Grid.ColumnSpan" Value="3"/>
+      <Setter Property="Margin" Value="0,14,16,14"/>
+    </Style>
+    <Style Selector="^:actionnewline /template/ Button#PART_ActionButton">
+      <Setter Property="Grid.Row" Value="1"/>
+      <Setter Property="Margin" Value="0,0,0,4"/>
+    </Style>
+    <Style Selector="^:actionnewline /template/ Button#PART_DismissButton">
+      <Setter Property="Grid.Row" Value="1"/>
+      <Setter Property="Margin" Value="0,0,0,4"/>
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type material:MaterialSnackbarHost}" TargetType="material:MaterialSnackbarHost">
+    <Setter Property="Margin" Value="12"/>
+    <Setter Property="MaxWidth" Value="600"/>
+    <Setter Property="VerticalAlignment" Value="Bottom"/>
+    <Setter Property="ReducedMotion" Value="{DynamicResource MaterialReducedMotion}"/>
+    <Setter Property="MotionScheme" Value="{DynamicResource MaterialMotionScheme}"/>
+    <Setter Property="ClipToBounds" Value="False"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel x:Name="PART_Items"/>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

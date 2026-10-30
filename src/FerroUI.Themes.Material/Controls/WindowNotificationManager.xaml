@@ -1,0 +1,107 @@
+<!--
+  Not ported from a style: WinUI 3 has no host of notifications in a window (microsoft-ui-xaml,
+  https://github.com/microsoft/microsoft-ui-xaml, commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0).
+  The template is the one FerroUI's WindowNotificationManager requires (the panel PART_Items and
+  the pseudo-classes of its position, src/FerroUI.Themes.Fluent/Controls/WindowNotificationManager.xaml);
+  its cards are NotificationCard, the InfoBar of the theme (NotificationCard.xaml). A notification
+  (INotification) is presented as InfoBar presents its title and message, in the InfoBarPanel of
+  the theme (Primitives/info_bar_panel.rs, the port of InfoBarPanel.cpp) with the paddings and the
+  margins of controls/dev/InfoBar/InfoBar.xaml (the resources of
+  Resources/InfoBar_themeresources.xaml): the title and the message on one line when they fit
+  (both 14 down, the message 12 after the title, the panel without padding, so that a card of one
+  line is the 48 of InfoBarMinHeight), else below each other (the message 4 below the title, the
+  panel padded by InfoBarPanelVerticalOrientationPadding); the title in InfoBarTitleFontSize,
+  InfoBarTitleFontWeight and InfoBarTitleForeground, the message in InfoBarMessageFontSize,
+  InfoBarMessageFontWeight and InfoBarMessageForeground, a title or message that is empty left out
+  as InfoBarPanel leaves out an element without size. TextWrapping WrapWholeWords is Wrap. Text
+  content is presented as the message with InfoBarPanelVerticalOrientationPadding (InfoBarPanel
+  lays out one item below the padding of its vertical layout).
+  The width of a card in the host, the spacing between the cards and the margin of the host have
+  no WinUI source (DEVIATIONS.md, WindowNotificationManager).
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:primitives="using:FerroUI.Themes.Material.Primitives"
+                    x:DataType="WindowNotificationManager"
+                    x:ClassModifier="internal">
+  <ControlTheme x:Key="{x:Type WindowNotificationManager}" TargetType="WindowNotificationManager">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <ReversibleStackPanel Name="PART_Items"
+                              Margin="12"
+                              Spacing="8">
+          <ReversibleStackPanel.DataTemplates>
+            <DataTemplate DataType="INotification">
+              <primitives:InfoBarPanel HorizontalOrientationPadding="{StaticResource InfoBarPanelHorizontalOrientationPadding}"
+                                       VerticalOrientationPadding="{StaticResource InfoBarPanelVerticalOrientationPadding}">
+                <TextBlock Text="{Binding Title}"
+                           IsVisible="{Binding Title, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                           primitives:InfoBarPanel.HorizontalOrientationMargin="{StaticResource InfoBarTitleHorizontalOrientationMargin}"
+                           primitives:InfoBarPanel.VerticalOrientationMargin="{StaticResource InfoBarTitleVerticalOrientationMargin}"
+                           Foreground="{DynamicResource InfoBarTitleForeground}"
+                           FontSize="{StaticResource InfoBarTitleFontSize}"
+                           FontWeight="{StaticResource InfoBarTitleFontWeight}"
+                           TextWrapping="Wrap" />
+                <TextBlock Text="{Binding Message}"
+                           IsVisible="{Binding Message, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                           primitives:InfoBarPanel.HorizontalOrientationMargin="{StaticResource InfoBarMessageHorizontalOrientationMargin}"
+                           primitives:InfoBarPanel.VerticalOrientationMargin="{StaticResource InfoBarMessageVerticalOrientationMargin}"
+                           Foreground="{DynamicResource InfoBarMessageForeground}"
+                           FontSize="{StaticResource InfoBarMessageFontSize}"
+                           FontWeight="{StaticResource InfoBarMessageFontWeight}"
+                           TextWrapping="Wrap" />
+              </primitives:InfoBarPanel>
+            </DataTemplate>
+            <DataTemplate DataType="x:String">
+              <TextBlock Margin="{StaticResource InfoBarPanelVerticalOrientationPadding}"
+                         Text="{Binding}"
+                         Foreground="{DynamicResource InfoBarMessageForeground}"
+                         FontSize="{StaticResource InfoBarMessageFontSize}"
+                         FontWeight="{StaticResource InfoBarMessageFontWeight}"
+                         TextWrapping="Wrap" />
+            </DataTemplate>
+          </ReversibleStackPanel.DataTemplates>
+        </ReversibleStackPanel>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- The cards of the host: the width of a notification card of FerroUI (NotificationCardWidth of
+         the Fluent theme); an InfoBar takes the width of its container. -->
+    <Style Selector="^ /template/ ReversibleStackPanel#PART_Items > NotificationCard">
+      <Setter Property="Width" Value="350" />
+    </Style>
+
+    <Style Selector="^:topleft /template/ ReversibleStackPanel#PART_Items">
+      <Setter Property="VerticalAlignment" Value="Top" />
+      <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+
+    <Style Selector="^:topright /template/ ReversibleStackPanel#PART_Items">
+      <Setter Property="VerticalAlignment" Value="Top" />
+      <Setter Property="HorizontalAlignment" Value="Right" />
+    </Style>
+
+    <Style Selector="^:topcenter /template/ ReversibleStackPanel#PART_Items">
+      <Setter Property="VerticalAlignment" Value="Top" />
+      <Setter Property="HorizontalAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="^:bottomleft /template/ ReversibleStackPanel#PART_Items">
+      <Setter Property="ReverseOrder" Value="True" />
+      <Setter Property="VerticalAlignment" Value="Bottom" />
+      <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+
+    <Style Selector="^:bottomright /template/ ReversibleStackPanel#PART_Items">
+      <Setter Property="ReverseOrder" Value="True" />
+      <Setter Property="VerticalAlignment" Value="Bottom" />
+      <Setter Property="HorizontalAlignment" Value="Right" />
+    </Style>
+
+    <Style Selector="^:bottomcenter /template/ ReversibleStackPanel#PART_Items">
+      <Setter Property="ReverseOrder" Value="True" />
+      <Setter Property="VerticalAlignment" Value="Bottom" />
+      <Setter Property="HorizontalAlignment" Value="Center" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

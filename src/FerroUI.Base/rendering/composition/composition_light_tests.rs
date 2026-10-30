@@ -1,23 +1,19 @@
-//! Tests of the WinUI shadows and lights of phase 5 (not from upstream): the
-//! mask and the source policy of a drop shadow, the targets and exclusions of
+//! Tests of the WinUI lights of phase 5 (not from upstream; the drop shadows
+//! are in `composition_shadow_tests.rs`): the targets and exclusions of
 //! a light, the light math and the light map drawn over a lit visual. A child
 //! module of the compositor tests, whose fixture renders the composition
 //! visuals into a recording drawing context.
 
 use super::CompositorCanvas;
 use crate::animation::easings::LinearEasing;
-use crate::media::imaging::Bitmap;
 use crate::media::Colors;
-use crate::platform::{AlphaFormat, LtrbRect, PixelFormats};
 use crate::rendering::composition::server::{
     distant_light_incidence, light_map_of, point_light_incidence, spot_light_cone, IServerCompositionLight,
     LightAttenuation, LightColor, LightMap, LightSource, ServerAmbientLight, ServerPointLight,
 };
 use crate::rendering::composition::{
-    AmbientLight, CompositionDropShadowSourcePolicy, CompositionVisual, ElementComposition, ICompositionObjectAnimations,
-    ICompositionSurface, LoadedImageSurface, PointLight, SpotLight,
+    AmbientLight, CompositionVisual, ElementComposition, ICompositionObjectAnimations, PointLight, SpotLight,
 };
-use crate::rendering::testing::{DrawingLog, MockDrawingContextImpl};
 use crate::{Matrix, PixelSize, Point, Rect, Vector, Vector3D};
 use std::rc::Rc;
 use std::time::Duration;
@@ -51,155 +47,12 @@ fn position_starting(entries: &[String], prefix: &str) -> usize {
     entries.iter().position(|e| e.starts_with(prefix)).unwrap_or_else(|| panic!("{prefix} is drawn: {entries:?}"))
 }
 
-/// A 20 x 10 pixel bitmap at 96 DPI.
-fn test_bitmap() -> Bitmap {
-    Bitmap::from_pixels(
-        PixelFormats::RGBA8888,
-        AlphaFormat::Premul,
-        &[0u8; 20 * 10 * 4],
-        PixelSize::new(20, 10),
-        Vector::new(96.0, 96.0),
-        20 * 4,
-    )
-}
-
 /// A blue sprite visual of the given size.
 fn blue_sprite(s: &CompositorCanvas, width: f64, height: f64) -> crate::rendering::composition::SpriteVisual {
     let sprite = s.compositor.create_sprite_visual();
     sprite.set_size(Vector::new(width, height));
     sprite.set_brush(Some((*s.compositor.create_color_brush_with_color(Colors::BLUE)).clone()));
     sprite
-}
-
-/// Renders the server visual of `visual` into a recording drawing context
-/// with effects.
-fn render_with_effects(s: &CompositorCanvas, visual: &Rc<CompositionVisual>) -> Vec<String> {
-    let log = DrawingLog::new();
-    let mut context = MockDrawingContextImpl::new(log.clone());
-    context.supports_effects = true;
-    s.server_object(visual.server()).render(&mut context, LtrbRect::INFINITE, None, true, false, false);
-    log.entries()
-}
-
-// --- drop shadow masks and source policies -----------------------------------------
-
-#[test]
-fn a_masked_shadow_is_the_shadow_of_its_mask_through_an_effect() {
-    let s = CompositorCanvas::new();
-    let log = s.render_interface.log().clone();
-
-    let image = LoadedImageSurface::from_bitmap(&s.compositor, &test_bitmap());
-    let surface: Rc<dyn ICompositionSurface> = image.clone();
-    let mask = s.compositor.create_surface_brush_with_surface(surface);
-    let shadow = s.compositor.create_drop_shadow();
-    shadow.set_offset(Vector3D::new(5.0, 5.0, 0.0));
-    shadow.set_mask(Some((*mask).clone()));
-    assert!(shadow.mask().is_some());
-    let sprite = blue_sprite(&s, 100.0, 50.0);
-    sprite.set_shadow(Some(shadow.clone()));
-    show(&s, &sprite);
-
-    // The drawing context of the canvas has no effects: the box shadow of
-    // the rectangle, then the brush.
-    let entries = log.entries();
-    let box_shadow = position(&entries, "DrawRectangle none none 0, 0, 100, 50 shadows=1");
-    let brush = position(&entries, "DrawRectangle Blue none 0, 0, 100, 50 shadows=0");
-    assert!(box_shadow < brush, "{entries:?}");
-
-    // With effects: the mask through a drop shadow effect in a layer, the
-    // mask removed again with destination-out blending, then the brush.
-    let entries = render_with_effects(&s, &sprite);
-    let layer = position_starting(&entries, "PushLayer");
-    let effect = position_starting(&entries, "PushEffect");
-    let pop_effect = position(&entries, "PopEffect");
-    let options = position_starting(&entries, "PushRenderOptions");
-    let pop_layer = position(&entries, "PopLayer");
-    let brush = position(&entries, "DrawRectangle Blue none 0, 0, 100, 50 shadows=0");
-    assert!(
-        layer < effect && effect < pop_effect && pop_effect < options && options < pop_layer && pop_layer < brush,
-        "{entries:?}"
-    );
-    let bitmaps = entries[effect..pop_layer].iter().filter(|e| e.starts_with("DrawBitmap")).count();
-    assert_eq!(2, bitmaps, "the mask is painted for its shadow and removed again: {entries:?}");
-    assert!(!entries.iter().any(|e| e.ends_with("shadows=1")), "{entries:?}");
-
-    // A change of the mask brush redraws the visual.
-    log.clear();
-    mask.set_offset(Vector::new(5.0, 0.0));
-    s.run_jobs();
-    assert!(log.count("DrawRectangle Blue none 0, 0, 100, 50") > 0, "{:?}", log.entries());
-}
-
-#[test]
-fn a_color_mask_is_the_opacity_mask_of_the_box_shadow() {
-    let s = CompositorCanvas::new();
-    let log = s.render_interface.log().clone();
-
-    let shadow = s.compositor.create_drop_shadow();
-    shadow.set_mask(Some((*s.compositor.create_color_brush_with_color(Colors::BLACK)).clone()));
-    let sprite = blue_sprite(&s, 100.0, 50.0);
-    sprite.set_shadow(Some(shadow.clone()));
-    show(&s, &sprite);
-
-    let entries = log.entries();
-    let push = position_starting(&entries, "PushOpacityMask");
-    let draw = position(&entries, "DrawRectangle none none 0, 0, 100, 50 shadows=1");
-    let pop = position(&entries, "PopOpacityMask");
-    let brush = position(&entries, "DrawRectangle Blue none 0, 0, 100, 50 shadows=0");
-    assert!(push < draw && draw < pop && pop < brush, "{entries:?}");
-
-    // The source policy `InheritFromVisualContent` wins over the mask.
-    log.clear();
-    shadow.set_source_policy(CompositionDropShadowSourcePolicy::InheritFromVisualContent);
-    s.run_jobs();
-    assert!(!log.entries().iter().any(|e| e.starts_with("PushOpacityMask")), "{:?}", log.entries());
-}
-
-#[test]
-fn a_shadow_that_inherits_from_the_content_follows_the_brush() {
-    let s = CompositorCanvas::new();
-    let log = s.render_interface.log().clone();
-
-    let shadow = s.compositor.create_drop_shadow();
-    shadow.set_source_policy(CompositionDropShadowSourcePolicy::InheritFromVisualContent);
-    let sprite = blue_sprite(&s, 100.0, 50.0);
-    sprite.set_shadow(Some(shadow.clone()));
-    show(&s, &sprite);
-
-    // Without effects: the box shadow of the rectangle.
-    assert!(has_entry(&log.entries(), "DrawRectangle none none 0, 0, 100, 50 shadows=1"), "{:?}", log.entries());
-
-    // With effects: the brush drawn through a drop shadow effect, once.
-    let entries = render_with_effects(&s, &sprite);
-    let push = position_starting(&entries, "PushEffect");
-    let brush = position(&entries, "DrawRectangle Blue none 0, 0, 100, 50 shadows=0");
-    let pop = position(&entries, "PopEffect");
-    assert!(push < brush && brush < pop, "{entries:?}");
-    assert_eq!(1, entries.iter().filter(|e| e.starts_with("DrawRectangle Blue")).count(), "{entries:?}");
-    assert!(!entries.iter().any(|e| e.ends_with("shadows=1")), "{entries:?}");
-}
-
-#[test]
-fn the_masked_shadow_of_a_layer_visual_is_drawn_under_its_layer() {
-    let s = CompositorCanvas::new();
-
-    let shadow = s.compositor.create_drop_shadow();
-    shadow.set_mask(Some((*s.compositor.create_color_brush_with_color(Colors::BLACK)).clone()));
-    let layer = s.compositor.create_layer_visual();
-    layer.set_size(Vector::new(100.0, 50.0));
-    layer.set_shadow(Some(shadow.clone()));
-    layer.children().insert_at_top((*blue_sprite(&s, 30.0, 20.0)).clone());
-    show(&s, &layer);
-
-    // Even with effects the children are composed into a plain layer, over
-    // the shadow of the mask.
-    let entries = render_with_effects(&s, &layer);
-    let mask = position_starting(&entries, "PushOpacityMask");
-    let draw = position(&entries, "DrawRectangle none none 0, 0, 100, 50 shadows=1");
-    let push = position_starting(&entries, "PushLayer");
-    let child = position(&entries, "DrawRectangle Blue none 0, 0, 30, 20 shadows=0");
-    assert!(mask < draw && draw < push && push < child, "{entries:?}");
-    assert!(!entries.iter().any(|e| e.starts_with("PushEffect")), "{entries:?}");
 }
 
 // --- the light math ----------------------------------------------------------------

@@ -3,6 +3,7 @@ use super::{
     PointerPressedEventArgs, PointerReleasedEventArgs, PointerType, TappedEventArgs,
 };
 use crate::interactivity::{IRoutedEventArgs, Interactive, RoutingStrategies};
+use crate::reactive::IDisposable;
 use crate::threading::{DispatcherPriority, DispatcherTimer};
 use crate::utilities::HandlerList;
 use crate::{FerroObject, Point, Rect, Ref, Size, Thickness, Visual, WeakRef};
@@ -38,6 +39,7 @@ struct GesturesData {
     last_press: RefCell<Option<WeakRef<FerroObject>>>,
     last_press_point: Cell<Point>,
     hold_cancellation_token: RefCell<Option<Rc<Cell<bool>>>>,
+    hold_timer: RefCell<Option<Rc<dyn IDisposable>>>,
 }
 
 crate::ferro_thread_local! {
@@ -50,6 +52,7 @@ crate::ferro_thread_local! {
         last_press: RefCell::new(None),
         last_press_point: Cell::new(Point::new(0.0, 0.0)),
         hold_cancellation_token: RefCell::new(None),
+        hold_timer: RefCell::new(None),
     }));
 }
 
@@ -114,8 +117,16 @@ impl Gestures {
 
     fn cancel_hold() {
         let token = data().hold_cancellation_token.borrow_mut().take();
+        let timer = data().hold_timer.borrow_mut().take();
         if let Some(token) = token {
             token.set(true);
+        }
+        // Stopping the queued operation releases its captured pointer event and
+        // source immediately. A flag alone retains a detached control until the
+        // original long-press deadline. Dispose outside the RefCell borrows: a
+        // callback or the final drop of an event source may reenter input code.
+        if let Some(timer) = timer {
+            timer.dispose();
         }
     }
 
@@ -176,12 +187,16 @@ impl Gestures {
                 let e = e.clone();
                 let source = source.clone();
 
-                DispatcherTimer::run_once(
+                let timer = DispatcherTimer::run_once(
                     move || {
-                        let Some(state) = Self::gesture_state() else { return };
                         if token.get() {
                             return;
                         }
+                        // Release this timer before calling user handlers. A
+                        // handler may start a replacement hold; completing this
+                        // callback must not cancel that new timer.
+                        Self::cancel_hold();
+                        let Some(state) = Self::gesture_state() else { return };
                         let Some(i) = source.cast::<InputElement>() else { return };
 
                         if InputElement::get_is_holding_enabled(&i)
@@ -207,6 +222,10 @@ impl Gestures {
                     settings.hold_wait_duration(),
                     DispatcherPriority::default(),
                 );
+                let previous = data.hold_timer.replace(Some(timer));
+                if let Some(previous) = previous {
+                    previous.dispose();
+                }
             }
         } else if e.click_count() % 2 == 0 && e.get_current_point(Some(&visual)).properties.is_left_button_pressed {
             if let Some(i) = &interactive {

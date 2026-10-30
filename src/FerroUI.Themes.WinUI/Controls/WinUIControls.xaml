@@ -35,6 +35,9 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/ProgressBar.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/Separator.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/PathIcon.xaml" />
+        <!-- The icons of WinUI that FerroUI ports as controls (docs/porting/winui-controls.md). -->
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/FontIcon.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/SymbolIcon.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/Label.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/ItemsControl.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/HeaderedContentControl.xaml" />
@@ -56,6 +59,12 @@
         <!-- B6: window decorations, notifications, tables and dialogs. -->
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/WindowDrawnDecorations.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/NotificationCard.xaml" />
+        <!-- The status controls of WinUI that FerroUI ports as controls (docs/porting/winui-controls.md);
+             InfoBar uses InfoBarCloseButtonStyle of NotificationCard.xaml. -->
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/InfoBar.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/InfoBadge.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/TitleBar.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/ProgressRing.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/WindowNotificationManager.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/TableView.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/TableViewCell.xaml" />
@@ -72,6 +81,11 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/TabbedPage.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/NavigationPage.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/DrawerPage.xaml" />
+        <!-- The navigation of WinUI that FerroUI ports as controls (docs/porting/winui-controls.md):
+             Frame, NavigationView and its items; NavigationView uses the styles of DrawerPage.xaml
+             and NavigationPage.xaml. -->
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/Frame.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/NavigationView.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/Carousel.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/CarouselPage.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/CommandBar.xaml" />
@@ -81,9 +95,13 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/ToggleSwitch.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/Slider.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/NumericUpDown.xaml" />
+        <!-- An input control of WinUI that FerroUI ports as a control (docs/porting/winui-controls.md). -->
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/NumberBox.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/ButtonSpinner.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/Expander.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/PipsPager.xaml" />
+        <!-- An input control of WinUI that FerroUI ports as a control (docs/porting/winui-controls.md). -->
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/RatingControl.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/RefreshContainer.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/RefreshVisualizer.xaml" />
         <!-- B3: flyouts, menus, lists and selection. -->
@@ -100,6 +118,10 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/TreeViewItem.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/TreeView.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/AutoCompleteBox.xaml" />
+        <!-- An input control of WinUI that FerroUI ports as a control (docs/porting/winui-controls.md). -->
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/AutoSuggestBox.xaml" />
+        <!-- An input control of WinUI that FerroUI ports as a control (docs/porting/winui-controls.md). -->
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/RadioButtons.xaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Styles.Resources>

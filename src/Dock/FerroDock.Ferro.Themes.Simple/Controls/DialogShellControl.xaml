@@ -1,0 +1,38 @@
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:o="using:FerroDock.Ferro.Controls.Overlays" x:CompileBindings="True">
+  <ControlTheme x:Key="{x:Type o:DialogShellControl}" TargetType="o:DialogShellControl" x:DataType="o:DialogShellControl">
+    <Setter Property="Template">
+      <ControlTemplate x:DataType="o:DialogShellControl">
+        <Border Background="{DynamicResource DockSurfaceEditorBrush}"
+                BorderBrush="{DynamicResource DockBorderSubtleBrush}"
+                BorderThickness="1"
+                CornerRadius="{DynamicResource DockDialogCornerRadius}"
+                Padding="{DynamicResource DockDialogPadding}"
+                MinWidth="{DynamicResource DockDialogMinWidth}"
+                MaxWidth="{DynamicResource DockDialogMaxWidth}"
+                BoxShadow="0 6 18 #33000000">
+          <Grid RowDefinitions="Auto,*" RowSpacing="{DynamicResource DockDialogSpacing}">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{DynamicResource DockDialogSpacing}">
+              <TextBlock Text="{TemplateBinding Title}"
+                         FontSize="{DynamicResource DockDialogTitleFontSize}"
+                         FontWeight="SemiBold"
+                         Foreground="{DynamicResource DockTabForegroundBrush}"
+                         VerticalAlignment="Center" />
+              <Button Content="&#x2715;"
+                      Command="{TemplateBinding CloseCommand}"
+                      IsVisible="{TemplateBinding IsCloseVisible}"
+                      Width="{DynamicResource DockDialogCloseButtonSize}"
+                      Height="{DynamicResource DockDialogCloseButtonSize}"
+                      HorizontalAlignment="Right"
+                      VerticalAlignment="Center" />
+            </Grid>
+            <ContentPresenter Grid.Row="1"
+                              Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}" />
+          </Grid>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

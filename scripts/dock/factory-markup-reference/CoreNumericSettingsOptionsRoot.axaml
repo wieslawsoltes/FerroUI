@@ -1,0 +1,3 @@
+<settings:DockSettingsOptions xmlns="https://github.com/avaloniaui"
+ xmlns:settings="clr-namespace:Dock.Settings;assembly=Dock.Settings"
+ DefaultFloatingWindowOwnerMode="-19" />

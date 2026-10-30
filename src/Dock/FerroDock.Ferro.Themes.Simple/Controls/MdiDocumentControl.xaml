@@ -1,0 +1,120 @@
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="using:FerroDock.Ferro.Controls"
+                    xmlns:settings="using:FerroDock.Settings"
+                    xmlns:core="using:FerroDock.Model.Core"
+                    xmlns:dmc="using:FerroDock.Model.Controls"
+                    x:DataType="dmc:IDocumentDock"
+                    x:CompileBindings="True">
+  <Design.PreviewWith>
+    <controls:MdiDocumentControl Width="300" Height="400" />
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="{x:Type controls:MdiDocumentControl}" TargetType="controls:MdiDocumentControl">
+
+    <Setter Property="(settings:DockProperties.IsDragEnabled)" Value="{Binding CanDrag}" />
+    <Setter Property="(settings:DockProperties.IsDropEnabled)" Value="{Binding CanDrop}" />
+    <Setter Property="(settings:DockProperties.DockGroup)" Value="{Binding DockGroup}" />
+    <Setter Property="CloseButtonTheme" Value="{DynamicResource ChromeButton}" />
+
+    <Setter Property="IconTemplate">
+      <DataTemplate DataType="core:IDockable" x:DataType="core:IDockable">
+        <Panel />
+      </DataTemplate>
+    </Setter>
+
+    <Setter Property="HeaderTemplate">
+      <DataTemplate DataType="core:IDockable" x:DataType="core:IDockable">
+        <TextBlock Text="{Binding Title}"
+                   VerticalAlignment="Center"
+                   Padding="{DynamicResource DockHeaderContentPadding}"
+                   TextTrimming="CharacterEllipsis"
+                   TextWrapping="NoWrap" />
+      </DataTemplate>
+    </Setter>
+
+    <Setter Property="ModifiedTemplate">
+      <DataTemplate DataType="core:IDockable" x:DataType="core:IDockable">
+        <TextBlock VerticalAlignment="Center"
+                   Text="*"
+                   Margin="{DynamicResource DockModifiedIndicatorMargin}" />
+      </DataTemplate>
+    </Setter>
+
+    <Setter Property="CloseTemplate">
+      <DataTemplate DataType="core:IDockable" x:DataType="core:IDockable">
+        <Viewbox Width="{DynamicResource DockMdiTitleIconSize}" Height="{DynamicResource DockMdiTitleIconSize}">
+          <Path x:Name="PART_ClosePath"
+                Data="{DynamicResource DockToolIconCloseGeometry}"
+                UseLayoutRounding="False"
+                Classes.active="{Binding $parent[controls:MdiDocumentWindow].IsActive}">
+            <Path.Styles>
+              <Style Selector="Path">
+                <Setter Property="Stretch" Value="UniformToFill" />
+                <Setter Property="Fill" Value="{DynamicResource DockChromeButtonForegroundBrush}" />
+              </Style>
+              <Style Selector="Path.active">
+                <Setter Property="Fill" Value="{DynamicResource DockTabActiveForegroundBrush}" />
+              </Style>
+            </Path.Styles>
+          </Path>
+        </Viewbox>
+      </DataTemplate>
+    </Setter>
+
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="PART_Root"
+                Background="Transparent"
+                settings:DockProperties.IsDropArea="True"
+                settings:DockProperties.IsDockTarget="True"
+                settings:DockProperties.DockAdornerHost="{Binding RelativeSource={RelativeSource Self}}">
+          <Grid>
+            <ItemsControl x:Name="PART_ItemsControl"
+                          Classes="MdiLayoutItems"
+                          IsVisible="{Binding $parent[controls:MdiDocumentControl].HasVisibleDocuments}"
+                          ItemsSource="{Binding VisibleDockables}">
+              <ItemsControl.Styles>
+                <Style Selector="ItemsControl.MdiLayoutItems > ContentPresenter"
+                       x:DataType="dmc:IMdiDocument">
+                  <Setter Property="ZIndex" Value="{Binding MdiZIndex}" />
+                </Style>
+              </ItemsControl.Styles>
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <controls:MdiLayoutPanel LayoutManager="{Binding $parent[controls:MdiDocumentControl].LayoutManager}" />
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="dmc:IMdiDocument" x:DataType="dmc:IMdiDocument">
+                  <controls:MdiDocumentWindow IconTemplate="{Binding $parent[controls:MdiDocumentControl].IconTemplate}"
+                                              HeaderTemplate="{Binding $parent[controls:MdiDocumentControl].HeaderTemplate}"
+                                              ModifiedTemplate="{Binding $parent[controls:MdiDocumentControl].ModifiedTemplate}"
+                                              CloseTemplate="{Binding $parent[controls:MdiDocumentControl].CloseTemplate}"
+                                              CloseButtonTheme="{Binding $parent[controls:MdiDocumentControl].CloseButtonTheme}"
+                                              DocumentContextMenu="{DynamicResource MdiDocumentWindowContextMenu}"
+                                              MdiState="{Binding MdiState}"
+                                              ZIndex="{Binding MdiZIndex}"
+                                              settings:DockProperties.IsDropArea="True"
+                                              settings:DockProperties.IsDockTarget="True"
+                                              settings:DockProperties.ShowDockIndicatorOnly="True"
+                                              settings:DockProperties.IndicatorDockOperation="Fill"
+                                              settings:DockProperties.DockAdornerHost="{Binding RelativeSource={RelativeSource AncestorType=controls:MdiDocumentControl}}" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <ContentControl x:Name="PART_EmptyContentHost"
+                            Content="{Binding EmptyContent}"
+                            ContentTemplate="{Binding $parent[controls:MdiDocumentControl].EmptyContentTemplate}"
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            IsVisible="{Binding !$parent[controls:MdiDocumentControl].HasVisibleDocuments}" />
+          </Grid>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+
+  </ControlTheme>
+
+</ResourceDictionary>

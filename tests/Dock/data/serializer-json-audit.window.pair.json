@@ -1,0 +1,30 @@
+{
+  "$id": "1",
+  "A": {
+    "$id": "2",
+    "OwnerMode": -19,
+    "ParentWindow": {
+      "$id": "3",
+      "$type": "Dock.Model.ReactiveUI.Core.DockWindow",
+      "Id": "parent",
+      "X": 0,
+      "Y": 0,
+      "Width": 0,
+      "Height": 0,
+      "WindowState": -17,
+      "Topmost": false,
+      "Title": "Parent",
+      "OwnerMode": 123,
+      "IsModal": false,
+      "ShowInTaskbar": true
+    },
+    "IsModal": true,
+    "ShowInTaskbar": false
+  },
+  "B": {
+    "$ref": "2"
+  },
+  "Window": {
+    "$ref": "3"
+  }
+}

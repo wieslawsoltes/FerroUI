@@ -1,0 +1,46 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    dxaml/xcp/dxaml/themes/generic.xaml (the implicit style of Frame)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  The template of WinUI's Frame, which FerroUI ports as a control (ferroui-controls,
+  docs/porting/winui-controls.md, section 7); the Fluent theme has no document for it. The pages of
+  a frame (FramePage, WinUI's Page) are user controls with the theme of UserControl: WinUI's Page
+  has no style.
+
+  Translation notes (docs/porting/winui-theme.md, section 4):
+  - The ContentPresenter of the template is PART_ContentPresenter: FerroUI's Frame is a
+    ContentControl, whose content is hosted by the presenter of that name.
+  - ContentTransitions (the NavigationThemeTransition of a navigation) has no counterpart and is
+    left out: FerroUI's frame has no navigation transitions.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Width="300" Height="200">
+      <Frame />
+    </Border>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="{x:Type Frame}" TargetType="Frame">
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="VerticalContentAlignment" Value="Stretch" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <ContentPresenter x:Name="PART_ContentPresenter"
+                          Content="{TemplateBinding Content}"
+                          Background="{TemplateBinding Background}"
+                          BorderBrush="{TemplateBinding BorderBrush}"
+                          BorderThickness="{TemplateBinding BorderThickness}"
+                          CornerRadius="{TemplateBinding CornerRadius}"
+                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                          Padding="{TemplateBinding Padding}"
+                          HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                          VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

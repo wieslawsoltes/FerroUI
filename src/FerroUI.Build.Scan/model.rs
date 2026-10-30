@@ -640,6 +640,11 @@ pub struct GenericModel {
 }
 
 /// A type of a crate (`TypeModel`).
+///
+/// A `TypeModel` is built only through [`TypeModel::new`] (then its fields are
+/// set, or the struct update syntax is used): its fields grow with the export
+/// format of the scanner, and an added field is not a breaking change of the
+/// API (docs/release.md, "API stability").
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct TypeModel {
     /// The dotted namespace: the explicit one, else the one the namespace table of the
@@ -710,6 +715,9 @@ pub struct TypeModel {
     pub events: Vec<MemberModel>,
     pub enum_members: Vec<EnumMemberModel>,
     pub is_flags: bool,
+    /// Explicit associated `fn(i32) -> value` for unnamed plain-enum literals.
+    /// The function belongs to the public metadata carrier; None retains closed enums.
+    pub enum_i32_factory: Option<String>,
     pub attributes: Vec<AttributeModel>,
     /// The attributes of registered properties, by the name of the property.
     pub property_attributes: Vec<(String, Vec<AttributeModel>)>,
@@ -753,6 +761,7 @@ impl TypeModel {
             events: Vec::new(),
             enum_members: Vec::new(),
             is_flags: false,
+            enum_i32_factory: None,
             attributes: Vec::new(),
             property_attributes: Vec::new(),
             notify_property_changed: None,
@@ -917,7 +926,8 @@ impl TypeModel {
             .list("fields", &self.fields, MemberModel::to_json)
             .list("events", &self.events, MemberModel::to_json)
             .list("enum_members", &self.enum_members, EnumMemberModel::to_json)
-            .flag("is_flags", self.is_flags);
+            .flag("is_flags", self.is_flags)
+            .optional_text("enum_i32_factory", &self.enum_i32_factory);
         Json::object(
             attributes_to_json(members, &self.attributes)
                 .list("property_attributes", &self.property_attributes, |(name, attributes)| {
@@ -965,6 +975,7 @@ impl TypeModel {
             events: fields.list("events", MemberModel::from_json)?,
             enum_members: fields.list("enum_members", EnumMemberModel::from_json)?,
             is_flags: fields.flag("is_flags")?,
+            enum_i32_factory: fields.optional_text("enum_i32_factory")?,
             attributes: fields.list("attributes", AttributeModel::from_json)?,
             property_attributes: fields.list("property_attributes", |pair| match pair {
                 Json::Array(pair) if pair.len() == 2 => {
@@ -1071,7 +1082,7 @@ pub struct ValueTypeModel {
 /// The registration functions of the untyped value conversions the scanner reads
 /// ([`ValueTypeModel`], and `cast` for [`CastModel`]), with the number of type arguments.
 pub const VALUE_REGISTRATIONS: &[(&str, usize)] =
-    &[("nullable", 1), ("reference", 1), ("object", 1), ("element_ref", 1), ("interface", 2), ("upcast", 2), ("cast", 2), ("deref", 2)];
+    &[("nullable", 1), ("reference", 1), ("object", 1), ("element_ref", 1), ("interface", 2), ("upcast", 2), ("cast", 2), ("boxed_cast", 2), ("deref", 2)];
 
 /// A public function of an inherent `impl` block of a type of a crate, as far as the choice
 /// of a call form reads it (9.5.3, form B).
@@ -1546,6 +1557,7 @@ mod tests {
             EnumMemberModel { name: "Direct".to_string(), rust_variant: None, rust_value: Some("Routing::DIRECT".to_string()), value: None },
         ];
         type_.is_flags = true;
+        type_.enum_i32_factory=Some("__enum_from_i32".to_string());
         type_.attributes = vec![attribute.clone()];
         type_.property_attributes = vec![("Row".to_string(), vec![attribute])];
         type_.notify_property_changed = Some(unresolved);

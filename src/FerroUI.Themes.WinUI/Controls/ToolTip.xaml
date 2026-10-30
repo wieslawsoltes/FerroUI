@@ -15,9 +15,8 @@
     The fade-out is not seen: FerroUI closes the popup of a tool tip at once.
   - ContentTransitions has no counterpart. The drop shadow WinUI's ToolTip applies to LayoutRoot
     in code when it opens (ApplyElevationEffect with a base elevation of 16 under drop shadows,
-    ToolTip_Partial.cpp) is the BoxShadow ThemeShadowToolTipBoxShadow of the border
-    ThemeShadowWrapper around PART_ContentPresenter under :open (a border of its own, because a
-    presenter whose background is sized to the inner edge of its border draws no box shadow),
+    ToolTip_Partial.cpp) is a ThemeShadow (the shared WinUIThemeShadow, Translation.Z as in WinUI) on the border
+    ThemeShadowWrapper around PART_ContentPresenter under :open (a border of its own),
     with the margin ThemeShadowToolTipMargin as the room for it in the popup
     (Resources/ThemeShadows.xaml; DEVIATIONS.md, G-24).
 -->
@@ -56,9 +55,8 @@
     </Setter>
     <Setter Property="Template">
       <ControlTemplate>
-        <!-- The shadow on a border of its own: a presenter whose background is sized to the inner
-             edge of its border is drawn as geometries, without its box shadows (G-24). -->
-        <Border x:Name="ThemeShadowWrapper" CornerRadius="{TemplateBinding CornerRadius}">
+        <!-- The theme shadow on a border of its own, at the elevation of a tool tip (G-24). -->
+        <Border x:Name="ThemeShadowWrapper" Translation="0,0,16" CornerRadius="{TemplateBinding CornerRadius}">
           <ContentPresenter x:Name="PART_ContentPresenter"
                             BorderThickness="{TemplateBinding BorderThickness}"
                             Background="{TemplateBinding Background}"
@@ -80,7 +78,7 @@
       <Setter Property="Margin" Value="{StaticResource ThemeShadowToolTipMargin}" />
     </Style>
     <Style Selector="^:open /template/ Border#ThemeShadowWrapper">
-      <Setter Property="BoxShadow" Value="{DynamicResource ThemeShadowToolTipBoxShadow}" />
+      <Setter Property="Shadow" Value="{StaticResource WinUIThemeShadow}" />
     </Style>
   </ControlTheme>
 

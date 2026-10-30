@@ -27,6 +27,10 @@ pub const OBLIQUE_SKEW: f64 = -0.3;
 /// twenty-fourth of the em size at 9 and below, a thirty-second at 36 and
 /// above, interpolated between; the outline is stroked with that width, so
 /// a glyph grows by half of it on every side.
+///
+/// Native glyph rendering evaluates this at the requested em size. Public
+/// glyph paths evaluate it at the canonical path size, then scale the whole
+/// outline to the requested size; see [`VelloFontFace::glyph_path`].
 pub fn bold_simulation_outline_width(em_size: f64) -> f64 {
     const KEYS: (f64, f64) = (9.0, 36.0);
     const VALUES: (f64, f64) = (1.0 / 24.0, 1.0 / 32.0);
@@ -113,6 +117,9 @@ impl VelloFontFace {
     /// down and the origin is the origin of the glyph on the baseline,
     /// without hinting and with the simulations of the face applied: the
     /// bold simulation widens the outline, the oblique one shears it.
+    /// Simulated bold paths use the same canonical em size of 64 as Skia's
+    /// public glyph geometry, then scale the completed outline. They remain
+    /// the same scalable shape at every requested size.
     ///
     /// Returns `None` for a glyph the font does not have or that has no
     /// outline (a bitmap glyph); a glyph without contours (a space) is an
@@ -180,19 +187,33 @@ impl VelloFontFace {
             return None;
         }
 
-        // The outline in the units of the font, scaled afterwards: a glyph
-        // of a size is the same curve, and the result is not rounded to the
-        // single precision of a size.
-        let scale = em_size / self.units_per_em.max(1) as f64;
+        // SkFont::getPaths calls setupForAsPaths before obtaining an outline:
+        // the font is set to SkFontPriv::kCanonicalTextSizeForPaths (64), so
+        // useStrokeForFakeBold expands it at that size, then getPaths scales
+        // the completed path to the requested em size. Applying the native
+        // glyph rasterizer's size-dependent expansion here instead makes
+        // small public outlines too heavy and changes their scalable shape.
+        // https://github.com/google/skia/blob/main/src/core/SkFont.cpp
+        const CANONICAL_PATH_EM_SIZE: f64 = 64.0;
+        let bold = font_simulations.contains(FontSimulations::Bold);
+        let path_em_size = if bold { CANONICAL_PATH_EM_SIZE } else { em_size };
+
+        // Scale the font's outline in f64, without first rounding the size to
+        // the single precision of the font scaler.
+        let scale = path_em_size / self.units_per_em.max(1) as f64;
         let mut path = Affine::scale_non_uniform(scale, -scale) * self.unscaled_glyph_path(glyph_index)?;
 
-        if font_simulations.contains(FontSimulations::Bold) && !path.elements().is_empty() {
-            let amount = bold_simulation_outline_width(em_size) / 2.0;
+        if bold && !path.elements().is_empty() {
+            let amount = bold_simulation_outline_width(path_em_size) / 2.0;
             path = kurbo::expand_path(&path, Diagonal2::new(amount, amount), Join::Miter, 4.0, 0.01);
         }
 
         if font_simulations.contains(FontSimulations::Oblique) {
             path = Affine::skew(OBLIQUE_SKEW, 0.0) * path;
+        }
+
+        if bold {
+            path = Affine::scale(em_size / path_em_size) * path;
         }
 
         Some(path)

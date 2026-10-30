@@ -1,0 +1,32 @@
+<!-- Ported from both pinned RatingControl examples; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <TextBlock Text="A RatingControl with a caption" FontSize="18" />
+  <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
+    <StackPanel VerticalAlignment="Top" Spacing="12">
+      <RatingControl x:Name="RatingControl1" HorizontalAlignment="Left"
+                           Caption="312 ratings" AutomationProperties.Name="Simple RatingControl"
+                           IsClearEnabled="{Binding #ClearEnabled.IsChecked, Mode=OneWay}"
+                           IsReadOnly="{Binding #ReadOnly.IsChecked, Mode=OneWay}" />
+      <TextBlock x:Name="RatingOutput" Text="-1" FontWeight="Bold"
+                 AutomationProperties.LiveSetting="Polite" />
+    </StackPanel>
+    <StackPanel Grid.Column="1" Spacing="12">
+      <CheckBox x:Name="ClearEnabled" Content="IsClearEnabled" IsChecked="False" />
+      <TextBlock Text="Swipe left or click again to clear your rating." TextWrapping="Wrap" />
+      <CheckBox x:Name="ReadOnly" Content="IsReadOnly" IsChecked="False" />
+    </StackPanel>
+  </Grid>
+  <TextBlock Text="A RatingControl with a placeholder" FontSize="18" />
+  <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
+    <RatingControl x:Name="RatingControl2" HorizontalAlignment="Left" VerticalAlignment="Top"
+                         AutomationProperties.Name="RatingControl with placeholder"
+                         PlaceholderValue="{Binding #PlaceholderSlider.Value, Mode=TwoWay}" />
+    <StackPanel Grid.Column="1" Spacing="8">
+      <TextBlock Text="PlaceholderValue" />
+      <Slider x:Name="PlaceholderSlider" Minimum="0" Maximum="5" SmallChange="0.5"
+              TickFrequency="0.5" IsSnapToTickEnabled="True"
+              AutomationProperties.Name="PlaceholderValue" />
+    </StackPanel>
+  </Grid>
+</StackPanel>

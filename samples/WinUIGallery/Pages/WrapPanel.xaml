@@ -1,0 +1,4 @@
+<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <WrapPanel Width="360" HorizontalAlignment="Left" ItemSpacing="8" LineSpacing="8"><Button Content="Alpha"/><Button Content="Beta item"/><Button Content="Gamma"/><Button Content="Delta item"/><Button Content="Epsilon"/><Button Content="Zeta item"/><Button Content="Eta"/><Button Content="Theta item"/><Button Content="Iota"/><Button Content="Kappa item"/></WrapPanel>
+</StackPanel>

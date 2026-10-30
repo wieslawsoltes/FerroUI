@@ -133,4 +133,25 @@ mod tests {
         assert!(assembly.xmlns_definitions.iter().all(|definition| definition.xml_namespace == FERRO_XML_NAMESPACE
             && definition.namespace.starts_with("FerroUI.Xaml.Interactions")));
     }
+
+    #[test]
+    fn the_storage_provider_of_a_top_level_converts_to_the_handle_of_the_pickers() {
+        use crate::StorageProviderRef;
+        use ferroui_base::data::core::{ValueType, ValueTypes};
+        use ferroui_base::platform::storage::{IStorageProvider, NoopStorageProvider};
+        use ferroui_base::BoxedValue;
+        use std::rc::Rc;
+
+        register_types();
+        // What `{Binding $parent[TopLevel].StorageProvider}` reads.
+        let provider: Rc<dyn IStorageProvider> = Rc::new(NoopStorageProvider);
+        let value: BoxedValue = Rc::new(provider.clone());
+        let converted = ValueTypes::try_convert(Some(&value), ValueType::of::<Option<StorageProviderRef>>())
+            .flatten()
+            .and_then(|converted| converted.downcast_ref::<Option<StorageProviderRef>>().cloned())
+            .flatten()
+            .expect("the handle of the storage provider");
+        assert!(std::ptr::addr_eq(Rc::as_ptr(converted.get()), Rc::as_ptr(&provider)));
+        assert!(ValueTypes::is_assignable(ValueType::of::<Rc<dyn IStorageProvider>>(), ValueType::of::<StorageProviderRef>()));
+    }
 }

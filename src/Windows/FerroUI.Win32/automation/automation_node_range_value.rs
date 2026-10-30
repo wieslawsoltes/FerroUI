@@ -28,12 +28,14 @@ impl IRangeValueProviderImpl for AutomationNode {
         self.invoke_sync_provider(|x: &Rc<dyn IRangeValueProvider>| Ok(x.minimum()))
     }
 
-    // The reference answers one for both changes, whatever the peer says.
+    // Deviation (DEVIATIONS.md, Windows platform backend): the reference answers one for both
+    // changes, whatever the peer says; the port answers the provider's values, as WinUI's
+    // `RangeBaseAutomationPeer` does.
     fn get_large_change(&self) -> Result<f64, HResult> {
-        Ok(1.0)
+        self.invoke_sync_provider(|x: &Rc<dyn IRangeValueProvider>| Ok(x.large_change()))
     }
 
     fn get_small_change(&self) -> Result<f64, HResult> {
-        Ok(1.0)
+        self.invoke_sync_provider(|x: &Rc<dyn IRangeValueProvider>| Ok(x.small_change()))
     }
 }

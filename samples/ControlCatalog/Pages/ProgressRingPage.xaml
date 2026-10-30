@@ -1,0 +1,31 @@
+<ContentPage Theme="{StaticResource ScrollPage}" xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Header="ProgressRing"
+             x:Class="ControlCatalog.Pages.ProgressRingPage">
+  <!-- Not from upstream: WinUI's ProgressRing (docs/porting/winui-controls.md). Its template (arcs
+       where WinUI plays an animated visual) is in the WinUI theme and the macOS and Material themes
+       derived from it. -->
+  <StackPanel Orientation="Vertical" Spacing="4" MaxWidth="800">
+    <TextBlock Margin="2" Classes="h2" TextWrapping="Wrap">A ProgressRing shows that work is going on: indeterminate while the amount is unknown, determinate with a value in a range.</TextBlock>
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">Indeterminate</TextBlock>
+    <StackPanel Margin="2" Orientation="Horizontal" Spacing="24">
+      <ProgressRing IsActive="{Binding #RingActive.IsChecked}" />
+      <ProgressRing IsActive="{Binding #RingActive.IsChecked}" Width="60" Height="60" />
+      <CheckBox x:Name="RingActive" IsChecked="True" Content="IsActive" VerticalAlignment="Center" />
+    </StackPanel>
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">Determinate</TextBlock>
+    <StackPanel Margin="2" Orientation="Horizontal" Spacing="24">
+      <ProgressRing IsIndeterminate="False" Value="{Binding #RingValue.Value}" />
+      <ProgressRing IsIndeterminate="False" Value="{Binding #RingValue.Value}" Width="60" Height="60" />
+      <Slider x:Name="RingValue" Width="200" Minimum="0" Maximum="100" Value="35" VerticalAlignment="Center" />
+    </StackPanel>
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">Colours</TextBlock>
+    <StackPanel Margin="2" Orientation="Horizontal" Spacing="24">
+      <ProgressRing IsIndeterminate="False" Value="70" Foreground="Green" Background="LightGray" />
+      <ProgressRing Foreground="OrangeRed" />
+    </StackPanel>
+  </StackPanel>
+</ContentPage>

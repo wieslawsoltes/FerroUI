@@ -20,8 +20,8 @@ use ferroui_base::reactive::{CompositeDisposable, IDisposable, ObservableExt};
 use ferroui_base::utilities::MathUtilities;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, instantiate, AttachedProperty, BoxedValue, DirectProperty,
-    FerroObjectExtensions, FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Rect,
-    Ref, Size, StyledElementImpl, StyledProperty, StyledPropertyMetadata, Thickness, Vector, Visual, VisualImpl,
+    FerroObjectExtensions, FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Matrix,
+    Rect, Ref, Size, StyledElementImpl, StyledProperty, StyledPropertyMetadata, Thickness, Vector, Visual, VisualImpl,
     VisualImplExt,
     VisualTreeAttachmentEventArgs, WeakRef,
 };
@@ -62,6 +62,8 @@ pub struct ScrollContentPresenter {
     /// (vertical, then horizontal).
     scroll_snap_points_subscriptions: RefCell<Option<[Rc<dyn IDisposable>; 2]>>,
     is_snap_points_updated: Cell<bool>,
+    /// The zoom of the content (WinUI's `ZoomFactor` of the scroll viewer, not upstream).
+    zoom: Cell<f64>,
 }
 
 ferro_class!(ScrollContentPresenter: ContentPresenter);
@@ -211,6 +213,28 @@ impl LayoutableImpl for ScrollContentPresenter {
 
 impl InputElementImpl for ScrollContentPresenter {
     fn on_pointer_wheel_changed(this: &Self, e: &PointerWheelEventArgs) {
+        // Not upstream: Ctrl and the wheel zoom the content of a scroll viewer whose `ZoomMode`
+        // is enabled, about the point under the pointer.
+        if e.key_modifiers().contains(KeyModifiers::CONTROL) {
+            if let Some(owner) = this.owner().filter(|owner| owner.zoom_mode() == crate::ZoomMode::Enabled) {
+                let delta = e.delta().y;
+                if delta != 0.0 && this.logical_scroll_subscription.borrow().is_none() {
+                    let old = this.zoom.get();
+                    let zoom = owner.clamp_zoom_factor((old * 1.1f64.powf(delta)) as f32) as f64;
+                    let anchor = e.get_position(Some(this));
+                    let offset = this.offset();
+                    let ratio = zoom / old;
+                    let target = Vector::new(
+                        (offset.x + anchor.x) * ratio - anchor.x,
+                        (offset.y + anchor.y) * ratio - anchor.y,
+                    );
+                    this.set_zoom(zoom, target);
+                }
+                e.set_handled(true);
+                return;
+            }
+        }
+
         let extent = this.extent();
         let viewport = this.viewport();
 
@@ -435,6 +459,7 @@ impl ScrollContentPresenter {
             scroll_snap_points_info: RefCell::new(None),
             scroll_snap_points_subscriptions: RefCell::new(None),
             is_snap_points_updated: Cell::new(false),
+            zoom: Cell::new(1.0),
         }
     }
 
@@ -883,10 +908,53 @@ impl ScrollContentPresenter {
         margin
     }
 
+    /// The zoom of the content: 1 unless the scroll viewer was zoomed (not upstream).
+    pub fn zoom_factor(&self) -> f64 {
+        self.zoom.get()
+    }
+
+    /// The transform of the zoom on the content: a scale about its top left corner.
+    fn zoom_transform(&self) -> Option<Matrix> {
+        let zoom = self.zoom.get();
+        (zoom != 1.0).then(|| Matrix::create_scale(zoom, zoom))
+    }
+
+    /// Zooms the content to `zoom` and scrolls to `offset` (in zoomed units), as the
+    /// `ChangeView` of WinUI's scroll viewer does (not upstream). The content keeps its layout:
+    /// the presenter scales it ([`Visual::manipulation_transform`]) and the extent is its zoomed
+    /// size. A content that scrolls logically (a virtualizing panel) is not zoomed.
+    pub fn set_zoom(&self, zoom: f64, offset: Vector) {
+        let zoom = if zoom.is_finite() && zoom > 0.0 { zoom } else { 1.0 };
+        let child = self.child().filter(|_| self.logical_scroll_subscription.borrow().is_none());
+        if let Some(child) = &child {
+            if zoom != self.zoom.get() {
+                self.zoom.set(zoom);
+                child.set_manipulation_transform(self.zoom_transform());
+                // The extent at the new zoom, before the offset is kept within it.
+                self.set_extent(self.compute_extent(child, self.viewport(), self.get_child_padding()));
+                self.invalidate_arrange();
+            }
+        }
+        if let Some(owner) = self.owner() {
+            owner.set_zoom_factor_internal(self.zoom.get() as f32);
+        }
+        let extent = self.extent();
+        let viewport = self.viewport();
+        let clamped = Vector::new(
+            offset.x.clamp(0.0, (extent.width - viewport.width).max(0.0)),
+            offset.y.clamp(0.0, (extent.height - viewport.height).max(0.0)),
+        );
+        self.set_current_value(Self::offset_property(), clamped);
+    }
+
     fn compute_extent(&self, child: &Ref<Control>, viewport_size: Size, padding: Thickness) -> Size {
         let child_margin = self.get_child_margin();
 
-        let mut extent = child.bounds().size().inflate(child_margin).inflate(padding);
+        // Not upstream: the zoomed size of the content (its layout is not zoomed).
+        let zoom = self.zoom.get();
+        let child_size = child.bounds().size();
+        let child_size = Size::new(child_size.width * zoom, child_size.height * zoom);
+        let mut extent = child_size.inflate(child_margin).inflate(padding);
 
         if MathUtilities::are_close_eps(extent.width, viewport_size.width, LayoutHelper::LAYOUT_EPSILON) {
             extent = extent.with_width(viewport_size.width);
@@ -1103,6 +1171,13 @@ impl ScrollContentPresenter {
 
     fn child_changed(&self, e: &FerroPropertyChangedEventArgs<'_>) {
         let (old_value, new_value) = e.get_old_and_new_value::<Option<Ref<Control>>>();
+        // The zoom moves with the content (not upstream).
+        if let Some(old_value) = &old_value {
+            old_value.set_manipulation_transform(None);
+        }
+        if let Some(new_value) = &new_value {
+            new_value.set_manipulation_transform(self.zoom_transform());
+        }
         self.update_scrollable_subscription(new_value);
 
         if old_value.is_some() {

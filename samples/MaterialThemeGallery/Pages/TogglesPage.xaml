@@ -1,0 +1,49 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="MaterialThemeGallery.Pages.TogglesPage">
+  <!-- CheckBox, RadioButton and ToggleSwitch in their states. The native counterpart is
+       TogglesPage.winui.xml. Every radio button has a group of its own, so that the checked
+       ones stay checked. -->
+  <StackPanel Margin="24" Spacing="12">
+    <TextBlock Text="Check boxes and toggles" FontSize="28" FontWeight="SemiBold" />
+
+    <TextBlock Text="CheckBox" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+    <WrapPanel ItemSpacing="16" LineSpacing="8">
+      <CheckBox Content="Unchecked" />
+      <CheckBox Content="Checked" IsChecked="True" />
+      <CheckBox Content="Indeterminate" IsThreeState="True" IsChecked="{x:Null}" />
+      <CheckBox Content="Pointer over" Classes="force-pointerover" />
+      <CheckBox Content="Pressed" Classes="force-pressed" />
+    </WrapPanel>
+    <WrapPanel ItemSpacing="16" LineSpacing="8">
+      <CheckBox Content="Disabled" IsEnabled="False" />
+      <CheckBox Content="Checked, disabled" IsChecked="True" IsEnabled="False" />
+      <CheckBox Content="Indeterminate, disabled" IsThreeState="True" IsChecked="{x:Null}" IsEnabled="False" />
+    </WrapPanel>
+
+    <TextBlock Text="RadioButton" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+    <WrapPanel ItemSpacing="16" LineSpacing="8">
+      <RadioButton Content="Unchecked" GroupName="Radio1" />
+      <RadioButton Content="Checked" GroupName="Radio2" IsChecked="True" />
+      <RadioButton Content="Pointer over" GroupName="Radio3" Classes="force-pointerover" />
+      <RadioButton Content="Pressed" GroupName="Radio4" Classes="force-pressed" />
+    </WrapPanel>
+    <WrapPanel ItemSpacing="16" LineSpacing="8">
+      <RadioButton Content="Disabled" GroupName="Radio5" IsEnabled="False" />
+      <RadioButton Content="Checked, disabled" GroupName="Radio6" IsChecked="True" IsEnabled="False" />
+    </WrapPanel>
+
+    <TextBlock Text="ToggleSwitch" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+    <WrapPanel ItemSpacing="24" LineSpacing="8">
+      <ToggleSwitch />
+      <ToggleSwitch IsChecked="True" />
+      <ToggleSwitch Classes="force-pointerover" />
+      <ToggleSwitch IsEnabled="False" />
+      <ToggleSwitch IsChecked="True" IsEnabled="False" />
+    </WrapPanel>
+    <WrapPanel ItemSpacing="24" LineSpacing="8">
+      <ToggleSwitch Content="With a header" />
+      <ToggleSwitch Content="Custom texts" OnContent="Enabled" OffContent="Disabled" IsChecked="True" />
+    </WrapPanel>
+  </StackPanel>
+</UserControl>

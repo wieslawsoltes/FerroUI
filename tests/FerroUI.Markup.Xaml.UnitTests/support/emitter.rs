@@ -284,6 +284,44 @@ ferro_markup_type!(class Table {
     ],
 });
 
+// --- A reference type in a typed list of the runtime library -----------------------
+
+/// A shared object boxed as itself (a type registered as a reference, as a view model is):
+/// its first handle is the type, the constructor of its metadata gives the `Rc`. A list of
+/// the runtime library typed with it (`List<Note>`) holds the object.
+pub struct Note {
+    text: String,
+}
+
+crate::test_identity_eq!(Note);
+
+impl Note {
+    pub fn new(text: &str) -> Rc<Self> {
+        Rc::new(Self { text: text.to_string() })
+    }
+
+    pub fn text(&self) -> String {
+        self.text.clone()
+    }
+
+    /// The words of the text, as the items source of an items control holds them: what a
+    /// binding path indexes (`Words[1]`).
+    pub fn words(&self) -> ferroui_controls::ItemsSource {
+        ferroui_controls::ItemsSource::from_strs(self.text.split(' '))
+    }
+}
+
+ferro_markup_type!(class Note {
+    this: Rc<Note>,
+    handles: [Note, Rc<Note>, Option<Rc<Note>>],
+    namespace: "FerroUI.Markup.Xaml.UnitTests",
+    constructors: [(String) => |text: String| Note::new(&text)],
+    properties: [
+        Text: String { get: |this: &Rc<Note>| this.text() },
+        Words: ferroui_controls::ItemsSource { get: |this: &Rc<Note>| this.words() },
+    ],
+});
+
 // --- The owner of the commands of the corpus ----------------------------------
 
 /// The data of the document whose buttons call methods as commands: every method records
@@ -368,12 +406,14 @@ pub(crate) const MODULE: TypeModule = TypeModule {
         <Row as MarkupTyped>::MARKUP,
         <Table as MarkupTyped>::MARKUP,
         <Desk as MarkupTyped>::MARKUP,
+        <Note as MarkupTyped>::MARKUP,
     ],
     value_types: || {
         RowList::register();
         ValueTypes::register_nullable::<Rc<Row>>();
         ValueTypes::register_nullable::<Rc<Table>>();
         ValueTypes::register_reference::<Desk>();
+        ValueTypes::register_reference::<Note>();
         ValueTypes::register_nullable::<Rc<Caption>>();
         ValueTypes::register_reference::<CaptionConverter>();
         ValueTypes::register_cast::<CaptionConverter, Rc<dyn TypeConverter>>(CaptionConverter::as_type_converter);
@@ -403,4 +443,5 @@ pub(crate) const MARKUP_RUST_PATHS: &[(&MarkupType, &str, bool)] = &[
     (<RowList as MarkupTyped>::MARKUP, "ferroui_markup_xaml_tests::support::emitter::RowList", false),
     (<Table as MarkupTyped>::MARKUP, "ferroui_markup_xaml_tests::support::emitter::Table", false),
     (<Desk as MarkupTyped>::MARKUP, "ferroui_markup_xaml_tests::support::emitter::Desk", false),
+    (<Note as MarkupTyped>::MARKUP, "ferroui_markup_xaml_tests::support::emitter::Note", false),
 ];

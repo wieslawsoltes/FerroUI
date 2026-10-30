@@ -9,7 +9,7 @@ use crate::primitives::popup_positioning::{
 };
 use crate::primitives::CustomPopupPlacementCallbackValue;
 use crate::templates::{DataTemplates, IDataTemplate};
-use crate::{ItemsSourceView, NativeMenuItemBase, Page, TableViewColumn};
+use crate::{ItemsSourceView, NativeMenuItemBase, Page, StateTriggerBase, TableViewColumn, VisualState, VisualStateGroup};
 use ferroui_base::collections::FerroList;
 use crate::{
     ColumnDefinition, ColumnDefinitions, Control, Controls, ItemCollection, RowDefinition, RowDefinitions, TrayIcon,
@@ -19,6 +19,7 @@ use super::classes::RoutedEventOf;
 use crate::ScrollChangedEventArgs;
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::interactivity::{IRoutedEventArgs, RoutedEvent};
+use ferroui_base::animation::TimeSpan;
 use ferroui_base::Vector;
 use ferroui_base::ferro_markup_type;
 use ferroui_base::metadata::{MarkupDelegate, MarkupType, MarkupTyped};
@@ -154,6 +155,54 @@ ferro_markup_type!(class ItemsSourceView {
         try fn KeyFromIndex(i32) -> String => items_source_view_key_from_index,
         try fn IndexFromKey(String) -> i32 => items_source_view_index_from_key,
     ],
+});
+
+// FerroUI.Controls.Notifications
+
+/// The setter of `Notification.Expiration`: a negative time span is an error, as a negative
+/// delay is upstream when the notification is shown.
+fn set_notification_expiration(
+    notification: &Rc<crate::notifications::Notification>,
+    value: TimeSpan,
+) -> Result<(), &'static str> {
+    match value.to_duration() {
+        Some(expiration) => Ok(notification.set_expiration(expiration)),
+        None => Err("The expiration of a notification cannot be negative."),
+    }
+}
+
+// A notification created in markup (`<Notification Title=".." Message=".."/>`, the content of
+// an action that shows it). `OnClick` and `OnClose` are actions, which markup cannot state, and
+// are not declared.
+ferro_markup_type!(class crate::notifications::Notification as "Notification" {
+    namespace: "FerroUI.Controls.Notifications",
+    handles: [
+        crate::notifications::Notification,
+        Rc<crate::notifications::Notification>,
+        Option<Rc<crate::notifications::Notification>>
+    ],
+    this: Rc<crate::notifications::Notification>,
+    interfaces: [Rc<dyn crate::notifications::INotification>],
+    constructors: [() => crate::notifications::Notification::empty],
+    properties: [
+        Title: Option<String> {
+            get: |n: &Rc<crate::notifications::Notification>| n.title(),
+            set: |n: &Rc<crate::notifications::Notification>, value: Option<String>| n.set_title(value)
+        },
+        Message: Option<String> {
+            get: |n: &Rc<crate::notifications::Notification>| n.message(),
+            set: |n: &Rc<crate::notifications::Notification>, value: Option<String>| n.set_message(value)
+        },
+        Type: crate::notifications::NotificationType {
+            get: |n: &Rc<crate::notifications::Notification>| n.type_(),
+            set: |n: &Rc<crate::notifications::Notification>, value: crate::notifications::NotificationType| n.set_type(value)
+        },
+        Expiration: TimeSpan {
+            get: |n: &Rc<crate::notifications::Notification>| TimeSpan::from(n.expiration()),
+            try_set: set_notification_expiration
+        },
+    ],
+    notify_property_changed: crate::notifications::Notification,
 });
 
 // FerroUI.Controls.Documents
@@ -409,6 +458,48 @@ ferro_markup_type!(class FerroListOf<Ref<TableViewColumn>> as "FerroList`1" {
     methods: [fn Add(Ref<TableViewColumn>) => |list: &FerroList<Ref<TableViewColumn>>, item: Ref<TableViewColumn>| list.add(item)],
 });
 
+// The visual state groups of an element (`VisualStateManager.VisualStateGroups`).
+ferro_markup_type!(class FerroListOf<Ref<VisualStateGroup>> as "FerroList`1" {
+    namespace: "FerroUI.Collections",
+    handles: [FerroList<Ref<VisualStateGroup>>, Option<FerroList<Ref<VisualStateGroup>>>],
+    this: FerroList<Ref<VisualStateGroup>>,
+    generic: "FerroList`1" [Ref<VisualStateGroup>],
+    constructors: [() => FerroList::<Ref<VisualStateGroup>>::new],
+    properties: [
+        Capacity: i32 { get: list_capacity, try_set: set_list_capacity },
+        Count: i32 { get: |list: &FerroList<Ref<VisualStateGroup>>| list.count() as i32 },
+    ],
+    methods: [fn Add(Ref<VisualStateGroup>) => |list: &FerroList<Ref<VisualStateGroup>>, item: Ref<VisualStateGroup>| list.add(item)],
+});
+
+// The states of a visual state group (`VisualStateGroup.States`).
+ferro_markup_type!(class FerroListOf<Ref<VisualState>> as "FerroList`1" {
+    namespace: "FerroUI.Collections",
+    handles: [FerroList<Ref<VisualState>>, Option<FerroList<Ref<VisualState>>>],
+    this: FerroList<Ref<VisualState>>,
+    generic: "FerroList`1" [Ref<VisualState>],
+    constructors: [() => FerroList::<Ref<VisualState>>::new],
+    properties: [
+        Capacity: i32 { get: list_capacity, try_set: set_list_capacity },
+        Count: i32 { get: |list: &FerroList<Ref<VisualState>>| list.count() as i32 },
+    ],
+    methods: [fn Add(Ref<VisualState>) => |list: &FerroList<Ref<VisualState>>, item: Ref<VisualState>| list.add(item)],
+});
+
+// The triggers of a visual state (`VisualState.StateTriggers`).
+ferro_markup_type!(class FerroListOf<Ref<StateTriggerBase>> as "FerroList`1" {
+    namespace: "FerroUI.Collections",
+    handles: [FerroList<Ref<StateTriggerBase>>, Option<FerroList<Ref<StateTriggerBase>>>],
+    this: FerroList<Ref<StateTriggerBase>>,
+    generic: "FerroList`1" [Ref<StateTriggerBase>],
+    constructors: [() => FerroList::<Ref<StateTriggerBase>>::new],
+    properties: [
+        Capacity: i32 { get: list_capacity, try_set: set_list_capacity },
+        Count: i32 { get: |list: &FerroList<Ref<StateTriggerBase>>| list.count() as i32 },
+    ],
+    methods: [fn Add(Ref<StateTriggerBase>) => |list: &FerroList<Ref<StateTriggerBase>>, item: Ref<StateTriggerBase>| list.add(item)],
+});
+
 // The arguments of `ScrollViewer.ScrollChanged` and the type of its routed event. `classes.rs`
 // declares the arguments of the routed events of the classes whose `markup:` part it generates;
 // the scroll viewer declares its part in its own file (with its public methods), so the two
@@ -455,6 +546,7 @@ ferro_markup_type!(class ScrollChangedEventArgs {
 
 /// The types declared in this file.
 pub(super) const TYPES: &[&MarkupType] = &[
+    <crate::notifications::Notification as MarkupTyped>::MARKUP,
     <RoutedEventOf<ScrollChangedEventArgs> as MarkupTyped>::MARKUP,
     <ScrollChangedEventArgs as MarkupTyped>::MARKUP,
     <dyn crate::ICommandBarElement as MarkupTyped>::MARKUP,
@@ -479,6 +571,9 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <FerroListOf<Ref<NativeMenuItemBase>> as MarkupTyped>::MARKUP,
     <FerroListOf<Ref<Page>> as MarkupTyped>::MARKUP,
     <FerroListOf<Ref<TableViewColumn>> as MarkupTyped>::MARKUP,
+    <FerroListOf<Ref<VisualStateGroup>> as MarkupTyped>::MARKUP,
+    <FerroListOf<Ref<VisualState>> as MarkupTyped>::MARKUP,
+    <FerroListOf<Ref<StateTriggerBase>> as MarkupTyped>::MARKUP,
 ];
 
 /// Registers the nullable forms of the types that can be held in untyped
@@ -501,6 +596,9 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<FerroList<Ref<NativeMenuItemBase>>>();
     ValueTypes::register_nullable::<FerroList<Ref<Page>>>();
     ValueTypes::register_nullable::<FerroList<Ref<TableViewColumn>>>();
+    ValueTypes::register_nullable::<FerroList<Ref<VisualStateGroup>>>();
+    ValueTypes::register_nullable::<FerroList<Ref<VisualState>>>();
+    ValueTypes::register_nullable::<FerroList<Ref<StateTriggerBase>>>();
     ValueTypes::register_nullable::<Rc<WindowIcon>>();
     ValueTypes::register_nullable::<Rc<RefCell<CustomPopupPlacement>>>();
     ValueTypes::register_nullable::<CustomPopupPlacementCallbackValue>();
@@ -513,7 +611,18 @@ pub(super) fn register_value_types() {
     // (and null) from an untyped value, and a binding delivers a handle to it.
     ValueTypes::register_nullable::<crate::ItemsSource>();
     ValueTypes::register_nullable::<crate::primitives::SelectedItemsList>();
+    // A notification is a reference type, boxed as itself, and a notification of the contract.
+    crate::notifications::Notification::ensure_registered();
     crate::ItemsSource::register_binding_conversion::<crate::ItemsSource>();
+    // The selected items of a selecting control are a list (upstream `IList`), so an
+    // enumerable: the handle shares the list, and a binding delivers it to an items source
+    // (`{Binding #list.SelectedItems}` as the items of an action).
+    ValueTypes::register_cast::<crate::primitives::SelectedItemsList, crate::ItemsSource>(|list| {
+        crate::ItemsSource::from(list.0.clone())
+    });
+    ValueTypes::register_conversion::<crate::primitives::SelectedItemsList, Option<crate::ItemsSource>>(|list| {
+        Some(Some(crate::ItemsSource::from(list.0.clone())))
+    });
     // A font collection is a read-only list of font families (`IReadOnlyList<FontFamily>` in
     // the managed original), which a binding delivers to an items source
     // (`{Binding SystemFonts, Source={x:Static FontManager.Current}}`): the items are the

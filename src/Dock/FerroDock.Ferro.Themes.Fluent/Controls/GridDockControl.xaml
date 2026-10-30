@@ -1,0 +1,53 @@
+<ResourceDictionary xmlns:fd="using:FerroDock.Ferro.Controls"
+                    xmlns:pc="using:FerroDock.Ferro.Converters"
+                    xmlns:sp="using:FerroDock.Settings" xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="using:FerroDock.Model.Controls"
+                    x:DataType="controls:IGridDock"
+                    x:CompileBindings="True">
+  <Design.PreviewWith>
+    <fd:GridDockControl Width="300" Height="300" />
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="{x:Type fd:GridDockControl}" TargetType="fd:GridDockControl" x:DataType="controls:IGridDock">
+
+    <Setter Property="(AutomationProperties.AutomationId)" Value="{Binding Id}" />
+    <Setter Property="(AutomationProperties.Name)" Value="{Binding Title}" />
+
+    <Setter Property="(sp:DockProperties.IsDragEnabled)" Value="{Binding CanDrag}" />
+    <Setter Property="(sp:DockProperties.IsDropEnabled)" Value="{Binding CanDrop}" />
+    <Setter Property="(sp:DockProperties.DockGroup)" Value="{Binding DockGroup}" />
+
+    <Setter Property="Template">
+      <ControlTemplate>
+        <fd:DockableControl TrackingMode="Visible">
+          <ItemsControl Name="PART_ItemsControl"
+                        ItemsSource="{Binding VisibleDockables}"
+                        Classes="GridDock">
+            <ItemsControl.Styles>
+              <Style Selector="ItemsControl.GridDock > ContentPresenter">
+                <Setter Property="(Grid.Column)" Value="{Binding Column}" />
+                <Setter Property="(Grid.ColumnSpan)" Value="{Binding ColumnSpan}" />
+                <Setter Property="(Grid.Row)" Value="{Binding Row}" />
+                <Setter Property="(Grid.RowSpan)" Value="{Binding RowSpan}" />
+                <Setter Property="(Grid.IsSharedSizeScope)" Value="{Binding IsSharedSizeScope}" />
+                <Setter Property="MinWidth" Value="{Binding MinWidth}" />
+                <Setter Property="MaxWidth" Value="{Binding MaxWidth}" />
+                <Setter Property="MinHeight" Value="{Binding MinHeight}" />
+                <Setter Property="MaxHeight" Value="{Binding MaxHeight}" />
+              </Style>
+            </ItemsControl.Styles>
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <Grid sp:DockProperties.IsDropArea="True"
+                      Background="Transparent" />
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+          </ItemsControl>
+        </fd:DockableControl>
+      </ControlTemplate>
+    </Setter>
+
+  </ControlTheme>
+
+</ResourceDictionary>

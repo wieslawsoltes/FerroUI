@@ -747,9 +747,13 @@ fn names_are_registered_in_the_scope_of_the_context_and_the_root_completes_it() 
     let found = h.scope.find("brush").expect("registered");
     let object: Ref<FerroObject> = brush.clone().upcast();
     assert!(found == object);
-    // Not an object of the object model.
+    // Plain boxed objects retain their original identity in the same scope.
     let registration = FerroNameScopeRegistrationXamlIlNode::new(h.text("other"), None);
-    assert!(message(h.manipulate(registration.as_node(), &boxed(1i32))).contains("FerroObject"));
+    let scalar=boxed(1i32);
+    ok(h.manipulate(registration.as_node(), &scalar));
+    assert!(Rc::ptr_eq(&h.scope.find_value("other").unwrap(),scalar.as_ref().unwrap()));
+    let registration=FerroNameScopeRegistrationXamlIlNode::new(h.text("missing"),None);
+    assert!(message(h.manipulate(registration.as_node(),&None)).contains("element"));
 
     // The root: a styled element gets the scope attached; the scope is completed.
     let styled = StyledElement::new();

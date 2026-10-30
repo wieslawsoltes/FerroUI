@@ -18,7 +18,7 @@ use ferroui_base::utilities::{MathUtilities, ReadOnlyMemory, ValueSpan};
 use ferroui_base::{
     ferro_class, ferro_property, instantiate, AttachedProperty, DirectProperty, FerroObject, FerroObjectImpl, FerroObjectImplExt,
     FerroProperty, FerroPropertyChangedEventArgs, Point, Rect, Ref, Size, StyledElementImpl, StyledProperty,
-    StyledPropertyMetadata, StyledPropertyOptions, Thickness, Visual, VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs, WeakRef,
+    StyledPropertyMetadata, StyledPropertyOptions, Thickness, Upcast, Visual, VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs, WeakRef,
 };
 use std::cell::{Cell, OnceCell, RefCell};
 use std::rc::Rc;
@@ -41,6 +41,9 @@ pub struct TextBlock {
     /// new layout of unchanged text (a new constraint, an arrange) does not
     /// transcode it again.
     utf16_text: RefCell<Option<(String, ReadOnlyMemory<u16>)>>,
+    /// The alpha mask of [`get_alpha_mask`](TextBlock::get_alpha_mask),
+    /// created on the first request.
+    alpha_mask: OnceCell<Box<ferroui_base::rendering::composition::AlphaMask>>,
 }
 
 ferro_class! {
@@ -124,6 +127,12 @@ impl VisualImpl for TextBlock {
     /// This member is sealed: subclasses override `render_text_layout`.
     fn render(this: &Self, context: &mut DrawingContext) {
         this.render_core(context);
+
+        // The mask follows what the text block draws (WinUI's
+        // `CTextBlock::NotifyRenderContent`).
+        if let Some(mask) = this.alpha_mask.get() {
+            mask.update_if_available(this.upcast());
+        }
     }
 
     fn bypass_flow_direction_policies(_this: &Self) -> bool {
@@ -596,7 +605,24 @@ impl TextBlock {
             clear_text_internal: Cell::new(false),
             layout_text_alignment: Cell::new(TextAlignment::Left),
             utf16_text: RefCell::new(None),
+            alpha_mask: OnceCell::new(),
         }
+    }
+
+    /// `TextBlock.GetAlphaMask`: a composition brush that shows the alpha of
+    /// the text block (its text, and its background when it has one), for
+    /// the `Mask` of a
+    /// [`DropShadow`](ferroui_base::rendering::composition::DropShadow) or
+    /// another composition effect. The same brush is returned on every call;
+    /// it follows the text block as it is drawn again (its text, font, size
+    /// and visibility). `None` when no compositor is available.
+    ///
+    /// See [`AlphaMask`](ferroui_base::rendering::composition::AlphaMask) for
+    /// how the mask is drawn.
+    pub fn get_alpha_mask(&self) -> Option<Rc<ferroui_base::rendering::composition::CompositionBrush>> {
+        self.alpha_mask
+            .get_or_init(|| Box::new(ferroui_base::rendering::composition::AlphaMask::new()))
+            .get(self.upcast())
     }
 
     /// Initializes a new instance of the `TextBlock` class.

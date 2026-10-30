@@ -94,7 +94,7 @@
 
 use super::allocations::{self, AllocationCounts};
 use super::support::*;
-use crate::pages::{ButtonsPage, TableViewPage};
+use crate::pages::{ButtonsPage, ItemsRepeaterPage, TableViewPage};
 use ferroui_base::diagnostics::perf_counters::{self, PerfCounter, PerfCountersSnapshot};
 use ferroui_base::input::raw::{RawMouseWheelEventArgs, RawPointerEventArgs, RawPointerEventType};
 use ferroui_base::input::{IInputDevice, IInputRoot, MouseDevice, Pointer, PointerType, RawInputModifiers};
@@ -1291,6 +1291,43 @@ fn table_view_wheel_scrolling_renders_every_frame_and_reuses_its_rows() {
     assert_eq!(800.0, scroll_viewer.offset().y);
     assert_eq!(40, bench.surface.frames() - rendered);
     assert!(rows.len() <= realized + 2, "{} rows for {realized} realized", rows.len());
+}
+
+/// The ItemsRepeater page under the mouse wheel with the pointer over an item, through the input
+/// of the window (the Windows report of #269: one notch scrolled, and every later notch, in either
+/// direction, was lost). Each notch scrolls by 50 pixels, down and back up.
+#[test]
+fn items_repeater_page_wheel_over_an_item_scrolls_every_notch() {
+    let bench = Bench::start(|| ItemsRepeaterPage::new().upcast());
+    bench.frame();
+    let scroll_viewer = descendants::<ScrollViewer>(&bench.window)
+        .into_iter()
+        .find(|viewer| viewer.name().as_deref() == Some("RepeaterScroller"))
+        .expect("the scroll viewer of the repeater");
+    let repeater = descendants::<ferroui_controls_repeater::ItemsRepeater>(&bench.window)
+        .into_iter()
+        .next()
+        .expect("the repeater");
+    let item = repeater.try_get_element(1).expect("a realized item");
+    let bounds = item.bounds();
+    let point = item
+        .translate_point(Point::new(bounds.width / 2.0, bounds.height / 2.0), &bench.window)
+        .expect("in the window");
+    bench.pointer_move(point);
+    bench.frame();
+    let mut expected = 0.0;
+    for (notch, delta) in [-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, 1.0, 1.0].into_iter().enumerate() {
+        bench.wheel(point, Vector::new(0.0, delta));
+        bench.frame();
+        expected -= delta * 50.0;
+        assert_eq!(
+            scroll_viewer.offset().y,
+            expected,
+            "after notch {notch} ({delta}); {} realized items, the extent is {:?}",
+            repeater.realized_elements().len(),
+            scroll_viewer.extent(),
+        );
+    }
 }
 
 /// The rounds of the test below.

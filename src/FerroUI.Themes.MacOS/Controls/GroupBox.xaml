@@ -1,0 +1,48 @@
+<!-- macOS 26 adaptation; see docs/porting/macos26-theme.md.
+     Derived from FerroUI WinUI templates and microsoft-ui-xaml commit
+     7e4b0c2096be402f51cc8f7d203ebf67cff183d0. Copyright (c) Microsoft Corporation.
+     Licensed under the MIT License; see NOTICE.md.
+     Acrylic backing is the portable fallback for native Liquid Glass. -->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20" Width="320">
+      <StackPanel Spacing="20">
+        <GroupBox Header="A group">
+          <TextBlock Text="The content of the group."/>
+        </GroupBox>
+        <GroupBox Header="Disabled" IsEnabled="False">
+          <TextBlock Text="The content of the group."/>
+        </GroupBox>
+      </StackPanel>
+    </Border>
+  </Design.PreviewWith>
+  <ControlTheme x:Key="{x:Type GroupBox}" TargetType="GroupBox">
+    <Setter Property="Background" Value="{DynamicResource ExpanderContentBackground}"/>
+    <Setter Property="BackgroundSizing" Value="InnerBorderEdge"/>
+    <Setter Property="MinHeight" Value="0"/>
+    <Setter Property="BorderThickness" Value="0.5"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource ExpanderContentBorderBrush}"/>
+    <Setter Property="Padding" Value="12"/>
+    <Setter Property="CornerRadius" Value="10"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid x:Name="RootGrid" RowDefinitions="Auto,*">
+          <Border x:Name="ToggleButtonGrid" Grid.Row="0" Background="Transparent" BackgroundSizing="{TemplateBinding BackgroundSizing}" BorderBrush="{DynamicResource ExpanderHeaderBorderBrush}" BorderThickness="0" CornerRadius="0" MinHeight="0" Padding="4,0,4,6">
+            <ContentPresenter x:Name="PART_HeaderPresenter" Content="{TemplateBinding Header}" ContentTemplate="{TemplateBinding HeaderTemplate}" Foreground="{DynamicResource TextFillColorSecondaryBrush}" HorizontalContentAlignment="{StaticResource ExpanderHeaderHorizontalContentAlignment}" VerticalContentAlignment="{StaticResource ExpanderHeaderVerticalContentAlignment}" RecognizesAccessKey="True" FontWeight="SemiBold" FontSize="12"/>
+          </Border>
+          <Border x:Name="ExpanderContent" Grid.Row="1" Background="{TemplateBinding Background}" BackgroundSizing="{TemplateBinding BackgroundSizing}" CornerRadius="{TemplateBinding CornerRadius}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" MinHeight="0" Padding="{TemplateBinding Padding}">
+            <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" RecognizesAccessKey="True"/>
+          </Border>
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:disabled">
+      <Style Selector="^ /template/ Border#ToggleButtonGrid">
+        <Setter Property="BorderBrush" Value="{DynamicResource ExpanderHeaderDisabledBorderBrush}"/>
+      </Style>
+      <Style Selector="^ /template/ ContentPresenter#PART_HeaderPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource ExpanderHeaderDisabledForeground}"/>
+      </Style>
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>
