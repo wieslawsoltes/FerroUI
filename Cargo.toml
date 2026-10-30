@@ -9,6 +9,7 @@ members = [
     "src/FerroUI.Designer.Collaboration",
     "src/FerroUI.Designer.Collaboration.Host",
     "src/FerroUI.Designer",
+    "samples/DesignerStudio",
     # The Dock port (docs/porting/dock).
     "samples/Dock/FerroDockReactiveUISample",
     "src/Dock/FerroDock.Controls.DeferredContentControl",

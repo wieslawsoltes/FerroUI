@@ -9,6 +9,7 @@ on:
     paths:
       - 'src/FerroUI.Designer*/**'
       - 'docs/designer/samples/**'
+      - 'samples/DesignerStudio/**'
       - 'src/FerroUI.Mcp/**'
       - 'src/FerroUI.HotReload/**'
       - 'src/FerroUI.Inspect/**'
@@ -82,9 +83,17 @@ jobs:
       - name: Studio, MCP tools and render-smoke suites
         env:
           FERROUI_DESIGNER_RENDER_OUTPUT: ${{ github.workspace }}/designer-render
-        run: cargo test --locked -p ferroui-designer --features mcp,render-smoke -- --test-threads=1
+        run: cargo test --locked -p ferroui-designer -p designer-studio --no-default-features --features ferroui-designer/mcp,ferroui-designer/render-smoke,designer-studio/headless,designer-studio/mcp -- --test-threads=1
       - name: The studio is warning-free
-        run: cargo clippy --locked -p ferroui-designer --features mcp,render-smoke --all-targets --no-deps -- -D warnings
+        run: cargo clippy --locked -p ferroui-designer -p designer-studio --no-default-features --features ferroui-designer/mcp,ferroui-designer/render-smoke,designer-studio/headless,designer-studio/mcp --all-targets --no-deps -- -D warnings
+      - name: Headless studio startup and clean shutdown, with the sample documents
+        env:
+          FERROUI_SMOKE_EXIT_MS: '1500'
+        run: |
+          cargo run --locked -p designer-studio --no-default-features --features headless,mcp -- --headless
+          for file in DesignWorkflows PreviewStages PrototypeFlow PrototypeOverlays; do
+            cargo run --locked -p designer-studio --no-default-features --features headless,mcp -- --headless --file docs/designer/samples/$file.xaml
+          done
       - name: Release build without development hot reload
         run: cargo check --locked -p ferroui-designer --features mcp --release
       - name: Render evidence

@@ -1,0 +1,34 @@
+services:
+  collaboration:
+    build:
+      context: ../../..
+      dockerfile: docs/designer/deployment/Dockerfile
+    command:
+      - --storage
+      - /var/lib/ferroui
+      - --bind
+      - 127.0.0.1:7491
+      - --public-url
+      - https://${COLLABORATION_DOMAIN:?Set COLLABORATION_DOMAIN}/mcp
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - rooms:/var/lib/ferroui
+    restart: unless-stopped
+  tls:
+    image: caddy:2
+    network_mode: service:collaboration
+    depends_on:
+      - collaboration
+    environment:
+      COLLABORATION_DOMAIN: ${COLLABORATION_DOMAIN:?Set COLLABORATION_DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    restart: unless-stopped
+volumes:
+  rooms:
+  caddy_data:
+  caddy_config:

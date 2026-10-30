@@ -1,0 +1,9 @@
+{$COLLABORATION_DOMAIN} {
+    @mcp path /mcp
+    handle @mcp {
+        reverse_proxy 127.0.0.1:7491 {
+            header_up Host 127.0.0.1:7491
+        }
+    }
+    respond 404
+}
