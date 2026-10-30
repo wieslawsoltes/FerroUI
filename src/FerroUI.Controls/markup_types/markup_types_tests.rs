@@ -250,6 +250,10 @@ const DECLARED_NEXT_TO_THE_TYPE: &[&str] = &[
     "RichEditBoxTextChangingEventArgs",
     "RoutedEvent`1",
     "TextEditChangeType",
+    // The WinUI materials (winui-materials.md).
+    "ApplicationTheme",
+    "RevealBrushState",
+    "FocusVisualKind",
 ];
 
 #[test]

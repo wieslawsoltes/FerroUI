@@ -1297,32 +1297,6 @@ pub fn reversible_stack_panel() -> El<ferroui_controls::ReversibleStackPanel> {
     El::new()
 }
 
-pub use ferroui_controls::RichEditBox;
-
-impl ViewClass for ferroui_controls::RichEditBox {
-    fn create() -> ferroui_base::Ref<Self> {
-        <ferroui_controls::RichEditBox>::new()
-    }
-}
-
-/// Starts an element of [`RichEditBox`](ferroui_controls::RichEditBox).
-pub fn rich_edit_box() -> El<ferroui_controls::RichEditBox> {
-    El::new()
-}
-
-pub use ferroui_controls::RichEditBoxTextPresenter;
-
-impl ViewClass for ferroui_controls::RichEditBoxTextPresenter {
-    fn create() -> ferroui_base::Ref<Self> {
-        <ferroui_controls::RichEditBoxTextPresenter>::new()
-    }
-}
-
-/// Starts an element of [`RichEditBoxTextPresenter`](ferroui_controls::RichEditBoxTextPresenter).
-pub fn rich_edit_box_text_presenter() -> El<ferroui_controls::RichEditBoxTextPresenter> {
-    El::new()
-}
-
 pub use ferroui_controls::RichTextBlock;
 
 impl ViewClass for ferroui_controls::RichTextBlock {
@@ -2046,6 +2020,40 @@ pub trait AccessTextProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::primitives::AccessText>> AccessTextProps for El<T> {}
+
+/// The properties and routed events of [`AcrylicBrush`](ferroui_base::media::AcrylicBrush).
+pub trait AcrylicBrushProps: ElementBuilder {
+    /// Sets [`AcrylicBrush::tint_color_property`](ferroui_base::media::AcrylicBrush::tint_color_property).
+    fn tint_color<M>(self, value: impl IntoProp<ferroui_base::media::Color, M>) -> Self {
+        self.prop(<ferroui_base::media::AcrylicBrush>::tint_color_property(), value)
+    }
+
+    /// Sets [`AcrylicBrush::tint_opacity_property`](ferroui_base::media::AcrylicBrush::tint_opacity_property).
+    fn tint_opacity<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_base::media::AcrylicBrush>::tint_opacity_property(), value)
+    }
+
+    /// Sets [`AcrylicBrush::tint_luminosity_opacity_property`](ferroui_base::media::AcrylicBrush::tint_luminosity_opacity_property).
+    fn tint_luminosity_opacity<M>(self, value: impl IntoProp<Option<f64>, M>) -> Self {
+        self.prop(<ferroui_base::media::AcrylicBrush>::tint_luminosity_opacity_property(), value)
+    }
+
+    /// Sets [`AcrylicBrush::tint_transition_duration_property`](ferroui_base::media::AcrylicBrush::tint_transition_duration_property).
+    fn tint_transition_duration<M>(self, value: impl IntoProp<std::time::Duration, M>) -> Self {
+        self.prop(<ferroui_base::media::AcrylicBrush>::tint_transition_duration_property(), value)
+    }
+
+    /// Sets [`AcrylicBrush::background_source_property`](ferroui_base::media::AcrylicBrush::background_source_property).
+    fn background_source<M>(self, value: impl IntoProp<ferroui_base::media::AcrylicBrushBackgroundSource, M>) -> Self {
+        self.prop(<ferroui_base::media::AcrylicBrush>::background_source_property(), value)
+    }
+
+    /// Sets [`AcrylicBrush::always_use_fallback_property`](ferroui_base::media::AcrylicBrush::always_use_fallback_property).
+    fn always_use_fallback<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_base::media::AcrylicBrush>::always_use_fallback_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_base::media::AcrylicBrush>> AcrylicBrushProps for El<T> {}
 
 /// The properties and routed events of [`AdaptiveTrigger`](ferroui_controls::AdaptiveTrigger).
 pub trait AdaptiveTriggerProps: ElementBuilder {
@@ -5001,6 +5009,15 @@ pub trait MenuItemProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_controls::MenuItem>> MenuItemProps for El<T> {}
 
+/// The properties and routed events of [`MicaBackdrop`](ferroui_controls::media::MicaBackdrop).
+pub trait MicaBackdropProps: ElementBuilder {
+    /// Sets [`MicaBackdrop::kind_property`](ferroui_controls::media::MicaBackdrop::kind_property).
+    fn kind<M>(self, value: impl IntoProp<ferroui_base::rendering::composition::system_backdrops::MicaKind, M>) -> Self {
+        self.prop(<ferroui_controls::media::MicaBackdrop>::kind_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::media::MicaBackdrop>> MicaBackdropProps for El<T> {}
+
 /// The properties and routed events of [`MultiPage`](ferroui_controls::MultiPage).
 pub trait MultiPageProps: ElementBuilder {
     /// Sets [`MultiPage::items_source_property`](ferroui_controls::MultiPage::items_source_property).
@@ -6581,6 +6598,35 @@ pub trait RepeatButtonProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_controls::RepeatButton>> RepeatButtonProps for El<T> {}
 
+/// The properties and routed events of [`RevealBrush`](ferroui_controls::media::RevealBrush).
+pub trait RevealBrushProps: ElementBuilder {
+    /// Sets [`RevealBrush::color_property`](ferroui_controls::media::RevealBrush::color_property).
+    fn color<M>(self, value: impl IntoProp<ferroui_base::media::Color, M>) -> Self {
+        self.prop(<ferroui_controls::media::RevealBrush>::color_property(), value)
+    }
+
+    /// Sets [`RevealBrush::target_theme_property`](ferroui_controls::media::RevealBrush::target_theme_property).
+    fn target_theme<M>(self, value: impl IntoProp<ferroui_controls::media::ApplicationTheme, M>) -> Self {
+        self.prop(<ferroui_controls::media::RevealBrush>::target_theme_property(), value)
+    }
+
+    /// Sets [`RevealBrush::always_use_fallback_property`](ferroui_controls::media::RevealBrush::always_use_fallback_property).
+    fn always_use_fallback<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::media::RevealBrush>::always_use_fallback_property(), value)
+    }
+
+    /// Sets [`RevealBrush::state_property`](ferroui_controls::media::RevealBrush::state_property).
+    fn state<M>(self, value: impl IntoProp<ferroui_controls::media::RevealBrushState, M>) -> Self {
+        self.prop(<ferroui_controls::media::RevealBrush>::state_property(), value)
+    }
+
+    /// Sets [`RevealBrush::is_container_property`](ferroui_controls::media::RevealBrush::is_container_property).
+    fn is_container<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::media::RevealBrush>::is_container_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::media::RevealBrush>> RevealBrushProps for El<T> {}
+
 /// The properties and routed events of [`ReversibleStackPanel`](ferroui_controls::ReversibleStackPanel).
 pub trait ReversibleStackPanelProps: ElementBuilder {
     /// Sets [`ReversibleStackPanel::reverse_order_property`](ferroui_controls::ReversibleStackPanel::reverse_order_property).
@@ -6589,230 +6635,6 @@ pub trait ReversibleStackPanelProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::ReversibleStackPanel>> ReversibleStackPanelProps for El<T> {}
-
-/// The properties and routed events of [`RichEditBox`](ferroui_controls::RichEditBox).
-pub trait RichEditBoxProps: ElementBuilder {
-    /// Sets [`RichEditBox::rich_document_property`](ferroui_controls::RichEditBox::rich_document_property).
-    fn rich_document<M>(self, value: impl IntoProp<ferroui_controls::documents::RichTextDocument, M>) -> Self {
-        self.prop(<ferroui_controls::RichEditBox>::rich_document_property(), value)
-    }
-
-    /// Sets [`RichEditBox::selection_start_property`](ferroui_controls::RichEditBox::selection_start_property).
-    fn selection_start<M>(self, value: impl IntoProp<i32, M>) -> Self {
-        self.prop(<ferroui_controls::RichEditBox>::selection_start_property(), value)
-    }
-
-    /// Sets [`RichEditBox::selection_end_property`](ferroui_controls::RichEditBox::selection_end_property).
-    fn selection_end<M>(self, value: impl IntoProp<i32, M>) -> Self {
-        self.prop(<ferroui_controls::RichEditBox>::selection_end_property(), value)
-    }
-
-    /// Sets [`RichEditBox::selected_text_property`](ferroui_controls::RichEditBox::selected_text_property).
-    fn selected_text<M>(self, value: impl IntoProp<String, M>) -> Self {
-        self.prop(<ferroui_controls::RichEditBox>::selected_text_property(), value)
-    }
-
-    /// Sets [`RichEditBox::is_text_selection_enabled_property`](ferroui_controls::RichEditBox::is_text_selection_enabled_property).
-    fn is_text_selection_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
-        self.prop(<ferroui_controls::RichEditBox>::is_text_selection_enabled_property(), value)
-    }
-
-    /// Sets [`RichEditBox::selection_highlight_color_property`](ferroui_controls::RichEditBox::selection_highlight_color_property).
-    fn selection_highlight_color<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
-        self.prop(<ferroui_controls::RichEditBox>::selection_highlight_color_property(), value)
-    }
-
-    /// Sets [`RichEditBox::selection_highlight_color_when_not_focused_property`](ferroui_controls::RichEditBox::selection_highlight_color_when_not_focused_property).
-    fn selection_highlight_color_when_not_focused<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
-        self.prop(<ferroui_controls::RichEditBox>::selection_highlight_color_when_not_focused_property(), value)
-    }
-
-    /// Sets [`RichEditBox::selection_foreground_brush_property`](ferroui_controls::RichEditBox::selection_foreground_brush_property).
-    fn selection_foreground_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
-        self.prop(<ferroui_controls::RichEditBox>::selection_foreground_brush_property(), value)
-    }
-
-    /// Sets [`RichEditBox::caret_brush_property`](ferroui_controls::RichEditBox::caret_brush_property).
-    fn caret_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
-        self.prop(<ferroui_controls::RichEditBox>::caret_brush_property(), value)
-    }
-
-    /// Sets [`RichEditBox::text_alignment_property`](ferroui_controls::RichEditBox::text_alignment_property).
-    fn text_alignment<M>(self, value: impl IntoProp<ferroui_base::media::TextAlignment, M>) -> Self {
-        self.prop(<ferroui_controls::RichEditBox>::text_alignment_property(), value)
-    }
-
-    /// Sets [`RichEditBox::text_wrapping_property`](ferroui_controls::RichEditBox::text_wrapping_property).
-    fn text_wrapping<M>(self, value: impl IntoProp<ferroui_base::media::TextWrapping, M>) -> Self {
-        self.prop(<ferroui_controls::RichEditBox>::text_wrapping_property(), value)
-    }
-
-    /// Sets [`RichEditBox::line_height_property`](ferroui_controls::RichEditBox::line_height_property).
-    fn line_height<M>(self, value: impl IntoProp<f64, M>) -> Self {
-        self.prop(<ferroui_controls::RichEditBox>::line_height_property(), value)
-    }
-
-    /// Sets [`RichEditBox::text_indent_property`](ferroui_controls::RichEditBox::text_indent_property).
-    fn text_indent<M>(self, value: impl IntoProp<f64, M>) -> Self {
-        self.prop(<ferroui_controls::RichEditBox>::text_indent_property(), value)
-    }
-
-    /// Sets [`RichEditBox::line_stacking_strategy_property`](ferroui_controls::RichEditBox::line_stacking_strategy_property).
-    fn line_stacking_strategy<M>(self, value: impl IntoProp<ferroui_controls::documents::LineStackingStrategy, M>) -> Self {
-        self.prop(<ferroui_controls::RichEditBox>::line_stacking_strategy_property(), value)
-    }
-
-    /// Sets [`RichEditBox::text_decorations_property`](ferroui_controls::RichEditBox::text_decorations_property).
-    fn text_decorations<M>(self, value: impl IntoProp<Option<ferroui_base::media::TextDecorationCollection>, M>) -> Self {
-        self.prop(<ferroui_controls::RichEditBox>::text_decorations_property(), value)
-    }
-
-    /// Sets [`RichEditBox::is_read_only_property`](ferroui_controls::RichEditBox::is_read_only_property).
-    fn is_read_only<M>(self, value: impl IntoProp<bool, M>) -> Self {
-        self.prop(<ferroui_controls::RichEditBox>::is_read_only_property(), value)
-    }
-
-    /// Sets [`RichEditBox::accepts_return_property`](ferroui_controls::RichEditBox::accepts_return_property).
-    fn accepts_return<M>(self, value: impl IntoProp<bool, M>) -> Self {
-        self.prop(<ferroui_controls::RichEditBox>::accepts_return_property(), value)
-    }
-
-    /// Sets [`RichEditBox::accepts_tab_property`](ferroui_controls::RichEditBox::accepts_tab_property).
-    fn accepts_tab<M>(self, value: impl IntoProp<bool, M>) -> Self {
-        self.prop(<ferroui_controls::RichEditBox>::accepts_tab_property(), value)
-    }
-
-    /// Sets [`RichEditBox::caret_blink_interval_property`](ferroui_controls::RichEditBox::caret_blink_interval_property).
-    fn caret_blink_interval<M>(self, value: impl IntoProp<ferroui_base::animation::TimeSpan, M>) -> Self {
-        self.prop(<ferroui_controls::RichEditBox>::caret_blink_interval_property(), value)
-    }
-
-    /// Sets [`RichEditBox::max_length_property`](ferroui_controls::RichEditBox::max_length_property).
-    fn max_length<M>(self, value: impl IntoProp<i32, M>) -> Self {
-        self.prop(<ferroui_controls::RichEditBox>::max_length_property(), value)
-    }
-
-    /// Sets [`RichEditBox::clipboard_copy_format_property`](ferroui_controls::RichEditBox::clipboard_copy_format_property).
-    fn clipboard_copy_format<M>(self, value: impl IntoProp<ferroui_controls::rich_text::RichEditClipboardFormat, M>) -> Self {
-        self.prop(<ferroui_controls::RichEditBox>::clipboard_copy_format_property(), value)
-    }
-
-    /// Sets [`RichEditBox::disabled_formatting_accelerators_property`](ferroui_controls::RichEditBox::disabled_formatting_accelerators_property).
-    fn disabled_formatting_accelerators<M>(self, value: impl IntoProp<ferroui_controls::DisabledFormattingAccelerators, M>) -> Self {
-        self.prop(<ferroui_controls::RichEditBox>::disabled_formatting_accelerators_property(), value)
-    }
-
-    /// Sets [`RichEditBox::character_casing_property`](ferroui_controls::RichEditBox::character_casing_property).
-    fn character_casing<M>(self, value: impl IntoProp<ferroui_controls::RichEditCharacterCasing, M>) -> Self {
-        self.prop(<ferroui_controls::RichEditBox>::character_casing_property(), value)
-    }
-
-    /// Sets [`RichEditBox::is_text_prediction_enabled_property`](ferroui_controls::RichEditBox::is_text_prediction_enabled_property).
-    fn is_text_prediction_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
-        self.prop(<ferroui_controls::RichEditBox>::is_text_prediction_enabled_property(), value)
-    }
-
-    /// Sets [`RichEditBox::input_scope_property`](ferroui_controls::RichEditBox::input_scope_property).
-    fn input_scope<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::input::InputScope>>, M>) -> Self {
-        self.prop(<ferroui_controls::RichEditBox>::input_scope_property(), value)
-    }
-
-    /// Sets [`RichEditBox::placeholder_text_property`](ferroui_controls::RichEditBox::placeholder_text_property).
-    fn placeholder_text<M>(self, value: impl IntoProp<String, M>) -> Self {
-        self.prop(<ferroui_controls::RichEditBox>::placeholder_text_property(), value)
-    }
-
-    /// Sets [`RichEditBox::placeholder_foreground_property`](ferroui_controls::RichEditBox::placeholder_foreground_property).
-    fn placeholder_foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
-        self.prop(<ferroui_controls::RichEditBox>::placeholder_foreground_property(), value)
-    }
-
-    /// Sets [`RichEditBox::header_property`](ferroui_controls::RichEditBox::header_property).
-    fn header<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
-        self.prop(<ferroui_controls::RichEditBox>::header_property(), value)
-    }
-
-    /// Sets [`RichEditBox::header_template_property`](ferroui_controls::RichEditBox::header_template_property).
-    fn header_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
-        self.prop(<ferroui_controls::RichEditBox>::header_template_property(), value)
-    }
-
-    /// Sets [`RichEditBox::description_property`](ferroui_controls::RichEditBox::description_property).
-    fn description<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
-        self.prop(<ferroui_controls::RichEditBox>::description_property(), value)
-    }
-
-    /// Sets [`RichEditBox::is_undo_enabled_property`](ferroui_controls::RichEditBox::is_undo_enabled_property).
-    fn is_undo_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
-        self.prop(<ferroui_controls::RichEditBox>::is_undo_enabled_property(), value)
-    }
-
-    /// Sets [`RichEditBox::undo_limit_property`](ferroui_controls::RichEditBox::undo_limit_property).
-    fn undo_limit<M>(self, value: impl IntoProp<i32, M>) -> Self {
-        self.prop(<ferroui_controls::RichEditBox>::undo_limit_property(), value)
-    }
-
-    /// Sets [`RichEditBox::text_property`](ferroui_controls::RichEditBox::text_property).
-    fn text<M>(self, value: impl IntoProp<String, M>) -> Self {
-        self.prop(<ferroui_controls::RichEditBox>::text_property(), value)
-    }
-
-    /// Handles [`RichEditBox::selection_changed_event`](ferroui_controls::RichEditBox::selection_changed_event).
-    fn on_selection_changed(self, handler: impl Fn(&ferroui_base::interactivity::RoutedEventArgs) + 'static) -> Self {
-        self.routed(<ferroui_controls::RichEditBox>::selection_changed_event(), move |_, e| handler(e))
-    }
-
-    /// Handles [`RichEditBox::text_changed_event`](ferroui_controls::RichEditBox::text_changed_event).
-    fn on_text_changed(self, handler: impl Fn(&ferroui_base::interactivity::RoutedEventArgs) + 'static) -> Self {
-        self.routed(<ferroui_controls::RichEditBox>::text_changed_event(), move |_, e| handler(e))
-    }
-
-    /// Handles [`RichEditBox::text_changing_event`](ferroui_controls::RichEditBox::text_changing_event).
-    fn on_text_changing(self, handler: impl Fn(&ferroui_controls::RichEditBoxTextChangingEventArgs) + 'static) -> Self {
-        self.routed(<ferroui_controls::RichEditBox>::text_changing_event(), move |_, e| handler(e))
-    }
-
-    /// Handles [`RichEditBox::selection_changing_event`](ferroui_controls::RichEditBox::selection_changing_event).
-    fn on_selection_changing(self, handler: impl Fn(&ferroui_controls::RichEditBoxSelectionChangingEventArgs) + 'static) -> Self {
-        self.routed(<ferroui_controls::RichEditBox>::selection_changing_event(), move |_, e| handler(e))
-    }
-
-    /// Handles [`RichEditBox::copying_to_clipboard_event`](ferroui_controls::RichEditBox::copying_to_clipboard_event).
-    fn on_copying_to_clipboard(self, handler: impl Fn(&ferroui_base::interactivity::RoutedEventArgs) + 'static) -> Self {
-        self.routed(<ferroui_controls::RichEditBox>::copying_to_clipboard_event(), move |_, e| handler(e))
-    }
-
-    /// Handles [`RichEditBox::cutting_to_clipboard_event`](ferroui_controls::RichEditBox::cutting_to_clipboard_event).
-    fn on_cutting_to_clipboard(self, handler: impl Fn(&ferroui_base::interactivity::RoutedEventArgs) + 'static) -> Self {
-        self.routed(<ferroui_controls::RichEditBox>::cutting_to_clipboard_event(), move |_, e| handler(e))
-    }
-
-    /// Handles [`RichEditBox::pasting_from_clipboard_event`](ferroui_controls::RichEditBox::pasting_from_clipboard_event).
-    fn on_pasting_from_clipboard(self, handler: impl Fn(&ferroui_base::interactivity::RoutedEventArgs) + 'static) -> Self {
-        self.routed(<ferroui_controls::RichEditBox>::pasting_from_clipboard_event(), move |_, e| handler(e))
-    }
-
-    /// Handles [`RichEditBox::text_composition_started_event`](ferroui_controls::RichEditBox::text_composition_started_event).
-    fn on_text_composition_started(self, handler: impl Fn(&ferroui_controls::RichEditCompositionEventArgs) + 'static) -> Self {
-        self.routed(<ferroui_controls::RichEditBox>::text_composition_started_event(), move |_, e| handler(e))
-    }
-
-    /// Handles [`RichEditBox::text_composition_changed_event`](ferroui_controls::RichEditBox::text_composition_changed_event).
-    fn on_text_composition_changed(self, handler: impl Fn(&ferroui_controls::RichEditCompositionEventArgs) + 'static) -> Self {
-        self.routed(<ferroui_controls::RichEditBox>::text_composition_changed_event(), move |_, e| handler(e))
-    }
-
-    /// Handles [`RichEditBox::text_composition_ended_event`](ferroui_controls::RichEditBox::text_composition_ended_event).
-    fn on_text_composition_ended(self, handler: impl Fn(&ferroui_controls::RichEditCompositionEventArgs) + 'static) -> Self {
-        self.routed(<ferroui_controls::RichEditBox>::text_composition_ended_event(), move |_, e| handler(e))
-    }
-
-    /// Handles [`RichEditBox::context_menu_opening_event`](ferroui_controls::RichEditBox::context_menu_opening_event).
-    fn on_context_menu_opening(self, handler: impl Fn(&ferroui_controls::ContextMenuEventArgs) + 'static) -> Self {
-        self.routed(<ferroui_controls::RichEditBox>::context_menu_opening_event(), move |_, e| handler(e))
-    }
-}
-impl<T: ObjectType + Upcast<ferroui_controls::RichEditBox>> RichEditBoxProps for El<T> {}
 
 /// The properties and routed events of [`RichTextBlock`](ferroui_controls::RichTextBlock).
 pub trait RichTextBlockProps: ElementBuilder {
@@ -9409,6 +9231,29 @@ pub trait WrapPanelProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_controls::WrapPanel>> WrapPanelProps for El<T> {}
 
+/// The properties and routed events of [`XamlAmbientLight`](ferroui_controls::media::XamlAmbientLight).
+pub trait XamlAmbientLightProps: ElementBuilder {
+    /// Sets [`XamlAmbientLight::color_property`](ferroui_controls::media::XamlAmbientLight::color_property).
+    fn color<M>(self, value: impl IntoProp<ferroui_base::media::Color, M>) -> Self {
+        self.prop(<ferroui_controls::media::XamlAmbientLight>::color_property(), value)
+    }
+
+    /// Sets [`XamlAmbientLight::is_target_property`](ferroui_controls::media::XamlAmbientLight::is_target_property).
+    fn is_target<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::media::XamlAmbientLight>::is_target_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::media::XamlAmbientLight>> XamlAmbientLightProps for El<T> {}
+
+/// The properties and routed events of [`XamlCompositionBrushBase`](ferroui_base::media::XamlCompositionBrushBase).
+pub trait XamlCompositionBrushBaseProps: ElementBuilder {
+    /// Sets [`XamlCompositionBrushBase::fallback_color_property`](ferroui_base::media::XamlCompositionBrushBase::fallback_color_property).
+    fn fallback_color<M>(self, value: impl IntoProp<ferroui_base::media::Color, M>) -> Self {
+        self.prop(<ferroui_base::media::XamlCompositionBrushBase>::fallback_color_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_base::media::XamlCompositionBrushBase>> XamlCompositionBrushBaseProps for El<T> {}
+
 /// The attached properties of FerroUI.Base and FerroUI.Controls, named after their owner.
 pub trait AttachedProps: ElementBuilder {
     /// Sets the attached [`AccessKeyHandler::show_access_key_property`](ferroui_base::input::AccessKeyHandler::show_access_key_property).
@@ -9849,6 +9694,16 @@ pub trait AttachedProps: ElementBuilder {
     /// Sets the attached [`RelativePanel::right_of_property`](ferroui_controls::RelativePanel::right_of_property).
     fn relative_panel_right_of<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::RelativePanel>::right_of_property(), value)
+    }
+
+    /// Sets the attached [`RevealBrush::state_property`](ferroui_controls::media::RevealBrush::state_property).
+    fn reveal_brush_state<M>(self, value: impl IntoProp<ferroui_controls::media::RevealBrushState, M>) -> Self {
+        self.prop(<ferroui_controls::media::RevealBrush>::state_property(), value)
+    }
+
+    /// Sets the attached [`RevealBrush::is_container_property`](ferroui_controls::media::RevealBrush::is_container_property).
+    fn reveal_brush_is_container<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::media::RevealBrush>::is_container_property(), value)
     }
 
     /// Sets the attached [`ScrollContentPresenter::horizontal_snap_points_type_property`](ferroui_controls::presenters::ScrollContentPresenter::horizontal_snap_points_type_property).
@@ -10464,6 +10319,11 @@ pub trait AttachedProps: ElementBuilder {
     /// Sets the attached [`XYFocus::navigation_modes_property`](ferroui_base::input::XYFocus::navigation_modes_property).
     fn xy_focus_navigation_modes<M>(self, value: impl IntoProp<ferroui_base::input::XYFocusNavigationModes, M>) -> Self {
         self.prop(<ferroui_base::input::XYFocus>::navigation_modes_property(), value)
+    }
+
+    /// Sets the attached [`XamlAmbientLight::is_target_property`](ferroui_controls::media::XamlAmbientLight::is_target_property).
+    fn xaml_ambient_light_is_target<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::media::XamlAmbientLight>::is_target_property(), value)
     }
 }
 impl<T: ObjectType> AttachedProps for El<T> {}

@@ -23,6 +23,7 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/Button.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/RepeatButton.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/ToggleButton.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/RevealStyles.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/HyperlinkButton.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/CheckBox.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/RadioButton.xaml" />

@@ -16,19 +16,28 @@
 -(void)invalidate;
 @end
 
+@interface CocoaPowerObserver : NSObject
+-(id)initWithCallback:(IFrnActionCallback *)callback;
+-(void)powerStateDidChange:(NSNotification *)notification;
+-(void)invalidate;
+@end
+
 // Keep IFrnPlatformSettings' original vtable intact. New runtimes discover the
 // optional interface with QueryInterface and can still load an older native lib.
 class PlatformSettings : public ComObject,
                          public virtual IFrnPlatformSettings,
-                         public virtual IFrnAccessibilitySettings
+                         public virtual IFrnAccessibilitySettings,
+                         public virtual IFrnPowerSettings
 {
     CocoaThemeObserver* observer = nil;
     CocoaLocaleObserver* localeObserver = nil;
     CocoaAccessibilityObserver* accessibilityObserver = nil;
+    CocoaPowerObserver* powerObserver = nil;
 
     BEGIN_INTERFACE_MAP()
     INTERFACE_MAP_ENTRY(IFrnPlatformSettings, IID_IFrnPlatformSettings)
     INTERFACE_MAP_ENTRY(IFrnAccessibilitySettings, IID_IFrnAccessibilitySettings)
+    INTERFACE_MAP_ENTRY(IFrnPowerSettings, IID_IFrnPowerSettings)
     END_INTERFACE_MAP()
 
 public:
@@ -39,6 +48,7 @@ public:
         RegisterColorsChange(nullptr);
         RegisterLanguageChange(nullptr);
         RegisterAccessibilityChange(nullptr);
+        RegisterPowerChange(nullptr);
     }
 
     virtual FrnPlatformThemeVariant GetPlatformTheme() override
@@ -168,6 +178,37 @@ public:
         }
     }
     
+    virtual bool GetLowPowerMode() override
+    {
+        if (@available(macOS 12.0, *))
+        {
+            return NSProcessInfo.processInfo.isLowPowerModeEnabled;
+        }
+        return false;
+    }
+
+    virtual void RegisterPowerChange(IFrnActionCallback *callback) override
+    {
+        auto center = NSNotificationCenter.defaultCenter;
+        if (powerObserver != nil)
+        {
+            [powerObserver invalidate];
+            [center removeObserver:powerObserver];
+            powerObserver = nil;
+        }
+        if (callback != nullptr)
+        {
+            if (@available(macOS 12.0, *))
+            {
+                powerObserver = [[CocoaPowerObserver alloc] initWithCallback:callback];
+                [center addObserver:powerObserver
+                           selector:@selector(powerStateDidChange:)
+                               name:NSProcessInfoPowerStateDidChangeNotification
+                             object:nil];
+            }
+        }
+    }
+
 private:
     unsigned int to_argb(NSColor* color)
     {
@@ -264,6 +305,43 @@ private:
 - (void)accessibilityOptionsDidChange:(NSNotification *)notification {
     // Rust platform settings and their subscribers belong to the UI thread.
     // Capture the observer, not a Rust Rc, when a notification arrives elsewhere.
+    if ([NSThread isMainThread]) {
+        [self invokeCallback];
+    } else {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self invokeCallback];
+        });
+    }
+}
+@end
+
+@implementation CocoaPowerObserver
+{
+    ComPtr<IFrnActionCallback> _callback;
+}
+
+- (id)initWithCallback:(IFrnActionCallback *)callback {
+    self = [super init];
+    if (self) {
+        _callback = callback;
+    }
+    return self;
+}
+
+- (void)invalidate {
+    _callback = nullptr;
+}
+
+- (void)invokeCallback {
+    // Keep the COM callback alive even when a subscriber unregisters during the call.
+    auto callback = _callback;
+    if (callback != nullptr) {
+        callback->Run();
+    }
+}
+
+// The power state notification is posted on any thread: the callback runs on the main thread.
+- (void)powerStateDidChange:(NSNotification *)notification {
     if ([NSThread isMainThread]) {
         [self invokeCallback];
     } else {

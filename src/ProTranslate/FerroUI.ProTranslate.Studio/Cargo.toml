@@ -1,0 +1,33 @@
+[package]
+name = "ferroui-protranslate-studio"
+description = "Portable localization catalog editing, persistence and AI translation workflow"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme = "README.md"
+keywords.workspace = true
+categories.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[features]
+default = ["filesystem"]
+filesystem = []
+
+[dependencies]
+ferroui-protranslate-core.workspace = true
+ferroui-protranslate-formats.workspace = true
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+regex = "1.12"
+url = "2"
+
+[dev-dependencies]
+tempfile = "3"
+
+[package.metadata.release]
+group = "tools"

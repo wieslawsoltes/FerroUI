@@ -1,0 +1,18 @@
+[package]
+name = "ferroui-pretext-contracts"
+description = "Backend contracts for prepared text and glyph output"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme = "README.md"
+keywords.workspace = true
+categories.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[package.metadata.release]
+group = "rendering"

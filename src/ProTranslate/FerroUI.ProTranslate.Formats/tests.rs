@@ -1,0 +1,1398 @@
+use super::*;
+
+fn options(culture: &str) -> TranslationFormatOptions {
+    TranslationFormatOptions {
+        culture: Some(culture.into()),
+        ..Default::default()
+    }
+}
+fn read(content: &str, format: TranslationFileFormat, culture: &str) -> TranslationFormatResult {
+    let result = import(content, format, &options(culture), None);
+    assert!(!result.has_errors(), "{format:?}: {:?}", result.diagnostics);
+    result
+}
+fn sample() -> TranslationCatalog {
+    let mut catalog = TranslationCatalog {
+        name: Some("Messages".into()),
+        source_culture: Some("en".into()),
+        entries: Vec::new(),
+        metadata: Default::default(),
+    };
+    catalog
+        .add(
+            "Greeting",
+            Some("pl-PL"),
+            "Cześć, \"świat\"!\nSecond line\r\n\\ <> & ' \t🙂",
+        )
+        .comment = Some("Translator note".into());
+    catalog.add("Empty", Some("pl-PL"), "");
+    catalog
+}
+fn plurals() -> TranslationCatalog {
+    let mut catalog = TranslationCatalog::default();
+    let one = catalog.add("Count.one", Some("en"), "%d message");
+    one.plural_category = Some("one".into());
+    one.source = Some("Count".into());
+    let other = catalog.add("Count.other", Some("en"), "%d messages");
+    other.plural_category = Some("other".into());
+    other.source = Some("Counts".into());
+    catalog
+}
+
+#[test]
+fn detects_all_file_names_case_insensitively() {
+    use TranslationFileFormat::*;
+    for (name, format) in [
+        ("Strings.json", ProTranslateJson),
+        ("pl.i18next.json", I18NextJson),
+        ("pl.i18n.json", I18NextJson),
+        ("EN.ARB", FlutterArb),
+        ("Strings.pl.resx", Resx),
+        ("res/values/strings.xml", AndroidResources),
+        ("en.lproj/Localizable.strings", AppleStrings),
+        ("Localizable.stringsdict", AppleStringsdict),
+        ("Localizable.xcstrings", AppleXcstrings),
+        ("pl.po", GettextPo),
+        ("en.pot", GettextPo),
+        ("translations.xlf", Xliff12),
+        ("translations.xliff", Xliff12),
+        ("strings.csv", Csv),
+        ("strings.tsv", Tsv),
+    ] {
+        assert_eq!(detect_format(name), format, "{name}");
+    }
+    assert_eq!(TranslationFileFormat::ALL.len(), 13);
+}
+
+#[test]
+fn imports_original_common_fixtures() {
+    use TranslationFileFormat::*;
+    for (content,format,culture) in [
+        (r#"{"AppTitle":"ProTranslate"}"#,ProTranslateJson,"en-US"),
+        (r#"{"Shell":{"Title":"ProTranslate"}}"#,I18NextJson,"en-US"),
+        (r#"{"@@locale":"en-US","AppTitle":"ProTranslate","@AppTitle":{"description":"Application title"}}"#,FlutterArb,"en-US"),
+        (r#"<root><data name="AppTitle"><value>ProTranslate</value><comment>Application title</comment></data></root>"#,Resx,"en-US"),
+        (r#"<resources><string name="AppTitle">ProTranslate</string></resources>"#,AndroidResources,"en-US"),
+        (r#"/* Application title */ "AppTitle" = "ProTranslate";"#,AppleStrings,"en-US"),
+        (r#"{"sourceLanguage":"en","strings":{"AppTitle":{"localizations":{"en-US":{"stringUnit":{"state":"translated","value":"ProTranslate"}}}}}}"#,AppleXcstrings,"en-US"),
+        ("msgid \"\"\nmsgstr \"\"\n\"Language: en-US\\n\"\n\nmsgid \"AppTitle\"\nmsgstr \"ProTranslate\"",GettextPo,"en-US"),
+        (r#"<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2"><file source-language="en" target-language="en-US"><body><trans-unit id="AppTitle"><source>Title</source><target>ProTranslate</target></trans-unit></body></file></xliff>"#,Xliff12,"en-US"),
+        (r#"<xliff version="2.1" xmlns="urn:oasis:names:tc:xliff:document:2.0" srcLang="en" trgLang="en-US"><file id="f"><unit id="AppTitle"><segment><source>Title</source><target>ProTranslate</target></segment></unit></file></xliff>"#,Xliff20,"en-US"),
+        ("key,culture,value,comment\nAppTitle,en-US,ProTranslate,Application title",Csv,"en-US"),
+        ("key\tculture\tvalue\nAppTitle\ten-US\tProTranslate",Tsv,"en-US"),
+    ] {
+        let result=read(content,format,culture);
+        assert_eq!(result.catalog.entries.len(),1,"{format:?}");
+        assert_eq!(result.catalog.entries[0].value,"ProTranslate","{format:?}");
+        assert_eq!(result.catalog.entries[0].culture.as_deref(),Some(culture),"{format:?}");
+    }
+}
+
+#[test]
+fn round_trips_text_and_empty_values_through_twelve_formats() {
+    for format in TranslationFileFormat::ALL
+        .into_iter()
+        .filter(|f| *f != TranslationFileFormat::AppleStringsdict)
+    {
+        let catalog = sample();
+        let exported = export(&catalog, format, &options("pl-PL"));
+        assert!(
+            !exported.has_errors(),
+            "{format:?}: {:?}",
+            exported.diagnostics
+        );
+        let imported = read(&exported.content, format, "pl-PL");
+        let expected = catalog.to_dictionary(Some("pl-PL"));
+        let mut actual = imported.catalog.to_dictionary(Some("pl-PL"));
+        // gettext explicitly marks untranslated empty values, matching the source behavior.
+        if format == TranslationFileFormat::GettextPo {
+            assert_eq!(actual.get("Empty").map(String::as_str), Some("Empty"));
+            actual.insert("Empty".into(), String::new());
+        }
+        assert_eq!(actual, expected, "{format:?}: {}", exported.content);
+    }
+}
+
+#[test]
+fn round_trips_plural_categories_in_native_formats() {
+    for format in [
+        TranslationFileFormat::AndroidResources,
+        TranslationFileFormat::AppleStringsdict,
+        TranslationFileFormat::AppleXcstrings,
+        TranslationFileFormat::GettextPo,
+    ] {
+        let catalog = plurals();
+        let exported = export(&catalog, format, &options("en"));
+        assert!(!exported.has_errors(), "{:?}", exported.diagnostics);
+        let imported = read(&exported.content, format, "en");
+        assert_eq!(imported.catalog.entries.len(), 2, "{format:?}");
+        assert!(imported.catalog.entries.iter().any(|e| e.key == "Count.one"
+            && e.plural_category.as_deref() == Some("one")
+            && e.value == "%d message"));
+        assert!(imported
+            .catalog
+            .entries
+            .iter()
+            .any(|e| e.key == "Count.other"
+                && e.plural_category.as_deref() == Some("other")
+                && e.value == "%d messages"));
+    }
+}
+
+#[test]
+fn malformed_input_is_transactional_for_every_format() {
+    use TranslationFileFormat::*;
+    for format in TranslationFileFormat::ALL {
+        let content = match format {
+            ProTranslateJson | I18NextJson | FlutterArb | AppleXcstrings => "{\"a\":\"b\",",
+            Resx | AndroidResources | AppleStringsdict | Xliff12 | Xliff20 => {
+                "<root><unterminated></root>"
+            }
+            AppleStrings => "\"a\" = \"b\"; \"missing\" = \"value\"",
+            GettextPo => "msgid \"a\"\nmsgstr \"b\"\n\nmsgid \"bad\"\nmsgstr[nope] \"value\"",
+            Csv => "key,value\na,b\n\"unterminated,value",
+            Tsv => "key\tvalue\na\tb\n\"unterminated\tvalue",
+        };
+        let result = import(content, format, &Default::default(), None);
+        assert!(result.has_errors(), "{format:?}: {:?}", result.diagnostics);
+        assert!(result.catalog.entries.is_empty(), "{format:?}");
+    }
+}
+
+#[test]
+fn json_preserves_strings_when_accepting_trailing_commas() {
+    let result = read(
+        r#"{"a":{"b":"text ,} ] \\\"",},"ignored":true,}"#,
+        TranslationFileFormat::I18NextJson,
+        "en",
+    );
+    assert_eq!(result.catalog.entries[0].key, "a.b");
+    assert_eq!(result.catalog.entries[0].value, "text ,} ] \\\"");
+    assert!(result.diagnostics.iter().any(|d| d.code == "PTF101"));
+}
+
+#[test]
+fn duplicate_json_members_are_rejected_and_flattening_collisions_diagnosed() {
+    assert!(import(
+        r#"{"a":"one","a":"two"}"#,
+        TranslationFileFormat::ProTranslateJson,
+        &Default::default(),
+        None
+    )
+    .has_errors());
+    let result = read(
+        r#"{"a.b":"literal","a":{"b":"nested"}}"#,
+        TranslationFileFormat::I18NextJson,
+        "en",
+    );
+    assert!(result.diagnostics.iter().any(|d| d.code == "PTF003"));
+}
+
+#[test]
+fn arb_preserves_placeholder_metadata() {
+    let result = read(
+        r#"{"@@locale":"pl","welcome":"Witaj {name}","@welcome":{"description":"Greeting","placeholders":{"name":{"type":"String","example":"Ada"}}}}"#,
+        TranslationFileFormat::FlutterArb,
+        "en",
+    );
+    let entry = &result.catalog.entries[0];
+    assert_eq!(entry.culture.as_deref(), Some("pl"));
+    assert_eq!(entry.comment.as_deref(), Some("Greeting"));
+    let exported = export(
+        &result.catalog,
+        TranslationFileFormat::FlutterArb,
+        &options("pl"),
+    );
+    let json: serde_json::Value = serde_json::from_str(&exported.content).unwrap();
+    assert_eq!(json["@welcome"]["placeholders"]["name"]["example"], "Ada");
+}
+
+#[test]
+fn exact_culture_precedes_neutral_in_any_entry_order() {
+    for reverse in [false, true] {
+        let mut catalog = TranslationCatalog::default();
+        catalog.add("Title", Some("pl-PL"), "Tytuł");
+        catalog.add("Title", None, "Neutral");
+        catalog.add("Subtitle", None, "Fallback");
+        if reverse {
+            catalog.entries.reverse();
+        }
+        let exported = export(
+            &catalog,
+            TranslationFileFormat::ProTranslateJson,
+            &options("PL-pl"),
+        );
+        let imported = read(
+            &exported.content,
+            TranslationFileFormat::ProTranslateJson,
+            "pl-PL",
+        );
+        assert_eq!(
+            imported.catalog.to_dictionary(Some("pl-PL"))["Title"],
+            "Tytuł"
+        );
+        assert_eq!(
+            imported.catalog.to_dictionary(Some("pl-PL"))["Subtitle"],
+            "Fallback"
+        );
+    }
+}
+
+#[test]
+fn csv_and_tsv_preserve_metadata_multiline_and_delimiters() {
+    let mut catalog = sample();
+    let entry = &mut catalog.entries[0];
+    entry.context = Some("menu\r\nmain".into());
+    entry.source = Some("source,\t\"quote\"".into());
+    entry
+        .metadata
+        .insert("vendor.note".into(), "nested,\"data\"".into());
+    for format in [TranslationFileFormat::Csv, TranslationFileFormat::Tsv] {
+        let exported = export(&catalog, format, &Default::default());
+        let mut imported = read(&exported.content, format, "pl-PL").catalog;
+        imported.entries.sort_by(|a, b| a.key.cmp(&b.key));
+        let mut expected = catalog.entries.clone();
+        expected.sort_by(|a, b| a.key.cmp(&b.key));
+        assert_eq!(imported.entries, expected);
+    }
+}
+
+#[test]
+fn csv_accepts_custom_delimiter_and_reports_formula_cells() {
+    let opts = TranslationFormatOptions {
+        delimiter: ';',
+        ..options("en")
+    };
+    let imported = import(
+        "key;value\nFormula;=SUM(A1:A2)\n",
+        TranslationFileFormat::Csv,
+        &opts,
+        None,
+    );
+    assert!(!imported.has_errors());
+    assert!(imported.diagnostics.iter().any(|d| d.code == "PTF192"));
+    let exported = export(&imported.catalog, TranslationFileFormat::Csv, &opts);
+    assert!(exported.content.starts_with("key;culture;value;"));
+    assert!(exported.diagnostics.iter().any(|d| d.code == "PTF192"));
+}
+
+#[test]
+fn delimited_invalid_headers_and_rows_are_diagnostics() {
+    for text in [
+        "key,key,value\na,b,c",
+        "key,value\na",
+        "key,value\na,\"b\"junk",
+        "key,value\na,b\"c",
+        "key,value\na,b,c",
+    ] {
+        assert!(
+            import(text, TranslationFileFormat::Csv, &Default::default(), None).has_errors(),
+            "{text}"
+        );
+    }
+    let missing = import(
+        "name,text\na,b",
+        TranslationFileFormat::Csv,
+        &Default::default(),
+        None,
+    );
+    assert!(missing.diagnostics.iter().any(|d| d.code == "PTF190"));
+}
+
+#[test]
+fn apple_unicode_escapes_and_comment_delimiters_round_trip() {
+    let content = r#"// Context
+"Greeting" = "\U0041\uD83D\uDE00\n\t\\\"";"#;
+    let result = read(content, TranslationFileFormat::AppleStrings, "en");
+    assert_eq!(result.catalog.entries[0].value, "A😀\n\t\\\"");
+    let mut catalog = result.catalog;
+    catalog.entries[0].comment = Some("Contains */ and /*\nsecond line".into());
+    let exported = export(
+        &catalog,
+        TranslationFileFormat::AppleStrings,
+        &options("en"),
+    );
+    let imported = read(&exported.content, TranslationFileFormat::AppleStrings, "en");
+    assert_eq!(imported.catalog.entries, catalog.entries);
+    for bad in [
+        r#""a" = "\uD800";"#,
+        r#""a" = "\uDC00";"#,
+        r#""a" = "\q";"#,
+        r#"/* unfinished"#,
+    ] {
+        assert!(import(
+            bad,
+            TranslationFileFormat::AppleStrings,
+            &Default::default(),
+            None
+        )
+        .has_errors());
+    }
+}
+
+#[test]
+fn infers_platform_cultures_from_paths() {
+    for (text, format, path, culture) in [
+        (
+            "<root><data name=\"A\"><value>B</value></data></root>",
+            TranslationFileFormat::Resx,
+            "/res/Strings.pl-PL.resx",
+            "pl-PL",
+        ),
+        (
+            "<resources><string name=\"a\">b</string></resources>",
+            TranslationFileFormat::AndroidResources,
+            "/res/values-en-rUS/strings.xml",
+            "en-US",
+        ),
+        (
+            "<resources><string name=\"a\">b</string></resources>",
+            TranslationFileFormat::AndroidResources,
+            "/res/values-b+sr+Latn+RS/strings.xml",
+            "sr-Latn-RS",
+        ),
+        (
+            "\"a\"=\"b\";",
+            TranslationFileFormat::AppleStrings,
+            "/pl_PL.lproj/Localizable.strings",
+            "pl-PL",
+        ),
+    ] {
+        let result = import(text, format, &Default::default(), Some(path));
+        assert!(!result.has_errors());
+        assert_eq!(result.catalog.entries[0].culture.as_deref(), Some(culture));
+    }
+}
+
+#[test]
+fn android_arrays_and_flags_reconstruct_native_shapes() {
+    let content = r#"<resources><string name="escaped" formatted="false" translatable="false">"  a\n\'b\' \\ "</string><string-array name="days"><item>Mon</item><item>Tue</item></string-array><plurals name="files"><item quantity="one">one</item><item quantity="other">many</item></plurals></resources>"#;
+    let imported = read(content, TranslationFileFormat::AndroidResources, "en");
+    assert_eq!(imported.catalog.entries[0].value, "  a\n'b' \\ ");
+    let exported = export(
+        &imported.catalog,
+        TranslationFileFormat::AndroidResources,
+        &options("en"),
+    );
+    assert!(!exported.has_errors());
+    assert!(exported.content.contains("<string-array name=\"days\">"));
+    assert!(exported.content.contains("translatable=\"false\""));
+    let imported_again = read(
+        &exported.content,
+        TranslationFileFormat::AndroidResources,
+        "en",
+    );
+    assert_eq!(
+        imported_again.catalog.to_dictionary(Some("en")),
+        imported.catalog.to_dictionary(Some("en"))
+    );
+}
+
+#[test]
+fn stringsdict_preserves_variables_and_accepts_standard_doctype() {
+    let content = r#"<?xml version="1.0"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict><key>Items</key><dict><key>NSStringLocalizedFormatKey</key><string>%#@items@</string><key>items</key><dict><key>NSStringFormatSpecTypeKey</key><string>NSStringPluralRuleType</string><key>NSStringFormatValueTypeKey</key><string>lld</string><key>one</key><string>%lld item</string><key>other</key><string>%lld items</string></dict></dict></dict></plist>"#;
+    let imported = read(content, TranslationFileFormat::AppleStringsdict, "en");
+    assert_eq!(imported.catalog.entries.len(), 2);
+    assert_eq!(
+        imported.catalog.entries[0].metadata["apple.variable"],
+        "items"
+    );
+    let exported = export(
+        &imported.catalog,
+        TranslationFileFormat::AppleStringsdict,
+        &options("en"),
+    );
+    assert!(!exported.has_errors());
+    assert!(exported.content.contains("%#@items@"));
+    assert!(exported.content.contains("<string>lld</string>"));
+    let again = read(
+        &exported.content,
+        TranslationFileFormat::AppleStringsdict,
+        "en",
+    );
+    assert_eq!(again.catalog.entries, imported.catalog.entries);
+    assert!(export(
+        &sample(),
+        TranslationFileFormat::AppleStringsdict,
+        &options("pl-PL")
+    )
+    .has_errors());
+}
+
+#[test]
+fn po_context_plural_indices_fuzzy_and_comments_survive() {
+    let content="msgid \"\"\nmsgstr \"\"\n\"Language: pl_PL\\n\"\n\"Plural-Forms: nplurals=3; plural=(n == 1 ? 0 : n % 10 >= 2 && n % 10 <= 4 ? 1 : 2);\\n\"\n\n# Translator\n#. Developer\n#: app.rs:42\n#, fuzzy, rust-format\nmsgctxt \"Inbox\"\nmsgid \"Message\"\nmsgid_plural \"Messages\"\nmsgstr[0] \"Wiadomość\"\nmsgstr[1] \"Wiadomości\"\nmsgstr[2] \"Wiadomości wiele\"\n";
+    let imported = read(content, TranslationFileFormat::GettextPo, "en");
+    assert_eq!(imported.catalog.entries.len(), 3);
+    let dictionary = imported.catalog.to_dictionary(Some("pl-PL"));
+    assert_eq!(dictionary["Inbox\u{4}Message.one"], "Wiadomość");
+    assert_eq!(dictionary["Inbox\u{4}Message.index2"], "Wiadomości wiele");
+    assert!(imported.diagnostics.iter().any(|d| d.code == "PTF171"));
+    assert!(imported
+        .catalog
+        .entries
+        .iter()
+        .all(|entry| entry.state.as_deref() == Some("fuzzy")));
+    let exported = export(
+        &imported.catalog,
+        TranslationFileFormat::GettextPo,
+        &options("pl-PL"),
+    );
+    assert!(!exported.has_errors());
+    assert!(exported.content.contains("msgstr[2]"));
+    assert!(exported.content.contains("#: app.rs:42"));
+    assert!(exported.content.contains("Plural-Forms:"));
+    let again = read(&exported.content, TranslationFileFormat::GettextPo, "en");
+    assert_eq!(again.catalog.entries, imported.catalog.entries);
+}
+
+#[test]
+fn po_multiline_adjacent_entries_tabs_and_empty_translation() {
+    let content="msgid\t\"First\"\n\" line\"\nmsgstr\t\"Pierwsza\"\n\" linia\"\nmsgid \"Empty\"\nmsgstr \"\"\n";
+    let imported = read(content, TranslationFileFormat::GettextPo, "pl");
+    assert_eq!(imported.catalog.entries.len(), 2);
+    assert_eq!(imported.catalog.entries[0].key, "First line");
+    assert_eq!(imported.catalog.entries[0].value, "Pierwsza linia");
+    assert_eq!(
+        imported.catalog.entries[1].metadata["po.untranslated"],
+        "true"
+    );
+    let exported = export(
+        &imported.catalog,
+        TranslationFileFormat::GettextPo,
+        &options("pl"),
+    );
+    assert!(exported.content.contains("msgid \"Empty\"\nmsgstr \"\""));
+}
+
+#[test]
+fn xliff_preserves_context_state_source_and_comments() {
+    let mut catalog = sample();
+    catalog.entries[0].source = Some("Hello!".into());
+    catalog.entries[0].context = Some("Status bar".into());
+    catalog.entries[0].state = Some("translated".into());
+    for format in [
+        TranslationFileFormat::Xliff12,
+        TranslationFileFormat::Xliff20,
+    ] {
+        let exported = export(&catalog, format, &options("pl-PL"));
+        assert!(!exported.has_errors());
+        let imported = read(&exported.content, format, "pl-PL");
+        let greeting = imported
+            .catalog
+            .entries
+            .iter()
+            .find(|entry| entry.key == "Greeting")
+            .unwrap();
+        assert_eq!(greeting.source, Some("Hello!".into()));
+        assert_eq!(greeting.context, Some("Status bar".into()));
+        assert_eq!(greeting.state, Some("translated".into()));
+        assert_eq!(greeting.comment, Some("Translator note".into()));
+    }
+}
+
+#[test]
+fn xliff_multisegments_are_unique_and_inline_markup_is_diagnosed() {
+    let content = r#"<xliff version="2.1" srcLang="en" trgLang="pl"><file id="f"><unit id="title"><segment id="a"><source>A <ph id="1"/></source><target>Pierwszy <pc id="2">tekst</pc></target></segment><segment id="b"><source>B</source><target>Drugi</target></segment></unit></file></xliff>"#;
+    let result = read(content, TranslationFileFormat::Xliff20, "pl");
+    assert_eq!(result.catalog.entries.len(), 2);
+    assert_eq!(result.catalog.entries[0].key, "title#a");
+    assert_eq!(result.catalog.entries[1].key, "title#b");
+    assert_eq!(result.catalog.entries[0].value, "Pierwszy tekst");
+    assert!(result.diagnostics.iter().any(|d| d.code == "PTF181"));
+    assert!(result.diagnostics.iter().any(|d| d.code == "PTF183"));
+}
+
+#[test]
+fn xliff12_exports_multiple_languages_as_separate_files() {
+    let mut catalog = TranslationCatalog::default();
+    catalog.add("Title", Some("en"), "Title");
+    catalog.add("Title", Some("pl"), "Tytuł");
+    let exported = export(
+        &catalog,
+        TranslationFileFormat::Xliff12,
+        &Default::default(),
+    );
+    let imported = read(&exported.content, TranslationFileFormat::Xliff12, "en");
+    assert_eq!(imported.catalog.entries.len(), 2);
+    assert_eq!(imported.catalog.to_dictionary(Some("pl"))["Title"], "Tytuł");
+}
+
+#[test]
+fn rejects_entity_declarations_and_xml_control_characters() {
+    let malicious = r#"<!DOCTYPE root [<!ENTITY x SYSTEM "file:///etc/passwd">]><root><data name="a"><value>&x;</value></data></root>"#;
+    assert!(import(
+        malicious,
+        TranslationFileFormat::Resx,
+        &Default::default(),
+        None
+    )
+    .has_errors());
+    let mut catalog = sample();
+    catalog.entries[0].value.push('\0');
+    for format in [
+        TranslationFileFormat::Resx,
+        TranslationFileFormat::AndroidResources,
+        TranslationFileFormat::Xliff12,
+        TranslationFileFormat::Xliff20,
+    ] {
+        assert!(export(&catalog, format, &Default::default()).has_errors());
+    }
+}
+
+#[test]
+fn non_string_resx_is_diagnosed_and_device_variations_are_supported() {
+    let result = read(
+        r#"<root><data name="Text"><value>Text</value></data><data name="Image" type="System.Drawing.Bitmap"><value>base64</value></data></root>"#,
+        TranslationFileFormat::Resx,
+        "en",
+    );
+    assert_eq!(result.catalog.entries.len(), 1);
+    assert!(result.diagnostics.iter().any(|d| d.code == "PTF131"));
+    let xc = read(
+        r#"{"strings":{"a":{"localizations":{"en":{"variations":{"device":{"iphone":{"stringUnit":{"value":"iPhone"}}}}}}}}}"#,
+        TranslationFileFormat::AppleXcstrings,
+        "en",
+    );
+    assert_eq!(xc.catalog.entries.len(), 1);
+    assert_eq!(xc.catalog.entries[0].key, "a.device.iphone");
+    assert_eq!(xc.catalog.entries[0].value, "iPhone");
+}
+
+#[test]
+fn export_reports_metadata_loss_and_is_deterministic() {
+    let mut catalog = sample();
+    catalog.entries[0].context = Some("Dialog".into());
+    catalog.entries[0]
+        .metadata
+        .insert("vendor".into(), "data".into());
+    let first = export(
+        &catalog,
+        TranslationFileFormat::ProTranslateJson,
+        &options("pl-PL"),
+    );
+    assert!(first
+        .diagnostics
+        .iter()
+        .any(|d| d.code == "PTF202" && d.message.contains("metadata")));
+    catalog.entries.reverse();
+    let second = export(
+        &catalog,
+        TranslationFileFormat::ProTranslateJson,
+        &options("pl-PL"),
+    );
+    assert_eq!(first.content, second.content);
+}
+
+#[test]
+fn catalog_validates_keys_and_normalizes_culture_spelling() {
+    let mut catalog = TranslationCatalog::default();
+    catalog.add("A", Some("pl-PL"), "First");
+    catalog.add("A", Some("PL-pl"), "Second");
+    assert_eq!(catalog.to_dictionary(Some("pl-pl"))["A"], "Second");
+    assert_eq!(catalog.cultures().len(), 1);
+    assert!(catalog.validate().iter().any(|d| d.code == "PTF003"));
+    catalog.add("", None, "invalid");
+    assert!(export(&catalog, TranslationFileFormat::Csv, &Default::default()).has_errors());
+    assert_eq!(
+        TranslationCatalog::normalize_culture_name(Some("sr_latn_rs")),
+        "sr-Latn-RS"
+    );
+    assert_eq!(TranslationCatalog::normalize_culture_name(None), "");
+}
+
+#[test]
+fn trailing_comma_compatibility_does_not_repair_missing_json_values() {
+    for content in [
+        r#"{"a":{,}}"#,
+        r#"{"a":[,]}"#,
+        r#"{"a":[1,,]}"#,
+        r#"{"a":,}"#,
+    ] {
+        assert!(
+            import(
+                content,
+                TranslationFileFormat::ProTranslateJson,
+                &Default::default(),
+                None
+            )
+            .has_errors(),
+            "{content}"
+        );
+    }
+}
+
+#[test]
+fn export_refuses_ambiguous_plural_shapes() {
+    let mut catalog = plurals();
+    catalog.add("Count", Some("en"), "Singular");
+    assert!(export(
+        &catalog,
+        TranslationFileFormat::AppleXcstrings,
+        &options("en")
+    )
+    .has_errors());
+    let mut catalog = plurals();
+    let few = catalog.add("Count.few", Some("en"), "Few");
+    few.plural_category = Some("few".into());
+    assert!(export(&catalog, TranslationFileFormat::GettextPo, &options("en")).has_errors());
+}
+
+#[test]
+fn po_unrepresentable_workflow_state_is_reported() {
+    let mut catalog = sample();
+    catalog.entries[0].state = Some("reviewed".into());
+    let result = export(
+        &catalog,
+        TranslationFileFormat::GettextPo,
+        &options("pl-PL"),
+    );
+    assert!(result
+        .diagnostics
+        .iter()
+        .any(|d| d.code == "PTF202" && d.message.contains("state")));
+}
+
+#[test]
+fn normalized_catalog_json_preserves_metadata_and_reads_older_documents() {
+    let mut catalog = sample();
+    catalog
+        .metadata
+        .insert("vendor.document".into(), "retained".into());
+    catalog.entries[0]
+        .metadata
+        .insert("vendor.entry".into(), "retained too".into());
+    let json = serde_json::to_string(&catalog).unwrap();
+    assert!(json.contains("sourceCulture"));
+    assert_eq!(
+        serde_json::from_str::<TranslationCatalog>(&json).unwrap(),
+        catalog
+    );
+    let older: TranslationCatalog = serde_json::from_str(
+        r#"{"name":"Messages","sourceCulture":"en","entries":[{"key":"A","value":"B"}]}"#,
+    )
+    .unwrap();
+    assert!(older.metadata.is_empty());
+    assert!(older.entries[0].metadata.is_empty());
+    assert_eq!(older.entries[0].culture, None);
+}
+
+#[test]
+fn xml_accepts_literal_declaration_text_and_bounded_internal_entities() {
+    for content in [
+        r#"<root><!-- <!ENTITY is merely a comment --><data name="Text"><value><![CDATA[<!ENTITY literal>]]></value></data></root>"#,
+        r#"<!DOCTYPE root [<!ENTITY label "Safe text">]><root><data name="Text"><value>&label;</value></data></root>"#,
+    ] {
+        let result = read(content, TranslationFileFormat::Resx, "en");
+        assert_eq!(result.catalog.entries.len(), 1);
+        assert!(!result.catalog.entries[0].value.is_empty());
+    }
+    let recursive = r#"<!DOCTYPE root [<!ENTITY loop "&loop;">]><root><data name="Text"><value>&loop;</value></data></root>"#;
+    assert!(import(recursive, TranslationFileFormat::Resx, &options("en"), None).has_errors());
+    let typed = read(
+        r#"<root><data name="String" type="System.String, System.Private.CoreLib"><value>Text</value></data><data name="Builder" type="System.StringBuilder"><value>Not a string</value></data></root>"#,
+        TranslationFileFormat::Resx,
+        "en",
+    );
+    assert_eq!(typed.catalog.entries.len(), 1);
+    assert_eq!(typed.catalog.entries[0].key, "String");
+    assert!(typed.diagnostics.iter().any(|d| d.code == "PTF131"));
+}
+
+#[test]
+fn android_quoting_whitespace_and_group_flags_round_trip() {
+    let source = r#"<resources><string name="Mixed">before  "  quoted  "  after\n\u000D\uD83D\uDE42</string><string-array name="Planets" translatable="false" formatted="false"><item>Earth</item><item>Venus</item></string-array><plurals name="Count" translatable="false" formatted="false"><item quantity="one">One</item><item quantity="other">Many</item></plurals></resources>"#;
+    let imported = read(source, TranslationFileFormat::AndroidResources, "en");
+    assert_eq!(
+        imported.catalog.to_dictionary(Some("en"))["Mixed"],
+        "before   quoted   after\n\r🙂"
+    );
+    let exported = export(
+        &imported.catalog,
+        TranslationFileFormat::AndroidResources,
+        &options("en"),
+    );
+    assert!(!exported.has_errors(), "{:?}", exported.diagnostics);
+    assert!(exported.content.contains("\\u000D"));
+    let again = read(
+        &exported.content,
+        TranslationFileFormat::AndroidResources,
+        "en",
+    );
+    assert_eq!(
+        again.catalog.to_dictionary(Some("en")),
+        imported.catalog.to_dictionary(Some("en"))
+    );
+    for entry in again
+        .catalog
+        .entries
+        .iter()
+        .filter(|entry| entry.key != "Mixed")
+    {
+        assert_eq!(entry.metadata["android.translatable"], "false");
+        assert_eq!(entry.metadata["android.formatted"], "false");
+    }
+    let mut conflict = imported.catalog;
+    conflict
+        .entries
+        .iter_mut()
+        .find(|entry| entry.key == "Planets[1]")
+        .unwrap()
+        .metadata
+        .insert("android.formatted".into(), "true".into());
+    assert!(export(
+        &conflict,
+        TranslationFileFormat::AndroidResources,
+        &options("en")
+    )
+    .has_errors());
+}
+
+#[test]
+fn apple_filename_fallback_and_single_language_selection_are_consistent() {
+    for (path, format, content) in [
+        (
+            "Messages.pl-PL.STRINGS",
+            TranslationFileFormat::AppleStrings,
+            "\"Title\" = \"Tytuł\";",
+        ),
+        (
+            "Messages.pl-PL.RESX",
+            TranslationFileFormat::Resx,
+            "<root><data name=\"Title\"><value>Tytuł</value></data></root>",
+        ),
+        (
+            "res/values-b+sr+Latn+RS-night/strings.xml",
+            TranslationFileFormat::AndroidResources,
+            "<resources><string name=\"Title\">Title</string></resources>",
+        ),
+    ] {
+        let imported = import(content, format, &Default::default(), Some(path));
+        assert!(!imported.has_errors());
+        let expected = if format == TranslationFileFormat::AndroidResources {
+            "sr-Latn-RS"
+        } else {
+            "pl-PL"
+        };
+        assert_eq!(
+            imported.catalog.entries[0].culture.as_deref(),
+            Some(expected)
+        );
+    }
+    let mut catalog = TranslationCatalog::default();
+    catalog.add("A", Some("en"), "English");
+    catalog.add("B", Some("pl"), "Polish only");
+    let exported = export(
+        &catalog,
+        TranslationFileFormat::AppleStrings,
+        &Default::default(),
+    );
+    assert!(exported.diagnostics.iter().any(|d| d.code == "PTF200"));
+    let again = read(&exported.content, TranslationFileFormat::AppleStrings, "en");
+    assert_eq!(again.catalog.entries.len(), 1);
+    assert_eq!(again.catalog.entries[0].value, "English");
+}
+
+#[test]
+fn po_single_form_plurals_and_repeated_flags_survive_edits() {
+    let source = "msgid \"\"\nmsgstr \"\"\n\"Language: ja\\n\"\n\"Plural-Forms: nplurals=1; plural=0;\\n\"\n\n#, fuzzy\n#, c-format\nmsgid \"%d item\"\nmsgid_plural \"%d items\"\nmsgstr[0] \"%d 個\"\n";
+    let mut imported = read(source, TranslationFileFormat::GettextPo, "ja");
+    assert_eq!(imported.catalog.entries.len(), 1);
+    assert_eq!(
+        imported.catalog.entries[0].metadata["po.flags"],
+        "fuzzy, c-format"
+    );
+    let exported = export(
+        &imported.catalog,
+        TranslationFileFormat::GettextPo,
+        &options("ja"),
+    );
+    assert!(!exported.has_errors(), "{:?}", exported.diagnostics);
+    assert!(exported.content.contains("msgid_plural \"%d items\""));
+    assert!(exported.content.contains("#, fuzzy, c-format"));
+    let again = read(&exported.content, TranslationFileFormat::GettextPo, "ja");
+    assert_eq!(again.catalog.entries, imported.catalog.entries);
+    imported.catalog.entries[0].state = None;
+    let reviewed = export(
+        &imported.catalog,
+        TranslationFileFormat::GettextPo,
+        &options("ja"),
+    );
+    assert!(!reviewed.content.contains("fuzzy"));
+    assert!(reviewed.content.contains("#, c-format"));
+}
+
+#[test]
+fn po_rejects_incomplete_duplicate_and_mixed_directives_transactionally() {
+    for input in [
+        "msgid \"a\"\nmsgid_plural \"as\"\nmsgstr \"wrong shape\"",
+        "msgid \"a\"\nmsgid_plural \"as\"\nmsgid_plural \"other\"\nmsgstr[0] \"a\"",
+        "msgctxt \"one\"\nmsgctxt \"two\"\nmsgid \"a\"\nmsgstr \"a\"",
+        "msgctxt \"orphaned\"",
+        "msgid \"lost\"\nmsgid \"next\"\nmsgstr \"value\"",
+        "msgid \"a\"\nmsgid_plural \"as\"\nmsgstr[1] \"missing zero\"",
+        "msgid \"a\"\nmsgid_plural \"as\"\nmsgstr[0]\"missing space\"",
+    ] {
+        let result = import(
+            input,
+            TranslationFileFormat::GettextPo,
+            &Default::default(),
+            None,
+        );
+        assert!(result.has_errors(), "{input}");
+        assert!(result.catalog.entries.is_empty());
+    }
+}
+
+#[test]
+fn arb_document_metadata_and_comment_removal_round_trip() {
+    let source = r#"{"@@locale":"en","@@context":"Application","@@last_modified":"2026-10-26","Title":"Title","@Title":{"description":"Old note","placeholders":{"user":{"type":"String"}}},"@Untranslated":{"description":"Pending"}}"#;
+    let mut imported = read(source, TranslationFileFormat::FlutterArb, "en");
+    assert!(imported.catalog.metadata.contains_key("arb.globals"));
+    assert!(imported
+        .catalog
+        .metadata
+        .contains_key("arb.orphan_metadata"));
+    assert!(!imported
+        .diagnostics
+        .iter()
+        .any(|diagnostic| diagnostic.code == "PTF102"));
+    imported.catalog.entries[0].comment = None;
+    let exported = export(
+        &imported.catalog,
+        TranslationFileFormat::FlutterArb,
+        &options("en"),
+    );
+    assert!(!exported.has_errors(), "{:?}", exported.diagnostics);
+    let value: serde_json::Value = serde_json::from_str(&exported.content).unwrap();
+    assert_eq!(value["@@context"], "Application");
+    assert_eq!(value["@Untranslated"]["description"], "Pending");
+    assert!(value["@Title"].get("description").is_none());
+    assert_eq!(value["@Title"]["placeholders"]["user"]["type"], "String");
+    let again = read(&exported.content, TranslationFileFormat::FlutterArb, "en");
+    assert_eq!(again.catalog.metadata, imported.catalog.metadata);
+    let lossy = export(
+        &imported.catalog,
+        TranslationFileFormat::ProTranslateJson,
+        &options("en"),
+    );
+    assert!(lossy
+        .diagnostics
+        .iter()
+        .any(|diagnostic| diagnostic.code == "PTF204"));
+    imported
+        .catalog
+        .add("@Reserved", Some("en"), "Not a message key");
+    assert!(export(
+        &imported.catalog,
+        TranslationFileFormat::FlutterArb,
+        &options("en")
+    )
+    .has_errors());
+}
+
+#[test]
+fn csv_preserves_complete_document_metadata_with_or_without_entries() {
+    for format in [TranslationFileFormat::Csv, TranslationFileFormat::Tsv] {
+        for empty in [false, true] {
+            let mut catalog = sample();
+            if empty {
+                catalog.entries.clear();
+            }
+            catalog.metadata.insert(
+                "vendor.document".into(),
+                "retained\nmultiline, data\t".into(),
+            );
+            let exported = export(&catalog, format, &Default::default());
+            assert!(!exported.has_errors());
+            let imported = read(&exported.content, format, "pl-PL");
+            assert_eq!(imported.catalog.name, catalog.name);
+            assert_eq!(imported.catalog.source_culture, catalog.source_culture);
+            assert_eq!(imported.catalog.metadata, catalog.metadata);
+            assert_eq!(
+                imported.catalog.to_dictionary(Some("pl-PL")),
+                catalog.to_dictionary(Some("pl-PL"))
+            );
+            assert!(!imported
+                .diagnostics
+                .iter()
+                .any(|diagnostic| diagnostic.code == "PTF191" || diagnostic.code == "PTF193"));
+        }
+    }
+    let duplicated = "key,value,metadata\nA,B,\"{\"\"a\"\":\"\"one\"\",\"\"a\"\":\"\"two\"\"}\"\n";
+    assert!(import(
+        duplicated,
+        TranslationFileFormat::Csv,
+        &Default::default(),
+        None
+    )
+    .has_errors());
+}
+
+#[test]
+fn po_c_byte_escapes_preserve_utf8_and_literal_boundaries() {
+    let source = "msgid \"Greeting\"\nmsgstr \"\\303\"\n\"\\251 \\xC3\\xA9 \\x41\"\n\"B\"\n";
+    let imported = read(source, TranslationFileFormat::GettextPo, "en");
+    assert_eq!(imported.catalog.entries[0].value, "é é AB");
+    let exported = export(
+        &imported.catalog,
+        TranslationFileFormat::GettextPo,
+        &options("en"),
+    );
+    assert!(!exported.has_errors());
+    assert_eq!(
+        read(&exported.content, TranslationFileFormat::GettextPo, "en")
+            .catalog
+            .entries,
+        imported.catalog.entries
+    );
+    for source in [
+        r#"msgid "a"
+msgstr "\u0041""#,
+        r#"msgid "a"
+msgstr "\400""#,
+        r#"msgid "a"
+msgstr "\x""#,
+        r#"msgid "a"
+msgstr "\xFF""#,
+    ] {
+        assert!(import(
+            source,
+            TranslationFileFormat::GettextPo,
+            &Default::default(),
+            None
+        )
+        .has_errors());
+    }
+}
+
+#[test]
+fn po_header_previous_messages_new_flag_prefix_and_obsolete_records_survive() {
+    let source = "# Copyright example\nmsgid \"\"\nmsgstr \"\"\n\"Project-Id-Version: Example 1\\n\"\n\"Language: en\\n\"\n\"X-Team: Localization\\n\"\n\n#= fuzzy, rust-format\n#| msgid \"Previous\"\nmsgid \"Current\"\nmsgstr \"Value\"\n\n#~ msgid \"Removed\"\n#~ msgstr \"Old\"\n";
+    let imported = read(source, TranslationFileFormat::GettextPo, "en");
+    let exported = export(
+        &imported.catalog,
+        TranslationFileFormat::GettextPo,
+        &options("en"),
+    );
+    assert!(!exported.has_errors(), "{:?}", exported.diagnostics);
+    for retained in [
+        "# Copyright example",
+        "Project-Id-Version: Example 1",
+        "X-Team: Localization",
+        "#= fuzzy, rust-format",
+        "#| msgid \"Previous\"",
+        "#~ msgid \"Removed\"",
+    ] {
+        assert!(
+            exported.content.contains(retained),
+            "missing {retained}: {}",
+            exported.content
+        );
+    }
+    let again = read(&exported.content, TranslationFileFormat::GettextPo, "en");
+    assert_eq!(again.catalog.entries, imported.catalog.entries);
+    let empty = read(
+        "msgid \"\"\nmsgstr \"Project-Id-Version: Empty catalog\\n\"\n",
+        TranslationFileFormat::GettextPo,
+        "en",
+    );
+    assert!(empty.catalog.entries.is_empty());
+    assert!(export(
+        &empty.catalog,
+        TranslationFileFormat::GettextPo,
+        &options("en")
+    )
+    .content
+    .contains("Empty catalog"));
+}
+
+#[test]
+fn po_checks_shared_plural_metadata_and_native_message_identity() {
+    let mut catalog = TranslationCatalog::default();
+    catalog.add("Count.one", Some("en"), "One").plural_category = Some("one".into());
+    catalog
+        .add("Count.other", Some("en"), "Many")
+        .plural_category = Some("other".into());
+    let exported = export(&catalog, TranslationFileFormat::GettextPo, &options("en"));
+    assert!(!exported.has_errors());
+    assert_eq!(
+        read(&exported.content, TranslationFileFormat::GettextPo, "en")
+            .catalog
+            .to_dictionary(Some("en")),
+        catalog.to_dictionary(Some("en"))
+    );
+    catalog.entries[1].state = Some("fuzzy".into());
+    assert!(export(&catalog, TranslationFileFormat::GettextPo, &options("en")).has_errors());
+    let mut duplicate = TranslationCatalog::default();
+    duplicate.add("A", Some("en"), "A").source = Some("Same source".into());
+    duplicate.add("B", Some("en"), "B").source = Some("Same source".into());
+    assert!(export(&duplicate, TranslationFileFormat::GettextPo, &options("en")).has_errors());
+    let inconsistent = "msgid \"\"\nmsgstr \"Plural-Forms: nplurals=2; plural=n != 1;\\n\"\n\nmsgid \"a\"\nmsgid_plural \"as\"\nmsgstr[0] \"a\"\n";
+    assert!(import(
+        inconsistent,
+        TranslationFileFormat::GettextPo,
+        &Default::default(),
+        None
+    )
+    .has_errors());
+}
+
+#[test]
+fn metadata_loss_diagnostics_only_describe_selected_records() {
+    let mut catalog = TranslationCatalog::default();
+    catalog.add("A", Some("en"), "English");
+    catalog
+        .add("B", Some("pl"), "Polski")
+        .metadata
+        .insert("vendor".into(), "data".into());
+    let result = export(
+        &catalog,
+        TranslationFileFormat::ProTranslateJson,
+        &options("en"),
+    );
+    assert!(!result
+        .diagnostics
+        .iter()
+        .any(|diagnostic| diagnostic.code == "PTF202"));
+    let imported = read(
+        r#"{"":{"Title":"Retain the empty path segment"}}"#,
+        TranslationFileFormat::I18NextJson,
+        "en",
+    );
+    assert_eq!(imported.catalog.entries[0].key, ".Title");
+}
+
+#[test]
+fn xcstrings_nested_device_plural_and_substitution_trees_round_trip_after_edits() {
+    let source = r#"{"sourceLanguage":"en","version":"1.0","vendor":{"project":"Demo"},"strings":{"Summary":{"comment":"Shared note","extractionState":"manual","localizations":{"en":{"stringUnit":{"state":"translated","value":"%#@files@ on this device","vendor":"unit"},"substitutions":{"files":{"argNum":1,"formatSpecifier":"lld","variations":{"plural":{"one":{"stringUnit":{"state":"translated","value":"%arg file"}},"other":{"stringUnit":{"state":"translated","value":"%arg files"}}}}}},"variations":{"device":{"iphone":{"variations":{"plural":{"one":{"stringUnit":{"value":"One on iPhone"}},"other":{"stringUnit":{"value":"Many on iPhone"}}}}},"mac":{"stringUnit":{"value":"Desktop"}}}}}}},"Pending":{"comment":"Not translated yet","extractionState":"stale"}}}"#;
+    let mut imported = read(source, TranslationFileFormat::AppleXcstrings, "en");
+    assert_eq!(imported.catalog.entries.len(), 6);
+    let plain = imported
+        .catalog
+        .entries
+        .iter_mut()
+        .find(|entry| entry.key == "Summary")
+        .unwrap();
+    plain.value = "Updated %#@files@".into();
+    let nested = imported
+        .catalog
+        .entries
+        .iter_mut()
+        .find(|entry| entry.key == "Summary.substitutions.files.other")
+        .unwrap();
+    nested.value = "%arg updated files".into();
+    let exported = export(
+        &imported.catalog,
+        TranslationFileFormat::AppleXcstrings,
+        &options("en"),
+    );
+    assert!(!exported.has_errors(), "{:?}", exported.diagnostics);
+    assert!(!exported
+        .diagnostics
+        .iter()
+        .any(|diagnostic| diagnostic.code == "PTF202" || diagnostic.code == "PTF204"));
+    let actual: serde_json::Value = serde_json::from_str(&exported.content).unwrap();
+    let mut expected: serde_json::Value = serde_json::from_str(source).unwrap();
+    expected["strings"]["Summary"]["localizations"]["en"]["stringUnit"]["value"] =
+        serde_json::json!("Updated %#@files@");
+    expected["strings"]["Summary"]["localizations"]["en"]["substitutions"]["files"]["variations"]
+        ["plural"]["other"]["stringUnit"]["value"] = serde_json::json!("%arg updated files");
+    assert_eq!(actual, expected);
+    let again = read(
+        &exported.content,
+        TranslationFileFormat::AppleXcstrings,
+        "en",
+    );
+    assert_eq!(
+        again.catalog.to_dictionary(Some("en")),
+        imported.catalog.to_dictionary(Some("en"))
+    );
+    imported
+        .catalog
+        .entries
+        .retain(|entry| !entry.key.contains(".substitutions.files"));
+    let removed = export(
+        &imported.catalog,
+        TranslationFileFormat::AppleXcstrings,
+        &options("en"),
+    );
+    assert!(!removed.has_errors(), "{:?}", removed.diagnostics);
+    let removed: serde_json::Value = serde_json::from_str(&removed.content).unwrap();
+    assert!(removed["strings"]["Summary"]["localizations"]["en"]
+        .get("substitutions")
+        .is_none());
+}
+
+#[test]
+fn xcstrings_validates_shapes_shared_comments_and_culture_case_identity() {
+    for source in [
+        r#"{"strings":{"a":{"localizations":[]}}}"#,
+        r#"{"strings":{"a":{"localizations":{"en":{"stringUnit":{"value":42}}}}}}"#,
+        r#"{"strings":{"a":{"localizations":{"en":{"variations":{"plural":{"unknown":{"stringUnit":{"value":"x"}}}}}}}}}"#,
+    ] {
+        let result = import(
+            source,
+            TranslationFileFormat::AppleXcstrings,
+            &Default::default(),
+            None,
+        );
+        assert!(result.has_errors(), "{source}");
+        assert!(result.catalog.entries.is_empty());
+    }
+    let mut catalog = TranslationCatalog::default();
+    catalog.add("Title", Some("en"), "Old");
+    catalog.add("Title", Some("EN"), "Latest");
+    let exported = export(
+        &catalog,
+        TranslationFileFormat::AppleXcstrings,
+        &Default::default(),
+    );
+    assert!(!exported.has_errors());
+    let imported = read(
+        &exported.content,
+        TranslationFileFormat::AppleXcstrings,
+        "en",
+    );
+    assert_eq!(imported.catalog.entries.len(), 1);
+    assert_eq!(imported.catalog.entries[0].value, "Latest");
+    catalog.entries[1].comment = Some("First note".into());
+    catalog.add("Title", Some("pl"), "Tytuł").comment = Some("Other note".into());
+    assert!(export(
+        &catalog,
+        TranslationFileFormat::AppleXcstrings,
+        &Default::default()
+    )
+    .has_errors());
+}
+
+#[test]
+fn stringsdict_device_and_width_rules_and_shared_metadata_are_preserved() {
+    let source = r#"<plist version="1.0"><dict><key>Instructions</key><dict><key>NSStringDeviceSpecificRuleType</key><dict><key>iphone</key><string>Tap here</string><key>mac</key><string>Click here</string></dict></dict><key>Greeting</key><dict><key>NSStringVariableWidthRuleType</key><dict><key>1</key><string>Hi</string><key>22</key><string>Hello</string></dict></dict></dict></plist>"#;
+    let imported = read(source, TranslationFileFormat::AppleStringsdict, "en");
+    assert_eq!(imported.catalog.entries.len(), 4);
+    assert_eq!(
+        imported.catalog.to_dictionary(Some("en"))["Instructions.device.iphone"],
+        "Tap here"
+    );
+    assert_eq!(
+        imported.catalog.to_dictionary(Some("en"))["Greeting.width.22"],
+        "Hello"
+    );
+    let exported = export(
+        &imported.catalog,
+        TranslationFileFormat::AppleStringsdict,
+        &options("en"),
+    );
+    assert!(!exported.has_errors(), "{:?}", exported.diagnostics);
+    assert!(!exported
+        .diagnostics
+        .iter()
+        .any(|diagnostic| diagnostic.code == "PTF202"));
+    assert_eq!(
+        read(
+            &exported.content,
+            TranslationFileFormat::AppleStringsdict,
+            "en"
+        )
+        .catalog
+        .entries,
+        imported.catalog.entries
+    );
+    for field in ["apple.localized_format", "apple.value_type"] {
+        let mut conflicting = plurals();
+        conflicting.entries[0]
+            .metadata
+            .insert(field.into(), "d".into());
+        conflicting.entries[1]
+            .metadata
+            .insert(field.into(), "lld".into());
+        assert!(export(
+            &conflicting,
+            TranslationFileFormat::AppleStringsdict,
+            &options("en")
+        )
+        .has_errors());
+    }
+    let mut invalid = plurals();
+    invalid.entries[0].plural_category = Some("index0".into());
+    assert!(export(
+        &invalid,
+        TranslationFileFormat::AppleStringsdict,
+        &options("en")
+    )
+    .has_errors());
+}
+
+#[test]
+fn xliff2_reconstructs_segments_inline_codes_notes_attributes_and_unit_data() {
+    let source = r#"<xliff version="2.1" srcLang="en" trgLang="pl" xmlns:v="urn:vendor"><file id="f"><unit id="u42" name="Title" translate="no" v:hint="retain"><notes><note category="description" priority="1">Main note</note><note category="description">Additional note</note><note category="context">Menu</note></notes><originalData><data id="d1">&lt;br&gt;</data></originalData><segment id="9" state="translated" canResegment="no"><source>A <ph id="1" dataRef="d1"/></source><target>Pierwszy <ph id="1" dataRef="d1"/></target></segment><ignorable id="gap"><source> </source><target> </target></ignorable><segment id="1" state="initial"><source>B</source><target>Drugi</target></segment></unit></file></xliff>"#;
+    let mut imported = read(source, TranslationFileFormat::Xliff20, "pl");
+    assert_eq!(imported.catalog.entries[0].key, "Title#9");
+    imported.catalog.entries[1].value = "Updated".into();
+    imported.catalog.entries[1].state = Some("final".into());
+    for entry in &mut imported.catalog.entries {
+        entry.comment = Some("Updated note".into());
+    }
+    let exported = export(
+        &imported.catalog,
+        TranslationFileFormat::Xliff20,
+        &options("pl"),
+    );
+    assert!(!exported.has_errors(), "{:?}", exported.diagnostics);
+    assert!(!exported
+        .diagnostics
+        .iter()
+        .any(|diagnostic| diagnostic.code == "PTF202"));
+    let document = roxmltree::Document::parse(&exported.content).unwrap();
+    let namespace = "urn:oasis:names:tc:xliff:document:2.0";
+    let unit = document
+        .descendants()
+        .find(|node| node.has_tag_name((namespace, "unit")))
+        .unwrap();
+    assert_eq!(unit.attribute("id"), Some("u42"));
+    assert_eq!(unit.attribute("translate"), Some("no"));
+    assert_eq!(unit.attribute(("urn:vendor", "hint")), Some("retain"));
+    assert_eq!(
+        unit.children()
+            .filter(|node| node.is_element())
+            .map(|node| node.tag_name().name())
+            .collect::<Vec<_>>(),
+        ["notes", "originalData", "segment", "ignorable", "segment"]
+    );
+    let segments: Vec<_> = unit
+        .children()
+        .filter(|node| node.has_tag_name((namespace, "segment")))
+        .collect();
+    assert_eq!(segments[0].attribute("id"), Some("9"));
+    assert_eq!(segments[0].attribute("canResegment"), Some("no"));
+    assert_eq!(segments[1].attribute("id"), Some("1"));
+    assert_eq!(segments[1].attribute("state"), Some("final"));
+    assert_eq!(
+        unit.descendants()
+            .filter(|node| node.has_tag_name((namespace, "ph")))
+            .count(),
+        2
+    );
+    let notes: Vec<_> = unit
+        .descendants()
+        .filter(|node| node.has_tag_name((namespace, "note")))
+        .collect();
+    assert_eq!(notes.len(), 3);
+    assert_eq!(notes[0].text(), Some("Updated note"));
+    assert_eq!(notes[0].attribute("priority"), Some("1"));
+    assert_eq!(notes[1].text(), Some("Additional note"));
+    let again = read(&exported.content, TranslationFileFormat::Xliff20, "pl");
+    assert_eq!(
+        again.catalog.to_dictionary(Some("pl")),
+        imported.catalog.to_dictionary(Some("pl"))
+    );
+    imported.catalog.entries[0].value = "Replacing inline structure requires review".into();
+    let changed = export(
+        &imported.catalog,
+        TranslationFileFormat::Xliff20,
+        &options("pl"),
+    );
+    assert!(changed.has_errors());
+    assert!(changed.content.is_empty());
+    imported.catalog.entries[0]
+        .metadata
+        .remove("xliff.target_xml");
+    assert!(!export(
+        &imported.catalog,
+        TranslationFileFormat::Xliff20,
+        &options("pl")
+    )
+    .has_errors());
+}
+
+#[test]
+fn xliff_preserves_missing_targets_and_enforces_native_state_and_element_order() {
+    let source = r#"<xliff version="1.2"><file source-language="en" target-language="pl"><body><trans-unit id="A" approved="yes"><source>Source</source><note>Pending translation</note></trans-unit></body></file></xliff>"#;
+    let mut imported = read(source, TranslationFileFormat::Xliff12, "pl");
+    let exported = export(
+        &imported.catalog,
+        TranslationFileFormat::Xliff12,
+        &options("pl"),
+    );
+    assert!(!exported.has_errors(), "{:?}", exported.diagnostics);
+    let document = roxmltree::Document::parse(&exported.content).unwrap();
+    let unit = document
+        .descendants()
+        .find(|node| node.tag_name().name() == "trans-unit")
+        .unwrap();
+    assert_eq!(unit.attribute("approved"), Some("yes"));
+    assert_eq!(
+        unit.children()
+            .filter(|node| node.is_element())
+            .map(|node| node.tag_name().name())
+            .collect::<Vec<_>>(),
+        ["source", "note"]
+    );
+    imported.catalog.entries[0].value = "Translated".into();
+    let translated = export(
+        &imported.catalog,
+        TranslationFileFormat::Xliff12,
+        &options("pl"),
+    );
+    let document = roxmltree::Document::parse(&translated.content).unwrap();
+    let unit = document
+        .descendants()
+        .find(|node| node.tag_name().name() == "trans-unit")
+        .unwrap();
+    assert_eq!(
+        unit.children()
+            .filter(|node| node.is_element())
+            .map(|node| node.tag_name().name())
+            .collect::<Vec<_>>(),
+        ["source", "target", "note"]
+    );
+    let cross_version = export(
+        &imported.catalog,
+        TranslationFileFormat::Xliff20,
+        &options("pl"),
+    );
+    assert!(cross_version
+        .diagnostics
+        .iter()
+        .any(|diagnostic| diagnostic.code == "PTF202"));
+    imported.catalog.entries[0].state = Some("fuzzy".into());
+    assert!(export(
+        &imported.catalog,
+        TranslationFileFormat::Xliff20,
+        &options("pl")
+    )
+    .has_errors());
+    let duplicate_segments = r#"<xliff version="2.1"><file id="f"><unit id="a"><segment id="a"><source>A</source></segment><segment id="a"><source>B</source></segment></unit></file></xliff>"#;
+    assert!(import(
+        duplicate_segments,
+        TranslationFileFormat::Xliff20,
+        &Default::default(),
+        None
+    )
+    .has_errors());
+}
+
+#[test]
+fn format_and_diagnostic_dtos_have_stable_serialized_names() {
+    assert_eq!(
+        serde_json::to_string(&TranslationFileFormat::I18NextJson).unwrap(),
+        "\"i18NextJson\""
+    );
+    assert_eq!(
+        serde_json::to_string(&TranslationFileFormat::Xliff20).unwrap(),
+        "\"xliff20\""
+    );
+    let diagnostic =
+        TranslationFormatDiagnostic::new(Severity::Warning, "PTF202", "Review this conversion.");
+    let serialized = serde_json::to_value(&diagnostic).unwrap();
+    assert_eq!(serialized["severity"], "warning");
+    assert_eq!(
+        serde_json::from_value::<TranslationFormatDiagnostic>(serialized).unwrap(),
+        diagnostic
+    );
+    assert_eq!(
+        serde_json::from_str::<TranslationFormatOptions>("{}").unwrap(),
+        TranslationFormatOptions::default()
+    );
+}
