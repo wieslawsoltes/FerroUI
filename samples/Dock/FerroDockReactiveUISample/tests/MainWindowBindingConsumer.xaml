@@ -1,0 +1,8 @@
+<StackPanel xmlns="https://github.com/ferroui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:vm="using:FerroDockReactiveUISample.ViewModels"
+ x:DataType="vm:MainWindowViewModel" x:CompileBindings="True">
+ <TextBlock Name="StatusText" Text="{Binding GlobalStatus}" />
+ <Button Name="ResetButton" Command="{Binding NewLayout}" />
+ <ContentControl Name="LayoutHost" Tag="{Binding Layout}" />
+</StackPanel>

@@ -1,0 +1,93 @@
+name: Android
+
+# The Android backend, built and packaged for arm64.
+# Split from ci.yml so that a pull request that does not touch this area shows no check for it
+# (a skipped job is still a check). It runs every night on main and by hand:
+# gh workflow run android.yml --ref <branch>
+
+on:
+  pull_request:
+    paths:
+      - 'src/Android/**'
+      - 'samples/*.Android/**'
+      - 'scripts/android/**'
+      - '.github/workflows/android.yml'
+  schedule:
+    - cron: '29 3 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  RUST_BACKTRACE: 1
+
+jobs:
+  # The Android platform (docs/porting/android-platform.md, section 12): the tests of what is logic,
+  # and the package of the smoke application built without Gradle. Nothing runs on a device here:
+  # the emulator runs are made on the development machine (scripts/android/emu-smoke.sh).
+  android:
+    name: Build and package (Android, arm64)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      CARGO_PROFILE_DEV_DEBUG: 0
+      CARGO_PROFILE_TEST_DEBUG: 0
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: android
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
+      - name: Tests of the Android crate (the logic, on the host)
+        run: cargo test --locked -p ferroui-android --no-fail-fast
+      # The thread-local variables of the framework are slots of one table per thread on Android
+      # (android-platform.md, section 5.1); --cfg ferro_tls_table makes the host build use the table,
+      # so the tests of the base crate run against it.
+      - name: Tests of the base crate against the table of thread-local variables
+        run: RUSTFLAGS="--cfg ferro_tls_table" cargo test --locked -p ferroui-base --lib --no-fail-fast
+      # The image has an Android SDK; what it has of it is printed, and the versions the scripts pin
+      # (scripts/android/env.sh) are installed when they are missing.
+      - name: The Android SDK of the image, and the pinned packages
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          ls "$ANDROID_HOME" "$ANDROID_HOME/ndk" "$ANDROID_HOME/build-tools" "$ANDROID_HOME/platforms" || true
+          java -version
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$ANDROID_HOME" \
+            "ndk;28.2.13676358" "build-tools;36.0.0" "platforms;android-36" > /dev/null
+          ls "$ANDROID_HOME/ndk"
+      # The native library is built with the stable toolchain: the framework keeps its thread-local
+      # variables in one table per thread (ferro_thread_local!), so the standard library as it is
+      # distributed for the target is enough (android-platform.md, section 5.1).
+      - name: The Rust target
+        run: rustup target add aarch64-linux-android
+      - name: Skia features of the target
+        run: |
+          # Ganesh on OpenGL, for which a Skia binary is published for the target. The scripts do not
+          # set ANDROID_NDK, so a fall-back to building Skia from source stops at once.
+          features="$(cargo tree --locked -p ferroui-skia -e features,normal --target aarch64-linux-android | grep -oE 'skia-bindings feature "(gl|ganesh|graphite|metal|vulkan|d3d)"' | sort -u | tr '\n' ' ')"
+          echo "GPU features: '$features'"
+          test "$features" = 'skia-bindings feature "ganesh" skia-bindings feature "gl" '
+      - name: The package of the smoke application
+        run: |
+          scripts/android/apk.sh smoke | tee apk.out
+          apk="$(sed -n 's/^APK: //p' apk.out)"
+          . scripts/android/env.sh
+          "$FERROUI_ANDROID_BUILD_TOOLS/aapt2" dump badging "$apk" | head -n 12
+          unzip -l "$apk"
+      - name: The ControlCatalog host compiles for the target
+        run: |
+          . scripts/android/env.sh
+          cargo check --locked -p control-catalog-android --target aarch64-linux-android
+      - name: Material system colors compile against the Android platform
+        run: |
+          . scripts/android/env.sh
+          cargo check --locked -p ferroui-themes-material --features android-dynamic-color --target aarch64-linux-android

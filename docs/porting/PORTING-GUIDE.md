@@ -10,6 +10,24 @@ How C# from the upstream project (Avalonia, MIT) maps to Rust in this repository
 4. **Idiomatic, safe, fast.** No `unsafe` outside the class model (`type_system.rs`, the root vtable in `ferro_object.rs`), one audited hot-path downcast in `property_store/effective_value.rs`, and FFI crates. No panics on user input (parsing returns `Result`); panics are for programmer errors where C# throws `InvalidOperationException`/`ArgumentException`. No allocations on hot paths that upstream avoids. No blocking waits, no threads assumed, no `std::time::Instant` or `std::fs` in core paths (the browser target has neither).
 5. **Things not ported yet** are left out, not stubbed with `todo!()`. Record every skipped member in the report/tracking data.
 
+## Scope: product behavior, not runtime emulation
+
+Ports must preserve the original product's functionality, algorithms, resources, data formats, and observable behavior using idiomatic Rust and FerroUI APIs.
+
+General .NET runtime emulation is outside the scope of a port. Do not recreate CLR/BCL infrastructure merely to reproduce the source implementation's internal structure.
+
+- **Use Rust equivalents.** Prefer `Option`, `Result`, traits, generics, iterators, standard collections, `Duration`, futures, and Rust closures. Do not introduce parallel implementations of `Nullable<T>`, `IEnumerable`, LINQ, `Task`, reflection, or delegate infrastructure.
+- **Preserve meaningful behavior.** Retain layout algorithms, editing semantics, gesture precedence, event ordering, cancellation, serialization, and extension capabilities. Express those contracts through appropriate Rust APIs.
+- **Adopt Rust ownership and lifetimes.** Use ownership, borrowing, `Rc`/`Arc`, weak references, RAII, and explicit subscription or cancellation handles. Resolve ownership cycles directly rather than simulating garbage collection.
+- **Use native platform and framework services.** Integrate FerroUI's actual focus, input, clipboard, scheduling, font, rendering, and lifecycle APIs. An absent Uno/WinUI service interface does not automatically establish a FerroUI capability gap.
+- **Keep metadata focused.** Register the constructors, properties, events, commands, and types needed by reusable controls and real XAML consumers. Do not expand metadata into a general CLR type system.
+- **Translate APIs deliberately.** Document source-to-Rust mappings and intentional API changes. Exact overload sets, generated record methods, exception classes, reflection attributes, runtime hashes, and string interning are unnecessary unless a demonstrated product requirement depends on them.
+- **Handle text explicitly.** Preserve required text units and editing behavior through tested encoding boundaries. UTF-16 selection offsets may require a bridge; they do not justify recreating `System.String`.
+- **Validate product behavior.** Use the unchanged implementation to produce reference fixtures for algorithms and interactions. Keep .NET reference harnesses in development tooling, outside the shipped runtime.
+- **Prioritize usable features.** Deliver working native library integration and representative applications early. Track functional gaps, supported platforms, performance, accessibility, and native verification separately from optional compatibility work.
+
+Any compatibility shim must have a concrete consumer, a documented necessity, and a narrowly isolated implementation. General runtime emulation requires an explicit, separate project decision.
+
 ## Layout
 
 | Upstream | FerroUI |

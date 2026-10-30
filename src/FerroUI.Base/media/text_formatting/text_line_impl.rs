@@ -4,10 +4,10 @@ use std::rc::Rc;
 
 use crate::media::text_formatting::bidi_reorderer::BidiReorderer;
 use crate::media::text_formatting::indexed_text_run::IndexedTextRun;
-use crate::media::text_formatting::unicode::Codepoint;
+use crate::media::text_formatting::unicode::{Codepoint, CodepointEnumerator};
 use crate::media::text_formatting::{
-    DrawableTextRun, ITextDrawingSink, JustificationProperties, LogicalDirection, ShapedTextRun, TextBounds,
-    TextCollapsingProperties, TextLine, TextLineBreak, TextLineMetrics, TextParagraphProperties, TextRun,
+    DrawableTextRun, FontFamilyLineMetrics, ITextDrawingSink, JustificationProperties, LogicalDirection, ShapedTextRun, TextBounds,
+    TextCollapsingProperties, TextLine, TextLineBreak, TextLineMetrics, TextLineMetricsMode, TextParagraphProperties, TextRun,
     TextRunBounds,
 };
 use crate::media::{BaselineAlignment, CharacterHit, FlowDirection, TextAlignment, TextLineBounds};
@@ -248,6 +248,15 @@ impl TextLineImpl {
             let Some(next_run) = next_run.as_ref() else {
                 break;
             };
+
+            // Deviation (DEVIATIONS.md, Text formatting).
+            // A structural line/paragraph marker has no bidi glyph position.
+            // Keeping it inside an RTL span makes reverse traversal consume
+            // the marker before the requested source character and can turn
+            // every caret or short range into the same zero-width rectangle.
+            if next_run.as_text_end_of_line().is_some() {
+                break;
+            }
 
             let next_direction = Self::get_run_direction(Some(&**next_run), flow_direction);
 
@@ -610,7 +619,11 @@ impl TextLineImpl {
         // Current position is a text source index and first cluster is relative to the GlyphRun's buffer.
         let text_source_offset = current_position - first_cluster;
 
-        debug_assert!(text_source_offset >= 0);
+        // Deviation (DEVIATIONS.md, Text formatting).
+        // A leading or middle ellipsis retains a suffix of the original glyph
+        // buffer. Its first cluster can be greater than its compacted position
+        // in the collapsed line, so this translation is legitimately negative.
+        debug_assert!(text_source_offset >= 0 || self.has_collapsed);
 
         let mut cluster_offset = 0;
 
@@ -774,7 +787,7 @@ impl TextLineImpl {
         let default_text_run_properties = self.paragraph_properties.default_text_run_properties();
 
         let font_metrics = default_text_run_properties.cached_glyph_typeface().metrics();
-        let font_rendering_em_size = default_text_run_properties.font_rendering_em_size();
+        let font_rendering_em_size = default_text_run_properties.effective_font_rendering_em_size();
         let scale = font_rendering_em_size / font_metrics.design_em_height as f64;
         let mut width_including_whitespace = 0f64;
         let mut trailing_whitespace_length = 0;
@@ -787,6 +800,7 @@ impl TextLineImpl {
         let line_height = self.paragraph_properties.line_height();
         let line_spacing = self.paragraph_properties.line_spacing();
         let text_line_bounds = self.paragraph_properties.text_line_bounds();
+        let use_font_family = self.paragraph_properties.line_metrics_mode() == TextLineMetricsMode::FontFamily;
 
         for run in text_runs.iter() {
             if let Some(text_run) = run.downcast_ref::<ShapedTextRun>() {
@@ -852,9 +866,16 @@ impl TextLineImpl {
         // docs/porting/DEVIATIONS.md, Text block): above the baseline the ascent and half the
         // line gap, or the cap height when the top is trimmed; below it the descent and half the
         // line gap, or nothing when the bottom is trimmed. `Full` is the reference's box.
-        let (above, gap_above) =
-            if text_line_bounds.trims_top() { (cap_height.max(0.0), 0.0) } else { (-ascent, half_line_gap) };
-        let (below, gap_below) = if text_line_bounds.trims_bottom() { (0.0, 0.0) } else { (descent, half_line_gap) };
+        let (above, gap_above, below, gap_below) = if use_font_family {
+            let metrics = self.font_family_line_metrics(&text_runs);
+            (metrics.baseline, 0.0, metrics.height - metrics.baseline, 0.0)
+        } else {
+            let (above, gap_above) =
+                if text_line_bounds.trims_top() { (cap_height.max(0.0), 0.0) } else { (-ascent, half_line_gap) };
+            let (below, gap_below) =
+                if text_line_bounds.trims_bottom() { (0.0, 0.0) } else { (descent, half_line_gap) };
+            (above, gap_above, below, gap_below)
+        };
 
         let natural_height = above + below + gap_above + gap_below;
         let mut baseline = above + gap_above;
@@ -877,6 +898,10 @@ impl TextLineImpl {
         }
 
         height += line_spacing;
+        // For baseline-aligned runs, family mode reports ink at the actual
+        // draw baseline, including a caller's explicit line height. Other
+        // alignment modes and the default policy retain their existing rules.
+        let ink_offset = if use_font_family { baseline + ascent } else { ink_offset };
 
         let mut width = width_including_whitespace;
 
@@ -917,7 +942,9 @@ impl TextLineImpl {
         let overhang_after = ink_bounds.bottom() - height + ink_offset;
         // The reference keeps the ink bounds of a line aligned at a baseline `-ascent` below its
         // top; a trimmed box moves them with its baseline.
-        let ink_bounds = if text_line_bounds == TextLineBounds::Full {
+        let ink_bounds = if use_font_family {
+            ink_bounds.translate(Vector::new(0.0, ink_offset))
+        } else if text_line_bounds == TextLineBounds::Full {
             ink_bounds
         } else {
             ink_bounds.translate(Vector::new(0.0, ink_offset - half_line_gap))
@@ -947,6 +974,51 @@ impl TextLineImpl {
             overhang_leading,
             overhang_trailing,
             overhang_after,
+        }
+    }
+
+    fn font_family_line_metrics(&self, text_runs: &[Rc<dyn TextRun>]) -> FontFamilyLineMetrics {
+        let bounds = self.paragraph_properties.text_line_bounds();
+        let mut baseline = 0.0_f64;
+        let mut descent = 0.0_f64;
+        let mut height = 0.0_f64;
+        let mut has_metrics = false;
+
+        for run in text_runs {
+            let metrics = if let Some(text_run) = run.downcast_ref::<ShapedTextRun>() {
+                // Line break markers do not contribute run metrics. A line
+                // containing only markers uses the paragraph's default family.
+                if CodepointEnumerator::new(text_run.text().span()).all(|codepoint| codepoint.is_break_char()) {
+                    continue;
+                }
+                let properties = text_run.run_properties();
+                FontFamilyLineMetrics::new(
+                    properties.requested_font_family(),
+                    properties.effective_font_rendering_em_size(),
+                    bounds,
+                )
+            } else if let Some(object) = run.as_drawable() {
+                // Bound text before adding objects: trimming capitals or
+                // descenders never removes an embedded object's dimensions.
+                FontFamilyLineMetrics { baseline: object.baseline(), height: object.size().height }
+            } else {
+                continue;
+            };
+            has_metrics = true;
+            baseline = baseline.max(metrics.baseline);
+            descent = descent.max(metrics.height - metrics.baseline);
+            height = height.max(metrics.height);
+        }
+
+        if has_metrics {
+            FontFamilyLineMetrics { baseline, height: height.max(baseline + descent) }
+        } else {
+            let properties = self.paragraph_properties.default_text_run_properties();
+            FontFamilyLineMetrics::new(
+                properties.requested_font_family(),
+                properties.effective_font_rendering_em_size(),
+                bounds,
+            )
         }
     }
 
@@ -1094,6 +1166,33 @@ impl TextLine for TextLineImpl {
                 drawable_text_run.draw(drawing_context, Point::new(current_x, current_y + offset_y));
 
                 current_x += drawable_text_run.size().width;
+            }
+        }
+        drop(text_runs);
+        if let Some(stops) = self.paragraph_properties.tab_stops() {
+            let properties = self.paragraph_properties.default_text_run_properties();
+            if let Some(brush) = properties.foreground_brush() {
+                let pen: Rc<dyn crate::media::IPen> = crate::media::Pen::with_brush(
+                    Some(brush.clone()),
+                    (properties.effective_font_rendering_em_size() / 16.0).max(0.5),
+                ).into();
+                for stop in stops.iter().filter(|stop| stop.alignment == super::TabAlignment::Bar) {
+                    let distance = stop.position - self.paragraph_properties.tab_origin();
+                    if !distance.is_finite() || distance < 0.0 || distance > self.paragraph_width {
+                        continue;
+                    }
+                    let x = line_origin.x
+                        + if self.paragraph_properties.flow_direction() == FlowDirection::RightToLeft {
+                            self.paragraph_width - distance
+                        } else {
+                            distance
+                        };
+                    drawing_context.draw_line(
+                        &pen,
+                        Point::new(x, line_origin.y),
+                        Point::new(x, line_origin.y + self.height()),
+                    );
+                }
             }
         }
     }
@@ -1271,7 +1370,8 @@ impl TextLine for TextLineImpl {
 
         let line_end = self.first_text_source_index + self.length;
 
-        let character_index = (character_hit.first_character_index() + character_hit.trailing_length()).min(line_end);
+        let mut character_index =
+            (character_hit.first_character_index() + character_hit.trailing_length()).min(line_end);
 
         let mut current_position = self.first_text_source_index;
 
@@ -1301,9 +1401,23 @@ impl TextLine for TextLineImpl {
             break;
         }
 
-        let Some(current_text_run) = current_text_run else {
+        let Some(mut current_text_run) = current_text_run else {
             return self.start();
         };
+
+        if current_text_run.as_text_end_of_line().is_some() && indexed_run_index > 0 {
+            // Deviation (DEVIATIONS.md, Text formatting).
+            // The terminator shares the trailing caret of the preceding logical
+            // run. Its visual array position is not a caret position in bidi
+            // text: the logical end can be at either side of the line.
+            let preceding = &indexed_text_runs[indexed_run_index - 1];
+            if let Some(run) = preceding.text_run.borrow().clone() {
+                indexed_run_index -= 1;
+                current_text_run = run;
+                current_position = preceding.text_source_character_index;
+                character_index = character_index.min(current_position + current_text_run.length());
+            }
+        }
 
         let current_indexed_run = &indexed_text_runs[indexed_run_index];
 
@@ -1474,7 +1588,11 @@ impl TextLine for TextLineImpl {
                 continue;
             }
 
-            let current_x = self.start() + self.get_preceding_distance(current_indexed_run.run_index.get());
+            let current_x = if current_text_run.as_text_end_of_line().is_some() {
+                self.get_distance_from_character_hit(CharacterHit::new(current_position))
+            } else {
+                self.start() + self.get_preceding_distance(current_indexed_run.run_index.get())
+            };
             let mut directional_width = 0.0;
 
             if let Some(current_drawable) = current_text_run.as_drawable() {

@@ -1,0 +1,558 @@
+<!-- Material 3 Expressive icon buttons and floating action buttons.
+     Effective source: IconButton.kt, IconButtonDefaults.kt, FloatingActionButton.kt,
+     FloatingActionButtonMenu.kt and their token files, AndroidX revision
+     e4d933c98df7baa7ea2b83eea6e086915961e0ff (Apache-2.0; see NOTICE.md).
+     The large FAB uses the implementation's corrected 36dp icon, not the stale 32 dp token.
+     Classes: extraSmall/small/medium/large/extraLarge, narrow/wide, square for icons;
+     small/medium/large, lowered, surface/secondary/tertiary for FABs. -->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:material="using:FerroUI.Themes.Material"
+                    x:ClassModifier="internal">
+  <ControlTheme x:Key="MaterialIconButton" TargetType="Button">
+    <Setter Property="MinWidth" Value="48" />
+    <Setter Property="MinHeight" Value="48" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="CornerRadius" Value="20" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="BorderBrush" Value="{DynamicResource MaterialOutlineVariantBrush}" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontSize" Value="24" />
+    <Setter Property="FocusAdorner" Value="{x:Null}" />
+    <Setter Property="ClipToBounds" Value="False" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="MaterialIconTouchTarget" Background="Transparent" MinWidth="48" MinHeight="48">
+          <Border x:Name="MaterialIconContainer"
+                  Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}">
+            <Border.Transitions>
+              <Transitions>
+                <material:MaterialCornerRadiusTransition Property="CornerRadius" Duration="{DynamicResource MaterialMotionDefaultEffectsDuration}" Easing="{DynamicResource MaterialMotionDefaultEffectsEasing}" />
+                <material:MaterialDoubleTransition Property="Width" Duration="{DynamicResource MaterialMotionFastSpatialDuration}" Easing="{DynamicResource MaterialMotionFastSpatialEasing}" />
+                <material:MaterialDoubleTransition Property="Height" Duration="{DynamicResource MaterialMotionFastSpatialDuration}" Easing="{DynamicResource MaterialMotionFastSpatialEasing}" />
+                <BrushTransition Property="Background" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" />
+                <BoxShadowsTransition Property="BoxShadow" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" />
+              </Transitions>
+            </Border.Transitions>
+            <Panel>
+              <Border x:Name="MaterialIconStateLayer" Background="{TemplateBinding Foreground}"
+                      CornerRadius="{Binding #MaterialIconContainer.CornerRadius}" Opacity="0" IsHitTestVisible="False">
+                <Border.Transitions><Transitions><material:MaterialDoubleTransition Property="Opacity" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" /></Transitions></Border.Transitions>
+              </Border>
+              <material:MaterialRipple x:Name="MaterialIconRipple" Fill="{TemplateBinding Foreground}"
+                       CornerRadius="{Binding #MaterialIconContainer.CornerRadius}"
+                       ReducedMotion="{DynamicResource MaterialReducedMotion}" />
+              <!-- Separate outline opacity keeps disabled color independent of the fill and icon. -->
+              <Border x:Name="MaterialIconOutline" BorderBrush="{TemplateBinding BorderBrush}"
+                      BorderThickness="{TemplateBinding BorderThickness}"
+                      CornerRadius="{Binding #MaterialIconContainer.CornerRadius}" IsHitTestVisible="False" />
+              <ContentPresenter x:Name="PART_ContentPresenter"
+                       Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"
+                       Foreground="{TemplateBinding Foreground}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                       HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+                <ContentPresenter.Transitions>
+                  <Transitions>
+                    <material:MaterialDoubleTransition Property="Width" Duration="{DynamicResource MaterialMotionFastSpatialDuration}" Easing="{DynamicResource MaterialMotionFastSpatialEasing}" />
+                    <material:MaterialDoubleTransition Property="Height" Duration="{DynamicResource MaterialMotionFastSpatialDuration}" Easing="{DynamicResource MaterialMotionFastSpatialEasing}" />
+                  </Transitions>
+                </ContentPresenter.Transitions>
+              </ContentPresenter>
+              <Border x:Name="MaterialIconFocusRing" BorderBrush="{DynamicResource MaterialSecondaryBrush}"
+                      BorderThickness="3" CornerRadius="{Binding #MaterialIconContainer.CornerRadius}"
+                      Margin="-3" IsVisible="False" IsHitTestVisible="False" />
+            </Panel>
+          </Border>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^ /template/ Border#MaterialIconContainer">
+      <Setter Property="Width" Value="40" /><Setter Property="Height" Value="40" />
+      <Setter Property="HorizontalAlignment" Value="Center" /><Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Width" Value="24" /><Setter Property="Height" Value="24" />
+    </Style>
+    <Style Selector="^:pointerover /template/ Border#MaterialIconStateLayer">
+      <Setter Property="Opacity" Value="0.08" />
+    </Style>
+    <Style Selector="^:focus-visible /template/ Border#MaterialIconStateLayer">
+      <Setter Property="Opacity" Value="0.10" />
+    </Style>
+    <Style Selector="^:focus-visible /template/ Border#MaterialIconFocusRing">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^.narrow /template/ Border#MaterialIconContainer">
+      <Setter Property="Width" Value="32" />
+    </Style>
+    <Style Selector="^.wide /template/ Border#MaterialIconContainer">
+      <Setter Property="Width" Value="52" />
+    </Style>
+    <Style Selector="^.square">
+      <Setter Property="CornerRadius" Value="12" />
+    </Style>
+    <Style Selector="^.extraSmall">
+      <Setter Property="CornerRadius" Value="16" />
+      <Setter Property="FontSize" Value="20" />
+    </Style>
+    <Style Selector="^.extraSmall /template/ Border#MaterialIconContainer">
+      <Setter Property="Width" Value="32" />
+      <Setter Property="Height" Value="32" />
+    </Style>
+    <Style Selector="^.extraSmall /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Width" Value="20" />
+      <Setter Property="Height" Value="20" />
+    </Style>
+    <Style Selector="^.extraSmall.narrow /template/ Border#MaterialIconContainer">
+      <Setter Property="Width" Value="28" />
+    </Style>
+    <Style Selector="^.extraSmall.wide /template/ Border#MaterialIconContainer">
+      <Setter Property="Width" Value="40" />
+    </Style>
+    <Style Selector="^.extraSmall.square">
+      <Setter Property="CornerRadius" Value="12" />
+    </Style>
+    <Style Selector="^.small.narrow /template/ Border#MaterialIconContainer">
+      <Setter Property="Width" Value="32" />
+    </Style>
+    <Style Selector="^.small.wide /template/ Border#MaterialIconContainer">
+      <Setter Property="Width" Value="52" />
+    </Style>
+    <Style Selector="^.small.square">
+      <Setter Property="CornerRadius" Value="12" />
+    </Style>
+    <Style Selector="^.medium">
+      <Setter Property="CornerRadius" Value="28" />
+      <Setter Property="FontSize" Value="24" />
+    </Style>
+    <Style Selector="^.medium /template/ Border#MaterialIconContainer">
+      <Setter Property="Width" Value="56" />
+      <Setter Property="Height" Value="56" />
+    </Style>
+    <Style Selector="^.medium /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Width" Value="24" />
+      <Setter Property="Height" Value="24" />
+    </Style>
+    <Style Selector="^.medium.narrow /template/ Border#MaterialIconContainer">
+      <Setter Property="Width" Value="48" />
+    </Style>
+    <Style Selector="^.medium.wide /template/ Border#MaterialIconContainer">
+      <Setter Property="Width" Value="72" />
+    </Style>
+    <Style Selector="^.medium.square">
+      <Setter Property="CornerRadius" Value="16" />
+    </Style>
+    <Style Selector="^.large">
+      <Setter Property="CornerRadius" Value="48" />
+      <Setter Property="FontSize" Value="32" />
+    </Style>
+    <Style Selector="^.large /template/ Border#MaterialIconContainer">
+      <Setter Property="Width" Value="96" />
+      <Setter Property="Height" Value="96" />
+    </Style>
+    <Style Selector="^.large /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Width" Value="32" />
+      <Setter Property="Height" Value="32" />
+    </Style>
+    <Style Selector="^.large.narrow /template/ Border#MaterialIconContainer">
+      <Setter Property="Width" Value="64" />
+    </Style>
+    <Style Selector="^.large.wide /template/ Border#MaterialIconContainer">
+      <Setter Property="Width" Value="128" />
+    </Style>
+    <Style Selector="^.large.square">
+      <Setter Property="CornerRadius" Value="28" />
+    </Style>
+    <Style Selector="^.extraLarge">
+      <Setter Property="CornerRadius" Value="68" />
+      <Setter Property="FontSize" Value="40" />
+    </Style>
+    <Style Selector="^.extraLarge /template/ Border#MaterialIconContainer">
+      <Setter Property="Width" Value="136" />
+      <Setter Property="Height" Value="136" />
+    </Style>
+    <Style Selector="^.extraLarge /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Width" Value="40" />
+      <Setter Property="Height" Value="40" />
+    </Style>
+    <Style Selector="^.extraLarge.narrow /template/ Border#MaterialIconContainer">
+      <Setter Property="Width" Value="104" />
+    </Style>
+    <Style Selector="^.extraLarge.wide /template/ Border#MaterialIconContainer">
+      <Setter Property="Width" Value="184" />
+    </Style>
+    <Style Selector="^.extraLarge.square">
+      <Setter Property="CornerRadius" Value="28" />
+    </Style>
+    <Style Selector="^:checked">
+      <Setter Property="Foreground" Value="{DynamicResource MaterialPrimaryBrush}" />
+    </Style>
+    <Style Selector="^:checked /template/ Border#MaterialIconContainer">
+      <Setter Property="CornerRadius" Value="12" />
+    </Style>
+    <Style Selector="^.square:checked /template/ Border#MaterialIconContainer">
+      <Setter Property="CornerRadius" Value="20" />
+    </Style>
+    <Style Selector="^.extraSmall:checked /template/ Border#MaterialIconContainer">
+      <Setter Property="CornerRadius" Value="12" />
+    </Style>
+    <Style Selector="^.extraSmall.square:checked /template/ Border#MaterialIconContainer">
+      <Setter Property="CornerRadius" Value="16" />
+    </Style>
+    <Style Selector="^.small:checked /template/ Border#MaterialIconContainer">
+      <Setter Property="CornerRadius" Value="12" />
+    </Style>
+    <Style Selector="^.small.square:checked /template/ Border#MaterialIconContainer">
+      <Setter Property="CornerRadius" Value="20" />
+    </Style>
+    <Style Selector="^.medium:checked /template/ Border#MaterialIconContainer">
+      <Setter Property="CornerRadius" Value="16" />
+    </Style>
+    <Style Selector="^.medium.square:checked /template/ Border#MaterialIconContainer">
+      <Setter Property="CornerRadius" Value="28" />
+    </Style>
+    <Style Selector="^.large:checked /template/ Border#MaterialIconContainer">
+      <Setter Property="CornerRadius" Value="28" />
+    </Style>
+    <Style Selector="^.large.square:checked /template/ Border#MaterialIconContainer">
+      <Setter Property="CornerRadius" Value="48" />
+    </Style>
+    <Style Selector="^.extraLarge:checked /template/ Border#MaterialIconContainer">
+      <Setter Property="CornerRadius" Value="28" />
+    </Style>
+    <Style Selector="^.extraLarge.square:checked /template/ Border#MaterialIconContainer">
+      <Setter Property="CornerRadius" Value="68" />
+    </Style>
+    <Style Selector="^:pressed /template/ Border#MaterialIconContainer">
+      <Setter Property="CornerRadius" Value="8" />
+    </Style>
+    <Style Selector="^.medium:pressed /template/ Border#MaterialIconContainer">
+      <Setter Property="CornerRadius" Value="12" />
+    </Style>
+    <Style Selector="^.large:pressed /template/ Border#MaterialIconContainer">
+      <Setter Property="CornerRadius" Value="16" />
+    </Style>
+    <Style Selector="^.extraLarge:pressed /template/ Border#MaterialIconContainer">
+      <Setter Property="CornerRadius" Value="16" />
+    </Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Foreground" Value="{DynamicResource MaterialDisabledOnSurfaceBrush}" />
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="^:disabled /template/ Border#MaterialIconStateLayer">
+      <Setter Property="Opacity" Value="0" />
+    </Style>
+    <Style Selector="^:disabled /template/ material|MaterialRipple#MaterialIconRipple">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:disabled /template/ Border#MaterialIconFocusRing">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="MaterialIconToggleButton" TargetType="ToggleButton" BasedOn="{StaticResource MaterialIconButton}">
+  </ControlTheme>
+
+  <ControlTheme x:Key="MaterialFilledIconButton" TargetType="Button" BasedOn="{StaticResource MaterialIconButton}">
+    <Setter Property="Background" Value="{DynamicResource MaterialPrimaryBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnPrimaryBrush}" />
+    <Style Selector="^:disabled">
+      <Setter Property="Background" Value="{DynamicResource MaterialDisabledContainerBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource MaterialDisabledOnSurfaceBrush}" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="MaterialTonalIconButton" TargetType="Button" BasedOn="{StaticResource MaterialIconButton}">
+    <Setter Property="Background" Value="{DynamicResource MaterialSecondaryContainerBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSecondaryContainerBrush}" />
+    <Style Selector="^:disabled">
+      <Setter Property="Background" Value="{DynamicResource MaterialDisabledContainerBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource MaterialDisabledOnSurfaceBrush}" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="MaterialFilledIconToggleButton" TargetType="ToggleButton" BasedOn="{StaticResource MaterialFilledIconButton}">
+    <Setter Property="Background" Value="{DynamicResource MaterialSurfaceContainerBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}" />
+    <Style Selector="^:checked">
+      <Setter Property="Background" Value="{DynamicResource MaterialPrimaryBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource MaterialOnPrimaryBrush}" />
+    </Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Background" Value="{DynamicResource MaterialDisabledContainerBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource MaterialDisabledOnSurfaceBrush}" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="MaterialTonalIconToggleButton" TargetType="ToggleButton" BasedOn="{StaticResource MaterialTonalIconButton}">
+    <Setter Property="Background" Value="{DynamicResource MaterialSecondaryContainerBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSecondaryContainerBrush}" />
+    <Style Selector="^:checked">
+      <Setter Property="Background" Value="{DynamicResource MaterialSecondaryBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource MaterialOnSecondaryBrush}" />
+    </Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Background" Value="{DynamicResource MaterialDisabledContainerBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource MaterialDisabledOnSurfaceBrush}" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="MaterialOutlinedIconButton" TargetType="Button" BasedOn="{StaticResource MaterialIconButton}">
+    <Setter Property="BorderThickness" Value="1" />
+    <Style Selector="^.large">
+      <Setter Property="BorderThickness" Value="2" />
+    </Style>
+    <Style Selector="^.extraLarge">
+      <Setter Property="BorderThickness" Value="3" />
+    </Style>
+    <Style Selector="^:disabled /template/ Border#MaterialIconOutline">
+      <Setter Property="Opacity" Value="0.38" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="MaterialOutlinedIconToggleButton" TargetType="ToggleButton" BasedOn="{StaticResource MaterialOutlinedIconButton}">
+    <Style Selector="^:checked">
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Background" Value="{DynamicResource MaterialInverseSurfaceBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource MaterialInverseOnSurfaceBrush}" />
+    </Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Foreground" Value="{DynamicResource MaterialDisabledOnSurfaceBrush}" />
+    </Style>
+    <Style Selector="^:checked:disabled">
+      <Setter Property="Background" Value="{DynamicResource MaterialDisabledContainerBrush}" />
+    </Style>
+  </ControlTheme>
+
+  <!-- FAB geometry uses the effective component implementation, including 20 dp medium corners. -->
+  <ControlTheme x:Key="MaterialFloatingActionButton" TargetType="Button" BasedOn="{StaticResource MaterialIconButton}">
+    <Setter Property="MinWidth" Value="56" />
+    <Setter Property="MinHeight" Value="56" />
+    <Setter Property="CornerRadius" Value="16" />
+    <Setter Property="Background" Value="{DynamicResource MaterialPrimaryContainerBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnPrimaryContainerBrush}" />
+    <Style Selector="^ /template/ Border#MaterialIconContainer">
+      <Setter Property="Width" Value="56" />
+      <Setter Property="Height" Value="56" />
+      <Setter Property="BoxShadow" Value="{DynamicResource MaterialElevationLevel3}" />
+    </Style>
+    <Style Selector="^:pressed /template/ Border#MaterialIconContainer, ^:checked /template/ Border#MaterialIconContainer">
+      <Setter Property="CornerRadius" Value="{Binding CornerRadius, RelativeSource={RelativeSource TemplatedParent}}" />
+    </Style>
+    <Style Selector="^:pointerover /template/ Border#MaterialIconContainer">
+      <Setter Property="BoxShadow" Value="{DynamicResource MaterialElevationLevel4}" />
+    </Style>
+    <Style Selector="^:pressed /template/ Border#MaterialIconContainer, ^:focus-visible /template/ Border#MaterialIconContainer">
+      <Setter Property="BoxShadow" Value="{DynamicResource MaterialElevationLevel3}" />
+    </Style>
+    <Style Selector="^.small">
+      <Setter Property="MinWidth" Value="48" />
+      <Setter Property="MinHeight" Value="48" />
+      <Setter Property="CornerRadius" Value="12" />
+      <Setter Property="FontSize" Value="24" />
+    </Style>
+    <Style Selector="^.small /template/ Border#MaterialIconContainer">
+      <Setter Property="Width" Value="40" />
+      <Setter Property="Height" Value="40" />
+      <Setter Property="CornerRadius" Value="{Binding CornerRadius, RelativeSource={RelativeSource TemplatedParent}}" />
+    </Style>
+    <Style Selector="^.small /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Width" Value="24" />
+      <Setter Property="Height" Value="24" />
+    </Style>
+    <Style Selector="^.medium">
+      <Setter Property="MinWidth" Value="80" />
+      <Setter Property="MinHeight" Value="80" />
+      <Setter Property="CornerRadius" Value="20" />
+      <Setter Property="FontSize" Value="28" />
+    </Style>
+    <Style Selector="^.medium /template/ Border#MaterialIconContainer">
+      <Setter Property="Width" Value="80" />
+      <Setter Property="Height" Value="80" />
+      <Setter Property="CornerRadius" Value="{Binding CornerRadius, RelativeSource={RelativeSource TemplatedParent}}" />
+    </Style>
+    <Style Selector="^.medium /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Width" Value="28" />
+      <Setter Property="Height" Value="28" />
+    </Style>
+    <Style Selector="^.large">
+      <Setter Property="MinWidth" Value="96" />
+      <Setter Property="MinHeight" Value="96" />
+      <Setter Property="CornerRadius" Value="28" />
+      <Setter Property="FontSize" Value="36" />
+    </Style>
+    <Style Selector="^.large /template/ Border#MaterialIconContainer">
+      <Setter Property="Width" Value="96" />
+      <Setter Property="Height" Value="96" />
+      <Setter Property="CornerRadius" Value="{Binding CornerRadius, RelativeSource={RelativeSource TemplatedParent}}" />
+    </Style>
+    <Style Selector="^.large /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Width" Value="36" />
+      <Setter Property="Height" Value="36" />
+    </Style>
+    <Style Selector="^.surface">
+      <Setter Property="Background" Value="{DynamicResource MaterialSurfaceContainerHighBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource MaterialPrimaryBrush}" />
+    </Style>
+    <Style Selector="^.secondary">
+      <Setter Property="Background" Value="{DynamicResource MaterialSecondaryContainerBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource MaterialOnSecondaryContainerBrush}" />
+    </Style>
+    <Style Selector="^.tertiary">
+      <Setter Property="Background" Value="{DynamicResource MaterialTertiaryContainerBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource MaterialOnTertiaryContainerBrush}" />
+    </Style>
+    <Style Selector="^.lowered /template/ Border#MaterialIconContainer">
+      <Setter Property="BoxShadow" Value="{DynamicResource MaterialElevationLevel1}" />
+    </Style>
+    <Style Selector="^.lowered:pointerover /template/ Border#MaterialIconContainer">
+      <Setter Property="BoxShadow" Value="{DynamicResource MaterialElevationLevel2}" />
+    </Style>
+    <Style Selector="^.lowered:pressed /template/ Border#MaterialIconContainer, ^.lowered:focus-visible /template/ Border#MaterialIconContainer">
+      <Setter Property="BoxShadow" Value="{DynamicResource MaterialElevationLevel1}" />
+    </Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Background" Value="{DynamicResource MaterialDisabledContainerBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource MaterialDisabledOnSurfaceBrush}" />
+    </Style>
+    <Style Selector="^:disabled /template/ Border#MaterialIconContainer">
+      <Setter Property="BoxShadow" Value="none" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="MaterialPrimaryFab" TargetType="Button" BasedOn="{StaticResource MaterialFloatingActionButton}">
+    <Setter Property="Background" Value="{DynamicResource MaterialPrimaryContainerBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnPrimaryContainerBrush}" />
+  </ControlTheme>
+
+  <ControlTheme x:Key="MaterialSurfaceFab" TargetType="Button" BasedOn="{StaticResource MaterialFloatingActionButton}">
+    <Setter Property="Background" Value="{DynamicResource MaterialSurfaceContainerHighBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource MaterialPrimaryBrush}" />
+  </ControlTheme>
+
+  <ControlTheme x:Key="MaterialSecondaryFab" TargetType="Button" BasedOn="{StaticResource MaterialFloatingActionButton}">
+    <Setter Property="Background" Value="{DynamicResource MaterialSecondaryContainerBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSecondaryContainerBrush}" />
+  </ControlTheme>
+
+  <ControlTheme x:Key="MaterialTertiaryFab" TargetType="Button" BasedOn="{StaticResource MaterialFloatingActionButton}">
+    <Setter Property="Background" Value="{DynamicResource MaterialTertiaryContainerBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnTertiaryContainerBrush}" />
+  </ControlTheme>
+
+  <ControlTheme x:Key="MaterialSmallFab" TargetType="Button" BasedOn="{StaticResource MaterialFloatingActionButton}">
+    <Setter Property="MinWidth" Value="48" />
+    <Setter Property="MinHeight" Value="48" />
+    <Setter Property="CornerRadius" Value="12" />
+    <Setter Property="FontSize" Value="24" />
+    <Style Selector="^ /template/ Border#MaterialIconContainer">
+      <Setter Property="Width" Value="40" />
+      <Setter Property="Height" Value="40" />
+    </Style>
+    <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Width" Value="24" />
+      <Setter Property="Height" Value="24" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="MaterialMediumFab" TargetType="Button" BasedOn="{StaticResource MaterialFloatingActionButton}">
+    <Setter Property="MinWidth" Value="80" />
+    <Setter Property="MinHeight" Value="80" />
+    <Setter Property="CornerRadius" Value="20" />
+    <Setter Property="FontSize" Value="28" />
+    <Style Selector="^ /template/ Border#MaterialIconContainer">
+      <Setter Property="Width" Value="80" />
+      <Setter Property="Height" Value="80" />
+    </Style>
+    <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Width" Value="28" />
+      <Setter Property="Height" Value="28" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="MaterialLargeFab" TargetType="Button" BasedOn="{StaticResource MaterialFloatingActionButton}">
+    <Setter Property="MinWidth" Value="96" />
+    <Setter Property="MinHeight" Value="96" />
+    <Setter Property="CornerRadius" Value="28" />
+    <Setter Property="FontSize" Value="36" />
+    <Style Selector="^ /template/ Border#MaterialIconContainer">
+      <Setter Property="Width" Value="96" />
+      <Setter Property="Height" Value="96" />
+    </Style>
+    <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Width" Value="36" />
+      <Setter Property="Height" Value="36" />
+    </Style>
+  </ControlTheme>
+
+  <!-- A toggle FAB keeps its initial footprint and collapses toward the logical top/end. -->
+  <ControlTheme x:Key="MaterialToggleFab" TargetType="ToggleButton" BasedOn="{StaticResource MaterialFloatingActionButton}">
+    <Style Selector="^ /template/ Border#MaterialIconContainer">
+      <Setter Property="HorizontalAlignment" Value="Right" />
+      <Setter Property="VerticalAlignment" Value="Top" />
+    </Style>
+    <Style Selector="^ /template/ Border#MaterialIconContainer">
+      <Setter Property="Transitions">
+        <Transitions>
+          <material:MaterialDoubleTransition Property="Width" Duration="{DynamicResource MaterialMotionFastSpatialDuration}" Easing="{DynamicResource MaterialMotionFastSpatialEasing}" />
+          <material:MaterialDoubleTransition Property="Height" Duration="{DynamicResource MaterialMotionFastSpatialDuration}" Easing="{DynamicResource MaterialMotionFastSpatialEasing}" />
+          <material:MaterialCornerRadiusTransition Property="CornerRadius" Duration="{DynamicResource MaterialMotionFastSpatialDuration}" Easing="{DynamicResource MaterialMotionFastSpatialEasing}" />
+          <BrushTransition Property="Background" Duration="{DynamicResource MaterialMotionFastSpatialDuration}" Easing="{DynamicResource MaterialMotionFastSpatialEasing}" />
+        </Transitions>
+      </Setter>
+    </Style>
+    <Style Selector="^:checked">
+      <Setter Property="Background" Value="{DynamicResource MaterialPrimaryBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource MaterialOnPrimaryBrush}" />
+    </Style>
+    <Style Selector="^:checked /template/ Border#MaterialIconContainer">
+      <Setter Property="Width" Value="56" />
+      <Setter Property="Height" Value="56" />
+      <Setter Property="CornerRadius" Value="28" />
+    </Style>
+    <Style Selector="^:checked /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Width" Value="20" />
+      <Setter Property="Height" Value="20" />
+    </Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Background" Value="{DynamicResource MaterialDisabledContainerBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource MaterialDisabledOnSurfaceBrush}" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="MaterialMediumToggleFab" TargetType="ToggleButton" BasedOn="{StaticResource MaterialToggleFab}">
+    <Setter Property="MinWidth" Value="80" />
+    <Setter Property="MinHeight" Value="80" />
+    <Setter Property="CornerRadius" Value="20" />
+    <Setter Property="FontSize" Value="28" />
+    <Style Selector="^:not(ToggleButton:checked) /template/ Border#MaterialIconContainer">
+      <Setter Property="Width" Value="80" />
+      <Setter Property="Height" Value="80" />
+      <Setter Property="CornerRadius" Value="20" />
+    </Style>
+    <Style Selector="^:not(ToggleButton:checked) /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Width" Value="28" />
+      <Setter Property="Height" Value="28" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="MaterialLargeToggleFab" TargetType="ToggleButton" BasedOn="{StaticResource MaterialToggleFab}">
+    <Setter Property="MinWidth" Value="96" />
+    <Setter Property="MinHeight" Value="96" />
+    <Setter Property="CornerRadius" Value="28" />
+    <Setter Property="FontSize" Value="36" />
+    <Style Selector="^:not(ToggleButton:checked) /template/ Border#MaterialIconContainer">
+      <Setter Property="Width" Value="96" />
+      <Setter Property="Height" Value="96" />
+      <Setter Property="CornerRadius" Value="28" />
+    </Style>
+    <Style Selector="^:not(ToggleButton:checked) /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Width" Value="36" />
+      <Setter Property="Height" Value="36" />
+    </Style>
+  </ControlTheme>
+
+</ResourceDictionary>

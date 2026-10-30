@@ -1,8 +1,9 @@
-use super::{INameScope, NameScope, NameScopeError, NameScopeRef};
+use super::{INameScope, NameScope, NameScopeError, NameScopeRef, NameScopeValueError};
 use crate::utilities::{SynchronousCompletionAsyncResult, SynchronousCompletionAsyncResultSource};
-use crate::{FerroObject, Ref};
+use crate::{BoxedValue, FerroObject, Ref};
+use crate::data::core::ValueTypes;
 
-type FindResult = Option<Ref<FerroObject>>;
+type FindResult = Option<BoxedValue>;
 
 /// A name scope nested in another one: names that are not found once the
 /// scope is complete are looked up in the parent scope.
@@ -24,7 +25,7 @@ impl ChildNameScope {
             name: &str,
             src: SynchronousCompletionAsyncResultSource<FindResult>,
         ) {
-            let parent_search = parent_scope.find_async(name);
+            let parent_search = parent_scope.find_value_async(name);
             if parent_search.is_completed() {
                 src.set_result(parent_search.get_result());
             } else {
@@ -35,7 +36,7 @@ impl ChildNameScope {
 
         if !self.inner.is_completed() {
             // Guaranteed to be incomplete at this point.
-            let inner_search = self.inner.find_async(name);
+            let inner_search = self.inner.find_value_async(name);
             let search = inner_search.clone();
             let src = src.clone();
             let parent_scope = self.parent_scope.clone();
@@ -61,8 +62,16 @@ impl INameScope for ChildNameScope {
         self.inner.try_register(name, element)
     }
 
-    fn find_async(&self, name: &str) -> SynchronousCompletionAsyncResult<FindResult> {
-        let found = self.find(name);
+    fn try_register_value(&self, name: &str, value: BoxedValue) -> Result<(), NameScopeValueError> {
+        self.inner.try_register_value(name, value)
+    }
+
+    fn find_async(&self, name: &str) -> SynchronousCompletionAsyncResult<Option<Ref<FerroObject>>> {
+        super::i_name_scope::map_result(self.find_value_async(name), |value| value.and_then(|value| ValueTypes::as_object(&*value)))
+    }
+
+    fn find_value_async(&self, name: &str) -> SynchronousCompletionAsyncResult<FindResult> {
+        let found = self.find_value(name);
         if found.is_some() {
             return SynchronousCompletionAsyncResult::new(found);
         }
@@ -73,13 +82,27 @@ impl INameScope for ChildNameScope {
         self.do_find_async(name)
     }
 
-    fn find(&self, name: &str) -> FindResult {
-        let found = self.inner.find(name);
+    fn find(&self, name: &str) -> Option<Ref<FerroObject>> {
+        if let Some(element) = self.inner.find(name) {
+            return Some(element);
+        }
+        // A local plain object shadows a parent's native object as well.
+        if self.inner.find_value(name).is_some() {
+            return None;
+        }
+        if self.inner.is_completed() {
+            return self.parent_scope.find(name);
+        }
+        None
+    }
+
+    fn find_value(&self, name: &str) -> FindResult {
+        let found = self.inner.find_value(name);
         if found.is_some() {
             return found;
         }
         if self.inner.is_completed() {
-            return self.parent_scope.find(name);
+            return self.parent_scope.find_value(name);
         }
         None
     }

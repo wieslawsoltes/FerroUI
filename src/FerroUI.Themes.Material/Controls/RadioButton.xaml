@@ -1,0 +1,94 @@
+<!--
+  Material 3 Expressive, AndroidX Compose Material3 1.5.0-beta02,
+  source e4d933c98df7baa7ea2b83eea6e086915961e0ff.
+  Component measurements and interaction states follow the Android Open Source Project
+  token definitions (Apache-2.0; see NOTICE.md). FerroUI template contracts are adapted
+  from the WinUI theme, Copyright (c) Microsoft Corporation, MIT license.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:material="using:FerroUI.Themes.Material"
+                    x:ClassModifier="internal">
+  <ControlTheme x:Key="DefaultRadioButtonStyle" TargetType="RadioButton">
+    <Setter Property="MinHeight" Value="48" />
+    <Setter Property="MinWidth" Value="48" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="HorizontalContentAlignment" Value="Left" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Padding" Value="0,0,12,0" />
+    <Setter Property="FontSize" Value="16" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceBrush}" />
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border BorderBrush="{DynamicResource MaterialSecondaryBrush}"
+                BorderThickness="3" CornerRadius="24" Margin="-3" />
+      </FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Grid Background="Transparent" ColumnDefinitions="48,*" MinHeight="48">
+          <Grid Width="48" Height="48" VerticalAlignment="Center">
+            <Border x:Name="MaterialStateLayer" Width="40" Height="40" CornerRadius="20"
+                    Background="{DynamicResource MaterialOnSurfaceBrush}" Opacity="0"
+                    IsHitTestVisible="False" HorizontalAlignment="Center" VerticalAlignment="Center">
+              <Border.Transitions><Transitions><material:MaterialDoubleTransition Property="Opacity" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" /></Transitions></Border.Transitions>
+            </Border>
+            <material:MaterialRipple x:Name="MaterialRipple" Fill="{DynamicResource MaterialOnSurfaceBrush}"
+                                     Width="40" Height="40" CornerRadius="20"
+                                     HorizontalAlignment="Center" VerticalAlignment="Center"
+                                     ReducedMotion="{DynamicResource MaterialReducedMotion}" />
+            <Ellipse x:Name="SelectionOutline" Width="20" Height="20" StrokeThickness="2"
+                     Stroke="{DynamicResource MaterialOnSurfaceVariantBrush}"
+                     HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <Ellipse x:Name="SelectionMark" Width="10" Height="10"
+                     Fill="{DynamicResource MaterialPrimaryBrush}" RenderTransformOrigin="50%,50%"
+                     RenderTransform="scale(0)" HorizontalAlignment="Center" VerticalAlignment="Center">
+              <Ellipse.Transitions><Transitions><TransformOperationsTransition Property="RenderTransform" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" /></Transitions></Ellipse.Transitions>
+            </Ellipse>
+          </Grid>
+          <ContentPresenter x:Name="PART_ContentPresenter" Grid.Column="1"
+                            Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Foreground="{TemplateBinding Foreground}" Margin="{TemplateBinding Padding}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                            RecognizesAccessKey="True" TextWrapping="Wrap" />
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:pointerover /template/ Border#MaterialStateLayer">
+    <Setter Property="Opacity" Value="0.08" />
+    </Style>
+    <Style Selector="^:focus-visible /template/ Border#MaterialStateLayer">
+    <Setter Property="Opacity" Value="0.10" />
+    </Style>
+    <Style Selector="^:disabled /template/ Border#MaterialStateLayer">
+    <Setter Property="Opacity" Value="0" />
+    </Style>
+    <Style Selector="^:checked /template/ Ellipse#SelectionOutline">
+    <Setter Property="Stroke" Value="{DynamicResource MaterialPrimaryBrush}" />
+    </Style>
+    <Style Selector="^:checked /template/ Ellipse#SelectionMark">
+    <Setter Property="RenderTransform" Value="scale(1)" />
+    </Style>
+    <Style Selector="^:disabled /template/ Ellipse#SelectionOutline">
+    <Setter Property="Stroke" Value="{DynamicResource MaterialOnSurfaceBrush}" />
+    <Setter Property="Opacity" Value="0.38" />
+    </Style>
+    <Style Selector="^:disabled /template/ Ellipse#SelectionMark">
+    <Setter Property="Fill" Value="{DynamicResource MaterialOnSurfaceBrush}" />
+    <Setter Property="Opacity" Value="0.38" />
+    </Style>
+    <Style Selector="^:checked /template/ Border#MaterialStateLayer">
+    <Setter Property="Background" Value="{DynamicResource MaterialPrimaryBrush}" />
+    </Style>
+    <Style Selector="^:disabled">
+    <Setter Property="Foreground" Value="{DynamicResource MaterialDisabledContentBrush}" />
+    </Style>
+    <Style Selector="^:checked /template/ material|MaterialRipple#MaterialRipple">
+      <Setter Property="Fill" Value="{DynamicResource MaterialPrimaryBrush}" />
+    </Style>
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type RadioButton}" TargetType="RadioButton" BasedOn="{StaticResource DefaultRadioButtonStyle}" />
+</ResourceDictionary>

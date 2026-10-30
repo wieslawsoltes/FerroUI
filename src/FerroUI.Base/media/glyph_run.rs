@@ -321,6 +321,15 @@ impl GlyphRun {
         crate::media::PlatformGeometry::new(geometry_impl).upcast()
     }
 
+    /// Obtains a complete monochrome outline suitable for converting text to
+    /// editable paths. Returns `None` if the platform cannot verify completeness
+    /// or a glyph requires bitmap or colour rendering. An available empty
+    /// outline (for example, a space) is a successful empty geometry.
+    pub fn try_build_geometry(&self) -> Option<crate::Ref<crate::media::Geometry>> {
+        let geometry_impl = render_interface().try_build_glyph_run_geometry(self)?;
+        Some(crate::media::PlatformGeometry::new(geometry_impl).upcast())
+    }
+
     /// Retrieves the offset from the leading edge of the glyph run to the
     /// leading or trailing edge of a caret stop containing the specified
     /// character hit.

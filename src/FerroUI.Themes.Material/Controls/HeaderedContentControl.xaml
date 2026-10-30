@@ -1,0 +1,73 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/CommonStyles/TextBox_themeresources.xaml (the header of DefaultTextBoxStyle:
+    HeaderContentPresenter and its Disabled state)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  WinUI has no HeaderedContentControl: the controls of WinUI with a Header (TextBox, ComboBox,
+  ToggleSwitch, the pickers) show it with the same presenter above the control. This theme is
+  that presenter above the content: HeaderContentPresenter of DefaultTextBoxStyle, in
+  TextControlHeaderForeground, with the bottom margin TextBoxTopHeaderMargin, wrapping, shown
+  only when there is a header (WinUI's controls collapse it without one), and
+  TextControlHeaderForegroundDisabled in the Disabled state.
+
+  Translation notes (docs/porting/winui-theme.md, section 4):
+  - The header presenter is FerroUI's PART_HeaderPresenter, the content presenter
+    PART_ContentPresenter. x:DeferLoadStrategy has no counterpart. The header takes the
+    horizontal and vertical content alignments of the control, as the content does.
+  - The border around both takes the Background, BorderBrush, BorderThickness, CornerRadius and
+    Padding of the control (none set by the theme), as for FerroUI's other themes.
+  - RecognizesAccessKey is FerroUI's access key support.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20" Width="240">
+      <HeaderedContentControl Header="A header" Content="The content under the header." />
+    </Border>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="{x:Type HeaderedContentControl}" TargetType="HeaderedContentControl">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="LayoutRoot"
+                Background="{TemplateBinding Background}"
+                BackgroundSizing="{TemplateBinding BackgroundSizing}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}"
+                Padding="{TemplateBinding Padding}">
+          <Grid RowDefinitions="Auto,*">
+            <ContentPresenter x:Name="PART_HeaderPresenter"
+                              Grid.Row="0"
+                              Content="{TemplateBinding Header}"
+                              ContentTemplate="{TemplateBinding HeaderTemplate}"
+                              FontWeight="Normal"
+                              Foreground="{DynamicResource TextControlHeaderForeground}"
+                              Margin="{DynamicResource TextBoxTopHeaderMargin}"
+                              TextWrapping="Wrap"
+                              VerticalAlignment="Top"
+                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                              IsVisible="{TemplateBinding Header, Converter={x:Static ObjectConverters.IsNotNull}}"
+                              RecognizesAccessKey="True" />
+            <ContentPresenter x:Name="PART_ContentPresenter"
+                              Grid.Row="1"
+                              Content="{TemplateBinding Content}"
+                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                              RecognizesAccessKey="True" />
+          </Grid>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- Disabled (the header of DefaultTextBoxStyle) -->
+    <Style Selector="^:disabled /template/ ContentPresenter#PART_HeaderPresenter">
+      <Setter Property="Foreground" Value="{DynamicResource TextControlHeaderForegroundDisabled}" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

@@ -2014,11 +2014,14 @@ fn hold_should_not_raised_when_pointer_released_before_timer() {
     mouse.down(&tree.border, MouseButton::Left, 1);
     assert!(!raised.get());
 
+    // Cancellation must abort a promoted callback as well as an inactive timer.
+    let timer = single_hold_timer();
+    timer.promote();
+
     mouse.up(&tree.border, MouseButton::Left, None);
     assert!(!raised.get());
-
-    // Verify timer duration, but execute it immediately.
-    let timer = single_hold_timer();
+    assert!(!timer.is_enabled());
+    assert!(crate::threading::Dispatcher::snapshot_timers_for_unit_tests().is_empty());
     force_fire(&timer);
 
     assert!(!raised.get());
@@ -2037,15 +2040,72 @@ fn hold_should_not_raised_when_pointer_is_moved_before_timer() {
 
     mouse.down(&tree.border, MouseButton::Left, 1);
     assert!(!raised.get());
+    let timer = single_hold_timer();
 
     mouse.move_to(&tree.border, HOLD_PRESS + Vector::new(20.0, 20.0));
     assert!(!raised.get());
-
-    // Verify timer duration, but execute it immediately.
-    let timer = single_hold_timer();
+    assert!(!timer.is_enabled());
+    assert!(crate::threading::Dispatcher::snapshot_timers_for_unit_tests().is_empty());
     force_fire(&timer);
 
     assert!(!raised.get());
+}
+
+#[test]
+fn hold_cancellation_releases_detached_event_source_without_waiting_for_timeout() {
+    let _scope = crate::threading::Dispatcher::unit_test_scope();
+
+    for cancel_by_moving in [false, true] {
+        let mouse = MouseTestHelper::new();
+        let tree = hold_tree();
+        let weak = tree.border.downgrade();
+        mouse.down(&tree.border, MouseButton::Left, 1);
+        assert_eq!(crate::threading::Dispatcher::snapshot_timers_for_unit_tests().len(), 1);
+
+        if cancel_by_moving {
+            mouse.move_to(&tree.border, HOLD_PRESS + Vector::new(20.0, 20.0));
+            mouse.pointer.capture(None);
+        } else {
+            mouse.up(&tree.border, MouseButton::Left, None);
+        }
+        assert!(crate::threading::Dispatcher::snapshot_timers_for_unit_tests().is_empty());
+        tree.root.root.remove_child(&tree.border);
+        drop(tree.border);
+
+        // Neither wall time nor dispatcher jobs have advanced. The canceled
+        // event's strong source must already have been released.
+        assert!(weak.upgrade().is_none());
+    }
+}
+
+#[test]
+fn hold_callback_can_start_another_hold_without_cancelling_its_timer() {
+    let _scope = crate::threading::Dispatcher::unit_test_scope();
+    let mouse = MouseTestHelper::new();
+    let next_mouse = Rc::new(MouseTestHelper::new());
+    let tree = hold_tree();
+    let starts = Rc::new(Cell::new(0));
+    let count = starts.clone();
+    let next = next_mouse.clone();
+    let weak = tree.border.downgrade();
+    tree.border.holding(move |_, event| {
+        if event.holding_state() == HoldingState::Started {
+            count.set(count.get() + 1);
+            if count.get() == 1 {
+                next.down(&weak.upgrade().unwrap(), MouseButton::Left, 1);
+            }
+        }
+    });
+
+    mouse.down(&tree.border, MouseButton::Left, 1);
+    force_fire(&single_hold_timer());
+    assert_eq!(starts.get(), 1);
+    force_fire(&single_hold_timer());
+    assert_eq!(starts.get(), 2);
+    assert!(crate::threading::Dispatcher::snapshot_timers_for_unit_tests().is_empty());
+
+    next_mouse.up(&tree.border, MouseButton::Left, None);
+    mouse.pointer.capture(None);
 }
 
 #[test]
@@ -4788,6 +4848,12 @@ fn do_drag_drop_goes_through_the_platform_drag_source() {
 
 // --- text input methods ---------------------------------------------------------
 
+#[path = "text_input/text_input_method_revision_tests.rs"]
+mod text_input_method_revision_tests;
+
+#[path = "text_input/text_input_method_options_tests.rs"]
+mod text_input_method_options_tests;
+
 use text_input::{
     ContextMenuAction, ITextInputMethodImpl, TextInputContentType, TextInputMethodClient, TextInputMethodClientEvents,
     TextInputMethodClientRequeryRequestedEventArgs, TextInputOptions, TextInputReturnKeyType, TextSelection,
@@ -4841,10 +4907,25 @@ struct TestTextClient {
     cursor: Cell<Rect>,
     selection: Cell<TextSelection>,
     preedit: RefCell<Vec<Option<String>>>,
+    /// Whether the client opts in to the exact-edit connection.
+    uses_connection: bool,
+    /// The owner the client names (`input_method_owner`).
+    owner: RefCell<Option<Ref<InputElement>>>,
+    /// The focus destinations that belong to the client's editing UI.
+    retained: RefCell<Vec<Ref<InputElement>>>,
 }
 
 impl TestTextClient {
     fn new(name: &'static str, view: &Ref<TestControl>) -> Rc<Self> {
+        Self::with_connection(name, view, false)
+    }
+
+    /// A client that opts in to the exact-edit connection, as RichEditBox does.
+    fn connected(name: &'static str, view: &Ref<TestControl>) -> Rc<Self> {
+        Self::with_connection(name, view, true)
+    }
+
+    fn with_connection(name: &'static str, view: &Ref<TestControl>, uses_connection: bool) -> Rc<Self> {
         Rc::new(Self {
             events: TextInputMethodClientEvents::new(),
             name,
@@ -4852,13 +4933,39 @@ impl TestTextClient {
             cursor: Cell::new(Rect::new(1.0, 2.0, 3.0, 4.0)),
             selection: Cell::new(TextSelection::default()),
             preedit: RefCell::new(Vec::new()),
+            uses_connection,
+            owner: RefCell::new(None),
+            retained: RefCell::new(Vec::new()),
         })
+    }
+}
+
+impl text_input::TextInputMethodEditing for TestTextClient {
+    fn begin_composition(&self) -> Result<(), text_input::TextInputMethodError> {
+        Ok(())
+    }
+    fn update_composition(&self, text: &str, _cursor: Option<i32>) -> Result<(), text_input::TextInputMethodError> {
+        self.preedit.borrow_mut().push(Some(text.to_string()));
+        Ok(())
+    }
+    fn cancel_composition(&self) -> Result<bool, text_input::TextInputMethodError> {
+        self.preedit.borrow_mut().push(None);
+        Ok(true)
     }
 }
 
 impl TextInputMethodClient for TestTextClient {
     fn events(&self) -> &TextInputMethodClientEvents {
         &self.events
+    }
+    fn input_method_editing(&self) -> Option<&dyn text_input::TextInputMethodEditing> {
+        self.uses_connection.then_some(self as &dyn text_input::TextInputMethodEditing)
+    }
+    fn input_method_owner(&self) -> Option<Ref<InputElement>> {
+        self.owner.borrow().clone()
+    }
+    fn retains_input_method_focus(&self, focused: &InputElement) -> bool {
+        self.retained.borrow().iter().any(|element| std::ptr::eq::<InputElement>(&**element, focused))
     }
     fn text_view_visual(&self) -> Option<Ref<Visual>> {
         Some(self.view.borrow().clone())
@@ -4905,6 +5012,15 @@ fn offer_client(element: &Ref<TestControl>, client: &Rc<TestTextClient>) {
 }
 
 fn ime_tree() -> ImeTree {
+    ime_tree_with(TestTextClient::new)
+}
+
+/// An IME tree whose editor offers a client of the exact-edit connection.
+fn ime_tree_with_connection() -> ImeTree {
+    ime_tree_with(TestTextClient::connected)
+}
+
+fn ime_tree_with(new_client: fn(&'static str, &Ref<TestControl>) -> Rc<TestTextClient>) -> ImeTree {
     let keyboard = KeyboardDevice::new();
     let editor = TestControl::focusable("editor").at(20.0, 30.0, 100.0, 20.0);
     let button = TestControl::focusable("button").at(0.0, 100.0, 50.0, 20.0);
@@ -4916,7 +5032,7 @@ fn ime_tree() -> ImeTree {
     let im = TestInputMethod::new("im", &log);
     *root.host.input_method.borrow_mut() = Some(im.clone());
 
-    let client = TestTextClient::new("editor", &editor);
+    let client = new_client("editor", &editor);
     offer_client(&editor, &client);
 
     ImeTree { root, keyboard, editor, button, client, im, log }
@@ -5129,6 +5245,8 @@ fn the_cursor_rectangle_follows_the_text_view_through_layout_changes() {
 fn text_input_method_client_defaults() {
     let view = TestControl::new("view");
     let client = TestTextClient::new("client", &view);
+    assert_eq!(client.input_method_state_revision(), None);
+    assert!(client.input_method_connection().is_none());
 
     // Without an override the cursor position is dropped.
     client.set_preedit_text_with_cursor(Some("pre"), Some(2));

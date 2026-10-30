@@ -1,0 +1,50 @@
+<ResourceDictionary xmlns:fd="using:FerroDock.Ferro.Controls"
+                    xmlns:pc="using:FerroDock.Ferro.Converters"
+                    xmlns:sp="using:FerroDock.Settings" xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:dmc="using:FerroDock.Model.Controls"
+                    x:DataType="dmc:ISplitViewDock"
+                    x:CompileBindings="True">
+  <Design.PreviewWith>
+    <fd:SplitViewDockControl Width="400" Height="300" />
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="{x:Type fd:SplitViewDockControl}" TargetType="fd:SplitViewDockControl" x:DataType="dmc:ISplitViewDock">
+
+    <Setter Property="(AutomationProperties.AutomationId)" Value="{Binding Id}" />
+    <Setter Property="(AutomationProperties.Name)" Value="{Binding Title}" />
+
+    <Setter Property="(sp:DockProperties.IsDragEnabled)" Value="{Binding CanDrag}" />
+    <Setter Property="(sp:DockProperties.IsDropEnabled)" Value="{Binding CanDrop}" />
+    <Setter Property="(sp:DockProperties.DockGroup)" Value="{Binding DockGroup}" />
+
+    <Setter Property="Template">
+      <ControlTemplate>
+        <fd:DockableControl TrackingMode="Visible">
+          <SplitView x:Name="PART_SplitView"
+                     CompactPaneLength="{Binding CompactPaneLength}"
+                     DisplayMode="{Binding DisplayMode, Converter={x:Static pc:SplitViewDisplayModeConverter.Instance}}"
+                     IsPaneOpen="{Binding IsPaneOpen, Mode=OneWay}"
+                     OpenPaneLength="{Binding OpenPaneLength}"
+                     PanePlacement="{Binding PanePlacement, Converter={x:Static pc:SplitViewPanePlacementConverter.Instance}}"
+                     UseLightDismissOverlayMode="{Binding UseLightDismissOverlayMode}">
+            <SplitView.Pane>
+              <DeferredContentControl Content="{Binding PaneDockable}"
+                                      HorizontalAlignment="Stretch"
+                                      VerticalAlignment="Stretch"
+                                      HorizontalContentAlignment="Stretch"
+                                      VerticalContentAlignment="Stretch" />
+            </SplitView.Pane>
+            <DeferredContentControl Content="{Binding ContentDockable}"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Stretch"
+                                    HorizontalContentAlignment="Stretch"
+                                    VerticalContentAlignment="Stretch" />
+          </SplitView>
+        </fd:DockableControl>
+      </ControlTemplate>
+    </Setter>
+
+  </ControlTheme>
+
+</ResourceDictionary>

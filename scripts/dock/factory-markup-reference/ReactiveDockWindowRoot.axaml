@@ -1,0 +1,7 @@
+<m:DockWindow xmlns="https://github.com/avaloniaui"
+ xmlns:m="clr-namespace:Dock.Model.ReactiveUI.Core;assembly=Dock.Model.ReactiveUI"
+ xmlns:c="clr-namespace:Dock.Model.ReactiveUI.Controls;assembly=Dock.Model.ReactiveUI"
+ Id="source-window" Title="Source window" X="42.25" Y="-12" Width="800" Height="600"
+ WindowState="Maximized" Topmost="True" OwnerMode="RootWindow" IsModal="True" ShowInTaskbar="False">
+ <m:DockWindow.Layout><c:RootDock Title="Window layout" /></m:DockWindow.Layout>
+</m:DockWindow>

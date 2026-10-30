@@ -1,0 +1,3 @@
+<core:DockCapabilityOverrides xmlns="https://github.com/avaloniaui"
+ xmlns:core="clr-namespace:Dock.Model.Core;assembly=Dock.Model"
+ CanPin="False" CanDrop="True" />

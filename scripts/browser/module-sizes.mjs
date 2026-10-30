@@ -7,24 +7,36 @@
 // pages each counted once, and the files no page waits for.
 //
 //   node scripts/browser/module-sizes.mjs <site directory> [--github-output <file>]
+//     [--cache-dir <directory> | --no-cache]
+//
+// Exact measurements are cached by file content, compression options and Node/zlib versions in
+// target/browser-build-cache/compression. Reports of a combined site can reuse both component
+// reports without running Brotli -11 again. The report is identical with --no-cache.
 //
 // Megabytes are 1,000,000 bytes. With --github-output the raw and the gzip size in bytes of the
 // WebAssembly modules of the site (summed, when there are several) are appended to the file as the
 // outputs `wasm_raw_bytes` and `wasm_gzip_bytes` of a GitHub Actions step (pass "$GITHUB_OUTPUT").
 import fs from "node:fs";
 import path from "node:path";
-import util from "node:util";
-import zlib from "node:zlib";
+import { fileURLToPath } from "node:url";
+import { CompressionCache } from "./compression-cache.mjs";
 
 const argv = process.argv.slice(2);
 let site;
 let githubOutput;
+let cacheDirectory = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../target/browser-build-cache/compression");
 for (let i = 0; i < argv.length; i++) {
-    if (argv[i] === "--github-output") githubOutput = argv[++i];
-    else site = argv[i];
+    if (argv[i] === "--github-output" && argv[i + 1]) githubOutput = argv[++i];
+    else if (argv[i] === "--cache-dir" && argv[i + 1]) cacheDirectory = argv[++i];
+    else if (argv[i] === "--no-cache") cacheDirectory = undefined;
+    else if (!argv[i].startsWith("-") && !site) site = argv[i];
+    else {
+        console.error(`invalid argument: ${argv[i]}`);
+        process.exit(2);
+    }
 }
 if (!site || !fs.existsSync(site) || (githubOutput !== undefined && !githubOutput)) {
-    console.error("usage: node scripts/browser/module-sizes.mjs <site directory> [--github-output <file>]");
+    console.error("usage: node scripts/browser/module-sizes.mjs <site directory> [--github-output <file>] [--cache-dir <directory> | --no-cache]");
     process.exit(2);
 }
 
@@ -56,21 +68,12 @@ const wasm = [0, 0];
 const sizesOf = new Map();
 // The files are compressed on the thread pool of Node.js, several at a time (and the two
 // compressions of a file at the same time): brotli at its highest level is most of the run.
-const gzip = util.promisify(zlib.gzip);
-const brotli = util.promisify(zlib.brotliCompress);
+const compression = new CompressionCache(cacheDirectory);
 const compressed = await Promise.all(files.map(async (name) => {
     const content = fs.readFileSync(path.join(site, name));
-    const [gzipped, brotlied] = await Promise.all([
-        gzip(content, { level: 9 }),
-        brotli(content, {
-            params: {
-                [zlib.constants.BROTLI_PARAM_QUALITY]: 11,
-                [zlib.constants.BROTLI_PARAM_SIZE_HINT]: content.length
-            }
-        })
-    ]);
-    return [content.length, gzipped.length, brotlied.length];
+    return compression.measure(content);
 }));
+console.error(`Compression measurements: ${compression.hits} reused, ${compression.misses} computed.`);
 for (const [index, name] of files.entries()) {
     const sizes = compressed[index];
     sizes.forEach((value, i) => { total[i] += value; });

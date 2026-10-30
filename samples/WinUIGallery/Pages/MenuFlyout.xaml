@@ -1,0 +1,4 @@
+<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <Button Content="Open a menu"><Button.Flyout><MenuFlyout><MenuItem Header="Open"/><MenuItem Header="Save"/><Separator/><MenuItem Header="Show details" ToggleType="CheckBox" IsChecked="True"/><MenuItem Header="More"><MenuItem Header="Settings"/></MenuItem></MenuFlyout></Button.Flyout></Button>
+</StackPanel>

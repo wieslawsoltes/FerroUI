@@ -1,0 +1,2 @@
+<m:Factory xmlns="https://github.com/avaloniaui" xmlns:m="clr-namespace:Dock.Model.ReactiveUI;assembly=Dock.Model.ReactiveUI"
+ HideToolsOnClose="True" HideDocumentsOnClose="False" />

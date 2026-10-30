@@ -1,0 +1,5 @@
+<test:ContractConsumer xmlns="https://github.com/avaloniaui"
+ xmlns:test="clr-namespace:FactoryReference;assembly=DockFactoryMarkupReference" xmlns:core="clr-namespace:Dock.Model.Core;assembly=Dock.Model">
+ <test:ContractConsumer.Policy><core:DockCapabilityOverrides CanClose="False" /></test:ContractConsumer.Policy>
+ <test:ContractConsumer.Optional><core:DockCapabilityOverrides CanFloat="False" /></test:ContractConsumer.Optional>
+</test:ContractConsumer>

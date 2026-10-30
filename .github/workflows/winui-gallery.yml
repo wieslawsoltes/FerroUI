@@ -1,0 +1,102 @@
+name: WinUI Gallery
+
+on:
+  pull_request:
+    # The tests of the sample also run in the workspace run of ci.yml; this workflow follows the
+    # sample and the WinUI controls, theme and markup it shows (docs/porting/winui-controls.md,
+    # O12: narrowed paths), and checks its two binaries. Its rendering job runs nightly and on
+    # demand only.
+    paths:
+      - '.github/workflows/winui-gallery.yml'
+      - 'samples/WinUIGallery/**'
+      - 'src/FerroUI.Themes.WinUI/Controls/**'
+      - 'src/Markup/FerroUI.Markup.Xaml.WinUI/**'
+      - 'src/FerroUI.Controls/auto_suggest_box*'
+      - 'src/FerroUI.Controls/frame*'
+      - 'src/FerroUI.Controls/info_ba*'
+      - 'src/FerroUI.Controls/navigation*'
+      - 'src/FerroUI.Controls/number_box*'
+      - 'src/FerroUI.Controls/progress_ring*'
+      - 'src/FerroUI.Controls/radio_buttons*'
+      - 'src/FerroUI.Controls/rating_*'
+      - 'src/FerroUI.Controls/icon*'
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: winui-gallery-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_PROFILE_DEV_DEBUG: 0
+  CARGO_PROFILE_TEST_DEBUG: 0
+  CARGO_INCREMENTAL: 0
+  RUST_BACKTRACE: 1
+
+jobs:
+  tests:
+    name: Gallery pages, interactions and source catalog
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+      - name: Native font dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libfontconfig1-dev libfreetype6-dev fonts-dejavu-core pkg-config
+      # With the WinUI theme: the tests of controls whose template only the theme gives.
+      - name: The tests of the sample
+        run: cargo test --locked -p winui-gallery --features theme --lib
+      - name: The desktop and capture binaries build
+        run: cargo check --locked -p winui-gallery --features desktop,capture --bins
+
+  rendering:
+    name: Gallery rendering (Skia, HarfBuzz)
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      CARGO_BUILD_JOBS: 2
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+      - name: Native font dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libfontconfig1-dev libfreetype6-dev fonts-dejavu-core pkg-config
+      - name: Render every catalog page
+        run: >-
+          cargo run --locked -p winui-gallery --features capture
+          --bin winui-gallery-capture -- --all --output-dir=gallery-captures/light
+      - name: Render the WinUI controls in the dark theme
+        run: >-
+          cargo run --locked -p winui-gallery --features capture
+          --bin winui-gallery-capture -- --pages=NumberBox,RadioButton,AutoSuggestBox,InfoBar,InfoBadge,ProgressRing,RatingControl,CompactSizing,NavigationView,ColorPicker,ConnectedAnimation,Image,FlipView
+          --dark --query=Button --output-dir=gallery-captures/dark
+      - name: Render the eight NavigationView compositions in both themes
+        run: |
+          for theme in light dark; do
+            theme_args=()
+            if [ "$theme" = dark ]; then
+              theme_args=(--dark)
+            fi
+            for control in nvSample5 nvSample6 nvSample2 nvSample7 nvSample4 nvSample9 nvSample8 nvSample; do
+              cargo run --locked -p winui-gallery --features capture --bin winui-gallery-capture -- \
+                --pages=NavigationView --control="$control" "${theme_args[@]}" \
+                --output-dir="gallery-captures/$theme"
+            done
+          done
+      - name: The captures, as an artifact of the run
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: winui-gallery-rendering
+          path: gallery-captures/
+          if-no-files-found: warn

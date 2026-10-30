@@ -8,11 +8,12 @@ use ferroui_base::layout::{LayoutableImpl, VerticalAlignment};
 use ferroui_base::media::immutable::{ImmutablePen, ImmutableSolidColorBrush};
 use ferroui_base::media::text_formatting::{
     GenericTextRunProperties, LogicalDirection, TextLayout, TextLayoutOptions, TextRunCache, TextRunProperties,
+    TextParagraphStyles,
 };
 use ferroui_base::media::{
     BaselineAlignment, BrushExtensions, Brushes, CharacterHit, Color, DrawingContext, FlowDirection, FontFamily,
     FontFeatureCollection, FontStretch, FontStyle, FontWeight, IBrush, IImmutableBrush, IPen, TextAlignment,
-    TextDecorations, TextWrapping, Typeface,
+    TextWrapping, Typeface,
 };
 use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
@@ -25,6 +26,12 @@ use ferroui_base::{
 };
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
+
+/// Immutable range formatting for the same UTF-16 positions used by
+/// [`TextLayout`], the caret, selection and input methods. Replace the collection
+/// when its ranges or run properties change. A span supplies complete run
+/// properties; unspanned text uses the control's defaults.
+pub type TextStyleOverrides = Rc<[ValueSpan<Rc<dyn TextRunProperties>>]>;
 
 /// The control that displays the text of a text box: the text, the
 /// selection, the pre-edit text of an input method and the caret.
@@ -106,6 +113,7 @@ impl FerroObjectImpl for TextPresenter {
             // Properties that affect shaping: invalidate the run cache + layout.
             "PreeditText" | "Foreground" | "FontSize" | "FontStyle" | "FontWeight" | "FontFamily" | "FontStretch"
             | "Text" | "LetterSpacing" | "PasswordChar" | "RevealPassword" | "FlowDirection"
+            | "FontFeatures" | "TextStyleOverrides" | "TextParagraphStyles"
             | "SelectionForegroundBrush" | "ShowSelectionHighlight" => {
                 this.invalidate_text_layout();
             }
@@ -285,41 +293,30 @@ impl TextPresenterImpl for TextPresenter {
         let start = selection_start.min(selection_end);
         let length = selection_start.max(selection_end) - start;
 
-        let mut text_style_overrides: Option<Rc<[ValueSpan<Rc<dyn TextRunProperties>>]>> = None;
-
-        let foreground = this.foreground();
-
-        if let Some(preedit_text) = &preedit_text {
-            let properties: Rc<dyn TextRunProperties> = Rc::new(GenericTextRunProperties::with_all(
-                typeface.clone(),
-                this.font_size(),
-                Some(TextDecorations::underline()),
-                foreground,
-                None,
-                BaselineAlignment::Baseline,
-                None,
-                this.font_features(),
-            ));
-
-            let preedit_highlight = ValueSpan::new(caret_index, preedit_text.len() as i32, properties);
-
-            text_style_overrides = Some(Rc::new([preedit_highlight]));
-        } else if this.show_selection_highlight() && length > 0 {
-            if let Some(selection_foreground_brush) = this.selection_foreground_brush() {
-                let properties: Rc<dyn TextRunProperties> = Rc::new(GenericTextRunProperties::with_all(
-                    typeface.clone(),
-                    this.font_size(),
-                    None,
-                    Some(selection_foreground_brush),
-                    None,
-                    BaselineAlignment::Baseline,
-                    None,
-                    this.font_features(),
-                ));
-
-                text_style_overrides = Some(Rc::new([ValueSpan::new(start, length, properties)]));
-            }
-        }
+        let defaults: Rc<dyn TextRunProperties> = Rc::new(GenericTextRunProperties::with_all(
+            typeface.clone(), this.font_size(), None, this.foreground(), None,
+            BaselineAlignment::Baseline, None, this.font_features(),
+        ));
+        let styles = this.text_style_overrides();
+        let removed = this.current_im_client.borrow().as_ref().and_then(Weak::upgrade)
+            .and_then(|client| client.preedit_removed_style_range(styles.as_ref()));
+        let committed_length = this.utf16_text().as_ref().map_or(0, |text| text.len() as i32);
+        let selected_foreground = (this.show_selection_highlight() && length > 0)
+            .then(|| this.selection_foreground_brush()).flatten()
+            .map(|brush| (start, length, brush));
+        let text_style_overrides = super::text_presenter_styles::compose(
+            defaults, styles, committed_length, removed, caret_index,
+            preedit_text.as_ref().map_or(0, |text| text.len() as i32), selected_foreground,
+        );
+        let paragraph_styles = this.text_paragraph_styles();
+        let (paragraph_source, paragraph_removed) = this.current_im_client.borrow().as_ref().and_then(Weak::upgrade)
+            .and_then(|client| client.preedit_paragraph_source(paragraph_styles.as_ref()))
+            .map(|(source, removed)| (Some(source), removed))
+            .unwrap_or_else(|| (this.utf16_text(), caret_index.max(0) as usize..caret_index.max(0) as usize));
+        let paragraph_styles = super::text_presenter_paragraphs::compose(paragraph_styles,
+            paragraph_source.as_ref().map_or(&[], |text| text.span()),
+            text.as_ref().map_or(&[], |text| text.span()), paragraph_removed, caret_index.max(0) as usize,
+            preedit_text.as_ref().map_or(0, |text| text.len()));
 
         let password_char = this.password_char();
 
@@ -338,9 +335,10 @@ impl TextPresenterImpl for TextPresenter {
                 Some(ReadOnlyMemory::from_vec(password)),
                 typeface,
                 text_style_overrides,
+                None,
             )
         } else {
-            this.create_text_layout_internal(this.constraint.get(), text, typeface, text_style_overrides)
+            this.create_text_layout_internal(this.constraint.get(), text, typeface, text_style_overrides, paragraph_styles)
         }
     }
 
@@ -359,6 +357,19 @@ impl TextPresenterImpl for TextPresenter {
 }
 
 ferroui_base::ferro_properties! { impl TextPresenter {
+    ferro_property!(
+        /// Defines the `TextParagraphStyles` property.
+        pub fn text_paragraph_styles_property() -> StyledProperty<Option<TextParagraphStyles>> {
+            TextBox::text_paragraph_styles_property().add_owner::<TextPresenter>()
+        }
+    );
+    ferro_property!(
+        /// Defines the `TextStyleOverrides` property.
+        pub fn text_style_overrides_property() -> StyledProperty<Option<TextStyleOverrides>> {
+            TextBox::text_style_overrides_property().add_owner::<TextPresenter>()
+        }
+    );
+
     ferro_property!(
         /// Defines the `ShowSelectionHighlight` property.
         pub fn show_selection_highlight_property() -> StyledProperty<bool> {
@@ -584,6 +595,25 @@ impl TextPresenter {
 
     pub fn set_preedit_text_cursor_position(&self, value: Option<i32>) {
         self.set_value(Self::preedit_text_cursor_position_property(), value)
+    }
+
+    /// Complete run properties at UTF-16 ranges of committed `Text`.
+    pub fn text_style_overrides(&self) -> Option<TextStyleOverrides> {
+        self.get_value(Self::text_style_overrides_property())
+    }
+
+    pub fn text_paragraph_styles(&self) -> Option<TextParagraphStyles> {
+        self.get_value(Self::text_paragraph_styles_property())
+    }
+
+    pub fn set_text_paragraph_styles(&self, value: Option<TextParagraphStyles>) {
+        self.set_value(Self::text_paragraph_styles_property(), value)
+    }
+
+    /// Selection colors and IME decorations preserve these properties. The
+    /// collection is immutable; assign a new one after editing the text.
+    pub fn set_text_style_overrides(&self, value: Option<TextStyleOverrides>) {
+        self.set_value(Self::text_style_overrides_property(), value)
     }
 
     /// The font family.
@@ -829,13 +859,14 @@ impl TextPresenter {
         text: Option<ReadOnlyMemory<u16>>,
         typeface: Typeface,
         text_style_overrides: Option<Rc<[ValueSpan<Rc<dyn TextRunProperties>>]>>,
+        paragraph_styles: Option<TextParagraphStyles>,
     ) -> Rc<TextLayout> {
         let max_width = if MathUtilities::is_zero(constraint.width) { f64::INFINITY } else { constraint.width };
         let max_height = if MathUtilities::is_zero(constraint.height) { f64::INFINITY } else { constraint.height };
 
         let text_run_cache = self.text_run_cache.borrow_mut().get_or_insert_with(|| Rc::new(TextRunCache::new())).clone();
 
-        Rc::new(TextLayout::from_utf16(
+        Rc::new(TextLayout::from_utf16_with_paragraph_styles(
             text.unwrap_or_default(),
             typeface,
             TextLayoutOptions {
@@ -855,6 +886,7 @@ impl TextPresenter {
                 text_style_overrides,
                 text_run_cache: Some(text_run_cache),
             },
+            paragraph_styles,
         ))
     }
 
@@ -897,7 +929,8 @@ impl TextPresenter {
         let y = caret_bounds.y.floor() + 0.5;
         let b = caret_bounds.bottom().ceil() - 0.5;
 
-        if caret_bounds.x > 0.0 && caret_bounds.x >= text_line.width_including_trailing_whitespace() {
+        if caret_bounds.x > 0.0 && caret_bounds.x >= text_layout.line_origin(line_index as usize).x
+            + text_line.start() + text_line.width_including_trailing_whitespace() {
             x -= 1.0;
         }
 
@@ -1136,16 +1169,14 @@ impl TextPresenter {
             return;
         }
 
-        let Point { x: current_x, y: mut current_y } = self.navigation_position.get();
+        let current_x = self.navigation_position.get().x;
 
         if direction == LogicalDirection::Forward {
             if line_index + 1 > text_layout.text_lines().len() as i32 - 1 {
                 return;
             }
 
-            let text_line = &text_layout.text_lines()[line_index as usize];
-
-            current_y += text_line.height();
+            line_index += 1;
         } else {
             if line_index - 1 < 0 {
                 return;
@@ -1153,14 +1184,11 @@ impl TextPresenter {
 
             line_index -= 1;
 
-            let text_line = &text_layout.text_lines()[line_index as usize];
-
-            current_y -= text_line.height();
         }
 
         let navigation_position = self.navigation_position.get();
 
-        self.move_caret_to_point(Point::new(current_x, current_y));
+        self.move_caret_to_point(Point::new(current_x, text_layout.line_origin(line_index as usize).y));
 
         self.navigation_position.set(navigation_position.with_y(self.caret_bounds.get().y));
 
@@ -1284,7 +1312,9 @@ impl TextPresenter {
     }
 
     pub fn move_caret_horizontal(&self, mut direction: LogicalDirection) {
-        if self.flow_direction() == FlowDirection::RightToLeft {
+        let layout = self.text_layout();
+        let index = layout.get_line_index_from_character_index(self.caret_index(), self.last_character_hit.get().trailing_length() > 0);
+        if layout.line_flow_direction(index.max(0) as usize) == FlowDirection::RightToLeft {
             direction = if direction == LogicalDirection::Forward {
                 LogicalDirection::Backward
             } else {
@@ -1342,15 +1372,9 @@ impl TextPresenter {
             text_layout.get_line_index_from_character_index(caret_index, character_hit.trailing_length() > 0);
         let text_lines = text_layout.text_lines();
         let text_line = &text_lines[line_index as usize];
-        let distance_x = text_line.get_distance_from_character_hit(character_hit);
-
-        let mut distance_y = 0.0;
-
-        for text_line in &text_lines[..line_index as usize] {
-            distance_y += text_line.height();
-        }
-
-        let caret_bounds = Rect::new(distance_x, distance_y, 0.0, text_line.height());
+        let origin = text_layout.line_origin(line_index as usize);
+        let distance_x = origin.x + text_line.get_distance_from_character_hit(character_hit);
+        let caret_bounds = Rect::new(distance_x, origin.y, 0.0, text_line.height());
 
         if caret_bounds != self.caret_bounds.get() {
             self.caret_bounds.set(caret_bounds);

@@ -412,12 +412,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "byteorder"
-version = "1.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1fd0f2584146f6f2ef48085050886acf353beff7305ebd1ae69500e27c67f64b"
-
-[[package]]
 name = "bytes"
 version = "1.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -538,6 +532,8 @@ dependencies = [
  "ferroui-build",
  "ferroui-controls",
  "ferroui-controls-color-picker",
+ "ferroui-controls-inking",
+ "ferroui-controls-repeater",
  "ferroui-controls-treedatagrid",
  "ferroui-dialogs",
  "ferroui-harfbuzz",
@@ -548,6 +544,8 @@ dependencies = [
  "ferroui-opengl",
  "ferroui-skia",
  "ferroui-themes-fluent",
+ "ferroui-themes-macos",
+ "ferroui-themes-material",
  "ferroui-themes-simple",
  "ferroui-themes-winui",
  "ferroui-vello",
@@ -736,29 +734,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "cssparser"
-version = "0.35.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4e901edd733a1472f944a45116df3f846f54d37e67e68640ac8bb69689aca2aa"
-dependencies = [
- "cssparser-macros",
- "dtoa-short",
- "itoa",
- "phf",
- "smallvec",
-]
-
-[[package]]
-name = "cssparser-macros"
-version = "0.6.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "13b588ba4ac1a99f7f2964d24b3d896ddc6bf847ee3855dbd4366f058cfcd331"
-dependencies = [
- "quote",
- "syn 2.0.119",
-]
-
-[[package]]
 name = "data-encoding"
 version = "2.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -858,121 +833,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "75b325c5dbd37f80359721ad39aca5a29fb04c89279657cffdda8736d0c0b9d2"
 
 [[package]]
-name = "dtoa"
-version = "1.0.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4c3cf4824e2d5f025c7b531afcb2325364084a16806f6d47fbc1f5fbd9960590"
-
-[[package]]
-name = "dtoa-short"
-version = "0.3.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cd1511a7b6a56299bd043a9c167a6d2bfb37bf84a6dfceaba651168adfb43c87"
-dependencies = [
- "dtoa",
-]
-
-[[package]]
-name = "ego-tree"
-version = "0.10.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b2972feb8dffe7bc8c5463b1dacda1b0dfbed3710e50f977d965429692d74cd8"
-
-[[package]]
 name = "either"
 version = "1.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "252afb9ae5eaa683babdc6a068b3f5726eb19e05070c731f9b2a23a7c3e8ed34"
-
-[[package]]
-name = "ember"
-version = "0.4.0"
-dependencies = [
- "ember-content",
- "ember-core",
- "ferroui-base",
- "ferroui-controls",
- "ferroui-markup",
- "ferroui-markup-xaml",
- "ferroui-themes-winui",
- "sample-build",
- "sample-support",
- "sample-testing",
- "serde_json",
-]
-
-[[package]]
-name = "ember-android"
-version = "0.4.0"
-dependencies = [
- "ember",
- "ferroui-android",
- "ferroui-base",
- "ferroui-controls",
- "ferroui-fonts-inter",
-]
-
-[[package]]
-name = "ember-browser"
-version = "0.4.0"
-dependencies = [
- "ember",
- "ember-core",
- "ferroui-base",
- "ferroui-browser",
- "ferroui-controls",
- "ferroui-fonts-inter",
- "serde_json",
- "wasm-bindgen",
-]
-
-[[package]]
-name = "ember-content"
-version = "0.4.0"
-dependencies = [
- "ferroui-base",
- "ferroui-controls",
- "sample-testing",
- "scraper",
- "url",
-]
-
-[[package]]
-name = "ember-core"
-version = "0.4.0"
-dependencies = [
- "futures-channel",
- "futures-executor",
- "futures-util",
- "rusqlite",
- "serde",
- "serde_json",
- "ureq",
- "url",
-]
-
-[[package]]
-name = "ember-desktop"
-version = "0.4.0"
-dependencies = [
- "ember",
- "ferroui-base",
- "ferroui-controls",
- "ferroui-desktop",
- "ferroui-fonts-inter",
- "sample-support",
-]
-
-[[package]]
-name = "ember-ios"
-version = "0.4.0"
-dependencies = [
- "ember",
- "ferroui-base",
- "ferroui-controls",
- "ferroui-fonts-inter",
- "ferroui-ios",
-]
 
 [[package]]
 name = "ena"
@@ -1056,18 +920,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "fallible-iterator"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2acce4a10f12dc2fb14a218589d4f1f62ef011b2d0cc4b3cb1bba8e94da14649"
-
-[[package]]
-name = "fallible-streaming-iterator"
-version = "0.1.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7360491ce676a36bf9bb3c56c1aa791658183a54d2744120f27285738d90465a"
-
-[[package]]
 name = "fastrand"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1089,6 +941,409 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f4beca3cb2444e3304ac30843cc091f44ed58932353cd492ce740067bfce6b12"
 
 [[package]]
+name = "ferrodock-controls-deferred-content-control"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-headless",
+ "ferroui-themes-fluent",
+]
+
+[[package]]
+name = "ferrodock-controls-proportional-stack-panel"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-model",
+ "ferrodock-model-reactiveui",
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-headless",
+ "ferroui-markup-xaml",
+]
+
+[[package]]
+name = "ferrodock-controls-recycling"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-controls-recycling-model",
+ "ferrodock-controls-recycling-model-ferro",
+ "ferrodock-runtime",
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-headless",
+ "ferroui-system",
+]
+
+[[package]]
+name = "ferrodock-controls-recycling-model"
+version = "0.4.0"
+
+[[package]]
+name = "ferrodock-controls-recycling-model-ferro"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-controls-recycling-model",
+ "ferrodock-runtime",
+ "ferroui-base",
+ "ferroui-build-scan",
+]
+
+[[package]]
+name = "ferrodock-ferro"
+version = "0.4.0"
+dependencies = [
+ "bitflags",
+ "ferrodock-controls-deferred-content-control",
+ "ferrodock-controls-proportional-stack-panel",
+ "ferrodock-controls-recycling",
+ "ferrodock-model",
+ "ferrodock-model-ferro",
+ "ferrodock-model-reactiveui",
+ "ferrodock-model-reactiveui-ferro",
+ "ferrodock-model-reactiveui-services",
+ "ferrodock-settings",
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-headless",
+ "ferroui-markup-xaml",
+ "ferroui-reactive",
+ "ferroui-reactiveui",
+ "ferroui-reactiveui-controls",
+ "ferroui-system",
+ "ferroui-themes-fluent",
+]
+
+[[package]]
+name = "ferrodock-ferro-diagnostics"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-ferro",
+ "ferrodock-ferro-themes-fluent",
+ "ferrodock-model",
+ "ferrodock-model-ferro",
+ "ferrodock-model-reactiveui",
+ "ferrodock-settings",
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-fonts-inter",
+ "ferroui-headless",
+ "ferroui-markup-xaml",
+ "ferroui-reactiveui",
+ "ferroui-reactiveui-controls",
+ "ferroui-system",
+ "ferroui-themes-fluent",
+]
+
+[[package]]
+name = "ferrodock-ferro-themes-browser"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-controls-deferred-content-control",
+ "ferrodock-controls-proportional-stack-panel",
+ "ferrodock-controls-recycling",
+ "ferrodock-ferro",
+ "ferrodock-ferro-themes-fluent",
+ "ferrodock-model",
+ "ferrodock-model-ferro",
+ "ferrodock-settings",
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-headless",
+ "ferroui-markup-xaml",
+ "ferroui-themes-fluent",
+]
+
+[[package]]
+name = "ferrodock-ferro-themes-fluent"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-controls-deferred-content-control",
+ "ferrodock-controls-proportional-stack-panel",
+ "ferrodock-controls-recycling",
+ "ferrodock-ferro",
+ "ferrodock-model",
+ "ferrodock-model-ferro",
+ "ferrodock-settings",
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-headless",
+ "ferroui-markup-xaml",
+]
+
+[[package]]
+name = "ferrodock-ferro-themes-simple"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-controls-deferred-content-control",
+ "ferrodock-controls-proportional-stack-panel",
+ "ferrodock-controls-recycling",
+ "ferrodock-ferro",
+ "ferrodock-model",
+ "ferrodock-model-ferro",
+ "ferrodock-settings",
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-headless",
+ "ferroui-markup-xaml",
+ "ferroui-themes-simple",
+]
+
+[[package]]
+name = "ferrodock-markup-extension"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-markup-xaml",
+]
+
+[[package]]
+name = "ferrodock-markup-tests"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-controls-deferred-content-control",
+ "ferrodock-controls-proportional-stack-panel",
+ "ferrodock-controls-recycling",
+ "ferrodock-controls-recycling-model-ferro",
+ "ferrodock-ferro",
+ "ferrodock-ferro-diagnostics",
+ "ferrodock-ferro-themes-browser",
+ "ferrodock-ferro-themes-fluent",
+ "ferrodock-ferro-themes-simple",
+ "ferrodock-markup-extension",
+ "ferrodock-model",
+ "ferrodock-model-ferro",
+ "ferrodock-model-reactiveui",
+ "ferrodock-model-reactiveui-ferro",
+ "ferrodock-model-reactiveui-services",
+ "ferrodock-serializer-system-text-json",
+ "ferrodock-serializer-system-text-json-generators",
+ "ferrodock-serializer-system-text-json-generators-rust",
+ "ferrodock-serializer-system-text-json-reactiveui",
+ "ferrodock-settings",
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-headless",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-reactive",
+ "ferroui-reactiveui",
+ "ferroui-system",
+ "ferroui-themes-fluent",
+ "ferroui-themes-simple",
+ "serde_json",
+]
+
+[[package]]
+name = "ferrodock-model"
+version = "0.4.0"
+dependencies = [
+ "bitflags",
+ "ferrodock-controls-recycling-model",
+ "ferroui-reactive",
+ "ferroui-reactiveui",
+ "ferroui-system",
+ "ryu",
+]
+
+[[package]]
+name = "ferrodock-model-ferro"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-controls-recycling-model-ferro",
+ "ferrodock-model",
+ "ferrodock-model-reactiveui",
+ "ferrodock-runtime",
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-reactiveui",
+ "ferroui-system",
+ "syn 2.0.119",
+]
+
+[[package]]
+name = "ferrodock-model-reactiveui"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-controls-recycling-model",
+ "ferrodock-model",
+ "ferroui-reactive",
+ "ferroui-reactiveui",
+ "ferroui-system",
+]
+
+[[package]]
+name = "ferrodock-model-reactiveui-ferro"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-controls-recycling",
+ "ferrodock-model",
+ "ferrodock-model-ferro",
+ "ferrodock-model-reactiveui",
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-reactiveui",
+ "ferroui-system",
+]
+
+[[package]]
+name = "ferrodock-model-reactiveui-services"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-model",
+ "ferrodock-model-reactiveui",
+ "ferroui-reactive",
+ "ferroui-reactiveui",
+ "ferroui-splat",
+ "ferroui-system",
+]
+
+[[package]]
+name = "ferrodock-model-reactiveui-services-ferro"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-model-reactiveui-services",
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-headless",
+ "ferroui-reactive",
+ "ferroui-reactiveui",
+ "ferroui-reactiveui-controls",
+ "ferroui-splat",
+ "ferroui-system",
+]
+
+[[package]]
+name = "ferrodock-reactiveui-sample"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-controls-recycling",
+ "ferrodock-ferro",
+ "ferrodock-ferro-diagnostics",
+ "ferrodock-ferro-themes-browser",
+ "ferrodock-ferro-themes-fluent",
+ "ferrodock-model",
+ "ferrodock-model-ferro",
+ "ferrodock-model-reactiveui",
+ "ferrodock-model-reactiveui-ferro",
+ "ferrodock-serializer-system-text-json",
+ "ferrodock-serializer-system-text-json-reactiveui",
+ "ferrodock-settings",
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-desktop",
+ "ferroui-fonts-inter",
+ "ferroui-headless",
+ "ferroui-markup-xaml",
+ "ferroui-reactive",
+ "ferroui-reactiveui",
+ "ferroui-reactiveui-controls",
+ "ferroui-system",
+ "ferroui-themes-fluent",
+]
+
+[[package]]
+name = "ferrodock-runtime"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+]
+
+[[package]]
+name = "ferrodock-serializer-generated-tests"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-model",
+ "ferrodock-model-reactiveui",
+ "ferrodock-serializer-system-text-json",
+ "ferrodock-serializer-system-text-json-generators",
+ "ferrodock-serializer-system-text-json-generators-rust",
+ "ferroui-build-scan",
+ "serde_json",
+]
+
+[[package]]
+name = "ferrodock-serializer-system-text-json"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-model",
+ "ferrodock-model-reactiveui",
+ "ferroui-system",
+ "ryu",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "ferrodock-serializer-system-text-json-generators"
+version = "0.4.0"
+dependencies = [
+ "serde_json",
+]
+
+[[package]]
+name = "ferrodock-serializer-system-text-json-generators-rust"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-serializer-system-text-json-generators",
+ "ferroui-build-scan",
+ "proc-macro2",
+ "quote",
+ "serde_json",
+ "syn 2.0.119",
+]
+
+[[package]]
+name = "ferrodock-serializer-system-text-json-reactiveui"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-model",
+ "ferrodock-model-reactiveui",
+ "ferrodock-serializer-system-text-json",
+ "ferroui-reactiveui",
+]
+
+[[package]]
+name = "ferrodock-settings"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-model",
+ "ferrodock-model-ferro",
+ "ferrodock-model-reactiveui",
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-headless",
+]
+
+[[package]]
+name = "ferrodock-settings-markup-tests"
+version = "0.4.0"
+dependencies = [
+ "ferrodock-model",
+ "ferrodock-model-ferro",
+ "ferrodock-settings",
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-headless",
+ "ferroui-markup-xaml",
+]
+
+[[package]]
 name = "ferroui"
 version = "0.4.0"
 dependencies = [
@@ -1097,6 +1352,8 @@ dependencies = [
  "ferroui-controls",
  "ferroui-controls-charts",
  "ferroui-controls-color-picker",
+ "ferroui-controls-inking",
+ "ferroui-controls-repeater",
  "ferroui-controls-treedatagrid",
  "ferroui-desktop",
  "ferroui-devtools",
@@ -1108,6 +1365,7 @@ dependencies = [
  "ferroui-markup",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
+ "ferroui-markup-xaml-winui",
  "ferroui-metal",
  "ferroui-native",
  "ferroui-opengl",
@@ -1118,6 +1376,8 @@ dependencies = [
  "ferroui-splat",
  "ferroui-system",
  "ferroui-themes-fluent",
+ "ferroui-themes-macos",
+ "ferroui-themes-material",
  "ferroui-themes-simple",
  "ferroui-themes-winui",
  "ferroui-treedatagrid-core",
@@ -1243,6 +1503,36 @@ dependencies = [
  "ferroui-markup-xaml-loader",
  "ferroui-themes-fluent",
  "ferroui-themes-simple",
+]
+
+[[package]]
+name = "ferroui-controls-inking"
+version = "0.4.0"
+dependencies = [
+ "bitflags",
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-microcom",
+ "ferroui-themes-winui",
+ "ferroui-win32",
+ "microcom-codegen",
+ "windows-sys 0.61.2",
+]
+
+[[package]]
+name = "ferroui-controls-repeater"
+version = "0.4.0"
+dependencies = [
+ "bitflags",
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-markup-xaml-loader",
+ "rustc-hash 2.1.3",
+ "xamlx",
 ]
 
 [[package]]
@@ -1587,6 +1877,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-markup-xaml-winui"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "roxmltree 0.20.0",
+]
+
+[[package]]
 name = "ferroui-mcp"
 version = "0.4.0"
 dependencies = [
@@ -1903,6 +2205,32 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-themes-macos"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-dialogs",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+]
+
+[[package]]
+name = "ferroui-themes-material"
+version = "0.4.0"
+dependencies = [
+ "ferroui-android",
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-dialogs",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "material-colors",
+]
+
+[[package]]
 name = "ferroui-themes-simple"
 version = "0.4.0"
 dependencies = [
@@ -1991,6 +2319,8 @@ dependencies = [
  "ferroui-build-scan",
  "ferroui-controls",
  "ferroui-controls-color-picker",
+ "ferroui-controls-inking",
+ "ferroui-controls-repeater",
  "ferroui-controls-treedatagrid",
  "ferroui-desktop",
  "ferroui-dialogs",
@@ -2336,40 +2666,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "futf"
-version = "0.1.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "df420e2e84819663797d1ec6544b13c5be84629e7bb00dc960d6917db2987843"
-dependencies = [
- "mac",
- "new_debug_unreachable",
-]
-
-[[package]]
-name = "futures-channel"
-version = "0.3.34"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b1f9e3d69d39e4862ffed03ed071a76f9a13ba1d9109d355b0f0aa6b15e393c4"
-dependencies = [
- "futures-core",
-]
-
-[[package]]
 name = "futures-core"
 version = "0.3.34"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "92d699e522242e69e3003b94ecc1f960f3a5e015aa7c5d7486e65ad01dd94f5e"
-
-[[package]]
-name = "futures-executor"
-version = "0.3.34"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "031b47cf1a3c6cc8bc2fc76cd437f521619387907d469316e7c0bc278f1f5432"
-dependencies = [
- "futures-core",
- "futures-task",
- "futures-util",
-]
 
 [[package]]
 name = "futures-intrusive"
@@ -2402,17 +2702,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "futures-macro"
-version = "0.3.34"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9fb9654ba8355388abeb8dcb4fc62f511300867002afc858860463bdd9fe0c44"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 3.0.6",
-]
-
-[[package]]
 name = "futures-task"
 version = "0.3.34"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2425,19 +2714,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0d50a92467f8ba5dd6e3ee5d4bd04d73ab2e4e1c44474a0674821dfce14b79bc"
 dependencies = [
  "futures-core",
- "futures-macro",
  "futures-task",
  "pin-project-lite",
  "slab",
-]
-
-[[package]]
-name = "fxhash"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c31b6d751ae2c7f11320402d34e41349dd1016f8d5d45e48c4312bc8625af50c"
-dependencies = [
- "byteorder",
 ]
 
 [[package]]
@@ -2621,15 +2900,6 @@ dependencies = [
 
 [[package]]
 name = "hashbrown"
-version = "0.14.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e5274423e17b7c9fc20b6e7e208532f9b19825d82dfd615708b70edd83df41f1"
-dependencies = [
- "ahash",
-]
-
-[[package]]
-name = "hashbrown"
 version = "0.16.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "841d1cc9bed7f9236f321df977030373f4a4163ae1a7dbfe1a51a2c1a51d9100"
@@ -2646,15 +2916,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ed5909b6e89a2db4456e54cd5f673791d7eca6732202bbf2a9cc504fe2f9b84a"
 dependencies = [
  "foldhash",
-]
-
-[[package]]
-name = "hashlink"
-version = "0.9.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6ba4ff7128dee98c7dc9794b6a411377e1404dba1c97deb8d1a55297bd25d8af"
-dependencies = [
- "hashbrown 0.14.5",
 ]
 
 [[package]]
@@ -2746,17 +3007,6 @@ dependencies = [
  "ferroui-markup-xaml",
  "ferroui-themes-simple",
  "serde_json",
-]
-
-[[package]]
-name = "html5ever"
-version = "0.35.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "55d958c2f74b664487a2035fe1dadb032c48718a03b63f3ab0b8537db8549ed4"
-dependencies = [
- "log",
- "markup5ever",
- "match_token",
 ]
 
 [[package]]
@@ -3339,17 +3589,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b6d2cec3eae94f9f509c767b45932f1ada8350c4bdb85af2fcab4a3c14807981"
 
 [[package]]
-name = "libsqlite3-sys"
-version = "0.30.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2e99fb7a497b1e3339bc746195567ed8d3e24945ecd636e3619d20b9de9e9149"
-dependencies = [
- "cc",
- "pkg-config",
- "vcpkg",
-]
-
-[[package]]
 name = "libz-sys"
 version = "1.1.29"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3446,31 +3685,30 @@ dependencies = [
 ]
 
 [[package]]
-name = "mac"
-version = "0.1.1"
+name = "material-colors"
+version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c41e0c4fef86961ac6d6f8a82609f55f31b05e4fce149ac5710e439df7619ba4"
-
-[[package]]
-name = "markup5ever"
-version = "0.35.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "311fe69c934650f8f19652b3946075f0fc41ad8757dbb68f1ca14e7900ecc1c3"
+checksum = "e226ffda362d5bc26bb8f730d637a0851eedfb05e35d92108c9d8b48d2e47941"
 dependencies = [
- "log",
- "tendril",
- "web_atoms",
+ "ahash",
+ "indexmap",
+ "libm",
 ]
 
 [[package]]
-name = "match_token"
-version = "0.35.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ac84fd3f360fcc43dc5f5d186f02a94192761a080e8bc58621ad4d12296a58cf"
+name = "material-theme-gallery"
+version = "0.4.0"
 dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.119",
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-desktop",
+ "ferroui-dialogs",
+ "ferroui-markup",
+ "ferroui-markup-xaml",
+ "ferroui-themes-material",
+ "sample-build",
+ "sample-support",
+ "sample-testing",
 ]
 
 [[package]]
@@ -3872,49 +4110,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "phf"
-version = "0.11.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1fd6780a80ae0c52cc120a26a1a42c1ae51b247a253e4e06113d23d2c2edd078"
-dependencies = [
- "phf_macros",
- "phf_shared",
-]
-
-[[package]]
-name = "phf_codegen"
-version = "0.11.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aef8048c789fa5e851558d709946d6d79a8ff88c0440c587967f8e94bfb1216a"
-dependencies = [
- "phf_generator",
- "phf_shared",
-]
-
-[[package]]
-name = "phf_generator"
-version = "0.11.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3c80231409c20246a13fddb31776fb942c38553c51e871f8cbd687a4cfb5843d"
-dependencies = [
- "phf_shared",
- "rand 0.8.8",
-]
-
-[[package]]
-name = "phf_macros"
-version = "0.11.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f84ac04429c13a7ff43785d75ad27569f2951ce0ffd30a3321230db2fc727216"
-dependencies = [
- "phf_generator",
- "phf_shared",
- "proc-macro2",
- "quote",
- "syn 2.0.119",
-]
-
-[[package]]
 name = "phf_shared"
 version = "0.11.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4116,21 +4311,12 @@ checksum = "f8dcc9c7d52a811697d2151c701e0d08956f92b0e24136cf4cf27b57a6a0d9bf"
 
 [[package]]
 name = "rand"
-version = "0.8.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e058c7de0b26af77780c769414d6257830bb240f3c38477dbc2c16e5f54d6d4c"
-dependencies = [
- "rand_core 0.6.4",
-]
-
-[[package]]
-name = "rand"
 version = "0.9.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b9ef1d0d795eb7d84685bca4f72f3649f064e6641543d3a8c415898726a57b41"
 dependencies = [
  "rand_chacha",
- "rand_core 0.9.5",
+ "rand_core",
 ]
 
 [[package]]
@@ -4140,14 +4326,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d3022b5f1df60f26e1ffddd6c66e8aa15de382ae63b3a0c1bfc0e4d3e3f325cb"
 dependencies = [
  "ppv-lite86",
- "rand_core 0.9.5",
+ "rand_core",
 ]
-
-[[package]]
-name = "rand_core"
-version = "0.6.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 
 [[package]]
 name = "rand_core"
@@ -4368,20 +4548,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f1964b10c76125c36f8afe190065a4bf9a87bf324842c05701330bba9f1cacbb"
 dependencies = [
  "memchr",
-]
-
-[[package]]
-name = "rusqlite"
-version = "0.32.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7753b721174eb8ff87a9a0e799e2d7bc3749323e773db92e0984debb00019d6e"
-dependencies = [
- "bitflags",
- "fallible-iterator",
- "fallible-streaming-iterator",
- "hashlink",
- "libsqlite3-sys",
- "smallvec",
 ]
 
 [[package]]
@@ -4606,39 +4772,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49"
 
 [[package]]
-name = "scraper"
-version = "0.24.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e5f3a24d916e78954af99281a455168d4a9515d65eca99a18da1b813689c4ad9"
-dependencies = [
- "cssparser",
- "ego-tree",
- "html5ever",
- "precomputed-hash",
- "selectors",
- "tendril",
-]
-
-[[package]]
-name = "selectors"
-version = "0.31.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5685b6ae43bfcf7d2e7dfcfb5d8e8f61b46442c902531e41a32a9a8bf0ee0fb6"
-dependencies = [
- "bitflags",
- "cssparser",
- "derive_more",
- "fxhash",
- "log",
- "new_debug_unreachable",
- "phf",
- "phf_codegen",
- "precomputed-hash",
- "servo_arc",
- "smallvec",
-]
-
-[[package]]
 name = "semver"
 version = "1.0.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4705,15 +4838,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6662b5879511e06e8999a8a235d848113e942c9124f211511b16466ee2995f26"
 dependencies = [
  "serde_core",
-]
-
-[[package]]
-name = "servo_arc"
-version = "0.4.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "170fb83ab34de17dc69aa7c67482b22218ddb85da56546f9bd6b929e32a05930"
-dependencies = [
- "stable_deref_trait",
 ]
 
 [[package]]
@@ -5146,19 +5270,6 @@ dependencies = [
  "parking_lot",
  "phf_shared",
  "precomputed-hash",
- "serde",
-]
-
-[[package]]
-name = "string_cache_codegen"
-version = "0.5.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c711928715f1fe0fe509c53b43e993a9a557babc2d0a3567d0a3006f1ac931a0"
-dependencies = [
- "phf_generator",
- "phf_shared",
- "proc-macro2",
- "quote",
 ]
 
 [[package]]
@@ -5268,17 +5379,6 @@ dependencies = [
  "once_cell",
  "rustix",
  "windows-sys 0.61.2",
-]
-
-[[package]]
-name = "tendril"
-version = "0.4.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d24a120c5fc464a3458240ee02c299ebcb9d67b5249c8848b09d639dca8d7bb0"
-dependencies = [
- "futf",
- "mac",
- "utf-8",
 ]
 
 [[package]]
@@ -5522,7 +5622,7 @@ dependencies = [
  "http",
  "httparse",
  "log",
- "rand 0.9.5",
+ "rand",
  "sha1",
  "thiserror 2.0.21",
  "utf-8",
@@ -5999,18 +6099,6 @@ checksum = "88261b9deccee56594c11a3460c462c41f58d148598fe70ad77070126a68aba4"
 dependencies = [
  "js-sys",
  "wasm-bindgen",
-]
-
-[[package]]
-name = "web_atoms"
-version = "0.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "57ffde1dc01240bdf9992e3205668b235e59421fd085e8a317ed98da0178d414"
-dependencies = [
- "phf",
- "phf_codegen",
- "string_cache",
- "string_cache_codegen",
 ]
 
 [[package]]
@@ -6604,6 +6692,23 @@ dependencies = [
  "sample-support",
  "sample-testing",
  "windows-sys 0.61.2",
+]
+
+[[package]]
+name = "winui-gallery"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-controls-color-picker",
+ "ferroui-desktop",
+ "ferroui-harfbuzz",
+ "ferroui-headless",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-markup-xaml-winui",
+ "ferroui-skia",
+ "ferroui-themes-winui",
 ]
 
 [[package]]

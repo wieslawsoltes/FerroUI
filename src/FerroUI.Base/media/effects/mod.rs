@@ -7,6 +7,7 @@ mod effect_extensions;
 mod i_blur_effect;
 mod i_drop_shadow_effect;
 mod i_effect;
+mod immutable_luminance_to_alpha_effect;
 
 pub use blur_effect::BlurEffect;
 pub use drop_shadow_effect::{DropShadowDirectionEffect, DropShadowEffect, DropShadowEffectBase};
@@ -17,3 +18,4 @@ pub use i_drop_shadow_effect::{
     IDirectionDropShadowEffect, IDropShadowEffect, ImmutableDropShadowDirectionEffect, ImmutableDropShadowEffect,
 };
 pub use i_effect::{IEffect, IImmutableEffect, IMutableEffect};
+pub use immutable_luminance_to_alpha_effect::ImmutableLuminanceToAlphaEffect;

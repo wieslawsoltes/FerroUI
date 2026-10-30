@@ -9,6 +9,19 @@ from it to the default branch (and up from it, for `list`).
   scripts/stack/stack.py merge 290           # merges the stack up to #290 while each one is ready
   scripts/stack/stack.py merge 290 --wait    # and waits for the checks of the next one between merges
   scripts/stack/stack.py merge 290 --dry-run # says what it would merge
+  scripts/stack/stack.py land 290            # GitHub's atomic stack merge, up to the last ready pull request
+  scripts/stack/stack.py land 290 --dry-run  # says how far it would land
+
+`land` is the fast way (docs/stacked-pull-requests.md, "GitHub stacks"): it links the stack on
+GitHub (`gh stack link`, the stacks of the `gh-stack` extension), finds the highest pull request
+that is ready with every one below it ready, and merges all of them into the default branch in one
+all-or-nothing operation (`gh stack merge <pr> --merge --yes`): no retarget, no second run of the
+checks against the default branch, no waiting between the parts. A pull request of a GitHub stack is
+ready when its base is the branch of the one below it (the default branch for the lowest), it is
+not a draft, GitHub says it can be merged (CLEAN), and every check of its head passed on runs that
+started after the last change of its base. GitHub checks nothing more than open and not a draft
+before an atomic merge (the default branch has no required checks), so the script is what keeps a
+failing part out. The parts are merged with merge commits, as `merge` does.
 
 A pull request is merged only when:
 - its base is the default branch and GitHub says it can be merged without conflicts (CLEAN);
@@ -23,9 +36,11 @@ It is merged with a merge commit (never squashed or rebased: that would rewrite 
 pull requests above it contain) and only if its head is still the commit that was checked
 (`--match-head-commit`). The repository deletes the head branch of a merged pull request, and
 GitHub then retargets the pull request above it to the default branch; the script waits for that
-(and retargets it itself if GitHub has not within two minutes). The retarget runs the checks
-again (`edited` with a change of the base in .github/workflows/ci.yml): without `--wait` the
-script stops there and says so; with it, it polls until they end.
+(and retargets it itself if GitHub has not within two minutes), then brings its branch up to date
+with the new base (`gh pr update-branch`, a merge commit), which runs the checks again on a new
+head: the CI does not run for `edited`, since the skipped checks of such a run would replace the
+results of the real one. Without `--wait` the script stops there and says so; with it, it polls
+until they end.
 
 Needs the GitHub CLI (`gh`), signed in with write access to the repository.
 """
@@ -167,12 +182,15 @@ def readiness(repo, pr, default):
 def wait_for_retarget(number, default, seconds=120):
     deadline = time.time() + seconds
     while time.time() < deadline:
-        pr = pull(number)
-        if pr["baseRefName"] == default:
-            return pr
+        if pull(number)["baseRefName"] == default:
+            break
         time.sleep(5)
-    print(f"#{number} was not retargeted by GitHub; retargeting it to {default}")
-    gh("pr", "edit", str(number), "--base", default, parse=False)
+    else:
+        print(f"#{number} was not retargeted by GitHub; retargeting it to {default}")
+        gh("pr", "edit", str(number), "--base", default, parse=False)
+    # The new head runs the checks against the new base.
+    result = subprocess.run(["gh", "pr", "update-branch", str(number)], capture_output=True, text=True)
+    print(f"#{number}: {(result.stdout or result.stderr).strip() or 'branch updated'}")
     return pull(number)
 
 
@@ -222,6 +240,63 @@ def command_merge(args):
     return 0
 
 
+def stack_readiness(repo, pr, expected_base):
+    """(ready, reasons) of a part of a GitHub stack: based on the part below it."""
+    reasons = []
+    if pr["state"] != "OPEN":
+        reasons.append(pr["state"].lower())
+    if pr["isDraft"]:
+        reasons.append("a draft")
+    if pr["baseRefName"] != expected_base:
+        reasons.append(f"based on {pr['baseRefName']}, not {expected_base}")
+    if pr["mergeStateStatus"] != "CLEAN":
+        reasons.append(f"merge state {pr['mergeStateStatus']}")
+    ready, summary = checks(pr, base_changed_at(repo, pr["number"]))
+    if not ready:
+        reasons.append(f"checks: {summary}")
+    return not reasons, reasons
+
+
+def command_land(args):
+    repo = repository()
+    name, default = repo["nameWithOwner"], repo["defaultBranchRef"]["name"]
+    top = pull(args.pr)
+    chain = stack_below(top, default) + stack_above(top)
+    landed = None
+    expected_base = default
+    for pr in chain:
+        ready, reasons = stack_readiness(name, pr, expected_base)
+        print(f"  #{pr['number']} {pr['headRefName']} -> {pr['baseRefName']}: "
+              f"{'ready' if ready else '; '.join(reasons)}")
+        if not ready:
+            break
+        landed = pr
+        expected_base = pr["headRefName"]
+    if landed is None:
+        print("nothing to land: the lowest pull request is not ready")
+        return 1
+    numbers = [str(pr["number"]) for pr in chain]
+    upto = [pr["number"] for pr in chain[:chain.index(landed) + 1]]
+    if args.dry_run:
+        print(f"would link {', '.join('#' + n for n in numbers)} as a GitHub stack and merge "
+              f"{', '.join(f'#{n}' for n in upto)} into {default} at once")
+        return 0
+    if len(chain) > 1:
+        # A stack that already exists on GitHub keeps its merged parts, and `gh stack link` refuses a
+        # list without them ("this would remove #N"): the stack is then linked already, and merging
+        # through it is what is wanted.
+        result = subprocess.run(["gh", "stack", "link", *numbers], capture_output=True, text=True)
+        if result.returncode == 0:
+            print(result.stdout.strip())
+        elif "would remove" in (result.stdout + result.stderr):
+            print("the stack is linked on GitHub already (with its merged parts)")
+        else:
+            raise SystemExit(f"gh stack link {' '.join(numbers)}: {(result.stderr or result.stdout).strip()}")
+    print(gh("stack", "merge", str(landed["number"]), "--merge", "--yes", parse=False).strip())
+    print(f"landed {', '.join(f'#{n}' for n in upto)}")
+    return 0
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     sub = parser.add_subparsers(dest="command", required=True)
@@ -232,8 +307,11 @@ def main():
     merge.add_argument("--wait", action="store_true", help="wait for the checks of each pull request")
     merge.add_argument("--timeout", type=int, default=180, help="minutes to wait for one pull request (with --wait)")
     merge.add_argument("--dry-run", action="store_true", help="say what would be merged first, and merge nothing")
+    land = sub.add_parser("land", help="merge the stack at once, up to the last ready pull request (GitHub stacks)")
+    land.add_argument("pr", type=int)
+    land.add_argument("--dry-run", action="store_true", help="say how far it would land, and merge nothing")
     args = parser.parse_args()
-    return command_list(args) if args.command == "list" else command_merge(args)
+    return {"list": command_list, "merge": command_merge, "land": command_land}[args.command](args)
 
 
 if __name__ == "__main__":

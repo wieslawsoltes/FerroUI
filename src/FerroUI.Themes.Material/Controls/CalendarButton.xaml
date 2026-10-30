@@ -1,0 +1,56 @@
+<!-- Material 3 Expressive templates using FerroUI controls and bounded MaterialRipple.
+     Reference AndroidX Material3 1.5.0-beta02, e4d933c98df7baa7ea2b83eea6e086915961e0ff.
+     Structural heritage: FerroUI WinUI theme, Microsoft Corporation, MIT; see NOTICE.md. -->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:material="using:FerroUI.Themes.Material" x:ClassModifier="internal">
+  <ControlTheme x:Key="{x:Type CalendarButton}" TargetType="CalendarButton">
+    <Setter Property="ClickMode" Value="Release"/>
+    <Setter Property="MinWidth" Value="48"/>
+    <Setter Property="MinHeight" Value="48"/>
+    <Setter Property="Margin" Value="0"/>
+    <Setter Property="Padding" Value="0"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceBrush}"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="BorderBrush" Value="Transparent"/>
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}"/>
+    <Setter Property="FontSize" Value="14"/>
+    <Setter Property="CornerRadius" Value="20"/>
+    <Setter Property="FocusAdorner" Value="{x:Null}"/>
+    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    <Setter Property="VerticalContentAlignment" Value="Center"/>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel Background="Transparent">
+          <Border x:Name="OuterBorder" Width="64" Height="40" CornerRadius="20" HorizontalAlignment="Center" VerticalAlignment="Center" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+            <Panel>
+              <Border x:Name="StateLayer" Background="Transparent" CornerRadius="20" IsHitTestVisible="False"/>
+              <material:MaterialRipple x:Name="Ripple" Fill="{TemplateBinding Foreground}" CornerRadius="20" ReducedMotion="{DynamicResource MaterialReducedMotion}"/>
+              <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Foreground="{TemplateBinding Foreground}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+            </Panel>
+          </Border>
+          <Border x:Name="FocusVisual" Width="46" Height="46" CornerRadius="23" BorderThickness="3" BorderBrush="{DynamicResource MaterialSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="False" IsHitTestVisible="False"/>
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:pointerover /template/ Border#StateLayer">
+      <Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceHoverBrush}"/>
+    </Style>
+    <Style Selector="^:inactive /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}"/>
+    </Style>
+    <Style Selector="^:selected">
+      <Setter Property="Background" Value="{DynamicResource MaterialPrimaryBrush}"/>
+      <Setter Property="Foreground" Value="{DynamicResource MaterialOnPrimaryBrush}"/>
+      <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    <Style Selector="^:selected:pointerover /template/ Border#StateLayer">
+      <Setter Property="Background" Value="{DynamicResource MaterialOnPrimaryHoverBrush}"/>
+    </Style>
+    <Style Selector="^:disabled /template/ Border#OuterBorder">
+      <Setter Property="Opacity" Value="0.38"/>
+    </Style>
+    <Style Selector="^:btnfocused /template/ Border#FocusVisual">
+      <Setter Property="IsVisible" Value="True"/>
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

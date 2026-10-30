@@ -18,6 +18,94 @@ fn infinity() -> Size {
     Size::new(f64::INFINITY, f64::INFINITY)
 }
 
+fn rich_style(start: i32, length: i32, size: f64) -> super::TextStyleOverrides {
+    use ferroui_base::media::text_formatting::{GenericTextRunProperties, TextRunProperties};
+    use ferroui_base::media::{BaselineAlignment, FontFeatureCollection, Typeface, TextDecorations};
+    use ferroui_base::utilities::ValueSpan;
+    let properties: Rc<dyn TextRunProperties> = Rc::new(GenericTextRunProperties::with_all(
+        Typeface::default(), size, Some(TextDecorations::strikethrough()), Some(Brushes::red()), None,
+        BaselineAlignment::Baseline, None, Some(FontFeatureCollection::parse("liga=0").unwrap()),
+    ));
+    Rc::from([ValueSpan::new(start, length, properties)])
+}
+
+fn rendered_font_sizes(presenter: &TextPresenter) -> Vec<f64> {
+    presenter.text_layout().text_lines().iter().flat_map(|line| line.text_runs().iter()
+        .flat_map(|run| {
+            let count = run.text().len();
+            let size = run.properties().map_or(0.0, |properties| properties.font_rendering_em_size());
+            std::iter::repeat_n(size, count)
+        }).collect::<Vec<_>>()).collect()
+}
+
+#[test]
+fn rich_ranges_and_selection_share_unicode_layout_geometry() {
+    let _scope = test_scope();
+    let target = presenter("aΩ🦀bc");
+    target.set_font_size(12.0);
+    target.set_text_style_overrides(Some(rich_style(1, 3, 30.0)));
+    target.measure(infinity());
+    let before = target.text_layout();
+    assert_eq!(rendered_font_sizes(&target), [12.0, 30.0, 30.0, 30.0, 12.0, 12.0]);
+    let bounds = before.hit_test_text_range(1, 3);
+    let selected_brush: Rc<dyn IBrush> = Brushes::blue();
+    target.set_selection_foreground_brush(Some(selected_brush.clone()));
+    target.set_selection_start(1);
+    target.set_selection_end(5);
+    assert_eq!(before.width_including_trailing_whitespace(), target.text_layout().width_including_trailing_whitespace());
+    assert_eq!(before.height(), target.text_layout().height());
+    assert_eq!(bounds, target.text_layout().hit_test_text_range(1, 3));
+    assert_eq!(rendered_font_sizes(&target), [12.0, 30.0, 30.0, 30.0, 12.0, 12.0]);
+    let layout = target.text_layout();
+    let styled = layout.text_lines()[0].text_runs().iter().find(|run| run.text().to_string_lossy().contains('Ω')).cloned().unwrap();
+    let properties = styled.properties().unwrap();
+    assert!(properties.foreground_brush().is_some_and(|brush| **brush == *selected_brush));
+    assert_eq!(properties.font_features().unwrap().get(0).value, 0);
+    assert!(properties.text_decorations().is_some());
+}
+
+#[test]
+fn rich_ranges_shift_around_preedit_and_preserve_its_inherited_style() {
+    let _scope = test_scope();
+    let target = presenter("aΩ🦀bc");
+    let styles = rich_style(1, 3, 30.0);
+    target.set_text_style_overrides(Some(styles.clone()));
+    target.set_caret_index(4);
+    target.set_preedit_text(Some("漢字"));
+    target.set_preedit_text_cursor_position(Some(2));
+    target.measure(infinity());
+    assert_eq!(layout_text(&target), "aΩ🦀漢字bc");
+    assert_eq!(rendered_font_sizes(&target), [12.0, 30.0, 30.0, 30.0, 30.0, 30.0, 12.0, 12.0]);
+    let layout = target.text_layout();
+    let preedit = layout.text_lines()[0].text_runs().iter().find(|run| run.text().to_string_lossy().contains('漢')).cloned().unwrap();
+    let properties = preedit.properties().unwrap();
+    assert_eq!(properties.font_features().unwrap().get(0).value, 0);
+    assert_eq!(properties.text_decorations().unwrap().len(), 2, "IME underline retains the authored strike");
+    assert!(Rc::ptr_eq(target.text_style_overrides().as_ref().unwrap(), &styles));
+    target.set_preedit_text(None);
+    assert_eq!(layout_text(&target), "aΩ🦀bc");
+    assert_eq!(rendered_font_sizes(&target), [12.0, 30.0, 30.0, 30.0, 12.0, 12.0]);
+}
+
+#[test]
+fn replacing_range_styles_and_font_features_invalidates_shaped_layout() {
+    use ferroui_base::media::FontFeatureCollection;
+    let _scope = test_scope();
+    let target = presenter("office");
+    target.set_text_style_overrides(Some(rich_style(0, 6, 24.0)));
+    let first = target.text_layout();
+    target.set_text_style_overrides(Some(rich_style(0, 6, 40.0)));
+    let second = target.text_layout();
+    assert!(!Rc::ptr_eq(&first, &second));
+    assert!(second.width() > first.width());
+    target.set_text_style_overrides(None);
+    let plain = target.text_layout();
+    target.set_font_features(Some(FontFeatureCollection::parse("kern=0").unwrap()));
+    let featured = target.text_layout();
+    assert!(!Rc::ptr_eq(&plain, &featured));
+    assert_eq!(featured.text_lines()[0].text_runs()[0].properties().unwrap().font_features().unwrap().get(0).tag, "kern");
+}
+
 fn presenter(text: &str) -> Ref<TextPresenter> {
     let presenter = TextPresenter::new();
     presenter.set_text(Some(text));

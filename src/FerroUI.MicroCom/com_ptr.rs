@@ -61,13 +61,13 @@ impl<T: Interface> ComPtr<T> {
 
     /// `QueryInterface` for `U`.
     ///
-    /// The native library compares against the IIDs materialized by `com.h`
-    /// (see [`crate::Guid::as_com_h_materialized`]), Rust-implemented objects
-    /// accept both forms; so the materialized form is tried first and the IDL
-    /// form second.
+    /// The native library compares against the IIDs `com.h` materializes: the
+    /// IDL value, or in libraries built before the `com.h` fix the form of
+    /// [`crate::Guid::as_com_h_materialized`]. Rust-implemented objects accept
+    /// both; so the IDL form is tried first and the older form second.
     pub fn cast<U: Interface>(&self) -> Result<ComPtr<U>, HResult> {
         let mut last = E_NOINTERFACE;
-        for iid in [U::IID.as_com_h_materialized(), U::IID] {
+        for iid in [U::IID, U::IID.as_com_h_materialized()] {
             let mut out: *mut c_void = std::ptr::null_mut();
             // SAFETY: valid object, valid out pointer.
             let hr = unsafe { self.as_unknown().query_interface_raw(&iid, &mut out) };

@@ -109,6 +109,17 @@ ferro_class! {
         /// Returns a new, type-specific automation peer implementation for
         /// the control.
         fn on_create_automation_peer(this) -> Ref<AutomationPeer>;
+        /// The flyout a context request on the control shows (`for_request`), or
+        /// that its keys and cancellation dismiss: `ContextFlyout` by default. A
+        /// control whose context flyout belongs to another element (a linked text
+        /// container) resolves it here, and may show none for a request. An
+        /// addition (`docs/porting/DEVIATIONS.md`, Popup).
+        fn effective_context_flyout(this, for_request: bool) -> Option<Ref<FlyoutBase>>;
+        /// A counter the control advances when it raises a newer context request
+        /// of its own while an older one is being handled; `None` by default. The
+        /// context menu and flyout drop the older request when it changed. An
+        /// addition (`docs/porting/DEVIATIONS.md`, Popup).
+        fn context_request_generation(this) -> Option<u64>;
     }
 }
 ferroui_base::ferro_class_info!(Control { new: Control::new });
@@ -259,6 +270,14 @@ impl ControlImpl for Control {
 
     fn on_size_changed(this: &Self, e: &SizeChangedEventArgs) {
         this.raise_event(e);
+    }
+
+    fn effective_context_flyout(this: &Self, _for_request: bool) -> Option<Ref<FlyoutBase>> {
+        this.context_flyout()
+    }
+
+    fn context_request_generation(_this: &Self) -> Option<u64> {
+        None
     }
 }
 

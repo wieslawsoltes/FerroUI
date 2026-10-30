@@ -1,6 +1,34 @@
 [workspace]
 resolver = "2"
 members = [
+    # The Dock port (docs/porting/dock).
+    "samples/Dock/FerroDockReactiveUISample",
+    "src/Dock/FerroDock.Controls.DeferredContentControl",
+    "src/Dock/FerroDock.Controls.ProportionalStackPanel",
+    "src/Dock/FerroDock.Controls.Recycling",
+    "src/Dock/FerroDock.Controls.Recycling.Model",
+    "src/Dock/FerroDock.Controls.Recycling.Model.Ferro",
+    "src/Dock/FerroDock.Ferro",
+    "src/Dock/FerroDock.Ferro.Diagnostics",
+    "src/Dock/FerroDock.Ferro.Themes.Browser",
+    "src/Dock/FerroDock.Ferro.Themes.Fluent",
+    "src/Dock/FerroDock.Ferro.Themes.Simple",
+    "src/Dock/FerroDock.MarkupExtension",
+    "src/Dock/FerroDock.Model",
+    "src/Dock/FerroDock.Model.Ferro",
+    "src/Dock/FerroDock.Model.ReactiveUI",
+    "src/Dock/FerroDock.Model.ReactiveUI.Ferro",
+    "src/Dock/FerroDock.Model.ReactiveUI.Services",
+    "src/Dock/FerroDock.Model.ReactiveUI.Services.Ferro",
+    "src/Dock/FerroDock.Runtime",
+    "src/Dock/FerroDock.Serializer.SystemTextJson",
+    "src/Dock/FerroDock.Serializer.SystemTextJson.Generators",
+    "src/Dock/FerroDock.Serializer.SystemTextJson.Generators.Rust",
+    "src/Dock/FerroDock.Serializer.SystemTextJson.ReactiveUI",
+    "src/Dock/FerroDock.Settings",
+    "tests/Dock/FerroDock.Markup.Tests",
+    "tests/Dock/FerroDock.Serializer.Generated.Tests",
+    "tests/Dock/FerroDock.Settings.Markup.Tests",
     "samples/HotReload",
     "src/FerroUI.HotReload",
     "src/FerroUI.HotPatch",
@@ -24,6 +52,8 @@ members = [
     "src/FerroUI.View.Macros",
     "src/FerroUI.Controls.ColorPicker",
     "src/FerroUI.Controls.Charts",
+    "src/FerroUI.Controls.Repeater",
+    "src/FerroUI.Controls.Inking",
     "src/TreeDataGrid/FerroUI.TreeDataGrid.Core",
     "src/TreeDataGrid/FerroUI.Controls.TreeDataGrid",
     "src/StaticViewLocator/FerroUI.StaticViewLocator",
@@ -31,6 +61,7 @@ members = [
     "src/StaticViewLocator/FerroUI.StaticViewLocator.Build",
     "src/Markup/FerroUI.Markup",
     "src/Markup/FerroUI.Markup.Xaml",
+    "src/Markup/FerroUI.Markup.Xaml.WinUI",
     "src/Markup/FerroUI.Markup.Xaml.Loader",
     "src/FerroUI.Build.Scan",
     "src/FerroUI.Build.Tasks",
@@ -69,6 +100,8 @@ members = [
     "src/FerroUI.Themes.Simple",
     "src/FerroUI.Themes.Fluent",
     "src/FerroUI.Themes.WinUI",
+    "src/FerroUI.Themes.MacOS",
+    "src/FerroUI.Themes.Material",
     "src/FerroUI.OpenGL",
     "src/FerroUI.Metal",
     "src/FerroUI.Remote.Protocol",
@@ -131,6 +164,7 @@ members = [
     "samples/ReactiveDemoComponents",
     "samples/MiniMvvm",
     "samples/ControlCatalog",
+    "samples/WinUIGallery",
     "samples/ControlCatalog.Desktop",
     "samples/ControlCatalog.iOS",
     "samples/ControlCatalog.Browser",
@@ -154,6 +188,7 @@ members = [
     "samples/ControlGallery.WinUI",
     "samples/WinUIEmbedSample",
     "samples/WinUIThemeGallery",
+    "samples/MaterialThemeGallery",
     "samples/BehaviorsGallery",
     "samples/SafeAreaDemo",
     "samples/SafeAreaDemo.Desktop",
@@ -163,13 +198,6 @@ members = [
     "samples/PlatformSanityChecks",
     "samples/SingleProjectSandbox",
     "samples/GpuInterop",
-    "samples/Ember.Core",
-    "samples/Ember.Content",
-    "samples/Ember",
-    "samples/Ember.Desktop",
-    "samples/Ember.Browser",
-    "samples/Ember.Android",
-    "samples/Ember.iOS",
 ]
 
 [workspace.package]
@@ -189,6 +217,17 @@ categories = ["gui"]
 # that the crates of a release are only ever resolved together (docs/release.md, "Version scheme").
 # `scripts/release/set-version.sh <version>` writes the version above and these keys.
 [workspace.dependencies]
+# The Dock port (docs/porting/dock): its crates and the dependencies only it has.
+ferrodock-controls-recycling-model = { path = "src/Dock/FerroDock.Controls.Recycling.Model" }
+ferrodock-controls-recycling-model-ferro = { path = "src/Dock/FerroDock.Controls.Recycling.Model.Ferro" }
+ferrodock-model = { path = "src/Dock/FerroDock.Model" }
+ferrodock-model-ferro = { path = "src/Dock/FerroDock.Model.Ferro" }
+ferrodock-runtime = { path = "src/Dock/FerroDock.Runtime" }
+ferrodock-settings = { path = "src/Dock/FerroDock.Settings" }
+ryu = "1.0"
+serde = "1.0"
+serde_json = { version = "1.0", features = ["raw_value"] }
+
 ferroui-hot-reload = { version = "=0.4.0", path = "src/FerroUI.HotReload" }
 ferroui-hot-patch = { version = "=0.4.0", path = "src/FerroUI.HotPatch" }
 ferroui-inspect = { version = "=0.4.0", path = "src/FerroUI.Inspect" }
@@ -214,6 +253,8 @@ ferroui-view = { version = "=0.4.0", path = "src/FerroUI.View" }
 ferroui-view-macros = { version = "=0.4.0", path = "src/FerroUI.View.Macros" }
 ferroui-controls-color-picker = { version = "=0.4.0", path = "src/FerroUI.Controls.ColorPicker" }
 ferroui-controls-charts = { version = "=0.4.0", path = "src/FerroUI.Controls.Charts" }
+ferroui-controls-repeater = { version = "=0.4.0", path = "src/FerroUI.Controls.Repeater" }
+ferroui-controls-inking = { version = "=0.4.0", path = "src/FerroUI.Controls.Inking" }
 ferroui-treedatagrid-core = { version = "=0.4.0", path = "src/TreeDataGrid/FerroUI.TreeDataGrid.Core" }
 ferroui-controls-treedatagrid = { version = "=0.4.0", path = "src/TreeDataGrid/FerroUI.Controls.TreeDataGrid" }
 ferroui-static-view-locator = { version = "=0.4.0", path = "src/StaticViewLocator/FerroUI.StaticViewLocator" }
@@ -221,6 +262,7 @@ ferroui-static-view-locator-macros = { version = "=0.4.0", path = "src/StaticVie
 ferroui-static-view-locator-build = { version = "=0.4.0", path = "src/StaticViewLocator/FerroUI.StaticViewLocator.Build" }
 ferroui-markup = { version = "=0.4.0", path = "src/Markup/FerroUI.Markup" }
 ferroui-markup-xaml = { version = "=0.4.0", path = "src/Markup/FerroUI.Markup.Xaml" }
+ferroui-markup-xaml-winui = { version = "=0.4.0", path = "src/Markup/FerroUI.Markup.Xaml.WinUI" }
 # Without the default features: the default is the run-time back end, which links the XAML runtime library
 # and the controls, and the build tool (`ferroui-build`) takes the compiler alone. Every crate that loads
 # markup at run time states the `runtime` feature.
@@ -265,6 +307,8 @@ ferroui-xaml-interactions-responsive = { version = "=0.4.0", path = "src/Behavio
 ferroui-themes-simple = { version = "=0.4.0", path = "src/FerroUI.Themes.Simple" }
 ferroui-themes-fluent = { version = "=0.4.0", path = "src/FerroUI.Themes.Fluent" }
 ferroui-themes-winui = { version = "=0.4.0", path = "src/FerroUI.Themes.WinUI" }
+ferroui-themes-macos = { version = "=0.4.0", path = "src/FerroUI.Themes.MacOS" }
+ferroui-themes-material = { version = "=0.4.0", path = "src/FerroUI.Themes.Material" }
 ferroui-opengl = { version = "=0.4.0", path = "src/FerroUI.OpenGL" }
 ferroui-metal = { version = "=0.4.0", path = "src/FerroUI.Metal" }
 ferroui-remote-protocol = { version = "=0.4.0", path = "src/FerroUI.Remote.Protocol" }
@@ -273,6 +317,18 @@ ferroui-skia = { version = "=0.4.0", path = "src/Skia/FerroUI.Skia" }
 ferroui-vello = { version = "=0.4.0", path = "src/Vello/FerroUI.Vello" }
 ferroui-harfbuzz = { version = "=0.4.0", path = "src/HarfBuzz/FerroUI.HarfBuzz" }
 bitflags = "2"
+# ICU4X, one version for the whole workspace (owner decision, 2026-10-30): its crates require each
+# other within a minor version (`~2.4.0`), so two crates of the workspace on different minor
+# versions cannot be resolved together. The text preparation of the Pretext port (segmentation) and
+# the formatting of the ProTranslate port (locales, numbers, calendars, dates) take them from here,
+# with the compiled data and without the default features; a crate adds the features it needs.
+icu_segmenter = { version = "2.4", default-features = false, features = ["compiled_data"] }
+icu_locale_core = "2.4"
+icu_properties = "2.4"
+icu_locale = "2.4"
+icu_decimal = { version = "2.4", features = ["alloc"] }
+icu_calendar = { version = "2.4", default-features = false, features = ["compiled_data"] }
+icu_datetime = { version = "2.4", default-features = false, features = ["compiled_data"] }
 # A fast hasher for maps keyed by identities and short keys (the TreeDataGrid's recycle pools).
 rustc-hash = "2.1"
 smallvec = "1.16"
@@ -374,6 +430,15 @@ getrandom = { version = "0.4" }
 # thin LTO over the default sixteen code generation units, which generates code on all cores.
 [profile.release]
 lto = "thin"
+
+# Optimised code for running an application locally (`cargo run --profile fast-release -p <app>`):
+# the optimisation level of release, without link-time optimisation across crates. The last step
+# of an executable then links the optimised crates instead of optimising the whole program again,
+# which took most of a release build of a large application. Not for measurements or shipping:
+# the benchmarks are measured with release, and what is shipped is built with dist.
+[profile.fast-release]
+inherits = "release"
+lto = false
 
 # The build that is shipped and measured (`cargo build --profile dist`, `scripts/perf-report.py
 # --profile dist`): whole-program optimisation in one code generation unit. The executables are

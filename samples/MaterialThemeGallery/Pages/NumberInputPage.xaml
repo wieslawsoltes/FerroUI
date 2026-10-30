@@ -1,0 +1,61 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:data="using:FerroUI.Data"
+             x:Class="MaterialThemeGallery.Pages.NumberInputPage">
+  <!-- NumericUpDown, ButtonSpinner and AutoCompleteBox in their states. The native counterpart
+       is NumberInputPage.winui.xml (NumberBox, a composed spinner and AutoSuggestBox). -->
+  <StackPanel Margin="24" Spacing="12">
+    <TextBlock Text="Numbers and suggestions" FontSize="28" FontWeight="SemiBold" />
+
+    <TextBlock Text="NumericUpDown" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+    <Grid ColumnSpacing="16" RowSpacing="12" HorizontalAlignment="Left">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="160" />
+        <ColumnDefinition Width="220" />
+      </Grid.ColumnDefinitions>
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+      </Grid.RowDefinitions>
+
+      <TextBlock Grid.Row="0" Text="With a value" VerticalAlignment="Center" />
+      <NumericUpDown Grid.Row="0" Grid.Column="1" Value="42" Minimum="0" Maximum="100" />
+
+      <TextBlock Grid.Row="1" Text="Placeholder" VerticalAlignment="Center" />
+      <NumericUpDown Grid.Row="1" Grid.Column="1" PlaceholderText="Enter a number" />
+
+      <TextBlock Grid.Row="2" Text="Disabled" VerticalAlignment="Center" />
+      <NumericUpDown Grid.Row="2" Grid.Column="1" Value="42" IsEnabled="False" />
+
+      <TextBlock Grid.Row="3" Text="Validation error" VerticalAlignment="Top" Margin="0,6,0,0" />
+      <NumericUpDown Grid.Row="3" Grid.Column="1" Value="420">
+        <DataValidationErrors.Error>
+          <data:DataValidationException>
+            <x:Arguments>
+              <x:String>Enter a number from 0 to 100.</x:String>
+            </x:Arguments>
+          </data:DataValidationException>
+        </DataValidationErrors.Error>
+      </NumericUpDown>
+    </Grid>
+
+    <TextBlock Text="ButtonSpinner" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+    <StackPanel Orientation="Horizontal" Spacing="16">
+      <ButtonSpinner Width="220">
+        <TextBlock Text="Spinner content" VerticalAlignment="Center" Margin="10,0" />
+      </ButtonSpinner>
+      <ButtonSpinner Width="220" AllowSpin="False">
+        <TextBlock Text="Spinning not allowed" VerticalAlignment="Center" Margin="10,0" />
+      </ButtonSpinner>
+    </StackPanel>
+
+    <TextBlock Text="AutoCompleteBox" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+    <StackPanel Orientation="Horizontal" Spacing="16">
+      <AutoCompleteBox Width="220" PlaceholderText="Search" />
+      <AutoCompleteBox Width="220" Text="Search text" />
+      <AutoCompleteBox Width="180" Text="Disabled" IsEnabled="False" />
+    </StackPanel>
+  </StackPanel>
+</UserControl>

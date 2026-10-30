@@ -1,0 +1,31 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/CommonStyles/Hyperlink_themeresources.xaml
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+  Copied from the WinUI theme foundation and adapted for macOS 26.
+  Maintained here independently; see docs/porting/macos26-theme.md.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:winui="using:FerroUI.Themes.MacOS"
+                    x:ClassModifier="internal">
+  <ResourceDictionary.ThemeDictionaries>
+    <ResourceDictionary x:Key="Default">
+      <StaticResource x:Key="HyperlinkForeground" ResourceKey="AccentTextFillColorPrimaryBrush" />
+      <StaticResource x:Key="HyperlinkForegroundPointerOver" ResourceKey="AccentTextFillColorSecondaryBrush" />
+      <StaticResource x:Key="HyperlinkForegroundPressed" ResourceKey="AccentTextFillColorTertiaryBrush" />
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="Light">
+      <StaticResource x:Key="HyperlinkForeground" ResourceKey="AccentTextFillColorPrimaryBrush" />
+      <StaticResource x:Key="HyperlinkForegroundPointerOver" ResourceKey="AccentTextFillColorSecondaryBrush" />
+      <StaticResource x:Key="HyperlinkForegroundPressed" ResourceKey="AccentTextFillColorTertiaryBrush" />
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="{x:Static winui:MacOSTheme.HighContrast}">
+      <StaticResource x:Key="HyperlinkForeground" ResourceKey="AccentTextFillColorPrimaryBrush" />
+      <StaticResource x:Key="HyperlinkForegroundPointerOver" ResourceKey="AccentTextFillColorSecondaryBrush" />
+      <StaticResource x:Key="HyperlinkForegroundPressed" ResourceKey="AccentTextFillColorTertiaryBrush" />
+    </ResourceDictionary>
+  </ResourceDictionary.ThemeDictionaries>
+  <x:Boolean x:Key="HyperlinkUnderlineVisible">False</x:Boolean>
+</ResourceDictionary>

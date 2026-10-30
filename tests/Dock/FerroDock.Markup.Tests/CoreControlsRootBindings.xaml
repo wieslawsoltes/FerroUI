@@ -1,0 +1,3 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:m="clr-namespace:FerroDock.Model.Controls;assembly=FerroDock.Model" x:DataType="m:IRootDock">
+<TextBlock Text="{Binding Title}"/><TextBlock Text="{Binding Windows.Count}"/><TextBlock Text="{Binding LeftPinnedDockables.Count}"/><CheckBox IsChecked="{Binding IsFocusableRoot, Mode=TwoWay}"/>
+</StackPanel>

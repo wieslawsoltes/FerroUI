@@ -1,0 +1,206 @@
+name: Nightly (informative)
+
+# Informative jobs: Windows on ARM64 and Wayland under the sway of Debian 13. No pull request runs them.
+# Split from ci.yml so that a pull request that does not touch this area shows no check for it
+# (a skipped job is still a check). It runs every night on main and by hand:
+# gh workflow run nightly.yml --ref <branch>
+
+on:
+  schedule:
+    - cron: '47 3 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: nightly-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  RUST_BACKTRACE: 1
+
+jobs:
+  # The same backend on Windows for ARM64 (the owner's test machine is one): whether ANGLE builds
+  # for the target and runs there. Informative as a whole until its first green run.
+  windows-arm64:
+    name: Build, test and smoke run (Windows platform backend, ARM64; informative)
+    runs-on: windows-11-arm
+    continue-on-error: true
+    timeout-minutes: 120
+    env:
+      CARGO_PROFILE_DEV_DEBUG: 0
+      CARGO_PROFILE_TEST_DEBUG: 0
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+        with:
+          targets: aarch64-pc-windows-msvc
+      - name: The toolchain and LLVM of the image
+        run: |
+          rustc -vV
+          clang --version || true
+          echo "LIBCLANG_PATH=${LIBCLANG_PATH:-unset}"
+      - name: Build the backend and its example (without ANGLE)
+        run: cargo build --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --no-default-features --examples
+      - name: Tests of the backend
+        run: cargo test --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --no-default-features --no-fail-fast
+      - name: Smoke run of a window (software rendering)
+        timeout-minutes: 5
+        run: cargo run --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --no-default-features --example win32_window -- --smoke
+      - name: Smoke run with the OpenGL of the system (WGL), or its fallback
+        timeout-minutes: 5
+        run: cargo run --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --no-default-features --example win32_window -- --smoke --rendering wgl
+      - name: Accessibility, the tree of a window through the client interface of UI Automation
+        if: ${{ !cancelled() }}
+        timeout-minutes: 5
+        run: cargo run --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --no-default-features --example win32_window -- --a11y
+      - name: Build with ANGLE (the time of the mozangle build)
+        if: ${{ !cancelled() }}
+        timeout-minutes: 90
+        run: |
+          start=$(date +%s)
+          cargo build --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --examples
+          echo "::notice::ferroui-win32 with the feature angle built in $(( $(date +%s) - start )) s on $RUNNER_ARCH"
+      - name: Smoke run through ANGLE with the ANGLE probe
+        if: ${{ !cancelled() }}
+        timeout-minutes: 5
+        run: cargo run --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --example win32_window -- --smoke --rendering angle --angle-probe
+      - name: Smoke run through ANGLE, presented through DirectComposition
+        if: ${{ !cancelled() }}
+        timeout-minutes: 5
+        run: cargo run --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --example win32_window -- --smoke --rendering angle --composition dcomp --teardown-trace
+      # The process has to end after the run, every time: in runs 38066650638 and 38067972798 it
+      # did not on this runner, and in run 38071416065 it did not on the ARM64 runner (the values
+      # of the main thread were destroyed after the system had ended the thread that renders:
+      # docs/porting/win32-platform.md, section 11.2). Ten runs. A process that does not end is
+      # stopped by the time limit of the step: `timeout` of the shell does not end a process
+      # that waits inside its own exit (run 38072903035).
+      - name: The process ends after a run through DirectComposition (ten runs)
+        if: ${{ !cancelled() }}
+        timeout-minutes: 5
+        run: |
+          exe=target/aarch64-pc-windows-msvc/debug/examples/win32_window.exe
+          for run in 1 2 3 4 5 6 7 8 9 10; do
+            code=0
+            timeout 60 "$exe" --smoke --rendering angle --composition dcomp > "smoke-$run.log" 2>&1 || code=$?
+            if [ "$code" != 0 ]; then
+              tail -n 40 "smoke-$run.log"
+              echo "::error::run $run ended with the code $code (124: the process did not end in a minute)"
+              exit 1
+            fi
+            echo "run $run: $(tail -n 2 "smoke-$run.log" | tr '\n' ' ')"
+          done
+      # The same run presented through Windows.UI.Composition (the rest of stage 2c): the compositor
+      # of the Windows Runtime on a thread with a dispatcher queue, the tree of the window with
+      # the visuals of the blur effects, a drawing surface of a composition graphics device; of
+      # mica, acrylic blur, blur and transparent the window takes the effect the system has.
+      - name: Smoke run through ANGLE, presented through Windows.UI.Composition
+        if: ${{ !cancelled() }}
+        timeout-minutes: 5
+        run: cargo run --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --example win32_window -- --smoke --rendering angle --composition winui --teardown-trace
+      # And the process ends after such a run, every time (the thread of the mode is in its
+      # message loop when the system ends it). Ten runs.
+      - name: The process ends after a run through Windows.UI.Composition (ten runs)
+        if: ${{ !cancelled() }}
+        timeout-minutes: 5
+        run: |
+          exe=target/aarch64-pc-windows-msvc/debug/examples/win32_window.exe
+          for run in 1 2 3 4 5 6 7 8 9 10; do
+            code=0
+            timeout 60 "$exe" --smoke --rendering angle --composition winui > "smoke-winui-$run.log" 2>&1 || code=$?
+            if [ "$code" != 0 ]; then
+              tail -n 40 "smoke-winui-$run.log"
+              echo "::error::run $run ended with the code $code (124: the process did not end in a minute)"
+              exit 1
+            fi
+            echo "run $run: $(tail -n 2 "smoke-winui-$run.log" | tr '\n' ' ')"
+          done
+      # The same run presented through a DXGI swap chain of the window (the low-latency mode, the
+      # rest of stage 2c): a flip-model swap chain that allows tearing, on the device of ANGLE.
+      # Required since its first green run (38078715201): the software device of the runners
+      # creates such a swap chain.
+      - name: Smoke run through ANGLE, presented through a DXGI swap chain
+        if: ${{ !cancelled() }}
+        timeout-minutes: 5
+        run: cargo run --locked --target aarch64-pc-windows-msvc -p ferroui-win32 --example win32_window -- --smoke --rendering angle --composition dxgi --teardown-trace
+      - name: Skia binaries published for Windows on ARM64
+        if: ${{ !cancelled() }}
+        run: |
+          cargo fetch --locked --target aarch64-pc-windows-msvc
+          info="$(ls "${CARGO_HOME:-$HOME/.cargo}"/registry/src/*/skia-bindings-*/.cargo_vcs_info.json | head -n 1)"
+          version="$(basename "$(dirname "$info")" | sed 's/^skia-bindings-//')"
+          hash="$(grep -o '"sha1": *"[0-9a-f]*"' "$info" | grep -o '[0-9a-f]\{40\}' | cut -c1-20)"
+          echo "skia-bindings $version, commit $hash"
+          for key in jpegd-jpege-pdf ganesh-gl-jpegd-jpege-pdf; do
+            if curl -sfL -r 0-0 -o /dev/null "https://github.com/rust-skia/skia-binaries/releases/download/$version/skia-binaries-$hash-aarch64-pc-windows-msvc-$key.tar.gz"; then
+              echo "::notice::Skia binary published for aarch64-pc-windows-msvc: $key"
+            else
+              echo "::warning::no Skia binary for aarch64-pc-windows-msvc with the features $key"
+            fi
+          done
+
+  # The smoke mode under a newer sway than the runner has: the container of a distribution whose
+  # sway is 1.10 or later (version 5 or more of xdg_wm_base, so that a popup is moved with
+  # xdg_popup.reposition where sway 1.9 has it created again; popups of an input method, so that
+  # the textinput phase can compare the cursor rectangle at the compositor). Informational: the
+  # phases were written against sway 1.9, and what differs here is a finding, not a failure of the
+  # workflow (docs/porting/wayland-platform.md, section 12.3). The compositor does not run as
+  # root: the run is made by a user of the container.
+  wayland-next:
+    name: Informational (Linux, Wayland under the sway of Debian 13)
+    runs-on: ubuntu-latest
+    container: debian:trixie
+    continue-on-error: true
+    timeout-minutes: 90
+    env:
+      CARGO_PROFILE_DEV_DEBUG: 0
+      CARGO_PROFILE_TEST_DEBUG: 0
+    steps:
+      - name: System packages
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            ca-certificates curl git build-essential pkg-config python3 util-linux \
+            sway wl-clipboard libwayland-client0 libwayland-egl1 libxkbcommon0 xkb-data \
+            libegl1 libegl-mesa0 libgl1 libgles2 libgl1-mesa-dri \
+            libfontconfig1-dev libfreetype-dev fonts-dejavu-core
+          sway --version
+          useradd -m tester
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: wayland-next
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
+      - name: Build the window example
+        run: cargo build --locked -p ferroui-wayland --features example --example wayland_window
+      - name: A window on a compositor, rendered through wl_shm buffers
+        if: ${{ !cancelled() }}
+        run: |
+          chmod -R a+rX . 2>/dev/null || true
+          runuser -u tester -- scripts/wayland/sway-run.sh -- \
+            timeout 300 target/debug/examples/wayland_window --smoke
+      - name: On an output of scale 1.5, through wl_shm buffers
+        if: ${{ !cancelled() }}
+        run: |
+          runuser -u tester -- scripts/wayland/sway-run.sh --size 1200x720 --scale 1.5 -- \
+            timeout 300 target/debug/examples/wayland_window --smoke --expect-scale=1.5 --skip=resize
+      - name: The same rendered through EGL
+        if: ${{ !cancelled() }}
+        run: |
+          runuser -u tester -- env LIBGL_ALWAYS_SOFTWARE=1 scripts/wayland/sway-run.sh -- \
+            timeout 300 target/debug/examples/wayland_window --smoke --mode=egl
+      # The dmabuf swapchain asked for: the container has no render node, so the backend falls back
+      # to a wl_egl_window and the run says so.
+      - name: The dmabuf swapchain asked for (the fallback)
+        if: ${{ !cancelled() }}
+        run: |
+          runuser -u tester -- env LIBGL_ALWAYS_SOFTWARE=1 scripts/wayland/sway-run.sh -- \
+            timeout 300 target/debug/examples/wayland_window --smoke --mode=dmabuf

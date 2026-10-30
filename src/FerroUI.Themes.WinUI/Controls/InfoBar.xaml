@@ -1,0 +1,219 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/InfoBar/InfoBar.xaml (the implicit InfoBar style)
+    controls/dev/InfoBar/InfoBar_themeresources.xaml (its resources are
+    Resources/InfoBar_themeresources.xaml; InfoBarCloseButtonStyle is in Controls/NotificationCard.xaml)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  The template of WinUI's InfoBar, which FerroUI ports as a control (ferroui-controls,
+  docs/porting/winui-controls.md); the Fluent theme has no document for it.
+  Translation notes (docs/porting/winui-theme.md, section 4):
+  - The visual states are the pseudo-classes the control sets (InfoBar.cpp calls GoToState):
+    SeverityLevels are :informational (the base values), :error, :warning and :success;
+    IconStates are :standard-icon-visible and :user-icon-visible (NoIconVisible is neither);
+    CloseButtonCollapsed is :close-button-collapsed; InfoBarVisible is :open, so InfoBarCollapsed
+    is ^:not(:open); ForegroundSet is :foreground-set; NoBannerContent is :no-banner-content.
+  - ContentArea, the presenter of the Content, is PART_ContentPresenter: InfoBar is a
+    ContentControl, whose content is hosted by the presenter of that name.
+  - The inner Grid draws a background with a corner radius and has a padding: a Border around the
+    Grid, which keeps the MinHeight that InfoBarPanel reads from its parent.
+  - The severity icons are the glyphs of WinUI in TextBlocks in SymbolThemeFontFamily, and the
+    close button the SymbolIcon of InfoBarCloseButtonSymbol, as in WinUI
+    (docs/porting/winui-controls.md, section 5.2).
+  - The CloseButton has no Button.Resources: the AppBarButton brushes that WinUI gives the button
+    there are the setters and states of InfoBarCloseButtonStyle (NC-7), its CloseButtonStyle.
+  - The Style of HyperlinkButton in the resources of the presenter of the action button is a style
+    of its Styles. TextWrapping WrapWholeWords is WrapWithOverflow. AutomationProperties
+    (LandmarkType, IsDialog, AccessibilityView) are left out.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20" Width="480">
+      <StackPanel Spacing="12">
+        <InfoBar IsOpen="True" Title="Title" Message="An informational message." />
+        <InfoBar IsOpen="True" Severity="Success" Title="Success" Message="A message of success." />
+        <InfoBar IsOpen="True" Severity="Warning" Title="Warning" Message="A warning." IsClosable="False" />
+        <InfoBar IsOpen="True" Severity="Error" Title="Error" Message="An error that is long enough to need a second line below the title." />
+      </StackPanel>
+    </Border>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="{x:Type InfoBar}" TargetType="InfoBar">
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="CloseButtonStyle" Value="{StaticResource InfoBarCloseButtonStyle}" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="{DynamicResource InfoBarBorderBrush}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource InfoBarBorderThickness}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border x:Name="ContentRoot"
+                VerticalAlignment="Top"
+                Background="{DynamicResource InfoBarInformationalSeverityBackgroundBrush}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BackgroundSizing="InnerBorderEdge"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}">
+          <!-- Background is used here so that it overrides the severity status color if set. -->
+          <Border HorizontalAlignment="Stretch"
+                  Background="{TemplateBinding Background}"
+                  CornerRadius="{TemplateBinding CornerRadius}"
+                  Padding="{StaticResource InfoBarContentRootPadding}">
+            <Grid MinHeight="{DynamicResource InfoBarMinHeight}"
+                  ColumnDefinitions="Auto,*,Auto"
+                  RowDefinitions="Auto,Auto">
+              <Grid x:Name="StandardIconArea" IsVisible="False">
+                <TextBlock x:Name="IconBackground"
+                           VerticalAlignment="Top"
+                           Margin="{StaticResource InfoBarIconMargin}"
+                           FontSize="{StaticResource InfoBarIconFontSize}"
+                           Text="{StaticResource InfoBarIconBackgroundGlyph}"
+                           Foreground="{DynamicResource InfoBarInformationalSeverityIconBackground}"
+                           FontFamily="{DynamicResource SymbolThemeFontFamily}" />
+                <TextBlock x:Name="StandardIcon"
+                           VerticalAlignment="Top"
+                           Margin="{StaticResource InfoBarIconMargin}"
+                           FontSize="{StaticResource InfoBarIconFontSize}"
+                           Text="{StaticResource InfoBarInformationalIconGlyph}"
+                           Foreground="{DynamicResource InfoBarInformationalSeverityIconForeground}"
+                           FontFamily="{DynamicResource SymbolThemeFontFamily}" />
+              </Grid>
+              <Viewbox x:Name="UserIconBox"
+                       Grid.Column="0"
+                       IsVisible="False"
+                       VerticalAlignment="Top"
+                       MaxWidth="{DynamicResource InfoBarIconFontSize}"
+                       MaxHeight="{DynamicResource InfoBarIconFontSize}"
+                       Margin="{DynamicResource InfoBarIconMargin}"
+                       Child="{Binding TemplateSettings.IconElement, RelativeSource={RelativeSource TemplatedParent}}" />
+              <InfoBarPanel Grid.Column="1"
+                            Margin="{StaticResource InfoBarPanelMargin}"
+                            HorizontalOrientationPadding="{StaticResource InfoBarPanelHorizontalOrientationPadding}"
+                            VerticalOrientationPadding="{StaticResource InfoBarPanelVerticalOrientationPadding}">
+                <TextBlock x:Name="Title"
+                           Text="{TemplateBinding Title}"
+                           Foreground="{DynamicResource InfoBarTitleForeground}"
+                           InfoBarPanel.HorizontalOrientationMargin="{StaticResource InfoBarTitleHorizontalOrientationMargin}"
+                           InfoBarPanel.VerticalOrientationMargin="{StaticResource InfoBarTitleVerticalOrientationMargin}"
+                           TextWrapping="WrapWithOverflow"
+                           FontWeight="{StaticResource InfoBarTitleFontWeight}"
+                           FontSize="{StaticResource InfoBarTitleFontSize}" />
+                <TextBlock x:Name="Message"
+                           Text="{TemplateBinding Message}"
+                           Foreground="{DynamicResource InfoBarMessageForeground}"
+                           InfoBarPanel.HorizontalOrientationMargin="{StaticResource InfoBarMessageHorizontalOrientationMargin}"
+                           InfoBarPanel.VerticalOrientationMargin="{StaticResource InfoBarMessageVerticalOrientationMargin}"
+                           TextWrapping="WrapWithOverflow"
+                           FontWeight="{StaticResource InfoBarMessageFontWeight}"
+                           FontSize="{StaticResource InfoBarMessageFontSize}" />
+                <ContentPresenter InfoBarPanel.HorizontalOrientationMargin="{StaticResource InfoBarActionHorizontalOrientationMargin}"
+                                  InfoBarPanel.VerticalOrientationMargin="{StaticResource InfoBarActionVerticalOrientationMargin}"
+                                  VerticalAlignment="Top"
+                                  Content="{TemplateBinding ActionButton}">
+                  <ContentPresenter.Styles>
+                    <Style Selector="HyperlinkButton">
+                      <Setter Property="Margin" Value="{StaticResource InfoBarHyperlinkButtonMargin}" />
+                      <Setter Property="Foreground" Value="{DynamicResource InfoBarHyperlinkButtonForeground}" />
+                    </Style>
+                  </ContentPresenter.Styles>
+                </ContentPresenter>
+              </InfoBarPanel>
+              <ContentPresenter x:Name="PART_ContentPresenter"
+                                Grid.Column="1"
+                                Grid.Row="1"
+                                Content="{TemplateBinding Content}"
+                                ContentTemplate="{TemplateBinding ContentTemplate}"
+                                VerticalAlignment="Center" />
+              <Button x:Name="CloseButton"
+                      Grid.Column="2"
+                      Command="{TemplateBinding CloseButtonCommand}"
+                      CommandParameter="{TemplateBinding CloseButtonCommandParameter}"
+                      Theme="{TemplateBinding CloseButtonStyle}">
+                <Viewbox Width="{StaticResource InfoBarCloseButtonGlyphSize}"
+                         Height="{StaticResource InfoBarCloseButtonGlyphSize}"
+                         HorizontalAlignment="Center"
+                         VerticalAlignment="Center">
+                  <SymbolIcon Symbol="{StaticResource InfoBarCloseButtonSymbol}" />
+                </Viewbox>
+              </Button>
+            </Grid>
+          </Border>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+
+    <!-- SeverityLevels: Error -->
+    <Style Selector="^:error /template/ Border#ContentRoot">
+      <Setter Property="Background" Value="{DynamicResource InfoBarErrorSeverityBackgroundBrush}" />
+    </Style>
+    <Style Selector="^:error /template/ TextBlock#IconBackground">
+      <Setter Property="Foreground" Value="{DynamicResource InfoBarErrorSeverityIconBackground}" />
+    </Style>
+    <Style Selector="^:error /template/ TextBlock#StandardIcon">
+      <Setter Property="Text" Value="{StaticResource InfoBarErrorIconGlyph}" />
+      <Setter Property="Foreground" Value="{DynamicResource InfoBarErrorSeverityIconForeground}" />
+    </Style>
+    <!-- SeverityLevels: Warning -->
+    <Style Selector="^:warning /template/ Border#ContentRoot">
+      <Setter Property="Background" Value="{DynamicResource InfoBarWarningSeverityBackgroundBrush}" />
+    </Style>
+    <Style Selector="^:warning /template/ TextBlock#IconBackground">
+      <Setter Property="Foreground" Value="{DynamicResource InfoBarWarningSeverityIconBackground}" />
+    </Style>
+    <Style Selector="^:warning /template/ TextBlock#StandardIcon">
+      <Setter Property="Text" Value="{StaticResource InfoBarWarningIconGlyph}" />
+      <Setter Property="Foreground" Value="{DynamicResource InfoBarWarningSeverityIconForeground}" />
+    </Style>
+    <!-- SeverityLevels: Success -->
+    <Style Selector="^:success /template/ Border#ContentRoot">
+      <Setter Property="Background" Value="{DynamicResource InfoBarSuccessSeverityBackgroundBrush}" />
+    </Style>
+    <Style Selector="^:success /template/ TextBlock#IconBackground">
+      <Setter Property="Foreground" Value="{DynamicResource InfoBarSuccessSeverityIconBackground}" />
+    </Style>
+    <Style Selector="^:success /template/ TextBlock#StandardIcon">
+      <Setter Property="Text" Value="{StaticResource InfoBarSuccessIconGlyph}" />
+      <Setter Property="Foreground" Value="{DynamicResource InfoBarSuccessSeverityIconForeground}" />
+    </Style>
+
+    <!-- IconStates: StandardIconVisible, UserIconVisible (NoIconVisible: the base values). -->
+    <Style Selector="^:standard-icon-visible /template/ Viewbox#UserIconBox">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:standard-icon-visible /template/ Grid#StandardIconArea">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^:user-icon-visible /template/ Viewbox#UserIconBox">
+      <Setter Property="IsVisible" Value="True" />
+    </Style>
+    <Style Selector="^:user-icon-visible /template/ Grid#StandardIconArea">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+
+    <!-- CloseButtonCollapsed -->
+    <Style Selector="^:close-button-collapsed /template/ Button#CloseButton">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+
+    <!-- InfoBarVisibility: InfoBarCollapsed -->
+    <Style Selector="^:not(:open) /template/ Border#ContentRoot">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+
+    <!-- ForegroundSet: the title and the message take the foreground set on the bar. -->
+    <Style Selector="^:foreground-set /template/ TextBlock#Title">
+      <Setter Property="Foreground" Value="{Binding $parent[InfoBar].Foreground}" />
+    </Style>
+    <Style Selector="^:foreground-set /template/ TextBlock#Message">
+      <Setter Property="Foreground" Value="{Binding $parent[InfoBar].Foreground}" />
+    </Style>
+
+    <!-- NoBannerContent: the content moves up. -->
+    <Style Selector="^:no-banner-content /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Grid.Row" Value="0" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>

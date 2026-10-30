@@ -233,16 +233,25 @@ control_tests! {
     grid_splitter => "GridSplitter";
     group_box => "GroupBox";
     headered_content_control => "HeaderedContentControl";
+    info_badge => "InfoBadge";
     items_control => "ItemsControl";
     label => "Label";
     path_icon => "PathIcon";
+    font_icon => "FontIcon";
+    symbol_icon => "SymbolIcon";
     progress_bar => "ProgressBar";
+    progress_ring => "ProgressRing";
     selectable_text_block => "SelectableTextBlock";
     separator => "Separator";
     text_selection_handle => "TextSelectionHandle";
     tool_tip => "ToolTip";
     transitioning_content_control => "TransitioningContentControl";
     // B6: window decorations, notifications, tables and dialogs
+    info_bar => "InfoBar";
+    number_box => "NumberBox";
+    auto_suggest_box => "AutoSuggestBox";
+    radio_buttons => "RadioButtons";
+    rating_control => "RatingControl";
     managed_file_chooser => "ManagedFileChooser";
     managed_file_chooser_overwrite_prompt => "ManagedFileChooserOverwritePrompt";
     notification_card => "NotificationCard";
@@ -260,6 +269,12 @@ control_tests! {
     command_bar_toggle_button => "CommandBarToggleButton";
     content_page => "ContentPage";
     drawer_page => "DrawerPage";
+    frame => "Frame";
+    navigation_view => "NavigationView";
+    title_bar => "TitleBar";
+    navigation_view_item => "NavigationViewItem";
+    navigation_view_item_header => "NavigationViewItemHeader";
+    navigation_view_item_separator => "NavigationViewItemSeparator";
     navigation_page => "NavigationPage";
     split_view => "SplitView";
     tab_control => "TabControl";
@@ -368,6 +383,268 @@ fn the_path_icon_of_a_menu_item_is_unscaled() {
     let layoutable: &Layoutable = &icon;
     assert!(layoutable.width().is_nan() && layoutable.height().is_nan(), "the icon keeps the size of the theme of PathIcon");
     assert_eq!((19.0, 19.0), (icon.bounds().width, icon.bounds().height));
+    window.close();
+}
+
+/// The icons of WinUI (`Controls/FontIcon.xaml`, `Controls/SymbolIcon.xaml`) draw their glyph in
+/// the font of the resource `SymbolThemeFontFamily` (docs/porting/winui-controls.md, section 5.2):
+/// an application that replaces the resource gets its font in both.
+#[test]
+fn the_icons_draw_in_the_symbol_font_of_the_theme() {
+    use ferroui_base::media::FontFamily;
+    use ferroui_controls::{FontIcon, StackPanel, Symbol, SymbolIcon, TextBlock};
+
+    let _app = start_themed_application();
+    let font_icon = FontIcon::new();
+    font_icon.set_glyph("\u{E710}");
+    let symbol_icon = SymbolIcon::with_symbol(Symbol::Accept);
+    let panel = StackPanel::new();
+    panel.children().add(&font_icon);
+    panel.children().add(&symbol_icon);
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(&panel)));
+    window.show();
+    window.update_layout();
+
+    let text_of = |icon: &TemplatedControl| {
+        icon.visual_children_snapshot().expect("the template of the theme")[0].cast::<TextBlock>().expect("PART_Text")
+    };
+    let theme_font = FontFamily::new("Segoe Fluent Icons,Segoe MDL2 Assets");
+    assert_eq!(theme_font, font_icon.font_family());
+    assert_eq!(theme_font, text_of(&font_icon).font_family());
+    assert_eq!(20.0, text_of(&font_icon).font_size());
+    assert_eq!(theme_font, text_of(&symbol_icon).font_family());
+    assert_eq!(20.0, text_of(&symbol_icon).font_size());
+    assert_eq!(Some(Symbol::Accept.glyph().to_string()), text_of(&symbol_icon).text());
+
+    // An application's symbol font, through the resource.
+    let custom = FontFamily::new("Custom Icons");
+    window.resources().add("SymbolThemeFontFamily", Some(Rc::new(custom.clone()) as ferroui_base::BoxedValue));
+    window.update_layout();
+    assert_eq!(custom, text_of(&font_icon).font_family());
+    assert_eq!(custom, text_of(&symbol_icon).font_family());
+    window.close();
+}
+
+/// The status controls of WinUI (`Controls/InfoBar.xaml`, `Controls/InfoBadge.xaml`,
+/// `Controls/ProgressRing.xaml`; docs/porting/winui-controls.md, section 10.2): the states the
+/// controls set as pseudo-classes give their parts the looks of WinUI.
+#[test]
+fn the_status_controls_show_their_states() {
+    use ferroui_controls::shapes::Arc;
+    use ferroui_controls::{Button, InfoBadge, InfoBar, InfoBarSeverity, ProgressRing, StackPanel, TextBlock};
+
+    let _app = start_themed_application();
+    let bar = InfoBar::new();
+    bar.set_title("Title");
+    bar.set_message("Message");
+    let badge = InfoBadge::new();
+    let ring = ProgressRing::new();
+    let panel = StackPanel::new();
+    panel.children().add(&bar);
+    panel.children().add(&badge);
+    panel.children().add(&ring);
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(&panel)));
+    window.show();
+    window.update_layout();
+
+    let part = |control: &TemplatedControl, name: &str| {
+        control
+            .get_template_descendants()
+            .into_iter()
+            .find(|element| element.name().as_deref() == Some(name))
+            .unwrap_or_else(|| panic!("the part {name}"))
+    };
+
+    // InfoBar: InfoBarCollapsed until it opens, the severity, the close button.
+    let root = part(&bar, "ContentRoot").cast::<Border>().expect("a border");
+    assert!(!root.is_visible());
+    bar.set_is_open(true);
+    window.update_layout();
+    assert!(root.is_visible());
+    let informational = root.background();
+    assert!(informational.is_some());
+    let icon = part(&bar, "StandardIcon").cast::<TextBlock>().expect("a text block");
+    assert_eq!(Some("\u{F13F}".to_string()), icon.text());
+    bar.set_severity(InfoBarSeverity::Error);
+    assert_eq!(Some("\u{F13D}".to_string()), icon.text());
+    assert!(root.background().is_some());
+    assert_ne!(informational, root.background());
+    let close = part(&bar, "CloseButton").cast::<Button>().expect("a button");
+    assert!(bar.close_button_style().is_some());
+    assert_eq!(bar.close_button_style(), close.theme());
+    assert!(close.is_visible());
+    bar.set_is_closable(false);
+    assert!(!close.is_visible());
+
+    // InfoBadge: a dot, then a number.
+    let value = part(&badge, "ValueTextBlock").cast::<TextBlock>().expect("a text block");
+    assert!(!value.is_visible());
+    badge.set_numeric_value(5);
+    window.update_layout();
+    assert!(value.is_visible());
+    assert_eq!(Some("5".to_string()), value.text());
+
+    // ProgressRing: 32 by 32, the arc in the foreground, hidden while inactive.
+    assert_eq!(32.0, ring.bounds().width);
+    let indicator = part(&ring, "PART_Indicator").cast::<Arc>().expect("an arc");
+    assert_eq!(ring.foreground(), indicator.stroke());
+    ring.set_is_active(false);
+    assert_eq!(0.0, part(&ring, "LayoutRoot").opacity());
+    window.close();
+}
+
+/// The input controls of WinUI (`Controls/NumberBox.xaml`, `Controls/AutoSuggestBox.xaml`,
+/// `Controls/RadioButtons.xaml`, `Controls/RatingControl.xaml`; docs/porting/winui-controls.md,
+/// Input) get the parts their code looks up from the theme, and the resources of their templates:
+/// the spacing of the items panel of RadioButtons and the size and spacing of the items of
+/// RatingControl.
+#[test]
+fn the_input_controls_get_their_parts_and_resources_from_the_theme() {
+    use ferroui_controls::primitives::RadioButtonsPanel;
+    use ferroui_controls::{
+        AutoSuggestBox, NumberBox, NumberBoxSpinButtonPlacementMode, RadioButton, RadioButtons, RatingControl, RepeatButton,
+        StackPanel, TextBox,
+    };
+
+    let _app = start_themed_application();
+    let number_box = NumberBox::new();
+    number_box.set_spin_button_placement_mode(NumberBoxSpinButtonPlacementMode::Inline);
+    number_box.set_numeric_value(3.0);
+    let auto_suggest_box = AutoSuggestBox::new();
+    let radio_buttons = RadioButtons::new();
+    for _ in 0..3 {
+        radio_buttons.items().add(Some(Control::boxed(RadioButton::new())));
+    }
+    radio_buttons.set_max_columns(3);
+    let rating = RatingControl::new();
+    let panel = StackPanel::new();
+    panel.children().add(&number_box);
+    panel.children().add(&auto_suggest_box);
+    panel.children().add(&radio_buttons);
+    panel.children().add(&rating);
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(&panel)));
+    window.show();
+    window.update_layout();
+
+    let part = |control: &TemplatedControl, name: &str| {
+        control
+            .get_template_descendants()
+            .into_iter()
+            .find(|element| element.name().as_deref() == Some(name))
+            .unwrap_or_else(|| panic!("the part {name} of {}", control.get_type().name()))
+    };
+    let input_box = part(&number_box, "InputBox").cast::<TextBox>().expect("a text box");
+    assert_eq!(Some("3"), input_box.text().as_deref());
+    assert!(part(&number_box, "UpSpinButton").cast::<RepeatButton>().expect("a repeat button").is_visible());
+    assert!(part(&auto_suggest_box, "TextBox").cast::<TextBox>().is_some());
+    let items_panel = radio_buttons.items_panel_root().and_then(|panel| panel.cast::<RadioButtonsPanel>()).expect("RadioButtonsPanel");
+    // RadioButtonsColumnSpacing and RadioButtonsRowSpacing.
+    assert_eq!(7.0, items_panel.column_spacing());
+    assert_eq!(8.0, items_panel.row_spacing());
+    let background = part(&rating, "RatingBackgroundStackPanel").cast::<StackPanel>().expect("a stack panel");
+    // RatingControlItemSpacing, and five items of RatingControlFontSizeForRendering drawn at half
+    // their size.
+    assert_eq!(8.0, background.spacing());
+    assert_eq!(5, background.children().count());
+    assert_eq!(16.0, background.children().get(0).bounds().width);
+    window.close();
+}
+
+/// The navigation controls of WinUI (`Controls/Frame.xaml`, `Controls/NavigationView.xaml`;
+/// docs/porting/winui-controls.md, section 10.4): a NavigationView with its pane at the left gets
+/// the parts its code looks up, its items are realized in `MenuItemsHost` with the parts of the
+/// item template, the template settings carry the widths of the compact pane length, and a Frame in
+/// its content hosts its content in `PART_ContentPresenter`.
+#[test]
+fn the_navigation_controls_get_their_parts_from_the_theme() {
+    use ferroui_base::BoxedValue;
+    use ferroui_controls::presenters::ContentPresenter;
+    use ferroui_controls::primitives::Popup;
+    use ferroui_controls::{Button, Frame, NavigationView, NavigationViewItem, NavigationViewPaneDisplayMode, SplitView, StackPanel};
+
+    let _app = start_themed_application();
+    let navigation = NavigationView::new();
+    navigation.set_pane_display_mode(NavigationViewPaneDisplayMode::Left);
+    let item = NavigationViewItem::new();
+    item.set_content(Some(Rc::new("Home".to_string()) as BoxedValue));
+    item.menu_items().add(Some(Rc::new("Child".to_string()) as BoxedValue));
+    navigation.menu_items().add(Some(Control::boxed(&item)));
+    let frame = Frame::new();
+    navigation.set_content(Some(Control::boxed(&frame)));
+    let window = Window::new();
+    window.set_width(1200.0);
+    window.set_height(600.0);
+    window.set_content(Some(Control::boxed(&navigation)));
+    window.show();
+    window.update_layout();
+
+    let part = |control: &TemplatedControl, name: &str| {
+        control
+            .get_template_descendants()
+            .into_iter()
+            .find(|element| element.name().as_deref() == Some(name))
+            .unwrap_or_else(|| panic!("the part {name} of {}", control.get_type().name()))
+    };
+    assert!(part(&navigation, "RootSplitView").cast::<SplitView>().is_some());
+    assert!(part(&navigation, "TogglePaneButton").cast::<Button>().is_some());
+    let host = part(&navigation, "MenuItemsHost").cast::<StackPanel>().expect("a stack panel");
+    let item_control: Ref<Control> = item.clone().upcast();
+    assert!(host.children().snapshot().iter().any(|child| *child == item_control));
+    // The settings item is the last footer item.
+    let footer = part(&navigation, "FooterMenuItemsHost").cast::<StackPanel>().expect("a stack panel");
+    assert_eq!(1, footer.children().count());
+    // CompactPaneLength is NavigationViewCompactPaneLength (48); the smaller width is 8 less.
+    assert_eq!(48.0, navigation.compact_pane_length());
+    assert_eq!(40.0, navigation.template_settings().smaller_pane_toggle_button_width());
+    assert!(navigation.classes().contains(":expanded"));
+    assert!(part(&item, "ContentGrid").cast::<Control>().is_some());
+    assert!(part(&item, "ExpandCollapseChevron").cast::<Control>().is_some());
+    assert!(part(&item, "ChildrenFlyout").cast::<Popup>().is_some());
+    assert!(part(&item, "NavigationViewItemMenuItemsHost").cast::<StackPanel>().is_some());
+    // An item with children shows its chevron.
+    assert!(item.classes().contains(":chevron-visible-closed"));
+    assert!(part(&frame, "PART_ContentPresenter").cast::<ContentPresenter>().is_some());
+    window.close();
+}
+
+/// The menu items of a NavigationView whose pane is shorter than they are scroll in
+/// `MenuItemsScrollViewer` (the star row of `ItemsContainerGrid`), above the settings item, as in
+/// WinUI: none of them goes under the footer.
+#[test]
+fn the_menu_items_of_a_short_navigation_view_scroll() {
+    use ferroui_base::{BoxedValue, Vector};
+    use ferroui_controls::{NavigationView, NavigationViewItem, NavigationViewPaneDisplayMode, ScrollViewer};
+
+    let _app = start_themed_application();
+    let navigation = NavigationView::new();
+    navigation.set_pane_display_mode(NavigationViewPaneDisplayMode::Left);
+    for index in 0..12 {
+        let item = NavigationViewItem::new();
+        item.set_content(Some(Rc::new(format!("Item {index}")) as BoxedValue));
+        navigation.menu_items().add(Some(Control::boxed(&item)));
+    }
+    let window = Window::new();
+    window.set_width(800.0);
+    window.set_height(320.0);
+    window.set_content(Some(Control::boxed(&navigation)));
+    window.show();
+    window.update_layout();
+
+    let scroll_viewer = navigation
+        .get_template_descendants()
+        .into_iter()
+        .find(|element| element.name().as_deref() == Some("MenuItemsScrollViewer"))
+        .and_then(|element| element.cast::<ScrollViewer>())
+        .expect("MenuItemsScrollViewer");
+    let (extent, viewport) = (scroll_viewer.extent(), scroll_viewer.viewport());
+    assert!(viewport.height > 0.0, "the menu items have room in the pane: {viewport:?}");
+    assert!(extent.height > viewport.height, "twelve items overflow a pane of 320: {extent:?} in {viewport:?}");
+    scroll_viewer.set_offset(Vector::new(0.0, extent.height));
+    window.update_layout();
+    assert_eq!(scroll_viewer.offset().y, extent.height - viewport.height, "the last item scrolls into view");
     window.close();
 }
 
@@ -667,5 +944,42 @@ fn a_path_icon_in_a_button_is_scaled_into_its_box() {
     assert!(visual.get_visual_descendants().any(|d| d.cast::<ferroui_controls::Viewbox>().is_some()), "the icon has the template of PI-2: {names:?}");
     let path = visual.get_visual_descendants().find_map(|d| d.cast::<Path>()).unwrap_or_else(|| panic!("the path of the icon: {names:?}"));
     assert_eq!(ferroui_base::media::Stretch::Uniform, path.stretch(), "the geometry is scaled");
+    window.close();
+}
+
+/// In a minimal pane with a back button the toggle button sits right beside the back button, as
+/// in WinUI (NVW-17): not over it and without a gap.
+#[test]
+fn the_back_and_toggle_buttons_of_a_minimal_pane_are_adjacent() {
+    use ferroui_base::Point;
+    use ferroui_controls::{Button, NavigationView, NavigationViewBackButtonVisible, NavigationViewPaneDisplayMode};
+
+    let _app = start_themed_application();
+    let navigation = NavigationView::new();
+    navigation.set_pane_display_mode(NavigationViewPaneDisplayMode::LeftMinimal);
+    navigation.set_is_back_button_visible(NavigationViewBackButtonVisible::Visible);
+    let window = Window::new();
+    window.set_width(500.0);
+    window.set_height(400.0);
+    window.set_content(Some(Control::boxed(&navigation)));
+    window.show();
+    window.update_layout();
+
+    let part = |name: &str| {
+        navigation
+            .get_template_descendants()
+            .into_iter()
+            .find(|element| element.name().as_deref() == Some(name))
+            .and_then(|element| element.cast::<Button>())
+            .unwrap_or_else(|| panic!("the part {name}"))
+    };
+    let bounds = |button: &Button| {
+        let origin = button.translate_point(Point::new(0.0, 0.0), &window).expect("in the window");
+        (origin.x, button.bounds().width, button.is_effectively_visible())
+    };
+    let (back, toggle, close) = (bounds(&part("NavigationViewBackButton")), bounds(&part("TogglePaneButton")), bounds(&part("NavigationViewCloseButton")));
+    assert!(back.2 && toggle.2, "both buttons are shown: back {back:?}, toggle {toggle:?}, close {close:?}");
+    let gap = toggle.0 - (back.0 + back.1);
+    assert!((0.0..=8.0).contains(&gap), "the toggle button starts beside the back button: back {back:?}, toggle {toggle:?}, close {close:?}");
     window.close();
 }

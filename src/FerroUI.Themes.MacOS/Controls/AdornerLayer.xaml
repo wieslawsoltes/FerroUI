@@ -1,0 +1,17 @@
+<!-- macOS 26 focus halo; docs/porting/macos26-theme.md.
+     Derived from the FerroUI WinUI focus host (microsoft-ui-xaml
+     7e4b0c2096be402f51cc8f7d203ebf67cff183d0, MIT; see NOTICE.md).
+     One accent-colored outline sits outside layout bounds and never intercepts input. -->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <ControlTheme x:Key="{x:Type AdornerLayer}" TargetType="AdornerLayer">
+    <Setter Property="DefaultFocusAdorner">
+      <FocusAdornerTemplate>
+        <Border Margin="-3" BorderThickness="3" IsHitTestVisible="False"
+                BorderBrush="{DynamicResource MacOSFocusBrush}"
+                CornerRadius="{DynamicResource MacOSControlCornerRadius}" />
+      </FocusAdornerTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>
