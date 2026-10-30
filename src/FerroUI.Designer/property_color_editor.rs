@@ -389,4 +389,7 @@ fn install_color_popup_palette(body: &StackPanel) {
         .add_value("TabItemHeaderThemeFontWeight", FontWeight::SemiBold);
 }
 
+#[cfg(test)]
+#[path = "property_color_editor_tests.rs"]
+mod tests;
 

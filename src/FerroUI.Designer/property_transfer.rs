@@ -904,3 +904,6 @@ fn replacement_edits(
     Ok(edits)
 }
 
+#[cfg(test)]
+#[path = "property_transfer_tests.rs"]
+mod tests;

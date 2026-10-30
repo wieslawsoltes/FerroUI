@@ -690,3 +690,6 @@ fn escape(value: &str) -> String {
         .replace('"', "&quot;")
 }
 
+#[cfg(test)]
+#[path = "definition_projection_tests.rs"]
+mod tests;

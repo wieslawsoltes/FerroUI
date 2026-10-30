@@ -886,3 +886,6 @@ fn source_field(panel: &StackPanel, name: &str, value: &str) -> Ref<TextBox> {
     input
 }
 
+#[cfg(test)]
+#[path = "resource_editor_tests.rs"]
+mod tests;

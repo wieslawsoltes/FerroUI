@@ -537,3 +537,6 @@ fn validate_edits(document: &Document, edits: Vec<Edit>) -> Result<Vec<Edit>, St
     Ok(edits)
 }
 
+#[cfg(test)]
+#[path = "selection_layout_tests.rs"]
+mod tests;

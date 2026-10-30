@@ -663,3 +663,6 @@ pub(crate) fn components_text(values: [f64; 4]) -> String {
     values.map(number_text).join(",")
 }
 
+#[cfg(test)]
+#[path = "property_controls_tests.rs"]
+mod tests;

@@ -1039,3 +1039,6 @@ impl DesignerWorkspace {
     }
 }
 
+#[cfg(test)]
+#[path = "inspector_drag_tests.rs"]
+mod tests;

@@ -363,3 +363,6 @@ fn difference(before: &str, after: &str) -> Edit {
     }
 }
 
+#[cfg(test)]
+#[path = "workspace_component_import_tests.rs"]
+mod tests;

@@ -11,10 +11,19 @@ use std::rc::{Rc, Weak};
 
 #[path = "mcp_authoring.rs"]
 mod authoring;
+#[cfg(test)]
+#[path = "mcp_automation_tests.rs"]
+mod automation_tests;
 #[path = "mcp_components.rs"]
 mod components;
+#[cfg(test)]
+#[path = "mcp_components_tests.rs"]
+mod components_tests;
 #[path = "mcp_design_workflows.rs"]
 mod design_workflows;
+#[cfg(test)]
+#[path = "mcp_design_workflows_tests.rs"]
+mod design_workflows_tests;
 #[path = "mcp_preview_stages.rs"]
 mod preview_stages;
 #[path = "mcp_prototype.rs"]

@@ -684,3 +684,6 @@ fn check(name: &str, label: &str) -> Ref<CheckBox> {
     field
 }
 
+#[cfg(test)]
+#[path = "focus_order_editor_tests.rs"]
+mod tests;

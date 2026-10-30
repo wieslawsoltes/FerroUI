@@ -207,3 +207,6 @@ fn stage_file_type() -> Rc<FilePickerFileType> {
         .with_patterns(&["*.ferroui-previews.json", "*.json"])
 }
 
+#[cfg(test)]
+#[path = "workspace_stage_files_tests.rs"]
+mod tests;

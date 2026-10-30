@@ -217,3 +217,6 @@ pub(super) fn call(
     }
 }
 
+#[cfg(test)]
+#[path = "mcp_selection_workflows_tests.rs"]
+mod tests;

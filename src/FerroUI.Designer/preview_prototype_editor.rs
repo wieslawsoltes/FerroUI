@@ -724,3 +724,6 @@ fn field(body: &StackPanel, label: &str, control: &Control) -> Ref<StackPanel> {
     field
 }
 
+#[cfg(test)]
+#[path = "preview_prototype_editor_stage_tests.rs"]
+mod stage_tests;

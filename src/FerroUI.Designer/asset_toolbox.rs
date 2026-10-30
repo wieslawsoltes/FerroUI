@@ -648,3 +648,6 @@ pub fn default_designer_assets() -> Vec<DesignerAsset> {
     }).collect()
 }
 
+#[cfg(test)]
+#[path = "asset_toolbox_tests.rs"]
+mod tests;

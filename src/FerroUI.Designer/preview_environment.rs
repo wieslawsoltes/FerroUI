@@ -397,3 +397,6 @@ fn row(panel: &StackPanel, name: &str, control: Ref<Control>) {
     panel.children().add(row.upcast::<Control>());
 }
 
+#[cfg(test)]
+#[path = "preview_environment_tests.rs"]
+mod tests;

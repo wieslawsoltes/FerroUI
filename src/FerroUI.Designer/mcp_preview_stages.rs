@@ -350,3 +350,9 @@ pub(super) fn call(
     Ok(result)
 }
 
+#[cfg(test)]
+#[path = "mcp_preview_stage_permission_tests.rs"]
+mod permission_tests;
+#[cfg(test)]
+#[path = "mcp_preview_stages_tests.rs"]
+mod tests;

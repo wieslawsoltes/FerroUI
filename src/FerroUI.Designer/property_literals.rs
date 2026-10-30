@@ -139,3 +139,6 @@ fn setter_target_type(document: &Document, owner: NodeId) -> Option<&'static Typ
     registered_type(document, owner, token.trim())
 }
 
+#[cfg(test)]
+#[path = "property_literals_tests.rs"]
+mod tests;

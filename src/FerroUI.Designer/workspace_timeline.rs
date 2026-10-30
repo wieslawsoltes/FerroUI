@@ -1370,3 +1370,6 @@ enum KeyframeEdit {
     Remove,
 }
 
+#[cfg(test)]
+#[path = "timeline_selection_tests.rs"]
+mod selection_tests;

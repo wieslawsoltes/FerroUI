@@ -333,3 +333,6 @@ impl GridTrackEditor {
     }
 }
 
+#[cfg(test)]
+#[path = "grid_track_editor_tests.rs"]
+mod tests;

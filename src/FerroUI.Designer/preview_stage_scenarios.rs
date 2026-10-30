@@ -261,3 +261,6 @@ impl IClock for StageStateClock {
     }
 }
 
+#[cfg(test)]
+#[path = "preview_stage_scenarios_tests.rs"]
+mod tests;

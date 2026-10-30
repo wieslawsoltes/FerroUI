@@ -846,3 +846,6 @@ fn escape(value: &str) -> String {
         .replace('<', "&lt;")
 }
 
+#[cfg(test)]
+#[path = "design_time_tests.rs"]
+mod tests;

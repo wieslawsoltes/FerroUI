@@ -171,3 +171,6 @@ fn append_primitives(
     Ok(())
 }
 
+#[cfg(test)]
+#[path = "workspace_layout_helper_frames_tests.rs"]
+mod tests;

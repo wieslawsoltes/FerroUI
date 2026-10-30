@@ -745,4 +745,10 @@ fn validate_label(value: &str, label: &str) -> Result<(), String> {
     }
 }
 
+#[cfg(test)]
+#[path = "preview_prototype_tests.rs"]
+mod tests;
 
+#[cfg(test)]
+#[path = "preview_prototype_overlay_tests.rs"]
+mod overlay_tests;

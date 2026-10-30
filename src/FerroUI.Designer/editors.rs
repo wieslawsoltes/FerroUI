@@ -33,6 +33,9 @@ pub use binding_editor::PropertyBindingEditor;
 pub use typed::PropertyVectorEditor;
 pub use workbench::binding_expression;
 
+#[cfg(test)]
+#[path = "property_editor_system_tests.rs"]
+mod tests;
 
 #[derive(Clone)]
 pub struct PropertyEditorContext {

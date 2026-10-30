@@ -787,3 +787,6 @@ fn framework_name(
 mod overlay;
 pub(crate) use overlay::render_focus_order;
 
+#[cfg(test)]
+#[path = "focus_order_tests.rs"]
+mod tests;

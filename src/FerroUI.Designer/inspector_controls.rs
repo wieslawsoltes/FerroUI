@@ -2570,5 +2570,14 @@ fn property_reference_applies(
     }
 }
 
+#[cfg(test)]
+#[path = "inspector_controls_tests.rs"]
+mod tests;
 
+#[cfg(test)]
+#[path = "inspector_property_editor_tests.rs"]
+mod property_editor_tests;
 
+#[cfg(test)]
+#[path = "property_inspector_view_tests.rs"]
+mod property_view_tests;

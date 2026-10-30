@@ -136,3 +136,6 @@ pub(super) fn call(
     report(workspace, &json!({}))
 }
 
+#[cfg(test)]
+#[path = "mcp_prototype_tests.rs"]
+mod tests;

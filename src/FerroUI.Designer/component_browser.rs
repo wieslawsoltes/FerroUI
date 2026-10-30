@@ -557,3 +557,6 @@ impl ComponentLibrary {
     }
 }
 
+#[cfg(test)]
+#[path = "component_browser_tests.rs"]
+mod tests;

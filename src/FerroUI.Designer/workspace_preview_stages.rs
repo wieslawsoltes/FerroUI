@@ -23,6 +23,9 @@ pub(super) struct PreviewStagesUi {
     flyout: RefCell<Option<Ref<Flyout>>>,
 }
 
+#[cfg(test)]
+#[path = "preview_stage_ui_tests.rs"]
+mod tests;
 
 impl Default for PreviewStagesUi {
     fn default() -> Self {

@@ -1034,3 +1034,6 @@ fn segment_distance(point: Point, start: Point, end: Point) -> f64 {
     (point.x - start.x - fraction * dx).hypot(point.y - start.y - fraction * dy)
 }
 
+#[cfg(test)]
+#[path = "workspace_layout_helpers_tests.rs"]
+mod tests;

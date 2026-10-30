@@ -35,10 +35,14 @@ mod preview_prototype;
 mod preview_prototype_editor;
 mod preview_prototype_player;
 mod preview_prototype_view;
+#[cfg(test)]
+mod preview_prototype_ui_tests;
 mod preview_stages;
 mod preview_stage_export;
 mod preview_stage_matrix;
 mod preview_stage_matrix_editor;
+#[cfg(test)]
+mod preview_stage_matrix_ui_tests;
 mod preview_stage_scenarios;
 mod preview_stage_editor;
 mod preview_stage_view;
@@ -160,7 +164,23 @@ pub use workspace::{
 /// The self-contained example opened by Designer Studio and usable by hosts.
 pub const STARTER_XAML: &str = include_str!("Starter.xaml");
 
+#[cfg(test)]
+mod layer_state_tests;
+#[cfg(test)]
+mod native_extensions_tests;
+#[cfg(test)]
+mod tests;
+#[cfg(test)]
+mod workspace_authoring_tests;
 mod workspace_layout_helpers;
+#[cfg(test)]
+mod workspace_shell_tests;
+#[cfg(test)]
+mod workspace_navigation_tests;
+#[cfg(test)]
+mod workspace_guides_tests;
+#[cfg(test)]
+mod workspace_navigation_file_tests;
 mod workspace_tools;
 
 pub use layout_helper_renderer::{
@@ -173,3 +193,5 @@ pub use workspace_layout_helpers::{LayoutEditPreview, LayoutHelperSnapshot};
 pub mod mcp;
 
 
+#[cfg(test)]
+mod animation_integration_tests;

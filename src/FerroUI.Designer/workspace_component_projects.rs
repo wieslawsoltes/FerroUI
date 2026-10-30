@@ -247,3 +247,6 @@ impl DesignerWorkspace {
     }
 }
 
+#[cfg(test)]
+#[path = "workspace_component_projects_tests.rs"]
+mod tests;

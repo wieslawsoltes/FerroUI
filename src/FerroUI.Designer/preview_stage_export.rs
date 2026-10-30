@@ -208,3 +208,6 @@ impl Write for BoundedPng {
     }
 }
 
+#[cfg(test)]
+#[path = "preview_stage_export_tests.rs"]
+mod tests;

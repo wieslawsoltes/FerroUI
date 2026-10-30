@@ -318,3 +318,6 @@ fn bounded_name(full: &str, index: usize, force_suffix: bool) -> String {
     format!("{}{suffix}", full[..end].trim_end())
 }
 
+#[cfg(test)]
+#[path = "preview_stage_matrix_tests.rs"]
+mod tests;

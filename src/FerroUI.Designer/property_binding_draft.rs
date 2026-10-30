@@ -519,3 +519,6 @@ fn split_arguments(source: &str) -> Vec<&str> {
     parts
 }
 
+#[cfg(test)]
+#[path = "property_binding_draft_tests.rs"]
+mod tests;

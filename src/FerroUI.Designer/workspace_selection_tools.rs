@@ -550,3 +550,6 @@ fn authored_layer_path(ast: &Ast, node: NodeId) -> String {
     path.join(" / ")
 }
 
+#[cfg(test)]
+#[path = "workspace_selection_tools_tests.rs"]
+mod tests;

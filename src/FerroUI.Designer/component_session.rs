@@ -407,3 +407,6 @@ impl DesignerSession {
     }
 }
 
+#[cfg(test)]
+#[path = "component_session_tests.rs"]
+mod tests;

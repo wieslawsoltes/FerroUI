@@ -632,3 +632,6 @@ fn button(value: &str, name: &str, help: &str) -> Ref<Button> {
     button
 }
 
+#[cfg(test)]
+#[path = "property_binding_editor_tests.rs"]
+mod tests;

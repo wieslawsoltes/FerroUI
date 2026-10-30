@@ -1090,3 +1090,6 @@ fn format_time(time: f64, interval: f64) -> String {
     }
 }
 
+#[cfg(test)]
+#[path = "timeline_lane_tests.rs"]
+mod tests;

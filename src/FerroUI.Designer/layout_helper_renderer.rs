@@ -588,4 +588,7 @@ fn pen(color: u32, width: f64, dashed: bool) -> Rc<dyn IPen> {
     pen.into()
 }
 
+#[cfg(test)]
+#[path = "layout_helper_renderer_tests.rs"]
+mod tests;
 

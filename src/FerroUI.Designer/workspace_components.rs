@@ -1908,3 +1908,6 @@ fn definition_type(document: &Document, entry: &ComponentEntry) -> Option<&'stat
     control_types::registered_type(document, entry.node, &token)
 }
 
+#[cfg(test)]
+#[path = "workspace_components_tests.rs"]
+mod tests;

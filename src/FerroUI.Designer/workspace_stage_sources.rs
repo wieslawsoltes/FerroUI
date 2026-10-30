@@ -304,3 +304,6 @@ impl DesignerWorkspace {
     }
 }
 
+#[cfg(test)]
+#[path = "workspace_stage_sources_tests.rs"]
+mod tests;

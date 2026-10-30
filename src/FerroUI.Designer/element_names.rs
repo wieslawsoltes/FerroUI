@@ -237,3 +237,6 @@ impl DesignerSession {
     }
 }
 
+#[cfg(test)]
+#[path = "element_names_tests.rs"]
+mod tests;

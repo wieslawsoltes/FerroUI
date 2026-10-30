@@ -166,3 +166,6 @@ impl LayoutAdapter for TemplateRootLayout {
     }
 }
 
+#[cfg(test)]
+#[path = "definition_manipulation_tests.rs"]
+mod tests;

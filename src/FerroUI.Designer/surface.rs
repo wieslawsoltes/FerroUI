@@ -1328,6 +1328,9 @@ fn marquee_selection(
     result
 }
 
+#[cfg(test)]
+#[path = "surface_tests.rs"]
+mod tests;
 
 #[path = "surface_helpers.rs"]
 mod helpers;

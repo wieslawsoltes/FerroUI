@@ -529,4 +529,10 @@ impl DesignerWorkspace {
     }
 }
 
+#[cfg(test)]
+#[path = "workspace_prototype_tests.rs"]
+mod tests;
 
+#[cfg(test)]
+#[path = "workspace_prototype_overlay_tests.rs"]
+mod overlay_tests;

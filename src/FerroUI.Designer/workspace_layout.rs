@@ -586,3 +586,6 @@ fn layout_header(title: &str, expanded: bool, expandable: bool) -> Ref<Control> 
     content.upcast::<Control>()
 }
 
+#[cfg(test)]
+#[path = "workspace_layout_tests.rs"]
+mod tests;
