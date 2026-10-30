@@ -10,6 +10,7 @@ mod automation_property_changed_event_args;
 mod element_not_enabled_exception;
 mod expand_collapse_pattern_identifiers;
 mod expand_collapse_state;
+mod i_automation_event_sink;
 mod is_offscreen_behavior;
 pub mod peers;
 pub mod provider;
@@ -31,6 +32,7 @@ pub use automation_property_changed_event_args::AutomationPropertyChangedEventAr
 pub use element_not_enabled_exception::ElementNotEnabledException;
 pub use expand_collapse_pattern_identifiers::ExpandCollapsePatternIdentifiers;
 pub use expand_collapse_state::ExpandCollapseState;
+pub use i_automation_event_sink::IAutomationEventSink;
 pub use is_offscreen_behavior::IsOffscreenBehavior;
 pub use range_value_pattern_identifiers::RangeValuePatternIdentifiers;
 pub use scroll_pattern_identifiers::ScrollPatternIdentifiers;

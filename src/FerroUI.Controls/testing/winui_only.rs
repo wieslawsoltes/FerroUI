@@ -7,7 +7,7 @@
 
 use crate::{
     AutoSuggestBox, FontIcon, Frame, InfoBadge, InfoBar, NavigationView, NavigationViewItem, NavigationViewItemHeader,
-    NavigationViewItemSeparator, NumberBox, ProgressRing, RadioButtons, RatingControl, SymbolIcon, TitleBar,
+    NavigationViewItemSeparator, NumberBox, ProgressRing, RadioButtons, RatingControl, RichEditBox, SymbolIcon, TitleBar,
 };
 use ferroui_base::TypeInfo;
 
@@ -27,6 +27,7 @@ pub const WINUI_ONLY_CONTROLS: &[(&TypeInfo, &str)] = &[
     (NavigationViewItem::TYPE, "WinUI's NavigationViewItem: its template is converted from NavigationView.xaml with the item presenter styles into the WinUI theme and its derived themes"),
     (NavigationViewItemHeader::TYPE, "WinUI's NavigationViewItemHeader: its template is converted from WinUI's NavigationView.xaml into the WinUI theme and its derived themes"),
     (NavigationViewItemSeparator::TYPE, "WinUI's NavigationViewItemSeparator: its template is converted from WinUI's NavigationView.xaml into the WinUI theme and its derived themes"),
+    (RichEditBox::TYPE, "WinUI's RichEditBox: its template is ported from WinUI's RichEditBox_themeresources.xaml into the WinUI theme (docs/porting/winui-rich-text.md, decision D4)"),
     (TitleBar::TYPE, "WinUI's TitleBar: its template is converted from WinUI's TitleBar.xaml into the WinUI theme and its derived themes"),
 ];
 

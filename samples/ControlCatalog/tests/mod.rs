@@ -33,6 +33,7 @@ mod hot_reload;
 mod interaction_controls;
 mod interaction_tour;
 mod items_repeater_page;
+mod rich_edit_box_page;
 mod navigation_pages_b;
 mod navigation_pages_a;
 mod numeric_up_down_page;

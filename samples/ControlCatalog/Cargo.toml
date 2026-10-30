@@ -64,7 +64,8 @@ runtime-markup = [
 ferroui-hot-reload = { workspace = true, optional = true }
 # The compiled markup of the crate calls the typed functions of the declared members.
 ferroui-base = { workspace = true, features = ["markup-functions"] }
-ferroui-controls = { workspace = true }
+# The catalog reads RTF in every code page (docs/porting/winui-rich-text.md, D2).
+ferroui-controls = { workspace = true, features = ["rtf-codepages"] }
 # The colour picker library (the colour picker page and the styles of App.xaml).
 ferroui-controls-color-picker = { workspace = true }
 # The TreeDataGrid (the styles of App.xaml) and the pages of its demo, which the page TreeDataGrid
