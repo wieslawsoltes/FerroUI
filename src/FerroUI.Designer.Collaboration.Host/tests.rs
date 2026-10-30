@@ -927,8 +927,19 @@ mod network_tests {
         assert_eq!(two.document().source(), paged.source());
         let old_endpoint = host.endpoint();
         drop(host);
-        std::thread::sleep(std::time::Duration::from_millis(100));
-        let restarted = HostedServer::start(&path, &admin, None).unwrap();
+        // The transport thread of the dropped server releases the storage lock when it notices
+        // the stop; on a slow runner that takes longer than a fixed pause.
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(10);
+        let restarted = loop {
+            match HostedServer::start(&path, &admin, None) {
+                Ok(server) => break server,
+                Err(error) if std::time::Instant::now() < deadline => {
+                    assert!(error.message.contains("already locked"), "{error:?}");
+                    std::thread::sleep(std::time::Duration::from_millis(50));
+                }
+                Err(error) => panic!("the restarted server did not get the storage: {error:?}"),
+            }
+        };
         assert_eq!(old_endpoint.bearer, restarted.endpoint().bearer);
         assert_eq!(
             restarted
