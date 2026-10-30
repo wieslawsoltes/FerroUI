@@ -489,6 +489,9 @@ mod imp {
         /// disposable).
         gl_surface_dispose: RefCell<Option<Arc<dyn Fn() + Send + Sync>>>,
         transparency_level: Cell<WindowTransparencyLevel>,
+        /// The DWM system backdrop drawn behind the window, and the transparency level it
+        /// replaced (winui-materials.md).
+        system_backdrop: Cell<Option<(i32, WindowTransparencyLevel)>>,
         default_transparency_level: WindowTransparencyLevel,
         corner_preference: Cell<WindowCornerPreference>,
         current_theme_variant: Cell<PlatformThemeVariant>,
@@ -614,6 +617,7 @@ mod imp {
                 composition_effects_surface: RefCell::new(None),
                 gl_surface_dispose: RefCell::new(None),
                 transparency_level: Cell::new(default_transparency_level),
+                system_backdrop: Cell::new(None),
                 default_transparency_level,
                 corner_preference: Cell::new(WindowCornerPreference::default()),
                 current_theme_variant: Cell::new(PlatformThemeVariant::Light),
@@ -2341,6 +2345,62 @@ mod imp {
 
         fn transparency_level(&self) -> WindowTransparencyLevel {
             self.transparency_level.get()
+        }
+
+        /// The DWM system backdrop types of Windows 11 22H2 (build 22621): Mica
+        /// (`DWMSBT_MAINWINDOW`), Mica Alt (`DWMSBT_TABBEDWINDOW`) and desktop acrylic
+        /// (`DWMSBT_TRANSIENTWINDOW`), drawn by DWM behind the transparent client area
+        /// (winui-materials.md, section 6.3).
+        fn set_system_backdrop(
+            &self,
+            backdrop: Option<&ferroui_base::rendering::composition::system_backdrops::PlatformSystemBackdrop>,
+        ) -> ferroui_base::rendering::composition::system_backdrops::SystemBackdropSupport {
+            use ferroui_base::rendering::composition::system_backdrops::{
+                MicaKind, PlatformSystemBackdropKind, SystemBackdropSupport, SystemBackdropTheme,
+            };
+            let hwnd = self.hwnd.get();
+            let Some(backdrop) = backdrop else {
+                if let Some((_, previous_level)) = self.system_backdrop.take() {
+                    dwm_set_window_attribute(
+                        hwnd,
+                        DwmWindowAttribute::DWMWA_SYSTEMBACKDROP_TYPE,
+                        DwmSystemBackdropType::DWMSBT_AUTO,
+                    );
+                    dwm_extend_frame_into_client_area(hwnd, &MARGINS::default());
+                    self.set_transparency_level_hint(&[previous_level]);
+                }
+                return SystemBackdropSupport::None;
+            };
+            if Win32Platform::windows_version().build < 22621 || !self.is_supported(WindowTransparencyLevel::transparent()) {
+                return SystemBackdropSupport::None;
+            }
+            let backdrop_type = match backdrop.kind {
+                PlatformSystemBackdropKind::Mica(MicaKind::Base) => DwmSystemBackdropType::DWMSBT_MAINWINDOW,
+                PlatformSystemBackdropKind::Mica(MicaKind::BaseAlt) => DwmSystemBackdropType::DWMSBT_TABBEDWINDOW,
+                PlatformSystemBackdropKind::DesktopAcrylic(_) => DwmSystemBackdropType::DWMSBT_TRANSIENTWINDOW,
+            };
+            dwm_set_window_attribute(
+                hwnd,
+                DwmWindowAttribute::DWMWA_USE_IMMERSIVE_DARK_MODE,
+                i32::from(backdrop.theme == SystemBackdropTheme::Dark),
+            );
+            if dwm_set_window_attribute(hwnd, DwmWindowAttribute::DWMWA_SYSTEMBACKDROP_TYPE, backdrop_type) != 0 {
+                return SystemBackdropSupport::None;
+            }
+            // The backdrop shows through the whole client area, which is drawn transparent.
+            dwm_extend_frame_into_client_area(
+                hwnd,
+                &MARGINS { cx_left_width: -1, cx_right_width: -1, cy_top_height: -1, cy_bottom_height: -1 },
+            );
+            let previous_level = match self.system_backdrop.get() {
+                Some((_, previous)) => previous,
+                None => self.transparency_level.get(),
+            };
+            if self.set_transparency_transparent() {
+                self.set_transparency_level(WindowTransparencyLevel::transparent());
+            }
+            self.system_backdrop.set(Some((backdrop_type, previous_level)));
+            SystemBackdropSupport::Native
         }
 
         fn acrylic_compensation_levels(&self) -> AcrylicPlatformCompensationLevels {

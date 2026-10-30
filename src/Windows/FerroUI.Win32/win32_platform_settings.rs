@@ -5,6 +5,13 @@
 use ferroui_base::media::Color;
 use ferroui_base::platform::{AccentColorShades, ColorContrastPreference, PlatformColorValues, PlatformThemeVariant};
 
+/// Whether the battery saver is on, from the flag of the power status
+/// (`SYSTEM_POWER_STATUS.SystemStatusFlag`: 1 while the battery saver is on), which is what
+/// `PowerManager.EnergySaverStatus` of WinUI's material policy reports.
+pub(crate) fn energy_saver_from(system_status_flag: u8) -> bool {
+    system_status_flag == 1
+}
+
 /// The shades of the accent colour from the colours `UISettings` reports
 /// for `UIColorType` `AccentDark3` to `AccentLight3`, in the order of the
 /// enumeration (FerroUI addition: the reference reads only the accent).
@@ -80,7 +87,7 @@ mod imp {
     use crate::interop::unmanaged_methods::{get_double_click_time, get_system_metrics, SystemMetric};
     use crate::win_rt::{
         HStringInterop, IAccessibilitySettings, IGlobalizationPreferencesStatics, IUISettings, IUISettings3,
-        NativeWinRTMethods, UIColorType, WinRTApiInformation,
+        IUISettings4, NativeWinRTMethods, UIColorType, WinRTApiInformation,
     };
     use ferroui_base::input::platform::PlatformHotkeyConfiguration;
     use ferroui_base::input::PointerType;
@@ -116,10 +123,10 @@ mod imp {
 
     /// The class of the Windows Runtime that reports the settings of the user interface. It is
     /// the one source of every setting the platform settings read from `UISettings`, each
-    /// through the interface that declares it in `winrt.idl`: the colours (`IUISettings3`) and
-    /// the motion preference (`IUISettings`). A further setting (the advanced effects of
-    /// `IUISettings4`, which WinUI's material policy reads) is read the same way: its interface
-    /// declared once in `winrt.idl`, read with `ui_settings` and `read_ui_setting`.
+    /// through the interface that declares it in `winrt.idl`: the colours (`IUISettings3`), the
+    /// motion preference (`IUISettings`) and the transparency effects (the advanced effects of
+    /// `IUISettings4`, which WinUI's material policy reads), read with `ui_settings` and
+    /// `read_ui_setting`.
     const UI_SETTINGS: &str = "Windows.UI.ViewManagement.UISettings";
 
     /// A new `UISettings`, through its interface `I`.
@@ -157,12 +164,15 @@ mod imp {
     /// Windows Runtime (`UISettings`, `AccessibilitySettings`,
     /// `GlobalizationPreferences`) and kept until the platform tells the
     /// settings that the system changed them (`WM_SETTINGCHANGE` of the
-    /// message window). The motion preference (`UISettings`) is read each
-    /// time it is asked for.
+    /// message window). The motion preference and the transparency effects
+    /// (`UISettings`) and the energy saver (the power status) are read each
+    /// time they are asked for.
     pub struct Win32PlatformSettings {
         base: DefaultPlatformSettings,
         color_values: Cell<Option<PlatformColorValues>>,
         last_language: RefCell<Option<String>>,
+        /// The state of the energy saver last reported, to raise its change once.
+        energy_saver: Cell<Option<bool>>,
     }
 
     impl Win32PlatformSettings {
@@ -172,7 +182,32 @@ mod imp {
                 base: DefaultPlatformSettings::new(),
                 color_values: Cell::new(None),
                 last_language: RefCell::new(None),
+                energy_saver: Cell::new(None),
             })
+        }
+
+        fn read_energy_saver() -> bool {
+            use windows_sys::Win32::System::Power::{GetSystemPowerStatus, SYSTEM_POWER_STATUS};
+            // SAFETY: the structure is written by the call.
+            let mut power: SYSTEM_POWER_STATUS = unsafe { std::mem::zeroed() };
+            let flag = if unsafe { GetSystemPowerStatus(&mut power) } != 0 { power.SystemStatusFlag } else { 0 };
+            energy_saver_from(flag)
+        }
+
+        /// The power status may have changed (`WM_POWERBROADCAST`): raises
+        /// [`IPlatformSettings::energy_saver_changed`] when the energy saver was turned on or off.
+        pub(crate) fn on_power_status_changed(&self) {
+            let energy_saver = Self::read_energy_saver();
+            if self.energy_saver.replace(Some(energy_saver)) != Some(energy_saver) {
+                self.base.on_energy_saver_changed();
+            }
+        }
+
+        /// The transparency effects setting may have changed (it is announced with the colours,
+        /// `ImmersiveColorSet`): raises [`IPlatformSettings::accessibility_settings_changed`],
+        /// whose handlers read the current values.
+        pub(crate) fn on_accessibility_settings_changed(&self) {
+            self.base.on_accessibility_settings_changed();
         }
 
         fn get_uncached_color_values(&self) -> PlatformColorValues {
@@ -362,6 +397,28 @@ mod imp {
         fn preferred_application_language_changed(&self, handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
             self.base.preferred_application_language_changed(handler)
         }
+
+        fn transparency_enabled(&self) -> bool {
+            // `UISettings.AdvancedEffectsEnabled`, the transparency effects setting that WinUI's
+            // material policy reads; read each time, as the motion preference is.
+            read_ui_setting(
+                "Unable to read the transparency effects setting of the system: {0}",
+                || Ok(ui_settings::<IUISettings4>()?.advanced_effects_enabled()? != 0),
+                || self.base.transparency_enabled(),
+            )
+        }
+
+        fn accessibility_settings_changed(&self, handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
+            self.base.accessibility_settings_changed(handler)
+        }
+
+        fn energy_saver_enabled(&self) -> bool {
+            Self::read_energy_saver()
+        }
+
+        fn energy_saver_changed(&self, handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
+            self.base.energy_saver_changed(handler)
+        }
     }
 }
 
@@ -370,6 +427,14 @@ mod tests {
     use super::*;
 
     const ACCENT: Color = Color::new(255, 0, 120, 215);
+
+    #[test]
+    fn the_energy_saver_follows_the_battery_saver_flag_of_the_power_status() {
+        assert!(!energy_saver_from(0));
+        assert!(energy_saver_from(1));
+        // 255: the status is unknown.
+        assert!(!energy_saver_from(255));
+    }
 
     #[test]
     fn a_dark_background_is_the_dark_theme() {

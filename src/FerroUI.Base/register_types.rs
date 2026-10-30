@@ -153,6 +153,7 @@ const TYPES: &[&TypeInfo] = types![
     // FerroUI.Layout
     crate::layout::Layoutable,
     // FerroUI.Media
+    crate::media::AcrylicBrush,
     crate::media::ArcSegment,
     crate::media::BezierSegment,
     crate::media::BitmapCache,
@@ -205,6 +206,8 @@ const TYPES: &[&TypeInfo] = types![
     crate::media::TransformGroup,
     crate::media::TranslateTransform,
     crate::media::VisualBrush,
+    crate::media::XamlCompositionBrushBase,
+    crate::media::XamlLight,
     crate::media::effects::BlurEffect,
     crate::media::effects::DropShadowDirectionEffect,
     crate::media::effects::DropShadowEffect,

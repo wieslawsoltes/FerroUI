@@ -4,6 +4,7 @@ mod color;
 #[cfg(test)]
 mod color_tests;
 mod colors;
+mod color_matrix;
 mod drawing_context;
 #[cfg(test)]
 mod drawing_context_tests;
@@ -122,6 +123,7 @@ mod transform_group;
 mod translate_transform;
 
 pub use alignment_x::AlignmentX;
+pub use color_matrix::{ColorMatrix, ColorMatrixAlphaMode, LUMINANCE_WEIGHTS};
 pub use alignment_y::AlignmentY;
 pub use arc_segment::ArcSegment;
 pub use bezier_segment::BezierSegment;
@@ -209,6 +211,8 @@ pub use crate::rotate_3d_transform::Rotate3DTransform;
 // --- imaging, tile brushes, effects, drawings, materials ---
 
 mod acrylic_background_source;
+mod acrylic_brush;
+mod material_policy;
 mod background_sizing;
 mod bitmap_cache;
 mod cache_mode;
@@ -236,8 +240,15 @@ mod media_extensions;
 mod precise_elliptic_arc_helper;
 mod tile_brush;
 mod visual_brush;
+mod xaml_composition_brush_base;
+pub(crate) mod xaml_light;
 
 pub use acrylic_background_source::AcrylicBackgroundSource;
+pub use acrylic_brush::{
+    acrylic_effect, acrylic_effect_with_source, AcrylicBrushBackgroundSource, luminosity_color, tint_opacity_modifier, AcrylicBrush, ACRYLIC_BLUR_AMOUNT, ACRYLIC_FALLBACK_CROSS_FADE,
+    ACRYLIC_NOISE_OPACITY,
+};
+pub use material_policy::{MaterialPolicy, NOISE_ASSET_PNG};
 pub use background_sizing::BackgroundSizing;
 pub use bitmap_cache::BitmapCache;
 pub use cache_mode::{CacheMode, CacheModeImpl, CacheModeImplExt};
@@ -267,6 +278,11 @@ pub use image_brush::ImageBrush;
 pub use image_drawing::ImageDrawing;
 pub use immutable_experimental_acrylic_material::ImmutableExperimentalAcrylicMaterial;
 pub use material_extensions::MaterialExtensions;
+pub use xaml_composition_brush_base::{
+    XamlCompositionBrushBase, XamlCompositionBrushBaseImpl, XamlCompositionBrushBaseImplExt, XamlCompositionBrushBaseVTable,
+};
+pub(crate) use xaml_composition_brush_base::XamlBrushChanges;
+pub use xaml_light::{XamlLight, XamlLightImpl, XamlLightImplExt, XamlLightVTable};
 pub use media_extensions::MediaExtensions;
 pub use tile_brush::TileBrush;
 pub use visual_brush::VisualBrush;
