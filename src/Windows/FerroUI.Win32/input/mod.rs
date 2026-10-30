@@ -2,6 +2,7 @@
 //! method of the system and its input pane.
 
 mod imm32_caret_manager;
+mod imm32_context;
 mod imm32_input_method;
 mod key_interop;
 mod windows_input_pane;

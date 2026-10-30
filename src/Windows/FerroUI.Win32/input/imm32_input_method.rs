@@ -6,13 +6,30 @@
 //! ([`Imm32Parent`]), so that what it does with a composition is tested on
 //! every host: on Windows the first is the system and the second the
 //! window implementation.
+//!
+//! A client of the exact-edit connection (`TextInputMethodClient::input_method_connection`
+//! is `Some`, RichEditBox) is served through that connection: its composition is
+//! one session of the connection, its result one commit, a reset cancels the
+//! composition of the input method synchronously, its window owns the input
+//! contexts it creates, and its owner's input scopes reach the system
+//! (`docs/porting/winui-rich-text.md`, decision D5; `win32-platform.md`,
+//! section 8.2). Every other client, and so every TextBox, is served as the
+//! reference serves it.
+
+#[path = "imm32_input_options.rs"]
+mod input_options;
 
 use super::imm32_caret_manager::Imm32CaretManager;
+use super::imm32_context::{ImmContext, ImmWindowContext, OwnedImmContext};
 use crate::interop::unmanaged_methods::{
-    lgid, primary_lang_id, CANDIDATEFORM, CFS_EXCLUDE, CFS_POINT, COMPOSITIONFORM, CPS_COMPLETE, GCS, LANG_KO,
-    NI_COMPOSITIONSTR, POINT, RECT,
+    lgid, primary_lang_id, CANDIDATEFORM, CFS_EXCLUDE, CFS_POINT, COMPOSITIONFORM, CPS_CANCEL, CPS_COMPLETE, GCS,
+    LANG_KO, NI_COMPOSITIONSTR, POINT, RECT,
 };
-use ferroui_base::input::text_input::{ITextInputMethodImpl, TextInputMethodClient, TextInputOptions};
+use ferroui_base::input::text_input::{
+    ITextInputMethodImpl, TextInputMethodClient, TextInputMethodComposition, TextInputMethodConnection,
+    TextInputOptions,
+};
+use input_options::ImmInputOptions;
 use ferroui_base::input::{Key, PhysicalKey};
 use ferroui_base::Rect;
 use std::cell::{Cell, RefCell};
@@ -22,7 +39,10 @@ use std::rc::{Rc, Weak};
 pub(crate) trait ImmSystem {
     fn imm_get_context(&self, hwnd: isize) -> isize;
     fn imm_create_context(&self) -> isize;
-    fn imm_associate_context(&self, hwnd: isize, himc: isize);
+    /// Only for a context the input method created (connection clients).
+    fn imm_destroy_context(&self, himc: isize);
+    /// Returns the context the window had.
+    fn imm_associate_context(&self, hwnd: isize, himc: isize) -> isize;
     fn imm_release_context(&self, hwnd: isize, himc: isize);
     fn imm_notify_ime(&self, himc: isize, action: i32, index: i32, value: i32);
     fn imm_set_candidate_window(&self, himc: isize, candidate: &CANDIDATEFORM);
@@ -30,6 +50,12 @@ pub(crate) trait ImmSystem {
     fn imm_set_composition_font(&self, himc: isize, height: i32, quality: u8);
     /// A string of the composition; `None` when there is none.
     fn imm_get_composition_string(&self, himc: isize, flag: u32) -> Option<String>;
+    /// A string of the composition as the system has it, for a connection
+    /// client: empty when it is empty, `None` when the call fails or the
+    /// text is not well-formed.
+    fn imm_get_exact_composition_string(&self, himc: isize, flag: u32) -> Option<String> {
+        self.imm_get_composition_string(himc, flag)
+    }
     /// A number of the composition (the cursor position); negative for an
     /// error.
     fn imm_get_composition_value(&self, himc: isize, flag: u32) -> i32;
@@ -37,6 +63,21 @@ pub(crate) trait ImmSystem {
     fn set_caret_pos(&self, x: i32, y: i32);
     fn destroy_caret(&self);
     fn get_active_window(&self) -> isize;
+    /// Sets the input scopes of a window of the calling thread; one
+    /// `IS_DEFAULT` removes them (connection clients).
+    fn set_input_scopes(&self, hwnd: isize, scopes: &[i32]) -> bool;
+    /// Whether the next message of the queue is the result of a composition
+    /// of the window, without taking it (connection clients: some Korean
+    /// input methods end a composition just before its result).
+    fn next_message_is_composition_result(&self, _hwnd: isize) -> bool {
+        false
+    }
+    /// Maps a rectangle in pixels from the client area of one window to that
+    /// of another (connection clients: the window of the client and the
+    /// window that has the input context).
+    fn map_window_rect(&self, from: isize, to: isize, rect: RECT) -> Option<RECT> {
+        (from == to).then_some(rect)
+    }
     /// Runs an action later on the UI thread (`Dispatcher.UIThread.Post`).
     fn post(&self, action: Box<dyn FnOnce()>);
 }
@@ -44,6 +85,8 @@ pub(crate) trait ImmSystem {
 /// What the input method needs of the window it serves (the reference
 /// holds the window implementation).
 pub(crate) trait Imm32Parent {
+    /// The handle of the window; 0 once it is destroyed.
+    fn hwnd(&self) -> isize;
     fn desktop_scaling(&self) -> f64;
     /// The next `WM_CHAR` message of the window is not text.
     fn set_ignore_wm_char(&self, value: bool);
@@ -93,6 +136,12 @@ fn to_int32(ptr: isize) -> i32 {
     (ptr as i64 & 0xffff_ffff) as u32 as i32
 }
 
+/// The connection of a client that opted in to it; `None` for every other
+/// client, which keeps the reference's behaviour.
+fn connection_of(client: &Rc<dyn TextInputMethodClient>) -> Option<Rc<TextInputMethodConnection>> {
+    client.input_method_editing().and_then(|_| client.input_method_connection())
+}
+
 /// A Windows input method editor based on Windows Input Method Manager
 /// (IMM32).
 pub(crate) struct Imm32InputMethod {
@@ -101,13 +150,33 @@ pub(crate) struct Imm32InputMethod {
     hwnd: Cell<isize>,
     current_himc: Cell<isize>,
     parent: RefCell<Option<Weak<dyn Imm32Parent>>>,
-    caret_manager: RefCell<Imm32CaretManager>,
+    caret_manager: Imm32CaretManager,
     lang_id: Cell<u16>,
     ignore_composition: Cell<bool>,
     composition_cursor_position: Cell<Option<i32>>,
     client: RefCell<Option<Rc<dyn TextInputMethodClient>>>,
     is_composing: Cell<bool>,
     composition: RefCell<Option<String>>,
+    // What serves a client of the exact-edit connection (D5). `managed_input`
+    // tells which of the two ways the input method works: it is set by every
+    // client that is installed and kept while there is none, so that what
+    // ends the work of a connection client is done its way. The generations
+    // tell the work posted for a connection client, and the native calls it
+    // makes, from what happened meanwhile; the reference's own work is never
+    // fenced by them.
+    managed_input: Cell<bool>,
+    connection: RefCell<Option<Rc<TextInputMethodConnection>>>,
+    composition_session: RefCell<Option<TextInputMethodComposition>>,
+    generation: Cell<u64>,
+    context_generation: Cell<u64>,
+    /// The input contexts of the windows a connection client used.
+    contexts: RefCell<Vec<Rc<ImmWindowContext>>>,
+    /// The window (its site) whose client is installed.
+    source_site: RefCell<Option<(Weak<()>, Weak<dyn Imm32Parent>)>>,
+    input_options: ImmInputOptions,
+    end_before_result: Cell<bool>,
+    native_composition_cancelled: Cell<bool>,
+    completion_rejected: Cell<bool>,
 }
 
 impl Imm32InputMethod {
@@ -118,14 +187,48 @@ impl Imm32InputMethod {
             hwnd: Cell::new(0),
             current_himc: Cell::new(0),
             parent: RefCell::new(None),
-            caret_manager: RefCell::new(Imm32CaretManager::default()),
+            caret_manager: Imm32CaretManager::default(),
             lang_id: Cell::new(0),
             ignore_composition: Cell::new(false),
             composition_cursor_position: Cell::new(None),
             client: RefCell::new(None),
             is_composing: Cell::new(false),
             composition: RefCell::new(None),
+            managed_input: Cell::new(false),
+            connection: RefCell::new(None),
+            composition_session: RefCell::new(None),
+            generation: Cell::new(0),
+            context_generation: Cell::new(0),
+            contexts: RefCell::new(Vec::new()),
+            source_site: RefCell::new(None),
+            input_options: ImmInputOptions::default(),
+            end_before_result: Cell::new(false),
+            native_composition_cancelled: Cell::new(false),
+            completion_rejected: Cell::new(false),
         })
+    }
+
+    /// The text input method of one window: a facade of the input method
+    /// of the thread that knows its window. While a connection client is
+    /// installed, only the site that installed it detaches, resets or moves
+    /// it; for every other client every site acts as the reference's one
+    /// input method does.
+    pub(crate) fn for_window(self: &Rc<Self>, parent: Weak<dyn Imm32Parent>) -> Rc<dyn ITextInputMethodImpl> {
+        Rc::new(Imm32InputMethodSite { transport: self.clone(), identity: Rc::new(()), parent, options: RefCell::new(None) })
+    }
+
+    fn owns_site(&self, identity: &Rc<()>) -> bool {
+        self.source_site
+            .borrow()
+            .as_ref()
+            .and_then(|(site, _)| site.upgrade())
+            .is_some_and(|site| Rc::ptr_eq(&site, identity))
+    }
+
+    /// Whether the input method serves a client of the exact-edit connection
+    /// (or did, and has no client now).
+    pub fn has_managed_connection(&self) -> bool {
+        self.managed_input.get()
     }
 
     /// The window the input method serves; 0 for none (`Hwnd`).
@@ -170,10 +273,15 @@ impl Imm32InputMethod {
 
     #[allow(dead_code)] // A member of the reference without a caller there.
     pub fn create_caret(&self) {
-        self.caret_manager.borrow_mut().try_create(&*self.system, self.hwnd.get());
+        self.caret_manager.try_create(&*self.system, self.hwnd.get());
     }
 
     pub fn enable_imm(&self) {
+        if self.managed_input.get() {
+            self.enable_managed_imm();
+            return;
+        }
+
         let hwnd = self.hwnd.get();
         let mut himc = self.system.imm_get_context(hwnd);
 
@@ -192,23 +300,33 @@ impl Imm32InputMethod {
 
             self.current_himc.set(himc);
 
-            self.caret_manager.borrow_mut().try_create(&*self.system, hwnd);
+            self.caret_manager.try_create(&*self.system, hwnd);
         }
     }
 
     pub fn disable_imm(&self) {
-        self.caret_manager.borrow_mut().try_destroy(&*self.system);
+        if self.managed_input.get() {
+            self.disable_managed_imm();
+            return;
+        }
+
+        self.caret_manager.try_destroy(&*self.system);
 
         ITextInputMethodImpl::reset(self);
 
         self.system.imm_associate_context(self.hwnd.get(), 0);
 
-        self.caret_manager.borrow_mut().try_destroy(&*self.system);
+        self.caret_manager.try_destroy(&*self.system);
 
         self.current_himc.set(0);
     }
 
     pub fn set_language_and_window(&self, parent: Weak<dyn Imm32Parent>, hwnd: isize, hkl: isize) {
+        if self.managed_input.get() {
+            self.set_managed_language_and_window(parent, hwnd, hkl);
+            return;
+        }
+
         self.hwnd.set(hwnd);
         *self.parent.borrow_mut() = Some(parent);
 
@@ -234,13 +352,28 @@ impl Imm32InputMethod {
         self.composition_cursor_position.set(None);
     }
 
+    /// `WM_DESTROY` of a window: the reference clears the input method when
+    /// it serves that window. What a connection client left on the window
+    /// (an input context it created, input scopes) is given back too.
+    pub(crate) fn release_window(&self, hwnd: isize, parent: &Weak<dyn Imm32Parent>) {
+        if self.managed_input.get() {
+            self.release_physical_window(hwnd, Some(parent));
+            return;
+        }
+
+        if self.hwnd.get() == hwnd {
+            self.clear_language_and_window();
+        }
+        self.release_window_resources(hwnd, Some(parent));
+    }
+
     // see: https://chromium.googlesource.com/experimental/chromium/src/+/bf09a5036ccfb77d2277247c66dc55daf41df3fe/chrome/browser/ime_input.cc
     // see: https://engine.chinmaygarde.com/window__win32_8cc_source.html
     fn move_ime_window(&self, rect: Rect, himc: isize) {
         let s = self.parent().map_or(1.0, |parent| parent.desktop_scaling());
         let (x1, y1, x2, y2) = cursor_rect_in_pixels(rect, s);
 
-        self.caret_manager.borrow_mut().try_move(&*self.system, x2, y2);
+        self.caret_manager.try_move(&*self.system, x2, y2);
 
         if self.show_composition_window() {
             self.configure_composition_window(x1, y1, himc, y2 - y1);
@@ -263,6 +396,11 @@ impl Imm32InputMethod {
     }
 
     pub fn composition_changed(&self, composition: Option<String>, cursor_position: Option<i32>) {
+        if self.managed_input.get() {
+            self.managed_composition_changed(composition, cursor_position);
+            return;
+        }
+
         self.set_composition(composition.clone());
         self.composition_cursor_position.set(cursor_position);
 
@@ -277,6 +415,10 @@ impl Imm32InputMethod {
     }
 
     pub fn get_composition_string(&self, flag: u32) -> Option<String> {
+        if self.managed_input.get() {
+            return self.get_managed_composition_string(flag);
+        }
+
         if !self.is_composing.get() {
             return None;
         }
@@ -306,6 +448,11 @@ impl Imm32InputMethod {
     }
 
     pub fn handle_composition_start(&self) {
+        if self.managed_input.get() {
+            self.handle_managed_composition_start();
+            return;
+        }
+
         self.set_composition(None);
         self.composition_cursor_position.set(None);
 
@@ -322,6 +469,11 @@ impl Imm32InputMethod {
     }
 
     pub fn handle_composition_end(&self, timestamp: u64) {
+        if self.managed_input.get() {
+            self.handle_managed_composition_end();
+            return;
+        }
+
         //Cleanup composition state.
         self.is_composing.set(false);
 
@@ -346,6 +498,11 @@ impl Imm32InputMethod {
         }
 
         let flags = to_int32(l_param) as u32;
+        if self.managed_input.get() {
+            self.handle_managed_composition(flags, timestamp);
+            return;
+        }
+
         let result_changed = (flags & GCS::GCS_RESULTSTR) != 0;
 
         if flags == 0 {
@@ -395,6 +552,14 @@ impl Imm32InputMethod {
 
 impl ITextInputMethodImpl for Imm32InputMethod {
     fn set_client(&self, client: Option<Rc<dyn TextInputMethodClient>>) {
+        let connection = client.as_ref().and_then(connection_of);
+        if self.managed_input.get() || connection.is_some() {
+            self.set_managed_client(client, connection);
+            return;
+        }
+        // What a connection client posted is over.
+        self.generation.set(self.generation.get().wrapping_add(1));
+
         if let Some(old) = self.client() {
             self.set_composition(None);
             self.composition_cursor_position.set(None);
@@ -424,6 +589,11 @@ impl ITextInputMethodImpl for Imm32InputMethod {
     }
 
     fn set_cursor_rect(&self, rect: Rect) {
+        if self.managed_input.get() {
+            self.set_managed_cursor_rect(rect);
+            return;
+        }
+
         let focused = self.system.get_active_window() == self.hwnd.get();
 
         if !focused {
@@ -448,11 +618,25 @@ impl ITextInputMethodImpl for Imm32InputMethod {
         }));
     }
 
-    fn set_options(&self, _options: &TextInputOptions) {
+    fn set_options(&self, options: &TextInputOptions) {
         // we're skipping this. not usable on windows
+        // The options are kept for a client of the connection, whose input
+        // scopes reach the system; for every other client nothing is set.
+        self.input_options.update(Some(options.clone()));
+        // A connection that was replaced (a reset of the client) is followed
+        // by the client with its new one, which applies them.
+        if self.connection.borrow().as_ref().is_some_and(|connection| !connection.is_current()) {
+            return;
+        }
+        self.input_options.apply(self);
     }
 
     fn reset(&self) {
+        if self.managed_input.get() {
+            self.reset_managed();
+            return;
+        }
+
         self.composition_cursor_position.set(None);
 
         let this = self.this.clone();
@@ -485,9 +669,736 @@ impl ITextInputMethodImpl for Imm32InputMethod {
     }
 }
 
+/// The work of the input method for a client of the exact-edit connection
+/// (D5). None of it runs for another client.
+impl Imm32InputMethod {
+    fn current_window_context(&self) -> Option<Rc<ImmWindowContext>> {
+        let hwnd = self.hwnd.get();
+        if hwnd == 0 {
+            return None;
+        }
+        let parent = self.parent.borrow().clone();
+        let existing = self.contexts.borrow().iter().find(|record| record.hwnd == hwnd).cloned();
+        if let Some(existing) = existing {
+            return (!existing.retired.get() && existing.same_parent(parent.as_ref())).then_some(existing);
+        }
+        let record = ImmWindowContext::new(self.system.clone(), hwnd, parent);
+        self.contexts.borrow_mut().push(record.clone());
+        Some(record)
+    }
+
+    fn acquire_context(&self, hwnd: isize) -> Option<ImmContext> {
+        let record = self.contexts.borrow().iter().find(|record| record.hwnd == hwnd).cloned();
+        if let Some(record) = record {
+            if record.retired.get() {
+                return None;
+            }
+            record.acquire()
+        } else {
+            ImmContext::acquire(self.system.clone(), hwnd, None)
+        }
+    }
+
+    fn next_context_generation(&self) -> u64 {
+        let generation = self.context_generation.get().wrapping_add(1);
+        self.context_generation.set(generation);
+        generation
+    }
+
+    fn context_operation_is_current(&self, generation: u64, context_generation: u64, record: &ImmWindowContext) -> bool {
+        self.generation.get() == generation
+            && self.context_generation.get() == context_generation
+            && self.hwnd.get() == record.hwnd
+            && !record.retired.get()
+            && record.same_parent(self.parent.borrow().as_ref())
+    }
+
+    /// `EnableImm` for a connection client: the context the window has, the
+    /// one it had before the client disabled it, or one created for the
+    /// window and destroyed with it. Every `ImmGetContext` is given back.
+    fn enable_managed_imm(&self) {
+        let context_generation = self.next_context_generation();
+        let generation = self.generation.get();
+        let Some(record) = self.current_window_context() else {
+            return;
+        };
+        let acquired = record.acquire();
+        let mut himc = acquired.as_ref().map_or(0, |context| context.handle);
+        // Even a repeated enable releases its successful native acquisition.
+        drop(acquired);
+        if !self.context_operation_is_current(generation, context_generation, &record) {
+            return;
+        }
+
+        if himc == 0 {
+            let mut owned = record.owned.borrow().clone();
+            himc = record
+                .suspended
+                .get()
+                .filter(|handle| *handle != 0)
+                .or_else(|| owned.as_ref().map(|owned| owned.handle))
+                .unwrap_or(0);
+            let created = himc == 0;
+            if created {
+                owned = OwnedImmContext::create(self.system.clone());
+                if !self.context_operation_is_current(generation, context_generation, &record) {
+                    return;
+                }
+                let Some(context) = owned.as_ref() else {
+                    return;
+                };
+                himc = context.handle;
+                // Publish ownership before an association can invoke native callbacks.
+                let previous = record.owned.replace(owned.clone());
+                drop(previous);
+            }
+            record.suspended.set(None);
+            self.current_himc.set(himc);
+            let previous = self.system.imm_associate_context(record.hwnd, himc);
+            if !self.context_operation_is_current(generation, context_generation, &record) {
+                return;
+            }
+            if created {
+                record.original.set(previous);
+            }
+        } else {
+            record.suspended.set(None);
+            self.current_himc.set(himc);
+        }
+        self.caret_manager.try_create(&*self.system, record.hwnd);
+    }
+
+    /// `DisableImm` for a connection client: the composition is cancelled
+    /// while the window still has its context (the reference posts a reset
+    /// that runs after the context was taken away), then the context is
+    /// taken from the window and kept for the next enable. False when a
+    /// callback of the system changed the window or the client meanwhile.
+    fn disable_managed_imm(&self) -> bool {
+        let context_generation = self.next_context_generation();
+        let Some(record) = self.current_window_context() else {
+            return false;
+        };
+        let Some(generation) = self.prepare_reset() else {
+            return false;
+        };
+        // Cancel while the old window still has its context.
+        self.reset_native(generation);
+        if !self.context_operation_is_current(generation, context_generation, &record) {
+            return false;
+        }
+        self.caret_manager.try_destroy(&*self.system);
+        if !self.context_operation_is_current(generation, context_generation, &record) {
+            return false;
+        }
+        let acquired = record.acquire();
+        let himc = acquired.as_ref().map_or(0, |context| context.handle);
+        drop(acquired);
+        if !self.context_operation_is_current(generation, context_generation, &record) {
+            return false;
+        }
+        self.current_himc.set(0);
+        if himc == 0 {
+            return true;
+        }
+        // A reentrant enable can see the saved association immediately.
+        record.suspended.set(Some(himc));
+        let previous = self.system.imm_associate_context(record.hwnd, 0);
+        if !self.context_operation_is_current(generation, context_generation, &record) {
+            return false;
+        }
+        if previous != 0 {
+            record.suspended.set(Some(previous));
+        }
+        true
+    }
+
+    /// `SetLanguageAndWindow` for a connection client: a window that changes
+    /// gets its own context also when the language did not change.
+    fn set_managed_language_and_window(&self, parent: Weak<dyn Imm32Parent>, hwnd: isize, hkl: isize) {
+        let lang_id = primary_lang_id(lgid(hkl));
+        let same_window =
+            self.hwnd.get() == hwnd && self.parent.borrow().as_ref().is_some_and(|old| Weak::ptr_eq(old, &parent));
+        if same_window && lang_id == self.lang_id.get() {
+            return;
+        }
+        if same_window && self.is_active() {
+            if !self.disable_managed_imm() {
+                return;
+            }
+            if self.hwnd.get() != hwnd || !self.parent.borrow().as_ref().is_some_and(|old| Weak::ptr_eq(old, &parent)) {
+                return;
+            }
+        }
+        let generation = self.generation.get().wrapping_add(1);
+        self.generation.set(generation);
+        let context_generation = self.next_context_generation();
+        self.hwnd.set(hwnd);
+        *self.parent.borrow_mut() = Some(parent);
+        self.current_himc.set(0);
+        self.lang_id.set(lang_id);
+        self.caret_manager.try_destroy(&*self.system);
+        if self.generation.get() != generation || self.context_generation.get() != context_generation {
+            return;
+        }
+        // A new physical window needs its own association even when the language did not change.
+        if self.is_active() {
+            self.enable_managed_imm();
+        }
+        self.input_options.apply(self);
+    }
+
+    /// What a connection client left on a window (an input context it
+    /// created, input scopes), given back when the window is destroyed while
+    /// another client is served.
+    fn release_window_resources(&self, hwnd: isize, parent: Option<&Weak<dyn Imm32Parent>>) {
+        if hwnd == 0 {
+            return;
+        }
+        self.input_options.retire_window(hwnd, parent, &*self.system);
+        let record =
+            self.contexts.borrow().iter().find(|record| record.hwnd == hwnd && record.same_parent(parent)).cloned();
+        if let Some(record) = record {
+            record.dispose();
+            self.contexts.borrow_mut().retain(|current| !Rc::ptr_eq(current, &record));
+        }
+    }
+
+    /// `WM_DESTROY` while a connection client is served: its composition is
+    /// cancelled, its input scopes removed, and the input contexts the window
+    /// got from the input method destroyed. A window that only had the input
+    /// context while the client's own window stays keeps the client.
+    fn release_physical_window(&self, hwnd: isize, parent: Option<&Weak<dyn Imm32Parent>>) {
+        if hwnd == 0 {
+            return;
+        }
+        // Native cleanup may run user callbacks. Stage any replacement scope
+        // until the outgoing association and physical ownership are retired.
+        let options_guard = self.input_options.pause();
+        let record =
+            self.contexts.borrow().iter().find(|record| record.hwnd == hwnd && record.same_parent(parent)).cloned();
+        if record.as_ref().is_some_and(|record| record.retired.replace(true)) {
+            return;
+        }
+        let same_parent = match (self.parent.borrow().as_ref(), parent) {
+            (Some(a), Some(b)) => Weak::ptr_eq(a, b),
+            (None, None) => true,
+            _ => false,
+        };
+        let source_is_closing = self
+            .source_site
+            .borrow()
+            .as_ref()
+            .is_some_and(|(_, source)| parent.is_some_and(|parent| Weak::ptr_eq(source, parent)));
+        if self.hwnd.get() == hwnd && same_parent {
+            let generation = self.generation.get().wrapping_add(1);
+            self.generation.set(generation);
+            self.next_context_generation();
+            self.hwnd.set(0);
+            self.parent.take();
+            self.current_himc.set(0);
+            self.lang_id.set(0);
+            let retain_owner = !source_is_closing
+                && self.source_site.borrow().is_some()
+                && self.connection.borrow().as_ref().is_some_and(|connection| connection.is_current());
+            let previous = if retain_owner {
+                None
+            } else {
+                self.source_site.take();
+                self.input_options.update(None);
+                self.connection.take();
+                self.composition_session.take();
+                self.is_composing.set(false);
+                self.composition_cursor_position.set(None);
+                self.set_composition(None);
+                self.client.take()
+            };
+            self.input_options.retire_window(hwnd, parent, &*self.system);
+            if self.generation.get() == generation {
+                self.caret_manager.try_destroy(&*self.system);
+            }
+            if self.generation.get() == generation {
+                if let Some(previous) = previous {
+                    previous.set_preedit_text_with_cursor(None, None);
+                }
+            }
+            if !retain_owner && self.generation.get() == generation {
+                if let Some(context) = record.as_ref().and_then(|record| record.acquire()) {
+                    if self.generation.get() == generation {
+                        self.system.imm_notify_ime(context.handle, NI_COMPOSITIONSTR, CPS_CANCEL, 0);
+                    }
+                }
+            }
+        } else if source_is_closing {
+            self.source_site.take();
+            self.set_client(None);
+        }
+        self.input_options.retire_window(hwnd, parent, &*self.system);
+        if let Some(record) = record {
+            record.dispose();
+            self.contexts.borrow_mut().retain(|current| !Rc::ptr_eq(current, &record));
+        }
+        drop(options_guard);
+        self.input_options.apply(self);
+    }
+
+    /// The candidate window of a connection client: the cursor rectangle is
+    /// in the coordinates of the client's window (the site that installed
+    /// it), which may not be the window that has the input context (a popup
+    /// that does not take activation).
+    fn move_managed_ime_window(&self, rect: Rect, himc: isize) {
+        let generation = self.generation.get();
+        let context_generation = self.context_generation.get();
+        let hwnd = self.hwnd.get();
+        let is_current = || {
+            self.generation.get() == generation
+                && self.context_generation.get() == context_generation
+                && self.hwnd.get() == hwnd
+        };
+        let source_site = self.source_site.borrow().clone();
+        let source = match source_site {
+            Some((site, parent)) if site.upgrade().is_some() => parent.upgrade(),
+            Some(_) => return,
+            None => self.parent(),
+        };
+        let Some(source) = source else {
+            return;
+        };
+        let source_hwnd = source.hwnd();
+        if source_hwnd == 0 {
+            return;
+        }
+        let (x1, y1, x2, y2) = cursor_rect_in_pixels(rect, source.desktop_scaling());
+        if !is_current() {
+            return;
+        }
+        let Some(mapped) = self.system.map_window_rect(source_hwnd, hwnd, RECT { left: x1, top: y1, right: x2, bottom: y2 })
+        else {
+            return;
+        };
+        if !is_current() {
+            return;
+        }
+        let (x1, y1, x2, y2) = (mapped.left, mapped.top, mapped.right, mapped.bottom);
+
+        self.caret_manager.try_move(&*self.system, x2, y2);
+        if !is_current() {
+            return;
+        }
+
+        if self.show_composition_window() {
+            self.configure_composition_window(x1, y1, himc, y2 - y1);
+            // Don't need to set the position of candidate window.
+            return;
+        }
+
+        let exclude_rectangle = candidate_exclude_rectangle(x1, y1, x2, y2, self.lang_id.get());
+
+        self.system.imm_set_candidate_window(himc, &exclude_rectangle);
+    }
+
+    /// The preview of a connection client is an update of its composition
+    /// session; one the client does not accept is not kept.
+    fn managed_composition_changed(&self, composition: Option<String>, cursor_position: Option<i32>) {
+        let generation = self.generation.get();
+        let session = self.composition_session.borrow().clone();
+        if let (Some(session), Some(text)) = (session, composition) {
+            if session.update(&text, cursor_position).is_ok() && self.generation.get() == generation {
+                self.set_composition(Some(text));
+                self.composition_cursor_position.set(cursor_position);
+            }
+        }
+    }
+
+    fn get_managed_composition_string(&self, flag: u32) -> Option<String> {
+        if !self.is_composing.get() && self.composition_session.borrow().is_none() {
+            return None;
+        }
+        let generation = self.generation.get();
+        let context_generation = self.context_generation.get();
+        let context = self.acquire_context(self.hwnd.get())?;
+        if self.generation.get() != generation || self.context_generation.get() != context_generation {
+            return None;
+        }
+        let result = self.system.imm_get_exact_composition_string(context.handle, flag);
+        drop(context);
+        if self.generation.get() != generation || self.context_generation.get() != context_generation {
+            return None;
+        }
+        result
+    }
+
+    fn get_managed_composition_cursor_position(&self) -> Option<i32> {
+        if !self.is_composing.get() {
+            return None;
+        }
+        let generation = self.generation.get();
+        let context_generation = self.context_generation.get();
+        let context = self.acquire_context(self.hwnd.get())?;
+        if self.generation.get() != generation || self.context_generation.get() != context_generation {
+            return None;
+        }
+        let cursor = self.system.imm_get_composition_value(context.handle, GCS::GCS_CURSORPOS);
+        drop(context);
+        if self.generation.get() != generation || self.context_generation.get() != context_generation {
+            return None;
+        }
+        (cursor >= 0).then_some(cursor)
+    }
+
+    /// The start of a composition begins a session of the connection; the
+    /// selection is not deleted (the client replaces it when the result is
+    /// committed).
+    fn handle_managed_composition_start(&self) {
+        self.native_composition_cancelled.set(false);
+        let generation = self.generation.get().wrapping_add(1);
+        self.generation.set(generation);
+        self.end_before_result.set(false);
+        self.completion_rejected.set(false);
+        self.set_composition(None);
+        self.composition_cursor_position.set(None);
+
+        let connection = self.connection.borrow().clone();
+        let Some(connection) = connection else {
+            self.is_composing.set(true);
+            return;
+        };
+        self.composition_session.take();
+        let result = connection.begin_composition();
+        if self.generation.get() != generation {
+            return;
+        }
+        let Ok(session) = result else {
+            self.is_composing.set(false);
+            return;
+        };
+        *self.composition_session.borrow_mut() = Some(session);
+        self.is_composing.set(true);
+    }
+
+    /// The end of a composition without a result cancels the preview: a
+    /// cached preview is never committed. A result the client rejected can
+    /// be sent again; a Korean result queued right after the end is waited
+    /// for.
+    fn handle_managed_composition_end(&self) {
+        let generation = self.generation.get();
+        if self.completion_rejected.get() {
+            self.is_composing.set(false);
+            return;
+        }
+        if i32::from(self.lang_id.get()) == LANG_KO && self.system.next_message_is_composition_result(self.hwnd.get()) {
+            self.end_before_result.set(true);
+            return;
+        }
+        self.is_composing.set(false);
+        let session = self.composition_session.take();
+        if let Some(session) = session {
+            let _ = session.cancel();
+        }
+        if self.generation.get() != generation {
+            return;
+        }
+        self.set_composition(None);
+        self.composition_cursor_position.set(None);
+    }
+
+    /// `WM_IME_COMPOSITION` for a connection client: the result is committed
+    /// through the session (one undo unit; no `WM_CHAR` follows), the
+    /// composition string updates its preview.
+    fn handle_managed_composition(&self, flags: u32, timestamp: u64) {
+        let generation = self.generation.get();
+        if flags == 0 {
+            let session = self.composition_session.take();
+            if let Some(session) = session {
+                let _ = session.cancel();
+            }
+            if self.generation.get() != generation {
+                return;
+            }
+            self.set_composition(None);
+            self.composition_cursor_position.set(None);
+            return;
+        }
+        if flags & GCS::GCS_RESULTSTR != 0 {
+            let Some(result) = self.get_managed_composition_string(GCS::GCS_RESULTSTR) else {
+                return;
+            };
+            if self.generation.get() != generation {
+                return;
+            }
+            let session = self.composition_session.borrow().clone();
+            let Some(session) = session else {
+                return;
+            };
+            let result = session.commit(&result, timestamp);
+            if self.generation.get() != generation {
+                return;
+            }
+            if result.is_err() {
+                self.completion_rejected.set(session.is_current());
+                return;
+            }
+            self.completion_rejected.set(false);
+            self.composition_session.take();
+            self.set_composition(None);
+            self.composition_cursor_position.set(None);
+            if self.end_before_result.replace(false) && flags & GCS::GCS_COMPSTR == 0 {
+                self.is_composing.set(false);
+            }
+            if let Some(parent) = self.parent() {
+                parent.set_ignore_wm_char(true);
+            }
+            if flags & GCS::GCS_COMPSTR != 0 {
+                let connection = self.connection.borrow().clone();
+                if let Some(connection) = connection {
+                    let session = connection.begin_composition();
+                    if self.generation.get() != generation {
+                        return;
+                    }
+                    if let Ok(session) = session {
+                        *self.composition_session.borrow_mut() = Some(session);
+                    }
+                }
+            }
+        }
+        if flags & (GCS::GCS_COMPSTR | GCS::GCS_CURSORPOS) != 0 {
+            let text = if flags & GCS::GCS_COMPSTR != 0 {
+                self.get_managed_composition_string(GCS::GCS_COMPSTR)
+            } else {
+                self.composition()
+            };
+            let cursor = if flags & GCS::GCS_CURSORPOS != 0 {
+                self.get_managed_composition_cursor_position()
+            } else {
+                self.composition_cursor_position.get()
+            };
+            if self.generation.get() != generation {
+                return;
+            }
+            if text.is_some() {
+                self.managed_composition_changed(text, cursor);
+            }
+        }
+    }
+
+    /// `SetClient` when a connection client is installed, or replaced: the
+    /// composition of the old one is cancelled while its window still has
+    /// the context, and the work posted for it is over.
+    fn set_managed_client(
+        &self,
+        client: Option<Rc<dyn TextInputMethodClient>>,
+        connection: Option<Rc<TextInputMethodConnection>>,
+    ) {
+        let cancel_native =
+            self.managed_input.get() && (self.is_composing.get() || self.composition_session.borrow().is_some());
+        let generation = self.generation.get().wrapping_add(1);
+        self.generation.set(generation);
+        if client.is_none() {
+            self.input_options.update(None);
+        }
+        self.composition_session.take();
+        self.connection.take();
+        if self.managed_input.get() || connection.is_some() {
+            self.is_composing.set(false);
+        }
+        if cancel_native {
+            // Different per-window facades share this transport. The next owner
+            // can invalidate the posted disable, so retire the old native
+            // composition while its HWND/HIMC still identifies the old owner.
+            self.reset_native(generation);
+            if self.generation.get() != generation {
+                return;
+            }
+        }
+        if let Some(old) = self.client() {
+            self.set_composition(None);
+            self.composition_cursor_position.set(None);
+
+            old.set_preedit_text_with_cursor(None, None);
+        }
+
+        if self.generation.get() != generation {
+            return;
+        }
+        if client.is_some() {
+            self.managed_input.set(connection.is_some());
+        }
+        *self.connection.borrow_mut() = connection;
+        *self.client.borrow_mut() = client;
+
+        self.input_options.apply(self);
+        if self.generation.get() != generation {
+            return;
+        }
+        let this = self.this.clone();
+        self.system.post(Box::new(move || {
+            let Some(this) = this.upgrade() else {
+                return;
+            };
+            if this.generation.get() != generation {
+                return;
+            }
+            if this.is_active() {
+                this.enable_imm();
+            } else {
+                this.disable_imm();
+            }
+        }));
+    }
+
+    fn set_managed_cursor_rect(&self, rect: Rect) {
+        let focused = self.system.get_active_window() == self.hwnd.get();
+
+        if !focused {
+            return;
+        }
+
+        let this = self.this.clone();
+        let generation = self.generation.get();
+        self.system.post(Box::new(move || {
+            let Some(this) = this.upgrade() else {
+                return;
+            };
+            if this.generation.get() != generation {
+                return;
+            }
+            let Some(context) = this.acquire_context(this.hwnd.get()) else {
+                return;
+            };
+            if this.generation.get() != generation {
+                return;
+            }
+            this.move_managed_ime_window(rect, context.handle);
+        }));
+    }
+
+    /// `Reset` for a connection client: the client already committed or
+    /// dropped its preview, so the composition of the input method is
+    /// cancelled, at once, while the window has its context.
+    fn reset_managed(&self) {
+        let Some(generation) = self.prepare_reset() else {
+            return;
+        };
+        self.reset_native(generation);
+    }
+
+    fn prepare_reset(&self) -> Option<u64> {
+        let generation = self.generation.get().wrapping_add(1);
+        self.generation.set(generation);
+        self.completion_rejected.set(false);
+        self.composition_session.take();
+        self.is_composing.set(false);
+        self.set_composition(None);
+        if let Some(client) = self.client() {
+            client.set_preedit_text_with_cursor(None, None);
+        }
+        if self.generation.get() != generation {
+            return None;
+        }
+        self.composition_cursor_position.set(None);
+        Some(generation)
+    }
+
+    fn reset_native(&self, generation: u64) {
+        if self.generation.get() != generation || self.native_composition_cancelled.get() {
+            return;
+        }
+        let Some(context) = self.acquire_context(self.hwnd.get()) else {
+            return;
+        };
+        if self.generation.get() != generation {
+            return;
+        }
+        if let Some(parent) = self.parent() {
+            parent.set_ignore_wm_char(true);
+        }
+        if self.generation.get() != generation {
+            return;
+        }
+        // Publish before a native callback can start a replacement session.
+        self.native_composition_cancelled.set(true);
+        self.system.imm_notify_ime(context.handle, NI_COMPOSITIONSTR, CPS_CANCEL, 0);
+        if self.generation.get() != generation {
+            return;
+        }
+        self.is_composing.set(false);
+        self.set_composition(None);
+        self.composition_cursor_position.set(None);
+    }
+}
+
+/// The text input method of one window (`Imm32InputMethod::for_window`).
+struct Imm32InputMethodSite {
+    transport: Rc<Imm32InputMethod>,
+    identity: Rc<()>,
+    parent: Weak<dyn Imm32Parent>,
+    // The manager sends the options of a connection client before its client.
+    options: RefCell<Option<TextInputOptions>>,
+}
+
+impl Imm32InputMethodSite {
+    /// Whether this site may act on the input method: always while it serves
+    /// a client without the connection (the reference has one input method
+    /// for every window), else only when this site installed the client.
+    fn may_act(&self) -> bool {
+        !self.transport.managed_input.get() || self.transport.owns_site(&self.identity)
+    }
+}
+
+impl ITextInputMethodImpl for Imm32InputMethodSite {
+    fn set_client(&self, client: Option<Rc<dyn TextInputMethodClient>>) {
+        if let Some(client) = client {
+            // A connection client of a window that is gone is not installed.
+            if connection_of(&client).is_some() && !self.parent.upgrade().is_some_and(|parent| parent.hwnd() != 0) {
+                return;
+            }
+            *self.transport.source_site.borrow_mut() = Some((Rc::downgrade(&self.identity), self.parent.clone()));
+            self.transport.input_options.update(self.options.borrow().clone());
+            self.transport.set_client(Some(client));
+        } else if self.transport.owns_site(&self.identity) {
+            self.transport.source_site.take();
+            self.transport.set_client(None);
+        } else if !self.transport.managed_input.get() {
+            self.transport.set_client(None);
+        }
+    }
+
+    fn set_cursor_rect(&self, rect: Rect) {
+        if self.may_act() {
+            self.transport.set_cursor_rect(rect);
+        }
+    }
+
+    fn set_options(&self, options: &TextInputOptions) {
+        self.options.replace(Some(options.clone()));
+        if self.may_act() {
+            self.transport.set_options(options);
+        }
+    }
+
+    fn reset(&self) {
+        if self.may_act() {
+            self.transport.reset();
+        }
+    }
+}
+
+impl Drop for Imm32InputMethodSite {
+    fn drop(&mut self) {
+        // The connection client of a window that goes away is detached.
+        if self.transport.managed_input.get() && self.transport.owns_site(&self.identity) {
+            self.set_client(None);
+        }
+    }
+}
+
 impl Drop for Imm32InputMethod {
     fn drop(&mut self) {
-        self.caret_manager.borrow_mut().try_destroy(&*self.system);
+        self.input_options.dispose(&*self.system);
+        self.caret_manager.try_destroy(&*self.system);
+        let contexts = self.contexts.take();
+        for context in contexts {
+            context.dispose();
+        }
     }
 }
 
@@ -515,8 +1426,12 @@ mod imp {
             native::imm_create_context()
         }
 
-        fn imm_associate_context(&self, hwnd: isize, himc: isize) {
-            native::imm_associate_context(hwnd, himc);
+        fn imm_destroy_context(&self, himc: isize) {
+            native::imm_destroy_context(himc);
+        }
+
+        fn imm_associate_context(&self, hwnd: isize, himc: isize) -> isize {
+            native::imm_associate_context(hwnd, himc)
         }
 
         fn imm_release_context(&self, hwnd: isize, himc: isize) {
@@ -543,6 +1458,10 @@ mod imp {
             native::imm_get_composition_string(himc, flag)
         }
 
+        fn imm_get_exact_composition_string(&self, himc: isize, flag: u32) -> Option<String> {
+            native::imm_get_exact_composition_string(himc, flag)
+        }
+
         fn imm_get_composition_value(&self, himc: isize, flag: u32) -> i32 {
             native::imm_get_composition_value(himc, flag)
         }
@@ -561,6 +1480,18 @@ mod imp {
 
         fn get_active_window(&self) -> isize {
             native::get_active_window()
+        }
+
+        fn set_input_scopes(&self, hwnd: isize, scopes: &[i32]) -> bool {
+            native::set_input_scopes(hwnd, scopes)
+        }
+
+        fn next_message_is_composition_result(&self, hwnd: isize) -> bool {
+            native::next_message_is_composition_result(hwnd)
+        }
+
+        fn map_window_rect(&self, from: isize, to: isize, rect: super::RECT) -> Option<super::RECT> {
+            native::map_window_rect(from, to, rect)
         }
 
         fn post(&self, action: Box<dyn FnOnce()>) {
@@ -592,6 +1523,7 @@ pub(crate) mod tests {
     pub(crate) enum Call {
         GetContext(isize),
         CreateContext,
+        DestroyContext(isize),
         AssociateContext(isize, isize),
         ReleaseContext(isize, isize),
         NotifyIme(isize, i32, i32, i32),
@@ -601,6 +1533,7 @@ pub(crate) mod tests {
         CreateCaret(isize, i32, i32),
         SetCaretPos(i32, i32),
         DestroyCaret,
+        SetInputScopes(isize, Vec<i32>),
     }
 
     /// The system as a record of the calls made of it, with the answers a
@@ -608,13 +1541,33 @@ pub(crate) mod tests {
     pub(crate) struct FakeSystem {
         pub calls: RefCell<Vec<Call>>,
         pub posted: RefCell<Vec<Box<dyn FnOnce()>>>,
-        /// The input context of every window; 0 for none.
+        /// The input context of every window; 0 for none. With
+        /// `track_associations`, of every window whose context was not set.
         pub context: Cell<isize>,
+        /// Whether `ImmAssociateContext` changes what `ImmGetContext` answers,
+        /// as on the system. Off for the tests of the reference's sequence,
+        /// which answer one context whatever was associated.
+        pub track_associations: Cell<bool>,
+        pub associations: RefCell<std::collections::BTreeMap<isize, isize>>,
+        /// `ImmGetContext` less `ImmReleaseContext`, per window and context.
+        pub borrows: RefCell<std::collections::BTreeMap<(isize, isize), i64>>,
+        created_contexts: RefCell<std::collections::BTreeSet<isize>>,
+        pub next_created_context: Cell<isize>,
+        /// Runs once, after the first call it matches is recorded: a window
+        /// procedure the system runs from inside that call.
+        #[allow(clippy::type_complexity)]
+        pub next_hook: RefCell<Option<(fn(&Call) -> bool, Box<dyn FnOnce()>)>>,
         pub active_window: Cell<isize>,
         pub refuse_caret: Cell<bool>,
         pub composition_string: RefCell<Option<String>>,
         pub result_string: RefCell<Option<String>>,
         pub cursor: Cell<i32>,
+        /// What `next_message_is_composition_result` answers.
+        pub next_result: Cell<bool>,
+        pub refuse_input_scopes: Cell<bool>,
+        /// Whether `SetInputScopes` takes effect only after its callback ran.
+        pub complete_input_scopes_after_callback: Cell<bool>,
+        pub input_scopes: RefCell<std::collections::BTreeMap<isize, Vec<i32>>>,
     }
 
     impl FakeSystem {
@@ -623,12 +1576,34 @@ pub(crate) mod tests {
                 calls: RefCell::new(Vec::new()),
                 posted: RefCell::new(Vec::new()),
                 context: Cell::new(0x1C),
+                track_associations: Cell::new(false),
+                associations: RefCell::new(std::collections::BTreeMap::new()),
+                borrows: RefCell::new(std::collections::BTreeMap::new()),
+                created_contexts: RefCell::new(std::collections::BTreeSet::new()),
+                next_created_context: Cell::new(0x2C),
+                next_hook: RefCell::new(None),
                 active_window: Cell::new(0),
                 refuse_caret: Cell::new(false),
                 composition_string: RefCell::new(None),
                 result_string: RefCell::new(None),
                 cursor: Cell::new(-1),
+                next_result: Cell::new(false),
+                refuse_input_scopes: Cell::new(false),
+                complete_input_scopes_after_callback: Cell::new(false),
+                input_scopes: RefCell::new(std::collections::BTreeMap::new()),
             })
+        }
+
+        /// A system whose windows keep the context associated with them.
+        pub fn tracking() -> Rc<FakeSystem> {
+            let system = FakeSystem::new();
+            system.track_associations.set(true);
+            system
+        }
+
+        /// Whether every `ImmGetContext` was given back.
+        pub fn balanced(&self) -> bool {
+            self.borrows.borrow().values().all(|count| *count == 0)
         }
 
         pub fn take_calls(&self) -> Vec<Call> {
@@ -649,26 +1624,69 @@ pub(crate) mod tests {
         }
 
         fn record(&self, call: Call) {
-            self.calls.borrow_mut().push(call);
+            self.calls.borrow_mut().push(call.clone());
+            let hook = self.next_hook.take();
+            if let Some((matches, action)) = hook {
+                if matches(&call) {
+                    action();
+                } else {
+                    *self.next_hook.borrow_mut() = Some((matches, action));
+                }
+            }
         }
     }
 
     impl ImmSystem for FakeSystem {
         fn imm_get_context(&self, hwnd: isize) -> isize {
+            let handle = if !self.track_associations.get() {
+                self.context.get()
+            } else if hwnd == 0 {
+                0
+            } else {
+                self.associations.borrow().get(&hwnd).copied().unwrap_or(self.context.get())
+            };
+            if handle != 0 {
+                *self.borrows.borrow_mut().entry((hwnd, handle)).or_default() += 1;
+            }
             self.record(Call::GetContext(hwnd));
-            self.context.get()
+            handle
         }
 
         fn imm_create_context(&self) -> isize {
+            let handle = self.next_created_context.get();
+            if handle != 0 {
+                self.next_created_context.set(handle + 1);
+                self.created_contexts.borrow_mut().insert(handle);
+            }
             self.record(Call::CreateContext);
-            0x2C
+            handle
         }
 
-        fn imm_associate_context(&self, hwnd: isize, himc: isize) {
+        fn imm_destroy_context(&self, himc: isize) {
+            assert!(
+                self.created_contexts.borrow_mut().remove(&himc),
+                "destroying a context not created by the input method or destroying twice"
+            );
+            assert!(self.associations.borrow().values().all(|handle| *handle != himc), "destroying an associated context");
+            assert!(
+                self.borrows.borrow().iter().all(|((_, handle), count)| *handle != himc || *count == 0),
+                "destroying a borrowed context"
+            );
+            self.record(Call::DestroyContext(himc));
+        }
+
+        fn imm_associate_context(&self, hwnd: isize, himc: isize) -> isize {
+            let previous = if self.track_associations.get() {
+                self.associations.borrow_mut().insert(hwnd, himc).unwrap_or(self.context.get())
+            } else {
+                self.context.get()
+            };
             self.record(Call::AssociateContext(hwnd, himc));
+            previous
         }
 
         fn imm_release_context(&self, hwnd: isize, himc: isize) {
+            *self.borrows.borrow_mut().entry((hwnd, himc)).or_default() -= 1;
             self.record(Call::ReleaseContext(hwnd, himc));
         }
 
@@ -717,6 +1735,32 @@ pub(crate) mod tests {
             self.active_window.get()
         }
 
+        fn set_input_scopes(&self, hwnd: isize, scopes: &[i32]) -> bool {
+            let success = !self.refuse_input_scopes.get();
+            let delayed = self.complete_input_scopes_after_callback.get();
+            let apply = || {
+                if success {
+                    if scopes == [0] {
+                        self.input_scopes.borrow_mut().remove(&hwnd);
+                    } else {
+                        self.input_scopes.borrow_mut().insert(hwnd, scopes.to_vec());
+                    }
+                }
+            };
+            if !delayed {
+                apply();
+            }
+            self.record(Call::SetInputScopes(hwnd, scopes.to_vec()));
+            if delayed {
+                apply();
+            }
+            success
+        }
+
+        fn next_message_is_composition_result(&self, _hwnd: isize) -> bool {
+            self.next_result.get()
+        }
+
         fn post(&self, action: Box<dyn FnOnce()>) {
             self.posted.borrow_mut().push(action);
         }
@@ -732,6 +1776,10 @@ pub(crate) mod tests {
     }
 
     impl Imm32Parent for FakeParent {
+        fn hwnd(&self) -> isize {
+            HWND
+        }
+
         fn desktop_scaling(&self) -> f64 {
             self.scaling.get()
         }
@@ -753,8 +1801,9 @@ pub(crate) mod tests {
         }
     }
 
-    /// A text input client that records the preedit text it is given.
-    struct Client {
+    /// A text input client that records the preedit text it is given: a
+    /// client without the exact-edit connection, as every TextBox.
+    pub(crate) struct Client {
         events: TextInputMethodClientEvents,
         supports_preedit: bool,
         supports_surrounding_text: bool,
@@ -763,7 +1812,7 @@ pub(crate) mod tests {
     }
 
     impl Client {
-        fn new() -> Rc<Client> {
+        pub(crate) fn new() -> Rc<Client> {
             Rc::new(Client {
                 events: TextInputMethodClientEvents::new(),
                 supports_preedit: true,
@@ -1180,4 +2229,172 @@ pub(crate) mod tests {
         system.run_posted();
         assert_eq!(vec![Call::GetContext(0)], system.take_calls());
     }
+
+    // D5: a client without the exact-edit connection (every TextBox) keeps the
+    // reference's sequence, also beside the work for connection clients.
+
+    #[test]
+    fn a_client_without_the_connection_keeps_the_reference_sequence() {
+        let Setup { system, parent, input_method, client } = setup(HKL_JA);
+        assert!(!input_method.has_managed_connection());
+
+        // Options are not given to the system (`SetOptions` is a no-op).
+        input_method.set_options(&TextInputOptions {
+            content_type: ferroui_base::input::text_input::TextInputContentType::Password,
+            is_sensitive: true,
+            ..Default::default()
+        });
+        system.run_posted();
+        assert!(system.take_calls().is_empty());
+
+        // A reset is posted, and completes the composition.
+        input_method.handle_composition_start();
+        ITextInputMethodImpl::reset(&*input_method);
+        assert!(system.take_calls().is_empty());
+        system.run_posted();
+        assert_eq!(
+            vec![
+                Call::GetContext(HWND),
+                Call::NotifyIme(0x1C, NI_COMPOSITIONSTR, CPS_COMPLETE, 0),
+                Call::ReleaseContext(HWND, 0x1C)
+            ],
+            system.take_calls()
+        );
+        // The composition message the completion sends is ignored once.
+        *system.result_string.borrow_mut() = Some("x".to_owned());
+        input_method.handle_composition(0, GCS::GCS_RESULTSTR as isize, 1);
+        assert!(parent.text.borrow().is_empty());
+
+        // The result is raw text input, and the string is read without
+        // giving the context back, as the reference does.
+        input_method.handle_composition_start();
+        client.take_preedit();
+        *system.result_string.borrow_mut() = Some("日本".to_owned());
+        input_method.handle_composition(0, GCS::GCS_RESULTSTR as isize, 2);
+        assert_eq!(vec![(2, "日本".to_owned())], *parent.text.borrow());
+        assert_eq!(vec![Call::GetContext(HWND)], system.take_calls());
+        input_method.handle_composition_end(3);
+        assert_eq!(1, parent.text.borrow().len());
+
+        // No client: the context is taken from the window, then the posted
+        // reset runs. No scope, context or cancellation of the connection.
+        input_method.set_client(None);
+        system.run_posted();
+        assert_eq!(
+            vec![
+                Call::DestroyCaret,
+                Call::AssociateContext(HWND, 0),
+                Call::GetContext(HWND),
+                Call::NotifyIme(0x1C, NI_COMPOSITIONSTR, CPS_COMPLETE, 0),
+                Call::ReleaseContext(HWND, 0x1C),
+            ],
+            system.take_calls()
+        );
+        assert!(!input_method.has_managed_connection());
+    }
+
+    #[test]
+    fn work_of_a_client_without_the_connection_is_not_fenced_by_a_new_client() {
+        // A callback of the system that installs another client while a
+        // result is read does not stop the rest of the message, as in the
+        // reference: the composition string goes to the new client.
+        let Setup { system, parent, input_method, client } = setup(HKL_KO);
+        input_method.handle_composition_start();
+        client.take_preedit();
+        let other = Client::new();
+        let weak = Rc::downgrade(&input_method);
+        let next: Rc<dyn TextInputMethodClient> = other.clone();
+        *system.next_hook.borrow_mut() = Some((
+            |call| matches!(call, Call::GetContext(_)),
+            Box::new(move || weak.upgrade().unwrap().set_client(Some(next))),
+        ));
+        *system.result_string.borrow_mut() = Some("한".to_owned());
+        *system.composition_string.borrow_mut() = Some("ㄱ".to_owned());
+        system.cursor.set(1);
+
+        input_method.handle_composition(0, (GCS::GCS_RESULTSTR | GCS::GCS_COMPSTR | GCS::GCS_CURSORPOS) as isize, 5);
+
+        assert_eq!(vec![(5, "한".to_owned())], *parent.text.borrow());
+        assert_eq!(vec![(None, None)], client.take_preedit());
+        assert_eq!(vec![(None, None), (Some("ㄱ".to_owned()), Some(1))], other.take_preedit());
+        // The enable the new client posted runs.
+        system.take_calls();
+        system.run_posted();
+        assert_eq!(vec![Call::GetContext(HWND)], system.take_calls());
+    }
+
+    #[test]
+    fn every_window_acts_on_the_input_method_of_a_client_without_the_connection() {
+        let system = FakeSystem::new();
+        let parent = Rc::new(FakeParent::default());
+        parent.scaling.set(1.0);
+        let input_method = Imm32InputMethod::new(system.clone());
+        let weak: Weak<dyn Imm32Parent> = Rc::downgrade(&(parent.clone() as Rc<dyn Imm32Parent>));
+        input_method.set_language_and_window(weak.clone(), HWND, HKL_JA);
+        let first = input_method.for_window(weak.clone());
+        let second = input_method.for_window(weak);
+        let client = Client::new();
+        first.set_client(Some(client.clone()));
+        system.run_posted();
+        system.take_calls();
+
+        // The reference has one input method for every window: another
+        // window's reset, cursor rectangle and detach reach it.
+        system.active_window.set(HWND);
+        second.set_cursor_rect(Rect::new(1.0, 2.0, 1.0, 10.0));
+        second.reset();
+        system.run_posted();
+        assert_eq!(
+            vec![
+                Call::GetContext(HWND),
+                Call::SetCaretPos(2, 12),
+                Call::SetCandidateWindow(
+                    0x1C,
+                    CANDIDATEFORM {
+                        dwIndex: 0,
+                        dwStyle: CFS_EXCLUDE,
+                        ptCurrentPos: POINT { x: 1, y: 2 },
+                        rcArea: RECT { left: 1, top: 2, right: 2, bottom: 13 },
+                    }
+                ),
+                Call::ReleaseContext(HWND, 0x1C),
+                Call::GetContext(HWND),
+                Call::NotifyIme(0x1C, NI_COMPOSITIONSTR, CPS_COMPLETE, 0),
+                Call::ReleaseContext(HWND, 0x1C),
+            ],
+            system.take_calls()
+        );
+        second.set_options(&TextInputOptions::default());
+        second.set_client(None);
+        assert!(!input_method.is_active());
+        drop(first);
+        drop(second);
+        system.run_posted();
+        assert!(system.take_calls().iter().all(|call| !matches!(call, Call::SetInputScopes(..))));
+    }
+
+    #[test]
+    fn a_destroyed_window_of_a_client_without_the_connection_is_cleared_as_the_reference() {
+        let Setup { system, parent, input_method, .. } = setup(HKL_JA);
+        let weak: Weak<dyn Imm32Parent> = Rc::downgrade(&(parent.clone() as Rc<dyn Imm32Parent>));
+        input_method.handle_composition_start();
+
+        // Another window: nothing.
+        input_method.release_window(0x99, &weak);
+        assert!(system.take_calls().is_empty());
+        assert!(input_method.is_active());
+
+        input_method.release_window(HWND, &weak);
+        assert_eq!(0, input_method.hwnd());
+        assert!(!input_method.is_active());
+        assert_eq!(vec![Call::DestroyCaret, Call::AssociateContext(HWND, 0)], system.take_calls());
+    }
 }
+
+#[cfg(test)]
+#[path = "imm32_rich_text_tests.rs"]
+mod rich_text_tests;
+
+#[cfg(test)]
+#[path = "imm32_context_tests.rs"]
+mod context_tests;
