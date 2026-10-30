@@ -5,6 +5,7 @@ mod auto_complete_box;
 mod auto_complete_filter_mode;
 mod populated_event_args;
 mod populating_event_args;
+mod query_submitted_event_args;
 
 pub use auto_complete_box::{
     AutoCompleteAsyncPopulator, AutoCompleteBox, AutoCompleteBoxImpl, AutoCompleteBoxImplExt, AutoCompleteBoxVTable,
@@ -13,6 +14,7 @@ pub use auto_complete_box::{
 pub use auto_complete_filter_mode::AutoCompleteFilterMode;
 pub use populated_event_args::PopulatedEventArgs;
 pub use populating_event_args::PopulatingEventArgs;
+pub use query_submitted_event_args::AutoCompleteBoxQuerySubmittedEventArgs;
 
 #[cfg(test)]
 mod auto_complete_box_tests;

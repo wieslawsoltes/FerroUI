@@ -710,7 +710,7 @@ mod auto_complete_box;
 pub use auto_complete_box::{
     AutoCompleteAsyncPopulator, AutoCompleteBox, AutoCompleteBoxImpl, AutoCompleteBoxImplExt, AutoCompleteBoxVTable,
     AutoCompleteFilterMode, AutoCompleteFilterPredicate, AutoCompletePopulation, AutoCompleteSelector,
-    PopulatedEventArgs, PopulatingEventArgs,
+    AutoCompleteBoxQuerySubmittedEventArgs, PopulatedEventArgs, PopulatingEventArgs,
 };
 
 // --- storage-misc ---

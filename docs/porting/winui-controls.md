@@ -115,7 +115,7 @@ The upstream-ported controls keep their upstream contract, defaults and behaviou
 3. a test checks that the default reproduces upstream, and another test checks the WinUI behaviour;
 4. it has a row in `DEVIATIONS.md`, section "WinUI additions to upstream controls", with the WinUI member, the default that keeps upstream, the kind **Behaviour (opt-in)** and the pull request.
 
-When one of these fails, the WinUI control is a separate type. The additions planned (W7):
+When one of these fails, the WinUI control is a separate type. The additions (W7, landed with their tests and DEVIATIONS rows):
 
 | Control | Member | Default (upstream unchanged) | WinUI source |
 |---|---|---|---|

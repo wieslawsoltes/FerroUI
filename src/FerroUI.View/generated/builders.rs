@@ -5376,6 +5376,21 @@ pub trait NumericUpDownProps: ElementBuilder {
         self.prop(<ferroui_controls::NumericUpDown>::clip_value_to_min_max_property(), value)
     }
 
+    /// Sets [`NumericUpDown::accepts_expression_property`](ferroui_controls::NumericUpDown::accepts_expression_property).
+    fn accepts_expression<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::NumericUpDown>::accepts_expression_property(), value)
+    }
+
+    /// Sets [`NumericUpDown::large_change_property`](ferroui_controls::NumericUpDown::large_change_property).
+    fn large_change<M>(self, value: impl IntoProp<Option<ferroui_base::utilities::Decimal>, M>) -> Self {
+        self.prop(<ferroui_controls::NumericUpDown>::large_change_property(), value)
+    }
+
+    /// Sets [`NumericUpDown::is_wrap_enabled_property`](ferroui_controls::NumericUpDown::is_wrap_enabled_property).
+    fn is_wrap_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::NumericUpDown>::is_wrap_enabled_property(), value)
+    }
+
     /// Sets [`NumericUpDown::number_format_property`](ferroui_controls::NumericUpDown::number_format_property).
     fn number_format<M>(self, value: impl IntoProp<Option<std::rc::Rc<ferroui_base::utilities::NumberFormatInfo>>, M>) -> Self {
         self.prop(<ferroui_controls::NumericUpDown>::number_format_property(), value)
