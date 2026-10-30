@@ -980,6 +980,21 @@ impl RichTextBlock {
         *self.font_features_subscription.borrow_mut() = subscription;
     }
 
+    /// The shared document of the view (the property `RichDocument`, D3).
+    pub fn rich_document(&self) -> RichTextDocument {
+        self.document()
+    }
+
+    /// Sets the shared document of the view (the property `RichDocument`, D3).
+    pub fn set_rich_document(&self, value: RichTextDocument) {
+        self.set_document(value);
+    }
+
+    /// Attaches a shared document whose blocks no other view owns; see `try_set_document`.
+    pub fn try_set_rich_document(&self, value: RichTextDocument) -> bool {
+        self.try_set_document(value)
+    }
+
     pub fn document(&self) -> RichTextDocument {
         let parent = self
             .flow_parent
@@ -1430,6 +1445,18 @@ impl RichTextBlock {
                 result => result,
             }
         });
+    }
+
+    /// Exports using the same resolved tab intervals as this view and its overflow
+    /// chain. RTF has one document-wide default interval, so paragraphs resolving
+    /// to different intervals return an unsupported-feature error.
+    pub fn export_rtf(&self) -> Result<String, crate::rich_text::RtfError> {
+        let mut snapshot = self.document().snapshot();
+        let source = self.page_layout().source.clone();
+        for (paragraph, resolved) in snapshot.paragraphs.iter_mut().zip(&source.paragraphs) {
+            paragraph.format.default_tab_stop = Some(resolved.default_tab_stop);
+        }
+        crate::rich_text::RtfWriter::write(&snapshot)
     }
 
     pub fn hit_test_text_position(&self, point: Point) -> usize {
