@@ -483,4 +483,7 @@ fn rich_paragraph_tabs_editor_default_remains_document_based_when_font_changes()
     assert!((presenter.get_rect_from_character_index(2).x - 48.0).abs() < 0.01);
     let exported = RtfReader::read_str(&control.export_rtf().unwrap()).unwrap();
     assert_eq!(exported.paragraphs[0].format.default_tab_stop, Some(48.0));
+fn measure_tabs(view: &RichTextBlock, height: f64) {
+    view.measure(Size::new(300.0, height));
+    view.arrange(Rect::new(0.0, 0.0, 300.0, height));
 }

@@ -4,7 +4,6 @@
 //! synthetic terminal EOP remain separate contracts; these rows compare
 //! accepted offsets and signed movement counts.
 use super::*;
-use crate::RichEditBox;
 use ferroui_base::threading::Dispatcher;
 use std::cell::Cell;
 use std::rc::Rc;

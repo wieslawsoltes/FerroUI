@@ -2,7 +2,7 @@
 use super::*;
 use crate::documents::ParagraphSnapshot;
 use crate::test_support::test_scope;
-use crate::{RichEditBox, RichTextBlockOverflow};
+use crate::RichTextBlockOverflow;
 use ferroui_base::media::text_formatting::testing::TextTestScope;
 use ferroui_base::media::{FlowDirection, TextTrimming, TextWrapping};
 use ferroui_base::threading::Dispatcher;

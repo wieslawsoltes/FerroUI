@@ -1,7 +1,6 @@
 use super::*;
 use crate::documents::{Run, TextElement};
 use crate::test_support::test_scope;
-use crate::RichEditBox;
 use ferroui_base::input::text_input::{TextInputMethodEdit, TextSelection};
 use ferroui_base::media::{
     FlowDirection, FontStyle, FontWeight, IBrush, ISolidColorBrush, ITransform, TextAlignment,

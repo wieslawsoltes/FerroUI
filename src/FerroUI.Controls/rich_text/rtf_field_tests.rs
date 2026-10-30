@@ -7,7 +7,6 @@ use crate::documents::{
     RichTextDocument,
 };
 use crate::rich_text::{TextSetOptions, TextStreamOptions};
-use crate::RichEditBox;
 use ferroui_base::media::{FontStyle, FontWeight, TextAlignment};
 use ferroui_base::threading::Dispatcher;
 #[allow(unused_imports)]

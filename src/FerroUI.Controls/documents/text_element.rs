@@ -210,8 +210,8 @@ impl TextElement {
     /// existing `NameScope` API. Each call follows the current parent chain.
     /// Finds a named object in the nearest name scope of the element: a scope set on
     /// the element or a logical ancestor, or, for an element in a control template,
-    /// the name scope of that template (the one `TemplateApplied` carries), as
-    /// WinUI's `TextElement.FindName` finds template names.
+    /// the named parts of that template, as WinUI's `TextElement.FindName` finds
+    /// template names.
     pub fn find_name(&self, name: &str) -> Option<Ref<FerroObject>> {
         let mut current: Option<Ref<StyledElement>> = Some(self.to_ref().upcast());
         while let Some(element) = current {
@@ -225,8 +225,16 @@ impl TextElement {
                 let is_template_root =
                     element.templated_parent().is_some_and(|templated| templated == parent.clone().upcast::<FerroObject>());
                 if is_template_root {
-                    if let Some(scope) = parent.cast::<TemplatedControl>().and_then(|control| control.template_name_scope()) {
-                        return scope.find(name);
+                    // The names of the template: the template parts of the control (the
+                    // elements the template's name scope registers), without the templated
+                    // control holding that scope.
+                    if let Some(control) = parent.cast::<TemplatedControl>() {
+                        return control
+                            .get_template_descendants()
+                            .into_iter()
+                            .filter_map(|part| part.cast::<StyledElement>())
+                            .find(|part| part.name().as_deref() == Some(name))
+                            .map(Ref::upcast);
                     }
                 }
             }

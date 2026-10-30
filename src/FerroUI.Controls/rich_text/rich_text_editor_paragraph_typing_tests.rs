@@ -4,7 +4,6 @@ use super::*;
 use crate::documents::{Block, LineBreak, Paragraph, Run};
 use crate::rich_text::RichEditTextDocument;
 use crate::test_support::test_scope;
-use crate::RichEditBox;
 use ferroui_base::media::{FlowDirection, FontStyle, FontWeight, TextAlignment};
 use std::cell::RefCell;
 #[allow(unused_imports)]
