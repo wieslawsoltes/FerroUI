@@ -231,6 +231,7 @@ impl Win32Platform {
         let instance = Self::instance();
         let dispatcher: Rc<Win32DispatcherImpl> = instance.dispatcher.clone();
         Dispatcher::initialize_ui_thread_dispatcher(dispatcher);
+        crate::automation::Win32AutomationEventSink::register();
 
         let render_timer: Arc<dyn IRenderTimer> = if options.should_render_on_ui_thread {
             Arc::new(UiThreadRenderTimer::new(DEFAULT_FRAMES_PER_SECOND))
