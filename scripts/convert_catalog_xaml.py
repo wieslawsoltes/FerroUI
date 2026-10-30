@@ -194,6 +194,7 @@ PORT_DOCUMENTS = [
     ("Pages/RadioButtonsPage.xaml", "the page of WinUI's RadioButtons (docs/porting/winui-controls.md)"),
     ("Pages/RatingControlPage.xaml", "the page of WinUI's RatingControl (docs/porting/winui-controls.md)"),
     ("Pages/AutoSuggestBoxPage.xaml", "the page of WinUI's AutoSuggestBox (docs/porting/winui-controls.md)"),
+    ("Pages/RichTextBlockPage.xaml", "the page of WinUI's RichTextBlock (docs/porting/winui-rich-text.md)"),
     ("Pages/NavigationViewPage.xaml", "the page of WinUI's NavigationView with a Frame (docs/porting/winui-controls.md)"),
     ("Pages/IconElementPage.xaml", "the page of the icons of WinUI (SymbolIcon, FontIcon; docs/porting/winui-controls.md)"),
     ("Pages/ItemsRepeaterPage.xaml", "the page of the ItemsRepeater of the port"),
