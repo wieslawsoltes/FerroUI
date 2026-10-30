@@ -1457,6 +1457,9 @@ impl Drop for PendingEditScope<'_> {
 
 /// The change of a replacement of `range` (UTF-16) by `inserted` when it turns `before`
 /// into `after`, else `None` (the edit was normalized, or something else changed).
+/// Text the replacement keeps at either end of the range is not part of the change,
+/// so replacing "ab" by "abX" inserts at the end of "ab"; outside the range the real
+/// edit wins over a text diff (#243 review, S2).
 fn explained_change(before: &str, after: &str, range: &Range<usize>, inserted: &str) -> Option<(Range<usize>, usize)> {
     let start = utf16_to_byte(before, range.start)?;
     let end = utf16_to_byte(before, range.end)?;
@@ -1464,7 +1467,35 @@ fn explained_change(before: &str, after: &str, range: &Range<usize>, inserted: &
         && after.starts_with(&before[..start])
         && after[start..].starts_with(inserted)
         && after.ends_with(&before[end..]);
-    explains.then(|| (range.clone(), inserted.encode_utf16().count()))
+    if !explains {
+        return None;
+    }
+    let (replaced, inserted) = trim_common(&before[start..end], inserted);
+    let prefix = before[start..end].len() - replaced.len();
+    let prefix = before[start..start + prefix].encode_utf16().count();
+    let replaced_length = replaced.encode_utf16().count();
+    let changed_start = range.start + prefix;
+    Some((changed_start..changed_start + replaced_length, inserted.encode_utf16().count()))
+}
+
+/// Removes the common prefix and then the common suffix (whole characters) of two
+/// strings, returning what is left of each.
+fn trim_common<'a>(left: &'a str, right: &'a str) -> (&'a str, &'a str) {
+    let prefix: usize = left
+        .chars()
+        .zip(right.chars())
+        .take_while(|(a, b)| a == b)
+        .map(|(c, _)| c.len_utf8())
+        .sum();
+    let (left, right) = (&left[prefix..], &right[prefix..]);
+    let suffix: usize = left
+        .chars()
+        .rev()
+        .zip(right.chars().rev())
+        .take_while(|(a, b)| a == b)
+        .map(|(c, _)| c.len_utf8())
+        .sum();
+    (&left[..left.len() - suffix], &right[..right.len() - suffix])
 }
 
 fn changed_range(before: &str, after: &str) -> (Range<usize>, usize) {

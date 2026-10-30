@@ -129,8 +129,8 @@ impl RichTextEditor {
     /// consumes one target text element per supplied Unicode scalar; an existing
     /// selection consumes the first scalar's replacement. Typed paragraph breaks
     /// and an existing paragraph mark do not consume another target element.
-    /// CR and LF are both protected so a structured LineBreak remains intact on
-    /// every platform. Native VT/U+2028 soft-break parity is uncharacterized.
+    /// CR, LF and VT (a LineBreak, decision D10) are protected so a structured
+    /// line or paragraph break remains intact. Native U+2028 parity is uncharacterized.
     ///
     /// Compute the accepted prefix and its consumed extent together. Truncating
     /// input only after extending the range would erase targets for rejected
@@ -161,7 +161,9 @@ impl RichTextEditor {
                 && scalar != '\n'
                 && source
                     .get(end)
-                    .is_some_and(|unit| *unit != u16::from(b'\n') && *unit != u16::from(b'\r'))
+                    .is_some_and(|unit| {
+                        *unit != u16::from(b'\n') && *unit != u16::from(b'\r') && *unit != 0x000B
+                    })
             {
                 ends.next().unwrap_or(end)
             } else {
