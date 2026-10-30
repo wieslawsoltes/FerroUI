@@ -10,6 +10,8 @@ use ferroui_base::media::text_formatting::{DrawableTextRun, GenericTextRunProper
 use ferroui_base::media::{FontFamily, TextLineBounds, TextWrapping, Typeface};
 use ferroui_base::{Point, Rect, Ref, Size, Thickness};
 use std::rc::Rc;
+#[allow(unused_imports)]
+use crate::{RichEditBox, RichEditBoxTextPresenter};
 
 fn close(actual: f64, expected: f64) {
     assert!(
@@ -215,4 +217,69 @@ fn rich_family_metrics_existing_embedded_constructor_retains_legacy_desired_bott
     let run = EmbeddedControlRun::new(child.clone().upcast(), properties);
     close(run.baseline(), 22.0);
     close(run.with_measured_metrics().baseline(), 16.0);
+}
+
+#[test]
+fn rich_family_metrics_equal_size_baseline_change_reflows_without_document_or_history_change() {
+    let _scope = ferroui_base::threading::Dispatcher::unit_test_scope();
+    let _text = TextTestScope::with_fonts(vec![
+        TestFont::new("First")
+            .with_ranges(&[(0x20, 0x7e)])
+            .with_vertical_metrics(800, -200)
+            .with_line_gap(0),
+        TestFont::new("Second")
+            .with_ranges(&[(0x20, 0x7e)])
+            .with_vertical_metrics(600, -400)
+            .with_line_gap(0),
+    ]);
+    assert_eq!(
+        ferroui_base::media::FontManager::current()
+            .default_font_family()
+            .name(),
+        "First"
+    );
+    let editor = RichEditBox::new();
+    editor.set_font_size(10.0);
+    editor.set_text_wrapping(TextWrapping::NoWrap);
+    let view: Ref<RichTextBlock> = editor.text_presenter().upcast();
+    view.set_text_line_bounds(TextLineBounds::Tight);
+    let child = RichTextBlock::new();
+    child.set_font_size(20.0);
+    child.set_font_family(FontFamily::new("First"));
+    child.set_text_line_bounds(TextLineBounds::Full);
+    child.blocks().add(Paragraph::with_text("H"));
+    add_child(&view, child.clone().upcast());
+    // Keep a real redo unit so layout-only invalidation cannot silently
+    // clear editor history while preserving an already empty history pair.
+    editor.select(1, 1);
+    assert!(editor.insert_text("x").unwrap());
+    assert!(editor.undo().unwrap());
+    assert_eq!(editor.text(), "\u{fffc}");
+    measure(&view, 100.0);
+    let old = view.page_layout();
+    let size = child.desired_size();
+    let snapshot = editor.rich_document().snapshot();
+    let revision = editor.rich_document().revision();
+    let history = (editor.can_undo(), editor.can_redo());
+    assert_eq!(history, (false, true));
+    close(old.lines[0].line.baseline(), 16.0);
+    close(old.lines[0].line.height(), 20.0);
+
+    child.set_font_family(FontFamily::new("Second"));
+    assert!(!child.is_measure_valid());
+    // This fixture has no layout manager. Request the host pass explicitly:
+    // child invalidation alone does not synchronously invalidate its parent.
+    view.invalidate_measure();
+    measure(&view, 100.0);
+    let current = view.page_layout();
+    assert_eq!(child.desired_size(), size);
+    assert!(!Rc::ptr_eq(&old, &current));
+    // Object metrics belong to the measured page; its logical source remains
+    // shared and does not need rebuilding for a layout-only baseline change.
+    assert!(Rc::ptr_eq(&old.source, &current.source));
+    close(current.lines[0].line.baseline(), 12.0);
+    close(current.lines[0].line.height(), 20.0);
+    assert_eq!(editor.rich_document().snapshot(), snapshot);
+    assert_eq!(editor.rich_document().revision(), revision);
+    assert_eq!((editor.can_undo(), editor.can_redo()), history);
 }

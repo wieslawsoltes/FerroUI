@@ -574,7 +574,8 @@ fn text(value: &str) -> String {
 /// and takes the selection.
 #[test]
 fn the_pane_opens_the_sections_and_their_pages() {
-    let shell = Shell::start(1400.0, 900.0);
+    // Tall enough for the Text section open with all its pages and every section below it.
+    let shell = Shell::start(1400.0, 1000.0);
     let navigation = shell.navigation_view();
     assert_eq!(NavigationViewDisplayMode::Expanded, navigation.display_mode());
     assert!(navigation.is_pane_open(), "the wide pane is open");

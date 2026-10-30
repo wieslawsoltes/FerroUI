@@ -248,6 +248,7 @@ control_tests! {
     transitioning_content_control => "TransitioningContentControl";
     // B6: window decorations, notifications, tables and dialogs
     info_bar => "InfoBar";
+    rich_edit_box => "RichEditBox";
     number_box => "NumberBox";
     auto_suggest_box => "AutoSuggestBox";
     radio_buttons => "RadioButtons";
