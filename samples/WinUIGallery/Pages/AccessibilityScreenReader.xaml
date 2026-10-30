@@ -1,0 +1,4 @@
+<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <Button Content="Visible content is the accessible name"/><Button Content="..." AutomationProperties.Name="More options"/><TextBlock x:Name="Description" Text="Email address"/><TextBox AutomationProperties.Name="Email address" PlaceholderText="name@example.com" Width="320" HorizontalAlignment="Left"/><TextBlock Text="Decorative marker" AutomationProperties.AccessibilityView="Raw"/>
+</StackPanel>

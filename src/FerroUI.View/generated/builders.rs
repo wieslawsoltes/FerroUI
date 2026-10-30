@@ -6719,6 +6719,16 @@ pub trait ScrollViewerProps: ElementBuilder {
         self.prop(<ferroui_controls::ScrollViewer>::offset_property(), value)
     }
 
+    /// Sets [`ScrollViewer::min_zoom_factor_property`](ferroui_controls::ScrollViewer::min_zoom_factor_property).
+    fn min_zoom_factor<M>(self, value: impl IntoProp<f32, M>) -> Self {
+        self.prop(<ferroui_controls::ScrollViewer>::min_zoom_factor_property(), value)
+    }
+
+    /// Sets [`ScrollViewer::max_zoom_factor_property`](ferroui_controls::ScrollViewer::max_zoom_factor_property).
+    fn max_zoom_factor<M>(self, value: impl IntoProp<f32, M>) -> Self {
+        self.prop(<ferroui_controls::ScrollViewer>::max_zoom_factor_property(), value)
+    }
+
     /// Sets [`ScrollViewer::horizontal_scroll_bar_visibility_property`](ferroui_controls::ScrollViewer::horizontal_scroll_bar_visibility_property).
     fn horizontal_scroll_bar_visibility<M>(self, value: impl IntoProp<ferroui_controls::primitives::ScrollBarVisibility, M>) -> Self {
         self.prop(<ferroui_controls::ScrollViewer>::horizontal_scroll_bar_visibility_property(), value)

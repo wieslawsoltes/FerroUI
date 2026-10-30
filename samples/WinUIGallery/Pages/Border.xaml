@@ -1,0 +1,4 @@
+<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <Border Padding="20" BorderThickness="2" BorderBrush="DodgerBlue" CornerRadius="8" HorizontalAlignment="Left"><TextBlock Text="Text inside a border" FontSize="18"/></Border>
+</StackPanel>

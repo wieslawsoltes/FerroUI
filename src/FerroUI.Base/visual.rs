@@ -34,6 +34,9 @@ pub struct Visual {
     // Deviation (DEVIATIONS.md, Visual tree): whether `RenderTransform` has a value, kept by its
     // change handler, so that the transforms of the visual tree skip the property read.
     has_render_transform: Cell<bool>,
+    // Not upstream: whether the visual has a manipulation transform (the zoom a scroll presenter
+    // applies to its content), kept so that the transforms of the visual tree skip the lookup.
+    has_manipulation_transform: Cell<bool>,
     is_effectively_visible: Cell<bool>,
     has_non_uniform_z_index_children: Cell<bool>,
     visual_children: OnceCell<FerroList<Ref<Visual>>>,
@@ -85,9 +88,27 @@ struct CompositionExtras {
     /// the subscription that offers the element to those lights when it enters a tree.
     light_target_ids: Vec<String>,
     light_target_subscription: Option<Rc<dyn IDisposable>>,
+    /// The manipulation transform of the visual (see [`Visual::manipulation_transform`]).
+    manipulation_transform: Option<crate::Matrix>,
+    /// The theme shadow of the visual (`UIElement.Shadow`): `None` while the visual never had a
+    /// `Shadow` and is not the child of a popup with one.
+    theme_shadow: Option<ThemeShadowState>,
+}
+
+/// What a visual knows of the theme shadow it casts (see `visual/theme_shadow.rs`).
+#[derive(Default)]
+struct ThemeShadowState {
+    /// The popup whose `Shadow` the visual casts as its child.
+    popup: Option<WeakRef<Visual>>,
+    /// Whether the visual is a popup, whose `Shadow` its child casts.
+    delegates_to_child: bool,
+    /// The visual that draws the shadow, shown by the parent before the composition visual of
+    /// this visual.
+    visual: Option<Rc<crate::rendering::composition::ThemeShadowVisual>>,
 }
 
 mod composition_facades;
+mod theme_shadow;
 #[cfg(test)]
 mod composition_facades_tests;
 
@@ -181,6 +202,15 @@ crate::ferro_overrides! { impl FerroObjectImpl for Visual {
         if change.property() == Self::is_visible_property().as_property() {
             let parent_state = this.visual_parent().is_none_or(|p| p.is_effectively_visible());
             this.update_is_effectively_visible(parent_state);
+        } else if change.property() == Self::shadow_property().as_property() {
+            let old = change.get_old_value::<Option<Ref<crate::media::Shadow>>>().flatten();
+            let new = change.get_new_value::<Option<Ref<crate::media::Shadow>>>();
+            this.on_shadow_changed(old.as_ref(), new.as_ref());
+        } else if change.property() == crate::styling::ThemeVariant::actual_theme_variant_property().as_property() {
+            // The shadow of the theme is drawn in the theme of the element.
+            if this.may_cast_theme_shadow() {
+                this.invalidate_visual();
+            }
         } else if change.property() == Self::flow_direction_property().as_property() {
             this.invalidate_mirror_transform();
             if let Some(children) = this.visual_children.get() {
@@ -340,6 +370,8 @@ impl VisualImpl for Visual {
     }
 
     fn detach_from_compositor(this: &Self) {
+        // The shadow visual belongs to the composition visual it follows.
+        this.release_theme_shadow_visual();
         let composition_visual = this.composition_visual.borrow_mut().take();
         if let Some(composition_visual) = composition_visual {
             if let Some(child) = this.child_composition_visual() {
@@ -392,7 +424,30 @@ impl VisualImpl for Visual {
             .filter(|unloading| Rc::ptr_eq(unloading.compositor(), composition_visual.compositor()))
             .collect();
 
-        let mut expected_count = visual_children.len() + unloading_visuals.len();
+        let child_count = visual_children.len();
+        let child_at = |c: usize| -> &Ref<Visual> {
+            match &sorted_children {
+                Some(sorted) => &sorted[c].0,
+                None => &visual_children[c],
+            }
+        };
+
+        // The visuals that draw the theme shadows of the children, each shown just before the
+        // visual of its child (WinUI parents it under the prepend visual of the caster), so that
+        // it is under the child and clipped by the clips of this visual, not by the child's.
+        // Looked at only when a child may cast one.
+        let shadows: Option<Vec<Option<Rc<CompositionVisual>>>> =
+            if visual_children.iter().any(|child| child.may_cast_theme_shadow()) {
+                Some((0..child_count).map(|c| child_at(c).ensure_theme_shadow_composition_visual()).collect())
+            } else {
+                None
+            };
+        let shadow_at = |c: usize| -> Option<&Rc<CompositionVisual>> {
+            shadows.as_ref().and_then(|shadows| shadows[c].as_ref())
+        };
+        let shadow_count = shadows.as_ref().map_or(0, |shadows| shadows.iter().flatten().count());
+
+        let mut expected_count = child_count + shadow_count + unloading_visuals.len();
         if child_visual.is_some() {
             expected_count += 1;
         }
@@ -406,33 +461,39 @@ impl VisualImpl for Visual {
 
         if composition_children.count() == expected_count {
             let mut mismatch = false;
-            for c in 0..visual_children.len() {
-                let expected = match &sorted_children {
-                    Some(sorted) => sorted[c].0.composition_visual(),
-                    None => visual_children[c].composition_visual(),
-                };
-                if !same(&composition_children.get(c), expected) {
+            let mut index = 0;
+            for c in 0..child_count {
+                if let Some(shadow) = shadow_at(c) {
+                    if !Rc::ptr_eq(&composition_children.get(index), shadow) {
+                        mismatch = true;
+                        break;
+                    }
+                    index += 1;
+                }
+                if !same(&composition_children.get(index), child_at(c).composition_visual()) {
                     mismatch = true;
                     break;
                 }
+                index += 1;
             }
 
-            let mut index = visual_children.len();
-            for unloading in &unloading_visuals {
-                if !Rc::ptr_eq(&composition_children.get(index), unloading) {
-                    mismatch = true;
+            if !mismatch {
+                for unloading in &unloading_visuals {
+                    if !Rc::ptr_eq(&composition_children.get(index), unloading) {
+                        mismatch = true;
+                    }
+                    index += 1;
                 }
-                index += 1;
-            }
-            if let Some(child_visual) = &child_visual {
-                if !Rc::ptr_eq(&composition_children.get(index), child_visual) {
-                    mismatch = true;
+                if let Some(child_visual) = &child_visual {
+                    if !Rc::ptr_eq(&composition_children.get(index), child_visual) {
+                        mismatch = true;
+                    }
+                    index += 1;
                 }
-                index += 1;
-            }
-            if let Some(layer_visual) = &layer_visual {
-                if !Rc::ptr_eq(&composition_children.get(index), layer_visual) {
-                    mismatch = true;
+                if let Some(layer_visual) = &layer_visual {
+                    if !Rc::ptr_eq(&composition_children.get(index), layer_visual) {
+                        mismatch = true;
+                    }
                 }
             }
 
@@ -442,20 +503,12 @@ impl VisualImpl for Visual {
         }
 
         composition_children.clear();
-        match &sorted_children {
-            Some(sorted) => {
-                for (child, _) in sorted {
-                    if let Some(composition_child) = child.composition_visual() {
-                        composition_children.add((*composition_child).clone());
-                    }
-                }
+        for c in 0..child_count {
+            if let Some(shadow) = shadow_at(c) {
+                composition_children.add(shadow.clone());
             }
-            None => {
-                for child in visual_children.iter() {
-                    if let Some(composition_child) = child.composition_visual() {
-                        composition_children.add((*composition_child).clone());
-                    }
-                }
+            if let Some(composition_child) = child_at(c).composition_visual() {
+                composition_children.add((*composition_child).clone());
             }
         }
 
@@ -533,6 +586,11 @@ impl VisualImpl for Visual {
             render_transform = render_transform * facade;
         }
 
+        // The zoom of a scroll presenter, after the transforms of the element itself.
+        if let Some(manipulation) = this.manipulation_transform() {
+            render_transform = render_transform * manipulation;
+        }
+
         comp.set_transform_matrix(render_transform);
 
         if let Some(translation) = this.composition_translation() {
@@ -541,6 +599,9 @@ impl VisualImpl for Visual {
 
         this.synchronize_composition_facades(&comp);
         this.apply_composition_transitions(&comp, true);
+
+        // The shadow of the theme follows the size, the visibility, the elevation and the theme.
+        this.update_theme_shadow_visual();
     }
 
     fn invalidate_mirror_transform(this: &Self) {
@@ -596,6 +657,28 @@ crate::ferro_properties! { impl Visual {
         /// Defines the `Clip` property.
         pub fn clip_property() -> StyledProperty<Option<Ref<Geometry>>> {
             FerroProperty::register::<Visual, _>("Clip", None)
+        }
+    );
+
+    ferro_property!(
+        /// Defines the `Shadow` property (WinUI `UIElement.Shadow`): the shadow the element casts,
+        /// a [`ThemeShadow`](crate::media::ThemeShadow).
+        pub fn shadow_property() -> StyledProperty<Option<Ref<crate::media::Shadow>>> {
+            FerroProperty::register::<Visual, _>("Shadow", None)
+        }
+    );
+
+    ferro_property!(
+        /// Defines the `Translation` property (WinUI `UIElement.Translation`): the facade
+        /// [`translation`](Visual::translation) as a property markup can set
+        /// (`Translation="0,0,32"`).
+        pub fn translation_property() -> DirectProperty<Visual, crate::Vector3D> {
+            FerroProperty::register_direct::<Visual, _>(
+                "Translation",
+                |o| o.translation(),
+                Some(|o, value| o.set_translation(value)),
+                crate::Vector3D::default(),
+            )
         }
     );
 
@@ -721,6 +804,7 @@ impl Visual {
             visual_parent: RefCell::new(None),
             has_mirror_transform: Cell::new(false),
             has_render_transform: Cell::new(false),
+            has_manipulation_transform: Cell::new(false),
             is_effectively_visible: Cell::new(true),
             has_non_uniform_z_index_children: Cell::new(false),
             visual_children: OnceCell::new(),
@@ -890,6 +974,32 @@ impl Visual {
     #[inline]
     pub(crate) fn has_render_transform(&self) -> bool {
         self.has_render_transform.get()
+    }
+
+    /// The manipulation transform of the visual (not upstream): a transform its parent applies
+    /// to it after its render transform and before its position, about its top left corner. The
+    /// scroll presenter of a zooming scroll viewer scales its content this way (WinUI applies the
+    /// zoom of DirectManipulation to the content of a scroll viewer); it takes part in rendering,
+    /// hit testing and the transforms between visuals as the render transform does. `None` by
+    /// default.
+    pub fn manipulation_transform(&self) -> Option<crate::Matrix> {
+        if !self.has_manipulation_transform.get() {
+            return None;
+        }
+        self.read_composition_extras(|extras| extras.manipulation_transform).flatten()
+    }
+
+    /// Sets [`manipulation_transform`](Self::manipulation_transform); the identity is no
+    /// transform.
+    pub fn set_manipulation_transform(&self, value: Option<crate::Matrix>) {
+        let value = value.filter(|matrix| !matrix.is_identity());
+        if self.manipulation_transform() == value {
+            return;
+        }
+        self.has_manipulation_transform.set(value.is_some());
+        self.with_composition_extras(|extras| extras.manipulation_transform = value);
+        bump_geometry_version();
+        self.invalidate_visual();
     }
 
     /// Whether the control is mirrored relative to its parent because of its
@@ -1101,8 +1211,12 @@ impl Visual {
     }
 
     pub fn set_translation(&self, value: crate::Vector3D) {
+        let old = self.translation();
         self.with_composition_extras(|extras| extras.translation = Some(value));
         self.invalidate_visual();
+        if old != value {
+            self.raise_direct_property_changed(Self::translation_property(), &old, &value);
+        }
     }
 
     fn composition_translation(&self) -> Option<crate::Vector3D> {

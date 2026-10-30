@@ -1,0 +1,4 @@
+<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <ToggleSplitButton x:Name="Primary" Content="Bullets"><ToggleSplitButton.Flyout><Flyout><StackPanel Spacing="8"><TextBlock Text="Select a bullet style"/><RadioButton Content="Round" GroupName="Bullets" IsChecked="True"/><RadioButton Content="Square" GroupName="Bullets"/></StackPanel></Flyout></ToggleSplitButton.Flyout></ToggleSplitButton><TextBlock x:Name="Output" Text="Toggle the primary action"/>
+</StackPanel>

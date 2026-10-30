@@ -58,6 +58,7 @@ pub mod server;
 pub mod testing;
 pub mod transport;
 
+mod alpha_mask;
 mod composition_batch;
 mod composition_cache_mode;
 mod composition_clip;
@@ -98,6 +99,7 @@ mod loaded_image_surface;
 mod shape_visual;
 mod sprite_visual;
 mod element_composition_preview;
+mod theme_shadow_visual;
 mod visual;
 mod visual_collection;
 mod composition_transparency_level;
@@ -109,6 +111,7 @@ mod i_compositor_serializable;
 mod matrix_utils;
 mod render_interface_feature;
 
+pub use alpha_mask::{AlphaMask, ALPHA_MASK_MAX_SIZE};
 pub use composition_batch::{
     AnimationCompletion, BatchCompletionGuard, CompositionBatchCompletedEventArgs, CompositionBatchTypes,
     CompositionCommitBatch, CompositionScopedBatch,
@@ -176,6 +179,7 @@ pub use composition_target::CompositionTarget;
 pub use compositing_renderer::CompositingRenderer;
 pub use container_visual::CompositionContainerVisual;
 pub use element_composition_preview::ElementComposition;
+pub use theme_shadow_visual::ThemeShadowVisual;
 pub use server::RenderSurfaces;
 pub use visual::CompositionVisual;
 pub use visual_collection::CompositionVisualCollection;

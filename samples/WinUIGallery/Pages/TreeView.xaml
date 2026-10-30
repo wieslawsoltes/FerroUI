@@ -1,0 +1,4 @@
+<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <TreeView Width="350" HorizontalAlignment="Left"><TreeViewItem Header="Work documents" IsExpanded="True"><TreeViewItem Header="Specifications"/><TreeViewItem Header="Meeting notes"/><TreeViewItem Header="Archive"><TreeViewItem Header="Previous release"/></TreeViewItem></TreeViewItem><TreeViewItem Header="Personal documents"><TreeViewItem Header="Photos"/></TreeViewItem></TreeView>
+</StackPanel>

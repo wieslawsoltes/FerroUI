@@ -1202,8 +1202,11 @@ fn winui_flight_run(directory: &std::path::Path, selected_at: Duration) {
     // `FERROUI_SMOKE_WINUI_SECTION_MS`: the time between two sections (1200 ms by default); a
     // debug build with Vello needs more, as each saved frame holds the compositor up.
     let spacing = environment_milliseconds("FERROUI_SMOKE_WINUI_SECTION_MS").unwrap_or(1200);
-    for section in 0..6usize {
-        let shown = 5800 + section as u64 * spacing;
+    // `FERROUI_SMOKE_WINUI_FIRST_SECTION`: the first section shown (0 by default), so that the
+    // later sections (6 to 8: alpha masks, theme shadows, zoom) can be saved in a short run.
+    let first = environment_milliseconds("FERROUI_SMOKE_WINUI_FIRST_SECTION").unwrap_or(0) as usize;
+    for (slot, section) in (first..9usize).enumerate() {
+        let shown = 5800 + slot as u64 * spacing;
         let _ = DispatcherTimer::run_once(
             move || println!("Flight: show section {section}: {}", control_catalog::pages::smoke_show_section(section)),
             selected_at + Duration::from_millis(shown),

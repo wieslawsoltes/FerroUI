@@ -139,7 +139,7 @@ pub use server_composition_light::{paint_scene_lighting, scene_light_map, SCENE_
 pub(crate) use server_composition_light::XamlLightChanges;
 pub use server_loaded_image_surface::ServerLoadedImageSurface;
 pub use server_sprite_visual::ServerSpriteVisual;
-pub use server_layer_visual::{drop_shadow_effect, ServerLayerVisual};
+pub use server_layer_visual::{drop_shadow_effect, drop_shadow_effect_in, ServerLayerVisual};
 pub use server_redirect_visual::ServerRedirectVisual;
 // The server-side surface brush lives with the composition brushes.
 pub use super::brushes::{paint_composition_brush, surface_brush_content_rect, ServerCompositionSurfaceBrush};

@@ -1,0 +1,24 @@
+<!-- Adapted from Samples/Popup/PopupOffsetPositioning.txt; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <TextBlock Text="Popup with offset positioning" FontSize="18"/>
+  <Grid HorizontalAlignment="Left" VerticalAlignment="Top">
+    <Button x:Name="ShowPopup" Content="Show Popup (using Offset)"/>
+    <Popup x:Name="StandardPopup" PlacementTarget="{Binding #ShowPopup, Mode=OneWay}" Placement="Bottom"
+           VerticalOffset="{Binding #VerticalOffset.Value, Mode=OneWay}"
+           HorizontalOffset="{Binding #HorizontalOffset.Value, Mode=OneWay}"
+           IsLightDismissEnabled="{Binding #LightDismiss.IsChecked, Mode=OneWay}">
+      <Border Padding="20" CornerRadius="8" Width="200" Height="160" BorderThickness="1" BorderBrush="Gray" Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
+          <TextBlock Text="Simple Popup" FontSize="16" HorizontalAlignment="Center"/>
+          <Button x:Name="ClosePopup" Content="Close"/>
+        </StackPanel>
+      </Border>
+    </Popup>
+  </Grid>
+  <TextBlock Text="Horizontal offset"/>
+  <Slider x:Name="HorizontalOffset" Minimum="-100" Maximum="100" Value="0" Width="300" HorizontalAlignment="Left" AutomationProperties.Name="Horizontal offset"/>
+  <TextBlock Text="Vertical offset"/>
+  <Slider x:Name="VerticalOffset" Minimum="-100" Maximum="100" Value="0" Width="300" HorizontalAlignment="Left" AutomationProperties.Name="Vertical offset"/>
+  <CheckBox x:Name="LightDismiss" Content="Light dismiss" IsChecked="True"/>
+  <TextBlock x:Name="PopupOutput" Text="Closed"/>
+</StackPanel>

@@ -23,10 +23,9 @@
   - The scroll and rail modes and ZoomMode of the source are left out.
   - The shadow WinUI's presenter gives itself in code (ApplyElevationEffect at the depth of the
     menu, MenuFlyoutPresenter_Partial.cpp: a ThemeShadow at a Translation.Z of 32 for a menu) is
-    the BoxShadow ThemeShadowFlyoutBoxShadow of the border ThemeShadowWrapper around the border of
-    the presenter (a border of its own: a border whose background is sized to the inner edge of
-    its border draws no box shadow), with the margin ThemeShadowFlyoutMargin as the room for it in
-    the popup (Resources/ThemeShadows.xaml; DEVIATIONS.md, G-24).
+    a ThemeShadow (the shared WinUIThemeShadow, Translation.Z 32) on the border ThemeShadowWrapper
+    around the border of the presenter, with the margin ThemeShadowFlyoutMargin as the room for it
+    in the popup (Resources/ThemeShadows.xaml; DEVIATIONS.md, G-24).
 -->
 <ResourceDictionary xmlns="https://github.com/ferroui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -60,10 +59,9 @@
     <Setter Property="Margin" Value="{StaticResource ThemeShadowFlyoutMargin}" />
     <Setter Property="Template">
       <ControlTemplate>
-        <!-- The shadow on a border of its own: a border whose background is sized to the inner
-             edge of its border is drawn as geometries, without its box shadows (G-24). -->
+        <!-- The theme shadow on a border of its own (G-24). -->
         <Border x:Name="ThemeShadowWrapper"
-                BoxShadow="{DynamicResource ThemeShadowFlyoutBoxShadow}"
+                Translation="0,0,32" Shadow="{StaticResource WinUIThemeShadow}"
                 CornerRadius="{TemplateBinding CornerRadius}">
           <Border Background="{TemplateBinding Background}"
                   BorderBrush="{TemplateBinding BorderBrush}"

@@ -121,6 +121,8 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <crate::media::ApplicationTheme as MarkupTyped>::MARKUP,
     <crate::media::RevealBrushState as MarkupTyped>::MARKUP,
     <crate::media::FocusVisualKind as MarkupTyped>::MARKUP,
+    // WinUI's ZoomMode of the scroll viewer (docs/porting/winui-composition.md, phase 7).
+    <crate::ZoomMode as MarkupTyped>::MARKUP,
 ];
 
 /// Registers the nullable forms of the value types with the untyped value
@@ -134,6 +136,7 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<TextLayoutRoundingPlacement>();
     ValueTypes::register_nullable::<Symbol>();
     ValueTypes::register_nullable::<InfoBarSeverity>();
+    ValueTypes::register_nullable::<crate::ZoomMode>();
     ValueTypes::register_nullable::<InfoBarCloseReason>();
     ValueTypes::register_nullable::<NumberBoxSpinButtonPlacementMode>();
     ValueTypes::register_nullable::<NumberBoxValidationMode>();

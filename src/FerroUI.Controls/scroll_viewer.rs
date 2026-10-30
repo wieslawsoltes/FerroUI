@@ -5,6 +5,7 @@ use crate::primitives::{
     TemplateAppliedEventArgs, TemplatedControlImpl, TemplatedControlImplExt,
 };
 use crate::{
+    ZoomMode,
     as_scroll_anchor_provider, register_scroll_anchor_provider, ContentControl, ContentControlImpl,
     ContentControlImplExt, Control, ControlImpl, IScrollAnchorProvider, ScrollChangedEventArgs,
 };
@@ -47,6 +48,8 @@ pub struct ScrollViewer {
     scroll_bar_expand_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
     horizontal_scroll_bar: RefCell<Option<Ref<ScrollBar>>>,
     vertical_scroll_bar: RefCell<Option<Ref<ScrollBar>>>,
+    /// The zoom factor of the content (WinUI `ZoomFactor`, not upstream).
+    zoom_factor: Cell<f32>,
 }
 
 ferro_class! {
@@ -341,6 +344,36 @@ ferroui_base::ferro_properties! { impl ScrollViewer {
     );
 
     ferro_property!(
+        /// Defines the `ZoomMode` property (WinUI `ScrollViewer.ZoomMode`, not upstream): whether
+        /// the user can zoom the content.
+        pub fn zoom_mode_property() -> StyledProperty<ZoomMode> {
+            FerroProperty::register::<ScrollViewer, _>("ZoomMode", ZoomMode::Disabled)
+        }
+    );
+
+    ferro_property!(
+        /// Defines the `MinZoomFactor` property (WinUI, not upstream).
+        pub fn min_zoom_factor_property() -> StyledProperty<f32> {
+            FerroProperty::register::<ScrollViewer, _>("MinZoomFactor", 0.1)
+        }
+    );
+
+    ferro_property!(
+        /// Defines the `MaxZoomFactor` property (WinUI, not upstream).
+        pub fn max_zoom_factor_property() -> StyledProperty<f32> {
+            FerroProperty::register::<ScrollViewer, _>("MaxZoomFactor", 10.0)
+        }
+    );
+
+    ferro_property!(
+        /// Defines the `ZoomFactor` property (WinUI, not upstream): the zoom of the content,
+        /// changed with [`change_view`](ScrollViewer::change_view) or by the user.
+        pub fn zoom_factor_property() -> DirectProperty<ScrollViewer, f32> {
+            FerroProperty::register_direct::<ScrollViewer, _>("ZoomFactor", |o| o.zoom_factor(), None, 1.0)
+        }
+    );
+
+    ferro_property!(
         /// Defines the `Viewport` property.
         pub fn viewport_property() -> DirectProperty<ScrollViewer, Size> {
             FerroProperty::register_direct::<ScrollViewer, _>("Viewport", |o| o.viewport(), None, Size::default())
@@ -508,6 +541,7 @@ impl ScrollViewer {
             scroll_bar_expand_subscription: RefCell::new(None),
             horizontal_scroll_bar: RefCell::new(None),
             vertical_scroll_bar: RefCell::new(None),
+            zoom_factor: Cell::new(1.0),
         }
     }
 
@@ -579,6 +613,95 @@ impl ScrollViewer {
     /// Gets the size of the viewport on the scrollable content.
     pub fn viewport(&self) -> Size {
         self.viewport.get()
+    }
+
+    /// `ZoomMode`: whether the user can zoom the content (Ctrl and the mouse wheel); a zoom
+    /// asked for by [`change_view`](Self::change_view) is applied either way.
+    pub fn zoom_mode(&self) -> ZoomMode {
+        self.get_value(Self::zoom_mode_property())
+    }
+
+    pub fn set_zoom_mode(&self, value: ZoomMode) {
+        self.set_value(Self::zoom_mode_property(), value)
+    }
+
+    /// `MinZoomFactor` (default 0.1).
+    pub fn min_zoom_factor(&self) -> f32 {
+        self.get_value(Self::min_zoom_factor_property())
+    }
+
+    pub fn set_min_zoom_factor(&self, value: f32) {
+        self.set_value(Self::min_zoom_factor_property(), value)
+    }
+
+    /// `MaxZoomFactor` (default 10).
+    pub fn max_zoom_factor(&self) -> f32 {
+        self.get_value(Self::max_zoom_factor_property())
+    }
+
+    pub fn set_max_zoom_factor(&self, value: f32) {
+        self.set_value(Self::max_zoom_factor_property(), value)
+    }
+
+    /// `ZoomFactor`: the zoom of the content (1 unless it was zoomed). The content keeps its
+    /// layout and is scaled about its top left corner; the extent and the offsets are in
+    /// zoomed units, as in WinUI.
+    pub fn zoom_factor(&self) -> f32 {
+        self.zoom_factor.get()
+    }
+
+    pub(crate) fn set_zoom_factor_internal(&self, value: f32) {
+        self.set_and_raise_cell(Self::zoom_factor_property(), &self.zoom_factor, value);
+    }
+
+    /// The zoom factor `value` kept between [`min_zoom_factor`](Self::min_zoom_factor) and
+    /// [`max_zoom_factor`](Self::max_zoom_factor).
+    pub(crate) fn clamp_zoom_factor(&self, value: f32) -> f32 {
+        let min = self.min_zoom_factor().max(f32::MIN_POSITIVE);
+        let max = self.max_zoom_factor().max(min);
+        if value.is_finite() {
+            value.clamp(min, max)
+        } else {
+            self.zoom_factor()
+        }
+    }
+
+    /// `ChangeView(horizontalOffset, verticalOffset, zoomFactor)`: scrolls and zooms the content
+    /// to the values given (`None` keeps the current one); the zoom factor is kept between the
+    /// minimum and the maximum, the offsets within the extent at that zoom. Returns `false` when
+    /// the scroll viewer has no scroll presenter to change.
+    ///
+    /// Deviation (winui-composition.md): the change is applied at once; WinUI animates it unless
+    /// `disableAnimation` (see [`change_view_with`](Self::change_view_with)).
+    pub fn change_view(&self, horizontal_offset: Option<f64>, vertical_offset: Option<f64>, zoom_factor: Option<f32>) -> bool {
+        self.change_view_with(horizontal_offset, vertical_offset, zoom_factor, false)
+    }
+
+    /// `ChangeView(horizontalOffset, verticalOffset, zoomFactor, disableAnimation)`.
+    pub fn change_view_with(
+        &self,
+        horizontal_offset: Option<f64>,
+        vertical_offset: Option<f64>,
+        zoom_factor: Option<f32>,
+        _disable_animation: bool,
+    ) -> bool {
+        let Some(presenter) = self.scroll_content_presenter() else { return false };
+        let zoom = self.clamp_zoom_factor(zoom_factor.unwrap_or_else(|| self.zoom_factor()));
+        let offset = self.offset();
+        let target = Vector::new(horizontal_offset.unwrap_or(offset.x), vertical_offset.unwrap_or(offset.y));
+        presenter.set_zoom(zoom as f64, target);
+        true
+    }
+
+    /// `ZoomToFactor(factor)` (deprecated in WinUI for `ChangeView`): zooms to `factor`, keeping
+    /// the offsets.
+    pub fn zoom_to_factor(&self, factor: f32) {
+        self.change_view(None, None, Some(factor));
+    }
+
+    /// The scroll presenter of the template.
+    pub(crate) fn scroll_content_presenter(&self) -> Option<Ref<crate::presenters::ScrollContentPresenter>> {
+        self.presenter()?.downcast::<crate::presenters::ScrollContentPresenter>().ok()
     }
 
     pub(crate) fn set_viewport(&self, value: Size) {

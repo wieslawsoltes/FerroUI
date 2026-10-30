@@ -25,9 +25,8 @@
     MenuFlyoutPresenter (WinUI opens a MenuFlyoutPresenter for a sub item); it opens at the right
     edge of the item, 4 px over it (CascadingMenuHelper::m_subMenuOverlapPixels). The shadow of
     the presenter of a sub item (ApplyElevationEffect at the depth 1 of a submenu: a ThemeShadow at
-    a Translation.Z of 40) is the BoxShadow ThemeShadowSubMenuBoxShadow of the border
-    ThemeShadowWrapper around the border of the popup (a border of its own: a border whose
-    background is sized to the inner edge of its border draws no box shadow), with the margin
+    a Translation.Z of 40) is a ThemeShadow (the shared WinUIThemeShadow, Translation.Z as in WinUI) on the border
+    ThemeShadowWrapper around the border of the popup (a border of its own), with the margin
     ThemeShadowSubMenuMargin as the room for it in the popup; deeper submenus have the same
     shadow (Resources/ThemeShadows.xaml; DEVIATIONS.md, G-24). The background of the popup is
     AcrylicBackgroundFillColorDefaultBrush, the acrylic brush of the flyouts, where the presenter
@@ -177,7 +176,7 @@
                  IsOpen="{TemplateBinding IsSubMenuOpen, Mode=TwoWay}">
             <!-- The shadow on a border of its own (G-24). -->
             <Border x:Name="ThemeShadowWrapper"
-                    BoxShadow="{DynamicResource ThemeShadowSubMenuBoxShadow}"
+                    Translation="0,0,40" Shadow="{StaticResource WinUIThemeShadow}"
                     Margin="{StaticResource ThemeShadowSubMenuMargin}"
                     CornerRadius="{DynamicResource OverlayCornerRadius}">
               <Border Background="{DynamicResource AcrylicBackgroundFillColorDefaultBrush}"

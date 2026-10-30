@@ -1,0 +1,4 @@
+<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <TextBlock Text="Colors"/><ComboBox x:Name="Primary" Width="220" HorizontalAlignment="Left" PlaceholderText="Pick a color"><x:String>Blue</x:String><x:String>Green</x:String><x:String>Red</x:String><x:String>Yellow</x:String></ComboBox><TextBlock Text="Editable choice"/><ComboBox Width="220" HorizontalAlignment="Left" IsEditable="True"><x:String>12</x:String><x:String>16</x:String><x:String>24</x:String></ComboBox><TextBlock x:Name="Output" Text="Pick a color"/>
+</StackPanel>

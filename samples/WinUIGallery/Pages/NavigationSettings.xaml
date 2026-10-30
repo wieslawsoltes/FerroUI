@@ -1,0 +1,4 @@
+<!-- Adapted from SampleSupport/SamplePages/SampleSettingsPage.xaml in the pinned Gallery; see ../NOTICE.md. -->
+<Grid xmlns="https://github.com/ferroui">
+  <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="Sample Settings Page" FontSize="28" />
+</Grid>
