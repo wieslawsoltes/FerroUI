@@ -224,7 +224,7 @@ Not taken from #243 in R8: its manager tests for a client without exact editing 
 
 | WinUI | FerroUI | Why |
 |---|---|---|
-| `InputScope` is the hint of the touch keyboard and the IME of Windows. | For RichEditBox (a client of the exact-edit connection) the first input scope becomes the IBus `ContentType` purpose, the Fcitx capability flags and the `zwp_text_input_v3` content purpose; without a scope, the content type. TextBox keeps upstream behaviour: IBus gets no `ContentType`. | Decision D5. |
+| `InputScope` is the hint of the touch keyboard and the IME of Windows. | For RichEditBox (a client of the exact-edit connection) the first input scope becomes the IBus `ContentType` purpose, the Fcitx capability flags and the `zwp_text_input_v3` content purpose; without a scope, the content type. A scope never takes away the privacy hints of a Password content type. TextBox keeps upstream behaviour: IBus gets no `ContentType`. | Decision D5. |
 | Scopes select width and script (`AlphanumericFullWidth`, `Hiragana`, `KatakanaHalfWidth`, `Hangul*`). | IBus, Fcitx and the Wayland protocol have no width or script selector: these scopes are free-form; only `AlphanumericHalfWidth` asks Wayland for Latin. | No counterpart in the protocols. |
 | The IME accepts every scope. | An IBus that refuses `ContentType` (older than 1.5.32 or a portal without it) keeps the IME connected without the hint; a warning is logged. | #243 review P24. |
 

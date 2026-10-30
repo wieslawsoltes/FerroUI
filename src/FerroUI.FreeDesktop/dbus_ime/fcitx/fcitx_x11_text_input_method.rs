@@ -73,6 +73,11 @@ pub(crate) fn option_flags_with_input_scope(
     }
     if let Some(scope) = scope {
         flags |= scope_flags(scope);
+        // An input scope never takes away the privacy a Password content type asks for (as for
+        // IBus and Wayland).
+        if options.content_type == TextInputContentType::Password {
+            flags |= FcitxCapabilityFlags::CAPACITY_PASSWORD;
+        }
     } else if options.content_type == TextInputContentType::Email {
         flags |= FcitxCapabilityFlags::CAPACITY_EMAIL;
     } else if options.content_type == TextInputContentType::Number {
@@ -511,6 +516,22 @@ mod tests {
             options.content_type = content_type;
             assert_eq!(option_flags(&options), FcitxCapabilityFlags::CAPACITY_UPPERCASE | flag);
         }
+    }
+
+    #[test]
+    fn an_input_scope_keeps_the_password_capability_of_a_password_content_type() {
+        use FcitxCapabilityFlags as Flags;
+        let options = TextInputOptions {
+            content_type: TextInputContentType::Password,
+            auto_capitalization: true,
+            ..Default::default()
+        };
+        assert_eq!(option_flags_with_input_scope(&options, Some(InputScopeNameValue::Default)), Flags::CAPACITY_PASSWORD);
+        assert_eq!(
+            option_flags_with_input_scope(&options, Some(InputScopeNameValue::Number)),
+            Flags::CAPACITY_PASSWORD | Flags::CAPACITY_NUMBER
+        );
+        assert_eq!(option_flags_with_input_scope(&options, None), option_flags(&options));
     }
 
     #[test]

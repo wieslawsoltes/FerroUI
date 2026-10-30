@@ -102,8 +102,9 @@ pub fn convert_with_input_scope(options: &TextInputOptions, scope: Option<InputS
     }
 
     // Password always overrides: even with ShowSuggestions=true, never reveal text. A secret
-    // input scope does the same; these hints protect the candidates and the learning of the input
-    // method, they do not mask or validate the text of the control.
+    // input scope does the same, and an input scope never takes away the privacy a Password
+    // content type asks for (as for IBus); these hints protect the candidates and the learning of
+    // the input method, they do not mask or validate the text of the control.
     let secret_scope = matches!(
         scope,
         Some(
@@ -113,7 +114,7 @@ pub fn convert_with_input_scope(options: &TextInputOptions, scope: Option<InputS
                 | InputScopeNameValue::AlphanumericPin
         )
     );
-    if secret_scope || (scope.is_none() && options.content_type == TextInputContentType::Password) {
+    if secret_scope || options.content_type == TextInputContentType::Password {
         hint &= !(ContentHint::COMPLETION | ContentHint::SPELLCHECK);
         hint |= ContentHint::HIDDEN_TEXT | ContentHint::SENSITIVE_DATA;
     }
@@ -208,12 +209,25 @@ mod tests {
     }
 
     #[test]
-    fn without_an_input_scope_the_content_type_is_converted_as_upstream() {
-        let mut options = TextInputOptions { content_type: TextInputContentType::Password, ..Default::default() };
+    fn an_input_scope_keeps_the_privacy_hints_of_a_password_content_type() {
+        let options = TextInputOptions {
+            content_type: TextInputContentType::Password,
+            show_suggestions: Some(true),
+            ..Default::default()
+        };
         assert_eq!(
             convert_with_input_scope(&options, Some(InputScopeNameValue::Default)),
-            (ContentHint::NONE, ContentPurpose::Normal)
+            (ContentHint::HIDDEN_TEXT | ContentHint::SENSITIVE_DATA, ContentPurpose::Normal)
         );
+        let (hint, purpose) = convert_with_input_scope(&options, Some(InputScopeNameValue::Number));
+        assert_eq!(purpose, ContentPurpose::Number);
+        assert!(hint.contains(ContentHint::HIDDEN_TEXT | ContentHint::SENSITIVE_DATA));
+        assert!(!hint.intersects(ContentHint::COMPLETION | ContentHint::SPELLCHECK));
+    }
+
+    #[test]
+    fn without_an_input_scope_the_content_type_is_converted_as_upstream() {
+        let mut options = TextInputOptions { content_type: TextInputContentType::Password, ..Default::default() };
         assert_eq!(
             convert_with_input_scope(&options, None),
             (ContentHint::HIDDEN_TEXT | ContentHint::SENSITIVE_DATA, ContentPurpose::Password)
