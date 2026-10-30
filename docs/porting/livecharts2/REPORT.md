@@ -24,26 +24,27 @@ Counts are source/API/test declarations, not executed tests or behavioral equiva
 
 | Disposition | Count |
 |---|---:|
-| native-replacement | 16 |
+| native-replacement | 17 |
 | partial | 9 |
-| pending | 652 |
+| pending | 651 |
 | ported | 21 |
 
 ### API members
 
 | Disposition | Count |
 |---|---:|
+| native-replacement | 12 |
 | partial | 1 |
-| pending | 4857 |
+| pending | 4845 |
 | ported | 1 |
 
 ### Test declarations
 
 | Disposition | Count |
 |---|---:|
-| partial | 11 |
-| pending | 963 |
-| ported | 92 |
+| partial | 12 |
+| pending | 960 |
+| ported | 94 |
 
 ## Test declarations by suite
 

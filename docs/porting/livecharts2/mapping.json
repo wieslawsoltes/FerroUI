@@ -398,9 +398,75 @@
         "src/FerroUI.LiveCharts/series.rs"
       ],
       "status": "partial"
+    },
+    "src/skiasharp/LiveChartsCore.SkiaSharp/Drawing/Geometries/DoughnutGeometry.cs": {
+      "reason": "Classic and rounded/inverted doughnut outlines become FerroUI cubic path commands, with tangent arcs and quarter-circle segmentation; actual Pushout is applied to geometry and hit coordinates.",
+      "remaining": [
+        "Tiny-wedge corner limiting and exact full-circle closure intentionally differ from the upstream fallback.",
+        "This replaces native backend drawing; source Skia snapshot equality has not been established."
+      ],
+      "rust": [
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs::rounded_annular_sector_path"
+      ],
+      "status": "native-replacement"
     }
   },
   "members": {
+    "src/LiveChartsCore/CorePieSeries.cs::LiveChartsCore.CorePieSeries<TModel, TVisual, TLabel, TMiniatureGeometry>::PolarLabelsPosition DataLabelsPosition { get; set; }#L112": {
+      "reason": "Chart center, start, end, middle and outer labels use source radius/angle and native horizontal alignment rules.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs::label_position"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/CorePieSeries.cs::LiveChartsCore.CorePieSeries<TModel, TVisual, TLabel, TMiniatureGeometry>::RadialAlignment RadialAlign { get; set; }#L97": {
+      "reason": "Typed snapshot field drives the source-derived angular/radial calculation; native styled properties observe changes.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/series.rs::Series::radial_align",
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/CorePieSeries.cs::LiveChartsCore.CorePieSeries<TModel, TVisual, TLabel, TMiniatureGeometry>::bool InvertedCornerRadius { get; set; }#L103": {
+      "reason": "Native cubic outlines support rounded/inverted radial corners.",
+      "remaining": [
+        "Tiny wedges clamp corner overlap and full rings remain exactly closed; this is a documented geometry correction."
+      ],
+      "rust": [
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs::rounded_annular_sector_path"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/CorePieSeries.cs::LiveChartsCore.CorePieSeries<TModel, TVisual, TLabel, TMiniatureGeometry>::bool IsFillSeries { get; set; }#L106": {
+      "reason": "Typed snapshot field drives the source-derived angular/radial calculation; native styled properties observe changes.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/series.rs::Series::is_fill_series",
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/CorePieSeries.cs::LiveChartsCore.CorePieSeries<TModel, TVisual, TLabel, TMiniatureGeometry>::bool IsRelativeToMinValue { get; set; }#L109": {
+      "reason": "Typed snapshot field drives the source-derived angular/radial calculation; native styled properties observe changes.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/series.rs::Series::is_relative_to_min_value",
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/CorePieSeries.cs::LiveChartsCore.CorePieSeries<TModel, TVisual, TLabel, TMiniatureGeometry>::double CornerRadius { get; set; }#L100": {
+      "reason": "Native cubic outlines support rounded/inverted radial corners.",
+      "remaining": [
+        "Tiny wedges clamp corner overlap and full rings remain exactly closed; this is a documented geometry correction."
+      ],
+      "rust": [
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs::rounded_annular_sector_path"
+      ],
+      "status": "native-replacement"
+    },
     "src/LiveChartsCore/CorePieSeries.cs::LiveChartsCore.CorePieSeries<TModel, TVisual, TLabel, TMiniatureGeometry>::double HoverPushout { get; set; }#L85": {
       "reason": "Reserves normal pie layout space and correctly excludes gauges.",
       "remaining": [
@@ -410,6 +476,60 @@
         "src/FerroUI.LiveCharts/series.rs::Series::hover_push_out"
       ],
       "status": "partial"
+    },
+    "src/LiveChartsCore/CorePieSeries.cs::LiveChartsCore.CorePieSeries<TModel, TVisual, TLabel, TMiniatureGeometry>::double InnerRadius { get; set; }#L79": {
+      "reason": "Typed snapshot field drives the source-derived angular/radial calculation; native styled properties observe changes.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/series.rs::Series::inner_radius",
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/CorePieSeries.cs::LiveChartsCore.CorePieSeries<TModel, TVisual, TLabel, TMiniatureGeometry>::double MaxRadialColumnWidth { get; set; }#L94": {
+      "reason": "Typed snapshot field drives the source-derived angular/radial calculation; native styled properties observe changes.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/series.rs::Series::max_radial_column_width",
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/CorePieSeries.cs::LiveChartsCore.CorePieSeries<TModel, TVisual, TLabel, TMiniatureGeometry>::double OuterRadiusOffset { get; set; }#L82": {
+      "reason": "Typed snapshot field drives the source-derived angular/radial calculation; native styled properties observe changes.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/series.rs::Series::outer_radius_offset",
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/CorePieSeries.cs::LiveChartsCore.CorePieSeries<TModel, TVisual, TLabel, TMiniatureGeometry>::double Pushout { get; set; }#L76": {
+      "reason": "Typed snapshot field drives the source-derived angular/radial calculation; native styled properties observe changes.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/series.rs::Series::push_out",
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/CorePieSeries.cs::LiveChartsCore.CorePieSeries<TModel, TVisual, TLabel, TMiniatureGeometry>::double RelativeInnerRadius { get; set; }#L88": {
+      "reason": "Typed snapshot field drives the source-derived angular/radial calculation; native styled properties observe changes.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/series.rs::Series::relative_inner_radius",
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs"
+      ],
+      "status": "native-replacement"
+    },
+    "src/LiveChartsCore/CorePieSeries.cs::LiveChartsCore.CorePieSeries<TModel, TVisual, TLabel, TMiniatureGeometry>::double RelativeOuterRadius { get; set; }#L91": {
+      "reason": "Typed snapshot field drives the source-derived angular/radial calculation; native styled properties observe changes.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/series.rs::Series::relative_outer_radius",
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs"
+      ],
+      "status": "native-replacement"
     },
     "src/LiveChartsCore/Kernel/Extensions.cs::LiveChartsCore.Kernel.Extensions::static FindingStrategy GetFindingStrategy(this IEnumerable<ISeries> seriesCollection)#L486": {
       "reason": "All visible-series preferences select X-closest, Y-closest, or all-dimensions-closest using the source all-series reduction.",
@@ -1212,6 +1332,23 @@
       ],
       "status": "partial"
     },
+    "tests/CoreTests/SeriesTests/PieSeriesTest.cs::CoreTests.SeriesTests.PieSeriesTest::void ShouldPlaceDataLabel()#L132": {
+      "reason": "The source fixture: thirteen one-value pie series in a 500 by 500 chart with a draw margin of 50, the hidden case and the five label positions for the normal, inner, outer and inner-and-outer radii, with the source assertions on each label location. Labels are measured with fixed native text metrics; angles are compared on the circle so that 360 and 0 degrees agree in f64.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/pie_series_tests.rs::source_should_place_data_label",
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs::tests::source_label_positions_follow_slice_angles_and_native_text_metrics"
+      ],
+      "status": "ported"
+    },
+    "tests/CoreTests/SeriesTests/PieSeriesTest.cs::CoreTests.SeriesTests.PieSeriesTest::void ShouldScale()#L19": {
+      "reason": "Pinned source fixture values and numerical assertions are adapted to owned Rust scenes; native rendering resources are asserted through scene geometry.",
+      "remaining": [],
+      "rust": [
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs::tests::source_should_scale_preserves_slice_angles_center_and_hover_reservation"
+      ],
+      "status": "ported"
+    },
     "tests/CoreTests/SeriesTests/RangeSeriesAutoBoundsTests.cs::CoreTests.SeriesTests.RangeSeriesAutoBoundsTests::void RangeColumnSeries_AutoBounds_IncludeLowestLowEndpoint()#L76": {
       "reason": "Pinned source fixture values and numerical assertions are adapted to owned Rust scenes; native rendering resources are asserted through scene geometry.",
       "remaining": [],
@@ -1267,6 +1404,16 @@
         "src/FerroUI.LiveCharts/cartesian_series_tests.rs::source_step_line_should_scale"
       ],
       "status": "ported"
+    },
+    "tests/SnapshotTests/PieChartTests.cs::SnapshotTests.PieChartTests::void GaugeInTightBounds()#L184": {
+      "reason": "Uses the reporter's exact 240x100 size, inner/relative offsets and maximum radial widths from source #2131.",
+      "remaining": [
+        "Numerical geometry only; upstream snapshot PNG has not been compared."
+      ],
+      "rust": [
+        "src/FerroUI.LiveCharts/pie_chart_engine.rs::tests::tight_gauge_preserves_negative_offsets_and_does_not_reserve_hover_pushout"
+      ],
+      "status": "partial"
     }
   }
 }

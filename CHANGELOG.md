@@ -6,6 +6,7 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ### Added
 
+- **LiveCharts2 port, pie engine** (L1c of [docs/porting/livecharts2.md](docs/porting/livecharts2.md); from #312): `PieChartEngine` measures pie, doughnut, gauge and nested-ring series into a retained scene, with the upstream pie scale and data label tests.
 - **LiveCharts2 port, Cartesian engine** (L1b of [docs/porting/livecharts2.md](docs/porting/livecharts2.md); from #312): `CartesianChartEngine` measures Cartesian series and axes into a retained scene, with the `ShouldScale` fixtures of the upstream column, row, scatter, step line, stacked, financial and box series tests.
 - **LiveCharts2 port, core** (L1a of [docs/porting/livecharts2.md](docs/porting/livecharts2.md); from #312): the new crate `ferroui-livecharts` holds the shared core of the chart engines (axes, scales and ticks, stacking, easing, motion, paints, scenes and hit testing, series descriptions, visual states), with the dispositions of the core sources and upstream tests in `docs/porting/livecharts2/mapping.json`.
 - **LiveCharts2 port, accounting** (L0 of [docs/porting/livecharts2.md](docs/porting/livecharts2.md); from #312): `scripts/livecharts2/inventory.py` accounts for the source files, API members and test declarations of LiveCharts2 at `8537b90f` from a pinned checkout and FerroUI's Roslyn extractor; the reviewed map and the generated report are in `docs/porting/livecharts2/`, the inventories are an artifact of the new workflow `livecharts.yml`.

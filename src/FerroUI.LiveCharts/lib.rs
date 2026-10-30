@@ -1,7 +1,7 @@
 //! Live chart calculation and retained scenes for FerroUI: the core of the LiveCharts2 port
-//! (axes, scales, bounds, stacking, motion, paints, scenes and visual states) and the Cartesian
-//! engine. The other chart engines land with their upstream tests in the following parts
-//! (docs/porting/livecharts2.md); see NOTICE.md for the source attribution.
+//! (axes, scales, bounds, stacking, motion, paints, scenes and visual states), the Cartesian
+//! engine and the pie engine. The other chart engines land with their upstream tests in the
+//! following parts (docs/porting/livecharts2.md); see NOTICE.md for the source attribution.
 
 pub mod axis;
 pub mod cartesian_chart_engine;
@@ -11,6 +11,7 @@ pub mod kernel;
 pub mod measure;
 pub mod motion;
 pub mod paint;
+pub mod pie_chart_engine;
 pub mod scene;
 mod scene_transform;
 pub mod series;
@@ -24,6 +25,7 @@ pub use easing_functions::{EasingFunctions, KeyFrame};
 pub use kernel::{Coordinate, Error, StackedValue, Stacker};
 pub use motion::{Animatable, Animation, MotionProperty, Repeat};
 pub use paint::BrushSpace;
+pub use pie_chart_engine::{PieChartEngine, PieOptions};
 pub use scene::{
     ChartError, FindingStrategy, Geometry, HitRegion, HitShape, LegendItem, PaintStyle,
     PathCommand, PointId, Primitive, Scene, TextAnchor,
@@ -40,3 +42,5 @@ pub use register_types::register_types;
 mod cartesian_series_tests;
 #[cfg(test)]
 mod upstream_regression_tests;
+#[cfg(test)]
+mod pie_series_tests;
