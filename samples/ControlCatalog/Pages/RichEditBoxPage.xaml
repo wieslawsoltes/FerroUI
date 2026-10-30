@@ -39,13 +39,8 @@
           <Paragraph>
             <Bold><Run Text="A shared document" /></Bold>
           </Paragraph>
-          <Paragraph>
-            <Run Text="Start with a thought, add " />
-            <Italic><Run Text="emphasis" /></Italic>
-            <Run Text=", and " />
-            <Underline><Run Text="mark the next step" /></Underline>
-            <Run Text=". The preview below follows every edit." />
-          </Paragraph>
+          <!-- The inlines are on one line: whitespace between them would be text. -->
+          <Paragraph><Run Text="Start with a thought, add " /><Italic><Run Text="emphasis" /></Italic><Run Text=", and " /><Underline><Run Text="mark the next step" /></Underline><Run Text=". The preview below follows every edit." /></Paragraph>
           <Paragraph>
             <Run Text="Text can include café, 日本語, العربية and emoji 😀." />
           </Paragraph>
@@ -59,14 +54,23 @@
         IsEnabled="{Binding #Editor.CanFormat}" />]]></x:String></controls:SampleSection.Code>
     </controls:SampleSection>
 
-    <controls:SampleSection Header="Shared preview"
-                            Description="The editor and this read-only view show the same document. Formatting, text edits and undo appear in both views.">
+    <controls:SampleSection Header="Read-only preview"
+                            Description="A read-only view of the editor's content: the page copies each change of the editor's document into the view's own document (a document belongs to one view; RichTextBlockOverflow continues a view instead).">
       <Border BorderBrush="{DynamicResource CatalogBaseMediumColor}" BorderThickness="1" Padding="16">
         <ScrollViewer MaxHeight="220" HorizontalScrollBarVisibility="Disabled">
-          <RichTextBlock Name="Preview" RichDocument="{Binding #Editor.RichDocument}" TextWrapping="Wrap" />
+          <RichTextBlock Name="Preview" TextWrapping="Wrap" />
         </ScrollViewer>
       </Border>
-      <controls:SampleSection.Code><x:String xml:space="preserve"><![CDATA[<RichTextBlock RichDocument="{Binding #Editor.RichDocument}" TextWrapping="Wrap" />]]></x:String></controls:SampleSection.Code>
+      <controls:SampleSection.Code><x:String xml:space="preserve"><![CDATA[<RichTextBlock Name="Preview" TextWrapping="Wrap" />
+
+// Code-behind: copy each change of the editor's document into the view's.
+let document = editor.rich_document();
+let (preview, source) = (preview.downgrade(), document.downgrade());
+document.changed(move |_| {
+    if let (Some(preview), Some(source)) = (preview.upgrade(), source.upgrade()) {
+        let _ = preview.rich_document().restore(&source.snapshot());
+    }
+});]]></x:String></controls:SampleSection.Code>
     </controls:SampleSection>
 
   </StackPanel>
