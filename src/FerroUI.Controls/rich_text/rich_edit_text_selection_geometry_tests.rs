@@ -1,7 +1,6 @@
 //! Navigation work and reentrancy measured through the actual formatter service.
 use super::*;
 use crate::test_support::test_scope;
-use crate::RichEditBox;
 use ferroui_base::media::text_formatting::testing::TextTestScope;
 use ferroui_base::media::text_formatting::{
     ITextDrawingSink, ITextSource, JustificationProperties, TextBounds, TextCollapsingProperties,

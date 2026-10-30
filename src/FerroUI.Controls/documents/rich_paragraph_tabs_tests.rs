@@ -460,3 +460,8 @@ fn rich_paragraph_tabs_clipboard_resolves_external_defaults_and_preserves_exact_
         .all(|p| p.format.default_tab_stop == Some(48.0)));
     assert_eq!(inserted.text(), original.text());
 }
+
+fn measure_tabs(view: &RichTextBlock, height: f64) {
+    view.measure(Size::new(300.0, height));
+    view.arrange(Rect::new(0.0, 0.0, 300.0, height));
+}

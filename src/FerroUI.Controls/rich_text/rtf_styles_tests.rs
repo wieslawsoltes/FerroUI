@@ -4,7 +4,6 @@
 use super::{RtfError, RtfLimits, RtfReader, RtfWriter};
 use crate::documents::{DocumentSnapshot, LineSpacingRule, TabAlignment, TabLeader};
 use crate::rich_text::TextSetOptions;
-use crate::RichEditBox;
 use ferroui_base::media::{FontStyle, FontWeight, TextAlignment};
 use ferroui_base::threading::Dispatcher;
 

@@ -3,7 +3,7 @@
 use super::*;
 use crate::documents::ParagraphSnapshot;
 use crate::test_support::test_scope;
-use crate::{RichEditBox, RichTextBlockOverflow};
+use crate::RichTextBlockOverflow;
 use ferroui_base::input::IScrollable;
 use ferroui_base::media::text_formatting::testing::TextTestScope;
 use ferroui_base::media::{FlowDirection, TextTrimming, TextWrapping};
@@ -28,17 +28,6 @@ fn displayed(text: &str) -> (Ref<RichTextBlock>, RichEditTextDocument) {
     document.editor().set_text_view(Some(view.clone())).unwrap();
     measure(&view, 300.0, 500.0);
     (view, document)
-}
-
-fn owner_with_view(text: &str) -> (Ref<RichEditBox>, Ref<RichTextBlock>, RichEditTextDocument) {
-    let owner = RichEditBox::new();
-    owner.set_text(text).unwrap();
-    let document = owner.text_document();
-    let view = owner.text_presenter().upcast::<RichTextBlock>();
-    document.editor().set_text_view(Some(view.clone())).unwrap();
-    measure(&view, 300.0, 500.0);
-    document.clear_undo_redo_history();
-    (owner, view, document)
 }
 
 #[test]

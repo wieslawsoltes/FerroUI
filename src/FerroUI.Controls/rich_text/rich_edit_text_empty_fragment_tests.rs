@@ -2,7 +2,6 @@
 use super::*;
 use crate::documents::LineSpacingRule;
 use crate::rich_text::LetterCase;
-use crate::RichEditBox;
 use std::cell::{Cell, RefCell};
 
 fn empty_rich_fragment() -> DocumentSnapshot {

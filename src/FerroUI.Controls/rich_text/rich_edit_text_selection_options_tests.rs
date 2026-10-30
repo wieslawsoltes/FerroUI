@@ -2,7 +2,7 @@
 use super::*;
 use crate::documents::{Hyperlink, InlineUIContainer, LineBreak, Run};
 use crate::test_support::test_scope;
-use crate::{Border, RichEditBox};
+use crate::Border;
 use ferroui_base::media::{FontStyle, FontWeight};
 use ferroui_base::threading::Dispatcher;
 use std::cell::Cell;
