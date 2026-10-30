@@ -334,6 +334,7 @@ Reported from a phone: a swipe moved the content only a little. Reproduced in he
 - What default typeface, if any, the SkiaSharp WASM binary embeds, and how upstream apps get text without registering a font.
 - trunk support for `wasm32-unknown-emscripten`.
 - Rust standard-library requirements for WASM threads on either target (not investigated further because threads are rejected).
+- The textarea of a connection client (section 14, R10 of #243) with real input methods and on-screen keyboards: Japanese, Chinese and Korean IMEs on desktop browsers, autocorrect and the `inputmode` keyboards of Chrome on Android and Safari on iOS. Its protocol is tested with node doubles and a RichEditBox in a test application; the headless Chrome job does not type into a RichEditBox.
 
 ## 14. Upstream quirks: do not copy as is
 
