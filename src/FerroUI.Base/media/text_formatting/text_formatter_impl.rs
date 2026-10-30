@@ -10,8 +10,8 @@ use crate::media::text_formatting::unicode::{
 use crate::media::text_formatting::wrapping_text_line_break::WrappingTextLineBreak;
 use crate::media::text_formatting::{
     GlyphInfo, ITextSource, ShapedBuffer, ShapedTextRun, SplitResult, TextCharacters,
-    TextFormatter, TextLine, TextLineBreak, TextParagraphProperties, TextRun, TextRunCache, TextRunProperties,
-    TextShaper, TextShaperOptions, UnshapedTextRun, DEFAULT_TEXT_SOURCE_LENGTH,
+    TextFormatter, TextLine, TextLineBreak, TextLineMetricsMode, TextParagraphProperties, TextRun, TextRunCache,
+    TextRunProperties, TextShaper, TextShaperOptions, UnshapedTextRun, DEFAULT_TEXT_SOURCE_LENGTH,
 };
 use crate::media::{FlowDirection, FontManager, TextWrapping};
 use crate::utilities::{MathUtilities, ReadOnlyMemory};
@@ -52,7 +52,8 @@ impl TextFormatterImpl {
 
         match paragraph_properties.text_wrapping() {
             TextWrapping::NoWrap => {
-                let line_runs = Self::add_ref_shaped_runs(&cached.shaped_runs);
+                let mut line_runs = Self::add_ref_shaped_runs(&cached.shaped_runs);
+                super::text_tab_layout::resolve_tabs(&mut line_runs, &**paragraph_properties, paragraph_width);
 
                 let text_line = TextLineImpl::new(
                     line_runs,
@@ -279,7 +280,13 @@ impl TextFormatterImpl {
         let mut processed_runs = object_pool.text_run_lists.rent();
         let mut grouped_runs = object_pool.unshaped_text_run_lists.rent();
 
-        Self::coalesce_levels(text_runs, bidi_algorithm.resolved_levels(), font_manager, &mut processed_runs);
+        Self::coalesce_levels(
+            text_runs,
+            bidi_algorithm.resolved_levels(),
+            font_manager,
+            paragraph_properties.line_metrics_mode(),
+            &mut processed_runs,
+        );
 
         bidi_data.reset();
         bidi_algorithm.reset();
@@ -308,7 +315,11 @@ impl TextFormatterImpl {
 
                         if shapeable_run.bidi_level() == next_run.bidi_level() {
                             if let Some(joined_text) = Self::try_join_contiguous_memories(&text, &next_run.text()) {
-                                if Self::can_shape_together(&*properties, &**next_run.run_properties()) {
+                                if Self::can_shape_together(
+                                    &*properties,
+                                    &**next_run.run_properties(),
+                                    paragraph_properties.line_metrics_mode(),
+                                ) {
                                     grouped_runs.push(next_run.clone());
                                     index += 1;
                                     shapeable_run = next_run;
@@ -323,11 +334,11 @@ impl TextFormatterImpl {
 
                     let shaper_options = TextShaperOptions::with_all(
                         properties.cached_glyph_typeface(),
-                        properties.font_rendering_em_size(),
+                        properties.effective_font_rendering_em_size(),
                         shapeable_run.bidi_level(),
                         properties.culture_info().cloned(),
                         paragraph_properties.default_incremental_tab(),
-                        paragraph_properties.letter_spacing(),
+                        paragraph_properties.letter_spacing() * properties.font_scale(),
                         properties.font_features().map(|features| Rc::new(features.to_vec())),
                     );
 
@@ -370,10 +381,24 @@ impl TextFormatterImpl {
         None
     }
 
-    fn can_shape_together(x: &dyn TextRunProperties, y: &dyn TextRunProperties) -> bool {
+    // Deviation (DEVIATIONS.md, Text formatting): `TextFormatterImpl.CanShapeTogether` compares the em size,
+    // the typeface and the baseline alignment; the font scale and, in the opt-in FontFamily line-metrics mode,
+    // the requested family and the resolved glyph face are compared too. Both are equal by default.
+    fn can_shape_together(
+        x: &dyn TextRunProperties,
+        y: &dyn TextRunProperties,
+        line_metrics_mode: TextLineMetricsMode,
+    ) -> bool {
         MathUtilities::are_close(x.font_rendering_em_size(), y.font_rendering_em_size())
             && x.typeface() == y.typeface()
+            && x.font_scale() == y.font_scale()
             && x.baseline_alignment() == y.baseline_alignment()
+            // A cluster crossing a run boundary can absorb that run during
+            // splitting. Preserve each requested family's metric contribution
+            // even when both runs resolve to the same fallback glyph font.
+            && (line_metrics_mode == TextLineMetricsMode::GlyphTypeface
+                || (x.requested_font_family() == y.requested_font_family()
+                    && Rc::ptr_eq(&x.cached_glyph_typeface(), &y.cached_glyph_typeface())))
     }
 
     fn shape_together(
@@ -423,6 +448,7 @@ impl TextFormatterImpl {
         text_characters: &[Rc<dyn TextRun>],
         levels: &[i8],
         font_manager: &FontManager,
+        mode: TextLineMetricsMode,
         processed_runs: &mut Vec<Rc<dyn TextRun>>,
     ) {
         if levels.is_empty() {
@@ -461,10 +487,11 @@ impl TextFormatterImpl {
                 j += count;
 
                 if j == run_text.len() {
-                    current_run.get_shapeable_characters(
+                    current_run.get_shapeable_characters_with_metrics_mode(
                         run_text.slice(0, j),
                         run_level,
                         font_manager,
+                        mode,
                         &mut previous_properties,
                         processed_runs,
                     );
@@ -479,10 +506,11 @@ impl TextFormatterImpl {
                 }
 
                 // End of this run
-                current_run.get_shapeable_characters(
+                current_run.get_shapeable_characters_with_metrics_mode(
                     run_text.slice(0, j),
                     run_level,
                     font_manager,
+                    mode,
                     &mut previous_properties,
                     processed_runs,
                 );
@@ -504,7 +532,14 @@ impl TextFormatterImpl {
             return;
         }
 
-        current_run.get_shapeable_characters(run_text, run_level, font_manager, &mut previous_properties, processed_runs);
+        current_run.get_shapeable_characters_with_metrics_mode(
+            run_text,
+            run_level,
+            font_manager,
+            mode,
+            &mut previous_properties,
+            processed_runs,
+        );
     }
 
     /// Fetches text runs.
@@ -655,7 +690,7 @@ impl TextFormatterImpl {
             EMPTY.with(|empty| empty.clone()),
             1,
             glyph_typeface,
-            properties.font_rendering_em_size(),
+            properties.effective_font_rendering_em_size(),
             flow_direction as i8,
         );
         shaped_buffer.set(0, GlyphInfo::new(glyph, first_text_source_index, 0.0));
@@ -702,11 +737,43 @@ impl TextFormatterImpl {
             return Self::create_empty_text_line(first_text_source_index, paragraph_width, paragraph_properties);
         }
 
+        super::text_tab_layout::resolve_tabs(text_runs, &**paragraph_properties, paragraph_width);
         let measured_length = Self::find_wrap_length(text_runs, paragraph_width, &**paragraph_properties);
 
-        let (split, split_length) = Self::split_text_runs_with_length(text_runs, measured_length, object_pool);
+        let (split, mut split_length) = Self::split_text_runs_with_length(text_runs, measured_length, object_pool);
 
         let (mut pre_split_runs, mut post_split_runs) = split.deconstruct();
+
+        // A centered or decimal-aligned field acquires a wider tab gap when its
+        // visible fragment becomes shorter. Resolve against that fragment and
+        // repeat the existing cluster-aware wrap if the new gap overflows. Each
+        // successful pass removes text from this line, so progress is bounded by
+        // its source length; the usual one-oversize-cluster rule still applies.
+        // Without paragraph tab stops `resolve_tabs` returns false at once.
+        while let Some(pre_split) = pre_split_runs.as_mut() {
+            if !super::text_tab_layout::resolve_tabs(pre_split, &**paragraph_properties, paragraph_width) {
+                break;
+            }
+            let adjusted_length = Self::find_wrap_length(pre_split, paragraph_width, &**paragraph_properties);
+            if adjusted_length >= split_length {
+                break;
+            }
+            let (adjusted, actual_length) = Self::split_text_runs_with_length(pre_split, adjusted_length, object_pool);
+            let (adjusted_first, mut adjusted_second) = adjusted.deconstruct();
+            object_pool.text_run_lists.return_optional(pre_split_runs.take());
+            if let Some(second) = adjusted_second.as_mut() {
+                if let Some(previous_remaining) = post_split_runs.as_mut() {
+                    second.append(previous_remaining);
+                }
+                object_pool.text_run_lists.return_optional(post_split_runs.take());
+                post_split_runs = adjusted_second;
+            }
+            pre_split_runs = adjusted_first;
+            if actual_length >= split_length {
+                break;
+            }
+            split_length = actual_length;
+        }
 
         let has_post_split_runs = post_split_runs.as_ref().is_some_and(|runs| !runs.is_empty());
 
@@ -729,7 +796,10 @@ impl TextFormatterImpl {
                 // The runs are moved out of the rented list, which is returned below.
                 remaining_runs.append(post_split_runs);
 
-                Some(Rc::new(WrappingTextLineBreak::new(None, resolved_flow_direction, remaining_runs)))
+                Some(Rc::new(
+                    WrappingTextLineBreak::new(None, resolved_flow_direction, remaining_runs)
+                        .with_line_metrics_mode(paragraph_properties.line_metrics_mode()),
+                ))
             }
             _ => current_line_break.and_then(|line_break| line_break.text_end_of_line()).map(|text_end_of_line| {
                 Rc::new(TextLineBreak::new(Some(text_end_of_line.clone()), resolved_flow_direction, false))
@@ -1028,7 +1098,9 @@ impl TextFormatter for TextFormatterImpl {
 
         // we've wrapped the previous line and need to continue wrapping: ignore the text source and do that instead
         if let Some(previous_line_break) = previous_line_break {
-            if WrappingTextLineBreak::is_wrapping(previous_line_break) {
+            if WrappingTextLineBreak::is_wrapping(previous_line_break)
+                && previous_line_break.line_metrics_mode() == paragraph_properties.line_metrics_mode()
+            {
                 if let Some(mut remaining_runs) = WrappingTextLineBreak::acquire_remaining_runs(previous_line_break) {
                     if paragraph_properties.text_wrapping() != TextWrapping::NoWrap {
                         return Some(Self::perform_text_wrapping(
@@ -1048,7 +1120,10 @@ impl TextFormatter for TextFormatterImpl {
 
         // Try to use cached shaped runs to avoid redundant shaping/bidi processing.
         if let Some(text_run_cache) = text_run_cache {
-            if let Some(cached) = text_run_cache.try_get_shaped_runs(first_text_source_index) {
+            if let Some(cached) = text_run_cache
+                .try_get_shaped_runs(first_text_source_index)
+                .filter(|cached| cached.line_metrics_mode == paragraph_properties.line_metrics_mode())
+            {
                 crate::perf_count!(TextRunCacheHits);
                 return Some(Self::format_line_from_cache(
                     &cached,
@@ -1087,14 +1162,16 @@ impl TextFormatter for TextFormatterImpl {
                     resolved_flow_direction,
                     text_end_of_line,
                     text_source_length,
-                ),
+                )
+                .with_line_metrics_mode(paragraph_properties.line_metrics_mode()),
             );
         }
 
         let text_line = match paragraph_properties.text_wrapping() {
             TextWrapping::NoWrap => {
                 // The runs are moved out of the rented list, which is returned below.
-                let line_runs: Vec<Rc<dyn TextRun>> = shaped_text_runs.drain(..).collect();
+                let mut line_runs: Vec<Rc<dyn TextRun>> = shaped_text_runs.drain(..).collect();
+                super::text_tab_layout::resolve_tabs(&mut line_runs, &**paragraph_properties, paragraph_width);
 
                 let text_line = TextLineImpl::new(
                     line_runs,
