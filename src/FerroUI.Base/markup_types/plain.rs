@@ -296,6 +296,11 @@ ferro_markup_type!(class TargetPropertyPath {
             get: |this: &Rc<TargetPropertyPath>| this.path(),
             set: |this: &Rc<TargetPropertyPath>, value: String| this.set_path(value)
         },
+        // The name of the target element, resolved when the setter applies (WinUI's target name).
+        TargetName: String {
+            get: |this: &Rc<TargetPropertyPath>| this.target_name(),
+            set: |this: &Rc<TargetPropertyPath>, value: String| this.set_target_name(value)
+        },
         Property: Option<&'static FerroProperty> {
             get: |this: &Rc<TargetPropertyPath>| this.property(),
             set: |this: &Rc<TargetPropertyPath>, value: Option<&'static FerroProperty>| this.set_property(value)

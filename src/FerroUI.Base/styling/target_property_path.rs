@@ -14,16 +14,20 @@ use std::rc::Rc;
 /// The target of a [`Setter`](super::Setter) of a visual state: an object and a property of it.
 ///
 /// Markup writes it as the text of `Setter.Target`: `Element.Property` or
-/// `Element.(Owner.Property)` for an attached property. The compiler resolves the element in the
-/// name scope of the document (or of the template) and the property against the type of the
-/// element; the property is the [`property`](super::Setter::property) of the setter, and this
-/// object holds the element and the text of the path.
+/// `Element.(Owner.Property)` for an attached property. The compiler keeps the name of the element
+/// ([`target_name`](Self::target_name)) and resolves the property against the type of the
+/// element; the property is the [`property`](super::Setter::property) of the setter. The element
+/// is found by its name in the name scope of the template or the document when the state is
+/// applied, as WinUI's `CTargetPropertyPath` does (`m_targetName`, `ResolveTargetForVisualStateSetter`),
+/// so a setter may name an element declared after it. An explicit [`target`](Self::target)
+/// object, set in code or markup, is used instead of the name (WinUI's manual target).
 ///
 /// The target is held weakly: a setter of a visual state usually targets an element of the tree
 /// that holds the visual states, and so the setter would keep that tree alive.
 #[derive(Default)]
 pub struct TargetPropertyPath {
     path: RefCell<String>,
+    target_name: RefCell<String>,
     target: RefCell<Option<WeakRef<FerroObject>>>,
     property: Cell<Option<&'static FerroProperty>>,
 }
@@ -60,6 +64,16 @@ impl TargetPropertyPath {
         *self.target.borrow_mut() = value.map(|target| target.downgrade());
     }
 
+    /// The name of the target element, resolved in a name scope when the setter applies; empty
+    /// when the target is an explicit object or not set.
+    pub fn target_name(&self) -> String {
+        self.target_name.borrow().clone()
+    }
+
+    pub fn set_target_name(&self, value: impl Into<String>) {
+        *self.target_name.borrow_mut() = value.into();
+    }
+
     /// The text of the path of the property (`Property` or `(Owner.Property)`), as markup wrote
     /// it.
     pub fn path(&self) -> String {
@@ -84,6 +98,10 @@ impl TargetPropertyPath {
 impl fmt::Debug for TargetPropertyPath {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let target = self.target().map(|target| target.get_type().name().to_string());
-        f.debug_struct("TargetPropertyPath").field("target", &target).field("path", &*self.path.borrow()).finish()
+        f.debug_struct("TargetPropertyPath")
+            .field("target", &target)
+            .field("target_name", &*self.target_name.borrow())
+            .field("path", &*self.path.borrow())
+            .finish()
     }
 }

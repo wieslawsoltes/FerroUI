@@ -10,9 +10,10 @@
 //!   style target-type scope of the type of the element around the setter, as
 //!   `x:SetterTargetType` does, so that [`FerroXamlIlSetterTransformer`] resolves the property and
 //!   converts the value as for a setter of a style;
-//! - replaces the text of the target with a `TargetPropertyPath` whose `Target` is the name
-//!   (resolved by name when the document is loaded, so it is the element of the name scope the
-//!   setter is loaded in) and whose `Path` is the text of the property.
+//! - replaces the text of the target with a `TargetPropertyPath` whose `TargetName` is the name
+//!   and whose `Path` is the text of the property. The element is found by that name in the name
+//!   scope of the template or the document when the state applies, as WinUI resolves the target
+//!   of a visual state setter, so a setter may name an element declared after it.
 //!
 //! [`FerroXamlIlSetterTransformer`]: super::FerroXamlIlSetterTransformer
 
@@ -110,7 +111,9 @@ impl IXamlAstTransformer for FerroXamlIlVisualStateSetterTransformer {
             string_node(context, &*text, &property_text),
             true,
         );
-        on.children.borrow_mut().push(property_value);
+        // First: `Setter.Value` depends on `Setter.Property` (its value is converted to the type of
+        // the property), and the assignments were already ordered by their dependencies.
+        on.children.borrow_mut().insert(0, property_value);
 
         // Setter.Target: a TargetPropertyPath with the element name and the path.
         let path_type = context.configuration().type_system.get_type("FerroUI.Styling.TargetPropertyPath")?;
@@ -121,7 +124,7 @@ impl IXamlAstTransformer for FerroXamlIlVisualStateSetterTransformer {
             let mut children = path_object.children.borrow_mut();
             let target: Rc<dyn IXamlAstNode> = XamlAstXamlPropertyValueNode::new(
                 &*text,
-                clr_property(context, &*text, &path_type, "Target")?,
+                clr_property(context, &*text, &path_type, "TargetName")?,
                 string_node(context, &*text, &element_name),
                 true,
             );

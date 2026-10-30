@@ -130,9 +130,9 @@ impl VisualStateGroup {
     /// Enters `state` (or no state): applies its setters, then removes the values of the state
     /// it leaves (WinUI's `VisualStateManagerActuator::ChangeVisualState` for a change without a
     /// transition). Raises nothing; the manager raises the events.
-    pub(crate) fn set_state(&self, state: Option<&Ref<VisualState>>) {
+    pub(crate) fn set_state(&self, state: Option<&Ref<VisualState>>, template_root: Option<&Ref<crate::Control>>) {
         let applied = match state {
-            Some(state) => AppliedSetters::apply(state),
+            Some(state) => AppliedSetters::apply(state, template_root),
             None => AppliedSetters::default(),
         };
         // The new values are applied before the old ones are removed, so that a property both
@@ -144,9 +144,9 @@ impl VisualStateGroup {
 
     /// Applies the setters of the current state again (`GoToState` to the current state without
     /// transitions).
-    pub(crate) fn reapply_current_state(&self) {
+    pub(crate) fn reapply_current_state(&self, template_root: Option<&Ref<crate::Control>>) {
         let state = self.current_state();
-        self.set_state(state.as_ref());
+        self.set_state(state.as_ref(), template_root);
     }
 
     pub(crate) fn raise_current_state_changing(&self, args: &VisualStateChangedEventArgs) {
@@ -166,7 +166,7 @@ impl VisualStateGroup {
     /// Leaves the current state without raising events: the values are removed (the groups are
     /// removed from their element).
     pub(crate) fn detach(&self) {
-        self.set_state(None);
+        self.set_state(None, None);
     }
 }
 
