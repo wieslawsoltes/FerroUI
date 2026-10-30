@@ -50,7 +50,7 @@ jobs:
         with:
           toolchain: ${{ matrix.rust }}
           components: clippy
-      - name: Source preservation, transaction and language regressions
-        run: cargo test --locked -p ferroui-designer-core -p ferroui-designer-project -p ferroui-designer-tools -p ferroui-designer-language
+      - name: Source preservation, transaction, language and timeline regressions
+        run: cargo test --locked -p ferroui-designer-core -p ferroui-designer-project -p ferroui-designer-tools -p ferroui-designer-language -p ferroui-designer-animation
       - name: Portable public APIs are warning-free
-        run: cargo clippy --locked -p ferroui-designer-core -p ferroui-designer-project -p ferroui-designer-tools -p ferroui-designer-language --all-targets -- -D warnings
+        run: cargo clippy --locked -p ferroui-designer-core -p ferroui-designer-project -p ferroui-designer-tools -p ferroui-designer-language -p ferroui-designer-animation --all-targets -- -D warnings
