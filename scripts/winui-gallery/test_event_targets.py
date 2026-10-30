@@ -8,6 +8,9 @@ MODULE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(MODULE)
 
 
+# The WinUI API inventory is not committed: the scanner of the gallery port makes it from the
+# pinned checkouts (W10), and its workflow runs these tests after the scan.
+@unittest.skipUnless(MODULE.MODEL.is_file(), "upstream-api.json is made by scripts/winui-gallery/scan.py")
 class EventTargets(unittest.TestCase):
     def test_inherited_winui_events_resolve_exact_owners(self):
         table = MODULE.rows(json.loads(MODULE.MODEL.read_bytes()))

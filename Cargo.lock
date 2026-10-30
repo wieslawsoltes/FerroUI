@@ -1346,6 +1346,7 @@ dependencies = [
  "ferroui-markup",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
+ "ferroui-markup-xaml-winui",
  "ferroui-metal",
  "ferroui-native",
  "ferroui-opengl",
