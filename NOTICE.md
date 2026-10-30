@@ -132,11 +132,18 @@ The Vello render backend (`src/Vello/FerroUI.Vello`) links crates of the Vello p
 
 The Vulkan platform contracts (`src/FerroUI.Vulkan`) use `ash` 0.38.0 (MIT OR Apache-2.0, Copyright (c) 2016 ASH contributors) for the types, constants and function tables of Vulkan, with `libloading` (ISC) to open the Vulkan loader of the system at run time.
 
+## LiveCharts2
+
+- Project: <https://github.com/Live-Charts/LiveCharts2> (commit `8537b90ffb100a947cd0b1f6be49f896ae6050eb`)
+- License: MIT, Copyright (c) 2021 Alberto Rodriguez Orozco.
+- Used for: the chart calculation, geometry, motion and paints of `src/FerroUI.LiveCharts` (`ferroui-livecharts`), ported from LiveCharts2's `LiveChartsCore`; the crate's `NOTICE.md` holds the licence text, and `docs/porting/livecharts2.md` records the port.
+
 ## ProTranslate
 
 - Project: <https://github.com/wieslawsoltes/ProTranslate> (commit `b088669a22c8979d54dd81098991f8d16f880156`)
 - License: MIT, Copyright (c) 2026 Wiesław Šoltés.
 - Used for: the translation/globalization services, catalog formats, build-time generation, native UI integration and portable Translation Studio authoring engine under `src/ProTranslate/`, with the corresponding source license in each package's `NOTICE.md`.
+
 ## Pretext text preparation and layout
 
 The crates under `src/Pretext/` derive from

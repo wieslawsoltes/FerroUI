@@ -1,0 +1,64 @@
+name: LiveCharts2 port
+
+on:
+  pull_request:
+    # The accounting of the port against the pinned LiveCharts2 sources (docs/porting/livecharts2.md):
+    # the scanner, its reviewed map and report. The crates of the port add their own jobs here.
+    paths:
+      - '.github/workflows/livecharts.yml'
+      - 'scripts/livecharts2/**'
+      - 'scripts/api-extract/Program.cs'
+      - 'docs/porting/livecharts2/**'
+      - 'src/FerroUI.LiveCharts/**'
+      - 'src/FerroUI.Controls.LiveCharts/**'
+  schedule:
+    - cron: '23 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: livecharts-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  scan:
+    name: Source, API and test accounting against the pinned LiveCharts2
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      # The pin of docs/porting/livecharts2/sources.lock.json; the scanner reads its Git objects.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: Live-Charts/LiveCharts2
+          ref: 8537b90ffb100a947cd0b1f6be49f896ae6050eb
+          path: upstream/LiveCharts2
+          fetch-depth: 1
+      # The Roslyn syntax extractor of scripts/api-extract targets .NET 10.
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
+        with:
+          dotnet-version: '10.0.x'
+      # Writes the inventories and maps to target/livecharts2-scan; fails on a pull request when the
+      # committed summary.json or REPORT.md is stale, and reports the drift at night.
+      - name: Scan, and compare with the committed report
+        continue-on-error: ${{ github.event_name == 'schedule' }}
+        run: python3 scripts/livecharts2/inventory.py --check --upstream upstream/LiveCharts2
+      - name: The report in the run summary
+        if: always()
+        run: |
+          report=target/livecharts2-scan/REPORT.md
+          if [ -f "$report" ]; then
+            echo "The committed report is stale; the report of this scan:" >> "$GITHUB_STEP_SUMMARY"
+          else
+            report=docs/porting/livecharts2/REPORT.md
+          fi
+          cat "$report" >> "$GITHUB_STEP_SUMMARY"
+      - name: The inventories and maps, as an artifact of the run
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: livecharts2-scan
+          path: target/livecharts2-scan/
+          if-no-files-found: warn
