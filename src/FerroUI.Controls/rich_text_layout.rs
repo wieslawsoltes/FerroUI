@@ -31,8 +31,53 @@ pub(crate) struct RichParagraphSource {
     pub length: usize,
     pub properties: Rc<dyn TextRunProperties>,
     pub default_tab_stop: f64,
-    pub cache: TextRunCache,
+    /// The shaping cache of the paragraph, shared with the next source while the paragraph
+    /// does not change (F1, #243 review S7).
+    pub cache: Rc<TextRunCache>,
+    /// The formatting overrides of the paragraph (selection, highlighters), relative to it.
+    modifiers: Option<Rc<[ValueSpan<Rc<dyn TextRunProperties>>]>>,
     has_embedded_controls: bool,
+}
+
+impl RichParagraphSource {
+    /// Whether this paragraph of an earlier source formats as the runs, properties and overrides
+    /// of a new one: then its runs and shaping cache serve the new source.
+    fn formats_as(
+        &self,
+        runs: &[Rc<dyn TextRun>],
+        properties: &Rc<dyn TextRunProperties>,
+        default_tab_stop: f64,
+        modifiers: &Option<Rc<[ValueSpan<Rc<dyn TextRunProperties>>]>>,
+    ) -> bool {
+        fn same_properties(a: &Rc<dyn TextRunProperties>, b: &Rc<dyn TextRunProperties>) -> bool {
+            **a == **b && a.baseline_alignment() == b.baseline_alignment()
+        }
+        let old_runs = self.source.text_runs();
+        !self.has_embedded_controls
+            && self.default_tab_stop.to_bits() == default_tab_stop.to_bits()
+            && same_properties(&self.properties, properties)
+            && old_runs.len() == runs.len()
+            && old_runs.iter().zip(runs).all(|(old, new)| {
+                old.as_any().type_id() == new.as_any().type_id()
+                    && old.length() == new.length()
+                    && old.text_span() == new.text_span()
+                    && match (old.properties(), new.properties()) {
+                        (None, None) => true,
+                        (Some(a), Some(b)) => same_properties(a, b),
+                        _ => false,
+                    }
+            })
+            && match (&self.modifiers, modifiers) {
+                (None, None) => true,
+                (Some(a), Some(b)) => {
+                    a.len() == b.len()
+                        && a.iter().zip(b.iter()).all(|(a, b)| {
+                            a.start() == b.start() && a.length() == b.length() && same_properties(a.value(), b.value())
+                        })
+                }
+                _ => false,
+            }
+    }
 }
 
 /// A revision of the document's formatter input, shared by all overflow views.
@@ -47,7 +92,20 @@ pub(crate) struct RichTextSource {
 }
 
 impl RichTextSource {
-    pub fn new(document: &RichTextDocument, view: &crate::RichTextBlock) -> Rc<Self> {
+    /// The source of the document for the view. The paragraphs of `previous` (the source the
+    /// view had before its document or its selection changed) that format as before keep their
+    /// runs and shaping caches, so an edit reshapes the paragraphs it changed, not the document
+    /// (F1, #243 review S7).
+    pub fn new(document: &RichTextDocument, view: &crate::RichTextBlock, previous: Option<&RichTextSource>) -> Rc<Self> {
+        let previous_paragraphs: FxHashMap<usize, &RichParagraphSource> = previous
+            .map(|previous| {
+                previous
+                    .paragraphs
+                    .iter()
+                    .map(|paragraph| (&*paragraph.block as *const Block as *const () as usize, paragraph))
+                    .collect()
+            })
+            .unwrap_or_default();
         let mut blocks = document.blocks().snapshot().to_vec();
         // The empty editor still has a line with a measurable caret.
         let empty = blocks.is_empty();
@@ -119,16 +177,35 @@ impl RichTextSource {
                 );
             let modifiers = formatting_overrides(&runs, offset, &highlights, view);
             let has_embedded_controls = runs.iter().any(|run| run.is::<EmbeddedControlRun>());
-            paragraphs.push(RichParagraphSource {
-                block,
-                source: InlinesTextSource::new(Rc::new(runs), modifiers),
-                offset,
-                length,
-                properties,
-                default_tab_stop,
-                cache: TextRunCache::new(),
-                has_embedded_controls,
-            });
+            let unchanged = (!empty && !has_embedded_controls)
+                .then(|| previous_paragraphs.get(&(&*block as *const Block as *const () as usize)))
+                .flatten()
+                .filter(|old| old.formats_as(&runs, &properties, default_tab_stop, &modifiers));
+            if let Some(old) = unchanged {
+                paragraphs.push(RichParagraphSource {
+                    block,
+                    source: old.source.clone(),
+                    offset,
+                    length,
+                    properties: old.properties.clone(),
+                    default_tab_stop,
+                    cache: old.cache.clone(),
+                    modifiers: old.modifiers.clone(),
+                    has_embedded_controls,
+                });
+            } else {
+                paragraphs.push(RichParagraphSource {
+                    block,
+                    source: InlinesTextSource::new(Rc::new(runs), modifiers.clone()),
+                    offset,
+                    length,
+                    properties,
+                    default_tab_stop,
+                    cache: Rc::new(TextRunCache::new()),
+                    modifiers,
+                    has_embedded_controls,
+                });
+            }
             offset += length + 1;
         }
         let has_embedded_controls = paragraphs
@@ -229,7 +306,10 @@ fn formatting_overrides(
 impl Drop for RichTextSource {
     fn drop(&mut self) {
         for paragraph in &self.paragraphs {
-            paragraph.cache.dispose();
+            // A cache the next source took over stays alive with it.
+            if Rc::strong_count(&paragraph.cache) == 1 {
+                paragraph.cache.dispose();
+            }
         }
     }
 }

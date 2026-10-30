@@ -663,6 +663,9 @@ fn cluster_units_traverse_linked_pages_and_refresh_after_format_changes() {
     let document = displayed_services(&view);
     assert_eq!(cluster_strings(&document), ["f", "i", "\n", "f", "i"]);
     text.shaper().add_ligature("fi");
+    // A change of the text services reshapes every paragraph (an edit reshapes only the
+    // paragraphs it changes, F1).
+    view.invalidate_document_layout();
     paragraph.set_font_size(18.0);
     measure(&view, 300.0, 100.0);
     measure(&overflow, 300.0, 100.0);
