@@ -113,8 +113,23 @@ The changes #243 made on default paths and what the landing pull requests do wit
 ## 8. Evidence and the Msftedit oracle
 
 - #243 committed 1.57 million lines of evidence JSON (per-run observations of the system Msftedit, inventories and maps). None of it lands (D11).
-- What lands: the observation extractor (`scripts/winui-rich-text/`), the case tables it writes (`src/FerroUI.Controls/rich_text/*_native_cases.rs`, included from test modules only, each with the hash of its source), and the oracle that characterises the system Msftedit, moved from `ferroui-win32`'s tests into a tool and run by an on-demand job (R9, R13).
-- Native observations are test oracles for the editor; a case table is regenerated with the extractor, never edited by hand.
+- What lands (R13):
+  - **The oracle**, `src/tools/RichTextOracle` (crate `ferroui-rich-text-oracle`, `publish = false`): #243's `rich_text_tom_oracle_tests.rs`, moved out of `ferroui-win32`'s tests into a Windows program (S15). It creates hidden `RICHEDIT50W` windows of the system `Msftedit.dll`, drives them through the text object model (TOM) and prints one `SYSTEM_MSFTEDIT_*` line per observation: Home/End and directional movement, selection options and `TypeText`, links, range gravity and formatting affinity, the gravity of the live selection, passive ranges across `SetText`. It asserts nothing about FerroUI. On other systems it builds as a program that only says it runs on Windows.
+  - **The observation extractor**, `scripts/winui-rich-text/rich-text-tom-observations.py` (W11). `extract` turns the output of a run into a record (JSON, with the commit, the blob of `probes.rs` and the run), rejecting unknown rows, incomplete probes and contradictory setup. `check-cases` compares the case tables with a record (or directly with an output) and names every entry that differs; `native_cases.py` holds, per table, which observations it replays, and `rust_literals.py` reads the tables without a Rust toolchain.
+  - **The case tables**, `src/FerroUI.Controls/rich_text/*_native_cases.rs` (six files, included from test modules only), the literal observations the editor's tests replay. `write-cases` writes them from a record (`case_writer.py`): it rewrites only the literals that differ from the record, writes added entries in the layout of their neighbours, and gives each table a header that names the record, its SHA-256, the run of the on-demand job it came from and the engine version; a table is never edited by hand. The records are not in the repository: the record a header names is in the artifact of that run.
+  - **The workflow** `.github/workflows/rich-text.yml` (S14): on a pull request that changes the oracle, the extractor or a case table, the tests of the extractor and of the reader of the tables, and a `cargo check` of the oracle on Windows when the oracle changed; by hand, the oracle job. The tests of the controls run in `ci.yml` only.
+- **Running the oracle on demand:** `gh workflow run rich-text.yml --ref <branch>` (the input `runner` chooses `windows-latest`, the default, or `windows-11-arm`). The job builds and runs the oracle, extracts the record, checks the case tables against it and keeps `msftedit.log`, `msftedit-record.json`, `check-cases.txt` and the environment as the artifact `msftedit-oracle-<runner>` (30 days). It fails when a table differs from the Msftedit of the runner.
+- **Running it on a Windows machine:**
+
+  ```text
+  cargo run --locked -p ferroui-rich-text-oracle > msftedit.log
+  python scripts/winui-rich-text/rich-text-tom-observations.py extract --log msftedit.log \
+      --commit <commit> --probe-blob <git rev-parse <commit>:src/tools/RichTextOracle/probes.rs> --output msftedit-record.json
+  python scripts/winui-rich-text/rich-text-tom-observations.py check-cases --record msftedit-record.json
+  ```
+
+  Arguments of the oracle name the probes to run (`--help` lists them); `check-cases` needs a run of all of them. `RICH_TEXT_ORACLE_RECORDS=<directory>` makes the extractor's tests also read the records of that directory.
+- **When a table differs:** native observations are test oracles for the editor, so a difference is a change of the system engine (a new Msftedit) or of the oracle. Download the record of the run (`gh run download <run> -n msftedit-oracle-<runner>`), run `rich-text-tom-observations.py write-cases --record msftedit-record.json`, check that `check-cases` passes, and fix the editor if its tests fail. The artifact of the run is kept 30 days; the header still names the run and the hash of its record after that, and a new run of the job reproduces it.
 
 ## 9. Landing plan
 
@@ -131,11 +146,11 @@ Each pull request carries its tests, its `DEVIATIONS.md` rows and a line in `CHA
 | R6 | RichTextBlock, RichTextBlockOverflow, the rich layout, the context menu through the R4 hook, the automation providers and peers; catalog page | R4, R5 | S10 | no |
 | R7 | Editor services: `RichTextEditor`, TOM, units, find, case, stream, clipboard, RTF (`rtf-codepages`) | R5 | M6, S1, S2, S3, S6, S8 (at least shared snapshots), N3 | no |
 | R8 | RichEditBox, its presenter, IME client and format commands; the converted WinUI template; `WINUI_ONLY_CONTROLS`; the theme tracking; catalog page | R3, R6, R7 | S4, S5, N1, N2, N4, S13 (D3) | yes: RichEditBox in the WinUI theme |
-| R9 | Windows: IMM32 for connection clients, the UIA text pattern, the WinUI CoreText host; the oracle as a tool | R8 | P1-P22 as opt-in | yes: Japanese, Chinese and Korean IMEs in TextBox and RichEditBox; Narrator and Inspect |
+| R9 | Windows, in three pull requests: the UIA text pattern (R9a), IMM32 for connection clients (R9b), the WinUI CoreText host (R9c) | R8 | P1-P22 as opt-in | yes: Japanese, Chinese and Korean IMEs in TextBox and RichEditBox; Narrator and Inspect |
 | R10 | Browser: the connection protocol with the old public functions kept; `browser-platform.md` section 14 | R8 | P28-P32 as opt-in | no |
 | R11 | FreeDesktop, Wayland, X11: the connection for IBus and Fcitx, the IBus content-type property non-fatal | R8 | P23-P27 | Ubuntu VM (IBus, Fcitx) |
 | R12 | macOS, iOS, Android: content hints, input options; `patches/0003` regenerated | R8 | P33-P37 | iOS simulator and Android emulator (never with a VM) |
-| R13 | CI: the regeneration check repository-wide and the on-demand oracle job, actions pinned by SHA | R9 | | no |
+| R13 | The Msftedit oracle as a tool (`src/tools/RichTextOracle`, S15), the extractor with its check and writer of the case tables, the rich-text workflow (the extractor's tests and the on-demand oracle job, actions pinned by SHA) | R8 | | no |
 | F1 | Performance: a layout cache per paragraph (runs, shaping cache and lines of the paragraphs an edit or a selection change did not change), the benchmark `text::RichTextEditing`. Still open: the selection drawn as an overlay, an incremental IME preview and the identity lookup of the content pool (S9), the fast path near fields, delta undo units | R8 | S7 (S8, S9 open) | no |
 
 R1, R3 and R4 are independent; R6 to R8 are sequential; R9 to R12 may land in any order after R8.
@@ -214,9 +229,15 @@ What remains outside the port (RT-P of #243): the exact LineServices metrics, th
 | A click or focus loss terminates the composition and keeps its text (`TextBoxBase.cpp`). | The same: the preview is committed, then the IME is reset (#243 discarded it). | #243 review S5. |
 | `TextCompositionStarted` precedes the first `TextChanging` of a composition. | The same, at the caret with no composed text yet. | #243 review N1. |
 | The caret rectangle is current in `TextChanging`. | While an edit is published, the caret rectangle (and so the IME candidate window) follows the editor, not the view's earlier selection. | #243 review N4. |
-| Shift+Enter inserts a soft line break. | It inserts a paragraph, as #243 did, until the Windows check confirms RichEdit's behaviour. | #243 review N2 (open). |
 | The context menu is `TextCommandBarFlyout`. | A `MenuFlyout` with the same commands (`docs/porting/winui-theme/DEVIATIONS.md`, G-30). | FerroUI has no command bar flyout. |
 | The template is in every theme. | The WinUI theme has it (`WINUI_ONLY_CONTROLS`), and so do the macOS and Material themes, which derive every control theme of the WinUI theme; Fluent and Simple show nothing. | Decision D4. |
+
+### 11.4 The input method on Windows (R9b)
+
+| WinUI | FerroUI | Why |
+|---|---|---|
+| RichEdit talks to the text services framework (TSF) of the system: the composition, reconversion and the input scopes of the document. | The Win32 backend serves RichEditBox through IMM32 (with TSF behind it as the system provides): the composition is a preview of the exact-edit connection and the result one undo unit; no reconversion. Input scopes are set on the window (`SetInputScopes`); a touch keyboard that is already shown is not told of a change. | The backend's input method is IMM32 (`win32-platform.md`, section 8.2); TSF for the backend is not in the reference. |
+| Terminating a composition keeps its text in the document and ends the composition of the text service. | The editor commits the preview, and the composition of the input method is cancelled (`CPS_CANCEL`), so the input method does not send the text a second time. | S5 (R8) with the backend's reset. |
 
 Not taken from #243 in R8: its manager tests for a client without exact editing whose cursor query moves focus or replaces the client (`rich_edit_input_geometry_tests.rs`). Such a client keeps the upstream manager (D5), which has no such guarantees. While a connection client's flyout has focus, the manager keeps the input method of the owner's root, also when the flyout is in a popup root of its own.
 
