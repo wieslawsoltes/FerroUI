@@ -127,15 +127,31 @@ impl Session {
                     VERSION
                 };
                 *self.version.lock().unwrap() = Some(version.to_owned());
+                if client.service.is_some() {
+                    return Some(
+                        json!({"jsonrpc":"2.0","id":id,"result":{"protocolVersion":version,"capabilities":{"tools":{}},"serverInfo":{"name":"ferroui-mcp-service","version":env!("CARGO_PKG_VERSION")},"instructions":"Application service. Only its advertised tools are available; each service validates its own identities and access policies."}}),
+                    );
+                }
                 json!({"protocolVersion":version,"capabilities":{"tools":{},"resources":{"subscribe":false,"listChanged":false},"logging":{}},"serverInfo":{"name":"ferroui-mcp","version":env!("CARGO_PKG_VERSION")},"instructions":"Inspect a running FerroUI application. Property writes and input require explicit application permissions. IDs expire when their objects are destroyed."})
             }
             "ping" => json!({}),
-            "tools/list" => json!({"tools":ferroui_inspect::tools()}),
+            "tools/list" => json!({"tools":client.tools()}),
             "resources/list" => {
-                json!({"resources":[{"uri":TREE_URI,"name":"Current visual tree","mimeType":"application/json"},{"uri":LOG_URI,"name":"Diagnostic log","mimeType":"application/json"}]})
+                if client.service.is_some() {
+                    json!({"resources":[]})
+                } else {
+                    json!({"resources":[{"uri":TREE_URI,"name":"Current visual tree","mimeType":"application/json"},{"uri":LOG_URI,"name":"Diagnostic log","mimeType":"application/json"}]})
+                }
             }
             "resources/templates/list" => json!({"resourceTemplates":[]}),
             "logging/setLevel" => {
+                if client.service.is_some() {
+                    return Some(error(
+                        id,
+                        -32601,
+                        "Logging is not exposed by this application service",
+                    ));
+                }
                 let Some(level) = params["level"].as_str().filter(|s| {
                     [
                         "debug",
@@ -160,6 +176,9 @@ impl Session {
             }
             "tools/call" | "resources/read" => {
                 let (tool, args, uri) = if method == "resources/read" {
+                    if client.service.is_some() {
+                        return Some(error(id, -32002, "Unknown resource"));
+                    }
                     let uri = params["uri"].as_str().unwrap_or("");
                     let tool = match uri {
                         TREE_URI => "get_tree",
@@ -171,7 +190,8 @@ impl Session {
                     let Some(tool) = params["name"].as_str() else {
                         return Some(error(id, -32602, "Tool name required"));
                     };
-                    if !ferroui_inspect::tools()
+                    if !client
+                        .tools()
                         .iter()
                         .any(|t| t["name"].as_str() == Some(tool))
                     {
@@ -182,7 +202,7 @@ impl Session {
                         .cloned()
                         .unwrap_or_else(|| json!({}));
                     // Invalid arguments are a result of the tool, which the model can correct.
-                    if let Err(e) = ferroui_inspect::validate(tool, &args) {
+                    if let Err(e) = client.validate(tool, &args) {
                         return Some(
                             json!({"jsonrpc":"2.0","id":id,"result":{"content":[{"type":"text","text":e}],"isError":true}}),
                         );
@@ -209,8 +229,13 @@ impl Session {
                     Ok(value) => {
                         if let Some(uri) = uri {
                             json!({"contents":[{"uri":uri,"mimeType":"application/json","text":value.to_string()}]})
-                        } else if tool == "screenshot" {
+                        } else if tool == "screenshot" && client.service.is_none() {
                             json!({"content":[{"type":"image","mimeType":"image/png","data":value["data"]}],"isError":false})
+                        } else if client.service.is_none()
+                            && value["mimeType"] == "image/png"
+                            && value["data"].is_string()
+                        {
+                            native_image_result(value)
                         } else {
                             json!({"content":[{"type":"text","text":value.to_string()}],"isError":false})
                         }
@@ -260,6 +285,39 @@ impl Session {
             .collect()
     }
 }
+
+/// Native extension screenshots share the inspector's byte envelope while
+/// retaining source and layout metadata beside the MCP image content block.
+fn native_image_result(mut value: Value) -> Value {
+    let data = value.as_object_mut().unwrap().remove("data").unwrap();
+    json!({
+        "content":[
+            {"type":"image","mimeType":"image/png","data":data},
+            {"type":"text","text":value.to_string()}
+        ],
+        "structuredContent":value,
+        "isError":false
+    })
+}
+
 pub fn error(id: Value, code: i32, message: &str) -> Value {
     json!({"jsonrpc":"2.0","id":id,"error":{"code":code,"message":message}})
+}
+
+#[cfg(test)]
+mod image_result_tests {
+    use super::*;
+    #[test]
+    fn native_extension_image_preserves_metadata_without_repeating_base64() {
+        let result = native_image_result(
+            json!({"mimeType":"image/png","data":"cG5n","stage":3,"width":390,"height":844,"source_uri":"memory://image/View.xaml"}),
+        );
+        assert_eq!(result["content"][0]["type"], "image");
+        assert_eq!(result["content"][0]["data"], "cG5n");
+        assert_eq!(result["structuredContent"]["stage"], 3);
+        assert!(result["structuredContent"].get("data").is_none());
+        let text: Value =
+            serde_json::from_str(result["content"][1]["text"].as_str().unwrap()).unwrap();
+        assert_eq!(text, result["structuredContent"]);
+    }
 }
