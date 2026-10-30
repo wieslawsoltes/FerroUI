@@ -72,6 +72,8 @@ ferroui-controls-color-picker = { workspace = true }
 # network requests, and the article list of the demo shows that it cannot load.
 ferroui-controls-treedatagrid = { workspace = true }
 treedatagrid-demo = { path = "../TreeDataGridDemo", default-features = false }
+# The ItemsRepeater (the page ItemsRepeater, not in the original).
+ferroui-controls-repeater = { workspace = true }
 # The inking controls and their WinUI styles (the page Inking, not in the original).
 ferroui-controls-inking = { workspace = true }
 # The about dialog.

@@ -10,6 +10,7 @@ Other pages hold the entries of their own area, and this page does not repeat th
 - `winui-controls.md`: the native ports of WinUI 3 controls in `ferroui-controls` (differences from WinUI, per control). The WinUI members added to upstream-ported controls are listed in the section "WinUI additions to upstream controls" below.
 - `winui-calculator-gaps.md`: the plan of the visual state manager, ListView, GridView, SwipeControl, Pivot and system high contrast; the differences from WinUI are recorded here and in `winui-controls.md` as each lands.
 - `winui-charts.md` section 4: the port of the WinUI Charts public contract (`src/FerroUI.Controls.Charts`; differences from the published API and tests). The decisions the port makes where the implementation is not published are in its section 3.1.
+- `winui-repeater/DEVIATIONS.md`: the port of the Repeater of WinUI (`src/FerroUI.Controls.Repeater/`), rows WR-01 onward, with the code sites marked `// Deviation (winui-repeater/DEVIATIONS.md, WR-nn)`.
 - `PORTING-GUIDE.md`: the systematic mappings that apply everywhere (class model, nullability, events, generics, naming). An application of those rules is not a deviation and is not listed here.
 
 ## How to record a deviation

@@ -38,6 +38,7 @@ xaml = ["dep:ferroui-markup-xaml", "dep:ferroui-markup-xaml-loader"]
 treedatagrid = ["dep:ferroui-controls-treedatagrid"]
 color-picker = ["dep:ferroui-controls-color-picker"]
 dialogs = ["dep:ferroui-dialogs"]
+repeater = ["dep:ferroui-controls-repeater"]
 inking = ["dep:ferroui-controls-inking"]
 reactiveui = ["dep:ferroui-reactiveui-controls", "dep:ferroui-reactiveui"]
 # Hot reload of the literals of `rsx!` (`hot.rs`): the sources are read again with `proc-macro2`.
@@ -58,6 +59,7 @@ ferroui-markup-xaml-loader = { workspace = true, optional = true, features = ["r
 ferroui-controls-treedatagrid = { workspace = true, optional = true }
 ferroui-controls-color-picker = { workspace = true, optional = true }
 ferroui-dialogs = { workspace = true, optional = true }
+ferroui-controls-repeater = { workspace = true, optional = true }
 ferroui-controls-inking = { workspace = true, optional = true }
 ferroui-reactiveui-controls = { workspace = true, optional = true }
 ferroui-reactiveui = { workspace = true, optional = true }

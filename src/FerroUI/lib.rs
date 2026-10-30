@@ -32,6 +32,7 @@
 //! | `controls_color_picker` | `ferroui-controls-color-picker` | `color-picker` | no |
 //! | `controls_charts` | `ferroui-controls-charts` | `charts` | no |
 //! | `controls_inking` | `ferroui-controls-inking` | `inking` | no |
+//! | `controls_repeater` | `ferroui-controls-repeater` | `repeater` | no |
 //! | `controls_treedatagrid`, `treedatagrid_core` | `ferroui-controls-treedatagrid`, `ferroui-treedatagrid-core` | `treedatagrid` | no |
 //! | `dialogs` | `ferroui-dialogs` | `dialogs` | no |
 //! | `diagnostics` | `ferroui-diagnostics` (the developer tools) | `diagnostics` | no |
@@ -166,6 +167,8 @@ pub use ferroui_controls_color_picker as controls_color_picker;
 pub use ferroui_controls_charts as controls_charts;
 #[cfg(feature = "inking")]
 pub use ferroui_controls_inking as controls_inking;
+#[cfg(feature = "repeater")]
+pub use ferroui_controls_repeater as controls_repeater;
 #[cfg(feature = "treedatagrid")]
 pub use ferroui_controls_treedatagrid as controls_treedatagrid;
 #[cfg(feature = "treedatagrid")]

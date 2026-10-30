@@ -80,6 +80,8 @@ pub mod generated {
     pub mod inking;
     #[cfg(feature = "reactiveui")]
     pub mod reactiveui;
+    #[cfg(feature = "repeater")]
+    pub mod repeater;
     #[cfg(feature = "treedatagrid")]
     pub mod treedatagrid;
 }
@@ -130,6 +132,8 @@ pub mod prelude {
     pub use crate::generated::inking::*;
     #[cfg(feature = "reactiveui")]
     pub use crate::generated::reactiveui::*;
+    #[cfg(feature = "repeater")]
+    pub use crate::generated::repeater::*;
     #[cfg(feature = "treedatagrid")]
     pub use crate::generated::treedatagrid::*;
     pub use crate::{

@@ -76,6 +76,7 @@ The first preview added the five other names of section 2.2 as placeholders (37 
 
 `ferroui-controls-charts` (`src/FerroUI.Controls.Charts`, Controls and themes; the port of the public contract of WinUI Charts, docs/porting/winui-charts.md) joined with #282. It is an optional part of the facade (`charts`), and its sample `samples/ChartsDemo` is not published.
 `ferroui-controls-inking` (`src/FerroUI.Controls.Inking`, Controls and themes; the port of the inking controls of WinUI with the WinUI styles of the toolbar, docs/porting/winui-inking.md) joined with #283. It compiles its theme documents in its build script (`links = "ferroui_controls_inking_xaml"`) and depends on the WinUI theme, so it is published after it; it is an optional part of the facade (`inking`).
+`ferroui-controls-repeater` (`src/FerroUI.Controls.Repeater`, Controls and themes; the port of the Repeater of WinUI, docs/porting/winui-repeater/README.md) joined with #269. It is an optional part of the facade (`repeater`).
 
 Every crate was checked in the same way: packaged, and built from its package, by `scripts/release/publish.sh --dry-run` (section 8). `cargo publish --dry-run -p <crate>` cannot be used for this before the first release: it resolves the dependencies of the package in the registry, where the other crates of the workspace are not yet. `cargo package --workspace` (Cargo 1.90 and later) resolves them among the packages it has just assembled instead, which is what the dry run uses, and so every crate got the full check, not only the ones without dependencies in the workspace.
 
@@ -150,6 +151,7 @@ Two names are not under the `ferroui-` prefix. The owner decided on 2026-10-10 t
   | `color-picker`, `dialogs` | `ferroui-controls-color-picker`, `ferroui-dialogs` | `controls_color_picker`, `dialogs` | no |
   | `charts` | `ferroui-controls-charts` (WinUI public-contract port) | `controls_charts` | no |
   | `inking` | `ferroui-controls-inking` (the port of WinUI's inking controls) | `controls_inking` | no |
+  | `repeater` | `ferroui-controls-repeater` (the port of WinUI's Repeater) | `controls_repeater` | no |
   | `devtools` | `ferroui-devtools`, `ferroui-inspect` (opt-in CDP inspection and automation) | `devtools` | no |
   | `diagnostics` | `ferroui-diagnostics` (added for 0.4) | `diagnostics` | no |
   | `treedatagrid` | `ferroui-controls-treedatagrid` and `ferroui-treedatagrid-core` (added for 0.2) | `controls_treedatagrid`, `treedatagrid_core` | no |

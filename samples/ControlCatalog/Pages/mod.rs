@@ -50,6 +50,7 @@ mod auto_suggest_box_page;
 mod number_box_page;
 mod radio_buttons_page;
 mod rating_control_page;
+mod items_repeater_page;
 mod labels_page;
 mod layout_transform_control_page;
 mod list_box_page;
@@ -195,6 +196,7 @@ pub use auto_suggest_box_page::AutoSuggestBoxPage;
 pub use number_box_page::NumberBoxPage;
 pub use radio_buttons_page::RadioButtonsPage;
 pub use rating_control_page::RatingControlPage;
+pub use items_repeater_page::ItemsRepeaterPage;
 pub use labels_page::LabelsPage;
 pub use layout_transform_control_page::LayoutTransformControlPage;
 pub use list_box_page::ListBoxPage;
@@ -299,6 +301,7 @@ const ROOT_TYPES: &[&TypeInfo] = &[
     NumberBoxPage::TYPE,
     RadioButtonsPage::TYPE,
     RatingControlPage::TYPE,
+    ItemsRepeaterPage::TYPE,
     ScrollViewerPage::TYPE,
     PointersPage::TYPE,
     CompositionPage::TYPE,
@@ -395,6 +398,7 @@ const ROOT_CLASSES: &[&XamlClass] = &[
     &NumberBoxPage::XAML_CLASS,
     &RadioButtonsPage::XAML_CLASS,
     &RatingControlPage::XAML_CLASS,
+    &ItemsRepeaterPage::XAML_CLASS,
     &ScrollViewerPage::XAML_CLASS,
     &PointersPage::XAML_CLASS,
     &CompositionPage::XAML_CLASS,

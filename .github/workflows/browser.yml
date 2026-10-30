@@ -13,6 +13,8 @@ on:
       - 'src/Vello/**'
       - 'src/FerroUI.DevTools/**'
       - 'samples/ControlCatalog.Browser/**'
+      # The ItemsRepeater page of the browser catalog (scripts/browser/tests/repeater.test.mjs).
+      - 'src/FerroUI.Controls.Repeater/**'
       - 'scripts/browser/**'
       - 'scripts/build-browser.sh'
       - '.github/actions/browser-toolchain/**'
@@ -87,6 +89,8 @@ jobs:
         run: scripts/build-browser.sh control-catalog-browser --webapp-prebuilt
       - name: ControlCatalog tests in headless Chrome (rendering, resize, console, drawer, navigation, click, typing)
         run: node scripts/browser/tests/control_catalog.test.mjs --screenshot target/browser/screenshots/control-catalog.png
+      - name: ItemsRepeater rendering, recycling and collection mutations in headless Chrome
+        run: node scripts/browser/tests/repeater.test.mjs target/browser/control-catalog-browser --screenshot-dir target/browser/screenshots/repeater
       - name: Sizes of the published modules
         run: node scripts/browser/module-sizes.mjs target/browser/control-catalog-browser >> "$GITHUB_STEP_SUMMARY"
       - name: Keep exact compression measurements for the combined-site report
