@@ -275,6 +275,13 @@ BASE = {
 }
 
 CONTROLS = {
+    # WinUI's TextElement.FindName (docs/porting/winui-rich-text.md, decision D7).
+    'TextElement': {
+        'methods': [
+            """fn FindName(String) -> Option<Ref<FerroObject>> =>
+                |element: &Ref<TextElement>, name: String| element.find_name(&name)""",
+        ],
+    },
     # The accessors of the design-time properties that are not plain attached-property
     # accessors, in the declaration order of the managed original (overloads are tried
     # in that order).

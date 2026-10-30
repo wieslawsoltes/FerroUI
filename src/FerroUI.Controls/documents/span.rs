@@ -87,10 +87,9 @@ impl FerroObjectImpl for Span {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
-        // The reference compares with the name of the property field
-        // ("InlinesProperty"), which no property has: replacing the
-        // collection is not observed.
-        if change.property().name() == "InlinesProperty" {
+        // Replacing a collection must transfer both ownership and its
+        // invalidation subscription, just like changing its contents.
+        if change.property() == Self::inlines_property().as_property() {
             let (old_value, new_value) = change.get_old_and_new_value::<Option<InlineCollection>>();
             this.on_inlines_changed(old_value, new_value);
             if let Some(host) = this.inline_host() {

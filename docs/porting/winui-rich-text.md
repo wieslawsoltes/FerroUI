@@ -179,6 +179,17 @@ What remains outside the port (RT-P of #243): the exact LineServices metrics, th
 
 ## 11. Deviations
 
-- Differences from WinUI of the controls and the TOM are listed in this page as each area lands (none yet).
+- Differences from WinUI of the controls and the TOM are listed below as each area lands.
 - Changes to upstream-ported code are in `DEVIATIONS.md`: "WinUI additions to upstream controls", the text and input sections, and the platform sections (Windows, browser, X11 and Wayland, Android, iOS, the native backend).
 - Differences of the converted RichEditBox template are in `docs/porting/winui-theme/DEVIATIONS.md`.
+
+### 11.1 RichTextBlock and RichTextBlockOverflow (R6)
+
+| WinUI | FerroUI | Why |
+|---|---|---|
+| `RichTextBlock` has `Blocks` only; its document is internal. | The shared document is also the property `RichDocument` (`rich_document_property`); `Blocks` is the content property. | Decision D3: one model under the view and the editor; a FerroUI name, so it never reads as `RichEditBox.Document`. |
+| Paragraphs are formatted by LineServices and drawn with DirectWrite. | Paragraphs are formatted by the FerroUI text formatter (with the opt-in line-metrics mode of R1) and drawn through `DrawingContext`. | RT-A02: pixels differ by backend; line breaking and metrics follow the shared formatter. |
+| `RichTextBlockAutomationPeer` exposes the Text pattern. | Until R8, the peer is a Text element named by the document text, without the Text pattern. | The text pattern is built on the text object model (R7, R8). |
+| `RichTextBlockOverflow` falls back to the master's context flyout (`GetContextFlyout`). | The same, through the `Control::effective_context_flyout` virtual (R4) instead of a type test in the flyout code. | Layering (S10). |
+| The selection context menu of WinUI (`TextCommandBarFlyout` with Copy) opens by default. | Only a configured `ContextMenu` or `ContextFlyout` opens; `ContextMenuOpening` is raised before it. | The automatic selection menu of the legacy selection manager is not projected (RT-I22, RT-I37). |
+
