@@ -11,6 +11,8 @@ conformance.
     check-cases  the case tables of the editor's tests (`src/FerroUI.Controls/rich_text/
                  *_native_cases.rs`) against a record or the output of a run; exits with 1 when an
                  entry of a table differs from the observation (native_cases.py).
+    write-cases  the case tables from a record: only the entries that differ are rewritten, and
+                 each table's header names the record, its hash and its run (case_writer.py).
 
 The records are not committed (docs/porting/winui-rich-text.md, section 8): the on-demand job of
 `.github/workflows/rich-text.yml` runs the oracle, extracts its record, checks the case tables
@@ -1158,6 +1160,17 @@ def run_check_cases(args: argparse.Namespace) -> int:
     return 1 if failed else 0
 
 
+def run_write_cases(args: argparse.Namespace) -> int:
+    import case_writer
+
+    changed = case_writer.write(args.record, args.root)
+    for table in changed:
+        print(f"{table}: written")
+    if not changed:
+        print("every table is already the record's")
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     commands = parser.add_subparsers(dest="command", required=True)
@@ -1178,6 +1191,11 @@ def main() -> int:
     check_command.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[2], help="the repository")
     check_command.add_argument("--limit", type=int, default=20, help="differences shown per table")
     check_command.set_defaults(run=run_check_cases)
+
+    write_command = commands.add_parser("write-cases", help="the case tables from a record")
+    write_command.add_argument("--record", required=True, type=Path, help="a record written by extract")
+    write_command.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[2], help="the repository")
+    write_command.set_defaults(run=run_write_cases)
 
     args = parser.parse_args()
     return args.run(args)

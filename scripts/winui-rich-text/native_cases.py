@@ -348,6 +348,8 @@ class Table:
     project: Callable[[dict], dict]
     # Constants of the table that state where it came from, not what was observed.
     provenance: tuple[str, ...] = ()
+    # What the tests replay of the observations: the lines `case_writer` keeps under the header.
+    notes: tuple[str, ...] = ()
 
 
 TABLES = (
@@ -355,12 +357,52 @@ TABLES = (
         "rich_text_link_native_cases.rs",
         project_links,
         ("SOURCE_SHA256", "MEASURED_COMMIT", "PROBE_GIT_BLOB", "ENGINE_VERSION"),
+        (
+            "Tests intentionally supply each observed BEFORE range: this is a transition oracle,",
+            "not validation of independent live-range rebasing through setup.",
+        ),
     ),
-    Table("rich_edit_text_range_tracking_native_cases.rs", project_range_tracking),
-    Table("rich_edit_text_range_gravity_native_cases.rs", project_range_gravity),
-    Table("rich_edit_text_selection_options_native_cases.rs", project_selection_options),
-    Table("rich_edit_text_selection_gravity_native_cases.rs", project_selection_gravity),
-    Table("rich_edit_text_paragraph_typing_native_cases.rs", project_paragraph_typing),
+    Table(
+        "rich_edit_text_range_tracking_native_cases.rs",
+        project_range_tracking,
+        notes=(
+            "Passive-range SetText observations; no expected endpoint is computed. Only the",
+            "endpoint, mode, acted-range, text and HRESULT fields are replayed; formatting caches",
+            "and native synthetic terminal-EOP positions are not claimed.",
+        ),
+    ),
+    Table(
+        "rich_edit_text_range_gravity_native_cases.rs",
+        project_range_gravity,
+        notes=(
+            "Character, paragraph and mode fields are replayed separately from the still",
+            "different physical tracking/terminal-EOP coordinate policies.",
+        ),
+    ),
+    Table(
+        "rich_edit_text_selection_options_native_cases.rs",
+        project_selection_options,
+        notes=(
+            "Story strings retain the native synthetic final CR. The replay alone adapts CR",
+            "paragraphs to FerroUI LF paragraphs and excludes that synthetic EOP.",
+        ),
+    ),
+    Table(
+        "rich_edit_text_selection_gravity_native_cases.rs",
+        project_selection_gravity,
+        notes=(
+            "Live-selection observations. CR text, HRESULTs, direction, mode and format numbers",
+            "remain native values; the Rust tests state which fields are replayed.",
+        ),
+    ),
+    Table(
+        "rich_edit_text_paragraph_typing_native_cases.rs",
+        project_paragraph_typing,
+        notes=(
+            "Paragraph TypeText observations. Tests project the final synthetic EOP for paragraph",
+            "queries only; raw native character caches and paragraph marks remain in the record.",
+        ),
+    ),
 )
 
 
