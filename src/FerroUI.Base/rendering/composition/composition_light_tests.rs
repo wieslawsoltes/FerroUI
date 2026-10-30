@@ -233,8 +233,8 @@ fn a_point_light_is_strongest_under_it_and_falls_off_to_the_edge() {
     );
     let rect = Rect::new(0.0, 0.0, 100.0, 100.0);
     // A sample every second device pixel: 50 x 50 at a scale of 1, 100 x 100 at 2.
-    assert_eq!(PixelSize::new(100, 100), LightMap::size_for(rect, 2.0));
-    let size = LightMap::size_for(rect, 1.0);
+    assert_eq!(PixelSize::new(100, 100), LightMap::size_for_scale(rect, 2.0));
+    let size = LightMap::size_for_scale(rect, 1.0);
     assert_eq!(PixelSize::new(50, 50), size);
     let pixels = map.pixels(rect, size).expect("the corners are darker");
     let alpha = |column: i32, row: i32| pixels[((row * size.width + column) * 4 + 3) as usize];

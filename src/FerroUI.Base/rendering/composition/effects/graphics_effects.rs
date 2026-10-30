@@ -342,9 +342,8 @@ impl Default for SaturationEffect {
 /// contexts are drawn: `Multiply`, `Screen`, `Darken`, `Lighten`,
 /// `ColorBurn`, `ColorDodge`, `LinearDodge` (an addition), `Overlay`,
 /// `SoftLight`, `HardLight`, `Difference`, `Exclusion`, `Hue`, `Saturation`,
-/// `Color` and `Luminosity`. A factory made from a blend effect with another
-/// mode reports
-/// [`CompositionEffectFactoryError::BlendModeNotSupported`](super::CompositionEffectFactoryError::BlendModeNotSupported).
+/// `Color` and `Luminosity`. The other modes are drawn from the pixels of the
+/// two sources (docs/porting/winui-materials.md).
 ///
 /// `Color` keeps the hue and saturation of the foreground and the
 /// luminosity of the background; `Luminosity` the other way round, as Win2D

@@ -60,6 +60,15 @@ use std::rc::{Rc, Weak};
 use std::sync::Arc;
 use std::time::Duration;
 
+/// The size of a cell of the light map grid of [`LightMap::size_for`], in
+/// units (the grid of 0.4; the render walk samples the map by device pixels,
+/// [`LightMap::size_for_scale`]).
+pub const LIGHT_MAP_CELL: f64 = 4.0;
+
+/// The largest number of cells of the grid of [`LightMap::size_for`] along a
+/// side.
+pub const LIGHT_MAP_MAX_CELLS: i32 = 128;
+
 /// The distance, in device pixels, between two samples of a light map.
 pub const LIGHT_MAP_SAMPLE_SPACING: f64 = 2.0;
 
@@ -422,11 +431,19 @@ impl LightMap {
         self.lit_at(point, &LightingMaterial::VISUAL).clamped()
     }
 
+    /// The size of the light map of `rect` on the grid of 0.4: a cell per
+    /// [`LIGHT_MAP_CELL`] units, at least 2 and at most [`LIGHT_MAP_MAX_CELLS`].
+    /// The render walk uses [`size_for_scale`](Self::size_for_scale).
+    pub fn size_for(rect: Rect) -> PixelSize {
+        let cells = |length: f64| ((length / LIGHT_MAP_CELL).ceil() as i32).clamp(2, LIGHT_MAP_MAX_CELLS);
+        PixelSize::new(cells(rect.width), cells(rect.height))
+    }
+
     /// The number of samples of the light map of `rect` along each side,
     /// for a visual drawn `device_scale` device pixels per unit: a sample
     /// every [`LIGHT_MAP_SAMPLE_SPACING`] device pixels, at least 2 and at
     /// most [`LIGHT_MAP_MAX_SAMPLES`].
-    pub fn size_for(rect: Rect, device_scale: f64) -> PixelSize {
+    pub fn size_for_scale(rect: Rect, device_scale: f64) -> PixelSize {
         let scale = if device_scale.is_finite() && device_scale > 0.0 { device_scale } else { 1.0 };
         let samples = |length: f64| {
             ((length * scale / LIGHT_MAP_SAMPLE_SPACING).ceil().min(f64::from(LIGHT_MAP_MAX_SAMPLES)) as i32)
@@ -1082,11 +1099,16 @@ fn device_scale(matrix: &Matrix) -> f64 {
 
 /// The lighting of the own content of a visual in the render walk: begun
 /// before the content is drawn, ended after it (before the children).
-pub enum LitContent {
-    /// The content is drawn in a multiply layer of the light map.
+pub struct LitContent {
+    kind: LitContentKind,
+}
+
+/// How the content of a lit visual is drawn.
+enum LitContentKind {
+    /// In a multiply layer of the light map.
     Multiplied,
-    /// The content is drawn in a layer, under the source-atop light map
-    /// (a drawing context without layer effects).
+    /// In a layer, under the source-atop light map (a drawing context
+    /// without layer effects).
     Atop { bitmap: Arc<SharedBitmapImpl>, rect: Rect, size: PixelSize },
 }
 
@@ -1106,11 +1128,11 @@ impl LitContent {
         if rect.width <= 0.0 || rect.height <= 0.0 {
             return None;
         }
-        let size = LightMap::size_for(rect, device_scale(&canvas.transform()));
+        let size = LightMap::size_for_scale(rect, device_scale(&canvas.transform()));
         if let Some(layers) = canvas.as_drawing_context_impl_with_layer_effects() {
             let factors = map.factors(rect, size, &LightingMaterial::VISUAL)?;
             layers.push_multiply_layer(rect, &factors);
-            return Some(LitContent::Multiplied);
+            return Some(LitContent { kind: LitContentKind::Multiplied });
         }
         let pixels = map.pixels(rect, size)?;
         let compositor = visual.compositor()?;
@@ -1125,19 +1147,19 @@ impl LitContent {
             )
         })?;
         canvas.push_layer(rect);
-        Some(LitContent::Atop { bitmap, rect, size })
+        Some(LitContent { kind: LitContentKind::Atop { bitmap, rect, size } })
     }
 
     /// Ends the lighting: pops the multiply layer, or draws the light map
     /// over the content and pops the layer.
     pub fn end(self, canvas: &mut dyn IDrawingContextImpl) {
-        match self {
-            LitContent::Multiplied => {
+        match self.kind {
+            LitContentKind::Multiplied => {
                 if let Some(layers) = canvas.as_drawing_context_impl_with_layer_effects() {
                     layers.pop_multiply_layer();
                 }
             }
-            LitContent::Atop { bitmap, rect, size } => {
+            LitContentKind::Atop { bitmap, rect, size } => {
                 canvas.push_render_options(RenderOptions {
                     bitmap_blending_mode: BitmapBlendingMode::SourceAtop,
                     ..RenderOptions::default()
@@ -1250,7 +1272,7 @@ pub fn paint_scene_lighting(canvas: &mut dyn IDrawingContextImpl, rect: Rect, ma
     let Some(visual) = super::painting_visual() else { return };
     let ids = super::brush_light_ids();
     let map = scene_light_map(&visual, &ids);
-    let size = LightMap::size_for(rect, device_scale(&canvas.transform()));
+    let size = LightMap::size_for_scale(rect, device_scale(&canvas.transform()));
     let pixels = map.scene_pixels(rect, size, material);
     let Some(compositor) = visual.compositor() else { return };
     let bitmap = compositor.render_interface().with_platform_render_interface(|render_interface| {

@@ -3,7 +3,7 @@
 //! `Microsoft.UI.Composition`, phase 6).
 
 use super::effect_graph::EffectGraph;
-use super::{BlendEffectMode, CanvasComposite, GraphicsEffect};
+use super::{CanvasComposite, GraphicsEffect};
 use crate::rendering::composition::{
     CompositionBackdropBrush, CompositionEffectBrush, CompositionHostBackdropBrush, Compositor,
 };
@@ -38,8 +38,6 @@ pub enum CompositionEffectFactoryError {
     /// A composite effect has a mode the drawing contexts do not have
     /// (`MaskInvert`).
     CompositeModeNotSupported(CanvasComposite),
-    /// A blend effect has a mode the drawing contexts do not have.
-    BlendModeNotSupported(BlendEffectMode),
     /// An effect of the graph has an input that is not set.
     MissingSource {
         /// The Win2D class of the effect.
@@ -62,9 +60,6 @@ impl std::fmt::Display for CompositionEffectFactoryError {
             }
             CompositionEffectFactoryError::CompositeModeNotSupported(mode) => {
                 write!(f, "the composite mode {mode:?} is not supported")
-            }
-            CompositionEffectFactoryError::BlendModeNotSupported(mode) => {
-                write!(f, "the blend mode {mode:?} is not supported")
             }
             CompositionEffectFactoryError::MissingSource { effect, name } => {
                 write!(f, "the {effect} '{name}' has an input that is not set")

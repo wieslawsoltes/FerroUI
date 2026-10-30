@@ -93,7 +93,7 @@ fn the_factors_of_a_light_map_multiply_each_channel() {
     let mut map = LightMap::new();
     map.add(LightSource::Ambient { color: LightColor::new(0.5, 1.0, 2.0) }, Matrix::IDENTITY);
     let rect = Rect::new(0.0, 0.0, 10.0, 10.0);
-    let factors = map.factors(rect, LightMap::size_for(rect, 1.0), &LightingMaterial::VISUAL).expect("not full");
+    let factors = map.factors(rect, LightMap::size_for_scale(rect, 1.0), &LightingMaterial::VISUAL).expect("not full");
     assert_eq!(2.0, factors.scale);
     let [r, g, b] = factors.factor_at(0.5, 0.5);
     assert!((r - 0.5).abs() < 0.01 && (g - 1.0).abs() < 0.01 && (b - 2.0).abs() < 0.01, "{r} {g} {b}");
@@ -101,10 +101,10 @@ fn the_factors_of_a_light_map_multiply_each_channel() {
     // A full white light changes nothing.
     let mut full = LightMap::new();
     full.add(LightSource::Ambient { color: LightColor::WHITE }, Matrix::IDENTITY);
-    assert!(full.factors(rect, LightMap::size_for(rect, 1.0), &LightingMaterial::VISUAL).is_none());
+    assert!(full.factors(rect, LightMap::size_for_scale(rect, 1.0), &LightingMaterial::VISUAL).is_none());
 
     // The map follows the device scale, up to its largest size.
-    assert_eq!(crate::PixelSize::new(1024, 2), LightMap::size_for(Rect::new(0.0, 0.0, 100_000.0, 1.0), 1.0));
+    assert_eq!(crate::PixelSize::new(1024, 2), LightMap::size_for_scale(Rect::new(0.0, 0.0, 100_000.0, 1.0), 1.0));
 }
 
 #[test]
