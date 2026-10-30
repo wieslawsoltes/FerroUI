@@ -70,6 +70,9 @@ mod split_button_automation_peer;
 #[cfg(test)]
 mod split_button_automation_peer_tests;
 mod tabbed_page_automation_peer;
+mod hyperlink_automation_peer;
+mod rich_edit_box_automation_peer;
+mod rich_edit_box_text_presenter_automation_peer;
 mod rich_text_block_automation_peer;
 mod text_block_automation_peer;
 mod text_box_automation_peer;
@@ -154,6 +157,9 @@ pub use selecting_items_control_automation_peer::{
 pub use slider_automation_peer::SliderAutomationPeer;
 pub use split_button_automation_peer::SplitButtonAutomationPeer;
 pub use tabbed_page_automation_peer::TabbedPageAutomationPeer;
+pub use hyperlink_automation_peer::HyperlinkAutomationPeer;
+pub use rich_edit_box_automation_peer::RichEditBoxAutomationPeer;
+pub use rich_edit_box_text_presenter_automation_peer::RichEditBoxTextPresenterAutomationPeer;
 pub use rich_text_block_automation_peer::RichTextBlockAutomationPeer;
 pub use text_block_automation_peer::TextBlockAutomationPeer;
 pub use text_box_automation_peer::{

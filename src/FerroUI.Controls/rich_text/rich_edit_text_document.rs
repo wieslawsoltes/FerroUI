@@ -248,6 +248,10 @@ impl RichEditTextDocument {
     pub fn document(&self) -> RichTextDocument {
         self.editor.document()
     }
+    #[doc(hidden)]
+    pub fn rich_document(&self) -> RichTextDocument {
+        self.editor.document()
+    }
     pub fn editor(&self) -> Rc<RichTextEditor> {
         self.editor.clone()
     }
@@ -481,6 +485,10 @@ impl RichEditTextRange {
         })
     }
     pub fn document(&self) -> RichTextDocument {
+        self.editor.document()
+    }
+    #[doc(hidden)]
+    pub fn rich_document(&self) -> RichTextDocument {
         self.editor.document()
     }
     pub fn start_position(&self) -> usize {

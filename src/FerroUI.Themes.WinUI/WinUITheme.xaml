@@ -24,6 +24,7 @@
         <MergeResourceInclude Source="/Resources/Common_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/Common_themeresources_any.xaml" />
         <MergeResourceInclude Source="/Resources/Deprecated_themeresources_any.xaml" />
+        <MergeResourceInclude Source="/Resources/RichEditBox_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/PasswordBox_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/TextBox_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/MenuFlyout_themeresources.xaml" />

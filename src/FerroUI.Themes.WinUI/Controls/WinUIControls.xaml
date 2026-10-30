@@ -122,6 +122,8 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/AutoSuggestBox.xaml" />
         <!-- An input control of WinUI that FerroUI ports as a control (docs/porting/winui-controls.md). -->
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/RadioButtons.xaml" />
+        <!-- WinUI's RichEditBox (docs/porting/winui-rich-text.md). -->
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/RichEditBox.xaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Styles.Resources>

@@ -67,11 +67,6 @@
       "reason": "GridViewItem: no FerroUI control (no GridView)."
     },
     {
-      "document": "controls/dev/CommonStyles/RichEditBox_themeresources.xaml",
-      "key": "*",
-      "reason": "RichEditBox: no FerroUI control (no rich text editing)."
-    },
-    {
       "document": "controls/dev/PersonPicture/PersonPicture.xaml",
       "key": "*",
       "reason": "PersonPicture: no FerroUI control."

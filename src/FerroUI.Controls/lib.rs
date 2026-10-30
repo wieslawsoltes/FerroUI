@@ -528,6 +528,19 @@ mod rich_text_block;
 mod rich_text_block_overflow;
 mod rich_text_layout;
 pub mod rich_text;
+mod rich_edit_box;
+mod rich_edit_box_text_presenter;
+mod rich_edit_box_text_input_method_client;
+pub use rich_edit_box::{
+    DisabledFormattingAccelerators, RichEditBox, RichEditBoxSelectionChangingEventArgs,
+    RichEditBoxSelectionChangingRoutedEvent, RichEditBoxTextChangingEventArgs, RichEditBoxTextChangingRoutedEvent,
+    RichEditCharacterCasing, RichEditCompositionEventArgs, RichEditCompositionRoutedEvent,
+};
+pub use rich_edit_box_text_presenter::RichEditBoxTextPresenter;
+#[cfg(test)]
+mod rich_edit_box_tests;
+#[cfg(test)]
+mod rich_edit_context_menu_tests;
 pub use context_menu_event_args::{ContextMenuEventArgs, ContextMenuOpeningRoutedEvent};
 pub use rich_text_block::{
     RichTextBlock, RichTextBlockImpl, RichTextBlockImplExt, RichTextBlockVTable, RichTextSelectionChangedEventArgs,

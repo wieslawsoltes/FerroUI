@@ -242,6 +242,10 @@ impl RichTextEditor {
         }
     }
 
+    #[doc(hidden)]
+    pub fn rich_document(&self) -> RichTextDocument {
+        self.document()
+    }
     pub fn document(&self) -> RichTextDocument {
         self.document.clone()
     }

@@ -197,6 +197,7 @@ document_tests! {
     resources_hyperlink_themeresources => "/Resources/Hyperlink_themeresources.xaml";
     resources_info_badge_themeresources => "/Resources/InfoBadge_themeresources.xaml";
     resources_info_bar_themeresources => "/Resources/InfoBar_themeresources.xaml";
+    resources_rich_edit_box_themeresources => "/Resources/RichEditBox_themeresources.xaml";
     resources_list_box_themeresources => "/Resources/ListBox_themeresources.xaml";
     resources_list_view_item_themeresources => "/Resources/ListViewItem_themeresources.xaml";
     resources_menu_bar_themeresources => "/Resources/MenuBar_themeresources.xaml";
@@ -236,6 +237,7 @@ document_tests! {
     controls_managed_file_chooser => "/Controls/ManagedFileChooser.xaml";
     controls_notification_card => "/Controls/NotificationCard.xaml";
     controls_info_bar => "/Controls/InfoBar.xaml";
+    controls_rich_edit_box => "/Controls/RichEditBox.xaml";
     controls_info_badge => "/Controls/InfoBadge.xaml";
     controls_title_bar => "/Controls/TitleBar.xaml";
     controls_progress_ring => "/Controls/ProgressRing.xaml";

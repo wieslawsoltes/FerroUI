@@ -1,11 +1,18 @@
-use crate::automation::provider::IRootProvider;
+use crate::automation::provider::{
+    IRootProvider, TextEditChangeType, TextEditTextChangedEventArgs,
+};
 use crate::automation::{
-    AutomationLiveSetting, AutomationProperty, AutomationPropertyChangedEventArgs, ElementNotEnabledException,
+    AutomationLiveSetting, AutomationProperty, AutomationPropertyChangedEventArgs,
+    ElementNotEnabledException, IAutomationEventSink,
 };
 use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::utilities::HandlerList;
-use ferroui_base::{ferro_class, AnyValue, BoxedValue, FerroObject, FerroObjectImpl, Rect, Ref};
+use ferroui_base::{
+    ferro_class, AnyValue, BoxedValue, FerroLocator, FerroObject, FerroObjectImpl,
+    LocatorExtensions, Nullable, Rect, Ref, WeakRef,
+};
+use std::cell::RefCell;
 use std::rc::Rc;
 
 /// The control type an automation peer reports for its element.
@@ -82,6 +89,8 @@ pub struct AutomationPeer {
     base: FerroObject,
     children_changed: HandlerList<dyn Fn()>,
     property_changed: HandlerList<dyn Fn(&AutomationPropertyChangedEventArgs)>,
+    events_source: RefCell<Option<WeakRef<AutomationPeer>>>,
+    text_edit_text_changed: HandlerList<dyn Fn(&TextEditTextChangedEventArgs)>,
 }
 
 ferro_class! {
@@ -343,7 +352,13 @@ impl AutomationPeerImpl for AutomationPeer {
 impl AutomationPeer {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
     pub fn construct() -> Self {
-        Self { base: FerroObject::construct(), children_changed: HandlerList::new(), property_changed: HandlerList::new() }
+        Self {
+            base: FerroObject::construct(),
+            children_changed: HandlerList::new(),
+            property_changed: HandlerList::new(),
+            events_source: RefCell::new(None),
+            text_edit_text_changed: HandlerList::new(),
+        }
     }
 
     /// Whether the element of the peer still exists. The peer of a control
@@ -670,6 +685,67 @@ impl AutomationPeer {
         }
     }
 
+    /// The peer used as the source of this peer's native text-edit events.
+    /// This relationship is weak: delegating an event never retains a control
+    /// tree, and self references or cycles do not create ownership cycles.
+    pub fn events_source(&self) -> Option<Ref<AutomationPeer>> {
+        self.events_source
+            .borrow()
+            .as_ref()
+            .and_then(WeakRef::upgrade)
+    }
+
+    pub fn set_events_source(&self, value: impl Into<Nullable<AutomationPeer>>) {
+        self.verify_access();
+        *self.events_source.borrow_mut() = value.into().0.as_ref().map(Ref::downgrade);
+    }
+
+    /// Observes the text-edit events explicitly raised by this peer. A platform
+    /// receives the resolved EventsSource; this observation remains attached to
+    /// the original peer. Disposal and the observer handle retain it weakly.
+    pub fn text_edit_text_changed(
+        &self,
+        handler: impl Fn(&TextEditTextChangedEventArgs) + 'static,
+    ) -> Rc<dyn IDisposable> {
+        let token = self.text_edit_text_changed.add(Rc::new(handler));
+        let weak = self.to_ref().downgrade();
+        Disposable::create(move || {
+            if let Some(this) = weak.upgrade() {
+                this.text_edit_text_changed.remove(token);
+            }
+        })
+    }
+
+    /// Raises the native text-edit event on any peer, independently of whether
+    /// it implements the TextEdit pattern. The platform creates its native
+    /// provider on demand. `None` has no event, matching the native contract.
+    ///
+    /// EventsSource is read exactly once before invoking observers or platform
+    /// code. Reentrant source changes therefore affect the next event only.
+    pub fn raise_text_edit_text_changed_event(
+        &self,
+        change_type: TextEditChangeType,
+        changed_data: Vec<String>,
+    ) {
+        self.verify_access();
+        if change_type == TextEditChangeType::None {
+            return;
+        }
+        let source = self.events_source().unwrap_or_else(|| self.to_ref());
+        let event = TextEditTextChangedEventArgs {
+            change_type,
+            changed_data,
+        };
+        let observers = self.text_edit_text_changed.snapshot();
+        let sink = FerroLocator::current().get_service::<dyn IAutomationEventSink>();
+        if let Some(sink) = sink {
+            sink.raise_text_edit_text_changed(&source, &event);
+        }
+        for (_, observer) in observers.iter() {
+            observer(&event);
+        }
+    }
+
     /// Returns the error of an element that is not enabled unless the
     /// element of the peer is enabled.
     pub fn ensure_enabled(&self) -> Result<(), ElementNotEnabledException> {
@@ -679,3 +755,7 @@ impl AutomationPeer {
         Ok(())
     }
 }
+
+#[cfg(test)]
+#[path = "automation_peer_text_edit_tests.rs"]
+mod text_edit_tests;

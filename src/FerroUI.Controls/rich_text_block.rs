@@ -980,6 +980,21 @@ impl RichTextBlock {
         *self.font_features_subscription.borrow_mut() = subscription;
     }
 
+    /// The shared document of the view (the property `RichDocument`, D3).
+    pub fn rich_document(&self) -> RichTextDocument {
+        self.document()
+    }
+
+    /// Sets the shared document of the view (the property `RichDocument`, D3).
+    pub fn set_rich_document(&self, value: RichTextDocument) {
+        self.set_document(value);
+    }
+
+    /// Attaches a shared document whose blocks no other view owns; see `try_set_document`.
+    pub fn try_set_rich_document(&self, value: RichTextDocument) -> bool {
+        self.try_set_document(value)
+    }
+
     pub fn document(&self) -> RichTextDocument {
         let parent = self
             .flow_parent

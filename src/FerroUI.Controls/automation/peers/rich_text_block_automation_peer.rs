@@ -1,48 +1,79 @@
-use super::{AutomationControlType, AutomationPeerImpl, AutomationPeerImplExt, ControlAutomationPeer, ControlAutomationPeerImpl};
+use super::{
+    AutomationControlType, AutomationPeer, AutomationPeerImpl, ControlAutomationPeer,
+    ControlAutomationPeerImpl,
+};
+use crate::automation::provider::{
+    ITextProvider, ITextProvider2, ProviderAdapter, RichTextAutomationHost, RichTextAutomationPeer,
+    RichTextAutomationState,
+};
 use crate::RichTextBlock;
-use ferroui_base::{ferro_class, instantiate, FerroObjectImpl, Ref};
+use ferroui_base::{ferro_class, instantiate, FerroObjectImpl, FerroObjectImplExt, Ref};
+use std::rc::Rc;
 
-/// An automation peer which represents a [`RichTextBlock`]: a text element named by
-/// the text of its document. The UI Automation text pattern of WinUI's
-/// `RichTextBlockAutomationPeer` comes with the text object model
-/// (`docs/porting/winui-rich-text.md`, R8).
+/// Accessibility projection of the rich view, with live document ranges,
+/// selection, effective formatting, embedded children, and shaped geometry.
 #[repr(C)]
 pub struct RichTextBlockAutomationPeer {
     base: ControlAutomationPeer,
+    text_automation: Rc<RichTextAutomationState>,
 }
-
 ferro_class!(RichTextBlockAutomationPeer: ControlAutomationPeer);
-ferroui_base::ferro_class_info!(RichTextBlockAutomationPeer {});
-ferroui_base::ferro_impl_classes!(RichTextBlockAutomationPeer: FerroObjectImpl, ControlAutomationPeerImpl);
-
+ferroui_base::ferro_class_info!(RichTextBlockAutomationPeer {
+    interfaces: [
+        Rc<dyn ITextProvider> => ProviderAdapter::as_text_provider,
+        Rc<dyn ITextProvider2> => ProviderAdapter::as_text_provider2,
+    ]
+});
+impl FerroObjectImpl for RichTextBlockAutomationPeer {
+    fn constructed(this: &Self) {
+        Self::parent_constructed(this);
+        this.text_automation.observe(this.to_ref());
+    }
+}
+impl ControlAutomationPeerImpl for RichTextBlockAutomationPeer {}
 impl AutomationPeerImpl for RichTextBlockAutomationPeer {
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::Text
     }
-
     fn get_name_core(this: &Self) -> Option<String> {
         Some(this.owner().document().text())
     }
-
-    fn is_control_element_core(this: &Self) -> bool {
-        // Not a control element when the view is part of a control template.
-        this.owner().templated_parent().is_none() && Self::parent_is_control_element_core(this)
+    fn get_or_create_children_core(this: &Self) -> Rc<Vec<Ref<AutomationPeer>>> {
+        this.text_host().map_or_else(
+            || Rc::new(Vec::new()),
+            |host| {
+                this.text_automation
+                    .children(&host, &this.text_peer(), None)
+            },
+        )
     }
 }
-
-impl RichTextBlockAutomationPeer {
-    /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
-    pub fn construct(owner: &RichTextBlock) -> Self {
-        Self { base: ControlAutomationPeer::construct(owner) }
+impl RichTextAutomationPeer for RichTextBlockAutomationPeer {
+    fn text_host(&self) -> Option<RichTextAutomationHost> {
+        ControlAutomationPeer::try_owner(self)
+            .and_then(|owner| owner.cast::<RichTextBlock>())
+            .map(|view| RichTextAutomationHost::Block(view.downgrade()))
     }
-
-    /// Initializes a new peer of `owner`.
+    fn text_peer(&self) -> Ref<AutomationPeer> {
+        self.to_ref().upcast()
+    }
+    fn text_automation_state(&self) -> &Rc<RichTextAutomationState> {
+        &self.text_automation
+    }
+}
+impl RichTextBlockAutomationPeer {
+    pub fn construct(owner: &RichTextBlock) -> Self {
+        Self {
+            base: ControlAutomationPeer::construct(owner),
+            text_automation: RichTextAutomationState::new(),
+        }
+    }
     pub fn new(owner: &RichTextBlock) -> Ref<Self> {
         instantiate(Self::construct(owner))
     }
-
-    /// Gets the owning rich text view.
     pub fn owner(&self) -> Ref<RichTextBlock> {
-        ControlAutomationPeer::owner(self).cast().expect("The owner of the peer is a rich text view.")
+        ControlAutomationPeer::owner(self)
+            .cast()
+            .expect("The owner is a rich text view.")
     }
 }

@@ -163,6 +163,9 @@ impl RichTextBlock {
             .source()
             .and_then(|source| source.cast::<Interactive>());
         while let Some(current) = source {
+            if current.cast::<crate::RichEditBox>().is_some() {
+                return;
+            }
             if let Some(view) = current.cast::<RichTextBlock>() {
                 if view != self.to_ref() {
                     return;
