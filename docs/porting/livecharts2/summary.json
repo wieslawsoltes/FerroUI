@@ -8,19 +8,20 @@
   "source_members": 4859,
   "source_status": {
     "native-replacement": 16,
-    "partial": 6,
-    "pending": 655,
+    "partial": 9,
+    "pending": 652,
     "ported": 21
   },
   "member_status": {
     "partial": 1,
-    "pending": 4858
+    "pending": 4857,
+    "ported": 1
   },
   "test_declarations": 1066,
   "test_status": {
-    "partial": 8,
-    "pending": 978,
-    "ported": 80
+    "partial": 11,
+    "pending": 963,
+    "ported": 92
   },
   "test_declarations_by_suite": {
     "ConsoleTests": 33,
