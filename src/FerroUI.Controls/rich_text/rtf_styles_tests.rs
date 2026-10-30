@@ -94,6 +94,8 @@ fn rich_rtf_style_nonadditive_character_format_resets_only_character_properties(
     assert_eq!(paragraph.inlines[2].format.font_size, Some(24.0));
 }
 
+// The code page 1250 needs the cargo feature `rtf-codepages` (decision D2).
+#[cfg(feature = "rtf-codepages")]
 #[test]
 fn rich_rtf_style_font_charset_drives_scoped_body_decoding() {
     let _scope = Dispatcher::unit_test_scope();
