@@ -1857,6 +1857,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-livecharts"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "serde_json",
+]
+
+[[package]]
 name = "ferroui-markup"
 version = "0.4.0"
 dependencies = [
