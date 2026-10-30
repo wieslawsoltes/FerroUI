@@ -6,6 +6,7 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ### Added
 
+- **Source snapshots for designers and runtime reload sessions** (C3 of #345): the feature `source-overlays` of `ferroui-markup-xaml` lets an embedded designer load documents and includes from a `SourceSnapshot` in every build profile; `HotReloadSession::for_runtime_documents` accepts structural changes of documents instantiated at run time.
 - **WinUI theme: designer sources** (C6 of #345): with the feature `designer-sources`, `ferroui_themes_winui::designer_documents()` lists the theme's control theme documents by resource URI and source text for designer definition libraries; the build script derives the table from the theme's documents.
 - **TreeDataGrid: drag payloads and modifiers** (C5 of #345): `TreeDataGridRowDragStartedEventArgs::data_transfer` adds application payloads to a row drag and `key_modifiers` reports the modifiers of the press that started it; the expander column keeps its inner column's type-ahead and options.
 - **Animation preview and render suppression** (C2 of #345, additions): `Animation::apply_for_preview` runs an isolated preview of an animation that restores the control when disposed; `Visual::add_render_suppression_request` and `remove_render_suppression_request` hide a visual from composition and immediate rendering without changing its authored visibility.
