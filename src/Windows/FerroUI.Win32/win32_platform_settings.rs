@@ -419,7 +419,6 @@ mod imp {
         fn energy_saver_changed(&self, handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
             self.base.energy_saver_changed(handler)
         }
-        }
     }
 }
 
