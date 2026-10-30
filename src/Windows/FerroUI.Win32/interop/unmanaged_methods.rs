@@ -2379,6 +2379,39 @@ mod native {
         found.then_some(Msg(msg))
     }
 
+    /// `MapWindowPoints` of a rectangle from the client area of one window
+    /// to that of another; `None` when the call fails. The two corners are
+    /// passed as one call of two points, so that the system normalises a
+    /// rectangle of a mirrored (right-to-left) window.
+    pub fn map_window_rect(from: isize, to: isize, rect: RECT) -> Option<RECT> {
+        let mut points = [wf::POINT { x: rect.left, y: rect.top }, wf::POINT { x: rect.right, y: rect.bottom }];
+        // SAFETY: an array of exactly two writable points; the handles are
+        // numbers, a stale one makes the call fail. A result of zero is a
+        // translation by nothing unless the last error says otherwise.
+        let failed = unsafe {
+            wf::SetLastError(0);
+            gdi::MapWindowPoints(h(from), h(to), points.as_mut_ptr(), 2) == 0 && wf::GetLastError() != 0
+        };
+        (!failed).then_some(RECT { left: points[0].x, top: points[0].y, right: points[1].x, bottom: points[1].y })
+    }
+
+    /// Whether the next message in the queue of the calling thread is a
+    /// `WM_IME_COMPOSITION` of a window with a result string, without
+    /// taking it off the queue (`PeekMessage` with `PM_NOREMOVE`). Some
+    /// Korean input methods send `WM_IME_ENDCOMPOSITION` just before the
+    /// result of the composition.
+    pub fn next_message_is_composition_result(hwnd: isize) -> bool {
+        // SAFETY: zeroed plain data, filled by the call.
+        let mut msg: wm::MSG = unsafe { std::mem::zeroed() };
+        // SAFETY: a valid out structure; PM_NOREMOVE leaves the message in
+        // the queue.
+        let found = unsafe { wm::PeekMessageW(&mut msg, std::ptr::null_mut(), 0, 0, wm::PM_NOREMOVE) != 0 };
+        found
+            && msg.hwnd as isize == hwnd
+            && msg.message == wm::WM_IME_COMPOSITION
+            && (msg.lParam as u32 & super::GCS::GCS_RESULTSTR) != 0
+    }
+
     /// An overlapped window of a class, never shown: what the device
     /// context of an OpenGL context belongs to.
     pub fn create_offscreen_gl_window(atom: u16) -> isize {
@@ -2500,6 +2533,66 @@ mod native {
         unsafe { ime::ImmCreateContext() as isize }
     }
 
+    /// `ImmDestroyContext`: only for a context this backend created, once no
+    /// window has it and every `ImmGetContext` of it was given back.
+    pub fn imm_destroy_context(context: isize) -> bool {
+        // SAFETY: a handle the backend owns (`OwnedImmContext`); a stale one
+        // makes the call fail.
+        unsafe { ime::ImmDestroyContext(himc(context)) != 0 }
+    }
+
+    /// `SetInputScopes` of `msctf.dll`: the input scopes of a window, in
+    /// order, for the text services of the system (the touch keyboard, the
+    /// input methods). One `IS_DEFAULT` removes the association
+    /// (`SetInputScope`), which is done before the window is destroyed.
+    /// False for no window, no scope, or when the system refuses.
+    pub fn set_input_scopes(hwnd: isize, scopes: &[i32]) -> bool {
+        use windows_sys::Win32::UI::TextServices::{InputScope, IS_DEFAULT};
+
+        // windows-sys has the values of the scopes, not these two functions
+        // of `inputscope.h`.
+        #[cfg_attr(not(target_arch = "x86"), link(name = "msctf", kind = "raw-dylib"))]
+        #[cfg_attr(target_arch = "x86", link(name = "msctf", kind = "raw-dylib", import_name_type = "undecorated"))]
+        extern "system" {
+            fn SetInputScope(hwnd: wf::HWND, scope: InputScope) -> i32;
+            fn SetInputScopes(
+                hwnd: wf::HWND,
+                scopes: *const InputScope,
+                scope_count: u32,
+                phrases: *mut *mut u16,
+                phrase_count: u32,
+                regular_expression: *mut u16,
+                speech_recognition_grammar: *mut u16,
+            ) -> i32;
+        }
+
+        let Ok(count) = u32::try_from(scopes.len()) else {
+            return false;
+        };
+        if hwnd == 0 || count == 0 {
+            return false;
+        }
+        // SAFETY: `InputScope` is the 32-bit signed enumeration of the SDK;
+        // the array lives through the call, which does not keep it; no
+        // phrases, regular expression or grammar. A stale handle fails.
+        let result = unsafe {
+            if scopes == [IS_DEFAULT] {
+                SetInputScope(h(hwnd), IS_DEFAULT)
+            } else {
+                SetInputScopes(
+                    h(hwnd),
+                    scopes.as_ptr(),
+                    count,
+                    std::ptr::null_mut(),
+                    0,
+                    std::ptr::null_mut(),
+                    std::ptr::null_mut(),
+                )
+            }
+        };
+        result >= 0
+    }
+
     /// `ImmAssociateContext`: gives a window an input context (0 for
     /// none) and returns the one it had.
     pub fn imm_associate_context(hwnd: isize, context: isize) -> isize {
@@ -2591,6 +2684,33 @@ mod native {
             ime::ImmGetCompositionStringW(himc(context), index, buffer.as_mut_ptr().cast(), buffer_length as u32)
         };
         (result >= 0).then(|| String::from_utf16_lossy(&buffer[..(result as usize / 2).min(buffer.len())]))
+    }
+
+    /// `ImmGetCompositionString` for a string of the composition as the
+    /// system has it: an empty string when the string is empty, `None`
+    /// when the call fails or the text is not well-formed UTF-16. The
+    /// input method of a client of the exact-edit connection reads this;
+    /// every other client reads [`imm_get_composition_string`], as the
+    /// reference.
+    pub fn imm_get_exact_composition_string(context: isize, index: u32) -> Option<String> {
+        let buffer_length = imm_get_composition_value(context, index);
+        if buffer_length < 0 || buffer_length % 2 != 0 {
+            return None;
+        }
+        if buffer_length == 0 {
+            return Some(String::new());
+        }
+        // The length is in bytes; the buffer is of UTF-16 code units.
+        let mut buffer = vec![0u16; buffer_length as usize / 2];
+        // SAFETY: the system writes at most `buffer_length` bytes into a
+        // buffer of that size.
+        let result = unsafe {
+            ime::ImmGetCompositionStringW(himc(context), index, buffer.as_mut_ptr().cast(), buffer_length as u32)
+        };
+        if result < 0 || result % 2 != 0 || result as usize > buffer.len() * 2 {
+            return None;
+        }
+        String::from_utf16(&buffer[..result as usize / 2]).ok()
     }
 
     /// `ImmSetCompositionString` with `SCS_SETSTR`: asks the input method
