@@ -959,7 +959,14 @@
     "documentation": "ferroui_controls::automation::peers::AutomationPeer",
     "base": "FerroObject",
     "constructible": false,
-    "properties": {},
+    "properties": {
+      "EventsSource": {
+        "name": "EventsSource",
+        "type_name": "Option<Ref<AutomationPeer>>",
+        "documentation": "AutomationPeer.EventsSource: Option<Ref<AutomationPeer>>",
+        "values": []
+      }
+    },
     "namespace_aliases": [
       "using:FerroUI.Automation.Peers",
       "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
@@ -7885,6 +7892,18 @@
     "namespace_aliases": [
       "using:FerroUI.Controls.Documents",
       "clr-namespace:FerroUI.Controls.Documents;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "HyperlinkAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::automation::peers::HyperlinkAutomationPeer",
+    "base": "AutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
     ]
   },
   {
@@ -17740,6 +17759,527 @@
     "namespace_aliases": [
       "using:FerroUI.Controls.Notifications",
       "clr-namespace:FerroUI.Controls.Notifications;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "RichEditBox",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::RichEditBox",
+    "base": "TemplatedControl",
+    "constructible": true,
+    "properties": {
+      "RichDocument": {
+        "name": "RichDocument",
+        "type_name": "RichTextDocument",
+        "documentation": "RichEditBox.RichDocument: RichTextDocument",
+        "values": [],
+        "attached": false
+      },
+      "SelectionStart": {
+        "name": "SelectionStart",
+        "type_name": "i32",
+        "documentation": "RichEditBox.SelectionStart: i32",
+        "values": [],
+        "attached": false
+      },
+      "SelectionEnd": {
+        "name": "SelectionEnd",
+        "type_name": "i32",
+        "documentation": "RichEditBox.SelectionEnd: i32",
+        "values": [],
+        "attached": false
+      },
+      "SelectedText": {
+        "name": "SelectedText",
+        "type_name": "String",
+        "documentation": "RichEditBox.SelectedText: String",
+        "values": [],
+        "attached": false
+      },
+      "IsTextSelectionEnabled": {
+        "name": "IsTextSelectionEnabled",
+        "type_name": "bool",
+        "documentation": "RichEditBox.IsTextSelectionEnabled: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "SelectionHighlightColor": {
+        "name": "SelectionHighlightColor",
+        "type_name": "Option<Rc<dyn IBrush>>",
+        "documentation": "RichEditBox.SelectionHighlightColor: Option<Rc<dyn IBrush>>",
+        "values": [],
+        "attached": false
+      },
+      "SelectionHighlightColorWhenNotFocused": {
+        "name": "SelectionHighlightColorWhenNotFocused",
+        "type_name": "Option<Rc<dyn IBrush>>",
+        "documentation": "RichEditBox.SelectionHighlightColorWhenNotFocused: Option<Rc<dyn IBrush>>",
+        "values": [],
+        "attached": false
+      },
+      "SelectionForegroundBrush": {
+        "name": "SelectionForegroundBrush",
+        "type_name": "Option<Rc<dyn IBrush>>",
+        "documentation": "RichEditBox.SelectionForegroundBrush: Option<Rc<dyn IBrush>>",
+        "values": [],
+        "attached": false
+      },
+      "CaretBrush": {
+        "name": "CaretBrush",
+        "type_name": "Option<Rc<dyn IBrush>>",
+        "documentation": "RichEditBox.CaretBrush: Option<Rc<dyn IBrush>>",
+        "values": [],
+        "attached": false
+      },
+      "LetterSpacing": {
+        "name": "LetterSpacing",
+        "type_name": "f64",
+        "documentation": "RichEditBox.LetterSpacing: f64",
+        "values": [],
+        "attached": false
+      },
+      "Language": {
+        "name": "Language",
+        "type_name": "ferroui_base::utilities::CultureInfo",
+        "documentation": "RichEditBox.Language: ferroui_base::utilities::CultureInfo",
+        "values": [],
+        "attached": false
+      },
+      "TextAlignment": {
+        "name": "TextAlignment",
+        "type_name": "TextAlignment",
+        "documentation": "RichEditBox.TextAlignment: TextAlignment",
+        "values": [
+          "Left",
+          "Center",
+          "Right",
+          "Start",
+          "End",
+          "DetectFromContent",
+          "Justify"
+        ],
+        "attached": false
+      },
+      "TextWrapping": {
+        "name": "TextWrapping",
+        "type_name": "TextWrapping",
+        "documentation": "RichEditBox.TextWrapping: TextWrapping",
+        "values": [
+          "NoWrap",
+          "Wrap",
+          "WrapWithOverflow"
+        ],
+        "attached": false
+      },
+      "LineHeight": {
+        "name": "LineHeight",
+        "type_name": "f64",
+        "documentation": "RichEditBox.LineHeight: f64",
+        "values": [],
+        "attached": false
+      },
+      "TextIndent": {
+        "name": "TextIndent",
+        "type_name": "f64",
+        "documentation": "RichEditBox.TextIndent: f64",
+        "values": [],
+        "attached": false
+      },
+      "LineStackingStrategy": {
+        "name": "LineStackingStrategy",
+        "type_name": "LineStackingStrategy",
+        "documentation": "RichEditBox.LineStackingStrategy: LineStackingStrategy",
+        "values": [
+          "MaxHeight",
+          "BlockLineHeight",
+          "BaselineToBaseline"
+        ],
+        "attached": false
+      },
+      "TextDecorations": {
+        "name": "TextDecorations",
+        "type_name": "Option<TextDecorationCollection>",
+        "documentation": "RichEditBox.TextDecorations: Option<TextDecorationCollection>",
+        "values": [],
+        "attached": false
+      },
+      "IsReadOnly": {
+        "name": "IsReadOnly",
+        "type_name": "bool",
+        "documentation": "RichEditBox.IsReadOnly: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "AcceptsReturn": {
+        "name": "AcceptsReturn",
+        "type_name": "bool",
+        "documentation": "RichEditBox.AcceptsReturn: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "AcceptsTab": {
+        "name": "AcceptsTab",
+        "type_name": "bool",
+        "documentation": "RichEditBox.AcceptsTab: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "CaretBlinkInterval": {
+        "name": "CaretBlinkInterval",
+        "type_name": "TimeSpan",
+        "documentation": "RichEditBox.CaretBlinkInterval: TimeSpan",
+        "values": [],
+        "attached": false
+      },
+      "MaxLength": {
+        "name": "MaxLength",
+        "type_name": "i32",
+        "documentation": "RichEditBox.MaxLength: i32",
+        "values": [],
+        "attached": false
+      },
+      "ClipboardCopyFormat": {
+        "name": "ClipboardCopyFormat",
+        "type_name": "RichEditClipboardFormat",
+        "documentation": "RichEditBox.ClipboardCopyFormat: RichEditClipboardFormat",
+        "values": [
+          "AllFormats",
+          "PlainText"
+        ],
+        "attached": false
+      },
+      "DisabledFormattingAccelerators": {
+        "name": "DisabledFormattingAccelerators",
+        "type_name": "DisabledFormattingAccelerators",
+        "documentation": "RichEditBox.DisabledFormattingAccelerators: DisabledFormattingAccelerators",
+        "values": [],
+        "attached": false
+      },
+      "CharacterCasing": {
+        "name": "CharacterCasing",
+        "type_name": "RichEditCharacterCasing",
+        "documentation": "RichEditBox.CharacterCasing: RichEditCharacterCasing",
+        "values": [
+          "Normal",
+          "Lower",
+          "Upper"
+        ],
+        "attached": false
+      },
+      "IsTextPredictionEnabled": {
+        "name": "IsTextPredictionEnabled",
+        "type_name": "bool",
+        "documentation": "RichEditBox.IsTextPredictionEnabled: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "InputScope": {
+        "name": "InputScope",
+        "type_name": "Option<Ref<InputScope>>",
+        "documentation": "RichEditBox.InputScope: Option<Ref<InputScope>>",
+        "values": [],
+        "attached": false
+      },
+      "PlaceholderText": {
+        "name": "PlaceholderText",
+        "type_name": "String",
+        "documentation": "RichEditBox.PlaceholderText: String",
+        "values": [],
+        "attached": false
+      },
+      "PlaceholderForeground": {
+        "name": "PlaceholderForeground",
+        "type_name": "Option<Rc<dyn IBrush>>",
+        "documentation": "RichEditBox.PlaceholderForeground: Option<Rc<dyn IBrush>>",
+        "values": [],
+        "attached": false
+      },
+      "Header": {
+        "name": "Header",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "RichEditBox.Header: Option<BoxedValue>",
+        "values": [],
+        "attached": false
+      },
+      "HeaderTemplate": {
+        "name": "HeaderTemplate",
+        "type_name": "Option<Rc<dyn IDataTemplate>>",
+        "documentation": "RichEditBox.HeaderTemplate: Option<Rc<dyn IDataTemplate>>",
+        "values": [],
+        "attached": false
+      },
+      "Description": {
+        "name": "Description",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "RichEditBox.Description: Option<BoxedValue>",
+        "values": [],
+        "attached": false
+      },
+      "IsUndoEnabled": {
+        "name": "IsUndoEnabled",
+        "type_name": "bool",
+        "documentation": "RichEditBox.IsUndoEnabled: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "UndoLimit": {
+        "name": "UndoLimit",
+        "type_name": "i32",
+        "documentation": "RichEditBox.UndoLimit: i32",
+        "values": [],
+        "attached": false
+      },
+      "Text": {
+        "name": "Text",
+        "type_name": "String",
+        "documentation": "RichEditBox.Text: String",
+        "values": [],
+        "attached": false
+      },
+      "Blocks": {
+        "name": "Blocks",
+        "type_name": "BlockCollection",
+        "documentation": "RichEditBox.Blocks: BlockCollection",
+        "values": []
+      },
+      "TextHighlighters": {
+        "name": "TextHighlighters",
+        "type_name": "TextHighlighterCollection",
+        "documentation": "RichEditBox.TextHighlighters: TextHighlighterCollection",
+        "values": []
+      },
+      "SelectionChanged": {
+        "name": "SelectionChanged",
+        "type_name": "RoutedEventArgs",
+        "documentation": "RichEditBox.SelectionChanged routed event",
+        "event": true
+      },
+      "TextChanged": {
+        "name": "TextChanged",
+        "type_name": "RoutedEventArgs",
+        "documentation": "RichEditBox.TextChanged routed event",
+        "event": true
+      },
+      "TextChanging": {
+        "name": "TextChanging",
+        "type_name": "RichEditBoxTextChangingEventArgs",
+        "documentation": "RichEditBox.TextChanging routed event",
+        "event": true
+      },
+      "SelectionChanging": {
+        "name": "SelectionChanging",
+        "type_name": "RichEditBoxSelectionChangingEventArgs",
+        "documentation": "RichEditBox.SelectionChanging routed event",
+        "event": true
+      },
+      "CopyingToClipboard": {
+        "name": "CopyingToClipboard",
+        "type_name": "RoutedEventArgs",
+        "documentation": "RichEditBox.CopyingToClipboard routed event",
+        "event": true
+      },
+      "CuttingToClipboard": {
+        "name": "CuttingToClipboard",
+        "type_name": "RoutedEventArgs",
+        "documentation": "RichEditBox.CuttingToClipboard routed event",
+        "event": true
+      },
+      "PastingFromClipboard": {
+        "name": "PastingFromClipboard",
+        "type_name": "RoutedEventArgs",
+        "documentation": "RichEditBox.PastingFromClipboard routed event",
+        "event": true
+      },
+      "TextCompositionStarted": {
+        "name": "TextCompositionStarted",
+        "type_name": "RichEditCompositionEventArgs",
+        "documentation": "RichEditBox.TextCompositionStarted routed event",
+        "event": true
+      },
+      "TextCompositionChanged": {
+        "name": "TextCompositionChanged",
+        "type_name": "RichEditCompositionEventArgs",
+        "documentation": "RichEditBox.TextCompositionChanged routed event",
+        "event": true
+      },
+      "TextCompositionEnded": {
+        "name": "TextCompositionEnded",
+        "type_name": "RichEditCompositionEventArgs",
+        "documentation": "RichEditBox.TextCompositionEnded routed event",
+        "event": true
+      },
+      "ContextMenuOpening": {
+        "name": "ContextMenuOpening",
+        "type_name": "ContextMenuEventArgs",
+        "documentation": "RichEditBox.ContextMenuOpening routed event",
+        "event": true
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "RichEditBoxAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::automation::peers::RichEditBoxAutomationPeer",
+    "base": "ControlAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "RichEditBoxSelectionChangingEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::RichEditBoxSelectionChangingEventArgs",
+    "base": "IRoutedEventArgs",
+    "constructible": false,
+    "properties": {
+      "SelectionStart": {
+        "name": "SelectionStart",
+        "type_name": "i32",
+        "documentation": "RichEditBoxSelectionChangingEventArgs.SelectionStart: i32",
+        "values": []
+      },
+      "SelectionLength": {
+        "name": "SelectionLength",
+        "type_name": "i32",
+        "documentation": "RichEditBoxSelectionChangingEventArgs.SelectionLength: i32",
+        "values": []
+      },
+      "Cancel": {
+        "name": "Cancel",
+        "type_name": "bool",
+        "documentation": "RichEditBoxSelectionChangingEventArgs.Cancel: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "RichEditBoxTextChangingEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::RichEditBoxTextChangingEventArgs",
+    "base": "IRoutedEventArgs",
+    "constructible": false,
+    "properties": {
+      "IsContentChanging": {
+        "name": "IsContentChanging",
+        "type_name": "bool",
+        "documentation": "RichEditBoxTextChangingEventArgs.IsContentChanging: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "RichEditBoxTextPresenter",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::RichEditBoxTextPresenter",
+    "base": "RichTextBlock",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "RichEditBoxTextPresenterAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::automation::peers::RichEditBoxTextPresenterAutomationPeer",
+    "base": "NoneAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "RichEditCompositionEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::RichEditCompositionEventArgs",
+    "base": "IRoutedEventArgs",
+    "constructible": false,
+    "properties": {
+      "Text": {
+        "name": "Text",
+        "type_name": "String",
+        "documentation": "RichEditCompositionEventArgs.Text: String",
+        "values": []
+      },
+      "SelectionStart": {
+        "name": "SelectionStart",
+        "type_name": "i32",
+        "documentation": "RichEditCompositionEventArgs.SelectionStart: i32",
+        "values": []
+      },
+      "SelectionEnd": {
+        "name": "SelectionEnd",
+        "type_name": "i32",
+        "documentation": "RichEditCompositionEventArgs.SelectionEnd: i32",
+        "values": []
+      },
+      "Committed": {
+        "name": "Committed",
+        "type_name": "bool",
+        "documentation": "RichEditCompositionEventArgs.Committed: bool",
+        "values": [
+          "True",
+          "False"
+        ]
+      },
+      "StartIndex": {
+        "name": "StartIndex",
+        "type_name": "i32",
+        "documentation": "RichEditCompositionEventArgs.StartIndex: i32",
+        "values": []
+      },
+      "Length": {
+        "name": "Length",
+        "type_name": "i32",
+        "documentation": "RichEditCompositionEventArgs.Length: i32",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
     ]
   },
   {
