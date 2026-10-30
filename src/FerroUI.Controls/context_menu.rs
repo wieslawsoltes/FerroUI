@@ -14,7 +14,7 @@ use ferroui_base::utilities::{CancelEventArgs, HandlerList};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate, ElementRef, FerroObjectImpl,
     FerroObjectImplExt, FerroPropertyChangedEventArgs, Nullable, Rect, Ref, StyledElement, StyledElementImpl,
-    StyledProperty, VisualImpl, VisualTreeAttachmentEventArgs, WeakRef,
+    StyledProperty, VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs, WeakRef,
 };
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -34,6 +34,8 @@ pub struct ContextMenu {
     popup_host_changed_handler: HandlerList<dyn Fn(Option<&Rc<dyn IPopupHost>>)>,
     opening: HandlerList<dyn Fn(&CancelEventArgs)>,
     closing: HandlerList<dyn Fn(&CancelEventArgs)>,
+    /// The system backdrop of the menu (winui-materials.md).
+    element_backdrop: crate::media::ElementSystemBackdrop,
 }
 
 ferro_class!(ContextMenu: MenuBase);
@@ -41,7 +43,6 @@ ferro_class_info!(ContextMenu { new: ContextMenu::new });
 
 ferro_impl_classes!(
     ContextMenu: StyledElementImpl,
-    VisualImpl,
     LayoutableImpl,
     InteractiveImpl,
     InputElementImpl,
@@ -61,6 +62,21 @@ impl FerroObjectImpl for ContextMenu {
                 popup.set_window_manager_add_shadow_hint(change.get_new_value::<bool>());
             }
         }
+        if change.property() == Self::system_backdrop_property().as_property() && this.is_attached_to_visual_tree() {
+            this.element_backdrop.connect(this, this.system_backdrop());
+        }
+    }
+}
+
+impl VisualImpl for ContextMenu {
+    fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
+        Self::parent_on_attached_to_visual_tree(this, e);
+        this.element_backdrop.connect(this, this.system_backdrop());
+    }
+
+    fn on_detached_from_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
+        Self::parent_on_detached_from_visual_tree(this, e);
+        this.element_backdrop.disconnect();
     }
 }
 
@@ -149,6 +165,13 @@ ferro_properties! {
         pub fn custom_popup_placement_callback_property() -> StyledProperty<Option<CustomPopupPlacementCallbackValue>> {
             Popup::custom_popup_placement_callback_property().add_owner::<ContextMenu>()
         }
+
+        /// Defines the `SystemBackdrop` property: the system backdrop drawn as the
+        /// background of the menu (the property of a menu flyout presenter, a FerroUI
+        /// addition on the context menu, which is a menu flyout presenter of its own).
+        pub fn system_backdrop_property() -> StyledProperty<Option<Ref<crate::media::SystemBackdrop>>> {
+            crate::flyouts::MenuFlyoutPresenter::system_backdrop_property().add_owner::<ContextMenu>()
+        }
     }
 }
 
@@ -179,6 +202,7 @@ impl ContextMenu {
             popup_host_changed_handler: HandlerList::new(),
             opening: HandlerList::new(),
             closing: HandlerList::new(),
+            element_backdrop: Default::default(),
         }
     }
 
@@ -191,6 +215,15 @@ impl ContextMenu {
     /// `interaction_handler`.
     pub fn with_interaction_handler(interaction_handler: Rc<dyn IMenuInteractionHandler>) -> Ref<Self> {
         instantiate(Self::construct_with(interaction_handler))
+    }
+
+    /// `SystemBackdrop`: the system backdrop drawn as the background of the menu.
+    pub fn system_backdrop(&self) -> Option<Ref<crate::media::SystemBackdrop>> {
+        self.get_value(Self::system_backdrop_property())
+    }
+
+    pub fn set_system_backdrop(&self, value: Option<Ref<crate::media::SystemBackdrop>>) {
+        self.set_value(Self::system_backdrop_property(), value)
     }
 
     /// The horizontal offset of the menu in relation to its target; see

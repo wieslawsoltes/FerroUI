@@ -182,6 +182,35 @@ impl ServerCompositionSurfaceBrush {
     }
 }
 
+impl ServerCompositionSurfaceBrush {
+    /// Paints the surface tiled over `rect` (a border effect that wraps,
+    /// winui-materials.md): tiles of the natural size of the surface times
+    /// the scale of the brush, the first at the top left corner of `rect`,
+    /// clipped to `rect`. At most 4096 tiles are drawn.
+    pub fn paint_tiled(&self, canvas: &mut dyn IDrawingContextImpl, rect: Rect) {
+        let Some(surface) = self.surface() else { return };
+        let Some(natural_size) = surface.natural_size() else { return };
+        let scale = self.props.scale();
+        let (width, height) = (natural_size.width * scale.x.abs(), natural_size.height * scale.y.abs());
+        let opacity = self.brush_props().opacity();
+        if width < 1.0 || height < 1.0 || opacity <= 0.0 || rect.width <= 0.0 || rect.height <= 0.0 {
+            return;
+        }
+        let (columns, rows) = ((rect.width / width).ceil(), (rect.height / height).ceil());
+        if columns * rows > 4096.0 {
+            return;
+        }
+        canvas.push_clip(rect);
+        for row in 0..rows as usize {
+            for column in 0..columns as usize {
+                let tile = Rect::new(rect.x + column as f64 * width, rect.y + row as f64 * height, width, height);
+                surface.draw(canvas, tile, opacity);
+            }
+        }
+        canvas.pop_clip();
+    }
+}
+
 /// Where a surface brush puts the whole content of a surface of
 /// `natural_size` in the area `area`: the content is sized by `stretch`
 /// (`None` keeps the natural size, `Fill` takes the size of the area,
@@ -223,7 +252,7 @@ pub fn surface_brush_content_rect(
 /// Paints a composition brush over `rect`, in the coordinates of `canvas`:
 /// what a sprite visual (and later a shape) does with its brush. A surface
 /// brush is painted by [`ServerCompositionSurfaceBrush::paint`], a nine-grid,
-/// mask or effect brush by its own `paint` (a backdrop brush paints nothing); a brush of
+/// mask, effect, backdrop, host backdrop or XAML brush by its own `paint`; a brush of
 /// the drawing context (the colour and gradient brushes) fills the
 /// rectangle.
 pub fn paint_composition_brush(canvas: &mut dyn IDrawingContextImpl, brush: &Rc<dyn IServerObject>, rect: Rect) {
@@ -237,6 +266,10 @@ pub fn paint_composition_brush(canvas: &mut dyn IDrawingContextImpl, brush: &Rc<
         effect.paint(canvas, rect);
     } else if let Some(backdrop) = brush.as_any().downcast_ref::<super::ServerCompositionBackdropBrush>() {
         backdrop.paint(canvas, rect);
+    } else if let Some(host_backdrop) = brush.as_any().downcast_ref::<super::ServerCompositionHostBackdropBrush>() {
+        host_backdrop.paint(canvas, rect);
+    } else if let Some(xaml) = brush.as_any().downcast_ref::<super::ServerXamlCompositionBrush>() {
+        xaml.paint(canvas, rect);
     } else if let Some(platform_brush) = brush.clone().as_brush() {
         canvas.draw_rectangle(Some(&*platform_brush), None, RoundedRect::from_rect(rect), &BoxShadows::default());
     }

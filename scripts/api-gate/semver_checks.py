@@ -33,7 +33,10 @@ they are the dispatch machinery of the class model, every new virtual member add
 and no application constructs one. The lint `constructible_struct_adds_field` is not counted
 either for the metadata structs `MarkupType` (ferroui-base) and `TypeModel` (ferroui-build-scan):
 they are built only through `MarkupType::new` and `TypeModel::new` with the struct update syntax,
-and the compiler metadata grows with the markup compiler. Every other result counts. The defaults of properties, which no signature shows, are
+and the compiler metadata grows with the markup compiler. The lint `enum_variant_added` is not
+counted for the enum `GraphicsEffect` (ferroui-base), the effect descriptions of the WinUI
+composition API, which gain the Win2D effects of the materials within 0.4 (owner decision,
+2026-10-30, #325); it becomes `#[non_exhaustive]` in 0.5. Every other result counts. The defaults of properties, which no signature shows, are
 guarded by the snapshot test `property_defaults_tests` of `ferroui-controls`.
 
 Only the standard library, `git`, and the `cargo` and `cargo-semver-checks` on PATH.
@@ -65,6 +68,9 @@ VTABLE_ITEM = re.compile(r"\b\w+VTable\.")
 # (`MarkupType { .., ..MarkupType::new(..) }`, `TypeModel::new`): a new field of one is not
 # counted (docs/porting/winui-theme/DEVIATIONS.md, "API gate"). By crate, the struct.
 METADATA_STRUCTS = {"ferroui-base": "MarkupType", "ferroui-build-scan": "TypeModel"}
+# The enums whose new variants are not counted within 0.4 (owner decision, 2026-10-30, #325: the
+# Win2D effects of the WinUI materials); each becomes `#[non_exhaustive]` in 0.5. By crate, the enum.
+OPEN_ENUMS = {"ferroui-base": "GraphicsEffect"}
 # The rustdoc JSON of the pull request and of the baseline, and the worktree of the baseline.
 GATE_DIR = os.path.join(ROOT, "target", "api-gate")
 BASELINE_DOCS = os.path.join(GATE_DIR, "baseline")
@@ -78,6 +84,13 @@ def is_metadata_struct(crate, item):
     """Whether `item` (a field of the listing) is a field of a metadata struct of `crate`."""
     struct = METADATA_STRUCTS.get(crate)
     return struct is not None and re.search(r"\b" + struct + r"\.", item) is not None
+
+
+def is_open_enum_variant(crate, item):
+    """Whether `item` (a variant of the listing, `variant Enum:Variant in ...`) is a variant of an
+    enum of `crate` whose new variants are not counted."""
+    enum = OPEN_ENUMS.get(crate)
+    return enum is not None and re.search(r"\bvariant " + enum + r":", item) is not None
 
 
 # The colours of a terminal (CI sets CARGO_TERM_COLOR=always): the output is read without them.
@@ -115,6 +128,8 @@ def counted_failures(output, crate=None):
             if lint in VTABLE_LINTS and VTABLE_ITEM.search(item):
                 continue
             if lint == "constructible_struct_adds_field" and is_metadata_struct(crate, item):
+                continue
+            if lint == "enum_variant_added" and is_open_enum_variant(crate, item):
                 continue
             failures.append((crate, lint, item))
     return failures
