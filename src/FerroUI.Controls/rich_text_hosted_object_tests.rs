@@ -15,6 +15,8 @@ use ferroui_base::{
 };
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
+#[allow(unused_imports)]
+use crate::{RichEditBox, RichEditBoxTextPresenter};
 
 type MeasureCallback = Rc<dyn Fn(&HostedProbe)>;
 
@@ -693,4 +695,24 @@ fn rich_hosted_read_cache_is_remeasured_even_with_an_unchanged_constraint() {
             .size(),
         Size::new(20.0, 20.0)
     );
+}
+
+#[test]
+fn rich_hosted_editor_preserves_additive_paragraph_spacing() {
+    let _scope = test_scope();
+    let _text = TextTestScope::new();
+    let editor = RichEditBox::new();
+    editor.set_font_size(10.0);
+    let first = Paragraph::with_text("first");
+    first.set_margin(Thickness::new(0.0, 7.0, 0.0, 11.0));
+    let second = Paragraph::with_text("second");
+    second.set_margin(Thickness::new(0.0, 13.0, 0.0, 17.0));
+    editor.rich_document().blocks().add(first);
+    editor.rich_document().blocks().add(second);
+    let view = editor.text_presenter();
+    measure(&view, Size::new(100.0, 200.0));
+    assert!(!view.page_layout().source.collapse_paragraph_margins);
+    close(view.line_metrics()[0].bounds.y, 7.0);
+    close(view.line_metrics()[1].bounds.y, 42.0);
+    close(view.page_layout().size.height, 70.0);
 }

@@ -99,6 +99,15 @@ ferro_class_info!(ConnectedAnimationService {
 ferro_class_info!(AutomationPeer {
     markup: {
         namespace: "FerroUI.Automation.Peers",
+        properties: [
+            EventsSource: Option<Ref<AutomationPeer>> {
+                get: AutomationPeer::events_source,
+                set: |this: &Ref<AutomationPeer>, value: Option<Ref<AutomationPeer>>| this.set_events_source(value)
+            },
+        ],
+        methods: [
+            fn RaiseTextEditTextChangedEvent(crate::automation::provider::TextEditChangeType, Vec<String>) => AutomationPeer::raise_text_edit_text_changed_event,
+        ],
         events: [
             ChildrenChanged(Option<BoxedValue>, EventArgs) => |this: &Ref<AutomationPeer>, handler: MarkupDelegate| {
                 let sender = this.downgrade();

@@ -7,6 +7,8 @@ use ferroui_base::{Rect, Size};
 use crate::{RichTextBlock, RichTextBlockOverflow};
 #[allow(unused_imports)]
 use crate::rich_text::*;
+#[allow(unused_imports)]
+use crate::{RichEditBox, RichEditBoxTextPresenter};
 
 #[test]
 fn rich_language_source_validation_and_patch_assignment_are_atomic() {
@@ -194,4 +196,18 @@ fn rich_language_rtf_reports_unrepresentable_tags_and_unknown_ids() {
     assert!(RtfWriter::write(&no_language)
         .unwrap()
         .contains("\\lang1024"));
+}
+
+#[test]
+fn rich_language_owner_uses_the_same_inherited_presenter_value() {
+    let _scope = test_scope();
+    let editor = RichEditBox::new();
+    editor.set_language(CultureInfo::get_culture_info("ko-KR"));
+    assert_eq!(editor.text_presenter().language().name(), "ko-KR");
+    editor.set_rich_document(RichTextDocument::from_text("한글"));
+    let block = editor.blocks().get(0);
+    assert_eq!(block.language().name(), "ko-KR");
+    editor.set_language(CultureInfo::get_culture_info("ja-JP"));
+    assert_eq!(editor.text_presenter().language().name(), "ja-JP");
+    assert_eq!(block.language().name(), "ja-JP");
 }

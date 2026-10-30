@@ -240,6 +240,16 @@ const DECLARED_NEXT_TO_THE_TYPE: &[&str] = &[
     "TextStreamEncoding",
     "TextRangeUnit",
     "LetterCase",
+    // RichEditBox (crate::rich_edit_box::MARKUP_TYPES).
+    "RichEditCharacterCasing",
+    "DisabledFormattingAccelerators",
+    "RichEditCompositionEventArgs",
+    "RoutedEvent`1",
+    "RichEditBoxSelectionChangingEventArgs",
+    "RoutedEvent`1",
+    "RichEditBoxTextChangingEventArgs",
+    "RoutedEvent`1",
+    "TextEditChangeType",
 ];
 
 #[test]

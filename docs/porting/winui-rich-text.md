@@ -205,3 +205,16 @@ What remains outside the port (RT-P of #243): the exact LineServices metrics, th
 | RTF reads every Windows code page. | With the cargo feature `rtf-codepages` (encoding_rs); without it, the code page 1252 and Unicode escapes only. | Decision D2. |
 | `UndoLimit` limits the undo stack. | It limits the redo stack too. | #243 review N3. |
 
+### 11.3 RichEditBox (R8)
+
+| WinUI | FerroUI | Why |
+|---|---|---|
+| `Document` and `TextDocument` return the text object model. | The same (`document()`, `text_document()`); the shared document is the property `RichDocument`, and `Paragraph` content in markup fills it (FerroUI additions). | Decision D3 (#243 had `Document` as the shared model, S13). |
+| Programmatic edits, undo and paste during a composition end it with `TextCompositionEnded` and reset the input method. | The same: a composition the editor ends outside the control's own composition calls raises `TextCompositionEnded` and resets the IME. | #243 review S4. |
+| A click or focus loss terminates the composition and keeps its text (`TextBoxBase.cpp`). | The same: the preview is committed, then the IME is reset (#243 discarded it). | #243 review S5. |
+| `TextCompositionStarted` precedes the first `TextChanging` of a composition. | The same, at the caret with no composed text yet. | #243 review N1. |
+| `SelectionStart` and `SelectionLength` are current in `TextChanging`. | The selection is read from the editor, so it is the edit's. | #243 review N4. |
+| Shift+Enter inserts a soft line break. | It inserts a paragraph, as #243 did, until the Windows check confirms RichEdit's behaviour. | #243 review N2 (open). |
+| The context menu is `TextCommandBarFlyout`. | A `MenuFlyout` with the same commands (`docs/porting/winui-theme/DEVIATIONS.md`, G-30). | FerroUI has no command bar flyout. |
+| The template is in every theme. | Only the WinUI theme has it (`WINUI_ONLY_CONTROLS`); Fluent and Simple show nothing. | Decision D4. |
+

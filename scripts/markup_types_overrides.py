@@ -275,6 +275,18 @@ BASE = {
 }
 
 CONTROLS = {
+    # The text-edit automation of WinUI's rich text (docs/porting/winui-rich-text.md, R8).
+    'AutomationPeer': {
+        'properties': [
+            """EventsSource: Option<Ref<AutomationPeer>> {
+                get: AutomationPeer::events_source,
+                set: |this: &Ref<AutomationPeer>, value: Option<Ref<AutomationPeer>>| this.set_events_source(value)
+            }""",
+        ],
+        'methods': [
+            "fn RaiseTextEditTextChangedEvent(crate::automation::provider::TextEditChangeType, Vec<String>) => AutomationPeer::raise_text_edit_text_changed_event",
+        ],
+    },
     # WinUI's TextElement.FindName (docs/porting/winui-rich-text.md, decision D7).
     'TextElement': {
         'methods': [

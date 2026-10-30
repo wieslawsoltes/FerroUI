@@ -7,6 +7,8 @@ use crate::test_support::test_scope;
 use crate::RichEditBox;
 use ferroui_base::media::{FlowDirection, FontStyle, FontWeight, TextAlignment};
 use std::cell::RefCell;
+#[allow(unused_imports)]
+use crate::{RichEditBox, RichEditBoxTextPresenter};
 
 fn model(text: &str) -> RichTextDocument {
     let document = RichTextDocument::from_text(text);
@@ -280,8 +282,8 @@ fn rich_selection_paragraph_typing_publishes_complete_alignment_and_caret_once()
     document.changed(move |_| {
         let editor = weak.upgrade().unwrap();
         read.borrow_mut().push((
-            editor.document().text(),
-            editor.document().paragraphs()[0].text_alignment(),
+            editor.rich_document().text(),
+            editor.rich_document().paragraphs()[0].text_alignment(),
             editor.selection(),
         ));
     });
@@ -306,7 +308,7 @@ fn rich_selection_paragraph_typing_failed_group_restores_exact_document_and_hist
     let result: Result<(), EditError> = editor.edit_group(|editor| {
         editor.type_text("X")?;
         assert_eq!(
-            editor.document().paragraphs()[0].text_alignment(),
+            editor.rich_document().paragraphs()[0].text_alignment(),
             TextAlignment::Right
         );
         Err(DocumentError::InvalidFormat("Reject the outer transaction.").into())
@@ -348,4 +350,27 @@ fn rich_selection_paragraph_typing_retains_explicit_typing_and_independent_range
         document.paragraphs()[0].text_alignment(),
         TextAlignment::Right
     );
+}
+
+#[test]
+fn rich_selection_paragraph_typing_is_used_by_the_real_control_and_shared_history() {
+    let _scope = test_scope();
+    let owner = RichEditBox::new();
+    owner.set_rich_document(model("ab\ncd"));
+    owner.select(3, 2);
+    let services = owner.text_document();
+    services.clear_undo_redo_history();
+    assert!(owner.insert_text("X").unwrap());
+    assert_eq!(owner.text(), "abX\ncd");
+    assert_eq!(services.selection().selection(), EditorSelection::caret(3));
+    assert_eq!(
+        owner.rich_document().paragraphs()[0].text_alignment(),
+        TextAlignment::Left
+    );
+    assert!(services.undo().unwrap());
+    assert_eq!(owner.text(), "ab\ncd");
+    assert_eq!(services.selection().selection(), EditorSelection::new(3, 2));
+    assert!(!services.can_undo());
+    assert!(services.redo().unwrap());
+    assert_eq!(owner.text(), "abX\ncd");
 }

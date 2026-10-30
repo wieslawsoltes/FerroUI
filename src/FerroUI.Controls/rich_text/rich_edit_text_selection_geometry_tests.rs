@@ -11,6 +11,8 @@ use ferroui_base::{FerroLocator, Point, Rect, Ref, Size};
 use std::any::Any;
 use std::cell::{Cell, Ref as CellRef, RefCell};
 use std::rc::Rc;
+#[allow(unused_imports)]
+use crate::{RichEditBox, RichEditBoxTextPresenter};
 
 #[derive(Default)]
 struct GeometryProbe {
@@ -178,4 +180,78 @@ fn rich_selection_vertical_extension_geometry_work_is_independent_of_story_size(
         work[0], work[1],
         "one crossed line must perform the same caret geometry work"
     );
+}
+
+#[test]
+fn rich_selection_vertical_redirected_edge_geometry_preserves_newer_callback_state() {
+    let _scope = test_scope();
+    let _text = TextTestScope::new();
+    for change in 0..4 {
+        let probe = install_observer();
+        let owner = RichEditBox::new();
+        owner.set_text("aaaaaa\na\naaaaaa\nbbbbbb\ncccccc").unwrap();
+        let document = owner.text_document();
+        let view: Ref<RichTextBlock> = owner.text_presenter().upcast();
+        document.editor().set_text_view(Some(view.clone())).unwrap();
+        arrange(&view);
+        owner.select(5, 5);
+        document.clear_undo_redo_history();
+        let end = document.text_length();
+        // A deferred model batch proves the native mutation identity is used,
+        // independently of whether its public revision notification has run.
+        let batch = (change == 0).then(|| document.document().begin_edit());
+        let callback_document = document.clone();
+        let invoked = Rc::new(Cell::new(false));
+        let observed = invoked.clone();
+        let callback: Box<dyn FnOnce()> = Box::new(move || {
+            invoked.set(true);
+            match change {
+                0 => callback_document
+                    .document()
+                    .replace_text(0..end, "external")
+                    .unwrap(),
+                1 => callback_document.selection().set_range(3, 3).unwrap(),
+                2 => callback_document.selection().set_range(5, end).unwrap(),
+                _ => callback_document.editor().set_text_view(None).unwrap(),
+            }
+        });
+        let pending = Rc::new(RefCell::new(Some(callback)));
+        let weak = owner.downgrade();
+        owner.selection_changing(move |_, args| {
+            let callback = pending.borrow_mut().take();
+            if let Some(callback) = callback {
+                weak.upgrade().unwrap().select(5, end);
+                args.set_cancel(true);
+                // Hit testing on the path to the redirected edge happens after
+                // selection publication. Ordinary caret publication asks only
+                // for distances and cannot consume this one-shot callback.
+                *probe.on_hit.borrow_mut() = Some(callback);
+            }
+        });
+        assert!(
+            matches!(
+                document.selection().move_down(TextRangeUnit::Line, 1, true),
+                Err(EditError::ReentrantEdit)
+            ),
+            "change={change}"
+        );
+        assert!(
+            observed.get(),
+            "the redirected geometry callback must execute"
+        );
+        match change {
+            0 => assert_eq!(document.text(), "external"),
+            1 => assert_eq!(document.selection().selection(), EditorSelection::caret(3)),
+            2 => assert_eq!(
+                document.selection().selection(),
+                EditorSelection::new(5, end)
+            ),
+            _ => assert!(document
+                .selection()
+                .move_down(TextRangeUnit::Line, 1, false)
+                .is_err()),
+        }
+        assert!(!document.can_undo());
+        drop(batch);
+    }
 }

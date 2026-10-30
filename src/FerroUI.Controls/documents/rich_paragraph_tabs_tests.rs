@@ -11,6 +11,8 @@ use ferroui_base::{Rect, Size};
 use crate::{RichTextBlock, RichTextBlockOverflow};
 #[allow(unused_imports)]
 use crate::rich_text::*;
+#[allow(unused_imports)]
+use crate::{RichEditBox, RichEditBoxTextPresenter};
 
 #[test]
 fn rich_paragraph_tabs_use_native_values_points_and_sorted_replacement() {
@@ -459,4 +461,26 @@ fn rich_paragraph_tabs_clipboard_resolves_external_defaults_and_preserves_exact_
         .iter()
         .all(|p| p.format.default_tab_stop == Some(48.0)));
     assert_eq!(inserted.text(), original.text());
+}
+
+#[test]
+fn rich_paragraph_tabs_editor_default_remains_document_based_when_font_changes() {
+    let _scope = test_scope();
+    let _text = TextTestScope::new();
+    let control = RichEditBox::new();
+    let paragraph = Paragraph::with_text("a\tb");
+    paragraph.set_font_size(20.0);
+    control.blocks().add(paragraph);
+    let presenter = control.text_presenter();
+    measure_tabs(&presenter, 100.0);
+    assert_eq!(control.text_document().default_tab_stop(), 36.0);
+    assert!((presenter.get_rect_from_character_index(2).x - 48.0).abs() < 0.01);
+    control.text_document().set_default_tab_stop(54.0).unwrap();
+    measure_tabs(&presenter, 100.0);
+    assert!((presenter.get_rect_from_character_index(2).x - 72.0).abs() < 0.01);
+    assert!(control.text_document().undo().unwrap());
+    measure_tabs(&presenter, 100.0);
+    assert!((presenter.get_rect_from_character_index(2).x - 48.0).abs() < 0.01);
+    let exported = RtfReader::read_str(&control.export_rtf().unwrap()).unwrap();
+    assert_eq!(exported.paragraphs[0].format.default_tab_stop, Some(48.0));
 }

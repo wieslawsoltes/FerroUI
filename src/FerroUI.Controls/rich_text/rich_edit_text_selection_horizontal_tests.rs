@@ -8,6 +8,8 @@ use crate::RichEditBox;
 use ferroui_base::threading::Dispatcher;
 use std::cell::Cell;
 use std::rc::Rc;
+#[allow(unused_imports)]
+use crate::{RichEditBox, RichEditBoxTextPresenter};
 
 #[derive(Debug)]
 struct HorizontalCase {
@@ -557,4 +559,138 @@ fn rich_selection_horizontal_extreme_counts_saturate_to_real_boundaries() {
         );
         assert_eq!(document.selection().selection().active, 6);
     }
+}
+
+#[test]
+fn rich_selection_horizontal_cancellation_preserves_selection_document_and_redo() {
+    let _scope = Dispatcher::unit_test_scope();
+    let owner = RichEditBox::new();
+    owner.set_text("A😀e\u{301}B").unwrap();
+    let document = owner.text_document();
+    document.set_text("changed").unwrap();
+    document.undo().unwrap();
+    owner.select(1, 1);
+    owner.selection_changing(|_, args| args.set_cancel(true));
+    let snapshot = document.document().snapshot();
+    let revision = document.document().revision();
+    assert_eq!(
+        document
+            .selection()
+            .move_right(TextRangeUnit::Character, 2, true)
+            .unwrap(),
+        0
+    );
+    assert_eq!(document.selection().selection(), EditorSelection::caret(1));
+    assert_eq!(document.document().snapshot(), snapshot);
+    assert_eq!(document.document().revision(), revision);
+    assert!(document.can_redo());
+    assert!(!document.can_undo());
+}
+
+#[test]
+fn rich_selection_horizontal_redirection_counts_graphemes_and_command_direction() {
+    let _scope = Dispatcher::unit_test_scope();
+    for right in [false, true] {
+        let owner = RichEditBox::new();
+        owner
+            .set_text("A😀e\u{301}👩\u{200d}👩\u{200d}👦B")
+            .unwrap();
+        owner.select(3, 3);
+        let document = owner.text_document();
+        let weak = owner.downgrade();
+        owner.selection_changing(move |_, args| {
+            weak.upgrade().unwrap().select(3, 13);
+            args.set_cancel(true);
+        });
+        let moved = if right {
+            document
+                .selection()
+                .move_right(TextRangeUnit::Character, 1, true)
+        } else {
+            document
+                .selection()
+                .move_left(TextRangeUnit::Character, 1, true)
+        };
+        assert_eq!(moved.unwrap(), if right { 2 } else { -2 });
+        assert_eq!(
+            document.selection().selection(),
+            EditorSelection::new(3, 13)
+        );
+    }
+}
+
+#[test]
+fn rich_selection_horizontal_callback_model_edit_rejects_stale_count() {
+    let _scope = Dispatcher::unit_test_scope();
+    let owner = RichEditBox::new();
+    owner.set_text("one two three").unwrap();
+    owner.select(1, 1);
+    let document = owner.text_document();
+    let model = document.document();
+    let batch = model.begin_edit();
+    let callback_model = model.clone();
+    let changed = Rc::new(Cell::new(false));
+    owner.selection_changing(move |_, _| {
+        if !changed.replace(true) {
+            callback_model
+                .replace_text(0..callback_model.text_length(), "external")
+                .unwrap();
+        }
+    });
+    assert!(matches!(
+        document
+            .selection()
+            .move_right(TextRangeUnit::Word, 1, true),
+        Err(EditError::ReentrantEdit)
+    ));
+    assert_eq!(document.text(), "external");
+    assert!(!document.can_undo());
+    assert!(!document.can_redo());
+    drop(batch);
+}
+
+#[test]
+fn rich_selection_horizontal_nested_boundary_command_owns_vertical_affinity() {
+    let _scope = crate::test_support::test_scope();
+    let _text = ferroui_base::media::text_formatting::testing::TextTestScope::new();
+    let owner = RichEditBox::new();
+    owner.set_text("aaaaaa\na").unwrap();
+    let document = owner.text_document();
+    let view = owner.text_presenter().upcast::<RichTextBlock>();
+    document.editor().set_text_view(Some(view.clone())).unwrap();
+    view.measure(ferroui_base::Size::new(300.0, 500.0));
+    view.arrange(ferroui_base::Rect::new(0.0, 0.0, 300.0, 500.0));
+    owner.select(5, 5);
+    let nested = document.selection();
+    let changed = Rc::new(Cell::new(false));
+    let observed = changed.clone();
+    owner.selection_changing(move |_, _| {
+        if !changed.replace(true) {
+            assert_eq!(nested.selection(), EditorSelection::caret(8));
+            // A nonzero horizontal command at the story boundary owns the
+            // reached caret, even when its source offsets do not change.
+            assert_eq!(
+                nested
+                    .move_right(TextRangeUnit::Character, 1, false)
+                    .unwrap(),
+                0
+            );
+        }
+    });
+    assert_eq!(
+        document
+            .selection()
+            .move_down(TextRangeUnit::Line, 1, false)
+            .unwrap(),
+        1
+    );
+    assert!(observed.get());
+    assert_eq!(
+        document
+            .selection()
+            .move_up(TextRangeUnit::Line, 1, false)
+            .unwrap(),
+        1
+    );
+    assert_eq!(document.selection().selection(), EditorSelection::caret(1));
 }

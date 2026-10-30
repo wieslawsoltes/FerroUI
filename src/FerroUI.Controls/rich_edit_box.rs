@@ -54,6 +54,7 @@ use ferroui_base::{
     StyledProperty, StyledPropertyOptions, Visual, VisualImpl, VisualImplExt,
     VisualTreeAttachmentEventArgs,
 };
+use ferroui_base::metadata::{MarkupType, MarkupTyped};
 use std::cell::{Cell, RefCell};
 use std::ops::Range;
 use std::rc::Rc;
@@ -2549,3 +2550,29 @@ impl RichEditBox {
         self.add_handler(Self::selection_changing_event(), handler)
     }
 }
+
+/// The markup types of RichEditBox declared next to their types, registered with the
+/// other types of the crate.
+pub(crate) const MARKUP_TYPES: &[&MarkupType] = &[
+    <RichEditCharacterCasing as MarkupTyped>::MARKUP,
+    <DisabledFormattingAccelerators as MarkupTyped>::MARKUP,
+    <RichEditCompositionEventArgs as MarkupTyped>::MARKUP,
+    <RichEditCompositionRoutedEvent as MarkupTyped>::MARKUP,
+    <RichEditBoxSelectionChangingEventArgs as MarkupTyped>::MARKUP,
+    <RichEditBoxSelectionChangingRoutedEvent as MarkupTyped>::MARKUP,
+    <RichEditBoxTextChangingEventArgs as MarkupTyped>::MARKUP,
+    <RichEditBoxTextChangingRoutedEvent as MarkupTyped>::MARKUP,
+    <crate::automation::provider::TextEditChangeType as MarkupTyped>::MARKUP,
+];
+
+/// Registers the nullable forms of the value types of [`MARKUP_TYPES`].
+pub(crate) fn register_value_types() {
+    use ferroui_base::data::core::ValueTypes;
+    ValueTypes::register_nullable::<RichEditCharacterCasing>();
+    ValueTypes::register_nullable::<DisabledFormattingAccelerators>();
+    ValueTypes::register_nullable::<crate::automation::provider::TextEditChangeType>();
+    ValueTypes::register_nullable::<RoutedEvent<RichEditCompositionEventArgs>>();
+    ValueTypes::register_nullable::<RoutedEvent<RichEditBoxSelectionChangingEventArgs>>();
+    ValueTypes::register_nullable::<RoutedEvent<RichEditBoxTextChangingEventArgs>>();
+}
+

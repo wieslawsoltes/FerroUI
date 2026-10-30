@@ -20,6 +20,8 @@ use std::future::Future;
 use std::ops::Range;
 use std::rc::Rc;
 use std::task::{Context, Poll, Waker};
+#[allow(unused_imports)]
+use crate::{RichEditBox, RichEditBoxTextPresenter};
 
 fn ready<T>(future: impl Future<Output = T>) -> T {
     match Box::pin(future)
@@ -383,5 +385,274 @@ impl ferroui_base::media::IBrush for FilteringCallbackBrush {
             }
         }
         None
+    }
+}
+
+#[test]
+fn rich_edit_link_clipboard_filter_rebases_expansion_soft_breaks_tabs_and_paragraphs() {
+    let _scope = Dispatcher::unit_test_scope();
+    let mut source = RtfReader::read_str(concat!(
+        r#"{\rtf1 p{\field{\*\fldinst HYPERLINK "https://example.test" \\t "frame"}"#,
+        r"{\fldrslt {\b\u223?\tab a}\line b\par c\u-10179?\u-8704?}}{\i z}}",
+    ))
+    .unwrap();
+    source.link_fields[0].has_sentinel = true;
+    let clipboard = clipboard(&source);
+    let control = RichEditBox::new();
+    control.set_accepts_return(false);
+    control.set_accepts_tab(false);
+    control.set_character_casing(RichEditCharacterCasing::Upper);
+    let before = control.rich_document().snapshot();
+    ready(control.paste_from_clipboard_async(clipboard.clipboard(), false)).unwrap();
+    assert_eq!(control.text(), "PSSABC😀Z");
+    let snapshot = control.rich_document().snapshot();
+    snapshot.validate().unwrap();
+    assert_eq!(snapshot.paragraphs.len(), 1);
+    assert_eq!(snapshot.link_fields.len(), 1);
+    assert_eq!(snapshot.link_fields[0].range, 1..8);
+    assert_eq!(
+        snapshot.link_fields[0].target_name.as_deref(),
+        Some("frame")
+    );
+    assert!(snapshot.link_fields[0].has_sentinel);
+    assert!(projected_ids(&snapshot)
+        .iter()
+        .all(|id| *id == snapshot.link_fields[0].id));
+    assert_eq!(
+        control
+            .document()
+            .character_format_at(2)
+            .unwrap()
+            .font_weight,
+        Some(FontWeight::Bold)
+    );
+    assert!(control.undo().unwrap());
+    assert_eq!(control.rich_document().snapshot(), before);
+    assert!(!control.editor().can_undo());
+}
+
+#[test]
+fn rich_edit_link_clipboard_lowercase_mapping_preserves_contextual_sigma_and_dotted_i() {
+    let _scope = Dispatcher::unit_test_scope();
+    let source = one_field("AİΟΣ😀Z", 1..6, 9);
+    let clipboard = clipboard(&source);
+    let control = RichEditBox::new();
+    control.set_character_casing(RichEditCharacterCasing::Lower);
+    ready(control.paste_from_clipboard_async(clipboard.clipboard(), false)).unwrap();
+    assert_eq!(control.text(), "ai\u{307}ος😀z");
+    let snapshot = control.rich_document().snapshot();
+    snapshot.validate().unwrap();
+    assert_eq!(snapshot.link_fields.len(), 1);
+    assert_eq!(snapshot.link_fields[0].range, 1..7);
+    assert_eq!(
+        snapshot.link_fields[0].target_name.as_deref(),
+        Some("frame")
+    );
+}
+
+#[test]
+fn rich_edit_link_clipboard_filter_retires_fully_removed_fields_without_invisible_links() {
+    let _scope = Dispatcher::unit_test_scope();
+    let mut source = one_field("a\t\n\nb", 1..2, 4);
+    source
+        .add_link_field(DocumentLinkField {
+            id: 5,
+            range: 2..4,
+            target: "https://other.test".into(),
+            target_name: None,
+            has_sentinel: false,
+        })
+        .unwrap();
+    let clipboard = clipboard(&source);
+    let control = RichEditBox::new();
+    control.set_accepts_return(false);
+    control.set_accepts_tab(false);
+    ready(control.paste_from_clipboard_async(clipboard.clipboard(), false)).unwrap();
+    assert_eq!(control.text(), "ab");
+    let snapshot = control.rich_document().snapshot();
+    snapshot.validate().unwrap();
+    assert!(snapshot.link_fields.is_empty());
+    assert!(projected_ids(&snapshot).is_empty());
+    fn no_links(inlines: &[InlineSnapshot]) -> bool {
+        inlines.iter().all(|inline| {
+            !matches!(inline.kind, InlineSnapshotKind::Hyperlink { .. })
+                && inline.children().is_none_or(no_links)
+        })
+    }
+    assert!(snapshot
+        .paragraphs
+        .iter()
+        .all(|paragraph| no_links(&paragraph.inlines)));
+}
+
+#[test]
+fn rich_edit_link_clipboard_filter_keeps_adjacent_equal_target_identities_distinct() {
+    let _scope = Dispatcher::unit_test_scope();
+    let mut source = one_field("ß\tb", 0..1, 4);
+    source
+        .add_link_field(DocumentLinkField {
+            id: 5,
+            range: 2..3,
+            target: "https://example.test".into(),
+            target_name: Some("frame".into()),
+            has_sentinel: false,
+        })
+        .unwrap();
+    let clipboard = clipboard(&source);
+    let control = RichEditBox::new();
+    control.set_accepts_tab(false);
+    control.set_character_casing(RichEditCharacterCasing::Upper);
+    ready(control.paste_from_clipboard_async(clipboard.clipboard(), false)).unwrap();
+    assert_eq!(control.text(), "SSB");
+    let snapshot = control.rich_document().snapshot();
+    snapshot.validate().unwrap();
+    assert_eq!(snapshot.link_fields.len(), 2);
+    assert_eq!(snapshot.link_fields[0].range, 0..2);
+    assert_eq!(snapshot.link_fields[1].range, 2..3);
+    assert_ne!(snapshot.link_fields[0].id, snapshot.link_fields[1].id);
+    assert_eq!(
+        snapshot.link_fields[0].target,
+        snapshot.link_fields[1].target
+    );
+    assert_eq!(
+        RtfWriter::write(&snapshot)
+            .unwrap()
+            .matches("\\field")
+            .count(),
+        2
+    );
+}
+
+#[test]
+fn rich_edit_link_clipboard_filter_counts_embedded_content_but_not_empty_containers() {
+    let _scope = Dispatcher::unit_test_scope();
+    let child = Button::new();
+    let mut source = DocumentSnapshot::from_text("ßx");
+    source.paragraphs[0].inlines = vec![
+        InlineSnapshot::run("ß"),
+        InlineSnapshot {
+            format: Default::default(),
+            kind: InlineSnapshotKind::Embedded(Some(child.clone().upcast())),
+        },
+        InlineSnapshot::run("x"),
+    ];
+    source
+        .add_link_field(DocumentLinkField {
+            id: 1,
+            range: 0..3,
+            target: "https://example.test".into(),
+            target_name: None,
+            has_sentinel: false,
+        })
+        .unwrap();
+    if let InlineSnapshotKind::Hyperlink { inlines, .. } = &mut source.paragraphs[0].inlines[0].kind
+    {
+        inlines.insert(
+            0,
+            InlineSnapshot {
+                format: Default::default(),
+                kind: InlineSnapshotKind::Embedded(None),
+            },
+        );
+    } else {
+        panic!("The explicit field must have a hyperlink projection.");
+    }
+    let clipboard = clipboard(&source);
+    let control = RichEditBox::new();
+    control.set_character_casing(RichEditCharacterCasing::Upper);
+    ready(control.paste_from_clipboard_async(clipboard.clipboard(), false)).unwrap();
+    assert_eq!(control.text(), "SS\u{fffc}X");
+    let snapshot = control.rich_document().snapshot();
+    snapshot.validate().unwrap();
+    assert_eq!(snapshot.link_fields[0].range, 0..4);
+    fn contains(inlines: &[InlineSnapshot], child: &ferroui_base::Ref<crate::Control>) -> bool {
+        inlines.iter().any(|inline| match &inline.kind {
+            InlineSnapshotKind::Embedded(Some(actual)) => actual == child,
+            _ => inline
+                .children()
+                .is_some_and(|children| contains(children, child)),
+        })
+    }
+    assert!(contains(&snapshot.paragraphs[0].inlines, &child.upcast()));
+}
+
+#[test]
+fn rich_edit_link_clipboard_filter_callback_cannot_overwrite_newer_editor_state() {
+    use ferroui_base::input::platform::ClipboardErrorKind;
+    let _scope = Dispatcher::unit_test_scope();
+    for change in 0..3 {
+        let control = RichEditBox::new();
+        control.set_text("abcd").unwrap();
+        control.select(1, 1);
+        control.editor().clear_history();
+        let before = control.rich_document().snapshot();
+        let armed = Rc::new(Cell::new(false));
+        let called = Rc::new(Cell::new(false));
+        let brush = Rc::new(FilteringCallbackBrush {
+            armed: armed.clone(),
+            callback: RefCell::new(None),
+        });
+        let mut source = one_field("q", 0..1, 1);
+        source.paragraphs[0].inlines[0].format.foreground = Some(Some(brush.clone()));
+        let transfer = Rc::new(ArmOnDispose {
+            inner: RichTextTransfer::create(&source, RichEditClipboardFormat::AllFormats),
+            armed,
+        });
+        let clipboard = crate::testing::TestClipboardImpl::new();
+        ready(clipboard.clipboard().set_data_async(Some(transfer))).unwrap();
+        let target = control.downgrade();
+        let observed = called.clone();
+        *brush.callback.borrow_mut() = Some(Box::new(move || {
+            observed.set(true);
+            let control = target.upgrade().unwrap();
+            match change {
+                0 => control.select(3, 3),
+                1 => {
+                    control.set_text("external").unwrap();
+                }
+                _ => {
+                    control
+                        .editor()
+                        .apply_format(&CharacterFormat {
+                            font_weight: Some(FontWeight::Bold),
+                            ..Default::default()
+                        })
+                        .unwrap();
+                }
+            }
+        }));
+        let result = ready(control.paste_from_clipboard_async(clipboard.clipboard(), false));
+        assert_eq!(result.unwrap_err().kind(), ClipboardErrorKind::Canceled);
+        assert!(called.get());
+        if change == 1 {
+            assert_eq!(control.text(), "external");
+        } else {
+            assert_eq!(control.rich_document().snapshot(), before);
+            assert_eq!(
+                control.editor().selection(),
+                EditorSelection::caret(if change == 0 { 3 } else { 1 })
+            );
+            if change == 2 {
+                assert_eq!(
+                    control.editor().typing_format().font_weight,
+                    Some(FontWeight::Bold)
+                );
+            }
+        }
+        // The callback's accepted formatting command owns its undo unit. A
+        // canceled paste must preserve that unit as well as the typing patch.
+        assert_eq!(control.editor().can_undo(), change == 2);
+        if change == 2 {
+            assert!(control.undo().unwrap());
+            assert_eq!(control.rich_document().snapshot(), before);
+            assert_eq!(control.editor().typing_format(), CharacterFormat::default());
+            assert!(control.redo().unwrap());
+            assert_eq!(control.rich_document().snapshot(), before);
+            assert_eq!(
+                control.editor().typing_format().font_weight,
+                Some(FontWeight::Bold)
+            );
+        }
+        assert!(control.rich_document().snapshot().link_fields.is_empty());
     }
 }

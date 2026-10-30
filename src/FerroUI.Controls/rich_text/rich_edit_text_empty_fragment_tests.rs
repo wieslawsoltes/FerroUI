@@ -4,6 +4,8 @@ use crate::documents::LineSpacingRule;
 use crate::rich_text::LetterCase;
 use crate::RichEditBox;
 use std::cell::{Cell, RefCell};
+#[allow(unused_imports)]
+use crate::{RichEditBox, RichEditBoxTextPresenter};
 
 fn empty_rich_fragment() -> DocumentSnapshot {
     DocumentSnapshot {
@@ -159,4 +161,75 @@ fn rich_independent_range_invalid_paragraph_patch_preserves_composition_preview(
     assert_eq!(document.selection().selection(), selection);
     assert!(document.editor().is_composing());
     assert!(!document.can_undo());
+}
+
+#[test]
+fn rich_empty_fragment_preserves_paragraph_defaults_and_is_one_undo_unit() {
+    let _scope = Dispatcher::unit_test_scope();
+    let owner = RichEditBox::new();
+    owner.set_text("word").unwrap();
+    owner.select(3, 1);
+    owner.editor().clear_history();
+    let document = owner.text_document();
+    let before = owner.rich_document().snapshot();
+    let range = document.document_range().unwrap();
+    let fragment = empty_rich_fragment();
+
+    range.set_snapshot(&fragment).unwrap();
+    assert_eq!(owner.rich_document().snapshot(), fragment);
+    assert_eq!(owner.editor().selection(), EditorSelection::caret(0));
+    assert_eq!(range.range(), 0..0);
+    assert!(owner.undo().unwrap());
+    assert_eq!(owner.rich_document().snapshot(), before);
+    assert_eq!(owner.editor().selection(), EditorSelection::new(3, 1));
+    assert!(!owner.can_undo());
+    assert!(owner.redo().unwrap());
+    assert_eq!(owner.rich_document().snapshot(), fragment);
+    assert_eq!(owner.editor().selection(), EditorSelection::caret(0));
+}
+
+#[test]
+fn rich_case_control_projects_only_final_selection_and_retains_the_users_decision_in_history() {
+    let _scope = Dispatcher::unit_test_scope();
+    for replace_selection in [false, true] {
+        let owner = RichEditBox::new();
+        owner.set_text("Straße tail").unwrap();
+        owner.select(6, 4);
+        owner.editor().clear_history();
+        let proposals = Rc::new(RefCell::new(Vec::new()));
+        let seen = proposals.clone();
+        let first = Cell::new(true);
+        let weak = owner.downgrade();
+        owner.selection_changing(move |_, args| {
+            if first.replace(false) {
+                let owner = weak.upgrade().unwrap();
+                // The range's temporary selection is never projected. The
+                // already-converted story accompanies the final user proposal.
+                assert_eq!(owner.text(), "STRASSE tail");
+                seen.borrow_mut()
+                    .push((args.selection_start(), args.selection_length()));
+                if replace_selection {
+                    owner.select(10, 8);
+                }
+                args.set_cancel(true);
+            }
+        });
+        let range = owner.text_document().get_range(0, 6).unwrap();
+        assert!(range.change_case(LetterCase::Upper).unwrap());
+        assert_eq!(owner.text(), "STRASSE tail");
+        assert_eq!(range.range(), 0..7);
+        assert_eq!(&*proposals.borrow(), &[(4, 3)]);
+        let accepted = if replace_selection {
+            EditorSelection::new(10, 8)
+        } else {
+            EditorSelection::new(6, 4)
+        };
+        assert_eq!(owner.editor().selection(), accepted);
+        assert!(owner.undo().unwrap());
+        assert_eq!(owner.text(), "Straße tail");
+        assert_eq!(owner.editor().selection(), EditorSelection::new(6, 4));
+        assert!(owner.redo().unwrap());
+        assert_eq!(owner.text(), "STRASSE tail");
+        assert_eq!(owner.editor().selection(), accepted);
+    }
 }

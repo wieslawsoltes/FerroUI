@@ -9,6 +9,8 @@ use ferroui_base::threading::Dispatcher;
 use ferroui_base::{Rect, Ref, Size};
 use std::cell::Cell;
 use std::rc::Rc;
+#[allow(unused_imports)]
+use crate::{RichEditBox, RichEditBoxTextPresenter};
 
 fn services(text: &str) -> RichEditTextDocument {
     RichEditTextDocument::new(RichTextDocument::from_text(text))
@@ -811,4 +813,184 @@ fn rich_selection_home_end_editor_publication_model_write_preserves_external_sta
     assert!(!document.can_undo());
     assert!(!document.can_redo());
     assert_eq!(document.selection().selection(), EditorSelection::caret(0));
+}
+
+#[test]
+fn rich_selection_extended_end_cancellation_retains_affinity() {
+    let _scope = Dispatcher::unit_test_scope();
+    let owner = RichEditBox::new();
+    owner.set_text("abc\ndefg\nhij").unwrap();
+    owner.select(1, 6);
+    let document = owner.text_document();
+    assert_eq!(
+        document
+            .selection()
+            .end_key(TextRangeUnit::Line, true)
+            .unwrap(),
+        3
+    );
+    owner.selection_changing(|_, args| args.set_cancel(true));
+    assert_eq!(
+        document
+            .selection()
+            .home_key(TextRangeUnit::Story, false)
+            .unwrap(),
+        0
+    );
+    assert_eq!(document.selection().selection(), EditorSelection::new(1, 9));
+    assert_eq!(
+        document
+            .selection()
+            .end_key(TextRangeUnit::Line, true)
+            .unwrap(),
+        0
+    );
+}
+
+#[test]
+fn rich_selection_extended_end_nested_same_offset_navigation_owns_affinity() {
+    let _scope = Dispatcher::unit_test_scope();
+    let owner = RichEditBox::new();
+    owner.set_text("abc\ndefg\nhij").unwrap();
+    owner.select(1, 6);
+    let document = owner.text_document();
+    let nested = document.selection();
+    let changed = Rc::new(Cell::new(false));
+    let observed = changed.clone();
+    owner.selection_changing(move |_, _| {
+        if !changed.replace(true) {
+            assert_eq!(nested.selection(), EditorSelection::new(1, 9));
+            // Home accepts the same endpoint as a following-line start. The
+            // enclosing End must not overwrite this newer affinity decision.
+            assert_eq!(nested.home_key(TextRangeUnit::Line, true).unwrap(), 0);
+        }
+    });
+    assert_eq!(
+        document
+            .selection()
+            .end_key(TextRangeUnit::Line, true)
+            .unwrap(),
+        3
+    );
+    assert!(observed.get());
+    assert_eq!(
+        document
+            .selection()
+            .end_key(TextRangeUnit::Line, true)
+            .unwrap(),
+        3
+    );
+    assert_eq!(
+        document.selection().selection(),
+        EditorSelection::new(1, 12)
+    );
+}
+
+#[test]
+fn rich_selection_extended_end_view_detach_during_publication_invalidates_old_affinity() {
+    let _scope = test_scope();
+    let _text = TextTestScope::new();
+    let owner = RichEditBox::new();
+    owner.set_text("abc\ndefg\nhij").unwrap();
+    owner.select(1, 6);
+    let document = owner.text_document();
+    let view = owner.text_presenter().upcast::<RichTextBlock>();
+    measure(&view, 300.0, 500.0);
+    document.editor().set_text_view(Some(view.clone())).unwrap();
+    let editor = document.editor();
+    let changed = Rc::new(Cell::new(false));
+    owner.selection_changing(move |_, _| {
+        if !changed.replace(true) {
+            editor.set_text_view(None).unwrap();
+        }
+    });
+    assert_eq!(
+        document
+            .selection()
+            .end_key(TextRangeUnit::Line, true)
+            .unwrap(),
+        3
+    );
+    assert_eq!(
+        document
+            .selection()
+            .end_key(TextRangeUnit::Line, true)
+            .unwrap(),
+        3
+    );
+    assert_eq!(
+        document.selection().selection(),
+        EditorSelection::new(1, 12)
+    );
+}
+
+#[test]
+fn rich_selection_home_end_reports_canceled_or_reentrant_accepted_selection() {
+    let _scope = Dispatcher::unit_test_scope();
+    for override_selection in [false, true] {
+        for to_end in [false, true] {
+            let owner = RichEditBox::new();
+            owner.set_text("abcdef").unwrap();
+            owner.select(1, 4);
+            let document = owner.text_document();
+            document.clear_undo_redo_history();
+            let snapshot = document.document().snapshot();
+            let weak = owner.downgrade();
+            owner.selection_changing(move |_, args| {
+                if override_selection {
+                    weak.upgrade().unwrap().select(5, 2);
+                }
+                args.set_cancel(true);
+            });
+            assert_eq!(
+                navigate(&document, TextRangeUnit::Story, false, to_end).unwrap(),
+                if override_selection { -2 } else { 0 }
+            );
+            let expected = if override_selection {
+                EditorSelection::new(5, 2)
+            } else {
+                EditorSelection::new(1, 4)
+            };
+            assert_eq!(document.selection().selection(), expected);
+            assert_eq!(
+                (owner.selection_start(), owner.selection_end()),
+                (expected.anchor, expected.active)
+            );
+            assert_eq!(document.document().snapshot(), snapshot);
+            assert!(!document.can_undo());
+        }
+    }
+}
+
+#[test]
+fn rich_selection_home_end_selection_callback_model_write_rejects_stale_result_in_outer_batch() {
+    let _scope = Dispatcher::unit_test_scope();
+    let owner = RichEditBox::new();
+    owner.set_text("abcdef").unwrap();
+    owner.select(4, 4);
+    let document = owner.text_document();
+    let model = document.document();
+    let revision = model.revision();
+    let batch = model.begin_edit();
+    let callback_model = model.clone();
+    let changed = Rc::new(Cell::new(false));
+    let observed = changed.clone();
+    owner.selection_changing(move |_, _| {
+        if !changed.replace(true) {
+            callback_model
+                .replace_text(0..callback_model.text_length(), "external")
+                .unwrap();
+        }
+    });
+    assert!(matches!(
+        document.selection().home_key(TextRangeUnit::Story, false),
+        Err(EditError::ReentrantEdit)
+    ));
+    assert!(observed.get());
+    assert_eq!(document.text(), "external");
+    assert_eq!(model.revision(), revision);
+    assert!(!document.can_undo());
+    assert!(!document.can_redo());
+    drop(batch);
+    assert_eq!(document.text(), "external");
 }

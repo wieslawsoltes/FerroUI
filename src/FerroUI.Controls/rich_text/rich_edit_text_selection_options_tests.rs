@@ -10,6 +10,8 @@ use std::cell::Cell;
 #[path = "rich_edit_text_selection_options_native_cases.rs"]
 mod native_cases;
 use native_cases::{NATIVE_CASES, NATIVE_FIXTURES};
+#[allow(unused_imports)]
+use crate::{RichEditBox, RichEditBoxTextPresenter};
 
 type NativeState = (usize, usize, u32, i32);
 
@@ -450,4 +452,159 @@ fn rich_selection_options_type_text_distinguishes_typed_and_bulk_crlf() {
         assert!(document.undo().unwrap());
         assert_eq!(document.text(), "ab");
     }
+}
+
+#[test]
+fn rich_selection_options_are_shared_and_drive_control_typing() {
+    let _scope = test_scope();
+    let owner = RichEditBox::new();
+    owner.set_text("abcdef").unwrap();
+    owner.select(2, 2);
+    let document = owner.text_document();
+    document.clear_undo_redo_history();
+    let first = document.selection();
+    let second = document.selection();
+    first
+        .set_options(
+            SelectionOptions::OVERTYPE
+                | SelectionOptions::ACTIVE
+                | SelectionOptions::AT_END_OF_LINE,
+        )
+        .unwrap();
+    assert_eq!(observed(&second), (2, 2, 31, 1));
+    assert!(owner.insert_text("XY").unwrap());
+    assert_eq!(owner.text(), "abXYef");
+    assert_eq!(observed(&first), (4, 4, 29, 1));
+    assert_eq!(observed(&second), observed(&first));
+    assert!(document.undo().unwrap());
+    assert_eq!(owner.text(), "abcdef");
+    assert!(second
+        .options()
+        .contains(SelectionOptions::OVERTYPE | SelectionOptions::ACTIVE));
+    assert!(!document.can_undo());
+}
+
+#[test]
+fn rich_selection_options_cancelled_direction_keeps_existing_modes() {
+    let _scope = test_scope();
+    let owner = RichEditBox::new();
+    owner.set_text("abcdef").unwrap();
+    owner.select(1, 4);
+    let selection = owner.text_document().selection();
+    selection.set_options(SelectionOptions::OVERTYPE).unwrap();
+    owner.selection_changing(|_, args| args.set_cancel(true));
+    selection
+        .set_options(SelectionOptions::START_ACTIVE | SelectionOptions::ACTIVE)
+        .unwrap();
+    assert_eq!(observed(&selection), (1, 4, 20, 2));
+}
+
+#[test]
+fn rich_selection_options_redirected_direction_keeps_existing_modes() {
+    let _scope = test_scope();
+    let owner = RichEditBox::new();
+    owner.set_text("abcdef").unwrap();
+    owner.select(1, 4);
+    let selection = owner.text_document().selection();
+    selection.set_options(SelectionOptions::OVERTYPE).unwrap();
+    let weak = owner.downgrade();
+    owner.selection_changing(move |_, args| {
+        weak.upgrade().unwrap().select(0, 0);
+        args.set_cancel(true);
+    });
+    selection
+        .set_options(SelectionOptions::START_ACTIVE | SelectionOptions::ACTIVE)
+        .unwrap();
+    assert_eq!(observed(&selection), (0, 0, 21, 1));
+}
+
+#[test]
+fn rich_selection_options_nested_same_value_intent_owns_modes() {
+    let _scope = test_scope();
+    let owner = RichEditBox::new();
+    owner.set_text("abcdef").unwrap();
+    owner.select(1, 4);
+    let selection = owner.text_document().selection();
+    selection.set_options(SelectionOptions::OVERTYPE).unwrap();
+    let nested = selection.clone();
+    let called = Rc::new(Cell::new(false));
+    let observed_call = called.clone();
+    owner.selection_changing(move |_, _| {
+        if !called.replace(true) {
+            assert_eq!(nested.selection(), EditorSelection::new(4, 1));
+            nested
+                .set_options(SelectionOptions::START_ACTIVE | SelectionOptions::OVERTYPE)
+                .unwrap();
+        }
+    });
+    selection
+        .set_options(SelectionOptions::START_ACTIVE | SelectionOptions::ACTIVE)
+        .unwrap();
+    assert!(observed_call.get());
+    assert_eq!(observed(&selection), (4, 1, 21, 2));
+}
+
+#[test]
+fn rich_selection_options_nested_navigation_owns_affinity_and_modes() {
+    let _scope = test_scope();
+    let owner = RichEditBox::new();
+    owner.set_text("abcdef").unwrap();
+    owner.select(1, 4);
+    let document = owner.text_document();
+    let selection = document.selection();
+    selection.set_options(SelectionOptions::OVERTYPE).unwrap();
+    document.editor().remember_vertical_navigation_x(42.0);
+    let nested = selection.clone();
+    let called = Rc::new(Cell::new(false));
+    let observed_call = called.clone();
+    owner.selection_changing(move |_, _| {
+        if !called.replace(true) {
+            let requested = nested.selection();
+            nested
+                .set_range(requested.anchor, requested.active)
+                .unwrap();
+        }
+    });
+    selection
+        .set_options(SelectionOptions::START_ACTIVE | SelectionOptions::ACTIVE)
+        .unwrap();
+    assert!(observed_call.get());
+    assert_eq!(observed(&selection), (4, 1, 21, 2));
+    assert_eq!(document.editor().vertical_navigation_x(), None);
+}
+
+#[test]
+fn rich_selection_options_callback_model_edit_rejects_stale_modes() {
+    let _scope = test_scope();
+    let owner = RichEditBox::new();
+    owner.set_text("abcdef").unwrap();
+    owner.select(1, 4);
+    let document = owner.text_document();
+    let selection = document.selection();
+    selection.set_options(SelectionOptions::OVERTYPE).unwrap();
+    let model = document.document();
+    let revision = model.revision();
+    let batch = model.begin_edit();
+    let callback_model = model.clone();
+    let called = Rc::new(Cell::new(false));
+    let observed_call = called.clone();
+    owner.selection_changing(move |_, _| {
+        if !called.replace(true) {
+            callback_model
+                .replace_text(0..callback_model.text_length(), "external")
+                .unwrap();
+        }
+    });
+    assert!(matches!(
+        selection.set_options(SelectionOptions::START_ACTIVE | SelectionOptions::ACTIVE),
+        Err(EditError::ReentrantEdit)
+    ));
+    assert!(observed_call.get());
+    assert_eq!(document.text(), "external");
+    assert_eq!(model.revision(), revision);
+    assert!(selection.options().contains(SelectionOptions::OVERTYPE));
+    assert!(!selection.options().contains(SelectionOptions::ACTIVE));
+    assert!(!document.can_undo());
+    drop(batch);
+    assert_eq!(document.text(), "external");
 }

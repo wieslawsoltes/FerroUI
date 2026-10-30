@@ -10,6 +10,8 @@ use ferroui_base::threading::Dispatcher;
 use ferroui_base::{Rect, Ref, RelativePoint, Size};
 use std::any::Any;
 use std::cell::Cell;
+#[allow(unused_imports)]
+use crate::{RichEditBox, RichEditBoxTextPresenter};
 
 #[path = "rich_edit_text_selection_gravity_native_cases.rs"]
 mod native_cases;
@@ -1434,4 +1436,53 @@ fn rich_selection_gravity_nonempty_queries_preserve_uniform_and_mixed_content() 
         ));
         assert_eq!(document.document().snapshot(), before);
     }
+}
+
+#[test]
+fn rich_selection_gravity_is_shared_and_drives_real_control_typing() {
+    let _scope = test_scope();
+    let owner = RichEditBox::new();
+    owner.set_rich_document(formatted_model());
+    owner.select(2, 2);
+    let document = owner.text_document();
+    let first = document.selection();
+    let second = document.selection();
+    first.set_gravity(RangeGravity::Forward);
+    assert_eq!(second.gravity(), RangeGravity::Forward);
+    assert_eq!(document.editor().selection_gravity(), RangeGravity::Forward);
+    assert_eq!(character_pair(&second.character_format().unwrap()), (0, -1));
+    assert!(owner.insert_text("X").unwrap());
+    assert_eq!(owner.text(), "abXCD");
+    assert_eq!(range_pair(&document.get_range(2, 3).unwrap()), (0, -1));
+    assert_eq!(first.gravity(), RangeGravity::Forward);
+    first.set_gravity(RangeGravity::Outward);
+    assert_eq!(second.gravity(), RangeGravity::UIBehavior);
+}
+
+#[test]
+fn rich_selection_gravity_publication_preserves_newer_mode_without_restyling_typed_text() {
+    let _scope = test_scope();
+    let owner = RichEditBox::new();
+    owner.set_rich_document(formatted_model());
+    owner.select(2, 2);
+    let document = owner.text_document();
+    let selection = document.selection();
+    let callback_selection = selection.clone();
+    let called = Rc::new(Cell::new(false));
+    let observed = called.clone();
+    owner.selection_changing(move |_, _| {
+        if !called.replace(true) {
+            callback_selection.set_gravity(RangeGravity::Forward);
+        }
+    });
+    assert!(owner.insert_text("X").unwrap());
+    assert!(observed.get());
+    assert_eq!(selection.gravity(), RangeGravity::Forward);
+    assert_eq!(range_pair(&document.get_range(2, 3).unwrap()), (-1, 0));
+    assert_eq!(
+        character_pair(&selection.character_format().unwrap()),
+        (0, -1)
+    );
+    document.undo().unwrap();
+    assert_eq!(selection.gravity(), RangeGravity::Forward);
 }

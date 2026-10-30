@@ -29,6 +29,8 @@ use ferroui_base::threading::Dispatcher;
 use ferroui_base::{FerroLocator, Matrix, Point, Rect, Ref, StaticType, Thickness};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
+#[allow(unused_imports)]
+use crate::{RichEditBox, RichEditBoxTextPresenter};
 
 #[derive(Default)]
 struct RecordingFeedback(RefCell<Vec<(FeedbackAction, FeedbackType)>>);
@@ -1144,4 +1146,62 @@ fn rich_readonly_context_holding_keeps_overflow_feedback_and_selection_policy() 
     );
     f.assert_anchor(point);
     pointer.capture(None);
+}
+
+#[test]
+fn rich_readonly_context_metadata_exposes_the_exact_distinct_typed_event() {
+    let _scope = crate::test_support::test_scope();
+    crate::register_types();
+    ferroui_base::register_types();
+    let metadata = RichTextBlock::TYPE.markup().unwrap();
+    let field = metadata.find_field("ContextMenuOpeningEvent").unwrap();
+    assert_eq!(
+        (field.type_)(),
+        ValueType::of::<RoutedEvent<ContextMenuEventArgs>>()
+    );
+    let event = from_markup_value::<RoutedEvent<ContextMenuEventArgs>>(&(field.get)()).unwrap();
+    assert_eq!(event, *RichTextBlock::context_menu_opening_event());
+    assert_ne!(event, *RichEditBox::context_menu_opening_event());
+}
+
+#[test]
+fn rich_readonly_context_presenter_defers_the_public_event_to_its_editor() {
+    let f = Fixture::new();
+    let editor = RichEditBox::new();
+    editor.set_template(Some(crate::rich_edit_box_tests::rich_edit_box_template()));
+    editor.set_width(240.0);
+    editor.set_height(100.0);
+    editor.set_text("editable selection").unwrap();
+    editor.select(2, 12);
+    f.panel.children().add(editor.clone());
+    let flyout = f.flyout(&editor);
+    let readonly_calls = Rc::new(Cell::new(0));
+    let observed = readonly_calls.clone();
+    f.panel
+        .add_handler(RichTextBlock::context_menu_opening_event(), move |_, _| {
+            observed.set(observed.get() + 1);
+        });
+    let editor_calls = Rc::new(Cell::new(0));
+    let observed = editor_calls.clone();
+    editor.context_menu_opening(move |_, _| observed.set(observed.get() + 1));
+    f.layout();
+    let presenter = editor.text_presenter();
+    // A directly configured presenter still keeps ordinary Control property
+    // precedence. It must never project RichTextBlock's read-only public event.
+    let local = f.flyout(&presenter);
+    let local_request = ContextRequestedEventArgs::new();
+    presenter.raise_event(&local_request);
+    assert!(local_request.handled());
+    assert!(local.is_open());
+    assert_eq!(readonly_calls.get(), 0);
+    assert_eq!(editor_calls.get(), 0);
+    local.hide();
+    presenter.set_context_flyout(None);
+    let request = ContextRequestedEventArgs::new();
+    presenter.raise_event(&request);
+    assert!(request.handled());
+    assert_eq!(readonly_calls.get(), 0);
+    assert_eq!(editor_calls.get(), 1);
+    assert!(flyout.is_open());
+    assert_eq!(flyout.target(), Some(editor.upcast()));
 }

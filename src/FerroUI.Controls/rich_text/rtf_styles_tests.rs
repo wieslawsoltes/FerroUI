@@ -7,6 +7,8 @@ use crate::rich_text::TextSetOptions;
 use crate::RichEditBox;
 use ferroui_base::media::{FontStyle, FontWeight, TextAlignment};
 use ferroui_base::threading::Dispatcher;
+#[allow(unused_imports)]
+use crate::{RichEditBox, RichEditBoxTextPresenter};
 
 fn read(text: &str) -> DocumentSnapshot {
     RtfReader::read_str(text).unwrap()
@@ -328,4 +330,34 @@ fn rich_rtf_style_resolved_formats_survive_canonical_rtf_round_trip() {
         Some(FontStyle::Italic)
     );
     assert_eq!(second, third);
+}
+
+#[test]
+fn rich_rtf_style_import_rejects_invalid_graph_before_mutation_and_undoes_once() {
+    let _scope = Dispatcher::unit_test_scope();
+    let control = RichEditBox::new();
+    control.set_text("before").unwrap();
+    let text = control.text_document();
+    let original = control.rich_document().snapshot();
+    let invalid = r"{\rtf1{\stylesheet{\s1\sbasedon1 Cycle;}}\s1 replacement}";
+    assert!(text
+        .set_text_with_options(TextSetOptions::FORMAT_RTF, invalid)
+        .is_err());
+    assert_eq!(control.rich_document().snapshot(), original);
+    text.set_text_with_options(
+        TextSetOptions::FORMAT_RTF,
+        r"{\rtf1{\stylesheet{\s1\b Strong;}}\s1 replacement}",
+    )
+    .unwrap();
+    assert_eq!(control.text(), "replacement");
+    assert_eq!(
+        control.rich_document().snapshot().paragraphs[0].inlines[0]
+            .format
+            .font_weight,
+        Some(FontWeight::Bold)
+    );
+    assert!(text.undo().unwrap());
+    assert_eq!(control.rich_document().snapshot(), original);
+    assert!(text.redo().unwrap());
+    assert_eq!(control.text(), "replacement");
 }

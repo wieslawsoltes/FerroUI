@@ -11,6 +11,8 @@ use ferroui_base::threading::Dispatcher;
 use ferroui_base::{Rect, Ref, Size};
 use std::cell::Cell;
 use std::rc::Rc;
+#[allow(unused_imports)]
+use crate::{RichEditBox, RichEditBoxTextPresenter};
 
 fn services(text: &str) -> RichEditTextDocument {
     RichEditTextDocument::new(RichTextDocument::from_text(text))
@@ -1166,4 +1168,169 @@ fn rich_selection_move_by_external_editor_publication_preserves_handler_state() 
     assert!(!document.can_undo());
     assert!(!document.can_redo());
     subscription.dispose();
+}
+
+#[test]
+fn rich_selection_vertical_presenter_scroll_retains_desired_column() {
+    let _scope = test_scope();
+    let _text = TextTestScope::new();
+    let owner = RichEditBox::new();
+    owner.set_text("aaaaaa\na\naaaaaa").unwrap();
+    owner.set_template(Some(crate::rich_edit_box_tests::rich_edit_box_template()));
+    let root = crate::test_support::TestRoot::with_child(owner.clone());
+    let layout = |size| {
+        root.set_client_size(size);
+        root.measure(size);
+        root.arrange(Rect::from_size(size));
+        root.layout_manager().execute_layout_pass();
+    };
+    layout(Size::new(300.0, 100.0));
+    let presenter = owner.text_presenter();
+    let line_height = presenter.line_metrics()[0].bounds.height;
+    layout(Size::new(300.0, line_height + 1.0));
+    assert!(presenter.viewport().height > 0.0);
+    assert!(presenter.viewport().height < line_height * 2.0);
+    owner.select(5, 5);
+    let document = owner.text_document();
+    let original_offset = presenter.offset();
+    for position in [8, 14] {
+        assert_eq!(
+            document
+                .selection()
+                .move_down(TextRangeUnit::Line, 1, false)
+                .unwrap(),
+            1
+        );
+        root.layout_manager().execute_layout_pass();
+        assert_eq!(
+            document.selection().selection(),
+            EditorSelection::caret(position)
+        );
+        assert!(presenter.offset().y > original_offset.y);
+    }
+}
+
+#[test]
+fn rich_selection_move_by_cancellation_reports_zero_without_history_changes() {
+    let _scope = Dispatcher::unit_test_scope();
+    let owner = RichEditBox::new();
+    owner.set_text("one two three").unwrap();
+    owner.select(1, 1);
+    let document = owner.text_document();
+    document.clear_undo_redo_history();
+    let snapshot = document.document().snapshot();
+    owner.selection_changing(|_, args| args.set_cancel(true));
+    assert_eq!(
+        document
+            .selection()
+            .move_by(TextRangeUnit::Word, 2, false)
+            .unwrap(),
+        0
+    );
+    assert_eq!(document.selection().selection(), EditorSelection::caret(1));
+    assert_eq!(document.document().snapshot(), snapshot);
+    assert!(!document.can_undo());
+}
+
+#[test]
+fn rich_selection_move_by_reports_actual_units_after_directed_callback_redirection() {
+    let _scope = Dispatcher::unit_test_scope();
+    for (text, unit, start, target, expected) in [
+        ("A😀BC", TextRangeUnit::Character, 0, 3, 2),
+        ("one two three", TextRangeUnit::Word, 0, 8, 2),
+        ("one two three", TextRangeUnit::Word, 9, 0, -3),
+    ] {
+        let owner = RichEditBox::new();
+        owner.set_text(text).unwrap();
+        owner.select(start, start);
+        let document = owner.text_document();
+        let weak = owner.downgrade();
+        owner.selection_changing(move |_, args| {
+            weak.upgrade().unwrap().select(target, target);
+            args.set_cancel(true);
+        });
+        assert_eq!(
+            document.selection().move_by(unit, 1, false).unwrap(),
+            expected
+        );
+        assert_eq!(
+            document.selection().selection(),
+            EditorSelection::caret(target)
+        );
+    }
+}
+
+#[test]
+fn rich_selection_move_by_counts_collapse_once_and_keeps_existing_unit_alignment() {
+    let _scope = Dispatcher::unit_test_scope();
+    let document = services("one two three");
+    document.selection().set_range(1, 6).unwrap();
+    assert_eq!(
+        document
+            .selection()
+            .move_by(TextRangeUnit::Word, 1, false)
+            .unwrap(),
+        1
+    );
+    assert_eq!(document.selection().selection(), EditorSelection::caret(8));
+    document.selection().set_range(6, 1).unwrap();
+    assert_eq!(
+        document
+            .selection()
+            .move_by(TextRangeUnit::Word, -2, false)
+            .unwrap(),
+        -1
+    );
+    assert_eq!(document.selection().selection(), EditorSelection::caret(0));
+
+    let owner = RichEditBox::new();
+    owner.set_text("one two three").unwrap();
+    owner.select(1, 6);
+    let document = owner.text_document();
+    let weak = owner.downgrade();
+    owner.selection_changing(move |_, args| {
+        weak.upgrade().unwrap().select(3, 3);
+        args.set_cancel(true);
+    });
+    assert_eq!(
+        document
+            .selection()
+            .move_by(TextRangeUnit::Word, 3, false)
+            .unwrap(),
+        1
+    );
+    assert_eq!(document.selection().selection(), EditorSelection::caret(3));
+}
+
+#[test]
+fn rich_selection_move_by_external_model_write_survives_deferred_model_publication() {
+    let _scope = Dispatcher::unit_test_scope();
+    let owner = RichEditBox::new();
+    owner.set_text("one two three").unwrap();
+    owner.select(1, 1);
+    let document = owner.text_document();
+    let model = document.document();
+    let revision = model.revision();
+    let batch = model.begin_edit();
+    let callback_model = model.clone();
+    let changed = Rc::new(Cell::new(false));
+    let observed = changed.clone();
+    owner.selection_changing(move |_, _| {
+        if !changed.replace(true) {
+            callback_model
+                .replace_text(0..callback_model.text_length(), "external")
+                .unwrap();
+        }
+    });
+    assert!(matches!(
+        document.selection().move_by(TextRangeUnit::Word, 1, false),
+        Err(EditError::ReentrantEdit)
+    ));
+    assert!(observed.get());
+    assert_eq!(document.text(), "external");
+    assert_eq!(model.revision(), revision);
+    assert!(!document.can_undo());
+    assert!(!document.can_redo());
+    drop(batch);
+    assert_eq!(document.text(), "external");
 }

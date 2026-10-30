@@ -10,6 +10,8 @@ use crate::rich_text::{TextSetOptions, TextStreamOptions};
 use crate::RichEditBox;
 use ferroui_base::media::{FontStyle, FontWeight, TextAlignment};
 use ferroui_base::threading::Dispatcher;
+#[allow(unused_imports)]
+use crate::{RichEditBox, RichEditBoxTextPresenter};
 
 fn link(inline: &InlineSnapshot) -> (&[InlineSnapshot], &str, Option<&str>) {
     match &inline.kind {
@@ -521,4 +523,72 @@ fn rich_rtf_quoted_unc_and_switch_like_targets_remain_literal_data() {
         RtfReader::read_str(r#"{\rtf1{\field{\*\fldinst HYPERLINK \\unknown "x"}{\fldrslt x}}}"#),
         Err(RtfError::UnsupportedFeature("hyperlink field switch"))
     );
+}
+
+#[test]
+fn rich_rtf_field_metadata_expansion_is_bounded_across_the_whole_document() {
+    let _scope = Dispatcher::unit_test_scope();
+    let field = format!(
+        r#"{{\field{{\*\fldinst HYPERLINK "{}"}}{{\fldrslt a\par b\par c}}}}"#,
+        "x".repeat(128)
+    );
+    let source = format!(r"{{\rtf1{field}{field}}}");
+    assert!(source.len() < 512);
+    assert_eq!(
+        RtfReader::read_with_limits(
+            source.as_bytes(),
+            RtfLimits {
+                max_bytes: 512,
+                ..Default::default()
+            }
+        ),
+        Err(RtfError::LimitExceeded("field metadata expansion"))
+    );
+    let accepted = RtfReader::read_with_limits(
+        source.as_bytes(),
+        RtfLimits {
+            max_bytes: 1024,
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    assert_eq!(links(&accepted), 6);
+    assert_eq!(accepted.link_fields.len(), 2);
+    assert_eq!(accepted.text(), "a\nb\nca\nb\nc");
+    // Each of the two fields retains its target once in the common record
+    // and once per three paragraph-local navigation projections: 8 * 128.
+    assert_eq!(
+        RtfReader::read_with_limits(
+            source.as_bytes(),
+            RtfLimits {
+                max_bytes: 1023,
+                ..Default::default()
+            }
+        ),
+        Err(RtfError::LimitExceeded("field metadata expansion"))
+    );
+
+    // The stream adapter passes its byte policy into the codec and parses the
+    // whole snapshot before cancelling an existing preview or editing history.
+    let control = RichEditBox::new();
+    control.set_text("before").unwrap();
+    control.editor().set_preedit("preview", None).unwrap();
+    let snapshot = control.rich_document().snapshot();
+    let selection = control.editor().selection();
+    let revision = control.rich_document().revision();
+    assert!(control
+        .text_document()
+        .load_from_stream(
+            TextSetOptions::FORMAT_RTF,
+            &mut source.as_bytes(),
+            TextStreamOptions {
+                max_bytes: 512,
+                ..Default::default()
+            }
+        )
+        .is_err());
+    assert_eq!(control.rich_document().snapshot(), snapshot);
+    assert_eq!(control.rich_document().revision(), revision);
+    assert_eq!(control.editor().selection(), selection);
+    assert!(control.editor().is_composing());
 }
