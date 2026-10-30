@@ -1,4 +1,5 @@
 use super::{TextInputContentType, TextInputReturnKeyType};
+use crate::input::InputScopeNameValue;
 use crate::{ferro_property, AttachedProperty, FerroProperty, StyledElement, StyledPropertyOptions};
 use std::rc::Rc;
 
@@ -41,6 +42,7 @@ crate::ferro_static_type!(TextInputOptions);
 crate::ferro_properties! {
     impl TextInputOptions, also [
         TextInputOptions::content_type_property,
+        TextInputOptions::input_scope_names_property,
         TextInputOptions::return_key_type_property,
         TextInputOptions::multiline_property,
         TextInputOptions::lowercase_property,
@@ -72,6 +74,44 @@ impl TextInputOptions {
     /// The default options.
     pub fn default_options() -> TextInputOptions {
         TextInputOptions::default()
+    }
+
+    ferro_property!(for TextInputOptions;
+        /// Defines the `InputScopeNames` attached property: the ordered, immutable input-scope
+        /// hints of WinUI's `InputScope` (an addition, `docs/porting/winui-rich-text.md`). `None`
+        /// or an empty list leaves the input method to `ContentType`.
+        ///
+        /// Within 0.4 the value is not a field of [`TextInputOptions`]: a backend reads it from
+        /// the element, through [`TextInputMethodConnection::input_scope_names`](super::TextInputMethodConnection::input_scope_names)
+        /// of a client that opted in to the connection.
+        pub fn input_scope_names_property() -> AttachedProperty<Option<Rc<[InputScopeNameValue]>>> {
+            FerroProperty::register_attached_with::<TextInputOptions, StyledElement, _>(
+                "InputScopeNames",
+                StyledPropertyOptions::new(None).inherits(true),
+            )
+        }
+    );
+
+    /// Sets the value of the attached `InputScopeNames` property on a control.
+    pub fn set_input_scope_names(ferro_object: &StyledElement, value: Option<Rc<[InputScopeNameValue]>>) {
+        ferro_object.set_value(Self::input_scope_names_property(), value)
+    }
+
+    /// Gets the value of the attached `InputScopeNames` property of a control.
+    pub fn get_input_scope_names(ferro_object: &StyledElement) -> Option<Rc<[InputScopeNameValue]>> {
+        ferro_object.get_value(Self::input_scope_names_property())
+    }
+
+    /// The first input scope of a control, the one a platform with a single hint uses.
+    pub fn get_effective_input_scope(ferro_object: &StyledElement) -> Option<InputScopeNameValue> {
+        Self::get_input_scope_names(ferro_object).and_then(|names| names.first().copied())
+    }
+
+    /// The content type that best matches the first input scope of a control, or its
+    /// `ContentType` without one: for a platform that has content types and no input scopes.
+    pub fn get_effective_content_type(ferro_object: &StyledElement) -> TextInputContentType {
+        Self::get_effective_input_scope(ferro_object)
+            .map_or_else(|| Self::get_content_type(ferro_object), InputScopeNameValue::content_type)
     }
 
     ferro_property!(for TextInputOptions;
