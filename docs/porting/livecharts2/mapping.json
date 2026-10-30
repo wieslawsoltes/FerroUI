@@ -1,0 +1,7 @@
+{
+  "description": "Reviewed dispositions of the LiveCharts2 port. Each part of the port (L1 and later, docs/porting/livecharts2.md) adds the dispositions it implements; a `ported` or `native-replacement` entry names the Rust files that implement it.",
+  "files": {},
+  "members": {},
+  "schema": 1,
+  "tests": {}
+}
