@@ -1,0 +1,12 @@
+<ContentControl xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ContentControl.ContentTemplate>
+    <DataTemplate x:DataType="Button">
+      <StackPanel>
+        <TextBlock x:Name="initial" Text="{x:Bind Content}" />
+        <TextBox x:Name="editor" Text="{x:Bind Content, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+        <TextBlock x:Name="mirror" Text="{x:Bind Content, Mode=OneWay}" />
+      </StackPanel>
+    </DataTemplate>
+  </ContentControl.ContentTemplate>
+</ContentControl>

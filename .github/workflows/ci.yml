@@ -86,6 +86,12 @@ jobs:
       # The WinUI source paths keep their Windows spelling on Linux (InkToolbar and InkToolBar).
       - name: Tests of the WinUI theme scripts
         run: python3 -m unittest discover -s scripts/winui-theme -p 'test_*.py'
+      # The event-target table of the WinUI XAML importer is written by a script from the pinned
+      # WinUI API data (src/Markup/FerroUI.Markup.Xaml.WinUI/importer/event_targets.rs).
+      - name: WinUI XAML importer event targets are up to date
+        run: |
+          python3 scripts/winui-gallery/event_targets.py --check
+          python3 -m unittest discover -s scripts/winui-gallery -p 'test_*.py'
       - name: Browser build reuse and exact compression measurements remain correct
         run: node scripts/browser/tests/build_tooling.test.mjs
       # Thread-local variables are declared with ferroui_base::ferro_thread_local!, which on Android

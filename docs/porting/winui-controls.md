@@ -316,3 +316,25 @@ Where #286 differed from WinUI, the port follows WinUI: the text of NumberBox's 
 | `TitleBarTrace` (debug output). | Not ported. | Missing | Diagnostics of the WinUI build. |
 | `TitleBar` passes `RightToLeft` insets swapped. | The same, from `FlowDirection`. | - | - |
 
+
+### 10.6 WinUI XAML importer and x:Bind (W9)
+
+The crate `ferroui-markup-xaml-winui` (`src/Markup/FerroUI.Markup.Xaml.WinUI`; the facade feature `winui-xaml`). Nothing in it changes the default loader or the ordinary bindings: an application opts in.
+
+- **Importer** (`importer/`): `migrate_winui_xaml(xaml, &WinUIXamlOptions)` rewrites a WinUI document into FerroUI's XAML.
+  - The edits are namespace-aware, keep the byte ranges of the original, and never reserialize the document (roxmltree).
+  - The WinUI namespaces map to FerroUI's (`Microsoft.UI.Xaml.Controls` to `FerroUI.Controls`, `Microsoft.UI.Xaml.Navigation` to `FerroUI.Navigation`, and so on).
+  - Audited type and member mappings with a diagnostic replace the rest, such as WinUI's inline `ColorPicker` adapted to `ColorView`.
+  - What has no implementation is reported, not hidden, with the codes `WXAML0001` to `WXAML2006` and the source span of the original (`WinUIXamlMigration`, `WinUIXamlDiagnostic`).
+  - The event-target table (`importer/event_targets.rs`) is written by `scripts/winui-gallery/event_targets.py` from the pinned WinUI API data (`docs/porting/winui-gallery/data/upstream-api.json`). CI checks it with `--check`.
+- **Loading** (`load.rs`): `load_winui`, `parse_winui` and `parse_winui_as` migrate the document, then load it with the run-time loader. A fresh root is loaded inside `xaml_error_scope::with_xaml_errors` (W2), so a deferred resource error comes back as `Err`. The entry points register the crate's types. A build-time compiler is fed the same migrated document.
+- **x:Bind** (`bindings/`): `WinUIBindExtension`, `WinUIBinding`, `WinUIBindingScope` and the `WinUIBindings` host lifecycle (`Initialize`, `Update`, `StopTracking`, opt-in stop on unload), in the namespace `FerroUI.Markup.Xaml.WinUI`, which the importer reaches through a `using:` prefix. It is an explicit property-path adapter on the ordinary binding engine, not WinUI's generated binding compiler. The contract and its pinned WinUI sources are in the crate's `NOTICE.md`.
+
+| WinUI | Port | Kind | Why |
+|---|---|---|---|
+| The XAML compiler generates `x:Bind` code: functions, casts, indexers, converters, fallback values, event bindings, `x:Phase`, `x:DefaultBindMode`. | Dotted property paths with an explicit mode and update trigger; every other form is a diagnostic of the importer. | Missing | The adapter binds through registered property and model metadata; the other forms need generated code. |
+| The generated code initializes the bindings of a page during `Loading`. | The host calls `WinUIBindings::Initialize` after construction (and sets the `DataContext` of a typed template first); `Loaded` is not substituted. | Behaviour | There is no generated page class to hook; the lifecycle is explicit. |
+| `StopTracking` skips the reset when the generated group needs no tracking. | `StopTracking` always resets the controller to uninitialized, so a later `Initialize` refreshes every path. | Behaviour | One explicit lifecycle for every group. |
+| Sources and named elements are kept alive by the managed collector. | Source roots, named elements and intermediate values are held weakly; the declaring root or model owns its fields. | Representation | Rust ownership without cycles, as the native binding engine. |
+
+Tests (75 in the crate, plus the regeneration of the compiled fixture): `importer_tests` (the migration, its diagnostics and the loading entry points), `bindings_tests` (the x:Bind lifecycle) and `compiled_tests`. In `compiled_tests` the same migrated documents run through the interpreter and through the Rust emitter, whose output, `fixtures/winui_bindings.generated.rs`, is checked in and compared with the current compiler.
