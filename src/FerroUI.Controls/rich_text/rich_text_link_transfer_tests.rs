@@ -8,7 +8,7 @@ use crate::documents::{
     RichTextDocument,
 };
 use crate::rich_text::{EditorSelection, RichEditTextDocument, RtfReader, RtfWriter};
-use crate::Button;
+use crate::{Button, RichEditCharacterCasing};
 use ferroui_base::input::{
     AsyncDataTransferExtensions, DataFormat, DataTransfer, DataTransferItem, IAsyncDataTransfer,
 };
