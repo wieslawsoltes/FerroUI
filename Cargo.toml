@@ -306,6 +306,18 @@ ferroui-skia = { version = "=0.4.0", path = "src/Skia/FerroUI.Skia" }
 ferroui-vello = { version = "=0.4.0", path = "src/Vello/FerroUI.Vello" }
 ferroui-harfbuzz = { version = "=0.4.0", path = "src/HarfBuzz/FerroUI.HarfBuzz" }
 bitflags = "2"
+# ICU4X, one version for the whole workspace (owner decision, 2026-10-30): its crates require each
+# other within a minor version (`~2.4.0`), so two crates of the workspace on different minor
+# versions cannot be resolved together. The text preparation of the Pretext port (segmentation) and
+# the formatting of the ProTranslate port (locales, numbers, calendars, dates) take them from here,
+# with the compiled data and without the default features; a crate adds the features it needs.
+icu_segmenter = { version = "2.4", default-features = false, features = ["compiled_data"] }
+icu_locale_core = "2.4"
+icu_properties = "2.4"
+icu_locale = "2.4"
+icu_decimal = { version = "2.4", features = ["alloc"] }
+icu_calendar = { version = "2.4", default-features = false, features = ["compiled_data"] }
+icu_datetime = { version = "2.4", default-features = false, features = ["compiled_data"] }
 # A fast hasher for maps keyed by identities and short keys (the TreeDataGrid's recycle pools).
 rustc-hash = "2.1"
 smallvec = "1.16"
