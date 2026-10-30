@@ -1360,12 +1360,11 @@ fn rich_automation_retained_editor_presenter_does_not_keep_owner_or_text_provide
         Some(&TextProviderError::ElementNotAvailable)
     );
     assert!(text.document_range().is_err());
+    // A peer whose control is gone offers no provider (DEVIATIONS.md, Automation peers).
     assert!(text
         .peer()
         .get_provider::<dyn ITextProvider2>()
-        .unwrap()
-        .get_caret_range()
-        .is_err());
+        .is_none_or(|provider| provider.get_caret_range().is_err()));
     assert_eq!(text.peer().get_name(), "");
 }
 

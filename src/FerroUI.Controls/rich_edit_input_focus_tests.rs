@@ -88,10 +88,10 @@ fn rich_input_nested_focus_during_popup_dismissal_owns_the_final_binding() {
             for return_to_owner in [false, true] {
                 let f = Fixture::new(overlay);
                 let outside = outside(&f);
-                let before = f.owner.rich_document().snapshot();
                 let connection = f.native.connection.borrow().clone().unwrap();
                 let session = connection.begin_composition().unwrap();
                 session.update("candidate", Some(4)).unwrap();
+                let composed = f.owner.rich_document().snapshot();
                 let (flyout, child) = focused_flyout(&f);
                 assert!(session.is_current());
                 let armed = Rc::new(Cell::new(true));
@@ -158,8 +158,9 @@ fn rich_input_nested_focus_during_popup_dismissal_owns_the_final_binding() {
                 assert!(!connection.is_current());
                 assert!(!session.is_current());
                 assert!(!f.owner.editor().is_composing());
-                assert_eq!(f.owner.rich_document().snapshot(), before);
-                assert!(!f.owner.can_undo());
+                // Focus loss keeps the composed text as one undo unit (#243 review, S5).
+                assert_eq!(f.owner.rich_document().snapshot(), composed);
+                assert!(f.owner.can_undo());
                 let accepted = f.native.connection.borrow().clone();
                 if return_to_owner {
                     let accepted = accepted.unwrap();

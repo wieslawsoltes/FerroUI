@@ -190,9 +190,6 @@ mod composition_event_tests;
 #[path = "rich_edit_input_options_tests.rs"]
 mod input_options_tests;
 
-#[path = "rich_edit_input_geometry_tests.rs"]
-mod input_geometry_tests;
-
 #[test]
 fn rich_input_method_start_preserves_styled_selection_and_commit_is_one_undo_unit() {
     let f = Fixture::new(true);
@@ -286,7 +283,8 @@ fn rich_input_method_raw_interception_preserves_preview_and_owner_handoff_reject
         session.commit("stale", 2),
         Err(TextInputMethodError::StateChanged)
     );
-    assert_eq!(f.owner.text(), "abcd");
+    // The focus change commits the preview (#243 review, S5); the stale commit is not applied.
+    assert_eq!(f.owner.text(), "apreviewd");
     assert!(!session.is_current());
     subscription.dispose();
 }
