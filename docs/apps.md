@@ -207,7 +207,8 @@ All jobs run on `ubuntu-latest`, except the iOS bundle (`macos-15`):
 
 Inputs: `test`, `check`, `apt-packages` (extra Ubuntu packages), `script`, `browser-package`,
 `browser-features`, `browser-script`, `smoke` (default `true`), `smoke-ignore` (regular expressions,
-one per line, of smoke errors to leave out), `browser-tests` and `browser-tests-setup`, `android` and
+one per line, of smoke errors to leave out), `browser-tests`, `browser-tests-pull-request` (the
+lines for pull requests when they differ, for example fewer of the slow ones) and `browser-tests-setup`, `android` and
 `ios` (the arguments of the packaging scripts; empty: no package), `pages` (default `true`). The actions are pinned by commit, as
 in the workflows of this repository.
 
