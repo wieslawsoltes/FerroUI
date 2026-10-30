@@ -229,6 +229,27 @@ const DECLARED_NEXT_TO_THE_TYPE: &[&str] = &[
     // The rich text views (crate::context_menu_event_args::MARKUP_TYPES).
     "ContextMenuEventArgs",
     "RoutedEvent`1",
+    // The text object model (crate::rich_text::MARKUP_TYPES).
+    "RichEditClipboardFormat",
+    "FindOptions",
+    "RangeGravity",
+    "SelectionOptions",
+    "SelectionType",
+    "TextGetOptions",
+    "TextSetOptions",
+    "TextStreamEncoding",
+    "TextRangeUnit",
+    "LetterCase",
+    // RichEditBox (crate::rich_edit_box::MARKUP_TYPES).
+    "RichEditCharacterCasing",
+    "DisabledFormattingAccelerators",
+    "RichEditCompositionEventArgs",
+    "RoutedEvent`1",
+    "RichEditBoxSelectionChangingEventArgs",
+    "RoutedEvent`1",
+    "RichEditBoxTextChangingEventArgs",
+    "RoutedEvent`1",
+    "TextEditChangeType",
     // The WinUI materials (winui-materials.md).
     "ApplicationTheme",
     "RevealBrushState",

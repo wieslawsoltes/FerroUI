@@ -335,6 +335,9 @@ ferroui-skia = { version = "=0.4.0", path = "src/Skia/FerroUI.Skia" }
 ferroui-vello = { version = "=0.4.0", path = "src/Vello/FerroUI.Vello" }
 ferroui-harfbuzz = { version = "=0.4.0", path = "src/HarfBuzz/FerroUI.HarfBuzz" }
 bitflags = "2"
+# The legacy code pages of RTF (the optional feature `rtf-codepages` of ferroui-controls,
+# docs/porting/winui-rich-text.md, decision D2): strict byte decoding, no platform code page.
+encoding_rs = { version = "=0.8.42", default-features = false }
 # ICU4X, one version for the whole workspace (owner decision, 2026-10-30): its crates require each
 # other within a minor version (`~2.4.0`), so two crates of the workspace on different minor
 # versions cannot be resolved together. The text preparation of the Pretext port (segmentation) and
