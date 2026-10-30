@@ -4586,6 +4586,15 @@ pub trait InputPaneAwareDecoratorProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_controls::InputPaneAwareDecorator>> InputPaneAwareDecoratorProps for El<T> {}
 
+/// The properties and routed events of [`InputScopeName`](ferroui_base::input::InputScopeName).
+pub trait InputScopeNameProps: ElementBuilder {
+    /// Sets [`InputScopeName::name_value_property`](ferroui_base::input::InputScopeName::name_value_property).
+    fn name_value<M>(self, value: impl IntoProp<ferroui_base::input::InputScopeNameValue, M>) -> Self {
+        self.prop(<ferroui_base::input::InputScopeName>::name_value_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_base::input::InputScopeName>> InputScopeNameProps for El<T> {}
+
 /// The properties and routed events of [`ItemsControl`](ferroui_controls::ItemsControl).
 pub trait ItemsControlProps: ElementBuilder {
     /// Sets [`ItemsControl::item_container_theme_property`](ferroui_controls::ItemsControl::item_container_theme_property).
@@ -9583,6 +9592,11 @@ pub trait AttachedProps: ElementBuilder {
     /// Sets the attached [`TextElement::letter_spacing_property`](ferroui_controls::documents::TextElement::letter_spacing_property).
     fn text_element_letter_spacing<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::documents::TextElement>::letter_spacing_property(), value)
+    }
+
+    /// Sets the attached [`TextInputOptions::input_scope_names_property`](ferroui_base::input::text_input::TextInputOptions::input_scope_names_property).
+    fn text_input_options_input_scope_names<M>(self, value: impl IntoProp<Option<std::rc::Rc<[ferroui_base::input::InputScopeNameValue]>>, M>) -> Self {
+        self.prop(<ferroui_base::input::text_input::TextInputOptions>::input_scope_names_property(), value)
     }
 
     /// Sets the attached [`TextInputOptions::content_type_property`](ferroui_base::input::text_input::TextInputOptions::content_type_property).
