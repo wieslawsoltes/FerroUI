@@ -360,6 +360,7 @@ crate::ferro_rust_paths! {
         crate::styling::StyleQueries,
         crate::styling::StyleQuery,
         crate::styling::StyleQueryComparisonOperator,
+        crate::styling::TargetPropertyPath,
         crate::styling::ThemeVariant,
         crate::utilities::CalendarWeekRule,
         crate::utilities::CancelEventArgs,

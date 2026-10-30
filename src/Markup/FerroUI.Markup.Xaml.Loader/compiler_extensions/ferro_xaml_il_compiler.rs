@@ -258,6 +258,7 @@ impl FerroXamlIlCompiler {
                 Box::new(FerroXamlIlDuplicateSettersChecker),
                 Box::new(FerroXamlIlControlTemplateTargetTypeMetadataTransformer),
                 Box::new(FerroXamlIlBindingPathParser),
+                Box::new(FerroXamlIlVisualStateSetterTransformer),
                 Box::new(FerroXamlIlSetterTargetTypeMetadataTransformer),
                 Box::new(FerroXamlIlSetterTransformer),
                 Box::new(FerroXamlIlStyleValidatorTransformer),
