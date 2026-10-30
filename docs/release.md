@@ -77,6 +77,7 @@ The first preview added the five other names of section 2.2 as placeholders (37 
 `ferroui-controls-charts` (`src/FerroUI.Controls.Charts`, Controls and themes; the port of the public contract of WinUI Charts, docs/porting/winui-charts.md) joined with #282. It is an optional part of the facade (`charts`), and its sample `samples/ChartsDemo` is not published.
 `ferroui-controls-inking` (`src/FerroUI.Controls.Inking`, Controls and themes; the port of the inking controls of WinUI with the WinUI styles of the toolbar, docs/porting/winui-inking.md) joined with #283. It compiles its theme documents in its build script (`links = "ferroui_controls_inking_xaml"`) and depends on the WinUI theme, so it is published after it; it is an optional part of the facade (`inking`).
 `ferroui-controls-repeater` (`src/FerroUI.Controls.Repeater`, Controls and themes; the port of the Repeater of WinUI, docs/porting/winui-repeater/README.md) joined with #269. It is an optional part of the facade (`repeater`).
+`ferroui-markup-xaml-winui` (`src/Markup/FerroUI.Markup.Xaml.WinUI`, Markup; the WinUI XAML importer, its run-time loading entry points and the x:Bind property-path adapter, from #286, W9) joined with the W9 pull request. It exports its type model in its build script (`links = "ferroui_markup_xaml_winui_xaml"`) and is an optional part of the facade (`winui-xaml`).
 
 Every crate was checked in the same way: packaged, and built from its package, by `scripts/release/publish.sh --dry-run` (section 8). `cargo publish --dry-run -p <crate>` cannot be used for this before the first release: it resolves the dependencies of the package in the registry, where the other crates of the workspace are not yet. `cargo package --workspace` (Cargo 1.90 and later) resolves them among the packages it has just assembled instead, which is what the dry run uses, and so every crate got the full check, not only the ones without dependencies in the workspace.
 
@@ -148,6 +149,7 @@ Two names are not under the `ferroui-` prefix. The owner decided on 2026-10-10 t
   | `simple` | `ferroui-themes-simple` | `themes_simple` | no |
   | `winui-theme` | `ferroui-themes-winui` | `themes_winui` | no |
   | `xaml` | `ferroui-markup-xaml` and the run-time loader (`ferroui-markup-xaml-loader` with its feature `runtime`) | `markup_xaml`, `markup_xaml_loader` | no |
+  | `winui-xaml` | `ferroui-markup-xaml-winui` (the WinUI XAML importer and x:Bind; turns on `xaml`) | `markup_xaml_winui` | no |
   | `color-picker`, `dialogs` | `ferroui-controls-color-picker`, `ferroui-dialogs` | `controls_color_picker`, `dialogs` | no |
   | `charts` | `ferroui-controls-charts` (WinUI public-contract port) | `controls_charts` | no |
   | `inking` | `ferroui-controls-inking` (the port of WinUI's inking controls) | `controls_inking` | no |

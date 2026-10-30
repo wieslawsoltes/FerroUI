@@ -1,11 +1,9 @@
 //! Port of `Views/Pages/RemoveRangeActionView` of the reference sample: the class of `pages/RemoveRangeActionView.xaml`.
 
 use crate::markup::{user_control_class, xaml_class};
-use crate::pages::PageInfo;
-use ferroui_base::data::core::ValueTypes;
+use crate::pages::{no_value_types, PageInfo};
 use ferroui_base::{ferro_class_info, instantiate, Ref, TypeInfo};
-use ferroui_controls::primitives::SelectedItemsList;
-use ferroui_controls::{Control, ItemsSource, UserControl};
+use ferroui_controls::{Control, UserControl};
 
 #[repr(C)]
 pub struct RemoveRangeActionView {
@@ -45,22 +43,5 @@ pub(crate) const PAGE: PageInfo = PageInfo {
     types: TYPES,
     classes: &[&RemoveRangeActionView::XAML_CLASS],
     markup_types: &[],
-    register_value_types,
+    register_value_types: no_value_types,
 };
-
-/// What the untyped value conversions must know for the document of the page: the selected items
-/// of a list box (`SelectedItems`) as the items of the action (`Items`).
-///
-/// Deviation (DEVIATIONS.md, Behaviors gallery): the reference binds the selected items (an
-/// `IList`) to the items of the action (an `IEnumerable`) directly; the framework registers no
-/// conversion from the list of the selected items to the untyped list of items the action
-/// declares (`ItemsSource`), so the page registers it: the items are the shared list of the
-/// selected items, not a copy.
-fn register_value_types() {
-    ValueTypes::register_conversion::<SelectedItemsList, ItemsSource>(|list| {
-        Some(ItemsSource::from(list.0.clone()))
-    });
-    ValueTypes::register_conversion::<SelectedItemsList, Option<ItemsSource>>(|list| {
-        Some(Some(ItemsSource::from(list.0.clone())))
-    });
-}

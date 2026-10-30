@@ -19,6 +19,7 @@ use super::classes::RoutedEventOf;
 use crate::ScrollChangedEventArgs;
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::interactivity::{IRoutedEventArgs, RoutedEvent};
+use ferroui_base::animation::TimeSpan;
 use ferroui_base::Vector;
 use ferroui_base::ferro_markup_type;
 use ferroui_base::metadata::{MarkupDelegate, MarkupType, MarkupTyped};
@@ -154,6 +155,54 @@ ferro_markup_type!(class ItemsSourceView {
         try fn KeyFromIndex(i32) -> String => items_source_view_key_from_index,
         try fn IndexFromKey(String) -> i32 => items_source_view_index_from_key,
     ],
+});
+
+// FerroUI.Controls.Notifications
+
+/// The setter of `Notification.Expiration`: a negative time span is an error, as a negative
+/// delay is upstream when the notification is shown.
+fn set_notification_expiration(
+    notification: &Rc<crate::notifications::Notification>,
+    value: TimeSpan,
+) -> Result<(), &'static str> {
+    match value.to_duration() {
+        Some(expiration) => Ok(notification.set_expiration(expiration)),
+        None => Err("The expiration of a notification cannot be negative."),
+    }
+}
+
+// A notification created in markup (`<Notification Title=".." Message=".."/>`, the content of
+// an action that shows it). `OnClick` and `OnClose` are actions, which markup cannot state, and
+// are not declared.
+ferro_markup_type!(class crate::notifications::Notification as "Notification" {
+    namespace: "FerroUI.Controls.Notifications",
+    handles: [
+        crate::notifications::Notification,
+        Rc<crate::notifications::Notification>,
+        Option<Rc<crate::notifications::Notification>>
+    ],
+    this: Rc<crate::notifications::Notification>,
+    interfaces: [Rc<dyn crate::notifications::INotification>],
+    constructors: [() => crate::notifications::Notification::empty],
+    properties: [
+        Title: Option<String> {
+            get: |n: &Rc<crate::notifications::Notification>| n.title(),
+            set: |n: &Rc<crate::notifications::Notification>, value: Option<String>| n.set_title(value)
+        },
+        Message: Option<String> {
+            get: |n: &Rc<crate::notifications::Notification>| n.message(),
+            set: |n: &Rc<crate::notifications::Notification>, value: Option<String>| n.set_message(value)
+        },
+        Type: crate::notifications::NotificationType {
+            get: |n: &Rc<crate::notifications::Notification>| n.type_(),
+            set: |n: &Rc<crate::notifications::Notification>, value: crate::notifications::NotificationType| n.set_type(value)
+        },
+        Expiration: TimeSpan {
+            get: |n: &Rc<crate::notifications::Notification>| TimeSpan::from(n.expiration()),
+            try_set: set_notification_expiration
+        },
+    ],
+    notify_property_changed: crate::notifications::Notification,
 });
 
 // FerroUI.Controls.Documents
@@ -455,6 +504,7 @@ ferro_markup_type!(class ScrollChangedEventArgs {
 
 /// The types declared in this file.
 pub(super) const TYPES: &[&MarkupType] = &[
+    <crate::notifications::Notification as MarkupTyped>::MARKUP,
     <RoutedEventOf<ScrollChangedEventArgs> as MarkupTyped>::MARKUP,
     <ScrollChangedEventArgs as MarkupTyped>::MARKUP,
     <dyn crate::ICommandBarElement as MarkupTyped>::MARKUP,
@@ -513,7 +563,18 @@ pub(super) fn register_value_types() {
     // (and null) from an untyped value, and a binding delivers a handle to it.
     ValueTypes::register_nullable::<crate::ItemsSource>();
     ValueTypes::register_nullable::<crate::primitives::SelectedItemsList>();
+    // A notification is a reference type, boxed as itself, and a notification of the contract.
+    crate::notifications::Notification::ensure_registered();
     crate::ItemsSource::register_binding_conversion::<crate::ItemsSource>();
+    // The selected items of a selecting control are a list (upstream `IList`), so an
+    // enumerable: the handle shares the list, and a binding delivers it to an items source
+    // (`{Binding #list.SelectedItems}` as the items of an action).
+    ValueTypes::register_cast::<crate::primitives::SelectedItemsList, crate::ItemsSource>(|list| {
+        crate::ItemsSource::from(list.0.clone())
+    });
+    ValueTypes::register_conversion::<crate::primitives::SelectedItemsList, Option<crate::ItemsSource>>(|list| {
+        Some(Some(crate::ItemsSource::from(list.0.clone())))
+    });
     // A font collection is a read-only list of font families (`IReadOnlyList<FontFamily>` in
     // the managed original), which a binding delivers to an items source
     // (`{Binding SystemFonts, Source={x:Static FontManager.Current}}`): the items are the

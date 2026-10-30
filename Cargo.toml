@@ -56,6 +56,7 @@ members = [
     "src/StaticViewLocator/FerroUI.StaticViewLocator.Build",
     "src/Markup/FerroUI.Markup",
     "src/Markup/FerroUI.Markup.Xaml",
+    "src/Markup/FerroUI.Markup.Xaml.WinUI",
     "src/Markup/FerroUI.Markup.Xaml.Loader",
     "src/FerroUI.Build.Scan",
     "src/FerroUI.Build.Tasks",
@@ -249,6 +250,7 @@ ferroui-static-view-locator-macros = { version = "=0.4.0", path = "src/StaticVie
 ferroui-static-view-locator-build = { version = "=0.4.0", path = "src/StaticViewLocator/FerroUI.StaticViewLocator.Build" }
 ferroui-markup = { version = "=0.4.0", path = "src/Markup/FerroUI.Markup" }
 ferroui-markup-xaml = { version = "=0.4.0", path = "src/Markup/FerroUI.Markup.Xaml" }
+ferroui-markup-xaml-winui = { version = "=0.4.0", path = "src/Markup/FerroUI.Markup.Xaml.WinUI" }
 # Without the default features: the default is the run-time back end, which links the XAML runtime library
 # and the controls, and the build tool (`ferroui-build`) takes the compiler alone. Every crate that loads
 # markup at run time states the `runtime` feature.
