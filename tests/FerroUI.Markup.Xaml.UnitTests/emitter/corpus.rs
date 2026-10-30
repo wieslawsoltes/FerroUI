@@ -100,7 +100,7 @@ pub const DOCUMENTS: &[(&str, &str)] = &[
     ("binding_mode.xaml", "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' DataContext='hello'><TextBlock Text='{Binding Mode=OneTime}'/><TextBlock Text='{Binding Path=., Mode=OneWay, FallbackValue=none}'/></StackPanel>"),
     ("dynamic_resource_unresolved.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' Background='{DynamicResource AccentBrush}'></Border>"),
     ("type_extension.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' Tag='{x:Type Button}'></Border>"),
-    ("static_resource_local.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><Border.Resources><SolidColorBrush x:Key='Accent' Color='Red'/></Border.Resources><Border Background='{StaticResource Accent}'/></Border>"),
+    ("static_resource_local.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><Border.Resources><SolidColorBrush x:Key='Accent' Color='Red'/><StaticResource xmlns:p='clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls' x:Key='ScopedAccent' ResourceKey='Accent'/></Border.Resources><Border Background='{StaticResource ScopedAccent}'/></Border>"),
     ("dynamic_resource_local.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><Border.Resources><SolidColorBrush x:Key='Accent' Color='Red'/></Border.Resources><Border Background='{DynamicResource Accent}'/></Border>"),
     ("static_resource_missing.xaml", "<Border xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' Background='{StaticResource Missing}'></Border>"),
     ("x_static_converter.xaml", "<TextBlock xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' Tag='{x:Static ObjectConverters.IsNotNull}'></TextBlock>"),
@@ -145,6 +145,8 @@ pub const DOCUMENTS: &[(&str, &str)] = &[
     ("static_resource_element.xaml", "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>\n  <StackPanel.Resources>\n    <ControlTheme x:Key='Plain' TargetType='Button'>\n      <Setter Property='Opacity' Value='0.5'/>\n    </ControlTheme>\n    <SolidColorBrush x:Key='Accent' Color='Blue'/>\n  </StackPanel.Resources>\n  <Button>\n    <Button.Theme>\n      <StaticResource ResourceKey='Plain'/>\n    </Button.Theme>\n  </Button>\n  <Border>\n    <Border.Background>\n      <StaticResource ResourceKey='Accent'/>\n    </Border.Background>\n  </Border>\n</StackPanel>\n"),
     ("runtime_list_of_references.xaml", "<ItemsControl xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'\n              xmlns:generic='clr-namespace:System.Collections.Generic;assembly=netstandard'\n              xmlns:t='clr-namespace:FerroUI.Markup.Xaml.UnitTests;assembly=FerroUI.Markup.Xaml.UnitTests'>\n  <ItemsControl.ItemsSource>\n    <generic:List x:TypeArguments='t:Note'>\n      <t:Note>\n        <x:Arguments>\n          <x:String>first note</x:String>\n        </x:Arguments>\n      </t:Note>\n      <t:Note>\n        <x:Arguments>\n          <x:String>second note</x:String>\n        </x:Arguments>\n      </t:Note>\n    </generic:List>\n  </ItemsControl.ItemsSource>\n</ItemsControl>\n"),
     ("items_source_indexer.xaml", "<StackPanel xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'\n            xmlns:t='clr-namespace:FerroUI.Markup.Xaml.UnitTests;assembly=FerroUI.Markup.Xaml.UnitTests'\n            x:DataType='t:Note'>\n  <TextBlock Text='{CompiledBinding Words[1]}'/>\n  <Border Tag='{CompiledBinding Words[0]}'/>\n</StackPanel>\n"),
+    ("scoped_namespace_types.xaml", r#"<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:p="clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"><Border xmlns:p="clr-namespace:FerroUI.Media;assembly=FerroUI.Base" Tag="{x:Type p:SolidColorBrush}"/><Border Tag="{x:Type p:Button}"/></StackPanel>"#),
+    ("scoped_namespace_bindings.xaml", r#"<StackPanel xmlns="https://github.com/ferroui" xmlns:p="clr-namespace:Wrong.Scope"><TextBlock xmlns:p="clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls" Grid.Row="7" Text="{Binding (p:Grid.Row), RelativeSource={RelativeSource Self}}"/><TextBlock xmlns:p='clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls' Grid.Row='9' Text='{Binding (p:Grid.Row), RelativeSource={RelativeSource Self}}'/><Button><Button.Template><ControlTemplate xmlns:p="clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"><TextBlock Name="PART_Value" Grid.Row="11" Text="{Binding (p:Grid.Row), RelativeSource={RelativeSource Self}}"/></ControlTemplate></Button.Template></Button></StackPanel>"#),
 ];
 
 /// The documents that must be eligible for emission.
@@ -278,6 +280,8 @@ pub const EXPECTED_ELIGIBLE: &[&str] = &[
     "static_resource_element.xaml",
     "runtime_list_of_references.xaml",
     "items_source_indexer.xaml",
+    "scoped_namespace_types.xaml",
+    "scoped_namespace_bindings.xaml",
 ];
 
 /// The documents whose values depend on the base URI of the document or on a service of

@@ -7,7 +7,8 @@ use ferroui_base::metadata::{IServiceProvider, MarkupValue};
 use ferroui_base::utilities::Uri;
 
 use crate::runtime::interpreter::services::{
-    IProvideValueTarget, IRootObjectProvider, IUriContext, IXamlParentStackProvider, IXamlXmlNamespaceInfoProvider,
+    IProvideValueTarget, IRootObjectProvider, IUriContext, IXamlParentStackProvider,
+    IXamlXmlNamespaceInfoProvider,
 };
 use crate::runtime::interpreter::XamlXmlNamespaceInfo;
 use crate::runtime::type_system::ITypeDescriptorContext;
@@ -28,15 +29,19 @@ fn me(attributes: &str) -> String {
 #[test]
 fn object_should_be_casted_to_string() {
     let host = TestHost::new();
-    let res = host.run::<Rc<MarkupExtensionTestsClass>>(&me("StringProperty='{ObjectTestExtension Returned=test}'"));
+    let res = host.run::<Rc<MarkupExtensionTestsClass>>(&me(
+        "StringProperty='{ObjectTestExtension Returned=test}'",
+    ));
     assert_eq!(res.string_property.borrow().as_deref(), Some("test"));
 }
 
 #[test]
 fn object_should_be_casted_to_value_type() {
     let host = TestHost::new();
-    let res = host
-        .run_with::<Rc<MarkupExtensionTestsClass>>(&me("IntProperty='{ServiceProviderValue}'"), value_provider(boxed(123)));
+    let res = host.run_with::<Rc<MarkupExtensionTestsClass>>(
+        &me("IntProperty='{ServiceProviderValue}'"),
+        value_provider(boxed(123)),
+    );
     assert_eq!(*res.int_property.borrow(), 123);
 }
 
@@ -77,15 +82,31 @@ fn extensions_should_be_able_to_assign_lists() {
 #[test]
 fn extensions_which_dont_return_collections_should_not_be_able_to_assign_lists() {
     let host = TestHost::new();
-    let error = host.error(&me("IntList2='{ServiceProviderValue}'"), value_provider(boxed(123)));
-    assert_eq!(error.type_name(), "InvalidCastException", "{}", error.message());
+    let error = host.error(
+        &me("IntList2='{ServiceProviderValue}'"),
+        value_provider(boxed(123)),
+    );
+    assert_eq!(
+        error.type_name(),
+        "InvalidCastException",
+        "{}",
+        error.message()
+    );
 }
 
 #[test]
 fn extensions_should_not_be_able_to_assign_to_read_only_lists() {
     let host = TestHost::new();
-    let error = host.error(&me("ReadOnlyIntList='{ServiceProviderIntList}'"), value_provider(boxed(123)));
-    assert_eq!(error.type_name(), "XamlLoadException", "{}", error.message());
+    let error = host.error(
+        &me("ReadOnlyIntList='{ServiceProviderIntList}'"),
+        value_provider(boxed(123)),
+    );
+    assert_eq!(
+        error.type_name(),
+        "XamlLoadException",
+        "{}",
+        error.message()
+    );
 }
 
 #[test]
@@ -101,7 +122,10 @@ fn extensions_should_be_able_to_populate_content_dictionaries() {
         ),
         value_provider(boxed(123)),
     );
-    assert_eq!(*res.int_dic.0.borrow(), [("First".to_string(), 123), ("Second".to_string(), 123)]);
+    assert_eq!(
+        *res.int_dic.0.borrow(),
+        [("First".to_string(), 123), ("Second".to_string(), 123)]
+    );
 }
 
 #[test]
@@ -118,30 +142,62 @@ fn non_boxed_value_type_should_be_convertable_to_nullable_and_object() {
 #[test]
 fn unknown_reference_type_to_value_type_should_trigger_invalid_cast_exception() {
     let host = TestHost::new();
-    let error = host.error(&me("IntProperty='{ServiceProviderValue}'"), value_provider(boxed("test".to_string())));
-    assert_eq!(error.type_name(), "InvalidCastException", "{}", error.message());
+    let error = host.error(
+        &me("IntProperty='{ServiceProviderValue}'"),
+        value_provider(boxed("test".to_string())),
+    );
+    assert_eq!(
+        error.type_name(),
+        "InvalidCastException",
+        "{}",
+        error.message()
+    );
 }
 
 #[test]
 fn value_type_to_reference_type_should_trigger_compile_error() {
     let host = TestHost::new();
-    let error = host.error(&me("StringProperty='{ServiceProviderIntValue}'"), value_provider(boxed(123)));
-    assert_eq!(error.type_name(), "XamlLoadException", "{}", error.message());
+    let error = host.error(
+        &me("StringProperty='{ServiceProviderIntValue}'"),
+        value_provider(boxed(123)),
+    );
+    assert_eq!(
+        error.type_name(),
+        "XamlLoadException",
+        "{}",
+        error.message()
+    );
 }
 
 #[test]
 fn mismatched_value_type_to_value_type_should_trigger_compile_error() {
     let host = TestHost::new();
-    let error = host.error(&me("DoubleProperty='{ServiceProviderIntValue}'"), value_provider(boxed(123)));
-    assert_eq!(error.type_name(), "XamlLoadException", "{}", error.message());
+    let error = host.error(
+        &me("DoubleProperty='{ServiceProviderIntValue}'"),
+        value_provider(boxed(123)),
+    );
+    assert_eq!(
+        error.type_name(),
+        "XamlLoadException",
+        "{}",
+        error.message()
+    );
 }
 
 #[test]
 fn mismatched_reference_type_to_reference_type_should_trigger_invalid_cast_exception() {
     let host = TestHost::new();
     let value = Uri::absolute("http://test/").expect("a URI");
-    let error = host.error(&me("StringProperty='{ServiceProviderValue}'"), value_provider(boxed(value)));
-    assert_eq!(error.type_name(), "InvalidCastException", "{}", error.message());
+    let error = host.error(
+        &me("StringProperty='{ServiceProviderValue}'"),
+        value_provider(boxed(value)),
+    );
+    assert_eq!(
+        error.type_name(),
+        "InvalidCastException",
+        "{}",
+        error.message()
+    );
 }
 
 #[test]
@@ -149,15 +205,29 @@ fn markup_extension_with_directive_should_compile() {
     // An undefined directive reaches the back end, which has no evaluator for it: this shows
     // that the directive inside the extension was parsed.
     let host = TestHost::new();
-    let error = host.error(&me("StringProperty='{ObjectTestExtension x:Dir=RTL}'"), None);
-    assert_eq!(error.type_name(), "XamlLoadException", "{}", error.message());
-    assert!(error.message().contains("XamlAstXmlDirective"), "{}", error.message());
+    let error = host.error(
+        &me("StringProperty='{ObjectTestExtension x:Dir=RTL}'"),
+        None,
+    );
+    assert_eq!(
+        error.type_name(),
+        "XamlLoadException",
+        "{}",
+        error.message()
+    );
+    assert!(
+        error.message().contains("XamlAstXmlDirective"),
+        "{}",
+        error.message()
+    );
 }
 
 #[test]
 fn same_name_extension_should_work_without_generics() {
     let host = TestHost::new();
-    let res = host.run::<Rc<MarkupExtensionTestsClass>>(&me("ObjectProperty='{GenericTestExtension Returned=test}'"));
+    let res = host.run::<Rc<MarkupExtensionTestsClass>>(&me(
+        "ObjectProperty='{GenericTestExtension Returned=test}'",
+    ));
     assert_eq!(get::<String>(&res.object_property.borrow()), "test");
 }
 
@@ -252,14 +322,21 @@ impl IXamlParentStackProvider for ListParentsProvider {
 }
 
 fn id_of(value: &MarkupValue) -> String {
-    get::<Rc<ServiceProviderTestsClass>>(value).id.borrow().clone().unwrap_or_default()
+    get::<Rc<ServiceProviderTestsClass>>(value)
+        .id
+        .borrow()
+        .clone()
+        .unwrap_or_default()
 }
 
 #[test]
 fn parent_stack_should_provide_info_about_parents() {
     for import_parents in [true, false] {
         let imported: Option<Rc<dyn IXamlParentStackProvider>> = import_parents.then(|| {
-            Rc::new(ListParentsProvider(vec![boxed("Parent1".to_string()), boxed("Parent2".to_string())])) as _
+            Rc::new(ListParentsProvider(vec![
+                boxed("Parent1".to_string()),
+                boxed("Parent2".to_string()),
+            ])) as _
         });
         let num = Rc::new(Cell::new(0));
         let counter = num.clone();
@@ -274,8 +351,10 @@ fn parent_stack_should_provide_info_about_parents() {
 </ServiceProviderTestsClass>",
             callback_provider(
                 move |provider| {
-                    let stack =
-                        provider.get_service_of::<Rc<dyn IXamlParentStackProvider>>().expect("parent stack").parents();
+                    let stack = provider
+                        .get_service_of::<Rc<dyn IXamlParentStackProvider>>()
+                        .expect("parent stack")
+                        .parents();
                     let base_count = if import_parents { 2 } else { 0 };
                     if import_parents {
                         assert_eq!(get::<String>(&stack[stack.len() - 2]), "Parent1");
@@ -318,9 +397,13 @@ fn type_descriptor_context_is_the_context() {
         "<ServiceProviderTestsClass xmlns='rt-test' Property='{Callback}'/>",
         callback_provider(
             move |provider| {
-                let context = provider.get_service_of::<Rc<dyn ITypeDescriptorContext>>().expect("the context");
+                let context = provider
+                    .get_service_of::<Rc<dyn ITypeDescriptorContext>>()
+                    .expect("the context");
                 let as_provider: Rc<dyn IServiceProvider> = context;
-                assert!(as_provider.get_service_of::<Rc<dyn IRootObjectProvider>>().is_some());
+                assert!(as_provider
+                    .get_service_of::<Rc<dyn IRootObjectProvider>>()
+                    .is_some());
                 flag.set(true);
                 boxed("Value".to_string())
             },
@@ -344,7 +427,9 @@ fn provide_value_target_provides_info_about_properties() {
 />",
         callback_provider(
             move |provider| {
-                let target = provider.get_service_of::<Rc<dyn IProvideValueTarget>>().expect("provide value target");
+                let target = provider
+                    .get_service_of::<Rc<dyn IProvideValueTarget>>()
+                    .expect("provide value target");
                 let object = get::<Rc<ServiceProviderTestsClass>>(&target.target_object());
                 match counter.get() {
                     0 => assert_eq!(get::<String>(&target.target_property()), "Property"),
@@ -377,7 +462,9 @@ fn provide_value_target_target_object_is_valid_after_nested_push_pop() {
 />",
         callback_provider(
             move |provider| {
-                let target = provider.get_service_of::<Rc<dyn IProvideValueTarget>>().expect("provide value target");
+                let target = provider
+                    .get_service_of::<Rc<dyn IProvideValueTarget>>()
+                    .expect("provide value target");
                 let property = get::<String>(&target.target_property());
                 match counter.get() {
                     0 => {
@@ -408,15 +495,25 @@ fn provide_value_target_target_object_is_valid_after_nested_push_pop() {
 fn inner_provider_interception_works() {
     let called = Rc::new(Cell::new(false));
     let flag = called.clone();
-    let host = TestHost::with_options(HostOptions { inner_provider_factory: true, ..HostOptions::default() });
+    let host = TestHost::with_options(HostOptions {
+        inner_provider_factory: true,
+        ..HostOptions::default()
+    });
     host.build(
         "<ServiceProviderTestsClass xmlns='rt-test' Property='{Callback}'/>",
         callback_provider(
             move |provider| {
-                let root_provider = provider.get_service_of::<Rc<dyn IRootObjectProvider>>().expect("root provider");
-                let inner = provider.get_service_of::<Rc<InnerProvider>>().expect("the inner provider");
+                let root_provider = provider
+                    .get_service_of::<Rc<dyn IRootObjectProvider>>()
+                    .expect("root provider");
+                let inner = provider
+                    .get_service_of::<Rc<InnerProvider>>()
+                    .expect("the inner provider");
                 let _ = get::<Rc<ServiceProviderTestsClass>>(&inner.original_root_object());
-                assert_eq!(get::<String>(&root_provider.root_object()), "Definitely not the root object");
+                assert_eq!(
+                    get::<String>(&root_provider.root_object()),
+                    "Definitely not the root object"
+                );
                 flag.set(true);
                 boxed("Value".to_string())
             },
@@ -451,7 +548,11 @@ fn namespace_info(xaml: &str, expected: &[(&str, &str, Option<&str>)]) {
                     .xml_namespaces();
                 assert_eq!(namespaces.len(), expected.len());
                 for (prefix, info) in &expected {
-                    assert_eq!(namespaces.get(prefix).map(Vec::as_slice), Some(std::slice::from_ref(info)), "{prefix}");
+                    assert_eq!(
+                        namespaces.get(prefix).map(Vec::as_slice),
+                        Some(std::slice::from_ref(info)),
+                        "{prefix}"
+                    );
                 }
                 flag.set(true);
                 boxed("Value".to_string())
@@ -481,6 +582,59 @@ fn namespace_info_should_be_preserved() {
 }
 
 #[test]
+fn namespace_info_is_lexical_for_markup_extensions_and_retained_providers() {
+    let observed = Rc::new(std::cell::RefCell::new(Vec::new()));
+    let captured = observed.clone();
+    TestHost::new().build(
+        "<ServiceProviderTestsClass xmlns='rt-test' xmlns:p='using:OuterScope' Property='{Callback}'><ServiceProviderTestsClass xmlns:p='using:InnerScope' Property='{Callback}'/><ServiceProviderTestsClass Property='{Callback}'/></ServiceProviderTestsClass>",
+        callback_provider(move |provider| {
+            let namespaces = provider.get_service_of::<Rc<dyn IXamlXmlNamespaceInfoProvider>>().expect("namespace service");
+            captured.borrow_mut().push(namespaces);
+            boxed("Value".to_owned())
+        },None),
+    ).unwrap_or_else(|error|panic!("{}",error.message()));
+    let observed = observed.borrow();
+    assert_eq!(observed.len(), 3);
+    // Services captured during ProvideValue keep the lexical map after the enclosing
+    // context has moved on to a sibling or has finished building the entire document.
+    for (service, expected) in observed
+        .iter()
+        .zip(["OuterScope", "InnerScope", "OuterScope"])
+    {
+        assert_eq!(service.xml_namespaces()["p"][0].clr_namespace, expected);
+    }
+}
+
+#[test]
+fn deferred_content_retains_namespace_scope_from_its_declaration() {
+    use crate::runtime::type_system::DeferredContentFactory;
+    let host = TestHost::new();
+    let root = host.run::<Rc<DeferredContentTestsClass>>(
+        "<DeferredContentTestsClass xmlns='rt-test' xmlns:p='using:OuterScope'><ServiceProviderTestsClass xmlns:p='using:DeferredScope' Property='{Callback}'/></DeferredContentTestsClass>"
+    );
+    let factory = get::<DeferredContentFactory>(&root.deferred_content.borrow());
+    let called = Rc::new(Cell::new(0));
+    for _ in 0..2 {
+        let count = called.clone();
+        factory
+            .invoke(callback_provider(
+                move |provider| {
+                    let namespaces = provider
+                        .get_service_of::<Rc<dyn IXamlXmlNamespaceInfoProvider>>()
+                        .expect("namespace service")
+                        .xml_namespaces();
+                    assert_eq!(namespaces["p"][0].clr_namespace, "DeferredScope");
+                    count.set(count.get() + 1);
+                    boxed("Value".to_owned())
+                },
+                None,
+            ))
+            .unwrap_or_else(|error| panic!("{}", error.message()));
+    }
+    assert_eq!(called.get(), 2);
+}
+
+#[test]
 fn namespace_info_should_be_preserved_with_using_syntax() {
     namespace_info(
         "
@@ -489,7 +643,11 @@ fn namespace_info_should_be_preserved_with_using_syntax() {
     xmlns:clr1='using:System.Collections.Generic'
     xmlns:clr2='using:Dummy'
     Property='{Callback}'/>",
-        &[("", "RtXamlParserTests", None), ("clr1", "System.Collections.Generic", None), ("clr2", "Dummy", None)],
+        &[
+            ("", "RtXamlParserTests", None),
+            ("clr1", "System.Collections.Generic", None),
+            ("clr2", "Dummy", None),
+        ],
     );
 }
 
@@ -502,8 +660,14 @@ fn uri_context_is_usable() {
         "<ServiceProviderTestsClass xmlns='rt-test' Property='{Callback}'/>",
         callback_provider(
             move |provider| {
-                let base_uri = provider.get_service_of::<Rc<dyn IUriContext>>().expect("URI context").base_uri();
-                assert_eq!(base_uri.map(|uri| uri.to_string()).as_deref(), Some("http://example.com/"));
+                let base_uri = provider
+                    .get_service_of::<Rc<dyn IUriContext>>()
+                    .expect("URI context")
+                    .base_uri();
+                assert_eq!(
+                    base_uri.map(|uri| uri.to_string()).as_deref(),
+                    Some("http://example.com/")
+                );
                 flag.set(true);
                 boxed("Value".to_string())
             },

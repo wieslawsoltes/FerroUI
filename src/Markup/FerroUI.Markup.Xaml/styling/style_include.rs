@@ -20,6 +20,8 @@ pub struct StyleInclude {
     loaded: RefCell<Option<Rc<Vec<Rc<dyn IStyle>>>>>,
     is_loading: Cell<bool>,
     source: RefCell<Option<Uri>>,
+    #[cfg(feature = "source-overlays")]
+    source_snapshot: Option<crate::source_overlay::SourceSnapshot>,
 }
 
 ferroui_base::ferro_thread_local! {
@@ -49,6 +51,8 @@ impl StyleInclude {
             loaded: RefCell::new(None),
             is_loading: Cell::new(false),
             source: RefCell::new(None),
+            #[cfg(feature = "source-overlays")]
+            source_snapshot: crate::source_overlay::capture_snapshot(),
         })
     }
 
@@ -63,6 +67,17 @@ impl StyleInclude {
     }
 
     pub fn set_source(&self, value: Option<Uri>) {
+        #[cfg(feature = "source-overlays")]
+        if let (Some(snapshot), Some(source)) = (&self.source_snapshot, &value) {
+            let absolute = if source.is_absolute_uri() {
+                Some(source.clone())
+            } else {
+                self.base_uri.as_ref().map(|base| Uri::combine(base, source))
+            };
+            if let Some(absolute) = absolute {
+                snapshot.record_request(absolute.absolute_uri());
+            }
+        }
         *self.source.borrow_mut() = value;
     }
 
@@ -94,8 +109,12 @@ impl StyleInclude {
         let Some(source) = self.source() else {
             return Err(XamlLoadException::with_message("StyleInclude.Source must be set."));
         };
-        let loaded =
-            FerroXamlLoader::load_with_service_provider(self.service_provider.as_ref(), &source, self.base_uri.as_ref())?;
+        let load = ||
+            FerroXamlLoader::load_with_service_provider(self.service_provider.as_ref(), &source, self.base_uri.as_ref());
+        #[cfg(feature = "source-overlays")]
+        let loaded = if let Some(snapshot) = &self.source_snapshot { snapshot.run(load) } else { load() }?;
+        #[cfg(not(feature = "source-overlays"))]
+        let loaded = load()?;
         let Some(loaded) = <Rc<dyn IStyle>>::from_xaml_object(&loaded) else {
             return Err(XamlLoadException::with_message(format!(
                 "Unable to cast object of type '{}' to type 'IStyle'.",
