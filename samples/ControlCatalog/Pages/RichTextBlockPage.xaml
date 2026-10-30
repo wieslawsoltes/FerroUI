@@ -15,15 +15,7 @@
           <Paragraph>
             <Bold><Run Text="A shared document" /></Bold>
           </Paragraph>
-          <Paragraph>
-            <Run Text="Start with a thought, add " />
-            <Italic><Run Text="emphasis" /></Italic>
-            <Run Text=", " />
-            <Underline><Run Text="mark the next step" /></Underline>
-            <Run Text=" and follow a " />
-            <Hyperlink NavigateUri="https://github.com/ferroui"><Run Text="link" /></Hyperlink>
-            <Run Text="." />
-          </Paragraph>
+          <Paragraph><Run Text="Start with a thought, add " /><Italic><Run Text="emphasis" /></Italic><Run Text=", " /><Underline><Run Text="mark the next step" /></Underline><Run Text=" and follow a " /><Hyperlink NavigateUri="https://github.com/ferroui"><Run Text="link" /></Hyperlink><Run Text="." /></Paragraph>
           <Paragraph>
             <Run Text="Text can include café, 日本語, العربية and emoji 😀." />
           </Paragraph>
@@ -44,7 +36,7 @@
       <WrapPanel>
         <Border BorderBrush="{DynamicResource CatalogBaseMediumColor}" BorderThickness="1"
                 Padding="16" Margin="0,0,12,12">
-          <RichTextBlock Name="Column" Width="250" Height="150" TextWrapping="Wrap"
+          <RichTextBlock Name="Column" Width="250" Height="110" TextWrapping="Wrap"
                          OverflowContentTarget="{Binding #Continuation}">
             <Paragraph>
               <Bold><Run Text="Room for the whole story" /></Bold>
@@ -59,7 +51,7 @@
         </Border>
         <Border BorderBrush="{DynamicResource CatalogBaseMediumColor}" BorderThickness="1"
                 Padding="16" Margin="0,0,12,12">
-          <RichTextBlockOverflow Name="Continuation" Width="250" Height="150" />
+          <RichTextBlockOverflow Name="Continuation" Width="250" Height="110" />
         </Border>
       </WrapPanel>
       <controls:SampleSection.Code><x:String xml:space="preserve"><![CDATA[<RichTextBlock Height="150" OverflowContentTarget="{Binding #Continuation}">

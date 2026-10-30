@@ -2,7 +2,7 @@ use super::TemplateAppliedEventArgs;
 use crate::documents::TextElement;
 use crate::templates::IControlTemplate;
 use crate::{Border, Control, ControlImpl, Decorator};
-use ferroui_base::controls::{NameScopeRef, ResourcesChangedEventArgs};
+use ferroui_base::controls::ResourcesChangedEventArgs;
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::{Interactive, InteractiveImpl, RoutedEvent, RoutedEventHandlerToken, RoutingStrategies};
 use ferroui_base::layout::LayoutableImpl;
@@ -24,10 +24,6 @@ use std::rc::Rc;
 pub struct TemplatedControl {
     base: Control,
     applied_template: RefCell<Option<Rc<dyn IControlTemplate>>>,
-    /// The name scope of the applied template, the one `TemplateApplied` carries:
-    /// text elements in the template find their names in it
-    /// (`TextElement::find_name`).
-    template_name_scope: RefCell<Option<NameScopeRef>>,
 }
 
 ferro_class! {
@@ -109,13 +105,11 @@ impl LayoutableImpl for TemplatedControl {
 
                 this.visual_children().clear();
             }
-            drop(this.template_name_scope.take());
 
             if let Some(template) = &template {
                 let this_ref = this.to_ref();
                 if let Some(template_result) = template.build(&this_ref) {
                     let (child, name_scope) = template_result.deconstruct();
-                    *this.template_name_scope.borrow_mut() = Some(name_scope.clone());
                     Self::apply_templated_parent(&child, Some(&this_ref.clone().upcast()));
                     child.set_parent(this_ref);
                     this.visual_children().add(child.upcast());
@@ -282,12 +276,7 @@ impl TemplatedControl {
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
     pub fn construct() -> Self {
-        Self { base: Control::construct(), applied_template: RefCell::new(None), template_name_scope: RefCell::new(None) }
-    }
-
-    /// The name scope of the applied template, while one is applied.
-    pub(crate) fn template_name_scope(&self) -> Option<NameScopeRef> {
-        self.template_name_scope.borrow().clone()
+        Self { base: Control::construct(), applied_template: RefCell::new(None) }
     }
 
     pub fn new() -> Ref<Self> {
