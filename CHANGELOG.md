@@ -6,6 +6,7 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ### Added
 
+- **XAML: lexical namespace scopes** (C1 of #345, a recorded deviation): namespaces declared on nested elements are resolved at run time as the compiler resolves them, in compiled documents (`rt::push_namespace_scope`) and in the run-time loader; the compiled XAML of the four themes is regenerated.
 - **Source snapshots for designers and runtime reload sessions** (C3 of #345): the feature `source-overlays` of `ferroui-markup-xaml` lets an embedded designer load documents and includes from a `SourceSnapshot` in every build profile; `HotReloadSession::for_runtime_documents` accepts structural changes of documents instantiated at run time.
 - **WinUI theme: designer sources** (C6 of #345): with the feature `designer-sources`, `ferroui_themes_winui::designer_documents()` lists the theme's control theme documents by resource URI and source text for designer definition libraries; the build script derives the table from the theme's documents.
 - **TreeDataGrid: drag payloads and modifiers** (C5 of #345): `TreeDataGridRowDragStartedEventArgs::data_transfer` adds application payloads to a row drag and `key_modifiers` reports the modifiers of the press that started it; the expander column keeps its inner column's type-ahead and options.

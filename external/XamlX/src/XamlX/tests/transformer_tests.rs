@@ -310,6 +310,40 @@ fn type_extension_resolves_types() {
 }
 
 #[test]
+fn type_extensions_and_converters_resolve_shadowed_namespaces_without_sibling_leaks() {
+    let tree = root(&format!("<DictionaryHost xmlns='test' {X} xmlns:t='test'><IntrinsicsTestsClass xmlns:t='using:System' x:Key='first' TypeProperty='{{x:Type t:String}}'/><IntrinsicsTestsClass x:Key='second' TypeProperty='t:Control'/></DictionaryHost>"));
+    let values = assignments(&tree);
+    let first = values[0].values.borrow()[1].as_node();
+    let second = values[1].values.borrow()[1].as_node();
+    assert_eq!(
+        assigned(&first, "TypeProperty"),
+        "(TypeExt clr!!System.String)"
+    );
+    assert_eq!(
+        assigned(&second, "TypeProperty"),
+        "(TypeExt clr!!XamlParserTests.Control)"
+    );
+    assert_eq!(
+        first.namespace_scope().unwrap().lookup("t"),
+        Some("using:System")
+    );
+    assert_eq!(second.namespace_scope().unwrap().lookup("t"), Some("test"));
+}
+
+#[test]
+fn intrinsic_arguments_and_property_elements_resolve_their_own_scope() {
+    let tree = root(&format!("<IntrinsicsTestsClass xmlns='test' {X} xmlns:t='using:System'><IntrinsicsTestsClass.IntProperty xmlns:t='test'><x:Static Member='t:IntrinsicsTestsClass.ConstField'/></IntrinsicsTestsClass.IntProperty><IntrinsicsTestsClass.TypeProperty xmlns:t='test'><x:Type TypeName='t:Control'/></IntrinsicsTestsClass.TypeProperty></IntrinsicsTestsClass>"));
+    assert_eq!(
+        assigned(&tree, "IntProperty"),
+        "(Static clr!!XamlParserTests.IntrinsicsTestsClass.ConstField)"
+    );
+    assert_eq!(
+        assigned(&tree, "TypeProperty"),
+        "(TypeExt clr!!XamlParserTests.Control)"
+    );
+}
+
+#[test]
 fn static_extension_resolves_members() {
     let node = intrinsics("ObjectProperty='{x:Static IntrinsicsTestsClass.StaticProp}'");
     assert_eq!(
