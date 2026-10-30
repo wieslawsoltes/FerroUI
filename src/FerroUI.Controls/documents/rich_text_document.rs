@@ -1470,8 +1470,7 @@ fn explained_change(before: &str, after: &str, range: &Range<usize>, inserted: &
     if !explains {
         return None;
     }
-    let (replaced, inserted) = trim_common(&before[start..end], inserted);
-    let prefix = before[start..end].len() - replaced.len();
+    let (prefix, replaced, inserted) = trim_common(&before[start..end], inserted);
     let prefix = before[start..start + prefix].encode_utf16().count();
     let replaced_length = replaced.encode_utf16().count();
     let changed_start = range.start + prefix;
@@ -1479,8 +1478,8 @@ fn explained_change(before: &str, after: &str, range: &Range<usize>, inserted: &
 }
 
 /// Removes the common prefix and then the common suffix (whole characters) of two
-/// strings, returning what is left of each.
-fn trim_common<'a>(left: &'a str, right: &'a str) -> (&'a str, &'a str) {
+/// strings, returning the length of the prefix in bytes and what is left of each.
+fn trim_common<'a>(left: &'a str, right: &'a str) -> (usize, &'a str, &'a str) {
     let prefix: usize = left
         .chars()
         .zip(right.chars())
@@ -1495,7 +1494,7 @@ fn trim_common<'a>(left: &'a str, right: &'a str) -> (&'a str, &'a str) {
         .take_while(|(a, b)| a == b)
         .map(|(c, _)| c.len_utf8())
         .sum();
-    (&left[..left.len() - suffix], &right[..right.len() - suffix])
+    (prefix, &left[..left.len() - suffix], &right[..right.len() - suffix])
 }
 
 fn changed_range(before: &str, after: &str) -> (Range<usize>, usize) {
