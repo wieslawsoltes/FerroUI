@@ -218,6 +218,13 @@ What remains outside the port (RT-P of #243): the exact LineServices metrics, th
 | The context menu is `TextCommandBarFlyout`. | A `MenuFlyout` with the same commands (`docs/porting/winui-theme/DEVIATIONS.md`, G-30). | FerroUI has no command bar flyout. |
 | The template is in every theme. | The WinUI theme has it (`WINUI_ONLY_CONTROLS`), and so do the macOS and Material themes, which derive every control theme of the WinUI theme; Fluent and Simple show nothing. | Decision D4. |
 
+### 11.4 The input method on Windows (R9b)
+
+| WinUI | FerroUI | Why |
+|---|---|---|
+| RichEdit talks to the text services framework (TSF) of the system: the composition, reconversion and the input scopes of the document. | The Win32 backend serves RichEditBox through IMM32 (with TSF behind it as the system provides): the composition is a preview of the exact-edit connection and the result one undo unit; no reconversion. Input scopes are set on the window (`SetInputScopes`); a touch keyboard that is already shown is not told of a change. | The backend's input method is IMM32 (`win32-platform.md`, section 8.2); TSF for the backend is not in the reference. |
+| Terminating a composition keeps its text in the document and ends the composition of the text service. | The editor commits the preview, and the composition of the input method is cancelled (`CPS_CANCEL`), so the input method does not send the text a second time. | S5 (R8) with the backend's reset. |
+
 Not taken from #243 in R8: its manager tests for a client without exact editing whose cursor query moves focus or replaces the client (`rich_edit_input_geometry_tests.rs`). Such a client keeps the upstream manager (D5), which has no such guarantees. While a connection client's flyout has focus, the manager keeps the input method of the owner's root, also when the flyout is in a popup root of its own.
 
 

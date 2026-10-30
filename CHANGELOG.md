@@ -6,6 +6,7 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ### Added
 
+- **IMM32 for clients of the exact-edit IME connection** (R9b of #243, [docs/porting/winui-rich-text.md](docs/porting/winui-rich-text.md)): on Windows, RichEditBox composes through the connection (one undo unit per commit, no `WM_CHAR`, a reset cancels the IME's composition), its input scopes reach the system (`SetInputScopes`), and the input contexts the backend creates are destroyed with their window; every TextBox keeps the upstream IMM32 sequence.
 - **Designer Studio** (D9 of #345): the sample `samples/DesignerStudio` (`cargo run -p designer-studio`), the designer guide in [docs/designer](docs/designer/README.md) with its deployment notes for collaboration servers, and the studio's headless smoke runs in `designer.yml`.
 - **Designer: the studio** (D6 of #345, not published before 0.5): `ferroui-designer`, the embeddable visual XAML designer: native workspace and artboard, layers, properties and editors, preview stages and prototype flows, timeline, sharing and an optional MCP server (feature `mcp`). Its test suites follow in D7 and D8.
 - **Designer: collaboration** (D5 of #345, not published before 0.5): `ferroui-designer-collaboration`, a transport-independent replicated XAML model with synchronization and presence, and `ferroui-designer-collaboration-host`, durable authenticated rooms with an MCP service (feature `server`, binary `ferroui-collaboration-server`) and a reconnecting HTTPS client (feature `client`, off by default).
