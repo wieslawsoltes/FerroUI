@@ -1,0 +1,6 @@
+<!-- Compact spacing keeps Android's 48dp accessible input targets. -->
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:ClassModifier="internal">
+  <x:Double x:Key="MaterialMinimumTouchTarget">48</x:Double>
+  <Thickness x:Key="MenuFlyoutItemThemePadding">12,8</Thickness>
+  <Thickness x:Key="ListViewItemMargin">0</Thickness>
+</ResourceDictionary>

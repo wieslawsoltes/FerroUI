@@ -390,13 +390,13 @@ pub fn core_types() -> Vec<CoreType> {
         define("System.Collections.Specialized", "INotifyCollectionChanged", Interface),
         define(COLLECTIONS, "IEnumerator", Interface),
         define(COLLECTIONS, "IEnumerable", Interface).method("GetEnumerator", false, t("System.Collections.IEnumerator"), Vec::new(), Virtual),
-        define(COLLECTIONS, "IList", Interface).interface(t("System.Collections.IEnumerable")).method(
-            "Add",
-            false,
-            t("System.Int32"),
-            vec![t("System.Object")],
-            Virtual,
-        ),
+        // The indexer of the untyped list (`this[int]`), which a compiled binding path indexes
+        // (`Items[0]` of an items source, whose handle is published as this contract). It is
+        // read-only here: the items source handle is not written through.
+        define(COLLECTIONS, "IList", Interface)
+            .interface(t("System.Collections.IEnumerable"))
+            .method("Add", false, t("System.Int32"), vec![t("System.Object")], Virtual)
+            .indexer(vec![t("System.Int32")], t("System.Object"), false),
         define(GENERIC, "IEnumerator`1", Interface).parameters(&["T"]).interface(t("System.Collections.IEnumerator")),
         define(GENERIC, "IEnumerable`1", Interface).parameters(&["T"]).interface(t("System.Collections.IEnumerable")),
         define(GENERIC, "ICollection`1", Interface)

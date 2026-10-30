@@ -1,0 +1,83 @@
+<!--
+  Not ported from a style: WinUI's PathIcon has no template in microsoft-ui-xaml
+  (https://github.com/microsoft/microsoft-ui-xaml, commit
+  7e4b0c2096be402f51cc8f7d203ebf67cff183d0). The control builds its visual in code
+  (CPathIcon::ApplyTemplate, dxaml/xcp/core/core/elements/icon.cpp): one Path, stretched over
+  the icon by its alignments, whose Fill is the Foreground of the icon and whose Data is the Data
+  of the icon. WinUI's Path keeps its own Stretch (None), so the geometry is drawn in its own
+  coordinates; IconElement has no default size. The port sizes the icon 20 by 20 and scales the
+  geometry uniformly, as the framework's other themes do and its applications expect (PI-2), inside
+  a border of the Background of the control (null by default, so nothing more is drawn).
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20">
+      <StackPanel Orientation="Horizontal" Spacing="16">
+        <PathIcon Width="20" Height="20" Data="M11,5H13V11H19V13H13V19H11V13H5V11H11Z" />
+        <PathIcon Width="20" Height="20" Data="M4,12.5L5.5,11L9.5,15L18.5,6L20,7.5L9.5,18Z" />
+      </StackPanel>
+    </Border>
+  </Design.PreviewWith>
+
+  <!-- The path icon of WinUI (CPathIcon::ApplyTemplate: a Path with Stretch None, its geometry in
+       its own coordinates, the size of the icon the extent of the geometry from its origin), for
+       the templates of WinUI that size the icon in a Viewbox (AppBarButton and
+       AppBarToggleButton: ContentViewbox of AppBarButtonContentHeight; MenuFlyoutItem: IconRoot
+       of 16; NavigationViewItem: IconBox of NavigationViewItemOnLeftIconBoxHeight; TabViewItem:
+       IconBox of TabViewItemHeaderIconSize): there the Viewbox scales the geometry as WinUI's does
+       (PI-3), where the default theme below scales the bounds of the geometry to 20 by 20 (PI-2).
+       Set with Width and Height NaN by a style of the icon presenter of those templates, and for
+       the icon of a menu item, a logical child of the item that no style of its template reaches,
+       by the style MenuItem > PathIcon of Controls/MaterialControls.xaml (a style of a control theme
+       cannot name a parent: the nesting selector ^ stands for the whole selector of the theme,
+       and what is written before it is dropped). -->
+  <ControlTemplate x:Key="PathIconUnscaledTemplate" TargetType="PathIcon">
+    <Border Background="{TemplateBinding Background}">
+      <Path x:Name="Path"
+            Data="{TemplateBinding Data}"
+            Fill="{TemplateBinding Foreground}" />
+    </Border>
+  </ControlTemplate>
+
+  <ControlTheme x:Key="{x:Type PathIcon}" TargetType="PathIcon">
+    <!-- The size and the uniform scaling of the framework's path icons (PI-2): 20 by 20, the
+         IconElementThemeWidth and IconElementThemeHeight of its other themes. -->
+    <Setter Property="Width" Value="20" />
+    <Setter Property="Height" Value="20" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Background="{TemplateBinding Background}">
+          <Viewbox Height="{TemplateBinding Height}" Width="{TemplateBinding Width}">
+            <Path x:Name="Path"
+                  Data="{TemplateBinding Data}"
+                  Fill="{TemplateBinding Foreground}"
+                  Stretch="Uniform" />
+          </Viewbox>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+
+  </ControlTheme>
+  <!-- Source-defined Material icons have a 24dp viewport, including the space around
+       their paths (AndroidX material3/internal/Icons.kt, e4d933c98df7baa7ea2b83eea6e086915961e0ff).
+       Scaling the complete viewport keeps, for example, ArrowDropDown's 10 by 5 path
+       inside its 24 by 24 icon. The ordinary PathIcon theme retains its existing semantics. -->
+  <ControlTheme x:Key="MaterialSymbolIcon" TargetType="PathIcon" BasedOn="{StaticResource {x:Type PathIcon}}">
+    <Setter Property="Width" Value="24" />
+    <Setter Property="Height" Value="24" />
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Background="{TemplateBinding Background}">
+          <Viewbox Width="{TemplateBinding Width}" Height="{TemplateBinding Height}">
+            <Canvas Width="24" Height="24">
+              <Path x:Name="SymbolPath" Width="24" Height="24" Stretch="None"
+                    Data="{TemplateBinding Data}" Fill="{TemplateBinding Foreground}" />
+            </Canvas>
+          </Viewbox>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

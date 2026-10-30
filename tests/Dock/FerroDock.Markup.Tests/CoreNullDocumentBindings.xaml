@@ -1,0 +1,3 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:m="clr-namespace:FerroDock.Model.Controls;assembly=FerroDock.Model" x:DataType="m:IDocumentDock">
+<Button Command="{Binding CreateDocument}"/><Button Command="{Binding AddDocument}" CommandParameter="{x:Null}"/><Button Command="{Binding AddTool}" CommandParameter="{x:Null}"/>
+</StackPanel>

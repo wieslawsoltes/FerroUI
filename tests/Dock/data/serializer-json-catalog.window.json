@@ -1,0 +1,13 @@
+{
+  "$id": "1",
+  "Id": "IDockWindow",
+  "X": 0,
+  "Y": 0,
+  "Width": 0,
+  "Height": 0,
+  "WindowState": 0,
+  "Topmost": false,
+  "Title": "IDockWindow",
+  "OwnerMode": 0,
+  "IsModal": false
+}

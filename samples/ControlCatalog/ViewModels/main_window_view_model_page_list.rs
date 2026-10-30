@@ -50,13 +50,20 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add("/Pages/CheckBoxPage.xaml", "CheckBox", Icons::CHECKBOX, "Two- and three-state check boxes");
             s.add("/Pages/ColorPickerPage.xaml", "ColorPicker", Icons::PALETTE, "Pick colors from spectrum and palette views");
             s.add("/Pages/ComboBoxPage.xaml", "ComboBox", Icons::DROPDOWN, "A drop-down list of selectable items");
+            // Not from upstream: NumberBox of WinUI (docs/porting/winui-controls.md).
+            s.add("/Pages/NumberBoxPage.xaml", "NumberBox", Icons::NUMBER, "Numbers and expressions with spin buttons");
             s.add("/Pages/NumericUpDownPage.xaml", "NumericUpDown", Icons::NUMBER, "Numeric input with spinner buttons");
             s.add("/Pages/RadioButtonPage.xaml", "RadioButton", Icons::RADIO, "Mutually exclusive option groups");
+            // Not from upstream: RadioButtons and RatingControl of WinUI (docs/porting/winui-controls.md).
+            s.add("/Pages/RadioButtonsPage.xaml", "RadioButtons", Icons::RADIO, "A group of radio buttons with one selection");
+            s.add("/Pages/RatingControlPage.xaml", "RatingControl", Icons::STAR, "Rate with stars, with placeholder and clearing");
             s.add("/Pages/SliderPage.xaml", "Slider", Icons::TUNE, "Select a value from a continuous range");
             s.add("/Pages/ToggleSwitchPage.xaml", "ToggleSwitch", Icons::TOGGLE, "An on/off switch with a sliding knob");
         }),
         section("Text", Icons::TEXT_BOX, &mut unavailable, |s| {
             s.add("/Pages/AutoCompleteBoxPage.xaml", "AutoCompleteBox", Icons::TEXT_INPUT, "Text input with completion suggestions");
+            // Not from upstream: AutoSuggestBox of WinUI (docs/porting/winui-controls.md).
+            s.add("/Pages/AutoSuggestBoxPage.xaml", "AutoSuggestBox", Icons::TEXT_INPUT, "Text input with suggestions the app filters");
             s.add("/Pages/LabelsPage.xaml", "Label", Icons::TAG, "Captions with access keys for other controls");
             s.add_with_samples(
                 "/Pages/TextBoxPage.xaml",
@@ -68,6 +75,8 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add("/Pages/TextBlockPage.xaml", "TextBlock", Icons::TEXT_INPUT, "Styled read-only text display");
         }),
         section("Collections & Data", Icons::LISTS, &mut unavailable, |s| {
+            // Not from upstream: the page of the port of the Repeater of WinUI.
+            s.add("/Pages/ItemsRepeaterPage.xaml", "ItemsRepeater", Icons::GRID, "Virtualized layouts, recycling, and collection changes across 10,000 items");
             s.add("/Pages/CarouselPage.xaml", "Carousel", Icons::SLIDES, "Cycle through a collection of items");
             s.add("/Pages/ListBoxPage.xaml", "ListBox", Icons::LIST, "A selectable, virtualized list of items");
             s.add("/Pages/PipsPagerPage.xaml", "PipsPager", Icons::HORIZONTAL_DOTS, "Dot-style pager for paginated content");
@@ -94,6 +103,8 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add("/Pages/ContentDemoPage.xaml", "ContentPage", Icons::DOCUMENT, "A page that hosts a single content view");
             s.add("/Pages/DrawerDemoPage.xaml", "DrawerPage", Icons::DRAWER, "A page with a sliding navigation drawer");
             s.add("/Pages/NavigationDemoPage.xaml", "NavigationPage", Icons::NAVIGATION, "Stack-based page navigation");
+            // Not from upstream: NavigationView and Frame of WinUI (docs/porting/winui-controls.md).
+            s.add("/Pages/NavigationViewPage.xaml", "NavigationView", Icons::MENU, "Left, top and compact panes with a Frame");
             s.add("/Pages/SplitViewPage.xaml", "SplitView", Icons::SPLIT, "A collapsible pane beside content");
             s.add("/Pages/TabbedDemoPage.xaml", "TabbedPage", Icons::TAB, "Tab-based page navigation");
             s.add("/Pages/TabControlPage.xaml", "TabControl", Icons::TAB, "Switch between tabbed content views");
@@ -124,7 +135,12 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
                 "Connected animations and ElementCompositionPreview",
             );
             s.add("/Pages/CustomDrawing.xaml", "Custom Drawing", Icons::BRUSH, "Render custom geometry in code");
+            // Not from upstream: SymbolIcon and FontIcon of WinUI (docs/porting/winui-controls.md) and PathIcon.
+            s.add("/Pages/IconElementPage.xaml", "IconElement", Icons::SPARKLE, "Symbol, font and path icons");
             s.add("/Pages/ImagePage.xaml", "Image", Icons::IMAGE, "Display bitmaps with different stretch modes");
+            // Not from upstream: the pages of the port of the inking controls of WinUI.
+            s.add("/Pages/InkCanvasPage.xaml", "InkCanvas", Icons::CANVAS, "Pressure-sensitive ink from pen, mouse and touch");
+            s.add("/Pages/InkToolbarPage.xaml", "InkToolbar", Icons::BRUSH, "Pens, eraser and stencil guides for an InkCanvas");
             s.add("/Pages/OpenGlPage.xaml", "OpenGL", Icons::CUBE_3D, "Embed custom OpenGL rendering");
             s.add("/Pages/OpenGl/OpenGlLeasePage.xaml", "OpenGL Lease", Icons::CUBE_3D, "Low-level access to the OpenGL context");
             s.add("/Pages/OpenGl/OpenGlInteropPage.xaml", "OpenGL Interop", Icons::CUBE_3D, "Compositor and OpenGL interop");
@@ -134,8 +150,13 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add("/Pages/AdornerLayerPage.xaml", "AdornerLayer", Icons::SPARKLE, "Overlay visuals on top of other controls");
             s.add("/Pages/DataValidationPage.xaml", "Data Validation", Icons::SHIELD, "Display validation errors from bindings");
             s.add("/Pages/DialogsPage.xaml", "Dialogs", Icons::DIALOG, "File pickers and modal dialog windows");
+            // Not from upstream: InfoBadge and InfoBar of WinUI (docs/porting/winui-controls.md).
+            s.add("/Pages/InfoBadgePage.xaml", "InfoBadge", Icons::DOTS, "A dot, number or icon that draws attention");
+            s.add("/Pages/InfoBarPage.xaml", "InfoBar", Icons::INFO, "Inline app-wide messages by severity");
             s.add("/Pages/NotificationsPage.xaml", "Notifications", Icons::BELL, "Toast-style in-app notifications");
             s.add("/Pages/ProgressBarPage.xaml", "ProgressBar", Icons::PROGRESS, "Determinate and indeterminate progress");
+            // Not from upstream: ProgressRing of WinUI (docs/porting/winui-controls.md).
+            s.add("/Pages/ProgressRingPage.xaml", "ProgressRing", Icons::REFRESH, "Circular indeterminate and determinate progress");
             s.add("/Pages/ToolTipPage.xaml", "ToolTip", Icons::TOOLTIP, "Hover hints for any control");
         }),
         section("Interaction", Icons::KEYBOARD_FLOAT, &mut unavailable, |s| {

@@ -1,0 +1,8 @@
+<StackPanel xmlns="https://github.com/ferroui"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:core="clr-namespace:FerroDock.Model.Core;assembly=FerroDock.Model"
+ x:DataType="core:IDock">
+ <TextBlock Text="{Binding VisibleDockables.Count}" />
+ <ContentControl Content="{Binding VisibleDockables[0]}" />
+ <ItemsControl ItemsSource="{Binding VisibleDockables}" />
+</StackPanel>

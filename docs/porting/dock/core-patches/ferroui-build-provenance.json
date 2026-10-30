@@ -1,0 +1,39 @@
+{
+  "package": "ferroui-build",
+  "version": "0.3.0",
+  "registry_source": "ferroui-build-0.3.0",
+  "original_vcs": {
+    "git": {
+      "sha1": "0116724da88df86fa4e4575f7e9a0d78708f2204"
+    },
+    "path_in_vcs": "src/Dock/FerroUI.Build.Tasks"
+  },
+  "modified_files": [
+    "type_system/emit_types.rs",
+    "type_system/tests.rs"
+  ],
+  "original_sha256": {
+    ".cargo_vcs_info.json": "0df0a79fc7f353120f320890cc8faf70e0d3a580f627e3f9177505d74b8ba0bd",
+    "Cargo.lock": "234d00a9f73e2520fbab1ade924cd92560df1e7a424b994d7d55e75422c38c70",
+    "Cargo.toml": "77d98f8b70d12d3f337ed8b619ed01f67430063b6ceb932967ed1af737d99568",
+    "Cargo.toml.orig": "14ff86ec9d64b0415082e5b0c7fc0af20f517cf0de7b302e4af02afd0e765687",
+    "LICENSE": "2b3a10daf2350f7b900bd7b989cdff149b6b4bd07358db9e5c112bd9560b6b46",
+    "NOTICE-PROJECT.md": "3620991f97d43324a80b6137dbaeb4f23d35c5b036e7485021654f597495be87",
+    "README.md": "619c6d173776f77ff0f40a38a304560d14cb5f37f0b6e5a40f5af711d02228c0",
+    "deterministic_id_generator.rs": "bd50008b3c20ff2006c9e6c703ca33629962e6227b9421463a8577710001db3d",
+    "diagnostics.rs": "002fd9d77b3efcde6014c9020b54e46156f8e97e23f05ab5b7ffbaeceeed7a40",
+    "lib.rs": "17fdccccbf05364f13d63fc3ce91695addc464119d16cf8fa835e6c8becb161a",
+    "type_system/emit_types.rs": "49922048b8e9070f7b01ee05bce5181918b03712940dfdaaf3c566895fb9df61",
+    "type_system/mod.rs": "4397bd4c17e9995630409306837b384e10f6e6adf56df14812177dd2c904f735",
+    "type_system/model_type_system.rs": "e4b1e05a1a1ac4d4fc7e12c2bad5a89de1232b2ed75b774dedea6923f7ab44bb",
+    "type_system/tests.rs": "75690b503e2488d72c07e1b70ab7f7e2c435d51a000ab966b463cbf211bed133",
+    "type_system/types.rs": "fec5042e9d04b152b60afb800363360d111e1cc39ce85d314b5e7eafcfc4e2f5",
+    "xaml_compiler_diagnostics_filter.rs": "42f23fb27898b6a13955996f82d48e0a2667243b7952d1a3ba8787c90832d7ca"
+  },
+  "modified_sha256": {
+    "type_system/emit_types.rs": "22b8081abf88941c89c185ea04203c4d27cc7780a7c98c3d3f2f17d85612f952",
+    "type_system/tests.rs": "c8f6fdb0546dd789cfee7f9569d4d52c80f1d6f9284a5b8631f13a32b7412901"
+  },
+  "patch_file": "ferroui-build-public-value-path.patch",
+  "patch_sha256": "edd10b18b363137374ef2dd77ac1df02e734ee0d9077591ee8232fb5d2918714"
+}

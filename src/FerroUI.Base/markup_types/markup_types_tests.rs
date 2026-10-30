@@ -807,11 +807,13 @@ fn the_well_known_members_work_through_metadata() {
     (name_scope.find_methods("SetNameScope").next().unwrap().invoke)(&[element.clone(), scope.clone()]).unwrap();
     let read = (name_scope.find_methods("GetNameScope").next().unwrap().invoke)(&[element]).unwrap();
     assert!(unbox::<NameScopeRef>(&read) == unbox::<NameScopeRef>(&scope));
-    // Only objects are registered.
+    // Object registration includes boxed scalar values and retains their identity.
     let register = find("FerroUI.Controls", "INameScope").find_methods("Register").next().unwrap();
-    assert!((register.invoke)(&[scope.clone(), text("n"), boxed(1i32)]).is_err());
+    let scalar=boxed(1i32);
+    (register.invoke)(&[scope.clone(), text("n"), scalar.clone()]).unwrap();
+    let stored=(find("FerroUI.Controls","INameScope").find_methods("Find").next().unwrap().invoke)(&[scope.clone(),text("n")]).unwrap();
+    assert!(Rc::ptr_eq(stored.as_ref().unwrap(),scalar.as_ref().unwrap()));
     // A name that is taken, or a completed scope, is an error and not a panic.
-    (register.invoke)(&[scope.clone(), text("n"), into_markup_value(StyledElement::new())]).unwrap();
     let taken = (register.invoke)(&[scope.clone(), text("n"), into_markup_value(StyledElement::new())]).unwrap_err();
     assert_eq!(taken.to_string(), "Control with the name 'n' already registered.");
     (find("FerroUI.Controls", "INameScope").find_methods("Complete").next().unwrap().invoke)(&[scope.clone()]).unwrap();

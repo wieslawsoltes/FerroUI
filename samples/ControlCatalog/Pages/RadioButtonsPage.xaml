@@ -1,0 +1,33 @@
+<ContentPage Theme="{StaticResource ScrollPage}" xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Header="RadioButtons"
+             x:Class="ControlCatalog.Pages.RadioButtonsPage">
+  <!-- Not from upstream: WinUI's RadioButtons (docs/porting/winui-controls.md), a group of radio
+       buttons with one selection. Its template is in the WinUI theme and the macOS and Material
+       themes derived from it. -->
+  <StackPanel Orientation="Vertical" Spacing="4" MaxWidth="800">
+    <TextBlock Margin="2" Classes="h2" TextWrapping="Wrap">RadioButtons is a group of radio buttons with one selection, one tab stop and arrow-key navigation, in columns.</TextBlock>
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">A group</TextBlock>
+    <Grid Margin="2" ColumnDefinitions="Auto,200" RowDefinitions="Auto">
+      <TextBlock VerticalAlignment="Center" Margin="2">MaxColumns:</TextBlock>
+      <Slider Grid.Column="1" x:Name="Columns" Minimum="1" Maximum="3" Value="2" IsSnapToTickEnabled="True" TickFrequency="1" Margin="2" />
+    </Grid>
+    <RadioButtons x:Name="Colors" Margin="2" Header="Background colour" SelectedIndex="1" MaxColumns="{Binding #Columns.Value}">
+      <x:String>Red</x:String>
+      <x:String>Green</x:String>
+      <x:String>Blue</x:String>
+      <x:String>Yellow</x:String>
+      <x:String>Orange</x:String>
+      <x:String>Purple</x:String>
+    </RadioButtons>
+    <TextBlock Margin="2" Text="{Binding #Colors.SelectedItem, StringFormat='Selected: {0}'}" />
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">Radio buttons as items</TextBlock>
+    <RadioButtons Margin="2" Header="Delivery">
+      <RadioButton Content="Standard" IsChecked="True" />
+      <RadioButton Content="Express" />
+      <RadioButton Content="Pick up" IsEnabled="False" />
+    </RadioButtons>
+  </StackPanel>
+</ContentPage>

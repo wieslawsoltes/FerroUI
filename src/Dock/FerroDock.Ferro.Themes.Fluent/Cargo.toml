@@ -1,0 +1,30 @@
+[package]
+name = "ferrodock-ferro-themes-fluent"
+description = "Source Fluent docking resources for FerroDock"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+build = "build.rs"
+links = "ferrodock_ferro_themes_fluent_metadata"
+[lib]
+path = "lib.rs"
+[dependencies]
+ferrodock-model-ferro.workspace = true
+ferrodock-controls-deferred-content-control = { path = "../FerroDock.Controls.DeferredContentControl" }
+ferrodock-controls-recycling = { path = "../FerroDock.Controls.Recycling" }
+ferrodock-controls-proportional-stack-panel = { path = "../FerroDock.Controls.ProportionalStackPanel" }
+ferrodock-settings.workspace = true
+ferrodock-model.workspace = true
+ferrodock-ferro = { path = "../FerroDock.Ferro" }
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+ferroui-markup-xaml.workspace = true
+[build-dependencies]
+ferroui-build.workspace = true
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "deny"
+[dev-dependencies]
+ferroui-headless = { workspace = true, features = ["testing"] }

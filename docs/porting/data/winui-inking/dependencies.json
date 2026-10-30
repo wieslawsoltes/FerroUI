@@ -1,0 +1,313 @@
+{
+  "schema_version": 1,
+  "commit": "7e4b0c2096be402f51cc8f7d203ebf67cff183d0",
+  "dependencies": [
+    {
+      "id": "windows-ink-points-and-attributes",
+      "upstream": "Windows.UI.Input.Inking.InkPoint / InkDrawingAttributes / PenTipShape",
+      "scope": "required",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_point.rs",
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
+      ],
+      "notes": "Validated Rust point/attribute values retain pressure, tilt, twist, microsecond timestamps, nib, curve/pressure/tilt flags, colors and pencil opacity. Native renderer appearance is separately recorded. Additional uncalled OS ModelerAttributes members remain explicit in service-api-map.json."
+    },
+    {
+      "id": "windows-ink-stroke-renderer",
+      "upstream": "Windows.UI.Input.Inking.InkStroke / InkStrokeBuilder and the DirectInk renderer",
+      "scope": "required",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_stroke.rs",
+        "src/FerroUI.Controls.Inking/ink_stroke_builder.rs",
+        "src/FerroUI.Controls.Inking/ink_canvas.rs"
+      ],
+      "notes": "Pressure-dependent nib contours, bounded Hermite fitting, cache invalidation, transformed bounds and selection/eraser geometry form a working independent FerroUI renderer. The 32-sided circular nib, pencil opacity/tilt response without native grain, subpixel coverage and UI-thread scheduling are explicit adaptations, not claims to the unavailable DirectInk algorithm."
+    },
+    {
+      "id": "ink-desktop-host",
+      "upstream": "InkDesktopHost COM class, IInkDesktopHost, ink-thread work queue",
+      "scope": "required",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_canvas.rs",
+        "src/FerroUI.Controls.Inking/ink_presenter.rs",
+        "src/FerroUI.Controls.Inking/ink_synchronizer.rs"
+      ],
+      "notes": "The framework Control, stable Rc presenter/services, disposable subscriptions and UI dispatcher replace the COM host and ink-thread work queue. Lifecycle, input and drying behavior are exercised in FerroUI tests. Native independent ink-thread latency is not reproduced or promised; no OS binary is bundled."
+    },
+    {
+      "id": "direct-composition-host",
+      "upstream": "IDCompositionDevice / IDCompositionTarget / SystemVisualLink",
+      "scope": "required",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_canvas.rs",
+        "src/FerroUI.Controls.Inking/ink_canvas_automation_peer.rs"
+      ],
+      "notes": "FerroUI drawing, visual invalidation, transforms/clipping and the application render backend replace the Windows-only external composition visual. Passed canvas clipping/lifecycle tests verify the required framework behavior; independent DirectComposition latency and exact native pixels remain separate comparisons."
+    },
+    {
+      "id": "windows-isf",
+      "upstream": "InkStrokeContainer.SaveAsync / LoadAsync, InkPersistenceFormat.Isf",
+      "scope": "required",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/windows_ink_services.rs",
+        "src/FerroUI.Controls.Inking/ink_platform_services.rs",
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs"
+      ],
+      "notes": "WindowsInkServices invokes actual OS SaveWithFormatAsync(Isf)/LoadAsync. Real Windows CI run39600257242/job119222654079 at353c692 passes ISF conversion/round-trip, malformed-load atomicity and explicit twist-loss tests. Portable builds use FERROINK. Native f32/ISF quantization, fresh imported IDs and twist policy are documented."
+    },
+    {
+      "id": "gif-with-embedded-isf",
+      "upstream": "InkPersistenceFormat.GifWithEmbeddedIsf",
+      "scope": "required",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/windows_ink_services.rs"
+      ],
+      "notes": "WindowsInkServices invokes real OS SaveAsync GIF-with-ISF and LoadAsync. The Windows CI round-trip fixture passes at353c692, including GIF signature and recovered strokes/attributes/transforms/visible geometry. Raster bounds and byte budgets are enforced; visual preview pixel equivalence is a renderer boundary."
+    },
+    {
+      "id": "native-ink-clipboard",
+      "upstream": "InkStrokeContainer.CopySelectedToClipboard / PasteFromClipboard / CanPasteFromClipboard",
+      "scope": "required",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/windows_ink_services.rs",
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs",
+        "src/FerroUI.Controls.Inking/ink_clipboard.rs"
+      ],
+      "notes": "Real Windows CI run 39605086703/job119239093640 at 7fbffd0 passes the dedicated STA copy/can-paste/paste fixture, comparing native getter state, attributes, transformed samples and fresh IDs. The adapter preserves OS selection. The public FerroUI container deliberately selects newly pasted clones and clears the old selection, matching the published Learn contract and portable paste; the installed native reference instead retains old=true and returns new=false. STA is required and checked explicitly."
+    },
+    {
+      "id": "ruler-and-protractor",
+      "upstream": "Windows.UI.Input.Inking.InkPresenterRuler / InkPresenterProtractor",
+      "scope": "required",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs",
+        "src/FerroUI.Controls.Inking/ink_canvas.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs",
+        "src/FerroUI.Controls.Inking/ink_stencil_input.rs"
+      ],
+      "notes": "Stable portable services implement all 42 audited ruler/protractor members, bounds/defaults, ticks/compass/rays/measured arc, touch/mouse translation/rotation, protractor resize and capture cancellation. Bounded centerline clipping and edge snapping deliberately replace private Windows stencil/nib rasterization; interaction/geometry tests exercise the working FerroUI replacement."
+    },
+    {
+      "id": "high-contrast-services",
+      "upstream": "AccessibilitySettings / UISettings / InkHighContrastAdjustment",
+      "scope": "required",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_input.rs",
+        "src/FerroUI.Controls.Inking/ink_canvas.rs",
+        "src/FerroUI.Controls.Inking/ink_toolbar_configuration.rs",
+        "src/FerroUI.Controls.Inking/color_names.rs"
+      ],
+      "notes": "Canvas and live pen palettes follow platform/theme color resources and the three source adjustment policies, including 7:1 filtering and separate normal/contrast selections. Existing FerroUI platform settings supply system changes; native pixel/OS palette comparison is recorded at the visual and renderer boundaries."
+    },
+    {
+      "id": "pointer-routing",
+      "upstream": "Windows.UI.Core.PointerEventArgs / CoreInputDeviceTypes / CoreInkIndependentInputSource",
+      "scope": "required",
+      "status": "adapted",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/ink_input.rs",
+        "src/FerroUI.Controls.Inking/ink_presenter.rs",
+        "src/FerroUI.Controls.Inking/ink_canvas.rs"
+      ],
+      "notes": "Routed FerroUI events, capture, coalesced samples and cancellation supply the processed/unprocessed input services with pressure/tilt/twist and normalized timestamps when the platform supplies them. Device filters, barrel/eraser policy, loss/detach and stroke events are tested. Coalesced points share the framework event timestamp, and hardware precision/independent Windows scheduling remain documented platform limits."
+    },
+    {
+      "id": "ink-recognition",
+      "upstream": "Windows.UI.Input.Inking.InkRecognizerContainer and installed language recognizers",
+      "scope": "adjacent_os_service",
+      "status": "partial",
+      "rust_files": [
+        "src/FerroUI.Controls.Inking/windows_ink_services.rs"
+      ],
+      "notes": "Optional WindowsInkServices recognizers/recognize methods invoke installed OS handwriting engines, returning candidates/bounds/original FerroUI IDs. Optional enumeration fixture passes in Windows CI; language availability and candidate recognition accuracy are not yet tested. This adjacent extension is not called by the pinned controls."
+    },
+    {
+      "id": "ink-analysis",
+      "upstream": "Windows.UI.Input.Inking.Analysis.InkAnalyzer",
+      "scope": "adjacent_os_service",
+      "status": "external",
+      "rust_files": [],
+      "notes": "Document/shape/text analysis is outside the two pinned WinUI control directories and is not required by their public IDLs. It is tracked explicitly because a broader Windows Ink feature claim would otherwise be ambiguous. No analyzer implementation or recognition-model parity is claimed."
+    }
+  ],
+  "native_validation": {
+    "run_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39605086703",
+    "job_id": 119239093640,
+    "revision": "7fbffd0a6e07f036a247a686bc91727a49efa55d",
+    "command": "cargo test --locked -p ferroui-winui --lib inking::",
+    "result": {
+      "passed": 9,
+      "failed": 0,
+      "ignored": 1,
+      "seconds": 7.18
+    },
+    "passing_tests": [
+      "clipboard_position_must_be_finite_and_bounded",
+      "affine_matrix_layout_matches_windows",
+      "native_export_requires_explicit_twist_loss",
+      "native_conversion_preserves_supported_attributes_samples_and_transform",
+      "malformed_native_load_preserves_existing_container",
+      "real_native_save_rejects_twist_until_application_opts_in",
+      "native_isf_and_gif_round_trip_preserve_strokes_attributes_and_geometry",
+      "installed_recognizer_enumeration_is_optional",
+      "native_move_selected_uses_relative_translation_like_portable_container"
+    ],
+    "clipboard_step": {
+      "command": "cargo test --locked -p ferroui-winui --lib inking::tests::native_clipboard_round_trip -- --ignored --exact --test-threads=1 --nocapture",
+      "result": {
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "seconds": 0.11
+      },
+      "native_reference": {
+        "paste_position": [
+          300.0,
+          200.0
+        ],
+        "native_bounds": [
+          300.0,
+          200.0,
+          155.5,
+          63.68741
+        ],
+        "existing_selected_after_paste": true,
+        "new_strokes_selected": [
+          false,
+          false,
+          false
+        ]
+      },
+      "notes": "The STA fixture compares the adapter with direct native getters and matrix math, verifies positions/attributes/pressure/tilt/fresh IDs and requested relative placement. Native selection is preserved by the adapter; the public container documents a normalization to the published selected-new/clear-old contract."
+    }
+  },
+  "native_validation_history": [
+    {
+      "run_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39600257242",
+      "job_id": 119222654079,
+      "revision": "353c692",
+      "command": "cargo test --locked -p ferroui-winui --lib inking::",
+      "result": {
+        "passed": 8,
+        "failed": 0,
+        "ignored": 1,
+        "seconds": 2.4
+      },
+      "ignored_test": "inking::tests::native_clipboard_round_trip",
+      "passing_tests": [
+        "clipboard_position_must_be_finite_and_bounded",
+        "affine_matrix_layout_matches_windows",
+        "native_export_requires_explicit_twist_loss",
+        "native_conversion_preserves_supported_attributes_samples_and_transform",
+        "malformed_native_load_preserves_existing_container",
+        "real_native_save_rejects_twist_until_application_opts_in",
+        "native_isf_and_gif_round_trip_preserve_strokes_attributes_and_geometry",
+        "installed_recognizer_enumeration_is_optional"
+      ]
+    },
+    {
+      "run_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39602608194",
+      "job_id": 119230639456,
+      "revision_prefix": "c65",
+      "command": "cargo test --locked -p ferroui-winui --lib inking::",
+      "result": {
+        "passed": 9,
+        "failed": 0,
+        "ignored": 1
+      },
+      "additional_passing_test": "native_move_selected_uses_relative_translation_like_portable_container",
+      "clipboard_step": {
+        "command": "cargo test --locked -p ferroui-winui --lib inking::tests::native_clipboard_round_trip -- --ignored --exact --test-threads=1",
+        "result": "failed",
+        "reason": "RO_E_UNSUPPORTED_FROM_MTA (0x8000001D) at native copy; production STA precondition and STA fixture fix added, awaiting rerun."
+      }
+    },
+    {
+      "run_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39603593237",
+      "job_id": 119233997021,
+      "revision": "dd8abb5",
+      "command": "cargo test --locked -p ferroui-winui --lib inking::",
+      "result": {
+        "passed": 9,
+        "failed": 0,
+        "ignored": 1
+      },
+      "passing_tests": [
+        "clipboard_position_must_be_finite_and_bounded",
+        "affine_matrix_layout_matches_windows",
+        "native_export_requires_explicit_twist_loss",
+        "native_conversion_preserves_supported_attributes_samples_and_transform",
+        "malformed_native_load_preserves_existing_container",
+        "real_native_save_rejects_twist_until_application_opts_in",
+        "native_isf_and_gif_round_trip_preserve_strokes_attributes_and_geometry",
+        "installed_recognizer_enumeration_is_optional",
+        "native_move_selected_uses_relative_translation_like_portable_container"
+      ],
+      "clipboard_step": {
+        "command": "cargo test --locked -p ferroui-winui --lib inking::tests::native_clipboard_round_trip -- --ignored --exact --test-threads=1",
+        "result": "failed assertion after successful copy/can-paste/paste",
+        "reason": "Installed Windows returns unselected pasted strokes; fixture assumed selection. New fixture compares actual native getters and separately records an existing selected sentinel. Portable public wrapper selection normalization is unchanged pending reference results."
+      }
+    },
+    {
+      "run_url": "https://github.com/wieslawsoltes/FerroUI/actions/runs/39605086703",
+      "job_id": 119239093640,
+      "revision": "7fbffd0a6e07f036a247a686bc91727a49efa55d",
+      "command": "cargo test --locked -p ferroui-winui --lib inking::",
+      "result": {
+        "passed": 9,
+        "failed": 0,
+        "ignored": 1,
+        "seconds": 7.18
+      },
+      "passing_tests": [
+        "clipboard_position_must_be_finite_and_bounded",
+        "affine_matrix_layout_matches_windows",
+        "native_export_requires_explicit_twist_loss",
+        "native_conversion_preserves_supported_attributes_samples_and_transform",
+        "malformed_native_load_preserves_existing_container",
+        "real_native_save_rejects_twist_until_application_opts_in",
+        "native_isf_and_gif_round_trip_preserve_strokes_attributes_and_geometry",
+        "installed_recognizer_enumeration_is_optional",
+        "native_move_selected_uses_relative_translation_like_portable_container"
+      ],
+      "clipboard_step": {
+        "command": "cargo test --locked -p ferroui-winui --lib inking::tests::native_clipboard_round_trip -- --ignored --exact --test-threads=1 --nocapture",
+        "result": {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "seconds": 0.11
+        },
+        "native_reference": {
+          "paste_position": [
+            300.0,
+            200.0
+          ],
+          "native_bounds": [
+            300.0,
+            200.0,
+            155.5,
+            63.68741
+          ],
+          "existing_selected_after_paste": true,
+          "new_strokes_selected": [
+            false,
+            false,
+            false
+          ]
+        },
+        "notes": "The STA fixture compares the adapter with direct native getters and matrix math, verifies positions/attributes/pressure/tilt/fresh IDs and requested relative placement. Native selection is preserved by the adapter; the public container documents a normalization to the published selected-new/clear-old contract."
+      }
+    }
+  ]
+}

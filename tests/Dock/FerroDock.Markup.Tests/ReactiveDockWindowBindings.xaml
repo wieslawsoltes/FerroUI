@@ -1,0 +1,9 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:m="clr-namespace:FerroDock.Model.ReactiveUI.Core;assembly=FerroDock.Model.ReactiveUI"
+ x:CompileBindings="True" x:DataType="m:DockWindow">
+ <TextBlock Text="{Binding Title}" />
+ <TextBox Text="{Binding Title, Mode=TwoWay}" />
+ <Slider Minimum="0" Maximum="1200" Value="{Binding Width, Mode=TwoWay}" />
+ <CheckBox IsChecked="{Binding Topmost, Mode=TwoWay}" />
+ <TextBox Text="{Binding WindowState, Mode=TwoWay}" />
+</StackPanel>

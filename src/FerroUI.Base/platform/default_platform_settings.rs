@@ -15,12 +15,14 @@ const TOUCH_DOUBLE_TAP_SIZE: f64 = 50.0;
 /// not provide settings of their own, and the base the settings of the
 /// platform backends are built on: a backend embeds one, delegates what it
 /// does not replace and raises the change events through
-/// [`on_color_values_changed`](Self::on_color_values_changed) and
-/// [`on_preferred_application_language_changed`](Self::on_preferred_application_language_changed).
+/// [`on_color_values_changed`](Self::on_color_values_changed),
+/// [`on_preferred_application_language_changed`](Self::on_preferred_application_language_changed) and
+/// [`on_accessibility_settings_changed`](Self::on_accessibility_settings_changed).
 #[derive(Default)]
 pub struct DefaultPlatformSettings {
     color_values_changed: Rc<HandlerList<dyn Fn(&PlatformColorValues)>>,
     preferred_application_language_changed: Rc<HandlerList<dyn Fn()>>,
+    accessibility_settings_changed: Rc<HandlerList<dyn Fn()>>,
 }
 
 impl DefaultPlatformSettings {
@@ -51,6 +53,14 @@ impl DefaultPlatformSettings {
             return;
         }
         for (_, handler) in self.preferred_application_language_changed.snapshot().iter() {
+            handler();
+        }
+    }
+
+    /// Raises [`IPlatformSettings::accessibility_settings_changed`] on the UI
+    /// thread. Snapshot dispatch permits a handler to unsubscribe itself.
+    pub fn on_accessibility_settings_changed(&self) {
+        for (_, handler) in self.accessibility_settings_changed.snapshot().iter() {
             handler();
         }
     }
@@ -127,6 +137,14 @@ impl IPlatformSettings for DefaultPlatformSettings {
             handlers.remove(token);
         })
     }
+
+    fn accessibility_settings_changed(&self, handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
+        let token = self.accessibility_settings_changed.add(handler);
+        let handlers = self.accessibility_settings_changed.clone();
+        Disposable::create(move || {
+            handlers.remove(token);
+        })
+    }
 }
 
 #[cfg(test)]
@@ -174,6 +192,50 @@ mod tests {
         assert!(settings.animations_enabled());
         let as_contract: &dyn IPlatformSettings = &settings;
         assert!(as_contract.animations_enabled());
+        assert!(settings.transparency_enabled());
+        assert!(as_contract.transparency_enabled());
+    }
+
+    #[test]
+    fn accessibility_changes_are_independent_and_unsubscribe_cleanly() {
+        use std::cell::Cell;
+        let settings = DefaultPlatformSettings::new();
+        let count = Rc::new(Cell::new(0));
+        let changes = {
+            let count = count.clone();
+            settings.accessibility_settings_changed(Rc::new(move || count.set(count.get() + 1)))
+        };
+        settings.on_accessibility_settings_changed();
+        settings.on_color_values_changed(PlatformColorValues::new());
+        settings.on_preferred_application_language_changed();
+        assert_eq!(count.get(), 1);
+        changes.dispose();
+        settings.on_accessibility_settings_changed();
+        assert_eq!(count.get(), 1);
+    }
+
+    #[test]
+    fn accessibility_handler_can_dispose_itself_during_notification() {
+        use std::cell::Cell;
+        let settings = DefaultPlatformSettings::new();
+        let count = Rc::new(Cell::new(0));
+        let subscription: Rc<RefCell<Option<Rc<dyn IDisposable>>>> = Rc::new(RefCell::new(None));
+        let token = {
+            let weak_subscription = Rc::downgrade(&subscription);
+            let count = count.clone();
+            settings.accessibility_settings_changed(Rc::new(move || {
+                count.set(count.get() + 1);
+                if let Some(subscription) = weak_subscription.upgrade() {
+                    if let Some(token) = subscription.borrow_mut().take() {
+                        token.dispose();
+                    }
+                }
+            }))
+        };
+        *subscription.borrow_mut() = Some(token);
+        settings.on_accessibility_settings_changed();
+        settings.on_accessibility_settings_changed();
+        assert_eq!(count.get(), 1);
     }
 
     #[test]

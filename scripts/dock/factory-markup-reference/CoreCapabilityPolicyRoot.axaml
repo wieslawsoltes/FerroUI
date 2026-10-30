@@ -1,0 +1,3 @@
+<core:DockCapabilityPolicy xmlns="https://github.com/avaloniaui"
+ xmlns:core="clr-namespace:Dock.Model.Core;assembly=Dock.Model"
+ CanClose="False" CanFloat="True" />

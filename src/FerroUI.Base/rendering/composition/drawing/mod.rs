@@ -36,7 +36,7 @@ pub use render_data_resources::{RenderDataResource, RenderDataResources, NULL_HA
 pub use render_data_opcode::RenderDataOpcode;
 pub use render_data_payloads::{
     DrawBitmapPayload, DrawCustomPayload, DrawEllipsePayload, DrawGeometryPayload, DrawGlyphRunPayload,
-    DrawLinePayload, DrawRectanglePayload, IRenderDataPayload, PushClipPayload, PushEffectPayload,
+    DrawLinePayload, DrawRectanglePayload, IRenderDataPayload, PushClipPayload, PushCompositingLayerPayload, PushEffectPayload,
     PushGeometryClipPayload, PushOpacityMaskPayload, PushOpacityPayload, PushRenderOptionsPayload,
     PushTextOptionsPayload, PushTransformPayload,
 };
