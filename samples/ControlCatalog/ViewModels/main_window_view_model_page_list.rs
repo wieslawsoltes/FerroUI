@@ -72,6 +72,8 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
                 "Single- and multi-line text editing",
                 Rc::new(crate::pages::TextBoxPage::demos().snapshot().to_vec()),
             );
+            // Not from upstream: RichEditBox of WinUI (docs/porting/winui-rich-text.md).
+            s.add("/Pages/RichEditBoxPage.xaml", "RichEditBox", Icons::TEXT_INPUT, "Rich text editing with undo and input methods");
             // Not from upstream: RichTextBlock of WinUI (docs/porting/winui-rich-text.md).
             s.add("/Pages/RichTextBlockPage.xaml", "RichTextBlock", Icons::TEXT_INPUT, "Read-only rich text with linked overflow");
             s.add("/Pages/TextBlockPage.xaml", "TextBlock", Icons::TEXT_INPUT, "Styled read-only text display");

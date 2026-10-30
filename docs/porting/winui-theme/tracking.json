@@ -41674,8 +41674,8 @@
    "key": "DefaultRichEditBoxStyle",
    "kind": "Style",
    "target_type": "RichEditBox",
-   "status": "waived",
-   "reason": "RichEditBox: no FerroUI control (no rich text editing).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -41684,8 +41684,8 @@
    "key": "RichEditBoxTopHeaderMargin",
    "kind": "Thickness",
    "target_type": "",
-   "status": "waived",
-   "reason": "RichEditBox: no FerroUI control (no rich text editing).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -41694,8 +41694,8 @@
    "key": "{RichEditBox}",
    "kind": "Style",
    "target_type": "RichEditBox",
-   "status": "waived",
-   "reason": "RichEditBox: no FerroUI control (no rich text editing).",
+   "status": "ported",
+   "reason": null,
    "batch": null
   },
   {
@@ -90117,6 +90117,7 @@
   "Controls/RefreshContainer.xaml",
   "Controls/RefreshVisualizer.xaml",
   "Controls/RepeatButton.xaml",
+  "Controls/RichEditBox.xaml",
   "Controls/ScrollBar.xaml",
   "Controls/ScrollViewer.xaml",
   "Controls/SelectableTextBlock.xaml",
@@ -90201,6 +90202,7 @@
   "Resources/RepeatButton_themeresources.xaml",
   "Resources/ResizeGripper_themeresources.xaml",
   "Resources/RevealBrush_themeresources.xaml",
+  "Resources/RichEditBox_themeresources.xaml",
   "Resources/ScrollBar_themeresources.xaml",
   "Resources/ScrollViewer_themeresources.xaml",
   "Resources/SelectorBar_themeresources.xaml",
@@ -90251,7 +90253,7 @@
    "winui": "AutoSuggestBox: DefaultAutoSuggestBoxStyle, AutoSuggestBoxTextBoxStyle (AutoSuggestBox_themeresources.xaml).",
    "status": "ported",
    "deviations": 9,
-   "date": "2026-10-17"
+   "date": "2026-10-24"
   },
   {
    "document": "Button.xaml",
@@ -90306,7 +90308,7 @@
    "winui": "CalendarDatePicker: DefaultCalendarDatePicker (CalendarDatePicker_themeresources.xaml).",
    "status": "ported",
    "deviations": 11,
-   "date": "2026-10-22"
+   "date": "2026-10-24"
   },
   {
    "document": "CalendarDayButton.xaml",
@@ -90372,7 +90374,7 @@
    "winui": "ComboBox: DefaultComboBoxStyle (ComboBox_themeresources.xaml).",
    "status": "ported",
    "deviations": 16,
-   "date": "2026-10-22"
+   "date": "2026-10-24"
   },
   {
    "document": "ComboBoxItem.xaml",
@@ -90397,7 +90399,7 @@
    "winui": "CommandBar: DefaultCommandBarStyle, DefaultCommandBarOverflowPresenterStyle (CommandBar_themeresources.xaml); AppBarButton: DefaultAppBarButtonStyle, AppBarButtonOverflowStyle; AppBarToggleButton: DefaultAppBarToggleButtonStyle, AppBarToggleButtonOverflowStyle; AppBarSeparator: DefaultAppBarSeparatorStyle.",
    "status": "ported",
    "deviations": 20,
-   "date": "2026-10-22"
+   "date": "2026-10-24"
   },
   {
    "document": "ContentPage.xaml",
@@ -90419,7 +90421,7 @@
    "winui": "MenuFlyoutPresenter: DefaultMenuFlyoutPresenterStyle (MenuFlyout_themeresources.xaml).",
    "status": "ported",
    "deviations": 3,
-   "date": "2026-10-17"
+   "date": "2026-10-24"
   },
   {
    "document": "DataValidationErrors.xaml",
@@ -90442,7 +90444,7 @@
    "winui": "DatePicker: DefaultDatePickerStyle; DatePickerFlyoutPresenter: DefaultDatePickerFlyoutPresenterStyle (DatePicker_themeresources.xaml).",
    "status": "ported",
    "deviations": 15,
-   "date": "2026-10-22"
+   "date": "2026-10-24"
   },
   {
    "document": "DateTimePickerShared.xaml",
@@ -90506,7 +90508,7 @@
    "winui": "FlyoutPresenter: DefaultFlyoutPresenterStyle (FlyoutPresenter_themeresources.xaml).",
    "status": "ported",
    "deviations": 3,
-   "date": "2026-10-17"
+   "date": "2026-10-24"
   },
   {
    "document": "Frame.xaml",
@@ -90628,7 +90630,7 @@
    "winui": "MenuBar: DefaultMenuBarStyle (MenuBar.xaml); MenuBarItem (MenuBarItem.xaml).",
    "status": "ported",
    "deviations": 8,
-   "date": "2026-10-17"
+   "date": "2026-10-24"
   },
   {
    "document": "MenuFlyoutPresenter.xaml",
@@ -90639,7 +90641,7 @@
    "winui": "MenuFlyoutPresenter: DefaultMenuFlyoutPresenterStyle (MenuFlyout_themeresources.xaml).",
    "status": "ported",
    "deviations": 6,
-   "date": "2026-10-17"
+   "date": "2026-10-24"
   },
   {
    "document": "MenuItem.xaml",
@@ -90650,7 +90652,7 @@
    "winui": "MenuFlyoutItem: DefaultMenuFlyoutItemStyle; MenuFlyoutSubItem: DefaultMenuFlyoutSubItemStyle; ToggleMenuFlyoutItem: DefaultToggleMenuFlyoutItemStyle (MenuFlyout_themeresources.xaml); RadioMenuFlyoutItem: DefaultRadioMenuFlyoutItemStyle (RadioMenuFlyoutItem_themeresources.xaml).",
    "status": "ported",
    "deviations": 16,
-   "date": "2026-10-18"
+   "date": "2026-10-24"
   },
   {
    "document": "MenuScrollViewer.xaml",
@@ -90783,7 +90785,7 @@
    "winui": "AutoSuggestBox: the implicit style and DefaultAutoSuggestBoxStyle, with AutoSuggestBoxTextBoxStyle, QueryButtonStyle and the resources of AutoSuggestBox_themeresources.xaml (DefaultAutoSuggestBoxStyle and AutoSuggestBoxTextBoxStyle are ported in AutoCompleteBox.xaml). A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it.",
    "status": "ported",
    "deviations": 8,
-   "date": "2026-10-29"
+   "date": "2026-10-30"
   },
   {
    "document": "NumberBox.xaml",
@@ -90794,7 +90796,7 @@
    "winui": "NumberBox: {NumberBox} (NumberBox.xaml, NumberBox_themeresources.xaml), with NumberBoxTextBoxStyle, NumberBoxSpinButtonStyle and NumberBoxPopupSpinButtonStyle, which NumericUpDown.xaml ports. A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it.",
    "status": "ported",
    "deviations": 8,
-   "date": "2026-10-24"
+   "date": "2026-10-30"
   },
   {
    "document": "RadioButtons.xaml",
@@ -90925,8 +90927,8 @@
    "batch": "F",
    "winui": "ScrollViewer: DefaultScrollViewerStyle (ScrollViewer_themeresources.xaml).",
    "status": "ported",
-   "deviations": 9,
-   "date": "2026-10-16"
+   "deviations": 10,
+   "date": "2026-10-29"
   },
   {
    "document": "SelectableTextBlock.xaml",
@@ -91125,7 +91127,7 @@
    "winui": "TimePicker: {TimePicker}; TimePickerFlyoutPresenter: {TimePickerFlyoutPresenter} (TimePicker_themeresources.xaml).",
    "status": "ported",
    "deviations": 12,
-   "date": "2026-10-17"
+   "date": "2026-10-24"
   },
   {
    "document": "ToggleButton.xaml",
@@ -91158,7 +91160,7 @@
    "winui": "ToolTip: DefaultToolTipStyle (ToolTip_themeresources.xaml).",
    "status": "ported",
    "deviations": 3,
-   "date": "2026-10-17"
+   "date": "2026-10-24"
   },
   {
    "document": "TransitioningContentControl.xaml",
@@ -91225,7 +91227,7 @@
    "winui": "TitleBar: DefaultTitleBarStyle (as DefaultTitleBarControlStyle) and the implicit style (TitleBar.xaml); TitleBarBackButtonStyle and TitleBarPaneToggleButtonStyle are in WindowDrawnDecorations.xaml. A WinUI control in ferroui-controls (docs/porting/winui-controls.md); the Fluent theme has no document for it.",
    "status": "ported",
    "deviations": 4,
-   "date": "not committed"
+   "date": "2026-10-29"
   },
   {
    "document": "WindowNotificationManager.xaml",
@@ -91340,13 +91342,6 @@
    "variant": null,
    "reason": "GridViewItem: no FerroUI control (no GridView).",
    "items": 125
-  },
-  {
-   "document": "controls/dev/CommonStyles/RichEditBox_themeresources.xaml",
-   "key": "*",
-   "variant": null,
-   "reason": "RichEditBox: no FerroUI control (no rich text editing).",
-   "items": 3
   },
   {
    "document": "controls/dev/PersonPicture/PersonPicture.xaml",
@@ -91639,7 +91634,7 @@
   "RadioButtons": 3,
   "RepeatButton": 1,
   "ScrollBar": 11,
-  "ScrollViewer": 9,
+  "ScrollViewer": 10,
   "SelectableTextBlock": 2,
   "Separator": 1,
   "TextBlock": 4,
