@@ -220,3 +220,11 @@ What remains outside the port (RT-P of #243): the exact LineServices metrics, th
 
 Not taken from #243 in R8: its manager tests for a client without exact editing whose cursor query moves focus or replaces the client (`rich_edit_input_geometry_tests.rs`). Such a client keeps the upstream manager (D5), which has no such guarantees. While a connection client's flyout has focus, the manager keeps the input method of the owner's root, also when the flyout is in a popup root of its own.
 
+### 11.4 Browser input (R10)
+
+| WinUI | FerroUI | Why |
+|---|---|---|
+| The touch keyboard follows `InputScope` through the text services of the system. | In the browser the first input scope of the owner picks the `inputmode` of the hidden textarea (`tel`, `numeric`, `decimal`, `email`, `url`, `search`, else `text`); the keyboard shown is the browser's choice. | HTML has hints only (`browser-platform.md`, section 14). |
+| The IME edits the story directly, CR and CRLF included. | The textarea shows LF; a caret between CR and LF of a raw Run cannot start a native edit there (the edit is rejected and the textarea restored). | `<textarea>` normalizes line ends. |
+
+Not taken from #243 in R10: its tests of input options and preedit resets for clients without the connection (`browser_text_input_method.rs`); such clients keep the upstream path (D5), which ignores options and is tested as such.

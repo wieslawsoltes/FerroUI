@@ -31,7 +31,8 @@ export class CaretHelper {
         const isInput = element.nodeName === "INPUT";
 
         // Default textarea styles
-        style.whiteSpace = "pre-wrap";
+        // Not in the original: the textarea of a connection client does not wrap (wrap="off").
+        style.whiteSpace = !isInput && (element as HTMLTextAreaElement).wrap === "off" ? "pre" : "pre-wrap";
         if (!isInput) style.wordWrap = "break-word"; // only for textarea-s
 
         // Position off-screen
