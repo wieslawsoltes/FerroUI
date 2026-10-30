@@ -43,12 +43,18 @@ impl RichTextEditing {
         self.view.arrange(ferroui_base::Rect::new(0.0, 0.0, 600.0, desired.height));
     }
 
-    /// One typed character in the middle of the document.
+    /// One typed character in the middle of the document, and its deletion on the next call, so
+    /// that the paragraph keeps its size however many invocations a run makes.
     pub fn type_character(&self) {
         let caret = self.caret.get();
         let _ = self.editor.set_selection(EditorSelection::caret(caret));
-        self.editor.insert_text("x", EditKind::Typing).unwrap();
-        self.caret.set(caret + 1);
+        if self.document.text_length() > self.length {
+            self.editor.delete_backward(false).unwrap();
+            self.caret.set(caret - 1);
+        } else {
+            self.editor.insert_text("x", EditKind::Typing).unwrap();
+            self.caret.set(caret + 1);
+        }
         self.layout();
     }
 
