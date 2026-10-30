@@ -185,6 +185,11 @@ pub fn markup_handle(markup: &'static MarkupType) -> ValueType {
 /// declares); generated code asks the assignability of the untyped value
 /// conversions ([`ValueTypes::is_assignable`]), which the declarations of
 /// that metadata register.
+///
+/// A value held in another handle of the markup type of `target` (the nullable form
+/// `Option<Rc<dyn Contract>>`, which `ResolveByName` provides for a property of that type:
+/// it brings the element to the type the property stores) is an instance of it, as the
+/// run-time loader takes the type of a value from the metadata that declares its handle.
 pub fn is_instance(value: &MarkupValue, target: ValueType) -> bool {
     let Some(value) = value else { return false };
     if let Some(object) = ValueTypes::as_object(&**value) {
@@ -197,7 +202,13 @@ pub fn is_instance(value: &MarkupValue, target: ValueType) -> bool {
             None => false,
         };
     }
-    ValueTypes::is_assignable(ValueType::of_value(&**value), target)
+    if ValueTypes::is_assignable(ValueType::of_value(&**value), target) {
+        return true;
+    }
+    // Not the null of the form: the null of a nullable form is no instance (`isinst`).
+    MarkupType::find_by_handle(value.value_type_id())
+        .filter(|markup| markup.handles.iter().any(|handle| handle().id() == target.id()))
+        .is_some_and(|_| ValueTypes::normalize(value.clone()).is_some())
 }
 
 /// The value `value` as the Rust type `T` a member declares, with the
@@ -1299,6 +1310,28 @@ pub fn cast<T: Clone + 'static, V: PartialEq + 'static>(value: V, line: i32, pos
     };
     match converted.as_ref().and_then(|converted| converted.downcast_ref::<T>()) {
         Some(value) => Ok(value.clone()),
+        None => Err(at("InvalidCastException", format!("Unable to cast the value to {}.", target.name()), line, position)),
+    }
+}
+
+/// `value` cast to the type with the handle `target`, then held untyped as the run-time
+/// loader holds the value of a node ([`to_untyped`]): [`cast`] for a target that generated
+/// code names by its handle, not by a Rust type (the element type of a list of the runtime
+/// library, `List<T>`, which the adder of the list states). A value it does not convert is
+/// the `InvalidCastException` of the loader at `line`, `position`.
+pub fn cast_untyped<V: PartialEq + 'static>(
+    value: V,
+    target: ValueType,
+    line: i32,
+    position: i32,
+) -> Result<MarkupValue, XamlLoadException> {
+    let converted = match into_markup_value(value) {
+        Some(boxed) if boxed.value_type_id() == target.id() => Some(boxed),
+        Some(boxed) => ValueTypes::try_cast(&boxed, target),
+        None => ValueTypes::try_convert(None, target).flatten(),
+    };
+    match converted {
+        Some(converted) => Ok(to_untyped(converted)),
         None => Err(at("InvalidCastException", format!("Unable to cast the value to {}.", target.name()), line, position)),
     }
 }

@@ -349,6 +349,7 @@ ferroui_base::ferro_rust_paths! {
         crate::NavigationViewPaneDisplayMode,
         crate::NavigationViewSelectionChangedEventArgs,
         crate::NavigationViewSelectionFollowsFocus,
+        crate::Notification,
         crate::NotificationPosition,
         crate::NotificationType,
         crate::NumberBoxSpinButtonPlacementMode,

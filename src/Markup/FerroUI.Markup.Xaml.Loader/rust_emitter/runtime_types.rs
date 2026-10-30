@@ -22,6 +22,7 @@ use xamlx::type_system::{IXamlConstructor, IXamlField, IXamlMethod, IXamlType};
 
 use crate::runtime::type_system::{
     DeclaredMember, RuntimeConstructor, RuntimeField, RuntimeFieldValue, RuntimeInvoker, RuntimeMethod, RuntimeType,
+    RuntimeTypeOrigin,
 };
 
 use super::emit_types::{
@@ -221,6 +222,17 @@ fn runtime_type(type_: &dyn IXamlType) -> Option<&RuntimeType> {
     type_.as_any().downcast_ref::<RuntimeType>()
 }
 
+/// The metadata a crate declares for a type of the table of runtime library types
+/// (`System.Collections.IList`, the items source handle): the type is that metadata, with
+/// its handles, as the build-time type system answers.
+fn table_type_markup(runtime: &RuntimeType, type_: &dyn IXamlType) -> Option<&'static MarkupType> {
+    if !matches!(runtime.origin(), RuntimeTypeOrigin::Synthetic) {
+        return None;
+    }
+    let namespace = type_.namespace().filter(|namespace| namespace.starts_with("System"))?;
+    MarkupType::find(&namespace, &type_.name()).filter(|found| found.generic.is_none())
+}
+
 fn emit_function(emit: ferroui_base::metadata::MarkupEmit) -> EmitFunction {
     EmitFunction { function: emit.function.to_string(), fallible: emit.fallible }
 }
@@ -327,12 +339,19 @@ impl EmitTypes for RuntimeEmitTypes {
 
     fn metadata_of(&self, type_: &dyn IXamlType) -> Option<&dyn EmitMarkup> {
         let runtime = runtime_type(type_)?;
-        let found = runtime.markup().or_else(|| MarkupType::find_by_handle(runtime.handle()?.id()))?;
+        let found = runtime
+            .markup()
+            .or_else(|| MarkupType::find_by_handle(runtime.handle()?.id()))
+            .or_else(|| table_type_markup(runtime, type_))?;
         Some(markup(found))
     }
 
     fn handle_of(&self, type_: &dyn IXamlType) -> Option<Handle<'_>> {
-        runtime_type(type_).and_then(RuntimeType::handle).map(handle_of)
+        let runtime = runtime_type(type_)?;
+        match runtime.handle() {
+            Some(handle) => Some(handle_of(handle)),
+            None => table_type_markup(runtime, type_).and_then(|found| found.handles.first()).map(|handle| handle_of(handle())),
+        }
     }
 
     fn class_by_handle(&self, key: TypeKey<'_>) -> Option<(&dyn EmitClass, bool)> {
