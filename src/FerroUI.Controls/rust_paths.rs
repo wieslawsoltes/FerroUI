@@ -6,6 +6,7 @@
 
 ferroui_base::ferro_rust_paths! {
     classes: [
+        crate::AdaptiveTrigger,
         crate::Application,
         crate::AutoCompleteBox,
         crate::AutoSuggestBox,
@@ -124,6 +125,8 @@ ferroui_base::ferro_rust_paths! {
         crate::SplitButton,
         crate::SplitView,
         crate::StackPanel,
+        crate::StateTrigger,
+        crate::StateTriggerBase,
         crate::SymbolIcon,
         crate::SymbolIconSource,
         crate::TabControl,
@@ -506,6 +509,7 @@ ferroui_base::ferro_rust_paths! {
         (crate::FerroListOf<::ferroui_base::Ref<crate::NativeMenuItemBase>>, "ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::NativeMenuItemBase>>"),
         (crate::FerroListOf<::ferroui_base::Ref<crate::Page>>, "ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::Page>>"),
         (crate::FerroListOf<::ferroui_base::Ref<crate::RowDefinition>>, "ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::RowDefinition>>"),
+        (crate::FerroListOf<::ferroui_base::Ref<crate::StateTriggerBase>>, "ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::StateTriggerBase>>"),
         (crate::FerroListOf<::ferroui_base::Ref<crate::TableViewColumn>>, "ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::TableViewColumn>>"),
         (crate::FerroListOf<::ferroui_base::Ref<crate::TrayIcon>>, "ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::TrayIcon>>"),
         (crate::FerroListOf<::ferroui_base::Ref<crate::VisualState>>, "ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::VisualState>>"),
