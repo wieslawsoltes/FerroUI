@@ -207,7 +207,19 @@ impl ValueStore {
         source: Rc<dyn BindingExpressionBase>,
     ) -> Rc<dyn BindingExpressionBase> {
         let priority = source.default_priority();
+        self.add_binding_expression_with_priority(owner, property, source, priority)
+    }
 
+    /// [`add_binding_expression`](Self::add_binding_expression) at the given priority instead of
+    /// the expression's default priority (an addition: the values of WinUI's visual states are
+    /// bound at animation priority).
+    pub fn add_binding_expression_with_priority(
+        &self,
+        owner: &FerroObject,
+        property: &'static FerroProperty,
+        source: Rc<dyn BindingExpressionBase>,
+        priority: BindingPriority,
+    ) -> Rc<dyn BindingExpressionBase> {
         if priority == BindingPriority::LocalValue || property.is_direct() {
             self.dispose_existing_local_value_binding(property);
             let disposable: Rc<dyn IDisposable> = source.clone();
