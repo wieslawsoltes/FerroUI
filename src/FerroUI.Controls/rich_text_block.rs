@@ -1432,6 +1432,18 @@ impl RichTextBlock {
         });
     }
 
+    /// Exports using the same resolved tab intervals as this view and its overflow
+    /// chain. RTF has one document-wide default interval, so paragraphs resolving
+    /// to different intervals return an unsupported-feature error.
+    pub fn export_rtf(&self) -> Result<String, crate::rich_text::RtfError> {
+        let mut snapshot = self.document().snapshot();
+        let source = self.page_layout().source.clone();
+        for (paragraph, resolved) in snapshot.paragraphs.iter_mut().zip(&source.paragraphs) {
+            paragraph.format.default_tab_stop = Some(resolved.default_tab_stop);
+        }
+        crate::rich_text::RtfWriter::write(&snapshot)
+    }
+
     pub fn hit_test_text_position(&self, point: Point) -> usize {
         let origin = self.text_origin();
         self.page_layout()

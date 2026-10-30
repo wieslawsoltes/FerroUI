@@ -527,6 +527,7 @@ mod context_menu_event_args;
 mod rich_text_block;
 mod rich_text_block_overflow;
 mod rich_text_layout;
+pub mod rich_text;
 pub use context_menu_event_args::{ContextMenuEventArgs, ContextMenuOpeningRoutedEvent};
 pub use rich_text_block::{
     RichTextBlock, RichTextBlockImpl, RichTextBlockImplExt, RichTextBlockVTable, RichTextSelectionChangedEventArgs,

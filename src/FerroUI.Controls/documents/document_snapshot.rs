@@ -404,10 +404,7 @@ pub(crate) fn normalize_paragraph_breaks(text: &str) -> String {
     text.replace("\r\n", "\n").replace('\r', "\n")
 }
 
+/// A soft line break of the model: one unit, U+000B, on every platform (decision D10).
 fn inline_line_break() -> &'static str {
-    if cfg!(windows) {
-        "\r\n"
-    } else {
-        "\n"
-    }
+    super::line_break::RICH_LINE_BREAK
 }

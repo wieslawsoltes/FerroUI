@@ -6,6 +6,8 @@ use ferroui_base::media::text_formatting::testing::TextTestScope;
 use ferroui_base::{Rect, Size};
 #[allow(unused_imports)]
 use crate::{RichTextBlock, RichTextBlockOverflow};
+#[allow(unused_imports)]
+use crate::rich_text::*;
 
 #[test]
 fn rich_paragraph_line_spacing_uses_native_values_and_points() {
@@ -167,4 +169,84 @@ fn rich_paragraph_indentation_affects_line_origin_and_invalidates_layout() {
     view.arrange(Rect::new(0.0, 0.0, 300.0, 100.0));
     assert_eq!(view.page_layout().lines[0].origin.x, original_x - 10.0);
     assert_eq!(view.page_layout().lines[1].origin.x, original_x - 10.0);
+}
+
+#[test]
+fn rich_rtf_multiple_spacing_accepts_both_control_orders() {
+    for input in [
+        r"{\rtf1\sl360\slmult1 first\par second}",
+        r"{\rtf1\slmult1\sl360 first\par second}",
+    ] {
+        let document = RtfReader::read_str(input).unwrap();
+        assert_eq!(document.text(), "first\nsecond");
+        for paragraph in &document.paragraphs {
+            assert_eq!(
+                paragraph.format.get_line_spacing(),
+                (LineSpacingRule::Multiple, 1.5)
+            );
+        }
+        let output = RtfWriter::write(&document).unwrap();
+        assert!(output.contains(r"\sl360\slmult1"));
+        let imported = RtfReader::read_str(&output).unwrap();
+        assert_eq!(imported.text(), document.text());
+        assert!(imported
+            .paragraphs
+            .iter()
+            .all(|p| p.format.get_line_spacing() == (LineSpacingRule::Multiple, 1.5)));
+    }
+}
+
+#[test]
+fn rich_rtf_exact_minimum_and_reset_spacing_are_preserved() {
+    let input = r"{\rtf1\sl-360\slmult0 exact\par\sl480 minimum\par\pard natural}";
+    let document = RtfReader::read_str(input).unwrap();
+    assert_eq!(
+        document.paragraphs[0].format.get_line_spacing(),
+        (LineSpacingRule::Exactly, 18.0)
+    );
+    assert_eq!(
+        document.paragraphs[1].format.get_line_spacing(),
+        (LineSpacingRule::AtLeast, 24.0)
+    );
+    assert_eq!(
+        document.paragraphs[2].format.get_line_spacing().0,
+        LineSpacingRule::Undefined
+    );
+    let output = RtfWriter::write(&document).unwrap();
+    let imported = RtfReader::read_str(&output).unwrap();
+    for (a, b) in imported.paragraphs.iter().zip(&document.paragraphs) {
+        assert_eq!(a.format.get_line_spacing(), b.format.get_line_spacing());
+    }
+}
+
+#[test]
+fn rich_rtf_rejects_invalid_spacing_and_unrepresentable_metrics() {
+    for input in [
+        r"{\rtf1\slmult2 text}",
+        r"{\rtf1\sl-240\slmult1 text}",
+        r"{\rtf1\slmult1\sl-240 text}",
+        r"{\rtf1\sb-20 text}",
+    ] {
+        assert!(
+            matches!(
+                RtfReader::read_str(input),
+                Err(RtfError::InvalidParameter(_))
+            ),
+            "{input}"
+        );
+    }
+}
+
+#[test]
+fn rich_rtf_negative_indents_round_trip_without_negative_margins() {
+    let document = RtfReader::read_str(r"{\rtf1\fi-180\li360\ri-60 text}").unwrap();
+    let format = &document.paragraphs[0].format;
+    assert_eq!(format.get_indents(), (-9.0, 18.0, -3.0));
+    assert!(format.margin.is_none());
+    let imported = RtfReader::read_str(&RtfWriter::write(&document).unwrap()).unwrap();
+    assert_eq!(
+        imported.paragraphs[0].format.get_indents(),
+        format.get_indents()
+    );
+    assert_eq!(imported.text(), document.text());
 }

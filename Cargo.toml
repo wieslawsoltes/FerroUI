@@ -306,6 +306,9 @@ ferroui-skia = { version = "=0.4.0", path = "src/Skia/FerroUI.Skia" }
 ferroui-vello = { version = "=0.4.0", path = "src/Vello/FerroUI.Vello" }
 ferroui-harfbuzz = { version = "=0.4.0", path = "src/HarfBuzz/FerroUI.HarfBuzz" }
 bitflags = "2"
+# The legacy code pages of RTF (the optional feature `rtf-codepages` of ferroui-controls,
+# docs/porting/winui-rich-text.md, decision D2): strict byte decoding, no platform code page.
+encoding_rs = { version = "=0.8.42", default-features = false }
 # A fast hasher for maps keyed by identities and short keys (the TreeDataGrid's recycle pools).
 rustc-hash = "2.1"
 smallvec = "1.16"
