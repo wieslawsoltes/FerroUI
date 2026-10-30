@@ -1,6 +1,7 @@
 // Public input-manager integration regressions. The custom client intentionally
 // invokes application code from a geometry query, as framework clients may do
-// while resolving their current layout.
+// while resolving their current layout. It is a client without exact editing, so
+// it takes the upstream path of the manager and has no connection (decision D5).
 use super::*;
 use ferroui_base::input::text_input::{
     TextInputMethodClientEvents, TextInputMethodClientRequeryRequestedEventArgs, TextSelection,
@@ -86,7 +87,6 @@ fn rich_input_cursor_getter_cannot_overwrite_a_replacement_owners_caret() {
     provide_client(&f.owner, first.clone());
     let second = CursorQueryClient::new(&f.outside, Rect::new(3.0, 7.0, 2.0, 19.0));
     provide_client(&f.outside, second.clone());
-    let old_connection = f.connection();
     let expected = in_root(&f.outside, second.cursor.get());
     assert_ne!(expected, in_root(&f.owner, first.cursor.get()));
     let outside = f.outside.clone();
@@ -95,11 +95,6 @@ fn rich_input_cursor_getter_cannot_overwrite_a_replacement_owners_caret() {
     })));
     first.raise_cursor_rectangle_changed();
     assert!(f.outside.is_focused());
-    assert!(!old_connection.is_current());
-    assert_eq!(
-        f.connection().owner(),
-        Some(f.outside.clone().upcast::<InputElement>())
-    );
     let expected_client: Rc<dyn TextInputMethodClient> = second;
     assert!(Rc::ptr_eq(
         f.native.client.borrow().as_ref().unwrap(),
@@ -117,7 +112,6 @@ fn rich_input_cursor_getter_cannot_overwrite_a_same_owner_client_replacement() {
     let current = provide_client(&f.owner, first.clone());
     let second = CursorQueryClient::new(&f.owner, Rect::new(31.0, 27.0, 2.0, 19.0));
     let expected = in_root(&f.owner, second.cursor.get());
-    let old_connection = f.connection();
     let expected_client: Rc<dyn TextInputMethodClient> = second;
     let replacement = expected_client.clone();
     let owner = f.owner.clone();
@@ -127,11 +121,6 @@ fn rich_input_cursor_getter_cannot_overwrite_a_same_owner_client_replacement() {
     })));
     first.raise_cursor_rectangle_changed();
     assert!(f.owner.is_focused());
-    assert!(!old_connection.is_current());
-    assert_eq!(
-        f.connection().owner(),
-        Some(f.owner.clone().upcast::<InputElement>())
-    );
     assert!(Rc::ptr_eq(
         f.native.client.borrow().as_ref().unwrap(),
         &expected_client
@@ -145,8 +134,7 @@ fn rich_input_cursor_reset_focus_roundtrip_and_nested_geometry_keep_the_latest_c
         let f = Fixture::new(true);
         let client = CursorQueryClient::new(&f.owner, Rect::new(11.0, 13.0, 1.0, 17.0));
         provide_client(&f.owner, client.clone());
-        let old_connection = f.connection();
-        let latest = Rect::new(31.0, 27.0, 2.0, 19.0);
+            let latest = Rect::new(31.0, 27.0, 2.0, 19.0);
         let expected = in_root(&f.owner, latest);
         let callback_client = Rc::downgrade(&client);
         let owner = f.owner.clone();
@@ -171,12 +159,5 @@ fn rich_input_cursor_reset_focus_roundtrip_and_nested_geometry_keep_the_latest_c
             &expected_client
         ));
         assert_eq!(f.native.cursor.get(), expected, "transition {transition}");
-        if transition == 2 {
-            assert!(old_connection.is_current());
-            assert!(Rc::ptr_eq(&old_connection, &f.connection()));
-        } else {
-            assert!(!old_connection.is_current());
-            assert!(!Rc::ptr_eq(&old_connection, &f.connection()));
-        }
     }
 }

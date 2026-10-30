@@ -420,7 +420,7 @@ fn rich_edit_link_clipboard_filter_rebases_expansion_soft_breaks_tabs_and_paragr
         .all(|id| *id == snapshot.link_fields[0].id));
     assert_eq!(
         control
-            .document()
+            .rich_document()
             .character_format_at(2)
             .unwrap()
             .font_weight,

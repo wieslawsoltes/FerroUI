@@ -2859,7 +2859,8 @@ fn rich_edit_context_flyout_defers_composition_blur_until_focus_leaves_its_conte
         assert!(outside.is_focused());
         assert!(!editor.classes().contains(":flyout-focus"));
         assert!(!editor.editor().is_composing());
-        assert_eq!(editor.text(), "editable text");
+        // Focus loss keeps the composed text (#243 review, S5).
+        assert_eq!(editor.text(), "editablepreview text");
         assert_eq!(resets.get(), 1);
         flyout.hide();
         assert_eq!(
@@ -2939,7 +2940,7 @@ fn rich_edit_canceled_flyout_focus_keeps_editor_state_and_replacement_ends_reten
         editor.set_context_flyout(None);
         assert!(!editor.classes().contains(":flyout-focus"));
         assert!(!editor.editor().is_composing());
-        assert_eq!(editor.text(), "editable text");
+        assert_eq!(editor.text(), "previeweditable text");
         flyout.hide();
         window.close();
     }

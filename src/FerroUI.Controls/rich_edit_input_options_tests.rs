@@ -153,7 +153,7 @@ fn rich_input_scope_shared_objects_update_each_owner_without_owning_it() {
     other.set_input_scope(scope.clone());
     f.owner.set_input_scope(scope.clone());
     scope.names().get(0).set_name_value(Scope::Url);
-    assert_eq!(TextInputOptions::from_styled_element(&other).effective_input_scope(), Some(Scope::Url));
+    assert_eq!(TextInputOptions::get_effective_input_scope(&other), Some(Scope::Url));
     assert_eq!(f.native.options.borrow().effective_input_scope(), Some(Scope::Url));
     let weak = other.downgrade();
     drop(other);

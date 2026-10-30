@@ -188,12 +188,14 @@ fn rich_legacy_first_preedit_still_starts_without_a_native_begin() {
     assert_eq!(observed.borrow().len(), 2);
     assert_eq!(
         observed.borrow()[0],
+        // TextCompositionStarted precedes the first preview (#243 review, N1): at the
+        // caret, before the preview replaced the selection.
         ObservedComposition {
             stage: "start",
-            text: "😀".into(),
+            text: String::new(),
             start: 1,
-            length: 2,
-            selection: EditorSelection::caret(3),
+            length: 0,
+            selection: EditorSelection::new(1, 3),
             committed: false,
         }
     );

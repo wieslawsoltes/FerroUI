@@ -9,7 +9,8 @@ use ferroui_base::input::text_input::{
     ITextInputMethodImpl, TextInputMethodClient, TextInputMethodConnection, TextInputMethodError,
     TextInputOptions,
 };
-use ferroui_base::input::{InputElement, InputManager, TextInputEventArgs};
+use ferroui_base::input::text_input::TextInputContentType;
+use ferroui_base::input::{InputElement, InputManager, InputScopeNameValue, TextInputEventArgs};
 use ferroui_base::interactivity::RoutingStrategies;
 use ferroui_base::media::text_formatting::testing::TextTestScope;
 use ferroui_base::media::FontWeight;
@@ -25,7 +26,36 @@ struct RecordingInputMethod {
     resets: Cell<usize>,
     installations: Cell<usize>,
     cursor: Cell<Rect>,
-    options: RefCell<TextInputOptions>,
+    options: RefCell<PublishedOptions>,
+}
+
+/// What a backend sees on `set_options`: the options and, through the connection, the
+/// input scopes of the owner (decision D8 keeps them out of `TextInputOptions`).
+#[derive(Clone, Debug, Default, PartialEq)]
+struct PublishedOptions {
+    options: TextInputOptions,
+    input_scope_names: Option<Rc<[InputScopeNameValue]>>,
+}
+
+impl PublishedOptions {
+    fn effective_input_scope(&self) -> Option<InputScopeNameValue> {
+        self.input_scope_names
+            .as_deref()
+            .and_then(|names| names.first().copied())
+    }
+
+    fn effective_content_type(&self) -> TextInputContentType {
+        self.effective_input_scope()
+            .map_or(self.options.content_type, InputScopeNameValue::content_type)
+    }
+}
+
+impl std::ops::Deref for PublishedOptions {
+    type Target = TextInputOptions;
+
+    fn deref(&self) -> &TextInputOptions {
+        &self.options
+    }
 }
 
 impl ITextInputMethodImpl for RecordingInputMethod {
@@ -40,7 +70,15 @@ impl ITextInputMethodImpl for RecordingInputMethod {
         self.cursor.set(rect);
     }
     fn set_options(&self, options: &TextInputOptions) {
-        *self.options.borrow_mut() = options.clone();
+        let input_scope_names = self
+            .connection
+            .borrow()
+            .as_ref()
+            .and_then(|connection| connection.input_scope_names());
+        *self.options.borrow_mut() = PublishedOptions {
+            options: options.clone(),
+            input_scope_names,
+        };
     }
     fn reset(&self) {
         self.resets.set(self.resets.get() + 1);

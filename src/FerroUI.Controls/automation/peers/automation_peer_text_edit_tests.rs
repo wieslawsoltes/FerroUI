@@ -281,7 +281,7 @@ fn rich_text_automatic_events_ignore_detached_and_retained_editors() {
     let (detached, retained, weak_owner, weak_peer) = {
         let owner = RichEditBox::new();
         let detached = owner.editor();
-        owner.set_document(RichTextDocument::from_text("replacement"));
+        owner.set_rich_document(RichTextDocument::from_text("replacement"));
         detached.set_preedit("detached", None).unwrap();
         assert!(sink.events.borrow().is_empty());
         assert!(ControlAutomationPeer::from_element(&owner).is_none());

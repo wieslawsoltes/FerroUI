@@ -273,13 +273,6 @@ ferroui_base::ferro_markup_type!(class RichEditBoxTextChangingRoutedEvent as "Ro
     generic: "RoutedEvent`1" [RichEditBoxTextChangingEventArgs],
 });
 
-/// A structured rich-text editor rendered by FerroUI's text layout, drawing, and input APIs.
-///
-/// The `Document` is shared with its persistent presenter and remains editable independently of
-/// this control. Read-only and length policies apply to user editing, clipboard, and IME;
-/// applications can replace the document directly. Every user operation goes through the
-/// same transaction engine, including formatting and accessible value changes.
-#[repr(C)]
 /// Marks a composition operation of the control itself while it lives.
 struct CompositionOperation<'a>(&'a RichEditBox);
 
@@ -296,6 +289,13 @@ impl Drop for CompositionOperation<'_> {
     }
 }
 
+/// A structured rich-text editor rendered by FerroUI's text layout, drawing, and input APIs.
+///
+/// The `Document` is shared with its persistent presenter and remains editable independently of
+/// this control. Read-only and length policies apply to user editing, clipboard, and IME;
+/// applications can replace the document directly. Every user operation goes through the
+/// same transaction engine, including formatting and accessible value changes.
+#[repr(C)]
 pub struct RichEditBox {
     base: TemplatedControl,
     text_presenter: Ref<RichEditBoxTextPresenter>,
@@ -742,7 +742,9 @@ impl InputElementImpl for RichEditBox {
                 .properties
                 .is_left_button_pressed
         {
-            this.complete_composition_keeping_text();
+            if this.complete_composition_keeping_text() {
+                this.im_client.request_reset();
+            }
             // Template chrome can take focus without moving the document caret.
             this.focus_with(
                 ferroui_base::input::NavigationMethod::Pointer,
@@ -942,23 +944,14 @@ impl RichEditBox {
     pub fn text_highlighters(&self) -> TextHighlighterCollection {
         self.text_presenter.text_highlighters()
     }
-    /// The selection of the editor while one exists, so that handlers of TextChanging
-    /// and the input method see the selection of the edit being made, not the view's
-    /// earlier one (#243 review, N4).
     pub fn selection_start(&self) -> usize {
-        match self.editor.borrow().as_ref() {
-            Some(editor) => editor.selection().anchor,
-            None => self.text_presenter.selection_start(),
-        }
+        self.text_presenter.selection_start()
     }
     pub fn set_selection_start(&self, value: usize) {
         self.select(value, self.selection_end());
     }
     pub fn selection_end(&self) -> usize {
-        match self.editor.borrow().as_ref() {
-            Some(editor) => editor.selection().active,
-            None => self.text_presenter.selection_end(),
-        }
+        self.text_presenter.selection_end()
     }
     pub fn set_selection_end(&self, value: usize) {
         self.select(self.selection_start(), value);
@@ -1064,7 +1057,17 @@ impl RichEditBox {
     }
 
     /// The caret rectangle in the owning control's coordinate system.
+    /// The caret rectangle. While an edit is being published (TextChanging handlers and
+    /// the input method run before the view takes the new selection) it is the caret of
+    /// the editor, not the view's earlier one (#243 review, N4).
     pub fn cursor_rectangle(&self) -> Rect {
+        let editor = self.editor.borrow().clone();
+        if let Some(editor) = editor {
+            let selection = editor.selection();
+            if selection != self.selection() {
+                return self.get_rect_from_character_index(selection.active);
+            }
+        }
         self.rect_from_presenter(self.text_presenter.cursor_rectangle())
     }
     pub fn get_rect_from_character_index(&self, index: usize) -> Rect {
@@ -1670,11 +1673,12 @@ impl RichEditBox {
 
     /// Ends a composition keeping its text, as RichEdit does when the user clicks or
     /// focus leaves (TextBoxBase.cpp terminates the composition on left button down and
-    /// WM_KILLFOCUS; #243 review, S5), then resets the input method.
-    fn complete_composition_keeping_text(&self) {
+    /// WM_KILLFOCUS; #243 review, S5). Returns whether a composition was ended; the
+    /// caller resets the input method.
+    fn complete_composition_keeping_text(&self) -> bool {
         let editor = self.editor();
         if !editor.is_composing() {
-            return;
+            return false;
         }
         if self.complete_input_method_composition().is_err() && editor.is_composing() {
             let text = editor
@@ -1683,7 +1687,7 @@ impl RichEditBox {
                 .unwrap_or_default();
             self.handle_edit(self.commit_composition(&text));
         }
-        self.im_client.request_reset();
+        true
     }
 
     fn raise_automation_composition_changed(&self, change: &RichTextCompositionChange) {
