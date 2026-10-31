@@ -1,6 +1,8 @@
 // Copyright (c) Wiesław Šoltés. All rights reserved.
 // Licensed under the MIT license. See LICENSE.TXT in the workspace root.
-use super::i_dock_control_factory_service::IDockControlFactoryService;
+//! The control recycling and factory caches of a dock control (`DockControlFactoryService`).
+//! Upstream declares the contract as the internal interface `IDockControlFactoryService`, which has
+//! this one implementation; the port has the concrete type (docs/porting/data/upstream-names.toml).
 use crate::{controls::DockControl, model_projection};
 use ferrodock_controls_recycling::{
     ControlRecycling, ControlRecyclingDataTemplate, IControlRecycling,
@@ -24,8 +26,10 @@ ferroui_base::ferro_thread_local! { static CONTROL_RECYCLING:RefCell<HashMap<usi
 // order and retains the original references; no mirror model tree or random HashMap order.
 type Dockables = Dictionary<Option<Rc<dyn IDockable>>, ()>;
 pub(crate) struct DockControlFactoryService;
-impl IDockControlFactoryService for DockControlFactoryService {
-    fn initialize_control_recycling(&self, control: &DockControl) {
+impl DockControlFactoryService {
+    /// Shares the control recycling of the factory of the layout of `control`
+    /// (`IDockControlFactoryService.InitializeControlRecycling`).
+    pub(crate) fn initialize_control_recycling(&self, control: &DockControl) {
         let Some(factory) = control.layout().and_then(|l| l.factory()) else {
             return;
         };
@@ -50,7 +54,8 @@ impl IDockControlFactoryService for DockControlFactoryService {
             }
         });
     }
-    fn cleanup_factory(&self, owner: &DockControl, layout: Rc<dyn IDock>) {
+    /// Prunes the caches of the factory of `layout` when `owner` leaves it (`CleanupFactory`).
+    pub(crate) fn cleanup_factory(&self, owner: &DockControl, layout: Rc<dyn IDock>) {
         let Some(factory) = layout.factory() else {
             return;
         };
@@ -59,8 +64,6 @@ impl IDockControlFactoryService for DockControlFactoryService {
         }
         Self::release_factory_defaults(factory, owner);
     }
-}
-impl DockControlFactoryService {
     pub(crate) fn new() -> Self {
         Self
     }

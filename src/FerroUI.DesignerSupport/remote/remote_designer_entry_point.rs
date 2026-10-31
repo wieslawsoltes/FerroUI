@@ -1,5 +1,5 @@
 use crate::design_window_loader::DesignWindowLoader;
-use crate::remote::file_watcher_transport::{FileWatcherTransport, ITransportWithEnforcedMethod};
+use crate::remote::file_watcher_transport::FileWatcherTransport;
 use crate::remote::html_transport::HtmlWebSocketTransport;
 use crate::remote::previewer_windowing_platform::PreviewerWindowingPlatform;
 use ferroui_base::threading::{CancellationToken, Dispatcher, DispatcherPriority};
@@ -206,7 +206,8 @@ impl RemoteDesignerEntryPoint {
 
     /// `CreateTransport`: the connection the transport of the arguments
     /// names and, for a transport that enforces one
-    /// (`ITransportWithEnforcedMethod`), the method of the previewer.
+    /// (`ITransportWithEnforcedMethod`, which only the file watcher is), the
+    /// method of the previewer.
     fn create_transport(
         args: &CommandLineArgs,
     ) -> Result<(Arc<dyn IFerroRemoteTransportConnection>, Option<&'static str>), String> {

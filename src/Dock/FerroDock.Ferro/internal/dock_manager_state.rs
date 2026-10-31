@@ -6,10 +6,7 @@ use super::{
     drag_dockable_resolver::DragDockableResolver,
     global_docking_helper::GlobalDockingHelper,
     managed_window_registry::ManagedWindowRegistry,
-    services::{
-        global_docking_service::GlobalDockingService,
-        i_global_docking_service::IGlobalDockingService,
-    },
+    services::global_docking_service::GlobalDockingService,
 };
 use crate::{
     contract::DockOperationHandler,
@@ -37,13 +34,13 @@ pub(crate) struct DockManagerState {
     pub(crate) drop_control: RefCell<Option<Ref<Control>>>,
     pub(crate) local_adorner_helper: Rc<AdornerHelper<DockTarget>>,
     pub(crate) global_adorner_helper: Rc<AdornerHelper<GlobalDockTarget>>,
-    pub(crate) global_docking: Rc<dyn IGlobalDockingService>,
+    pub(crate) global_docking: Rc<GlobalDockingService>,
 }
 impl IDockManagerState for DockManagerState {}
 impl DockManagerState {
     pub(crate) fn new(
         manager: Rc<dyn IDockManager>,
-        global: Option<Rc<dyn IGlobalDockingService>>,
+        global: Option<Rc<GlobalDockingService>>,
     ) -> Self {
         // Source reads the setting separately for each helper construction.
         Self {

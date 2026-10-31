@@ -1,4 +1,4 @@
-use super::{EmbeddedAssetDescriptor, IAssetDescriptor, RegisteredAssembly};
+use super::{EmbeddedAssetDescriptor, RegisteredAssembly};
 use crate::platform::AssetAssembly;
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -7,17 +7,17 @@ use std::rc::Rc;
 #[derive(Default)]
 pub(crate) struct AssetMap {
     order: Vec<String>,
-    map: HashMap<String, Rc<dyn IAssetDescriptor>>,
+    map: HashMap<String, Rc<EmbeddedAssetDescriptor>>,
 }
 
 impl AssetMap {
-    pub fn insert(&mut self, key: String, value: Rc<dyn IAssetDescriptor>) {
+    pub fn insert(&mut self, key: String, value: Rc<EmbeddedAssetDescriptor>) {
         if self.map.insert(key.clone(), value).is_none() {
             self.order.push(key);
         }
     }
 
-    pub fn get(&self, key: &str) -> Option<Rc<dyn IAssetDescriptor>> {
+    pub fn get(&self, key: &str) -> Option<Rc<EmbeddedAssetDescriptor>> {
         self.map.get(key).cloned()
     }
 

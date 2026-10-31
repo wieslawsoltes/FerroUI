@@ -4,6 +4,10 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ## [Unreleased]
 
+### Changed
+
+- **Internal single-implementation traits are concrete types** (C1 of #423, [docs/idiomatic-rust.md](docs/idiomatic-rust.md)): seven crate-internal traits ported from internal upstream interfaces, each with one implementation and none in the public API, are now inherent methods of the type that implemented them: `IAssetDescriptor` (ferroui-base), `IHeadlessWindow` (ferroui-headless), `IGlSkiaFboProvider` (ferroui-skia), `ITransportWithEnforcedMethod` (ferroui-designer-support), `ISubjectWithRefCount` (ferroui-dynamic-data), `IGlobalDockingService` and `IDockControlFactoryService` (the Dock port). Their handles are `Rc` of the concrete type instead of `Rc<dyn ...>`. The upstream names are mapped in `docs/porting/data/upstream-names.toml`, the first rows of the upstream-name map. No public API changes.
+
 ## [0.4.0] - 2026-10-31
 
 The fourth release. It completes the declarative Rust API of `0.4.0-preview.1` and adds, among the entries below:
