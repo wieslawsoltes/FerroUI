@@ -77,6 +77,11 @@ impl Kind {
                 .property("y", "real", Number(0.0))
                 .property("clip", "bool", Bool(false))
                 .property("opacity", "real", Number(1.0))
+                .property("anchors.fill", "Item", Value::Null)
+                .property("anchors.centerIn", "Item", Value::Null)
+                .property("anchors.margins", "real", Number(0.0))
+                .property("anchors.horizontalCenterOffset", "real", Number(0.0))
+                .property("anchors.verticalCenterOffset", "real", Number(0.0))
                 .property("data", "list<QtObject>", List(vec![]))
                 .default_property("data")
         } else {
@@ -113,7 +118,7 @@ impl Kind {
 
     fn create(self) -> Peer {
         match self {
-            Self::Item => Peer::Canvas(Canvas::new()),
+            Self::Item => Peer::Canvas(super::anchors::AnchorCanvas::create()),
             Self::Row | Self::Column => {
                 let stack = StackPanel::new();
                 stack.set_orientation(if matches!(self, Self::Row) {
@@ -129,7 +134,7 @@ impl Kind {
                 // separate canvas so a QML child's origin stays at the outer edge.
                 let root = Grid::new();
                 let paint = Border::new();
-                let children = Canvas::new();
+                let children = super::anchors::AnchorCanvas::create();
                 root.children().add(&paint);
                 root.children().add(&children);
                 Peer::Rectangle {
@@ -176,6 +181,19 @@ impl NativeObject for Peer {
             Self::Button(c) => c.clone().upcast(),
             Self::CheckBox(c) => c.clone().upcast(),
             Self::Input(c) => c.clone().upcast(),
+        }
+    }
+
+    fn uses_item_anchors(&self) -> bool {
+        true
+    }
+    fn anchor_host(&self) -> Option<Ref<Canvas>> {
+        match self {
+            Self::Canvas(canvas)
+            | Self::Rectangle {
+                children: canvas, ..
+            } => Some(canvas.clone()),
+            _ => None,
         }
     }
 

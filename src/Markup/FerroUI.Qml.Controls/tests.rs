@@ -2,7 +2,7 @@ use super::*;
 use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
 use ferroui_controls::{Button, Canvas, StackPanel, TextBlock, TextBox};
-use ferroui_qml_compiler::parse;
+use ferroui_qml::ir::parse;
 
 fn mount(source: &str) -> QmlView {
     let doc = parse(source).unwrap();
@@ -191,4 +191,51 @@ fn reflected_controls_use_native_owners_defaults_validation_and_input_notificati
     let err = view.set(id, "width", Value::Number(-42.0)).unwrap_err();
     assert!(err.to_string().contains("Width"));
     assert!(output.width().is_nan());
+}
+
+#[test]
+fn parent_anchors_follow_native_arrangement_and_unfill_restores_explicit_dimensions() {
+    use ferroui_base::{Rect, Size};
+    let _scope = UnitTestApplication::start(TestServices::new());
+    let view = mount(
+        r#"
+        import QtQuick
+        Item {
+            Rectangle {
+                id: backdrop; anchors.fill: parent; anchors.margins: 4
+                width: 24; height: 12
+            }
+            Item {
+                id: middle; width: 10; height: 8
+                anchors.centerIn: parent; anchors.horizontalCenterOffset: 2
+            }
+        }
+    "#,
+    );
+    let root = view.root();
+    let backdrop_id = view.id("backdrop").unwrap();
+    let backdrop = view.control(backdrop_id).unwrap();
+    let middle = view.control(view.id("middle").unwrap()).unwrap();
+    let layout = |w, h| {
+        root.measure(Size::new(w, h));
+        root.arrange(Rect::new(0., 0., w, h));
+    };
+    layout(100., 60.);
+    assert_eq!(backdrop.bounds(), Rect::new(4., 4., 92., 52.));
+    assert_eq!(middle.bounds(), Rect::new(47., 26., 10., 8.));
+    layout(140., 80.);
+    assert_eq!(backdrop.bounds(), Rect::new(4., 4., 132., 72.));
+    assert_eq!(middle.bounds(), Rect::new(67., 36., 10., 8.));
+    view.set(backdrop_id, "width", Value::Number(32.)).unwrap();
+    view.set(backdrop_id, "anchors.fill", Value::Null).unwrap();
+    layout(140., 80.);
+    assert_eq!(backdrop.bounds(), Rect::new(0., 0., 32., 12.));
+    assert!(view
+        .set(
+            backdrop_id,
+            "anchors.fill",
+            Value::Object(view.id("middle").unwrap())
+        )
+        .is_err());
+    assert_eq!(view.get(backdrop_id, "anchors.fill").unwrap(), Value::Null);
 }

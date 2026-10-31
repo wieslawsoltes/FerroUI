@@ -4,7 +4,10 @@
 use super::*;
 use std::collections::BTreeSet;
 
-pub(super) type Plan = Vec<(Controls, Vec<Ref<Control>>)>;
+pub(super) struct Plan {
+    children: Vec<(Controls, Vec<Ref<Control>>)>,
+    anchors: Vec<(Ref<super::anchors::AnchorCanvas>, super::anchors::Rules)>,
+}
 
 pub(super) fn plan(
     instance: &Instance,
@@ -63,19 +66,46 @@ pub(super) fn plan(
         }
         finished.extend(path);
     }
-    Ok(plan)
+    let mut hosts = BTreeMap::new();
+    for (&id, node) in nodes {
+        if let Some(canvas) = node
+            .anchor_host()
+            .and_then(|c| c.cast::<super::anchors::AnchorCanvas>())
+        {
+            hosts.insert(id, (canvas, super::anchors::Rules::default()));
+        }
+    }
+    for (&id, node) in nodes {
+        if !node.uses_item_anchors() {
+            continue;
+        }
+        let Some((target, rule)) = super::anchors::read(instance, id)? else {
+            continue;
+        };
+        if parents.get(&id) != Some(&target) {
+            return Err(Error::new("anchor target must be the item's visual parent"));
+        }
+        let (_, rules) = hosts
+            .get_mut(&target)
+            .ok_or_else(|| Error::new("parent anchors require an Item or Rectangle layout host"))?;
+        rules.insert(node.control(), rule);
+    }
+    Ok(Plan {
+        children: plan,
+        anchors: hosts.into_values().collect(),
+    })
 }
 
 pub(super) fn apply(plan: Plan) {
     // Remove transferred children from all old parents before inserting into new ones.
-    for (collection, children) in &plan {
+    for (collection, children) in &plan.children {
         for child in collection.to_vec() {
             if !children.contains(&child) {
                 collection.remove(&child);
             }
         }
     }
-    for (collection, children) in plan {
+    for (collection, children) in plan.children {
         for (target, child) in children.into_iter().enumerate() {
             if target == collection.count() {
                 collection.add(child);
@@ -89,6 +119,9 @@ pub(super) fn apply(plan: Plan) {
                 None => collection.insert(target, child),
             }
         }
+    }
+    for (host, rules) in plan.anchors {
+        host.update(rules);
     }
 }
 

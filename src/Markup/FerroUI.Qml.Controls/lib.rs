@@ -3,6 +3,7 @@
 //! Keep the returned [`QmlView`] alive for as long as the component is interactive.
 //! The view owns a single instance and native subscriptions. Subscribers hold weak
 //! handles back to the view, and dropping its last owner disconnects them.
+mod anchors;
 mod builtins;
 mod clock;
 mod composition;
@@ -35,6 +36,13 @@ pub trait NativeObject {
     /// properties, preserving FerroUI style precedence at mount time.
     fn apply_initial(&self, property: &str, value: &Value, _assigned: bool) -> Result<(), Error> {
         self.apply(property, value)
+    }
+
+    fn uses_item_anchors(&self) -> bool {
+        false
+    }
+    fn anchor_host(&self) -> Option<Ref<ferroui_controls::Canvas>> {
+        None
     }
 
     fn children_property(&self) -> Option<&str> {
@@ -228,8 +236,10 @@ impl QmlView {
                 for change in changes {
                     if let Some(node) = inner.nodes.get(&change.object) {
                         node.validate(&change.property, &change.value)?;
-                        layout_changed |=
-                            node.children_property() == Some(change.property.as_str());
+                        layout_changed |= node.children_property()
+                            == Some(change.property.as_str())
+                            || (node.uses_item_anchors()
+                                && change.property.starts_with("anchors."));
                     }
                 }
                 if layout_changed {
@@ -304,7 +314,8 @@ impl QmlView {
         let mut layout_changed = false;
         for change in changes {
             if let Some(node) = self.0.nodes.get(&change.object) {
-                layout_changed |= node.children_property() == Some(change.property.as_str());
+                layout_changed |= node.children_property() == Some(change.property.as_str())
+                    || (node.uses_item_anchors() && change.property.starts_with("anchors."));
                 // A native subscriber can synchronously update a later slot in this batch.
                 let latest = self.get(change.object, &change.property)?;
                 // Preserve the native source's priority (e.g. an inherited style)
