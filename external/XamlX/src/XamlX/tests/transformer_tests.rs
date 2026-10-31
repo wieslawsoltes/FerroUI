@@ -973,3 +973,234 @@ fn visitors_replace_children_in_place_and_track_parents() {
         other => panic!("Expected an invalid cast, got {:?}", other.map(|_| ())),
     }
 }
+
+// Native backends can opt in without changing the default CLR/IL guard.
+#[test]
+fn value_constructor_capability_is_explicit_and_keeps_constructor_validation() {
+    use super::test_xaml_language::NS;
+    use crate::transform::transformers::ConstructableObjectTransformerOptions;
+    for allowed in [None, Some(false), Some(true)] {
+        let host = TestHost::new();
+        host.asm
+            .define_struct(NS, "NativeCtorValue")
+            .add_constructor(vec![host.ts.get("System.String")]);
+        if let Some(allow_value_type_construction) = allowed {
+            host.configuration
+                .add_extra(Rc::new(ConstructableObjectTransformerOptions {
+                    allow_value_type_construction,
+                    ..Default::default()
+                }));
+        }
+        let doc = host.transform(&format!("<ContentControl xmlns='test' {X}><NativeCtorValue><x:Arguments><x:String>abc</x:String></x:Arguments></NativeCtorValue></ContentControl>")).unwrap();
+        if allowed == Some(true) {
+            host.assert_no_errors();
+            let value = assigned(&doc.root().unwrap(), "Content");
+            assert!(
+                value.contains("Constructable clr!!XamlParserTests.NativeCtorValue"),
+                "{value}"
+            );
+            assert!(value.contains("abc"), "{value}");
+        } else {
+            let errors = host.errors();
+            assert_eq!(errors.len(), 1);
+            assert!(errors[0]
+                .title
+                .contains("Value types can only be loaded via converters"));
+        }
+    }
+    let host = TestHost::new();
+    host.asm
+        .define_struct(NS, "NativeCtorValue")
+        .add_constructor(vec![host.ts.get("System.String")]);
+    host.configuration
+        .add_extra(Rc::new(ConstructableObjectTransformerOptions {
+            allow_value_type_construction: true,
+            ..Default::default()
+        }));
+    host.transform(&format!("<ContentControl xmlns='test' {X}><NativeCtorValue><x:Arguments><x:String>a</x:String><x:String>b</x:String></x:Arguments></NativeCtorValue></ContentControl>")).unwrap();
+    assert!(host
+        .errors()
+        .iter()
+        .any(|e| e.title.contains("Unable to find public constructor")));
+}
+
+#[cfg(test)]
+mod optional_constructor_tests {
+    use super::*;
+    use crate::testing::{FakeConstructor, FakeCustomAttribute};
+    use crate::transform::transformers::ConstructableObjectTransformerOptions;
+    use crate::type_system::XamlValue;
+    fn enable(host: &TestHost) {
+        host.configuration
+            .add_extra(Rc::new(ConstructableObjectTransformerOptions {
+                allow_optional_constructor_arguments: true,
+                ..Default::default()
+            }));
+    }
+    fn optional(
+        host: &TestHost,
+        ctor: &Rc<FakeConstructor>,
+        index: usize,
+        value: Option<XamlValue>,
+    ) {
+        let optional = host
+            .asm
+            .define_class("System.Runtime.InteropServices", "OptionalAttribute");
+        ctor.add_parameter_attribute(index, FakeCustomAttribute::new(optional, vec![]));
+        if let Some(value) = value {
+            let default = host.asm.define_class(
+                "System.Runtime.InteropServices",
+                "DefaultParameterValueAttribute",
+            );
+            ctor.add_parameter_attribute(index, FakeCustomAttribute::new(default, vec![value]));
+        }
+    }
+    fn content(host: &TestHost, xml: &str) -> Rc<XamlAstConstructableObjectNode> {
+        let document = host.transform(xml).unwrap();
+        host.assert_no_errors();
+        let values = property_values(&document.root().unwrap(), "Content");
+        values[0]
+            .as_node()
+            .cast::<XamlAstConstructableObjectNode>()
+            .unwrap()
+    }
+    #[test]
+    fn optional_constructor_capability_keeps_default_guard_and_materializes_typed_defaults() {
+        use super::super::test_xaml_language::NS;
+        for enabled in [false, true] {
+            let host = TestHost::new();
+            let t = host.asm.define_class(NS, "OptionalDefaults");
+            let ctor = t.add_constructor(vec![
+                host.ts.get("System.String"),
+                host.ts.get("System.Int32"),
+                host.ts.get("System.Boolean"),
+                host.ts.get("System.Double"),
+            ]);
+            optional(&host, &ctor, 0, Some(XamlValue::String("  exact  ".into())));
+            optional(&host, &ctor, 1, Some(XamlValue::Int64(7)));
+            optional(&host, &ctor, 2, Some(XamlValue::Boolean(false)));
+            optional(&host, &ctor, 3, Some(XamlValue::Double(-0.0)));
+            if enabled {
+                enable(&host);
+                let value = content(
+                    &host,
+                    &format!(
+                        "<ContentControl xmlns='test' {X}><OptionalDefaults/></ContentControl>"
+                    ),
+                );
+                let args = value.arguments.borrow();
+                assert_eq!(args.len(), 4);
+                assert_eq!(
+                    args[0].as_node().cast::<XamlAstTextNode>().unwrap().text(),
+                    "  exact  "
+                );
+                assert!(matches!(
+                    args[1]
+                        .as_node()
+                        .cast::<XamlConstantNode>()
+                        .unwrap()
+                        .constant,
+                    XamlValue::Int32(7)
+                ));
+                assert!(matches!(
+                    args[2]
+                        .as_node()
+                        .cast::<XamlConstantNode>()
+                        .unwrap()
+                        .constant,
+                    XamlValue::Boolean(false)
+                ));
+                match args[3]
+                    .as_node()
+                    .cast::<XamlConstantNode>()
+                    .unwrap()
+                    .constant
+                {
+                    XamlValue::Double(v) => assert_eq!(v.to_bits(), (-0.0f64).to_bits()),
+                    _ => panic!("typed double default"),
+                };
+            } else {
+                host.transform(&format!(
+                    "<ContentControl xmlns='test' {X}><OptionalDefaults/></ContentControl>"
+                ))
+                .unwrap();
+                assert!(host
+                    .errors()
+                    .iter()
+                    .any(|e| e.title.contains("Unable to find public constructor")));
+            }
+        }
+    }
+    #[test]
+    fn optional_constructor_selection_preserves_exact_arity_and_explicit_null() {
+        use super::super::test_xaml_language::NS;
+        let host = TestHost::new();
+        enable(&host);
+        let t = host.asm.define_class(NS, "OptionalText");
+        let ctor = t.add_constructor(vec![host.ts.get("System.String")]);
+        optional(&host, &ctor, 0, Some(XamlValue::String("default".into())));
+        let value=content(&host,&format!("<ContentControl xmlns='test' {X}><OptionalText><x:Arguments><x:Null/></x:Arguments></OptionalText></ContentControl>"));
+        assert_eq!(value.arguments.borrow().len(), 1);
+        assert!(dump(&value.arguments.borrow()[0].as_node()).contains("Null"));
+        t.add_constructor(vec![]);
+        let value = content(
+            &host,
+            &format!("<ContentControl xmlns='test' {X}><OptionalText/></ContentControl>"),
+        );
+        assert!(value.arguments.borrow().is_empty());
+    }
+    #[test]
+    fn optional_constructor_rejects_required_tail_missing_default_overflow_and_ambiguity() {
+        use super::super::test_xaml_language::NS;
+        for case in 0..5 {
+            let host = TestHost::new();
+            enable(&host);
+            let t = host.asm.define_class(NS, "InvalidDefaults");
+            match case {
+                0 => {
+                    let ctor = t.add_constructor(vec![
+                        host.ts.get("System.String"),
+                        host.ts.get("System.String"),
+                    ]);
+                    optional(&host, &ctor, 0, Some(XamlValue::Null));
+                }
+                1 => {
+                    let ctor = t.add_constructor(vec![host.ts.get("System.String")]);
+                    optional(&host, &ctor, 0, None);
+                }
+                2 => {
+                    let ctor = t.add_constructor(vec![host.ts.get("System.Byte")]);
+                    optional(&host, &ctor, 0, Some(XamlValue::Int64(256)));
+                }
+                3 => {
+                    let a = t.add_constructor(vec![host.ts.get("System.String")]);
+                    optional(&host, &a, 0, Some(XamlValue::Null));
+                    let b = t.add_constructor(vec![host.ts.get("System.Int32")]);
+                    optional(&host, &b, 0, Some(XamlValue::Int64(7)));
+                }
+                4 => {
+                    let ctor = t.add_constructor(vec![host.ts.get("System.Int32")]);
+                    optional(&host, &ctor, 0, Some(XamlValue::String("7".into())));
+                }
+                _ => unreachable!(),
+            }
+            host.transform(&format!(
+                "<ContentControl xmlns='test' {X}><InvalidDefaults/></ContentControl>"
+            ))
+            .unwrap();
+            let expected = match case {
+                0 => "Unable to find public constructor",
+                1 => "exactly one explicit default",
+                2 => "out of range",
+                3 => "Ambiguous optional constructor",
+                4 => "not assignable",
+                _ => unreachable!(),
+            };
+            assert!(
+                host.errors().iter().any(|e| e.title.contains(expected)),
+                "case={case}: {:?}",
+                host.errors().iter().map(|e| &e.title).collect::<Vec<_>>()
+            );
+        }
+    }
+}

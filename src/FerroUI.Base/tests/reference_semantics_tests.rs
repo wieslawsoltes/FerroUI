@@ -630,6 +630,117 @@ fn weak_values_compare_by_the_source_they_refer_to() {
     let _ = ValueTypes::normalize(boxed(1_i32));
 }
 
+#[test]
+fn projected_weak_values_follow_the_backing_allocation_without_owning_it() {
+    use crate::data::core::ProjectedWeakReference;
+    use std::sync::{Arc, Weak};
+    struct View(Arc<i32>);
+    impl PartialEq for View {
+        fn eq(&self, other: &Self) -> bool {
+            Arc::ptr_eq(&self.0, &other.0)
+        }
+    }
+    struct BackingWeak(Weak<i32>);
+    impl ProjectedWeakReference for BackingWeak {
+        fn upgrade(&self) -> Option<BoxedValue> {
+            self.0.upgrade().map(|v| Rc::new(View(v)) as BoxedValue)
+        }
+        fn ptr_eq(&self, other: &dyn ProjectedWeakReference) -> bool {
+            (other as &dyn std::any::Any)
+                .downcast_ref::<Self>()
+                .is_some_and(|other| Weak::ptr_eq(&self.0, &other.0))
+        }
+    }
+    ValueTypes::register_projected_weak::<View>(|v| Rc::new(BackingWeak(Arc::downgrade(&v.0))));
+    assert!(ValueTypes::is_reference(std::any::TypeId::of::<View>()));
+    assert!(ValueTypes::accepts_null(ValueType::of::<View>()));
+    let owner = Arc::new(7);
+    let backing = Arc::downgrade(&owner);
+    let view: BoxedValue = Rc::new(View(owner.clone()));
+    let native = Rc::downgrade(&view);
+    let first = WeakValue::new(&view);
+    drop(view);
+    assert!(native.upgrade().is_none());
+    let recovered = first.upgrade().unwrap();
+    assert!(Arc::ptr_eq(
+        &recovered.downcast_ref::<View>().unwrap().0,
+        &owner
+    ));
+    let again = WeakValue::new(&recovered);
+    let other_view: BoxedValue = Rc::new(View(Arc::new(7)));
+    let other = WeakValue::new(&other_view);
+    drop(other_view);
+    assert!(first == again);
+    assert!(first != other);
+    drop(recovered);
+    drop(owner);
+    assert!(backing.upgrade().is_none());
+    assert!(first.upgrade().is_none());
+    assert!(first == again);
+    assert!(first != other);
+    assert!(other.upgrade().is_none());
+}
+
+#[test]
+fn projected_weak_factories_and_replaced_captures_run_outside_the_registry_borrow() {
+    use crate::data::core::ProjectedWeakReference;
+    use std::sync::{Arc, Weak};
+    struct View(Arc<i32>);
+    impl PartialEq for View {
+        fn eq(&self, other: &Self) -> bool {
+            Arc::ptr_eq(&self.0, &other.0)
+        }
+    }
+    struct BackingWeak(Weak<i32>);
+    impl ProjectedWeakReference for BackingWeak {
+        fn upgrade(&self) -> Option<BoxedValue> {
+            self.0.upgrade().map(|v| Rc::new(View(v)) as BoxedValue)
+        }
+        fn ptr_eq(&self, other: &dyn ProjectedWeakReference) -> bool {
+            (other as &dyn std::any::Any)
+                .downcast_ref::<Self>()
+                .is_some_and(|other| Weak::ptr_eq(&self.0, &other.0))
+        }
+    }
+    struct Capture(Rc<std::cell::Cell<bool>>);
+    impl Drop for Capture {
+        fn drop(&mut self) {
+            assert!(ValueTypes::is_reference(std::any::TypeId::of::<View>()));
+            self.0.set(true);
+        }
+    }
+    let dropped = Rc::new(std::cell::Cell::new(false));
+    let capture = Capture(dropped.clone());
+    ValueTypes::register_projected_weak::<View>(move |v| {
+        let _keep = &capture;
+        assert!(ValueTypes::is_reference(std::any::TypeId::of::<View>()));
+        ValueTypes::register_nullable::<i32>();
+        Rc::new(BackingWeak(Arc::downgrade(&v.0)))
+    });
+    let value: BoxedValue = Rc::new(View(Arc::new(7)));
+    let weak = WeakValue::new(&value);
+    ValueTypes::register_projected_weak::<View>(|v| Rc::new(BackingWeak(Arc::downgrade(&v.0))));
+    assert!(dropped.get());
+    assert!(weak.upgrade().is_some());
+    drop(value);
+    assert!(weak.upgrade().is_none());
+}
+
+#[test]
+fn projected_weak_registration_does_not_override_class_hierarchy_weak_references() {
+    ValueTypes::register_projected_weak::<Ref<StyledElement>>(|_| {
+        panic!("hierarchy objects use their actual WeakRef")
+    });
+    let element = StyledElement::new();
+    let value = boxed(element.clone());
+    let weak = WeakValue::new(&value);
+    assert!(matches!(weak, WeakValue::Object(..)));
+    drop(value);
+    assert!(weak.upgrade().is_some());
+    drop(element);
+    assert!(weak.upgrade().is_none());
+}
+
 // --- disposables and binding expressions -------------------------------------
 
 #[test]

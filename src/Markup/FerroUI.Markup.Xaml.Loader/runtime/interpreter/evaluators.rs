@@ -520,7 +520,7 @@ pub fn constant_value(
         match type_.name().as_str() {
             "Boolean" => return boxed(integer != 0),
             "Char" => {
-                return boxed(u32::try_from(integer).ok().and_then(char::from_u32).ok_or_else(unsupported)?);
+                return boxed(ferroui_base::Char::from_unit(u16::try_from(integer).map_err(|_| unsupported())?));
             }
             "SByte" => return integer!(i8),
             "Byte" => return integer!(u8),
@@ -538,7 +538,7 @@ pub fn constant_value(
     // The constant is typed as something else (`System.Object`): its own kind decides.
     match constant {
         XamlValue::Boolean(v) => boxed(*v),
-        XamlValue::Char(v) => boxed(*v),
+        XamlValue::Char(v) => boxed(ferroui_base::Char::from_unit(*v)),
         XamlValue::SByte(v) => boxed(*v),
         XamlValue::Byte(v) => boxed(*v),
         XamlValue::Int16(v) => boxed(*v),
@@ -700,20 +700,36 @@ pub(crate) fn evaluate_intrinsic(
     None
 }
 
-fn load_method_delegate(node: &Rc<XamlLoadMethodDelegateNode>, context: &mut EvalContext<'_>) -> XamlResult<EvalResult> {
+fn load_method_delegate(
+    node: &Rc<XamlLoadMethodDelegateNode>,
+    context: &mut EvalContext<'_>,
+) -> XamlResult<EvalResult> {
     let declaring_type = node.method.declaring_type();
     #[cfg(all(feature = "hot-reload", debug_assertions))]
-    let replacement = if node.base.value().as_node().cast::<XamlRootObjectNode>().is_some() {
+    let replacement = if node
+        .base
+        .value()
+        .as_node()
+        .cast::<XamlRootObjectNode>()
+        .is_some()
+    {
         let runtime = context.runtime_context()?;
         ferroui_markup_xaml::reload_events::code_behind(&**runtime, &runtime.root_object())
-    } else { None };
+    } else {
+        None
+    };
     #[cfg(not(all(feature = "hot-reload", debug_assertions)))]
     let replacement: Option<BoxedValue> = None;
     let instance = match replacement {
         Some(root) => Some(root),
         None => context.evaluate(&node.base.value().as_node(), Some(&declaring_type))?,
     };
-    if node.method.as_any().downcast_ref::<RuntimeMethod>().is_none() {
+    if node
+        .method
+        .as_any()
+        .downcast_ref::<RuntimeMethod>()
+        .is_none()
+    {
         return Err(XamlError::load_exception(
             format!(
                 "Unable to create a delegate for {}.{}: it is not a method of the run-time type system",
@@ -729,22 +745,32 @@ fn load_method_delegate(node: &Rc<XamlLoadMethodDelegateNode>, context: &mut Eva
     // the element the handler is attached to, and a strong reference would close a
     // cycle root -> element -> handler -> root. A handler whose target is gone does
     // nothing.
-    let instance = instance.as_ref().map(ferroui_base::data::core::WeakValue::new);
+    let instance = instance
+        .as_ref()
+        .map(ferroui_base::data::core::WeakValue::new);
     let delegate = MarkupDelegate::new(move |arguments| {
         let runtime = method.as_any().downcast_ref::<RuntimeMethod>()?;
         let mut all = Vec::with_capacity(arguments.len() + 1);
         if !is_static {
             match &instance {
-                Some(instance) => all.push(Some(crate::runtime::type_system::normalize_object(instance.upgrade()?))),
+                Some(instance) => all.push(Some(crate::runtime::type_system::normalize_object(
+                    instance.upgrade()?,
+                ))),
                 None => all.push(None),
             }
         }
         all.extend(arguments.iter().cloned());
-        // A handler has nowhere to report a failure to.
-        runtime.invoke(&all).ok().flatten()
+        // Exceptions in a live handler stop the event source synchronously; null is a
+        // successful result, not a replacement for argument/conversion/member failure.
+        runtime
+            .invoke(&all)
+            .unwrap_or_else(|error| std::panic::panic_any(error))
     });
     let delegate: BoxedValue = Rc::new(delegate);
-    Ok(EvalResult::value(node.delegate_type.clone(), Some(delegate)))
+    Ok(EvalResult::value(
+        node.delegate_type.clone(),
+        Some(delegate),
+    ))
 }
 
 fn deferred_content(node: &Rc<XamlDeferredContentNode>, context: &mut EvalContext<'_>) -> XamlResult<EvalResult> {

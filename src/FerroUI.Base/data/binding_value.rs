@@ -298,9 +298,12 @@ impl<T: PropertyValue> BindingValue<T> {
         let mut value: Option<BoxedValue> = value.cloned();
 
         let notification = value.as_ref().and_then(|value| {
-            value.downcast_ref::<BindingNotification>().map(|n| (n.error(), n.error_type(), n.has_value(), n.value()))
+            value
+                .downcast_ref::<BindingNotification>()
+                .map(|n| (n.error(), n.error_type(), n.has_value(), n.value()))
         });
-        if let Some((notification_error, error_type, has_value, notification_value)) = notification {
+        if let Some((notification_error, error_type, has_value, notification_value)) = notification
+        {
             error = notification_error;
             type_ = match error_type {
                 BindingErrorType::Error => BindingValueType::BINDING_ERROR,
@@ -315,21 +318,32 @@ impl<T: PropertyValue> BindingValue<T> {
         }
 
         if type_.contains(BindingValueType::HAS_VALUE) {
-            let typed = ValueTypes::try_convert(value.as_ref(), target_type)
-                .flatten()
-                .and_then(|typed| typed.downcast_ref::<T>().cloned());
+            let (typed, conversion_error) =
+                match ValueTypes::try_convert_result(value.as_ref(), target_type) {
+                    Ok(typed) => (
+                        typed
+                            .flatten()
+                            .and_then(|typed| typed.downcast_ref::<T>().cloned()),
+                        None,
+                    ),
+                    Err(error) => (None, Some(BindingError::new(error))),
+                };
             match typed {
                 Some(typed) => v = Some(typed),
                 None => {
-                    let e = BindingError::message(format!(
-                        "Unable to convert object '{}' of type '{}' to type '{}'.",
-                        ValueTypes::to_display_string(value.as_ref()),
-                        value
-                            .as_ref()
-                            .map(|value| ValueTypes::type_full_name(ValueType::of_value(&**value)))
-                            .unwrap_or_default(),
-                        ValueTypes::type_full_name(target_type)
-                    ));
+                    let e = conversion_error.unwrap_or_else(|| {
+                        BindingError::message(format!(
+                            "Unable to convert object '{}' of type '{}' to type '{}'.",
+                            ValueTypes::to_display_string(value.as_ref()),
+                            value
+                                .as_ref()
+                                .map(|value| ValueTypes::type_full_name(ValueType::of_value(
+                                    &**value
+                                )))
+                                .unwrap_or_default(),
+                            ValueTypes::type_full_name(target_type)
+                        ))
+                    });
 
                     match error.take() {
                         None => error = Some(e),
@@ -345,7 +359,11 @@ impl<T: PropertyValue> BindingValue<T> {
             error = Some(BindingError::new(AggregateError::new(errors)));
         }
 
-        Self { type_, value: v, error }
+        Self {
+            type_,
+            value: v,
+            error,
+        }
     }
 }
 

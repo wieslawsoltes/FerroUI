@@ -17,7 +17,7 @@ use ferroui_base::metadata::{property_accessors, rust_path_of_type, IServiceProv
 use ferroui_base::{BoxedValue, FerroProperty, StyledElement, TypeInfo};
 use ferroui_markup_xaml::converters::ITypeDescriptorContext;
 use ferroui_base::collections::FerroList;
-use ferroui_markup_xaml::xaml_il::runtime::{DeferredContent, RuntimeList};
+use ferroui_markup_xaml::xaml_il::runtime::{DeferredContent, RuntimeList, RuntimeArray};
 use xamlx::type_system::{IXamlConstructor, IXamlField, IXamlMethod, IXamlType};
 
 use crate::runtime::type_system::{
@@ -246,7 +246,8 @@ impl EmitTypes for RuntimeEmitTypes {
             Known::String => TypeId::of::<String>(),
             Known::OptionString => TypeId::of::<Option<String>>(),
             Known::Bool => TypeId::of::<bool>(),
-            Known::Char => TypeId::of::<char>(),
+            Known::Char => TypeId::of::<ferroui_base::Char>(),
+            Known::ScalarChar => TypeId::of::<char>(),
             Known::I8 => TypeId::of::<i8>(),
             Known::U8 => TypeId::of::<u8>(),
             Known::I16 => TypeId::of::<i16>(),
@@ -279,6 +280,7 @@ impl EmitTypes for RuntimeEmitTypes {
             Known::OptionTypeDescriptorContext => TypeId::of::<Option<Rc<dyn ITypeDescriptorContext>>>(),
             Known::StyleQuery => TypeId::of::<ferroui_base::styling::StyleQuery>(),
             Known::RuntimeList => TypeId::of::<RuntimeList>(),
+            Known::RuntimeArray => TypeId::of::<RuntimeArray>(),
             Known::ListItems => TypeId::of::<Rc<FerroList<Option<BoxedValue>>>>(),
         })
     }
@@ -288,7 +290,8 @@ impl EmitTypes for RuntimeEmitTypes {
             Known::String => TypeId::of::<Option<String>>(),
             Known::OptionString => TypeId::of::<Option<Option<String>>>(),
             Known::Bool => TypeId::of::<Option<bool>>(),
-            Known::Char => TypeId::of::<Option<char>>(),
+            Known::Char => TypeId::of::<Option<ferroui_base::Char>>(),
+            Known::ScalarChar => TypeId::of::<Option<char>>(),
             Known::I8 => TypeId::of::<Option<i8>>(),
             Known::U8 => TypeId::of::<Option<u8>>(),
             Known::I16 => TypeId::of::<Option<i16>>(),
@@ -321,6 +324,7 @@ impl EmitTypes for RuntimeEmitTypes {
             Known::OptionTypeDescriptorContext => TypeId::of::<Option<Option<Rc<dyn ITypeDescriptorContext>>>>(),
             Known::StyleQuery => TypeId::of::<Option<ferroui_base::styling::StyleQuery>>(),
             Known::RuntimeList => TypeId::of::<Option<RuntimeList>>(),
+            Known::RuntimeArray => TypeId::of::<Option<RuntimeArray>>(),
             Known::ListItems => TypeId::of::<Option<Rc<FerroList<Option<BoxedValue>>>>>(),
         })
     }
@@ -344,6 +348,14 @@ impl EmitTypes for RuntimeEmitTypes {
             .or_else(|| MarkupType::find_by_handle(runtime.handle()?.id()))
             .or_else(|| table_type_markup(runtime, type_))?;
         Some(markup(found))
+    }
+
+    fn rust_path_of_handle(&self, key: TypeKey<'_>) -> Option<String> {
+        let id=id_of(key)?;
+        if let Some(path)=rust_path_of_type(id) {return Some(path.to_string());}
+        if let Some(path)=self.primitive_type_name(key) {return Some(path.to_string());}
+        let inner=ValueTypes::nullable_carrier(id)?;
+        self.rust_path_of_handle(TypeKey::Id(inner.id())).map(|path|format!("::core::option::Option<{path}>"))
     }
 
     fn handle_of(&self, type_: &dyn IXamlType) -> Option<Handle<'_>> {
@@ -374,6 +386,8 @@ impl EmitTypes for RuntimeEmitTypes {
             };
         }
         let table = primitives!(bool, char, i8, u8, i16, u16, i32, u32, i64, u64, f32, f64);
+        if id == TypeId::of::<ferroui_base::Char>() { return Some("::ferroui_base::Char"); }
+        if id == TypeId::of::<ferroui_base::Utf16Text>() { return Some("::ferroui_base::Utf16Text"); }
         if id == TypeId::of::<String>() {
             // Not a primitive of the language: named by its full path, as generated code names
             // the items of the prelude.
@@ -385,6 +399,15 @@ impl EmitTypes for RuntimeEmitTypes {
     fn is_assignable(&self, from: TypeKey<'_>, to: TypeKey<'_>) -> bool {
         match (id_of(from), id_of(to)) {
             (Some(from), Some(to)) => ValueTypes::is_assignable(ValueType::new(from, ""), ValueType::new(to, "")),
+            _ => false,
+        }
+    }
+
+    fn can_adapt(&self, from: TypeKey<'_>, to: TypeKey<'_>) -> bool {
+        match (id_of(from), id_of(to)) {
+            (Some(from), Some(to)) => {
+                ValueTypes::can_adapt(ValueType::new(from, ""), ValueType::new(to, ""))
+            }
             _ => false,
         }
     }

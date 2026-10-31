@@ -848,7 +848,7 @@ impl Builder {
     }
 
     fn parameter(&mut self, raw: &RawParameter, site: &Site, self_type: Option<&str>) -> ParameterModel {
-        ParameterModel { name: raw.name.clone(), type_: self.rust_type(&raw.type_, site, self_type), attributes: self.attributes(&raw.attributes, site, self_type) }
+        ParameterModel { by_ref_element: None, name: raw.name.clone(), type_: self.rust_type(&raw.type_, site, self_type), attributes: self.attributes(&raw.attributes, site, self_type) }
     }
 
     /// `prefix` is the start of the names of the typed functions of the accessors

@@ -77,7 +77,7 @@ pub(crate) fn build_state_set(states: &[AtSpiState]) -> Vec<u32> {
 }
 
 pub(crate) fn resolve_locale() -> String {
-    locale_from_culture_name(CultureInfo::current_ui_culture().name())
+    locale_from_culture_name(&CultureInfo::current_ui_culture().name())
 }
 
 pub(crate) fn locale_from_culture_name(culture: &str) -> String {

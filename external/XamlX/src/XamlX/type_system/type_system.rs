@@ -21,7 +21,8 @@ use super::XamlTypeWellKnownTypes;
 pub enum XamlValue {
     Null,
     Boolean(bool),
-    Char(char),
+    /// UTF-16 code unit; the tag distinguishes this from System.UInt16.
+    Char(u16),
     SByte(i8),
     Byte(u8),
     Int16(i16),
@@ -128,7 +129,7 @@ impl fmt::Debug for XamlValue {
         match self {
             Null => write!(f, "null"),
             Boolean(v) => write!(f, "{v}"),
-            Char(v) => write!(f, "{v:?}"),
+            Char(v) => write!(f, "Char(0x{v:04X})"),
             SByte(v) => write!(f, "{v}i8"),
             Byte(v) => write!(f, "{v}u8"),
             Int16(v) => write!(f, "{v}i16"),
@@ -153,7 +154,7 @@ impl fmt::Display for XamlValue {
         match self {
             Null => Ok(()),
             Boolean(v) => write!(f, "{}", if *v { "True" } else { "False" }),
-            Char(v) => write!(f, "{v}"),
+            Char(v) => match char::from_u32(u32::from(*v)) { Some(c) => write!(f, "{c}"), None => Err(fmt::Error) },
             SByte(v) => write!(f, "{v}"),
             Byte(v) => write!(f, "{v}"),
             Int16(v) => write!(f, "{v}"),
@@ -178,6 +179,8 @@ pub enum XamlTypeId {
     Unique(u64),
     /// Identity derived from a stable name.
     Named(String),
+    /// Structural identity of a managed reference type, distinct from every named type.
+    ByRef(Box<XamlTypeId>),
 }
 
 impl XamlTypeId {
@@ -208,6 +211,20 @@ pub trait IXamlType: 'static {
         type_arguments: &[Rc<dyn IXamlType>],
     ) -> XamlResult<Rc<dyn IXamlType>>;
     fn generic_type_definition(&self) -> Option<Rc<dyn IXamlType>>;
+    /// Whether this is the managed reference type `T&`, not an ordinary class handle.
+    fn is_by_ref(&self) -> bool {
+        false
+    }
+    /// The exact element type of `T&`; absent for value/reference-object types.
+    fn by_ref_element_type(&self) -> Option<Rc<dyn IXamlType>> {
+        None
+    }
+    /// Construct a managed reference type. Hosts that do not implement it fail explicitly.
+    fn make_by_ref_type(&self) -> XamlResult<Rc<dyn IXamlType>> {
+        Err(XamlError::not_supported(
+            "This type-system host cannot construct managed reference types",
+        ))
+    }
     fn is_array(&self) -> bool;
     fn array_element_type(&self) -> Option<Rc<dyn IXamlType>>;
     fn make_array_type(&self, dimensions: i32) -> XamlResult<Rc<dyn IXamlType>>;
@@ -230,7 +247,193 @@ pub trait IXamlType: 'static {
     }
 }
 
+/// A first-class managed reference type. It retains its exact element, has no object
+/// members/base/constructors, and cannot be nested or made into an array. Hosts intern
+/// live instances weakly, avoiding a parent/reference-type ownership cycle.
+pub struct XamlByRefType {
+    element: Rc<dyn IXamlType>,
+}
+impl XamlByRefType {
+    pub fn new(element: Rc<dyn IXamlType>) -> XamlResult<Rc<dyn IXamlType>> {
+        if element.is_by_ref() {
+            return Err(XamlError::internal(
+                "TypeLoadException",
+                "A managed reference type cannot be nested",
+            ));
+        }
+        Ok(Rc::new(Self { element }))
+    }
+}
+// CLR by-reference assignability permits reference-type covariance and enum/underlying
+// signed-unsigned equivalence, but never boxing or numeric widening. Char/Boolean stay
+// distinct. The actual element type/identity is retained even when assignment is allowed.
+fn by_ref_integral_kind(type_: &dyn IXamlType) -> Option<&'static str> {
+    if type_.is_enum() {
+        return type_
+            .get_enum_underlying_type()
+            .ok()
+            .and_then(|t| by_ref_integral_kind(&*t));
+    }
+    match type_.full_name().as_str() {
+        "System.SByte" | "System.Byte" => Some("i8"),
+        "System.Int16" | "System.UInt16" => Some("i16"),
+        "System.Int32" | "System.UInt32" => Some("i32"),
+        "System.Int64" | "System.UInt64" => Some("i64"),
+        _ => None,
+    }
+}
+impl IXamlType for XamlByRefType {
+    fn id(&self) -> XamlTypeId {
+        XamlTypeId::ByRef(Box::new(self.element.id()))
+    }
+    fn name(&self) -> String {
+        format!("{}&", self.element.name())
+    }
+    fn namespace(&self) -> Option<String> {
+        self.element.namespace()
+    }
+    fn full_name(&self) -> String {
+        format!("{}&", self.element.full_name())
+    }
+    fn is_public(&self) -> bool {
+        self.element.is_public()
+    }
+    fn is_nested_private(&self) -> bool {
+        false
+    }
+    fn assembly(&self) -> Option<Rc<dyn IXamlAssembly>> {
+        self.element.assembly()
+    }
+    fn properties(&self) -> Vec<Rc<dyn IXamlProperty>> {
+        Vec::new()
+    }
+    fn events(&self) -> Vec<Rc<dyn IXamlEventInfo>> {
+        Vec::new()
+    }
+    fn fields(&self) -> Vec<Rc<dyn IXamlField>> {
+        Vec::new()
+    }
+    fn methods(&self) -> Vec<Rc<dyn IXamlMethod>> {
+        Vec::new()
+    }
+    fn constructors(&self) -> Vec<Rc<dyn IXamlConstructor>> {
+        Vec::new()
+    }
+    fn custom_attributes(&self) -> Vec<Rc<dyn IXamlCustomAttribute>> {
+        Vec::new()
+    }
+    fn generic_arguments(&self) -> Vec<Rc<dyn IXamlType>> {
+        self.element.generic_arguments()
+    }
+    fn is_assignable_from(&self, type_: &dyn IXamlType) -> bool {
+        let Some(other) = type_.by_ref_element_type() else {
+            return false;
+        };
+        if self.element.equals(&*other) {
+            return true;
+        }
+        if !self.element.is_value_type() && !other.is_value_type() {
+            return self.element.is_assignable_from(&*other);
+        }
+        let own = by_ref_integral_kind(&*self.element);
+        own.is_some() && own == by_ref_integral_kind(&*other)
+    }
+    fn make_generic_type(&self, _: &[Rc<dyn IXamlType>]) -> XamlResult<Rc<dyn IXamlType>> {
+        Err(XamlError::invalid_operation(
+            "A managed reference type is not a generic type definition",
+        ))
+    }
+    fn generic_type_definition(&self) -> Option<Rc<dyn IXamlType>> {
+        None
+    }
+    fn is_by_ref(&self) -> bool {
+        true
+    }
+    fn by_ref_element_type(&self) -> Option<Rc<dyn IXamlType>> {
+        Some(self.element.clone())
+    }
+    fn make_by_ref_type(&self) -> XamlResult<Rc<dyn IXamlType>> {
+        Err(XamlError::internal(
+            "TypeLoadException",
+            "A managed reference type cannot be nested",
+        ))
+    }
+    fn is_array(&self) -> bool {
+        false
+    }
+    fn array_element_type(&self) -> Option<Rc<dyn IXamlType>> {
+        None
+    }
+    fn make_array_type(&self, _: i32) -> XamlResult<Rc<dyn IXamlType>> {
+        Err(XamlError::internal(
+            "TypeLoadException",
+            "An array cannot have managed reference elements",
+        ))
+    }
+    fn base_type(&self) -> Option<Rc<dyn IXamlType>> {
+        None
+    }
+    fn declaring_type(&self) -> Option<Rc<dyn IXamlType>> {
+        None
+    }
+    fn is_value_type(&self) -> bool {
+        false
+    }
+    fn is_enum(&self) -> bool {
+        false
+    }
+    fn interfaces(&self) -> Vec<Rc<dyn IXamlType>> {
+        Vec::new()
+    }
+    fn is_interface(&self) -> bool {
+        false
+    }
+    fn get_enum_underlying_type(&self) -> XamlResult<Rc<dyn IXamlType>> {
+        Err(XamlError::argument(
+            "A managed reference type is not an enum",
+        ))
+    }
+    fn generic_parameters(&self) -> Vec<Rc<dyn IXamlType>> {
+        Vec::new()
+    }
+    fn is_function_pointer(&self) -> bool {
+        false
+    }
+    fn equals(&self, other: &dyn IXamlType) -> bool {
+        other
+            .by_ref_element_type()
+            .is_some_and(|element| self.element.equals(&*element))
+    }
+    fn get_hash_code(&self) -> u64 {
+        self.element.get_hash_code() ^ 0x0042_5952_4546
+    }
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+}
+
 pub trait IXamlParameterInfo: 'static {
+    fn name(&self) -> Option<String> {
+        None
+    }
+    fn position(&self) -> Option<usize> {
+        None
+    }
+    fn is_in(&self) -> bool {
+        self.custom_attributes()
+            .iter()
+            .any(|a| a.type_().full_name() == "System.Runtime.InteropServices.InAttribute")
+    }
+    fn is_out(&self) -> bool {
+        self.custom_attributes()
+            .iter()
+            .any(|a| a.type_().full_name() == "System.Runtime.InteropServices.OutAttribute")
+    }
+    fn is_optional(&self) -> bool {
+        self.custom_attributes()
+            .iter()
+            .any(|a| a.type_().full_name() == "System.Runtime.InteropServices.OptionalAttribute")
+    }
     fn parameter_type(&self) -> Rc<dyn IXamlType>;
     fn custom_attributes(&self) -> Vec<Rc<dyn IXamlCustomAttribute>>;
 }
@@ -587,7 +790,7 @@ impl IXamlType for XamlPseudoType {
     fn get_hash_code(&self) -> u64 {
         match self.id {
             XamlTypeId::Unique(v) => v,
-            XamlTypeId::Named(_) => 0,
+            XamlTypeId::Named(_) | XamlTypeId::ByRef(_) => 0,
         }
     }
     fn as_any(&self) -> &dyn Any {
@@ -641,6 +844,7 @@ impl fmt::Display for FindMethodMethodSignature {
 }
 
 pub struct AnonymousParameterInfo {
+    position: Option<usize>,
     pub name: String,
     parameter_type: Rc<dyn IXamlType>,
 }
@@ -648,17 +852,26 @@ pub struct AnonymousParameterInfo {
 impl AnonymousParameterInfo {
     pub fn new(type_: Rc<dyn IXamlType>, name: Option<&str>) -> Self {
         Self {
+            position: None,
             name: name.unwrap_or("unknown").to_string(),
             parameter_type: type_,
         }
     }
 
     pub fn with_index(type_: Rc<dyn IXamlType>, index: usize) -> Self {
-        Self::new(type_, Some(&format!("arg{index}")))
+        let mut info = Self::new(type_, Some(&format!("arg{index}")));
+        info.position = Some(index);
+        info
     }
 }
 
 impl IXamlParameterInfo for AnonymousParameterInfo {
+    fn name(&self) -> Option<String> {
+        Some(self.name.clone())
+    }
+    fn position(&self) -> Option<usize> {
+        self.position
+    }
     fn parameter_type(&self) -> Rc<dyn IXamlType> {
         self.parameter_type.clone()
     }

@@ -1795,3 +1795,308 @@ fn static_properties_are_not_static_fields() {
     assert!(matches!(set(&[into_markup_value("x".to_string())]), Err(MarkupInvokeError::Argument { index: 0, .. })));
     assert_eq!(from_markup_value::<i32>(&get(&[]).unwrap()), Some(7));
 }
+
+// Descriptor markers are not the represented value type.
+struct MetaPointFacade;
+ferro_markup_type!(
+    struct MetaPointFacade {
+        this: MetaPoint,
+        handles: [MetaPoint],
+    }
+);
+struct MetaPointHandleFacade;
+ferro_markup_type!(
+    struct MetaPointHandleFacade {
+        handles: [MetaPoint],
+    }
+);
+
+#[test]
+fn nullable_struct_facades_follow_represented_value_type() {
+    for descriptor in [
+        MetaPoint::MARKUP,
+        MetaPointFacade::MARKUP,
+        MetaPointHandleFacade::MARKUP,
+    ] {
+        assert_eq!(descriptor.kind, MarkupTypeKind::Struct);
+        crate::__ferro_compiler_metadata! {
+            assert_eq!((descriptor.value.unwrap())(), ValueType::of::<MetaPoint>());
+        }
+        assert_eq!(
+            (descriptor.nullable.unwrap())(),
+            ValueType::of::<Option<MetaPoint>>()
+        );
+    }
+}
+
+trait InterfaceRefReading {
+    fn read(&self) -> i32;
+}
+struct InterfaceRefModel(Cell<i32>);
+impl PartialEq for InterfaceRefModel {
+    fn eq(&self, other: &Self) -> bool {
+        self.0.get() == other.0.get()
+    }
+}
+impl InterfaceRefReading for InterfaceRefModel {
+    fn read(&self) -> i32 {
+        self.0.get() + 100
+    }
+}
+#[test]
+fn interface_ref_preserves_object_identity_value_equality_vtable_and_lifetime() {
+    let original = Rc::new(InterfaceRefModel(Cell::new(1)));
+    let weak = Rc::downgrade(&original);
+    let view = InterfaceRef::<dyn InterfaceRefReading>::new(original.clone(), |v| v);
+    let alias = view.clone();
+    assert!(view.ptr_eq(&alias));
+    assert!(Rc::ptr_eq(
+        &original,
+        &view.downcast::<InterfaceRefModel>().unwrap()
+    ));
+    assert_eq!(view.read(), 101);
+    let equal = InterfaceRef::<dyn InterfaceRefReading>::new(
+        Rc::new(InterfaceRefModel(Cell::new(1))),
+        |v| v,
+    );
+    assert!(view == equal);
+    assert!(!view.ptr_eq(&equal));
+    original.0.set(2);
+    assert_eq!(alias.read(), 102);
+    assert!(view != equal);
+    drop(original);
+    drop(view);
+    assert!(weak.upgrade().is_some());
+    drop(alias);
+    assert!(weak.upgrade().is_none());
+}
+#[test]
+#[should_panic(expected = "interface coercion must retain the original object")]
+fn interface_ref_rejects_another_object_from_the_coercion() {
+    let _ = InterfaceRef::<dyn InterfaceRefReading>::new(
+        Rc::new(InterfaceRefModel(Cell::new(1))),
+        |_| Rc::new(InterfaceRefModel(Cell::new(1))),
+    );
+}
+
+
+#[derive(Clone, PartialEq)]
+struct NamedMethodArguments;
+fn named_sum(first: i32, second: i32) -> i32 {
+    first + second
+}
+crate::ferro_markup_type!(class NamedMethodArguments {
+ namespace:"Tests.NamedMethodArguments",this:Rc<NamedMethodArguments>,handles:[Rc<NamedMethodArguments>],
+ methods:[
+ static fn Sum(first:i32,second:i32)->i32=>named_sum,
+ static try fn Positive(value:i32)->i32=>(|value|if value>=0 {Ok(value)} else {Err("negative")})[Public],
+ fn Echo(value:Option<crate::Utf16Text>)->Option<crate::Utf16Text> =>(|_:&Rc<NamedMethodArguments>,value|value)[Virtual],
+ try fn Fail(value:i32)->i32=>(|_:&Rc<NamedMethodArguments>,_:i32|Err::<i32,_>("named-failure"))
+ ]
+});
+#[test]
+fn named_method_parameters_keep_names_native_signature_flags_typed_calls_and_failures() {
+    let meta = NamedMethodArguments::MARKUP;
+    assert_eq!(
+        meta.methods
+            .iter()
+            .map(|m| m.parameter_info.iter().map(|p| p.name).collect::<Vec<_>>())
+            .collect::<Vec<_>>(),
+        vec![
+            vec![Some("first"), Some("second")],
+            vec![Some("value")],
+            vec![Some("value")],
+            vec![Some("value")]
+        ]
+    );
+    assert_eq!(
+        unbox::<i32>(&(meta.methods[0].invoke)(&[boxed(2i32), boxed(5i32)]).unwrap()),
+        7
+    );
+    assert_eq!(
+        unbox::<i32>(&(meta.methods[1].invoke)(&[boxed(3i32)]).unwrap()),
+        3
+    );
+    assert!((meta.methods[1].invoke)(&[boxed(-1i32)]).is_err());
+    let owner = Rc::new(NamedMethodArguments);
+    let text = crate::Utf16Text::from_units(vec![0xd800, 65]);
+    let output =
+        (meta.methods[2].invoke)(&[boxed(owner.clone()), boxed(Some(text.clone()))]).unwrap();
+    assert!(unbox::<crate::Utf16Text>(&output).ptr_eq(&text));
+    assert!(meta.methods[2]
+        .attributes
+        .iter()
+        .any(|a| a.name == "Virtual"));
+    assert!((meta.methods[3].invoke)(&[boxed(owner), boxed(0i32)]).is_err());
+    assert_eq!(NamedMethodArguments::__markup_Sum_0(3, 4), 7);
+}
+
+#[test]
+fn nullable_native_carriers_do_not_erase_reference_storage() {
+    ValueTypes::register_reference::<NamedMethodArguments>();
+    ValueTypes::register_nullable::<crate::Utf16Text>();
+    assert_eq!(
+        ValueTypes::nullable_carrier(std::any::TypeId::of::<Option<Rc<NamedMethodArguments>>>()),
+        Some(ValueType::of::<Rc<NamedMethodArguments>>())
+    );
+    assert_eq!(
+        ValueTypes::nullable_inner(ValueType::of::<Option<Rc<NamedMethodArguments>>>()),
+        Some(ValueType::of::<NamedMethodArguments>())
+    );
+    assert_eq!(
+        ValueTypes::nullable_carrier(std::any::TypeId::of::<Option<crate::Utf16Text>>()),
+        Some(ValueType::of::<crate::Utf16Text>())
+    );
+}
+#[test]
+fn erased_interface_views_require_the_original_allocation() {
+    use crate::{metadata::InterfaceRef, BoxedValue};
+    use std::rc::Rc;
+    #[derive(PartialEq)]
+    struct Model(i32);
+    trait Read {
+        fn read(&self) -> i32;
+    }
+    impl Read for Model {
+        fn read(&self) -> i32 {
+            self.0
+        }
+    }
+    let object = Rc::new(Model(7));
+    let raw = object.clone() as BoxedValue;
+    let interface: Rc<dyn Read> = object.clone();
+    let view = InterfaceRef::from_parts(raw.clone(), interface.clone());
+    assert!(Rc::ptr_eq(&view.object(), &raw));
+    assert_eq!(view.read(), 7);
+    let different = Rc::new(Model(7)) as BoxedValue;
+    assert!(
+        std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| InterfaceRef::from_parts(
+            different, interface
+        )))
+        .is_err()
+    );
+}
+
+#[cfg(test)]
+mod method_parameter_attribute_tests {
+    use super::*;
+    struct Probe;
+    fn instance(_: &i64, value: i32) -> i32 {
+        value
+    }
+    fn instance_try(_: &i64, value: i32) -> Result<i32, &'static str> {
+        Ok(value)
+    }
+    fn static_value(value: i32) -> i32 {
+        value
+    }
+    fn static_try(value: i32) -> Result<i32, &'static str> {
+        Ok(value)
+    }
+    crate::ferro_markup_type!(class Probe {
+            namespace:"Tests.Optional",this:i64,handles:[i64],methods:[
+    fn M0(value:i32[Optional,DefaultParameterValue(7)])->i32=>instance [Virtual],
+    fn M1(value:i32[Optional,DefaultParameterValue(7)])->i32=>(instance) [Virtual],
+    fn M2(value:i32[Optional,DefaultParameterValue(7)])->i32=>instance,
+    try fn M3(value:i32[Optional,DefaultParameterValue(7)])->i32=>instance_try [Virtual],
+    try fn M4(value:i32[Optional,DefaultParameterValue(7)])->i32=>(instance_try) [Virtual],
+    try fn M5(value:i32[Optional,DefaultParameterValue(7)])->i32=>instance_try,
+    static fn M6(value:i32[Optional,DefaultParameterValue(7)])->i32=>static_value [Virtual],
+    static fn M7(value:i32[Optional,DefaultParameterValue(7)])->i32=>(static_value) [Virtual],
+    static fn M8(value:i32[Optional,DefaultParameterValue(7)])->i32=>static_value,
+    static try fn M9(value:i32[Optional,DefaultParameterValue(7)])->i32=>static_try [Virtual],
+    static try fn M10(value:i32[Optional,DefaultParameterValue(7)])->i32=>(static_try) [Virtual],
+    static try fn M11(value:i32[Optional,DefaultParameterValue(7)])->i32=>static_try
+        ]});
+    #[test]
+    fn method_parameter_attributes_survive_all_named_callable_forms_and_native_invocation() {
+        use crate::metadata::{from_markup_value, into_markup_value, MarkupAttributeValue};
+        assert_eq!(Probe::MARKUP.methods.len(), 12);
+        for (index, method) in Probe::MARKUP.methods.iter().enumerate() {
+            assert_eq!(method.parameter_info.len(), 1);
+            let parameter = &method.parameter_info[0];
+            assert_eq!(parameter.name, Some("value"));
+            assert_eq!(parameter.attributes.len(), 2);
+            assert_eq!(parameter.attributes[0].name, "Optional");
+            assert_eq!(parameter.attributes[1].name, "DefaultParameterValue");
+            assert_eq!(
+                parameter.attributes[1].arguments,
+                &[MarkupAttributeValue::Int(7)]
+            );
+            let arguments = if method.is_static {
+                vec![into_markup_value(9i32)]
+            } else {
+                vec![into_markup_value(0i64), into_markup_value(9i32)]
+            };
+            assert_eq!(
+                from_markup_value::<i32>(&(method.invoke)(&arguments).unwrap()),
+                Some(9)
+            );
+            assert_eq!(
+                method.attributes.iter().any(|a| a.name == "Virtual"),
+                index % 3 < 2
+            );
+        }
+        assert_eq!(Probe::__markup_M0_0(&0i64, 3), 3);
+        assert_eq!(Probe::__markup_M9_9(4).unwrap(), 4);
+    }
+}
+
+// Keywords remain valid source parameter names in both constructor and method tables.
+struct RawParameterProbe;
+ferro_markup_type!(struct RawParameterProbe {
+    this:i32,handles:[i32],
+    constructors:[(r#type:i32,r#match:bool[Optional,DefaultParameterValue(false)])=>(|value,_|value)],
+    methods:[
+      fn Instance(r#type:i32)->i32=>(|this:&i32,value|*this+value),
+      try fn Fallible(r#type:i32)->i32=>(|this:&i32,value|Ok::<i32,&str>(*this+value)),
+      static fn Static(r#type:i32)->i32=>(|value|value),
+      static try fn StaticFallible(r#type:i32[Optional,DefaultParameterValue(2)])->i32=>(|value|Ok::<i32,&str>(value))
+    ]
+});
+#[test]
+fn raw_constructor_and_all_method_parameter_forms_keep_unescaped_names_and_invokers() {
+    let m=RawParameterProbe::MARKUP;
+    assert_eq!(m.constructors[0].parameter_info[0].name,Some("type"));
+    assert_eq!(m.constructors[0].parameter_info[1].name,Some("match"));
+    for (i,method) in m.methods.iter().enumerate(){
+        assert_eq!(method.parameter_info[0].name,Some("type"));
+        let args=if i<2{vec![boxed(10i32),boxed(2i32)]}else{vec![boxed(2i32)]};
+        assert_eq!(unbox::<i32>(&(method.invoke)(&args).unwrap()),if i<2{12}else{2});
+    }
+    assert_eq!(m.methods[3].parameter_info[0].attributes[1].arguments,[MarkupAttributeValue::Int(2)]);
+}
+
+#[test]
+fn expired_method_binding_reports_failure_but_live_void_and_static_calls_return_null() {
+    ValueTypes::register_reference::<MetaTable>();
+    let markup = <MetaTable as MarkupTyped>::MARKUP;
+    let table = MetaTable::create(2);
+    let target: BoxedValue = table.clone();
+    let clear = markup.find_methods("Clear").next().unwrap();
+    let weak = MarkupDelegate::for_method_of_source(&target, markup, clear);
+    let touch = MarkupDelegate::for_method_of_source(&target, markup, markup.find_methods("Touch").next().unwrap());
+    assert_eq!(weak.try_invoke(&[]), Ok(None));
+    assert_eq!(table.total(), 0);
+    drop((target, table));
+    assert!(!weak.is_target_alive());
+    assert_eq!(weak.invoke(&[]), None);
+    assert_eq!(weak.try_invoke(&[]), Err(MarkupInvokeError::Failed("The method binding target is no longer alive.".to_string())));
+    assert!(touch.is_target_alive());
+    assert_eq!(touch.try_invoke(&[]), Ok(None));
+}
+
+#[test]
+fn declared_method_delegate_keeps_its_original_target_until_last_clone_is_released() {
+    ValueTypes::register_reference::<MetaTable>();
+    let markup = <MetaTable as MarkupTyped>::MARKUP;
+    let table = MetaTable::create(2);
+    let weak = Rc::downgrade(&table);
+    let delegate = MarkupDelegate::for_method(Some(table.clone()), markup, markup.find_methods("Total").next().unwrap());
+    let copied = delegate.clone();
+    drop((table, delegate));
+    assert!(weak.upgrade().is_some());
+    assert_eq!(unbox::<i32>(&copied.try_invoke(&[]).unwrap()), 2);
+    drop(copied);
+    assert!(weak.upgrade().is_none());
+}

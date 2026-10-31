@@ -26,6 +26,8 @@ pub(crate) trait ITextInputPage {
     fn focus_container_element(&self);
     fn clear_input_element(&self);
     fn set_surrounding_text(&self, text: &str, start: i32, end: i32);
+    fn set_selection(&self, start: i32, end: i32);
+    fn set_options(&self, options: &TextInputOptions);
     fn set_bounds(&self, x: i32, y: i32, width: i32, height: i32, caret: i32);
     fn selection_start(&self) -> i32;
     fn selection_end(&self) -> i32;
@@ -85,6 +87,18 @@ impl ITextInputPage for TextInputPage {
         input_helper::set_surrounding_text(&self.input_element, text, start, end);
     }
 
+    fn set_selection(&self, start: i32, end: i32) {
+        input_helper::set_selection(&self.input_element, start, end);
+    }
+
+    fn set_options(&self, options: &TextInputOptions) {
+        let options = BrowserInputOptions::from_options(options);
+        input_helper::set_options(
+            &self.input_element, options.input_type, options.input_mode, options.enter_key_hint,
+            options.capitalization, options.suggestions.map_or(-1, i32::from), options.language, options.multiline, options.sensitive,
+        );
+    }
+
     fn set_bounds(&self, x: i32, y: i32, width: i32, height: i32, caret: i32) {
         input_helper::set_bounds(self.element(), x, y, width, height, caret);
     }
@@ -136,6 +150,66 @@ impl ITextInputPage for TextInputPage {
     }
 }
 
+// HTML input modes retain text/password inputs, which support UTF16 selection APIs.
+// Email/number input *types* would reject the selection operations used by the bridge.
+#[derive(Debug, PartialEq)]
+struct BrowserInputOptions<'a> {
+    input_type: &'static str,
+    input_mode: &'static str,
+    enter_key_hint: &'static str,
+    capitalization: &'static str,
+    suggestions: Option<bool>,
+    language: &'a str,
+    multiline: bool,
+    sensitive: bool,
+}
+impl<'a> BrowserInputOptions<'a> {
+    fn from_options(options: &'a TextInputOptions) -> Self {
+        use ferroui_base::input::text_input::{TextInputContentType as Content, TextInputReturnKeyType as Return};
+        let password = matches!(options.content_type, Content::Password | Content::Pin);
+        let private = options.is_sensitive || password;
+        Self {
+            input_type: if password { "password" } else { "text" },
+            sensitive: private,
+            // A textarea cannot provide a secure password input. Privacy takes precedence.
+            multiline: options.multiline && !password,
+            input_mode: match options.content_type {
+                Content::Digits | Content::Pin => "numeric",
+                Content::Number => "decimal",
+                Content::Email => "email",
+                Content::Url => "url",
+                Content::Search => "search",
+                Content::Normal | Content::Alpha | Content::Name | Content::Password | Content::Social => "text",
+            },
+            enter_key_hint: match options.return_key_type {
+                Return::Default => "",
+                Return::Return => "enter",
+                Return::Done => "done",
+                Return::Go => "go",
+                Return::Send => "send",
+                Return::Search => "search",
+                Return::Next => "next",
+                Return::Previous => "previous",
+            },
+            capitalization: if private {
+                "none"
+            } else if options.uppercase {
+                "characters"
+            } else if options.lowercase {
+                "none"
+            } else if options.auto_capitalization {
+                "sentences"
+            } else if options.content_type == Content::Name {
+                "words"
+            } else {
+                "none"
+            },
+            suggestions: if private { Some(false) } else { options.show_suggestions },
+            language: options.locale_hints.as_ref().and_then(|values| values.first()).map_or("", String::as_str),
+        }
+    }
+}
+
 /// The text input method of a view: the hidden input element of the view
 /// stands in for the text the client edits, so that the input method of
 /// the browser has an element to compose into.
@@ -147,6 +221,9 @@ pub struct BrowserTextInputMethod {
     /// The subscriptions to the events of the current client.
     subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
     is_composing: Cell<bool>,
+    disposed: Cell<bool>,
+    client_generation: Cell<u64>,
+    text_revision: Cell<u64>,
     /// Set while the page reports that the keyboard focus left the view.
     focus_is_leaving_view: Cell<bool>,
     // Not in the original: the state of a client of the exact-edit connection (decision D5 of
@@ -208,6 +285,9 @@ impl BrowserTextInputMethod {
             client: RefCell::new(None),
             subscriptions: RefCell::new(Vec::new()),
             is_composing: Cell::new(false),
+            disposed: Cell::new(false),
+            client_generation: Cell::new(0),
+            text_revision: Cell::new(0),
             focus_is_leaving_view: Cell::new(false),
             connection: RefCell::new(None),
             composition_session: RefCell::new(None),
@@ -246,11 +326,17 @@ impl BrowserTextInputMethod {
         self.client.borrow().clone()
     }
 
-    fn handler(&self, action: fn(&BrowserTextInputMethod)) -> Rc<dyn Fn()> {
+    fn current(&self, generation: u64) -> bool {
+        !self.disposed.get() && self.client_generation.get() == generation
+    }
+
+    fn handler(&self, generation: u64, action: fn(&BrowserTextInputMethod)) -> Rc<dyn Fn()> {
         let this = self.weak_self.clone();
         Rc::new(move || {
             if let Some(this) = this.upgrade() {
-                action(&this);
+                if this.current(generation) {
+                    action(&this);
+                }
             }
         })
     }
@@ -270,7 +356,7 @@ impl BrowserTextInputMethod {
     // cursor while it loses the focus would take the focus back from the element of the page
     // the user went to.
     fn focus_input_element(&self) {
-        if !self.focus_is_leaving_view.get() {
+        if !self.disposed.get() && !self.focus_is_leaving_view.get() {
             self.page.focus_input_element();
         }
     }
@@ -281,7 +367,7 @@ impl BrowserTextInputMethod {
         // view. There the framework never learns that the page moved the focus elsewhere; here
         // it does, drops its focused element and with it the client, and focusing the view then
         // would take the focus back from the element of the page the user just went to.
-        if !self.focus_is_leaving_view.get() {
+        if !self.disposed.get() && !self.focus_is_leaving_view.get() {
             self.page.focus_container_element();
         }
     }
@@ -298,25 +384,49 @@ impl BrowserTextInputMethod {
     }
 
     fn surrounding_text_changed(&self) {
+        if self.disposed.get() { return; }
         if self.uses_connection() {
             // A connection client is mirrored as revisioned snapshots (selection changes too).
             self.client_revision.set(self.client_revision.get().wrapping_add(1));
             self.synchronize_dom();
             return;
         }
+        let generation = self.client_generation.get();
+        let revision = self.text_revision.get().wrapping_add(1);
+        self.text_revision.set(revision);
         if let Some(client) = self.client() {
             let surrounding_text = client.surrounding_text();
+            if !self.current(generation) || self.text_revision.get() != revision {
+                return;
+            }
             let selection = client.selection();
+            if self.current(generation) && self.text_revision.get() == revision {
+                self.page.set_surrounding_text(&surrounding_text, selection.start, selection.end);
+            }
+        }
+    }
 
-            self.page.set_surrounding_text(&surrounding_text, selection.start, selection.end);
+    // A completed edit can publish surrounding text before its final selection.
+    // Mirror selection independently without copying text, resizing or taking focus.
+    fn selection_changed(&self) {
+        if self.disposed.get() { return; }
+        if self.uses_connection() { self.surrounding_text_changed(); return; }
+        if !self.is_composing.get() {
+            if let Some(client) = self.client() {
+                let generation = self.client_generation.get();
+                let revision = self.text_revision.get();
+                let selection = client.selection();
+                if self.current(generation) && self.text_revision.get() == revision && !self.is_composing.get() {
+                    self.page.set_selection(selection.start, selection.end);
+                }
+            }
         }
     }
 
     /// The hidden input element is about to change: `input_type` is the
     /// kind of the change and `start` and `end` the range it targets.
     pub fn on_before_input(&self, input_type: &str, mut start: i32, mut end: i32) {
-        // A connection client has its own element and protocol (`on_dom_before_input`).
-        if self.uses_connection() {
+        if self.disposed.get() || self.uses_connection() {
             return;
         }
         if input_type != "deleteByComposition" {
@@ -373,6 +483,7 @@ impl BrowserTextInputMethod {
             return;
         };
 
+        // Set before calling the client: a synchronous reset/detach must win.
         self.is_composing.set(true);
         client.set_preedit_text(None);
     }
@@ -404,7 +515,12 @@ impl BrowserTextInputMethod {
             return;
         };
 
+        let generation = self.client_generation.get();
+        let revision = self.text_revision.get();
         client.set_preedit_text(None);
+        if !self.current(generation) || self.text_revision.get() != revision || self.is_composing.get() {
+            return;
+        }
 
         // Clearing preedit can raise native callbacks that move focus. Never
         // deliver the old client's commit to the newly focused control.
@@ -416,8 +532,60 @@ impl BrowserTextInputMethod {
                 input_handler.raw_text_event(data);
             }
         }
+        if self.current(generation) {
+            self.selection_changed();
+        }
     }
 
+    /// Retires the native editor without moving page focus to a closing view.
+    pub(crate) fn dispose(&self) {
+        if self.disposed.replace(true) {
+            return;
+        }
+        self.client_generation.set(self.client_generation.get().wrapping_add(1));
+        self.next_generation();
+        let was_connection = self.uses_connection();
+        let dom_revision = self.invalidate_dom();
+        self.composition_session.take();
+        self.connection.take();
+        let composing = self.is_composing.replace(false);
+        let old_client = self.client.take();
+        let subscriptions = ClientSubscriptions(self.subscriptions.take());
+        self.page.clear_input_element();
+        if was_connection {
+            self.page.clear_text_input_element(dom_revision);
+        }
+        self.page.hide_input_element();
+        drop(subscriptions);
+        if composing {
+            if let Some(client) = old_client.as_ref() {
+                client.set_preedit_text(None);
+            }
+        }
+        drop(old_client);
+    }
+}
+
+// Pending installations and attached subscriptions use the same RAII cleanup.
+// Client callbacks run with no RefCell borrow held, including during unwinding.
+#[derive(Default)]
+struct ClientSubscriptions(Vec<Rc<dyn IDisposable>>);
+
+impl Drop for ClientSubscriptions {
+    fn drop(&mut self) {
+        for subscription in self.0.drain(..) {
+            subscription.dispose();
+        }
+    }
+}
+
+impl Drop for BrowserTextInputMethod {
+    fn drop(&mut self) {
+        self.dispose();
+    }
+}
+
+impl BrowserTextInputMethod {
     /// The textarea of a connection client started composing: a composition session of the
     /// connection, which keeps the selected text until the first update.
     fn begin_connection_composition(&self) -> bool {
@@ -510,11 +678,13 @@ impl BrowserTextInputMethod {
 
         if let Some(client) = &client {
             let mut subscriptions = vec![
-                client.surrounding_text_changed(self.handler(Self::surrounding_text_changed)),
-                client.input_pane_activation_requested(self.handler(Self::input_pane_activation_requested)),
+                client.surrounding_text_changed(self.handler(self.client_generation.get(), Self::surrounding_text_changed)),
+                client.input_pane_activation_requested(self.handler(self.client_generation.get(), Self::input_pane_activation_requested)),
             ];
             if connection.is_some() {
-                subscriptions.push(client.selection_changed(self.handler(Self::surrounding_text_changed)));
+                subscriptions.push(client.selection_changed(self.handler(self.client_generation.get(), Self::surrounding_text_changed)));
+            } else {
+                subscriptions.push(client.selection_changed(self.handler(self.client_generation.get(), Self::selection_changed)));
             }
             if self.generation.get() != generation {
                 for subscription in subscriptions {
@@ -527,9 +697,9 @@ impl BrowserTextInputMethod {
 
         self.page.clear_text_input_element(dom_revision);
         self.page.use_text_input_element(connection.is_some());
-        if connection.is_none() {
-            self.page.clear_input_element();
-        }
+        // Retire the legacy peer even when switching to the connection textarea.
+        // A hidden password or multiline editor must not retain its old value.
+        self.page.clear_input_element();
         if self.generation.get() != generation {
             return;
         }
@@ -558,78 +728,86 @@ impl BrowserTextInputMethod {
 
 impl ITextInputMethodImpl for BrowserTextInputMethod {
     fn set_client(&self, client: Option<Rc<dyn TextInputMethodClient>>) {
-        let generation = self.next_generation();
-        // Only a client that opted in to the exact-edit connection takes the textarea and its
-        // protocol (decision D5); the path of the original stays as it is for every other one.
-        let connection = client
-            .as_ref()
+        if self.disposed.get() {
+            return;
+        }
+        let generation = self.client_generation.get().wrapping_add(1);
+        self.client_generation.set(generation);
+        let connection_generation = self.next_generation();
+        let connection = client.as_ref()
             .filter(|_| self.page.has_text_input_element())
             .and_then(|client| client.input_method_editing().and_then(|_| client.input_method_connection()));
-        if self.generation.get() != generation {
-            return;
-        }
+        if self.generation.get() != connection_generation || !self.current(generation) { return; }
         if self.uses_connection() || connection.is_some() {
-            self.set_connection_client(client, connection, generation);
+            self.set_connection_client(client, connection, connection_generation);
             return;
         }
-
-        self.cancel_composition();
-        if self.client().is_some() {
-            let subscriptions = std::mem::take(&mut *self.subscriptions.borrow_mut());
-            for subscription in subscriptions {
-                subscription.dispose();
+        let composing = self.is_composing.replace(false);
+        let old_client = self.client.take();
+        let old_subscriptions = ClientSubscriptions(self.subscriptions.take());
+        self.page.clear_input_element();
+        drop(old_subscriptions);
+        if composing {
+            if let Some(client) = old_client.as_ref() {
+                client.set_preedit_text(None);
             }
         }
-
-        if let Some(client) = &client {
-            let subscriptions = vec![
-                client.surrounding_text_changed(self.handler(Self::surrounding_text_changed)),
-                client.input_pane_activation_requested(self.handler(Self::input_pane_activation_requested)),
-            ];
-            *self.subscriptions.borrow_mut() = subscriptions;
+        drop(old_client);
+        if !self.current(generation) {
+            return;
         }
 
-        self.page.clear_input_element();
-
-        let old_client = self.client.replace(client);
-        drop(old_client);
-
-        if let Some(client) = self.client() {
+        self.client.replace(client.clone());
+        if let Some(client) = client {
+            let mut subscriptions = ClientSubscriptions::default();
+            subscriptions.0.push(client.surrounding_text_changed(self.handler(generation, Self::surrounding_text_changed)));
+            if !self.current(generation) { return; }
+            subscriptions.0.push(client.selection_changed(self.handler(generation, Self::selection_changed)));
+            if !self.current(generation) { return; }
+            subscriptions.0.push(client.input_pane_activation_requested(self.handler(generation, Self::input_pane_activation_requested)));
+            if !self.current(generation) { return; }
+            *self.subscriptions.borrow_mut() = std::mem::take(&mut subscriptions.0);
             self.show_ime();
-
-            let surrounding_text = client.surrounding_text();
-            let selection = client.selection();
-
-            self.page.set_surrounding_text(&surrounding_text, selection.start, selection.end);
+            if self.current(generation) {
+                self.surrounding_text_changed();
+            }
         } else {
             self.hide_ime();
         }
     }
 
     fn set_cursor_rect(&self, rect: Rect) {
+        if self.disposed.get() { return; }
+        let generation = self.client_generation.get();
         self.focus_input_element();
+        if !self.current(generation) { return; }
         let caret = self.client().map_or(0, |client| client.selection().end);
+        if !self.current(generation) { return; }
         self.page.set_bounds(rect.x as i32, rect.y as i32, rect.width as i32, rect.height as i32, caret);
         self.focus_input_element();
     }
 
-    // As in the original, the options change nothing for most clients. A client of the
-    // connection gets them as attributes of its textarea (`apply_input_options`), which keeps the
-    // element, its selection and a running composition.
     fn set_options(&self, options: &TextInputOptions) {
+        if self.disposed.get() { return; }
         self.options.replace(Some(options.clone()));
         self.options_revision.set(self.options_revision.get().wrapping_add(1));
-        self.apply_input_options();
+        if self.uses_connection() { self.apply_input_options(); }
+        else { self.page.set_options(options); }
     }
 
     fn reset(&self) {
-        if self.uses_connection() {
-            self.reset_connection_client();
-            return;
-        }
-        self.cancel_composition();
+        if self.disposed.get() { return; }
+        if self.uses_connection() { self.reset_connection_client(); return; }
+        self.text_revision.set(self.text_revision.get().wrapping_add(1));
+        let composing = self.is_composing.replace(false);
+        let client = self.client();
         self.page.clear_input_element();
         self.page.set_surrounding_text("", 0, 0);
+        if composing {
+            if let Some(client) = client {
+                client.set_preedit_text(None);
+            }
+        }
     }
 }
 
@@ -699,6 +877,15 @@ mod tests {
             self.log(format!("text '{text}' {start} {end}"));
         }
 
+        fn set_selection(&self, start: i32, end: i32) {
+            self.log(format!("selection {start} {end}"));
+            self.selection.set((start, end));
+        }
+
+        fn set_options(&self, options: &TextInputOptions) {
+            self.log(format!("options {options:?}"));
+        }
+
         fn set_bounds(&self, x: i32, y: i32, width: i32, height: i32, caret: i32) {
             self.log(format!("bounds {x} {y} {width} {height} caret {caret}"));
         }
@@ -735,8 +922,11 @@ mod tests {
     struct TestClient {
         events: TextInputMethodClientEvents,
         text: RefCell<String>,
+        text_reads: Cell<usize>,
         selection: Cell<TextSelection>,
         preedit: RefCell<Vec<Option<String>>>,
+        preedit_hook: RefCell<Option<Box<dyn FnOnce()>>>,
+        text_hook: RefCell<Option<Box<dyn FnOnce()>>>,
     }
 
     impl TestClient {
@@ -744,8 +934,11 @@ mod tests {
             Rc::new(Self {
                 events: TextInputMethodClientEvents::new(),
                 text: RefCell::new(text.to_string()),
+                text_reads: Cell::new(0),
                 selection: Cell::new(TextSelection::new(start, end)),
                 preedit: RefCell::new(Vec::new()),
+                preedit_hook: RefCell::new(None),
+                text_hook: RefCell::new(None),
             })
         }
     }
@@ -768,7 +961,11 @@ mod tests {
         }
 
         fn surrounding_text(&self) -> String {
-            self.text.borrow().clone()
+            self.text_reads.set(self.text_reads.get() + 1);
+            let text = self.text.borrow().clone();
+            let hook = self.text_hook.take();
+            if let Some(hook) = hook { hook(); }
+            text
         }
 
         fn cursor_rectangle(&self) -> Rect {
@@ -785,6 +982,8 @@ mod tests {
 
         fn set_preedit_text(&self, preedit_text: Option<&str>) {
             self.preedit.borrow_mut().push(preedit_text.map(str::to_string));
+            let hook = self.preedit_hook.take();
+            if let Some(hook) = hook { hook(); }
         }
     }
 
@@ -821,6 +1020,15 @@ mod tests {
         fixture.set_client(&client);
 
         assert_eq!(vec!["clear", "show", "focus input", "text 'hello' 1 3"], fixture.take_calls());
+    }
+
+    #[test]
+    fn multiline_source_snapshots_keep_utf16_offsets_and_original_delimiters() {
+        let fixture = Fixture::new();
+        let text = "a\r\n😀\rb\nc";
+        fixture.set_client(&TestClient::new(text, 5, 9));
+        assert_eq!(vec!["clear".to_owned(), "show".to_owned(), "focus input".to_owned(),
+            format!("text '{text}' 5 9")], fixture.take_calls());
     }
 
     #[test]
@@ -871,6 +1079,70 @@ mod tests {
     }
 
     #[test]
+    fn selection_after_text_replacement_reaches_the_page_without_rewriting_text() {
+        let fixture = Fixture::new();
+        let client = TestClient::new("Qw", 2, 2);
+        fixture.set_client(&client);
+        fixture.take_calls();
+
+        *client.text.borrow_mut() = "Qwe".to_string();
+        client.raise_surrounding_text_changed();
+        client.selection.set(TextSelection::new(3, 3));
+        client.raise_selection_changed();
+
+        assert_eq!(vec!["text 'Qwe' 2 2", "selection 3 3"], fixture.take_calls());
+    }
+
+    #[test]
+    fn selection_only_changes_never_read_or_rewrite_the_text_or_focus_the_page() {
+        let fixture = Fixture::new();
+        let client = TestClient::new("a😀bc", 0, 0);
+        fixture.set_client(&client);
+        fixture.take_calls();
+        let reads = client.text_reads.get();
+
+        for (start, end) in [(1, 3), (5, 1), (0, 0), (5, 5)] {
+            client.selection.set(TextSelection::new(start, end));
+            client.raise_selection_changed();
+            assert_eq!(vec![format!("selection {start} {end}")], fixture.take_calls());
+            assert_eq!((start, end), fixture.selection.get());
+            assert_eq!(reads, client.text_reads.get());
+        }
+    }
+
+    #[test]
+    fn selection_updates_leave_browser_composition_alone_until_it_ends() {
+        let fixture = Fixture::new();
+        let client = TestClient::new("kana", 4, 4);
+        fixture.set_client(&client);
+        fixture.take_calls();
+        fixture.method.on_composition_start();
+        client.selection.set(TextSelection::new(1, 3));
+        client.raise_selection_changed();
+        assert!(fixture.take_calls().is_empty());
+        fixture.method.on_composition_update(Some("ka"));
+        assert!(fixture.take_calls().is_empty());
+        fixture.method.on_composition_end(None);
+        assert_eq!(vec!["selection 1 3"], fixture.take_calls());
+        assert!(!fixture.method.is_composing());
+    }
+
+    #[test]
+    fn a_selection_subscription_does_not_retain_the_input_method() {
+        let fixture = Fixture::new();
+        let client = TestClient::new("hello", 0, 0);
+        fixture.set_client(&client);
+        let weak = Rc::downgrade(&fixture.method);
+        let calls = fixture.calls.clone();
+        fixture.take_calls();
+        drop(fixture);
+        assert!(weak.upgrade().is_none());
+        assert_eq!(vec!["clear", "hide"], std::mem::take(&mut *calls.borrow_mut()));
+        client.raise_selection_changed();
+        assert!(calls.borrow().is_empty());
+    }
+
+    #[test]
     fn a_request_for_the_input_pane_shows_the_input_element_again() {
         let fixture = Fixture::new();
         let client = TestClient::new("", 0, 0);
@@ -891,6 +1163,7 @@ mod tests {
         fixture.set_client(&second);
         fixture.take_calls();
 
+        first.raise_selection_changed();
         first.raise_surrounding_text_changed();
         first.raise_input_pane_activation_requested();
         assert!(fixture.take_calls().is_empty());
@@ -902,6 +1175,7 @@ mod tests {
         fixture.take_calls();
         second.raise_surrounding_text_changed();
         second.raise_input_pane_activation_requested();
+        second.raise_selection_changed();
         assert!(fixture.take_calls().is_empty());
     }
 
@@ -919,6 +1193,103 @@ mod tests {
     }
 
     #[test]
+    fn input_modes_cover_all_native_content_types_without_unsupported_html_input_types() {
+        use ferroui_base::input::text_input::TextInputContentType as C;
+        for (content_type, input_mode) in [
+            (C::Normal, "text"), (C::Alpha, "text"), (C::Digits, "numeric"),
+            (C::Pin, "numeric"), (C::Number, "decimal"), (C::Email, "email"),
+            (C::Url, "url"), (C::Name, "text"), (C::Password, "text"),
+            (C::Social, "text"), (C::Search, "search"),
+        ] {
+            let options = TextInputOptions { content_type, ..Default::default() };
+            let mapped = BrowserInputOptions::from_options(&options);
+            assert_eq!(mapped.input_mode, input_mode, "{content_type:?}");
+            assert_eq!(mapped.input_type, if matches!(content_type, C::Password | C::Pin) { "password" } else { "text" });
+        }
+    }
+
+    #[test]
+    fn every_native_return_label_maps_to_a_real_html_hint() {
+        use ferroui_base::input::text_input::TextInputReturnKeyType as R;
+        for (return_key_type, hint) in [
+            (R::Default, ""), (R::Return, "enter"), (R::Done, "done"),
+            (R::Go, "go"), (R::Send, "send"), (R::Search, "search"),
+            (R::Next, "next"), (R::Previous, "previous"),
+        ] {
+            let options = TextInputOptions { return_key_type, ..Default::default() };
+            assert_eq!(BrowserInputOptions::from_options(&options).enter_key_hint, hint);
+        }
+    }
+
+    #[test]
+    fn sensitive_text_password_and_pin_inputs_disable_capitalization_and_suggestions() {
+        use ferroui_base::input::text_input::TextInputContentType as C;
+        for (content_type, is_sensitive) in [(C::Normal, true), (C::Password, false), (C::Pin, false)] {
+            let options = TextInputOptions { content_type, is_sensitive, uppercase: true,
+                auto_capitalization: true, show_suggestions: Some(true), ..Default::default() };
+            let mapped = BrowserInputOptions::from_options(&options);
+            assert_eq!(mapped.input_type, if matches!(content_type, C::Password | C::Pin) { "password" } else { "text" });
+            assert!(mapped.sensitive);
+            assert_eq!(mapped.capitalization, "none");
+            assert_eq!(mapped.suggestions, Some(false));
+        }
+    }
+
+    #[test]
+    fn nonprivate_options_preserve_casing_precedence_nullable_suggestions_and_first_locale() {
+        use ferroui_base::input::text_input::TextInputContentType;
+        let mut options = TextInputOptions { uppercase: true, lowercase: true,
+            locale_hints: Some(Rc::from(["tr-TR".to_string(), "en-US".to_string()])), ..Default::default() };
+        let mapped = BrowserInputOptions::from_options(&options);
+        assert_eq!(mapped.capitalization, "characters");
+        assert_eq!(mapped.language, "tr-TR");
+        assert_eq!(mapped.suggestions, None);
+        options.uppercase = false;
+        assert_eq!(BrowserInputOptions::from_options(&options).capitalization, "none");
+        options.lowercase = false;
+        options.auto_capitalization = true;
+        assert_eq!(BrowserInputOptions::from_options(&options).capitalization, "sentences");
+        options.auto_capitalization = false;
+        options.content_type = TextInputContentType::Name;
+        assert_eq!(BrowserInputOptions::from_options(&options).capitalization, "words");
+        for suggestions in [Some(false), Some(true)] {
+            options.show_suggestions = suggestions;
+            assert_eq!(BrowserInputOptions::from_options(&options).suggestions, suggestions);
+        }
+        options.locale_hints = None;
+        assert_eq!(BrowserInputOptions::from_options(&options).language, "");
+    }
+
+    #[test]
+    fn current_client_input_options_are_forwarded_to_the_page() {
+        let fixture = Fixture::new();
+        let options = TextInputOptions {
+            is_sensitive: true,
+            content_type: ferroui_base::input::text_input::TextInputContentType::Password,
+            ..Default::default()
+        };
+        fixture.method.set_options(&options);
+        assert_eq!(vec![format!("options {options:?}")], fixture.take_calls());
+    }
+
+    #[test]
+    fn multiline_is_enabled_only_for_non_private_native_editors() {
+        use ferroui_base::input::text_input::TextInputContentType as Content;
+        for content in [Content::Normal, Content::Email, Content::Password, Content::Pin] {
+            for sensitive in [false, true] {
+                for multiline in [false, true] {
+                    let options = TextInputOptions { content_type: content, is_sensitive: sensitive,
+                        multiline, ..TextInputOptions::default_options() };
+                    let actual = BrowserInputOptions::from_options(&options);
+                    let private = matches!(content, Content::Password | Content::Pin);
+                    assert_eq!(actual.multiline, multiline && !private);
+                    assert_eq!(actual.input_type, if private { "password" } else { "text" });
+                }
+            }
+        }
+    }
+
+    #[test]
     fn reset_empties_the_input_element() {
         let fixture = Fixture::new();
 
@@ -927,11 +1298,10 @@ mod tests {
         assert_eq!(vec!["clear", "text '' 0 0"], fixture.take_calls());
     }
 
-    // Decision D5 of docs/porting/winui-rich-text.md: a client without the exact-edit
-    // connection keeps the path of the original, which ignores the options and uses the input
-    // element; the textarea and its protocol are never involved.
+    // A legacy client keeps its own DOM protocol while receiving native input
+    // hints and selection notifications. It never uses the connection textarea.
     #[test]
-    fn a_client_without_the_connection_ignores_the_options_and_keeps_the_input_element() {
+    fn a_client_without_the_connection_receives_options_and_keeps_its_dom_protocol() {
         use ferroui_base::input::text_input::{TextInputContentType, TextInputReturnKeyType};
         let fixture = Fixture::new();
         let options = TextInputOptions {
@@ -953,7 +1323,9 @@ mod tests {
         fixture.method.set_client(None);
 
         assert_eq!(
-            vec!["clear", "show", "focus input", "text 'a\r\nb' 1 3", "clear", "text '' 0 0", "clear", "hide", "focus container"],
+            vec![format!("options {options:?}"), "clear".into(), "show".into(), "focus input".into(),
+                "text 'a\r\nb' 1 3".into(), format!("options {options:?}"), "selection 0 0".into(),
+                "clear".into(), "text '' 0 0".into(), "clear".into(), "hide".into(), "focus container".into()],
             fixture.take_calls()
         );
     }
@@ -1063,59 +1435,231 @@ mod tests {
         fixture.method.on_composition_update(Some("ka"));
 
         fixture.method.set_client(None);
-        assert!(!fixture.method.is_composing());
-        assert_eq!(vec![None, Some("ka".to_string()), None], *client.preedit.borrow());
-
         fixture.method.on_composition_end(None);
         assert!(!fixture.method.is_composing());
+        assert_eq!(vec![None, Some("ka".to_owned()), None], *client.preedit.borrow());
 
         fixture.set_client(&client);
+        let before = client.preedit.borrow().clone();
+        fixture.method.on_composition_end(None);
         assert!(!fixture.method.is_composing());
-        fixture.method.on_composition_update(Some("late"));
-        fixture.method.on_composition_end(Some("late"));
-        assert_eq!(vec![None, Some("ka".to_string()), None], *client.preedit.borrow());
+        assert_eq!(before, *client.preedit.borrow());
     }
 
     #[test]
-    fn replacing_the_client_does_not_transfer_canceled_preedit_or_commit() {
+    fn reset_cancels_preedit_and_ignores_the_late_composition_end() {
         let fixture = Fixture::new();
-        let first = TestClient::new("first", 0, 0);
-        let second = TestClient::new("second", 2, 2);
+        let client = TestClient::new("first", 5, 5);
+        fixture.set_client(&client);
+        fixture.method.on_composition_start();
+        fixture.method.on_composition_update(Some("ka"));
+        fixture.method.reset();
+        assert!(!fixture.method.is_composing());
+        assert_eq!(vec![None, Some("ka".to_owned()), None], *client.preedit.borrow());
+        fixture.take_calls();
+        fixture.method.on_composition_update(Some("late"));
+        fixture.method.on_composition_end(Some("late"));
+        assert!(fixture.take_calls().is_empty());
+        assert_eq!(vec![None, Some("ka".to_owned()), None], *client.preedit.borrow());
+    }
+
+    #[test]
+    fn replacing_a_composing_client_never_sends_old_preedit_to_the_next_field() {
+        let fixture = Fixture::new();
+        let first = TestClient::new("first", 5, 5);
+        let second = TestClient::new("second", 6, 6);
         fixture.set_client(&first);
         fixture.method.on_composition_start();
-        fixture.method.on_composition_update(Some("old"));
-
+        fixture.method.on_composition_update(Some("ka"));
         fixture.set_client(&second);
+        fixture.take_calls();
         assert!(!fixture.method.is_composing());
-        assert_eq!(vec![None, Some("old".to_string()), None], *first.preedit.borrow());
         fixture.method.on_composition_update(Some("late"));
         fixture.method.on_composition_end(Some("late"));
         assert!(second.preedit.borrow().is_empty());
-
-        fixture.method.on_composition_start();
-        fixture.method.on_composition_update(Some("new"));
-        fixture.method.on_composition_end(Some("new"));
-        assert!(!fixture.method.is_composing());
-        assert_eq!(vec![None, Some("new".to_string()), None], *second.preedit.borrow());
+        assert_eq!(vec![None, Some("ka".to_owned()), None], *first.preedit.borrow());
+        assert!(fixture.take_calls().is_empty());
     }
 
     #[test]
-    fn resetting_the_client_cancels_preedit_and_rejects_late_composition_events() {
+    fn a_preedit_callback_that_detaches_during_start_leaves_no_composition() {
         let fixture = Fixture::new();
-        let client = TestClient::new("hello", 1, 3);
+        let client = TestClient::new("first", 5, 5);
+        fixture.set_client(&client);
+        let method = fixture.method.clone();
+        *client.preedit_hook.borrow_mut() = Some(Box::new(move || method.set_client(None)));
+        fixture.method.on_composition_start();
+        assert!(!fixture.method.is_composing());
+        assert_eq!(vec![None, None], *client.preedit.borrow());
+    }
+
+    #[test]
+    fn replacement_during_old_preedit_cleanup_wins_over_the_outer_attachment() {
+        let fixture = Fixture::new();
+        let first = TestClient::new("first", 5, 5);
+        let second = TestClient::new("second", 6, 6);
+        let third = TestClient::new("third", 5, 5);
+        fixture.set_client(&first);
+        fixture.method.on_composition_start();
+        let method = fixture.method.clone();
+        let next = third.clone();
+        *first.preedit_hook.borrow_mut() = Some(Box::new(move || method.set_client(Some(next))));
+        fixture.take_calls();
+        fixture.set_client(&second);
+        let current = fixture.method.client().unwrap();
+        let third: Rc<dyn TextInputMethodClient> = third;
+        assert!(Rc::ptr_eq(&current, &third));
+        assert_eq!(vec!["clear", "clear", "show", "focus input", "text 'third' 5 5"], fixture.take_calls());
+        assert_eq!(0, second.text_reads.get());
+    }
+
+    #[test]
+    fn a_reentrant_text_snapshot_cannot_overwrite_the_replacement_field() {
+        let fixture = Fixture::new();
+        let first = TestClient::new("old private", 0, 0);
+        let second = TestClient::new("public", 6, 6);
+        fixture.set_client(&first);
+        fixture.take_calls();
+        let method = fixture.method.clone();
+        *first.text_hook.borrow_mut() = Some(Box::new(move || method.set_client(Some(second))));
+        first.raise_surrounding_text_changed();
+        assert_eq!(vec!["clear", "show", "focus input", "text 'public' 6 6"], fixture.take_calls());
+    }
+
+    #[test]
+    fn resetting_during_a_text_snapshot_does_not_restore_the_retired_value() {
+        let fixture = Fixture::new();
+        let client = TestClient::new("private", 0, 0);
+        fixture.set_client(&client);
+        fixture.take_calls();
+        let method = fixture.method.clone();
+        *client.text_hook.borrow_mut() = Some(Box::new(move || method.reset()));
+        client.raise_surrounding_text_changed();
+        assert_eq!(vec!["clear", "text '' 0 0"], fixture.take_calls());
+    }
+
+    #[test]
+    fn disposal_clears_the_editor_preedit_and_client_without_focus_or_reactivation() {
+        let fixture = Fixture::new();
+        let client = TestClient::new("private", 7, 7);
         fixture.set_client(&client);
         fixture.method.on_composition_start();
-        fixture.method.on_composition_update(Some("old"));
-
-        fixture.method.reset();
+        fixture.method.on_composition_update(Some("ka"));
+        fixture.take_calls();
+        fixture.method.dispose();
+        assert_eq!(vec!["clear", "hide"], fixture.take_calls());
         assert!(!fixture.method.is_composing());
+        assert!(fixture.method.client().is_none());
+        assert!(fixture.method.subscriptions.borrow().is_empty());
+        assert_eq!(vec![None, Some("ka".to_owned()), None], *client.preedit.borrow());
+        fixture.method.dispose();
+        fixture.set_client(&client);
+        fixture.method.set_cursor_rect(Rect::default());
+        fixture.method.set_options(&TextInputOptions::default_options());
+        fixture.method.reset();
+        fixture.method.on_before_input("deleteByComposition", 1, 2);
+        fixture.method.on_composition_start();
         fixture.method.on_composition_update(Some("late"));
         fixture.method.on_composition_end(Some("late"));
-        assert_eq!(vec![None, Some("old".to_string()), None], *client.preedit.borrow());
+        client.raise_selection_changed();
+        client.raise_surrounding_text_changed();
+        client.raise_input_pane_activation_requested();
+        assert!(fixture.take_calls().is_empty());
+        assert_eq!(TextSelection::new(7, 7), client.selection());
+    }
 
+    // A custom client exercises installation, explicit unsubscription and event
+    // snapshots already being dispatched when a client is replaced.
+    struct SubscriptionClient {
+        inner: Rc<TestClient>,
+        hook: RefCell<Option<Box<dyn FnOnce()>>>,
+        active: Rc<Cell<usize>>,
+        retired_handler: RefCell<Option<Rc<dyn Fn()>>>,
+    }
+    impl TextInputMethodClient for SubscriptionClient {
+        fn events(&self) -> &TextInputMethodClientEvents { self.inner.events() }
+        fn text_view_visual(&self) -> Option<Ref<Visual>> { None }
+        fn supports_preedit(&self) -> bool { true }
+        fn supports_surrounding_text(&self) -> bool { true }
+        fn surrounding_text(&self) -> String { self.inner.surrounding_text() }
+        fn cursor_rectangle(&self) -> Rect { Rect::default() }
+        fn selection(&self) -> TextSelection { self.inner.selection() }
+        fn set_selection(&self, value: TextSelection) { self.inner.set_selection(value); }
+        fn surrounding_text_changed(&self, handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
+            self.retired_handler.replace(Some(handler.clone()));
+            let handle = self.inner.surrounding_text_changed(handler);
+            self.active.set(self.active.get() + 1);
+            let hook = self.hook.take();
+            if let Some(hook) = hook { hook(); }
+            let active = self.active.clone();
+            ferroui_base::reactive::Disposable::create(move || {
+                handle.dispose();
+                active.set(active.get() - 1);
+            })
+        }
+    }
+
+    fn subscription_client() -> Rc<SubscriptionClient> {
+        Rc::new(SubscriptionClient { inner: TestClient::new("custom", 6, 6),
+            hook: RefCell::new(None), active: Rc::new(Cell::new(0)),
+            retired_handler: RefCell::new(None) })
+    }
+
+    #[test]
+    fn an_aborted_subscription_installation_disposes_the_returned_handle() {
+        let fixture = Fixture::new();
+        let client = subscription_client();
+        let replacement = TestClient::new("next", 4, 4);
+        let method = fixture.method.clone();
+        *client.hook.borrow_mut() = Some(Box::new(move || method.set_client(Some(replacement))));
+        fixture.method.set_client(Some(client.clone()));
+        assert_eq!(0, client.active.get());
+        assert_eq!(vec!["clear", "clear", "show", "focus input", "text 'next' 4 4"], fixture.take_calls());
+        client.retired_handler.borrow().as_ref().unwrap()();
+        assert!(fixture.take_calls().is_empty());
+    }
+
+    #[test]
+    fn drop_unsubscribes_even_when_the_custom_client_outlives_the_method() {
+        let fixture = Fixture::new();
+        let client = subscription_client();
+        fixture.method.set_client(Some(client.clone()));
+        assert_eq!(1, client.active.get());
+        drop(fixture);
+        assert_eq!(0, client.active.get());
+    }
+
+    #[test]
+    fn a_retired_event_snapshot_cannot_read_or_reactivate_the_new_client() {
+        let fixture = Fixture::new();
+        let client = subscription_client();
+        fixture.method.set_client(Some(client.clone()));
+        let next = TestClient::new("public", 6, 6);
+        fixture.set_client(&next);
+        fixture.take_calls();
+        let reads = next.text_reads.get();
+        client.retired_handler.borrow().as_ref().unwrap()();
+        assert_eq!(0, client.active.get());
+        assert_eq!(reads, next.text_reads.get());
+        assert!(fixture.take_calls().is_empty());
+    }
+
+    #[test]
+    fn new_composition_and_selection_notifications_work_after_reset() {
+        let fixture = Fixture::new();
+        let client = TestClient::new("kana", 4, 4);
+        fixture.set_client(&client);
         fixture.method.on_composition_start();
-        fixture.method.on_composition_end(Some("new"));
+        fixture.method.reset();
+        fixture.take_calls();
+        fixture.method.on_composition_start();
+        fixture.method.on_composition_update(Some("ka"));
+        assert!(fixture.method.is_composing());
+        fixture.method.on_composition_end(None);
+        client.selection.set(TextSelection::new(2, 2));
+        client.raise_selection_changed();
         assert!(!fixture.method.is_composing());
-        assert_eq!(vec![None, Some("old".to_string()), None, None, None], *client.preedit.borrow());
+        assert_eq!(vec!["selection 4 4", "selection 2 2"], fixture.take_calls());
+        assert_eq!(vec![None, None, None, Some("ka".to_owned()), None], *client.preedit.borrow());
     }
 }

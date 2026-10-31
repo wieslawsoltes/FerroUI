@@ -73,6 +73,12 @@ final class FerroAccessHelper extends View.AccessibilityDelegate {
         host.onInitializeAccessibilityNodeInfo(info);
         // The children of the host view are the virtual views of the children of the root peer.
         nativePopulateHost(nativeHandle, info, host);
+        // The native View receives key events for its virtual controls. Exposing it
+        // as a second input-focused node can replace the virtual child in Android's
+        // accessibility cache, so report one focused node at this boundary.
+        if (nativeFindFocus(nativeHandle, AccessibilityNodeInfo.FOCUS_INPUT) != INVALID_ID) {
+            info.setFocused(false);
+        }
         return info;
     }
 

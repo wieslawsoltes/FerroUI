@@ -28,7 +28,7 @@ impl Bcp47ScriptResolver {
         }
 
         // 1. Explicit script subtag wins (BCP-47 second subtag, four letters).
-        if let Some(explicit_script) = Self::try_extract_script_subtag(name) {
+        if let Some(explicit_script) = Self::try_extract_script_subtag(&name) {
             return Some(Cow::Owned(explicit_script));
         }
 

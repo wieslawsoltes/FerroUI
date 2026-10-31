@@ -27,7 +27,7 @@ use xamlx::transform::TransformerConfiguration;
 use xamlx::type_system::{IXamlConstructor, IXamlField, IXamlMethod, IXamlProperty, IXamlType, XamlValue};
 
 use crate::compiler_extensions::ast_nodes::{
-    FerroXamlIlFerroListConstantAstNode, FerroXamlIlFontFamilyAstNode, FerroXamlIlGridLengthAstNode, FerroXamlIlVectorLikeConstantAstNode,
+    FerroXamlIlArrayConstantAstNode, FerroXamlIlFerroListConstantAstNode, FerroXamlIlFontFamilyAstNode, FerroXamlIlGridLengthAstNode, FerroXamlIlVectorLikeConstantAstNode,
 };
 use crate::compiler_extensions::group_transformers::NewServiceProviderNode;
 use super::compiled_resources::CompiledDocumentBuildMethod;
@@ -944,6 +944,9 @@ impl<'a> Emitter<'a> {
             let arguments: Vec<Typed> = n.values().iter().map(|value| self.exact(Known::F64, f64_literal(*value))).collect();
             return self.constructor_call(node, n.constructor(), &arguments);
         }
+        if let Some(n) = node.cast::<FerroXamlIlArrayConstantAstNode>() {
+            return self.array_constant(node, &n);
+        }
         if let Some(n) = node.cast::<FerroXamlIlFerroListConstantAstNode>() {
             return self.list_constant(node, &n);
         }
@@ -1205,6 +1208,19 @@ impl<'a> Emitter<'a> {
         Ok(value)
     }
 
+    fn array_constant(&mut self,node:&Rc<dyn IXamlAstNode>,array:&Rc<FerroXamlIlArrayConstantAstNode>)->EmitResult<Typed<'a>> {
+        let element=self.types.handle_of(&**array.element_type()).ok_or_else(||unsupported(node,"array element has no Rust receiving type"))?;
+        let rust=self.types.rust_path_of_handle(element.id()).unwrap_or_else(||element.name().to_string());
+        let mut values=Vec::with_capacity(array.values().len());
+        for value in array.values() {
+            let value=self.value(&value.as_node())?;
+            values.push(self.coerce(&value,element.id()).ok_or_else(||unsupported(node,"array element cannot be converted to its declared type"))?);
+        }
+        let expression=format!("rt::RuntimeArray::typed::<{rust}>({},vec![{}])",rust_string_literal(&array.element_type().full_name()),values.join(","));
+        let value=self.exact(Known::RuntimeArray,expression);
+        Ok(self.bind(&value,"array"))
+    }
+
     /// A list from text (`"*,Auto"` for the column definitions of a grid):
     /// the list, its capacity, then each element added in order, as the
     /// interpreter's `list_constant` builds it.
@@ -1259,8 +1275,8 @@ impl<'a> Emitter<'a> {
             match type_.name().as_str() {
                 "Boolean" => return Ok(self.exact(Known::Bool, format!("{}", integer != 0))),
                 "Char" => {
-                    let character = u32::try_from(integer).ok().and_then(char::from_u32).ok_or_else(out_of_range)?;
-                    return Ok(self.exact(Known::Char, format!("{character:?}")));
+                    let unit = u16::try_from(integer).map_err(|_| out_of_range())?;
+                    return Ok(self.exact(Known::Char, format!("::ferroui_base::Char::from_unit({unit}_u16)")));
                 }
                 "SByte" => return integer!(i8, I8, "_i8"),
                 "Byte" => return integer!(u8, U8, "_u8"),
@@ -1278,7 +1294,7 @@ impl<'a> Emitter<'a> {
         // The constant is typed as something else (`System.Object`): its own kind decides.
         Ok(match constant {
             XamlValue::Boolean(v) => self.exact(Known::Bool, format!("{v}")),
-            XamlValue::Char(v) => self.exact(Known::Char, format!("{v:?}")),
+            XamlValue::Char(v) => self.exact(Known::Char, format!("::ferroui_base::Char::from_unit({v}_u16)")),
             XamlValue::SByte(v) => self.exact(Known::I8, format!("{v}_i8")),
             XamlValue::Byte(v) => self.exact(Known::U8, format!("{v}_u8")),
             XamlValue::Int16(v) => self.exact(Known::I16, format!("{v}_i16")),
@@ -1313,7 +1329,26 @@ impl<'a> Emitter<'a> {
             let id=markup.handle().ok_or_else(||unsupported(node,"the enumeration has no value type"))?;
             return Ok(Typed{expr:format!("{}::{factory}({number}_i32)",absolute(path)),kind:Kind::Exact{id,nullable:markup.nullable()}});
         }
-        Err(unsupported(node,format!("{value} is not a member of {}",type_.full_name())))
+        // A non-flags enum can retain undeclared integer values. Invoke its actual
+        // registered converter, just as the interpreter does; refusal remains a
+        // positioned load error, never an unchecked Rust discriminant cast.
+        let path = markup
+            .rust_path()
+            .ok_or_else(|| unsupported(node, "the enum has no public Rust path"))?;
+        let id = markup
+            .handle()
+            .ok_or_else(|| unsupported(node, "the enum has no value type"))?;
+        let value_path = self
+            .types
+            .rust_path_of_handle(id)
+            .ok_or_else(|| unsupported(node, "the enum value has no recorded public Rust path"))?;
+        Ok(Typed {
+            expr: format!(
+                "rt::enum_value::<{}>(<{} as ::ferroui_base::metadata::MarkupTyped>::MARKUP, {value}_i64, {}, {})?",
+                absolute(&value_path), absolute(path), node.line(), node.position()
+            ),
+            kind: Kind::Exact { id, nullable: markup.nullable() },
+        })
     }
 
     fn enum_variant(&mut self, node: &Rc<dyn IXamlAstNode>, markup: &'a dyn EmitMarkup, variant: &str) -> EmitResult<Typed<'a>> {
@@ -1461,8 +1496,31 @@ impl<'a> Emitter<'a> {
     /// (`to_exact`). `None`: it cannot be stated.
     fn coerce(&self, value: &Typed<'a>, target: TypeKey<'a>) -> Option<String> {
         self.coerce_static(value, target)
+            .or_else(|| self.coerce_character(value, target))
             .or_else(|| self.coerce_runtime_list(value, target))
+            .or_else(|| self.coerce_runtime_array(value, target))
             .or_else(|| self.coerce_registered(value, target))
+    }
+
+    /// A checked bridge between the UTF16 primitive and a legacy scalar-only signature.
+    fn coerce_character(&self, value: &Typed<'a>, target: TypeKey<'a>) -> Option<String> {
+        let Kind::Exact { id, .. } = value.kind else {
+            return None;
+        };
+        let char_ = self.types.known(Known::Char);
+        let scalar = self.types.known(Known::ScalarChar);
+        let matches = (id == char_
+            && (target == scalar || target == self.types.option_of_known(Known::ScalarChar)))
+            || (id == scalar
+                && (target == char_ || target == self.types.option_of_known(Known::Char)));
+        matches.then(|| {
+            format!(
+                "rt::cast({}, {}, {})?",
+                owned(&value.expr),
+                self.position.get().0,
+                self.position.get().1
+            )
+        })
     }
 
     /// A list of the runtime library created in markup as the collection handle a member
@@ -1480,6 +1538,11 @@ impl<'a> Emitter<'a> {
             .then(|| format!("rt::list_cast(&{}, {}, {})?", value.expr, self.position.get().0, self.position.get().1))
     }
 
+    fn coerce_runtime_array(&self,value:&Typed<'a>,_target:TypeKey<'a>)->Option<String> {
+        let Kind::Exact{id,..}=value.kind else{return None};
+        (id==self.types.known(Known::RuntimeArray)).then(||format!("rt::array_cast(&{}, {}, {})?",value.expr,self.position.get().0,self.position.get().1))
+    }
+
     /// A conversion through the assignability casts of the untyped value
     /// conversions (an interface handle, a registered cast), where
     /// `ValueTypes::is_assignable` proves it exists: `rt::cast(value)`, which
@@ -1490,9 +1553,13 @@ impl<'a> Emitter<'a> {
             Kind::Class(class) => (class.handle()?, format!("{}.clone()", value.expr)),
             Kind::Null | Kind::SystemType { .. } => return None,
         };
-        self.types
-            .is_assignable(from, target)
-            .then(|| format!("rt::cast({expr}, {}, {})?", self.position.get().0, self.position.get().1))
+        (self.types.is_assignable(from, target) || self.types.can_adapt(from, target)).then(|| {
+            format!(
+                "rt::cast({expr}, {}, {})?",
+                self.position.get().0,
+                self.position.get().1
+            )
+        })
     }
 
     /// A value of the type with markup metadata `from` as the handle of a contract
@@ -2736,7 +2803,13 @@ impl<'a> Emitter<'a> {
             .ok_or_else(|| unsupported(node, format!("{name}: the declaring type is gone")))?;
         let markup = self.markup_expr(node, &declaring)?;
         let property_type = property.property_type();
-        let handle = match self.types.handle_of(&*property_type) {
+        let handle = if property_type.is_array() {
+            // Array types have multiple native carriers. The actual getter declaration owns
+            // the ABI; a canonical Vec handle is not the shared reference carrier.
+            if property.getter().is_none() {return Err(unsupported(node,format!("{name}: array property has no getter")));}
+            format!("rt::declared_property_type({markup}, {}, {})",rust_string_literal(&name),runtime.is_static)
+        } else {
+            match self.types.handle_of(&*property_type) {
             Some(handle) if !handle.is_object() => match self.handle_expr(node, &property_type) {
                 Ok(expr) => expr,
                 // A type generated code cannot name (a Rust type no metadata declares, a
@@ -2753,6 +2826,7 @@ impl<'a> Emitter<'a> {
                 }
             },
             _ => "::ferroui_base::data::core::ValueType::object()".to_string(),
+        }
         };
         let cached_boxed_boolean = property.getter().is_some_and(|getter| getter.return_type().is("System", "Boolean"));
         Ok(format!(
@@ -2762,38 +2836,53 @@ impl<'a> Emitter<'a> {
         ))
     }
 
-    /// The builder call of an indexer of a binding path (`XamlIlClrIndexerPathElementNode`):
-    /// `builder.Property(indexer info, accessor factory)`, for an indexer with one 32-bit
-    /// integer argument that markup metadata declares. The run-time library builds the
-    /// description of the indexer from the declaration and takes the accessor factory the
-    /// node chooses (`rt::path_indexer`). An indexer with other arguments is refused.
+    /// Preserve the declared native signature when binding indexer arguments. Integer
+    /// collection indexers retain the collection-change accessor; all other indexers
+    /// follow the same property notification accessor as the run-time loader.
     fn path_indexer(&mut self, node: &Rc<dyn IXamlAstNode>, element: &XamlIlClrIndexerPathElementNode) -> EmitResult<String> {
-        let [value] = element.values.as_slice() else {
-            return Err(unsupported(node, "a binding path with an indexer that does not take one argument"));
-        };
-        let value_node = value.clone().as_node();
-        let constant = value_node
-            .cast::<XamlConstantNode>()
-            .ok_or_else(|| unsupported(node, "a binding path with an indexer whose argument is not a constant"))?;
-        let argument_type = IXamlAstValueNode::type_(&*constant).get_clr_type().map_err(|e| failed(node, e))?;
-        if !argument_type.is("System", "Int32") {
-            return Err(unsupported(node, "a binding path with an indexer whose argument is not a 32-bit integer"));
-        }
-        let (integer, _) = numeric_constant(&constant.constant)
-            .ok_or_else(|| unsupported(node, format!("the constant {:?}", constant.constant)))?;
-        let index = i32::try_from(integer).map_err(|_| unsupported(node, format!("{integer} is out of the range of a 32-bit integer")))?;
-        let accessor = element
-            .property
-            .getter()
-            .or_else(|| element.property.setter())
+        let accessor = element.property.getter().or_else(|| element.property.setter())
             .ok_or_else(|| unsupported(node, "an indexer without accessors"))?;
-        let runtime = self
-            .types
-            .method(accessor.as_ref())
+        let runtime = self.types.method(accessor.as_ref())
             .ok_or_else(|| unsupported(node, "an indexer whose accessor is not a method of the run-time type system"))?;
-        let declaring = runtime.declaring_type.clone().ok_or_else(|| unsupported(node, "an indexer whose declaring type is gone"))?;
+        let declaring = runtime.declaring_type.clone()
+            .ok_or_else(|| unsupported(node, "an indexer whose declaring type is gone"))?;
         let markup = self.markup_expr(node, &declaring)?;
-        Ok(format!("rt::path_indexer(&builder, {markup}, {index}_i32, {})", element.is_notifying_collection))
+        let mut parameters = Vec::new();
+        let mut arguments = Vec::new();
+        for (index, value) in element.values.iter().enumerate() {
+            let handle = runtime.parameter_handles.get(index).copied().flatten()
+                .ok_or_else(|| unsupported(node, "an indexer parameter has no native carrier"))?;
+            let key = handle.id();
+            let path = self.types.rust_path_of_handle(key)
+                .or_else(|| self.types.primitive_type_name(key).map(str::to_string))
+                .ok_or_else(|| unsupported(node, "an indexer parameter has no public Rust carrier"))?;
+            parameters.push(format!("::ferroui_base::data::core::ValueType::of::<{path}>()"));
+            let value = self.value(&value.clone().as_node())?;
+            let argument = self.coerce(&value, key)
+                .ok_or_else(|| unsupported(node, "an indexer argument cannot be converted to its declared native carrier"))?;
+            arguments.push(format!("rt::to_value::<{path}>({argument})"));
+        }
+        let notifying_index = if element.is_notifying_collection {
+            let [value] = element.values.as_slice() else {
+                return Err(unsupported(node, "a notifying collection indexer that does not take one argument"));
+            };
+            let value_node = value.clone().as_node();
+            let constant = value_node.cast::<XamlConstantNode>()
+                .ok_or_else(|| unsupported(node, "a notifying collection indexer whose argument is not a constant"))?;
+            let argument_type = IXamlAstValueNode::type_(&*constant).get_clr_type().map_err(|e| failed(node, e))?;
+            if !argument_type.is("System", "Int32") {
+                return Err(unsupported(node, "a notifying collection indexer whose argument is not a 32-bit integer"));
+            }
+            let (integer, _) = numeric_constant(&constant.constant)
+                .ok_or_else(|| unsupported(node, format!("the constant {:?}", constant.constant)))?;
+            let index = i32::try_from(integer)
+                .map_err(|_| unsupported(node, format!("{integer} is out of the range of a 32-bit integer")))?;
+            format!("::core::option::Option::Some({index}_i32)")
+        } else {
+            "::core::option::Option::None".to_string()
+        };
+        Ok(format!("rt::path_indexer_arguments(&builder, {markup}, &[{}], ::std::vec![{}], {notifying_index})",
+            parameters.join(", "), arguments.join(", ")))
     }
 
     /// A compiled binding path (`XamlIlBindingPathNode`): a builder, the
@@ -3036,12 +3125,17 @@ impl<'a> Emitter<'a> {
                     false => format!("builder.ferro_property(rt::property({definition}))"),
                 }
             }
-            XamlIlBindingPathElementNode::ClrProperty(e) => format!(
-                "rt::path_property(&builder, {}, {}, {})",
-                self.property_info_arguments(node, &e.property)?,
-                e.accepts_null,
-                e.emit_typed.get()
-            ),
+            XamlIlBindingPathElementNode::ClrProperty(e) => {
+                let declaring=e.property.declaring_type();
+                let member=match e.property.name().as_str() { "Value"=>Some("Value"),"HasValue"=>Some("HasValue"),_=>None };
+                if declaring.is_nullable() && member.is_some() {
+                    let arguments=declaring.generic_arguments();
+                    let inner=arguments.first().ok_or_else(||unsupported(node,"Nullable member without a value type"))?;
+                    format!("builder.nullable_member({}, ::ferroui_base::data::core::expression_nodes::NullableMember::{}, {})",self.handle_expr(node,inner)?,member.unwrap(),e.accepts_null)
+                } else {
+                    format!("rt::path_property(&builder, {}, {}, {})",self.property_info_arguments(node, &e.property)?,e.accepts_null,e.emit_typed.get())
+                }
+            },
             XamlIlBindingPathElementNode::ArrayIndexer(e) => {
                 let indices: Vec<String> = e.values.iter().map(|value| format!("{value}_i32")).collect();
                 format!("builder.array_element(&[{}])", indices.join(", "))
@@ -3062,7 +3156,49 @@ impl<'a> Emitter<'a> {
                 }
             }
             XamlIlBindingPathElementNode::ClrIndexer(e) => self.path_indexer(node, e)?,
-            XamlIlBindingPathElementNode::ClrMethod(_) => return Err(unsupported(node, "a binding path with a method")),
+            XamlIlBindingPathElementNode::ClrMethod(e) => {
+                let method = self.types.method(e.method.as_ref()).ok_or_else(|| {
+                    unsupported(node, "a method path outside the host type system")
+                })?;
+                if let Some(builtin) = method.builtin(&*e.method.return_type()) {
+                    return Ok(format!(
+                        "rt::path_builtin_method(&builder, ::ferroui_base::metadata::BuiltinMethod::{}, {})",
+                        builtin.rust_name(),
+                        e.accepts_null
+                    ));
+                }
+                if !method.declared().is_some_and(|v| v.kind == DeclaredKind::Method) {
+                    return Err(unsupported(node, "a method path without declared method metadata"));
+                }
+                let declaring = method.declaring_type.as_ref().ok_or_else(|| {
+                    unsupported(node, "a method path without a declaring type")
+                })?;
+                let metadata = self.markup_expr(node, declaring)?;
+                // Overload identity is the actual declared Rust ABI, not the CLR type's
+                // preferred value carrier (for example Option<Utf16Text> versus String).
+                let native_handle = |key| -> EmitResult<String> {
+                    let path = self.types.rust_path_of_handle(key)
+                        .or_else(||self.types.primitive_type_name(key).map(str::to_string))
+                        .ok_or_else(||unsupported(node,"a declared method signature has no public Rust carrier"))?;
+                    Ok(format!("::ferroui_base::data::core::ValueType::of::<{path}>()"))
+                };
+                let parameters = method.parameter_handles.iter()
+                    .map(|handle| handle.ok_or_else(||unsupported(node,"a declared method parameter has no native carrier")).and_then(|handle|native_handle(handle.id())))
+                    .collect::<EmitResult<Vec<_>>>()?;
+                let returned = e.method.return_type();
+                let returned = if returned.full_name() == "System.Void" {
+                    "::core::option::Option::None".to_string()
+                } else {
+                    let native = method.declared().and_then(|declared|declared.returns)
+                        .ok_or_else(||unsupported(node,"a declared method return has no native carrier"))?;
+                    format!("::core::option::Option::Some({})", native_handle(native)?)
+                };
+                format!(
+                    "rt::path_method(&builder, {metadata}, {}, {}, &[{}], {returned}, {})",
+                    rust_string_literal(&method.name), method.is_static,
+                    parameters.join(", "), e.accepts_null
+                )
+            },
             XamlIlBindingPathElementNode::ClrMethodAsCommand(e) => self.path_command(node, e)?,
         })
     }

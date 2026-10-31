@@ -507,6 +507,7 @@ fn read_constructors(tokens: &[TokenTree], line: usize) -> Result<Vec<RawMember>
             let mut parameters = Vec::new();
             while !list.is_end() {
                 let name = list.take_ident("the name of a parameter")?;
+                let name=name.strip_prefix("r#").unwrap_or(&name).to_owned();
                 list.expect_punct(':')?;
                 let type_ = list.take_type(TypeEnd { bracket: true, ..TypeEnd::default() }, "the type of the parameter")?.to_vec();
                 let attributes = if list.is_group(Delimiter::Bracket) {
@@ -590,7 +591,20 @@ fn read_methods(tokens: &[TokenTree], line: usize) -> Result<Vec<RawMember>, Par
         }
         let name = cursor.take_ident("the name of a method")?;
         let (list, line) = cursor.take_group(Delimiter::Parenthesis, "the parameters of the method in parentheses")?;
-        let parameters = split_types(&list, line)?.into_iter().map(positional).collect();
+        let named = matches!(list.first(), Some(TokenTree::Ident(_))) && list.get(1).is_some_and(|token| is_punct(token, ':')) && !is_path_separator(&list, 1);
+        let parameters = if named {
+            let mut list=Cursor::new(&list,line);let mut parameters=Vec::new();
+            while !list.is_end() {
+                let name=list.take_ident("the name of a method parameter")?;let name=name.strip_prefix("r#").unwrap_or(&name).to_owned();list.expect_punct(':')?;
+                let type_=list.take_type(TypeEnd{bracket:true,..TypeEnd::default()},"the type of the method parameter")?.to_vec();
+                let attributes=if list.is_group(Delimiter::Bracket){
+                    let (attributes,line)=take_list(&mut list,"the parameter attributes in brackets")?;
+                    read_attributes(&attributes,line)?
+                }else{Vec::new()};
+                parameters.push(RawParameter{name:Some(name),type_,attributes});separator(&mut list)?;
+            }
+            parameters
+        } else { split_types(&list, line)?.into_iter().map(positional).collect() };
         let return_type = if cursor.eat_arrow('-') { Some(cursor.take_type(TypeEnd::default(), "the return type")?.to_vec()) } else { None };
         cursor.expect_arrow('=')?;
         let start = cursor.position();
@@ -925,4 +939,70 @@ pub(crate) fn property_type(return_type: &[TokenTree]) -> Option<(crate::model::
 /// The line of the first token, or `line` when there is none.
 pub(crate) fn first_line(tokens: &[TokenTree], line: usize) -> usize {
     tokens.first().map_or(line, line_of)
+}
+
+
+#[cfg(test)]
+mod named_method_tests {
+    use super::*;
+    #[test]
+    fn named_and_positional_method_parameters_remain_distinct_and_keep_types() {
+        let input="methods:[static fn Sum(first:i32,second:Option<String>)->i32=>sum,try fn Echo(value:Option<String>)->String=>(echo)[Virtual],fn Old(i32)->bool=>old]";
+        let tokens = tokens_of(input.parse::<proc_macro2::TokenStream>().unwrap());
+        let body = read_markup_body(&tokens, 1).unwrap();
+        assert_eq!(body.methods.len(), 3);
+        assert_eq!(
+            body.methods[0]
+                .parameters
+                .iter()
+                .map(|p| p.name.as_deref())
+                .collect::<Vec<_>>(),
+            vec![Some("first"), Some("second")]
+        );
+        assert_eq!(body.methods[1].parameters[0].name.as_deref(), Some("value"));
+        assert!(body.methods[0].is_static);
+        assert!(body.methods[1].fallible);
+        assert_eq!(body.methods[1].attributes[0].name, "Virtual");
+        assert!(body.methods[2].parameters[0].name.is_none());
+    }
+}
+
+#[cfg(test)]
+mod method_parameter_attribute_tests {
+    use super::*;
+    #[test]
+    fn optional_method_parameter_attributes_preserve_types_names_values_and_order() {
+        let input="methods:[static try fn Load(data:Option<String>,tag:Option<String>[Optional,DefaultParameterValue(\"en\")])->i32=>(load)[Virtual],fn Buffer(bytes:[u8;4][Optional,Other(null)])->bool=>buffer]";
+        let tokens = tokens_of(input.parse::<proc_macro2::TokenStream>().unwrap());
+        let body = read_markup_body(&tokens, 1).unwrap();
+        assert_eq!(body.methods.len(), 2);
+        let method = &body.methods[0];
+        assert!(method.is_static && method.fallible);
+        assert_eq!(method.attributes[0].name, "Virtual");
+        assert_eq!(method.parameters[0].name.as_deref(), Some("data"));
+        assert!(method.parameters[0].attributes.is_empty());
+        let parameter = &method.parameters[1];
+        assert_eq!(parameter.name.as_deref(), Some("tag"));
+        assert_eq!(parameter.attributes.len(), 2);
+        assert_eq!(parameter.attributes[0].name, "Optional");
+        assert_eq!(parameter.attributes[1].name, "DefaultParameterValue");
+        assert!(matches!(&parameter.attributes[1].arguments[0],RawValue::Str(v)if v=="en"));
+        assert_eq!(body.methods[1].parameters[0].attributes.len(), 2);
+    }
+}
+
+#[cfg(test)]
+mod raw_parameter_tests {
+ use super::*;
+ #[test]
+ fn constructors_and_methods_unescape_keyword_parameters_without_changing_types_or_attributes(){
+  let input="constructors:[(r#type:i32,r#match:bool[Optional,DefaultParameterValue(false)])=>new],methods:[fn One(r#type:i32)->i32=>one,static try fn Two(r#match:Option<i32>[Optional,DefaultParameterValue(null)])->i32=>two]";
+  let tokens=tokens_of(input.parse::<proc_macro2::TokenStream>().unwrap());
+  let body=read_markup_body(&tokens,1).unwrap();
+  assert_eq!(body.constructors[0].parameters[0].name.as_deref(),Some("type"));
+  assert_eq!(body.constructors[0].parameters[1].name.as_deref(),Some("match"));
+  assert_eq!(body.methods[0].parameters[0].name.as_deref(),Some("type"));
+  assert_eq!(body.methods[1].parameters[0].name.as_deref(),Some("match"));
+  assert_eq!(body.methods[1].parameters[0].attributes.len(),2);
+ }
 }

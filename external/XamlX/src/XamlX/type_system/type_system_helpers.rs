@@ -205,9 +205,9 @@ impl TypeSystemHelpers {
                     }
                 }
                 "Char" => {
-                    let mut chars = s.chars();
-                    match (chars.next(), chars.next()) {
-                        (Some(c), None) if c.len_utf16() == 1 => XamlValue::Char(c),
+                    let mut units = s.encode_utf16();
+                    match (units.next(), units.next()) {
+                        (Some(unit), None) => XamlValue::Char(unit),
                         _ => {
                             return Err(XamlError::internal(
                                 "FormatException",

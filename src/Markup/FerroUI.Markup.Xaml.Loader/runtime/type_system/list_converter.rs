@@ -78,11 +78,7 @@ pub(crate) fn convert_text(element_type: &Rc<dyn IXamlType>, text: &str) -> Opti
             _ => None,
         },
         "Char" => {
-            let mut characters = text.chars();
-            match (characters.next(), characters.next()) {
-                (Some(character), None) => Some(boxed(character)),
-                _ => None,
-            }
+            ferroui_base::Char::from_utf8(text).map(boxed)
         }
         "SByte" => parse!(i8),
         "Byte" => parse!(u8),

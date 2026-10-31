@@ -396,12 +396,27 @@ impl XamlIlBindingPathHelper {
                                 .filter(|p| p.name() == *property_name)
                                 .collect();
                         if !method_candidates.is_empty() {
-                            let candidate = get_best_command_method(
-                                &method_candidates,
-                                property_name,
-                                &target_type,
-                                line_info,
-                            )?;
+                            let command_target = match context
+                                .parent_nodes()
+                                .into_iter()
+                                .find_map(|n| n.cast::<XamlPropertyAssignmentNode>())
+                            {
+                                Some(parent) => {
+                                    Self::get_property_type(context, &parent)?.is_some_and(|t| t.equals(&*types.i_command))
+                                }
+                                None => false,
+                            };
+                            let candidate = if !command_target {
+                                unique_multi_parameter_method(&method_candidates)
+                            } else {
+                                None
+                            };
+                            let candidate = match candidate {
+                                Some(method) => method,
+                                None => {
+                                    get_best_command_method(&method_candidates, property_name, &target_type, line_info)?
+                                }
+                            };
                             nodes.push(XamlIlBindingPathElementNode::ClrMethod(Rc::new(
                                 XamlIlClrMethodPathElementNode {
                                     method: candidate,
@@ -789,6 +804,27 @@ fn traverse_type_hierarchy(type_: &Rc<dyn IXamlType>) -> Vec<Rc<dyn IXamlType>> 
         }
     }
     rv
+}
+
+/// A single ordinary delegate signature can retain all parameters. Commands keep their
+/// original zero/one-argument policy. Hierarchy order selects the derived declaration
+/// of an otherwise identical parameter signature, as the one-argument policy does.
+fn unique_multi_parameter_method(
+    candidates: &[Rc<dyn IXamlMethod>],
+) -> Option<Rc<dyn IXamlMethod>> {
+    let first = candidates.first()?;
+    let parameters = first.parameters();
+    if parameters.len() < 2 {
+        return None;
+    }
+    candidates
+        .iter()
+        .all(|candidate| {
+            let other = candidate.parameters();
+            parameters.len() == other.len()
+                && parameters.iter().zip(other).all(|(a, b)| a.equals(&*b))
+        })
+        .then(|| first.clone())
 }
 
 /// The local function `GetBestCommandMethod`.

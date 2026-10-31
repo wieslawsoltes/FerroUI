@@ -185,19 +185,26 @@ public class FerroView extends FrameLayout implements ViewTreeObserver.OnGlobalL
      */
     private int forwardMotionEvent(MotionEvent e) {
         int actionMasked = e.getActionMasked();
-        int pointerCount = e.getPointerCount();
+        // API33 can reject just the pointer going up (for example a palm contact).
+        // Send that one contact through the existing cancel ABI; the other fingers
+        // remain active. A true ACTION_CANCEL still carries the whole gesture.
+        boolean canceledPointer = Build.VERSION.SDK_INT >= 33
+                && actionMasked == MotionEvent.ACTION_POINTER_UP
+                && (e.getFlags() & MotionEvent.FLAG_CANCELED) != 0;
+        int pointerCount = canceledPointer ? 1 : e.getPointerCount();
         int historySize = actionMasked == MotionEvent.ACTION_MOVE ? e.getHistorySize() : 0;
 
         int[] pointers = new int[pointerCount * 2];
         float[] values = new float[pointerCount * 4 * (1 + historySize)];
         int at = 0;
         for (int index = 0; index < pointerCount; index++) {
-            pointers[index * 2] = e.getPointerId(index);
-            pointers[index * 2 + 1] = e.getToolType(index);
-            values[at++] = e.getX(index);
-            values[at++] = e.getY(index);
-            values[at++] = e.getPressure(index);
-            values[at++] = e.getOrientation(index);
+            int sourceIndex = canceledPointer ? e.getActionIndex() : index;
+            pointers[index * 2] = e.getPointerId(sourceIndex);
+            pointers[index * 2 + 1] = e.getToolType(sourceIndex);
+            values[at++] = e.getX(sourceIndex);
+            values[at++] = e.getY(sourceIndex);
+            values[at++] = e.getPressure(sourceIndex);
+            values[at++] = e.getOrientation(sourceIndex);
         }
         for (int index = 0; index < pointerCount; index++) {
             for (int pos = 0; pos < historySize; pos++) {
@@ -211,8 +218,8 @@ public class FerroView extends FrameLayout implements ViewTreeObserver.OnGlobalL
         return nativeMotionEvent(
                 nativeHandle,
                 e.getEventTime(),
-                actionMasked,
-                e.getActionIndex(),
+                canceledPointer ? MotionEvent.ACTION_CANCEL : actionMasked,
+                canceledPointer ? 0 : e.getActionIndex(),
                 e.getMetaState(),
                 e.getButtonState(),
                 e.getActionButton(),

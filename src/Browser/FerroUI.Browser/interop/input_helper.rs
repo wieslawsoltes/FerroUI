@@ -5,15 +5,12 @@ use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen(raw_module = "./ferroui.js")]
 extern "C" {
-    /// The hidden input element of a view, for the properties the text
-    /// input method reads from it.
-    pub type HtmlInputElement;
+    /// Reads source UTF16 offsets through the active editor's newline-normalization bridge.
+    #[wasm_bindgen(js_namespace = InputHelper, js_name = getSelectionStart)]
+    pub fn get_selection_start(html_element: &JsObject) -> i32;
 
-    #[wasm_bindgen(method, getter, js_name = selectionStart)]
-    fn selection_start_raw(this: &HtmlInputElement) -> Option<i32>;
-
-    #[wasm_bindgen(method, getter, js_name = selectionEnd)]
-    fn selection_end_raw(this: &HtmlInputElement) -> Option<i32>;
+    #[wasm_bindgen(js_namespace = InputHelper, js_name = getSelectionEnd)]
+    pub fn get_selection_end(html_element: &JsObject) -> i32;
 
     /// Subscribes to the input events of the element of a top-level.
     /// Returns the subscription, to be passed to
@@ -54,6 +51,15 @@ extern "C" {
     /// input element.
     #[wasm_bindgen(js_namespace = InputHelper, js_name = setSurroundingText)]
     pub fn set_surrounding_text(html_element: &JsObject, text: &str, start: i32, end: i32);
+
+    /// Mirrors the UTF16 selection without replacing the input value or focus.
+    #[wasm_bindgen(js_namespace = InputHelper, js_name = setSelection)]
+    pub fn set_selection(html_element: &JsObject, start: i32, end: i32);
+
+    /// Applies native input hints and sensitive-field handling to the real DOM editor.
+    #[wasm_bindgen(js_namespace = InputHelper, js_name = setOptions)]
+    pub fn set_options(html_element: &JsObject, input_type: &str, input_mode: &str,
+        enter_key_hint: &str, capitalization: &str, suggestions: i32, language: &str, multiline: bool, sensitive: bool);
 
     /// Moves the hidden input element so that its caret is where the caret
     /// of the text is.
@@ -262,15 +268,6 @@ pub fn set_drop_effect(data_transfer: &JsObject, value: &str) {
     data_transfer.unchecked_ref::<DataTransfer>().set_drop_effect_raw(value);
 }
 
-/// The start of the selection of an input element; 0 when it has none.
-pub fn get_selection_start(input_element: &JsObject) -> i32 {
-    input_element.unchecked_ref::<HtmlInputElement>().selection_start_raw().unwrap_or(0)
-}
-
-/// The end of the selection of an input element; 0 when it has none.
-pub fn get_selection_end(input_element: &JsObject) -> i32 {
-    input_element.unchecked_ref::<HtmlInputElement>().selection_end_raw().unwrap_or(0)
-}
 
 /// Captures a pointer to the element.
 pub fn set_pointer_capture(container_element: &JsObject, pointer_id: i64) {

@@ -126,7 +126,7 @@ fn runtime_library_types_are_defined_from_the_table() {
 
     // A member of the table that only stands in is there while no metadata is declared.
     assert_eq!(signatures(&the(&system, "System.TimeSpan")), ["static Parse(System.String) -> System.TimeSpan"]);
-    assert_eq!(signatures(&the(&system, "System.String")), ["get_Length() -> System.Int32"]);
+    assert_eq!(signatures(&the(&system, "System.String")), ["get_Length() -> System.Int32", "ToString() -> System.String"]);
 
     // The list markup creates for an element type, and the untyped one.
     let list = the(&system, "System.Collections.Generic.List`1").make_generic_type(std::slice::from_ref(&int32)).expect("List<int>");
@@ -457,7 +457,7 @@ fn registered(name: Option<&str>, kind: RegisteredKind, value_type: &str, access
 }
 
 fn parameter(type_: &str) -> ParameterModel {
-    ParameterModel { name: None, type_: RustType::resolved(type_), attributes: Vec::new() }
+    ParameterModel { by_ref_element: None, name: None, type_: RustType::resolved(type_), attributes: Vec::new() }
 }
 
 const FERRO_OBJECT: &str = "::ferroui_base::ferro_object::FerroObject";
@@ -737,4 +737,113 @@ fn aliases_registered_handles_and_casts_decide_the_type_of_a_text() {
     let stack = the(&system, "Registration.PanelStack");
     assert_eq!(stack.base_type().map(|base| base.full_name()), Some("System.Object".to_string()));
     assert!(!list.is_assignable_from(&*stack));
+}
+
+#[test]
+fn nullable_struct_facades_use_represented_values_in_model_and_emitter() {
+    use ferroui_markup_xaml_loader::rust_emitter::emit_types::{EmitTypes, TypeKey};
+    for (path, explicit_this, handles) in [
+        ("::fixture::ActualValue", None, vec![]),
+        (
+            "::fixture::ValueDescriptor",
+            Some("::fixture::ActualValue"),
+            vec!["::fixture::ActualValue"],
+        ),
+        (
+            "::fixture::ValueDescriptor",
+            None,
+            vec!["::fixture::ActualValue"],
+        ),
+    ] {
+        let mut model = AssemblyModel::new("ValueModels", "fixture");
+        let mut value = TypeModel::new(
+            "ActualValue",
+            TypeKind::Struct,
+            RustType::resolved(path),
+            "fixture",
+        );
+        value.namespace = "Fixture".to_string();
+        value.this = explicit_this.map(RustType::resolved);
+        value.handles = handles.into_iter().map(RustType::resolved).collect();
+        model.types.push(value);
+        let system = ModelTypeSystem::new(vec![model]);
+        let actual = the(&system, "Fixture.ActualValue");
+        let nullable = system.resolve("Option<::fixture::ActualValue>");
+        assert!(nullable.is_nullable_of(&*actual));
+        assert!(nullable.is_assignable_from(&*actual));
+        let emitter = ModelEmitTypes::new(system.clone(), Vec::<String>::new());
+        let metadata = emitter.metadata_of(&*actual).expect("value metadata");
+        assert!(matches!(
+            metadata.nullable(),
+            Some(TypeKey::Text("Option<::fixture::ActualValue>"))
+        ));
+        assert!(matches!(
+            metadata.value(),
+            Some(TypeKey::Text("::fixture::ActualValue"))
+        ));
+    }
+}
+#[test]
+fn declared_inherited_collection_accessors_precede_synthetic_list_members() {
+    let mut assembly = AssemblyModel::new("Collections", "fixture");
+    let mut collection = markup(
+        "IReadOnlyCollection`1",
+        TypeKind::Interface,
+        "System.Collections.Generic",
+        "::fixture::CollectionMetadata",
+        "::fixture::CollectionView",
+    );
+    collection.this = Some(RustType::resolved("::fixture::CollectionView"));
+    collection.generic = Some(GenericModel {
+        definition: "IReadOnlyCollection`1".into(),
+        arguments: vec![RustType::resolved("String")],
+    });
+    collection.properties.push(PropertyModel {
+        name: "Count".into(),
+        value_type: RustType::resolved("i32"),
+        getter: Some(AccessorModel {
+            typed_function: Some("__markup_get_Count".into()),
+            ..Default::default()
+        }),
+        ..Default::default()
+    });
+    let mut list = markup(
+        "IReadOnlyList`1",
+        TypeKind::Interface,
+        "System.Collections.Generic",
+        "::fixture::ListMetadata",
+        "::fixture::ListView",
+    );
+    list.this = Some(RustType::resolved("::fixture::ListView"));
+    list.generic = Some(GenericModel {
+        definition: "IReadOnlyList`1".into(),
+        arguments: vec![RustType::resolved("String")],
+    });
+    list.interfaces
+        .push(RustType::resolved("::fixture::CollectionView"));
+    assembly.types.extend([collection, list]);
+    let system = ModelTypeSystem::new(vec![assembly]);
+    let list = system.resolve("::fixture::ListView");
+    assert!(!list.properties().iter().any(|p| p.name() == "Count"));
+    assert!(!list.methods().iter().any(|m| m.name() == "get_Count"));
+    let parent = system.resolve("::fixture::CollectionView");
+    let getter = property(&parent, "Count").getter().unwrap();
+    let getter = getter
+        .as_any()
+        .downcast_ref::<super::types::ModelMethod>()
+        .unwrap();
+    assert!(getter.rust().declared.is_some());
+    assert!(list.interfaces().iter().any(|i| i.equals(&*parent)));
+}
+
+#[test]
+fn shared_reference_array_handles_resolve_as_canonical_arrays() {
+    let system=fixture();
+    for handle in ["::std::rc::Rc<::ferroui_base::data::model::BindableArray<i32>>","Option<::std::rc::Rc<::ferroui_base::data::model::i_bindable_indexer::BindableArray<i32>>>"] {
+        let array=system.resolve(handle);
+        assert!(array.is_array(),"{handle}");assert_eq!(array.full_name(),"System.Int32[]");
+        assert_eq!(array.array_element_type().unwrap().full_name(),"System.Int32");
+        assert_eq!(array.base_type().unwrap().full_name(),"System.Array");
+    }
+    assert!(!system.resolve("::other::BindableArray<i32>").is_array());
 }

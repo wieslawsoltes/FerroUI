@@ -1,42 +1,8 @@
-//! String comparison: the counterparts of .NET's `StringComparison`,
-//! `CompareOptions` and `CultureInfo.CompareInfo`.
-//!
-//! The ordinal comparisons are complete and built in. The culture-sensitive
-//! comparisons belong to the culture: [`CultureInfo::compare_info`] gives the
-//! comparer of a culture, whose rules come from the culture data provider
-//! registered with the locator ([`ICultureDataProvider::get_compare_rules`]).
-//! Without a provider, or for a culture the provider has no rules for, the
-//! built-in invariant rules are used. They are the ones the reference
-//! runtime uses in its invariant globalization mode: a culture-sensitive
-//! comparison is an ordinal one, and a culture-sensitive comparison that
-//! ignores case is an ordinal one that ignores case. They know no ignorable
-//! characters, expansions, contractions or canonical equivalence; a provider
-//! that has collation data supplies them.
-//!
-//! Positions and lengths are in UTF-16 code units, as in the reference.
-
-use super::{CultureInfo, ICultureDataProvider};
-use crate::{FerroLocator, LocatorExtensions};
-use bitflags::bitflags;
-use std::cmp::Ordering;
-use std::rc::Rc;
-
-bitflags! {
-    /// The string comparison options to use with [`CompareInfo`].
-    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-    pub struct CompareOptions: i32 {
-        /// The default option settings for string comparisons.
-        const NONE = 0;
-        /// The string comparison must ignore case.
-        const IGNORE_CASE = 0x1;
-        /// The string comparison must use successive UTF-16 code units,
-        /// upper-cased with the invariant simple case mapping.
-        const ORDINAL_IGNORE_CASE = 0x1000_0000;
-        /// The string comparison must use successive UTF-16 code units.
-        const ORDINAL = 0x4000_0000;
-    }
-}
-
+//! Culture context and provider lookup over shared System comparison objects.
+use super::{CultureInfo,ICultureDataProvider};
+#[cfg(test)] use crate::{FerroLocator,LocatorExtensions};
+use std::{cmp::Ordering,rc::Rc};
+pub use ferroui_system::globalization::{CompareInfo,CompareOptions,ICompareRules};
 /// Specifies the culture, case, and sort rules to be used by the comparisons
 /// of strings.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -113,182 +79,22 @@ impl StringComparison {
     }
 }
 
-/// The culture-sensitive comparison rules of a culture, supplied by a
-/// culture data provider. `options` never has an ordinal flag: the ordinal
-/// comparisons do not reach the rules of a culture.
-pub trait ICompareRules: 'static {
-    /// Compares two strings.
-    fn compare(&self, a: &str, b: &str, options: CompareOptions) -> Ordering;
-
-    /// Whether `source` starts with `prefix`.
-    fn is_prefix(&self, source: &str, prefix: &str, options: CompareOptions) -> bool;
-
-    /// The position of the first occurrence of `value` in `source` in
-    /// UTF-16 code units, or -1.
-    fn index_of(&self, source: &str, value: &str, options: CompareOptions) -> i32;
-}
-
-/// Implements a set of methods for culture-sensitive string comparisons:
-/// the comparer of a culture.
-#[derive(Clone)]
-pub struct CompareInfo {
-    name: Rc<str>,
-    /// The rules of the culture; the built-in invariant rules if `None`.
-    rules: Option<Rc<dyn ICompareRules>>,
-}
-
-impl CompareInfo {
-    /// The comparer of the invariant culture.
-    pub fn invariant() -> CompareInfo {
-        CompareInfo { name: Rc::from(""), rules: None }
-    }
-
-    /// The name of the culture used for the comparisons.
-    pub fn name(&self) -> &str {
-        &self.name
-    }
-
-    /// Compares two strings using the specified options.
-    pub fn compare(&self, a: &str, b: &str, options: CompareOptions) -> Ordering {
-        match self.culture_rules(options) {
-            Some(rules) => rules.compare(a, b, options),
-            None => {
-                let ignore_case = Self::built_in_ignores_case(options);
-                OrdinalUnits::new(a, ignore_case).cmp(OrdinalUnits::new(b, ignore_case))
-            }
-        }
-    }
-
-    /// Determines whether `source` starts with `prefix` using the specified
-    /// options.
-    pub fn is_prefix(&self, source: &str, prefix: &str, options: CompareOptions) -> bool {
-        match self.culture_rules(options) {
-            Some(rules) => rules.is_prefix(source, prefix, options),
-            None => {
-                let ignore_case = Self::built_in_ignores_case(options);
-                let mut source = OrdinalUnits::new(source, ignore_case);
-                OrdinalUnits::new(prefix, ignore_case).all(|unit| source.next() == Some(unit))
-            }
-        }
-    }
-
-    /// Searches for `value` in `source` using the specified options and
-    /// returns the position of its first occurrence in UTF-16 code units,
-    /// or -1. An empty value is found at 0.
-    pub fn index_of(&self, source: &str, value: &str, options: CompareOptions) -> i32 {
-        match self.culture_rules(options) {
-            Some(rules) => rules.index_of(source, value, options),
-            None => {
-                let ignore_case = Self::built_in_ignores_case(options);
-                let value: Vec<u16> = OrdinalUnits::new(value, ignore_case).collect();
-                if value.is_empty() {
-                    return 0;
-                }
-                let source: Vec<u16> = OrdinalUnits::new(source, ignore_case).collect();
-                source.windows(value.len()).position(|window| window == value.as_slice()).map_or(-1, |index| index as i32)
-            }
-        }
-    }
-
-    /// The rules of the culture for a culture-sensitive comparison; `None`
-    /// for an ordinal comparison and for a culture without rules.
-    fn culture_rules(&self, options: CompareOptions) -> Option<&Rc<dyn ICompareRules>> {
-        if options.intersects(CompareOptions::ORDINAL | CompareOptions::ORDINAL_IGNORE_CASE) {
-            return None;
-        }
-        self.rules.as_ref()
-    }
-
-    /// Whether the built-in comparison for `options` ignores case.
-    fn built_in_ignores_case(options: CompareOptions) -> bool {
-        options.intersects(CompareOptions::IGNORE_CASE | CompareOptions::ORDINAL_IGNORE_CASE)
-    }
-
-    /// The upper-case form of a character under the invariant simple case
-    /// mapping, the mapping of the ordinal comparison that ignores case: one
-    /// character maps to one character (no expansions: `ß` stays `ß`), no
-    /// culture is involved, and the dotless `ı` (U+0131) and the long `ſ`
-    /// (U+017F) keep their identity, as in the reference runtime.
-    pub fn to_upper_ordinal(c: char) -> char {
-        if c.is_ascii() {
-            return c.to_ascii_uppercase();
-        }
-        match c {
-            '\u{0131}' | '\u{017F}' => return c,
-            // The Greek letters with ypogegrammeni: their simple upper-case
-            // forms are the letters with prosgegrammeni, their full ones are
-            // two characters.
-            '\u{1F80}'..='\u{1F87}' | '\u{1F90}'..='\u{1F97}' | '\u{1FA0}'..='\u{1FA7}' => {
-                return char::from_u32(c as u32 + 8).unwrap_or(c);
-            }
-            '\u{1FB3}' => return '\u{1FBC}',
-            '\u{1FC3}' => return '\u{1FCC}',
-            '\u{1FF3}' => return '\u{1FFC}',
-            // Case pairs the reference runtime folds that are newer than the
-            // case tables of some toolchains.
-            '\u{A7CF}' => return '\u{A7CE}',
-            '\u{A7D3}' => return '\u{A7D2}',
-            '\u{A7D5}' => return '\u{A7D4}',
-            _ => {}
-        }
-        let mut upper = c.to_uppercase();
-        match (upper.next(), upper.next()) {
-            (Some(upper), None) => upper,
-            // A character whose only upper-case form is an expansion has no
-            // simple one.
-            _ => c,
-        }
-    }
-}
-
-/// The UTF-16 code units of a text for an ordinal comparison, upper-cased
-/// character by character when the comparison ignores case.
-struct OrdinalUnits<'a> {
-    chars: std::str::Chars<'a>,
-    ignore_case: bool,
-    pending: Option<u16>,
-}
-
-impl<'a> OrdinalUnits<'a> {
-    fn new(text: &'a str, ignore_case: bool) -> Self {
-        Self { chars: text.chars(), ignore_case, pending: None }
-    }
-}
-
-impl Iterator for OrdinalUnits<'_> {
-    type Item = u16;
-
-    fn next(&mut self) -> Option<u16> {
-        if let Some(unit) = self.pending.take() {
-            return Some(unit);
-        }
-        let c = self.chars.next()?;
-        let c = if self.ignore_case { CompareInfo::to_upper_ordinal(c) } else { c };
-        let mut units = [0u16; 2];
-        let units = c.encode_utf16(&mut units);
-        if units.len() == 2 {
-            self.pending = Some(units[1]);
-        }
-        Some(units[0])
-    }
-}
-
 impl CultureInfo {
     /// The comparer of the culture (C# `CompareInfo`): the rules the culture
     /// data provider has for the culture or for the nearest of its parents,
     /// and otherwise the built-in invariant rules.
-    pub fn compare_info(&self) -> CompareInfo {
+    pub(crate) fn base_compare_info(&self, provider:Option<Rc<dyn ICultureDataProvider>>) -> CompareInfo {
         let mut rules = None;
         if !self.is_invariant() {
-            if let Some(provider) = FerroLocator::current().get_service::<dyn ICultureDataProvider>() {
+            if let Some(provider) = provider {
                 let mut current = self.clone();
                 while rules.is_none() && !current.is_invariant() {
-                    rules = provider.get_compare_rules(current.name());
+                    rules = provider.get_compare_rules(current.data_name());
                     current = current.parent();
                 }
             }
         }
-        CompareInfo { name: Rc::from(self.name()), rules }
+        CompareInfo::for_name(self.data_name(),rules)
     }
 }
 

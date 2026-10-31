@@ -15,7 +15,7 @@ mod model_type;
 
 pub use ferroui_system::events::Event;
 pub use crate::input::ICommand;
-pub use i_bindable_indexer::{BindableArray, BindableDictionary, IBindableArray, IBindableIndexer};
+pub use i_bindable_indexer::{BindableArray, BindableDictionary, IBindableArray, IBindableIndexer, register_bindable_array, bindable_array_element};
 pub use i_notify_collection_changed::{BindableList, CollectionChange, IBindableList, INotifyCollectionChanged};
 pub use i_notify_data_error_info::INotifyDataErrorInfo;
 pub use ferroui_system::component_model::INotifyPropertyChanged;

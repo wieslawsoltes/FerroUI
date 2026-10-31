@@ -1,6 +1,6 @@
 use super::TemplateAppliedEventArgs;
 use crate::documents::TextElement;
-use crate::templates::IControlTemplate;
+use crate::templates::{IControlTemplate, TemplateResult};
 use crate::{Border, Control, ControlImpl, Decorator};
 use ferroui_base::controls::ResourcesChangedEventArgs;
 use ferroui_base::input::InputElementImpl;
@@ -33,6 +33,9 @@ ferro_class! {
         /// In simple terms, this means the method is called just before the
         /// control is displayed.
         fn on_apply_template(this, e: &TemplateAppliedEventArgs);
+        /// Builds the template result before assigning templated parents or attaching the tree.
+        /// Derived controls can decorate the result while preserving Template identity/cache semantics.
+        fn build_template(this, template: &Rc<dyn IControlTemplate>) -> Option<TemplateResult<Ref<Control>>>;
         /// Called when the `Template` property changes.
         fn on_template_changed(this, e: &FerroPropertyChangedEventArgs<'_>);
     }
@@ -108,7 +111,7 @@ impl LayoutableImpl for TemplatedControl {
 
             if let Some(template) = &template {
                 let this_ref = this.to_ref();
-                if let Some(template_result) = template.build(&this_ref) {
+                if let Some(template_result) = this.build_template(template) {
                     let (child, name_scope) = template_result.deconstruct();
                     Self::apply_templated_parent(&child, Some(&this_ref.clone().upcast()));
                     child.set_parent(this_ref);
@@ -141,6 +144,10 @@ impl ControlImpl for TemplatedControl {
 
 impl TemplatedControlImpl for TemplatedControl {
     fn on_apply_template(_this: &Self, _e: &TemplateAppliedEventArgs) {}
+
+    fn build_template(this: &Self, template: &Rc<dyn IControlTemplate>) -> Option<TemplateResult<Ref<Control>>> {
+        template.build(&this.to_ref())
+    }
 
     fn on_template_changed(this: &Self, _e: &FerroPropertyChangedEventArgs<'_>) {
         this.invalidate_measure();

@@ -2,6 +2,7 @@ use super::{
     TextInputMethodConnection, TextInputMethodEditing, TextInputMethodError,
     TextInputMethodRangeGeometry,
 };
+use super::TextInputOptions;
 use crate::input::InputElement;
 use crate::reactive::{Disposable, IDisposable};
 use crate::utilities::HandlerList;
@@ -147,6 +148,13 @@ pub trait TextInputMethodClient {
     /// Indicates if the text input method client supports sending
     /// surrounding text.
     fn supports_surrounding_text(&self) -> bool;
+
+    /// Finalizes native options for this client and its focused element. The default
+    /// preserves the caller's options; controls can supply intrinsic input semantics
+    /// such as password masking without overwriting attached property values.
+    fn input_options(&self, _focused_element: &Ref<InputElement>, options: TextInputOptions) -> TextInputOptions {
+        options
+    }
 
     /// Returns the text around the cursor, usually the current paragraph.
     fn surrounding_text(&self) -> String;

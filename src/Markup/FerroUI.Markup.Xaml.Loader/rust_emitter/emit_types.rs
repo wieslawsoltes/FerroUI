@@ -44,6 +44,8 @@ pub enum Known {
     OptionString,
     Bool,
     Char,
+    /// Compatibility handle for APIs that still declare Rust scalar char.
+    ScalarChar,
     I8,
     U8,
     I16,
@@ -99,6 +101,8 @@ pub enum Known {
     /// `RuntimeList`: a list of the runtime library created in markup (`List<T>`,
     /// `ArrayList`).
     RuntimeList,
+    /// The array constant shared by generated code and the runtime loader.
+    RuntimeArray,
     /// `Rc<FerroList<Option<BoxedValue>>>`: the shared list of the items of a
     /// [`RuntimeList`](Known::RuntimeList), which a collection handle is cast from.
     ListItems,
@@ -295,6 +299,28 @@ impl<'a> MethodInfo<'a> {
         Self { name, is_static, declaring_type, parameters, parameter_handles, declared, built }
     }
 
+    /// Exact callable identity of a runtime-library method, independent of host registries.
+    pub fn builtin(
+        &self,
+        returned: &dyn IXamlType,
+    ) -> Option<ferroui_base::metadata::BuiltinMethod> {
+        if !self.built {
+            return None;
+        }
+        let declaring = self.declaring_type.as_ref()?;
+        ferroui_base::metadata::BuiltinMethod::from_signature(
+            &declaring.full_name(),
+            &self.name,
+            self.is_static,
+            &self
+                .parameters
+                .iter()
+                .map(|p| p.full_name())
+                .collect::<Vec<_>>(),
+            &returned.full_name(),
+        )
+    }
+
     /// The member of markup metadata the method is the projection of.
     pub fn declared(&self) -> Option<&DeclaredMethod<'a>> {
         self.declared.as_ref()
@@ -380,6 +406,15 @@ pub trait EmitTypes {
     /// The handle of `type_`.
     fn handle_of(&self, type_: &dyn IXamlType) -> Option<Handle<'_>>;
 
+    /// Public Rust spelling of a represented handle, when recorded. Build-time keys
+    /// already carry the expanded spelling; run-time hosts must use registered paths.
+    fn rust_path_of_handle(&self, key: TypeKey<'_>) -> Option<String> {
+        match key {
+            TypeKey::Text(path) => Some(path.to_string()),
+            TypeKey::Id(_) => None,
+        }
+    }
+
     /// The class whose handle (`Ref<Class>`, or with `true` `Option<Ref<Class>>`) `key` is.
     fn class_by_handle(&self, key: TypeKey<'_>) -> Option<(&dyn EmitClass, bool)>;
     /// The markup metadata that declares `key` among its handles.
@@ -393,6 +428,8 @@ pub trait EmitTypes {
     /// A value of the Rust type `from` is a value of `to` through the casts the crates
     /// register (a contract a class implements, a registered cast).
     fn is_assignable(&self, from: TypeKey<'_>, to: TypeKey<'_>) -> bool;
+    /// An explicit fallible representation adapter, separate from assignability.
+    fn can_adapt(&self, _from: TypeKey<'_>, _to: TypeKey<'_>) -> bool { false }
     /// A reference to a value of the Rust type `from` coerces to a reference to `to`: a
     /// crate states it of the two types (`ValueTypes::register_deref::<From, To>`). The
     /// declaration of a type names a base; whether the Rust type of the one dereferences

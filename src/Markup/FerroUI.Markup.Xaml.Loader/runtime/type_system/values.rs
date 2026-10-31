@@ -12,7 +12,8 @@
 //! ([`RuntimeArray::register_element::<T>`]; the element types of the
 //! runtime library and the base value types the compiler parses are
 //! registered by the type system), an untyped target (`object`) receives the
-//! `RuntimeArray` itself. A member that declares another collection type
+//! `RuntimeArray` itself. Registered BindableArray views share one mutable typed store.
+//! Generated code uses the same runtime array. A member that declares another collection type
 //! for an array is a conversion error that names both types.
 //!
 //! # Lists
@@ -28,7 +29,7 @@ use std::any::TypeId;
 use std::fmt;
 use std::rc::Rc;
 
-use ferroui_base::data::core::{ValueType, ValueTypes};
+use ferroui_base::data::core::ValueType;
 use ferroui_base::metadata::{IServiceProvider, MarkupType, MarkupValue};
 use ferroui_base::{BoxedValue, TypeInfo};
 use xamlx::exceptions::XamlResult;
@@ -209,108 +210,21 @@ pub use ferroui_markup_xaml::xaml_il::runtime::compiled::{box_object, normalize_
 
 /// The arrays bindings index into ([`BindableArray`](ferroui_base::data::model::BindableArray)),
 /// by the Rust types that hold them, with the Rust type of their elements.
-static BINDABLE_ARRAYS: std::sync::Mutex<Vec<(ValueType, ValueType)>> = std::sync::Mutex::new(Vec::new());
+pub fn register_bindable_array<T:ferroui_base::PropertyValue>(){ferroui_base::data::model::register_bindable_array::<T>();}
+pub(crate) fn bindable_array_element(handle:TypeId)->Option<ValueType>{ferroui_base::data::model::bindable_array_element(handle)}
 
-/// States that a member declared as `Rc<BindableArray<T>>` (or the `Option` of it) is
-/// a member of the array type `T[]`: a compiled binding path indexes it with the array
-/// element node (`Property[0]`), as the path of the managed original indexes a `T[]`.
-/// Process-wide and idempotent; a crate calls it from its `register_types()` for the
-/// element types of the arrays its metadata declares.
-pub fn register_bindable_array<T: ferroui_base::PropertyValue>() {
-    use ferroui_base::data::model::BindableArray;
-    let element = ValueType::of::<T>();
-    let mut arrays = BINDABLE_ARRAYS.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
-    for handle in [ValueType::of::<Rc<BindableArray<T>>>(), ValueType::of::<Option<Rc<BindableArray<T>>>>()] {
-        if !arrays.iter().any(|(known, _)| known.id() == handle.id()) {
-            arrays.push((handle, element));
-        }
-    }
+pub use ferroui_markup_xaml::xaml_il::runtime::RuntimeArray;
+struct ArrayElementType(Rc<dyn IXamlType>);
+impl ferroui_markup_xaml::xaml_il::runtime::RuntimeArrayElement for ArrayElementType {
+ fn full_name(&self)->String{self.0.full_name()}
+ fn value_type(&self)->Option<ValueType>{self.0.as_any().downcast_ref::<RuntimeType>().and_then(RuntimeType::handle)}
+ fn as_any(&self)->&dyn std::any::Any{self}
 }
-
-/// The element type of the bindable array held as the Rust type `handle`.
-pub(crate) fn bindable_array_element(handle: TypeId) -> Option<ValueType> {
-    let arrays = BINDABLE_ARRAYS.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
-    arrays.iter().find(|(known, _)| known.id() == handle).map(|(_, element)| *element)
+pub(crate) fn new_array(element_type:Rc<dyn IXamlType>,items:Vec<MarkupValue>)->RuntimeArray {
+ RuntimeArray::new(Rc::new(ArrayElementType(element_type)),items)
 }
-
-/// A value of an array type: its element type and its elements, untyped.
-/// See the module documentation.
-#[derive(Clone)]
-pub struct RuntimeArray {
-    element_type: Rc<dyn IXamlType>,
-    items: Rc<Vec<MarkupValue>>,
-}
-
-type ArrayForm = fn(&[MarkupValue], bool) -> Option<BoxedValue>;
-
-ferroui_base::ferro_thread_local! {
-    static ARRAY_FORMS: std::cell::RefCell<std::collections::HashMap<TypeId, ArrayForm>> =
-        std::cell::RefCell::new(std::collections::HashMap::new());
-}
-
-impl RuntimeArray {
-    pub fn new(element_type: Rc<dyn IXamlType>, items: Vec<MarkupValue>) -> Self {
-        Self { element_type, items: Rc::new(items) }
-    }
-
-    pub fn element_type(&self) -> &Rc<dyn IXamlType> {
-        &self.element_type
-    }
-
-    pub fn items(&self) -> &[MarkupValue] {
-        &self.items
-    }
-
-    /// States that arrays of elements held as `T` are passed to members
-    /// that declare `Vec<T>` or `Option<Vec<T>>`. Per thread; idempotent.
-    pub fn register_element<T: Clone + PartialEq + 'static>() {
-        fn form<T: Clone + PartialEq + 'static>(items: &[MarkupValue], optional: bool) -> Option<BoxedValue> {
-            let mut typed: Vec<T> = Vec::with_capacity(items.len());
-            for item in items {
-                typed.push(ferroui_base::metadata::from_markup_value::<T>(item)?);
-            }
-            Some(if optional { Rc::new(Some(typed)) } else { Rc::new(typed) })
-        }
-        ValueTypes::register_nullable::<Vec<T>>();
-        ARRAY_FORMS.with(|forms| {
-            let mut forms = forms.borrow_mut();
-            forms.insert(TypeId::of::<Vec<T>>(), form::<T> as ArrayForm);
-            forms.insert(TypeId::of::<Option<Vec<T>>>(), form::<T> as ArrayForm);
-        });
-    }
-
-    /// The array in the Rust type `target` a member declares. The error
-    /// names the array type and the target.
-    pub fn to_declared(&self, target: ValueType) -> Result<BoxedValue, String> {
-        if target.is_object() || target.is::<RuntimeArray>() {
-            return Ok(Rc::new(self.clone()));
-        }
-        if target.is::<Option<RuntimeArray>>() {
-            return Ok(Rc::new(Some(self.clone())));
-        }
-        let form = ARRAY_FORMS.with(|forms| forms.borrow().get(&target.id()).copied());
-        let optional = target.name().starts_with("core::option::Option<");
-        form.and_then(|form| form(&self.items, optional)).ok_or_else(|| {
-            format!(
-                "An array of {} cannot be passed as a {}: the element type has no registered array form",
-                self.element_type.full_name(),
-                target.name()
-            )
-        })
-    }
-}
-
-/// Arrays compare by identity of their storage: an array is a reference.
-impl PartialEq for RuntimeArray {
-    fn eq(&self, other: &Self) -> bool {
-        Rc::ptr_eq(&self.items, &other.items)
-    }
-}
-
-impl fmt::Debug for RuntimeArray {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}[{}]", self.element_type.full_name(), self.items.len())
-    }
+pub(crate) fn array_element_type(array:&RuntimeArray)->Option<Rc<dyn IXamlType>> {
+ array.element_type().as_any().downcast_ref::<ArrayElementType>().map(|element|element.0.clone())
 }
 
 /// A value of a list of the runtime library created in markup:

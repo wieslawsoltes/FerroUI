@@ -84,6 +84,8 @@ pub struct TextBox {
     presenter: RefCell<Option<Ref<TextPresenter>>>,
     scroll_viewer: RefCell<Option<Ref<ScrollViewer>>>,
     im_client: Rc<TextBoxTextInputMethodClient>,
+    password_input_privacy: RefCell<Option<Rc<dyn IDisposable>>>,
+    updating_password_privacy: Cell<bool>,
     undo_redo_helper: UndoRedoHelper<UndoRedoState>,
     /// The handle through which the undo/redo helper reaches this text box.
     undo_redo_host: RefCell<Option<Rc<dyn IUndoRedoHost<UndoRedoState>>>>,
@@ -139,6 +141,7 @@ impl FerroObjectImpl for TextBox {
     fn constructed(this: &Self) {
         // The static constructor runs before the instance constructors.
         Self::parent_constructed(this);
+        this.update_password_input_privacy();
 
         let object: &FerroObject = this;
         let accepts_return = FerroObjectExtensions::get_observable(object, Self::accepts_return_property());
@@ -236,13 +239,19 @@ impl FerroObjectImpl for TextBox {
             || property == Self::password_char_property().as_property()
             || property == Self::reveal_password_property().as_property()
         {
+            if property == Self::password_char_property().as_property() {
+                this.update_password_input_privacy();
+                ferroui_base::input::text_input::TextInputMethodClient::request_reset(&*this.im_client);
+            }
             this.update_command_states();
         } else if property == Self::caret_index_property().as_property() {
             this.on_caret_index_changed(change);
         } else if property == Self::selection_start_property().as_property() {
             this.on_selection_start_changed(change);
+            this.im_client.on_selection_changed();
         } else if property == Self::selection_end_property().as_property() {
             this.on_selection_end_changed(change);
+            this.im_client.on_selection_changed();
         } else if property == Self::max_lines_property().as_property() {
             this.invalidate_measure();
         } else if property == Self::min_lines_property().as_property() {
@@ -1539,10 +1548,39 @@ impl TextBox {
         InputElement::focusable_property().override_default_value::<TextBox>(true);
         // Not ported: the `Auto` default of `PlatformFeedback.FeedbackType` (waits for `PlatformFeedback`).
         InputElement::text_input_method_client_requested_event().add_class_handler::<TextBox>(|tb, e| {
+            tb.update_password_input_privacy();
             if !tb.is_read_only() {
                 e.set_client(Some(tb.im_client.clone()));
             }
         });
+    }
+
+    // Password presentation also requires a private native IME context, including
+    // reveal mode. Restore the caller's value source only when the mask is removed.
+    fn update_password_input_privacy(&self) {
+        if self.updating_password_privacy.replace(true) {
+            return;
+        }
+        struct Reset<'a>(&'a Cell<bool>);
+        impl Drop for Reset<'_> {
+            fn drop(&mut self) { self.0.set(false); }
+        }
+        let _reset = Reset(&self.updating_password_privacy);
+        loop {
+            let masked = self.password_char() != '\0';
+            let installed = self.password_input_privacy.borrow().is_some();
+            if masked == installed { break; }
+            if masked {
+                let value = self.set_value_with_priority(
+                    ferroui_base::input::text_input::TextInputOptions::is_sensitive_property(),
+                    true, BindingPriority::Animation,
+                ).expect("native password privacy requires a removable priority value");
+                *self.password_input_privacy.borrow_mut() = Some(value);
+            } else {
+                let value = self.password_input_privacy.borrow_mut().take();
+                if let Some(value) = value { value.dispose(); }
+            }
+        }
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
@@ -1553,6 +1591,8 @@ impl TextBox {
             presenter: RefCell::new(None),
             scroll_viewer: RefCell::new(None),
             im_client: TextBoxTextInputMethodClient::new(),
+            password_input_privacy: RefCell::new(None),
+            updating_password_privacy: Cell::new(false),
             undo_redo_helper: UndoRedoHelper::unattached(),
             undo_redo_host: RefCell::new(None),
             is_undoing_redoing: Cell::new(false),
@@ -1717,6 +1757,15 @@ impl TextBox {
         self.set_value(Self::selection_start_property(), value)
     }
 
+    /// Observes completed native selection operations, including when the text
+    /// view is inactive, read-only, or has not yet been created. Independent
+    /// endpoint setters remain independent operations. Dispose the returned
+    /// subscription to stop observing.
+    pub fn selection_changed(&self, handler: impl Fn() + 'static) -> Rc<dyn IDisposable> {
+        use ferroui_base::input::text_input::TextInputMethodClient;
+        self.im_client.selection_changed(Rc::new(handler))
+    }
+
     fn on_selection_start_changed(&self, e: &FerroPropertyChangedEventArgs<'_>) {
         self.update_command_states();
 
@@ -1724,6 +1773,20 @@ impl TextBox {
         if self.selection_end() == value && self.caret_index() != value {
             self.set_current_value(Self::caret_index_property(), value);
         }
+    }
+
+    /// Sets the UTF-16 selection and caret within one input-method change scope.
+    /// Native property coercion still applies. Input-method selection observers see
+    /// the completed range; individual property observers retain their usual order.
+    pub fn set_selection_and_caret(
+        &self,
+        selection: ferroui_base::input::text_input::TextSelection,
+        caret_index: i32,
+    ) {
+        let _change = self.im_client.begin_change();
+        self.set_caret_index(caret_index);
+        self.set_selection_start(selection.start);
+        self.set_selection_end(selection.end);
     }
 
     /// The end position of the text selected in the text box.

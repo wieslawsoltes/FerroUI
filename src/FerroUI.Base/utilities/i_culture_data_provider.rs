@@ -82,7 +82,7 @@ pub(crate) fn find_culture_data<T>(
     let provider = FerroLocator::current().get_service::<dyn ICultureDataProvider>()?;
     let mut current = culture.clone();
     while !current.is_invariant() {
-        if let Some(data) = get(&*provider, current.name()) {
+        if let Some(data) = get(&*provider, current.data_name()) {
             return Some(data);
         }
         current = current.parent();

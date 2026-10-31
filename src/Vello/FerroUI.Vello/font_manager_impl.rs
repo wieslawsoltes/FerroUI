@@ -250,7 +250,7 @@ impl FontManagerImpl {
         // What the system falls back to for the script of the character in
         // the language of the culture.
         if !matches!(script, Script::Unknown | Script::Common | Script::Inherited) {
-            let language = Language::parse(culture.name()).ok();
+            let language = Language::parse(&culture.name()).ok();
             let fallback_key = FallbackKey::new(fontique::Script::from_bytes(script_tag(script)), language.as_ref());
 
             candidates.extend(system_fonts.collection.fallback_families(fallback_key));

@@ -218,3 +218,211 @@ fn the_error_of_an_assignment_without_a_setter_names_the_type_of_the_value() {
     let error = no_setter("Background", &None, 1, 2);
     assert_eq!(error.message(), "No setter of property Background accepts null Line 1, position 2. (line 1 position 2)");
 }
+
+#[test]
+fn enum_integer_constants_use_the_converter_and_preserve_failures_and_positions() {
+    use super::compiled::{enum_value, CompiledLoadError};
+    use ferroui_base::metadata::{MarkupEnumMember, MarkupType, MarkupTypeKind};
+    use std::sync::atomic::{AtomicUsize, Ordering};
+    #[derive(Clone, Debug, PartialEq, Eq)]
+    struct IntegerValue(i32);
+    static CALLS: AtomicUsize = AtomicUsize::new(0);
+    static OPEN: MarkupType = {
+        let mut m = MarkupType::new("IntegerValue", MarkupTypeKind::Enum, "Fixture");
+        m.enum_from_value = Some(|raw| {
+            CALLS.fetch_add(1, Ordering::SeqCst);
+            i32::try_from(raw)
+                .ok()
+                .map(|v| Rc::new(IntegerValue(v)) as BoxedValue)
+        });
+        m
+    };
+    static FALLBACK: MarkupType = {
+        let mut m = MarkupType::new("ClosedValue", MarkupTypeKind::Enum, "Fixture");
+        m.enum_members = &[MarkupEnumMember {
+            name: "Zero",
+            value: 0,
+            get: || Rc::new(IntegerValue(0)),
+            rust_variant: Some("Zero"),
+        }];
+        m
+    };
+    static REFUSAL: MarkupType = {
+        let mut m = MarkupType::new("Refusal", MarkupTypeKind::Enum, "Fixture");
+        m.enum_members = FALLBACK.enum_members;
+        m.enum_from_value = Some(|_| None);
+        m
+    };
+    static WRONG_TYPE: MarkupType = {
+        let mut m = MarkupType::new("WrongType", MarkupTypeKind::Enum, "Fixture");
+        m.enum_from_value = Some(|_| Some(Rc::new("wrong".to_string())));
+        m
+    };
+    assert!(!OPEN.is_flags);
+    for raw in [i32::MIN, -1, 0, 1, i32::MAX] {
+        let before = CALLS.load(Ordering::SeqCst);
+        assert_eq!(
+            enum_value::<IntegerValue>(&OPEN, i64::from(raw), 5, 7).unwrap(),
+            IntegerValue(raw)
+        );
+        assert_eq!(CALLS.load(Ordering::SeqCst), before + 1);
+    }
+    for (markup, raw) in [
+        (&OPEN, i64::MIN),
+        (&OPEN, i64::MAX),
+        (&FALLBACK, -1),
+        (&REFUSAL, 0),
+    ] {
+        let error = enum_value::<IntegerValue>(markup, raw, 5, 7).unwrap_err();
+        let inner = error
+            .inner_exception()
+            .unwrap()
+            .downcast_ref::<CompiledLoadError>()
+            .unwrap();
+        assert_eq!(inner.type_name(), "XamlLoadException");
+        assert_eq!(inner.line_number(), 5);
+        assert_eq!(inner.line_position(), 7);
+        assert!(error.message().contains(&format!(
+            "{raw} is not a value of the enumeration {}",
+            markup.full_name()
+        )));
+    }
+    assert_eq!(
+        enum_value::<IntegerValue>(&FALLBACK, 0, 0, 0).unwrap(),
+        IntegerValue(0)
+    );
+    let error = enum_value::<IntegerValue>(&WRONG_TYPE, 0, 2, 3).unwrap_err();
+    assert_eq!(
+        error
+            .inner_exception()
+            .unwrap()
+            .downcast_ref::<CompiledLoadError>()
+            .unwrap()
+            .type_name(),
+        "InvalidCastException"
+    );
+}
+
+#[derive(PartialEq)]
+struct MethodPathClock;
+ferroui_base::ferro_markup_type!(class MethodPathClock {
+    namespace: "CompiledMethodPathTests", this: Rc<MethodPathClock>, handles: [Rc<MethodPathClock>],
+    methods: [
+        fn Now()->ferroui_base::utilities::DateTime => (|_: &Rc<MethodPathClock>| ferroui_base::utilities::DateTime::from_ticks(10)),
+        fn Now(i32)->ferroui_base::utilities::DateTime => (|_: &Rc<MethodPathClock>, value:i32| ferroui_base::utilities::DateTime::from_ticks(10+i64::from(value))),
+        static fn Static()->ferroui_base::utilities::DateTime => (||ferroui_base::utilities::DateTime::from_ticks(30)),
+        try fn Fail()->ferroui_base::utilities::DateTime => (|_: &Rc<MethodPathClock>|Err::<ferroui_base::utilities::DateTime,_>("declared-clock-failure"))
+    ]
+});
+#[test]
+fn declared_method_paths_preserve_overload_static_signature_target_and_failures() {
+    use crate::markup_extensions::CompiledBindingExtension;
+    use ferroui_base::{
+        FerroObject, FerroProperty,
+        data::{CompiledBindingPathBuilder, core::ValueType},
+        metadata::{
+            MarkupDelegate, MarkupInvokeError, MarkupTyped, from_markup_value, into_markup_value,
+        },
+        utilities::DateTime,
+    };
+    ferroui_base::register_types();
+    let source = Rc::new(MethodPathClock);
+    for (name, is_static, parameters, arguments, expected) in [
+        ("Now", false, vec![], vec![], Some(10)),
+        (
+            "Now",
+            false,
+            vec![ValueType::of::<i32>()],
+            vec![into_markup_value(7i32)],
+            Some(17),
+        ),
+        ("Static", true, vec![], vec![], Some(30)),
+        ("Fail", false, vec![], vec![], None),
+    ] {
+        let builder = super::compiled::path_method(
+            &CompiledBindingPathBuilder::new(),
+            MethodPathClock::MARKUP,
+            name,
+            is_static,
+            &parameters,
+            Some(ValueType::of::<DateTime>()),
+            false,
+        );
+        let binding = CompiledBindingExtension::with_path(builder.build());
+        binding.set_source(into_markup_value(source.clone()));
+        let target = FerroObject::new();
+        let property =
+            FerroProperty::register::<FerroObject, _>("DeclaredMethodValue", None::<BoxedValue>);
+        let subscription = target.bind_binding(property, binding.as_ref());
+        let value = target.get_value(property).expect("method delegate value");
+        let delegate = value
+            .downcast_ref::<MarkupDelegate>()
+            .expect("declared delegate");
+        assert_eq!(delegate.method().unwrap().name, name);
+        assert_eq!(
+            delegate.method().unwrap().parameters.len(),
+            parameters.len()
+        );
+        assert_eq!(delegate.target().is_none(), is_static);
+        let result = delegate.try_invoke(&arguments);
+        match expected {
+            Some(ticks) => assert_eq!(
+                from_markup_value::<DateTime>(&result.unwrap())
+                    .unwrap()
+                    .ticks(),
+                ticks
+            ),
+            None => assert!(
+                matches!(result,Err(MarkupInvokeError::Failed(v)) if v=="declared-clock-failure")
+            ),
+        }
+        subscription.dispose();
+    }
+}
+
+#[derive(PartialEq)]
+struct IndexerSignatureProbe;
+ferroui_base::ferro_markup_type!(class IndexerSignatureProbe as "IndexerSignatureProbe" {
+    namespace: "Tests", this: Rc<IndexerSignatureProbe>, handles: [Rc<IndexerSignatureProbe>],
+    indexers: [
+        (i32) -> i32 { get: |_: &Rc<IndexerSignatureProbe>, key: i32| key + 10 },
+        (Option<ferroui_base::Utf16Text>) -> i32 { get: |_: &Rc<IndexerSignatureProbe>, key: Option<ferroui_base::Utf16Text>| key.map_or(-1, |v| v.units().len() as i32) },
+        (u8) -> i32 { get: |_: &Rc<IndexerSignatureProbe>, key: u8| i32::from(key) + 20 },
+        (i32, i32) -> i32 { get: |_: &Rc<IndexerSignatureProbe>, a: i32, b: i32| a * 100 + b }
+    ]
+});
+#[test]
+fn compiled_indexers_select_exact_native_overloads_and_preserve_arguments() {
+    use crate::markup_extensions::CompiledBindingExtension;
+    use ferroui_base::{FerroObject, FerroProperty, data::{CompiledBindingPathBuilder, core::ValueType}, metadata::{MarkupTyped, into_markup_value}};
+    ferroui_base::register_types();
+    let source = Rc::new(IndexerSignatureProbe);
+    let text = ferroui_base::Utf16Text::from_units(vec![0xd800, 97]);
+    for (parameters, arguments, expected) in [
+        (vec![ValueType::of::<i32>()], vec![into_markup_value(7_i32)], 17),
+        (vec![ValueType::of::<Option<ferroui_base::Utf16Text>>()], vec![into_markup_value(Some(text))], 2),
+        (vec![ValueType::of::<Option<ferroui_base::Utf16Text>>()], vec![None], -1),
+        (vec![ValueType::of::<u8>()], vec![into_markup_value(7_u8)], 27),
+        (vec![ValueType::of::<i32>(), ValueType::of::<i32>()], vec![into_markup_value(7_i32), into_markup_value(9_i32)], 709),
+    ] {
+        let builder = super::compiled::path_indexer_arguments(&CompiledBindingPathBuilder::new(), IndexerSignatureProbe::MARKUP, &parameters, arguments, None);
+        let binding = CompiledBindingExtension::with_path(builder.build());
+        binding.set_source(into_markup_value(source.clone()));
+        let target = FerroObject::new();
+        let property = FerroProperty::register::<FerroObject, _>("IndexerSignatureValue", 0_i32);
+        let subscription = target.bind_binding(property, binding.as_ref());
+        assert_eq!(target.get_value(property), expected);
+        subscription.dispose();
+    }
+    // Keep the existing integer helper and its notifying collection accessor usable.
+    for notifying in [false, true] {
+        let builder = super::compiled::path_indexer(&CompiledBindingPathBuilder::new(), IndexerSignatureProbe::MARKUP, 3, notifying);
+        let binding = CompiledBindingExtension::with_path(builder.build());
+        binding.set_source(into_markup_value(source.clone()));
+        let target = FerroObject::new();
+        let property = FerroProperty::register::<FerroObject, _>("IntegerIndexerValue", 0_i32);
+        let subscription = target.bind_binding(property, binding.as_ref());
+        assert_eq!(target.get_value(property), 13);
+        subscription.dispose();
+    }
+}

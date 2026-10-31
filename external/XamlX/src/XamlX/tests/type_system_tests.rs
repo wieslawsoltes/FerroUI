@@ -222,7 +222,7 @@ fn constants_are_parsed_with_dotnet_rules() {
     );
     assert_eq!(
         parse("System.Char", "x").expect("ok"),
-        Some(XamlValue::Char('x'))
+        Some(XamlValue::Char(u16::from(b'x')))
     );
     assert_eq!(parse("System.String", "x").expect("ok"), None);
     assert_eq!(parse(&format!("{NS}.Control"), "x").expect("ok"), None);

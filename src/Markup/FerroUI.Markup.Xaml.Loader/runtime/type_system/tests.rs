@@ -1056,3 +1056,99 @@ fn a_static_property_has_static_accessors_and_no_field() {
     assert!(constant.is_static());
     assert!(!declared.properties().iter().any(|p| p.name() == "Constant"));
 }
+
+#[cfg(test)]
+mod inherited_declared_collection_accessors {
+    use super::*;
+    use ferroui_base::metadata::{MarkupType, MarkupTyped};
+    #[derive(Clone, PartialEq)]
+    struct Element;
+    #[derive(Clone, PartialEq)]
+    struct List;
+    #[derive(Clone, PartialEq)]
+    struct Collection;
+    struct ElementMetadata;
+    struct ListMetadata;
+    struct CollectionMetadata;
+    ferroui_base::ferro_markup_type!(struct ElementMetadata as "InheritedElement"{namespace:"Tests.Runtime",this:Element,handles:[Element]});
+    ferroui_base::ferro_markup_type!(interface CollectionMetadata as "IReadOnlyCollection`1"{namespace:"System.Collections.Generic",this:Collection,handles:[Collection],generic:"IReadOnlyCollection`1"[Element],properties:[Count:i32{get:|_:&Collection|17}]});
+    ferroui_base::ferro_markup_type!(interface ListMetadata as "IReadOnlyList`1"{namespace:"System.Collections.Generic",this:List,handles:[List],generic:"IReadOnlyList`1"[Element],interfaces:[Collection]});
+    #[test]
+    fn real_inherited_count_is_not_shadowed_by_a_virtual_core_standin() {
+        classes::register();
+        MarkupType::register_all(&[
+            ElementMetadata::MARKUP,
+            CollectionMetadata::MARKUP,
+            ListMetadata::MARKUP,
+        ]);
+        let ts = RuntimeTypeSystem::new();
+        let list = ts.resolve(ValueType::of::<List>());
+        assert!(list.properties().iter().all(|p| p.name() != "Count"));
+        let collection = list
+            .interfaces()
+            .into_iter()
+            .find(|t| t.name() == "IReadOnlyCollection`1")
+            .unwrap();
+        let count = collection
+            .properties()
+            .into_iter()
+            .find(|p| p.name() == "Count")
+            .unwrap();
+        let getter = count.getter().unwrap();
+        let getter = getter.as_any().downcast_ref::<RuntimeMethod>().unwrap();
+        assert!(getter.declared.is_some());
+        assert_eq!(
+            from_markup_value::<i32>(&getter.invoke(&[boxed(Collection)]).unwrap()),
+            Some(17)
+        );
+    }
+}
+
+#[test]
+fn nullable_value_members_are_closed_readonly_invocable_and_check_empty_and_arity() {
+    let ts=system();
+    let nullable=ts.resolve(ValueType::of::<Option<i32>>());
+    let properties=nullable.properties();
+    for name in ["Value","HasValue"] { let p=properties.iter().find(|p|p.name()==name).unwrap();assert!(p.getter().is_some()&&p.setter().is_none()); }
+    let value=method(&nullable,"get_Value");let has=method(&nullable,"get_HasValue");
+    assert!(value.is_invocable()&&has.is_invocable());
+    assert!(matches!(value.invoker(),super::RuntimeInvoker::Dynamic(_)));
+    assert_eq!(from_markup_value::<bool>(&has.invoke(&[None]).unwrap()),Some(false));
+    assert_eq!(from_markup_value::<bool>(&has.invoke(&[boxed(0i32)]).unwrap()),Some(true));
+    assert_eq!(from_markup_value::<i32>(&value.invoke(&[boxed(0i32)]).unwrap()),Some(0));
+    assert!(matches!(value.invoke(&[None]),Err(ferroui_base::metadata::MarkupInvokeError::Failed(e))if e.contains("InvalidOperationException")));
+    assert!(matches!(value.invoke(&[]),Err(ferroui_base::metadata::MarkupInvokeError::ArgumentCount{expected:1,actual:0})));
+    assert!(value.invoke(&[boxed(true)]).is_err());
+}
+
+mod declared_generic_receiving_carriers {
+    use super::*;
+    use ferroui_base::metadata::{MarkupType, MarkupTyped};
+    #[derive(Clone, PartialEq)]struct Item;
+    #[derive(Clone, PartialEq)]struct A;
+    #[derive(Clone, PartialEq)]struct B;
+    #[derive(Clone, PartialEq)]struct List;
+    struct ItemMetadata;struct AMetadata;struct BMetadata;struct ListMetadata;
+    ferroui_base::ferro_markup_type!(struct ItemMetadata as "CarrierItem"{namespace:"Tests.Runtime",this:Item,handles:[Item]});
+    ferroui_base::ferro_markup_type!(interface AMetadata as "IEnumerable`1"{namespace:"System.Collections.Generic",this:A,handles:[A],generic:"IEnumerable`1"[Item],methods:[fn ReadMarker()->i32 => (|_:&A|17)]});
+    ferroui_base::ferro_markup_type!(interface BMetadata as "IEnumerable`1"{namespace:"System.Collections.Generic",this:B,handles:[B],generic:"IEnumerable`1"[Item],methods:[fn ReadMarker()->i32 => (|_:&B|29)]});
+    ferroui_base::ferro_markup_type!(interface ListMetadata as "IReadOnlyList`1"{namespace:"System.Collections.Generic",this:List,handles:[List],generic:"IReadOnlyList`1"[Item],interfaces:[A]});
+    #[test]
+    fn declared_generic_interface_carrier_wins_over_synthetic_prototype_in_both_resolution_orders() {
+        classes::register();
+        MarkupType::register_all(&[ItemMetadata::MARKUP, AMetadata::MARKUP, BMetadata::MARKUP, ListMetadata::MARKUP]);
+        for foreign_first in [false,true] {
+            let ts=RuntimeTypeSystem::new();
+            if foreign_first { ts.resolve(ValueType::of::<B>()); }
+            let own=ts.resolve(ValueType::of::<A>());
+            let foreign=ts.resolve(ValueType::of::<B>());
+            assert!(own.equals(foreign.as_ref()));
+            assert!(!Rc::ptr_eq(&own,&foreign));
+            let list=ts.resolve(ValueType::of::<List>());
+            let declared=list.interfaces().into_iter().find(|i|i.name()=="IEnumerable`1").unwrap();
+            assert!(Rc::ptr_eq(&declared,&own));
+            assert_eq!(from_markup_value::<i32>(&method(&declared,"ReadMarker").invoke(&[boxed(A)]).unwrap()),Some(17));
+            assert_eq!(from_markup_value::<i32>(&method(&foreign,"ReadMarker").invoke(&[boxed(B)]).unwrap()),Some(29));
+        }
+    }
+}

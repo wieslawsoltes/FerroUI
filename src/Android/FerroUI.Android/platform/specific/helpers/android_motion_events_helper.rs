@@ -214,7 +214,26 @@ impl AndroidMotionEventsHelper {
         let action_masked = e.action_masked;
         let mut modifiers = Self::get_modifiers(e.meta_state, e.button_state);
 
-        if action_masked == motion_event_actions::MOVE {
+        if action_masked == motion_event_actions::CANCEL {
+            // Android cancels the entire gesture, not only action_index. Retire every
+            // contact so capture and pending key/gesture state cannot survive CANCEL.
+            for pointer in &e.pointers {
+                let tool_type = pointer.tool_type;
+                let Some(event_type) = Self::get_action_type(e.action_button, action_masked, tool_type) else {
+                    continue;
+                };
+                let args = RawTouchEventArgs::with_point(
+                    self.get_device(tool_type),
+                    event_time,
+                    input_root.clone(),
+                    event_type,
+                    Self::create_point(&pointer.current, view.motion_render_scaling()),
+                    modifiers | Self::get_tool_modifiers(tool_type),
+                    i64::from(pointer.id),
+                );
+                view.dispatch_input(Rc::new(args));
+            }
+        } else if action_masked == motion_event_actions::MOVE {
             for pointer in &e.pointers {
                 let tool_type = pointer.tool_type;
                 let device = self.get_device(tool_type);
@@ -522,6 +541,24 @@ mod tests {
 
     fn finger(id: i32, x: f32, y: f32) -> MotionPointer {
         MotionPointer { id, tool_type: motion_event_tool_type::FINGER, current: sample(x, y), history: Vec::new() }
+    }
+
+    #[test]
+    fn cancel_retires_every_contact_regardless_of_action_index() {
+        for index in [0, 1] {
+            let (top_level, helper) = fixture(true);
+            let event = event(motion_event_actions::CANCEL, index, vec![
+                finger(7, 20.0, 40.0), finger(29, 60.0, 80.0),
+            ]);
+            let mut call_base = false;
+            assert_eq!(helper.dispatch_motion_event(Some(&event), &mut call_base), Some(true));
+            let seen = top_level.seen.borrow();
+            assert_eq!(seen.len(), 2);
+            assert_eq!((seen[0].id, seen[1].id), (7, 29));
+            assert!(seen.iter().all(|e| e.type_ == RawPointerEventType::TouchCancel));
+            assert_eq!(seen[0].position, Point::new(10.0, 20.0));
+            assert_eq!(seen[1].position, Point::new(30.0, 40.0));
+        }
     }
 
     #[test]

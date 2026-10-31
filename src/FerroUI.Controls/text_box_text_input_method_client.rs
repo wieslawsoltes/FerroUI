@@ -3,7 +3,7 @@ use crate::TextBox;
 use ferroui_base::media::text_formatting::TextParagraphStyles;
 use ferroui_base::utilities::ReadOnlyMemory;
 use ferroui_base::input::text_input::{
-    ContextMenuAction, TextInputMethodClient, TextInputMethodClientEvents, TextSelection,
+    ContextMenuAction, TextInputContentType, TextInputMethodClient, TextInputMethodClientEvents, TextInputOptions, TextSelection,
 };
 use ferroui_base::input::{InputElement, TappedEventArgs};
 use ferroui_base::interactivity::RoutedEventHandlerToken;
@@ -103,6 +103,23 @@ impl TextInputMethodClient for TextBoxTextInputMethodClient {
 
     fn text_view_visual(&self) -> Option<Ref<Visual>> {
         self.presenter().map(Ref::upcast)
+    }
+
+    fn input_options(&self, focused_element: &Ref<InputElement>, mut options: TextInputOptions) -> TextInputOptions {
+        let parent = focused_element.cast::<TextBox>().or_else(|| self.parent());
+        if parent.as_ref().is_some_and(|parent| parent.password_char() != '\0') {
+            options.content_type = match options.content_type {
+                TextInputContentType::Digits | TextInputContentType::Number | TextInputContentType::Pin => TextInputContentType::Pin,
+                _ => TextInputContentType::Password,
+            };
+            options.is_sensitive = true;
+            options.multiline = false;
+            options.show_suggestions = Some(false);
+            options.uppercase = false;
+            options.lowercase = false;
+            options.auto_capitalization = false;
+        }
+        options
     }
 
     fn surrounding_text(&self) -> String {
@@ -547,14 +564,16 @@ impl TextBoxTextInputMethodClient {
             self.raise_surrounding_text_changed();
         }
 
-        if property == TextBox::selection_start_property().as_property()
-            || property == TextBox::selection_end_property().as_property()
-        {
-            if self.is_in_change.get() {
-                self.selection_changed.set(true);
-            } else {
-                self.raise_selection_changed();
-            }
+    }
+
+    // The owning TextBox reports its endpoint changes directly. This signal
+    // belongs to the selection operation, independently of IME activation and
+    // of the presenter/parent hooks used for platform text services.
+    pub(crate) fn on_selection_changed(&self) {
+        if self.is_in_change.get() {
+            self.selection_changed.set(true);
+        } else {
+            self.raise_selection_changed();
         }
     }
 

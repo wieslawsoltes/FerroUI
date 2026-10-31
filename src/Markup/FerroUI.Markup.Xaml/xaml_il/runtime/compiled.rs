@@ -18,7 +18,7 @@ use std::rc::Rc;
 use ferroui_base::controls::{INameScope, NameScope, NameScopeRef, NameScopeValueError};
 use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::metadata::{
-    from_markup_value, into_markup_value, service, IServiceProvider, MarkupInvokeError, MarkupValue,
+    from_markup_value, from_markup_value_result, into_markup_value, service, IServiceProvider, MarkupInvokeError, MarkupValue,
 };
 use ferroui_base::utilities::Uri;
 use ferroui_base::data::core::{
@@ -710,11 +710,28 @@ pub fn path_indexer(
     index: i32,
     notifying: bool,
 ) -> CompiledBindingPathBuilder {
-    let declared = markup
-        .indexers
-        .iter()
-        .find(|indexer| matches!(indexer.parameters, [parameter] if parameter().is::<i32>()))
-        .unwrap_or_else(|| panic!("{} declares no indexer with one 32-bit integer argument", markup.full_name()));
+    path_indexer_arguments(builder, markup, &[ValueType::of::<i32>()], vec![into_markup_value(index)], notifying.then_some(index))
+}
+
+/// A compiled indexer with its exact declared native parameter types and evaluated
+/// arguments. Overloads are resolved by the same declaration chosen by the compiler;
+/// arguments are retained once and cloned for each get/set, as in the run-time loader.
+/// `notifying_index` selects the existing integer collection-change accessor.
+///
+/// # Panics
+/// Panics if the selected declaration does not exist or argument counts differ.
+pub fn path_indexer_arguments(
+    builder: &CompiledBindingPathBuilder,
+    markup: &'static MarkupType,
+    parameters: &[ValueType],
+    arguments: Vec<MarkupValue>,
+    notifying_index: Option<i32>,
+) -> CompiledBindingPathBuilder {
+    assert_eq!(parameters.len(), arguments.len(), "indexer argument count");
+    let declared = markup.indexers.iter().find(|indexer| {
+        indexer.parameters.len() == parameters.len() &&
+            indexer.parameters.iter().zip(parameters).all(|(declared, selected)| declared().id() == selected.id())
+    }).unwrap_or_else(|| panic!("{} declares no indexer with the selected native signature", markup.full_name()));
     let owner = markup.full_name();
     let invoke = move |accessor: &str, invoke: MarkupInvoke, arguments: &[MarkupValue]| -> Result<MarkupValue, BindingError> {
         let result = invoke(arguments).map_err(|error| {
@@ -727,34 +744,46 @@ pub fn path_indexer(
         Ok(result.map(normalize_object))
     };
     let invoke = Rc::new(invoke);
-    let argument = move || into_markup_value(index);
+    let arguments = Rc::new(arguments);
     let getter: Option<FalliblePropertyGetter> = declared.get.map(|get| {
         let invoke = invoke.clone();
-        Rc::new(move |target: &dyn AnyValue| invoke("get", get, &[owner_handle(target)?, argument()])) as FalliblePropertyGetter
+        let arguments = arguments.clone();
+        Rc::new(move |target: &dyn AnyValue| {
+            let mut args = vec![owner_handle(target)?]; args.extend(arguments.iter().cloned());
+            invoke("get", get, &args)
+        }) as FalliblePropertyGetter
     });
     let setter: Option<PropertySetter> = declared.set.map(|set| {
         let invoke = invoke.clone();
+        let arguments = arguments.clone();
         Rc::new(move |target: &dyn AnyValue, value: Option<&BoxedValue>| {
-            invoke("set", set, &[owner_handle(target)?, argument(), value.cloned()]).map(|_| ())
+            let mut args = vec![owner_handle(target)?]; args.extend(arguments.iter().cloned()); args.push(value.cloned());
+            invoke("set", set, &args).map(|_| ())
         }) as PropertySetter
     });
     let boxed_getter: Option<BoxedPropertyGetter> = declared.get.map(|get| {
         let invoke = invoke.clone();
-        Rc::new(move |target: &BoxedValue| invoke("get", get, &[Some(target.clone()), argument()])) as BoxedPropertyGetter
+        let arguments = arguments.clone();
+        Rc::new(move |target: &BoxedValue| {
+            let mut args = vec![Some(target.clone())]; args.extend(arguments.iter().cloned());
+            invoke("get", get, &args)
+        }) as BoxedPropertyGetter
     });
     let boxed_setter: Option<BoxedPropertySetter> = declared.set.map(|set| {
         let invoke = invoke.clone();
+        let arguments = arguments.clone();
         Rc::new(move |target: &BoxedValue, value: Option<&BoxedValue>| {
-            invoke("set", set, &[Some(target.clone()), argument(), value.cloned()]).map(|_| ())
+            let mut args = vec![Some(target.clone())]; args.extend(arguments.iter().cloned()); args.push(value.cloned());
+            invoke("set", set, &args).map(|_| ())
         }) as BoxedPropertySetter
     });
     let info: Rc<dyn IPropertyInfo> = Rc::new(
         ClrPropertyInfo::new_fallible(ferroui_base::data::core::INDEXER_NAME, getter, setter, (declared.type_)())
             .with_boxed_accessors(boxed_getter, boxed_setter),
     );
-    let factory: PropertyAccessorFactory = match notifying {
-        true => Rc::new(move |target, property| PropertyInfoAccessorFactory::create_indexer_property_accessor(target, property, index)),
-        false => Rc::new(PropertyInfoAccessorFactory::create_inpc_property_accessor),
+    let factory: PropertyAccessorFactory = match notifying_index {
+        Some(index) => Rc::new(move |target, property| PropertyInfoAccessorFactory::create_indexer_property_accessor(target, property, index)),
+        None => Rc::new(PropertyInfoAccessorFactory::create_inpc_property_accessor),
     };
     builder.property(info, factory)
 }
@@ -1253,17 +1282,24 @@ pub fn argument<T: Clone + 'static, V: PartialEq + 'static>(
     position: i32,
 ) -> Result<T, XamlLoadException> {
     let value = to_untyped(Rc::new(value));
-    from_markup_value::<T>(&value).ok_or_else(|| {
-        let error = MarkupInvokeError::Argument {
-            index,
-            expected: std::any::type_name::<T>(),
-            actual: match &value {
-                Some(value) => value.type_name().to_string(),
-                None => "null".to_string(),
-            },
-        };
-        at("InvalidCastException", format!("{member}: {error}"), line, position)
-    })
+    from_markup_value_result::<T>(&value)
+        .map_err(|error| invocation_error(&format!("{member}: {error}"), line, position))?
+        .ok_or_else(|| {
+            let error = MarkupInvokeError::Argument {
+                index,
+                expected: std::any::type_name::<T>(),
+                actual: match &value {
+                    Some(value) => value.type_name().to_string(),
+                    None => "null".to_string(),
+                },
+            };
+            at(
+                "InvalidCastException",
+                format!("{member}: {error}"),
+                line,
+                position,
+            )
+        })
 }
 
 /// A nullable form (`Option<T>`, `Option<Rc<T>>`) the instance `T` of a member is borrowed
@@ -1309,16 +1345,32 @@ pub fn instance<'a, T: 'static>(
 /// conversion states the cast and [`ValueTypes::is_assignable`] holds for the
 /// two types, which is when the cast succeeds; a value it does not convert is
 /// the `InvalidCastException` of the loader at `line`, `position`.
-pub fn cast<T: Clone + 'static, V: PartialEq + 'static>(value: V, line: i32, position: i32) -> Result<T, XamlLoadException> {
+pub fn cast<T: Clone + 'static, V: PartialEq + 'static>(
+    value: V,
+    line: i32,
+    position: i32,
+) -> Result<T, XamlLoadException> {
     let target = ValueType::of::<T>();
     let converted = match into_markup_value(value) {
         Some(boxed) if boxed.value_type_id() == target.id() => Some(boxed),
-        Some(boxed) => ValueTypes::try_cast(&boxed, target),
+        Some(boxed) => match ValueTypes::try_cast(&boxed, target) {
+            Some(value) => Some(value),
+            None => ValueTypes::try_adapt(&boxed, target)
+                .map_err(|error| invocation_error(&error, line, position))?,
+        },
         None => ValueTypes::try_convert(None, target).flatten(),
     };
-    match converted.as_ref().and_then(|converted| converted.downcast_ref::<T>()) {
+    match converted
+        .as_ref()
+        .and_then(|converted| converted.downcast_ref::<T>())
+    {
         Some(value) => Ok(value.clone()),
-        None => Err(at("InvalidCastException", format!("Unable to cast the value to {}.", target.name()), line, position)),
+        None => Err(at(
+            "InvalidCastException",
+            format!("Unable to cast the value to {}.", target.name()),
+            line,
+            position,
+        )),
     }
 }
 
@@ -1344,9 +1396,44 @@ pub fn cast_untyped<V: PartialEq + 'static>(
     }
 }
 
+/// An integer enum constant through the same metadata converter as the interpreter.
+/// Conversion can retain undeclared values or refuse them; no raw discriminant cast
+/// or substitution of a declared member is performed.
+pub fn enum_value<T: Clone + 'static>(
+    markup: &'static MarkupType,
+    value: i64,
+    line: i32,
+    position: i32,
+) -> Result<T, XamlLoadException> {
+    let boxed = match markup.enum_from_value {
+        Some(convert) => convert(value),
+        None => markup
+            .enum_members
+            .iter()
+            .find(|member| member.value == value)
+            .map(|member| (member.get)()),
+    };
+    let boxed = boxed.ok_or_else(|| at(
+        "XamlLoadException",
+        format!("{value} is not a value of the enumeration {}: it is neither a member nor a combination of its flags", markup.full_name()),
+        line, position,
+    ))?;
+    from_markup_value(&Some(boxed)).ok_or_else(|| {
+        at(
+            "InvalidCastException",
+            format!(
+                "Unable to cast the enum value to {}.",
+                std::any::type_name::<T>()
+            ),
+            line,
+            position,
+        )
+    })
+}
+
 /// The list of the runtime library markup creates (`new List<T>()`, `new ArrayList()`), as
 /// generated code names it.
-pub use super::RuntimeList;
+pub use super::{RuntimeList,RuntimeArray};
 
 /// A list created in markup as the value of a member that declares the Rust type `T` for
 /// a collection (the items source of an items control): the shared list of its items
@@ -1362,6 +1449,13 @@ pub fn list_cast<T: Clone + 'static>(list: &RuntimeList, line: i32, position: i3
         Some(value) => Ok(value.clone()),
         None => Err(at("InvalidCastException", format!("Unable to cast the value to {}.", target.name()), line, position)),
     }
+}
+
+/// Converts the shared array constant to the exact receiving carrier, with positioned errors.
+pub fn array_cast<T:Clone+'static>(array:&RuntimeArray,line:i32,position:i32)->Result<T,XamlLoadException> {
+    let target=ValueType::of::<T>();
+    let converted=array.to_declared(target).map_err(|error|at("InvalidCastException",error,line,position))?;
+    from_markup_value(&Some(converted)).ok_or_else(||at("InvalidCastException",format!("Unable to cast the array to {}.",target.name()),line,position))
 }
 
 /// The arguments a delegate of a method named in markup is called with, read in order as
@@ -1385,7 +1479,7 @@ impl DelegateArguments<'_> {
             (Some(boxed), true) => untyped_object_form(boxed).map(Some).unwrap_or(value),
             _ => value,
         };
-        from_markup_value::<T>(&value).ok_or_else(|| MarkupInvokeError::Argument {
+        from_markup_value_result::<T>(&value)?.ok_or_else(|| MarkupInvokeError::Argument {
             // The instance is the first argument of the member.
             index: index + 1,
             expected: std::any::type_name::<T>(),
@@ -1412,24 +1506,43 @@ pub fn delegate_result<T: PartialEq + 'static>(value: T) -> MarkupValue {
 ///
 /// The delegate does not keep the root object alive: the root object owns the element the
 /// delegate is attached to, and a strong reference would close a cycle. A delegate whose
-/// root object is gone does nothing, as does one that is called with other arguments than
-/// the method takes or whose method fails: a handler has nowhere to report a failure to.
+/// root object is gone does nothing (the selected runtime's existing weak-owner contract).
+/// A live handler's argument/conversion/member failures escape synchronously as their actual
+/// MarkupInvokeError payload; discarding an error would incorrectly continue the event source.
 pub fn method_delegate<This: Clone + 'static>(
     context: &Rc<XamlIlContext>,
     parameters: usize,
-    method: impl Fn(&This, &mut DelegateArguments<'_>) -> Result<MarkupValue, MarkupInvokeError> + 'static,
+    method: impl Fn(&This, &mut DelegateArguments<'_>) -> Result<MarkupValue, MarkupInvokeError>
+        + 'static,
 ) -> ferroui_base::metadata::MarkupDelegate {
-    let instance = context.root_object_field().as_ref().map(ferroui_base::data::core::WeakValue::new);
+    let instance = context
+        .root_object_field()
+        .as_ref()
+        .map(ferroui_base::data::core::WeakValue::new);
     ferroui_base::metadata::MarkupDelegate::new(move |arguments| {
+        if arguments.len() != parameters {
+            std::panic::panic_any(MarkupInvokeError::ArgumentCount {
+                expected: parameters,
+                actual: arguments.len(),
+            });
+        }
         let instance = match &instance {
             Some(instance) => Some(normalize_object(instance.upgrade()?)),
             None => None,
         };
-        if arguments.len() != parameters {
-            return None;
-        }
-        let this = from_markup_value::<This>(&instance)?;
-        method(&this, &mut DelegateArguments { arguments, next: 0 }).ok().flatten()
+        let this = from_markup_value_result::<This>(&instance)
+            .unwrap_or_else(|error| std::panic::panic_any(error))
+            .unwrap_or_else(|| {
+                std::panic::panic_any(MarkupInvokeError::Argument {
+                    index: 0,
+                    expected: std::any::type_name::<This>(),
+                    actual: instance
+                        .as_ref()
+                        .map_or_else(|| "null".into(), |v| v.type_name().to_string()),
+                })
+            });
+        method(&this, &mut DelegateArguments { arguments, next: 0 })
+            .unwrap_or_else(|error| std::panic::panic_any(error))
     })
 }
 
@@ -1440,9 +1553,13 @@ pub fn static_method_delegate(
 ) -> ferroui_base::metadata::MarkupDelegate {
     ferroui_base::metadata::MarkupDelegate::new(move |arguments| {
         if arguments.len() != parameters {
-            return None;
+            std::panic::panic_any(MarkupInvokeError::ArgumentCount {
+                expected: parameters,
+                actual: arguments.len(),
+            });
         }
-        method(&mut DelegateArguments { arguments, next: 0 }).ok().flatten()
+        method(&mut DelegateArguments { arguments, next: 0 })
+            .unwrap_or_else(|error| std::panic::panic_any(error))
     })
 }
 
@@ -1639,6 +1756,74 @@ pub fn add_event_handler(
 mod tests {
     use super::uri_equals;
 
+    #[test]
+    fn live_compiled_method_delegates_preserve_failures_and_successful_null_results() {
+        use super::*;
+        fn raised(call: impl FnOnce()) -> MarkupInvokeError {
+            let payload = std::panic::catch_unwind(std::panic::AssertUnwindSafe(call)).unwrap_err();
+            *payload
+                .downcast::<MarkupInvokeError>()
+                .expect("actual native invocation error payload")
+        }
+        let context = populate_context(
+            None,
+            &DocumentInfo {
+                base_uri: None,
+                namespaces: &[],
+            },
+            into_markup_value(42i32),
+        );
+        let failed = method_delegate::<i32>(&context, 0, |_, _| {
+            Err(MarkupInvokeError::Failed("instance failure".into()))
+        });
+        assert_eq!(
+            raised(|| {
+                let _ = failed.try_invoke(&[]);
+            }),
+            MarkupInvokeError::Failed("instance failure".into())
+        );
+        let failed = static_method_delegate(0, |_| {
+            Err(MarkupInvokeError::Failed("static failure".into()))
+        });
+        assert_eq!(
+            raised(|| {
+                let _ = failed.try_invoke(&[]);
+            }),
+            MarkupInvokeError::Failed("static failure".into())
+        );
+        let nullable = method_delegate::<i32>(&context, 1, |_, args| {
+            let value = args.next::<Option<i32>>()?;
+            Ok(into_markup_value(value))
+        });
+        assert!(nullable.try_invoke(&[None]).unwrap().is_none());
+        assert_eq!(
+            raised(|| {
+                let _ = nullable.try_invoke(&[]);
+            }),
+            MarkupInvokeError::ArgumentCount {
+                expected: 1,
+                actual: 0
+            }
+        );
+        assert!(matches!(
+            raised(|| {
+                let _ = nullable.try_invoke(&[into_markup_value("bad".to_owned())]);
+            }),
+            MarkupInvokeError::Argument { index: 1, .. }
+        ));
+        let nullable = static_method_delegate(0, |_| Ok(None));
+        assert!(nullable.try_invoke(&[]).unwrap().is_none());
+        assert_eq!(
+            raised(|| {
+                let _ = nullable.try_invoke(&[None]);
+            }),
+            MarkupInvokeError::ArgumentCount {
+                expected: 0,
+                actual: 1
+            }
+        );
+    }
+
     /// Not from upstream: the comparison of `string.Equals(.., StringComparison.OrdinalIgnoreCase)`.
     #[test]
     fn uris_are_compared_as_ordinal_ignore_case() {
@@ -1667,4 +1852,54 @@ pub fn set_development_key(value: &MarkupValue, key: &str) {
     crate::reload_identity::record(value, key);
     #[cfg(not(all(feature = "hot-reload", debug_assertions)))]
     let _ = (value, key);
+}
+
+/// A declared method path bound as its real metadata delegate. Exact signature matching
+/// preserves overload dispatch, target identity, return type and try_invoke failures.
+pub fn path_method(
+    builder: &CompiledBindingPathBuilder,
+    declaring: &'static MarkupType,
+    name: &'static str,
+    is_static: bool,
+    parameters: &[ferroui_base::data::core::ValueType],
+    returned: Option<ferroui_base::data::core::ValueType>,
+    accepts_null: bool,
+) -> CompiledBindingPathBuilder {
+    let method = declaring
+        .find_methods(name)
+        .find(|method| {
+            method.is_static == is_static
+                && method.parameters.len() == parameters.len()
+                && method
+                    .parameters
+                    .iter()
+                    .zip(parameters)
+                    .all(|(actual, expected)| actual() == *expected)
+                && method.return_type.map(|v| v()) == returned
+        })
+        .expect("compiled method path signature differs from its declared metadata");
+    builder.method_untyped(
+        name,
+        Rc::new(move |owner| {
+            Rc::new(ferroui_base::metadata::MarkupDelegate::for_method(
+                Some(owner.clone()),
+                declaring,
+                method,
+            )) as BoxedValue
+        }),
+        accepts_null,
+    )
+}
+
+/// Shared callable identity and actual virtual override binding for runtime-library methods.
+pub fn path_builtin_method(
+    builder: &CompiledBindingPathBuilder,
+    method: ferroui_base::metadata::BuiltinMethod,
+    accepts_null: bool,
+) -> CompiledBindingPathBuilder {
+    builder.method_untyped(
+        method.method().name,
+        Rc::new(move |owner| method.binding_value(owner)),
+        accepts_null,
+    )
 }

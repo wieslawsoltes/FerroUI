@@ -130,24 +130,11 @@ ferro_markup_type!(interface dyn IPopupHost as "IPopupHost" {
 
 // System.Collections
 
-// The collection handle of the items controls is the list behind the enumerable of the
-// managed original (`IEnumerable? ItemsSource`, whose values are lists: `IList`): a list created
-// in markup is assignable to a property that holds the handle, and a binding path indexes it
-// (`Items[0]`, the indexer of `IList`) and reads its count (`Count`, a reflection binding).
-// Deviation (DEVIATIONS.md, Run-time type system of markup): upstream types the property as
-// `IEnumerable` and assigns any enumerable; here the handle is published as `IList`, and a
-// collection is cast to it by the cast registered for its type.
-ferro_markup_type!(interface crate::ItemsSource as "IList" {
-    namespace: "System.Collections",
-    handles: [crate::ItemsSource, Option<crate::ItemsSource>],
-    this: crate::ItemsSource,
-    properties: [
-        Count: i32 { try_get: items_source_count },
-    ],
-    indexers: [
-        (i32) -> Option<BoxedValue> { try_get: items_source_item },
-    ],
-});
+// ItemsSource is an external handle of the shared Base IEnumerable contract.
+// Its casts and live collection ownership are registered by markup_types::register.
+impl MarkupTyped for crate::ItemsSource {
+    const MARKUP: &'static MarkupType = <ferroui_base::collections::EnumerableMetadata as MarkupTyped>::MARKUP;
+}
 
 /// `IList.Count` of an items source: the count does not fit the `int` of markup.
 fn items_source_count(source: &crate::ItemsSource) -> Result<i32, &'static str> {
@@ -194,7 +181,6 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <dyn IWindowDrawnDecorationsTemplate as MarkupTyped>::MARKUP,
     <dyn ISelectionModel as MarkupTyped>::MARKUP,
     <dyn IPopupHost as MarkupTyped>::MARKUP,
-    <crate::ItemsSource as MarkupTyped>::MARKUP,
 ];
 
 /// Registers the nullable forms of the contract handles that can be held in

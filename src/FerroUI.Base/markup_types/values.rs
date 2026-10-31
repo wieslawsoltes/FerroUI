@@ -6,7 +6,7 @@ use crate::animation::easings::Easing;
 use crate::animation::{Cue, IterationCount, IterationType, TimeSpan};
 use crate::data::core::ValueTypes;
 use crate::data::CultureInfoIetfLanguageTagConverter;
-use crate::utilities::{CultureInfo, DateTime, DateTimeKind, DateTimeOffset, DayOfWeek, Decimal, NumberStyles};
+use crate::utilities::{TextInfo, CompareInfo, CultureInfo, DateTime, DateTimeKind, DateTimeOffset, DayOfWeek, Decimal, NumberStyles};
 use crate::ferro_markup_type;
 use crate::input::{Cursor, Key, KeyGesture, KeyModifiers, StandardCursorType};
 use crate::media::{
@@ -602,15 +602,37 @@ ferro_markup_type!(struct DateTimeOffset {
 // of the `ConverterCulture` property of the bindings: an IETF language tag.
 ferro_markup_type!(class CultureInfo {
     namespace: "System.Globalization",
-    handles: [CultureInfo, Option<CultureInfo>],
+    this: CultureInfo, handles: [CultureInfo, Option<CultureInfo>],
     parse: CultureInfoIetfLanguageTagConverter::convert_from,
     static_properties: [
         InvariantCulture: CultureInfo { get: CultureInfo::invariant_culture },
         CurrentCulture: CultureInfo { get: CultureInfo::current_culture },
     ],
     properties: [
-        Name: String { get: |culture: &CultureInfo| culture.name().to_string() },
+        Name: Option<crate::Utf16Text> { try_get: CultureInfo::try_name_text }[Virtual],
+        TextInfo: Option<Rc<TextInfo>> { try_get: CultureInfo::try_text_info }[Virtual],
+        CompareInfo: Option<Rc<CompareInfo>> { try_get: CultureInfo::try_compare_info }[Virtual],
     ],
+    methods:[
+       try fn Equals(value:Option<crate::BoxedValue>)->bool => CultureInfo::try_equals_object [Virtual],
+       try fn ToString()->Option<crate::Utf16Text> => CultureInfo::try_to_text [Virtual],
+       try fn GetHashCode()->i32 => CultureInfo::try_hash_code [Virtual]
+    ]
+});
+
+#[doc(hidden)]
+pub struct CompareInfoMetadata;
+ferro_markup_type!(class CompareInfoMetadata as "CompareInfo" {
+ namespace:"System.Globalization",attributes:[Sealed],this:Rc<CompareInfo>,handles:[Rc<CompareInfo>,Option<Rc<CompareInfo>>],
+ properties:[Name:crate::Utf16Text{get:|info:&Rc<CompareInfo>|info.name().into()}]
+});
+
+#[doc(hidden)]
+pub struct TextInfoMetadata;
+ferro_markup_type!(class TextInfoMetadata as "TextInfo" {
+ namespace: "System.Globalization", this: Rc<TextInfo>, handles: [Rc<TextInfo>, Option<Rc<TextInfo>>],
+ properties: [ListSeparator: String { get: |info:&Rc<TextInfo>| info.list_separator().to_string() }],
+ methods: [try fn ToUpper(str: Option<crate::Utf16Text>) -> crate::Utf16Text => (|info:&Rc<TextInfo>,text:Option<crate::Utf16Text>| info.try_to_upper_text(text.as_ref()))]
 });
 
 ferro_markup_type!(class Uri {
@@ -662,6 +684,8 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <DateTime as MarkupTyped>::MARKUP,
     <DateTimeOffset as MarkupTyped>::MARKUP,
     <CultureInfo as MarkupTyped>::MARKUP,
+    <TextInfo as MarkupTyped>::MARKUP,
+    <CompareInfo as MarkupTyped>::MARKUP,
     // Declared next to the types.
     <Decimal as MarkupTyped>::MARKUP,
     <NumberStyles as MarkupTyped>::MARKUP,
@@ -710,6 +734,10 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<TimeSpan>();
     ValueTypes::register_nullable::<Uri>();
     ValueTypes::register_nullable::<CultureInfo>();
+    ValueTypes::register_reference::<CompareInfo>();
+    ValueTypes::register_nullable::<Rc<CompareInfo>>();
+    ValueTypes::register_reference::<TextInfo>();
+    ValueTypes::register_nullable::<Rc<TextInfo>>();
     ValueTypes::register_nullable::<Rc<Cursor>>();
     ValueTypes::register_nullable::<TextLineBounds>();
     ValueTypes::register_nullable::<crate::rendering::composition::system_backdrops::SystemBackdropTheme>();
@@ -753,9 +781,14 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<Decimal>();
     ValueTypes::register_nullable::<NumberStyles>();
     ValueTypes::register_display::<Uri>();
-    ValueTypes::register_display::<CultureInfo>();
+    ValueTypes::register_boxed_cast::<CultureInfo,Option<crate::BoxedValue>>(|v| Some(Some(v.downcast_ref::<CultureInfo>()?.object())));
+    ValueTypes::register_object_text::<CultureInfo>(|v|v.try_to_text().map_err(|e|crate::metadata::MarkupInvokeError::Failed(e.to_string())));
     ValueTypes::register_display::<Rc<Cursor>>();
     // The text of a text trimming is the name it parses from (`CharacterEllipsis`, `None`, ...),
     // as the `ToString()` of the trimmings of the managed original.
     ValueTypes::register_display::<Rc<dyn crate::media::TextTrimming>>();
 }
+
+impl MarkupTyped for TextInfo {const MARKUP:&'static MarkupType=TextInfoMetadata::MARKUP;}
+
+impl MarkupTyped for CompareInfo {const MARKUP:&'static MarkupType=CompareInfoMetadata::MARKUP;}

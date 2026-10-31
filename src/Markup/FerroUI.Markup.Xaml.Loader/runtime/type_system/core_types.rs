@@ -200,7 +200,7 @@ fn handles_of(full_name: &str) -> Vec<ValueType> {
         "System.Object" => handles![Option<BoxedValue>, BoxedValue],
         "System.Void" => handles![()],
         "System.Boolean" => handles![bool],
-        "System.Char" => handles![char],
+        "System.Char" => handles![ferroui_base::Char, char],
         "System.SByte" => handles![i8],
         "System.Byte" => handles![u8],
         "System.Int16" => handles![i16],
@@ -212,7 +212,7 @@ fn handles_of(full_name: &str) -> Vec<ValueType> {
         "System.Single" => handles![f32],
         "System.Double" => handles![f64],
         "System.TimeSpan" => handles![TimeSpan],
-        "System.String" => handles![String, Option<String>],
+        "System.String" => handles![String, Option<String>, ferroui_base::Utf16Text, Option<ferroui_base::Utf16Text>],
         "System.Type" => handles![
             RuntimeTypeValue,
             Option<RuntimeTypeValue>,
@@ -245,18 +245,31 @@ fn handles_of(full_name: &str) -> Vec<ValueType> {
 /// marks as implemented.
 fn invoker_of(full_name: &str, member: &CoreMember) -> RuntimeInvoker {
     match (full_name, member) {
+        ("System.Object", CoreMember::Method { name, .. }) if name == "ToString" => dynamic(|arguments| {
+            (ferroui_base::metadata::BuiltinMethod::ObjectToString.method().invoke)(arguments)
+        }),
+        ("System.Object", CoreMember::Method { name, .. }) if name == "GetHashCode" => dynamic(|arguments| {
+            (ferroui_base::metadata::BuiltinMethod::ObjectGetHashCode.method().invoke)(arguments)
+        }),
         ("System.TimeSpan", CoreMember::Method { name, .. }) if name == "Parse" => dynamic(|arguments| {
             let text = argument::<String>(arguments, 0)?;
             TimeSpan::parse(&text).map(boxed).map_err(|e| MarkupInvokeError::Failed(e.to_string()))
         }),
+        ("System.String", CoreMember::Method { name, .. }) if name == "ToString" => dynamic(|arguments| {
+            (ferroui_base::metadata::BuiltinMethod::StringToString.method().invoke)(arguments)
+        }),
         // `string.Length`: the number of UTF-16 code units.
         ("System.String", CoreMember::Property { name, .. }) if name == "Length" => dynamic(|arguments| {
+            let value = arguments.first().and_then(Option::as_ref);
+            if let Some(text) = value.and_then(|v| v.downcast_ref::<ferroui_base::Utf16Text>()) {
+                return Ok(boxed(text.len() as i32));
+            }
             let text = argument::<String>(arguments, 0)?;
             Ok(boxed(text.encode_utf16().count() as i32))
         }),
         ("System.Array", CoreMember::Property { name, .. }) if name == "Length" => dynamic(|arguments| {
             let array = argument::<super::values::RuntimeArray>(arguments, 0)?;
-            Ok(boxed(array.items().len() as i32))
+            Ok(boxed(array.len() as i32))
         }),
         ("System.Uri", CoreMember::Constructor { .. }) => dynamic(|arguments| {
             let text = argument::<String>(arguments, 0)?;
@@ -303,6 +316,7 @@ pub(crate) fn define_core_types(system: &Rc<RuntimeTypeSystem>) {
         }
     };
     map_nullable("System.Boolean", ValueType::of::<Option<bool>>());
+    map_nullable("System.Char", ValueType::of::<Option<ferroui_base::Char>>());
     map_nullable("System.Char", ValueType::of::<Option<char>>());
     map_nullable("System.SByte", ValueType::of::<Option<i8>>());
     map_nullable("System.Byte", ValueType::of::<Option<u8>>());

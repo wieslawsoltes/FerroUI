@@ -43,6 +43,11 @@ pub const FERRO_DICTIONARY_DEFINITION: &str = "FerroUI.Collections.FerroDictiona
 /// name is declared: the type of an attribute of this list is found by its
 /// full name.
 pub const KNOWN_ATTRIBUTES: &[&str] = &[
+    "In",
+    "Out",
+    "Optional",
+    "DefaultParameterValue",
+    "IsReadOnly",
     "XmlnsDefinition",
     "XmlnsPrefix",
     attributes::CONTENT,
@@ -72,10 +77,16 @@ pub const KNOWN_ATTRIBUTES: &[&str] = &[
 /// is projected to.
 pub fn attribute_type_name(name: &str) -> String {
     match name {
+        "In" | "Out" | "Optional" | "DefaultParameterValue" => {
+            format!("System.Runtime.InteropServices.{name}Attribute")
+        }
+        "IsReadOnly" => "System.Runtime.CompilerServices.IsReadOnlyAttribute".to_string(),
         "Obsolete" => "System.ObsoleteAttribute".to_string(),
         "TypeConverter" => "System.ComponentModel.TypeConverterAttribute".to_string(),
         "DefaultMember" => "System.Reflection.DefaultMemberAttribute".to_string(),
-        "TemplatePart" | "PseudoClasses" => format!("{CONTROLS_METADATA_NAMESPACE}.{name}Attribute"),
+        "TemplatePart" | "PseudoClasses" => {
+            format!("{CONTROLS_METADATA_NAMESPACE}.{name}Attribute")
+        }
         // Declared next to the bindings, where the compiler looks it up.
         "AssignBinding" => format!("FerroUI.Data.{name}Attribute"),
         // Declared with the controls (`FerroUI.Controls.ResolveByNameAttribute`), where the
@@ -246,7 +257,7 @@ const COMPONENT_MODEL: &str = "System.ComponentModel";
 /// holds their values. The nullable form of each (`Option<T>`) is `System.Nullable<T>`.
 pub const PRIMITIVES: &[(&str, &str)] = &[
     ("Boolean", "bool"),
-    ("Char", "char"),
+    ("Char", "::ferroui_base::Char"),
     ("SByte", "i8"),
     ("Byte", "u8"),
     ("Int16", "i16"),
@@ -318,14 +329,33 @@ pub fn core_types() -> Vec<CoreType> {
     use CoreKind::{Class, Interface, Struct};
     let none = CoreBody::None;
     let define = CoreType::new;
+    let builtin = ferroui_base::metadata::BuiltinMethod::ObjectToString;
+    let method = builtin.method();
     let mut types = vec![
-        define(SYSTEM, "Object", Class),
+        define(
+            builtin.declaring_type().namespace(),
+            builtin.declaring_type().name,
+            Class,
+        )
+        .method(
+            method.name,
+            method.is_static,
+            t(builtin.return_type_name()),
+            builtin
+                .parameter_type_names()
+                .iter()
+                .map(|name| t(name))
+                .collect(),
+            Implemented,
+        ).method(ferroui_base::metadata::BuiltinMethod::ObjectGetHashCode.method().name,false,t(ferroui_base::metadata::BuiltinMethod::ObjectGetHashCode.return_type_name()),vec![],Implemented),
         define(SYSTEM, "ValueType", Class),
         define(SYSTEM, "Enum", Class).base("System.ValueType"),
         define(SYSTEM, "Attribute", Class),
         define(SYSTEM, "Void", Struct).base("System.ValueType"),
         define(SYSTEM, "IntPtr", Struct).base("System.ValueType"),
-        define(SYSTEM, "Nullable`1", Struct).parameters(&["T"]).base("System.ValueType"),
+        define(SYSTEM, "Nullable`1", Struct).parameters(&["T"]).base("System.ValueType")
+            .property("HasValue", t("System.Boolean"), false, Implemented)
+            .property("Value", p(0), false, Implemented),
     ];
     for (name, _) in PRIMITIVES {
         types.push(define(SYSTEM, name, Struct).base("System.ValueType"));
@@ -341,7 +371,17 @@ pub fn core_types() -> Vec<CoreType> {
             Implemented,
         ),
         // `string.Length`: the number of UTF-16 code units.
-        define(SYSTEM, "String", Class).property("Length", t("System.Int32"), false, Implemented),
+        define(SYSTEM, "String", Class)
+            .property("Length", t("System.Int32"), false, Implemented)
+            .method(
+                ferroui_base::metadata::BuiltinMethod::StringToString
+                    .method()
+                    .name,
+                false,
+                t(ferroui_base::metadata::BuiltinMethod::StringToString.return_type_name()),
+                vec![],
+                Implemented,
+            ),
         define(SYSTEM, "Type", Class),
         define(SYSTEM, "Array", Class).property("Length", t("System.Int32"), false, Implemented),
         define(SYSTEM, "Uri", Class).stands_in().constructor(vec![t("System.String")], Implemented),
@@ -519,6 +559,11 @@ pub fn core_handles() -> Vec<(String, CoreRef)> {
         add(*rust, t(&full_name));
         add(&format!("Option<{rust}>"), nullable(&full_name));
     }
+    add("::ferroui_system::Char", t("System.Char"));
+    add("Option<::ferroui_system::Char>", nullable("System.Char"));
+    // Legacy scalar signatures retain an explicit, range-checked native bridge.
+    add("char", t("System.Char"));
+    add("Option<char>", nullable("System.Char"));
     for (full_name, rust) in ARRAY_ELEMENTS {
         add(&format!("Vec<{rust}>"), CoreRef::Array(Box::new(t(full_name))));
         add(&format!("Option<Vec<{rust}>>"), CoreRef::Array(Box::new(t(full_name))));
@@ -526,6 +571,8 @@ pub fn core_handles() -> Vec<(String, CoreRef)> {
     add("::ferroui_base::animation::TimeSpan", t("System.TimeSpan"));
     add("Option<::ferroui_base::animation::TimeSpan>", nullable("System.TimeSpan"));
     reference(&mut add, "String", "System.String");
+    reference(&mut add, "::ferroui_system::Utf16Text", "System.String");
+    reference(&mut add, "::ferroui_base::Utf16Text", "System.String");
     reference(&mut add, "&'static ::ferroui_base::TypeInfo", "System.Type");
     reference(&mut add, "::ferroui_base::data::core::ValueType", "System.Type");
     reference(&mut add, "::ferroui_base::utilities::Uri", "System.Uri");

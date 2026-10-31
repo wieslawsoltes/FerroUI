@@ -53,6 +53,14 @@ impl FerroXamlIlCompilerConfiguration {
             identifier_generator,
             diagnostics_handler,
         )?;
+        // Both native backends invoke typed metadata constructors, including values;
+        // no CLR indirect-address loads are involved.
+        base.add_extra(Rc::new(
+            xamlx::transform::transformers::ConstructableObjectTransformerOptions {
+                allow_value_type_construction: true,
+                allow_optional_constructor_arguments: true,
+            },
+        ));
         base.add_extra(Rc::new(FerroXamlIlWellKnownTypes::new(&base.type_system)?));
         Ok(Self {
             base: Rc::new(base),

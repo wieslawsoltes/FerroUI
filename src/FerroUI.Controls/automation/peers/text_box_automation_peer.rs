@@ -1,5 +1,5 @@
 use super::{
-    AutomationControlType, AutomationPeer, AutomationPeerImpl, ControlAutomationPeer, ControlAutomationPeerImpl,
+    AutomationControlType, AutomationPeer, AutomationPeerImpl, AutomationPeerImplExt, ControlAutomationPeer, ControlAutomationPeerImpl,
 };
 use crate::automation::provider::{IValueProvider, ProviderError, ProviderAdapter};
 use crate::automation::{ElementNotEnabledException, ValuePatternIdentifiers};
@@ -7,6 +7,7 @@ use crate::TextBox;
 use ferroui_base::{
     ferro_class, instantiate, BoxedValue, FerroObjectImpl, FerroObjectImplExt, FerroPropertyChangedEventArgs, Ref,
 };
+use ferroui_base::data::core::ValueType;
 use std::rc::Rc;
 
 /// An automation peer which represents a [`TextBox`].
@@ -41,6 +42,24 @@ impl FerroObjectImpl for TextBoxAutomationPeer {
 impl ControlAutomationPeerImpl for TextBoxAutomationPeer {}
 
 impl AutomationPeerImpl for TextBoxAutomationPeer {
+    fn get_provider_core(this: &Self, provider_type: ValueType) -> Option<BoxedValue> {
+        if provider_type == ValueType::of::<Rc<dyn IValueProvider>>() && this.accessible_text_owner().is_none() {
+            None
+        } else {
+            Self::parent_get_provider_core(this, provider_type)
+        }
+    }
+
+    fn get_or_create_children_core(this: &Self) -> Rc<Vec<Ref<AutomationPeer>>> {
+        // Check the current owner even before this peer's property observer runs. A peer
+        // may already have cached normal template children when PasswordChar changes.
+        if this.accessible_text_owner().is_none() {
+            Rc::default()
+        } else {
+            Self::parent_get_or_create_children_core(this)
+        }
+    }
+
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::Edit
     }
@@ -52,7 +71,10 @@ impl AutomationPeerImpl for TextBoxAutomationPeer {
 
 impl TextBoxAutomationPeerImpl for TextBoxAutomationPeer {
     fn owner_property_changed(this: &Self, e: &FerroPropertyChangedEventArgs<'_>) {
-        if e.property() == TextBox::text_property().as_property() {
+        if e.property() == TextBox::password_char_property().as_property() {
+            this.invalidate_children();
+        }
+        if e.property() == TextBox::text_property().as_property() && this.accessible_text_owner().is_some() {
             this.raise_property_changed_event(
                 ValuePatternIdentifiers::value_property(),
                 e.get_old_value::<Option<String>>().flatten().map(|value| Rc::new(value) as BoxedValue),
@@ -101,9 +123,16 @@ impl TextBoxAutomationPeer {
         self.owner().is_read_only()
     }
 
-    /// The text of the text box (the value provider contract).
+    // RevealPassword changes rendering, not the confidentiality of the password field.
+    fn accessible_text_owner(&self) -> Option<Ref<TextBox>> {
+        let owner = self.try_owner()?.cast::<TextBox>()?;
+        (owner.password_char() == '\0').then_some(owner)
+    }
+
+    /// The text of an ordinary text box; password fields never disclose a value.
+    /// This guard also covers provider handles retained before entering password mode.
     pub fn value(&self) -> Option<String> {
-        self.owner().text()
+        self.accessible_text_owner().and_then(|owner| owner.text())
     }
 
     /// Sets the text of the text box (the value provider contract).

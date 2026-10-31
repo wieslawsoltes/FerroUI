@@ -79,6 +79,7 @@ macro_rules! types {
 /// known types ([`TypeInfo::find`]). Cheap and idempotent; nothing is
 /// initialised until a type is used or looked into.
 pub fn register_types() {
+    crate::utilities::TextInfo::install_current_info_reader(current_text_info).expect("current TextInfo service already configured");
     static ONCE: std::sync::Once = std::sync::Once::new();
     ONCE.call_once(|| {
         TypeInfo::register_namespaces(NAMESPACES);
@@ -224,3 +225,5 @@ const TYPES: &[&TypeInfo] = types![
     crate::styling::StyleBase,
     crate::styling::Styles,
 ];
+
+fn current_text_info()->std::rc::Rc<crate::utilities::TextInfo> {crate::utilities::CultureInfo::current_culture().text_info()}

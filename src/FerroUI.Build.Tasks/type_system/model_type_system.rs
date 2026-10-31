@@ -137,7 +137,15 @@ impl ModelTypeSystem {
                 // The nullable form of a value type or an enumeration (`Option<T>`) is a
                 // type of its own, the `Nullable<T>` of the managed original.
                 if matches!(type_.kind, TypeKind::Struct | TypeKind::Enum) {
-                    index.nullable_owners.entry(format!("Option<{}>", set.expanded(&type_.rust_path.text))).or_insert(position);
+                    let value = type_
+                        .this
+                        .as_ref()
+                        .or_else(|| type_.handles.first())
+                        .unwrap_or(&type_.rust_path);
+                    index
+                        .nullable_owners
+                        .entry(format!("Option<{}>", set.expanded(&value.text)))
+                        .or_insert(position);
                 }
                 match &type_.generic {
                     Some(generic) => index.generic_index.entry(full_name_of(&type_.namespace, &generic.definition)).or_default().push(position),
@@ -665,6 +673,8 @@ impl ModelTypeSystem {
                     model.add_handle(&text);
                 }
             })
+        } else if let Some(element)=bindable_array_element_text(&text) {
+            self.resolve(element).make_array_type(1).ok()
         } else {
             self.resolve_optional_reference(&text)
         };
@@ -795,6 +805,7 @@ impl ModelTypeSystem {
         source: MemberSource,
     ) -> Rc<ModelMethod> {
         Rc::new(ModelMethod {
+            parameter_metadata: Vec::new(),
             name,
             declaring_type: Rc::downgrade(type_),
             is_static,
@@ -815,7 +826,12 @@ impl ModelTypeSystem {
     }
 
     fn resolve_all(&self, parameters: &[crate::model::ParameterModel]) -> Vec<Rc<dyn IXamlType>> {
-        parameters.iter().map(|parameter| self.resolve(&parameter.type_.text)).collect()
+        parameters.iter().map(|parameter| {
+            match &parameter.by_ref_element {
+                Some(element) => self.resolve(&element.text).make_by_ref_type().expect("resolved model elements support managed references"),
+                None => self.resolve(&parameter.type_.text),
+            }
+        }).collect()
     }
 
     // --- projection ---------------------------------------------------------
@@ -923,6 +939,7 @@ impl ModelTypeSystem {
                 .map(|parameter| if named { self.project_attributes(&parameter.attributes) } else { Vec::new() })
                 .collect();
             members.constructors.push(Rc::new(ModelConstructor {
+                parameter_names: constructor.parameters.iter().map(|p| p.name.clone()).collect(),
                 declaring_type: weak.clone(),
                 parameters: self.resolve_all(&constructor.parameters),
                 is_public: true,
@@ -1004,7 +1021,9 @@ impl ModelTypeSystem {
                     self.project_attributes(&method.attributes),
                     source_of(method),
                 )
-                .with_rust(MemberRust { parameters: self.rust_types(&method.parameters), declared: Some(DeclaredRust::Method(returns)), registered: None }),
+                .with_rust(MemberRust { parameters: self.rust_types(&method.parameters), declared: Some(DeclaredRust::Method(returns)), registered: None }).with_parameter_metadata(method.parameters.iter().map(|p| super::types::MethodParameterMetadata {
+                    name: p.name.clone(), attributes: self.project_attributes(&p.attributes),
+                }).collect()),
             );
         }
         if let Some(parse) = &declared.parse {
@@ -1209,7 +1228,27 @@ impl ModelTypeSystem {
             let arguments = type_.generic_argument_types();
             let weak = Rc::downgrade(type_);
             let mut inherited: Vec<(Rc<ModelMethod>, Rc<ModelMethod>)> = Vec::new();
+            // A real inherited declaration takes precedence over the minimal core stand-in.
+            // Otherwise its synthetic Count accessor shadows IReadOnlyCollection<T>.Count.
+            let mut pending = members.interfaces.clone();
+            let mut visited: Vec<Rc<dyn IXamlType>> = Vec::new();
+            let mut declared_interface_methods = Vec::new();
+            while let Some(interface) = pending.pop() {
+                if visited.iter().any(|known| known.equals(&*interface)) { continue; }
+                visited.push(interface.clone());
+                pending.extend(interface.interfaces());
+                declared_interface_methods.extend(interface.methods().into_iter().filter(|method| {
+                    method.as_any().downcast_ref::<ModelMethod>().is_some_and(|method| method.rust().declared.is_some())
+                }));
+            }
             for method in source.methods.iter().filter(|method| method.is_abstract) {
+                let closed = method.substituted(&weak, parameters, arguments);
+                if declared_interface_methods.iter().any(|known| {
+                    known.name() == closed.name && known.is_static() == closed.is_static
+                        && known.return_type().equals(&*closed.return_type)
+                        && known.parameters().len() == closed.parameters.len()
+                        && known.parameters().iter().zip(&closed.parameters).all(|(a,b)| a.equals(&**b))
+                }) { continue; }
                 let is_declared = members
                     .methods
                     .iter()
@@ -1252,6 +1291,7 @@ impl ModelTypeSystem {
             // original has a constructor, and the metadata declares the public ones, so a class
             // that declares none has one that is not public.
             members.constructors.push(Rc::new(ModelConstructor {
+                parameter_names: Vec::new(),
                 declaring_type: Rc::downgrade(type_),
                 parameters: Vec::new(),
                 is_public: false,
@@ -1280,6 +1320,7 @@ impl ModelTypeSystem {
         };
         if let Some(callable) = &declared.default_constructor {
             members.constructors.push(Rc::new(ModelConstructor {
+                parameter_names: Vec::new(),
                 declaring_type: weak.clone(),
                 parameters: Vec::new(),
                 is_public: true,
@@ -1423,6 +1464,7 @@ impl ModelTypeSystem {
                 }
             }
             *method = Rc::new(ModelMethod {
+            parameter_metadata: method.parameter_metadata.clone(),
                 name: method.name.clone(),
                 declaring_type: method.declaring_type.clone(),
                 is_static: method.is_static,
@@ -1441,6 +1483,7 @@ impl ModelTypeSystem {
             // markup cannot create (an abstract class, a class without metadata for its
             // constructors) is not public.
             members.constructors.push(Rc::new(ModelConstructor {
+                parameter_names: Vec::new(),
                 declaring_type: weak.clone(),
                 parameters: Vec::new(),
                 is_public: false,
@@ -1484,6 +1527,7 @@ impl ModelTypeSystem {
     fn generic_method(&self, type_: &Rc<ModelType>, name: &str, return_type: Rc<dyn IXamlType>, parameters: Vec<Rc<dyn IXamlType>>, parameter: Rc<ModelType>) -> Rc<ModelMethod> {
         let parameter_count = parameters.len();
         Rc::new(ModelMethod {
+            parameter_metadata: Vec::new(),
             name: name.to_string(),
             declaring_type: Rc::downgrade(type_),
             is_static: false,
@@ -1699,6 +1743,7 @@ impl MemberBuilder {
         }
         let parameter_count = parameters.len();
         let method = Rc::new(ModelMethod {
+            parameter_metadata: Vec::new(),
             name: name.to_string(),
             declaring_type: Rc::downgrade(&self.type_),
             is_static,
@@ -1721,6 +1766,7 @@ impl MemberBuilder {
         }
         let parameter_count = parameters.len();
         self.members.constructors.push(Rc::new(ModelConstructor {
+                parameter_names: Vec::new(),
             declaring_type: Rc::downgrade(&self.type_),
             parameters,
             is_public: true,
@@ -1837,4 +1883,10 @@ fn apply(builder: &mut MemberBuilder, description: &CoreType, element: Option<&R
             }
         }
     }
+}
+
+pub(crate) fn bindable_array_element_text(text:&str)->Option<&str>{
+    let text=text.strip_prefix("Option<").and_then(|v|v.strip_suffix('>')).unwrap_or(text);
+    let text=text.strip_prefix("::std::rc::Rc<").and_then(|v|v.strip_suffix('>')).unwrap_or(text);
+    ["::ferroui_base::data::model::BindableArray<","::ferroui_base::data::model::i_bindable_indexer::BindableArray<"].into_iter().find_map(|prefix|text.strip_prefix(prefix).and_then(|v|v.strip_suffix('>')))
 }

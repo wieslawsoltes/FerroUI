@@ -102,6 +102,7 @@ pub struct BrowserInputHandler {
     top_level_impl: Weak<dyn IInputTopLevel>,
     page: Box<dyn IInputPage>,
     container: Rc<dyn IPointerCapture>,
+    disposed: Cell<bool>,
     sw: Instant,
     /// The time stamp of the last pointer event: the time stamps of the
     /// events of the page do not go back.
@@ -153,6 +154,7 @@ impl BrowserInputHandler {
             top_level_impl,
             page,
             container,
+            disposed: Cell::new(false),
             sw: Instant::now(),
             last_pointer_timestamp: Cell::new(0),
             touch_device: TouchDevice::new(),
@@ -219,6 +221,7 @@ impl BrowserInputHandler {
     }
 
     pub(crate) fn set_input_root(&self, input_root: Rc<dyn IInputRoot>) {
+        if self.disposed.get() { return; }
         let old = self.input_root.replace(Some(input_root));
         drop(old);
     }
@@ -231,7 +234,11 @@ impl BrowserInputHandler {
     /// Ends the subscription to the input events of the element.
     // Not in the original, which never unsubscribes.
     pub(crate) fn dispose(&self) {
+        if self.disposed.replace(true) { return; }
+        let old_root = self.input_root.take();
         self.page.unsubscribe_input_events();
+        self.text_input_method.dispose();
+        drop(old_root);
     }
 
     fn create_raw_pointer(
@@ -936,6 +943,8 @@ mod tests {
         fn clear_text_input_element(&self, _revision: u32) {}
         fn set_text_input_state(&self, _text: &str, _anchor: i32, _active: i32, _revision: u32) {}
         fn set_input_options(&self, _: &crate::browser_text_input_options::BrowserTextInputOptions) {}
+        fn set_selection(&self, _start: i32, _end: i32) {}
+        fn set_options(&self, _options: &ferroui_base::input::text_input::TextInputOptions) {}
         fn set_bounds(&self, _x: i32, _y: i32, _width: i32, _height: i32, _caret: i32) {}
 
         fn selection_start(&self) -> i32 {
@@ -1207,6 +1216,25 @@ mod tests {
     }
 
     #[test]
+    fn disposing_releases_the_root_and_stops_late_text_and_key_dispatch() {
+        let _scope = Dispatcher::unit_test_scope();
+        let _keyboard = with_keyboard();
+        let fixture = Fixture::without_root();
+        let root = Rc::new(TestRoot { element: InputElement::new() });
+        let weak = Rc::downgrade(&root);
+        fixture.handler.set_input_root(root);
+        fixture.handler.dispose();
+        assert!(weak.upgrade().is_none(), "a disposed handler retained the input root");
+        fixture.handler.dispose();
+        fixture.handler.set_input_root(Rc::new(TestRoot { element: InputElement::new() }));
+        fixture.top_level.handle.set(true);
+        assert!(!fixture.handler.raw_text_event("late"));
+        assert!(!fixture.handler.on_key_down(Some("KeyA"), Some("a"), 0));
+        assert_eq!(0, fixture.event_count());
+        assert_eq!(vec!["subscribe 42", "unsubscribe"], *fixture.page.calls.borrow());
+    }
+
+    #[test]
     fn without_an_input_root_nothing_is_dispatched() {
         let fixture = Fixture::without_root();
         fixture.top_level.handle.set(true);
@@ -1419,6 +1447,7 @@ mod tests {
         events: TextInputMethodClientEvents,
         preedit: RefCell<Vec<Option<String>>>,
         on_clear: RefCell<Option<Box<dyn FnOnce()>>>,
+        preedit_hook: RefCell<Option<Box<dyn FnOnce()>>>,
     }
 
     impl TextInputMethodClient for TestClient {
@@ -1460,6 +1489,8 @@ mod tests {
                     callback();
                 }
             }
+            let hook = self.preedit_hook.take();
+            if let Some(hook) = hook { hook(); }
         }
     }
 
@@ -1589,7 +1620,7 @@ mod tests {
         let client = Rc::new(TestClient {
             events: TextInputMethodClientEvents::new(),
             preedit: RefCell::new(Vec::new()),
-            on_clear: RefCell::new(None),
+            on_clear: RefCell::new(None), preedit_hook: RefCell::new(None),
         });
         let text_input_client: Rc<dyn TextInputMethodClient> = client.clone();
         fixture.handler.text_input_method().set_client(Some(text_input_client));
@@ -1619,7 +1650,7 @@ mod tests {
         let client = Rc::new(TestClient {
             events: TextInputMethodClientEvents::new(),
             preedit: RefCell::new(Vec::new()),
-            on_clear: RefCell::new(None),
+            on_clear: RefCell::new(None), preedit_hook: RefCell::new(None),
         });
         fixture.handler.text_input_method().set_client(Some(client.clone()));
         fixture.handler.text_input_method().on_composition_start();
@@ -1647,12 +1678,12 @@ mod tests {
         let client = Rc::new(TestClient {
             events: TextInputMethodClientEvents::new(),
             preedit: RefCell::new(Vec::new()),
-            on_clear: RefCell::new(None),
+            on_clear: RefCell::new(None), preedit_hook: RefCell::new(None),
         });
         let next = Rc::new(TestClient {
             events: TextInputMethodClientEvents::new(),
             preedit: RefCell::new(Vec::new()),
-            on_clear: RefCell::new(None),
+            on_clear: RefCell::new(None), preedit_hook: RefCell::new(None),
         });
         let method = fixture.handler.text_input_method();
         method.set_client(Some(client.clone()));
@@ -1866,5 +1897,36 @@ mod tests {
             BrowserInputHandler::drop_effect_name(DragDropEffects::COPY | DragDropEffects::MOVE | DragDropEffects::LINK)
         );
         assert_eq!("9", BrowserInputHandler::drop_effect_name(DragDropEffects::from_bits_retain(9)));
+    }
+
+    #[test]
+    fn a_retired_composition_never_commits_to_the_replacement_or_disposed_root() {
+        let _scope = Dispatcher::unit_test_scope();
+        let _keyboard = with_keyboard();
+        let fixture = Fixture::new();
+        let make_client = || Rc::new(TestClient { events: TextInputMethodClientEvents::new(),
+            preedit: RefCell::new(Vec::new()), preedit_hook: RefCell::new(None), on_clear: RefCell::new(None) });
+        let first = make_client();
+        let second = make_client();
+        let method = fixture.handler.text_input_method();
+        method.set_client(Some(first.clone()));
+        method.on_composition_start();
+        method.set_client(Some(second.clone()));
+        method.on_composition_end(Some("late"));
+        assert_eq!(0, fixture.event_count());
+        assert!(second.preedit.borrow().is_empty());
+
+        method.on_composition_start();
+        let weak = Rc::downgrade(method);
+        let next = first.clone();
+        *second.preedit_hook.borrow_mut() = Some(Box::new(move || weak.upgrade().unwrap().set_client(Some(next))));
+        method.on_composition_end(Some("reentrant"));
+        assert_eq!(0, fixture.event_count());
+
+        method.on_composition_start();
+        fixture.handler.dispose();
+        method.on_composition_end(Some("disposed"));
+        assert_eq!(0, fixture.event_count());
+        assert!(!method.is_composing());
     }
 }

@@ -263,6 +263,17 @@ fn element(
             }
         }
         XamlIlBindingPathElementNode::ClrProperty(e) => {
+            let declaring=e.property.declaring_type();
+            if declaring.is_nullable() {
+                use ferroui_base::data::core::expression_nodes::NullableMember;
+                let member=match e.property.name().as_str() { "Value"=>Some(NullableMember::Value),"HasValue"=>Some(NullableMember::HasValue),_=>None };
+                if let Some(member)=member {
+                    let arguments=declaring.generic_arguments();
+                    let inner=arguments.first().and_then(|t|t.as_any().downcast_ref::<RuntimeType>()).and_then(RuntimeType::handle)
+                        .ok_or_else(||XamlError::load_exception("The Nullable member's value type has no native carrier",Some(line_info)))?;
+                    return Ok(builder.nullable_member(inner,member,e.accepts_null));
+                }
+            }
             // --- typed emission (hook of the type system) ------------------------------
             // `builder.Property<TSource, TValue>(info, accessorFactory, acceptsNull)`: a path
             // that is this single property (`try_enable_typed_emission`) gets the typed
@@ -322,6 +333,36 @@ fn element(
                 &name,
                 Rc::new(move |owner: &BoxedValue| {
                     let method = method.clone();
+                    if let Some(runtime) = method.as_any().downcast_ref::<RuntimeMethod>() {
+                        if runtime.is_invocable() {
+                            if let Some(builtin) = ferroui_base::metadata::BuiltinMethod::from_signature(
+                                &method.declaring_type().full_name(),
+                                &method.name(),
+                                method.is_static(),
+                                &method
+                                    .parameters()
+                                    .iter()
+                                    .map(|p| p.full_name())
+                                    .collect::<Vec<_>>(),
+                                &method.return_type().full_name(),
+                            ) {
+                                return builtin.binding_value(owner);
+                            }
+                        }
+                    }
+                    if let Some(runtime) = method.as_any().downcast_ref::<RuntimeMethod>() {
+                        if let Some(crate::runtime::type_system::DeclaredMember::Method(declared)) =
+                            runtime.declared()
+                        {
+                            if let Some(metadata) = runtime.declaring_type.upgrade().and_then(|v| {
+                                v.markup().or_else(||v.handle().and_then(|handle|ferroui_base::metadata::MarkupType::find_by_handle(handle.id())))
+                            }) {
+                                return Rc::new(MarkupDelegate::for_method(
+                                    Some(owner.clone()), metadata, declared,
+                                )) as BoxedValue;
+                            }
+                        }
+                    }
                     let owner = owner.clone();
                     let is_static = method.is_static();
                     let delegate = MarkupDelegate::new(move |arguments| {

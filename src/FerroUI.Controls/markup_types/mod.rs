@@ -38,6 +38,8 @@ pub(crate) const TYPE_LISTS: &[&[&MarkupType]] =
 /// Adds the types declared in this module to the process-wide table of
 /// types with markup metadata. Called once by `register_types()`.
 pub(crate) fn register() {
+    MarkupType::register_handle::<crate::ItemsSource>(<ferroui_base::collections::EnumerableMetadata as ferroui_base::metadata::MarkupTyped>::MARKUP);
+    MarkupType::register_handle::<Option<crate::ItemsSource>>(<ferroui_base::collections::EnumerableMetadata as ferroui_base::metadata::MarkupTyped>::MARKUP);
     for types in TYPE_LISTS {
         MarkupType::register_all(types);
     }
@@ -60,6 +62,21 @@ pub(crate) fn register() {
 /// conversions are per thread: this runs on every thread, when the thread
 /// next converts an untyped value ([`ValueTypes::register_global`]).
 fn register_value_types() {
+    ValueTypes::register_identity_preserving_adapter::<ferroui_base::collections::Enumerable,crate::ItemsSource>(
+        crate::ItemsSource::try_from_enumerable,
+        ferroui_base::collections::Enumerable::object,
+        |source|source.as_enumerable().object(),
+    );
+    ValueTypes::register_boxed_cast::<crate::ItemsSource,ferroui_base::collections::Enumerable>(|object| {
+        let source=object.downcast_ref::<crate::ItemsSource>()?;
+        Some(source.list().original_enumerable().unwrap_or_else(||ferroui_base::collections::Enumerable::new(object.clone(),source.clone())))
+    });
+    ValueTypes::register_boxed_cast::<crate::ItemsSource,Option<ferroui_base::BoxedValue>>(|object| {
+        let source=object.downcast_ref::<crate::ItemsSource>()?;
+        Some(Some(source.list().original_enumerable().map(|v|v.object()).unwrap_or_else(||object.clone())))
+    });
+    ferroui_base::__ferro_compiler_metadata! {ferroui_base::metadata::register_type_rust_paths(&[
+        (||std::any::TypeId::of::<crate::ItemsSource>(),"::ferroui_controls::ItemsSource")]);}
     enums::register_value_types();
     values::register_value_types();
     contracts::register_value_types();

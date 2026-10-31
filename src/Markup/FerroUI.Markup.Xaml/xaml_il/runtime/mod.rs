@@ -36,3 +36,6 @@ pub use xaml_il_context::{
 mod compiled_tests;
 #[cfg(test)]
 mod xaml_il_runtime_helpers_tests;
+
+mod runtime_array;
+pub use runtime_array::{RuntimeArray,RuntimeArrayElement};

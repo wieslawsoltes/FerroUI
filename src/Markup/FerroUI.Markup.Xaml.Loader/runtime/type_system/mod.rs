@@ -75,3 +75,7 @@ pub fn typed_path_element(
 
 #[cfg(test)]
 mod tests;
+
+pub(crate) use values::new_array;
+#[cfg(test)]
+pub(crate) use values::array_element_type;

@@ -15,8 +15,9 @@ pub mod typed_path;
 pub use i_add_child::IAddChild;
 pub use members::{find_markup_event, find_markup_methods, find_markup_property, markup_types_of};
 pub use markup_assembly::{MarkupAssembly, XmlnsDefinition, XmlnsPrefix, FERRO_XML_NAMESPACE};
+pub use markup_type::InterfaceRef;
 pub use markup_type::{
-    attributes, from_markup_value, into_markup_value, markup_result, MarkupArguments, MarkupAttribute, MarkupAttributeValue,
+    BuiltinMethod, from_markup_value_result, attributes, from_markup_value, into_markup_value, markup_result, MarkupArguments, MarkupAttribute, MarkupAttributeValue,
     CompilerMetadata, MarkupConstructor, MarkupDelegate, MarkupEmit, NotRecorded, not_recorded, MarkupEnumMember, MarkupEvent, IntoMarkupSubscription, MarkupField, MarkupGeneric, MarkupIndexer, MarkupInvoke,
     MarkupInvokeError, MarkupLiteral, MarkupMethod, MarkupParameter, MarkupProperty, MarkupType, MarkupTypeKind, MarkupTyped,
     MarkupValue, TypeOf,

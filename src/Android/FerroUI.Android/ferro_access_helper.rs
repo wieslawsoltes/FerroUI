@@ -12,7 +12,8 @@
 use crate::automation::expand_collapse_node_info_provider::ExpandCollapseNodeInfoProvider;
 use crate::automation::invoke_node_info_provider::InvokeNodeInfoProvider;
 use crate::automation::node_info::{
-    NodeInfo, CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION, CONTENT_CHANGE_TYPE_SUBTREE, CONTENT_CHANGE_TYPE_TEXT,
+    NodeInfo, ACTION_CLEAR_FOCUS, ACTION_FOCUS, FOCUS_INPUT,
+    CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION, CONTENT_CHANGE_TYPE_SUBTREE, CONTENT_CHANGE_TYPE_TEXT,
 };
 use crate::automation::range_value_node_info_provider::RangeValueNodeInfoProvider;
 use crate::automation::scroll_node_info_provider::ScrollNodeInfoProvider;
@@ -24,6 +25,7 @@ use crate::explore_by_touch_helper::{
     ExploreByTouchHelper, IAccessibilityHost, IExploreByTouchCallbacks, IVirtualViewOwner, INVALID_ID,
 };
 use ferroui_base::reactive::IDisposable;
+use ferroui_base::input::{FocusManager, KeyModifiers, NavigationMethod};
 use ferroui_base::{PixelPoint, PixelRect, Point, Ref};
 use ferroui_controls::automation::peers::{
     AutomationControlType, AutomationPeer, ControlAutomationPeer, InteropAutomationPeer,
@@ -125,6 +127,16 @@ pub(crate) struct FerroAccessHelper {
     next_peer_view_id: Cell<i32>,
 
     view: Rc<dyn IAccessHelperView>,
+    root_focus_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    host_has_focus: Cell<Option<bool>>,
+}
+
+impl Drop for FerroAccessHelper {
+    fn drop(&mut self) {
+        if let Some(subscription) = self.root_focus_subscription.get_mut().take() {
+            subscription.dispose();
+        }
+    }
 }
 
 impl FerroAccessHelper {
@@ -143,11 +155,59 @@ impl FerroAccessHelper {
             peer_node_info_providers: RefCell::new(HashMap::new()),
             next_peer_view_id: Cell::new(0),
             view,
+            root_focus_subscription: RefCell::new(None),
+            host_has_focus: Cell::new(None),
         });
 
         this.get_or_create_node_info_providers_from_peer(&root_peer);
+        if let Some(provider) = root_peer.get_provider::<dyn IEmbeddedRootProvider>() {
+            let weak = this.this.clone();
+            let subscription = provider.focus_changed(Rc::new(move || {
+                if let Some(this) = weak.upgrade() {
+                    this.synchronize_input_focus();
+                }
+            }));
+            *this.root_focus_subscription.borrow_mut() = Some(subscription);
+            this.synchronize_input_focus();
+        }
 
         this
+    }
+
+    /// Returns None only for a root without a framework focus contract.
+    fn synchronize_input_focus(&self) -> Option<i32> {
+        let provider = self.root_peer()?.get_provider::<dyn IEmbeddedRootProvider>()?;
+        let peer = if self.host_has_focus.get() == Some(false) {
+            None
+        } else {
+            provider.get_focus().filter(|peer| peer.has_keyboard_focus() && !Self::is_interop_peer(peer))
+        };
+        let id = peer.map(|peer| self.get_or_create_node_info_providers_from_peer(&peer)).unwrap_or(INVALID_ID);
+        self.base.synchronize_keyboard_focus(id);
+        Some(id)
+    }
+
+    fn perform_input_focus_action(&self, virtual_view_id: i32, action: i32) -> bool {
+        let Some(peer) = self.peers.borrow().get(&virtual_view_id).cloned() else { return false; };
+        if action == ACTION_FOCUS {
+            if peer.has_keyboard_focus() || !peer.is_enabled() || !peer.is_keyboard_focusable() || peer.is_offscreen() {
+                return false;
+            }
+            if !self.base.ensure_host_input_focus() {
+                return false;
+            }
+            self.host_has_focus.set(Some(true));
+            peer.set_focus();
+            self.synchronize_input_focus();
+            peer.has_keyboard_focus()
+        } else {
+            if !peer.has_keyboard_focus() { return false; }
+            let Some(owner) = peer.clone().cast::<ControlAutomationPeer>().and_then(|peer| peer.try_owner()) else { return false; };
+            let Some(manager) = FocusManager::get_focus_manager(&owner) else { return false; };
+            manager.focus(None, NavigationMethod::Unspecified, KeyModifiers::NONE);
+            self.synchronize_input_focus();
+            !peer.has_keyboard_focus()
+        }
     }
 
     fn get_node_info_providers_from_virtual_view_id(&self, virtual_view_id: i32) -> Option<Rc<PeerRegistration>> {
@@ -280,16 +340,25 @@ impl FerroAccessHelper {
 
     /// The node of a virtual view.
     pub(crate) fn create_node_for_virtual_view(&self, virtual_view_id: i32) -> NodeInfo {
+        self.synchronize_input_focus();
         self.base.create_node_for_child(self, virtual_view_id)
     }
 
     /// An action of a virtual view; whether it was performed.
     pub(crate) fn perform_action(&self, virtual_view_id: i32, action: i32, arguments: Option<&NodeActionArguments>) -> bool {
-        self.base.perform_action_for_child(self, virtual_view_id, action, arguments)
+        let rooted = self.synchronize_input_focus().is_some();
+        if rooted && matches!(action, ACTION_FOCUS | ACTION_CLEAR_FOCUS) {
+            self.perform_input_focus_action(virtual_view_id, action)
+        } else {
+            self.base.perform_action_for_child(self, virtual_view_id, action, arguments)
+        }
     }
 
     /// The virtual view that has the focus of the type, or [`INVALID_ID`].
     pub(crate) fn find_focus(&self, focus_type: i32) -> i32 {
+        if focus_type == FOCUS_INPUT {
+            if let Some(id) = self.synchronize_input_focus() { return id; }
+        }
         self.base.find_focus(focus_type)
     }
 
@@ -301,12 +370,16 @@ impl FerroAccessHelper {
     /// A key event of the view that the framework did not handle; whether
     /// the helper took it.
     pub(crate) fn dispatch_key_event(&self, action: i32, key_code: i32, has_no_modifiers: bool, repeat_count: i32) -> bool {
+        self.synchronize_input_focus();
         self.base.dispatch_key_event(self, action, key_code, has_no_modifiers, repeat_count)
     }
 
     /// The focus of the view changed.
     pub(crate) fn on_focus_changed(&self, gain_focus: bool) {
-        self.base.on_focus_changed(gain_focus);
+        self.host_has_focus.set(Some(gain_focus));
+        if self.synchronize_input_focus().is_none() {
+            self.base.on_focus_changed(gain_focus);
+        }
     }
 
     /// The base of the helper: the focus and hover state of its virtual
@@ -1129,5 +1202,104 @@ mod tests {
         assert_eq!(vec![ACTION_CLICK, ACTION_SELECT], node.actions);
         assert_eq!(20, node.action_mask());
         assert_eq!(None, node.class_name);
+    }
+
+    fn embedded_focus_fixture() -> (Fixture, Ref<ferroui_controls::embedding::EmbeddableControlRoot>, Ref<Button>, Ref<Button>) {
+        use ferroui_controls::embedding::EmbeddableControlRoot;
+        use ferroui_controls::platform::ITopLevelImpl;
+        use ferroui_controls::testing::{MockImplKind, MockWindowImpl};
+        let platform: Rc<dyn ITopLevelImpl> = MockWindowImpl::bare(MockImplKind::TopLevel);
+        let root = EmbeddableControlRoot::with_impl(platform);
+        let panel = StackPanel::new();
+        let first = onscreen!(Button::new(), "First");
+        let second = onscreen!(Button::new(), "Second");
+        panel.children().add(first.clone());
+        panel.children().add(second.clone());
+        root.set_content(Some(Control::boxed(panel)));
+        root.prepare();
+        root.set_is_visible(true);
+        let fixture = helper_of(&root);
+        (fixture, root, first, second)
+    }
+
+    #[test]
+    fn embedded_root_real_focus_is_reported_without_a_virtual_focus_action() {
+        use ferroui_controls::testing::{TestServices, UnitTestApplication};
+        let _app = UnitTestApplication::start(TestServices::focusable_window());
+        let (fixture, _root, first, second) = embedded_focus_fixture();
+        assert!(first.focus());
+        assert!(ControlAutomationPeer::create_peer_for_element(&first).has_keyboard_focus());
+        let first_id = id_of(&fixture, &first);
+        assert!(fixture.helper.create_node_for_virtual_view(first_id).focused);
+        assert_eq!(first_id, fixture.helper.find_focus(FOCUS_INPUT));
+        assert!(second.focus());
+        let second_id = id_of(&fixture, &second);
+        assert!(!fixture.helper.create_node_for_virtual_view(first_id).focused);
+        assert!(fixture.helper.create_node_for_virtual_view(second_id).focused);
+        assert_eq!(second_id, fixture.helper.find_focus(FOCUS_INPUT));
+    }
+
+    #[test]
+    fn embedded_focus_actions_change_actual_controls_and_clear_only_the_focused_owner() {
+        use ferroui_controls::testing::{TestServices, UnitTestApplication};
+        let _app = UnitTestApplication::start(TestServices::focusable_window());
+        let (fixture, _root, first, second) = embedded_focus_fixture();
+        assert!(first.focus());
+        let first_id = id_of(&fixture, &first);
+        let second_id = id_of(&fixture, &second);
+        assert!(!fixture.helper.perform_action(first_id, ACTION_FOCUS, None));
+        assert!(!fixture.helper.perform_action(second_id, ACTION_CLEAR_FOCUS, None));
+        assert!(fixture.helper.perform_action(second_id, ACTION_FOCUS, None));
+        assert!(!first.is_focused() && second.is_focused());
+        assert_eq!(second_id, fixture.helper.find_focus(FOCUS_INPUT));
+        assert!(fixture.helper.perform_action(second_id, ACTION_CLEAR_FOCUS, None));
+        assert!(!first.is_focused() && !second.is_focused());
+        assert_eq!(INVALID_ID, fixture.helper.find_focus(FOCUS_INPUT));
+        second.set_is_enabled(false);
+        assert!(!fixture.helper.perform_action(second_id, ACTION_FOCUS, None));
+        assert_eq!(INVALID_ID, fixture.helper.find_focus(FOCUS_INPUT));
+    }
+
+    #[test]
+    fn embedded_keyboard_focus_does_not_move_accessibility_focus_and_respects_host_blur() {
+        use ferroui_controls::testing::{TestServices, UnitTestApplication};
+        let _app = UnitTestApplication::start(TestServices::focusable_window());
+        let (fixture, _root, first, second) = embedded_focus_fixture();
+        let first_id = id_of(&fixture, &first);
+        let second_id = id_of(&fixture, &second);
+        assert!(fixture.helper.perform_action(second_id, ACTION_ACCESSIBILITY_FOCUS, None));
+        assert!(first.focus());
+        assert_eq!(first_id, fixture.helper.find_focus(FOCUS_INPUT));
+        assert_eq!(second_id, fixture.helper.find_focus(FOCUS_ACCESSIBILITY));
+        assert!(fixture.helper.create_node_for_virtual_view(first_id).focused);
+        assert!(!fixture.helper.create_node_for_virtual_view(first_id).accessibility_focused);
+        assert!(fixture.helper.create_node_for_virtual_view(second_id).accessibility_focused);
+        fixture.helper.on_focus_changed(false);
+        assert_eq!(INVALID_ID, fixture.helper.find_focus(FOCUS_INPUT));
+        assert!(!fixture.helper.create_node_for_virtual_view(first_id).focused);
+        assert_eq!(second_id, fixture.helper.find_focus(FOCUS_ACCESSIBILITY));
+        fixture.helper.on_focus_changed(true);
+        assert_eq!(first_id, fixture.helper.find_focus(FOCUS_INPUT));
+    }
+
+    #[test]
+    fn embedded_focus_discovery_before_tree_walk_does_not_duplicate_events_or_retain_subscription() {
+        use ferroui_controls::testing::{TestServices, UnitTestApplication};
+        let _app = UnitTestApplication::start(TestServices::focusable_window());
+        let (fixture, _root, first, second) = embedded_focus_fixture();
+        assert!(first.focus());
+        let id = fixture.helper.find_focus(FOCUS_INPUT);
+        assert_ne!(INVALID_ID, id);
+        let count = fixture.host.events.borrow().len();
+        assert_eq!(id, fixture.helper.find_focus(FOCUS_INPUT));
+        fixture.helper.create_node_for_virtual_view(id);
+        assert_eq!(count, fixture.host.events.borrow().len());
+        let weak = Rc::downgrade(&fixture.helper);
+        let subscription = Rc::downgrade(fixture.helper.root_focus_subscription.borrow().as_ref().unwrap());
+        drop(fixture.helper);
+        assert!(weak.upgrade().is_none());
+        assert!(subscription.upgrade().is_none());
+        assert!(second.focus());
+        assert_eq!(count, fixture.host.events.borrow().len());
     }
 }

@@ -5477,3 +5477,26 @@ fn geometry_hit_test_finds_the_elements_intersecting_a_region() {
 
     scope.dispose();
 }
+
+#[test]
+fn interaction_focus_policy_is_inherited_and_local_values_override_it() {
+    let child=TestControl::focusable("child");let parent=TestControl::new("parent").with_children(&[&child]);let _root=TestRoot::with_child(&parent);
+    assert!(child.allow_focus_on_interaction());parent.set_allow_focus_on_interaction(false);assert!(!child.allow_focus_on_interaction());
+    child.set_allow_focus_on_interaction(true);assert!(child.allow_focus_on_interaction());child.clear_value(InputElement::allow_focus_on_interaction_property());assert!(!child.allow_focus_on_interaction());
+    parent.remove_child(&child);assert!(child.allow_focus_on_interaction());
+}
+#[test]
+fn interaction_focus_policy_blocks_pointer_but_not_explicit_or_keyboard_focus() {
+    let _keyboard=real_focus();let first=TestControl::focusable("first");let neutral=TestControl::focusable("neutral");let parent=TestControl::new("parent").with_children(&[&first,&neutral]);let root=TestRoot::with_child(&parent);
+    neutral.set_allow_focus_on_interaction(false);assert!(root.focus_manager().focus(Some(&first.clone().upcast()),NavigationMethod::Unspecified,KeyModifiers::NONE));
+    assert!(!neutral.focus_with(NavigationMethod::Pointer,KeyModifiers::NONE));assert!(first.is_focused());
+    for method in [NavigationMethod::Unspecified,NavigationMethod::Tab,NavigationMethod::Directional] {
+        assert!(neutral.focus_with(method,KeyModifiers::NONE));assert!(first.focus());
+    }
+}
+#[test]
+fn interaction_focus_policy_rejects_redirected_pointer_targets_without_committing_focus() {
+    let keyboard=real_focus();let first=TestControl::focusable("first");let allowed=TestControl::focusable("allowed");let blocked=TestControl::focusable("blocked");let parent=TestControl::new("parent").with_children(&[&first,&allowed,&blocked]);let _root=TestRoot::with_child(&parent);
+    blocked.set_allow_focus_on_interaction(false);assert!(first.focus());let redirected=blocked.clone();allowed.getting_focus(move|_,e|{e.try_set_new_focused_element(Some(&redirected.clone().upcast()));});
+    keyboard.set_focused_element(Some(&allowed.clone().upcast()),NavigationMethod::Pointer,KeyModifiers::NONE);assert!(first.is_focused());assert!(!blocked.is_focused());
+}

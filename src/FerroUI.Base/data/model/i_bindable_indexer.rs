@@ -81,7 +81,7 @@ fn argument<'a, T: 'static>(arguments: &'a [BoxedValue], index: usize) -> Result
 ///
 /// As a model object it has identity equality.
 pub struct BindableArray<T: PropertyValue> {
-    items: RefCell<Vec<T>>,
+    items: ferroui_system::SharedArray<T>,
     lengths: Vec<usize>,
 }
 
@@ -108,8 +108,21 @@ impl<T: PropertyValue> BindableArray<T> {
         if !ModelTypes::is_registered(TypeId::of::<Self>()) {
             ModelTypes::register::<Self>(|b| b.array().indexer());
         }
-        Rc::new(Self { items: RefCell::new(items), lengths })
+        register_bindable_array::<T>();
+        Rc::new(Self { items: ferroui_system::SharedArray::new(items), lengths })
     }
+
+    /// View the original shared storage without copying its elements.
+    pub fn from_shared(items:ferroui_system::SharedArray<T>)->Rc<Self> {
+        let lengths=vec![items.len()];
+        Self::from_shared_lengths(items,lengths)
+    }
+    fn from_shared_lengths(items:ferroui_system::SharedArray<T>,lengths:Vec<usize>)->Rc<Self> {
+        if !ModelTypes::is_registered(TypeId::of::<Self>()) {ModelTypes::register::<Self>(|b| b.array().indexer());}
+        register_bindable_array::<T>();
+        Rc::new(Self{items,lengths})
+    }
+    pub fn shared(&self)->ferroui_system::SharedArray<T>{self.items.clone()}
 
     /// The length of each dimension.
     pub fn lengths(&self) -> &[usize] {
@@ -118,7 +131,7 @@ impl<T: PropertyValue> BindableArray<T> {
 
     /// The total number of elements.
     pub fn len(&self) -> usize {
-        self.items.borrow().len()
+        self.items.len()
     }
 
     pub fn is_empty(&self) -> bool {
@@ -128,18 +141,18 @@ impl<T: PropertyValue> BindableArray<T> {
     /// The element at `indexes`. Panics if out of range.
     pub fn get(&self, indexes: &[usize]) -> T {
         let offset = self.offset(indexes).expect("Index was outside the bounds of the array.");
-        self.items.borrow()[offset].clone()
+        self.items.get(offset as i32).expect("checked array offset")
     }
 
     /// Replaces the element at `indexes`. Panics if out of range.
     pub fn set(&self, indexes: &[usize], value: T) {
         let offset = self.offset(indexes).expect("Index was outside the bounds of the array.");
-        self.items.borrow_mut()[offset] = value;
+        self.items.set(offset as i32,value).expect("checked array offset");
     }
 
     /// The elements in row-major order.
     pub fn to_vec(&self) -> Vec<T> {
-        self.items.borrow().clone()
+        self.items.to_vec()
     }
 
     fn offset(&self, indexes: &[usize]) -> Option<usize> {
@@ -169,7 +182,7 @@ impl<T: PropertyValue> BindableArray<T> {
 
 impl<T: PropertyValue> PartialEq for BindableArray<T> {
     fn eq(&self, other: &Self) -> bool {
-        std::ptr::eq(self, other)
+        self.items.ptr_eq(&other.items) && self.lengths==other.lengths
     }
 }
 
@@ -184,13 +197,13 @@ impl<T: PropertyValue> IBindableArray for BindableArray<T> {
 
     fn get_value(&self, indexes: &[i32]) -> Result<Option<BoxedValue>, BindingError> {
         let offset = self.checked_offset(indexes)?;
-        Ok(Some(Rc::new(self.items.borrow()[offset].clone())))
+        Ok(Some(Rc::new(self.items.get(offset as i32).expect("checked array offset"))))
     }
 
     fn set_value(&self, indexes: &[i32], value: Option<&BoxedValue>) -> Result<(), BindingError> {
         let offset = self.checked_offset(indexes)?;
         let value = Value::<T>::from_untyped(value).ok_or_else(|| invalid_value(value, ValueType::of::<T>()))?;
-        self.items.borrow_mut()[offset] = value;
+        self.items.set(offset as i32,value).expect("checked array offset");
         Ok(())
     }
 }
@@ -304,5 +317,38 @@ impl<K: Eq + Hash + Clone + Display + 'static, V: PropertyValue> IBindableIndexe
         let value = Value::<V>::from_untyped(value).ok_or_else(|| invalid_value(value, ValueType::of::<V>()))?;
         self.items.set(key.clone(), value);
         Ok(true)
+    }
+}
+
+// Native array handles are reference types. The type-system hosts read this process table.
+static ARRAY_HANDLES:std::sync::Mutex<Vec<(ValueType,ValueType)>>=std::sync::Mutex::new(Vec::new());
+pub fn bindable_array_element(handle:TypeId)->Option<ValueType>{ARRAY_HANDLES.lock().expect("array handle table poisoned").iter().find(|(known,_)|known.id()==handle).map(|(_,element)|*element)}
+pub fn register_bindable_array<T:PropertyValue>() {
+    {
+        let mut handles=ARRAY_HANDLES.lock().expect("array handle table poisoned");
+        for handle in [ValueType::of::<BindableArray<T>>(),ValueType::of::<Rc<BindableArray<T>>>(),ValueType::of::<Option<Rc<BindableArray<T>>>>()] {
+            if !handles.iter().any(|(known,_)|known.id()==handle.id()){handles.push((handle,ValueType::of::<T>()));}
+        }
+    }
+    crate::data::core::ValueTypes::register_reference::<BindableArray<T>>();
+    crate::data::core::ValueTypes::register_projected_weak::<BindableArray<T>>(|array|Rc::new(WeakBindableArray{items:array.items.downgrade(),lengths:array.lengths.clone()}));
+}
+struct WeakBindableArray<T:PropertyValue>{items:ferroui_system::WeakSharedArray<T>,lengths:Vec<usize>}
+impl<T:PropertyValue>crate::data::core::ProjectedWeakReference for WeakBindableArray<T>{
+    fn upgrade(&self)->Option<BoxedValue>{Some(BindableArray::from_shared_lengths(self.items.upgrade()?,self.lengths.clone()))}
+    fn ptr_eq(&self,other:&dyn crate::data::core::ProjectedWeakReference)->bool{(other as &dyn std::any::Any).downcast_ref::<Self>().is_some_and(|other|self.items.ptr_eq(&other.items)&&self.lengths==other.lengths)}
+}
+
+#[cfg(test)]mod shared_storage_tests {
+    use super::*;
+    #[test]fn original_shared_array_aliases_mutation_and_model_access() {
+        let original=ferroui_system::SharedArray::new(vec![97i32]);let view=BindableArray::from_shared(original.clone());
+        view.set(&[0],98);assert_eq!(original.get(0),Ok(98));original.set(0,99).unwrap();assert_eq!(view.get(&[0]),99);
+        assert!(view.shared().ptr_eq(&original));assert_eq!(view.get_value(&[0]).unwrap().unwrap().downcast_ref::<i32>(),Some(&99));
+    }
+    #[test]fn weak_view_survives_wrapper_release_but_does_not_own_backing() {
+        let original=ferroui_system::SharedArray::new(vec![97i32]);let view=BindableArray::from_shared(original.clone());
+        let boxed:BoxedValue=view;let weak=crate::data::core::WeakValue::new(&boxed);assert!(matches!(weak,crate::data::core::WeakValue::Projected(_)));drop(boxed);
+        let restored=weak.upgrade().unwrap();assert!(restored.downcast_ref::<BindableArray<i32>>().unwrap().shared().ptr_eq(&original));drop(restored);drop(original);assert!(weak.upgrade().is_none());
     }
 }

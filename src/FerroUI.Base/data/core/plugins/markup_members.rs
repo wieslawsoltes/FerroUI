@@ -28,10 +28,26 @@ pub(crate) fn find_property(value: &dyn AnyValue, name: &str) -> Option<&'static
     crate::metadata::find_markup_property(value, name)
 }
 
+/// Declared class methods also inherit the existing System.Object methods.
+/// Interface views expose their interface declarations; value-type behavior is
+/// handled separately. Keep property/indexer lookup on the declared graph.
+fn method_types_of(value: &dyn AnyValue) -> Vec<&'static MarkupType> {
+    let mut result = types_of(value);
+    if ValueTypes::as_object(value).is_some()
+        || result.first().is_some_and(|m| m.kind == crate::metadata::MarkupTypeKind::Class)
+    {
+        let object = crate::metadata::BuiltinMethod::ObjectToString.declaring_type();
+        if !result.iter().any(|seen| std::ptr::eq(*seen, object)) {
+            result.push(object);
+        }
+    }
+    result
+}
+
 /// Whether the type of `value` or one of its base types declares a method
 /// named `name`.
 pub(crate) fn has_method(value: &dyn AnyValue, name: &str) -> bool {
-    types_of(value).into_iter().any(|markup| markup.find_methods(name).next().is_some())
+    method_types_of(value).into_iter().any(|markup| markup.find_methods(name).next().is_some())
 }
 
 /// The indexer of the type of `value`: the one of the most derived type
@@ -64,7 +80,7 @@ pub(crate) fn find_best_command_method(value: &dyn AnyValue, name: &str) -> Meth
     // that hides the one of the base type) counts once: the most derived
     // declaration.
     let mut candidates: Vec<(&'static MarkupType, &'static MarkupMethod)> = Vec::new();
-    for (depth, markup) in types_of(value).into_iter().enumerate() {
+    for (depth, markup) in method_types_of(value).into_iter().enumerate() {
         for method in markup.find_methods(name) {
             // The static methods of base types are not members of the type.
             if method.is_static && depth > 0 {

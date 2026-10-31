@@ -1,7 +1,7 @@
 use crate::controls::NameScopeRef;
 use crate::data::core::expression_nodes::{
     ArrayIndexerNode, CastTarget, ExpressionNode, FerroPropertyAccessorNode, FuncTransformNode,
-    LogicalAncestorElementNode, LogicalNotNode, MethodCommandNode, NamedElementNode, PropertyAccessorNode,
+    LogicalAncestorElementNode, LogicalNotNode, MethodCommandNode, NamedElementNode, PropertyAccessorNode, NullableMember, NullableMemberNode,
     StreamNode, TemplatedParentNode, VisualAncestorElementNode,
 };
 use crate::data::core::plugins::{
@@ -31,6 +31,7 @@ type Cast = Rc<dyn Fn(Option<&BoxedValue>) -> Option<BoxedValue>>;
 #[derive(Clone)]
 enum PathElement {
     Not,
+    Nullable { inner: ValueType, member: NullableMember, accepts_null: bool },
     /// A registered property of an object of the class hierarchy.
     FerroProperty { property: &'static FerroProperty, accepts_null: bool },
     /// A plain property with typed accessors: eligible for the typed
@@ -117,6 +118,7 @@ impl<'a> CompiledBindingPathElement<'a> {
         use CompiledBindingPathElementKind as Kind;
         match self.0 {
             PathElement::Not => Kind::Not,
+            PathElement::Nullable { .. } => Kind::Property,
             PathElement::FerroProperty { .. } | PathElement::TypedProperty { .. } | PathElement::Property { .. } => {
                 Kind::Property
             }
@@ -142,6 +144,7 @@ impl<'a> CompiledBindingPathElement<'a> {
                 Some(property.name())
             }
             PathElement::Untyped { name, .. } => Some(name),
+            PathElement::Nullable { member, .. } => Some(member.name()),
             PathElement::MethodAsCommand { method_name, .. } => Some(method_name),
             PathElement::ElementName { name, .. } => Some(name),
             _ => None,
@@ -166,6 +169,7 @@ impl<'a> CompiledBindingPathElement<'a> {
     pub fn property_type(&self) -> Option<ValueType> {
         match self.0 {
             PathElement::Untyped { property_type, .. } => *property_type,
+            PathElement::Nullable { inner, member, .. } => Some(match member { NullableMember::Value => *inner, NullableMember::HasValue => ValueType::of::<bool>() }),
             _ => self.property().map(|property| property.property_type()),
         }
     }
@@ -183,7 +187,8 @@ impl<'a> CompiledBindingPathElement<'a> {
             PathElement::FerroProperty { accepts_null, .. }
             | PathElement::TypedProperty { accepts_null, .. }
             | PathElement::Property { accepts_null, .. }
-            | PathElement::Untyped { accepts_null, .. } => *accepts_null,
+            | PathElement::Untyped { accepts_null, .. }
+            | PathElement::Nullable { accepts_null, .. } => *accepts_null,
             _ => false,
         }
     }
@@ -291,6 +296,7 @@ impl CompiledBindingPath {
                     Some(PropertyAccessorNode::new(name, plugin.clone(), *accepts_null))
                 }
                 PathElement::ArrayElement { indices } => Some(ArrayIndexerNode::new(indices.clone())),
+                PathElement::Nullable { inner, member, accepts_null } => Some(NullableMemberNode::new(*inner,*member,*accepts_null)),
                 PathElement::VisualAncestor { ancestor_type, level } => {
                     is_rooted = true;
                     Some(VisualAncestorElementNode::new(*ancestor_type, *level))
@@ -362,6 +368,7 @@ impl fmt::Display for CompiledBindingPath {
         for element in self.elements.iter() {
             let text = match element {
                 PathElement::Not => "!".to_string(),
+                PathElement::Nullable { member, .. } => format!("{}{}",if first { "" } else { "." },member.name()),
                 PathElement::FerroProperty { property, .. } => {
                     format!("{}{}", if first { "" } else { "." }, property.name())
                 }
@@ -417,6 +424,13 @@ impl PartialEq for CompiledBindingPathBuilder {
 impl CompiledBindingPathBuilder {
     pub fn new() -> Self {
         Self::default()
+    }
+
+    /// Reads a System.Nullable<T> member without losing the distinction between an
+    /// empty nullable and a present default T when its native box is erased.
+    pub fn nullable_member(&self, inner: ValueType, member: NullableMember, accepts_null: bool) -> Self {
+        self.elements.borrow_mut().push(PathElement::Nullable { inner, member, accepts_null });
+        self.clone()
     }
 
     /// Negates the result of the path.

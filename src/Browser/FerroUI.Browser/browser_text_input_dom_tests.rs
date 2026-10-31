@@ -44,6 +44,12 @@ impl ITextInputPage for RecordingPage {
     fn set_surrounding_text(&self, text: &str, start: i32, end: i32) {
         self.0.legacy.borrow_mut().push(format!("text '{text}' {start} {end}"));
     }
+    fn set_selection(&self, start: i32, end: i32) {
+        self.0.legacy.borrow_mut().push(format!("selection {start} {end}"));
+    }
+    fn set_options(&self, _options: &TextInputOptions) {
+        self.0.legacy.borrow_mut().push("options".to_owned());
+    }
     fn has_text_input_element(&self) -> bool {
         true
     }
@@ -1085,4 +1091,14 @@ fn browser_dom_reset_keeps_a_client_installed_while_the_composition_ends() {
     assert!(Rc::ptr_eq(&f.method.client().unwrap(), &next));
     assert!(!f.method.is_composing());
     assert!(!f.owner.editor().is_composing());
+}
+
+#[test]
+fn browser_dom_input_connection_install_retires_legacy_peer_value() {
+    let f = Fixture::new();
+    assert!(f.page.legacy.borrow().iter().any(|call| call == "clear"));
+    assert!(f.page.uses_text_input.get());
+    f.assert_mirror();
+    f.method.dispose();
+    assert_eq!(f.page.text.borrow().as_str(), "");
 }

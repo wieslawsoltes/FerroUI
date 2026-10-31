@@ -7,7 +7,7 @@ use crate::data::core::{ValueTypes, WeakValue};
 use crate::data::model::{Event, ICommand, INotifyPropertyChanged};
 use crate::data::{BindingMode, BindingNotification, ReflectionBinding};
 use crate::logging::{ILogSink, LogArea, LogEventLevel, Logger};
-use crate::metadata::{MarkupDelegate, MarkupType, MarkupTyped};
+use crate::metadata::{MarkupDelegate, MarkupInvokeError, MarkupType, MarkupTyped};
 use crate::threading::Dispatcher;
 use crate::{
     ferro_class, ferro_impl_classes, ferro_markup_type, ferro_property, instantiate, BoxedValue, FerroObjectImpl,
@@ -669,11 +669,11 @@ fn a_command_of_a_method_of_the_object_that_owns_its_control_keeps_neither_alive
     let weak_part = part.downgrade();
     drop(owner);
     assert!(weak_owner.upgrade().is_none(), "the command or the delegate of the part keeps the owner alive");
-    // The command and the delegate that outlive their target do nothing.
+    // Legacy execution remains inert; fallible invocation reports the expired target.
     assert!(!delegate.is_target_alive());
     assert!(delegate.target().is_none());
     assert_eq!(delegate.invoke(&[]), None);
-    assert_eq!(delegate.try_invoke(&[]), Ok(None));
+    assert_eq!(delegate.try_invoke(&[]), Err(MarkupInvokeError::Failed("The method binding target is no longer alive.".to_string())));
     assert!(!command.can_execute(None));
     command.execute(None);
     subscription.dispose();
@@ -834,4 +834,137 @@ fn can_convert_from_delegate_to_command_no_parameters() {
     command.execute(None);
 
     assert_eq!(vm.log(), ["Save"]);
+}
+
+#[derive(Clone)]
+struct InterfaceMemberBase(Rc<Cell<i32>>);
+impl PartialEq for InterfaceMemberBase {
+    fn eq(&self, other: &Self) -> bool {
+        Rc::ptr_eq(&self.0, &other.0)
+    }
+}
+#[derive(Clone)]
+struct InterfaceMemberDerived(InterfaceMemberBase);
+impl PartialEq for InterfaceMemberDerived {
+    fn eq(&self, other: &Self) -> bool {
+        self.0 == other.0
+    }
+}
+#[derive(Clone)]
+struct InterfaceMemberClass(InterfaceMemberBase);
+impl PartialEq for InterfaceMemberClass {
+    fn eq(&self, other: &Self) -> bool {
+        self.0 == other.0
+    }
+}
+ferro_markup_type!(interface InterfaceMemberBase {
+    this: InterfaceMemberBase, handles: [InterfaceMemberBase],
+    properties: [Count: i32 { get: |v: &InterfaceMemberBase| v.0.get() }],
+    methods: [fn Touch() => |v: &InterfaceMemberBase| v.0.set(v.0.get() + 1)],
+    indexers: [(i32) -> i32 { get: |v: &InterfaceMemberBase, i| v.0.get() + i }]
+});
+ferro_markup_type!(interface InterfaceMemberDerived {
+    this: InterfaceMemberDerived, handles: [InterfaceMemberDerived], interfaces: [InterfaceMemberBase]
+});
+ferro_markup_type!(class InterfaceMemberClass {
+    this: InterfaceMemberClass, handles: [InterfaceMemberClass], interfaces: [InterfaceMemberBase]
+});
+#[test]
+fn declared_interface_views_find_parent_members_without_exposing_class_interfaces() {
+    MarkupType::register_all(&[
+        InterfaceMemberBase::MARKUP,
+        InterfaceMemberDerived::MARKUP,
+        InterfaceMemberClass::MARKUP,
+    ]);
+    ValueTypes::register_cast::<InterfaceMemberDerived, InterfaceMemberBase>(|v| v.0.clone());
+    ValueTypes::register_cast::<InterfaceMemberClass, InterfaceMemberBase>(|v| v.0.clone());
+    let base = InterfaceMemberBase(Rc::new(Cell::new(3)));
+    let source: BoxedValue = Rc::new(InterfaceMemberDerived(base.clone()));
+    assert!(InpcPropertyAccessorPlugin.match_(&*source, "Count"));
+    let target = MemberTarget::new();
+    target.set_data_context(Some(source.clone()));
+    target.bind_binding(MemberTarget::tag_property(), &ReflectionBinding::new("Count"));
+    assert_eq!(
+        *target
+            .get_value(MemberTarget::tag_property())
+            .unwrap()
+            .downcast_ref::<i32>()
+            .unwrap(),
+        3
+    );
+    let found = super::markup_members::find_property(&*source, "Count").unwrap();
+    assert!(std::ptr::eq(
+        found,
+        InterfaceMemberBase::MARKUP.find_property("Count").unwrap()
+    ));
+    assert!(super::markup_members::has_method(&*source, "Touch"));
+    let indexer = super::markup_members::find_indexer(&*source, 1).unwrap();
+    assert_eq!(
+        (indexer.get.unwrap())(&[Some(source.clone()), Some(boxed(2))])
+            .unwrap()
+            .unwrap()
+            .downcast_ref::<i32>(),
+        Some(&5)
+    );
+    let class: BoxedValue = Rc::new(InterfaceMemberClass(base));
+    assert!(!InpcPropertyAccessorPlugin.match_(&*class, "Count"));
+    assert!(!super::markup_members::has_method(&*class, "Touch"));
+    assert!(super::markup_members::find_indexer(&*class, 1).is_none());
+}
+
+
+#[derive(PartialEq)]
+struct ObjectMethodClass;
+ferro_markup_type!(class ObjectMethodClass {
+    this: Rc<ObjectMethodClass>, handles: [ObjectMethodClass, Rc<ObjectMethodClass>]
+});
+#[derive(PartialEq)]
+struct HiddenObjectMethodClass;
+ferro_markup_type!(class HiddenObjectMethodClass {
+    this: Rc<HiddenObjectMethodClass>, handles: [HiddenObjectMethodClass, Rc<HiddenObjectMethodClass>],
+    methods: [fn ToString() -> String => |_: &Rc<HiddenObjectMethodClass>| "hidden".to_owned()]
+});
+#[test]
+fn declared_classes_inherit_object_methods_with_original_receiver() {
+    use super::markup_members::{find_best_command_method, has_method, MethodLookup};
+    use crate::metadata::{from_markup_value, into_markup_value, BuiltinMethod};
+    register();
+    MarkupType::register_all(&[ObjectMethodClass::MARKUP, HiddenObjectMethodClass::MARKUP]);
+    ValueTypes::register_reference::<ObjectMethodClass>();
+    ValueTypes::register_reference::<HiddenObjectMethodClass>();
+    let original = Rc::new(ObjectMethodClass);
+    let source = into_markup_value(original.clone()).unwrap();
+    for name in ["ToString", "GetHashCode"] {
+        assert!(has_method(&*source, name));
+        let MethodLookup::Method(owner, method) = find_best_command_method(&*source, name) else { panic!("{name}") };
+        assert!(std::ptr::eq(owner, BuiltinMethod::ObjectToString.declaring_type()));
+        let builtin = if name == "ToString" { BuiltinMethod::ObjectToString } else { BuiltinMethod::ObjectGetHashCode };
+        let bound = builtin.bind(&source).unwrap();
+        assert!(std::ptr::eq(bound.method().unwrap(), method));
+        let callback = MarkupDelegate::for_method(Some(source.clone()), owner, method);
+        let target: Rc<ObjectMethodClass> = from_markup_value(&callback.target()).unwrap();
+        assert!(Rc::ptr_eq(&target, &original));
+        let result = callback.try_invoke(&[]).unwrap();
+        if name == "ToString" {
+            assert_eq!(from_markup_value::<ferroui_system::Utf16Text>(&result), Some(ObjectMethodClass::MARKUP.full_name().as_str().into()));
+        } else {
+            assert_eq!(from_markup_value::<i32>(&result), from_markup_value::<i32>(&callback.try_invoke(&[]).unwrap()));
+            assert!(from_markup_value::<i32>(&result).is_some());
+        }
+    }
+    let source = into_markup_value(Rc::new(HiddenObjectMethodClass)).unwrap();
+    let MethodLookup::Method(owner, method) = find_best_command_method(&*source, "ToString") else { panic!("hidden") };
+    assert!(std::ptr::eq(owner, HiddenObjectMethodClass::MARKUP));
+    let callback = MarkupDelegate::for_method(Some(source), owner, method);
+    assert_eq!(from_markup_value::<String>(&callback.try_invoke(&[]).unwrap()).as_deref(), Some("hidden"));
+}
+#[test]
+fn declared_interface_views_do_not_invent_object_method_members() {
+    use super::markup_members::{find_best_command_method, has_method, MethodLookup};
+    MarkupType::register_all(&[InterfaceMemberBase::MARKUP, InterfaceMemberDerived::MARKUP]);
+    let source = InterfaceMemberDerived(InterfaceMemberBase(Rc::new(Cell::new(0))));
+    for name in ["ToString", "GetHashCode"] {
+        assert!(!has_method(&source, name));
+        assert!(matches!(find_best_command_method(&source, name), MethodLookup::None));
+    }
 }

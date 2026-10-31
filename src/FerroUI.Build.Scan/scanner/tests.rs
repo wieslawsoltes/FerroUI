@@ -56,7 +56,7 @@ fn text(value: &str) -> AttributeValueModel {
 }
 
 fn positional(type_: RustType) -> ParameterModel {
-    ParameterModel { name: None, type_, attributes: Vec::new() }
+    ParameterModel { by_ref_element: None, name: None, type_, attributes: Vec::new() }
 }
 
 /// An accessor whose callable is not called by a path (form C).
@@ -190,11 +190,11 @@ fn class_with_every_kind_of_member_is_read_exactly() {
         MemberModel {
             parameters: vec![
                 ParameterModel {
-                    name: Some("property".to_string()),
+                    by_ref_element: None, name: Some("property".to_string()),
                     type_: unresolved("&'static FerroProperty", &["FerroProperty"]),
                     attributes: vec![attribute("InheritDataTypeFrom", vec![AttributeValueModel::Int(2)])],
                 },
-                ParameterModel { name: Some("dock".to_string()), type_: ty("::fixture::media::Dock"), attributes: Vec::new() },
+                ParameterModel { by_ref_element: None, name: Some("dock".to_string()), type_: ty("::fixture::media::Dock"), attributes: Vec::new() },
             ],
             is_static: true,
             callable: closure(),

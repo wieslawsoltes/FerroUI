@@ -12,6 +12,8 @@ pub mod diagnostics;
 /// Thread-local variables for every target (`ferroui_system::ferro_thread_local`): the module and
 /// the macro, at the paths they had when they were defined here.
 pub use ferroui_system::ferro_thread_local;
+/// Exact immutable UTF16 transport shared with independently testable engines.
+pub use ferroui_system::{Char, Utf16Text};
 #[doc(hidden)]
 pub use ferroui_system::__ferro_thread_local_table;
 pub mod input;
@@ -143,3 +145,6 @@ mod tree_tests;
 mod visual_render_tests;
 #[cfg(test)]
 mod tests;
+
+#[doc(hidden)]
+pub use markup_types::{TextInfoMetadata,CompareInfoMetadata};

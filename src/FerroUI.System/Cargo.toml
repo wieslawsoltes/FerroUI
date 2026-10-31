@@ -19,6 +19,7 @@ autotests = false
 path = "lib.rs"
 
 [dependencies]
+bitflags = { workspace = true }
 smallvec = { workspace = true }
 
 # `--cfg ferro_tls_table` makes every `ferro_thread_local!` of a build use the table of the Android

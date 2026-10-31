@@ -358,6 +358,26 @@ impl ExploreByTouchHelper {
         false
     }
 
+    /// Requests native host focus without inventing a focused virtual child.
+    pub(crate) fn ensure_host_input_focus(&self) -> bool {
+        self.host.is_focused_or_request_focus()
+    }
+
+    /// Follows the embedded framework root, which owns actual input focus.
+    /// Accessibility focus remains independent. Reading node state never requests focus.
+    pub(crate) fn synchronize_keyboard_focus(&self, virtual_view_id: i32) {
+        let previous = self.keyboard_focused_virtual_view_id.replace(virtual_view_id);
+        if previous == virtual_view_id {
+            return;
+        }
+        if previous != INVALID_ID {
+            self.invalidate_virtual_view(previous);
+        }
+        if virtual_view_id != INVALID_ID {
+            self.send_event_for_virtual_view(virtual_view_id, TYPE_VIEW_FOCUSED);
+        }
+    }
+
     /// Attempts to give the keyboard focus to a virtual view.
     pub(crate) fn request_keyboard_focus_for_virtual_view(&self, virtual_view_id: i32) -> bool {
         if !self.host.is_focused_or_request_focus() {

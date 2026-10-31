@@ -1,7 +1,7 @@
 use std::any::Any;
 use std::cell::RefCell;
 use std::cmp::Ordering;
-use std::collections::{BTreeMap, HashMap};
+use std::collections::BTreeMap;
 use std::io::Read;
 use std::rc::Rc;
 
@@ -10,7 +10,7 @@ use crate::media::fonts::{FontCollectionKey, FontFallbackScriptHints, IFontColle
 use crate::media::text_formatting::unicode::{Codepoint, Script};
 use crate::media::{FontFamily, FontSimulations, FontStretch, FontStyle, FontWeight, GlyphTypeface, Typeface};
 use crate::platform::{IAssetLoader, IFontManagerImpl, ASSET_SCHEME};
-use crate::utilities::{CultureInfo, Uri};
+use crate::utilities::{CultureInfo, Uri, CultureMap, CultureMapKey};
 use crate::{FerroLocator, LocatorExtensions};
 
 /// The typefaces of one font family: glyph typefaces by style, weight and
@@ -146,6 +146,11 @@ impl GlyphTypefaceCache {
 
 /// Identifies a script/culture bucket of the fallback cache.
 type ScriptFallbackKey = (Script, Option<CultureInfo>);
+impl CultureMapKey for ScriptFallbackKey {
+ fn culture_map_hash(&self)->u64 {use std::hash::{Hash,Hasher};let mut h=std::collections::hash_map::DefaultHasher::new();self.0.hash(&mut h);self.1.as_ref().map(CultureMapKey::culture_map_hash).hash(&mut h);h.finish()}
+ fn culture_map_equals(&self,other:&Self)->bool {self.0==other.0&&self.1==other.1}
+}
+
 
 /// The state and the shared matching, fallback and caching logic of font
 /// collections.
@@ -164,7 +169,7 @@ pub struct FontCollectionBase {
     // fallback family for that script bucket: a Tier B hint that is still re-checked for coverage
     // per codepoint, and which does NOT by itself suppress a platform call. A `None` value is a
     // *negative* entry that prevents repeated platform-fallback calls for the same script bucket.
-    script_fallback_cache: RefCell<HashMap<ScriptFallbackKey, Option<String>>>,
+    script_fallback_cache: RefCell<CultureMap<ScriptFallbackKey, Option<String>>>,
 
     font_families: RefCell<Vec<FontFamily>>,
     font_manager_impl: Rc<dyn IFontManagerImpl>,
@@ -364,7 +369,7 @@ impl FontCollectionBase {
     pub fn new() -> Self {
         Self {
             glyph_typeface_cache: GlyphTypefaceCache::default(),
-            script_fallback_cache: RefCell::new(HashMap::new()),
+            script_fallback_cache: RefCell::new(CultureMap::new()),
             font_families: RefCell::new(Vec::new()),
             font_manager_impl: FerroLocator::current().get_required_service::<dyn IFontManagerImpl>(),
             asset_loader: FerroLocator::current().get_service::<dyn IAssetLoader>(),

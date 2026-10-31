@@ -1,5 +1,5 @@
 use std::cell::{Cell, OnceCell, RefCell};
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 use std::rc::Rc;
 use std::sync::Arc;
 
@@ -22,7 +22,7 @@ use crate::media::{
     IPlatformTypeface, ITextShaperTypeface, UnicodeRange, UnicodeRangeSegment,
 };
 use crate::platform::{self, IGeometryImpl, ITextShaperImpl};
-use crate::utilities::CultureInfo;
+use crate::utilities::{CultureInfo,CultureMap};
 use crate::{FerroLocator, LocatorExtensions, Matrix};
 
 /// LCID of the invariant culture as stored in name records.
@@ -50,8 +50,8 @@ pub struct GlyphTypeface {
 
     family_name: String,
     typographic_family_name: String,
-    family_names: HashMap<CultureInfo, String>,
-    face_names: HashMap<CultureInfo, String>,
+    family_names: CultureMap<CultureInfo, String>,
+    face_names: CultureMap<CultureInfo, String>,
     metrics: FontMetrics,
     weight: FontWeight,
     style: FontStyle,
@@ -208,8 +208,8 @@ impl GlyphTypeface {
             None => family_name.clone(),
         };
 
-        let mut family_names = HashMap::new();
-        let mut face_names = HashMap::new();
+        let mut family_names = CultureMap::new();
+        let mut face_names = CultureMap::new();
 
         match &name_table {
             Some(name_table) => {
@@ -323,12 +323,12 @@ impl GlyphTypeface {
     }
 
     /// Gets a mapping of culture-specific family names.
-    pub fn family_names(&self) -> &HashMap<CultureInfo, String> {
+    pub fn family_names(&self) -> &CultureMap<CultureInfo, String> {
         &self.family_names
     }
 
     /// Gets a mapping of culture-specific face names.
-    pub fn face_names(&self) -> &HashMap<CultureInfo, String> {
+    pub fn face_names(&self) -> &CultureMap<CultureInfo, String> {
         &self.face_names
     }
 
@@ -412,7 +412,7 @@ impl GlyphTypeface {
         let name = culture.name();
 
         let matches_any =
-            |tags: &[String]| tags.iter().any(|tag| Self::is_bcp47_prefix_match(tag, name));
+            |tags: &[String]| tags.iter().any(|tag| Self::is_bcp47_prefix_match(tag, &name));
 
         matches_any(&self.design_languages) || matches_any(&self.supported_languages)
     }

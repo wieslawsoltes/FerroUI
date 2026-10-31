@@ -29,6 +29,39 @@ impl TargetTypeConverter {
         TargetTypeConverter { reflection: true }
     }
 
+    pub fn try_convert_result(
+        &self,
+        value: Option<&BoxedValue>,
+        type_: ValueType,
+        culture: &CultureInfo,
+    ) -> Result<Option<Option<BoxedValue>>, crate::metadata::MarkupInvokeError> {
+        if let Some(result) = self.try_convert(value, type_, culture) {
+            return Ok(Some(result));
+        }
+        match value {
+            Some(value) => ValueTypes::try_adapt(value, type_).map(|v| v.map(Some)),
+            None => Ok(None),
+        }
+    }
+
+    pub fn try_convert_result_with_current(
+        &self,
+        value: Option<&BoxedValue>,
+        type_: ValueType,
+        culture: &CultureInfo,
+        current: Option<&BoxedValue>,
+    ) -> Result<Option<Option<BoxedValue>>, crate::metadata::MarkupInvokeError> {
+        if let Some(result) = self.try_convert(value, type_, culture) {
+            return Ok(Some(result));
+        }
+        match value {
+            Some(value) => {
+                ValueTypes::try_adapt_with_current(value, type_, current).map(|v| v.map(Some))
+            }
+            None => Ok(None),
+        }
+    }
+
     /// Converts `value` to exactly `type_`, with the conventions of
     /// `culture` for the conversions that depend on one. Returns `None` if
     /// the value cannot be converted. The unset marker passes through

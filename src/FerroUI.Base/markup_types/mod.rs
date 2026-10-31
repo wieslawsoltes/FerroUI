@@ -34,6 +34,7 @@ pub(crate) const TYPE_LISTS: &[&[&MarkupType]] =
 /// Adds the types declared in this module to the process-wide table of
 /// types with markup metadata. Called once by `register_types()`.
 pub(crate) fn register() {
+    crate::collections::register_enumerable();
     for types in TYPE_LISTS {
         MarkupType::register_all(types);
     }
@@ -54,3 +55,5 @@ fn register_value_types() {
     animation::register_value_types();
     rich_text::register_value_types();
 }
+
+pub use values::{TextInfoMetadata,CompareInfoMetadata};

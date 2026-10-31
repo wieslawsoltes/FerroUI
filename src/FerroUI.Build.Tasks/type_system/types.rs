@@ -147,6 +147,7 @@ pub struct ModelType {
     initializing: Cell<bool>,
     init: RefCell<Option<MembersInit>>,
     array_element_type: Option<Rc<dyn IXamlType>>,
+    by_ref_type: RefCell<Option<Weak<dyn IXamlType>>>,
     arrays: RefCell<HashMap<i32, Rc<ModelType>>>,
 }
 
@@ -235,6 +236,7 @@ impl ModelType {
                 initializing: Cell::new(false),
                 init: RefCell::new(spec.init),
                 array_element_type: spec.array_element_type,
+                by_ref_type: RefCell::new(None),
                 arrays: RefCell::new(HashMap::new()),
             }
         })
@@ -331,6 +333,13 @@ impl ModelType {
 /// Replaces the generic parameters of a definition in `type_` by the arguments of an
 /// instantiation.
 pub(crate) fn substitute(type_: &Rc<dyn IXamlType>, parameters: &[Rc<ModelType>], arguments: &[Rc<dyn IXamlType>]) -> Rc<dyn IXamlType> {
+    if let Some(element) = type_.by_ref_element_type() {
+        let replacement = substitute(&element, parameters, arguments);
+        if replacement.equals(&*element) { return type_.clone(); }
+        // Generic construction rejects reference arguments; valid substitution cannot nest T&.
+        return replacement.make_by_ref_type().expect("validated host generic arguments support managed-reference construction");
+    }
+
     let Some(model) = type_.as_any().downcast_ref::<ModelType>() else {
         return type_.clone();
     };
@@ -435,6 +444,9 @@ impl IXamlType for ModelType {
                 type_arguments.len()
             )));
         }
+        if type_arguments.iter().any(|argument| argument.is_by_ref()) {
+            return Err(XamlError::argument("Managed reference types cannot be generic arguments"));
+        }
         match (self.system.upgrade(), self.this.upgrade()) {
             (Some(system), Some(this)) => system.instantiate(&this, type_arguments),
             _ => Err(XamlError::invalid_operation("The type system has been dropped")),
@@ -442,6 +454,18 @@ impl IXamlType for ModelType {
     }
     fn generic_type_definition(&self) -> Option<Rc<dyn IXamlType>> {
         self.generic_definition.clone().map(|definition| definition as Rc<dyn IXamlType>)
+    }
+    fn make_by_ref_type(&self) -> XamlResult<Rc<dyn IXamlType>> {
+        if let Some(existing) = self.by_ref_type.borrow().as_ref().and_then(Weak::upgrade) {
+            return Ok(existing);
+        }
+        let element = self
+            .this
+            .upgrade()
+            .ok_or_else(|| XamlError::invalid_operation("The element type has been dropped"))?;
+        let reference = xamlx::type_system::XamlByRefType::new(element)?;
+        *self.by_ref_type.borrow_mut() = Some(Rc::downgrade(&reference));
+        Ok(reference)
     }
     fn is_array(&self) -> bool {
         self.array_element_type.is_some()
@@ -560,7 +584,14 @@ impl IXamlCustomAttribute for ModelCustomAttribute {
 }
 
 /// A method projected from the model.
+#[derive(Clone)]
+pub(crate) struct MethodParameterMetadata {
+    pub name: Option<String>,
+    pub attributes: Vec<Rc<dyn IXamlCustomAttribute>>,
+}
+
 pub struct ModelMethod {
+    pub(crate) parameter_metadata: Vec<MethodParameterMetadata>,
     pub(crate) name: String,
     pub(crate) declaring_type: Weak<ModelType>,
     pub(crate) is_static: bool,
@@ -603,6 +634,7 @@ impl ModelMethod {
                 self
             }
             None => Rc::new(ModelMethod {
+                parameter_metadata: self.parameter_metadata.clone(),
                 name: self.name.clone(),
                 declaring_type: self.declaring_type.clone(),
                 is_static: self.is_static,
@@ -618,8 +650,35 @@ impl ModelMethod {
         }
     }
 
+    pub(crate) fn with_parameter_metadata(
+        mut self: Rc<Self>,
+        parameter_metadata: Vec<MethodParameterMetadata>,
+    ) -> Rc<Self> {
+        match Rc::get_mut(&mut self) {
+            Some(method) => {
+                method.parameter_metadata = parameter_metadata;
+                self
+            }
+            None => Rc::new(ModelMethod {
+                parameter_metadata,
+                name: self.name.clone(),
+                declaring_type: self.declaring_type.clone(),
+                is_static: self.is_static,
+                return_type: self.return_type.clone(),
+                parameters: self.parameters.clone(),
+                attributes: self.attributes.clone(),
+                generic_parameters: self.generic_parameters.clone(),
+                generic_arguments: self.generic_arguments.clone(),
+                is_abstract: self.is_abstract,
+                source: self.source.clone(),
+                rust: self.rust.clone(),
+            }),
+        }
+    }
+
     pub(crate) fn substituted(&self, declaring_type: &Weak<ModelType>, parameters: &[Rc<ModelType>], arguments: &[Rc<dyn IXamlType>]) -> Rc<ModelMethod> {
         Rc::new(ModelMethod {
+            parameter_metadata: self.parameter_metadata.clone(),
             name: self.name.clone(),
             declaring_type: declaring_type.clone(),
             is_static: self.is_static,
@@ -689,8 +748,12 @@ impl IXamlMethod for ModelMethod {
                 type_arguments.len()
             )));
         }
+        if type_arguments.iter().any(|argument| argument.is_by_ref()) {
+            return Err(XamlError::argument("Managed reference types cannot be generic arguments"));
+        }
         let parameters = &self.generic_parameters;
         Ok(Rc::new(ModelMethod {
+            parameter_metadata: self.parameter_metadata.clone(),
             name: self.name.clone(),
             declaring_type: self.declaring_type.clone(),
             is_static: self.is_static,
@@ -709,8 +772,22 @@ impl IXamlMethod for ModelMethod {
     }
     fn get_parameter_info(&self, index: usize) -> XamlResult<Rc<dyn IXamlParameterInfo>> {
         match self.parameters.get(index) {
-            Some(parameter) => Ok(Rc::new(AnonymousParameterInfo::with_index(parameter.clone(), index))),
-            None => Err(XamlError::internal("ArgumentOutOfRangeException", format!("Method {} doesn't have a parameter {index}", self.name))),
+            Some(parameter) => match self.parameter_metadata.get(index) {
+                Some(info) => Ok(Rc::new(ModelParameterInfo {
+                    name: info.name.clone(),
+                    position: index,
+                    parameter_type: parameter.clone(),
+                    attributes: info.attributes.clone(),
+                })),
+                None => Ok(Rc::new(AnonymousParameterInfo::with_index(
+                    parameter.clone(),
+                    index,
+                ))),
+            },
+            None => Err(XamlError::internal(
+                "ArgumentOutOfRangeException",
+                format!("Method {} doesn't have a parameter {index}", self.name),
+            )),
         }
     }
     fn generic_parameters(&self) -> Vec<Rc<dyn IXamlType>> {
@@ -742,6 +819,7 @@ impl IXamlMethod for ModelMethod {
 
 /// A constructor projected from the model.
 pub struct ModelConstructor {
+    pub(crate) parameter_names: Vec<Option<String>>,
     pub(crate) declaring_type: Weak<ModelType>,
     pub(crate) parameters: Vec<Rc<dyn IXamlType>>,
     /// `false` for the constructor of a class that markup cannot create (the protected
@@ -756,11 +834,19 @@ pub struct ModelConstructor {
 
 /// A parameter of a projected constructor.
 struct ModelParameterInfo {
+    name: Option<String>,
+    position: usize,
     parameter_type: Rc<dyn IXamlType>,
     attributes: Vec<Rc<dyn IXamlCustomAttribute>>,
 }
 
 impl IXamlParameterInfo for ModelParameterInfo {
+    fn name(&self) -> Option<String> {
+        self.name.clone()
+    }
+    fn position(&self) -> Option<usize> {
+        Some(self.position)
+    }
     fn parameter_type(&self) -> Rc<dyn IXamlType> {
         self.parameter_type.clone()
     }
@@ -782,6 +868,7 @@ impl ModelConstructor {
 
     pub(crate) fn substituted(&self, declaring_type: &Weak<ModelType>, parameters: &[Rc<ModelType>], arguments: &[Rc<dyn IXamlType>]) -> Rc<ModelConstructor> {
         Rc::new(ModelConstructor {
+            parameter_names: self.parameter_names.clone(),
             declaring_type: declaring_type.clone(),
             parameters: self.parameters.iter().map(|parameter| substitute(parameter, parameters, arguments)).collect(),
             is_public: self.is_public,
@@ -813,11 +900,20 @@ impl IXamlConstructor for ModelConstructor {
     }
     fn get_parameter_info(&self, index: usize) -> XamlResult<Rc<dyn IXamlParameterInfo>> {
         match self.parameters.get(index) {
-            Some(parameter) => match self.parameter_attributes.get(index).filter(|attributes| !attributes.is_empty()) {
-                Some(attributes) => Ok(Rc::new(ModelParameterInfo { parameter_type: parameter.clone(), attributes: attributes.clone() })),
-                None => Ok(Rc::new(AnonymousParameterInfo::with_index(parameter.clone(), index))),
-            },
-            None => Err(XamlError::internal("ArgumentOutOfRangeException", format!("The constructor doesn't have a parameter {index}"))),
+            Some(parameter) => Ok(Rc::new(ModelParameterInfo {
+                name: self.parameter_names.get(index).cloned().flatten(),
+                position: index,
+                parameter_type: parameter.clone(),
+                attributes: self
+                    .parameter_attributes
+                    .get(index)
+                    .cloned()
+                    .unwrap_or_default(),
+            })),
+            None => Err(XamlError::internal(
+                "ArgumentOutOfRangeException",
+                format!("The constructor doesn't have a parameter {index}"),
+            )),
         }
     }
     fn equals(&self, other: &dyn IXamlConstructor) -> bool {
@@ -1051,5 +1147,94 @@ impl IXamlAssembly for ModelAssembly {
     }
     fn as_any(&self) -> &dyn Any {
         self
+    }
+}
+
+#[cfg(test)]
+mod reference_parameter_tests {
+    use super::*;
+    #[test]
+    fn reference_parameter_substitution_retains_element_and_rejects_reference_generic_arguments() {
+        let system = ModelTypeSystem::new(Vec::new());
+        let parameter = ModelType::create(
+            &Rc::downgrade(&system),
+            ModelTypeSpec::new(
+                "reference.method.T".into(),
+                "",
+                "T",
+                ModelTypeKind::GenericParameter,
+                ModelTypeOrigin::GenericParameter,
+            ),
+        );
+        let reference = parameter.make_by_ref_type().unwrap();
+        let integer = system.get("System.Int32");
+        let actual = substitute(
+            &reference,
+            std::slice::from_ref(&parameter),
+            std::slice::from_ref(&integer),
+        );
+        assert!(actual.is_by_ref());
+        assert!(actual.by_ref_element_type().unwrap().equals(&*integer));
+        assert!(Rc::ptr_eq(&actual, &integer.make_by_ref_type().unwrap()));
+        let unchanged = substitute(&reference, &[], &[]);
+        assert!(Rc::ptr_eq(&reference, &unchanged));
+        let owner = system.get("System.Object");
+        let owner = owner
+            .as_any()
+            .downcast_ref::<ModelType>()
+            .unwrap()
+            .this
+            .upgrade()
+            .unwrap();
+        let method = Rc::new(ModelMethod {
+                parameter_metadata: vec![MethodParameterMetadata {
+                name: Some("value".into()),
+                attributes: Vec::new(),
+            }],
+            name: "Copy".into(),
+            declaring_type: Rc::downgrade(&owner),
+            is_static: true,
+            return_type: system.get("System.Void"),
+            parameters: vec![reference.clone()],
+            attributes: Vec::new(),
+            generic_parameters: vec![parameter],
+            generic_arguments: Vec::new(),
+            is_abstract: false,
+            source: MemberSource::TypeSystem,
+            rust: MemberRust::default(),
+        });
+        let closed = method
+            .make_generic_method(std::slice::from_ref(&integer))
+            .unwrap();
+        assert!(
+            closed.parameters()[0]
+                .by_ref_element_type()
+                .unwrap()
+                .equals(&*integer)
+        );
+        let info = closed.get_parameter_info(0).unwrap();
+        assert_eq!(info.name().as_deref(), Some("value"));
+        assert_eq!(info.parameter_type().full_name(), "System.Int32&");
+        assert!(!info.is_in() && !info.is_out() && !info.is_optional());
+        assert!(Rc::ptr_eq(
+            &info.parameter_type(),
+            &integer.make_by_ref_type().unwrap()
+        ));
+        let bad = integer.make_by_ref_type().unwrap();
+        assert!(
+            format!(
+                "{:?}",
+                method
+                    .make_generic_method(std::slice::from_ref(&bad))
+                    .err()
+                    .unwrap()
+            )
+            .contains("ArgumentException")
+        );
+        let definition = system.get("System.Collections.Generic.IList`1");
+        assert!(
+            format!("{:?}", definition.make_generic_type(&[bad]).err().unwrap())
+                .contains("ArgumentException")
+        );
     }
 }

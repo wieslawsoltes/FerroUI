@@ -40,4 +40,4 @@ pub use untyped_binding_expression_base::{
 };
 pub(crate) use value_type::value_type_id;
 pub use value_type::{ValueType, ValueTypes};
-pub use weak_value::WeakValue;
+pub use weak_value::{ProjectedWeakReference, WeakValue};

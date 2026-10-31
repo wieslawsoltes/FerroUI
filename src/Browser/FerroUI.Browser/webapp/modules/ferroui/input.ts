@@ -90,7 +90,21 @@ const textInputElementClass = "ferroui-text-input-element";
 const isTextInputElement = (target: EventTarget | null): boolean =>
     (target as Element | null)?.classList?.contains(textInputElementClass) === true;
 
+type TextEditor = HTMLInputElement | HTMLTextAreaElement;
+type EditorSelection = { domStart: number; domEnd: number; direction: string | null; sourceStart: number; sourceEnd: number };
+type EditorState = {
+    active: TextEditor;
+    sensitive: boolean;
+    textarea?: HTMLTextAreaElement;
+    sourceLength: number;
+    normalizedLength: number;
+    removed: number[];
+    normalizedRemoved: number[];
+    selection?: EditorSelection;
+};
+
 export class InputHelper {
+    private static readonly editors = new WeakMap<HTMLElement, EditorState>();
     static clipboardState: ClipboardState = ClipboardState.None;
     static resolveClipboard?: (value: ClipboardResult) => void;
     static rejectClipboard?: (reason?: any) => void;
@@ -802,18 +816,204 @@ export class InputHelper {
         return () => { };
     }
 
+    private static editorState(input: HTMLInputElement): EditorState {
+        let state = this.editors.get(input);
+        if (!state) {
+            state = { active: input, sensitive: input.type === "password", sourceLength: input.value.length, normalizedLength: input.value.length,
+                removed: [], normalizedRemoved: [] };
+            this.editors.set(input, state);
+        }
+        return state;
+    }
+
+    private static activeEditor<T extends HTMLElement>(element: T): T | TextEditor {
+        return this.editors.get(element)?.active ?? element;
+    }
+
+    private static clearMapping(state: EditorState) {
+        state.sourceLength = state.active.value.length;
+        state.normalizedLength = state.active.value.length;
+        state.removed = [];
+        state.normalizedRemoved = [];
+        state.selection = undefined;
+    }
+
+    // Sorted code-unit offsets of characters normalized away by the DOM. Build once
+    // per text snapshot; selection-only updates use binary searches and retain no text.
+    private static countBefore(offsets: number[], offset: number): number {
+        let low = 0, high = offsets.length;
+        while (low < high) {
+            const middle = (low + high) >>> 1;
+            if (offsets[middle] < offset) low = middle + 1;
+            else high = middle;
+        }
+        return low;
+    }
+
     public static clearInput(inputElement: HTMLInputElement) {
-        // Native reset/client changes clear the hidden input. Text events are
-        // subscribed on its containing view, and no DOM blur is required when
-        // focus moves between two native TextBoxes using that same input.
         for (let target: Element | null = inputElement; target; target = target.parentElement) {
             const reset = this.textInputResets.get(target);
-            if (reset) {
-                reset();
-                break;
+            if (reset) { reset(); break; }
+        }
+        const state = this.editorState(inputElement);
+        inputElement.value = "";
+        if (state.textarea) state.textarea.value = "";
+        this.clearMapping(state);
+    }
+
+    public static focusElement(element: HTMLElement) {
+        this.activeEditor(element).focus();
+    }
+
+    public static setCursor(element: HTMLElement, kind: string) {
+        const editor = this.activeEditor(element);
+        if (kind === "default") editor.style.removeProperty("cursor");
+        else editor.style.cursor = kind;
+    }
+
+    public static setBounds(inputElement: HTMLInputElement, x: number, y: number, caretWidth: number, caretHeight: number, caret: number) {
+        const state = this.editorState(inputElement), editor = state.active;
+        editor.style.left = x.toFixed(0) + "px";
+        editor.style.top = y.toFixed(0) + "px";
+        const offset = Math.min(Math.max(caret, 0), state.sourceLength);
+        const domCaret = offset - this.countBefore(state.removed, offset);
+        const { left, top } = CaretHelper.getCaretCoordinates(editor, domCaret);
+        editor.style.left = (x - left + editor.scrollLeft).toFixed(0) + "px";
+        editor.style.top = (y - top + editor.scrollTop).toFixed(0) + "px";
+    }
+
+    public static hide(inputElement: HTMLInputElement) {
+        this.activeEditor(inputElement).style.display = "none";
+    }
+
+    public static show(inputElement: HTMLInputElement) {
+        this.activeEditor(inputElement).style.display = "block";
+    }
+
+    public static setSurroundingText(inputElement: HTMLInputElement, text: string, start: number, end: number) {
+        if (!inputElement) return;
+        const state = this.editorState(inputElement), editor = state.active;
+        const multiline = editor.tagName === "TEXTAREA";
+        state.removed = [];
+        state.normalizedRemoved = [];
+        for (let index = 0; index < text.length; index++) {
+            const code = text.charCodeAt(index);
+            if ((!multiline && (code === 13 || code === 10)) ||
+                (multiline && code === 13 && text.charCodeAt(index + 1) === 10)) {
+                state.normalizedRemoved.push(index - state.removed.length);
+                state.removed.push(index);
             }
         }
-        inputElement.value = "";
+        editor.value = text;
+        state.sourceLength = text.length;
+        state.normalizedLength = editor.value.length;
+        this.setSelection(inputElement, start, end);
+        editor.style.width = "20px";
+        editor.style.width = `${editor.scrollWidth}px`;
+    }
+
+    // Preserve source UTF16 offsets even where CRLF collapses to one native LF.
+    // No value assignment, resize, focus, or full-buffer walk on this path.
+    public static setSelection(inputElement: HTMLInputElement, start: number, end: number) {
+        const state = this.editorState(inputElement), editor = state.active;
+        if (editor.value.length !== state.normalizedLength) this.clearMapping(state);
+        let low = Math.min(Math.min(start, end) >>> 0, state.sourceLength);
+        const high = Math.min(Math.max(start, end) >>> 0, state.sourceLength);
+        // Match setSelectionRange's unsigned conversion and end-before-start collapse.
+        if (high < low) low = high;
+        const domLow = low - this.countBefore(state.removed, low);
+        const domHigh = high - this.countBefore(state.removed, high);
+        editor.setSelectionRange(domLow, domHigh, start > end ? "backward" : "forward");
+        state.selection = { domStart: editor.selectionStart ?? 0, domEnd: editor.selectionEnd ?? 0,
+            direction: editor.selectionDirection, sourceStart: low, sourceEnd: high };
+    }
+
+    private static sourceSelection(inputElement: HTMLInputElement, end: boolean): number {
+        const state = this.editorState(inputElement), editor = state.active;
+        if (editor.value.length !== state.normalizedLength) this.clearMapping(state);
+        const start = editor.selectionStart ?? 0, finish = editor.selectionEnd ?? 0;
+        const previous = state.selection;
+        // A source caret inside a CRLF has no unique DOM position. Retain exactly
+        // the last forwarded source interval while its native interval is unchanged.
+        if (previous && previous.domStart === start && previous.domEnd === finish &&
+            previous.direction === editor.selectionDirection) {
+            return end ? previous.sourceEnd : previous.sourceStart;
+        }
+        const offset = end ? finish : start;
+        return offset + this.countBefore(state.normalizedRemoved, offset);
+    }
+
+    public static getSelectionStart(inputElement: HTMLInputElement): number {
+        if (isTextInputElement(inputElement)) return inputElement.selectionStart ?? 0;
+        return this.sourceSelection(inputElement, false);
+    }
+
+    public static getSelectionEnd(inputElement: HTMLInputElement): number {
+        if (isTextInputElement(inputElement)) return inputElement.selectionEnd ?? 0;
+        return this.sourceSelection(inputElement, true);
+    }
+
+    public static setOptions(inputElement: HTMLInputElement, type: string, mode: string,
+        enter: string, capitalization: string, suggestions: number, language: string, multiline = false, sensitive = false) {
+        const state = this.editorState(inputElement), previous = state.active;
+        const privateInput = type === "password" || sensitive;
+        if (state.sensitive && !privateInput) {
+            previous.value = "";
+            this.clearMapping(state);
+        }
+        state.sensitive = privateInput;
+        const useTextarea = multiline && type !== "password";
+        if (useTextarea && !state.textarea) {
+            const parent = inputElement.parentNode;
+            if (!parent) throw new Error("The native input editor must have a host before enabling multiline input.");
+            const textarea = inputElement.ownerDocument.createElement("textarea");
+            textarea.id = inputElement.id + "-multiline";
+            textarea.className = inputElement.className;
+            textarea.tabIndex = -1;
+            textarea.rows = 1;
+            textarea.wrap = "off";
+            textarea.style.cssText = inputElement.style.cssText;
+            textarea.style.resize = "none";
+            textarea.onpaste = inputElement.onpaste;
+            textarea.oncopy = inputElement.oncopy;
+            textarea.oncut = inputElement.oncut;
+            parent.insertBefore(textarea, inputElement);
+            state.textarea = textarea;
+        }
+        const editor = useTextarea ? state.textarea! : inputElement;
+        if (editor !== previous) {
+            const focused = previous.ownerDocument.activeElement === previous;
+            // Options precede set_client in InputMethodManager. Retire all old
+            // native text before the new client's snapshot is installed.
+            previous.value = "";
+            editor.value = "";
+            editor.style.display = previous.style.display;
+            state.active = editor;
+            this.clearMapping(state);
+            // Move focus between peers inside the same host before hiding the old
+            // peer. Never take focus away from an external element.
+            if (focused) editor.focus({ preventScroll: true });
+            previous.style.display = "none";
+        }
+        if (editor === inputElement && inputElement.type !== type) {
+            if (inputElement.type === "password") {
+                inputElement.value = "";
+                this.clearMapping(state);
+            }
+            inputElement.type = type;
+        }
+        const attribute = (name: string, value: string | null) => {
+            if (value === null || value === "") editor.removeAttribute(name);
+            else editor.setAttribute(name, value);
+        };
+        attribute("inputmode", mode);
+        attribute("enterkeyhint", enter);
+        attribute("autocapitalize", privateInput ? "none" : capitalization);
+        attribute("lang", language);
+        attribute("autocomplete", privateInput ? "off" : null);
+        const prediction = privateInput ? 0 : suggestions;
+        attribute("spellcheck", prediction < 0 ? null : prediction === 0 ? "false" : "true");
+        attribute("autocorrect", prediction < 0 ? null : prediction === 0 ? "off" : "on");
     }
 
     // Not in the original: the textarea of a connection client beside the input element.
@@ -838,47 +1038,6 @@ export class InputHelper {
     public static setInputOptions(input: TextInputElement, inputMode: string, enterKeyHint: string,
         capitalization: string, suggestions: boolean, sensitive: boolean, language: string): void {
         applyTextInputOptions(input, inputMode, enterKeyHint, capitalization, suggestions, sensitive, language);
-    }
-
-    public static focusElement(inputElement: HTMLElement) {
-        inputElement.focus();
-    }
-
-    public static setCursor(inputElement: HTMLInputElement, kind: string) {
-        if (kind === "default") {
-            inputElement.style.removeProperty("cursor");
-        } else {
-            inputElement.style.cursor = kind;
-        }
-    }
-
-    public static setBounds(inputElement: HTMLInputElement, x: number, y: number, caretWidth: number, caretHeight: number, caret: number) {
-        inputElement.style.left = (x).toFixed(0) + "px";
-        inputElement.style.top = (y).toFixed(0) + "px";
-
-        const { left, top } = CaretHelper.getCaretCoordinates(inputElement, caret);
-
-        inputElement.style.left = (x - left).toFixed(0) + "px";
-        inputElement.style.top = (y - top).toFixed(0) + "px";
-    }
-
-    public static hide(inputElement: HTMLInputElement) {
-        inputElement.style.display = "none";
-    }
-
-    public static show(inputElement: HTMLInputElement) {
-        inputElement.style.display = "block";
-    }
-
-    public static setSurroundingText(inputElement: HTMLInputElement, text: string, start: number, end: number) {
-        if (!inputElement) {
-            return;
-        }
-
-        inputElement.value = text;
-        inputElement.setSelectionRange(start, end);
-        inputElement.style.width = "20px";
-        inputElement.style.width = `${inputElement.scrollWidth}px`;
     }
 
     private static getModifiers(args: KeyboardEvent | PointerEvent | WheelEvent | DragEvent): number {

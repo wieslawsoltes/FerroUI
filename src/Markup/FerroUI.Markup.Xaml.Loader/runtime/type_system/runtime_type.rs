@@ -108,6 +108,7 @@ pub struct RuntimeType {
     initializing: Cell<bool>,
     init: RefCell<Option<MembersInit>>,
     array_element_type: Option<Rc<dyn IXamlType>>,
+    by_ref_type: RefCell<Option<Weak<dyn IXamlType>>>,
     arrays: RefCell<HashMap<i32, Rc<RuntimeType>>>,
 }
 
@@ -196,6 +197,7 @@ impl RuntimeType {
                 initializing: Cell::new(false),
                 init: RefCell::new(spec.init),
                 array_element_type: spec.array_element_type,
+                by_ref_type: RefCell::new(None),
                 arrays: RefCell::new(HashMap::new()),
             }
         })
@@ -336,6 +338,13 @@ pub(crate) fn substitute(
     parameters: &[Rc<RuntimeType>],
     arguments: &[Rc<dyn IXamlType>],
 ) -> Rc<dyn IXamlType> {
+    if let Some(element) = type_.by_ref_element_type() {
+        let replacement = substitute(&element, parameters, arguments);
+        if replacement.equals(&*element) { return type_.clone(); }
+        // Generic construction rejects reference arguments; valid substitution cannot nest T&.
+        return replacement.make_by_ref_type().expect("validated host generic arguments support managed-reference construction");
+    }
+
     let Some(runtime) = type_.as_any().downcast_ref::<RuntimeType>() else {
         return type_.clone();
     };
@@ -446,6 +455,9 @@ impl IXamlType for RuntimeType {
                 type_arguments.len()
             )));
         }
+        if type_arguments.iter().any(|argument| argument.is_by_ref()) {
+            return Err(XamlError::argument("Managed reference types cannot be generic arguments"));
+        }
         match (self.system.upgrade(), self.this.upgrade()) {
             (Some(system), Some(this)) => system.instantiate(&this, type_arguments),
             _ => Err(XamlError::invalid_operation("The type system has been dropped")),
@@ -453,6 +465,18 @@ impl IXamlType for RuntimeType {
     }
     fn generic_type_definition(&self) -> Option<Rc<dyn IXamlType>> {
         self.generic_definition.clone().map(|d| d as Rc<dyn IXamlType>)
+    }
+    fn make_by_ref_type(&self) -> XamlResult<Rc<dyn IXamlType>> {
+        if let Some(existing) = self.by_ref_type.borrow().as_ref().and_then(Weak::upgrade) {
+            return Ok(existing);
+        }
+        let element = self
+            .this
+            .upgrade()
+            .ok_or_else(|| XamlError::invalid_operation("The element type has been dropped"))?;
+        let reference = xamlx::type_system::XamlByRefType::new(element)?;
+        *self.by_ref_type.borrow_mut() = Some(Rc::downgrade(&reference));
+        Ok(reference)
     }
     fn is_array(&self) -> bool {
         self.array_element_type.is_some()
@@ -575,7 +599,14 @@ impl IXamlCustomAttribute for RuntimeCustomAttribute {
 }
 
 /// A method projected from metadata, with its invoker.
+#[derive(Clone)]
+pub(crate) struct MethodParameterMetadata {
+    pub name: Option<String>,
+    pub attributes: Vec<Rc<dyn IXamlCustomAttribute>>,
+}
+
 pub struct RuntimeMethod {
+    pub(crate) parameter_metadata: Vec<MethodParameterMetadata>,
     pub(crate) system: Weak<RuntimeTypeSystem>,
     pub(crate) name: String,
     pub(crate) declaring_type: Weak<RuntimeType>,
@@ -642,6 +673,12 @@ impl RuntimeMethod {
     /// The method as the projection of the declared member `declared`.
     pub(crate) fn with_declared(self: Rc<Self>, declared: DeclaredMember) -> Rc<Self> {
         let mut method = Rc::try_unwrap(self).unwrap_or_else(|shared| shared.copy());
+        if let DeclaredMember::Method(source) = declared {
+            let system = method.system.upgrade().expect("the projecting type system is alive");
+            method.parameter_metadata = source.parameter_info.iter().map(|p| MethodParameterMetadata {
+                name: p.name.map(str::to_owned), attributes: system.project_attributes(p.attributes),
+            }).collect();
+        }
         method.declared = Some(declared);
         Rc::new(method)
     }
@@ -654,6 +691,7 @@ impl RuntimeMethod {
             is_static: self.is_static,
             return_type: self.return_type.clone(),
             parameters: self.parameters.clone(),
+            parameter_metadata: self.parameter_metadata.clone(),
             parameter_handles: self.parameter_handles.clone(),
             invoker: self.invoker.clone(),
             attributes: self.attributes.clone(),
@@ -663,6 +701,16 @@ impl RuntimeMethod {
         }
     }
 
+    fn nullable_member(&self) -> Option<(ValueType, ferroui_base::data::core::expression_nodes::NullableMember)> {
+        use ferroui_base::data::core::expression_nodes::NullableMember;
+        if self.is_static || !self.parameters.is_empty() { return None; }
+        let owner=self.declaring_type.upgrade()?;
+        if !(owner.as_ref() as &dyn IXamlType).is_nullable() { return None; }
+        let member=match self.name.as_str() { "get_Value"=>NullableMember::Value,"get_HasValue"=>NullableMember::HasValue,_=>return None };
+        let arguments=owner.generic_arguments();
+        let inner=arguments.first()?.as_any().downcast_ref::<RuntimeType>()?.handle()?;
+        Some((inner,member))
+    }
     /// Whether the method has an invoker of its own (it is not abstract).
     pub fn is_invocable(&self) -> bool {
         matches!(self.invoker, RuntimeInvoker::Static(_) | RuntimeInvoker::Dynamic(_))
@@ -748,7 +796,8 @@ impl RuntimeMethod {
         parameters: &[Rc<RuntimeType>],
         arguments: &[Rc<dyn IXamlType>],
     ) -> Rc<RuntimeMethod> {
-        Rc::new(RuntimeMethod {
+        let mut method=RuntimeMethod {
+            parameter_metadata: self.parameter_metadata.clone(),
             system: self.system.clone(),
             name: self.name.clone(),
             declaring_type: declaring_type.clone(),
@@ -761,7 +810,14 @@ impl RuntimeMethod {
             generic_parameters: self.generic_parameters.clone(),
             generic_arguments: self.generic_arguments.clone(),
             declared: self.declared,
-        })
+        };
+        if let Some((inner,member))=method.nullable_member() {
+            method.invoker=RuntimeInvoker::Dynamic(Rc::new(move |arguments| {
+                if arguments.len()!=1 { return Err(MarkupInvokeError::ArgumentCount{expected:1,actual:arguments.len()}); }
+                member.read(arguments[0].as_ref(),inner).map_err(|e|MarkupInvokeError::Failed(e.to_string()))
+            }));
+        }
+        Rc::new(method)
     }
 
     /// The definition as a generic method definition with the type
@@ -909,8 +965,12 @@ impl IXamlMethod for RuntimeMethod {
                 type_arguments.len()
             )));
         }
+        if type_arguments.iter().any(|argument| argument.is_by_ref()) {
+            return Err(XamlError::argument("Managed reference types cannot be generic arguments"));
+        }
         let parameters = &self.generic_parameters;
         Ok(Rc::new(RuntimeMethod {
+            parameter_metadata: self.parameter_metadata.clone(),
             system: self.system.clone(),
             name: self.name.clone(),
             declaring_type: self.declaring_type.clone(),
@@ -930,7 +990,18 @@ impl IXamlMethod for RuntimeMethod {
     }
     fn get_parameter_info(&self, index: usize) -> XamlResult<Rc<dyn IXamlParameterInfo>> {
         match self.parameters.get(index) {
-            Some(parameter) => Ok(Rc::new(AnonymousParameterInfo::with_index(parameter.clone(), index))),
+            Some(parameter) => match self.parameter_metadata.get(index) {
+                Some(info) => Ok(Rc::new(RuntimeParameterInfo {
+                    name: info.name.clone(),
+                    position: index,
+                    parameter_type: parameter.clone(),
+                    attributes: info.attributes.clone(),
+                })),
+                None => Ok(Rc::new(AnonymousParameterInfo::with_index(
+                    parameter.clone(),
+                    index,
+                ))),
+            },
             None => Err(XamlError::internal(
                 "ArgumentOutOfRangeException",
                 format!("Method {} doesn't have a parameter {index}", self.name),
@@ -983,11 +1054,19 @@ pub struct RuntimeConstructor {
 
 /// A parameter of a projected constructor.
 struct RuntimeParameterInfo {
+    name: Option<String>,
+    position: usize,
     parameter_type: Rc<dyn IXamlType>,
     attributes: Vec<Rc<dyn IXamlCustomAttribute>>,
 }
 
 impl IXamlParameterInfo for RuntimeParameterInfo {
+    fn name(&self) -> Option<String> {
+        self.name.clone()
+    }
+    fn position(&self) -> Option<usize> {
+        Some(self.position)
+    }
     fn parameter_type(&self) -> Rc<dyn IXamlType> {
         self.parameter_type.clone()
     }
@@ -1058,13 +1137,19 @@ impl IXamlConstructor for RuntimeConstructor {
     }
     fn get_parameter_info(&self, index: usize) -> XamlResult<Rc<dyn IXamlParameterInfo>> {
         match self.parameters.get(index) {
-            Some(parameter) => match self.parameter_attributes.get(index).filter(|a| !a.is_empty()) {
-                Some(attributes) => Ok(Rc::new(RuntimeParameterInfo {
-                    parameter_type: parameter.clone(),
-                    attributes: attributes.clone(),
-                })),
-                None => Ok(Rc::new(AnonymousParameterInfo::with_index(parameter.clone(), index))),
-            },
+            Some(parameter) => Ok(Rc::new(RuntimeParameterInfo {
+                name: self
+                    .declared
+                    .and_then(|c| c.parameter_name(index))
+                    .map(str::to_owned),
+                position: index,
+                parameter_type: parameter.clone(),
+                attributes: self
+                    .parameter_attributes
+                    .get(index)
+                    .cloned()
+                    .unwrap_or_default(),
+            })),
             None => Err(XamlError::internal(
                 "ArgumentOutOfRangeException",
                 format!("The constructor doesn't have a parameter {index}"),
@@ -1343,12 +1428,24 @@ impl IXamlAssembly for RuntimeAssembly {
 
 /// Converts an untyped value to exactly the Rust type `target` with the
 /// assignability casts of the untyped value conversions.
-pub(crate) fn to_exact(value: &MarkupValue, target: ValueType, index: usize) -> Result<BoxedValue, MarkupInvokeError> {
+pub(crate) fn to_exact(
+    value: &MarkupValue,
+    target: ValueType,
+    index: usize,
+) -> Result<BoxedValue, MarkupInvokeError> {
     // A `System.Type` value is passed in the representation the target declares.
-    if let Some(type_value) = value.as_ref().and_then(|v| v.downcast_ref::<RuntimeTypeValue>()) {
-        return type_value.to_declared(target).map_err(MarkupInvokeError::Failed);
+    if let Some(type_value) = value
+        .as_ref()
+        .and_then(|v| v.downcast_ref::<RuntimeTypeValue>())
+    {
+        return type_value
+            .to_declared(target)
+            .map_err(MarkupInvokeError::Failed);
     }
-    if let Some(array) = value.as_ref().and_then(|v| v.downcast_ref::<RuntimeArray>()) {
+    if let Some(array) = value
+        .as_ref()
+        .and_then(|v| v.downcast_ref::<RuntimeArray>())
+    {
         return array.to_declared(target).map_err(MarkupInvokeError::Failed);
     }
     // A list created in markup is passed to a collection handle as the shared list of its items.
@@ -1363,7 +1460,10 @@ pub(crate) fn to_exact(value: &MarkupValue, target: ValueType, index: usize) -> 
     }
     let converted = match value {
         Some(boxed) if boxed.value_type_id() == target.id() => Some(boxed.clone()),
-        Some(boxed) => ValueTypes::try_cast(boxed, target),
+        Some(boxed) => match ValueTypes::try_cast(boxed, target) {
+            Some(value) => Some(value),
+            None => ValueTypes::try_adapt(boxed, target)?,
+        },
         None => ValueTypes::try_convert(None, target).flatten(),
     };
     converted.ok_or_else(|| MarkupInvokeError::Argument {
@@ -1374,4 +1474,90 @@ pub(crate) fn to_exact(value: &MarkupValue, target: ValueType, index: usize) -> 
             None => "null".to_string(),
         },
     })
+}
+
+#[cfg(test)]
+mod reference_parameter_tests {
+    use super::*;
+    #[test]
+    fn reference_parameter_substitution_retains_element_and_rejects_reference_generic_arguments() {
+        let system = RuntimeTypeSystem::new();
+        let parameter = RuntimeType::create(
+            &Rc::downgrade(&system),
+            RuntimeTypeSpec::new(
+                "reference.method.T".into(),
+                "",
+                "T",
+                RuntimeTypeKind::GenericParameter,
+                RuntimeTypeOrigin::GenericParameter,
+            ),
+        );
+        let reference = parameter.make_by_ref_type().unwrap();
+        let integer = system.get("System.Int32");
+        let actual = substitute(
+            &reference,
+            std::slice::from_ref(&parameter),
+            std::slice::from_ref(&integer),
+        );
+        assert!(actual.is_by_ref());
+        assert!(actual.by_ref_element_type().unwrap().equals(&*integer));
+        assert!(Rc::ptr_eq(&actual, &integer.make_by_ref_type().unwrap()));
+        let unchanged = substitute(&reference, &[], &[]);
+        assert!(Rc::ptr_eq(&reference, &unchanged));
+        let owner = system.get("System.Object");
+        let owner = owner
+            .as_any()
+            .downcast_ref::<RuntimeType>()
+            .unwrap()
+            .this
+            .upgrade()
+            .unwrap();
+        let mut method = system.method(
+            &owner,
+            "Copy".into(),
+            true,
+            system.get("System.Void"),
+            (vec![reference.clone()], vec![None]),
+            RuntimeInvoker::None,
+            Vec::new(),
+        );
+        Rc::get_mut(&mut method).unwrap().generic_parameters = vec![parameter];
+        Rc::get_mut(&mut method).unwrap().parameter_metadata = vec![MethodParameterMetadata {
+            name: Some("value".into()),
+            attributes: Vec::new(),
+        }];
+        let closed = method
+            .make_generic_method(std::slice::from_ref(&integer))
+            .unwrap();
+        assert!(
+            closed.parameters()[0]
+                .by_ref_element_type()
+                .unwrap()
+                .equals(&*integer)
+        );
+        let info = closed.get_parameter_info(0).unwrap();
+        assert_eq!(info.name().as_deref(), Some("value"));
+        assert_eq!(info.parameter_type().full_name(), "System.Int32&");
+        assert!(!info.is_in() && !info.is_out() && !info.is_optional());
+        assert!(Rc::ptr_eq(
+            &info.parameter_type(),
+            &integer.make_by_ref_type().unwrap()
+        ));
+        let bad = integer.make_by_ref_type().unwrap();
+        assert!(
+            format!(
+                "{:?}",
+                method
+                    .make_generic_method(std::slice::from_ref(&bad))
+                    .err()
+                    .unwrap()
+            )
+            .contains("ArgumentException")
+        );
+        let definition = system.get("System.Collections.Generic.IList`1");
+        assert!(
+            format!("{:?}", definition.make_generic_type(&[bad]).err().unwrap())
+                .contains("ArgumentException")
+        );
+    }
 }

@@ -68,7 +68,7 @@ mod value_span;
 
 pub use array_builder::ArrayBuilder;
 pub use array_slice::ArraySlice;
-pub use culture_info::{CultureInfo, CultureTypes};
+pub use culture_info::{CultureInfo, CultureInfoData, CultureInfoImpl, CultureInfoError, WeakCultureInfo, CultureTypes, CultureMap, CultureMapKey, hash_culture_text};
 mod compare_info;
 pub use compare_info::{CompareInfo, CompareOptions, ICompareRules, StringComparison};
 pub use read_only_memory::ReadOnlyMemory;
@@ -138,7 +138,7 @@ pub use gregorian_calendar::{GregorianCalendar, IsoWeek};
 pub use i_culture_data_provider::ICultureDataProvider;
 #[cfg(any(test, feature = "testing"))]
 pub use test_culture_data_provider::TestCultureDataProvider;
-pub use text_info::TextInfo;
+pub use text_info::{TextInfo, TextCasingError, TextCasingService, TextUppercaseCallback};
 pub use time_zone_info::{LocalUtcOffsetProvider, TimeZoneInfo};
 
 // --- numbers ---

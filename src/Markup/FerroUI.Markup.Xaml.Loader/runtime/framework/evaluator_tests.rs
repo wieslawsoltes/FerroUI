@@ -359,7 +359,7 @@ fn array_constants_are_arrays_converted_where_they_are_passed() {
     let node = FerroXamlIlArrayConstantAstNode::new(&line(), array_type.clone(), double.clone(), values);
     let value = ok(h.value(node));
     let array = from_markup_value::<RuntimeArray>(&value).expect("array");
-    assert!(array.element_type().equals(&*double));
+    assert!(crate::runtime::type_system::array_element_type(&array).unwrap().equals(&*double));
     assert_eq!(array.items().len(), 2);
     // The run-time type of the value is the array type.
     assert!(h.ts.runtime_type_of(value.as_ref().unwrap()).equals(&*array_type));
@@ -385,10 +385,10 @@ fn array_constants_are_arrays_converted_where_they_are_passed() {
         B,
     }
     RuntimeArray::register_element::<Unit>();
-    let units = RuntimeArray::new(double, vec![boxed(Unit::A), boxed(Unit::B)]);
+    let units = crate::runtime::type_system::new_array(double, vec![boxed(Unit::A), boxed(Unit::B)]);
     let typed = units.to_declared(ValueType::of::<Vec<Unit>>()).unwrap();
     assert_eq!(typed.downcast_ref::<Vec<Unit>>(), Some(&vec![Unit::A, Unit::B]));
-    let strings = RuntimeArray::new(h.ts.get("System.String"), vec![boxed("a".to_string()), boxed("b".to_string())]);
+    let strings = crate::runtime::type_system::new_array(h.ts.get("System.String"), vec![boxed("a".to_string()), boxed("b".to_string())]);
     let typed = strings.to_declared(ValueType::of::<Vec<String>>()).unwrap();
     assert_eq!(typed.downcast_ref::<Vec<String>>().map(Vec::len), Some(2));
 }

@@ -19,8 +19,9 @@ use crate::AnyValue;
 /// registered type the value is a handle of and the chain of its
 /// [`MarkupType::base_type`].
 ///
-/// The contracts (interfaces) a type implements are not part of the list:
-/// their members are reached through the handle of the contract.
+/// Implemented contracts of classes are not part of the list. A contract
+/// handle includes its inherited contracts, so inherited members remain
+/// available to ordinary string-path bindings.
 pub fn markup_types_of(value: &dyn AnyValue) -> Vec<&'static MarkupType> {
     let mut result = Vec::new();
     if let Some(object) = ValueTypes::as_object(value) {
@@ -41,6 +42,21 @@ pub fn markup_types_of(value: &dyn AnyValue) -> Vec<&'static MarkupType> {
         }
         result.push(markup);
         current = markup.base_type();
+    }
+    if result.first().is_some_and(|markup| markup.kind == super::MarkupTypeKind::Interface) {
+        fn inherited(markup: &'static MarkupType, result: &mut Vec<&'static MarkupType>) {
+            for interface in markup.interfaces {
+                if let Some(parent) = MarkupType::find_by_handle(interface().id()) {
+                    if !result.iter().any(|seen| std::ptr::eq(*seen, parent)) {
+                        result.push(parent);
+                        inherited(parent, result);
+                    }
+                }
+            }
+        }
+        for markup in result.clone() {
+            inherited(markup, &mut result);
+        }
     }
     result
 }

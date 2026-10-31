@@ -379,6 +379,12 @@ pub struct FakeConstructor {
     parameter_attributes: RefCell<HashMap<usize, Vec<Rc<dyn IXamlCustomAttribute>>>>,
 }
 
+impl FakeConstructor {
+    pub fn add_parameter_attribute(&self,index:usize,attribute:Rc<dyn IXamlCustomAttribute>)->&Self {
+        self.parameter_attributes.borrow_mut().entry(index).or_default().push(attribute);self
+    }
+}
+
 impl IXamlMember for FakeConstructor {
     fn name(&self) -> String {
         if self.is_static { ".cctor" } else { ".ctor" }.to_string()

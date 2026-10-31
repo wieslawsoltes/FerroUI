@@ -32,6 +32,73 @@ use crate::{BoxedValue, TypeInfo};
 use std::any::{Any, TypeId};
 use std::collections::HashMap;
 use std::fmt;
+
+/// A view of the same plain reference object through a Rust interface vtable.
+/// The original boxed object supplies object equality and downcasts; the typed vtable
+/// supplies interface calls. It contains no copied domain state. This is useful for
+/// contracts on model objects that do not derive from FerroObject.
+pub struct InterfaceRef<I: ?Sized> {
+    interface: std::rc::Rc<I>,
+    object: crate::BoxedValue,
+}
+impl<I: ?Sized> Clone for InterfaceRef<I> {
+    fn clone(&self) -> Self {
+        Self {
+            interface: self.interface.clone(),
+            object: self.object.clone(),
+        }
+    }
+}
+impl<I: ?Sized> PartialEq for InterfaceRef<I> {
+    fn eq(&self, other: &Self) -> bool {
+        std::cmp::PartialEq::eq(self.object.as_ref(), other.object.as_ref())
+    }
+}
+impl<I: ?Sized> std::ops::Deref for InterfaceRef<I> {
+    type Target = I;
+    fn deref(&self) -> &I {
+        &self.interface
+    }
+}
+impl<I: ?Sized> InterfaceRef<I> {
+    /// The coercion must name the same object, not a proxy or another allocation.
+    pub fn new<T: PartialEq + 'static>(
+        object: std::rc::Rc<T>,
+        cast: fn(std::rc::Rc<T>) -> std::rc::Rc<I>,
+    ) -> Self {
+        let interface = cast(object.clone());
+        let object: crate::BoxedValue = object;
+        assert!(
+            std::ptr::addr_eq(
+                std::rc::Rc::as_ptr(&interface),
+                std::rc::Rc::as_ptr(&object)
+            ),
+            "interface coercion must retain the original object"
+        );
+        Self { interface, object }
+    }
+    /// Project an already erased interface over its actual object allocation. Both views must
+    /// name the same allocation; this cannot be used to attach a proxy to an unrelated object.
+    pub fn from_parts(object:crate::BoxedValue,interface:std::rc::Rc<I>)->Self {
+        assert!(std::ptr::addr_eq(std::rc::Rc::as_ptr(&object),std::rc::Rc::as_ptr(&interface)),
+            "interface projection must retain the original object");
+        Self{interface,object}
+    }
+    pub fn object(&self) -> crate::BoxedValue {
+        self.object.clone()
+    }
+    pub fn interface(&self) -> std::rc::Rc<I> {
+        self.interface.clone()
+    }
+    pub fn downcast<T: 'static>(&self) -> Option<std::rc::Rc<T>> {
+        let any: std::rc::Rc<dyn std::any::Any> = self.object.clone();
+        any.downcast::<T>().ok()
+    }
+    pub fn ptr_eq(&self, other: &Self) -> bool {
+        std::rc::Rc::ptr_eq(&self.object, &other.object)
+    }
+}
+
 use std::rc::Rc;
 use std::sync::{OnceLock, RwLock};
 
@@ -113,6 +180,10 @@ pub struct MarkupDelegate {
 }
 
 impl MarkupDelegate {
+    /// Delegate object reference identity, distinct from method/target value equality.
+    pub fn reference_equals(&self, other: &Self) -> bool {
+        Rc::ptr_eq(&self.call, &other.call)
+    }
     pub fn new(f: impl Fn(&[MarkupValue]) -> MarkupValue + 'static) -> Self {
         Self { call: Rc::new(f), method: None }
     }
@@ -137,7 +208,8 @@ impl MarkupDelegate {
     /// value is held as a binding holds it, by value). Once the target is
     /// gone [`target`](Self::target) is `None`,
     /// [`is_target_alive`](Self::is_target_alive) is false and invoking the
-    /// delegate does nothing.
+    /// [`invoke`](Self::invoke) does nothing; [`try_invoke`](Self::try_invoke)
+    /// reports that the target is no longer alive.
     ///
     /// Deviation (DEVIATIONS.md, Bindings): the managed delegate has its
     /// target strongly, and so has the command made from it. A template that
@@ -175,12 +247,12 @@ impl MarkupDelegate {
 
     /// Calls the callback. For the delegate of a declared method
     /// ([`for_method`](Self::for_method)) a failure of the call (wrong
-    /// arguments, a failing member) is returned.
+    /// arguments, a failing member, an expired weak binding target) is returned.
     pub fn try_invoke(&self, arguments: &[MarkupValue]) -> Result<MarkupValue, MarkupInvokeError> {
         match &self.method {
             Some(bound) => match bound.target.get() {
                 Ok(target) => invoke_method(bound.method, &target, arguments),
-                Err(()) => Ok(None),
+                Err(()) => Err(MarkupInvokeError::Failed("The method binding target is no longer alive.".to_string())),
             },
             None => Ok((self.call)(arguments)),
         }
@@ -229,7 +301,34 @@ fn invoke_method(
 
 impl PartialEq for MarkupDelegate {
     fn eq(&self, other: &Self) -> bool {
-        Rc::ptr_eq(&self.call, &other.call)
+        if Rc::ptr_eq(&self.call, &other.call) {
+            return true;
+        }
+        let (Some(a), Some(b)) = (&self.method, &other.method) else {
+            return false;
+        };
+        if !std::ptr::eq(a.declaring_type, b.declaring_type) || !std::ptr::eq(a.method, b.method) {
+            return false;
+        }
+        if a.method.is_static {
+            return true;
+        }
+        let (Ok(Some(a)), Ok(Some(b))) = (a.target.get(), b.target.get()) else {
+            return false;
+        };
+        let (Some(a), Some(b)) = (ValueTypes::normalize(a), ValueTypes::normalize(b)) else {
+            return false;
+        };
+        if let (Some(a), Some(b)) = (ValueTypes::as_object(&*a), ValueTypes::as_object(&*b)) {
+            return a == b;
+        }
+        if let (Some(a), Some(b)) = (
+            a.downcast_ref::<crate::Utf16Text>(),
+            b.downcast_ref::<crate::Utf16Text>(),
+        ) {
+            return a.ptr_eq(b);
+        }
+        Rc::ptr_eq(&a, &b)
     }
 }
 
@@ -330,6 +429,19 @@ pub fn from_markup_value<T: Clone + 'static>(value: &MarkupValue) -> Option<T> {
     }
 }
 
+/// Assignment through ordinary casts, followed by explicitly registered fallible adapters.
+/// A callback error is never collapsed into an inapplicable/null value.
+pub fn from_markup_value_result<T: Clone + 'static>(
+    value: &MarkupValue,
+) -> Result<Option<T>, MarkupInvokeError> {
+    if let Some(value) = from_markup_value::<T>(value) {
+        return Ok(Some(value));
+    }
+    let Some(value) = value else { return Ok(None) };
+    Ok(ValueTypes::try_adapt(value, ValueType::of::<T>())?
+        .and_then(|v| v.downcast_ref::<T>().cloned()))
+}
+
 /// Maps the error of a fallible member to [`MarkupInvokeError::Failed`]; see
 /// the `try` forms of [`ferro_markup_type!`](crate::ferro_markup_type).
 pub fn markup_result<T, E: fmt::Display>(result: Result<T, E>) -> Result<T, MarkupInvokeError> {
@@ -356,7 +468,8 @@ impl<'a> MarkupArguments<'a> {
         let index = self.next;
         self.next += 1;
         let value = &self.arguments[index];
-        from_markup_value::<T>(value).ok_or_else(|| Self::argument_error(index, std::any::type_name::<T>(), value))
+        from_markup_value_result::<T>(value)?
+            .ok_or_else(|| Self::argument_error(index, std::any::type_name::<T>(), value))
     }
 
     /// The error of an argument that is not assignable to the type asked for.
@@ -492,11 +605,22 @@ impl MarkupAttribute {
 /// The name and attributes of a parameter of a [`MarkupConstructor`]
 /// (`[InheritDataTypeFrom(..)] FerroProperty property` of the managed
 /// original).
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug)]
 pub struct MarkupParameter {
+    /// Managed reference element, independent of the native argument-storage carrier.
+    /// None means the argument has its ordinary native/logical type.
+    pub by_ref_element: Option<TypeOf>,
     /// The parameter name, when the declaration states it.
     pub name: Option<&'static str>,
     pub attributes: &'static [MarkupAttribute],
+}
+
+impl PartialEq for MarkupParameter {
+    fn eq(&self, other: &Self) -> bool {
+        self.name == other.name
+            && self.attributes == other.attributes
+            && self.by_ref_element.map(|f| f()) == other.by_ref_element.map(|f| f())
+    }
 }
 
 impl MarkupConstructor {
@@ -659,6 +783,9 @@ pub struct MarkupMethod {
     pub is_static: bool,
     /// The parameter types, without the instance.
     pub parameters: &'static [TypeOf],
+    /// Names, attributes and managed-reference elements by position; empty for an
+    /// ordinary positional declaration. `parameters` keeps the actual native carrier.
+    pub parameter_info: &'static [MarkupParameter],
     /// `None` for a method that returns nothing.
     pub return_type: Option<TypeOf>,
     /// Calls the method: `(instance, arguments..)`, or `(arguments..)` for
@@ -1093,6 +1220,11 @@ impl MarkupType {
     /// The crate that declares `H` also registers the casts between `H` and the handles
     /// of the type ([`ValueTypes::register_cast`]). A handle that is already known keeps
     /// its type.
+    /// Same handle registration for an original erased implementation type.
+    pub fn register_handle_id(handle:TypeId,type_:&'static MarkupType) {
+        let mut registry=registry().write().unwrap_or_else(|e|e.into_inner());
+        registry.insert(type_);registry.by_handle.entry(handle).or_insert(type_);
+    }
     pub fn register_handle<H: 'static>(type_: &'static MarkupType) {
         let mut registry = registry().write().unwrap_or_else(|e| e.into_inner());
         registry.insert(type_);
@@ -1255,3 +1387,278 @@ pub mod attributes {
     /// On a constructor parameter or property of a markup extension.
     pub const CONSTRUCTOR_ARGUMENT: &str = "ConstructorArgument";
 }
+
+/// Callable identities shared by core-table methods and both compiled/runtime binding hosts.
+/// Descriptors describe actual runtime-library methods; they do not register proxy classes.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum BuiltinMethod {
+    ObjectToString,
+    StringToString,
+    ObjectGetHashCode,
+}
+
+impl BuiltinMethod {
+    pub fn declaring_type(self) -> &'static MarkupType {
+        match self {
+            Self::ObjectToString | Self::ObjectGetHashCode => &BUILTIN_OBJECT_METADATA,
+            Self::StringToString => &BUILTIN_STRING_METADATA,
+        }
+    }
+    pub fn method(self) -> &'static MarkupMethod {
+        match self {
+            Self::ObjectToString => &BUILTIN_OBJECT_METHODS[0],
+            Self::ObjectGetHashCode => &BUILTIN_OBJECT_METHODS[1],
+            Self::StringToString => &BUILTIN_STRING_METHODS[0],
+        }
+    }
+    pub fn return_type_name(self) -> &'static str {
+        match self { Self::ObjectGetHashCode => "System.Int32", _ => "System.String" }
+    }
+    pub fn parameter_type_names(self) -> &'static [&'static str] {
+        &[]
+    }
+    pub fn rust_name(self) -> &'static str {
+        match self {
+            Self::ObjectToString => "ObjectToString",
+            Self::ObjectGetHashCode => "ObjectGetHashCode",
+            Self::StringToString => "StringToString",
+        }
+    }
+    pub fn from_signature(
+        declaring: &str,
+        name: &str,
+        is_static: bool,
+        parameters: &[String],
+        returned: &str,
+    ) -> Option<Self> {
+        [Self::ObjectToString, Self::StringToString, Self::ObjectGetHashCode]
+            .into_iter()
+            .find(|id| {
+                let method = id.method();
+                declaring == id.declaring_type().full_name()
+                    && name == method.name
+                    && is_static == method.is_static
+                    && parameters
+                        .iter()
+                        .map(String::as_str)
+                        .eq(id.parameter_type_names().iter().copied())
+                    && returned == id.return_type_name()
+            })
+    }
+
+    fn override_of(
+        self,
+        instance: &BoxedValue,
+    ) -> Result<Option<(&'static MarkupType, &'static MarkupMethod)>, MarkupInvokeError> {
+        let mut lineage: Vec<&'static MarkupType> = Vec::new();
+        let mut current = ValueTypes::metadata_of(&**instance);
+        while let Some(metadata) = current {
+            // Invalid cyclic metadata cannot establish a CLR override chain.
+            if lineage.iter().any(|m| std::ptr::eq(*m, metadata)) {
+                return Err(MarkupInvokeError::Failed(
+                    format!("Cyclic type metadata cannot establish an Object.{} override", self.method().name),
+                ));
+            }
+            lineage.push(metadata);
+            current = metadata.base_type();
+        }
+        let mut selected = None;
+        let mut original_slot = true;
+        for metadata in lineage.into_iter().rev() {
+            for method in metadata
+                .find_methods(self.method().name)
+                .filter(|m| !m.is_static && m.parameters.is_empty())
+            {
+                if !method.attributes.iter().any(|a| a.name == "Virtual") {
+                    continue;
+                }
+                if method.attributes.iter().any(|a| a.name == "NewSlot") {
+                    original_slot = false;
+                } else if original_slot
+                    && method
+                        .return_type
+                        .is_some_and(|t| ValueTypes::type_full_name(t()) == self.return_type_name())
+                {
+                    selected = Some((metadata, method));
+                }
+            }
+        }
+        Ok(selected)
+    }
+
+    /// Bind the actual virtual override and retain the original target strongly, as CLR delegates do.
+    /// Missing callable metadata for a registered override is an explicit unsupported boundary.
+    pub fn bind(self, owner: &BoxedValue) -> Result<MarkupDelegate, MarkupInvokeError> {
+        let instance = ValueTypes::canonical_object(Some(owner))?.ok_or_else(|| {
+            MarkupInvokeError::Failed("Cannot bind an instance method to a null receiver".into())
+        })?;
+        if self == Self::ObjectGetHashCode {
+            let (declaring, method) = match self.override_of(&instance)? {
+                Some(pair) => pair,
+                None if ValueTypes::has_object_hash(&*instance) => return Err(MarkupInvokeError::Failed("Object.GetHashCode override has no virtual callable metadata".into())),
+                None if builtin_reference_identity_supported(&instance) => (self.declaring_type(), self.method()),
+                None => return Err(MarkupInvokeError::Failed("Object.GetHashCode receiver has no supported virtual or reference identity hash metadata".into())),
+            };
+            return Ok(MarkupDelegate::for_method(Some(instance),declaring,method));
+        }
+        if ValueType::of_value(&*instance).is_string() {
+            let id = Self::StringToString;
+            return Ok(MarkupDelegate::for_method(
+                Some(instance),
+                id.declaring_type(),
+                id.method(),
+            ));
+        }
+        if self == Self::StringToString {
+            return Err(MarkupInvokeError::Argument {
+                index: 0,
+                expected: "System.String",
+                actual: instance.type_name().into(),
+            });
+        }
+        let (declaring, method) = match self.override_of(&instance)? {
+            Some(pair) => pair,
+            None if ValueType::of_value(&*instance).is_string()
+                || ValueTypes::has_object_text(&*instance) =>
+            {
+                return Err(MarkupInvokeError::Failed(
+                    "Object.ToString override has no virtual callable metadata".into(),
+                ))
+            }
+            None if ValueTypes::metadata_of(&*instance)
+                .is_some_and(|m| m.kind == MarkupTypeKind::Class)
+                || ValueTypes::as_object(&*instance).is_some() =>
+            {
+                (self.declaring_type(), self.method())
+            }
+            None => {
+                return Err(MarkupInvokeError::Failed(
+                    "Object.ToString receiver has no callable metadata".into(),
+                ))
+            }
+        };
+        Ok(MarkupDelegate::for_method(
+            Some(instance),
+            declaring,
+            method,
+        ))
+    }
+
+    /// The method element factory reports unsupported binding as a real binding error.
+    pub fn binding_value(self, owner: &BoxedValue) -> BoxedValue {
+        match self.bind(owner) {
+            Ok(delegate) => Rc::new(delegate),
+            Err(error) => Rc::new(crate::data::BindingNotification::with_error(
+                crate::data::BindingError::message(error.to_string()),
+                crate::data::BindingErrorType::Error,
+            )),
+        }
+    }
+}
+
+fn builtin_object_to_string(arguments: &[MarkupValue]) -> Result<MarkupValue, MarkupInvokeError> {
+    if arguments.len() != 1 {
+        return Err(MarkupInvokeError::ArgumentCount {
+            expected: 1,
+            actual: arguments.len(),
+        });
+    }
+    let instance = ValueTypes::canonical_object(arguments[0].as_ref())?.ok_or_else(|| {
+        MarkupInvokeError::Failed("Method ToString was called on a null reference".into())
+    })?;
+    if ValueType::of_value(&*instance).is_string() {
+        return builtin_string_to_string(&[Some(instance)]);
+    }
+    let id = BuiltinMethod::ObjectToString;
+    if let Some((_, method)) = id.override_of(&instance)? {
+        return (method.invoke)(&[Some(instance)]);
+    }
+    ValueTypes::try_object_to_text(Some(&instance))
+        .map(|text| text.map(|text| Rc::new(text) as BoxedValue))
+}
+fn builtin_reference_identity_supported(instance: &BoxedValue) -> bool {
+    if ValueType::of_value(&**instance).is_string() { return false; }
+    ValueTypes::as_object(&**instance).is_some()
+        || ValueTypes::is_original_reference(ValueType::of_value(&**instance).id())
+}
+fn builtin_object_get_hash_code(arguments: &[MarkupValue]) -> Result<MarkupValue, MarkupInvokeError> {
+    if arguments.len()!=1 {return Err(MarkupInvokeError::ArgumentCount{expected:1,actual:arguments.len()});}
+    let instance=ValueTypes::canonical_object(arguments[0].as_ref())?.ok_or_else(||MarkupInvokeError::Failed("Method GetHashCode was called on a null reference".into()))?;
+    if let Some((_,method))=BuiltinMethod::ObjectGetHashCode.override_of(&instance)? {
+        return (method.invoke)(&[Some(instance)]);
+    }
+    if let Some(hash)=ValueTypes::try_registered_object_hash(&*instance) {
+        return hash.map(|hash|Some(Rc::new(hash) as BoxedValue));
+    }
+    if !builtin_reference_identity_supported(&instance) {
+        return Err(MarkupInvokeError::Failed("Object.GetHashCode receiver has no supported virtual or reference identity hash metadata".into()));
+    }
+    let hash=match ValueTypes::as_object(&*instance) {
+        Some(object)=>ferroui_system::runtime_identity_hash(object),
+        None=>ferroui_system::runtime_identity_hash(Rc::as_ptr(&instance) as *const () as usize),
+    };
+    Ok(Some(Rc::new(hash)))
+}
+static BUILTIN_OBJECT_METHODS: [MarkupMethod; 2] = [MarkupMethod {
+    name: "ToString",
+    is_static: false,
+    parameters: &[],
+    parameter_info: &[],
+    return_type: Some(ValueType::of::<Option<crate::Utf16Text>>),
+    invoke: builtin_object_to_string,
+    attributes: &[MarkupAttribute {
+        name: "Virtual",
+        arguments: &[],
+        properties: &[],
+    }],
+    emit: not_recorded(),
+}, MarkupMethod {
+    name: "GetHashCode",is_static:false,parameters:&[],parameter_info:&[],
+    return_type:Some(ValueType::of::<i32>),invoke:builtin_object_get_hash_code,
+    attributes:&[MarkupAttribute{name:"Virtual",arguments:&[],properties:&[]}],emit:not_recorded(),
+}];
+static BUILTIN_OBJECT_METADATA: MarkupType = MarkupType {
+    explicit_namespace: Some("System"),
+    methods: &BUILTIN_OBJECT_METHODS,
+    ..MarkupType::new("Object", MarkupTypeKind::Class, "ferroui_base::metadata")
+};
+
+fn builtin_string_to_string(arguments: &[MarkupValue]) -> Result<MarkupValue, MarkupInvokeError> {
+    if arguments.len() != 1 {
+        return Err(MarkupInvokeError::ArgumentCount {
+            expected: 1,
+            actual: arguments.len(),
+        });
+    }
+    let instance = ValueTypes::canonical_object(arguments[0].as_ref())?.ok_or_else(|| {
+        MarkupInvokeError::Failed("Method ToString was called on a null reference".into())
+    })?;
+    if !ValueType::of_value(&*instance).is_string() {
+        return Err(MarkupInvokeError::Argument {
+            index: 0,
+            expected: "System.String",
+            actual: instance.type_name().into(),
+        });
+    }
+    // Source string.ToString returns this exact string object. Do not transcode or rebox.
+    Ok(Some(instance))
+}
+static BUILTIN_STRING_METHODS: [MarkupMethod; 1] = [MarkupMethod {
+    name: "ToString",
+    is_static: false,
+    parameters: &[],
+    parameter_info: &[],
+    return_type: Some(ValueType::of::<Option<crate::Utf16Text>>),
+    invoke: builtin_string_to_string,
+    attributes: &[MarkupAttribute {
+        name: "Virtual",
+        arguments: &[],
+        properties: &[],
+    }],
+    emit: not_recorded(),
+}];
+static BUILTIN_STRING_METADATA: MarkupType = MarkupType {
+    explicit_namespace: Some("System"),
+    methods: &BUILTIN_STRING_METHODS,
+    ..MarkupType::new("String", MarkupTypeKind::Class, "ferroui_base::metadata")
+};

@@ -24,6 +24,8 @@ pub struct ModelSet {
     models: Vec<AssemblyModel>,
     /// Every public path of every model, with the path of the declaring module.
     exports: HashMap<String, String>,
+    /// Deterministic public spellings of canonical paths for generated native signatures.
+    public_paths: HashMap<String,String>,
     /// The types by the text of their Rust type, the first of a text.
     types: HashMap<String, (usize, usize)>,
     /// The accessors of registered properties that are functions of another type than the
@@ -43,7 +45,7 @@ impl ModelSet {
                 exports.entry(export.path.clone()).or_insert_with(|| export.declared.clone());
             }
         }
-        let mut set = Self { models, exports, types: HashMap::new(), functions: HashMap::new(), aliases: HashMap::new() };
+        let mut set = Self { models, exports, public_paths:HashMap::new(), types: HashMap::new(), functions: HashMap::new(), aliases: HashMap::new() };
         let mut types = HashMap::new();
         let mut functions = HashMap::new();
         let mut aliases = HashMap::new();
@@ -62,6 +64,19 @@ impl ModelSet {
                 aliases.entry(set.canonical_path(&alias.path)).or_insert_with(|| set.canonical(&alias.target.text));
             }
         }
+        let mut public_paths=HashMap::new();
+        let mut paths=set.exports.keys().collect::<Vec<_>>();
+        paths.sort_by(|a,b|a.len().cmp(&b.len()).then_with(||a.cmp(b)));
+        for path in paths {public_paths.entry(set.canonical_path(path)).or_insert_with(||path.clone());}
+        for model in &set.models {for type_ in &model.types {
+            if let Some(path)=&type_.public_path {
+                let canonical=set.canonical_path(&type_.rust_path.text);
+                // A metadata facade may represent a different value type. Its public path
+                // is an emitter owner, not a spelling of that native value carrier.
+                if set.canonical_path(path)==canonical {public_paths.insert(canonical,path.clone());}
+            }
+        }}
+        set.public_paths=public_paths;
         set.types = types;
         set.functions = functions;
         set.aliases = aliases;
@@ -104,6 +119,19 @@ impl ModelSet {
             end = path[..end].rfind("::")?;
         }
         None
+    }
+
+    /// Public spelling of a native Rust signature, including paths nested in nullable,
+    /// tuple and generic carriers. Identity still uses canonical/expanded keys.
+    pub fn public_spelling(&self,text:&str)->String {
+        self.map_paths(text,&|path| {
+            let mut end=path.len();
+            loop {
+                if let Some(public)=self.public_paths.get(&path[..end]) {return format!("{public}{}",&path[end..]);}
+                let Some(next)=path[..end].rfind("::") else {return path.to_string()};
+                if next==0 {return path.to_string()};end=next;
+            }
+        })
     }
 
     /// The normalised type text `text` with every absolute path made canonical
@@ -418,5 +446,57 @@ mod tests {
         assert_eq!(set.expanded("::base::Lost"), "::base::Lost");
         assert_eq!(set.expanded("f64"), "f64");
         assert_eq!(set.canonical("::base::Shapes"), "::base::shapes::shape::Shapes");
+    }
+}
+
+#[cfg(test)]
+mod public_signature_tests {
+    use super::*;
+    use crate::model::{ExportModel, RustType, TypeKind};
+    #[test]
+    fn nested_native_carriers_use_public_exports_without_changing_identity() {
+        let mut model = AssemblyModel::new("Base", "base");
+        model.exports = vec![
+            ExportModel {
+                path: "::base::Value".into(),
+                declared: "::base::private::Value".into(),
+            },
+            ExportModel {
+                path: "::base::OtherValue".into(),
+                declared: "::base::private::Value".into(),
+            },
+        ];
+        let mut value = TypeModel::new(
+            "Value",
+            TypeKind::Struct,
+            RustType::resolved("::base::private::Value"),
+            "base::private",
+        );
+        value.public_path = Some("::base::Value".into());
+        model.types.push(value);
+        let mut facade = TypeModel::new(
+            "ValueFacade",
+            TypeKind::Struct,
+            RustType::resolved("::base::private::Value"),
+            "base::metadata",
+        );
+        facade.public_path = Some("::base::ValueFacade".into());
+        model.types.push(facade);
+        let set = ModelSet::new(vec![model]);
+        let canonical = "Option<::std::rc::Rc<::base::private::Value>>";
+        assert_eq!(
+            set.public_spelling(canonical),
+            "Option<::std::rc::Rc<::base::Value>>"
+        );
+        assert_eq!(
+            set.expanded(&set.public_spelling(canonical)),
+            set.expanded(canonical)
+        );
+        assert_eq!(
+            set.public_spelling(
+                "(::base::private::Value, ::base::private::Value::Item, ::base::private::Values)"
+            ),
+            "(::base::Value, ::base::Value::Item, ::base::private::Values)"
+        );
     }
 }

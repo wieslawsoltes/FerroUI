@@ -53,6 +53,28 @@ fn clear_starts_over() {
 }
 
 #[test]
+fn resumable_slots_keep_holes_and_reuse_without_compressing_indices() {
+    let mut d = Dictionary::new();
+    for key in 1..=3 {
+        d.add(key, key * 10);
+    }
+    assert_eq!(d.slot_count(), 3);
+    assert_eq!(d.entry_at(0), Some((&1, &10)));
+    d.remove(&1);
+    assert_eq!(d.slot_count(), 3);
+    assert_eq!(d.entry_at(0), None);
+    assert_eq!(d.entry_at(1), Some((&2, &20)));
+    d.insert(2, 21);
+    assert_eq!(d.entry_at(1), Some((&2, &21)));
+    d.add(4, 40);
+    assert_eq!(d.entry_at(0), Some((&4, &40)));
+    assert_eq!(d.entry_at(3), None);
+    d.clear();
+    assert_eq!(d.slot_count(), 0);
+    assert_eq!(d.entry_at(0), None);
+}
+
+#[test]
 fn add_of_an_existing_key_panics() {
     let mut d = Dictionary::new();
     d.add(1, "v");

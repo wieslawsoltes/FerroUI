@@ -19,16 +19,28 @@ impl DefaultValueConverter {
         INSTANCE.with(Rc::clone)
     }
 
-    fn convert_core(value: Option<&BoxedValue>, target_type: ValueType, culture: &CultureInfo) -> Option<BoxedValue> {
+    fn convert_core(
+        value: Option<&BoxedValue>,
+        target_type: ValueType,
+        culture: &CultureInfo,
+    ) -> Option<BoxedValue> {
         if value.is_none() && ValueTypes::accepts_null(target_type) {
             return ValueTypes::try_convert(None, target_type).flatten();
         }
         // The delegate of a method becomes a command for a command target.
-        if let Some(command) = value.and_then(|value| super::method_to_command(value, target_type)) {
+        if let Some(command) = value.and_then(|value| super::method_to_command(value, target_type))
+        {
             return Some(command);
         }
-        if let Some(result) = ValueTypes::try_convert_with_culture(value, target_type, culture) {
-            return result;
+        match ValueTypes::try_convert_with_culture_result(value, target_type, culture) {
+            Ok(Some(result)) => return result,
+            Err(error) => {
+                return Some(Rc::new(BindingNotification::with_error(
+                    BindingError::new(error),
+                    BindingErrorType::Error,
+                )))
+            }
+            Ok(None) => {}
         }
         let message = match value {
             Some(v) => format!(
@@ -38,7 +50,10 @@ impl DefaultValueConverter {
             ),
             None => format!("Could not convert null to '{target_type}'."),
         };
-        Some(Rc::new(BindingNotification::with_error(BindingError::message(message), BindingErrorType::Error)))
+        Some(Rc::new(BindingNotification::with_error(
+            BindingError::message(message),
+            BindingErrorType::Error,
+        )))
     }
 }
 

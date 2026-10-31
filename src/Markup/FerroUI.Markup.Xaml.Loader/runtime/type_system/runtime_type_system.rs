@@ -768,7 +768,7 @@ impl RuntimeTypeSystem {
         }
     }
 
-    fn project_attributes(&self, attributes: &[MarkupAttribute]) -> Vec<Rc<dyn IXamlCustomAttribute>> {
+    pub(crate) fn project_attributes(&self, attributes: &[MarkupAttribute]) -> Vec<Rc<dyn IXamlCustomAttribute>> {
         attributes.iter().map(|a| self.project_attribute(a)).collect()
     }
 
@@ -790,8 +790,8 @@ impl RuntimeTypeSystem {
             }
         }
         if let Some(array) = value.downcast_ref::<super::values::RuntimeArray>() {
-            if let Ok(array_type) = array.element_type().make_array_type(1) {
-                return array_type;
+            if let Some(element)=super::values::array_element_type(array).or_else(||self.find_type(&array.element_type().full_name())) {
+                if let Ok(array_type)=element.make_array_type(1) {return array_type;}
             }
         }
         if let Some(list) = value.downcast_ref::<super::values::RuntimeList>() {
@@ -906,8 +906,17 @@ impl RuntimeTypeSystem {
     }
 
     fn resolve_all(&self, types: &[TypeOf]) -> (Vec<Rc<dyn IXamlType>>, Vec<Option<ValueType>>) {
+        self.resolve_parameters(types, &[])
+    }
+    fn resolve_parameters(&self, types: &[TypeOf], info: &[ferroui_base::metadata::MarkupParameter]) -> (Vec<Rc<dyn IXamlType>>, Vec<Option<ValueType>>) {
         let handles: Vec<ValueType> = types.iter().map(|t| t()).collect();
-        (handles.iter().map(|h| self.resolve(*h)).collect(), handles.into_iter().map(Some).collect())
+        let parameters = handles.iter().enumerate().map(|(index, handle)| {
+            match info.get(index).and_then(|p| p.by_ref_element) {
+                Some(element) => self.resolve(element()).make_by_ref_type().expect("resolved runtime elements support managed references"),
+                None => self.resolve(*handle),
+            }
+        }).collect();
+        (parameters, handles.into_iter().map(Some).collect())
     }
 
     pub(crate) fn method(
@@ -921,6 +930,7 @@ impl RuntimeTypeSystem {
         attributes: Vec<Rc<dyn IXamlCustomAttribute>>,
     ) -> Rc<RuntimeMethod> {
         Rc::new(RuntimeMethod {
+            parameter_metadata: Vec::new(),
             system: self.this.clone(),
             name,
             declaring_type: Rc::downgrade(type_),
@@ -946,7 +956,12 @@ impl RuntimeTypeSystem {
         let self_type: Rc<dyn IXamlType> = type_.clone();
         for interface in markup.interfaces {
             let interface = self.resolve(interface());
-            if !members.interfaces.iter().any(|i| i.equals(&*interface)) {
+            // Equal closed CLR interfaces can have different native receiving carriers.
+            // The declaration supplies the invocable view of this type; a synthetic
+            // generic-definition interface must not retain another carrier's accessors.
+            if let Some(inherited) = members.interfaces.iter_mut().find(|i| i.equals(&*interface)) {
+                *inherited = interface;
+            } else {
                 members.interfaces.push(interface);
             }
         }
@@ -954,7 +969,7 @@ impl RuntimeTypeSystem {
         // (`(property: T [InheritDataTypeFrom(2)]) => ..`); a constructor declared in the
         // positional form states none.
         for constructor in markup.constructors {
-            let (parameters, parameter_handles) = self.resolve_all(constructor.parameters);
+            let (parameters, parameter_handles) = self.resolve_parameters(constructor.parameters, constructor.parameter_info);
             let declared = !constructor.parameter_info.is_empty();
             let parameter_attributes: Vec<Vec<Rc<dyn IXamlCustomAttribute>>> = (0..parameters.len())
                 .map(|parameter_index| match declared {
@@ -1080,7 +1095,7 @@ impl RuntimeTypeSystem {
                     method.name.to_string(),
                     method.is_static,
                     return_type,
-                    self.resolve_all(method.parameters),
+                    self.resolve_parameters(method.parameters, method.parameter_info),
                     RuntimeInvoker::Static(method.invoke),
                     self.project_attributes(method.attributes),
                 )
@@ -1301,7 +1316,27 @@ impl RuntimeTypeSystem {
             let arguments = type_.generic_argument_types();
             let weak = Rc::downgrade(type_);
             let mut inherited: Vec<(Rc<RuntimeMethod>, Rc<RuntimeMethod>)> = Vec::new();
+            // Real inherited metadata wins over a minimal core stand-in, as in the model host.
+            // Compare complete closed signatures and traverse cyclic interface graphs once.
+            let mut pending = members.interfaces.clone();
+            let mut visited: Vec<Rc<dyn IXamlType>> = Vec::new();
+            let mut declared_interface_methods = Vec::new();
+            while let Some(interface) = pending.pop() {
+                if visited.iter().any(|known| known.equals(&*interface)) { continue; }
+                visited.push(interface.clone());
+                pending.extend(interface.interfaces());
+                declared_interface_methods.extend(interface.methods().into_iter().filter(|method| {
+                    method.as_any().downcast_ref::<RuntimeMethod>().is_some_and(|method| method.declared.is_some())
+                }));
+            }
             for method in source.methods.iter().filter(|m| matches!(m.invoker, RuntimeInvoker::Virtual)) {
+                let closed = method.substituted(&weak, parameters, arguments);
+                if declared_interface_methods.iter().any(|known| {
+                    known.name() == closed.name && known.is_static() == closed.is_static
+                        && known.return_type().equals(&*closed.return_type)
+                        && known.parameters().len() == closed.parameters.len()
+                        && known.parameters().iter().zip(&closed.parameters).all(|(a,b)| a.equals(&**b))
+                }) { continue; }
                 let declared = members
                     .methods
                     .iter()
@@ -1563,6 +1598,7 @@ impl RuntimeTypeSystem {
                     }
                 }
                 *method = Rc::new(RuntimeMethod {
+            parameter_metadata: method.parameter_metadata.clone(),
                     system: method.system.clone(),
                     name: method.name.clone(),
                     declaring_type: method.declaring_type.clone(),

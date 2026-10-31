@@ -35,6 +35,19 @@ impl<K: fmt::Debug, V: fmt::Debug> fmt::Debug for Dictionary<K, V> {
 }
 
 impl<K, V> Dictionary<K, V> {
+    /// Storage slots, including removed entries; supports resumable source enumerators.
+    pub fn slot_count(&self) -> usize {
+        self.entries.len()
+    }
+
+    /// The entry at a stable storage slot, without hashing or invoking key equality.
+    pub fn entry_at(&self, slot: usize) -> Option<(&K, &V)> {
+        self.entries
+            .get(slot)?
+            .as_ref()
+            .map(|(key, value)| (key, value))
+    }
+
     /// The entries in the order of enumeration.
     pub fn iter(&self) -> impl Iterator<Item = (&K, &V)> {
         self.entries.iter().filter_map(|entry| entry.as_ref().map(|(key, value)| (key, value)))

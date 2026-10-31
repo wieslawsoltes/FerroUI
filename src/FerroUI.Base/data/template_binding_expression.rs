@@ -1,3 +1,4 @@
+use crate::data::{BindingError, BindingErrorType};
 use crate::data::converters::IValueConverter;
 use crate::data::core::plugins::{get_property_value, set_property_value};
 use crate::data::core::{
@@ -74,18 +75,30 @@ impl TemplateBindingExpression {
         target.downcast_ref::<StyledElement>()?.templated_parent()
     }
 
-    fn convert_to_target_type(&self, value: Option<BoxedValue>) -> Option<BoxedValue> {
+    fn convert_to_target_type(
+        &self,
+        value: Option<BoxedValue>,
+        error: &mut Option<ExpressionError>,
+    ) -> Option<BoxedValue> {
         let target_type = self.base.target_type();
         if self.base.target_property().is_none() && target_type.is_object() {
             return value;
         }
-        match TargetTypeConverter::get_default_converter().try_convert(
+        match TargetTypeConverter::get_default_converter().try_convert_result(
             value.as_ref(),
             target_type,
             &CultureInfo::invariant_culture(),
         ) {
-            Some(result) => result,
-            None => {
+            Ok(Some(result)) => result,
+            Err(cause) => {
+                self.log_error(&cause.to_string(), LogEventLevel::Warning);
+                *error = Some(ExpressionError::new(
+                    BindingError::new(cause),
+                    BindingErrorType::Error,
+                ));
+                Some(FerroProperty::unset_value())
+            }
+            Ok(None) => {
                 let message = format!(
                     "Could not convert '{}' ({}) to '{}'.",
                     ValueTypes::to_display_string(value.as_ref()),
@@ -121,7 +134,7 @@ impl TemplateBindingExpression {
                     &mut error,
                 );
             }
-            let value = self.convert_to_target_type(value);
+            let value = self.convert_to_target_type(value,&mut error);
             self.base.publish_value(Publish::Value(value), error, false);
             self.has_published_value.set(true);
 
@@ -208,7 +221,9 @@ impl UntypedBindingExpression for TemplateBindingExpression {
     }
 
     fn write_value_to_source(&self, value: Option<BoxedValue>) -> bool {
-        let (Some(property), Some(templated_parent)) = (self.property, self.try_get_templated_parent()) else {
+        let (Some(property), Some(templated_parent)) =
+            (self.property, self.try_get_templated_parent())
+        else {
             return false;
         };
         let mut value = value;
@@ -227,13 +242,25 @@ impl UntypedBindingExpression for TemplateBindingExpression {
             // Written with the semantics of "set current value": the
             // templated parent's own bindings and styles stay in place.
             let target_type = crate::data::core::plugins::property_value_type(property);
-            match ValueTypes::try_convert(value.as_ref(), target_type) {
-                Some(Some(v)) if BindingOperations::is_unset(Some(&v)) || property.is_valid_value((*v).as_any()) => {
+            match ValueTypes::try_convert_result(value.as_ref(), target_type) {
+                Ok(Some(Some(v)))
+                    if BindingOperations::is_unset(Some(&v))
+                        || property.is_valid_value((*v).as_any()) =>
+                {
                     templated_parent.set_current_value_untyped(property, (*v).as_any());
+                }
+                Err(cause) => {
+                    self.log_error(&cause.to_string(), LogEventLevel::Warning);
+                    return false;
                 }
                 _ => {
                     if BindingOperations::is_unset(value.as_ref()) {
-                        let _ = set_property_value(&templated_parent, property, value.as_ref(), BindingPriority::LocalValue);
+                        let _ = set_property_value(
+                            &templated_parent,
+                            property,
+                            value.as_ref(),
+                            BindingPriority::LocalValue,
+                        );
                     }
                 }
             }

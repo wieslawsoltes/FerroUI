@@ -481,27 +481,41 @@ impl BindingExpression {
         }
     }
 
-    fn convert_fallback(&self, fallback: Option<BoxedValue>, fallback_name: &str) -> Option<BoxedValue> {
+    fn convert_fallback(
+        &self,
+        fallback: Option<BoxedValue>,
+        fallback_name: &str,
+    ) -> Option<BoxedValue> {
         let target_type = self.base.target_type();
-        if is_unset(&fallback) || (self.base.target_property().is_none() && target_type.is_object()) {
+        if is_unset(&fallback) || (self.base.target_property().is_none() && target_type.is_object())
+        {
             return fallback;
         }
         // The original converts with its target type converter and the converter culture.
         let converted = match &self.target_type_converter {
-            Some(converter) => converter.try_convert(fallback.as_ref(), target_type, &self.converter_culture()),
-            None => ValueTypes::try_convert(fallback.as_ref(), target_type),
+            Some(converter) => converter.try_convert_result(
+                fallback.as_ref(),
+                target_type,
+                &self.converter_culture(),
+            ),
+            None => ValueTypes::try_convert_result(fallback.as_ref(), target_type),
         };
-        if let Some(result) = converted {
-            return result;
-        }
+        let cause = match converted {
+            Ok(Some(result)) => return result,
+            Err(cause) => Some(cause),
+            Ok(None) => None,
+        };
         if let Some(target) = self.base.try_get_target() {
             self.base.log(
                 &target,
                 &self.description(),
-                &format!(
-                    "Could not convert {fallback_name} '{}' to '{target_type}'.",
-                    ValueTypes::to_display_string(fallback.as_ref())
-                ),
+                &match cause {
+                    Some(cause) => cause.to_string(),
+                    None => format!(
+                        "Could not convert {fallback_name} '{}' to '{target_type}'.",
+                        ValueTypes::to_display_string(fallback.as_ref())
+                    ),
+                },
                 LogEventLevel::Error,
             );
         }
@@ -510,19 +524,45 @@ impl BindingExpression {
 
     /// Converts a produced value to the target type. Without a target
     /// property (an expression observed directly) values pass through.
-    fn convert_from(&self, value: Option<BoxedValue>, error: &mut Option<ExpressionError>) -> Option<BoxedValue> {
+    fn convert_from(
+        &self,
+        value: Option<BoxedValue>,
+        error: &mut Option<ExpressionError>,
+    ) -> Option<BoxedValue> {
         let target_type = self.base.target_type();
         if self.base.target_property().is_none() && target_type.is_object() {
             return value;
         }
         // The converter of string-path bindings knows conversions the table
         // of value types does not (the delegate of a method to a command).
-        let converted = match &self.target_type_converter {
-            Some(converter) => converter.try_convert(value.as_ref(), target_type, &self.converter_culture()),
-            None => ValueTypes::try_convert(value.as_ref(), target_type),
+        let current = if self.base.is_running() {
+            self.base.get_value()
+        } else {
+            None
         };
-        if let Some(result) = converted {
-            return result;
+        let converted = match &self.target_type_converter {
+            Some(converter) => converter.try_convert_result_with_current(
+                value.as_ref(),
+                target_type,
+                &self.converter_culture(),
+                current.as_ref(),
+            ),
+            None => ValueTypes::try_convert_result_with_current(
+                value.as_ref(),
+                target_type,
+                current.as_ref(),
+            ),
+        };
+        match converted {
+            Ok(Some(result)) => return result,
+            Err(cause) => {
+                *error = Some(ExpressionError::new(
+                    BindingError::new(cause),
+                    BindingErrorType::Error,
+                ));
+                return Some(FerroProperty::unset_value());
+            }
+            Ok(None) => {}
         }
         let message = format!(
             "Could not convert '{}' ({}) to '{}'.",
@@ -531,9 +571,17 @@ impl BindingExpression {
             target_type
         );
         if let Some(target) = self.should_log_error() {
-            self.base.log(&target, &self.description(), &message, LogEventLevel::Warning);
+            self.base.log(
+                &target,
+                &self.description(),
+                &message,
+                LogEventLevel::Warning,
+            );
         }
-        *error = Some(ExpressionError::new(BindingError::message(message), BindingErrorType::Error));
+        *error = Some(ExpressionError::new(
+            BindingError::message(message),
+            BindingErrorType::Error,
+        ));
         Some(FerroProperty::unset_value())
     }
 
@@ -657,9 +705,15 @@ impl UntypedBindingExpression for BindingExpression {
         }
         self.stop_delay_timer();
         let mut value = value;
-        let Some(leaf) = self.leaf_node() else { return false };
-        let Some(setter) = leaf.as_settable() else { return false };
-        let Some(type_) = setter.value_type() else { return false };
+        let Some(leaf) = self.leaf_node() else {
+            return false;
+        };
+        let Some(setter) = leaf.as_settable() else {
+            return false;
+        };
+        let Some(type_) = setter.value_type() else {
+            return false;
+        };
 
         // Invoke any converter on the value before writing it to the source.
         // If the converter returns an error the value is not written.
@@ -675,20 +729,36 @@ impl UntypedBindingExpression for BindingExpression {
         // Use the target type converter to convert the value to the source
         // type if necessary.
         if let Some(converter) = &self.target_type_converter {
-            if let Some(converted) = converter.try_convert(value.as_ref(), type_, &self.converter_culture()) {
-                value = converted;
-            } else if !is_unset(&self.fallback_value()) {
-                value = self.fallback_value();
-            } else if self.base.is_data_validation_enabled() {
-                self.on_data_validation_error(BindingError::message(format!(
-                    "Could not convert '{}' ({}) to {}.",
-                    ValueTypes::to_display_string(value.as_ref()),
-                    value.as_ref().map_or("null", |v| (**v).type_name()),
-                    type_
-                )));
-                return false;
-            } else {
-                return false;
+            match converter.try_convert_result(value.as_ref(), type_, &self.converter_culture()) {
+                Ok(Some(converted)) => value = converted,
+                Err(cause) => {
+                    if self.base.is_data_validation_enabled() {
+                        self.on_data_validation_error(BindingError::new(cause));
+                    } else if let Some(target) = self.should_log_error() {
+                        self.base.log(
+                            &target,
+                            &self.description(),
+                            &cause.to_string(),
+                            LogEventLevel::Warning,
+                        );
+                    }
+                    return false;
+                }
+                Ok(None) => {
+                    if !is_unset(&self.fallback_value()) {
+                        value = self.fallback_value();
+                    } else if self.base.is_data_validation_enabled() {
+                        self.on_data_validation_error(BindingError::message(format!(
+                            "Could not convert '{}' ({}) to {}.",
+                            ValueTypes::to_display_string(value.as_ref()),
+                            value.as_ref().map_or("null", |v| (**v).type_name()),
+                            type_
+                        )));
+                        return false;
+                    } else {
+                        return false;
+                    }
+                }
             }
         }
 
@@ -703,7 +773,9 @@ impl UntypedBindingExpression for BindingExpression {
             return true;
         }
 
-        setter.write_value_to_source(value.as_ref(), &self.nodes).unwrap_or(false)
+        setter
+            .write_value_to_source(value.as_ref(), &self.nodes)
+            .unwrap_or(false)
     }
 
     fn should_log_error(&self) -> Option<Ref<FerroObject>> {

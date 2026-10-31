@@ -36,6 +36,7 @@ pub struct FerroObject {
     inheritance_parent: RefCell<Option<WeakRef<FerroObject>>>,
     inheritance_children: RefCell<Vec<WeakRef<FerroObject>>>,
     property_changed: HandlerList<PropertyChangedHandler>,
+    property_revisions: RefCell<Vec<(u32, u64)>>,
     /// The dispatcher of the thread that owns this object; resolved the first
     /// time it is asked for, so that constructing an object costs nothing.
     dispatcher: OnceCell<Arc<Dispatcher>>,
@@ -242,6 +243,7 @@ impl FerroObject {
             inheritance_parent: RefCell::new(None),
             inheritance_children: RefCell::new(Vec::new()),
             property_changed: HandlerList::new(),
+            property_revisions: RefCell::new(Vec::new()),
             dispatcher: OnceCell::new(),
         }
     }
@@ -501,6 +503,19 @@ impl FerroObject {
     /// Clears a property's local value.
     pub fn clear_value<T: PropertyValue>(&self, property: &'static StyledProperty<T>) {
         self.values.clear_value(self, property);
+    }
+
+    /// Tracks effective change notifications for a property without reading/cloning its value.
+    /// The first call starts at zero. Tracked revisions advance before virtual callbacks,
+    /// routed events and property observers, including style, binding and current-value changes.
+    /// Tracking belongs to this object and does not install a subscription or retain a consumer.
+    pub fn property_revision(&self, property: &FerroProperty) -> u64 {
+        let mut revisions = self.property_revisions.borrow_mut();
+        if let Some((_, revision)) = revisions.iter().find(|(id, _)| *id == property.id()) {
+            return *revision;
+        }
+        revisions.push((property.id(), 0));
+        0
     }
 
     /// Gets a property value.
@@ -894,6 +909,12 @@ impl FerroObject {
         priority: BindingPriority,
         is_effective_value: bool,
     ) {
+        if is_effective_value {
+            let mut revisions = self.property_revisions.borrow_mut();
+            if let Some((_, revision)) = revisions.iter_mut().find(|(id, _)| *id == property.id()) {
+                *revision = revision.checked_add(1).expect("effective property revision overflow");
+            }
+        }
         let e = FerroPropertyChangedEventArgs::new(
             self,
             property,

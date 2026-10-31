@@ -1,9 +1,9 @@
 use super::{
-    impl_untyped_binding_expression, IBindingExpressionSink, Publish, SinkRef, UntypedBindingExpression,
+    impl_untyped_binding_expression, ExpressionError, IBindingExpressionSink, Publish, SinkRef, UntypedBindingExpression,
     UntypedBindingExpressionBase, ValueTypes,
 };
 use crate::data::converters::IMultiValueConverter;
-use crate::data::{BindingBase, BindingExpressionBase, BindingNotification, BindingOperations, BindingPriority};
+use crate::data::{BindingError, BindingErrorType, BindingBase, BindingExpressionBase, BindingNotification, BindingOperations, BindingPriority};
 use crate::utilities::CultureInfo;
 use crate::{BoxedValue, FerroProperty};
 use std::cell::RefCell;
@@ -75,9 +75,16 @@ impl MultiBindingExpression {
 
         match &self.converter {
             Some(converter) => {
-                let culture = self.converter_culture.clone().unwrap_or_else(CultureInfo::current_culture);
-                let converted = match converter.convert(&values, target_type, self.converter_parameter.as_ref(), &culture)
-                {
+                let culture = self
+                    .converter_culture
+                    .clone()
+                    .unwrap_or_else(CultureInfo::current_culture);
+                let converted = match converter.convert(
+                    &values,
+                    target_type,
+                    self.converter_parameter.as_ref(),
+                    &culture,
+                ) {
                     Ok(v) => v,
                     Err(_) => Some(FerroProperty::unset_value()),
                 };
@@ -92,16 +99,44 @@ impl MultiBindingExpression {
                     converted = self.fallback_value.clone();
                 }
                 if has_target && !BindingOperations::is_unset(converted.as_ref()) {
-                    converted = ValueTypes::try_convert(converted.as_ref(), target_type)
-                        .unwrap_or_else(|| Some(FerroProperty::unset_value()));
+                    converted =
+                        match ValueTypes::try_convert_result(converted.as_ref(), target_type) {
+                            Ok(value) => {
+                                value.unwrap_or_else(|| Some(FerroProperty::unset_value()))
+                            }
+                            Err(cause) => {
+                                self.base.publish_value(
+                                    Publish::Value(Some(FerroProperty::unset_value())),
+                                    Some(ExpressionError::new(
+                                        BindingError::new(cause),
+                                        BindingErrorType::Error,
+                                    )),
+                                    false,
+                                );
+                                return;
+                            }
+                        };
                 }
-                self.base.publish_value(Publish::Value(converted), None, false);
+                self.base
+                    .publish_value(Publish::Value(converted), None, false);
             }
             None => {
                 let list: BoxedValue = Rc::new(values);
                 let value = if has_target {
-                    ValueTypes::try_convert(Some(&list), target_type)
-                        .unwrap_or_else(|| Some(FerroProperty::unset_value()))
+                    match ValueTypes::try_convert_result(Some(&list), target_type) {
+                        Ok(value) => value.unwrap_or_else(|| Some(FerroProperty::unset_value())),
+                        Err(cause) => {
+                            self.base.publish_value(
+                                Publish::Value(Some(FerroProperty::unset_value())),
+                                Some(ExpressionError::new(
+                                    BindingError::new(cause),
+                                    BindingErrorType::Error,
+                                )),
+                                false,
+                            );
+                            return;
+                        }
+                    }
                 } else {
                     Some(list)
                 };

@@ -25,3 +25,7 @@ pub use ferro_list::{
     CollectionChangedHandler, FerroList, NotifyCollectionChangedAction, NotifyCollectionChangedEventArgs,
     ResetBehavior, WeakFerroList,
 };
+
+mod enumerable;
+pub use enumerable::{IndexedEnumerableDispatch,Enumerable, Enumerator, EnumerableDispatch, EnumeratorDispatch, EnumerableMetadata, EnumeratorMetadata};
+pub(crate) use enumerable::register as register_enumerable;

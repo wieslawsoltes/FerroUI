@@ -62,7 +62,7 @@ impl FontManagerImpl {
         self.sk_font_manager.borrow().match_family_style_character(
             family_name.unwrap_or(""),
             sk_font_style,
-            &[culture.name()],
+            &[&culture.name()],
             codepoint,
         )
     }

@@ -122,6 +122,8 @@ crate::ferro_rust_paths! {
         crate::styling::Styles,
     ],
     types: [
+        crate::collections::EnumerableMetadata,
+        crate::collections::EnumeratorMetadata,
         crate::ClassBindingManager,
         crate::CornerRadius,
         crate::FerroProperty,
@@ -373,6 +375,8 @@ crate::ferro_rust_paths! {
         crate::utilities::CalendarWeekRule,
         crate::utilities::CancelEventArgs,
         crate::utilities::CultureInfo,
+        crate::TextInfoMetadata,
+    crate::CompareInfoMetadata,
         crate::utilities::DateTime,
         crate::utilities::DateTimeKind,
         crate::utilities::DateTimeOffset,

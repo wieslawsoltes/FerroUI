@@ -22,6 +22,9 @@
 //!   model next to them. The reader of format 1 looks its members up by name
 //!   and ignores the others, so it reads a file of format 2 as the documents
 //!   of the crate.
+//! - `"format": 3`: parameter records may state `by_ref_element` separately from their native
+//!   carrier. The writer uses this version only when a reference parameter exists; old
+//!   model readers reject it. Ordinary declarations keep format2 bytes.
 //!
 //! A member whose value is the default of its kind (an empty list, `false`,
 //! nothing) is left out of a file of format 2, except the four members of
@@ -30,8 +33,9 @@
 use crate::json::{text_of, Fields, Json, Members};
 pub use crate::xaml_metadata::{DocumentModel, XamlMetadata};
 
-/// The format [`AssemblyModel::to_json`] writes.
-pub const FORMAT: i64 = 2;
+/// Maximum supported model format. Ordinary declarations keep format2; managed-reference
+/// parameters require format3, so an old model reader rejects them explicitly.
+pub const FORMAT: i64 = 3;
 
 /// A Rust type as normalised text (9.5.2, step 1): the tokens of the type as the
 /// declaration writes it, spaced canonically, with every path the scanner resolved made
@@ -285,6 +289,9 @@ fn attributes_to_json(members: Members, attributes: &[AttributeModel]) -> Member
 /// A parameter of a constructor, a method, an indexer or an event handler.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct ParameterModel {
+    /// The logical element of a managed reference parameter. `type_` remains its
+    /// actual native carrier type; this field requires format3.
+    pub by_ref_element: Option<RustType>,
     /// The name, for a constructor that names its parameters.
     pub name: Option<String>,
     pub type_: RustType,
@@ -293,25 +300,42 @@ pub struct ParameterModel {
 
 impl ParameterModel {
     fn to_json(&self) -> Json {
-        if self.name.is_none() && self.attributes.is_empty() {
+        if self.name.is_none() && self.attributes.is_empty() && self.by_ref_element.is_none() {
             return self.type_.to_json();
         }
-        Json::object(attributes_to_json(Members::new().optional_text("name", &self.name).always("type", self.type_.to_json()), &self.attributes))
+        Json::object(attributes_to_json(
+            Members::new()
+                .optional_text("name", &self.name)
+                .always("type", self.type_.to_json())
+                .optional(
+                    "by_ref_element",
+                    self.by_ref_element.as_ref().map(RustType::to_json),
+                ),
+            &self.attributes,
+        ))
     }
 
     fn from_json(value: &Json) -> Result<Self, String> {
         if let Json::Object(members) = value {
             if members.iter().any(|(name, _)| name == "type") {
                 let fields = Fields::of(value, "a parameter")?;
-                let type_ = fields.get("type").ok_or_else(|| "\"type\" of a parameter is null".to_string())?;
+                let type_ = fields
+                    .get("type")
+                    .ok_or_else(|| "\"type\" of a parameter is null".to_string())?;
                 return Ok(Self {
+                    by_ref_element: fields.optional("by_ref_element", RustType::from_json)?,
                     name: fields.optional_text("name")?,
                     type_: RustType::from_json(type_)?,
                     attributes: fields.list("attributes", AttributeModel::from_json)?,
                 });
             }
         }
-        Ok(Self { name: None, type_: RustType::from_json(value)?, attributes: Vec::new() })
+        Ok(Self {
+            by_ref_element: None,
+            name: None,
+            type_: RustType::from_json(value)?,
+            attributes: Vec::new(),
+        })
     }
 }
 
@@ -815,6 +839,9 @@ impl TypeModel {
         fn parameters(parameters_: &mut [ParameterModel], visit: &mut dyn FnMut(&mut RustType)) {
             for parameter in parameters_ {
                 visit(&mut parameter.type_);
+                if let Some(element) = &mut parameter.by_ref_element {
+                    visit(element);
+                }
                 attributes(&mut parameter.attributes, visit);
             }
         }
@@ -1082,7 +1109,7 @@ pub struct ValueTypeModel {
 /// The registration functions of the untyped value conversions the scanner reads
 /// ([`ValueTypeModel`], and `cast` for [`CastModel`]), with the number of type arguments.
 pub const VALUE_REGISTRATIONS: &[(&str, usize)] =
-    &[("nullable", 1), ("reference", 1), ("object", 1), ("element_ref", 1), ("interface", 2), ("upcast", 2), ("cast", 2), ("boxed_cast", 2), ("deref", 2)];
+    &[("identity_preserving_adapter", 2), ("fallible_adapter", 2), ("object_text", 1), ("nullable", 1), ("reference", 1), ("object", 1), ("element_ref", 1), ("interface", 2), ("upcast", 2), ("cast", 2), ("boxed_cast", 2), ("deref", 2)];
 
 /// A public function of an inherent `impl` block of a type of a crate, as far as the choice
 /// of a call form reads it (9.5.3, form B).
@@ -1216,6 +1243,19 @@ pub struct AssemblyModel {
     pub dependencies: Vec<String>,
 }
 
+fn has_reference_parameters(types: &[TypeModel]) -> bool {
+    types.iter().any(|t| {
+        t.constructors
+            .iter()
+            .chain(&t.methods)
+            .chain(&t.events)
+            .any(|m| m.parameters.iter().any(|p| p.by_ref_element.is_some()))
+            || t.indexers
+                .iter()
+                .any(|p| p.parameters.iter().any(|p| p.by_ref_element.is_some()))
+    })
+}
+
 impl AssemblyModel {
     /// A model without types and documents.
     pub fn new(name: &str, crate_name: &str) -> Self {
@@ -1318,7 +1358,7 @@ impl AssemblyModel {
             ])
         };
         let members = Members::new()
-            .always("format", Json::Integer(FORMAT))
+            .always("format", Json::Integer(if has_reference_parameters(&self.types) { FORMAT } else { 2 }))
             .text("name", &self.name)
             .text("crate_name", &self.crate_name)
             .always("documents", Json::Array(self.documents.iter().map(document).collect()))
@@ -1365,6 +1405,10 @@ impl AssemblyModel {
                 public: document.flag("public")?,
             })
         })?;
+        let types = fields.list("types", TypeModel::from_json)?;
+        if format < 3 && has_reference_parameters(&types) {
+            return Err("managed-reference parameters require metadata format3".to_string());
+        }
         Ok(Self {
             name: fields.text("name")?,
             crate_name: fields.text("crate_name")?,
@@ -1376,7 +1420,7 @@ impl AssemblyModel {
             })?,
             metadata: fields.list("metadata", |pair| pair_from_json(pair, "an entry of the metadata"))?,
             namespaces: fields.list("namespaces", |pair| pair_from_json(pair, "an entry of the namespace table"))?,
-            types: fields.list("types", TypeModel::from_json)?,
+            types,
             exports: fields.list("exports", |pair| pair_from_json(pair, "an entry of the export table").map(|(path, declared)| ExportModel { path, declared }))?,
             aliases: fields.list("aliases", |pair| match pair {
                 Json::Array(pair) if pair.len() == 2 => Ok(AliasModel { path: text_of(&pair[0], "the path of an alias")?, target: RustType::from_json(&pair[1])? }),
@@ -1461,8 +1505,8 @@ mod tests {
         type_.parse_call = Some(CallForm::CratePath("::fixture::Panel::parse".to_string()));
         type_.constructors = vec![MemberModel {
             parameters: vec![
-                ParameterModel { name: Some("name".to_string()), type_: RustType::resolved("String"), attributes: vec![attribute.clone()] },
-                ParameterModel { name: None, type_: unresolved.clone(), attributes: Vec::new() },
+                ParameterModel { by_ref_element: None, name: Some("name".to_string()), type_: RustType::resolved("String"), attributes: vec![attribute.clone()] },
+                ParameterModel { by_ref_element: None, name: None, type_: unresolved.clone(), attributes: Vec::new() },
             ],
             is_static: true,
             fallible: true,
@@ -1495,7 +1539,7 @@ mod tests {
         }];
         type_.indexers = vec![PropertyModel {
             name: String::new(),
-            parameters: vec![ParameterModel { name: None, type_: RustType::resolved("i32"), attributes: Vec::new() }],
+            parameters: vec![ParameterModel { by_ref_element: None, name: None, type_: RustType::resolved("i32"), attributes: Vec::new() }],
             value_type: RustType::resolved("String"),
             getter: Some(accessor),
             setter: None,
@@ -1537,7 +1581,7 @@ mod tests {
         ];
         type_.methods = vec![MemberModel {
             name: "Add".to_string(),
-            parameters: vec![ParameterModel { name: None, type_: RustType::resolved("::fixture::Control"), attributes: Vec::new() }],
+            parameters: vec![ParameterModel { by_ref_element: None, name: None, type_: RustType::resolved("::fixture::Control"), attributes: Vec::new() }],
             return_type: Some(RustType::resolved("bool")),
             attributes: vec![attribute.clone()],
             callable: CallableModel::default(),
@@ -1621,8 +1665,8 @@ mod tests {
         assert_eq!(read, AssemblyModel::from_metadata(model.metadata()));
         assert!(read.types.is_empty() && read.namespaces.is_empty());
         assert_eq!(read.documents, model.documents);
-        let newer = model.to_json().replacen("\"format\": 2", "\"format\": 3", 1);
-        assert_eq!(AssemblyModel::parse(&newer), Err("the file has the format 3; this reader reads the formats 1 to 2".to_string()));
+        let newer = model.to_json().replacen("\"format\": 2", "\"format\": 4", 1);
+        assert_eq!(AssemblyModel::parse(&newer), Err("the file has the format 4; this reader reads the formats 1 to 3".to_string()));
     }
 
     /// Not from upstream: the checked-in `.xamlmeta` of the themes (format 1, written by the

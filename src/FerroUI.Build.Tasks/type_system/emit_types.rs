@@ -253,6 +253,7 @@ impl EmitProperty for ModelEmitProperty {
 /// state it.
 #[derive(Default)]
 struct Conversions {
+    adapters: Vec<(String, String)>,
     /// The nullable forms, each with the type it holds.
     nullable: HashMap<String, String>,
     /// The casts, by the two types.
@@ -299,7 +300,8 @@ const KNOWN: &[(Known, &str)] = &[
     (Known::String, "String"),
     (Known::OptionString, "Option<String>"),
     (Known::Bool, "bool"),
-    (Known::Char, "char"),
+    (Known::Char, "::ferroui_base::Char"),
+    (Known::ScalarChar, "char"),
     (Known::I8, "i8"),
     (Known::U8, "u8"),
     (Known::I16, "i16"),
@@ -332,6 +334,7 @@ const KNOWN: &[(Known, &str)] = &[
     (Known::OptionTypeDescriptorContext, "Option<::std::rc::Rc<dyn ::ferroui_markup_xaml::converters::ITypeDescriptorContext>>"),
     (Known::StyleQuery, "::ferroui_base::styling::StyleQuery"),
     (Known::RuntimeList, "::ferroui_markup_xaml::xaml_il::runtime::RuntimeList"),
+    (Known::RuntimeArray, "::ferroui_markup_xaml::xaml_il::runtime::RuntimeArray"),
     (Known::ListItems, "::std::rc::Rc<::ferroui_base::collections::FerroList<Option<::ferroui_base::BoxedValue>>>"),
 ];
 
@@ -339,6 +342,8 @@ const KNOWN: &[(Known, &str)] = &[
 const PRIMITIVES: &[(&str, &str)] = &[
     ("bool", "bool"),
     ("char", "char"),
+    ("::ferroui_base::Char", "::ferroui_base::Char"),
+    ("::ferroui_system::Char", "::ferroui_base::Char"),
     ("i8", "i8"),
     ("u8", "u8"),
     ("i16", "i16"),
@@ -503,6 +508,7 @@ impl ModelEmitTypes {
                     conversions.casts.insert((inner.to_string(), option_of(inner)));
                 };
                 match (registration.registration.as_str(), types.as_slice()) {
+                    ("fallible_adapter" | "identity_preserving_adapter", [source,target]) => conversions.adapters.push((source.clone(),target.clone())),
                     ("nullable", [inner]) => nullable(&mut conversions, inner),
                     ("reference", [object]) => {
                         let shared = format!("{SHARED}{object}>");
@@ -561,6 +567,23 @@ impl ModelEmitTypes {
         }
         for text in conversions.nullable.keys().chain(conversions.nullable.values()) {
             add_text(text);
+        }
+
+        // BindableArray is a known reference-array carrier. Its generic registration runs
+        // when a concrete view is made; the intrinsic handle spelling supplies the same
+        // reference/nullability facts to a process-independent build model.
+        let array_objects:Vec<String>=texts.iter().filter_map(|text| {
+            super::model_type_system::bindable_array_element_text(text)?;
+            let text=text.strip_prefix("Option<").and_then(|v|v.strip_suffix('>')).unwrap_or(text);
+            Some(text.strip_prefix(SHARED).and_then(|v|v.strip_suffix('>')).unwrap_or(text).to_string())
+        }).collect();
+        for object in array_objects {
+            let shared=format!("{SHARED}{object}>");let optional=option_of(&shared);
+            conversions.nullable.entry(optional.clone()).or_insert_with(||object.clone());
+            conversions.reference_handles.insert(shared.clone(),object.clone());
+            conversions.reference_objects.insert(object.clone(),shared.clone());
+            for (from,to) in [(&object,&optional),(&object,&shared),(&shared,&object),(&shared,&optional)] {conversions.casts.insert((from.clone(),to.clone()));}
+            texts.extend([object,shared,optional]);
         }
 
         let mut types = Self {
@@ -698,7 +721,13 @@ impl ModelEmitTypes {
             (this, Some(value))
         };
         // The nullable form of a value type and of an enumeration is `Option<T>`.
-        let nullable = matches!(declared.kind, TypeKind::Struct | TypeKind::Enum).then(|| option_of(&path));
+        let nullable = matches!(declared.kind, TypeKind::Struct | TypeKind::Enum).then(|| {
+            option_of(
+                value
+                    .as_deref()
+                    .expect("value types have a represented value"),
+            )
+        });
         for text in handles.iter().chain(&this).chain(&value).chain(&nullable) {
             if !self.texts.contains(text) {
                 self.texts.insert(text.clone());
@@ -992,6 +1021,10 @@ impl ModelEmitTypes {
 }
 
 impl EmitTypes for ModelEmitTypes {
+    fn rust_path_of_handle(&self,key:TypeKey<'_>)->Option<String> {
+        text_of(key).map(|text|self.set().public_spelling(text))
+    }
+
     fn known(&self, known: Known) -> TypeKey<'_> {
         match self.known.get(&known) {
             Some((text, _)) => TypeKey::Text(text),
@@ -1081,6 +1114,32 @@ impl EmitTypes for ModelEmitTypes {
         }
         if let Err(reason) = self.decided_not_assignable(from, to, 0) {
             self.cannot_answer(format!("whether a value of `{from}` is a value of `{to}`: {reason}"));
+        }
+        false
+    }
+
+    fn can_adapt(&self, from: TypeKey<'_>, to: TypeKey<'_>) -> bool {
+        let (Some(from), Some(to)) = (text_of(from), text_of(to)) else {
+            return false;
+        };
+        let exact = self
+            .conversions
+            .nullable
+            .get(to)
+            .map(String::as_str)
+            .unwrap_or(to);
+        if self
+            .conversions
+            .adapters
+            .iter()
+            .any(|(source, target)| target == exact && self.stated_assignable(from, source))
+        {
+            return true;
+        }
+        if self.unread(&["fallible_adapter", "identity_preserving_adapter"]) {
+            self.cannot_answer(format!(
+                "whether `{from}` adapts to `{to}`: an adapter declaration was not read"
+            ));
         }
         false
     }

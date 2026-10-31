@@ -57,6 +57,14 @@ impl ValueType {
         self.id
     }
 
+    /// The native process-local hash of the represented Rust type identity. Callers
+    /// resolving logical markup types must first select their canonical receiving handle.
+    /// This never hashes a type name or invokes an instance callback.
+    #[inline]
+    pub fn runtime_hash_code(&self) -> i32 {
+        ferroui_system::runtime_type_hash(self.id)
+    }
+
     #[inline]
     pub fn name(&self) -> &'static str {
         self.name
@@ -77,7 +85,7 @@ impl ValueType {
     /// Whether this is the string type.
     #[inline]
     pub fn is_string(&self) -> bool {
-        self.is::<String>() || self.is::<Option<String>>()
+        self.is::<String>() || self.is::<Option<String>>() || self.is::<ferroui_system::Utf16Text>() || self.is::<Option<ferroui_system::Utf16Text>>()
     }
 }
 
@@ -129,8 +137,23 @@ impl Hasher for IdHasher {
 type IdMap<K, V> = HashMap<K, V, BuildHasherDefault<IdHasher>>;
 
 type ConvertFn = Rc<dyn Fn(&BoxedValue) -> Option<BoxedValue>>;
+type AdaptFn = Rc<dyn Fn(&BoxedValue) -> Result<BoxedValue, crate::metadata::MarkupInvokeError>>;
+type AdapterReuseFn = Rc<dyn Fn(&BoxedValue,&BoxedValue)->bool>;
+#[derive(Clone)]
+struct Adapter {
+    source:ValueType,
+    convert:AdaptFn,
+    reusable:Option<AdapterReuseFn>,
+}
+
 type AnyConvertFn = Rc<dyn Fn(&dyn std::any::Any) -> Option<BoxedValue>>;
 type DisplayFn = fn(&dyn AnyValue) -> String;
+type ObjectHashFn = Rc<dyn Fn(&dyn AnyValue) -> Result<i32, crate::metadata::MarkupInvokeError>>;
+type ObjectTextFn = Rc<
+    dyn Fn(
+        &dyn AnyValue,
+    ) -> Result<Option<ferroui_system::Utf16Text>, crate::metadata::MarkupInvokeError>,
+>;
 type UnwrapFn = fn(&dyn AnyValue) -> Option<BoxedValue>;
 type NullFn = fn() -> BoxedValue;
 type ObjectFn = fn(&dyn AnyValue) -> Option<Ref<FerroObject>>;
@@ -139,10 +162,13 @@ type InterfaceFn = Rc<dyn Fn(&Ref<FerroObject>) -> Option<BoxedValue>>;
 type ReferenceIdentityFn = Rc<dyn Fn(&dyn AnyValue) -> Option<*const ()>>;
 type InterfaceObjectFn = Rc<dyn Fn(&dyn AnyValue) -> Option<Ref<FerroObject>>>;
 type OrderingFn = Rc<dyn Fn(&dyn AnyValue, &dyn AnyValue) -> Option<std::cmp::Ordering>>;
+type ProjectedWeakFn = Rc<dyn Fn(&BoxedValue) -> Rc<dyn super::ProjectedWeakReference>>;
 
 #[derive(Default)]
 struct Registry {
     display: IdMap<TypeId, DisplayFn>,
+    object_text: IdMap<TypeId, ObjectTextFn>,
+    object_hash: IdMap<TypeId, ObjectHashFn>,
     /// `Option<T>` → unwraps to the contained `T`.
     nullable: IdMap<TypeId, UnwrapFn>,
     /// `Option<T>` → a boxed `None`.
@@ -150,6 +176,10 @@ struct Registry {
     objects: IdMap<TypeId, (ObjectFn, FromObjectFn, &'static TypeInfo)>,
     /// Model types: values whose box is the shared object itself.
     references: IdMap<TypeId, ()>,
+    /// Erased original objects; typed Rc/nullable conversion registration remains independent.
+    erased_references: IdMap<TypeId, ()>,
+    /// Models whose weak lifetime follows a backing allocation rather than a transient Rc view.
+    projected_weak: IdMap<TypeId, ProjectedWeakFn>,
     /// `Rc<T>` of a model type `T` → `T`.
     reference_handles: IdMap<TypeId, TypeId>,
     /// A model type `T` → `Rc<T>`.
@@ -157,11 +187,15 @@ struct Registry {
     /// Typed interface/class views of an enclosing reference object's identity.
     reference_identities: IdMap<TypeId, ReferenceIdentityFn>,
     conversions: IdMap<(TypeId, TypeId), ConvertFn>,
+    adapters: IdMap<TypeId, Vec<Adapter>>,
     /// The conversions that are assignability casts: the value is the same
     /// value, seen as a wider type.
     casts: IdMap<(TypeId, TypeId), ConvertFn>,
     /// `Option<T>` → the type of the value it unwraps to.
     nullable_inner: IdMap<TypeId, ValueType>,
+    /// Actual native T in Option<T>, separate from the logical boxed reference type.
+    nullable_carriers: IdMap<TypeId, ValueType>,
+    nullable_value_copies: IdMap<TypeId, fn(&dyn AnyValue) -> Option<BoxedValue>>,
     /// `ElementRef<T>` and `Option<ElementRef<T>>` → the class `T` and
     /// whether the type is the nullable form: how the emitter of Rust source
     /// names the type.
@@ -303,6 +337,7 @@ fn insert_nullable(id: TypeId, unwrap: UnwrapFn, null: NullFn, inner: ValueType)
         r.nullable.insert(id, unwrap);
         r.null_values.insert(id, null);
         r.nullable_inner.insert(id, inner);
+        r.nullable_carriers.insert(id, inner);
     });
 }
 
@@ -374,6 +409,167 @@ impl ValueTypes {
         }
     }
 
+    /// A fallible representation adapter after ordinary casts/conversions. The source
+    /// is an explicitly registered interface facet, not an arbitrary transitive cast.
+    pub fn register_fallible_adapter<S: PropertyValue, T: PropertyValue>(
+        adapt: impl Fn(&S) -> Result<T, crate::metadata::MarkupInvokeError> + 'static,
+    ) {
+        let callback: AdaptFn = Rc::new(move |value| {
+            adapt(
+                value
+                    .downcast_ref::<S>()
+                    .expect("registered adapter source"),
+            )
+            .map(|value| Rc::new(value) as BoxedValue)
+        });
+        let previous = with_registry(|r| {
+            let entries = r.adapters.entry(TypeId::of::<T>()).or_default();
+            if let Some(entry) = entries.iter_mut().find(|entry| entry.source.is::<S>()) {
+                Some((
+                    std::mem::replace(&mut entry.convert, callback),
+                    entry.reusable.take(),
+                ))
+            } else {
+                entries.push(Adapter {
+                    source: ValueType::of::<S>(),
+                    convert: callback,
+                    reusable: None,
+                });
+                None
+            }
+        });
+        drop(previous); // User captures are released outside the registry borrow.
+    }
+
+    /// An adapter whose target preserves the supplied source object identity. Identity
+    /// readers must be side-effect-free projections. A binding may reuse only its own
+    /// current native result; independent targets still adapt independently.
+    pub fn register_identity_preserving_adapter<S: PropertyValue, T: PropertyValue>(
+        adapt: impl Fn(&S) -> Result<T, crate::metadata::MarkupInvokeError> + 'static,
+        source_object: fn(&S) -> BoxedValue,
+        target_object: fn(&T) -> BoxedValue,
+    ) {
+        Self::register_fallible_adapter::<S, T>(adapt);
+        let reusable: AdapterReuseFn = Rc::new(move |source, current| {
+            let source = source
+                .downcast_ref::<S>()
+                .expect("registered adapter source");
+            let current = current
+                .downcast_ref::<T>()
+                .expect("registered adapter target");
+            Rc::ptr_eq(&source_object(source), &target_object(current))
+        });
+        let previous = with_registry(|r| {
+            let entry = r
+                .adapters
+                .get_mut(&TypeId::of::<T>())
+                .expect("registered adapter")
+                .iter_mut()
+                .find(|entry| entry.source.is::<S>())
+                .expect("registered adapter source");
+            entry.reusable.replace(reusable)
+        });
+        drop(previous);
+    }
+
+    /// Whether an explicit adapter can consume a registered facet of this source.
+    pub fn can_adapt(source: ValueType, target: ValueType) -> bool {
+        let target =
+            with_registry(|r| r.nullable_carriers.get(&target.id()).copied()).unwrap_or(target);
+        let entries = with_registry(|r| r.adapters.get(&target.id()).cloned()).unwrap_or_default();
+        entries
+            .iter()
+            .any(|entry| Self::is_assignable(source, entry.source))
+    }
+
+    /// Attempts only the explicit fallible adapters. Callers first try ordinary
+    /// assignment/conversion. Inapplicable is Ok(None); callback failures stay Err.
+    pub fn try_adapt(
+        value: &BoxedValue,
+        target: ValueType,
+    ) -> Result<Option<BoxedValue>, crate::metadata::MarkupInvokeError> {
+        Self::try_adapt_with_current(value, target, None)
+    }
+
+    /// Adapt once, or reuse this caller's current result for an explicitly identity-
+    /// preserving adapter. Existing result and registry callbacks are borrowed/cloned
+    /// before user code runs. No result is retained in the registry or a global cache.
+    pub fn try_adapt_with_current(
+        value: &BoxedValue,
+        target: ValueType,
+        current: Option<&BoxedValue>,
+    ) -> Result<Option<BoxedValue>, crate::metadata::MarkupInvokeError> {
+        let inner = with_registry(|r| r.nullable_carriers.get(&target.id()).copied());
+        let exact = inner.unwrap_or(target);
+        let entries = with_registry(|r| r.adapters.get(&exact.id()).cloned()).unwrap_or_default();
+        let current = current.filter(|v| value_type_id(&***v) == target.id());
+        let native_current = current
+            .and_then(|v| Self::normalize(v.clone()))
+            .filter(|v| value_type_id(&**v) == exact.id());
+        for entry in entries {
+            let Some(source) = Self::try_cast(value, entry.source) else {
+                continue;
+            };
+            if let (Some(reusable), Some(current), Some(native)) =
+                (&entry.reusable, current, &native_current)
+            {
+                if reusable(&source, native) {
+                    return Ok(Some(current.clone()));
+                }
+            }
+            let result = (entry.convert)(&source)?;
+            return if inner.is_some() {
+                Self::try_cast(&result,target).map(Some).ok_or_else(||crate::metadata::MarkupInvokeError::Failed("Registered adapter result could not be wrapped as its declared nullable target.".into()))
+            } else {
+                Ok(Some(result))
+            };
+        }
+        Ok(None)
+    }
+
+    pub fn try_convert_result_with_current(
+        value: Option<&BoxedValue>,
+        target: ValueType,
+        current: Option<&BoxedValue>,
+    ) -> Result<Option<Option<BoxedValue>>, crate::metadata::MarkupInvokeError> {
+        if let Some(result) = Self::try_convert(value, target) {
+            return Ok(Some(result));
+        }
+        match value {
+            Some(value) => {
+                Self::try_adapt_with_current(value, target, current).map(|v| v.map(Some))
+            }
+            None => Ok(None),
+        }
+    }
+
+    pub fn try_convert_result(
+        value: Option<&BoxedValue>,
+        target: ValueType,
+    ) -> Result<Option<Option<BoxedValue>>, crate::metadata::MarkupInvokeError> {
+        if let Some(result) = Self::try_convert(value, target) {
+            return Ok(Some(result));
+        }
+        match value {
+            Some(value) => Self::try_adapt(value, target).map(|v| v.map(Some)),
+            None => Ok(None),
+        }
+    }
+
+    pub fn try_convert_with_culture_result(
+        value: Option<&BoxedValue>,
+        target: ValueType,
+        culture: &crate::utilities::CultureInfo,
+    ) -> Result<Option<Option<BoxedValue>>, crate::metadata::MarkupInvokeError> {
+        if let Some(result) = Self::try_convert_with_culture(value, target, culture) {
+            return Ok(Some(result));
+        }
+        match value {
+            Some(value) => Self::try_adapt(value, target).map(|v| v.map(Some)),
+            None => Ok(None),
+        }
+    }
+
     /// Registers `T` as convertible to text through its [`fmt::Display`]
     /// implementation (the `ToString()` of the value), and to `String`.
     pub fn register_display<T: fmt::Display + 'static>() {
@@ -381,6 +577,145 @@ impl ValueTypes {
             value.downcast_ref::<T>().map(T::to_string).unwrap_or_default()
         }
         insert_display(TypeId::of::<T>(), display::<T>);
+    }
+
+    /// Registers the actual original object's virtual hash callback. Registrations and
+    /// replacements release the registry borrow before invoking user code or destructors.
+    /// A callback is not callable method metadata: binding still needs an actual override.
+    pub fn register_object_hash_from_id(id: TypeId, hash: impl Fn(&dyn AnyValue) -> Result<i32, crate::metadata::MarkupInvokeError> + 'static) {
+        let previous = with_registry(|r| r.object_hash.insert(id, Rc::new(hash)));
+        drop(previous);
+    }
+    pub fn register_object_hash<T: 'static>(hash: impl Fn(&T) -> Result<i32, crate::metadata::MarkupInvokeError> + 'static) {
+        Self::register_object_hash_from_id(TypeId::of::<T>(), move |value| {
+            hash(value.downcast_ref::<T>().expect("object hash dispatch uses its exact registered type"))
+        });
+    }
+    pub fn has_object_hash(value: &dyn AnyValue) -> bool {
+        with_registry(|r| r.object_hash.contains_key(&value_type_id(value)))
+    }
+    /// Dispatch only a registered callback on a canonical original object. None means no
+    /// registered override, never a successful null hash. Callback failure is preserved.
+    pub fn try_registered_object_hash(value: &dyn AnyValue) -> Option<Result<i32, crate::metadata::MarkupInvokeError>> {
+        let callback = with_registry(|r| r.object_hash.get(&value_type_id(value)).cloned());
+        callback.map(|callback|callback(value))
+    }
+
+    /// Registers the actual object's fallible UTF16 ToString implementation. The callback
+    /// borrows the original value; no clone/snapshot/proxy is created. Null return and failure
+    /// remain distinct. Lookup releases the registry borrow before invoking user code.
+    /// Original erased-class text dispatch, installed by a shared reference contract.
+    pub fn register_object_text_from_id(id:TypeId,format:impl Fn(&dyn AnyValue)->Result<Option<ferroui_system::Utf16Text>,crate::metadata::MarkupInvokeError>+'static) {
+        let previous=with_registry(|r|r.object_text.insert(id,Rc::new(format)));drop(previous);
+    }
+    pub fn register_object_text<T: 'static>(
+        format: impl Fn(&T) -> Result<Option<ferroui_system::Utf16Text>, crate::metadata::MarkupInvokeError>
+            + 'static,
+    ) {
+        let callback: ObjectTextFn = Rc::new(move |value| {
+            let value = value
+                .downcast_ref::<T>()
+                .expect("object-text dispatch uses its exact registered type");
+            format(value)
+        });
+        let previous = with_registry(|r| r.object_text.insert(TypeId::of::<T>(), callback));
+        drop(previous);
+    }
+
+    fn object_text(
+        value: &dyn AnyValue,
+    ) -> Option<Result<Option<ferroui_system::Utf16Text>, crate::metadata::MarkupInvokeError>> {
+        let id = value_type_id(value);
+        let (callback, unwrap) = with_registry(|r| {
+            (
+                r.object_text.get(&id).cloned(),
+                r.nullable.get(&id).copied(),
+            )
+        });
+        if let Some(callback) = callback {
+            return Some(callback(value));
+        }
+        unwrap.map(|unwrap| match unwrap(value) {
+            Some(inner) => Self::try_object_to_text(Some(&inner)),
+            None => Ok(None),
+        })
+    }
+
+    /// Canonical original-object carrier, including registered interface projections.
+    /// A failed registered cast stays an error; no formatter is invoked by this operation.
+    pub fn canonical_object(
+        value: Option<&BoxedValue>,
+    ) -> Result<Option<BoxedValue>, crate::metadata::MarkupInvokeError> {
+        let Some(value) = value else {
+            return Ok(None);
+        };
+        let Some(normalized) = Self::normalize(value.clone()) else {
+            return Ok(None);
+        };
+        let direct = with_registry(|r| {
+            r.casts
+                .get(&(value_type_id(&*normalized), ValueType::object().id()))
+                .cloned()
+        });
+        let canonical = match direct {
+            Some(cast) => cast(&normalized).ok_or_else(|| {
+                crate::metadata::MarkupInvokeError::Failed("canonical object cast failed".into())
+            })?,
+            None => Self::try_cast(&normalized, ValueType::object()).ok_or_else(|| {
+                crate::metadata::MarkupInvokeError::Failed("canonical object boxing failed".into())
+            })?,
+        };
+        let value = canonical
+            .downcast_ref::<Option<BoxedValue>>()
+            .cloned()
+            .ok_or_else(|| {
+                crate::metadata::MarkupInvokeError::Failed(
+                    "canonical object cast returned an invalid carrier".into(),
+                )
+            })?;
+        Ok(value)
+    }
+
+    /// Metadata of an actual native receiver, accounting for its class and reference handle.
+    pub fn metadata_of(value: &dyn AnyValue) -> Option<&'static crate::metadata::MarkupType> {
+        if let Some(object) = Self::as_object(value) {
+            return crate::metadata::MarkupType::find_by_type_info(object.get_type());
+        }
+        let id = value_type_id(value);
+        let other = with_registry(|r| r.other_reference_form(id));
+        crate::metadata::MarkupType::find_by_handle(id)
+            .or_else(|| other.and_then(crate::metadata::MarkupType::find_by_handle))
+    }
+
+    /// Whether the native receiver declares an original-object text override.
+    pub fn has_object_text(value: &dyn AnyValue) -> bool {
+        let id = value_type_id(value);
+        with_registry(|r| {
+            r.object_text.contains_key(&id)
+                || r.display.contains_key(&id)
+                || r.other_reference_form(id).is_some_and(|id| {
+                    r.object_text.contains_key(&id) || r.display.contains_key(&id)
+                })
+        })
+    }
+
+    /// Virtual object-text dispatch over the canonical original object. Both null input
+    /// and an override returning null are Ok(None); a thrown/failing override stays Err.
+    /// Unknown native values retain the framework's existing type-name display convention.
+    pub fn try_object_to_text(
+        value: Option<&BoxedValue>,
+    ) -> Result<Option<ferroui_system::Utf16Text>, crate::metadata::MarkupInvokeError> {
+        let Some(value) = Self::canonical_object(value)? else {
+            return Ok(None);
+        };
+        if let Some(text) = value.downcast_ref::<ferroui_system::Utf16Text>() {
+            return Ok(Some(text.clone()));
+        }
+        if let Some(result) = Self::object_text(&*value) {
+            return result;
+        }
+        let text = Self::legacy_to_string(&*value).unwrap_or_else(|| value.type_name().to_string());
+        Ok(Some(ferroui_system::Utf16Text::from(text.as_str())))
     }
 
     /// Registers `Option<T>` as the nullable form of `T`: untyped bindings
@@ -397,13 +732,24 @@ impl ValueTypes {
             Rc::new(Option::<T>::None)
         }
         insert_nullable(TypeId::of::<Option<T>>(), unwrap::<T>, null::<T>, ValueType::of::<T>());
-        Self::register_cast::<T, Option<T>>(|v| Some(v.clone()));
+        fn copy<T: PropertyValue>(value: &dyn AnyValue) -> Option<BoxedValue> {
+            value.downcast_ref::<T>().map(|value|Rc::new(value.clone()) as BoxedValue)
+        }
+        with_registry(|r| { r.nullable_value_copies.insert(TypeId::of::<T>(), copy::<T>); });
+        Self::install_cast::<T, Option<T>>(|v| Some(v.clone()));
     }
 
     /// Registers an assignability cast: values of `TFrom` are values of
     /// `TTo` (the same value, seen as a wider type), as opposed to values
     /// that can merely be converted to it. A cast is also a conversion.
     pub fn register_cast<TFrom: 'static, TTo: PropertyValue>(cast: impl Fn(&TFrom) -> TTo + 'static) {
+        Self::install_cast(cast);
+    }
+
+    // The native scanner reads the public registration calls. The nullable
+    // registration already declares T -> Option<T>; its generic implementation
+    // must not look like an additional unknown application cast.
+    fn install_cast<TFrom: 'static, TTo: PropertyValue>(cast: impl Fn(&TFrom) -> TTo + 'static) {
         let cast = Rc::new(cast);
         let boxed = cast.clone();
         let convert: ConvertFn =
@@ -637,17 +983,37 @@ impl ValueTypes {
     /// enumeration with metadata; only then the Rust type name. Null is
     /// `"(null)"`.
     pub fn to_display_string(value: Option<&BoxedValue>) -> String {
-        match value {
-            None => "(null)".to_string(),
-            Some(v) => Self::try_to_string(&**v).unwrap_or_else(|| (**v).type_name().to_string()),
-        }
+        Self::to_display_text(value).to_utf8().expect(
+            "exact UTF16 cannot cross this UTF8 display API; use ValueTypes::try_object_to_text",
+        )
     }
 
+    /// Exact generic object display. The infallible compatibility API propagates callback
+    /// failures as a panic; callers needing the error/null distinction use try_object_to_text.
+    /// Null retains the established framework debug-display marker.
+    pub fn to_display_text(value: Option<&BoxedValue>) -> ferroui_system::Utf16Text {
+        Self::try_object_to_text(value)
+            .expect("object ToString failed; use ValueTypes::try_object_to_text")
+            .unwrap_or_else(|| ferroui_system::Utf16Text::from("(null)"))
+    }
     /// The text form of a value, if its type has one: its registered
     /// display form, or else the name [`to_display_string`](Self::to_display_string)
     /// describes for a type that is a class of the object model or has
     /// registered metadata. `None` for a type nothing is known about.
     pub fn try_to_string(value: &dyn AnyValue) -> Option<String> {
+        if let Some(result) = Self::object_text(value) {
+            return result
+                .expect("object ToString failed; use ValueTypes::try_object_to_text")
+                .and_then(|s| s.to_utf8().ok());
+        }
+        Self::legacy_to_string(value)
+    }
+
+    fn legacy_to_string(value: &dyn AnyValue) -> Option<String> {
+        if let Some(text) = value.downcast_ref::<ferroui_system::Utf16Text>() {
+            // This API explicitly permits conversion failure; never replace invalid units.
+            return text.to_utf8().ok();
+        }
         if let Some(s) = value.downcast_ref::<String>() {
             return Some(s.clone());
         }
@@ -662,7 +1028,7 @@ impl ValueTypes {
         if let Some(object) = Self::as_object(value) {
             return Some(object.get_type().full_name());
         }
-        let markup = crate::metadata::MarkupType::find_by_handle(id)?;
+        let markup = Self::metadata_of(value)?;
         if markup.kind == crate::metadata::MarkupTypeKind::Enum {
             if let Some(member) = markup.enum_members.iter().find(|member| (*(member.get)()).value_eq(value)) {
                 return Some(member.name.to_string());
@@ -698,7 +1064,7 @@ impl ValueTypes {
             return format!("System.Nullable`1[{}]", markup.full_name());
         }
         match inner {
-            Some(inner) if inner.is::<String>() => "System.String".to_string(),
+            Some(inner) if inner.is_string() => "System.String".to_string(),
             Some(inner) if primitive_full_name(inner.id()).is_some() => {
                 format!("System.Nullable`1[{}]", Self::type_full_name(inner))
             }
@@ -844,6 +1210,7 @@ impl ValueTypes {
             r.nullable.insert(TypeId::of::<Option<Rc<T>>>(), unwrap::<T>);
             r.null_values.insert(TypeId::of::<Option<Rc<T>>>(), null::<T>);
             r.nullable_inner.insert(TypeId::of::<Option<Rc<T>>>(), ValueType::of::<T>());
+            r.nullable_carriers.insert(TypeId::of::<Option<Rc<T>>>(), ValueType::of::<Rc<T>>());
             r.reference_handles.insert(TypeId::of::<Rc<T>>(), TypeId::of::<T>());
             r.reference_objects.insert(TypeId::of::<T>(), TypeId::of::<Rc<T>>());
             // The object, its handle and its nullable handle are the same
@@ -871,9 +1238,45 @@ impl ValueTypes {
         });
     }
 
+    /// Marks an erased original object's box as a reference without inventing a typed Rc ABI.
+    /// A later register_reference<T> still installs its ordinary typed/nullable conversions.
+    pub fn register_erased_reference(id: TypeId) {
+        with_registry(|r| { r.erased_references.insert(id, ()); });
+    }
+
     /// Whether the type is a registered reference (model) type.
     pub fn is_reference(id: TypeId) -> bool {
-        with_registry(|r| r.references.contains_key(&id))
+        with_registry(|r| r.references.contains_key(&id) || r.erased_references.contains_key(&id) || r.projected_weak.contains_key(&id))
+    }
+
+    /// True only when this box is registered as an actual original reference object.
+    /// A projected weak facade alone cannot establish its allocation identity for hashing.
+    pub fn is_original_reference(id: TypeId) -> bool {
+        with_registry(|r| r.references.contains_key(&id) || r.erased_references.contains_key(&id))
+    }
+
+    /// Registers the weak-binding representation of a shared model projection. The factory
+    /// must not keep its receiver alive. It is invoked after releasing the registry borrow;
+    /// upgrades may therefore use ordinary conversions and canonical view registries.
+    pub fn register_projected_weak<T: 'static>(
+        project: impl Fn(&T) -> Rc<dyn super::ProjectedWeakReference> + 'static,
+    ) {
+        let factory: ProjectedWeakFn = Rc::new(move |value| {
+            project(
+                value
+                    .downcast_ref::<T>()
+                    .expect("registered weak projection type"),
+            )
+        });
+        let previous = with_registry(|r| r.projected_weak.insert(TypeId::of::<T>(), factory));
+        drop(previous);
+    }
+
+    pub(crate) fn projected_weak_reference(
+        value: &BoxedValue,
+    ) -> Option<Rc<dyn super::ProjectedWeakReference>> {
+        let factory = with_registry(|r| r.projected_weak.get(&value_type_id(&**value)).cloned());
+        factory.map(|factory| factory(value))
     }
 
     /// Re-creates the registered handle type `id` from a root handle.
@@ -893,6 +1296,18 @@ impl ValueTypes {
 
     /// The type a registered nullable form holds: `T` for `Option<T>` and for
     /// `Option<Rc<T>>`, `None` for any other type.
+    /// The actual native inner carrier of Option<T>, without unboxing a reference T.
+    pub fn nullable_carrier(id: TypeId) -> Option<ValueType> {
+        with_registry(|r|r.nullable_carriers.get(&id).copied())
+    }
+
+    /// Copies the value returned by Nullable<T>.Value before boxing it. The callback is
+    /// obtained outside registry borrows, including while native Clone code runs.
+    pub fn copy_nullable_value(value: &BoxedValue, inner: ValueType) -> Option<BoxedValue> {
+        let copy=with_registry(|r|r.nullable_value_copies.get(&inner.id()).copied())?;
+        copy(&**value)
+    }
+
     pub fn nullable_inner(type_: ValueType) -> Option<ValueType> {
         with_registry(|r| r.nullable_inner.get(&type_.id()).copied())
     }
@@ -900,7 +1315,7 @@ impl ValueTypes {
     /// Whether `target` accepts null.
     pub fn accepts_null(target: ValueType) -> bool {
         target.is_object()
-            || with_registry(|r| r.null_values.contains_key(&target.id()) || r.references.contains_key(&target.id()))
+            || with_registry(|r| r.null_values.contains_key(&target.id()) || r.references.contains_key(&target.id()) || r.erased_references.contains_key(&target.id()) || r.projected_weak.contains_key(&target.id()))
     }
 
     /// The boxed null of a nullable target type.
@@ -1009,8 +1424,18 @@ impl ValueTypes {
                     Some(markup) => (markup, false),
                     None => (enumeration(MarkupType::find_by_nullable_handle(target.id()))?, true),
                 };
-                let number = Self::try_convert(Some(value), ValueType::of::<i32>())??;
-                let member = (markup.enum_from_value?)(i64::from(*number.downcast_ref::<i32>()?))?;
+                // The managed conversion accepts a string only when Enum.IsDefined
+                // matches a declared name exactly, before trying its numeric value.
+                let named = value.downcast_ref::<String>()
+                    .and_then(|text| markup.enum_members.iter().find(|member| member.name == text))
+                    .map(|member| (member.get)());
+                let member = match named {
+                    Some(member) => member,
+                    None => {
+                        let number = Self::try_convert(Some(value), ValueType::of::<i32>())??;
+                        (markup.enum_from_value?)(i64::from(*number.downcast_ref::<i32>()?))?
+                    }
+                };
                 match is_nullable {
                     true => Self::try_convert_registered(&member, target),
                     false => Some(member),
@@ -1212,10 +1637,17 @@ impl ValueTypes {
             let mut untyped = Self::normalize(value.clone());
             if let Some(v) = &untyped {
                 let handle = value_type_id(&**v);
-                let cast = with_registry(|r| {
-                    r.reference_handles.get(&handle).and_then(|object| r.casts.get(&(handle, *object)).cloned())
-                });
-                if let Some(cast) = cast {
+                // Class/interface handles may explicitly expose their original allocation.
+                // Honor that object projection before falling back to the Rc<T> carrier.
+                // Clone callbacks under the registry borrow; invoke and release outside it.
+                let (projection, cast) = with_registry(|r| (
+                    r.casts.get(&(handle, TypeId::of::<Option<BoxedValue>>())).cloned(),
+                    r.reference_handles.get(&handle).and_then(|object| r.casts.get(&(handle, *object)).cloned()),
+                ));
+                if let Some(projection) = projection {
+                    let projected = projection(v)?;
+                    untyped = projected.downcast_ref::<Option<BoxedValue>>()?.clone();
+                } else if let Some(cast) = cast {
                     untyped = cast(v);
                 }
             }
@@ -1278,7 +1710,21 @@ impl ValueTypes {
     pub fn identity_equals(a: Option<&BoxedValue>, b: Option<&BoxedValue>) -> bool {
         match (a, b) {
             (None, None) => true,
-            (Some(a), Some(b)) => Rc::ptr_eq(a, b) || (**a).value_eq(&**b),
+            (Some(a), Some(b)) => {
+                if let (Some(a), Some(b)) = (a.downcast_ref::<ferroui_system::Utf16Text>(), b.downcast_ref::<String>()) {
+                    return a.units().iter().copied().eq(b.encode_utf16());
+                }
+                if let (Some(a), Some(b)) = (a.downcast_ref::<String>(), b.downcast_ref::<ferroui_system::Utf16Text>()) {
+                    return b.units().iter().copied().eq(a.encode_utf16());
+                }
+                if let (Some(a), Some(b)) = (a.downcast_ref::<crate::Char>(), b.downcast_ref::<char>()) {
+                    return a.to_scalar() == Some(*b);
+                }
+                if let (Some(a), Some(b)) = (a.downcast_ref::<char>(), b.downcast_ref::<crate::Char>()) {
+                    return b.to_scalar() == Some(*a);
+                }
+                Rc::ptr_eq(a, b) || (**a).value_eq(&**b)
+            },
             _ => false,
         }
     }
@@ -1437,15 +1883,35 @@ fn number_as_f64(value: &dyn AnyValue) -> Option<f64> {
 fn implicit_numeric(value: &dyn std::any::Any, target: TypeId) -> Option<BoxedValue> {
     use crate::utilities::Decimal;
 
+    if let Some(v) = value.downcast_ref::<crate::Char>() {
+        let unit = v.unit();
+        if target == TypeId::of::<u16>() {
+            return Some(Rc::new(unit));
+        }
+        if target == TypeId::of::<i32>() {
+            return Some(Rc::new(i32::from(unit)));
+        }
+        if target == TypeId::of::<u32>() {
+            return Some(Rc::new(u32::from(unit)));
+        }
+        if target == TypeId::of::<i64>() {
+            return Some(Rc::new(i64::from(unit)));
+        }
+        return None;
+    }
     if let Some(v) = value.downcast_ref::<char>() {
         let code = u32::from(*v);
         // A character above the 16-bit range is no character of the managed
         // original: it has no 16-bit form.
         if target == TypeId::of::<u16>() {
-            return u16::try_from(code).ok().map(|code| Rc::new(code) as BoxedValue);
+            return u16::try_from(code)
+                .ok()
+                .map(|code| Rc::new(code) as BoxedValue);
         }
         if target == TypeId::of::<i32>() {
-            return i32::try_from(code).ok().map(|code| Rc::new(code) as BoxedValue);
+            return i32::try_from(code)
+                .ok()
+                .map(|code| Rc::new(code) as BoxedValue);
         }
         if target == TypeId::of::<u32>() {
             return Some(Rc::new(code) as BoxedValue);
@@ -1495,6 +1961,7 @@ fn implicit_numeric(value: &dyn std::any::Any, target: TypeId) -> Option<BoxedVa
     }
     None
 }
+
 
 macro_rules! numeric_conversions {
     ($($from:ty),* => $all:tt) => {
@@ -1732,7 +2199,8 @@ fn primitive_full_name(id: TypeId) -> Option<&'static str> {
         bool => "System.Boolean", i8 => "System.SByte", u8 => "System.Byte", i16 => "System.Int16",
         u16 => "System.UInt16", i32 => "System.Int32", u32 => "System.UInt32", i64 => "System.Int64",
         u64 => "System.UInt64", isize => "System.IntPtr", usize => "System.UIntPtr", f32 => "System.Single",
-        f64 => "System.Double", char => "System.Char", String => "System.String", &'static str => "System.String",
+        f64 => "System.Double", char => "System.Char", crate::Char => "System.Char", String => "System.String", &'static str => "System.String",
+        ferroui_system::Utf16Text => "System.String",
     );
     None
 }
@@ -1749,7 +2217,8 @@ fn parse_bool(s: &str) -> Option<bool> {
 }
 
 fn register_defaults() {
-    primitive!(i8, i16, i32, i64, u8, u16, u32, u64, isize, usize, f32, f64, char);
+    primitive!(i8, i16, i32, i64, u8, u16, u32, u64, isize, usize, f32, f64);
+    register_char();
     numeric_conversions!(i8, i16, i32, i64, u8, u16, u32, u64, isize, usize, f32, f64
         => [i8, i16, i32, i64, u8, u16, u32, u64, isize, usize, f32, f64]);
 
@@ -1780,6 +2249,13 @@ fn register_defaults() {
     character_conversions!(i8, u8, i16, u16, i32, u32, i64, u64);
 
     ValueTypes::register_nullable::<String>();
+    ValueTypes::register_nullable::<ferroui_system::Utf16Text>();
+    // Both carriers represent System.String. Every UTF8 value is exactly representable
+    // as UTF16; declaring this total bridge as a cast also exports it to model consumers.
+    ValueTypes::register_cast::<String, ferroui_system::Utf16Text>(|s| ferroui_system::Utf16Text::from(s.as_str()));
+    // The nullable native signature is the same System.String reference type.
+    // Conversion lookup is direct, so register this carrier as well.
+    ValueTypes::register_cast::<String, Option<ferroui_system::Utf16Text>>(|s| Some(ferroui_system::Utf16Text::from(s.as_str())));
     ValueTypes::register_conversion::<&'static str, String>(|s| Some((*s).to_string()));
     ValueTypes::register_conversion::<&'static str, Option<String>>(|s| Some(Some((*s).to_string())));
 
@@ -1832,6 +2308,12 @@ impl ValueTypes {
     /// types, whose box is the object (for example the cast of a reference
     /// object to the handle of a contract it implements). A cast is also a
     /// conversion.
+    /// Original-object projection for a source type erased behind a shared class interface.
+    /// The callback must retain the passed allocation; it runs after registry borrows end.
+    pub fn register_boxed_cast_from_id<TTo:PropertyValue>(source:TypeId,cast:impl Fn(&BoxedValue)->Option<TTo>+'static) {
+        let cast:ConvertFn=Rc::new(move|value|cast(value).map(|v|Rc::new(v) as BoxedValue));
+        insert_cast((source,TypeId::of::<TTo>()),cast);
+    }
     pub fn register_boxed_cast<TFrom: 'static, TTo: PropertyValue>(cast: impl Fn(&BoxedValue) -> Option<TTo> + 'static) {
         let cast: ConvertFn = Rc::new(move |v: &BoxedValue| cast(v).map(|v| Rc::new(v) as BoxedValue));
         insert_cast((TypeId::of::<TFrom>(), TypeId::of::<TTo>()), cast);
@@ -2112,6 +2594,13 @@ mod tests {
         let flags = convert(Rc::new(3i32), ValueType::of::<NamedFlags>()).expect("flags");
         assert_eq!(flags.downcast_ref::<NamedFlags>(), Some(&(NamedFlags::ONE | NamedFlags::TWO)));
 
+        for (text, expected) in [("First", Some(NamedMode::First)), ("Second", Some(NamedMode::Second)), ("second", None), (" Second ", None), ("Missing", None)] {
+            let result = convert(Rc::new(text.to_string()), ValueType::of::<NamedMode>());
+            assert_eq!(result.as_ref().and_then(|v| v.downcast_ref::<NamedMode>()).copied(), expected);
+            let nullable = convert(Rc::new(text.to_string()), ValueType::of::<Option<NamedMode>>());
+            assert_eq!(nullable.as_ref().and_then(|v| v.downcast_ref::<Option<NamedMode>>()).copied(), expected.map(Some));
+        }
+        assert!(convert(Rc::new(String::from("One, Two")), ValueType::of::<NamedFlags>()).is_none());
         // A number that is the value of no member is no value of the enumeration.
         assert!(convert(Rc::new(7i32), ValueType::of::<NamedMode>()).is_none());
         // An enumeration does not convert to what is not a number.
@@ -2650,5 +3139,312 @@ mod tests {
         ValueTypes::register_ordering_by::<Reversed>(|a, b| Some(b.0.cmp(&a.0)));
         let reversed = |value: i32| -> BoxedValue { Rc::new(Reversed(value)) };
         assert_eq!(ValueTypes::compare(&reversed(1), &reversed(2)), Some(std::cmp::Ordering::Greater));
+    }
+}
+
+/// Full code-unit carrier plus explicit compatibility bridges for legacy scalar signatures.
+fn register_char() {
+    use crate::Char;
+    use ferroui_system::Utf16Text;
+    ValueTypes::register_nullable::<Char>();
+    ValueTypes::register_parse::<Char>(Char::from_utf8);
+    ValueTypes::register_conversion::<String, Option<Char>>(|s| Char::from_utf8(s).map(Some));
+    ValueTypes::register_conversion::<Utf16Text, Char>(Char::from_text);
+    ValueTypes::register_conversion::<Utf16Text, Option<Char>>(|s| Char::from_text(s).map(Some));
+    ValueTypes::register_conversion::<Char, Utf16Text>(|c| Some(c.to_text()));
+    ValueTypes::register_conversion::<Char, Option<Utf16Text>>(|c| Some(Some(c.to_text())));
+    ValueTypes::register_object_text::<Char>(|c| Ok(Some(c.to_text())));
+    ValueTypes::register_display::<char>();
+    ValueTypes::register_nullable::<char>();
+    ValueTypes::register_parse::<char>(|s| Char::from_utf8(s)?.to_scalar());
+    ValueTypes::register_conversion::<String, Option<char>>(|s| {
+        Char::from_utf8(s)?.to_scalar().map(Some)
+    });
+    ValueTypes::register_boxed_cast::<char, Char>(|v| {
+        Char::try_from(*v.downcast_ref::<char>()?).ok()
+    });
+    ValueTypes::register_boxed_cast::<char, Option<Char>>(|v| {
+        Char::try_from(*v.downcast_ref::<char>()?).ok().map(Some)
+    });
+    ValueTypes::register_boxed_cast::<Char, char>(|v| v.downcast_ref::<Char>()?.to_scalar());
+    ValueTypes::register_boxed_cast::<Char, Option<char>>(|v| {
+        v.downcast_ref::<Char>()?.to_scalar().map(Some)
+    });
+    macro_rules! integers {
+        ($($t:ty),*) => {$(
+            ValueTypes::register_conversion::<Char, $t>(|c| <$t>::try_from(c.unit()).ok());
+            ValueTypes::register_conversion::<Char, Option<$t>>(|c| <$t>::try_from(c.unit()).ok().map(Some));
+            ValueTypes::register_conversion::<$t, Char>(|n| u16::try_from(*n).ok().map(Char::from_unit));
+            ValueTypes::register_conversion::<$t, Option<Char>>(|n| u16::try_from(*n).ok().map(Char::from_unit).map(Some));
+        )*};
+    }
+    integers!(i8, u8, i16, u16, i32, u32, i64, u64);
+}
+#[cfg(test)]
+mod original_object_projection_tests {
+    use super::*;
+    use crate::metadata::{from_markup_value, into_markup_value};
+    #[derive(PartialEq)]
+    struct Original(i32);
+    #[derive(Clone, PartialEq)]
+    struct Handle(Rc<Original>);
+    #[test]
+    fn registered_object_projection_keeps_original_identity_for_handles_and_nullables() {
+        ValueTypes::register_reference::<Original>();
+        ValueTypes::register_nullable::<Handle>();
+        ValueTypes::register_boxed_cast::<Handle, Option<BoxedValue>>(|value| {
+            // A user projection may register another conversion; no registry borrow survives.
+            ValueTypes::register_cast::<u16, Option<u16>>(|v| Some(*v));
+            Some(Some(value.downcast_ref::<Handle>()?.0.clone()))
+        });
+        let original = Rc::new(Original(7));
+        let raw = original.clone() as BoxedValue;
+        for value in [
+            into_markup_value(Handle(original.clone())),
+            into_markup_value(Some(Handle(original.clone()))),
+        ] {
+            assert!(Rc::ptr_eq(value.as_ref().unwrap(), &raw));
+            let cast = ValueTypes::try_cast(value.as_ref().unwrap(), ValueType::of::<BoxedValue>())
+                .unwrap();
+            assert!(Rc::ptr_eq(cast.downcast_ref::<BoxedValue>().unwrap(), &raw));
+        }
+        assert!(into_markup_value(Option::<Handle>::None).is_none());
+        let weak = Rc::downgrade(&original);
+        let boxed = into_markup_value(Handle(original.clone()));
+        drop(original);
+        drop(raw);
+        assert!(weak.upgrade().is_some());
+        drop(boxed);
+        assert!(weak.upgrade().is_none());
+    }
+    #[test]
+    fn string_carriers_are_assignable_forward_without_accepting_invalid_reverse_text() {
+        for text in ["", "a", "a😀e\u{301}אב"] {
+            let value = into_markup_value(text.to_string());
+            let exact = from_markup_value::<Option<ferroui_system::Utf16Text>>(&value)
+                .unwrap()
+                .unwrap();
+            assert_eq!(exact.units(), text.encode_utf16().collect::<Vec<_>>());
+            let converted = ValueTypes::try_convert(value.as_ref(), ValueType::of::<Option<ferroui_system::Utf16Text>>())
+                .expect("nullable UTF16 signature conversion").unwrap();
+            let converted = converted.downcast_ref::<Option<ferroui_system::Utf16Text>>().unwrap().as_ref().unwrap();
+            assert_eq!(converted.units(), exact.units());
+        }
+        assert!(
+            from_markup_value::<Option<ferroui_system::Utf16Text>>(&None)
+                .unwrap()
+                .is_none()
+        );
+        let invalid = ferroui_system::Utf16Text::from_units(vec![0xd800, 0xdfff]);
+        assert!(from_markup_value::<String>(&into_markup_value(invalid)).is_none());
+    }
+}
+
+#[cfg(test)]
+mod erased_reference_registration_tests {
+    use super::*;
+    #[test]
+    fn erased_identity_is_weak_and_does_not_suppress_later_typed_conversions() {
+        #[derive(PartialEq)]
+        struct Model(i32);
+        ValueTypes::register_erased_reference(TypeId::of::<Model>());
+        assert!(ValueTypes::is_reference(TypeId::of::<Model>()));
+        assert!(ValueTypes::accepts_null(ValueType::of::<Model>()));
+        let owner = Rc::new(Model(7));
+        let object = owner.clone() as BoxedValue;
+        let weak = super::super::WeakValue::new(&object);
+        ValueTypes::register_reference::<Model>();
+        let recovered =
+            crate::metadata::from_markup_value::<Rc<Model>>(&Some(object.clone())).unwrap();
+        assert!(Rc::ptr_eq(&owner, &recovered));
+        assert!(
+            crate::metadata::from_markup_value::<Option<Rc<Model>>>(&None)
+                .unwrap()
+                .is_none()
+        );
+        ValueTypes::register_erased_reference(TypeId::of::<Model>());
+        drop(recovered);
+        drop(owner);
+        drop(object);
+        assert!(weak.upgrade().is_none());
+    }
+}
+
+#[cfg(test)]
+mod fallible_adapter_tests {
+    use super::*;
+    use crate::metadata::{from_markup_value_result, MarkupInvokeError};
+    #[derive(Clone, PartialEq)]
+    struct Input(i32);
+    #[derive(Clone, PartialEq, Debug)]
+    struct Target(i32);
+    #[test]
+    fn adapters_preserve_errors_nullable_wrapping_and_ordinary_cast_priority() {
+        ValueTypes::register_nullable::<Target>();
+        ValueTypes::register_fallible_adapter::<Input, Target>(|v| {
+            if v.0 < 0 {
+                Err(MarkupInvokeError::Failed("adapter-failure".into()))
+            } else {
+                Ok(Target(v.0))
+            }
+        });
+        let raw = Some(Rc::new(Input(7)) as BoxedValue);
+        assert_eq!(
+            from_markup_value_result::<Target>(&raw).unwrap(),
+            Some(Target(7))
+        );
+        assert_eq!(
+            from_markup_value_result::<Option<Target>>(&raw).unwrap(),
+            Some(Some(Target(7)))
+        );
+        assert_eq!(
+            from_markup_value_result::<Option<Target>>(&None).unwrap(),
+            Some(None)
+        );
+        let invalid = Some(Rc::new(Input(-1)) as BoxedValue);
+        assert_eq!(
+            from_markup_value_result::<Target>(&invalid).unwrap_err(),
+            MarkupInvokeError::Failed("adapter-failure".into())
+        );
+        assert!(ValueTypes::try_cast(raw.as_ref().unwrap(), ValueType::of::<Target>()).is_none());
+        assert!(ValueTypes::can_adapt(
+            ValueType::of::<Input>(),
+            ValueType::of::<Option<Target>>()
+        ));
+        ValueTypes::register_cast::<Input, Target>(|_| Target(99));
+        assert_eq!(
+            from_markup_value_result::<Target>(&invalid).unwrap(),
+            Some(Target(99))
+        );
+    }
+    #[test]
+    fn callbacks_and_replaced_captures_run_outside_registry_borrows() {
+        struct Capture;
+        impl Drop for Capture {
+            fn drop(&mut self) {
+                assert!(ValueTypes::is_assignable(
+                    ValueType::of::<i32>(),
+                    ValueType::of::<i32>()
+                ));
+            }
+        }
+        let capture = Capture;
+        ValueTypes::register_fallible_adapter::<Input, Target>(move |v| {
+            let _keep = &capture;
+            ValueTypes::register_fallible_adapter::<Input, Target>(|v| Ok(Target(v.0 + 10)));
+            Ok(Target(v.0))
+        });
+        let raw = Some(Rc::new(Input(1)) as BoxedValue);
+        assert_eq!(
+            from_markup_value_result::<Target>(&raw).unwrap(),
+            Some(Target(1))
+        );
+        assert_eq!(
+            from_markup_value_result::<Target>(&raw).unwrap(),
+            Some(Target(11))
+        );
+    }
+}
+
+#[cfg(test)]
+mod identity_adapter_tests {
+    use super::*;
+    #[derive(Clone, PartialEq, Debug)]
+    struct Object(i32);
+    #[derive(Clone, PartialEq)]
+    struct Source {
+        object: Rc<Object>,
+        calls: Rc<std::cell::Cell<usize>>,
+    }
+    #[derive(Clone, PartialEq, Debug)]
+    struct View {
+        object: Rc<Object>,
+        serial: usize,
+    }
+    // Actual allocation identity, not Object's value equality.
+    fn source_object(value: &Source) -> BoxedValue {
+        value.object.clone()
+    }
+    fn target_object(value: &View) -> BoxedValue {
+        value.object.clone()
+    }
+    fn adapt(value: &Source) -> Result<View, crate::metadata::MarkupInvokeError> {
+        value.calls.set(value.calls.get() + 1);
+        Ok(View {
+            object: value.object.clone(),
+            serial: value.calls.get(),
+        })
+    }
+    #[test]
+    fn current_result_reuse_requires_opt_in_original_identity_and_preserves_conversion_priority() {
+        ValueTypes::register_nullable::<View>();
+        ValueTypes::register_identity_preserving_adapter::<Source, View>(
+            adapt,
+            source_object,
+            target_object,
+        );
+        let calls = Rc::new(std::cell::Cell::new(0));
+        let first: BoxedValue = Rc::new(Source {
+            object: Rc::new(Object(7)),
+            calls: calls.clone(),
+        });
+        let target = ValueType::of::<Option<View>>();
+        let current = ValueTypes::try_adapt(&first, target).unwrap().unwrap();
+        assert_eq!(calls.get(), 1);
+        let reused = ValueTypes::try_adapt_with_current(&first, target, Some(&current))
+            .unwrap()
+            .unwrap();
+        assert!(Rc::ptr_eq(&current, &reused));
+        assert_eq!(calls.get(), 1);
+        let equal_value_different_object: BoxedValue = Rc::new(Source {
+            object: Rc::new(Object(7)),
+            calls: calls.clone(),
+        });
+        let replacement = ValueTypes::try_adapt_with_current(
+            &equal_value_different_object,
+            target,
+            Some(&current),
+        )
+        .unwrap()
+        .unwrap();
+        assert_eq!(calls.get(), 2);
+        assert_eq!(
+            replacement
+                .downcast_ref::<Option<View>>()
+                .unwrap()
+                .as_ref()
+                .unwrap()
+                .serial,
+            2
+        );
+        // Existing ordinary casts win even when a reusable prior result is available.
+        ValueTypes::register_cast::<Source, Option<View>>(|v| {
+            Some(View {
+                object: v.object.clone(),
+                serial: 99,
+            })
+        });
+        let result =
+            ValueTypes::try_convert_result_with_current(Some(&first), target, Some(&current))
+                .unwrap()
+                .unwrap()
+                .unwrap();
+        assert_eq!(
+            result
+                .downcast_ref::<Option<View>>()
+                .unwrap()
+                .as_ref()
+                .unwrap()
+                .serial,
+            99
+        );
+        assert_eq!(calls.get(), 2);
+        // Replacing an identity-preserving registration with an ordinary fallible one
+        // removes the reuse capability, rather than silently retaining the old contract.
+        ValueTypes::register_fallible_adapter::<Source, View>(adapt);
+        ValueTypes::try_adapt_with_current(&first, target, Some(&current))
+            .unwrap()
+            .unwrap();
+        assert_eq!(calls.get(), 3);
     }
 }

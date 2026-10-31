@@ -291,7 +291,7 @@ impl IXamlType for CompiledResourcesType {
     fn get_hash_code(&self) -> u64 {
         match self.id {
             XamlTypeId::Unique(value) => value,
-            XamlTypeId::Named(_) => 0,
+            XamlTypeId::Named(_) | XamlTypeId::ByRef(_) => 0,
         }
     }
     fn as_any(&self) -> &dyn Any {

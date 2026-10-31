@@ -497,11 +497,40 @@ pub trait IItemsList {
         None
     }
 
+    /// The collection's actual enumeration protocol. Implementations without a
+    /// projection report the missing capability explicitly instead of inventing a cursor.
+    fn get_enumerator(
+        &self,
+    ) -> Result<
+        Option<ferroui_base::collections::Enumerator>,
+        ferroui_base::metadata::MarkupInvokeError,
+    > {
+        Err(ferroui_base::metadata::MarkupInvokeError::Failed(
+            "This IItemsList implementation has no native enumeration projection.".into(),
+        ))
+    }
+
+    /// The actual original enumerable represented by a native adapted view.
+    fn original_enumerable(&self) -> Option<ferroui_base::collections::Enumerable> {
+        None
+    }
+
     /// The collection as [`Any`], to get back to the typed collection.
     fn as_any(&self) -> &dyn Any;
 }
 
 impl IItemsList for Vec<Option<BoxedValue>> {
+    fn get_enumerator(
+        &self,
+    ) -> Result<
+        Option<ferroui_base::collections::Enumerator>,
+        ferroui_base::metadata::MarkupInvokeError,
+    > {
+        Ok(Some(ferroui_base::collections::Enumerator::from_snapshot(
+            Rc::new(self.clone()),
+            Clone::clone,
+        )))
+    }
     fn count(&self) -> usize {
         self.len()
     }
@@ -520,6 +549,17 @@ impl IItemsList for Vec<Option<BoxedValue>> {
 }
 
 impl<T: PropertyValue> IItemsList for FerroList<T> {
+    fn get_enumerator(
+        &self,
+    ) -> Result<
+        Option<ferroui_base::collections::Enumerator>,
+        ferroui_base::metadata::MarkupInvokeError,
+    > {
+        Ok(Some(ferroui_base::collections::Enumerator::from_snapshot(
+            self.snapshot(),
+            box_item::<T>,
+        )))
+    }
     fn count(&self) -> usize {
         FerroList::count(self)
     }
@@ -583,6 +623,14 @@ impl<T: PropertyValue> IItemsList for FerroList<T> {
 }
 
 impl<T: PropertyValue> IItemsList for BindableList<T> {
+    fn get_enumerator(
+        &self,
+    ) -> Result<
+        Option<ferroui_base::collections::Enumerator>,
+        ferroui_base::metadata::MarkupInvokeError,
+    > {
+        IItemsList::get_enumerator(self.items())
+    }
     fn count(&self) -> usize {
         self.items().count()
     }
@@ -669,6 +717,47 @@ impl<T: PropertyValue> IItemsList for ferroui_system::collections::object_model:
 pub struct ItemsSource(Rc<dyn IItemsList>);
 
 impl ItemsSource {
+    /// Shared framework interface over this same live list handle.
+    pub fn as_enumerable(&self) -> ferroui_base::collections::Enumerable {
+        self.0.original_enumerable().unwrap_or_else(|| {
+            ferroui_base::collections::Enumerable::new(Rc::new(self.clone()), self.clone())
+        })
+    }
+    /// Existing native handles retain their live lists. Actual IList facets use direct
+    /// indexed access; enumeration-only inputs are copied using their original cursor.
+    pub fn try_from_enumerable(
+        source: &ferroui_base::collections::Enumerable,
+    ) -> Result<Self, ferroui_base::metadata::MarkupInvokeError> {
+        if let Some(source) = source.dispatch_ref::<Self>() {
+            return Ok(source.clone());
+        }
+        if source.indexed().is_some() {
+            return Ok(Self::new(Rc::new(AdaptedItemsList {
+                original: source.clone(),
+                snapshot: None,
+            })));
+        }
+        let cursor = source.get_enumerator()?.ok_or_else(|| {
+            ferroui_base::metadata::MarkupInvokeError::Failed(
+                "IEnumerable.GetEnumerator returned null.".into(),
+            )
+        })?;
+        let result = (|| {
+            let mut items = Vec::new();
+            while cursor.move_next()? {
+                items.push(cursor.current()?);
+            }
+            Ok(Self::new(Rc::new(AdaptedItemsList {
+                original: source.clone(),
+                snapshot: Some(items),
+            })))
+        })();
+        if let Some(disposed) = cursor.dispose() {
+            disposed?;
+        }
+        result
+    }
+
     /// Wraps a list.
     pub fn new(list: Rc<dyn IItemsList>) -> Self {
         Self(list)
@@ -974,5 +1063,64 @@ mod nullable_item_tests {
         assert!(Rc::ptr_eq(&box_item(&value).unwrap(), &value));
         assert!(Rc::ptr_eq(&box_item(&Some(value.clone())).unwrap(), &value));
         assert!(item_equals_typed(&Some(value.clone()), &Some(value)));
+    }
+}
+
+impl ferroui_base::collections::EnumerableDispatch for ItemsSource {
+    fn get_enumerator(
+        &self,
+    ) -> Result<
+        Option<ferroui_base::collections::Enumerator>,
+        ferroui_base::metadata::MarkupInvokeError,
+    > {
+        self.0.get_enumerator()
+    }
+}
+
+/// The UI's indexed view and the public property's enumerable have distinct roles.
+/// Keep the original object even when the view needs a non-list enumeration snapshot.
+struct AdaptedItemsList {
+    original: ferroui_base::collections::Enumerable,
+    snapshot: Option<Vec<Option<BoxedValue>>>,
+}
+impl IItemsList for AdaptedItemsList {
+    fn count(&self) -> usize {
+        match &self.snapshot {
+            Some(items) => items.len(),
+            None => self
+                .original
+                .indexed()
+                .expect("actual IList facet")
+                .count()
+                .unwrap_or_else(|error| std::panic::panic_any(error)),
+        }
+    }
+    fn get_at(&self, index: usize) -> Option<BoxedValue> {
+        match &self.snapshot {
+            Some(items) => items[index].clone(),
+            None => self
+                .original
+                .indexed()
+                .expect("actual IList facet")
+                .get_at(index)
+                .unwrap_or_else(|error| std::panic::panic_any(error)),
+        }
+    }
+    fn identity(&self) -> Option<usize> {
+        Some(Rc::as_ptr(&self.original.object()) as *const () as usize)
+    }
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+    fn original_enumerable(&self) -> Option<ferroui_base::collections::Enumerable> {
+        Some(self.original.clone())
+    }
+    fn get_enumerator(
+        &self,
+    ) -> Result<
+        Option<ferroui_base::collections::Enumerator>,
+        ferroui_base::metadata::MarkupInvokeError,
+    > {
+        self.original.get_enumerator()
     }
 }

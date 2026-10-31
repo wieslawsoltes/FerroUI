@@ -2433,6 +2433,7 @@ dependencies = [
 name = "ferroui-system"
 version = "0.4.0"
 dependencies = [
+ "bitflags",
  "smallvec",
 ]
 

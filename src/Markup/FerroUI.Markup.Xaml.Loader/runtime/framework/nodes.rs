@@ -178,7 +178,7 @@ fn array_constant(node: &Rc<FerroXamlIlArrayConstantAstNode>, context: &mut Eval
     for value in node.values() {
         elements.push(evaluate_as(value, context, node.element_type())?);
     }
-    let array = crate::runtime::type_system::RuntimeArray::new(node.element_type().clone(), elements);
+    let array = crate::runtime::type_system::new_array(node.element_type().clone(), elements);
     Ok(EvalResult::value(node.type_().get_clr_type()?, boxed(array)))
 }
 
