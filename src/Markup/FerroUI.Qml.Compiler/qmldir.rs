@@ -163,11 +163,23 @@ impl<'m> ModuleView<'m> {
 /// Read a module definition using the documented, line-oriented `qmldir` grammar.
 /// Unsupported directives produce source-located diagnostics.
 pub fn parse_qmldir(source: &str) -> Result<ModuleDefinition, Diagnostic> {
+    parse_manifest(source, true)
+}
+
+/// Read a local directory listing or an identified module manifest.
+/// Listings expose only their declared unversioned public names.
+pub fn parse_directory_manifest(source: &str) -> Result<ModuleDefinition, Diagnostic> {
+    parse_manifest(source, false)
+}
+
+fn parse_manifest(source: &str, require_uri: bool) -> Result<ModuleDefinition, Diagnostic> {
     let mut module = ModuleDefinition::default();
+    let mut first = true;
     let mut offset = 0;
     for line in source.split_inclusive('\n') {
-        let stripped = line.trim_start_matches('\u{feff}').trim();
-        let start = offset + (stripped.as_ptr() as usize - line.as_ptr() as usize);
+        let trimmed = line.trim_start_matches('\u{feff}').trim_start();
+        let start = offset + line.len() - trimmed.len();
+        let stripped = trimmed.trim_end();
         offset += line.len();
         if stripped.is_empty() || stripped.starts_with('#') {
             continue;
@@ -181,7 +193,8 @@ pub fn parse_qmldir(source: &str) -> Result<ModuleDefinition, Diagnostic> {
             .take_while(|field| !field.starts_with('#'))
             .collect();
         let fail = |message: String| Diagnostic::new(source, span, message);
-        if module.uri.is_empty() {
+        if first {
+            first = false;
             if let ["module", uri] = fields.as_slice() {
                 if !uri.split('.').all(ident) {
                     return Err(fail(format!("invalid module URI '{uri}'")));
@@ -189,13 +202,22 @@ pub fn parse_qmldir(source: &str) -> Result<ModuleDefinition, Diagnostic> {
                 module.uri = (*uri).to_owned();
                 continue;
             }
+            if require_uri {
+                return Err(fail(
+                    "expected 'module <URI>' as the first directive".into(),
+                ));
+            }
+        }
+        if module.uri.is_empty()
+            && !matches!(fields.as_slice(), [name,_] | ["internal",name,_] if export_name(name))
+        {
             return Err(fail(
-                "expected 'module <URI>' as the first directive".into(),
+                "expected an unversioned public or internal directory entry".into(),
             ));
         }
         apply(&mut module, &fields).map_err(fail)?;
     }
-    if module.uri.is_empty() {
+    if require_uri && module.uri.is_empty() {
         return Err(Diagnostic::new(
             source,
             Span { start: 0, end: 0 },
@@ -242,6 +264,9 @@ fn apply(module: &mut ModuleDefinition, fields: &[&str]) -> Result<(), String> {
         }
         ["prefer", path] if module.prefer.is_none() => module.prefer = Some((*path).into()),
         ["typeinfo", path] => module.type_info.push((*path).into()),
+        ["depends", uri] if uri.split('.').all(ident) => module
+            .dependencies
+            .push(((*uri).into(), RequestedVersion::Latest)),
         ["depends", uri, version] if uri.split('.').all(ident) => {
             module.dependencies.push(((*uri).into(), version.parse()?))
         }
