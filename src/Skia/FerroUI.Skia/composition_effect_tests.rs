@@ -53,12 +53,12 @@ use ferroui_base::rendering::composition::server::{
 use ferroui_base::{Matrix, PixelSize, Point, Rect, RoundedRect, Vector, Vector3D};
 use std::sync::Arc;
 
-const WIDTH: i32 = 160;
-const HEIGHT: i32 = 120;
+pub(crate) const WIDTH: i32 = 160;
+pub(crate) const HEIGHT: i32 = 120;
 
 /// The premultiplied RGBA pixels of a raster target drawn by `draw` under
 /// `transform`.
-fn render(transform: Matrix, draw: impl FnOnce(&mut dyn IDrawingContextImpl)) -> Vec<u8> {
+pub(crate) fn render(transform: Matrix, draw: impl FnOnce(&mut dyn IDrawingContextImpl)) -> Vec<u8> {
     let target = PlatformRenderInterface::default()
         .create_render_target_bitmap(PixelSize::new(WIDTH, HEIGHT), Vector::new(96.0, 96.0));
     {
@@ -592,4 +592,52 @@ fn without_runtime_effects_the_drawing_context_reports_it_did_not_draw() {
         let layers = context.as_drawing_context_impl_with_layer_effects().unwrap();
         assert!(!layers.draw_lighting(RECT, &LightingParameters::new(&many, SHINY)));
     });
+}
+
+/// Scenes of every GPU form, for the backends that draw on a GPU device
+/// (`gpu/metal/tests.rs`): each draws on a context of `WIDTH` by `HEIGHT`
+/// pixels.
+#[allow(dead_code)]
+pub(crate) fn gpu_scenes() -> Vec<(&'static str, Box<dyn Fn(&mut dyn IDrawingContextImpl)>)> {
+    fn operation(operation: PixelOperation, sources: &'static [fn(&mut dyn IDrawingContextImpl)]) -> Box<dyn Fn(&mut dyn IDrawingContextImpl)> {
+        Box::new(move |context: &mut dyn IDrawingContextImpl| {
+            let layers = context.as_drawing_context_impl_with_layer_effects().unwrap();
+            assert!(layers.push_pixel_operation(full(), &operation));
+            for (index, source) in sources.iter().enumerate() {
+                if index > 0 {
+                    layers.next_pixel_operation_source();
+                }
+                source(layers);
+            }
+            layers.pop_pixel_operation();
+        })
+    }
+    const TWO: &[fn(&mut dyn IDrawingContextImpl)] = &[first_source, second_source];
+    const THREE: &[fn(&mut dyn IDrawingContextImpl)] = &[first_source, second_source, third_source];
+    let grid = (full(), PixelSize::new(WIDTH, HEIGHT));
+    vec![
+        (
+            "scene lighting, rotated",
+            Box::new(|context: &mut dyn IDrawingContextImpl| {
+                context.set_transform(Matrix::create_rotation(0.3) * Matrix::create_translation(40.0, 0.0));
+                gpu_scene(context, Rect::new(0.0, 0.0, 100.0, 80.0), &several_lights(), &SHINY);
+            }),
+        ),
+        (
+            "multiply layer above full light",
+            Box::new(|context: &mut dyn IDrawingContextImpl| {
+                let mut map = several_lights();
+                map.add(LightSource::Ambient { color: color(0.8, 1.2, 0.6) }, Matrix::IDENTITY);
+                let layers = context.as_drawing_context_impl_with_layer_effects().unwrap();
+                assert!(layers.push_lighting_multiply_layer(RECT, &LightingParameters::new(&map, LightingMaterial::VISUAL)));
+                content(layers, RECT);
+                layers.pop_multiply_layer();
+            }),
+        ),
+        ("vivid light", operation(PixelOperation::Blend { mode: BlendEffectMode::VividLight, noise_grid: grid.0, noise_size: grid.1 }, TWO)),
+        ("darker colour", operation(PixelOperation::Blend { mode: BlendEffectMode::DarkerColor, noise_grid: grid.0, noise_size: grid.1 }, TWO)),
+        ("dissolve", operation(PixelOperation::Blend { mode: BlendEffectMode::Dissolve, noise_grid: grid.0, noise_size: grid.1 }, TWO)),
+        ("arithmetic", operation(PixelOperation::Arithmetic { k: [0.5, 0.75, 0.6, 0.1] }, TWO)),
+        ("mask invert", operation(PixelOperation::MaskInvert, THREE)),
+    ]
 }

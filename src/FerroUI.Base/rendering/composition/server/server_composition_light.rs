@@ -14,18 +14,40 @@
 //!
 //! Here the render walk asks [`LitContent::begin`] before it draws the own
 //! content of a visual. When enabled lights reach the visual, the content is
-//! drawn into a multiply layer of the drawing context
-//! (`IDrawingContextImplWithLayerEffects::push_multiply_layer`) whose factors
-//! are a light map over the bounds of the content: the summed light sampled
-//! every [`LIGHT_MAP_SAMPLE_SPACING`] device pixels (at most
-//! [`LIGHT_MAP_MAX_SAMPLES`] per side) and interpolated bilinearly between
-//! the samples. Each channel of the content is multiplied by the light, the
-//! alpha of the content is kept, and a light brighter than 1 brightens the
-//! content (the factors carry a scale above 1); the result is clamped per
-//! channel, as WinUI clamps its output. Each visual is lit in its own layer
-//! (its children after it, each in theirs), the shadow of a sprite visual is
-//! lit with its content, and a layer visual itself is not lit (its children
-//! are).
+//! drawn into a multiply layer of the drawing context: each channel of the
+//! content is multiplied by the light, the alpha of the content is kept,
+//! and a light brighter than 1 brightens the content (up to
+//! [`LIGHT_MAP_MAX_SCALE`]); the result is clamped per channel, as WinUI
+//! clamps its output. Each visual is lit in its own layer (its children
+//! after it, each in theirs), the shadow of a sprite visual is lit with its
+//! content, and a layer visual itself is not lit (its children are).
+//!
+//! # Where the light is evaluated
+//!
+//! The lights are handed to the drawing context as plain data
+//! ([`LightingParameters`](crate::platform::LightingParameters): the
+//! ambient and distant lights summed into one constant light, the point and
+//! spot lights each with the transform into its space, and the material).
+//! A drawing context that evaluates them itself (the Skia backend, with an
+//! SkSL port of the math below, on the GPU and on raster surfaces) does so
+//! per pixel, at the point of the visual the pixel shows:
+//! `IDrawingContextImplWithLayerEffects::push_lighting_multiply_layer` for
+//! lit content, `draw_lighting` for the scene lighting effect. Nothing is
+//! rasterized or uploaded per frame; a moving light changes uniforms only.
+//!
+//! Otherwise, and with more than
+//! [`LightingParameters::MAX_LIGHTS`](crate::platform::LightingParameters::MAX_LIGHTS)
+//! point and spot lights, the light is evaluated here, on the CPU: the
+//! factors of `push_multiply_layer` are a light map over the bounds of the
+//! content, the summed light sampled every [`LIGHT_MAP_SAMPLE_SPACING`]
+//! device pixels (at most [`LIGHT_MAP_MAX_SAMPLES`] per side) and
+//! interpolated bilinearly between the samples. The CPU path is the
+//! reference the GPU path is tested against; the GPU path is the exact light
+//! (within the rounding to 8 bits), the sampled map loses up to a few levels
+//! where the light bends sharply (docs/porting/winui-composition.md,
+//! section 7). A light that is the same everywhere (ambient and distant
+//! lights only) needs no sampling: a map of 2 by 2 samples, and a solid
+//! colour for the scene lighting.
 //!
 //! A drawing context without layer effects keeps the approximation of
 //! source-atop blending ([`LightColor::atop_pixel`]): a light map pixel is

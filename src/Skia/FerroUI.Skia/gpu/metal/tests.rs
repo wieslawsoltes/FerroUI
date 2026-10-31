@@ -1235,3 +1235,64 @@ mod external_objects {
         unsafe { send(texture, sel(b"release\0")) };
     }
 }
+
+/// The lights and the pixel operations of the compositor drawn by Graphite
+/// on a Metal device match the raster backend, which the tests of
+/// `composition_effect_tests.rs` compare with the exact light and the CPU
+/// reference: the same SkSL programs, so the results differ by the
+/// rounding of the GPU only (2 levels: a blend and a layer composition each
+/// round once; 3 for vivid light, see below).
+#[test]
+fn graphite_evaluates_the_lights_and_the_pixel_operations_as_the_raster_backend() {
+    use crate::composition_effect_tests::{gpu_scenes, render, HEIGHT, WIDTH};
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device available");
+        return;
+    };
+    let render_interface = PlatformRenderInterface::default();
+    let context = render_interface.create_backend_context(Some(device.clone()));
+    for (name, draw) in gpu_scenes() {
+        let layer = context.create_offscreen_render_target(PixelSize::new(WIDTH, HEIGHT), Vector::new(1.0, 1.0), true);
+        let mut drawing_context = layer.create_drawing_context();
+        drawing_context.clear(Colors::TRANSPARENT);
+        draw(&mut *drawing_context);
+        drawing_context.dispose();
+        let target = layer.as_any().downcast_ref::<SurfaceRenderTarget>().unwrap();
+        let snapshot = target.create_non_affined_snapshot();
+        let snapshot = snapshot.as_any().downcast_ref::<ImmutableBitmap>().unwrap();
+        let image = snapshot.image();
+        let pixmap = image.peek_pixels().expect("the snapshot is a raster image");
+        let bgra = pixmap.color_type() == ColorType::BGRA8888;
+        let row_bytes = pixmap.row_bytes();
+        let bytes = pixmap.bytes().expect("the pixels");
+        let raster = render(ferroui_base::Matrix::IDENTITY, |context| draw(context));
+        let mut largest = 0;
+        for y in 0..HEIGHT as usize {
+            for x in 0..WIDTH as usize {
+                let at = y * row_bytes + x * 4;
+                let gpu = if bgra {
+                    [bytes[at + 2], bytes[at + 1], bytes[at], bytes[at + 3]]
+                } else {
+                    [bytes[at], bytes[at + 1], bytes[at + 2], bytes[at + 3]]
+                };
+                let reference = &raster[(y * WIDTH as usize + x) * 4..(y * WIDTH as usize + x) * 4 + 4];
+                // The anti-aliased edge of a rotated area: the coverage of
+                // the two rasterizers differs, not the light.
+                let partial = |alpha: u8| alpha != 0 && alpha != 255;
+                if name.contains("rotated") && (partial(reference[3]) || partial(gpu[3])) {
+                    continue;
+                }
+                for channel in 0..4 {
+                    largest = largest.max((i32::from(gpu[channel]) - i32::from(reference[channel])).abs());
+                }
+            }
+        }
+        // Vivid light divides by `1 - s` and `s`: the colours a blender is
+        // given are half precision on Metal, and the division magnifies
+        // their rounding by a level.
+        let tolerance = if name == "vivid light" { 3 } else { 2 };
+        assert!(largest <= tolerance, "{name}: Graphite is within {tolerance} levels of the raster backend: {largest}");
+        layer.dispose();
+    }
+    context.dispose();
+}
