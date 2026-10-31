@@ -4,21 +4,20 @@ use crate::helpers::debug_overlay_helper::DebugOverlayHelper;
 use ferrodock_ferro::controls::DockControl;
 use ferroui_base::{reactive::IDisposable, Ref, Visual};
 use ferroui_controls::{Control, TopLevel};
-use ferroui_system::collections::generic::Dictionary;
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 pub(crate) struct DockDebugOverlayManager {
     top_level: Ref<TopLevel>,
-    helpers: RefCell<Dictionary<Ref<DockControl>, Rc<DebugOverlayHelper>>>,
-    dock_subscriptions: RefCell<Dictionary<Ref<DockControl>, Rc<dyn IDisposable>>>,
+    helpers: RefCell<HashMap<Ref<DockControl>, Rc<DebugOverlayHelper>>>,
+    dock_subscriptions: RefCell<HashMap<Ref<DockControl>, Rc<dyn IDisposable>>>,
     root_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
 }
 impl DockDebugOverlayManager {
     pub(crate) fn new(top_level: Ref<TopLevel>) -> Rc<Self> {
         let this = Rc::new(Self {
             top_level,
-            helpers: RefCell::new(Dictionary::new()),
-            dock_subscriptions: RefCell::new(Dictionary::new()),
+            helpers: RefCell::new(HashMap::new()),
+            dock_subscriptions: RefCell::new(HashMap::new()),
             root_subscription: RefCell::new(None),
         });
         this.attach_existing(&this.top_level);

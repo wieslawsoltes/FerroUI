@@ -4,6 +4,10 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ## [Unreleased]
 
+### Changed
+
+- **Internal maps on std collections** (C1 of #423, [docs/idiomatic-rust.md](docs/idiomatic-rust.md)): the internal uses of the `Dictionary` port that are only looked up, or enumerated only to release everything they hold, are std `HashMap`/`HashSet`: eight tables of the Dock port and the group tables of DynamicData's `GroupOn`, `GroupOnImmutable` and `TransformToTree`. The set of dockables of the Dock factory service, enumerated in insertion order, is an `indexmap::IndexSet` (`indexmap` joins the workspace dependencies). The uses whose enumeration order is observable keep the port: `DockWorkspaceManager` (its order after removals is tested) and the DynamicData operators whose change sets follow the order of their caches. No public signature changes.
+
 ## [0.4.0] - 2026-10-31
 
 The fourth release. It completes the declarative Rust API of `0.4.0-preview.1` and adds, among the entries below:

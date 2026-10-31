@@ -10,16 +10,16 @@ use ferroui_base::{
     DirectProperty, FerroObject, FerroObjectImpl, FerroProperty, Ref,
 };
 use ferroui_controls::Control;
-use ferroui_system::collections::generic::Dictionary;
 use std::any::Any;
 use std::cell::{Cell, RefCell};
+use std::collections::HashMap;
 use std::rc::{Rc, Weak};
 
 /// A native property object caching and reparenting template-built content.
 #[repr(C)]
 pub struct ControlRecycling {
     base: FerroObject,
-    cache: RefCell<Dictionary<ValueKey, BoxedValue>>,
+    cache: RefCell<HashMap<ValueKey, BoxedValue>>,
     try_to_use_id_as_key: Cell<bool>,
     handle: RefCell<Weak<RecyclingHandle>>,
 }
@@ -47,7 +47,7 @@ impl ControlRecycling {
     pub fn construct() -> Self {
         Self {
             base: FerroObject::construct(),
-            cache: RefCell::new(Dictionary::new()),
+            cache: RefCell::new(HashMap::new()),
             try_to_use_id_as_key: Cell::new(false),
             handle: RefCell::new(Weak::new()),
         }

@@ -8,6 +8,7 @@ use ferroui_reactive::{Observable, ObservableExt};
 use ferroui_system::collections::generic::Dictionary;
 use ferroui_system::{IDisposable, IObservable, IObserver};
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::hash::Hash;
 use std::rc::Rc;
 
@@ -247,15 +248,16 @@ fn group_by<'a, T, K, G: PartialEq>(changes: &'a ChangeSet<T, K>, group_key: imp
 
 /// The nodes of each key of a parent (the groups of `Group(x => pivotOn(x.Item))`, kept as
 /// `GroupOn.Grouper` keeps them): the nodes of a group in the order of their cache, and the
-/// group of each node.
+/// group of each node. Only the nodes of a group are enumerated: the groups and the group of each
+/// node are looked up by key.
 struct PivotGroups<T, K> {
-    groups: Dictionary<K, Dictionary<K, Rc<Node<T, K>>>>,
-    item_groups: Dictionary<K, K>,
+    groups: HashMap<K, Dictionary<K, Rc<Node<T, K>>>>,
+    item_groups: HashMap<K, K>,
 }
 
 impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> PivotGroups<T, K> {
     fn new() -> Self {
-        Self { groups: Dictionary::new(), item_groups: Dictionary::new() }
+        Self { groups: HashMap::new(), item_groups: HashMap::new() }
     }
 
     /// The nodes of the group of `parent_key` (`groupedByPivot.Lookup(key).Cache.Items`).

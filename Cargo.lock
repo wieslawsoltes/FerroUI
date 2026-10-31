@@ -1087,6 +1087,7 @@ dependencies = [
  "ferroui-reactiveui-controls",
  "ferroui-system",
  "ferroui-themes-fluent",
+ "indexmap",
 ]
 
 [[package]]
