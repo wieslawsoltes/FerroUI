@@ -44,8 +44,11 @@ use super::{
     IServerRenderResourceObserver, ServerCompositionVisual, ServerCompositor, ServerLayerVisual, ServerRenderResource,
 };
 use crate::media::imaging::BitmapBlendingMode;
-use crate::media::{Color, RenderOptions};
-use crate::platform::{AlphaFormat, IDrawingContextImpl, MultiplyLayerFactors, PixelFormats, SharedBitmapImpl};
+use crate::media::immutable::ImmutableSolidColorBrush;
+use crate::media::{BoxShadows, Color, RenderOptions};
+use crate::platform::{
+    AlphaFormat, IDrawingContextImpl, LightingParameters, MultiplyLayerFactors, PixelFormats, SharedBitmapImpl,
+};
 use crate::rendering::composition::generated::{
     ServerAmbientLightHooks, ServerAmbientLightProps, ServerCompositionLightHooks, ServerCompositionLightProps,
     ServerDistantLightHooks, ServerDistantLightProps, ServerPointLightHooks, ServerPointLightProps,
@@ -53,7 +56,7 @@ use crate::rendering::composition::generated::{
     ServerVisualUnorderedCollectionProps,
 };
 use crate::rendering::composition::transport::BatchStreamReader;
-use crate::{Matrix, PixelSize, Point, Rect, Vector, Vector3D};
+use crate::{Matrix, PixelSize, Point, Rect, RoundedRect, Vector, Vector3D};
 use std::any::{Any, TypeId};
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
@@ -414,6 +417,19 @@ impl LightMap {
     /// Whether the map has no lights.
     pub fn is_empty(&self) -> bool {
         self.lights.is_empty()
+    }
+
+    /// The lights, each with the transform from the coordinates of the lit
+    /// visual to those of its coordinate space.
+    pub fn lights(&self) -> &[(LightSource, Matrix)] {
+        &self.lights
+    }
+
+    /// The light of a map whose light is the same at every point (no point
+    /// or spot light, [`LightingParameters::is_uniform`]) reflected by
+    /// `material`, not clamped: what each of its samples is.
+    fn uniform_light(&self, material: &LightingMaterial) -> LightColor {
+        self.lit_at(Point::default(), material)
     }
 
     /// The sum of the lights at `point` of the lit visual reflected by
@@ -1087,6 +1103,21 @@ impl LitContent {
         }
         let size = LightMap::size_for_scale(rect, device_scale(&canvas.transform()));
         if let Some(layers) = canvas.as_drawing_context_impl_with_layer_effects() {
+            let lighting = LightingParameters::new(&map, LightingMaterial::VISUAL);
+            if lighting.is_uniform() {
+                let light = map.uniform_light(&LightingMaterial::VISUAL);
+                // Full light everywhere: the layer would change nothing.
+                if light.r == 1.0 && light.g == 1.0 && light.b == 1.0 {
+                    return None;
+                }
+            }
+            // The light evaluated by the drawing context (on the GPU), or the
+            // light map sampled here; a light that is the same everywhere
+            // needs the smallest map.
+            if lighting.fits_a_drawing_context() && layers.push_lighting_multiply_layer(rect, &lighting) {
+                return Some(LitContent { kind: LitContentKind::Multiplied });
+            }
+            let size = if lighting.is_uniform() { PixelSize::new(2, 2) } else { size };
             let factors = map.factors(rect, size, &LightingMaterial::VISUAL)?;
             layers.push_multiply_layer(rect, &factors);
             return Some(LitContent { kind: LitContentKind::Multiplied });
@@ -1230,6 +1261,23 @@ pub fn paint_scene_lighting(canvas: &mut dyn IDrawingContextImpl, rect: Rect, ma
     let Some(visual) = super::painting_visual() else { return };
     let ids = super::brush_light_ids();
     let map = scene_light_map(&visual, &ids);
+    let lighting = LightingParameters::new(&map, *material);
+    if lighting.is_uniform() {
+        // The same light everywhere (no light, or ambient and distant lights
+        // only): a solid colour, the colour of every sample of the map.
+        let light = map.uniform_light(material).clamped();
+        let channel = |value: f64| (value * 255.0).round().clamp(0.0, 255.0) as u8;
+        let brush = ImmutableSolidColorBrush::new(Color::from_rgb(channel(light.r), channel(light.g), channel(light.b)));
+        canvas.draw_rectangle(Some(&brush), None, RoundedRect::from_rect(rect), &BoxShadows::default());
+        return;
+    }
+    // The lights evaluated per pixel by the drawing context (on the GPU).
+    if lighting.fits_a_drawing_context()
+        && canvas.as_drawing_context_impl_with_layer_effects().is_some_and(|layers| layers.draw_lighting(rect, &lighting))
+    {
+        return;
+    }
+    // The light map sampled on the CPU, drawn as a bitmap.
     let size = LightMap::size_for_scale(rect, device_scale(&canvas.transform()));
     let pixels = map.scene_pixels(rect, size, material);
     let Some(compositor) = visual.compositor() else { return };

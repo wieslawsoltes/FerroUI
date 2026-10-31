@@ -286,9 +286,10 @@ pub struct DrawingContextImpl {
     // transform.
     intermediate_surface_dpi: Vector,
     mask_stack: Vec<(sk::M44, PaintWrapper)>,
-    /// The multiply layers that are pushed: the image of their factors, their
-    /// bounds, and whether a scaling layer is under them.
-    multiply_stack: Vec<(Option<sk::Image>, sk::Rect, bool)>,
+    /// The multiply layers that are pushed.
+    multiply_stack: Vec<MultiplyLayer>,
+    /// The pixel operations that are pushed.
+    pixel_operation_stack: Vec<PixelOperationLayer>,
     opacity_stack: Vec<(f64, bool)>,
     compositing_opacity_stack: Vec<f64>,
     render_options_stack: Vec<RenderOptions>,
@@ -349,6 +350,7 @@ impl DrawingContextImpl {
             intermediate_surface_dpi: create_info.dpi,
             mask_stack: Vec::new(),
             multiply_stack: Vec::new(),
+            pixel_operation_stack: Vec::new(),
             opacity_stack: Vec::new(),
             compositing_opacity_stack: Vec::new(),
             render_options_stack: Vec::new(),
@@ -1888,6 +1890,8 @@ impl ferroui_base::platform::IDrawingContextImplWithLayerEffects for DrawingCont
         self.check_lease();
         let (width, height) = (factors.size.width.max(1), factors.size.height.max(1));
         let info = sk::ImageInfo::new((width, height), sk::ColorType::RGBA8888, sk::AlphaType::Premul, None);
+        // An image of pixels: uploaded to the GPU when drawn.
+        crate::composition_effects::note_pixel_image();
         let image = sk::images::raster_from_data(&info, sk::Data::new_copy(&factors.rgba), width as usize * 4);
         let bounds = to_sk_rect(bounds);
         let canvas = self.canvas.get();
@@ -1908,32 +1912,167 @@ impl ferroui_base::platform::IDrawingContextImplWithLayerEffects for DrawingCont
         }
         canvas.save_layer(&SaveLayerRec::default().bounds(&bounds));
         // No image of the factors: the content is drawn unchanged.
-        self.multiply_stack.push((image, bounds, scaled));
+        self.multiply_stack.push(MultiplyLayer::Factors { image, bounds, scaled });
     }
 
     fn pop_multiply_layer(&mut self) {
         self.check_lease();
-        let Some((image, bounds, scaled)) = self.multiply_stack.pop() else {
-            panic!("The multiply layer stack is empty")
-        };
-        if let Some(image) = image {
-            // `Modulate`: each premultiplied channel of the layer times the
-            // opaque factor image; the alpha of the layer is kept.
-            let mut paint = SkPaintCache::get();
-            paint.set_blend_mode(sk::BlendMode::Modulate);
-            let sampling = sk::SamplingOptions::new(sk::FilterMode::Linear, sk::MipmapMode::None);
-            self.canvas.get().draw_image_rect_with_sampling_options(
-                &image,
-                None,
-                bounds,
-                sampling,
-                &paint,
-            );
-            SkPaintCache::return_reset(paint);
+        let Some(layer) = self.multiply_stack.pop() else { panic!("The multiply layer stack is empty") };
+        match layer {
+            MultiplyLayer::Factors { image, bounds, scaled } => {
+                if let Some(image) = image {
+                    // `Modulate`: each premultiplied channel of the layer
+                    // times the opaque factor image; the alpha of the layer
+                    // is kept.
+                    let mut paint = SkPaintCache::get();
+                    paint.set_blend_mode(sk::BlendMode::Modulate);
+                    let sampling = sk::SamplingOptions::new(sk::FilterMode::Linear, sk::MipmapMode::None);
+                    self.canvas.get().draw_image_rect_with_sampling_options(&image, None, bounds, sampling, &paint);
+                    SkPaintCache::return_reset(paint);
+                }
+                self.restore_canvas();
+                if scaled {
+                    self.restore_canvas();
+                }
+                self.restore_canvas();
+            }
+            MultiplyLayer::Lighting { shader, blender, bounds } => {
+                // The factors evaluated per pixel by the lighting shader,
+                // multiplied into the layer by the blender.
+                let mut paint = SkPaintCache::get();
+                paint.set_shader(shader);
+                paint.set_blender(blender);
+                self.canvas.get().draw_rect(bounds, &paint);
+                SkPaintCache::return_reset(paint);
+                self.restore_canvas();
+                self.restore_canvas();
+            }
         }
+    }
+
+    fn draw_lighting(&mut self, rect: Rect, lighting: &ferroui_base::platform::LightingParameters) -> bool {
+        self.check_lease();
+        let Some(shader) =
+            crate::composition_effects::lighting_shader(lighting, crate::composition_effects::LightingOutput::Light)
+        else {
+            return false;
+        };
+        // As a bitmap of the light map would be drawn.
+        let mut paint = SkPaintCache::get();
+        paint.set_shader(shader);
+        paint.set_alpha((255.0 * self.current_opacity) as u8);
+        paint.set_blend_mode(to_sk_blend_mode(self.render_options.bitmap_blending_mode));
+        paint.set_anti_alias(self.render_options.edge_mode != EdgeMode::Aliased);
+        self.canvas.get().draw_rect(to_sk_rect(rect), &paint);
+        SkPaintCache::return_reset(paint);
+        true
+    }
+
+    fn push_lighting_multiply_layer(&mut self, bounds: Rect, lighting: &ferroui_base::platform::LightingParameters) -> bool {
+        self.check_lease();
+        let Some(shader) =
+            crate::composition_effects::lighting_shader(lighting, crate::composition_effects::LightingOutput::Factors)
+        else {
+            return false;
+        };
+        let Some(blender) = crate::composition_effects::light_multiply_blender() else { return false };
+        let bounds = to_sk_rect(bounds);
+        let canvas = self.canvas.get();
+        canvas.save();
+        // Nothing outside the bounds is kept.
+        canvas.clip_rect(bounds, sk::ClipOp::Intersect, false);
+        canvas.save_layer(&SaveLayerRec::default().bounds(&bounds));
+        self.multiply_stack.push(MultiplyLayer::Lighting { shader, blender, bounds });
+        true
+    }
+
+    fn push_pixel_operation(&mut self, bounds: Rect, operation: &ferroui_base::platform::PixelOperation) -> bool {
+        self.check_lease();
+        // Every program the operation needs, before anything is pushed.
+        let Some(programs) = crate::composition_effects::pixel_operation_programs(operation) else { return false };
+        let bounds = to_sk_rect(bounds);
+        // The result is composed as a bitmap of it would be drawn: with the
+        // opacity and the bitmap blending mode in effect; the sources are
+        // drawn with full opacity.
+        let inherited_opacity = self.current_opacity;
+        let mut paint = SkPaintCache::get();
+        paint.set_alpha((255.0 * inherited_opacity) as u8);
+        paint.set_blend_mode(to_sk_blend_mode(self.render_options.bitmap_blending_mode));
+        let canvas = self.canvas.get();
+        canvas.save();
+        // Nothing outside the bounds is kept (an offset of the arithmetic
+        // composite would show everywhere else).
+        canvas.clip_rect(bounds, sk::ClipOp::Intersect, true);
+        canvas.save_layer(&SaveLayerRec::default().bounds(&bounds).paint(&paint));
+        SkPaintCache::return_reset(paint);
+        self.current_opacity = 1.0;
+        self.pixel_operation_stack.push(PixelOperationLayer { programs, bounds, source_open: false, inherited_opacity });
+        true
+    }
+
+    fn next_pixel_operation_source(&mut self) {
+        self.check_lease();
+        self.close_pixel_operation_source();
+        let Some(layer) = self.pixel_operation_stack.last_mut() else { panic!("The pixel operation stack is empty") };
+        // The next source in a layer of its own, composed onto the sources
+        // before it by the blender.
+        let mut paint = SkPaintCache::get();
+        if let crate::composition_effects::PixelOperationPrograms::Blender(blender) = &layer.programs {
+            paint.set_blender(blender.clone());
+        }
+        let bounds = layer.bounds;
+        layer.source_open = true;
+        self.canvas.get().save_layer(&SaveLayerRec::default().bounds(&bounds).paint(&paint));
+        SkPaintCache::return_reset(paint);
+    }
+
+    fn pop_pixel_operation(&mut self) {
+        self.check_lease();
+        self.close_pixel_operation_source();
+        let Some(layer) = self.pixel_operation_stack.pop() else { panic!("The pixel operation stack is empty") };
         self.restore_canvas();
-        if scaled {
-            self.restore_canvas();
+        self.restore_canvas();
+        self.current_opacity = layer.inherited_opacity;
+    }
+}
+
+/// A multiply layer that is pushed.
+enum MultiplyLayer {
+    /// Of an image of factors (sampled on the CPU): the image, the bounds,
+    /// and whether a scaling layer is under it.
+    Factors { image: Option<sk::Image>, bounds: sk::Rect, scaled: bool },
+    /// Of the lighting shader: the shader of the factors and the blender
+    /// that multiplies by them.
+    Lighting { shader: sk::Shader, blender: sk::Blender, bounds: sk::Rect },
+}
+
+/// A pixel operation that is pushed.
+struct PixelOperationLayer {
+    programs: crate::composition_effects::PixelOperationPrograms,
+    bounds: sk::Rect,
+    /// Whether the layer of a next source is open.
+    source_open: bool,
+    /// The opacity in effect when it was pushed, restored when it is popped.
+    inherited_opacity: f64,
+}
+
+impl DrawingContextImpl {
+    /// Composes the layer of the latest next source of a pixel operation,
+    /// if one is open.
+    fn close_pixel_operation_source(&mut self) {
+        let Some(layer) = self.pixel_operation_stack.last_mut() else { return };
+        if !std::mem::replace(&mut layer.source_open, false) {
+            return;
+        }
+        if let crate::composition_effects::PixelOperationPrograms::Dissolve { noise, select } = &layer.programs {
+            // What the noise keeps of the foreground, opaque; the rest is
+            // cleared, so the background shows there.
+            let mut paint = SkPaintCache::get();
+            paint.set_shader(noise.clone());
+            paint.set_blender(select.clone());
+            let bounds = layer.bounds;
+            self.canvas.get().draw_rect(bounds, &paint);
+            SkPaintCache::return_reset(paint);
         }
         self.restore_canvas();
     }

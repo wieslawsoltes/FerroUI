@@ -475,6 +475,39 @@ impl crate::platform::IDrawingContextImplWithLayerEffects for CompositorDrawingC
             None => self.inner.pop_layer(),
         }
     }
+
+    fn draw_lighting(&mut self, rect: Rect, lighting: &crate::platform::LightingParameters) -> bool {
+        self.flush();
+        self.inner.as_drawing_context_impl_with_layer_effects().is_some_and(|layers| layers.draw_lighting(rect, lighting))
+    }
+
+    fn push_lighting_multiply_layer(&mut self, bounds: Rect, lighting: &crate::platform::LightingParameters) -> bool {
+        self.flush();
+        self.inner
+            .as_drawing_context_impl_with_layer_effects()
+            .is_some_and(|layers| layers.push_lighting_multiply_layer(bounds, lighting))
+    }
+
+    fn push_pixel_operation(&mut self, bounds: Rect, operation: &crate::platform::PixelOperation) -> bool {
+        self.flush();
+        self.inner
+            .as_drawing_context_impl_with_layer_effects()
+            .is_some_and(|layers| layers.push_pixel_operation(bounds, operation))
+    }
+
+    fn next_pixel_operation_source(&mut self) {
+        self.flush();
+        if let Some(layers) = self.inner.as_drawing_context_impl_with_layer_effects() {
+            layers.next_pixel_operation_source();
+        }
+    }
+
+    fn pop_pixel_operation(&mut self) {
+        self.flush();
+        if let Some(layers) = self.inner.as_drawing_context_impl_with_layer_effects() {
+            layers.pop_pixel_operation();
+        }
+    }
 }
 
 impl IDrawingContextImplWithEffects for CompositorDrawingContextProxy {
