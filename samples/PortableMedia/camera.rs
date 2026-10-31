@@ -19,6 +19,9 @@ use std::{
 };
 struct State {
     capture: RefCell<Option<CameraCapture>>,
+    root: WeakRef<Panel>,
+    interop: RefCell<Option<Rc<dyn ferroui_base::rendering::composition::ICompositionGpuInterop>>>,
+    renderer: RefCell<Option<WeakRef<ferroui_media_controls::RendererHost>>>,
     session: RefCell<Option<CameraSession>>,
     presenter: WeakRef<TexturePresenter>,
     status: WeakRef<TextBlock>,
@@ -35,6 +38,12 @@ impl State {
     }
     fn stop(&self) {
         self.generation.set(self.generation.get() + 1);
+        if let (Some(root), Some(renderer)) = (
+            self.root.upgrade(),
+            self.renderer.borrow_mut().take().and_then(|v| v.upgrade()),
+        ) {
+            root.children().remove(&renderer);
+        }
         if let Some(capture) = self.capture.borrow().as_ref() {
             capture.cancel_pending_start();
         }
@@ -80,6 +89,9 @@ pub fn create(window: &Ref<Window>) -> Ref<Panel> {
     root.children().add(&actions);
     let state = Rc::new(State {
         capture: RefCell::new(None),
+        root: root.downgrade(),
+        interop: RefCell::new(None),
+        renderer: RefCell::new(None),
         session: RefCell::new(None),
         presenter: presenter.downgrade(),
         status: status.downgrade(),
@@ -119,6 +131,13 @@ pub fn create(window: &Ref<Window>) -> Ref<Panel> {
                             Some(session.frames()),
                             Some(Rc::new(AppleTextureImporter)),
                         );
+                    }
+                    if let (Some(root), Some(interop)) =
+                        (state.root.upgrade(), state.interop.borrow().clone())
+                    {
+                        *state.renderer.borrow_mut() =
+                            super::renderer::install(&root, session.frames(), &*interop)
+                                .map(|v| v.downgrade());
                     }
                     *state.session.borrow_mut() = Some(session);
                 }
@@ -220,6 +239,7 @@ pub fn create(window: &Ref<Window>) -> Ref<Panel> {
                     }
                     Err(e)=>{state.status(&e.to_string());FAILED.store(true,Ordering::Relaxed);if std::env::args().any(|a|a=="--camera-discovery"){if let Some(window)=weak_window.upgrade(){window.close();}}}
                 }
+                *state.interop.borrow_mut()=Some(interop);
                 *state.capture.borrow_mut()=Some(capture);
             });
             }

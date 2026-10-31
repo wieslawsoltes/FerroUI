@@ -2,6 +2,7 @@
 resolver = "2"
 members = [
     "src/FerroUI.Media.OpenGL",
+    "src/FerroUI.Media.Metal",
     "src/FerroUI.Media.Android",
     "src/FerroUI.Media.Video.Android",
     "src/FerroUI.Media.Camera.Android",
@@ -267,6 +268,7 @@ ferroui-media-browser = { version = "=0.4.0", path = "src/FerroUI.Media.Browser"
 ferroui-media-video-browser = { version = "=0.4.0", path = "src/FerroUI.Media.Video.Browser" }
 ferroui-media-camera-browser = { version = "=0.4.0", path = "src/FerroUI.Media.Camera.Browser" }
 ferroui-media = { version = "=0.4.0", path = "src/FerroUI.Media" }
+ferroui-media-metal = { version = "=0.4.0", path = "src/FerroUI.Media.Metal" }
 ferroui-media-opengl = { version = "=0.4.0", path = "src/FerroUI.Media.OpenGL" }
 ferroui-media-android = { version = "=0.4.0", path = "src/FerroUI.Media.Android" }
 ferroui-media-video-android = { version = "=0.4.0", path = "src/FerroUI.Media.Video.Android" }

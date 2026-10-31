@@ -42,3 +42,12 @@ impl std::fmt::Display for MediaError {
     }
 }
 impl std::error::Error for MediaError {}
+
+/// Allocates one process-unique framework source identity. Generation and frame
+/// sequence remain local to that source. Native clients may use this for hosts.
+pub fn allocate_source_id() -> u64 {
+    use std::sync::atomic::{AtomicU64, Ordering};
+    static NEXT: AtomicU64 = AtomicU64::new(1);
+    NEXT.fetch_update(Ordering::AcqRel, Ordering::Acquire, |v| v.checked_add(1))
+        .expect("media source identity exhausted")
+}

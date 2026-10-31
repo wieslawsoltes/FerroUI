@@ -5,10 +5,7 @@ use std::{
     cell::{Cell, RefCell},
     path::PathBuf,
     rc::Rc,
-    sync::{
-        atomic::{AtomicU64, Ordering},
-        Arc,
-    },
+    sync::Arc,
     time::Duration,
 };
 
@@ -200,8 +197,7 @@ impl Drop for SourcePreparationGuard {
 }
 impl MediaPlayer {
     pub fn new(provider: Rc<dyn MediaPlayerProvider>) -> Self {
-        static NEXT: AtomicU64 = AtomicU64::new(1);
-        let id = NEXT.fetch_add(1, Ordering::Relaxed);
+        let id = ferroui_media::allocate_source_id();
         Self(Rc::new(PlayerInner {
             provider,
             source_id: id,

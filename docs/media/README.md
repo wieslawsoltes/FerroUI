@@ -31,13 +31,14 @@ The packages are independently installable and use the `FerroUI.Media.*` family:
 | `FerroUI.Media.Video` | `ferroui-media-video` | MediaSource, MediaPlayer and MediaPlaybackSession; depends on Media |
 | `FerroUI.Media.Camera` | `ferroui-media-camera` | Discovery, explicit capture, negotiated settings and owned photos; depends on Media |
 | `FerroUI.Media.Qr` | `ferroui-media-qr` | Optional QR analysis; depends on Media, independently of video/camera providers |
-| `FerroUI.Media.Controls` | `ferroui-media-controls` | Common TexturePresenter |
+| `FerroUI.Media.Controls` | `ferroui-media-controls` | Common TexturePresenter and renderer-host control |
 | `FerroUI.Media.Video.Controls` | `ferroui-media-video-controls` | MediaPlayerElement and MediaTransportControls |
 | `FerroUI.Media.Apple` | `ferroui-media-apple` | Shared CoreVideo ownership and IOSurface imports |
 | `FerroUI.Media.Video.Apple` | `ferroui-media-video-apple` | AVFoundation playback, native audio and timing |
 | `FerroUI.Media.Camera.Apple` | `ferroui-media-camera-apple` | AVFoundation camera acquisition and JPEG capture |
 | `FerroUI.Media.Browser` | `ferroui-media-browser` | Shared WebGL2 ownership, producer fences and direct texture imports |
 | `FerroUI.Media.Video.Browser` | `ferroui-media-video-browser` | Native browser playback/audio and shared frame output |
+| `FerroUI.Media.Metal` | `ferroui-media-metal` | Client-owned native Metal encoding, bounded IOSurface output and completion |
 | `FerroUI.Media.OpenGL` | `ferroui-media-opengl` | Active-context GPU producer jobs and deferred texture retirement |
 | `FerroUI.Media.Android` | `ferroui-media-android` | Shared external GLES conversion and surface ownership |
 | `FerroUI.Media.Video.Android` | `ferroui-media-video-android` | Independent Media3 playback and native presentation timestamps |
@@ -73,6 +74,29 @@ acceleration remains unknown. Unknown native color metadata is rejected.
 Frame timestamps come from AVFoundation's decoded-item display time, and
 imports reject a retired renderer generation even when its adapter identity matches.
 
+`RendererHost` uses normal composition, routed input and styling. It schedules
+client-owned rendering on invalidation or continuously, maps logical pointer
+coordinates to the active pixel viewport, and retires output on hide/detach.
+Rebinding inputs and resizing advance publication generations. Input mailboxes
+borrow existing frames; they never open another player or camera. Metal and
+native GL adapters allocate bounded premultiplied output on the active device,
+retain all inputs until actual completion and reject incompatible devices.
+Client scenes, depth/MSAA storage, native libraries and hit testing stay outside
+the framework. `project_frame_point` applies crop/orientation and a client planar
+matrix to source/QR corners. Non-planar mapping stays client-supplied.
+
+Native camera texture dimensions on Android are matched to Camera2 sensor
+timestamps, including CameraX use-case rebinds. A pure orientation decomposition
+combines the desired transform with the transform already sampled from
+SurfaceTexture, so rotation/mirroring is applied once. Tagged SDR BT.709 and
+BT.601 profiles are normalized to sRGB in the required GPU conversion pass.
+Unknown, wide-gamut and HDR tags are rejected. Dataspace tags require API 33;
+for an independently known untagged source, `AndroidCameraProvider` accepts an
+explicit `untagged_sdr_color` contract (sRGB or Rec.709). Native tags take priority.
+The default is None, and does not guess a color space. The mobile sample's
+`cameraSdrSrgb` launch option declares the synthetic emulator source explicitly;
+it is not physical-camera color evidence. Framework OS floors are unchanged.
+
 The optional Rust rxing adapter bounds analysis, rejects stale results and handles
 multiple symbols. Packed luma is borrowed; adapter stride/pixel repacking is counted
 separately from preview. Corrected codewords and byte-mode segments are distinct
@@ -104,6 +128,10 @@ and GPU preview. The framework defaults keep QR disabled.
 
 On macOS, run `cargo run -p portable-media -- /absolute/path/to/video.mp4`.
 The independent sample explicitly enables automatic playback and transport controls.
+Add `--renderer` to reuse the same source in a transparent, projected Metal
+plane. With `--smoke`, counted diagnostic pixel probes check independently
+selected coverage/alpha points, then both source and renderer allocations must
+retire. The scene/pipeline belongs to the sample.
 Add `--smoke` to exercise playback, pause, achieved native seek, resume, Stop/frame-zero import, clear and
 final native-frame retirement. The input remains external; private application
 assets are not included in the framework. Add `--resource` with a local MP4 to
@@ -199,18 +227,22 @@ work is opaque; the encoded transfer to Rust is counted as Photo. Browser camera
 controls are reported unavailable. Context loss quarantines unfinished reads;
 automatic recovery and a broader browser/device matrix remain unverified.
 
-Windows/Linux/Android providers and native QR engines are not implemented
-in this new framework. Apple camera acquisition/photos compile but lack physical
-device/denial/hotplug acceptance evidence. The capture callback keeps a single
+Windows and Linux native providers remain unimplemented at this checkpoint.
+Android Media3 playback, CameraX capture, bundled offline ML Kit QR and GLES
+renderer output have run together on a 16 KiB emulator. Apple playback, Vision
+QR and Metal renderer output have run on macOS and the iOS simulator. Apple
+camera acquisition/photos compile but lack physical-device/denial/hotplug
+acceptance evidence. The capture callback keeps a single
 native latest-frame slot in addition to the admitted frame budget; native pool
 and driver allocations have not been profiled. One native still request is
 allowed across generations, with a 64 MiB encoded-output limit. Canceled native
 still work retains its slot until AVFoundation's final callback.
 
-Camera preview controls, a complete native renderer-host example, automatic
-device-loss recovery, the complete markup/source API, six-platform packaging and
-native accessibility acceptance also remain unfinished. The independent sample
-does not yet cover combined navigation and QR handling. Apple source-image
+CameraPreview, RendererHost and client-owned Metal/GLES plane examples are
+implemented. Automatic device-loss recovery, complete markup/source APIs,
+six-platform packaging and native accessibility acceptance remain unfinished.
+The independent mobile sample combines camera, opt-in QR, JPEG capture, renderer
+output and detach/stop cleanup; the broader navigation matrix remains open. Apple source-image
 orientation/crop parity and audible output have not passed native acceptance.
 A public contract or simulated lifetime test is not
 functional support for a missing provider. Earlier media-branch evidence is not

@@ -31,6 +31,17 @@ public final class SurfaceFrames {
     private int surfaceUsers;
     private boolean orphaned;
     private boolean counted;
+    private volatile boolean cameraColorMode;
+    private volatile int dataSpace;
+    private volatile boolean unsupported;
+    public boolean unsupported(){return unsupported;}
+    private int colorTag=Integer.MIN_VALUE;
+    private volatile CameraColor cameraColor;
+    private volatile int untaggedColor;
+    public void setCameraColorMode(int profile){untaggedColor=profile;cameraColorMode=true;}
+    public int declaredUntaggedColor(){return untaggedColor;}
+    public int dataSpace(){return dataSpace;}
+    public boolean colorConversion(){return cameraColorMode && cameraColor!=null && cameraColor.conversion;}
     private static final java.util.concurrent.atomic.AtomicInteger LIVE=new java.util.concurrent.atomic.AtomicInteger();
     public static int liveSources() {return LIVE.get();}
 
@@ -56,8 +67,8 @@ public final class SurfaceFrames {
                 + "uv=(imageTransform*vec4(p,0,1)).xy; gl_Position=vec4(p*2.0-1.0,0,1);}");
             fragment = shader(GLES30.GL_FRAGMENT_SHADER,
                 "#version 300 es\n#extension GL_OES_EGL_image_external_essl3 : require\n"
-                + "precision highp float; uniform samplerExternalOES image; in vec2 uv; out vec4 color;"
-                + "void main(){color=vec4(texture(image,uv).rgb,1.0);}");
+                + "precision highp float; uniform samplerExternalOES image;uniform bool normalizeColor,transfer709;uniform mat3 colorMatrix;in vec2 uv;out vec4 color;"
+                + "void main(){vec3 rgb=texture(image,uv).rgb;if(normalizeColor){vec3 light=transfer709?mix(pow((max(rgb,vec3(0))+.099)/1.099,vec3(1./.45)),rgb/4.5,lessThan(rgb,vec3(.081))):mix(pow((max(rgb,vec3(0))+.055)/1.055,vec3(2.4)),rgb/12.92,lessThan(rgb,vec3(.04045)));light=colorMatrix*light;rgb=mix(1.055*pow(max(light,vec3(0)),vec3(1./2.4))-.055,12.92*light,lessThan(light,vec3(.0031308)));}color=vec4(clamp(rgb,0.,1.),1.0);}");
             program = GLES30.glCreateProgram();
             GLES30.glAttachShader(program, vertex); GLES30.glAttachShader(program, fragment);
             GLES30.glLinkProgram(program);
@@ -99,14 +110,22 @@ public final class SurfaceFrames {
             if(!pending.getAndSet(false)) return "";
             source.updateTexImage(); source.getTransformMatrix(transform);
             timestamp=source.getTimestamp(); sequence++;
+            if(cameraColorMode){
+                dataSpace=android.os.Build.VERSION.SDK_INT>=33?source.getDataSpace():0;
+                if(colorTag!=dataSpace){cameraColor=CameraColor.from(dataSpace,untaggedColor);colorTag=dataSpace;}
+            }
             synchronized(geometryLock) {if(!hasGeometry || !java.util.Arrays.equals(transform,publishedTransform)) geometryEpoch++;System.arraycopy(transform,0,publishedTransform,0,16);hasGeometry=true;}
             return "";
-        } catch(RuntimeException failure) { return failure.toString(); }
+        } catch(UnsupportedOperationException failure) {unsupported=true;return failure.toString();}
+        catch(RuntimeException failure) { return failure.toString(); }
         finally { GLES30.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,binding); GLES30.glActiveTexture(active); }
     }
     /** Metadata only. Convert raw external-image coordinates into the immutable
      * RGBA output's top-left coordinates using the inverse sampling transform. */
     public long geometryEpoch() {synchronized(geometryLock){return geometryEpoch;}}
+    public int[] remainingOrientation(int rotation,boolean mirror) {
+        synchronized(geometryLock) {return hasGeometry && !closed?FrameOrientation.remaining(publishedTransform,rotation,mirror):null;}
+    }
     public float[] mapRawPoints(float[] points) {
         synchronized(geometryLock) {
             if(!hasGeometry || closed) return null;
@@ -148,6 +167,9 @@ public final class SurfaceFrames {
             GLES30.glUseProgram(program); GLES30.glBindVertexArray(vao);
             GLES30.glBindSampler(0,0); GLES30.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,external);
             GLES30.glUniform1i(GLES30.glGetUniformLocation(program,"image"),0);
+            GLES30.glUniform1i(GLES30.glGetUniformLocation(program,"normalizeColor"),colorConversion()?1:0);
+            GLES30.glUniform1i(GLES30.glGetUniformLocation(program,"transfer709"),cameraColor!=null && cameraColor.transfer709?1:0);
+            if(cameraColor!=null)GLES30.glUniformMatrix3fv(GLES30.glGetUniformLocation(program,"colorMatrix"),1,false,cameraColor.matrix,0);
             GLES30.glUniformMatrix4fv(GLES30.glGetUniformLocation(program,"imageTransform"),1,false,transform,0);
             GLES30.glDrawArrays(GLES30.GL_TRIANGLES,0,3);
             int error = GLES30.glGetError();

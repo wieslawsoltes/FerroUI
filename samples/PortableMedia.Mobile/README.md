@@ -3,7 +3,7 @@
 Independent iOS and Android integration of `FerroUI.Media`, `.Video`, `.Camera`
 and their separate controls/providers. The library defaults remain paused and
 camera acquisition is explicit. The sample's smoke launch enables playback.
-The Camera, JPEG, Stop, Detach and opt-in QR buttons exercise camera ownership and cleanup.
+The Camera, JPEG, Stop, Detach, opt-in QR and 3D buttons exercise camera ownership and cleanup.
 JPEG output is decoded independently in memory with the Rust `image` crate.
 
 ## iOS
@@ -85,3 +85,20 @@ it never enters the preview route. The QR button separately enables CameraX
 native analysis, whose metadata statistics and preview transfer counters are
 recorded in the sample report. SDK-internal analysis copying remains opaque.
 The test fixtures contain only synthetic framework-specific text.
+
+The 3D action reuses the existing player/camera mailbox in a client-owned
+transparent projected plane. The framework's renderer host only schedules native
+encoding and presents its shared output; the scene and shaders are sample code.
+`--renderer-smoke` (iOS) or `--ez rendererSmoke true` (Android), alongside the
+normal smoke option, enables counted diagnostic projection/alpha probes.
+These CPU probes run only for explicit smoke testing and are excluded from
+preview transfer counts and performance acceptance.
+
+The tested emulator camera provides an unknown dataspace. For that synthetic
+source, launch Android with `--ez cameraSdrSrgb true` to explicitly declare its
+sRGB interpretation. This does not claim measured physical-camera color accuracy.
+Native color tags always take priority; ordinary applications leave the provider
+option None unless they have an independently known source contract. Untagged
+sources are rejected by default, and tagged HDR/wide-gamut sources remain outside
+this SDR profile. Native dataspace discovery requires Android 33; an explicitly
+known source profile can be supplied on earlier framework-supported versions.

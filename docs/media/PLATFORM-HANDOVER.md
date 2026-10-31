@@ -118,9 +118,9 @@ The existing composition system remains the renderer integration boundary.
    Do not release caller-owned sessions when detaching their views.
 
 `TextureRendererHost` already retains shared input frames before calling the
-client renderer and awaits actual completion before publication. A native 3D
-client example still needs implementation; the contract's tests are not that
-example or evidence of an implemented scene engine.
+client renderer and awaits actual completion before publication. Client-owned Metal and GLES plane examples now consume those same source
+leases. Native smoke probes verify transparent projection coverage and teardown;
+clients still own scenes, rendering libraries and hit testing.
 
 ### Provider contracts
 
@@ -214,6 +214,7 @@ They are functional evidence, not a frozen performance acceptance profile.
 | iOS native providers | Device-target compilation at deployment target 14.0; independent mobile app built, signed, installed and run on iOS 27.0 simulator. Shared Metal playback → pause → seek 750 ms → resume → Stop/frame zero → detach passed with zero preview CPU transfers and zero retained frames. Simulator camera discovery returned no devices. Physical camera/audio and minimum-OS runtime gates remain open. |
 | Android foundation | Native EGL render-thread jobs, nonblocking GL fences and deferred native surface retirement. On an API 35 ARM64 emulator with a verified 16,384-byte kernel page size, one independent texture fed two views and retired; zero preview CPU transfers and zero GPU copies. |
 | Android camera | Separate CameraX 1.5.2 provider and camera preview controls. Emulator permission denial/grant, live GPU preview, native JPEG independently decoded at 1856×1392, and Stop returning camera-service active clients to an empty list. The request-owned/background-copy version also produced a decoded native JPEG and rejected capture completion after Stop. Host JVM contracts check independent photo bytes and late cancellation. |
+| Renderer host | Normal composition control plus client-owned Metal/GLES adapters and projected-plane examples. macOS and iOS 27.0 simulator runs checked transparent coverage/alpha, playback/seek/Stop and renderer-frame retirement. Android GLES ran the corresponding video/plane and counted diagnostic pixel probe on the 16 KiB emulator. Pure Rust/JVM contracts cover input replacement, detach/reattach, queued-job rollback, unknown completion, crop/orientation/mirror and planar QR projection. |
 | Native QR | macOS Vision decoded two synthetic symbols from retained CoreVideo input; iOS 27.0 simulator did so using the revision-1 CPU analysis profile. Android bundled ML Kit 17.3.0 decoded the same two symbols and checked geometry/raw bytes with network services disabled on the 16 KiB emulator. CameraX live analysis ran at about 10 Hz, dropped excess frames and allowed a separately decoded native JPEG; Stop returned active camera clients to an empty list. Native SDK internal copies remain opaque. |
 | Android playback | Separate Media3 1.8.0 provider with native decoder/audio timing, a bounded presentation-time table, coalesced commands and a dedicated player looper. API 35/16 KiB run passed independent GPU sharing, playback, pause, achieved seek, resume, Stop/frame zero, frame retirement and native surface/player cleanup. Earlier failing runs remain separate evidence; fixes address surface-clock mapping, async command settling and obsolete queued acquisition. |
 
@@ -233,7 +234,12 @@ files or automatically available on another machine. Important names include
 `native-metal-generation-regression.log`, `native-browser-regression-smoke.log`,
 `apple-ios14-check.log`, `apple-native-qr-tests.log`, `ios-native-qr-smoke.log`,
 `ios14-native-qr-check.log`, `android16k-offline-qr-smoke.log`,
-`android16k-live-qr-camera-counters.log` and `native-qr-core-contracts.log`. Re-run applicable gates on the receiving host.
+`android16k-live-qr-camera-counters.log`, `native-qr-core-contracts.log`,
+`macos-renderer-smoke.log`, `ios-renderer-smoke.log`,
+`android16k-renderer-smoke.log`, `renderer-source-contracts.log`,
+`renderer-native-job-contracts.log`, `renderer-geometry-contracts.log`,
+`android16k-camera-qr-renderer.log`, `android-unknown-color-negative.log` and
+`android-frame-orientation-contracts.log`. Re-run applicable gates on the receiving host.
 
 Useful commands, from the repository root:
 
@@ -269,8 +275,10 @@ were used to limit disk/memory use; the target cache is private to this worktree
   copying from a borrowed input interface or zero framework transfer counters.
 - `FerroUI.Media.Camera.Controls` now provides CameraPreview with explicit
   start, owned-session teardown and weak caller-session attachment. Complete
-  markup/source APIs, native 3D texture-reuse examples and automatic device-loss
-  recovery remain unfinished.
+  markup/source APIs and automatic device-loss recovery remain unfinished.
+  RendererHost, native Metal/GLES adapters and client-owned video/camera plane
+  examples now exist; wider input/accessibility and physical geometry gates
+  remain open.
 - Apple source orientation/crop parity, physical capture/denial/hotplug, minimum
   OS linking/runtime and the broader browser/device matrix need
   separate evidence. Browser native frame output currently requires a page-owned

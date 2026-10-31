@@ -17,6 +17,9 @@ impl Drop for CurrentContext {
     }
 }
 
+mod renderer;
+pub use renderer::{GlTextureRender, GlTextureRenderer};
+
 fn unsupported(message: impl Into<String>) -> MediaError {
     MediaError::new(MediaErrorKind::Unsupported, message)
 }
@@ -243,6 +246,9 @@ pub struct ReadyGlFrame {
     completion: GpuCompletion,
 }
 impl ReadyGlFrame {
+    pub fn completion(&self) -> GpuCompletion {
+        self.completion.clone()
+    }
     pub fn take_if_ready(&self) -> Result<Option<FrameLease>, MediaError> {
         match self.completion.status() {
             GpuCompletionStatus::Complete => Ok(Some(self.frame.clone())),

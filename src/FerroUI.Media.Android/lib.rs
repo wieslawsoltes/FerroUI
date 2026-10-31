@@ -187,6 +187,7 @@ pub struct AndroidFrameStream {
     job_epoch: Rc<Cell<u64>>,
     frame_clock: Option<JavaObject>,
     capture_identity: bool,
+    clock_nanoseconds: bool,
 }
 impl AndroidFrameStream {
     pub fn new(
@@ -211,6 +212,7 @@ impl AndroidFrameStream {
             job_epoch: Rc::new(Cell::new(0)),
             frame_clock: None,
             capture_identity: false,
+            clock_nanoseconds: false,
         }
     }
     /// A bounded native frame-clock mapper for playback. Camera streams keep
@@ -222,6 +224,14 @@ impl AndroidFrameStream {
     /// Camera streams share sensor-timestamp identity with their optional
     /// analysis stream; playback keeps monotonic acquisition sequence instead.
     pub fn with_capture_identity(mut self) -> Self {
+        self.capture_identity = true;
+        self
+    }
+    /// Camera2 capture-result metadata belongs to the acquired sensor timestamp,
+    /// including across CameraX use-case rebinding. No guessed current size.
+    pub fn with_capture_clock(mut self, clock: JavaObject) -> Self {
+        self.frame_clock = Some(clock);
+        self.clock_nanoseconds = true;
         self.capture_identity = true;
         self
     }
@@ -295,6 +305,7 @@ impl AndroidFrameStream {
         let mut identity = self.identity;
         let frame_clock = self.frame_clock.clone();
         let capture_identity = self.capture_identity;
+        let clock_nanoseconds = self.clock_nanoseconds;
         let requested_epoch = self.epoch.load(std::sync::atomic::Ordering::Acquire);
         self.job_epoch.set(requested_epoch);
         let epoch = self.epoch.clone();
@@ -316,7 +327,11 @@ impl AndroidFrameStream {
                     }
                     let error = text(&native.0.java, "acquire");
                     if !error.is_empty() {
-                        return Err(native_error(error));
+                        return Err(if call_boolean(&native.0.java, "unsupported", "()Z", &[]) {
+                            MediaError::new(MediaErrorKind::Unsupported, error)
+                        } else {
+                            native_error(error)
+                        });
                     }
                     Ok(Some((
                         call_long(&native.0.java, "sequence", "()J", &[]) as u64,
@@ -336,7 +351,9 @@ impl AndroidFrameStream {
             } else {
                 sequence
             };
-            let (timestamp, width, height, color) = if let Some(clock) = frame_clock {
+            let (timestamp, width, height, color, rotation, mirrored) = if let Some(clock) =
+                frame_clock
+            {
                 let value = call_object(
                     &clock,
                     "frameInfo",
@@ -353,12 +370,15 @@ impl AndroidFrameStream {
                     .map(str::parse::<u64>)
                     .collect::<Result<Vec<_>, _>>()
                     .map_err(|_| native_error("Invalid native frame-clock metadata"))?;
-                if values.len() != 4 || values[1] > u32::MAX as u64 || values[2] > u32::MAX as u64 {
+                if values.len() != if clock_nanoseconds { 6 } else { 4 }
+                    || values[1] > u32::MAX as u64
+                    || values[2] > u32::MAX as u64
+                {
                     return Err(native_error("Invalid native frame dimensions"));
                 }
                 (
                     values[0]
-                        .checked_mul(1000)
+                        .checked_mul(if clock_nanoseconds { 1 } else { 1000 })
                         .ok_or_else(|| native_error("Native timestamp overflow"))?,
                     values[1] as u32,
                     values[2] as u32,
@@ -367,12 +387,39 @@ impl AndroidFrameStream {
                         2 => FrameColor::Rec709Full,
                         _ => return Err(native_error("Unsupported native video color")),
                     },
+                    if clock_nanoseconds {
+                        match values[4] {
+                            0 => FrameRotation::None,
+                            90 => FrameRotation::Clockwise90,
+                            180 => FrameRotation::Clockwise180,
+                            270 => FrameRotation::Clockwise270,
+                            _ => return Err(native_error("Unsupported native frame orientation")),
+                        }
+                    } else {
+                        rotation
+                    },
+                    if clock_nanoseconds {
+                        match values[5] {
+                            0 => false,
+                            1 => true,
+                            _ => return Err(native_error("Invalid native mirror flag")),
+                        }
+                    } else {
+                        mirrored
+                    },
                 )
             } else {
                 if epoch.load(std::sync::atomic::Ordering::Acquire) != requested_epoch {
                     return Ok(None);
                 }
-                (timestamp, width, height, FrameColor::Srgb)
+                (
+                    timestamp,
+                    width,
+                    height,
+                    FrameColor::Srgb,
+                    rotation,
+                    mirrored,
+                )
             };
             // A seek can race the render-thread acquisition itself. The
             // playback clock accepts only a frame belonging to its current
@@ -413,11 +460,15 @@ impl AndroidFrameStream {
                 }],
                 retained_bytes: bytes,
             };
+            let normalize_color = call_boolean(&source.0.java, "colorConversion", "()Z", &[]);
             let counters = producer.budget().counters();
             let owner = source.clone();
             producer
                 .produce_owned(metadata, owner, move |_, output| {
                     counters.gpu_conversion(GpuTransferReason::PixelFormatConversion);
+                    if normalize_color {
+                        counters.gpu_conversion(GpuTransferReason::ColorSpaceConversion);
+                    }
                     let error = call_object(
                         &source.0.java,
                         "draw",

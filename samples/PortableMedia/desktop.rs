@@ -6,7 +6,8 @@ use ferroui_base::{
     FerroObjectImpl, Ref,
 };
 use ferroui_controls::{
-    AppBuilder, Application, ApplicationImpl, ApplicationImplExt, Control, NewApplication, Window,
+    AppBuilder, Application, ApplicationImpl, ApplicationImplExt, Control, NewApplication, Panel,
+    Window,
 };
 use ferroui_desktop::AppBuilderDesktopExtensions;
 use ferroui_media_video::{MediaPlaybackState, MediaSource};
@@ -21,6 +22,8 @@ use std::{
 static FAILED: AtomicBool = AtomicBool::new(false);
 #[path = "camera.rs"]
 mod camera;
+#[path = "renderer.rs"]
+mod renderer;
 #[repr(C)]
 struct App {
     base: Application,
@@ -69,7 +72,10 @@ impl ApplicationImpl for App {
             window.set_title(Some("FerroUI shared-texture media".into()));
             window.set_width(800.);
             window.set_height(500.);
-            window.set_content(Some(Control::boxed(view.clone())));
+            let root = Panel::new();
+            root.children().add(&view);
+            window.set_content(Some(Control::boxed(root.clone())));
+            let weak_root = root.downgrade();
             let weak = view.downgrade();
             let weak_window = window.downgrade();
             let attempts = Cell::new(0);
@@ -92,6 +98,7 @@ impl ApplicationImpl for App {
                     let compositor = visual.compositor().clone();
                     let weak = view.downgrade();
                     let weak_window = weak_window.clone();
+                    let weak_root = weak_root.clone();
                     Dispatcher::ui_thread().invoke_async_task_local(move||async move {
                     let Some(interop)=compositor.try_get_composition_gpu_interop().await else {FAILED.store(true,Ordering::Relaxed);if let Some(window)=weak_window.upgrade() {window.close();}return;};
                     let Some(device)=interop.device_luid() else {FAILED.store(true,Ordering::Relaxed);if let Some(window)=weak_window.upgrade() {window.close();}return;};
@@ -106,6 +113,8 @@ impl ApplicationImpl for App {
                     let pending=view.set_source(source,provider,Rc::new(AppleTextureImporter));
                     if let Err(error)=pending.await {eprintln!("OPEN_FAILED {error}");FAILED.store(true,Ordering::Relaxed);if let Some(window)=weak_window.upgrade() {window.close();}return;}
                     println!("OPENED native=AVFoundation presentation=MetalSharedTexture decode=unknown");
+                    if let (Some(root),Some(player))=(weak_root.upgrade(),view.media_player()){renderer::install(&root,player.frames(),&*interop);}
+
                     if std::env::args().any(|a|a=="--smoke") {if let Some(window)=weak_window.upgrade() {smoke(&window,&view,budget);}}
                 });
                     false
@@ -140,7 +149,7 @@ fn smoke(window: &Ref<Window>, view: &Ref<MediaPlayerElement>, budget: FrameBudg
                 window.close();
                 return false;
             }
-            if stage.get() == 7 && budget.usage().frames == 0 {
+            if stage.get() == 7 && budget.usage().frames == 0 && !renderer::retained() {
                 println!("NATIVE_MEDIA_SMOKE_PASS retained_frames=0");
                 window.close();
                 return false;
@@ -229,7 +238,7 @@ fn smoke(window: &Ref<Window>, view: &Ref<MediaPlayerElement>, budget: FrameBudg
                     view.set_media_player(None, None);
                     stage.set(7);
                 }
-                7 if budget.usage().frames == 0 => {
+                7 if budget.usage().frames == 0 && !renderer::retained() => {
                     println!("NATIVE_MEDIA_SMOKE_PASS retained_frames=0");
                     window.close();
                     return false;

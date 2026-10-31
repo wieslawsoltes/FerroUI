@@ -9,7 +9,7 @@ publish = false
 [lib]
 name = "portable_media_mobile"
 path = "lib.rs"
-crate-type = ["cdylib"]
+crate-type = ["cdylib", "rlib"]
 [[bin]]
 name = "portable-media-mobile"
 path = "main.rs"
@@ -28,12 +28,19 @@ image = { version="0.25", default-features=false, features=["jpeg"] }
 ferroui-themes-simple.workspace = true
 [target.'cfg(target_os = "ios")'.dependencies]
 ferroui-ios.workspace = true
+ferroui-media-metal.workspace = true
+ferroui-media-apple.workspace = true
 ferroui-media-qr-apple = {workspace=true,features=["test-fixtures"]}
 ferroui-media-video-apple = {workspace=true,features=["controls"]}
 ferroui-media-camera-apple = {workspace=true,features=["controls"]}
 [target.'cfg(target_os = "android")'.dependencies]
 ferroui-android.workspace = true
 ferroui-media-qr-android.workspace = true
+ferroui-media-opengl.workspace = true
+ferroui-opengl.workspace = true
 ferroui-media-android = {workspace=true,features=["controls"]}
 ferroui-media-video-android = {workspace=true,features=["controls"]}
 ferroui-media-camera-android = {workspace=true,features=["controls"]}
+
+[build-dependencies]
+cc.workspace = true

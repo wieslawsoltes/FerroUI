@@ -62,13 +62,21 @@ public final class CameraController implements LifecycleOwner,Application.Activi
     private CameraSelector selectedCamera;
     private Camera camera;
     private volatile boolean closed;
-    private boolean ready;
+    private volatile boolean ready;
+    private final Object clockLock=new Object();
+    private final java.util.ArrayDeque<long[]> frameClock=new java.util.ArrayDeque<>();
+    private CameraCaptureSession clockSession;
+    private long clockStart;
+    private int clockWidth,clockHeight;
     private int width,height,rotation;
     private boolean mirrored;
+    private int desiredRotation;
+    private boolean desiredMirror;
     private volatile double fps;
     private int actualFacing;
-    private String deviceId="",error="";
-    private int errorKind;
+    private String deviceId="";
+    private volatile String error="";
+    private volatile int errorKind;
     private volatile boolean capturing;
     private java.lang.ref.WeakReference<CapturedPhoto> activePhoto=new java.lang.ref.WeakReference<>(null);
     private final java.util.concurrent.ExecutorService photoExecutor=java.util.concurrent.Executors.newSingleThreadExecutor();
@@ -77,8 +85,8 @@ public final class CameraController implements LifecycleOwner,Application.Activi
     private final int facing,preferredWidth,preferredHeight;
     private final boolean exact;
 
-    public CameraController(Activity activity,SurfaceFrames frames,String id,int facing,int width,int height,boolean exact) {
-        this.activity=activity;this.frames=frames;this.selectedId=id;this.facing=facing;
+    public CameraController(Activity activity,SurfaceFrames frames,String id,int facing,int width,int height,boolean exact,int colorProfile) {
+        this.activity=activity;this.frames=frames;frames.setCameraColorMode(colorProfile);this.selectedId=id;this.facing=facing;
         preferredWidth=width;preferredHeight=height;this.exact=exact;
         Handler handler=new Handler(Looper.getMainLooper());main=command->handler.post(command);
         activity.getApplication().registerActivityLifecycleCallbacks(this);
@@ -123,6 +131,7 @@ public final class CameraController implements LifecycleOwner,Application.Activi
                         @Override public void onCaptureCompleted(CameraCaptureSession session,CaptureRequest request,TotalCaptureResult result) {
                             Long timestamp=result.get(TotalCaptureResult.SENSOR_TIMESTAMP);
                             if(timestamp==null) return;
+                            recordFrame(session,timestamp);
                             Long interval=result.get(TotalCaptureResult.SENSOR_FRAME_DURATION);
                             if(interval!=null && interval>0) {fps=1e9/interval;return;}
                             if(first==0 || timestamp-last>1000000000L) {first=timestamp;count=0;}
@@ -134,7 +143,7 @@ public final class CameraController implements LifecycleOwner,Application.Activi
                     still=new ImageCapture.Builder().setTargetRotation(displayRotation()).setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY).build();
                     preview.setSurfaceProvider(main,request->{
                         if(closed) {request.willNotProvideSurface();return;}
-                        Size size=request.getResolution();width=size.getWidth();height=size.getHeight();
+                        Size size=request.getResolution();synchronized(geometryLock){width=size.getWidth();height=size.getHeight();}
                         if(exact && preferredWidth>0 && (width!=preferredWidth || height!=preferredHeight)) {
                             request.willNotProvideSurface();fail(7,"Exact camera size unavailable");return;
                         }
@@ -142,9 +151,13 @@ public final class CameraController implements LifecycleOwner,Application.Activi
                         request.setTransformationInfoListener(main,info->{
                             // SurfaceFrames applies getTransformMatrix, which
                             // already contains the HAL camera transform.
-                            rotation=info.hasCameraTransform() ? displayRotation()*90 : info.getRotationDegrees();
-                            mirrored=info.isMirroring();
-                            synchronized(geometryLock) {previewSensorToBuffer=new android.graphics.Matrix(info.getSensorToBufferTransform());geometryEpoch++;}
+                            synchronized(geometryLock) {
+                                desiredRotation=info.getRotationDegrees();
+                                // A GL-processed surface already includes mirroring;
+                                // direct camera surfaces encode it in their sampling matrix.
+                                desiredMirror=info.hasCameraTransform() && info.isMirroring();
+                                previewSensorToBuffer=new android.graphics.Matrix(info.getSensorToBufferTransform());geometryEpoch++;
+                            }
                             if(!info.getCropRect().equals(new android.graphics.Rect(0,0,width,height)))
                                 fail(7,"Non-full CameraX viewport crop is not admitted");
                         });
@@ -163,6 +176,39 @@ public final class CameraController implements LifecycleOwner,Application.Activi
                 } catch(Exception failure) {fail(8,failure.toString());}
             },main);
         } catch(RuntimeException failure) {fail(8,failure.toString());}
+    }
+    private void recordFrame(CameraCaptureSession session,long timestamp) {
+        synchronized(clockLock) {
+            if(closed || timestamp<=0)return;
+            if(session!=clockSession) {
+                // A closed earlier session may deliver its last callback after
+                // rebinding. Sensor timestamps precede the new session start.
+                if(timestamp<=clockStart)return;
+                synchronized(geometryLock) {
+                    if(width<=0 || height<=0)return;
+                    clockWidth=width;clockHeight=height;
+                }
+                clockSession=session;clockStart=timestamp;frameClock.clear();
+            }
+            if(timestamp<clockStart)return;
+            if(frameClock.size()==32)frameClock.removeFirst();
+            frameClock.addLast(new long[]{timestamp,clockWidth,clockHeight});
+        }
+    }
+    public String frameInfo(long timestamp) {
+        synchronized(clockLock) {
+            if(closed)return "";
+            for(long[] frame:frameClock)if(frame[0]==timestamp){
+                synchronized(geometryLock){
+                    if(previewSensorToBuffer==null)return "";
+                    int[] remaining=frames.remainingOrientation(desiredRotation,desiredMirror);
+                    if(remaining==null){fail(7,"Non-orthogonal camera sampling transform is not admitted");return "";}
+                    rotation=remaining[0];mirrored=remaining[1]!=0;
+                    return frame[0]+","+frame[1]+","+frame[2]+",1,"+rotation+","+(mirrored?1:0);
+                }
+            }
+            return "";
+        }
     }
     private void bindUseCases() {
         ready=false;
@@ -213,7 +259,7 @@ public final class CameraController implements LifecycleOwner,Application.Activi
     }
     public String settings() {
         try {
-            JSONObject value=new JSONObject().put("id",deviceId).put("width",width).put("height",height)
+            JSONObject value=new JSONObject().put("id",deviceId).put("dataSpace",frames.dataSpace()).put("declaredUntaggedColor",frames.declaredUntaggedColor()).put("width",width).put("height",height)
                 .put("fps",fps).put("rotation",rotation).put("mirrored",mirrored).put("facing",actualFacing).put("torch",camera!=null && camera.getCameraInfo().hasFlashUnit());
             if(camera!=null && camera.getCameraInfo().getZoomState().getValue()!=null) {
                 value.put("minZoom",camera.getCameraInfo().getZoomState().getValue().getMinZoomRatio());
@@ -263,7 +309,7 @@ public final class CameraController implements LifecycleOwner,Application.Activi
     private void captureFinished() {capturing=false;PHOTO_BUSY.set(false);if(closed) photoExecutor.shutdown();}
     public void close() {
         if(closed) return;
-        closed=true;ready=false;CapturedPhoto photo=activePhoto.get();if(photo!=null) photo.abandon();
+        closed=true;ready=false;synchronized(clockLock){frameClock.clear();clockSession=null;}CapturedPhoto photo=activePhoto.get();if(photo!=null) photo.abandon();
         if(!capturing) photoExecutor.shutdown();
         FrameAnalyzer old=analyzer;analyzer=null;if(old!=null) old.close();
         if(analysis!=null) analysis.clearAnalyzer();analysisExecutor.shutdown();

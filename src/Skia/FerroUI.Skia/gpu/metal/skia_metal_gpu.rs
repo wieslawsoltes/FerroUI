@@ -139,6 +139,7 @@ impl IOptionalFeatureProvider for SkiaMetalGpu {
     /// The external objects feature of the GPU, when the device has one,
     /// and the handle wrapping feature of the device.
     fn try_get_feature(&self, feature_type: TypeId) -> Option<Rc<dyn Any>> {
+        if feature_type==TypeId::of::<dyn IMetalDevice>() {return Some(Rc::new(self.device.clone()));}
         if feature_type == TypeId::of::<dyn IExternalObjectsHandleWrapRenderInterfaceContextFeature>() {
             return self.device.try_get_feature(feature_type);
         }

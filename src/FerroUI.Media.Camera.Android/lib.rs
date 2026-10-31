@@ -14,7 +14,14 @@ fn error(kind: CameraErrorKind, message: impl Into<String>) -> CameraError {
     CameraError::new(kind, message)
 }
 fn native(error: MediaError) -> CameraError {
-    CameraError::new(CameraErrorKind::NativeFailure, error.to_string())
+    CameraError::new(
+        match error.kind {
+            ferroui_media::MediaErrorKind::Unsupported => CameraErrorKind::Unsupported,
+            ferroui_media::MediaErrorKind::Cancelled => CameraErrorKind::Cancelled,
+            _ => CameraErrorKind::NativeFailure,
+        },
+        error.to_string(),
+    )
 }
 fn class() -> JavaClass {
     JavaClass::find("org/ferroui/media/camera/CameraController")
@@ -41,6 +48,9 @@ fn dimensions(value: &serde_json::Value) -> CameraFormat {
 /// compositor context. No CPU fallback is declared by this provider.
 pub struct AndroidCameraProvider {
     pub frames: Option<NativeGlFrameProducer>,
+    /// Explicit source contract for untagged SDR buffers only. Native color
+    /// tags take priority. None rejects missing metadata rather than guessing.
+    pub untagged_sdr_color: Option<FrameColor>,
 }
 /// Narrow native analysis extension. A clone keeps its bridge object alive,
 /// while stopping/dropping the originating CameraSession still closes capture.
@@ -50,6 +60,7 @@ pub struct AndroidCameraContext {
     source: u64,
     generation: u64,
     counters: FrameTransferCounters,
+    untagged_sdr_color: Option<FrameColor>,
 }
 impl AndroidCameraContext {
     pub fn java(&self) -> JavaObject {
@@ -60,6 +71,9 @@ impl AndroidCameraContext {
     }
     pub fn generation(&self) -> u64 {
         self.generation
+    }
+    pub fn declared_untagged_color(&self) -> Option<FrameColor> {
+        self.untagged_sdr_color
     }
     pub fn counters(&self) -> FrameTransferCounters {
         self.counters.clone()
@@ -131,6 +145,20 @@ impl CameraProvider for AndroidCameraProvider {
                 ))
             });
         };
+        let untagged_sdr_color = self.untagged_sdr_color;
+        let color_profile = match untagged_sdr_color {
+            None => 0,
+            Some(FrameColor::Srgb) => 1,
+            Some(FrameColor::Rec709Full) => 2,
+            _ => {
+                return Box::pin(async {
+                    Err(error(
+                        CameraErrorKind::Unsupported,
+                        "Unsupported declared camera color profile",
+                    ))
+                })
+            }
+        };
         let selection = options.selection;
         if selection.exact && selection.format.is_some() {
             return Box::pin(async {
@@ -148,7 +176,7 @@ impl CameraProvider for AndroidCameraProvider {
             let format = selection.format;
             let java = new_object(
                 &class,
-                "(Landroid/app/Activity;Lorg/ferroui/media/SurfaceFrames;Ljava/lang/String;IIIZ)V",
+                "(Landroid/app/Activity;Lorg/ferroui/media/SurfaceFrames;Ljava/lang/String;IIIZI)V",
                 &[
                     JavaValue::Object(Some(&activity)),
                     JavaValue::Object(Some(&source.java())),
@@ -161,6 +189,7 @@ impl CameraProvider for AndroidCameraProvider {
                     JavaValue::Int(format.map(|v| v.width as i32).unwrap_or(0)),
                     JavaValue::Int(format.map(|v| v.height as i32).unwrap_or(0)),
                     JavaValue::Boolean(selection.exact),
+                    JavaValue::Int(color_profile),
                 ],
             )
             .to_global();
@@ -170,10 +199,11 @@ impl CameraProvider for AndroidCameraProvider {
                     source: id,
                     generation,
                     counters: budget.counters(),
+                    untagged_sdr_color,
                 },
-                java,
+                java: java.clone(),
                 stream: AndroidFrameStream::new(frames, source, id, generation)
-                    .with_capture_identity(),
+                    .with_capture_clock(java),
                 budget,
             });
             poll_native(move || {

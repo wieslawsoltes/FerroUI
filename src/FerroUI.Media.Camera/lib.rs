@@ -8,10 +8,7 @@ use std::{
     future::Future,
     pin::Pin,
     rc::Rc,
-    sync::{
-        atomic::{AtomicU64, Ordering},
-        Arc,
-    },
+    sync::Arc,
     time::Duration,
 };
 
@@ -193,10 +190,9 @@ impl Drop for CaptureInner {
 pub struct CameraCapture(Rc<CaptureInner>);
 impl CameraCapture {
     pub fn new(provider: Rc<dyn CameraProvider>, budget: FrameBudget) -> Self {
-        static NEXT: AtomicU64 = AtomicU64::new(1 << 32);
         Self(Rc::new(CaptureInner {
             provider,
-            source: NEXT.fetch_add(1, Ordering::Relaxed),
+            source: ferroui_media::allocate_source_id(),
             generation: Cell::new(0),
             budget,
             pending: RefCell::new(None),

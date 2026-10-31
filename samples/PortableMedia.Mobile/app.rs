@@ -1,3 +1,5 @@
+#[path = "scene.rs"]
+mod scene;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, instantiate,
     rendering::composition::{frames::*, ElementComposition},
@@ -94,6 +96,66 @@ fn is_smoke() -> bool {
             })
     }
 }
+fn renderer_smoke() -> bool {
+    #[cfg(target_os = "ios")]
+    return std::env::args().any(|v| v == "--renderer-smoke");
+    #[cfg(target_os = "android")]
+    {
+        use ferroui_android::{interop::java::*, FerroActivity};
+        FerroActivity::current_main_activity()
+            .and_then(|v| {
+                call_object(
+                    v.java_object(),
+                    "getIntent",
+                    "()Landroid/content/Intent;",
+                    &[],
+                )
+            })
+            .is_some_and(|v| {
+                call_boolean(
+                    &v,
+                    "getBooleanExtra",
+                    "(Ljava/lang/String;Z)Z",
+                    &[
+                        JavaValue::String("rendererSmoke"),
+                        JavaValue::Boolean(false),
+                    ],
+                )
+            })
+    }
+}
+#[cfg(target_os = "android")]
+fn declared_camera_color() -> Option<FrameColor> {
+    use ferroui_android::{interop::java::*, FerroActivity};
+    let declared = FerroActivity::current_main_activity()
+        .and_then(|v| {
+            call_object(
+                v.java_object(),
+                "getIntent",
+                "()Landroid/content/Intent;",
+                &[],
+            )
+        })
+        .is_some_and(|v| {
+            call_boolean(
+                &v,
+                "getBooleanExtra",
+                "(Ljava/lang/String;Z)Z",
+                &[
+                    JavaValue::String("cameraSdrSrgb"),
+                    JavaValue::Boolean(false),
+                ],
+            )
+        });
+    if declared {
+        report(
+            "CAMERA_PROFILE untagged source explicitly declared sRGB; native tags retain priority",
+        );
+        Some(FrameColor::Srgb)
+    } else {
+        None
+    }
+}
 fn report(value: &str) {
     println!("{value}");
     #[cfg(target_os = "ios")]
@@ -156,7 +218,7 @@ fn create() -> Ref<Control> {
             // Android creates the view before onResume establishes its current
             // activity. Read launch options when the compositor is ready.
             let smoke = is_smoke();
-            view.set_autoplay(smoke);
+            view.set_autoplay(smoke || renderer_smoke());
             let weak = view.downgrade();
             let weak_root = weak_root.clone();
             let phase = phase.clone();
@@ -384,6 +446,7 @@ fn camera_actions(
         (
             Rc::new(ferroui_media_camera_android::AndroidCameraProvider {
                 frames: Some(frames),
+                untagged_sdr_color: declared_camera_color(),
             }) as Rc<dyn CameraProvider>,
             Rc::new(ferroui_media_android::NativeGlTextureImporter)
                 as Rc<dyn ferroui_media_controls::TextureFrameImporter>,
@@ -418,9 +481,9 @@ fn camera_actions(
     let photo = button("JPEG");
     let navigate = button("Detach");
     let weak = camera.downgrade();
-    let video = video.downgrade();
+    let video_weak = video.downgrade();
     start.click(move |_, _| {
-        if let Some(video) = video.upgrade() {
+        if let Some(video) = video_weak.upgrade() {
             if let Some(player) = video.media_player() {
                 player.clear_source();
             }
@@ -491,6 +554,7 @@ fn camera_actions(
     actions.children().add(photo);
     actions.children().add(navigate);
     qr_action(&actions, &camera);
+    renderer_action(root, &actions, &camera, video, interop);
     root.children().add(actions);
 }
 fn start_smoke(view: &Ref<MediaPlayerElement>, budget: FrameBudget) {
@@ -681,6 +745,9 @@ fn qr_action(
     let button = Button::new();
     button.set_content(Some(Rc::new("QR".to_string()) as BoxedValue));
     AutomationProperties::set_name(&button, Some("Toggle QR analysis"));
+    let camera_errors = camera
+        .errors()
+        .subscribe(|e| report(&format!("CAMERA_ERROR {:?} {e}", e.kind)));
     let enabled = Rc::new(Cell::new(false));
     let state = enabled.clone();
     button.click(move |_, _| {
@@ -699,6 +766,7 @@ fn qr_action(
         let analyzer = std::cell::RefCell::new(None::<ferroui_media_qr_android::AndroidQrAnalyzer>);
         DispatcherTimer::run(
             move || {
+                let _keep_errors = &camera_errors;
                 let Some(camera) = weak.upgrade() else {
                     analyzer.borrow_mut().take();
                     return false;
@@ -759,6 +827,7 @@ fn qr_action(
         let started = Instant::now();
         DispatcherTimer::run(
             move || {
+                let _keep_errors = &camera_errors;
                 let Some(camera) = weak.upgrade() else {
                     gate.stop();
                     return false;
@@ -796,4 +865,174 @@ fn qr_action(
             DispatcherPriority::NORMAL,
         );
     }
+}
+
+fn renderer_action(
+    root: &Ref<Panel>,
+    actions: &Ref<ferroui_controls::StackPanel>,
+    camera: &Ref<ferroui_media_camera_controls::CameraPreview>,
+    video: &Ref<MediaPlayerElement>,
+    interop: &dyn ferroui_base::rendering::composition::ICompositionGpuInterop,
+) {
+    use ferroui_base::{
+        layout::{HorizontalAlignment, VerticalAlignment},
+        BoxedValue,
+    };
+    use ferroui_controls::{automation::AutomationProperties, Button};
+    use ferroui_media::TextureRenderer;
+    use ferroui_media_controls::RendererHost;
+    use std::{cell::RefCell, sync::Arc};
+    let source = ferroui_media::allocate_source_id();
+    let budget = FrameBudget::new(Default::default());
+    #[cfg(target_os = "ios")]
+    let renderer = ferroui_media_metal::MetalTextureRenderer::from_interop(
+        interop,
+        budget.clone(),
+        source,
+        Arc::new(scene::Scene::default()),
+    )
+    .map(|v| Rc::new(v) as Rc<dyn TextureRenderer>);
+    #[cfg(target_os = "android")]
+    let renderer =
+        ferroui_media_android::NativeGlFrameProducer::from_interop(interop, budget.clone()).map(
+            |producer| {
+                let scene = Arc::new(scene::Scene::new(producer.retirement_wakeup()));
+                Rc::new(ferroui_media_opengl::GlTextureRenderer::new(
+                    producer, source, scene,
+                )) as Rc<dyn TextureRenderer>
+            },
+        );
+    #[cfg(target_os = "android")]
+    let probe_producer =
+        ferroui_media_android::NativeGlFrameProducer::from_interop(interop, budget.clone()).ok();
+    let renderer = match renderer {
+        Ok(v) => v,
+        Err(e) => {
+            report(&format!("RENDERER_SETUP_ERROR {e}"));
+            return;
+        }
+    };
+    let host = RendererHost::new();
+    host.set_width(220.);
+    host.set_height(220.);
+    host.set_horizontal_alignment(HorizontalAlignment::Right);
+    host.set_vertical_alignment(VerticalAlignment::Bottom);
+    host.set_is_visible(renderer_smoke());
+    #[cfg(target_os = "ios")]
+    let importer = Rc::new(ferroui_media_video_apple::AppleTextureImporter)
+        as Rc<dyn ferroui_media_controls::TextureFrameImporter>;
+    #[cfg(target_os = "android")]
+    let importer = Rc::new(ferroui_media_android::NativeGlTextureImporter)
+        as Rc<dyn ferroui_media_controls::TextureFrameImporter>;
+    host.set_renderer(Some(renderer), source, Some(importer));
+    // Retain the diagnostic subscription for this view's lifetime.
+    let errors = host
+        .errors()
+        .subscribe(|e| report(&format!("RENDERER_ERROR {e}")));
+    let weak = host.downgrade();
+    let camera = camera.downgrade();
+    let video = video.downgrade();
+    let current = RefCell::new(None::<Arc<FrameMailbox>>);
+    let last_message = RefCell::new(String::new());
+    let probed = Cell::new(false);
+    let retiring = Cell::new(false);
+    let last_report = Cell::new(Instant::now());
+    DispatcherTimer::run(
+        move || {
+            let _keep_errors = &errors;
+            let Some(host) = weak.upgrade() else {
+                return false;
+            };
+            if !host.is_visible() {
+                if retiring.get() && budget.usage().frames == 0 {
+                    report("RENDERER_RETIRED frames=0");
+                    retiring.set(false);
+                }
+                return true;
+            }
+            let input = camera
+                .upgrade()
+                .filter(|v| v.is_visible())
+                .and_then(|v| v.session())
+                .filter(|s| !s.is_stopped())
+                .map(|s| s.frames())
+                .or_else(|| {
+                    video
+                        .upgrade()
+                        .filter(|v| v.is_visible())
+                        .and_then(|v| v.media_player())
+                        .map(|p| p.frames())
+                });
+            let changed = match (current.borrow().as_ref(), input.as_ref()) {
+                (Some(a), Some(b)) => !Arc::ptr_eq(a, b),
+                (None, None) => false,
+                _ => true,
+            };
+            if changed {
+                if input.is_none() {
+                    host.set_is_visible(false);
+                    retiring.set(true);
+                }
+                host.set_inputs(input.iter().cloned().collect());
+                current.replace(input);
+            }
+            let input = current.borrow().as_ref().and_then(|s| s.latest());
+            let output = host.output().and_then(|s| s.latest());
+            if !probed.get() && is_smoke() && input.is_some() {
+                if let Some(frame) = output.clone() {
+                    probed.set(true);
+                    #[cfg(target_os = "ios")]
+                    match scene::probe(&frame) {
+                        Ok(()) => report("RENDERER_PIXELS_PASS transparent projection coverage"),
+                        Err(e) => report(&format!("RENDERER_PIXELS_FAIL {e}")),
+                    }
+                    #[cfg(target_os = "android")]
+                    if let Some(producer) = probe_producer.clone() {
+                        Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+                            match scene::probe(frame, producer).await {
+                                Ok(()) => {
+                                    report("RENDERER_PIXELS_PASS transparent projection coverage")
+                                }
+                                Err(e) => report(&format!("RENDERER_PIXELS_FAIL {e}")),
+                            }
+                        });
+                    }
+                }
+            }
+            if last_report.get().elapsed() > Duration::from_secs(2) {
+                let message = format!(
+                    "RENDERER_SHARED_INPUT {:?} output={:?} budget={:?} counters={:?}",
+                    input.as_ref().map(|v| v.metadata().identity),
+                    output.as_ref().map(|v| v.metadata().identity),
+                    budget.usage(),
+                    budget.counters().snapshot()
+                );
+                if *last_message.borrow() != message {
+                    report(&message);
+                    last_message.replace(message);
+                }
+
+                last_report.set(Instant::now());
+            }
+            true
+        },
+        Duration::from_millis(33),
+        DispatcherPriority::NORMAL,
+    );
+    let button = Button::new();
+    button.set_content(Some(Rc::new("3D".to_string()) as BoxedValue));
+    AutomationProperties::set_name(&button, Some("Toggle shared texture renderer"));
+    let weak = host.downgrade();
+    button.click(move |_, _| {
+        if let Some(host) = weak.upgrade() {
+            host.set_is_visible(!host.is_visible());
+            report(if host.is_visible() {
+                "RENDERER_ENABLED"
+            } else {
+                "RENDERER_DISABLED"
+            });
+        }
+    });
+    actions.children().add(button);
+    root.children().add(host);
 }

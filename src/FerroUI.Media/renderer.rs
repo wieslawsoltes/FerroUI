@@ -1,5 +1,7 @@
 use crate::{
-    frames::{FrameAlpha, FrameError, FrameLease, FrameMailbox, GpuCompletion},
+    frames::{
+        FrameAlpha, FrameError, FrameLease, FrameMailbox, GpuCompletion, GpuCompletionStatus,
+    },
     MediaError, MediaErrorKind, MediaFuture,
 };
 use std::{cell::Cell, rc::Rc, sync::Arc};
@@ -22,6 +24,9 @@ pub trait TextureRenderer {
     /// Before submitting GPU writes, the backend must retain its output in
     /// `completion`; inputs are already retained by the host. Signal only after
     /// actual GPU completion, even when the returned future is abandoned.
+    /// Complete the token on admission/allocation failure before any GPU work.
+    /// If submitted completion becomes unknown, mark it indeterminate; never
+    /// turn cancellation or an error into a premature completion.
     fn render(
         &self,
         viewport: RendererViewport,
@@ -49,9 +54,13 @@ pub struct TextureRendererHost(Rc<HostInner>);
 struct RenderGuard {
     host: std::rc::Weak<HostInner>,
     completed: bool,
+    completion: GpuCompletion,
 }
 impl Drop for RenderGuard {
     fn drop(&mut self) {
+        if !self.completed && self.completion.status() == GpuCompletionStatus::Pending {
+            self.completion.mark_indeterminate();
+        }
         if let Some(host) = self.host.upgrade() {
             host.busy.set(false);
             if !self.completed {
@@ -81,12 +90,45 @@ impl TextureRendererHost {
         self.0.output.clone()
     }
     pub fn set_active(&self, active: bool) {
-        self.0.active.set(active);
+        let previous = self.0.active.replace(active);
+        if previous && !active {
+            let mut viewport = self.0.viewport.get();
+            viewport.generation = viewport
+                .generation
+                .checked_add(1)
+                .expect("renderer generation exhausted");
+            self.0.viewport.set(viewport);
+            self.0
+                .output
+                .replace_generation(viewport.generation)
+                .expect("increasing generation");
+        }
         if active {
             self.invalidate();
         } else {
             self.0.output.clear();
         }
+    }
+    pub fn activate_if_needed(&self) {
+        if !self.0.active.get() {
+            self.set_active(true);
+        }
+    }
+    pub fn clear_output(&self) {
+        let mut viewport = self.0.viewport.get();
+        viewport.generation = viewport
+            .generation
+            .checked_add(1)
+            .expect("renderer generation exhausted");
+        self.0.viewport.set(viewport);
+        self.0
+            .output
+            .replace_generation(viewport.generation)
+            .expect("increasing generation");
+        self.invalidate();
+    }
+    pub fn viewport(&self) -> RendererViewport {
+        self.0.viewport.get()
     }
     pub fn set_schedule(&self, schedule: RenderSchedule) {
         self.0.schedule.set(schedule);
@@ -157,11 +199,12 @@ impl TextureRendererHost {
         }
         self.0.busy.set(true);
         self.0.dirty.set(false);
+        let completion = GpuCompletion::new();
         let guard = RenderGuard {
             host: Rc::downgrade(&self.0),
             completed: false,
+            completion: completion.clone(),
         };
-        let completion = GpuCompletion::new();
         for input in &inputs {
             if completion.retain(input.clone()).is_err() {
                 // No backend has recorded work yet. Roll back earlier input
@@ -257,3 +300,21 @@ pub fn project_texture_point(matrix: &[f64; 16], u: f64, v: f64) -> Option<(f64,
 #[cfg(test)]
 #[path = "renderer_tests.rs"]
 mod tests;
+
+/// Projects a QR/source corner through the same crop/orientation and planar
+/// client matrix as the sampled frame. Non-planar mapping stays client-owned.
+pub fn project_frame_point(
+    frame: &crate::frames::FrameMetadata,
+    matrix: &[f64; 16],
+    corner: (f64, f64),
+) -> Option<(f64, f64)> {
+    let r = frame.visible;
+    if r.width == 0 || r.height == 0 {
+        return None;
+    }
+    let (u, v) = frame.orient(
+        (corner.0 * frame.width as f64 - r.x as f64) / r.width as f64,
+        (corner.1 * frame.height as f64 - r.y as f64) / r.height as f64,
+    )?;
+    project_texture_point(matrix, u, v)
+}

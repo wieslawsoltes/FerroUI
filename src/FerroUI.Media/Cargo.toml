@@ -1,5 +1,6 @@
 [package]
 name = "ferroui-media"
+links = "ferroui_media_xaml"
 description = "Shared frame, event and renderer-host contracts for portable media"
 version.workspace = true
 edition.workspace = true
@@ -17,6 +18,9 @@ path = "lib.rs"
 [dependencies]
 ferroui-base.workspace = true
 
+
+[build-dependencies]
+ferroui-build-scan.workspace = true
 
 [package.metadata.release]
 group = "core"

@@ -154,3 +154,65 @@ fn saturated_reads_coalesce_without_calling_the_renderer_or_leaking_reservations
     renderer.completions.borrow()[2].complete();
     assert!(matches!(poll(&mut retry), Poll::Ready(Ok(()))));
 }
+
+#[test]
+fn detach_and_reattach_rejects_the_previous_submitted_output() {
+    let renderer = Rc::new(Renderer {
+        completions: RefCell::new(Vec::new()),
+        budget: FrameBudget::new(Default::default()),
+    });
+    let host = TextureRendererHost::new(renderer.clone(), 9);
+    host.resize(2., 2., 1., 8192).unwrap();
+    host.set_active(true);
+    let mut pending = host.render(vec![]).unwrap();
+    assert!(poll(&mut pending).is_pending());
+    let old = host.viewport();
+    host.set_active(false);
+    host.set_active(true);
+    assert!(host.viewport().generation > old.generation);
+    renderer.completions.borrow()[0].complete();
+    assert!(matches!(
+        poll(&mut pending),
+        Poll::Ready(Err(MediaError {
+            kind: MediaErrorKind::Cancelled,
+            ..
+        }))
+    ));
+    assert!(host.output().latest().is_none());
+    let mut retry = host.render(vec![]).unwrap();
+    assert!(poll(&mut retry).is_pending());
+    renderer.completions.borrow()[1].complete();
+    assert!(matches!(poll(&mut retry), Poll::Ready(Ok(()))));
+    assert_eq!(
+        host.output()
+            .latest()
+            .unwrap()
+            .metadata()
+            .identity
+            .generation,
+        host.viewport().generation
+    );
+}
+
+#[test]
+fn replacing_input_bindings_rejects_a_late_render_even_if_old_input_is_still_valid() {
+    let renderer = Rc::new(Renderer {
+        completions: RefCell::new(Vec::new()),
+        budget: FrameBudget::new(Default::default()),
+    });
+    let host = TextureRendererHost::new(renderer.clone(), 9);
+    host.resize(2., 2., 1., 8192).unwrap();
+    host.set_active(true);
+    let mut pending = host.render(vec![]).unwrap();
+    assert!(poll(&mut pending).is_pending());
+    host.clear_output();
+    renderer.completions.borrow()[0].complete();
+    assert!(matches!(
+        poll(&mut pending),
+        Poll::Ready(Err(MediaError {
+            kind: MediaErrorKind::Cancelled,
+            ..
+        }))
+    ));
+    assert!(host.output().latest().is_none());
+}
