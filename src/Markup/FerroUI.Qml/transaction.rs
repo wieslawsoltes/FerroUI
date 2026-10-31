@@ -277,6 +277,7 @@ impl Transaction<'_> {
         let binding = match self.model.slots[key].binding.as_ref()? {
             InstalledBinding::PropertyRead(source) => return Some(*source),
             InstalledBinding::Expression(binding) => binding,
+            InstalledBinding::Guest { .. } => return None,
         };
         let Binding::Expr(expr) = binding.as_ref() else {
             return None;
@@ -341,29 +342,50 @@ impl Transaction<'_> {
         let owner = self.model.properties[key].owner;
         let mut reads = BTreeSet::new();
         let overlay = self.model.slots[key].overlay.as_ref().map(|o| o.input());
-        let value = if let Some(input) = overlay {
-            self.read(input, &mut reads)?
-        } else {
-            match self.model.properties[key].alias {
-                Some(Alias::Slot(target)) => self.read(target, &mut reads)?,
-                Some(Alias::Object(target)) => Value::Object(target),
-                None => {
-                    let binding = self.model.slots[key]
-                        .binding
-                        .clone()
-                        .ok_or_else(|| Error::new("missing dirty binding"))?;
-                    match binding {
-                        InstalledBinding::PropertyRead(source) => self.read(source, &mut reads)?,
-                        InstalledBinding::Expression(binding) => match binding.as_ref() {
-                            Binding::Expr(expr) => {
-                                self.expr(owner, expr, &mut Locals::new(), &mut reads)?
-                            }
-                            Binding::Script(body) => self
-                                .statements(owner, body, &mut Locals::new(), &mut reads)?
-                                .value()?,
-                            _ => return Err(Error::new("unresolved object-valued binding")),
-                        },
+        let input = overlay
+            .map(|input| self.read(input, &mut reads))
+            .transpose()?;
+        let superseded = self.model.slots[key]
+            .overlay
+            .as_ref()
+            .is_some_and(|o| o.superseded);
+        let value = match (input, &self.model.properties[key].alias) {
+            (Some(value), _) if !superseded => value,
+            (_, Some(Alias::Slot(target))) => self.read(*target, &mut reads)?,
+            (_, Some(Alias::Object(target))) => Value::Object(*target),
+            _ => {
+                let binding = self.model.slots[key]
+                    .binding
+                    .clone()
+                    .ok_or_else(|| Error::new("missing dirty binding"))?;
+                match binding {
+                    InstalledBinding::PropertyRead(source) => self.read(source, &mut reads)?,
+                    InstalledBinding::Guest {
+                        callback,
+                        receiver,
+                        scope,
+                    } => {
+                        let ty = self.model.properties[key].ty.clone();
+                        let value = self.with_scope(scope, |tx| {
+                            tx.with_external(receiver, &callback, &mut reads, |engine, ctx| {
+                                if !engine.is_reference_live(&callback) {
+                                    return Err(Error::new("JavaScript binding expired after worker reset. Assign a value or install a new binding"));
+                                }
+                                engine.evaluate_binding(ctx, &callback, receiver, &ty)
+                            })
+                        })?;
+                        self.check_binding_edges(key, &reads)?;
+                        value
                     }
+                    InstalledBinding::Expression(binding) => match binding.as_ref() {
+                        Binding::Expr(expr) => {
+                            self.expr(owner, expr, &mut Locals::new(), &mut reads)?
+                        }
+                        Binding::Script(body) => self
+                            .statements(owner, body, &mut Locals::new(), &mut reads)?
+                            .value()?,
+                        _ => return Err(Error::new("unresolved object-valued binding")),
+                    },
                 }
             }
         };
@@ -372,6 +394,31 @@ impl Transaction<'_> {
         self.touched(key).dirty = false;
         self.evaluating.remove(&key);
         self.set_value(key, value);
+        Ok(())
+    }
+
+    // A cached alias or derived property can read cleanly during installation
+    // even though it already depends on the target. Reject that edge before it
+    // becomes a cycle, including when the computed value would stay unchanged.
+    fn check_binding_edges(&mut self, key: SlotId, reads: &BTreeSet<SlotId>) -> Result<(), Error> {
+        let slot = &self.model.slots[key];
+        if slot.dependents.is_empty() || reads.is_subset(&slot.reads) {
+            return Ok(());
+        }
+        let mut stack: Vec<_> = slot.dependents.iter().copied().collect();
+        let mut seen = BTreeSet::new();
+        while let Some(dep) = stack.pop() {
+            if seen.insert(dep) {
+                self.budget()?;
+                if reads.contains(&dep) {
+                    return Err(Error::new(format!(
+                        "binding cycle at '{}'",
+                        self.model.properties[key].name
+                    )));
+                }
+                stack.extend(&self.model.slots[dep].dependents);
+            }
+        }
         Ok(())
     }
 
@@ -390,6 +437,17 @@ impl Transaction<'_> {
             return;
         }
         self.touched(key).value = value;
+        if let Some(target) = self.model.slots[key].active_target {
+            if self.model.slots[target]
+                .overlay
+                .as_ref()
+                .is_some_and(|o| o.superseded && o.input() == key)
+            {
+                let slot = self.touched(target);
+                slot.overlay.as_mut().expect("active overlay").superseded = false;
+                slot.binding = None;
+            }
+        }
         // Eagerly marking the transitive closure lets code in the same handler
         // read a derived value before the outer transaction is settled.
         let mut stack: Vec<_> = self.model.slots[key].dependents.iter().copied().collect();
@@ -460,10 +518,45 @@ impl Transaction<'_> {
         let slot = self.touched(key);
         slot.assigned = true;
         slot.binding = None;
+        if let Some(overlay) = &mut slot.overlay {
+            overlay.superseded = false;
+        }
         slot.dirty = false;
         self.pending.remove(&key);
         self.set_value(key, value);
         Ok(())
+    }
+
+    pub(crate) fn install_guest_binding(
+        &mut self,
+        key: SlotId,
+        callback: ExternalValue,
+    ) -> Result<(), Error> {
+        if self.in_binding() {
+            return Err(Error::new(
+                "a binding cannot imperatively modify the object graph",
+            ));
+        }
+        if callback.instance() != self.model.script_instance() {
+            return Err(Error::new("foreign JavaScript binding"));
+        }
+        // The alias owner supplies `this`, even when the physical slot belongs to another object.
+        let receiver = self.model.properties[key].owner;
+        let target = self.model.write_target(key)?;
+        let scope = self.declaration_scope();
+        let slot = self.touched(target);
+        slot.binding = Some(InstalledBinding::Guest {
+            callback,
+            receiver,
+            scope,
+        });
+        slot.assigned = true;
+        slot.dirty = true;
+        if let Some(overlay) = &mut slot.overlay {
+            overlay.superseded = true;
+        }
+        self.pending.insert(target);
+        self.settle()
     }
 
     pub(crate) fn in_binding(&self) -> bool {

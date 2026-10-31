@@ -90,6 +90,11 @@ struct Property {
 enum InstalledBinding {
     Expression(Rc<Binding>),
     PropertyRead(SlotId),
+    Guest {
+        callback: ExternalValue,
+        receiver: ObjectId,
+        scope: Option<u32>,
+    },
 }
 
 #[derive(Clone)]

@@ -227,7 +227,22 @@ impl ScriptEngine for WebSceneEngine {
         args: Vec<Value>,
     ) -> Result<Value, Error> {
         self.realm(ctx.instance())
-            .call_external(ctx, v, receiver, args)
+            .call_external(ctx, v, receiver, args, None)
+    }
+    fn evaluate_binding(
+        &self,
+        ctx: &mut ScriptContext<'_, '_>,
+        callback: &ExternalValue,
+        receiver: ObjectId,
+        ty: &str,
+    ) -> Result<Value, Error> {
+        self.realm(ctx.instance()).call_external(
+            ctx,
+            callback,
+            Value::Object(receiver),
+            Vec::new(),
+            host::mode(Some(ty)),
+        )
     }
     fn observe_promise(
         &self,
@@ -480,12 +495,13 @@ impl Realm {
         value: &ExternalValue,
         receiver: Value,
         args: Vec<Value>,
+        mode: Option<&str>,
     ) -> Result<Value, Error> {
         let args = args
             .iter()
             .map(|v| self.encode(ctx.instance(), v))
             .collect::<Result<Vec<_>, _>>()?;
         let receiver = self.encode(ctx.instance(), &receiver)?;
-        self.invoke(ctx,json!({"op":"call","target":["js",self.handle(value)?],"receiver":receiver,"args":args}))
+        self.invoke(ctx,json!({"op":"call","target":["js",self.handle(value)?],"receiver":receiver,"args":args,"mode":mode}))
     }
 }

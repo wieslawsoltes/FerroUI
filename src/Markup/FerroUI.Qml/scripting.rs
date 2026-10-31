@@ -109,6 +109,17 @@ pub trait ScriptEngine {
             "the JavaScript backend does not support external property writes",
         ))
     }
+    /// Evaluate an imperative property binding. Backends can use the target type
+    /// to marshal typed lists while retaining ordinary JS objects by identity.
+    fn evaluate_binding(
+        &self,
+        context: &mut ScriptContext<'_, '_>,
+        callback: &ExternalValue,
+        receiver: ObjectId,
+        _property_type: &str,
+    ) -> Result<Value, Error> {
+        self.call_external(context, callback, Value::Object(receiver), Vec::new())
+    }
     fn call_external(
         &self,
         _context: &mut ScriptContext<'_, '_>,
@@ -472,6 +483,33 @@ impl ScriptContext<'_, '_> {
         }
         let key = self.tx.lookup_property(self.owner, self.root, name)?;
         self.write_key(key, value)
+    }
+
+    /// Install a validated guest function as the binding of a writable object
+    /// property. An absent receiver selects the property in the lexical scope.
+    pub fn install_binding(
+        &mut self,
+        object: Option<ObjectId>,
+        name: &str,
+        callback: ExternalValue,
+    ) -> Result<(), Error> {
+        if private(name) {
+            return Err(Error::new("private QML member"));
+        }
+        let key = if let Some(object) = object {
+            self.tx.scoped_key(object, name)?
+        } else {
+            if self.locals.contains_key(name)
+                || self.id(name).is_some()
+                || matches!(name, "this" | "parent")
+            {
+                return Err(Error::new(format!("cannot install a binding on '{name}'")));
+            }
+            self.tx.lookup_property(self.owner, self.root, name)?
+        };
+        self.tx.budget()?;
+        let result = self.tx.install_guest_binding(key, callback);
+        self.tx.host_result(result)
     }
 
     fn write_key(&mut self, key: SlotId, value: Value) -> Result<(), Error> {

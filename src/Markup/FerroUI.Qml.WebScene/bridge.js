@@ -16,6 +16,19 @@
     }
     let serial = 0, next = 0, preparing = "ready";
     const intrinsicPromise=Promise, intrinsicEval=eval;
+    // Qt.binding creates a transferable marker. Only assignment to a QML
+    // property installs the callback; JS containers can retain and reuse it.
+    const bindingCallbacks = new WeakMap();
+    Object.defineProperty(globalThis, "Qt", {value: Object.freeze({
+        binding(fn) {
+            if (arguments.length !== 1 || typeof fn !== "function") {
+                throw new Error("Qt.binding expects one function");
+            }
+            const marker = () => { throw new TypeError("A QML binding marker cannot be called"); };
+            bindingCallbacks.set(marker, fn);
+            return marker;
+        }
+    })});
     function atom(value) {
         // Install a rejection handler before WebScene drains its microtask queue.
         // Otherwise a rejected return value is reported as an unhandled engine
@@ -116,8 +129,8 @@
             },
             set(t,key,v) {
                 if(typeof key !== "string") return false;
-                const mode=rpc(["mode",id,key]);
-                rpc(["set",id,key,encode(v,mode)]);
+                if (bindingCallbacks.has(v)) rpc(["bind",id,key,atom(bindingCallbacks.get(v))]);
+                else rpc(["set",id,key,encode(v,rpc(["mode",id,key]))]);
                 return true;
             },
             has(t,key){return typeof key === "string" && (Reflect.has(t,key)||rpc(["keys",id]).includes(key));},
@@ -159,7 +172,8 @@
             },
             set(_,k,v){
                 if(typeof k!=="string"||!names.has(k)) throw new ReferenceError("Unknown QML property: "+String(k));
-                rpc(["assign",c.scope,k,encode(v,rpc(["scopeMode",c.scope,k]))]);
+                if (bindingCallbacks.has(v)) rpc(["bindScope",c.scope,k,atom(bindingCallbacks.get(v))]);
+                else rpc(["assign",c.scope,k,encode(v,rpc(["scopeMode",c.scope,k]))]);
                 return true;
             }
         });
@@ -219,7 +233,13 @@
     }
 
     function perform(command) {
-        if (command.op === "eval") return evaluate(command);
+        if (command.op === "eval") {
+            const result = evaluate(command);
+            if (command.form !== "body" && bindingCallbacks.has(result)) {
+                throw new Error("Qt.binding must be assigned imperatively to a QML property");
+            }
+            return result;
+        }
         const target = decode(command.target);
         switch (command.op) {
             case "get": return target[command.name];

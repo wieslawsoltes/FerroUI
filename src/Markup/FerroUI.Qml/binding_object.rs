@@ -10,6 +10,8 @@ pub(crate) struct Overlay {
     source_binding: Option<InstalledBinding>,
     source_assigned: bool,
     stack: Vec<SlotId>,
+    // An imperative binding can control the target until the overlay writes again.
+    pub(crate) superseded: bool,
 }
 
 impl Overlay {
@@ -64,8 +66,10 @@ impl Transaction<'_> {
                     source_binding: slot.binding.clone(),
                     source_assigned: slot.assigned,
                     stack: Vec::new(),
+                    superseded: false,
                 })
             });
+            overlay.superseded = false;
             overlay.stack.push(input);
             slot.assigned = true;
             self.invalidate_overlay(target);
@@ -87,6 +91,9 @@ impl Transaction<'_> {
         let was_top = overlay.input() == input;
         overlay.stack.retain(|v| *v != input);
         if !overlay.stack.is_empty() {
+            if was_top {
+                overlay.superseded = false;
+            }
             slot.overlay = Some(overlay);
             if was_top {
                 self.invalidate_overlay(target);

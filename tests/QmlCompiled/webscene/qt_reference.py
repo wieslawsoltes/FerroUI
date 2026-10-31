@@ -41,7 +41,37 @@ def main():
     sender.observeCount()
     sender.setProperty("count", 6)
     assert sender.property("history") == "M2M2S2C6"
-    print("Qt 6.12.0 JavaScript, module and signal reference passed")
+    bindings = QQmlComponent(engine, QUrl.fromLocalFile(str(Path(__file__).with_name("Bindings.qml").resolve())))
+    props = bindings.create()
+    if props is None:
+        raise RuntimeError("\n".join(issue.toString() for issue in bindings.errors()))
+    assert props.marker() == "function/false/TypeError/Error/Error"
+    assert props.installBranch() == 109
+    props.setProperty("right", 11)
+    assert props.property("mapped") == 109
+    props.setProperty("first", False)
+    assert props.property("mapped") == 216
+    props.setProperty("left", 30)
+    assert props.property("mapped") == 216
+    assert props.installAlias() == 111
+    assert props.installArrow() == 130
+    props.overwrite(42)
+    props.setProperty("left", 40)
+    assert props.property("mapped") == 42
+    props.installNumbers()
+    assert props.values() == "40,11"
+    props.setProperty("enabled", True)
+    assert props.installControlled() == 111
+    props.setProperty("right", 15)
+    assert props.property("controlled") == 115
+    props.setProperty("left", 4)
+    assert props.property("controlled") == 6
+    props.setProperty("right", 16)
+    assert props.property("controlled") == 6
+    props.setProperty("enabled", False)
+    assert props.property("controlled") == 5
+    print("Qt 6.12.0 JavaScript, module, signal and binding reference passed")
+    del props, bindings
     del sender, signals
     del root, component, engine, app
 

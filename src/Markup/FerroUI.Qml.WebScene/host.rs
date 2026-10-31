@@ -168,12 +168,25 @@ impl Realm {
         }
         json!(["fn", id, key, signature, ctx.is_signal(object, key)])
     }
+    fn install_binding(
+        &self,
+        ctx: &mut ScriptContext<'_, '_>,
+        object: Option<ObjectId>,
+        name: &str,
+        input: &Json,
+    ) -> Result<Json, Error> {
+        let Value::External(callback) = self.decode(ctx, input)? else {
+            return Err(Error::new("expected a guest binding function"));
+        };
+        ctx.install_binding(object, name, callback)?;
+        Ok(Json::Null)
+    }
     pub(super) fn host(&self, ctx: &mut ScriptContext<'_, '_>, v: &[Json]) -> Result<Json, Error> {
         ctx.consume_work()?;
         let op = text(v, 0)?;
         let id = number(v, 1)?;
         let instance = ctx.instance();
-        if matches!(op, "resolve" | "assign" | "scopeMode") {
+        if matches!(op, "resolve" | "assign" | "scopeMode" | "bindScope") {
             let scope = self
                 .tables
                 .borrow()
@@ -189,6 +202,7 @@ impl Realm {
                     ctx.assign(name, value)?;
                     Ok(Json::Null)
                 }
+                "bindScope" => self.install_binding(ctx, None, name, field(v, 3)?),
                 "scopeMode" => Ok(json!(mode(ctx.name_type(name)))),
                 _ => {
                     if let Some(value) = ctx.resolve(name)? {
@@ -212,6 +226,14 @@ impl Realm {
                 }
                 let result = ctx.read_member(&value, name)?;
                 self.encode(instance, &result)
+            }
+            "bind" => {
+                let Value::Object(object) = value else {
+                    return Err(Error::new(
+                        "Qt.binding requires a writable QML object property",
+                    ));
+                };
+                self.install_binding(ctx, Some(object), text(v, 2)?, field(v, 3)?)
             }
             "set" => {
                 let input = self.decode(ctx, field(v, 3)?)?;
