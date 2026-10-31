@@ -139,61 +139,81 @@
         });
         scopes.set(c.scope,scope); return scope;
     }
-    function release(c){
-            for(const id of c.dropScopes || []) scopes.delete(id);
-            for(const id of c.dropHosts || []) proxies.delete(id);
-            for(const id of c.release || []) {
-                const value=objects.get(id);
-                if(typeof value === "bigint"||typeof value === "symbol") atoms.delete(value);
-                objects.delete(id);
-            }
+    function release(command) {
+        for (const id of command.dropScopes || []) scopes.delete(id);
+        for (const id of command.dropHosts || []) proxies.delete(id);
+        for (const id of command.release || []) {
+            const value = objects.get(id);
+            if (typeof value === "bigint" || typeof value === "symbol") atoms.delete(value);
+            objects.delete(id);
+        }
     }
-    function execute(c) {
+
+    function functionFactory(script, parameters) {
+        const key = JSON.stringify([script.source, script.form, script.origin, parameters, script.hook]);
+        if (functions.has(key)) return functions.get(key);
+
+        // Validate names even for IR assembled directly by the application.
+        const identifier = /^[$_\p{ID_Start}][$\u200c\u200d_\p{ID_Continue}]*$/u;
+        const helpers = script.hook ? [script.hook] : [];
+        if (script.form === "block") helpers.push("eval");
+        if (![...parameters, ...helpers].every(name => identifier.test(name))) {
+            throw new SyntaxError("Invalid QML parameter");
+        }
+
+        let body = script.source;
+        if (script.form === "expr") {
+            body = "return (\n" + body + "\n);";
+        } else if (script.form === "block") {
+            // Direct eval preserves the completion value of branches, loops and finally.
+            body = "return eval(" + JSON.stringify(body) + ");";
+        }
+        let factory = "function(" + parameters.join(",") + "){\n" + body + "\n}";
+        if (helpers.length) {
+            // Closures can capture helpers without exposing them in arguments.
+            factory = "function(" + helpers.join(",") + "){return " + factory + "}";
+        }
+        const origin = script.origin.replace(/[\n\r\u2028\u2029]/g, "");
+        const compiled = Function("with(arguments[0]){return " + factory + "}\n//# sourceURL=" + origin);
+        if (functions.size >= 4096) functions.delete(functions.keys().next().value);
+        functions.set(key, compiled);
+        return compiled;
+    }
+
+    function evaluate(script) {
+        const parameters = script.parameters || Object.keys(script.args);
+        const factory = functionFactory(script, parameters);
+        let invoke = factory(environment(script));
+        const helpers = [];
+        if (script.hook) helpers.push(modules.context(script.graph, script.origin));
+        if (script.form === "block") helpers.push(intrinsicEval);
+        if (helpers.length) invoke = invoke(...helpers);
+        return Reflect.apply(invoke, decode(script.owner), parameters.map(name => decode(script.args[name])));
+    }
+
+    function perform(command) {
+        if (command.op === "eval") return evaluate(command);
+        const target = decode(command.target);
+        switch (command.op) {
+            case "get": return target[command.name];
+            case "set":
+                target[command.name] = decode(command.value);
+                return undefined;
+            case "call": return Reflect.apply(target, decode(command.receiver), command.args.map(decode));
+            default: throw new Error("Invalid WebScene operation");
+        }
+    }
+
+    function execute(command) {
         activeCalls++;
         try {
-            release(c);
-            let result;
-            if(c.op==="eval"){
-                const args=c.parameters || Object.keys(c.args);
-                // Names originate in QML method/signal declarations, but user-
-                // assembled IR must not turn an argument name into executable text.
-                if([...args,...(c.hook?[c.hook]:[])].some(k=>!/^[$_\p{ID_Start}][$\u200c\u200d_\p{ID_Continue}]*$/u.test(k)))
-                    throw new SyntaxError("Invalid QML parameter");
-                const key=JSON.stringify([c.source,c.form,c.origin,args,c.hook]);
-                let factory=functions.get(key);
-                if(!factory){
-                    const origin=c.origin.replace(/[\n\r\u2028\u2029]/g,"");
-                    // Direct eval returns the block's ECMAScript completion
-                    // value, including branch/loop/finally completions.
-                    const body=c.form==="expr" ? "return (\n"+c.source+"\n);"
-                        : c.form==="block" ? "return eval("+JSON.stringify(c.source)+");" : c.source;
-                    const fn="function("+args.join(",")+"){\n"+body+"\n}";
-                    // Bind the generated import helper outside user parameters.
-                    // Closures retain it, and it never appears in arguments.
-                    const bindings=[...(c.hook?[c.hook]:[]),...(c.form==="block"?["eval"]:[])];
-                    const scoped=bindings.length?"function("+bindings.join(",")+"){return "+fn+"}":fn;
-                    factory=Function("with(arguments[0]){return "+scoped+"}\n//# sourceURL="+origin);
-                    if(functions.size>=4096)functions.delete(functions.keys().next().value);
-                    functions.set(key,factory);
-                }
-                let invoke=factory(environment(c));
-                const bindings=[];
-                if(c.hook) bindings.push(modules.context(c.graph,c.origin));
-                if(c.form==="block") bindings.push(intrinsicEval);
-                if(bindings.length) invoke=invoke(...bindings);
-                result=invoke.apply(decode(c.owner),args.map(k=>decode(c.args[k])));
-            }else{
-                const value=decode(c.target);
-                switch(c.op){
-                    case "get": result=value[c.name];break;
-                    case "set": value[c.name]=decode(c.value);break;
-                    case "call": result=Reflect.apply(value,decode(c.receiver),c.args.map(decode));break;
-                    default:throw new Error("Invalid WebScene operation");
-                }
-            }
-            return {ok:encode(result,c.mode)};
-        }catch(e){return {error:String(e?.stack||e)};}
-        finally{activeCalls--;}
+            release(command);
+            return {ok: encode(perform(command), command.mode)};
+        } catch (error) {
+            return {error: String(error?.stack || error)};
+        } finally {
+            activeCalls--;
+        }
     }
     return Object.freeze({
         prepare(key,graph){authorize(key);
