@@ -20,7 +20,7 @@ upstream = "Avalonia.Platform.Internal.IAssetDescriptor"
 rust = "ferroui_base::platform::internal::EmbeddedAssetDescriptor"
 kind = "trait"
 phase = "C1"
-pull = PRNUM
+pull = 452
 behaviour = "same"
 notes = "Upstream has two implementations (embedded resources and assets by path); the port has had one type for both since the port of the asset loader."
 
@@ -29,7 +29,7 @@ upstream = "Avalonia.Headless.IHeadlessWindow"
 rust = "ferroui_headless::headless_window_impl::HeadlessWindowImpl"
 kind = "trait"
 phase = "C1"
-pull = PRNUM
+pull = 452
 behaviour = "same"
 
 [[name]]
@@ -37,7 +37,7 @@ upstream = "Avalonia.Skia.IGlSkiaFboProvider"
 rust = "ferroui_skia::GlSkiaExternalObjectsFeature"
 kind = "trait"
 phase = "C1"
-pull = PRNUM
+pull = 452
 behaviour = "same"
 notes = "`Fbo` is the private method `fbo` of the feature."
 
@@ -46,7 +46,7 @@ upstream = "Avalonia.DesignerSupport.Remote.ITransportWithEnforcedMethod"
 rust = "ferroui_designer_support::remote::file_watcher_transport::FileWatcherTransport"
 kind = "trait"
 phase = "C1"
-pull = PRNUM
+pull = 452
 behaviour = "same"
 
 [[name]]
@@ -54,7 +54,7 @@ upstream = "DynamicData.Experimental.ISubjectWithRefCount`1"
 rust = "ferroui_dynamic_data::experimental::SubjectWithRefCount"
 kind = "trait"
 phase = "C1"
-pull = PRNUM
+pull = 452
 behaviour = "same"
 
 [[name]]
@@ -62,7 +62,7 @@ upstream = "Dock.Avalonia.Internal.IGlobalDockingService"
 rust = "ferrodock_ferro::internal::services::global_docking_service::GlobalDockingService"
 kind = "trait"
 phase = "C1"
-pull = PRNUM
+pull = 452
 behaviour = "same"
 
 [[name]]
@@ -70,5 +70,5 @@ upstream = "Dock.Avalonia.Services.IDockControlFactoryService"
 rust = "ferrodock_ferro::services::DockControlFactoryService"
 kind = "trait"
 phase = "C1"
-pull = PRNUM
+pull = 452
 behaviour = "same"
