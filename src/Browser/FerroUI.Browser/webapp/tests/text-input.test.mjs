@@ -38,6 +38,11 @@ function setup(t, { handled = false } = {}) {
         InputHelper_OnCompositionStart: record("compositionstart"),
         InputHelper_OnCompositionUpdate: record("compositionupdate"),
         InputHelper_OnCompositionEnd: record("compositionend"),
+        InputHelper_OnConnectionBeforeInput: (...args) => { record("connection beforeinput")(...args); return 5; },
+        InputHelper_OnConnectionInput: record("connection input"),
+        InputHelper_OnConnectionCompositionStart: (...args) => { record("connection compositionstart")(...args); return 9; },
+        InputHelper_OnConnectionCompositionUpdate: record("connection compositionupdate"),
+        InputHelper_OnConnectionCompositionEnd: record("connection compositionend"),
         InputHelper_OnKeyDown: (...args) => { record("keydown")(...args); return handled; },
         InputHelper_OnKeyUp: (...args) => { record("keyup")(...args); return handled; },
     });
@@ -168,4 +173,63 @@ test("unsubscribe removes every text event callback and permits a fresh subscrip
     t.after(InputHelper.subscribeTextEvents(element, 23));
     element.dispatchEvent(insertion("Ω"));
     assert.deepEqual(calls, [["text", 23, "Ω"]]);
+});
+
+// The textarea of a client of the exact-edit connection (docs/porting/browser-platform.md,
+// section 14) sits in the same view, so its events bubble to the view's listeners too.
+function textarea() {
+    return Object.assign(new EventTarget(), {
+        value: "", selectionStart: 0, selectionEnd: 0, selectionDirection: "none",
+        classList: { contains: (name) => name === "ferroui-text-input-element" },
+        setSelectionRange(start, end, direction) {
+            this.selectionStart = start; this.selectionEnd = end; this.selectionDirection = direction;
+        },
+    });
+}
+function bubbled(type, target, fields = {}) {
+    const bubbledEvent = event(type, fields);
+    Object.defineProperty(bubbledEvent, "target", { value: target });
+    return bubbledEvent;
+}
+
+test("events of the connection textarea never reach the path of the input element", (t) => {
+    const { element, calls } = setup(t);
+    const input = textarea();
+    element.dispatchEvent(bubbled("compositionstart", input, { data: "" }));
+    element.dispatchEvent(bubbled("compositionupdate", input, { data: "か" }));
+    element.dispatchEvent(bubbled("beforeinput", input, { inputType: "insertText", getTargetRanges: () => [] }));
+    element.dispatchEvent(bubbled("input", input, { inputType: "insertText", data: "x", isComposing: false }));
+    const end = bubbled("compositionend", input, { data: "か" });
+    element.dispatchEvent(end);
+    assert.deepEqual(calls, []);
+    assert.equal(end.defaultPrevented, false, "the connection protocol decides about its own composition end");
+});
+
+test("the view subscribes the textarea to the connection protocol and leaves the input element to the original path", (t) => {
+    const calls = [];
+    const record = (name) => (...args) => { calls.push([name, ...args]); };
+    FerroExports.attach({
+        InputHelper_OnTextInput: record("text"),
+        InputHelper_OnConnectionBeforeInput: (...args) => { record("connection beforeinput")(...args); return 5; },
+        InputHelper_OnConnectionInput: record("connection input"),
+    });
+    const input = textarea();
+    const host = Object.assign(new EventTarget(), {
+        querySelector: (selector) => selector === ":scope > .ferroui-text-input-element" ? input : null,
+    });
+    t.after(InputHelper.subscribeTextEvents(host, 31));
+    InputHelper.setTextInputState(Object.assign(input, { style: {}, scrollWidth: 40 }), "ab", 2, 2, 7);
+    assert.equal(input.style.width, "40px");
+
+    input.dispatchEvent(event("beforeinput", { inputType: "insertText", isComposing: false }));
+    input.value = "abc";
+    input.selectionStart = input.selectionEnd = 3;
+    input.dispatchEvent(event("input", { inputType: "insertText", data: "c", isComposing: false }));
+    host.dispatchEvent(insertion("legacy"));
+    assert.deepEqual(calls, [
+        ["connection beforeinput", 31, 7, "insertText", "ab", 2, 2],
+        ["connection input", 31, 7, 5, "insertText", "abc", 3, 3],
+        ["text", 31, "legacy"],
+    ]);
+    assert.equal(InputHelper.getTextInputElement({ parentElement: host }), input);
 });

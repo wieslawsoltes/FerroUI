@@ -117,6 +117,12 @@ export class FerroExports {
             OnCompositionStart: "InputHelper_OnCompositionStart",
             OnCompositionUpdate: "InputHelper_OnCompositionUpdate",
             OnCompositionEnd: "InputHelper_OnCompositionEnd",
+            // Not in the original: the textarea of a connection client (textInput.ts).
+            OnConnectionBeforeInput: "InputHelper_OnConnectionBeforeInput",
+            OnConnectionInput: "InputHelper_OnConnectionInput",
+            OnConnectionCompositionStart: "InputHelper_OnConnectionCompositionStart",
+            OnConnectionCompositionUpdate: "InputHelper_OnConnectionCompositionUpdate",
+            OnConnectionCompositionEnd: "InputHelper_OnConnectionCompositionEnd",
             OnPointerMove: "InputHelper_OnPointerMove",
             OnPointerDown: "InputHelper_OnPointerDown",
             OnPointerUp: "InputHelper_OnPointerUp",

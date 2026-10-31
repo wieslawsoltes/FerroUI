@@ -1,6 +1,8 @@
 import { CaretHelper } from "./caretHelper";
 import { FerroExports } from "./ferroExports";
 import { StorageItem } from "../storage/storageItem";
+import { applyTextInputOptions } from "./inputOptions";
+import { setTextInputState as writeTextInputState, subscribeTextInput, TextInputElement } from "./textInput";
 
 enum RawInputModifiers {
     None = 0,
@@ -82,6 +84,11 @@ type ReadableDataValue = {
 // milliseconds since the browser raised the event. The page handles input between the frames it
 // draws, and a frame that takes long made a moving finger look as if it had stopped.
 const eventAge = (args: Event): number => performance.now() - args.timeStamp;
+
+// Not in the original: the hidden textarea of a client of the exact-edit connection (dom.ts).
+const textInputElementClass = "ferroui-text-input-element";
+const isTextInputElement = (target: EventTarget | null): boolean =>
+    (target as Element | null)?.classList?.contains(textInputElementClass) === true;
 
 export class InputHelper {
     static clipboardState: ClipboardState = ClipboardState.None;
@@ -495,7 +502,10 @@ export class InputHelper {
         };
         this.textInputResets.set(element, resetComposition);
 
+        // Not in the original: the events of the textarea of a connection client bubble here too.
+        // They belong to its own protocol (subscribeConnectionTextEvents), never to this path.
         const compositionStartHandler = (args: CompositionEvent) => {
+            if (isTextInputElement(args.target)) return;
             clearCompositionCommit();
             composing = true;
             FerroExports.InputHelper?.OnCompositionStart(topLevelId);
@@ -503,6 +513,7 @@ export class InputHelper {
         element.addEventListener("compositionstart", compositionStartHandler);
 
         const beforeInputHandler = (args: InputEvent) => {
+            if (isTextInputElement(args.target)) return;
             const ranges = args.getTargetRanges();
             let start = -1;
             let end = -1;
@@ -526,6 +537,7 @@ export class InputHelper {
         // insertion, never the input's potentially stale surrounding value.
         const inputHandler = (event: Event) => {
             const args = event as InputEvent;
+            if (isTextInputElement(args.target)) return;
             if (typeof args.inputType !== "string" || composing || args.isComposing || args.inputType.includes("Composition")) {
                 return;
             }
@@ -538,7 +550,7 @@ export class InputHelper {
         element.addEventListener("input", inputHandler);
 
         const textKeyDownHandler = (args: KeyboardEvent) => {
-            if (!args.isComposing) {
+            if (!args.isComposing && !isTextInputElement(args.target)) {
                 clearCompositionCommit();
             }
         };
@@ -546,13 +558,14 @@ export class InputHelper {
         element.addEventListener("blur", clearCompositionCommit);
 
         const compositionUpdateHandler = (args: CompositionEvent) => {
-            if (composing) {
+            if (composing && !isTextInputElement(args.target)) {
                 FerroExports.InputHelper?.OnCompositionUpdate(topLevelId, args.data);
             }
         };
         element.addEventListener("compositionupdate", compositionUpdateHandler);
 
         const compositionEndHandler = (args: CompositionEvent) => {
+            if (isTextInputElement(args.target)) return;
             const wasComposing = composing;
             composing = false;
             clearCompositionCommit();
@@ -572,7 +585,11 @@ export class InputHelper {
         };
         element.addEventListener("compositionend", compositionEndHandler);
 
+        const textInput = element.querySelector?.<TextInputElement>(`:scope > .${textInputElementClass}`) ?? null;
+        const textInputSub = textInput ? this.subscribeConnectionTextEvents(textInput, topLevelId) : () => { };
+
         return () => {
+            textInputSub();
             clearCompositionCommit();
             if (this.textInputResets.get(element) === resetComposition) {
                 this.textInputResets.delete(element);
@@ -586,6 +603,25 @@ export class InputHelper {
             element.removeEventListener("compositionupdate", compositionUpdateHandler);
             element.removeEventListener("compositionend", compositionEndHandler);
         };
+    }
+
+    // Not in the original: the protocol of the textarea of a client of the exact-edit connection
+    // (textInput.ts; docs/porting/browser-platform.md, section 14).
+    public static subscribeConnectionTextEvents(input: TextInputElement, topLevelId: number) {
+        return subscribeTextInput(input, {
+            beforeInput: (revision, type, value, anchor, active) =>
+                FerroExports.InputHelper?.OnConnectionBeforeInput(topLevelId, revision, type, value, anchor, active) ?? 0,
+            input: (revision, token, type, value, anchor, active) =>
+                FerroExports.InputHelper?.OnConnectionInput(topLevelId, revision, token, type, value, anchor, active),
+            compositionStart: (revision, value, anchor, active) =>
+                FerroExports.InputHelper?.OnConnectionCompositionStart(topLevelId, revision, value, anchor, active) ?? 0,
+            compositionUpdate: (token, data) =>
+                FerroExports.InputHelper?.OnConnectionCompositionUpdate(topLevelId, token, data),
+            compositionEnd: (token, data, value, anchor, active) =>
+                FerroExports.InputHelper?.OnConnectionCompositionEnd(topLevelId, token, data, value, anchor, active),
+            // A read of the clipboard through the paste event (see ClipboardState) takes the paste.
+            ownsPaste: () => this.clipboardState === ClipboardState.Pending
+        });
     }
 
     public static subscribePointerEvents(
@@ -778,6 +814,30 @@ export class InputHelper {
             }
         }
         inputElement.value = "";
+    }
+
+    // Not in the original: the textarea of a connection client beside the input element.
+    public static getTextInputElement(inputElement: HTMLElement): TextInputElement | null {
+        return inputElement.parentElement?.querySelector<TextInputElement>(`:scope > .${textInputElementClass}`) ?? null;
+    }
+
+    public static clearTextInput(input: TextInputElement, revision: number) {
+        writeTextInputState(input, "", 0, 0, revision);
+    }
+
+    public static setTextInputState(input: TextInputElement, text: string, anchor: number, active: number, revision: number) {
+        if (!input) {
+            return;
+        }
+
+        writeTextInputState(input, text, anchor, active, revision);
+        input.style.width = "20px";
+        input.style.width = `${input.scrollWidth}px`;
+    }
+
+    public static setInputOptions(input: TextInputElement, inputMode: string, enterKeyHint: string,
+        capitalization: string, suggestions: boolean, sensitive: boolean, language: string): void {
+        applyTextInputOptions(input, inputMode, enterKeyHint, capitalization, suggestions, sensitive, language);
     }
 
     public static focusElement(inputElement: HTMLElement) {
