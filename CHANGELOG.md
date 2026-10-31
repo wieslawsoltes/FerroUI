@@ -4,8 +4,13 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ## [Unreleased]
 
+### Added
+
+- **Idiomatic Rust inventory and rules** (C0 of #423): `scripts/idioms/inventory.py` counts, per crate and exactly, the .NET-shaped types and mechanisms of the Rust sources (`I...` traits, `IDisposable`, `...Exception` types, `TimeSpan`, `DateTime`, `CultureInfo`, `Uri`, `Guid`, `Dictionary`, `Task`, `CancellationToken`, `EventArgs`, `INotifyPropertyChanged`, `ObservableCollection`), skipping comments, literals and generated files. Its `--check`, in the Source conventions job of CI, fails on a new declaration of a `...Exception` type or of a port of a `System.*` type beyond `scripts/idioms/baseline.json`. [docs/idiomatic-rust.md](docs/idiomatic-rust.md) holds the naming rules (the control API keeps its .NET names), the type replacement table, the deprecation policy for 0.5 and the format of the upstream-name map.
+
 ### Changed
 
+- **One identifier type, `uuid`** (C1 of #423, [docs/idiomatic-rust.md](docs/idiomatic-rust.md)): the `Guid` of `ferroui-splat` and of `ferroui-remote-protocol` hold a `uuid::Uuid`, the COM `Guid` of `ferroui-microcom` keeps its layout, and all three convert to and from `uuid::Uuid` with `From`. Parsing, formatting, the .NET byte layout and new random identifiers (`Uuid::new_v4`, from the system's generator) come from `uuid`, which replaces the copies of that code in the ReactiveUI converters, the designer support, the D-Bus menu exporter and the DynamicData tests. `ferroui_microcom::Guid::parse` now rejects misplaced hyphens and unpaired braces, as `Guid.Parse` does. No public signature changes.
 - **Porting guide: .NET names, Rust types** ([docs/porting/PORTING-GUIDE.md](docs/porting/PORTING-GUIDE.md), #423): the rules of the owner for every port and the 0.5 cleanup. Control, member, event and interface names stay close to .NET and XAML names never change; types and mechanisms are idiomatic Rust and std (`Duration`, std collections, `Result` with `...Error` types, futures, `Drop`/RAII; `url`, ICU4X and `uuid` where std has nothing); no new ports of `System.*` types; replaced types stay one release as deprecated aliases; behaviour changes are recorded with tests. The type table, the worker rules and the application conventions follow them. A ground rule that every rendering feature has a proper, validated GPU implementation in every rendering backend (Skia and Vello): no per-frame CPU rasterization, readback or texture upload of unchanged content, effect graphs compiled once into cached GPU programs with uniforms for what animates, CPU code only as the tested reference and the fallback of surfaces without a GPU.
 
 ## [0.4.0] - 2026-10-31

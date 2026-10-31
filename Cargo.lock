@@ -1765,6 +1765,7 @@ dependencies = [
  "ferroui-remote-protocol",
  "ferroui-skia",
  "ferroui-win32",
+ "uuid",
  "xamlx",
 ]
 
@@ -1781,6 +1782,7 @@ dependencies = [
  "ferroui-markup-xaml-loader",
  "ferroui-remote-protocol",
  "ferroui-themes-simple",
+ "uuid",
 ]
 
 [[package]]
@@ -1861,6 +1863,7 @@ dependencies = [
  "ferroui-reactive",
  "ferroui-reactive-testing",
  "ferroui-system",
+ "uuid",
 ]
 
 [[package]]
@@ -1880,6 +1883,7 @@ dependencies = [
  "ferroui-base",
  "ferroui-controls",
  "futures-util",
+ "uuid",
  "zbus",
 ]
 
@@ -2114,6 +2118,9 @@ dependencies = [
 [[package]]
 name = "ferroui-microcom"
 version = "0.4.0"
+dependencies = [
+ "uuid",
+]
 
 [[package]]
 name = "ferroui-native"
@@ -2267,6 +2274,7 @@ dependencies = [
  "ferroui-splat",
  "ferroui-system",
  "paste",
+ "uuid",
 ]
 
 [[package]]
@@ -2319,6 +2327,9 @@ dependencies = [
 [[package]]
 name = "ferroui-remote-protocol"
 version = "0.4.0"
+dependencies = [
+ "uuid",
+]
 
 [[package]]
 name = "ferroui-render-backends-comparison"
@@ -2376,6 +2387,7 @@ name = "ferroui-splat"
 version = "0.4.0"
 dependencies = [
  "ferroui-system",
+ "uuid",
 ]
 
 [[package]]
