@@ -85,4 +85,28 @@ QtObject {
         let val = 0 ?? first.bump(500)
         return skipped + "/" + present + "/" + val + "/" + first.count
     }
+
+    property var recordValue: ({ inner: { n: 3 } })
+    property int recordReading: recordValue.inner.n
+
+    function recordIdentity(): string {
+        let before = recordReading
+        let same = recordValue
+        same.inner["n"] = 7
+        let stale = recordReading
+        let distinct = same === ({ inner: { n: 7 } })
+        recordValue = ({ inner: { n: 12 } })
+        return before + "/" + same.inner.n + "/" + stale + "/" + distinct + "/" + recordReading
+    }
+
+    function arrayIdentity(): string {
+        let data = [1, 2]
+        let alias = data
+        data.push(3)
+        alias[5] = 6
+        data.length = 4
+        let copied = data.slice(1)
+        let last = copied.pop()
+        return (alias === data) + "/" + (copied === data) + "/" + data.join(",") + "/" + copied.join(":") + "/" + last
+    }
 }

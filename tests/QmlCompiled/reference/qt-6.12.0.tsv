@@ -5,3 +5,5 @@ componentScope	14/22/14
 localFlow	16
 lazyEval	false/true/0/7
 propertyNotifications	3/8
+recordIdentity	3/7/3/false/12
+arrayIdentity	true/false/1,2,3,/2/3

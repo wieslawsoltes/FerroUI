@@ -94,9 +94,22 @@ pub(super) fn emit(expr: &Expr) -> Result<TokenStream, String> {
         Expr::String(value) => quote!(V::String(String::from(#value))),
         Expr::Name(ident) => quote!(frame.name(#ident,None)?),
         Expr::ScopedName { name, root } => quote!(frame.name(#name,Some(#root))?),
+        Expr::Record(fields) => {
+            let pairs = fields
+                .iter()
+                .map(|(name, value)| {
+                    let value = emit(value)?;
+                    Ok(quote!((String::from(#name),#value)))
+                })
+                .collect::<Result<Vec<_>, String>>()?;
+            quote!({let fields=std::collections::BTreeMap::from([#(#pairs),*]);frame.record(fields)})
+        }
         Expr::Array(items) => {
             let items = items.iter().map(emit).collect::<Result<Vec<_>, _>>()?;
-            quote!(V::List(vec![#(#items),*]))
+            quote!({
+                let items = vec![#(#items),*];
+                frame.array(items)
+            })
         }
         Expr::Conditional(test, yes, no) => {
             let (test, yes, no) = (emit(test)?, emit(yes)?, emit(no)?);
@@ -116,7 +129,7 @@ pub(super) fn emit(expr: &Expr) -> Result<TokenStream, String> {
         }
         Expr::Unary(op, value) => {
             let value = emit(value)?;
-            quote!(c::unary(#op,#value)?)
+            quote!({let v=#value;frame.unary(#op,v)?})
         }
         Expr::Binary(op, left, right) => {
             let (left, right) = (emit(left)?, emit(right)?);
@@ -126,7 +139,7 @@ pub(super) fn emit(expr: &Expr) -> Result<TokenStream, String> {
                 "??" => {
                     quote!({ let a=#left; if matches!(a,V::Null|V::Undefined) { #right } else { a } })
                 }
-                _ => quote!(c::binary(#op,#left,#right)?),
+                _ => quote!({let a=#left; let b=#right; frame.binary(#op,a,b)?}),
             }
         }
         Expr::Call(callee, args) => {

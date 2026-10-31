@@ -940,7 +940,8 @@ impl<'s> Parser<'s> {
             };
             let shorthand = matches!(self.token().kind,Kind::Ident(name) if !reserved(name));
             self.pos += 1;
-            let value = if self.eat(":") {
+            let explicit = self.eat(":");
+            let value = if explicit {
                 self.expr_bp(0)?
             } else if shorthand {
                 Node::leaf(Expr::Name(key.clone()))
@@ -949,7 +950,7 @@ impl<'s> Parser<'s> {
             };
             // Prototype mutation requires an ECMAScript prototype chain; rejecting
             // this spelling avoids treating it as an ordinary data property.
-            if key == "__proto__" && !matches!(&value.expr,Expr::Name(n) if n==&key) {
+            if key == "__proto__" && explicit {
                 return Err(self.error("object prototype initializers are unsupported"));
             }
             depth = depth.max(value.depth + 1);
