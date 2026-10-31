@@ -76,11 +76,11 @@ impl IRenderTarget for SkiaGpuRenderTarget {
 
         let gr_context = session.gr_context();
         let mut context = DrawingContextImpl::new(nfo, vec![Box::new(move || session.dispose())]);
-        // The programs of the runtime effects are made a stage a frame from
-        // the second frame of a GPU context on, not with the frame that
-        // first needs them.
-        if let Some(stage) = prewarm_stage(&gr_context) {
-            context.prewarm_runtime_effects_stage(stage);
+        // The programs of the runtime effects are made with the second frame
+        // of a GPU context (the first paint is not delayed), not with the
+        // frame that first needs them.
+        if prewarm_frame(&gr_context) {
+            context.prewarm_runtime_effects();
         }
 
         Ok((Box::new(context), RenderTargetDrawingContextProperties::default()))
@@ -101,11 +101,13 @@ ferroui_base::ferro_thread_local! {
         std::cell::RefCell::new(Vec::new());
 }
 
-/// The stage of the prewarm of the runtime effects the frame of
-/// `gr_context` that is beginning runs: none on its first frame (the first
-/// paint of the application is not delayed), stage `n - 1` on its frame
-/// `n`, none once every stage ran.
-pub(crate) fn prewarm_stage(gr_context: &Rc<dyn super::ISkiaGrContext>) -> Option<usize> {
+/// Whether the frame of `gr_context` that is beginning is the one that
+/// prewarms the runtime effects: its second frame. The first paint of the
+/// application is not delayed, and an application draws its next frames
+/// while it starts (what it loads, its animations), before a user scrolls.
+/// Rendered frames are the only time a render target has: a frame drawn
+/// only to prewarm would need the compositor to ask for it.
+pub(crate) fn prewarm_frame(gr_context: &Rc<dyn super::ISkiaGrContext>) -> bool {
     FRAMES.with(|frames| {
         let mut frames = frames.borrow_mut();
         frames.retain(|(context, _)| context.strong_count() > 0);
@@ -118,7 +120,7 @@ pub(crate) fn prewarm_stage(gr_context: &Rc<dyn super::ISkiaGrContext>) -> Optio
         };
         let frame = frames[index].1;
         frames[index].1 = frame.saturating_add(1);
-        (1..=DrawingContextImpl::PREWARM_STAGES).contains(&frame).then(|| frame - 1)
+        frame == 1
     })
 }
 
@@ -155,17 +157,13 @@ mod tests {
     }
 
     #[test]
-    fn the_prewarm_runs_a_stage_a_frame_from_the_second_frame_of_a_context() {
+    fn the_prewarm_runs_with_the_second_frame_of_a_context() {
         let context: Rc<dyn ISkiaGrContext> = Rc::new(NoContext);
         let other: Rc<dyn ISkiaGrContext> = Rc::new(NoContext);
-        let stages: Vec<_> = (0..DrawingContextImpl::PREWARM_STAGES + 3).map(|_| prewarm_stage(&context)).collect();
-        assert_eq!(None, stages[0], "the first paint is not delayed");
-        for (stage, scheduled) in stages[1..=DrawingContextImpl::PREWARM_STAGES].iter().enumerate() {
-            assert_eq!(Some(stage), *scheduled);
-        }
-        assert!(stages[DrawingContextImpl::PREWARM_STAGES + 1..].iter().all(Option::is_none));
-        // Each context has stages of its own.
-        assert_eq!(None, prewarm_stage(&other));
-        assert_eq!(Some(0), prewarm_stage(&other));
+        let frames: Vec<_> = (0..5).map(|_| prewarm_frame(&context)).collect();
+        assert_eq!(vec![false, true, false, false, false], frames, "not the first paint, once");
+        // Each context prewarms its own programs.
+        assert!(!prewarm_frame(&other));
+        assert!(prewarm_frame(&other));
     }
 }

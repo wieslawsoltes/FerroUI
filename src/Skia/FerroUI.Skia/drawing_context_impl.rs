@@ -2156,9 +2156,8 @@ impl DrawingContextImpl {
     /// of the target, cleared to transparent afterwards. The stages are the
     /// lighting, the multiply layer of the lights, a coverage clip (a rounded
     /// clip inside another) over a fill, a rounded fill, a circle and an
-    /// image, and each pixel operation. A GPU render target runs one stage a
-    /// frame from its second frame on, so neither the first frame nor an
-    /// interactive one waits for them all.
+    /// image, and each pixel operation. A GPU render target runs them all
+    /// with its second frame (`skia_gpu_render_target::prewarm_frame`).
     pub(crate) fn prewarm_runtime_effects_stage(&mut self, stage: usize) {
         use ferroui_base::media::immutable::ImmutableSolidColorBrush;
         use ferroui_base::platform::{IDrawingContextImplWithLayerEffects, LightingParameters, PixelOperation, PositionedLight};
