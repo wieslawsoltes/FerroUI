@@ -74,10 +74,18 @@ cargo run --locked -p ferroui-qml-build --bin ferroui-qmlc -- samples/QmlGallery
 
 ## Modern JavaScript with WebScene V8
 
-Enable `javascript` on the build helper and use `ferroui-qml-webscene` in the application. The published WebScene 1.0.37 native package contains V8 15.3.10 and ABI 3. The gallery can run the same native controls with either execution backend.
+Enable `javascript` on the build helper and use `ferroui-qml-webscene` in the application. The published WebScene 1.0.37 native package contains V8 15.3.10 and ABI 3. The gallery can run the same native controls with either execution backend. Use Python 3.11 or newer for the package verification step. On Linux and macOS, run the following from the workspace root.
 
 ```sh
 export FERROUI_WEBSCENE_LIBRARY="$(python3 scripts/qml/webscene-runtime.py target/webscene-runtime)"
+cargo build --locked -p ferroui-qml-webscene --bin ferroui-qml-webscene-worker
+cargo run --locked -p qml-gallery --features webscene
+```
+
+On Windows, run these commands in PowerShell.
+
+```powershell
+$env:FERROUI_WEBSCENE_LIBRARY = python scripts/qml/webscene-runtime.py target/webscene-runtime
 cargo build --locked -p ferroui-qml-webscene --bin ferroui-qml-webscene-worker
 cargo run --locked -p qml-gallery --features webscene
 ```
