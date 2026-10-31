@@ -657,51 +657,6 @@ pub trait IServerCompositionLight {
     }
 }
 
-crate::ferro_thread_local! {
-    /// The server-side lights of this (render) thread: what the render walk
-    /// asks which lights reach a visual.
-    static LIGHTS: RefCell<Vec<Weak<dyn IServerCompositionLight>>> = RefCell::new(Vec::new());
-}
-
-fn register_light(light: Weak<dyn IServerCompositionLight>) {
-    LIGHTS.with(|lights| {
-        let mut lights = lights.borrow_mut();
-        lights.retain(|light| light.strong_count() > 0);
-        lights.push(light);
-    });
-}
-
-/// The lights of this thread that are alive, not disposed and enabled.
-fn enabled_lights() -> Vec<Rc<dyn IServerCompositionLight>> {
-    LIGHTS
-        .try_with(|lights| {
-            lights.try_borrow().map_or_else(
-                |_| Vec::new(),
-                |lights| {
-                    lights
-                        .iter()
-                        .filter_map(Weak::upgrade)
-                        .filter(|light| !light.is_disposed() && light.light_props().is_enabled())
-                        .collect()
-                },
-            )
-        })
-        .unwrap_or_default()
-}
-
-/// The lights of this thread that are alive and not disposed, enabled or
-/// not.
-fn live_lights() -> Vec<Rc<dyn IServerCompositionLight>> {
-    LIGHTS
-        .try_with(|lights| {
-            lights.try_borrow().map_or_else(
-                |_| Vec::new(),
-                |lights| lights.iter().filter_map(Weak::upgrade).filter(|light| !light.is_disposed()).collect(),
-            )
-        })
-        .unwrap_or_default()
-}
-
 /// The transform from the coordinates of `visual` to those of the root of
 /// its tree: its own transform and those of its ancestors.
 fn to_root(visual: &ServerCompositionVisual) -> Matrix {
@@ -724,7 +679,7 @@ fn to_root(visual: &ServerCompositionVisual) -> Matrix {
 /// The lights that reach `visual`, as a light map in the coordinates of the
 /// visual; `None` when no enabled light reaches it.
 pub fn light_map_of(visual: &ServerCompositionVisual) -> Option<LightMap> {
-    let lights = enabled_lights();
+    let lights: Vec<_> = visual.compositor()?.live_lights().into_iter().filter(|light| light.light_props().is_enabled()).collect();
     if lights.is_empty() {
         return None;
     }
@@ -746,9 +701,9 @@ pub fn light_map_of(visual: &ServerCompositionVisual) -> Option<LightMap> {
 /// position of such a light moved with its space. Called by the composition
 /// targets after their update; returns whether a light drew something
 /// again, so the target collects the dirty areas once more.
-pub fn invalidate_lights_with_moved_spaces() -> bool {
+pub fn invalidate_lights_with_moved_spaces(compositor: &ServerCompositor) -> bool {
     let mut invalidated = false;
-    for light in live_lights() {
+    for light in compositor.live_lights() {
         let current = light.coordinate_space().map(|space| to_root(&space));
         let state = light.light_state();
         let previous = state.space_transform.replace(current);
@@ -820,7 +775,9 @@ impl ServerLightState {
         let observer: Rc<dyn IServerRenderResourceObserver> = Rc::new(LightObserver { light: light.clone() });
         base.core().add_observer(&observer);
         *state.observer.borrow_mut() = Some(observer);
-        register_light(light);
+        if let Some(compositor) = base.object().compositor() {
+            compositor.register_light(light);
+        }
     }
 
     /// The id of the XAML light and the visual of the element that holds
@@ -919,9 +876,9 @@ macro_rules! server_light {
         }
 
         impl $name {
-            /// Creates the light, active and registered with the lights of
-            /// the thread: the UI-thread light activates its server object
-            /// when it is created.
+            /// Creates the light, active and registered with its compositor:
+            /// the UI-thread light activates its server object when it is
+            /// created.
             pub fn new(compositor: &Rc<ServerCompositor>) -> Rc<$name> {
                 let light = Rc::new_cyclic(|this: &Weak<$name>| $name {
                     base: ServerRenderResource::new(
@@ -1240,7 +1197,8 @@ impl LightMap {
 pub fn scene_light_map(visual: &Rc<ServerCompositionVisual>, brush_light_ids: &[String]) -> LightMap {
     let mut map = LightMap::new();
     let mut visual_to_root: Option<Matrix> = None;
-    for light in live_lights() {
+    let Some(compositor) = visual.compositor() else { return map };
+    for light in compositor.live_lights() {
         let space = if let Some(target) = light.target_of(visual) {
             light.coordinate_space().unwrap_or(target)
         } else if let Some((id, Some(scope))) = light.light_state().xaml_binding() {

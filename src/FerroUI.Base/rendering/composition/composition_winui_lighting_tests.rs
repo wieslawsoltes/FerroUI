@@ -64,6 +64,64 @@ fn sprite(s: &CompositorCanvas, width: f64, height: f64, brush: Option<Rc<Compos
 // --- COMPOSITION-01: lighting ----------------------------------------------------------
 
 #[test]
+fn scene_lights_remain_available_when_the_server_renders_on_another_thread() {
+    use crate::rendering::composition::server::{scene_light_map, ServerCompositionVisual};
+
+    let s = CompositorCanvas::new();
+    let lit = sprite(&s, 30.0, 20.0, color_brush(&s, Colors::BLUE));
+    let light = s.compositor.create_ambient_light();
+    light.set_xaml_binding(Some("reveal-test".to_owned()), Some((*lit).clone()));
+    show(&s, &lit);
+
+    let visual_id = lit.server();
+    let server = s.compositor.locked_server();
+    let has_light = move |server: &Rc<crate::rendering::composition::server::ServerCompositor>| {
+        let visual = server
+            .get_object(visual_id)
+            .unwrap()
+            .into_any_rc()
+            .downcast::<ServerCompositionVisual>()
+            .ok()
+            .unwrap();
+        !scene_light_map(&visual, &["reveal-test".to_owned()]).is_empty()
+    };
+    assert!(server.with(&has_light), "the creating thread sees the light");
+    assert!(
+        std::thread::spawn(move || server.with(has_light)).join().unwrap(),
+        "native render-thread frames must see lights created during a synchronous UI-thread frame"
+    );
+}
+
+#[test]
+fn targeted_lights_remain_available_when_the_server_renders_on_another_thread() {
+    use crate::rendering::composition::server::{light_map_of, ServerCompositionVisual};
+
+    let s = CompositorCanvas::new();
+    let lit = sprite(&s, 30.0, 20.0, color_brush(&s, Colors::BLUE));
+    let light = s.compositor.create_ambient_light();
+    light.targets().add((*lit).clone());
+    show(&s, &lit);
+
+    let visual_id = lit.server();
+    let server = s.compositor.locked_server();
+    assert!(
+        std::thread::spawn(move || server.with(|server| {
+            let visual = server
+                .get_object(visual_id)
+                .unwrap()
+                .into_any_rc()
+                .downcast::<ServerCompositionVisual>()
+                .ok()
+                .unwrap();
+            light_map_of(&visual).is_some()
+        }))
+        .join()
+        .unwrap(),
+        "targeted composition lights must follow the server compositor across threads"
+    );
+}
+
+#[test]
 fn lit_content_is_drawn_in_a_multiply_layer_of_the_light_map() {
     let s = CompositorCanvas::new();
     let light = s.compositor.create_ambient_light();
