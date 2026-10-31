@@ -223,6 +223,26 @@ impl TestConnections {
         self.service.send(&signal(self.service.inner(), SERVICE_UNIQUE_NAME, path, interface, name, body)).unwrap();
     }
 
+    /// Another connection (`new_owner`, a unique name) takes `name` over, without the name being
+    /// without an owner in between. Only the double of the bus can do this: on a bus it is
+    /// `false` and nothing happens.
+    pub(crate) fn replace_owner(&self, name: &str, new_owner: &str) -> bool {
+        let Some(owners) = &self.owners else {
+            return false;
+        };
+        let old_owner = owners.lock().unwrap().insert(name.to_string(), new_owner.to_string()).unwrap_or_default();
+        self.name_owner_changed(&(name, &old_owner, new_owner));
+        true
+    }
+
+    /// Emits a signal of a double as the connection `sender` (a unique name) sends it.
+    pub(crate) fn emit_as<B>(&self, sender: &str, path: &str, interface: &str, name: &str, body: &B)
+    where
+        B: zbus::export::serde::ser::Serialize + zbus::zvariant::DynamicType,
+    {
+        self.service.send(&signal(self.service.inner(), sender, path, interface, name, body)).unwrap();
+    }
+
     /// The signal of the double of the bus that the owner of a name changed.
     fn name_owner_changed(&self, body: &(&str, &str, &str)) {
         let message =
