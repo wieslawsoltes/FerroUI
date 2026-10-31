@@ -87,7 +87,8 @@ pub struct QrCandidate {
     pub byte_segments: Vec<Vec<u8>>,
     /// Full payload bytes only when an engine actually exposes them.
     pub payload_bytes: Option<Vec<u8>>,
-    /// Normalized camera-plane corners, without rotation/mirror applied twice.
+    /// Normalized corners in the published frame's unrotated texture plane;
+    /// presentation rotation/mirror is applied by the common geometry mapping.
     pub corners: [(f64, f64); 4],
     pub geometry: GeometryQuality,
 }

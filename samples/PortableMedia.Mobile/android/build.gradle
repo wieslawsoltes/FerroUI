@@ -16,7 +16,7 @@ android {
     compileOptions { sourceCompatibility JavaVersion.VERSION_11; targetCompatibility JavaVersion.VERSION_11 }
     sourceSets.main {
         manifest.srcFile 'AndroidManifest.xml'
-        java.srcDirs = [new File(ferroRoot, 'src/Android/FerroUI.Android/java')]
+        java.srcDirs = [new File(ferroRoot, 'src/Android/FerroUI.Android/java'), file('java')]
         jniLibs.srcDirs = [new File(layout.buildDirectory.get().asFile, 'native')]
     }
     packaging { jniLibs { useLegacyPackaging = false } }
@@ -24,6 +24,7 @@ android {
 apply from: new File(ferroRoot, 'src/FerroUI.Media.Android/packaging.gradle')
 apply from: new File(ferroRoot, 'src/FerroUI.Media.Video.Android/packaging.gradle')
 apply from: new File(ferroRoot, 'src/FerroUI.Media.Camera.Android/packaging.gradle')
+apply from: new File(ferroRoot, 'src/FerroUI.Media.Qr.Android/packaging.gradle')
 tasks.register('verifyRustLibrary') {
     doLast {
         if (!new File(ferroRoot, 'target/aarch64-linux-android/debug/libportable_media_mobile.so').isFile()) {

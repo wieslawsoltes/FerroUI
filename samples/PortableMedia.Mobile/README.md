@@ -3,7 +3,7 @@
 Independent iOS and Android integration of `FerroUI.Media`, `.Video`, `.Camera`
 and their separate controls/providers. The library defaults remain paused and
 camera acquisition is explicit. The sample's smoke launch enables playback.
-The Camera, JPEG, Stop and Detach buttons exercise camera ownership and cleanup.
+The Camera, JPEG, Stop, Detach and opt-in QR buttons exercise camera ownership and cleanup.
 JPEG output is decoded independently in memory with the Rust `image` crate.
 
 ## iOS
@@ -22,6 +22,11 @@ Replace `DEVICE` with a booted simulator identifier. The smoke result is also in
 `Documents/portable-media-report.txt` in the app's data container. Simulator
 camera discovery can return no devices; this does not verify physical capture.
 Device installation requires application signing and a provisioning profile.
+
+The iOS smoke also decodes an independent synthetic two-symbol QR fixture using
+Vision on retained CoreVideo input. Simulator analysis uses Vision revision 1
+with CPU compute; device builds retain the default revision. This tests native
+analysis without pretending that the simulator supplies a physical camera.
 
 ## Android
 
@@ -72,3 +77,11 @@ smoke pass does not establish camera capture, native accessibility, color and
 orientation conformance, physical audio output or profile performance.
 Additional device/runtime evidence is recorded separately in the media
 platform handover document.
+
+Optional Android QR packaging applies `FerroUI.Media.Qr.Android/packaging.gradle`.
+It selects the bundled `com.google.mlkit:barcode-scanning:17.3.0` artifact, with no
+runtime model download. The independent QR fixture is analysis-only CPU input;
+it never enters the preview route. The QR button separately enables CameraX
+native analysis, whose metadata statistics and preview transfer counters are
+recorded in the sample report. SDK-internal analysis copying remains opaque.
+The test fixtures contain only synthetic framework-specific text.

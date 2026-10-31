@@ -42,6 +42,29 @@ fn dimensions(value: &serde_json::Value) -> CameraFormat {
 pub struct AndroidCameraProvider {
     pub frames: Option<NativeGlFrameProducer>,
 }
+/// Narrow native analysis extension. A clone keeps its bridge object alive,
+/// while stopping/dropping the originating CameraSession still closes capture.
+#[derive(Clone)]
+pub struct AndroidCameraContext {
+    java: JavaObject,
+    source: u64,
+    generation: u64,
+    counters: FrameTransferCounters,
+}
+impl AndroidCameraContext {
+    pub fn java(&self) -> JavaObject {
+        self.java.clone()
+    }
+    pub fn source(&self) -> u64 {
+        self.source
+    }
+    pub fn generation(&self) -> u64 {
+        self.generation
+    }
+    pub fn counters(&self) -> FrameTransferCounters {
+        self.counters.clone()
+    }
+}
 impl CameraProvider for AndroidCameraProvider {
     fn devices(&self) -> CameraFuture<Vec<CameraDevice>> {
         let result = call_static_object(
@@ -142,8 +165,15 @@ impl CameraProvider for AndroidCameraProvider {
             )
             .to_global();
             let mut session = Some(Session {
+                context: AndroidCameraContext {
+                    java: java.clone(),
+                    source: id,
+                    generation,
+                    counters: budget.counters(),
+                },
                 java,
-                stream: AndroidFrameStream::new(frames, source, id, generation),
+                stream: AndroidFrameStream::new(frames, source, id, generation)
+                    .with_capture_identity(),
                 budget,
             });
             poll_native(move || {
@@ -163,6 +193,7 @@ impl CameraProvider for AndroidCameraProvider {
     }
 }
 struct Session {
+    context: AndroidCameraContext,
     java: JavaObject,
     stream: AndroidFrameStream,
     budget: FrameBudget,
@@ -199,6 +230,9 @@ impl Drop for Session {
     }
 }
 impl NativeCameraSession for Session {
+    fn platform_context(&self) -> Option<&dyn std::any::Any> {
+        Some(&self.context)
+    }
     fn settings(&self) -> CameraSettings {
         let info = self.info();
         let format = dimensions(&info);

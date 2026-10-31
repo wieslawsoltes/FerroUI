@@ -38,6 +38,13 @@ The packages are independently installable and use the `FerroUI.Media.*` family:
 | `FerroUI.Media.Camera.Apple` | `ferroui-media-camera-apple` | AVFoundation camera acquisition and JPEG capture |
 | `FerroUI.Media.Browser` | `ferroui-media-browser` | Shared WebGL2 ownership, producer fences and direct texture imports |
 | `FerroUI.Media.Video.Browser` | `ferroui-media-video-browser` | Native browser playback/audio and shared frame output |
+| `FerroUI.Media.OpenGL` | `ferroui-media-opengl` | Active-context GPU producer jobs and deferred texture retirement |
+| `FerroUI.Media.Android` | `ferroui-media-android` | Shared external GLES conversion and surface ownership |
+| `FerroUI.Media.Video.Android` | `ferroui-media-video-android` | Independent Media3 playback and native presentation timestamps |
+| `FerroUI.Media.Camera.Android` | `ferroui-media-camera-android` | Independent CameraX acquisition and native JPEG |
+| `FerroUI.Media.Camera.Controls` | `ferroui-media-camera-controls` | Explicit-start CameraPreview and weak supplied sessions |
+| `FerroUI.Media.Qr.Apple` | `ferroui-media-qr-apple` | Optional native Vision analysis of retained CoreVideo storage |
+| `FerroUI.Media.Qr.Android` | `ferroui-media-qr-android` | Optional bundled offline ML Kit analysis of borrowed CameraX images |
 | `FerroUI.Media.Camera.Browser` | `ferroui-media-camera-browser` | Explicit video-only acquisition, preview and owned JPEG capture |
 
 Video and camera do not depend on each other. Installing Video brings the shared
@@ -73,6 +80,25 @@ from full payload bytes, which this adapter does not currently expose. Finder
 extrapolation is labeled estimated geometry. Expiry uses acquisition age and the
 caller's scheduler clock, independently of source media timestamps.
 Internal decoder input-copy behavior still needs profiling beyond adapter repacking.
+
+Native Apple QR uses one bounded Vision worker; cancellation retains its input
+until native recognition finishes and rejects late publication. Analysis geometry
+stays in the unrotated source plane. Device builds use Vision's default revision;
+the tested iOS simulator requires revision 1 with CPU compute. This is analysis
+compute, independent of the GPU preview policy. Android QR adds CameraX
+ImageAnalysis only when explicitly attached. It borrows native YUV images,
+closes every ImageProxy after actual task completion, keeps only the latest
+queued image and globally limits recognition to one task at 10 Hz. Results expire
+after 250 ms. Sensor/buffer and SurfaceTexture transforms map corners to the
+preview texture without applying orientation twice. Non-full analysis crops are
+rejected. Native SDK internal copies are opaque; zero framework transfer counters
+do not establish zero internal copying. The optional ML Kit artifact is bundled
+in the APK; no model installation/download metadata is added.
+
+The [mobile integration sample](../../samples/PortableMedia.Mobile/README.md)
+contains explicit camera, JPEG, Stop, Detach and QR actions. Its native QR smoke
+uses a synthetic analysis-only fixture; this is separate from camera acquisition
+and GPU preview. The framework defaults keep QR disabled.
 
 ## Native sample and checks
 

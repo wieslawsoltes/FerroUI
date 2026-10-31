@@ -18,6 +18,10 @@ public final class SurfaceFrames {
     private final Thread thread;
     private final AtomicBoolean pending = new AtomicBoolean();
     private final float[] transform = new float[16];
+    private final Object geometryLock=new Object();
+    private final float[] publishedTransform=new float[16];
+    private boolean hasGeometry;
+    private long geometryEpoch;
     private SurfaceTexture source;
     private Surface surface;
     private int external, program, vao, framebuffer;
@@ -95,9 +99,28 @@ public final class SurfaceFrames {
             if(!pending.getAndSet(false)) return "";
             source.updateTexImage(); source.getTransformMatrix(transform);
             timestamp=source.getTimestamp(); sequence++;
+            synchronized(geometryLock) {if(!hasGeometry || !java.util.Arrays.equals(transform,publishedTransform)) geometryEpoch++;System.arraycopy(transform,0,publishedTransform,0,16);hasGeometry=true;}
             return "";
         } catch(RuntimeException failure) { return failure.toString(); }
         finally { GLES30.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES,binding); GLES30.glActiveTexture(active); }
+    }
+    /** Metadata only. Convert raw external-image coordinates into the immutable
+     * RGBA output's top-left coordinates using the inverse sampling transform. */
+    public long geometryEpoch() {synchronized(geometryLock){return geometryEpoch;}}
+    public float[] mapRawPoints(float[] points) {
+        synchronized(geometryLock) {
+            if(!hasGeometry || closed) return null;
+            float a=publishedTransform[0],b=publishedTransform[4],c=publishedTransform[1],d=publishedTransform[5];
+            float determinant=a*d-b*c;
+            if(Math.abs(determinant)<1e-8f) return null;
+            float[] result=points.clone();
+            for(int i=0;i<result.length;i+=2) {
+                float x=points[i]-publishedTransform[12],y=points[i+1]-publishedTransform[13];
+                result[i]=(d*x-b*y)/determinant;
+                result[i+1]=1-(-c*x+a*y)/determinant;
+            }
+            return result;
+        }
     }
     /** Returns an error rather than allowing JNI exceptions to escape. */
     public String draw(int output, int width, int height) {

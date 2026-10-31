@@ -123,15 +123,20 @@ fn discovery_never_starts_capture_and_shared_readers_retire_independently() {
 }
 #[test]
 fn a_preview_weak_session_does_not_own_capture() {
-    let native=Rc::new(Native {stops:Cell::new(0)});
-    let provider=Rc::new(Provider {native:native.clone(),starts:Cell::new(0)});
-    let capture=CameraCapture::new(provider,FrameBudget::new(Default::default()));
-    let session=ready(capture.start(Default::default())).unwrap();
-    let view=session.downgrade();
-    assert!(view.upgrade().is_some_and(|s|!s.is_stopped()));
+    let native = Rc::new(Native {
+        stops: Cell::new(0),
+    });
+    let provider = Rc::new(Provider {
+        native: native.clone(),
+        starts: Cell::new(0),
+    });
+    let capture = CameraCapture::new(provider, FrameBudget::new(Default::default()));
+    let session = ready(capture.start(Default::default())).unwrap();
+    let view = session.downgrade();
+    assert!(view.upgrade().is_some_and(|s| !s.is_stopped()));
     drop(session);
     assert!(view.upgrade().is_none());
-    assert_eq!(native.stops.get(),1);
+    assert_eq!(native.stops.get(), 1);
 }
 #[test]
 fn canceled_start_stops_a_late_native_session() {

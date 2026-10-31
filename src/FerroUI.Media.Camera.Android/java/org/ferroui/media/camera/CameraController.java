@@ -23,6 +23,7 @@ import androidx.camera.camera2.interop.Camera2Interop;
 import androidx.camera.core.Camera;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageCapture;
+import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageCaptureException;
 import androidx.camera.core.ImageProxy;
 import androidx.camera.core.Preview;
@@ -52,6 +53,13 @@ public final class CameraController implements LifecycleOwner,Application.Activi
     private ProcessCameraProvider provider;
     private Preview preview;
     private ImageCapture still;
+    private ImageAnalysis analysis;
+    private volatile FrameAnalyzer analyzer;
+    private final java.util.concurrent.ExecutorService analysisExecutor=java.util.concurrent.Executors.newSingleThreadExecutor();
+    private final Object geometryLock=new Object();
+    private android.graphics.Matrix previewSensorToBuffer;
+    private long geometryEpoch;
+    private CameraSelector selectedCamera;
     private Camera camera;
     private volatile boolean closed;
     private boolean ready;
@@ -115,7 +123,9 @@ public final class CameraController implements LifecycleOwner,Application.Activi
                         @Override public void onCaptureCompleted(CameraCaptureSession session,CaptureRequest request,TotalCaptureResult result) {
                             Long timestamp=result.get(TotalCaptureResult.SENSOR_TIMESTAMP);
                             if(timestamp==null) return;
-                            if(first==0) first=timestamp;
+                            Long interval=result.get(TotalCaptureResult.SENSOR_FRAME_DURATION);
+                            if(interval!=null && interval>0) {fps=1e9/interval;return;}
+                            if(first==0 || timestamp-last>1000000000L) {first=timestamp;count=0;}
                             if(timestamp>last) {last=timestamp;count++;}
                             if(last>first && count>1) fps=(count-1)*1e9/(last-first);
                         }
@@ -134,6 +144,7 @@ public final class CameraController implements LifecycleOwner,Application.Activi
                             // already contains the HAL camera transform.
                             rotation=info.hasCameraTransform() ? displayRotation()*90 : info.getRotationDegrees();
                             mirrored=info.isMirroring();
+                            synchronized(geometryLock) {previewSensorToBuffer=new android.graphics.Matrix(info.getSensorToBufferTransform());geometryEpoch++;}
                             if(!info.getCropRect().equals(new android.graphics.Rect(0,0,width,height)))
                                 fail(7,"Non-full CameraX viewport crop is not admitted");
                         });
@@ -141,7 +152,8 @@ public final class CameraController implements LifecycleOwner,Application.Activi
                         request.provideSurface(frames.surface(),main,result->frames.releaseSurface());
                         ready=true;
                     });
-                    camera=provider.bindToLifecycle(this,selector.build(),preview,still);
+                    selectedCamera=selector.build();
+                    bindUseCases();
                     deviceId=Camera2CameraInfo.from(camera.getCameraInfo()).getCameraId();
                     Integer lens=Camera2CameraInfo.from(camera.getCameraInfo()).getCameraCharacteristic(CameraCharacteristics.LENS_FACING);
                     actualFacing=lens==null ? 0 : lens==CameraCharacteristics.LENS_FACING_FRONT ? 1 : lens==CameraCharacteristics.LENS_FACING_BACK ? 2 : 3;
@@ -151,6 +163,53 @@ public final class CameraController implements LifecycleOwner,Application.Activi
                 } catch(Exception failure) {fail(8,failure.toString());}
             },main);
         } catch(RuntimeException failure) {fail(8,failure.toString());}
+    }
+    private void bindUseCases() {
+        ready=false;
+        synchronized(geometryLock){previewSensorToBuffer=null;geometryEpoch++;}
+        if(analysis!=null) {analysis.clearAnalyzer();provider.unbind(preview,still,analysis);analysis=null;}
+        else provider.unbind(preview,still);
+        if(analyzer!=null) {
+            analysis=new ImageAnalysis.Builder().setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                .setTargetRotation(Surface.ROTATION_0).setOutputImageRotationEnabled(false)
+                .setResolutionSelector(new ResolutionSelector.Builder().setResolutionStrategy(new ResolutionStrategy(
+                    new Size(1280,720),ResolutionStrategy.FALLBACK_RULE_CLOSEST_LOWER)).build()).build();
+            analysis.setAnalyzer(analysisExecutor,image->{
+                FrameAnalyzer current=analyzer;
+                if(closed || current==null) image.close();
+                else {try {current.analyze(image,this);}catch(RuntimeException failure){image.close();}}
+            });
+            camera=provider.bindToLifecycle(this,selectedCamera,preview,still,analysis);
+        } else camera=provider.bindToLifecycle(this,selectedCamera,preview,still);
+    }
+    /** UI-thread opt-in; Camera remains independent of any recognition engine. */
+    public String setAnalyzer(FrameAnalyzer value) {
+        if(closed) return "Camera is closed";
+        FrameAnalyzer previous=analyzer;analyzer=value;
+        if(previous!=null && previous!=value) previous.close();
+        try {if(provider!=null && preview!=null) bindUseCases();return "";}
+        catch(RuntimeException failure) {
+            analyzer=null;if(value!=null)value.close();
+            // Optional analysis failure must restore camera preview/stills.
+            try {if(provider!=null && preview!=null) bindUseCases();}
+            catch(RuntimeException restore) {fail(8,restore.toString());}
+            return failure.toString();
+        }
+    }
+    public void removeAnalyzer(FrameAnalyzer expected) {
+        if(analyzer==expected && !closed) setAnalyzer(null);
+    }
+    public long geometryEpoch() {synchronized(geometryLock){return (geometryEpoch<<32)^frames.geometryEpoch();}}
+    public float[] mapAnalysisPoints(ImageProxy image,float[] points,long expectedEpoch) {
+        android.graphics.Matrix rawToSensor=new android.graphics.Matrix();
+        if(!image.getImageInfo().getSensorToBufferTransformMatrix().invert(rawToSensor)) return null;
+        float[] mapped=points.clone();rawToSensor.mapPoints(mapped);
+        synchronized(geometryLock) {
+            if(previewSensorToBuffer==null || expectedEpoch!=geometryEpoch() || width<=0 || height<=0) return null;
+            previewSensorToBuffer.mapPoints(mapped);
+            for(int i=0;i<mapped.length;i+=2) {mapped[i]/=width;mapped[i+1]/=height;}
+        }
+        return frames.mapRawPoints(mapped);
     }
     public String settings() {
         try {
@@ -206,8 +265,10 @@ public final class CameraController implements LifecycleOwner,Application.Activi
         if(closed) return;
         closed=true;ready=false;CapturedPhoto photo=activePhoto.get();if(photo!=null) photo.abandon();
         if(!capturing) photoExecutor.shutdown();
+        FrameAnalyzer old=analyzer;analyzer=null;if(old!=null) old.close();
+        if(analysis!=null) analysis.clearAnalyzer();analysisExecutor.shutdown();
         lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY);
-        if(provider!=null && preview!=null) provider.unbind(preview,still);
+        if(provider!=null && preview!=null) {if(analysis!=null) provider.unbind(preview,still,analysis);else provider.unbind(preview,still);}
         activity.getApplication().unregisterActivityLifecycleCallbacks(this);
         activity.getApplication().unregisterComponentCallbacks(this);
     }

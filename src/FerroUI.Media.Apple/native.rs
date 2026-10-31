@@ -17,6 +17,11 @@ pub struct PixelBuffer(NonNull<c_void>);
 unsafe impl Send for PixelBuffer {}
 unsafe impl Sync for PixelBuffer {}
 impl PixelBuffer {
+    /// Borrowed CoreVideo handle, valid only while this buffer remains leased.
+    /// Native clients must retain it for asynchronous use and never mutate it.
+    pub fn as_raw(&self) -> *mut c_void {
+        self.0.as_ptr()
+    }
     /// Adopts an immutable CoreVideo reference from a native producer.
     ///
     /// # Safety

@@ -128,6 +128,11 @@ pub enum CameraControl {
     Exposure(f64),
 }
 pub trait NativeCameraSession {
+    /// Optional narrow platform extension (for example an analysis stream).
+    /// Borrowing it never transfers ownership of the camera session.
+    fn platform_context(&self) -> Option<&dyn std::any::Any> {
+        None
+    }
     fn settings(&self) -> CameraSettings;
     fn take_frame(&self) -> Result<Option<FrameLease>, CameraError>;
     fn photo(&self) -> CameraFuture<CameraPhoto>;
@@ -322,11 +327,20 @@ pub struct CameraSession(Rc<SessionInner>);
 #[derive(Clone)]
 pub struct WeakCameraSession(std::rc::Weak<SessionInner>);
 impl WeakCameraSession {
-    pub fn upgrade(&self) -> Option<CameraSession> { self.0.upgrade().map(CameraSession) }
+    pub fn upgrade(&self) -> Option<CameraSession> {
+        self.0.upgrade().map(CameraSession)
+    }
 }
 impl CameraSession {
-    pub fn downgrade(&self) -> WeakCameraSession { WeakCameraSession(Rc::downgrade(&self.0)) }
-    pub fn is_stopped(&self) -> bool { self.0.stopped.get() }
+    pub fn platform_context<T: std::any::Any>(&self) -> Option<&T> {
+        self.0.native.platform_context()?.downcast_ref()
+    }
+    pub fn downgrade(&self) -> WeakCameraSession {
+        WeakCameraSession(Rc::downgrade(&self.0))
+    }
+    pub fn is_stopped(&self) -> bool {
+        self.0.stopped.get()
+    }
     pub fn settings(&self) -> CameraSettings {
         self.0.native.settings()
     }

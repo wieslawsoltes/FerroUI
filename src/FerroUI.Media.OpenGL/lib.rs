@@ -3,11 +3,19 @@
 //! CPU preview transfer is not part of this API.
 use ferroui_base::{
     platform::IOptionalFeatureProvider,
+    reactive::IDisposable,
     rendering::composition::{Compositor, ICompositionGpuInterop},
 };
 use ferroui_media::{frames::*, *};
 use ferroui_opengl::{IGlContext, SharedFrameTexture};
 use std::{rc::Rc, sync::Arc};
+
+struct CurrentContext(Rc<dyn IDisposable>);
+impl Drop for CurrentContext {
+    fn drop(&mut self) {
+        self.0.dispose();
+    }
+}
 
 fn unsupported(message: impl Into<String>) -> MediaError {
     MediaError::new(MediaErrorKind::Unsupported, message)
@@ -93,6 +101,7 @@ impl NativeGlFrameProducer {
                 {
                     return Ok(Err(unsupported("The producer GL context was replaced")));
                 }
+                let _current = CurrentContext(context.ensure_current());
                 let renderer = context
                     .gl_interface()
                     .renderer()
@@ -107,10 +116,7 @@ impl NativeGlFrameProducer {
                         "Software/unknown GL has no admitted GPU media route",
                     )));
                 }
-                let current = context.ensure_current();
-                let result = job(&context);
-                current.dispose();
-                Ok(result)
+                Ok(job(&context))
             },
             false,
         );

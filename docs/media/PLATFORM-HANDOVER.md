@@ -12,6 +12,7 @@ that the complete portable-media specification has been implemented.
   `/Users/danw/.codex/worktrees/portable-media-framework/FerroUI`.
 - Fresh upstream starting revision: `8518d2cada13541ee6149c259f918cfe504ba6c4`.
 - Foundation/Apple commit: `ce88d55f2bcc19ad28c0caa173a37d11a6a221bc`.
+- iOS/Android native providers and GL jobs: `76b95ab51a37be126809bc15b5d43f5ee62aa5d9`.
 - Browser/ownership commit: `b0692f13104ff55cdbddbe5d7e52955fee743f45`.
 - Start from the branch tip containing this handover, rather than upstream main
   alone. These commits have not been pushed by this task. Transfer the branch or
@@ -213,6 +214,7 @@ They are functional evidence, not a frozen performance acceptance profile.
 | iOS native providers | Device-target compilation at deployment target 14.0; independent mobile app built, signed, installed and run on iOS 27.0 simulator. Shared Metal playback → pause → seek 750 ms → resume → Stop/frame zero → detach passed with zero preview CPU transfers and zero retained frames. Simulator camera discovery returned no devices. Physical camera/audio and minimum-OS runtime gates remain open. |
 | Android foundation | Native EGL render-thread jobs, nonblocking GL fences and deferred native surface retirement. On an API 35 ARM64 emulator with a verified 16,384-byte kernel page size, one independent texture fed two views and retired; zero preview CPU transfers and zero GPU copies. |
 | Android camera | Separate CameraX 1.5.2 provider and camera preview controls. Emulator permission denial/grant, live GPU preview, native JPEG independently decoded at 1856×1392, and Stop returning camera-service active clients to an empty list. The request-owned/background-copy version also produced a decoded native JPEG and rejected capture completion after Stop. Host JVM contracts check independent photo bytes and late cancellation. |
+| Native QR | macOS Vision decoded two synthetic symbols from retained CoreVideo input; iOS 27.0 simulator did so using the revision-1 CPU analysis profile. Android bundled ML Kit 17.3.0 decoded the same two symbols and checked geometry/raw bytes with network services disabled on the 16 KiB emulator. CameraX live analysis ran at about 10 Hz, dropped excess frames and allowed a separately decoded native JPEG; Stop returned active camera clients to an empty list. Native SDK internal copies remain opaque. |
 | Android playback | Separate Media3 1.8.0 provider with native decoder/audio timing, a bounded presentation-time table, coalesced commands and a dedicated player looper. API 35/16 KiB run passed independent GPU sharing, playback, pause, achieved seek, resume, Stop/frame zero, frame retirement and native surface/player cleanup. Earlier failing runs remain separate evidence; fixes address surface-clock mapping, async command settling and obsolete queued acquisition. |
 
 The development machine is an Apple M4 Mac, macOS 27.0.1, with the iOS SDK
@@ -228,8 +230,10 @@ files or automatically available on another machine. Important names include
 `browser-integration.log`, `browser-webapp.log`, `browser-tooling-tests.log`,
 `queued-handle-contract.log`, `browser-foundation-contracts.log`,
 `browser-video-contracts.log`, `browser-surface-regression.log`,
-`native-metal-generation-regression.log`, `native-browser-regression-smoke.log`
-and `apple-ios14-check.log`. Re-run applicable gates on the receiving host.
+`native-metal-generation-regression.log`, `native-browser-regression-smoke.log`,
+`apple-ios14-check.log`, `apple-native-qr-tests.log`, `ios-native-qr-smoke.log`,
+`ios14-native-qr-check.log`, `android16k-offline-qr-smoke.log`,
+`android16k-live-qr-camera-counters.log` and `native-qr-core-contracts.log`. Re-run applicable gates on the receiving host.
 
 Useful commands, from the repository root:
 
@@ -258,9 +262,11 @@ were used to limit disk/memory use; the target cache is private to this worktree
 - Windows and Linux native providers are unimplemented at this checkpoint.
   Android now has native playback/CameraX/external GLES integration and a
   separate active-media/camera run on a 16 KiB kernel.
-- Native QR engines are unimplemented. The optional Rust adapter does not expose
-  complete payload bytes, and its internal input-copy behavior still needs
-  profiling. Do not infer zero copying from its borrowed input interface.
+- Apple Vision and bundled Android ML Kit QR engines are implemented. Physical
+  camera geometry/encoding and the wider native QR fixture matrix still need
+  verification. The optional Rust adapter does not expose complete payload bytes,
+  and its internal input-copy behavior still needs profiling. Do not infer zero
+  copying from a borrowed input interface or zero framework transfer counters.
 - `FerroUI.Media.Camera.Controls` now provides CameraPreview with explicit
   start, owned-session teardown and weak caller-session attachment. Complete
   markup/source APIs, native 3D texture-reuse examples and automatic device-loss

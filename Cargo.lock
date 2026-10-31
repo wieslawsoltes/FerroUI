@@ -2282,6 +2282,31 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-media-qr-android"
+version = "0.4.0"
+dependencies = [
+ "base64",
+ "ferroui-android",
+ "ferroui-media",
+ "ferroui-media-camera",
+ "ferroui-media-camera-android",
+ "ferroui-media-qr",
+ "serde_json",
+]
+
+[[package]]
+name = "ferroui-media-qr-apple"
+version = "0.4.0"
+dependencies = [
+ "cc",
+ "ferroui-media",
+ "ferroui-media-apple",
+ "ferroui-media-qr",
+ "rxing",
+ "serde_json",
+]
+
+[[package]]
 name = "ferroui-media-video"
 version = "0.4.0"
 dependencies = [
@@ -4876,6 +4901,7 @@ dependencies = [
 name = "portable-media-mobile"
 version = "0.4.0"
 dependencies = [
+ "base64",
  "ferroui-android",
  "ferroui-base",
  "ferroui-controls",
@@ -4887,6 +4913,9 @@ dependencies = [
  "ferroui-media-camera-apple",
  "ferroui-media-camera-controls",
  "ferroui-media-controls",
+ "ferroui-media-qr",
+ "ferroui-media-qr-android",
+ "ferroui-media-qr-apple",
  "ferroui-media-video",
  "ferroui-media-video-android",
  "ferroui-media-video-apple",

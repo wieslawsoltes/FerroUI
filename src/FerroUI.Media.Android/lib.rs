@@ -186,6 +186,7 @@ pub struct AndroidFrameStream {
     epoch: Arc<std::sync::atomic::AtomicU64>,
     job_epoch: Rc<Cell<u64>>,
     frame_clock: Option<JavaObject>,
+    capture_identity: bool,
 }
 impl AndroidFrameStream {
     pub fn new(
@@ -209,12 +210,19 @@ impl AndroidFrameStream {
             epoch: Arc::new(std::sync::atomic::AtomicU64::new(0)),
             job_epoch: Rc::new(Cell::new(0)),
             frame_clock: None,
+            capture_identity: false,
         }
     }
     /// A bounded native frame-clock mapper for playback. Camera streams keep
     /// their native capture timestamps and do not depend on a video crate.
     pub fn with_frame_clock(mut self, clock: JavaObject) -> Self {
         self.frame_clock = Some(clock);
+        self
+    }
+    /// Camera streams share sensor-timestamp identity with their optional
+    /// analysis stream; playback keeps monotonic acquisition sequence instead.
+    pub fn with_capture_identity(mut self) -> Self {
+        self.capture_identity = true;
         self
     }
     // Keep the current conversion until its producer fence retires. Canceling
@@ -286,6 +294,7 @@ impl AndroidFrameStream {
         let last = self.last_sequence.clone();
         let mut identity = self.identity;
         let frame_clock = self.frame_clock.clone();
+        let capture_identity = self.capture_identity;
         let requested_epoch = self.epoch.load(std::sync::atomic::Ordering::Acquire);
         self.job_epoch.set(requested_epoch);
         let epoch = self.epoch.clone();
@@ -322,7 +331,11 @@ impl AndroidFrameStream {
             if sequence <= last.swap(sequence, std::sync::atomic::Ordering::AcqRel) {
                 return Ok(None);
             }
-            identity.sequence = sequence;
+            identity.sequence = if capture_identity {
+                timestamp
+            } else {
+                sequence
+            };
             let (timestamp, width, height, color) = if let Some(clock) = frame_clock {
                 let value = call_object(
                     &clock,

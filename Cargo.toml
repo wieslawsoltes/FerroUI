@@ -6,6 +6,8 @@ members = [
     "src/FerroUI.Media.Video.Android",
     "src/FerroUI.Media.Camera.Android",
     "src/FerroUI.Media.Camera.Controls",
+    "src/FerroUI.Media.Qr.Apple",
+    "src/FerroUI.Media.Qr.Android",
     "src/FerroUI.Media",
     "src/FerroUI.Media.Video",
     "src/FerroUI.Media.Camera",
@@ -270,7 +272,9 @@ ferroui-media-android = { version = "=0.4.0", path = "src/FerroUI.Media.Android"
 ferroui-media-video-android = { version = "=0.4.0", path = "src/FerroUI.Media.Video.Android" }
 ferroui-media-camera-android = { version = "=0.4.0", path = "src/FerroUI.Media.Camera.Android" }
 ferroui-media-camera-controls = { version = "=0.4.0", path = "src/FerroUI.Media.Camera.Controls" }
-ferroui-media-qr = { version = "=0.4.0", path = "src/FerroUI.Media.Qr" }
+ferroui-media-qr = { version = "=0.4.0", path = "src/FerroUI.Media.Qr", default-features = false }
+ferroui-media-qr-android = { version = "=0.4.0", path = "src/FerroUI.Media.Qr.Android" }
+ferroui-media-qr-apple = { version = "=0.4.0", path = "src/FerroUI.Media.Qr.Apple" }
 # The Dock port (docs/porting/dock): its crates and the dependencies only it has.
 ferrodock-controls-recycling-model = { path = "src/Dock/FerroDock.Controls.Recycling.Model" }
 ferrodock-controls-recycling-model-ferro = { path = "src/Dock/FerroDock.Controls.Recycling.Model.Ferro" }

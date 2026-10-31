@@ -167,6 +167,9 @@ fn create() -> Ref<Control> {
                     return;
                 };
                 phase.set(2);
+                if smoke {
+                    native_qr_smoke().await;
+                }
                 let Some(view) = weak.upgrade() else {
                     return;
                 };
@@ -241,9 +244,9 @@ fn create() -> Ref<Control> {
         Duration::from_millis(50),
         DispatcherPriority::NORMAL,
     );
-    let host=ferroui_controls::UserControl::new();
+    let host = ferroui_controls::UserControl::new();
     host.set_content(Some(Control::boxed(root)));
-    ferroui_controls::TopLevel::set_auto_safe_area_padding(&host,true);
+    ferroui_controls::TopLevel::set_auto_safe_area_padding(&host, true);
     host.upcast()
 }
 
@@ -427,7 +430,13 @@ fn camera_actions(
             return;
         };
         camera.set_is_visible(true);
-        let pending = camera.start(capture.clone(), Default::default(), importer.clone());
+        let mut options = ferroui_media_camera::CameraStartOptions::default();
+        options.selection.format = Some(ferroui_media_camera::CameraFormat {
+            width: 1280,
+            height: 720,
+            frames_per_second: 30.,
+        });
+        let pending = camera.start(capture.clone(), options, importer.clone());
         Dispatcher::ui_thread().invoke_async_task_local(move || async move {
             match pending.await {
                 Ok(()) => report("CAMERA_STARTED"),
@@ -481,6 +490,7 @@ fn camera_actions(
     actions.children().add(stop);
     actions.children().add(photo);
     actions.children().add(navigate);
+    qr_action(&actions, &camera);
     root.children().add(actions);
 }
 fn start_smoke(view: &Ref<MediaPlayerElement>, budget: FrameBudget) {
@@ -596,4 +606,194 @@ fn start_smoke(view: &Ref<MediaPlayerElement>, budget: FrameBudget) {
         Duration::from_millis(33),
         DispatcherPriority::NORMAL,
     );
+}
+
+async fn native_qr_smoke() {
+    let fixture = include_bytes!("../../tests/media/fixtures/qr-multiple.pgm");
+    let luma = &fixture[fixture.len() - 512 * 256..];
+    #[cfg(target_os = "ios")]
+    {
+        use ferroui_media_qr::*;
+        let frame = match ferroui_media_qr_apple::fixtures::luma_frame(luma, 512, 256) {
+            Ok(v) => v,
+            Err(e) => {
+                report(&format!("NATIVE_QR FAIL fixture {e:?}"));
+                return;
+            }
+        };
+        let gate = QrAnalysisGate::new(QrOptions {
+            max_age: Duration::from_secs(30),
+            ..Default::default()
+        });
+        gate.activate(9, 1);
+        let result =
+            ferroui_media_qr_apple::recognize(gate.begin(frame, Duration::ZERO).unwrap()).await;
+        match result {
+            Ok(values)
+                if values.len() == 2
+                    && values
+                        .iter()
+                        .any(|v| v.text.as_deref() == Some("ferroui-native-qr-left"))
+                    && values
+                        .iter()
+                        .any(|v| v.text.as_deref() == Some("ferroui-native-qr-right")) =>
+            {
+                report("NATIVE_QR PASS offline Vision multi-symbol retained CoreVideo frame")
+            }
+            other => report(&format!("NATIVE_QR FAIL {other:?}")),
+        }
+    }
+    #[cfg(target_os = "android")]
+    {
+        use base64::Engine;
+        use ferroui_android::interop::java::*;
+        let bytes = base64::engine::general_purpose::STANDARD.encode(luma);
+        let fixture = new_object(
+            &JavaClass::find("org/ferroui/portablemedia/QrFixture"),
+            "(Ljava/lang/String;)V",
+            &[JavaValue::String(&bytes)],
+        )
+        .to_global();
+        let start = Instant::now();
+        ferroui_media_android::poll_native(move || {
+            let text = ferroui_media_android::text(&fixture, "result");
+            if !text.is_empty() {
+                report(&format!("NATIVE_QR {text}"));
+                return std::task::Poll::Ready(Ok::<(), ()>(()));
+            }
+            if start.elapsed() > Duration::from_secs(30) {
+                report("NATIVE_QR FAIL timeout");
+                return std::task::Poll::Ready(Ok::<(), ()>(()));
+            }
+            std::task::Poll::Pending
+        })
+        .await
+        .ok();
+    }
+}
+
+fn qr_action(
+    actions: &Ref<ferroui_controls::StackPanel>,
+    camera: &Ref<ferroui_media_camera_controls::CameraPreview>,
+) {
+    use ferroui_base::BoxedValue;
+    use ferroui_controls::{automation::AutomationProperties, Button};
+    let button = Button::new();
+    button.set_content(Some(Rc::new("QR".to_string()) as BoxedValue));
+    AutomationProperties::set_name(&button, Some("Toggle QR analysis"));
+    let enabled = Rc::new(Cell::new(false));
+    let state = enabled.clone();
+    button.click(move |_, _| {
+        state.set(!state.get());
+        report(if state.get() {
+            "QR_ENABLED"
+        } else {
+            "QR_DISABLED"
+        });
+    });
+    actions.children().add(button);
+    let weak = camera.downgrade();
+    #[cfg(target_os = "android")]
+    {
+        let last_report = Cell::new(Instant::now());
+        let analyzer = std::cell::RefCell::new(None::<ferroui_media_qr_android::AndroidQrAnalyzer>);
+        DispatcherTimer::run(
+            move || {
+                let Some(camera) = weak.upgrade() else {
+                    analyzer.borrow_mut().take();
+                    return false;
+                };
+                let session = camera.session().filter(|v| !v.is_stopped());
+                if !enabled.get() || session.is_none() {
+                    analyzer.borrow_mut().take();
+                    return true;
+                }
+                if analyzer.borrow().is_none() {
+                    match ferroui_media_qr_android::AndroidQrAnalyzer::attach(
+                        session.as_ref().unwrap(),
+                        Default::default(),
+                    ) {
+                        Ok(value) => {
+                            analyzer.replace(Some(value));
+                            report("QR_NATIVE_ATTACHED");
+                        }
+                        Err(e) => {
+                            report(&format!("QR_ATTACH_ERROR {e:?}"));
+                            enabled.set(false);
+                            return true;
+                        }
+                    }
+                }
+                if last_report.get().elapsed() > Duration::from_secs(2) {
+                    let frame = session.as_ref().unwrap().frames().latest();
+                    report(&format!(
+                        "QR_ANALYSIS {:?} preview={:?}",
+                        analyzer.borrow().as_ref().unwrap().statistics(),
+                        frame
+                            .as_ref()
+                            .map(|v| (v.metadata().identity.sequence, v.counters().snapshot()))
+                    ));
+                    last_report.set(Instant::now());
+                }
+                let result = analyzer.borrow().as_ref().unwrap().take();
+                match result {
+                    Ok(values) if !values.is_empty() => report(&format!("QR_SYMBOLS {values:?}")),
+                    Err(e) => {
+                        report(&format!("QR_ERROR {e:?}"));
+                        enabled.set(false);
+                        analyzer.borrow_mut().take();
+                    }
+                    _ => {}
+                }
+                true
+            },
+            Duration::from_millis(100),
+            DispatcherPriority::NORMAL,
+        );
+    }
+    #[cfg(target_os = "ios")]
+    {
+        use ferroui_media_qr::*;
+        let gate = QrAnalysisGate::new(Default::default());
+        let active = Cell::new(None);
+        let started = Instant::now();
+        DispatcherTimer::run(
+            move || {
+                let Some(camera) = weak.upgrade() else {
+                    gate.stop();
+                    return false;
+                };
+                let session = camera.session().filter(|v| !v.is_stopped());
+                if !enabled.get() || session.is_none() {
+                    gate.stop();
+                    active.set(None);
+                    return true;
+                }
+                let Some(frame) = session.unwrap().frames().latest() else {
+                    return true;
+                };
+                let id = frame.metadata().identity;
+                if active.get() != Some((id.source, id.generation)) {
+                    gate.activate(id.source, id.generation);
+                    active.set(Some((id.source, id.generation)));
+                }
+                if let Ok(analysis) = gate.begin(frame, started.elapsed()) {
+                    Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+                        match ferroui_media_qr_apple::recognize(analysis).await {
+                            Ok(values) if !values.is_empty() => {
+                                report(&format!("QR_SYMBOLS {values:?}"))
+                            }
+                            Err(QrError::DecodeFailure) => {
+                                report("QR_ERROR native recognition failed")
+                            }
+                            _ => {}
+                        }
+                    });
+                }
+                true
+            },
+            Duration::from_millis(100),
+            DispatcherPriority::NORMAL,
+        );
+    }
 }
