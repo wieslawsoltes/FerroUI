@@ -1151,7 +1151,10 @@ fn rich_selection_gravity_composition_read_reentry_keeps_preview_and_newer_mode(
     // boundary. No hard-coded clone count or private phase hook is assumed.
     // Rejections before publication retain the complete visible IME transaction;
     // accepted later metadata changes own the new mode for the next operation.
-    for kind in 0..3 {
+    // Step 0 (a new preview of a caret composition) updates the preview run in place
+    // and reads no format (F1b): it has no reentry point; see
+    // rich_composition_preview_in_place_reads_no_format_and_keeps_its_run.
+    for kind in 1..3 {
         let (probe, brush) = composing_with_brush(kind == 2);
         brush.arm_at(usize::MAX, || {});
         next_composition_step(&probe, kind).unwrap();
@@ -1207,7 +1210,10 @@ fn rich_selection_gravity_composition_preflight_model_writes_survive() {
     // while the initial preview's model version is still current. This covers
     // editor snapshot copies and the model's restoration preflight; mutation
     // during a reused child's installation setter is a separate boundary.
-    for kind in 0..3 {
+    // Step 0 (a new preview of a caret composition) updates the preview run in place
+    // and reads no format (F1b): it has no reentry point; see
+    // rich_composition_preview_in_place_reads_no_format_and_keeps_its_run.
+    for kind in 1..3 {
         let (probe, brush) = composing_with_brush(kind == 2);
         brush.arm_at(usize::MAX, || {});
         next_composition_step(&probe, kind).unwrap();
@@ -1254,7 +1260,10 @@ fn rich_selection_gravity_composition_preflight_model_writes_survive() {
 #[test]
 fn rich_selection_gravity_composition_snapshot_reentry_can_clear_history() {
     let _scope = Dispatcher::unit_test_scope();
-    for kind in 0..3 {
+    // Step 0 (a new preview of a caret composition) updates the preview run in place
+    // and reads no format (F1b): it has no reentry point; see
+    // rich_composition_preview_in_place_reads_no_format_and_keeps_its_run.
+    for kind in 1..3 {
         let (document, brush) = composing_with_brush(kind == 2);
         let before = document.document().snapshot();
         let editor = document.editor();
@@ -1484,4 +1493,25 @@ fn rich_selection_gravity_publication_preserves_newer_mode_without_restyling_typ
     );
     document.undo().unwrap();
     assert_eq!(selection.gravity(), RangeGravity::Forward);
+}
+
+#[test]
+fn rich_composition_preview_in_place_reads_no_format_and_keeps_its_run() {
+    let _scope = Dispatcher::unit_test_scope();
+    let (document, brush) = composing_with_brush(false);
+    let preview = document.document().snapshot();
+    brush.arm_at(usize::MAX, || {});
+    document.editor().set_preedit("QR", Some(2)).unwrap();
+    assert_eq!(brush.disarm(), 0);
+    assert_eq!(document.text(), "abQRCD");
+    assert_eq!(document.selection().selection(), EditorSelection::caret(4));
+    // The preview is still one underlined run, and the composition still restores the
+    // document from before it began.
+    document.editor().set_preedit("S", None).unwrap();
+    assert_eq!(document.text(), "abSCD");
+    // Back to the first preview's structure with the new text in its run.
+    document.editor().set_preedit("P", Some(1)).unwrap();
+    assert_eq!(document.document().snapshot(), preview);
+    assert!(document.editor().cancel_composition().unwrap());
+    assert_eq!(document.text(), "abCD");
 }

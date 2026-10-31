@@ -58,6 +58,21 @@ impl RichTextEditing {
         self.layout();
     }
 
+    /// One paragraph break in the middle of the document, and its deletion on the next call:
+    /// structural edits that rebuild the document from a snapshot through its content pool.
+    pub fn split_paragraph(&self) {
+        let caret = self.caret.get();
+        let _ = self.editor.set_selection(EditorSelection::caret(caret));
+        if self.document.text_length() > self.length {
+            self.editor.delete_backward(false).unwrap();
+            self.caret.set(caret - 1);
+        } else {
+            self.editor.insert_text("\n", EditKind::Typing).unwrap();
+            self.caret.set(caret + 1);
+        }
+        self.layout();
+    }
+
     /// One step of the selection of the view.
     pub fn move_selection(&self) {
         let caret = (self.caret.get() + 1) % self.length;
@@ -84,7 +99,8 @@ pub fn register(registry: &mut Registry) {
         let parameters = format!("Paragraphs={paragraphs}");
         class.benchmark("type_character", parameters.clone(), move || RichTextEditing::new(paragraphs), |b| b.type_character());
         class.benchmark("move_selection", parameters.clone(), move || RichTextEditing::new(paragraphs), |b| b.move_selection());
-        class.benchmark("update_ime_preview", parameters, move || RichTextEditing::new(paragraphs), |b| b.update_ime_preview());
+        class.benchmark("update_ime_preview", parameters.clone(), move || RichTextEditing::new(paragraphs), |b| b.update_ime_preview());
+        class.benchmark("split_paragraph", parameters, move || RichTextEditing::new(paragraphs), |b| b.split_paragraph());
     }
 }
 

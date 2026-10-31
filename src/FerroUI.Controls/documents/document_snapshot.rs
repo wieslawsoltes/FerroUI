@@ -387,10 +387,25 @@ pub(crate) fn slice_inlines(
 }
 
 pub(crate) fn utf16_to_byte(text: &str, offset: usize) -> Option<usize> {
-    let mut position = 0;
-    for (byte, scalar) in text.char_indices() {
+    // An ASCII prefix has one byte per UTF-16 unit: skip it a block at a time (F1b; most
+    // offsets of a document fall in long ASCII stretches), then count scalars.
+    let bytes = text.as_bytes();
+    let limit = offset.min(bytes.len());
+    let mut start = 0;
+    while start < limit {
+        let end = (start + 64).min(limit);
+        if !bytes[start..end].is_ascii() {
+            break;
+        }
+        start = end;
+    }
+    if start == offset {
+        return Some(offset);
+    }
+    let mut position = start;
+    for (byte, scalar) in text[start..].char_indices() {
         if position == offset {
-            return Some(byte);
+            return Some(start + byte);
         }
         position += scalar.len_utf16();
         if position > offset {

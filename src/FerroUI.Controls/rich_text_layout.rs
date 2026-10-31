@@ -1281,6 +1281,9 @@ mod family_metrics_tests;
 #[cfg(test)]
 #[path = "rich_text_fallback_scale_tests.rs"]
 mod fallback_scale_tests;
+#[cfg(test)]
+#[path = "rich_text_reuse_tests.rs"]
+mod reuse_tests;
 
 #[cfg(test)]
 #[path = "rich_text_hosted_object_tests.rs"]
