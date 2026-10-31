@@ -93,3 +93,9 @@ mod baseline {
 
 #[path = "webscene_signals.rs"]
 mod signals;
+
+#[path = "webscene_computed.rs"]
+mod computed;
+
+#[path = "webscene_bindings.rs"]
+mod bindings;

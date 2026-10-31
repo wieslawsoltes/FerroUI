@@ -2,6 +2,21 @@ fn main() {
     #[cfg(feature = "webscene")]
     ferroui_qml_build::Compiler::new()
         .with_javascript()
+        .compile_file("webscene/Bindings.qml", "webscene_bindings.rs")
+        .expect("compile imperative property bindings");
+
+    #[cfg(feature = "webscene")]
+    ferroui_qml_build::Compiler::new()
+        .javascript_entry("dual.js")
+        .javascript_entry("plugins/en/index.js")
+        .javascript_entry("plugins/pl/index.js")
+        .javascript_entry("plugins/en/leaf.mjs")
+        .compile_file("computed/Main.qml", "computed.rs")
+        .expect("compile explicitly bundled dynamic modules");
+
+    #[cfg(feature = "webscene")]
+    ferroui_qml_build::Compiler::new()
+        .with_javascript()
         .compile_file("webscene/Signals.qml", "webscene_signals.rs")
         .expect("compile dynamic signal connections");
 
