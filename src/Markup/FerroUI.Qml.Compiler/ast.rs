@@ -1,5 +1,6 @@
 //! Source-located component representation shared by the loader and compiler.
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeMap;
 
 /// Half-open byte range in the original UTF-8 source.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -10,12 +11,56 @@ pub struct SourceSpan {
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Document {
+    /// JavaScript resources embedded from the local import graph during linking.
+    #[serde(default)]
+    pub scripts: BTreeMap<String, ScriptResource>,
     /// Referenced module singletons, each privately scoped and owned by the engine.
     #[serde(default)]
     pub singletons: Vec<Object>,
     pub pragmas: Vec<Pragma>,
     pub imports: Vec<Import>,
     pub root: Object,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub enum ScriptForm {
+    Expression,
+    BindingBlock,
+    FunctionBody,
+    HandlerBody,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct JavaScript {
+    /// Candidate QML singleton names collected by the ECMAScript parser.
+    #[serde(default)]
+    pub references: Vec<String>,
+    pub form: ScriptForm,
+    pub source: String,
+    pub span: SourceSpan,
+    pub origin: String,
+    pub root: Option<String>,
+    pub ids: BTreeMap<String, String>,
+    pub imports: BTreeMap<String, String>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub enum ScriptKind {
+    Module,
+    Script,
+    Library,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct ScriptResource {
+    /// True for a static script import in a QML document.
+    pub preload: bool,
+    /// Qualified .import bindings in a classic JavaScript resource.
+    pub imports: BTreeMap<String, String>,
+    pub source: String,
+    pub kind: ScriptKind,
+    pub dependencies: BTreeMap<String, String>,
+    pub exports: Vec<String>,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -33,6 +78,12 @@ pub struct Import {
     pub version: Option<String>,
     pub alias: Option<String>,
     pub span: SourceSpan,
+}
+
+impl Import {
+    pub fn is_script(&self) -> bool {
+        self.is_path && (self.uri.ends_with(".js") || self.uri.ends_with(".mjs"))
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -139,6 +190,7 @@ pub enum Binding {
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum Expr {
+    JavaScript(JavaScript),
     /// Index in the native expression table of a compiled component.
     Native(usize),
     Null,
@@ -164,6 +216,7 @@ pub enum Expr {
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum Stmt {
+    JavaScript(JavaScript),
     /// Index in the compiled module's native statement table.
     Native(usize),
     Expr(Expr),

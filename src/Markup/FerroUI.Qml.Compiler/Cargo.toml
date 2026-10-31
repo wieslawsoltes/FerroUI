@@ -15,7 +15,14 @@ autotests = false
 [lib]
 path = "lib.rs"
 
+[features]
+javascript = ["dep:swc_common", "dep:swc_ecma_ast", "dep:swc_ecma_parser", "dep:swc_ecma_visit"]
+
 [dependencies]
+swc_common = { version = "27", optional = true }
+swc_ecma_ast = { version = "30", optional = true }
+swc_ecma_parser = { version = "47", default-features = false, optional = true }
+swc_ecma_visit = { version = "30", optional = true }
 serde = { workspace = true, features = ["derive"] }
 
 [package.metadata.release]

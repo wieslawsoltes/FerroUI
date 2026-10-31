@@ -319,3 +319,69 @@ fn validates_override_modifiers_across_composite_inheritance() {
     )
     .is_err());
 }
+
+#[cfg(feature = "javascript")]
+#[test]
+fn external_scripts_preserve_javascript_boundaries_and_qml_structure() {
+    let source = r#"
+        import QtQml
+        QtObject {
+            id: app
+            property int seed: 3
+            property alias input: app.seed
+            property var result: [1, 2].map(({x} = {}) => /[{}]/.test(`value:${x}`))
+            property bool after: true
+            function compute(v: int): int {
+                const text = `brace: } nested: ${`x${v}`}`
+                return /[a-z}]/u.test(text) ? v : 0
+            }
+            onReady: ({value: item}, scale = 2) => { result = item * scale }
+            property string finalText: "done"
+        }
+    "#;
+    let doc = parse_external(source).unwrap();
+    assert!(
+        matches!(&doc.root.members[2].kind,MemberKind::Property{value:Some(Binding::Expr(Expr::Member(_,name))),..} if name=="seed")
+    );
+    assert!(
+        matches!(&doc.root.members[3].kind,MemberKind::Property{value:Some(Binding::Expr(Expr::JavaScript(js))),..} if js.source.contains("/[{}]/") && js.form==ScriptForm::Expression && js.source==source[js.span.start..js.span.end])
+    );
+    assert!(
+        matches!(&doc.root.members[5].kind,MemberKind::Function{body,..} if matches!(&body[0],Stmt::JavaScript(js) if js.source.contains("const text") && js.source.contains("return /[a-z}]/u")))
+    );
+    assert!(
+        matches!(&doc.root.members[6].kind,MemberKind::Handler{parameters,body,..} if parameters.len()==2 && matches!(&body[0],Stmt::JavaScript(js) if js.source.contains(".call(this")))
+    );
+    assert!(
+        matches!(&doc.root.members.last().unwrap().kind,MemberKind::Property{value:Some(Binding::Expr(Expr::String(v))),..} if v=="done")
+    );
+    assert!(parse_external("Item { property var bad: /[/ }").is_err());
+}
+
+#[cfg(feature = "javascript")]
+#[test]
+fn module_dependencies_are_ast_based_and_classic_directives_preserve_offsets() {
+    let module = javascript::parse_resource(
+        r#"import {x} from "./x.mjs"; export * from "./other.mjs";
+        const ignored="import('./fake')"; export function later(){return import("./lazy.mjs")}"#,
+        true,
+    )
+    .unwrap();
+    let mut imports = module
+        .dependencies
+        .iter()
+        .map(|d| d.specifier.as_str())
+        .collect::<Vec<_>>();
+    imports.sort();
+    assert_eq!(imports, ["./lazy.mjs", "./other.mjs", "./x.mjs"]);
+    assert!(
+        javascript::parse_resource("export function dynamic(key){return import(key)}", true)
+            .is_err()
+    );
+    let source="/* directives */\n.pragma library\r\n.import 'tools.js' as Tools\nconst { title: label } = Tools.data(); function get(){ return label }";
+    let classic = javascript::parse_resource(source, false).unwrap();
+    assert_eq!(classic.resource.kind, ScriptKind::Library);
+    assert_eq!(classic.resource.exports, ["get", "label"]);
+    assert_eq!(classic.dependencies[0].namespace.as_deref(), Some("Tools"));
+    assert_eq!(source.find("const"), classic.resource.source.find("const"));
+}

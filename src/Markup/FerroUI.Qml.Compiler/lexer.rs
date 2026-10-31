@@ -1,16 +1,18 @@
 //! Lexical scanning. Newline trivia is retained for statement boundaries.
 use crate::{Diagnostic, SourceSpan};
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub(crate) enum Kind<'s> {
     Ident(&'s str),
     Number(&'s str),
     String(String),
     Symbol(&'s str),
+    #[cfg(feature = "javascript")]
+    Invalid(String),
     End,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub(crate) struct Token<'s> {
     pub kind: Kind<'s>,
     pub span: SourceSpan,
@@ -36,6 +38,84 @@ pub(crate) fn tokenize(source: &str) -> Result<Vec<Token<'_>>, Diagnostic> {
         if done {
             return Ok(tokens);
         }
+    }
+}
+
+/// Native parsing borrows its token vector. External parsing keeps only QML
+/// tokens and advances past complete ECMAScript spans supplied by its parser.
+pub(crate) enum Tokens<'s> {
+    Native(Vec<Token<'s>>),
+    #[cfg(feature = "javascript")]
+    External(std::cell::RefCell<ExternalTokens<'s>>),
+}
+
+impl<'s> Tokens<'s> {
+    pub fn get(&self, i: usize) -> Option<std::borrow::Cow<'_, Token<'s>>> {
+        match self {
+            Self::Native(tokens) => tokens.get(i).map(std::borrow::Cow::Borrowed),
+            #[cfg(feature = "javascript")]
+            Self::External(tokens) => tokens.borrow_mut().get(i).map(std::borrow::Cow::Owned),
+        }
+    }
+    #[cfg(feature = "javascript")]
+    pub fn external(source: &'s str) -> Self {
+        Self::External(std::cell::RefCell::new(ExternalTokens {
+            scanner: Scanner { source, pos: 0 },
+            tokens: Vec::new(),
+        }))
+    }
+    #[cfg(feature = "javascript")]
+    pub fn skip_script(&mut self, index: usize, span: SourceSpan) {
+        let Self::External(state) = self else {
+            unreachable!("only the external parser consumes script spans")
+        };
+        let state = state.get_mut();
+        state.tokens.truncate(index);
+        state.tokens.push(Token {
+            kind: Kind::Symbol("<JavaScript>"),
+            span,
+            line_break: false,
+        });
+        state.scanner.pos = span.end;
+    }
+}
+
+#[cfg(feature = "javascript")]
+pub(crate) struct ExternalTokens<'s> {
+    scanner: Scanner<'s>,
+    tokens: Vec<Token<'s>>,
+}
+
+#[cfg(feature = "javascript")]
+impl<'s> ExternalTokens<'s> {
+    fn get(&mut self, i: usize) -> Option<Token<'s>> {
+        while self.tokens.len() <= i {
+            if self
+                .tokens
+                .last()
+                .is_some_and(|t| matches!(t.kind, Kind::End | Kind::Invalid(_)))
+            {
+                return None;
+            }
+            let s = &mut self.scanner;
+            let token = (|| -> Result<Token<'s>, Diagnostic> {
+                let line_break = s.trivia()?;
+                let start = s.pos;
+                let kind = s.token()?;
+                Ok(Token {
+                    kind,
+                    span: SourceSpan { start, end: s.pos },
+                    line_break,
+                })
+            })()
+            .unwrap_or_else(|err| Token {
+                kind: Kind::Invalid(err.message),
+                span: err.span,
+                line_break: false,
+            });
+            self.tokens.push(token);
+        }
+        self.tokens.get(i).cloned()
     }
 }
 

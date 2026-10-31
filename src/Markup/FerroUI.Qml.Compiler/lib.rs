@@ -8,6 +8,10 @@ mod parser;
 
 pub use ast::*;
 pub use parser::parse;
+#[cfg(feature = "javascript")]
+pub use parser::parse_external;
+#[cfg(feature = "javascript")]
+pub mod javascript;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Diagnostic {

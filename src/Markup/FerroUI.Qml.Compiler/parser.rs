@@ -1,5 +1,5 @@
 //! Recursive-descent object grammar and precedence-climbing expression parser.
-use crate::lexer::{tokenize, Kind, Token};
+use crate::lexer::{tokenize, Kind, Token, Tokens};
 use crate::*;
 use std::collections::HashSet;
 
@@ -9,29 +9,78 @@ const MAX_NESTING: usize = 64;
 /// Parse one UTF-8 QML component. Offsets on diagnostics are byte offsets;
 /// displayed lines and Unicode scalar columns are one-based.
 pub fn parse(source: &str) -> Result<Document> {
+    parse_tokens(source, Tokens::Native(tokenize(source)?))
+}
+
+#[cfg(feature = "javascript")]
+pub fn parse_external(source: &str) -> Result<Document> {
+    parse_tokens(source, Tokens::external(source))
+}
+
+fn parse_tokens<'s>(source: &'s str, tokens: Tokens<'s>) -> Result<Document> {
     let document = Parser {
         source,
-        tokens: tokenize(source)?,
+        tokens,
         pos: 0,
         depth: 0,
         loops: 0,
     }
     .document()?;
+    for import in document.imports.iter().filter(|i| i.is_script()) {
+        let Some(alias) = import.alias.as_deref() else {
+            return Err(Diagnostic::new(
+                source,
+                import.span,
+                "a JavaScript import requires an uppercase qualifier",
+            ));
+        };
+        if matches!(
+            alias,
+            "Date"
+                | "Math"
+                | "JSON"
+                | "Object"
+                | "Array"
+                | "RegExp"
+                | "Promise"
+                | "String"
+                | "Number"
+                | "Boolean"
+                | "Symbol"
+                | "Function"
+                | "Map"
+                | "Set"
+                | "Proxy"
+                | "Reflect"
+        ) || document
+            .imports
+            .iter()
+            .filter(|i| i.alias.as_deref() == Some(alias))
+            .count()
+            != 1
+        {
+            return Err(Diagnostic::new(
+                source,
+                import.span,
+                format!("unavailable JavaScript import qualifier '{alias}'"),
+            ));
+        }
+    }
     validate(&document, source)?;
     Ok(document)
 }
 
 struct Parser<'s> {
     source: &'s str,
-    tokens: Vec<Token<'s>>,
+    tokens: Tokens<'s>,
     pos: usize,
     depth: usize,
     loops: usize,
 }
 
 impl<'s> Parser<'s> {
-    fn token(&self) -> &Token<'s> {
-        &self.tokens[self.pos]
+    fn token(&self) -> std::borrow::Cow<'_, Token<'s>> {
+        self.tokens.get(self.pos).expect("current QML token")
     }
     fn at(&self, text: &str) -> bool {
         token_is(&self.token().kind, text)
@@ -52,12 +101,17 @@ impl<'s> Parser<'s> {
         }
     }
     fn error(&self, message: impl Into<String>) -> Diagnostic {
-        Diagnostic::new(self.source, self.token().span, message)
+        let token = self.token();
+        #[cfg(feature = "javascript")]
+        if let Kind::Invalid(reason) = &token.kind {
+            return Diagnostic::new(self.source, token.span, reason);
+        }
+        Diagnostic::new(self.source, token.span, message)
     }
     fn span(&self, start: usize) -> SourceSpan {
         SourceSpan {
             start,
-            end: self.tokens[self.pos - 1].span.end,
+            end: self.tokens.get(self.pos - 1).unwrap().span.end,
         }
     }
     fn nested<T>(&mut self, f: impl FnOnce(&mut Self) -> Result<T>) -> Result<T> {
@@ -133,6 +187,7 @@ impl<'s> Parser<'s> {
             return Err(self.error("expected end of document after the root object"));
         }
         Ok(Document {
+            scripts: Default::default(),
             singletons: Vec::new(),
             pragmas,
             imports,
@@ -293,7 +348,11 @@ impl<'s> Parser<'s> {
             let ty = self.ty()?;
             let name = self.name()?;
             let value = if self.eat(":") {
-                Some(self.binding()?)
+                Some(if ty == "alias" {
+                    Binding::Expr(self.expression()?)
+                } else {
+                    self.binding()?
+                })
             } else {
                 None
             };
@@ -347,6 +406,15 @@ impl<'s> Parser<'s> {
             } else {
                 None
             };
+            #[cfg(feature = "javascript")]
+            let body = if self.external() {
+                vec![Stmt::JavaScript(
+                    self.external_block(ScriptForm::FunctionBody)?,
+                )]
+            } else {
+                self.block()?
+            };
+            #[cfg(not(feature = "javascript"))]
             let body = self.block()?;
             return Ok(MemberKind::Function {
                 name,
@@ -495,20 +563,21 @@ impl<'s> Parser<'s> {
         let Some(Token {
             kind: Kind::Ident(mut name),
             ..
-        }) = self.tokens.get(i)
+        }) = self.tokens.get(i).as_deref()
         else {
             return false;
         };
         i += 1;
         while self.tokens.get(i).is_some_and(|t| token_is(&t.kind, ".")) {
+            let token = self.tokens.get(i + 1);
             let Some(Token {
                 kind: Kind::Ident(next),
                 ..
-            }) = self.tokens.get(i + 1)
+            }) = token.as_deref()
             else {
                 return false;
             };
-            name = next;
+            name = *next;
             i += 2;
         }
         is_type(name) && self.tokens.get(i).is_some_and(|t| token_is(&t.kind, "{"))
@@ -524,6 +593,12 @@ impl<'s> Parser<'s> {
                     .get(self.pos + 2)
                     .is_some_and(|t| token_is(&t.kind, ":")))
         {
+            #[cfg(feature = "javascript")]
+            if self.external() {
+                return Ok(Binding::Script(vec![Stmt::JavaScript(
+                    self.external_block(ScriptForm::BindingBlock)?,
+                )]));
+            }
             return self.block().map(Binding::Script);
         }
         if self.object_ahead(self.pos) {
@@ -544,10 +619,47 @@ impl<'s> Parser<'s> {
             }
             return Ok(Binding::Objects(objects));
         }
+        #[cfg(feature = "javascript")]
+        if self.external() {
+            let (span, expr) = crate::javascript::expression(self.source, self.token().span.start)?;
+            self.consume_external(span);
+            return Ok(Binding::Expr(expr));
+        }
         self.expression().map(Binding::Expr)
+    }
+    #[cfg(feature = "javascript")]
+    fn external(&self) -> bool {
+        matches!(self.tokens, Tokens::External(_))
+    }
+    #[cfg(feature = "javascript")]
+    fn consume_external(&mut self, span: SourceSpan) {
+        self.tokens.skip_script(self.pos, span);
+        self.pos += 1;
+    }
+    #[cfg(feature = "javascript")]
+    fn external_block(&mut self, form: ScriptForm) -> Result<JavaScript> {
+        let (span, script) = crate::javascript::block(self.source, self.token().span.start, form)?;
+        self.consume_external(span);
+        Ok(script)
     }
 
     fn handler(&mut self) -> Result<(Vec<String>, Vec<Stmt>)> {
+        #[cfg(feature = "javascript")]
+        if self.external() {
+            if self.at("{") {
+                return Ok((
+                    Vec::new(),
+                    vec![Stmt::JavaScript(
+                        self.external_block(ScriptForm::HandlerBody)?,
+                    )],
+                ));
+            }
+            let (span, params, script) =
+                crate::javascript::handler(self.source, self.token().span.start)?;
+            self.consume_external(span);
+            self.end_statement()?;
+            return Ok((params, vec![Stmt::JavaScript(script)]));
+        }
         let mut params = Vec::new();
         if self.eat("function") {
             params = self
@@ -592,7 +704,11 @@ impl<'s> Parser<'s> {
         let mut i = self.pos;
         let tokens = &self.tokens;
         let at = |i: usize, symbol: &str| tokens.get(i).is_some_and(|t| token_is(&t.kind, symbol));
-        let ident = |i: usize| matches!(tokens.get(i).map(|t| &t.kind), Some(Kind::Ident(_)));
+        let ident = |i: usize| {
+            tokens
+                .get(i)
+                .is_some_and(|t| matches!(t.kind, Kind::Ident(_)))
+        };
         if at(i, "(") {
             i += 1;
             while ident(i) {
@@ -608,7 +724,7 @@ impl<'s> Parser<'s> {
         } else if !ident(i) {
             return false;
         }
-        at(i + 1, "=>") && !tokens[i + 1].line_break
+        at(i + 1, "=>") && tokens.get(i + 1).is_some_and(|t| !t.line_break)
     }
     fn block(&mut self) -> Result<Vec<Stmt>> {
         self.nested(|p| {

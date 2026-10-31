@@ -62,6 +62,7 @@ impl<R: ComponentResolver> Linker<'_, R> {
                 let mut root = source.document.root.clone();
                 let scope = self.scope_id(&source.key);
                 crate::scope::isolate(&mut root, self.serial, &id, scope);
+                self.collect_scripts(&source)?;
                 let defining = Context::new(source.key.clone(), &source.document, self.resolver)?;
                 self.stack.push(source.key);
                 self.object(&defining, &mut root)?;
@@ -135,11 +136,30 @@ fn type_path<'a>(expr: &'a Expr, parts: &mut Vec<&'a str>) -> bool {
     true
 }
 
+fn javascript_names(
+    js: &mut JavaScript,
+    locals: &HashSet<String>,
+    resolve: &mut Lookup<'_>,
+) -> Result<(), LinkError> {
+    for name in std::mem::take(&mut js.references) {
+        let parts: Vec<_> = name.split('.').collect();
+        if locals.contains(parts[0]) || js.imports.contains_key(parts[0]) {
+            continue;
+        }
+        if let Some(Expr::Name(id)) = resolve(&parts)? {
+            js.ids.insert(name, id);
+        }
+    }
+    Ok(())
+}
 fn expression(
     expr: &mut Expr,
     locals: &HashSet<String>,
     resolve: &mut Lookup<'_>,
 ) -> Result<(), LinkError> {
+    if let Expr::JavaScript(js) = expr {
+        return javascript_names(js, locals, resolve);
+    }
     let mut parts = Vec::new();
     if type_path(expr, &mut parts) && !locals.contains(parts[0]) {
         if let Some(value) = resolve(&parts)? {
@@ -191,6 +211,7 @@ fn statements(
     }
     for stmt in body {
         match stmt {
+            Stmt::JavaScript(js) => javascript_names(js, &locals, resolve)?,
             Stmt::Expr(expr)
             | Stmt::Return(Some(expr))
             | Stmt::Let {

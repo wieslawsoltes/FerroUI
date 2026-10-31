@@ -66,6 +66,7 @@ pub fn link(
 ) -> Result<Document, LinkError> {
     let mut linker = Linker {
         resolver,
+        scripts: source.document.scripts.clone(),
         stack: vec![source.key.clone()],
         serial: 0,
         nodes: 0,
@@ -77,6 +78,7 @@ pub fn link(
     let mut root = source.document.root.clone();
     linker.object(&context, &mut root)?;
     Ok(Document {
+        scripts: linker.scripts,
         singletons: linker.singletons,
         root,
         pragmas: source.document.pragmas.clone(),
@@ -131,6 +133,7 @@ impl Context {
 
 struct Linker<'a, R> {
     resolver: &'a mut R,
+    scripts: BTreeMap<String, ScriptResource>,
     stack: Vec<String>,
     serial: usize,
     nodes: usize,
@@ -173,6 +176,7 @@ impl<R: ComponentResolver> Linker<'_, R> {
                     ),
                 ));
             }
+            self.collect_scripts(&source)?;
             let defining = Context::new(source.key.clone(), &source.document, self.resolver)?;
             return self.expand(context, &defining, source.key, &source.document.root, site);
         }
@@ -190,6 +194,25 @@ impl<R: ComponentResolver> Linker<'_, R> {
             }
         }
         site.type_imports = Some(context.native_imports.clone());
+        Ok(())
+    }
+
+    fn collect_scripts(&mut self, source: &ComponentSource) -> Result<(), LinkError> {
+        for (key, resource) in &source.document.scripts {
+            if let Some(first) = self.scripts.get(key) {
+                if first != resource {
+                    return Err(LinkError {
+                        origin: source.key.clone(),
+                        span: source.document.root.span,
+                        message: format!(
+                            "conflicting definitions of embedded JavaScript resource '{key}'"
+                        ),
+                    });
+                }
+            } else {
+                self.scripts.insert(key.clone(), resource.clone());
+            }
+        }
         Ok(())
     }
 

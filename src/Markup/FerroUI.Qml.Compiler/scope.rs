@@ -97,6 +97,11 @@ fn expression(
     locals: &HashSet<String>,
 ) {
     match expr {
+        Expr::JavaScript(js) => {
+            js.root = Some(root.into());
+            js.ids
+                .extend(ids.iter().map(|(a, b)| (a.clone(), b.clone())));
+        }
         Expr::Name(name) if !locals.contains(name) => {
             if let Some(id) = ids.get(name) {
                 name.clone_from(id);
@@ -149,6 +154,11 @@ fn statements(
     }
     for stmt in body {
         match stmt {
+            Stmt::JavaScript(js) => {
+                js.root = Some(root.into());
+                js.ids
+                    .extend(ids.iter().map(|(a, b)| (a.clone(), b.clone())));
+            }
             Stmt::Expr(expr)
             | Stmt::Return(Some(expr))
             | Stmt::Let {
