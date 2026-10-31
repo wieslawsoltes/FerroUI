@@ -5,6 +5,7 @@ use std::sync::atomic::{AtomicU64, Ordering};
 static NEXT_INSTANCE: AtomicU64 = AtomicU64::new(1);
 
 struct Builder<'a> {
+    scopes:enums::Scopes,
     instance: Instance,
     registry: &'a TypeRegistry,
     imports: &'a [Import],
@@ -16,10 +17,21 @@ impl Instance {
     /// Allocates the complete object and id table before evaluating any binding.
     /// Required root properties can be supplied by the Rust caller.
     pub fn new(
-        document: &Document,
+        source: &impl ComponentSource,
         registry: &TypeRegistry,
         initial: BTreeMap<String, Value>,
     ) -> Result<Self, Error> {
+        Self::construct(None,source,registry,initial)
+    }
+
+    /// Load an in-memory document with the type name normally supplied by its
+    /// filename, so its own enumerations can be accessed from expressions.
+    pub fn new_named(name:&str, source:&impl ComponentSource, registry:&TypeRegistry, initial:BTreeMap<String,Value>) -> Result<Self,Error> {
+        Self::construct(Some(name),source,registry,initial)
+    }
+
+    fn construct(name:Option<&str>, source:&impl ComponentSource, registry:&TypeRegistry, initial:BTreeMap<String,Value>) -> Result<Self,Error> {
+        let document = source.document();
         registry.validate_imports(&document.imports)?;
         if let Some(pragma) = document.pragmas.first() {
             return Err(Error::new(format!(
@@ -28,7 +40,10 @@ impl Instance {
             )));
         }
         let mut builder = Builder {
+            scopes:enums::Scopes::named(name,&document.root)?,
             instance: Self {
+                native_functions: source.evaluators(),
+                timers:timers::Timers::default(),
                 listeners: BTreeMap::new(),
                 validator: None,
                 watched: BTreeSet::new(),
@@ -46,6 +61,11 @@ impl Instance {
             aliases: Vec::new(),
         };
         let root = builder.object(&document.root, None)?;
+        // Module objects share this engine's slots and dependency graph. They
+        // have no visual parent and are allocated before any binding runs.
+        for singleton in &document.singletons {
+            builder.object(singleton, None)?;
+        }
         builder.link_aliases()?;
         for (name, value) in initial {
             let key = builder.instance.key(root, &name)?;
@@ -207,6 +227,7 @@ impl Builder<'_> {
             instance: self.instance.identity,
         };
         self.instance.nodes.push(Node {
+            type_scope:self.scopes.imports(imports,self.registry),
             composite_types: source.composite_types.clone(),
             lineage: definition.lineage.clone(),
             module: module.into(),
@@ -240,6 +261,9 @@ impl Builder<'_> {
         if connections {
             let target = self.instance.key(id, "target")?;
             self.instance.slots[target].value = parent.map(Value::Object).unwrap_or(Value::Null);
+        }
+        if module == "QtQml" && name == "Timer" {
+            self.instance.timers.register(id);
         }
         let mut has_id = false;
         for member in &source.members {
@@ -309,9 +333,6 @@ impl Builder<'_> {
                     {
                         return Err(Error::new(format!("duplicate method '{name}'")));
                     }
-                }
-                MemberKind::Enum { name, .. } => {
-                    return Err(Error::new(format!("unresolved enumeration '{name}'")))
                 }
                 MemberKind::Component { name, .. } => {
                     return Err(Error::new(format!(

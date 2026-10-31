@@ -2,9 +2,14 @@
 //! Native integrations register their type contracts before constructing an instance.
 //! Public mutations settle bindings and handlers atomically before exposing changes.
 mod connections;
+pub mod compiled;
+pub use compiled::{CompiledComponent, ComponentSource};
+mod enums;
+pub use enums::Namespace;
 mod evaluation;
 mod instantiate;
 mod registry;
+mod timers;
 mod transaction;
 mod value;
 
@@ -28,6 +33,7 @@ struct Procedure {
 }
 
 struct Node {
+    type_scope:Rc<Namespace>,
     module: String,
     name: String,
     lineage: Vec<(String, String)>,
@@ -96,6 +102,8 @@ pub struct SignalEmission {
 }
 
 pub struct Instance {
+    native_functions: &'static [compiled::Evaluator],
+    timers:timers::Timers,
     listeners: BTreeMap<String, Vec<connections::Listener>>,
     validator: Option<Validator>,
     watched: BTreeSet<(ObjectId, String)>,

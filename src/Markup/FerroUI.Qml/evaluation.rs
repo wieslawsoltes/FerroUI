@@ -27,7 +27,7 @@ impl Transaction<'_> {
             .or_else(|_| self.model.key(self.model.root(), name))
     }
 
-    fn name(
+    pub(crate) fn name(
         &mut self,
         owner: ObjectId,
         root: ObjectId,
@@ -57,10 +57,13 @@ impl Transaction<'_> {
         if let Some(id) = self.model.ids.get(name) {
             return Ok(Value::Object(*id));
         }
+        if let Some(value) = self.model.nodes[owner.index].type_scope.member(name) {
+            return Ok(value);
+        }
         self.read(self.lookup_property(owner, root, name)?, reads)
     }
 
-    fn scope_id(&self, name: &str) -> Result<ObjectId, Error> {
+    pub(crate) fn scope_id(&self, name: &str) -> Result<ObjectId, Error> {
         self.model
             .ids
             .get(name)
@@ -77,6 +80,19 @@ impl Transaction<'_> {
     ) -> Result<Value, Error> {
         use Expr::*;
         Ok(match expression {
+            Native(index) => {
+                let eval = *self
+                    .model
+                    .native_functions
+                    .get(*index)
+                    .ok_or_else(|| Error::new("invalid compiled expression index"))?;
+                eval(&mut compiled::Frame {
+                    tx: self,
+                    owner,
+                    locals,
+                    reads,
+                })?
+            }
             Null => Value::Null,
             Undefined => Value::Undefined,
             Bool(b) => Value::Bool(*b),
@@ -93,20 +109,14 @@ impl Transaction<'_> {
                     .collect::<Result<_, _>>()?,
             ),
             Member(base, name) => {
-                if let Name(group) = base.as_ref() {
-                    if let Ok(key) = self.model.key(owner, &format!("{group}.{name}")) {
-                        return self.read(key, reads);
+                if let Some((group, root)) = lexical_name(base) {
+                    return compiled::Frame {
+                        tx: self,
+                        owner,
+                        locals,
+                        reads,
                     }
-                    if group == "Math" {
-                        let constant = match name.as_str() {
-                            "PI" => std::f64::consts::PI,
-                            "E" => std::f64::consts::E,
-                            other => {
-                                return Err(Error::new(format!("unknown Math constant '{other}'")))
-                            }
-                        };
-                        return Ok(Value::Number(constant));
-                    }
+                    .named_member(group, root, name);
                 }
                 let base = self.expr(owner, base, locals, reads)?;
                 self.member(base, name, reads)?
@@ -118,23 +128,7 @@ impl Transaction<'_> {
             }
             Unary(op, expr) => {
                 let value = self.expr(owner, expr, locals, reads)?;
-                match op.as_str() {
-                    "!" => Value::Bool(!value.truthy()),
-                    "-" => Value::Number(-value.number()?),
-                    "+" => Value::Number(value.number()?),
-                    "~" => Value::Number(f64::from(!int32(value.number()?))),
-                    "typeof" => Value::String(
-                        match value {
-                            Value::Number(_) => "number",
-                            Value::Bool(_) => "boolean",
-                            Value::String(_) => "string",
-                            Value::Undefined => "undefined",
-                            _ => "object",
-                        }
-                        .into(),
-                    ),
-                    _ => return Err(Error::new(format!("unsupported unary operator '{op}'"))),
-                }
+                unary(op, value)?
             }
             Binary(op, left, right) => {
                 let a = self.expr(owner, left, locals, reads)?;
@@ -152,41 +146,60 @@ impl Transaction<'_> {
             }
             Call(target, arguments) => {
                 let (receiver, name) = match target.as_ref() {
-                    Name(name) => (
-                        Some(self.call_receiver(owner, self.model.root(), name)),
-                        name,
-                    ),
-                    ScopedName { name, root } => (
-                        Some(self.call_receiver(owner, self.scope_id(root)?, name)),
-                        name,
-                    ),
-                    Member(base, name) if matches!(base.as_ref(), Name(n) if n == "Math") => {
-                        (None, name)
-                    }
                     Member(base, name) => {
-                        (Some(object(self.expr(owner, base, locals, reads)?)?), name)
+                        let receiver = if let Some((group, root)) = lexical_name(base) {
+                            compiled::Frame {
+                                tx: self,
+                                owner,
+                                locals,
+                                reads,
+                            }
+                            .named_receiver(group, root)?
+                        } else {
+                            compiled::receiver(self.expr(owner, base, locals, reads)?)?
+                        };
+                        (receiver, name.as_str())
                     }
-                    _ => return Err(Error::new("expected a named QML method")),
+                    other => {
+                        let (name, root) = lexical_name(other)
+                            .ok_or_else(|| Error::new("expected a named QML method"))?;
+                        (
+                            compiled::Frame {
+                                tx: self,
+                                owner,
+                                locals,
+                                reads,
+                            }
+                            .local_receiver(name, root)?,
+                            name,
+                        )
+                    }
                 };
                 let arguments: Vec<_> = arguments
                     .iter()
                     .map(|e| self.expr(owner, e, locals, reads))
                     .collect::<Result<_, _>>()?;
-                match receiver {
-                    Some(receiver) => self.invoke(receiver, name, arguments, reads)?,
-                    None => math(name, &arguments)?,
+                compiled::Frame {
+                    tx: self,
+                    owner,
+                    locals,
+                    reads,
                 }
+                .invoke(receiver, name, arguments)?
             }
         })
     }
 
-    fn member(
+    pub(crate) fn member(
         &mut self,
         base: Value,
         name: &str,
         reads: &mut BTreeSet<SlotId>,
     ) -> Result<Value, Error> {
         match base {
+            Value::Namespace(namespace) => namespace
+                .member(name)
+                .ok_or_else(|| Error::new(format!("unknown type or enum member '{name}'"))),
             Value::Object(id) if name == "parent" => Ok(self
                 .model
                 .parent(id)
@@ -206,12 +219,14 @@ impl Transaction<'_> {
         }
     }
 
-    fn call_receiver(&self, owner: ObjectId, root: ObjectId, name: &str) -> ObjectId {
+    pub(crate) fn call_receiver(&self, owner: ObjectId, root: ObjectId, name: &str) -> ObjectId {
         for object in [owner, root] {
             let node = &self.model.nodes[object.index];
             if node.methods.contains_key(name)
                 || node.signals.contains_key(name)
                 || node.native.contains_key(name)
+                || (self.model.timers.is_timer(object)
+                    && matches!(name, "start" | "stop" | "restart"))
             {
                 return object;
             }
@@ -242,6 +257,9 @@ impl Transaction<'_> {
         if node.signals.contains_key(name) {
             self.signal(owner, name, arguments)?;
             return Ok(Value::Undefined);
+        }
+        if self.model.timers.is_timer(owner) && matches!(name, "start" | "stop" | "restart") {
+            return self.timer_method(owner, name, &arguments);
         }
         Err(Error::new(format!("unknown method or signal '{name}'")))
     }
@@ -332,21 +350,53 @@ impl Transaction<'_> {
                             Place::Local(name) => locals[name].clone(),
                         })
                     };
-                    let value = self.expr(owner, value, locals, reads)?;
-                    completion = match previous {
-                        None => value,
-                        Some(old) => binary(
-                            op.strip_suffix('=')
-                                .ok_or_else(|| Error::new("invalid assignment operator"))?,
-                            old,
-                            value,
-                        )?,
+                    let assigned = match (op.as_str(), previous) {
+                        ("++" | "--" | "post++" | "post--", Some(old)) => {
+                            let old = old.number()?;
+                            let updated = Value::Number(if op.ends_with("++") {
+                                old + 1.0
+                            } else {
+                                old - 1.0
+                            });
+                            completion = if op.starts_with("post") {
+                                Value::Number(old)
+                            } else {
+                                updated.clone()
+                            };
+                            updated
+                        }
+                        ("&&=" | "||=" | "??=", Some(old)) => {
+                            let skip = match op.as_str() {
+                                "&&=" => !old.truthy(),
+                                "||=" => old.truthy(),
+                                _ => !matches!(old, Value::Null | Value::Undefined),
+                            };
+                            if skip {
+                                completion = old;
+                                continue;
+                            }
+                            completion = self.expr(owner, value, locals, reads)?;
+                            completion.clone()
+                        }
+                        (_, previous) => {
+                            let rhs = self.expr(owner, value, locals, reads)?;
+                            completion = match previous {
+                                None => rhs,
+                                Some(old) => binary(
+                                    op.strip_suffix('=')
+                                        .ok_or_else(|| Error::new("invalid assignment operator"))?,
+                                    old,
+                                    rhs,
+                                )?,
+                            };
+                            completion.clone()
+                        }
                     };
                     match place {
                         Place::Local(name) => {
-                            locals.insert(name, completion.clone());
+                            locals.insert(name, assigned);
                         }
-                        Place::Slot(key) => self.write(key, completion.clone())?,
+                        Place::Slot(key) => self.write(key, assigned)?,
                     }
                 }
                 Stmt::If {
@@ -407,7 +457,7 @@ enum Place {
     Local(String),
 }
 
-fn object(value: Value) -> Result<ObjectId, Error> {
+pub(crate) fn object(value: Value) -> Result<ObjectId, Error> {
     if let Value::Object(id) = value {
         Ok(id)
     } else {
@@ -439,7 +489,7 @@ fn loose_equal(a: &Value, b: &Value) -> Result<bool, Error> {
     Ok(false)
 }
 
-fn binary(op: &str, a: Value, b: Value) -> Result<Value, Error> {
+pub fn binary(op: &str, a: Value, b: Value) -> Result<Value, Error> {
     Ok(match op {
         "+" if matches!(a, Value::String(_)) || matches!(b, Value::String(_)) => {
             Value::String(a.js_string() + &b.js_string())
@@ -484,7 +534,7 @@ fn binary(op: &str, a: Value, b: Value) -> Result<Value, Error> {
     })
 }
 
-fn math(name: &str, args: &[Value]) -> Result<Value, Error> {
+pub(crate) fn math(name: &str, args: &[Value]) -> Result<Value, Error> {
     let first = args.first().unwrap_or(&Value::Undefined).number()?;
     let second = args.get(1).unwrap_or(&Value::Undefined).number()?;
     let value = match name {
@@ -528,4 +578,33 @@ fn math(name: &str, args: &[Value]) -> Result<Value, Error> {
         _ => return Err(Error::new(format!("unsupported Math function '{name}'"))),
     };
     Ok(Value::Number(value))
+}
+
+pub fn unary(op: &str, value: Value) -> Result<Value, Error> {
+    Ok(match op {
+        "void" => Value::Undefined,
+        "!" => Value::Bool(!value.truthy()),
+        "-" => Value::Number(-value.number()?),
+        "+" => Value::Number(value.number()?),
+        "~" => Value::Number(f64::from(!int32(value.number()?))),
+        "typeof" => Value::String(
+            match value {
+                Value::Number(_) => "number",
+                Value::Bool(_) => "boolean",
+                Value::String(_) => "string",
+                Value::Undefined => "undefined",
+                _ => "object",
+            }
+            .into(),
+        ),
+        _ => return Err(Error::new(format!("unsupported unary operator '{op}'"))),
+    })
+}
+
+fn lexical_name(expr: &Expr) -> Option<(&str, Option<&str>)> {
+    match expr {
+        Expr::Name(name) => Some((name, None)),
+        Expr::ScopedName { name, root } => Some((name, Some(root))),
+        _ => None,
+    }
 }

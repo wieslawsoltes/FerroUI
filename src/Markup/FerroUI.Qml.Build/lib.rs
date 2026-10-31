@@ -3,6 +3,7 @@
 mod emit;
 mod files;
 mod identified;
+mod native;
 
 use std::collections::BTreeSet;
 use std::fmt;
@@ -45,7 +46,7 @@ impl Compiler {
         let document = ferroui_qml_compiler::link(source, &mut files)
             .map_err(|e| BuildError(e.to_string()))?;
         Ok(Output {
-            rust: emit::module(&document),
+            rust: emit::module(document).map_err(BuildError)?,
             dependencies: files.dependencies(),
         })
     }
