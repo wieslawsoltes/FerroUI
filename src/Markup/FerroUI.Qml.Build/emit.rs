@@ -6,6 +6,7 @@ use quote::quote;
 pub(crate) fn module(mut document: Document) -> Result<String, String> {
     let crate::native::Functions {
         expressions,
+        first_reads,
         scripts,
     } = crate::native::lower(&mut document)?;
     let ir = document.rust();
@@ -18,7 +19,8 @@ pub(crate) fn module(mut document: Document) -> Result<String, String> {
             use ::ferroui_qml::{compiled as c, Value as V};
             static FUNCTIONS: &[::ferroui_qml::compiled::Evaluator] = &[#(#expressions),*];
             static SCRIPTS: &[::ferroui_qml::compiled::Script] = &[#(#scripts),*];
-            ::ferroui_qml::CompiledComponent::new(#ir, FUNCTIONS, SCRIPTS)
+            static FIRST_READS: &[::ferroui_qml::compiled::FirstRead] = &[#(#first_reads),*];
+            ::ferroui_qml::CompiledComponent::new(#ir, FUNCTIONS, SCRIPTS).with_first_reads(FIRST_READS)
         }
     };
     let file = syn::parse2(module).map_err(|e| format!("invalid generated Rust module: {e}"))?;

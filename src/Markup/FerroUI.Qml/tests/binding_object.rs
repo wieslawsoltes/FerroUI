@@ -69,3 +69,15 @@ fn on_property_syntax_is_an_owned_object_outside_the_default_property() {
         .unwrap();
     assert_eq!(view.get(root, "n").unwrap(), Value::Number(3.));
 }
+
+#[test]
+fn restore_masks_distinguish_scalar_initializers_from_expression_bindings() {
+    let mut vm=load("property int literal: -10; property int computed: literal * 2; Binding on literal { id: a; value: 3; restoreMode: Binding.RestoreValue }; Binding on computed { id: b; value: 9; restoreMode: Binding.RestoreValue }");
+    let root = vm.root();
+    vm.set(vm.id("a").unwrap(), "when", Value::Bool(false))
+        .unwrap();
+    vm.set(vm.id("b").unwrap(), "when", Value::Bool(false))
+        .unwrap();
+    assert_eq!(vm.get(root, "literal").unwrap(), Value::Number(-10.));
+    assert_eq!(vm.get(root, "computed").unwrap(), Value::Number(9.));
+}

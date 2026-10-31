@@ -183,3 +183,50 @@ pub enum Stmt {
     Break,
     Continue,
 }
+
+/// A scalar initializer is a stored value. It has no binding to restore when a
+/// conditional Binding stops overriding it.
+pub enum Literal<'a> {
+    Null,
+    Undefined,
+    Bool(bool),
+    Number(f64),
+    String(&'a str),
+}
+
+impl Expr {
+    pub fn as_literal(&self) -> Option<Literal<'_>> {
+        Some(match self {
+            Self::Null => Literal::Null,
+            Self::Undefined => Literal::Undefined,
+            Self::Bool(b) => Literal::Bool(*b),
+            Self::Number(n) => Literal::Number(*n),
+            Self::String(s) => Literal::String(s),
+            Self::Unary(op, operand) if op == "-" || op == "+" => {
+                let Self::Number(n) = operand.as_ref() else {
+                    return None;
+                };
+                Literal::Number(if op == "-" { -n } else { *n })
+            }
+            _ => return None,
+        })
+    }
+
+    /// A name guaranteed to be read before any other property or call. This
+    /// allows forward chains to be evaluated iteratively without speculating
+    /// into a branch or re-running user code.
+    pub fn first_read(&self) -> Option<(&str, Option<&str>)> {
+        match self {
+            Self::Name(name) => Some((name, None)),
+            Self::ScopedName { name, root } => Some((name, Some(root))),
+            Self::Unary(_, e) | Self::Conditional(e, ..) => e.first_read(),
+            Self::Binary(op, a, b)
+                if a.as_literal().is_some() && !matches!(op.as_str(), "&&" | "||" | "??") =>
+            {
+                b.first_read()
+            }
+            Self::Binary(_, a, _) => a.first_read(),
+            _ => None,
+        }
+    }
+}

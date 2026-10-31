@@ -167,18 +167,97 @@ impl Transaction<'_> {
         if !self.model.slots[key].dirty {
             return Ok(());
         }
-        self.budget()?;
-        if self.evaluating.len() >= 256 {
-            return Err(Error::new(
-                "binding dependency chain exceeds the nesting limit",
-            ));
+        self.with_stack(4, |tx| tx.evaluate_chain(key))
+    }
+
+    /// Only the first mandatory property read is scheduled ahead of its owner.
+    /// Every expression and Rust callback still runs exactly once.
+    fn evaluate_chain(&mut self, mut key: SlotId) -> Result<(), Error> {
+        let mut chain = Vec::new();
+        loop {
+            self.budget()?;
+            if !self.evaluating.insert(key) {
+                return Err(Error::new(format!(
+                    "binding cycle at '{}'",
+                    self.model.properties[key].name
+                )));
+            }
+            chain.push(key);
+            let Some(next) = self
+                .first_dependency(key)
+                .filter(|next| self.model.slots[*next].dirty)
+            else {
+                break;
+            };
+            key = next;
         }
-        if !self.evaluating.insert(key) {
-            return Err(Error::new(format!(
-                "binding cycle at '{}'",
-                self.model.properties[key].name
-            )));
+        for key in chain.into_iter().rev() {
+            self.evaluate_one(key)?;
         }
+        Ok(())
+    }
+
+    fn first_dependency(&self, key: SlotId) -> Option<SlotId> {
+        if let Some(overlay) = &self.model.slots[key].overlay {
+            return Some(overlay.input());
+        }
+        if let Some(Alias::Slot(target)) = self.model.properties[key].alias {
+            return Some(target);
+        }
+        let Binding::Expr(expr) = self.model.slots[key].binding.as_deref()? else {
+            return None;
+        };
+        let (name, scope) = match expr {
+            ir::Expr::Native(index) => self
+                .model
+                .native_first_reads
+                .get(*index)
+                .copied()
+                .flatten()?,
+            other => other.first_read()?,
+        };
+        if matches!(name, "parent" | "this" | "NaN" | "Infinity") {
+            return None;
+        }
+        let owner = self.model.properties[key].owner;
+        if let Some(key) = self.model.nodes[owner.index].properties.get(name) {
+            return Some(*key);
+        }
+        if self.model.ids.contains_key(name)
+            || self.model.nodes[owner.index]
+                .type_scope
+                .member(name)
+                .is_some()
+        {
+            return None;
+        }
+        let root = match scope {
+            Some(name) => *self.model.ids.get(name)?,
+            None => self.model.root(),
+        };
+        self.model
+            .key(root, name)
+            .or_else(|_| self.model.key(self.model.root(), name))
+            .ok()
+    }
+
+    pub(crate) fn with_stack<T>(
+        &mut self,
+        cost: usize,
+        operation: impl FnOnce(&mut Self) -> Result<T, Error>,
+    ) -> Result<T, Error> {
+        // Account for simultaneously active expression, method and binding
+        // frames; opaque/native evaluators may still perform dynamic reads.
+        if self.depth + cost > 80 {
+            return Err(Error::new("QML evaluation stack limit exceeded"));
+        }
+        self.depth += cost;
+        let result = operation(self);
+        self.depth -= cost;
+        result
+    }
+
+    fn evaluate_one(&mut self, key: SlotId) -> Result<(), Error> {
         let owner = self.model.properties[key].owner;
         let mut reads = BTreeSet::new();
         let overlay = self.model.slots[key].overlay.as_ref().map(|o| o.input());

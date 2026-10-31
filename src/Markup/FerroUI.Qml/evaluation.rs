@@ -81,6 +81,18 @@ impl Transaction<'_> {
         locals: &mut Locals,
         reads: &mut BTreeSet<SlotId>,
     ) -> Result<Value, Error> {
+        self.with_stack(1, |tx| {
+            tx.evaluate_expression(owner, expression, locals, reads)
+        })
+    }
+
+    fn evaluate_expression(
+        &mut self,
+        owner: ObjectId,
+        expression: &Expr,
+        locals: &mut Locals,
+        reads: &mut BTreeSet<SlotId>,
+    ) -> Result<Value, Error> {
         use Expr::*;
         Ok(match expression {
             Native(index) => {
@@ -275,18 +287,13 @@ impl Transaction<'_> {
         args: Vec<Value>,
         reads: &mut BTreeSet<SlotId>,
     ) -> Result<Value, Error> {
-        if self.depth >= 64 {
-            return Err(Error::new("QML call stack limit exceeded"));
-        }
-        self.depth += 1;
         let mut locals = proc
             .parameters
             .iter()
             .map(|p| p.name.clone())
             .zip(args)
             .collect();
-        let result = self.statements(owner, &proc.body, &mut locals, reads);
-        self.depth -= 1;
+        let result = self.with_stack(4, |tx| tx.statements(owner, &proc.body, &mut locals, reads));
         let value = match result? {
             Flow::Next(_) => Value::Undefined,
             Flow::Return(value) => value,

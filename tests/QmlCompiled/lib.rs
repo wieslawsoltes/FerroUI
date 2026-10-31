@@ -88,6 +88,23 @@ mod scripts {
     }
 
     #[test]
+    fn native_compiler_preserves_restore_value_and_first_read_metadata() {
+        let compiled = compiled_qml();
+        assert_eq!(compiled.first_reads().len(), compiled.evaluators().len());
+        assert!(compiled.first_reads().iter().any(Option::is_some));
+        let mut vm = Instance::new(&compiled, &TypeRegistry::new(), Default::default()).unwrap();
+        let root = vm.root();
+        assert_eq!(vm.get(root, "staticInitial").unwrap(), Value::Number(27.));
+        vm.set(
+            vm.id("literalOverride").unwrap(),
+            "when",
+            Value::Bool(false),
+        )
+        .unwrap();
+        assert_eq!(vm.get(root, "staticInitial").unwrap(), Value::Number(-8.));
+    }
+
+    #[test]
     fn native_and_source_scripts_agree_on_control_flow_and_transaction_rollback() {
         let compiled = compiled_qml();
         assert!(!compiled.scripts().is_empty());

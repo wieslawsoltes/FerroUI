@@ -7,6 +7,7 @@ use quote::quote;
 #[derive(Default)]
 pub(crate) struct Functions {
     pub expressions: Vec<TokenStream>,
+    pub first_reads: Vec<TokenStream>,
     pub scripts: Vec<TokenStream>,
 }
 pub(crate) fn lower(document: &mut Document) -> Result<Functions, String> {
@@ -36,7 +37,8 @@ fn members(group: &mut [Member], out: &mut Functions) -> Result<(), String> {
                         members(&mut object.members, out)?;
                     }
                 }
-                Binding::Expr(expr) => replace(expr, &mut out.expressions)?,
+                Binding::Expr(expr) if expr.as_literal().is_some() => (),
+                Binding::Expr(expr) => replace(expr, out)?,
                 Binding::Script(body) => statements(body, out)?,
             },
             MemberKind::Function { body, .. } | MemberKind::Handler { body, .. } => {
@@ -59,10 +61,16 @@ fn statements(body: &mut Vec<Stmt>, out: &mut Functions) -> Result<(), String> {
     Ok(())
 }
 
-fn replace(expr: &mut Expr, functions: &mut Vec<TokenStream>) -> Result<(), String> {
+fn replace(expr: &mut Expr, out: &mut Functions) -> Result<(), String> {
     let code = emit(expr)?;
-    *expr = Expr::Native(functions.len());
-    functions.push(quote!(|frame| { let _ = &frame; Ok(#code) }));
+    out.first_reads.push(match expr.first_read() {
+        Some((name, Some(root))) => quote!(Some((#name,Some(#root)))),
+        Some((name, None)) => quote!(Some((#name,None))),
+        None => quote!(None),
+    });
+    *expr = Expr::Native(out.expressions.len());
+    out.expressions
+        .push(quote!(|frame| { let _ = &frame; Ok(#code) }));
     Ok(())
 }
 

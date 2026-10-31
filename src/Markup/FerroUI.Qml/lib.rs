@@ -105,6 +105,7 @@ pub struct SignalEmission {
 }
 
 pub struct Instance {
+    native_first_reads: &'static [compiled::FirstRead],
     bindings: BTreeSet<ObjectId>,
     native_scripts: &'static [compiled::Script],
     native_functions: &'static [compiled::Evaluator],

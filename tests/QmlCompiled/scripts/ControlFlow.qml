@@ -33,4 +33,10 @@ QtObject {
         yes ||= missingName
         return yes && (active || missingName)
     }
+    property int staticInitial: -8
+    Binding on staticInitial {
+        id: literalOverride
+        value: 27
+        restoreMode: Binding.RestoreValue
+    }
 }

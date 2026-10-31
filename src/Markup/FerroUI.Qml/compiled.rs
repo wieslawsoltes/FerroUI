@@ -13,7 +13,12 @@ pub type Evaluator = fn(&mut Frame<'_, '_>) -> Result<Value, Error>;
 
 pub type Script = fn(&mut Frame<'_, '_>) -> Result<Flow, Error>;
 
+pub type FirstRead = Option<(&'static str, Option<&'static str>)>;
+
 pub trait ComponentSource {
+    fn first_reads(&self) -> &'static [FirstRead] {
+        &[]
+    }
     fn scripts(&self) -> &'static [Script] {
         &[]
     }
@@ -29,12 +34,18 @@ impl ComponentSource for Document {
 }
 
 pub struct CompiledComponent {
+    first_reads: &'static [FirstRead],
     document: Document,
     scripts: &'static [Script],
     evaluators: &'static [Evaluator],
 }
 
 impl CompiledComponent {
+    pub fn with_first_reads(mut self, first_reads: &'static [FirstRead]) -> Self {
+        self.first_reads = first_reads;
+        self
+    }
+
     pub fn new(
         document: Document,
         evaluators: &'static [Evaluator],
@@ -42,12 +53,16 @@ impl CompiledComponent {
     ) -> Self {
         Self {
             document,
+            first_reads: &[],
             evaluators,
             scripts,
         }
     }
 }
 impl ComponentSource for CompiledComponent {
+    fn first_reads(&self) -> &'static [FirstRead] {
+        self.first_reads
+    }
     fn scripts(&self) -> &'static [Script] {
         self.scripts
     }

@@ -191,6 +191,7 @@ impl<'a> Builder<'a> {
             instance: Instance {
                 bindings: BTreeSet::new(),
                 native_functions: source.evaluators(),
+                native_first_reads: source.first_reads(),
                 native_scripts: source.scripts(),
                 timers: timers::Timers::default(),
                 listeners: BTreeMap::new(),
@@ -544,6 +545,15 @@ impl Builder<'_> {
                     .map(|c| self.object(c, Some(owner)).map(Value::Object))
                     .collect::<Result<_, _>>()?,
             ),
+            Binding::Expr(expr) if expr.as_literal().is_some() => {
+                match expr.as_literal().expect("matched a literal") {
+                    ir::Literal::Null => Value::Null,
+                    ir::Literal::Undefined => Value::Undefined,
+                    ir::Literal::Bool(b) => Value::Bool(b),
+                    ir::Literal::Number(n) => Value::Number(n),
+                    ir::Literal::String(s) => Value::String(s.into()),
+                }
+            }
             expr => {
                 self.instance.slots[key].binding = Some(Rc::new(expr.clone()));
                 self.instance.slots[key].dirty = true;
