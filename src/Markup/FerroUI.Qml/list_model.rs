@@ -193,6 +193,29 @@ pub(crate) fn is_method(name: &str) -> bool {
 }
 
 impl Instance {
+    pub(crate) fn model_keys(&self, row: RowId) -> Result<Vec<String>, Error> {
+        let model = self
+            .models
+            .get(&row.model)
+            .ok_or_else(|| Error::new("foreign model handle"))?;
+        let fields = model
+            .rows
+            .get(&row.serial)
+            .ok_or_else(|| Error::new("model row was removed"))?;
+        Ok(if model.dynamic == Some(false) {
+            model
+                .roles
+                .keys()
+                .chain(fields.keys())
+                .cloned()
+                .collect::<BTreeSet<_>>()
+                .into_iter()
+                .collect()
+        } else {
+            fields.keys().cloned().collect()
+        })
+    }
+
     /// Read a role through a row handle obtained by calling ListModel.get().
     pub fn model_role(&self, row: RowId, name: &str) -> Result<Value, Error> {
         let model = self

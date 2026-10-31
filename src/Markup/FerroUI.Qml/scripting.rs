@@ -61,6 +61,20 @@ pub trait ScriptEngine {
         script: &ir::JavaScript,
     ) -> Result<Value, Error>;
 
+    /// Check a retained value; the backend must return within its configured
+    /// execution limit and must not wait beyond the supplied timeout for a
+    /// pending Promise. A zero duration requests an immediate inspection.
+    fn observe_promise(
+        &self,
+        _context: &mut ScriptContext<'_, '_>,
+        _value: &ExternalValue,
+        _timeout: std::time::Duration,
+    ) -> Result<PromiseState, Error> {
+        Err(Error::new(
+            "the JavaScript backend does not support Promise observation",
+        ))
+    }
+
     /// Optional VM transaction hooks for engine-owned state. QML slots,
     /// records, models, timers and signal emission have their own undo logs.
     fn begin_transaction(&self, _instance: ScriptInstance) -> Result<(), Error> {
@@ -140,6 +154,16 @@ impl ScriptContext<'_, '_> {
         }
     }
 
+    /// The lexical QML scope of a classic JavaScript file imported by the
+    /// component. Unqualified names refer to the component root irrespective of
+    /// which child first accesses an export.
+    pub fn capture_component_scope(&self) -> ScriptScope {
+        ScriptScope {
+            owner: self.root,
+            ..self.capture_scope()
+        }
+    }
+
     pub fn in_scope<T>(
         &mut self,
         scope: &ScriptScope,
@@ -198,6 +222,45 @@ impl ScriptContext<'_, '_> {
             }
         }
     }
+    pub fn argument_types(&self, object: ObjectId, method: &str) -> Vec<Option<&str>> {
+        let Some(node) = self.tx.model.node(object) else {
+            return Vec::new();
+        };
+        let params = node
+            .methods
+            .get(method)
+            .map(|m| m.parameters.as_slice())
+            .or_else(|| node.native.get(method).map(|m| m.parameters.as_slice()))
+            .or_else(|| node.signal(method))
+            .unwrap_or_default();
+        params.iter().map(|p| p.ty.as_deref()).collect()
+    }
+    pub fn is_list_model(&self, object: ObjectId) -> bool {
+        self.tx.model.models.contains_key(&object)
+    }
+    pub fn name_type(&self, name: &str) -> Option<&str> {
+        if self.locals.contains_key(name) || self.id(name).is_some() {
+            return None;
+        }
+        [self.owner, self.root, self.tx.model.root()]
+            .into_iter()
+            .find_map(|o| self.property_type(o, name))
+    }
+    pub fn keys(&self, base: &Value) -> Result<Vec<String>, Error> {
+        self.tx.model.validate_handles(base)?;
+        Ok(match base {
+            Value::Object(o) => self.members(*o),
+            Value::Record(r) => self.record_keys(r)?,
+            Value::List(items) => (0..items.len())
+                .map(|i| i.to_string())
+                .chain(std::iter::once("length".into()))
+                .collect(),
+            Value::ModelRow(row) => self.tx.model.model_keys(*row)?,
+            Value::Namespace(namespace) => namespace.names().map(str::to_owned).collect(),
+            _ => Vec::new(),
+        })
+    }
+
     pub fn argument_type(&self, object: ObjectId, method: &str, index: usize) -> Option<&str> {
         let node = self.tx.model.node(object)?;
         let params = node

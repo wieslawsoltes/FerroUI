@@ -139,9 +139,12 @@ impl ScriptEngine for Probe {
 
 fn script(source: &str, form: ScriptForm) -> JavaScript {
     JavaScript {
+        executable: None,
+        import_hook: None,
         source: source.into(),
         form,
         origin: "fixture.qml".into(),
+        references: Vec::new(),
         span: ir::SourceSpan { start: 1, end: 2 },
         root: None,
         ids: Default::default(),
@@ -176,6 +179,10 @@ fn fixture() -> ir::Document {
     doc.scripts.insert(
         "local.mjs".into(),
         ir::ScriptResource {
+            executable: String::new(),
+            import_hook: None,
+            preload: true,
+            imports: Default::default(),
             source: "export const n=1".into(),
             kind: ir::ScriptKind::Module,
             dependencies: Default::default(),
