@@ -2,6 +2,8 @@
 
 The normative behavior is in [the specification](PORTABLE-MEDIA-FRAMEWORK-SPECIFICATION.md).
 This is an initial implementation, not a declaration of six-platform support.
+The [platform-agent handover](PLATFORM-HANDOVER.md) records the receiving branches,
+integration boundaries, reproducible checks and outstanding native work.
 
 ## Available code
 
@@ -86,8 +88,9 @@ buttons. Captured JPEG bytes are independently decoded in memory; the sample doe
 not write camera images to disk. `--camera-discovery` enumerates without starting
 capture and verifies that permission did not change. The macOS sample embeds its
 camera usage description. Applications must supply their own usage descriptions
-and platform packaging/entitlements. This provider profile requires macOS 10.15
-or iOS 11; it does not change the framework's OS floors.
+and platform packaging/entitlements. The native APIs require macOS 10.15 or iOS 11;
+FerroUI's existing iOS 14 floor still applies. The providers compile with that
+deployment target; minimum-OS linking/runtime acceptance remains pending.
 
 Targeted checks:
 
