@@ -4,6 +4,10 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ## [Unreleased]
 
+### Changed
+
+- **One identifier type, `uuid`** (C1 of #423, [docs/idiomatic-rust.md](docs/idiomatic-rust.md)): the `Guid` of `ferroui-splat` and of `ferroui-remote-protocol` hold a `uuid::Uuid`, the COM `Guid` of `ferroui-microcom` keeps its layout, and all three convert to and from `uuid::Uuid` with `From`. Parsing, formatting, the .NET byte layout and new random identifiers (`Uuid::new_v4`, from the system's generator) come from `uuid`, which replaces the copies of that code in the ReactiveUI converters, the designer support, the D-Bus menu exporter and the DynamicData tests. `ferroui_microcom::Guid::parse` now rejects misplaced hyphens and unpaired braces, as `Guid.Parse` does. No public signature changes.
+
 ## [0.4.0] - 2026-10-31
 
 The fourth release. It completes the declarative Rust API of `0.4.0-preview.1` and adds, among the entries below:
