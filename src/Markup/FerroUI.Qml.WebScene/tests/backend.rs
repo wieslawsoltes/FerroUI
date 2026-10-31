@@ -166,3 +166,58 @@ fn separate_instances_sharing_a_backend_keep_independent_modules_globals_and_dea
     assert_eq!(call(&mut second), Value::String("3/2".into()));
     assert_eq!(call(&mut third), Value::String("43/402".into()));
 }
+
+#[test]
+#[ignore = "requires the WebScene native ABI 3 package"]
+fn collecting_transient_host_proxies_releases_records_but_preserves_retained_cycles_and_aliases() {
+    use ferroui_qml::Namespace;
+    use std::collections::BTreeMap;
+    let mut app = load(
+        r#"
+        import QtQml
+        QtObject {
+            function pin(item) { globalThis.kept = item; globalThis.lookup = new Map([[item, 41]]) }
+            function consume(item): int { return item.index }
+            function retained(): bool { return kept === kept.self && lookup.get(kept.self) === 41 }
+        }
+    "#,
+        engine(Duration::from_secs(5)),
+    );
+    let root = app.root();
+    let kept = app.new_record(BTreeMap::new()).unwrap();
+    app.set_record_property(&kept, "self", Value::Record(kept.clone()))
+        .unwrap();
+    app.call(root, "pin", vec![Value::Record(kept)]).unwrap();
+
+    // The ABI requests V8 low-memory work at pressure thresholds; reaching
+    // several thresholds exercises separate JS jobs without sleeps or racing
+    // FinalizationRegistry callbacks. The identity stays valid in the Map.
+    let sentinel = Rc::new(Namespace::default());
+    let weak = Rc::downgrade(&sentinel);
+    let mut payload = Some(sentinel);
+    for index in 0..1024 {
+        let mut fields = BTreeMap::from([("index".into(), Value::Number(f64::from(index)))]);
+        if let Some(sentinel) = payload.take() {
+            fields.insert("sentinel".into(), Value::Namespace(sentinel));
+        }
+        let record = app.new_record(fields).unwrap();
+        app.set_record_property(&record, "self", Value::Record(record.clone()))
+            .unwrap();
+        assert_eq!(
+            app.call(root, "consume", vec![Value::Record(record)])
+                .unwrap(),
+            Value::Number(f64::from(index))
+        );
+    }
+    for _ in 0..4096 {
+        app.new_record(BTreeMap::new()).unwrap();
+    }
+    assert!(
+        weak.upgrade().is_none(),
+        "discarded native record remains a GC root"
+    );
+    assert_eq!(
+        app.call(root, "retained", vec![]).unwrap(),
+        Value::Bool(true)
+    );
+}

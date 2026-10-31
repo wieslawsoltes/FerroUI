@@ -4,14 +4,14 @@
 use super::*;
 use std::rc::Weak;
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Hash)]
 struct Identity {
     engine: u64,
     index: u64,
     array: bool,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Record(Rc<Identity>);
 
 impl Record {

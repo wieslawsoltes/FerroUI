@@ -3,6 +3,7 @@
 //! FerroUI transaction thread, including nested evaluations on the same stack.
 mod framing;
 mod host;
+mod leases;
 mod modules;
 mod process;
 mod promise;
@@ -26,7 +27,7 @@ struct Tables {
     scope_values: BTreeMap<u64, (ScriptInstance, ScriptScope)>,
     scope_names: BTreeMap<u64, Rc<Vec<String>>>,
     objects: BTreeMap<ObjectId, u64>,
-    other: BTreeMap<ScriptInstance, Vec<(Value, u64)>>,
+    dynamic: leases::HostLeases,
     values: BTreeMap<u64, (ScriptInstance, Value)>,
     modules: Option<Rc<modules::Modules>>,
     prepared: bool,
@@ -66,31 +67,14 @@ impl Tables {
         self.scopes.insert(key, id);
         Ok((id, names))
     }
-    fn host_id(&mut self, instance: ScriptInstance, value: &Value) -> u64 {
-        if let Value::Object(object) = value {
-            if let Some(id) = self.objects.get(object) {
-                return *id;
-            }
-            let id = self.allocate();
-            self.objects.insert(*object, id);
-            self.values.insert(id, (instance, value.clone()));
-            id
-        } else {
-            if let Some((_, id)) = self
-                .other
-                .get(&instance)
-                .and_then(|all| all.iter().find(|(old, _)| old == value))
-            {
-                return *id;
-            }
-            let id = self.allocate();
-            self.other
-                .entry(instance)
-                .or_default()
-                .push((value.clone(), id));
-            self.values.insert(id, (instance, value.clone()));
-            id
+    fn object_id(&mut self, instance: ScriptInstance, object: ObjectId) -> u64 {
+        if let Some(id) = self.objects.get(&object) {
+            return *id;
         }
+        let id = self.allocate();
+        self.objects.insert(object, id);
+        self.values.insert(id, (instance, Value::Object(object)));
+        id
     }
 }
 
@@ -266,7 +250,10 @@ impl Realm {
     fn poison(&self, err: Error) -> Error {
         self.worker.borrow_mut().take();
         self.generation.set(self.generation.get() + 1);
-        self.tables.borrow_mut().prepared = false;
+        let mut tables = self.tables.borrow_mut();
+        tables.prepared = false;
+        tables.dynamic = leases::HostLeases::default();
+        drop(tables);
         self.handles.borrow_mut().clear();
         err
     }
@@ -370,11 +357,27 @@ impl Realm {
             }
         })();
         if outer.is_none() {
-            self.deadline.set(None)
+            self.deadline.set(None);
+            self.tables.borrow_mut().dynamic.finish();
         }
         result
     }
     fn result(&self, ctx: &mut ScriptContext<'_, '_>, result: &Json) -> Result<Value, Error> {
+        if let Some(updates) = result.get("hostLeases").and_then(Json::as_array) {
+            let mut tables = self.tables.borrow_mut();
+            for pair in updates {
+                let id = pair
+                    .get(0)
+                    .and_then(Json::as_u64)
+                    .ok_or_else(|| Error::new("invalid WebScene proxy id"))?;
+                let revision = pair
+                    .get(1)
+                    .and_then(Json::as_i64)
+                    .filter(|n| *n != 0)
+                    .ok_or_else(|| Error::new("invalid WebScene lease revision"))?;
+                tables.dynamic.update(id, revision);
+            }
+        }
         if let Some(e) = result.get("error") {
             return Err(Error::new(e.as_str().unwrap_or("V8 exception")));
         }
@@ -404,7 +407,7 @@ impl Realm {
         let instance = ctx.instance();
         let (root, scope, names, component_scope, component_names, catalog) = {
             let mut tables = self.tables.borrow_mut();
-            let root = tables.host_id(instance, &Value::Object(ctx.root()));
+            let root = tables.object_id(instance, ctx.root());
             let (scope, names) = tables.scope(ctx, ctx.capture_scope(), script)?;
             let (component_scope, component_names) =
                 tables.scope(ctx, ctx.capture_component_scope(), script)?;

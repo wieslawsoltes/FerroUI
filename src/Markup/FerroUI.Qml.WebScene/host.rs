@@ -44,23 +44,33 @@ impl Realm {
                     .map(|v| self.encode(instance, v))
                     .collect::<Result<Vec<_>, _>>()?
             ]),
+            Value::Object(object) => json!([
+                "h",
+                self.tables.borrow_mut().object_id(instance, *object),
+                "object"
+            ]),
             v => {
-                let id = self.tables.borrow_mut().host_id(instance, v);
+                let mut tables = self.tables.borrow_mut();
+                let Tables { dynamic, next, .. } = &mut *tables;
+                let id = dynamic.project(v, next)?;
                 json!([
                     "h",
                     id,
                     if matches!(v,Value::Record(r) if r.is_array()) {
                         "array"
                     } else {
-                        "object"
+                        "leased"
                     }
                 ])
             }
         })
     }
     fn lookup(&self, ctx: &ScriptContext<'_, '_>, id: u64) -> Result<Value, Error> {
-        self.tables
-            .borrow()
+        let tables = self.tables.borrow();
+        if let Some(value) = tables.dynamic.get(id) {
+            return Ok(value);
+        }
+        tables
             .values
             .get(&id)
             .filter(|(instance, _)| *instance == ctx.instance())
@@ -145,10 +155,7 @@ impl Realm {
         })
     }
     fn method(&self, ctx: &ScriptContext<'_, '_>, object: ObjectId, key: &str) -> Json {
-        let id = self
-            .tables
-            .borrow_mut()
-            .host_id(ctx.instance(), &Value::Object(object));
+        let id = self.tables.borrow_mut().object_id(ctx.instance(), object);
         let mut signature = ctx
             .argument_types(object, key)
             .into_iter()

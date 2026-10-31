@@ -75,6 +75,7 @@ pub struct Engine {
     begin: Begin,
     take: Take,
     release: Release,
+    notify_memory: unsafe extern "C" fn(Raw) -> u8,
     destroy: unsafe extern "C" fn(Raw),
     _library: Library,
 }
@@ -102,6 +103,7 @@ impl Engine {
             let begin = symbol(&library, b"webscene_engine_begin_evaluate_v3")?;
             let take = symbol(&library, b"webscene_engine_take_invoke_result_v3")?;
             let release = symbol(&library, b"webscene_interop_result_release_v3")?;
+            let notify_memory = symbol(&library, b"webscene_engine_request_low_memory")?;
             let destroy = symbol(&library, b"webscene_engine_destroy")?;
             let raw = create(&Options {
                 size: size_of::<Options>() as u32,
@@ -119,6 +121,7 @@ impl Engine {
                 begin,
                 take,
                 release,
+                notify_memory,
                 destroy,
                 _library: library,
             };
@@ -128,6 +131,10 @@ impl Engine {
             }
             Ok(engine)
         }
+    }
+
+    pub fn notify_low_memory(&self) {
+        unsafe { (self.notify_memory)(self.raw) };
     }
 
     /// Wait only inside the disposable child process. The parent independently

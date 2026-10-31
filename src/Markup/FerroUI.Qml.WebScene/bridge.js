@@ -1,5 +1,5 @@
 // Private per-worker V8 state. Host capabilities cross only the component transaction.
-(function (modules,observePromise,controlKey) {
+(function (modules,observePromise,controlKey,hostLeases) {
     "use strict";
     let activeCalls=0;
     let resources = Object.create(null);
@@ -118,7 +118,11 @@
     }
 
     function proxy(id,kind) {
-        if(proxies.has(id)) return proxies.get(id);
+        if(kind!=="object") return hostLeases.get(id,()=>makeProxy(id,kind));
+        if(!proxies.has(id)) proxies.set(id,makeProxy(id,kind));
+        return proxies.get(id);
+    }
+    function makeProxy(id,kind) {
         const array = kind === "array";
         const target = array ? [] : Object.create(null);
         const result=new Proxy(target,{
@@ -142,7 +146,7 @@
                     ? {configurable:true,enumerable:true} : undefined;
             }
         });
-        proxies.set(id,result); proxyIds.set(result,id);
+        proxyIds.set(result,id);
         return result;
     }
 
@@ -255,9 +259,9 @@
         activeCalls++;
         try {
             release(command);
-            return {ok: encode(perform(command), command.mode)};
+            return hostLeases.complete({ok: encode(perform(command), command.mode)});
         } catch (error) {
-            return {error: String(error?.stack || error)};
+            return hostLeases.complete({error: String(error?.stack || error)});
         } finally {
             activeCalls--;
         }
@@ -273,6 +277,7 @@
             );
         },
         preparation(key){authorize(key);return preparing},
+        sweepHosts(key){authorize(key);return JSON.stringify(hostLeases.sweep())},
         run(key,c){authorize(key);return JSON.stringify(execute(c))},
         promise(key,c){
             authorize(key); release(c);

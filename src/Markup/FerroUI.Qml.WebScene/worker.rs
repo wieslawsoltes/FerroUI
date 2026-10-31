@@ -153,7 +153,7 @@ fn run(library: &Path) -> Result<(), String> {
         include_str!("modules.js"),
         include_str!("vendor/systemjs-core.js")
     );
-    let bootstrap=format!("Object.defineProperty(globalThis,'__ferroQml',{{value:({})({},{},{key}),writable:false,configurable:false}}); 'ready'",include_str!("bridge.js"),module_runtime,include_str!("promise.js"));
+    let bootstrap=format!("Object.defineProperty(globalThis,'__ferroQml',{{value:({})({},{},{key},{}),writable:false,configurable:false}}); 'ready'",include_str!("bridge.js"),module_runtime,include_str!("promise.js"),include_str!("leases.js"));
     if engine.eval(&bootstrap)? != "ready" {
         return Err("WebScene bootstrap failed".into());
     }
@@ -208,7 +208,24 @@ fn run(library: &Path) -> Result<(), String> {
                 .map_err(|_| "poisoned resource state")?
                 .rpc_enabled = false;
             let answer = result?;
-            serde_json::from_str::<Value>(&answer).map_err(|err| err.to_string())
+            let mut response: Value = serde_json::from_str(&answer).map_err(|e| e.to_string())?;
+            if response.get("collectHosts") == Some(&Value::Bool(true)) {
+                // Between JS jobs, never while a reentrant invocation is active.
+                engine.notify_low_memory();
+                let changes = engine.eval(&format!("__ferroQml.sweepHosts({key})"))?;
+                let mut changes: Vec<Value> =
+                    serde_json::from_str(&changes).map_err(|e| e.to_string())?;
+                if !changes.is_empty() {
+                    if response.get("hostLeases").is_none() {
+                        response["hostLeases"] = json!([]);
+                    }
+                    response["hostLeases"]
+                        .as_array_mut()
+                        .ok_or("invalid lease updates")?
+                        .append(&mut changes);
+                }
+            }
+            Ok(response)
         })();
         let frame = match result {
             Ok(answer) => json!({"result":answer}),
