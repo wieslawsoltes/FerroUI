@@ -98,7 +98,9 @@ fn embeds_the_static_and_dynamic_graph_without_eager_dynamic_evaluation() {
     );
     let lazy = &first.dependencies["../lazy.mjs"];
     assert!(!resources[lazy].preload);
-    assert!(first.source.contains(&format!("import(\"{lazy}\")")));
+    assert!(first.source.contains("import('../lazy.mjs')"));
+    assert!(first.executable.contains("System.register"));
+    assert!(first.executable.contains(&format!(".import(\"{lazy}\")")));
     let MemberKind::Property {
         value: Some(Binding::Expr(Expr::JavaScript(later))),
         ..
@@ -110,7 +112,7 @@ fn embeds_the_static_and_dynamic_graph_without_eager_dynamic_evaluation() {
         .iter()
         .find(|(_, r)| r.source.contains("only when requested"))
         .unwrap();
-    assert!(later.source.contains(optional));
+    assert!(later.code().contains(optional));
     assert!(resources.values().filter(|r| r.preload).count() == 2);
 }
 
@@ -138,4 +140,78 @@ fn relocation_preserves_generated_output_and_malformed_imports_fail_the_build() 
         .unwrap()
         .to_string()
         .contains("string literal"));
+}
+
+#[test]
+fn registers_live_exports_and_lowers_only_real_import_expressions() {
+    let p = Project::new();
+    p.file("Main.qml",r#"import QtQml
+import "state.mjs" as State
+import "classic.js" as Classic
+QtObject {
+    method: () => { let __ferroModuleContext = 9; return [import.meta.url, import("./deferred.mjs"), __ferroModuleContext] }
+}"#);
+    p.file(
+        "state.mjs",
+        r#"
+        export {default as origin} from "./deferred.mjs";
+        export let counter = 0;
+        const _context = 3;
+        export function advance(){ return ++counter + _context; }
+        export const identity = import.meta.url;
+        export async function later(){return import("./deferred.mjs");}
+        await Promise.resolve();
+    "#,
+    );
+    p.file("deferred.mjs", "export default import.meta.url");
+    p.file(
+        "classic.js",
+        r#"function run(){
+       const __ferroModuleContext = 42;
+       const text = "import.meta and import('./absent.mjs')";
+       return [__ferroModuleContext, import.meta.url, import("./deferred.mjs"), text]
+    }"#,
+    );
+    let doc = Compiler::new()
+        .with_javascript()
+        .load(p.0.join("Main.qml"))
+        .unwrap()
+        .document;
+    let classic = doc
+        .scripts
+        .values()
+        .find(|r| r.kind == ScriptKind::Script)
+        .unwrap();
+    assert_eq!(
+        classic.import_hook.as_deref(),
+        Some("__ferroModuleContext_")
+    );
+    assert!(classic
+        .executable
+        .contains("__ferroModuleContext_.meta.url"));
+    assert!(classic
+        .executable
+        .contains("__ferroModuleContext_.import(\"https://qml.invalid/"));
+    assert!(classic
+        .executable
+        .contains("import.meta and import('./absent.mjs')"));
+    assert!(classic.source.contains("import(\"./deferred.mjs\")"));
+    let module = doc
+        .scripts
+        .values()
+        .find(|r| r.source.contains("++counter"))
+        .unwrap();
+    assert!(module.executable.starts_with("System.register("));
+    assert!(module.executable.contains(".meta.url"));
+    assert!(module.executable.contains("execute: async function"));
+    assert!(!module.executable.contains("import.meta"));
+    let MemberKind::Binding {
+        value: Binding::Expr(Expr::JavaScript(script)),
+        ..
+    } = &doc.root.members[0].kind
+    else {
+        panic!()
+    };
+    assert!(script.source.contains("import.meta"));
+    assert!(script.code().contains("__ferroModuleContext_.meta.url"));
 }

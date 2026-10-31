@@ -32,6 +32,9 @@ pub enum ScriptForm {
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct JavaScript {
+    /// Generated invocation or import lowering, separate from the source the user wrote.
+    pub executable: Option<String>,
+    pub import_hook: Option<String>,
     /// Candidate QML singleton names collected by the ECMAScript parser.
     #[serde(default)]
     pub references: Vec<String>,
@@ -44,6 +47,12 @@ pub struct JavaScript {
     pub imports: BTreeMap<String, String>,
 }
 
+impl JavaScript {
+    pub fn code(&self) -> &str {
+        self.executable.as_deref().unwrap_or(&self.source)
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ScriptKind {
     Module,
@@ -53,6 +62,9 @@ pub enum ScriptKind {
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ScriptResource {
+    /// Executable JavaScript. ES modules use the System.register module ABI.
+    pub executable: String,
+    pub import_hook: Option<String>,
     /// True for a static script import in a QML document.
     pub preload: bool,
     /// Qualified .import bindings in a classic JavaScript resource.
@@ -61,6 +73,8 @@ pub struct ScriptResource {
     pub kind: ScriptKind,
     pub dependencies: BTreeMap<String, String>,
     pub exports: Vec<String>,
+    /// Writable classic script bindings exposed by Qt (var and function declarations).
+    pub writable_exports: Vec<String>,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -190,7 +204,7 @@ pub enum Binding {
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum Expr {
-    JavaScript(JavaScript),
+    JavaScript(Box<JavaScript>),
     /// Index in the native expression table of a compiled component.
     Native(usize),
     Null,
@@ -216,7 +230,7 @@ pub enum Expr {
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum Stmt {
-    JavaScript(JavaScript),
+    JavaScript(Box<JavaScript>),
     /// Index in the compiled module's native statement table.
     Native(usize),
     Expr(Expr),

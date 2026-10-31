@@ -137,8 +137,8 @@ impl ScriptEngine for Probe {
     }
 }
 
-fn script(source: &str, form: ScriptForm) -> JavaScript {
-    JavaScript {
+fn script(source: &str, form: ScriptForm) -> Box<JavaScript> {
+    Box::new(JavaScript {
         executable: None,
         import_hook: None,
         source: source.into(),
@@ -149,7 +149,7 @@ fn script(source: &str, form: ScriptForm) -> JavaScript {
         root: None,
         ids: Default::default(),
         imports: Default::default(),
-    }
+    })
 }
 
 fn fixture() -> ir::Document {
@@ -187,6 +187,7 @@ fn fixture() -> ir::Document {
             kind: ir::ScriptKind::Module,
             dependencies: Default::default(),
             exports: vec!["n".into()],
+            writable_exports: vec!["n".into()],
         },
     );
     doc

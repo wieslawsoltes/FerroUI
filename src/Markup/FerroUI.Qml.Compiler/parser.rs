@@ -409,7 +409,7 @@ impl<'s> Parser<'s> {
             #[cfg(feature = "javascript")]
             let body = if self.external() {
                 vec![Stmt::JavaScript(
-                    self.external_block(ScriptForm::FunctionBody)?,
+                    self.external_block(ScriptForm::FunctionBody)?.into(),
                 )]
             } else {
                 self.block()?
@@ -596,7 +596,7 @@ impl<'s> Parser<'s> {
             #[cfg(feature = "javascript")]
             if self.external() {
                 return Ok(Binding::Script(vec![Stmt::JavaScript(
-                    self.external_block(ScriptForm::BindingBlock)?,
+                    self.external_block(ScriptForm::BindingBlock)?.into(),
                 )]));
             }
             return self.block().map(Binding::Script);
@@ -650,7 +650,7 @@ impl<'s> Parser<'s> {
                 return Ok((
                     Vec::new(),
                     vec![Stmt::JavaScript(
-                        self.external_block(ScriptForm::HandlerBody)?,
+                        self.external_block(ScriptForm::HandlerBody)?.into(),
                     )],
                 ));
             }
@@ -658,7 +658,7 @@ impl<'s> Parser<'s> {
                 crate::javascript::handler(self.source, self.token().span.start)?;
             self.consume_external(span);
             self.end_statement()?;
-            return Ok((params, vec![Stmt::JavaScript(script)]));
+            return Ok((params, vec![Stmt::JavaScript(script.into())]));
         }
         let mut params = Vec::new();
         if self.eat("function") {

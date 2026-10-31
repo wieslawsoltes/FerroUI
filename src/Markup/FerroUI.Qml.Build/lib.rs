@@ -7,6 +7,8 @@ mod identified;
 mod javascript;
 mod native;
 mod scripts;
+#[cfg(feature = "javascript")]
+mod system_module;
 
 use std::collections::BTreeSet;
 use std::fmt;

@@ -1,8 +1,8 @@
 //! Embed local JavaScript resources in the compiled component. Stable virtual
 //! URLs preserve module identity through cycles without encoding host paths.
 use ferroui_qml_compiler::{
-    javascript::{inline_dependencies, parse_resource, visit_scripts, Dependency},
-    Document, ScriptResource,
+    javascript::{import_sites, parse_resource, visit_scripts, Dependency},
+    Document, ScriptForm, ScriptKind, ScriptResource,
 };
 use std::{
     collections::BTreeMap,
@@ -43,14 +43,19 @@ impl Resources {
         visit_scripts(&mut document.root, &mut |script| {
             script.origin.clone_from(&origin);
             script.imports.clone_from(&imports);
-            let dynamic =
-                inline_dependencies(script).map_err(|e| format!("{}:{e}", path.display()))?;
-            let mut edits = Vec::new();
-            for dep in dynamic {
+            let sites = import_sites(script.code(), script.form == ScriptForm::Expression)
+                .map_err(|e| format!("{}:{e}", path.display()))?;
+            script.import_hook = sites.hook;
+            let mut edits = sites.edits;
+            for dep in sites.dependencies {
                 let target = self.load(&local_path(path, &dep.specifier)?, 0)?;
                 push_edit(&mut edits, dep, &target);
             }
-            replace(&mut script.source, edits);
+            if !edits.is_empty() {
+                let mut code = script.code().to_owned();
+                replace(&mut code, edits);
+                script.executable = Some(code);
+            }
             Ok::<_, String>(())
         })?;
         Ok(document)
@@ -105,7 +110,17 @@ impl Resources {
             );
             push_edit(&mut edits, dep, &dependency);
         }
-        replace(&mut resource.source, edits);
+        if resource.kind == ScriptKind::Module {
+            replace(&mut resource.executable, edits);
+            resource.executable = crate::system_module::compile(&key, &resource.executable)
+                .map_err(|why| format!("{}: {why}", path.display()))?;
+        } else {
+            let sites = import_sites(&resource.executable, false)
+                .map_err(|e| format!("{}:{e}", path.display()))?;
+            resource.import_hook = sites.hook;
+            edits.extend(sites.edits);
+            replace(&mut resource.executable, edits);
+        }
         self.embedded.insert(key.clone(), resource);
         Ok(key)
     }

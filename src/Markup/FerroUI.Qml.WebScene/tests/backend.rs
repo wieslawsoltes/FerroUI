@@ -94,81 +94,75 @@ fn runaway_script_is_killed_and_next_turn_restarts_with_committed_qml_state() {
 #[test]
 #[ignore = "requires the WebScene native ABI 3 package"]
 fn separate_instances_sharing_a_backend_keep_independent_modules_globals_and_deadlines() {
-    use ferroui_qml::ir::{self, Binding, Expr, MemberKind, ScriptKind};
-    use std::collections::BTreeMap;
-    let backend = engine(Duration::from_millis(900));
-    let make = |source: &str| {
-        let mut document = ferroui_qml_compiler::parse_external(
-            r#"
-            import QtQml
-            QtObject {
-                property int count: Lib.next()
-                function current(): int { return Lib.next() }
-                function runaway() { for (;;) {} }
-            }
-        "#,
+    use ferroui_qml_build::Compiler;
+
+    let shared = engine(Duration::from_millis(900));
+    let files = tempfile::tempdir().unwrap();
+    let project = files.path();
+    std::fs::write(
+        project.join("View.qml"),
+        r#"
+        import QtQml
+        import "Library.js" as Lib
+        import "Module.mjs" as Es
+        QtObject {
+            property int count: Lib.next()
+            function both(): string { return Lib.next() + "/" + Es.next() }
+            function runaway() { for (;;) {} }
+        }
+    "#,
+    )
+    .unwrap();
+    let compile = |start: i32| {
+        std::fs::write(
+            project.join("Library.js"),
+            format!(".pragma library\nlet n={start}; function next(){{return ++n}}"),
         )
         .unwrap();
-        let url = "https://qml.invalid/modules/shared/counter.js";
-        document.scripts.insert(
-            url.to_string(),
-            ir::ScriptResource {
-                source: source.into(),
-                kind: ScriptKind::Library,
-                preload: true,
-                imports: BTreeMap::new(),
-                dependencies: BTreeMap::new(),
-                exports: vec!["next".into()],
-            },
-        );
-        for member in &mut document.root.members {
-            match &mut member.kind {
-                MemberKind::Property {
-                    value: Some(Binding::Expr(Expr::JavaScript(js))),
-                    ..
-                } => {
-                    js.imports.insert("Lib".into(), url.into());
-                }
-                MemberKind::Function { body, .. } => {
-                    if let [ir::Stmt::JavaScript(js)] = body.as_mut_slice() {
-                        js.imports.insert("Lib".into(), url.into());
-                    }
-                }
-                _ => (),
-            }
-        }
+        std::fs::write(
+            project.join("Module.mjs"),
+            format!("let n={}; export const next=()=>++n;", start * 10),
+        )
+        .unwrap();
+        Compiler::new()
+            .with_javascript()
+            .load(project.join("View.qml"))
+            .unwrap()
+            .document
+    };
+    let create = |document: &ferroui_qml::Document| {
         Instance::with_engine(
-            &document,
+            document,
             &TypeRegistry::new(),
             Default::default(),
-            backend.clone(),
+            shared.clone(),
         )
         .unwrap()
     };
-    let counter = "let n=0; function next(){return ++n;}";
-    let mut first = make(counter);
-    let mut second = make(counter);
-    let mut different = make("let n=40; function next(){return ++n;}");
+    let original = compile(0);
+    let mut first = create(&original);
+    let mut second = create(&original);
+    let revised = compile(40);
+    assert!(original.scripts.keys().eq(revised.scripts.keys()));
+    let mut third = create(&revised);
+    let call = |app: &mut Instance| app.call(app.root(), "both", vec![]).unwrap();
     assert_eq!(first.get(first.root(), "count").unwrap(), Value::Number(1.));
     assert_eq!(
         second.get(second.root(), "count").unwrap(),
         Value::Number(1.)
     );
     assert_eq!(
-        different.call(different.root(), "current", vec![]).unwrap(),
-        Value::Number(42.)
+        third.get(third.root(), "count").unwrap(),
+        Value::Number(41.)
     );
+    assert_eq!(call(&mut first), Value::String("2/1".into()));
+    assert_eq!(call(&mut second), Value::String("2/1".into()));
+    assert_eq!(call(&mut third), Value::String("42/401".into()));
     assert!(first
         .call(first.root(), "runaway", vec![])
         .unwrap_err()
         .message
         .contains("deadline"));
-    assert_eq!(
-        second.call(second.root(), "current", vec![]).unwrap(),
-        Value::Number(2.)
-    );
-    assert_eq!(
-        different.call(different.root(), "current", vec![]).unwrap(),
-        Value::Number(43.)
-    );
+    assert_eq!(call(&mut second), Value::String("3/2".into()));
+    assert_eq!(call(&mut third), Value::String("43/402".into()));
 }

@@ -350,7 +350,7 @@ fn external_scripts_preserve_javascript_boundaries_and_qml_structure() {
         matches!(&doc.root.members[5].kind,MemberKind::Function{body,..} if matches!(&body[0],Stmt::JavaScript(js) if js.source.contains("const text") && js.source.contains("return /[a-z}]/u")))
     );
     assert!(
-        matches!(&doc.root.members[6].kind,MemberKind::Handler{parameters,body,..} if parameters.len()==2 && matches!(&body[0],Stmt::JavaScript(js) if js.source.contains(".call(this")))
+        matches!(&doc.root.members[6].kind,MemberKind::Handler{parameters,body,..} if parameters.len()==2 && matches!(&body[0],Stmt::JavaScript(js) if js.code().contains(".call(this")))
     );
     assert!(
         matches!(&doc.root.members.last().unwrap().kind,MemberKind::Property{value:Some(Binding::Expr(Expr::String(v))),..} if v=="done")
@@ -383,5 +383,59 @@ fn module_dependencies_are_ast_based_and_classic_directives_preserve_offsets() {
     assert_eq!(classic.resource.kind, ScriptKind::Library);
     assert_eq!(classic.resource.exports, ["get", "label"]);
     assert_eq!(classic.dependencies[0].namespace.as_deref(), Some("Tools"));
-    assert_eq!(source.find("const"), classic.resource.source.find("const"));
+    assert_eq!(
+        source.find("const"),
+        classic.resource.executable.find("const")
+    );
+}
+
+#[cfg(feature = "javascript")]
+#[test]
+fn binding_completion_does_not_rewrite_returns_of_nested_functions_or_catch_returns() {
+    let source = r#"QtObject {
+        property var value: {
+            let __ferroBindingExit = false
+            const nested = () => { return 5 }
+            if (__ferroBindingExit) { try { return nested() } catch (e) { return 0 } finally { nested() } }
+            let sum = 0
+            for(let i = 0; i < 3; i++) { sum += i }
+        }
+    }"#;
+    let doc = parse_external(source).unwrap();
+    let MemberKind::Property {
+        value: Some(Binding::Script(body)),
+        ..
+    } = &doc.root.members[0].kind
+    else {
+        panic!()
+    };
+    let Stmt::JavaScript(js) = &body[0] else {
+        panic!()
+    };
+    assert!(js.code().starts_with("__ferroBindingExit_:"));
+    assert_eq!(js.code().matches("break __ferroBindingExit_;").count(), 2);
+    assert!(js.code().contains("const nested = () => { return 5 }"));
+    assert!(js.source.contains("try { return nested() }"));
+}
+
+#[cfg(feature = "javascript")]
+#[test]
+fn classic_resource_bindings_match_qt_read_and_write_visibility() {
+    let parsed=javascript::parse_resource("var num=2; let local=2; const cnst=3; class Foo{}; function declaration(){var hidden}; if(true){var nested=6; function branch(){}}; var fn=()=>2;",false).unwrap();
+    assert_eq!(
+        parsed.resource.exports,
+        ["Foo", "cnst", "declaration", "fn", "local", "nested", "num"]
+    );
+    assert_eq!(
+        parsed.resource.writable_exports,
+        ["declaration", "fn", "nested", "num"]
+    );
+}
+
+#[cfg(feature = "javascript")]
+#[test]
+fn nested_javascript_reports_utf8_source_positions() {
+    let src = "QtObject {\n function f() {\n    const label='Łódź'; const = 1;\n }\n}";
+    let error = parse_external(src).unwrap_err();
+    assert_eq!((error.line, error.column), (3, 31));
 }

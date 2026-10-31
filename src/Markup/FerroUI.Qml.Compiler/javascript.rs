@@ -5,7 +5,7 @@ use swc_ecma_ast as js;
 use swc_ecma_parser::{lexer::Lexer, EsSyntax, Parser, StringInput, Syntax};
 use swc_ecma_visit::{Visit, VisitWith};
 
-pub(super) fn parser(source: &str, start: usize) -> Result<Parser<Lexer<'_>>, Diagnostic> {
+fn parser(source: &str, start: usize, allow_return: bool) -> Result<Parser<Lexer<'_>>, Diagnostic> {
     let len = u32::try_from(source.len()).map_err(|_| {
         Diagnostic::new(
             source,
@@ -15,7 +15,7 @@ pub(super) fn parser(source: &str, start: usize) -> Result<Parser<Lexer<'_>>, Di
     })?;
     let input = StringInput::new(&source[start..], BytePos(start as u32), BytePos(len));
     let syntax = EsSyntax {
-        allow_return_outside_function: true,
+        allow_return_outside_function: allow_return,
         ..Default::default()
     };
     Ok(Parser::new_from(Lexer::new(
@@ -35,8 +35,23 @@ pub(super) fn span(span: swc_common::Span) -> SourceSpan {
 pub(super) fn error(source: &str, error: swc_ecma_parser::error::Error) -> Diagnostic {
     Diagnostic::new(source, span(error.span()), error.kind().msg())
 }
+fn check_errors(source: &str, parser: &mut Parser<Lexer<'_>>) -> Result<(), Diagnostic> {
+    // Classic QML scripts and inline bindings run with the module context
+    // supplied by the host. The linker lowers import.meta for these contexts.
+    if let Some(err) = parser.take_errors().into_iter().find(|e| {
+        !matches!(
+            e.kind(),
+            swc_ecma_parser::error::SyntaxError::ImportMetaInScript
+        )
+    }) {
+        return Err(error(source, err));
+    }
+    Ok(())
+}
 fn script(source: &str, range: SourceSpan, form: ScriptForm) -> JavaScript {
     JavaScript {
+        executable: None,
+        import_hook: None,
         references: Vec::new(),
         form,
         source: source[range.start..range.end].to_owned(),
@@ -48,11 +63,9 @@ fn script(source: &str, range: SourceSpan, form: ScriptForm) -> JavaScript {
     }
 }
 fn parsed_expr(source: &str, start: usize) -> Result<(SourceSpan, Box<js::Expr>), Diagnostic> {
-    let mut p = parser(source, start)?;
+    let mut p = parser(source, start, true)?;
     let expr = p.parse_expr().map_err(|e| error(source, e))?;
-    if let Some(err) = p.take_errors().into_iter().next() {
-        return Err(error(source, err));
-    }
+    check_errors(source, &mut p)?;
     Ok((span(expr.span()), expr))
 }
 pub(super) fn expression(source: &str, start: usize) -> Result<(SourceSpan, Expr), Diagnostic> {
@@ -68,7 +81,7 @@ pub(super) fn expression(source: &str, start: usize) -> Result<(SourceSpan, Expr
         }
         js::Expr::Unary(u)
             if matches!(u.op, js::UnaryOp::Minus | js::UnaryOp::Plus)
-                && matches!(u.arg.as_ref(), js::Expr::Lit(js::Lit::Num(_))) =>
+                && matches!(u.arg.as_ref(), js::Expr::Lit(js::Lit::Num(n)) if n.value.is_finite()) =>
         {
             let js::Expr::Lit(js::Lit::Num(n)) = u.arg.as_ref() else {
                 unreachable!()
@@ -79,7 +92,7 @@ pub(super) fn expression(source: &str, start: usize) -> Result<(SourceSpan, Expr
                 n.value
             })
         }
-        _ => Expr::JavaScript(script(source, range, ScriptForm::Expression)),
+        _ => Expr::JavaScript(Box::new(script(source, range, ScriptForm::Expression))),
     };
     if let Expr::JavaScript(js) = &mut value {
         let mut inspect = Inspect::default();
@@ -93,11 +106,9 @@ pub(super) fn block(
     start: usize,
     form: ScriptForm,
 ) -> Result<(SourceSpan, JavaScript), Diagnostic> {
-    let mut p = parser(source, start)?;
+    let mut p = parser(source, start, true)?;
     let stmt = p.parse_stmt().map_err(|e| error(source, e))?;
-    if let Some(err) = p.take_errors().into_iter().next() {
-        return Err(error(source, err));
-    }
+    check_errors(source, &mut p)?;
     let range = span(stmt.span());
     if !matches!(stmt, js::Stmt::Block(_)) {
         return Err(Diagnostic::new(
@@ -113,8 +124,53 @@ pub(super) fn block(
     let mut code = script(source, body, form);
     let mut inspect = Inspect::default();
     stmt.visit_with(&mut inspect);
+    if form == ScriptForm::BindingBlock {
+        code.executable = completion_block(source, body, &stmt, &inspect.identifiers);
+    }
     code.references = inspect.names.into_iter().collect();
     Ok((range, code))
+}
+// ECMAScript eval computes completion records for blocks, branches, loops and
+// try/finally. Convert only QML's additional function-level return into a
+// labeled break carrying its completion value. This leaves nested function
+// returns and the behavior of user catch/finally blocks untouched.
+fn completion_block(
+    source: &str,
+    body: SourceSpan,
+    stmt: &js::Stmt,
+    identifiers: &std::collections::BTreeSet<String>,
+) -> Option<String> {
+    #[derive(Default)]
+    struct Returns(Vec<(SourceSpan, Option<SourceSpan>)>);
+    impl Visit for Returns {
+        fn visit_return_stmt(&mut self, r: &js::ReturnStmt) {
+            self.0
+                .push((span(r.span), r.arg.as_ref().map(|a| span(a.span()))));
+        }
+        fn visit_arrow_expr(&mut self, _: &js::ArrowExpr) {}
+        fn visit_function(&mut self, _: &js::Function) {}
+        fn visit_class(&mut self, _: &js::Class) {}
+        fn visit_getter_prop(&mut self, _: &js::GetterProp) {}
+        fn visit_setter_prop(&mut self, _: &js::SetterProp) {}
+    }
+    let mut returns = Returns::default();
+    stmt.visit_with(&mut returns);
+    if returns.0.is_empty() {
+        return None;
+    }
+    let mut label = "__ferroBindingExit".to_owned();
+    while identifiers.contains(&label) {
+        label.push('_');
+    }
+    let mut output = source[body.start..body.end].to_owned();
+    for (range, value) in returns.0.into_iter().rev() {
+        let value = value.map_or("void 0", |value| &source[value.start..value.end]);
+        output.replace_range(
+            range.start - body.start..range.end - body.start,
+            &format!("{{({value}); break {label};}}"),
+        );
+    }
+    Some(format!("{label}:{{\n{output}\n}}"))
 }
 pub(super) fn handler(
     source: &str,
@@ -138,12 +194,12 @@ pub(super) fn handler(
             prefix.push('_');
         }
         let parameters: Vec<_> = (0..count).map(|i| format!("{prefix}{i}")).collect();
-        code.source = format!(
+        code.executable = Some(format!(
             "return ({}).call(this{}{});",
             code.source,
             if count > 0 { "," } else { "" },
             parameters.join(",")
-        );
+        ));
         Ok((range, parameters, code))
     } else {
         Ok((range, Vec::new(), code))
@@ -162,12 +218,15 @@ pub struct Dependency {
 struct Inspect {
     names: std::collections::BTreeSet<String>,
     imports: Vec<Dependency>,
+    identifiers: std::collections::BTreeSet<String>,
+    sites: Vec<(SourceSpan, bool)>,
     missing: Option<SourceSpan>,
 }
 
 impl Visit for Inspect {
     fn visit_ident(&mut self, name: &js::Ident) {
         let name = name.sym.as_str();
+        self.identifiers.insert(name.to_owned());
         if name.chars().next().is_some_and(char::is_uppercase) {
             self.names.insert(name.to_owned());
         }
@@ -183,8 +242,14 @@ impl Visit for Inspect {
         }
         e.visit_children_with(self);
     }
+    fn visit_meta_prop_expr(&mut self, e: &js::MetaPropExpr) {
+        if e.kind == js::MetaPropKind::ImportMeta {
+            self.sites.push((span(e.span), true));
+        }
+    }
     fn visit_call_expr(&mut self, e: &js::CallExpr) {
-        if matches!(e.callee, js::Callee::Import(_)) {
+        if let js::Callee::Import(import) = &e.callee {
+            self.sites.push((span(import.span), false));
             if let Some(js::Expr::Lit(js::Lit::Str(s))) = e
                 .args
                 .first()
@@ -265,6 +330,24 @@ fn declared(d: &js::Decl, names: &mut Vec<String>) {
         _ => (),
     }
 }
+// var is function-scoped even inside a conditional or loop. Nested functions,
+// class bodies and accessor bodies have a separate variable environment.
+struct ScriptVars(Vec<String>);
+impl Visit for ScriptVars {
+    fn visit_var_decl(&mut self, d: &js::VarDecl) {
+        if d.kind == js::VarDeclKind::Var {
+            for v in &d.decls {
+                pattern_names(&v.name, &mut self.0);
+            }
+        }
+    }
+    fn visit_function(&mut self, _: &js::Function) {}
+    fn visit_arrow_expr(&mut self, _: &js::ArrowExpr) {}
+    fn visit_class(&mut self, _: &js::Class) {}
+    fn visit_getter_prop(&mut self, _: &js::GetterProp) {}
+    fn visit_setter_prop(&mut self, _: &js::SetterProp) {}
+}
+
 fn directive_error(source: &str, start: usize, end: usize, msg: &str) -> Diagnostic {
     Diagnostic::new(source, SourceSpan { start, end }, msg)
 }
@@ -281,6 +364,7 @@ pub fn parse_resource(source: &str, module: bool) -> Result<ParsedScript, Diagno
     };
     let mut dependencies = Vec::new();
     let mut exports = Vec::new();
+    let mut writable_exports = Vec::new();
     let mut clean = source.to_owned();
     if !module {
         // The QML scanner only reads the directive prefix. Stop immediately on
@@ -342,7 +426,7 @@ pub fn parse_resource(source: &str, module: bool) -> Result<ParsedScript, Diagno
             clean.replace_range(start..end, &" ".repeat(end - start));
         }
     }
-    let mut p = parser(&clean, 0)?;
+    let mut p = parser(&clean, 0, false)?;
     if module {
         let ast = p.parse_module().map_err(|e| error(source, e))?;
         let mut inspect = Inspect::default();
@@ -373,25 +457,35 @@ pub fn parse_resource(source: &str, module: bool) -> Result<ParsedScript, Diagno
         let mut inspect = Inspect::default();
         ast.visit_with(&mut inspect);
         dependencies.extend(inspect.dependencies(source)?);
+        let mut variables = ScriptVars(Vec::new());
+        ast.visit_with(&mut variables);
+        writable_exports = variables.0;
         for stmt in &ast.body {
             if let js::Stmt::Decl(decl) = stmt {
                 declared(decl, &mut exports);
+                if let js::Decl::Fn(f) = decl {
+                    writable_exports.push(f.ident.sym.to_string());
+                }
             }
         }
     }
-    if let Some(err) = p.take_errors().into_iter().next() {
-        return Err(error(source, err));
-    }
+    check_errors(source, &mut p)?;
+    writable_exports.sort();
+    writable_exports.dedup();
+    exports.extend(writable_exports.iter().cloned());
     exports.sort();
     exports.dedup();
     Ok(ParsedScript {
         resource: ScriptResource {
+            executable: clean,
+            import_hook: None,
             preload: false,
             imports: Default::default(),
-            source: clean,
+            source: source.to_owned(),
             kind,
             dependencies: Default::default(),
             exports,
+            writable_exports,
         },
         dependencies,
     })
@@ -449,22 +543,57 @@ pub fn visit_scripts<E>(
     members(&mut root.members, visit)
 }
 
-/// Find dynamic imports in a QML script island. Offsets are relative to its
-/// executable text (including any generated parameter forwarding).
-pub fn inline_dependencies(script: &JavaScript) -> Result<Vec<Dependency>, Diagnostic> {
-    if !script.source.contains("import") {
-        return Ok(Vec::new());
+/// Analyze dynamic imports and special module expressions without changing any
+/// user identifiers. Ranges refer to the supplied executable text.
+pub struct ImportSites {
+    pub dependencies: Vec<Dependency>,
+    pub hook: Option<String>,
+    pub edits: Vec<(SourceSpan, String)>,
+}
+
+pub fn import_sites(source: &str, expression: bool) -> Result<ImportSites, Diagnostic> {
+    if !source.contains("import") {
+        return Ok(ImportSites {
+            dependencies: Vec::new(),
+            hook: None,
+            edits: Vec::new(),
+        });
     }
-    let mut p = parser(&script.source, 0)?;
+    let mut p = parser(source, 0, true)?;
     let mut inspect = Inspect::default();
-    if script.form == ScriptForm::Expression {
+    if expression {
         p.parse_expr()
-            .map_err(|e| error(&script.source, e))?
+            .map_err(|e| error(source, e))?
             .visit_with(&mut inspect);
     } else {
         p.parse_script()
-            .map_err(|e| error(&script.source, e))?
+            .map_err(|e| error(source, e))?
             .visit_with(&mut inspect);
     }
-    inspect.dependencies(&script.source)
+    if let Some(span) = inspect.missing {
+        return Err(Diagnostic::new(
+            source,
+            span,
+            "embedded dynamic imports require a string literal module path",
+        ));
+    }
+    let mut hook = "__ferroModuleContext".to_owned();
+    while inspect.identifiers.contains(&hook) {
+        hook.push('_');
+    }
+    let edits: Vec<_> = inspect
+        .sites
+        .into_iter()
+        .map(|(span, meta)| {
+            (
+                span,
+                format!("{hook}.{}", if meta { "meta" } else { "import" }),
+            )
+        })
+        .collect();
+    Ok(ImportSites {
+        dependencies: inspect.imports,
+        hook: (!edits.is_empty()).then_some(hook),
+        edits,
+    })
 }
