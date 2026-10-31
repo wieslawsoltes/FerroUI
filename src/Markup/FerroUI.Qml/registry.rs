@@ -1,6 +1,7 @@
 use super::{Error, Parameter, Value};
+use crate::Namespace;
 use ferroui_qml_compiler::Import;
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, rc::Rc};
 
 pub type NativeCallback = fn(&[Value]) -> Result<Value, Error>;
 
@@ -13,6 +14,7 @@ pub(crate) struct NativeMethod {
 
 #[derive(Clone, Debug, Default)]
 pub struct TypeDefinition {
+    pub(crate) enums: Rc<Namespace>,
     base: Option<(String, String)>,
     pub(crate) lineage: Vec<(String, String)>,
     pub(crate) properties: BTreeMap<String, (String, Value)>,
@@ -27,6 +29,17 @@ impl TypeDefinition {
     pub fn inherits(mut self, module: &str, name: &str) -> Self {
         self.base = Some((module.into(), name.into()));
         self
+    }
+
+    /// Register a Rust enumeration in the type namespace. Keys are accessible
+    /// via both Type.Enum.Key and Type.Key.
+    pub fn enumeration(mut self, name: &str, keys: &[(&str, i32)]) -> Result<Self, Error> {
+        let keys = keys
+            .iter()
+            .map(|(k, v)| (k.to_string(), *v))
+            .collect::<Vec<_>>();
+        Rc::make_mut(&mut self.enums).declare(name, &keys)?;
+        Ok(self)
     }
 
     pub fn property(mut self, name: &str, ty: &str, default: Value) -> Self {
@@ -67,7 +80,7 @@ impl TypeDefinition {
 
 /// A registry explicitly owns the modules visible to a QML component.
 pub struct TypeRegistry {
-    modules: BTreeMap<String, BTreeMap<String, TypeDefinition>>,
+    pub(crate) modules: BTreeMap<String, BTreeMap<String, TypeDefinition>>,
     versions: BTreeMap<(String, u16), u16>,
 }
 
@@ -137,6 +150,7 @@ impl TypeRegistry {
                 })?;
             let mut merged = base.clone();
             merged.lineage.push((base_module, base_name));
+            Rc::make_mut(&mut merged.enums).inherit(&definition.enums);
             merged.properties.append(&mut definition.properties);
             merged.signals.append(&mut definition.signals);
             merged.native.append(&mut definition.native);

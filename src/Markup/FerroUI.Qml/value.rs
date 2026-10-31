@@ -15,6 +15,7 @@ pub enum Value {
     Number(f64),
     String(String),
     Object(ObjectId),
+    Namespace(std::rc::Rc<crate::Namespace>),
     List(Vec<Value>),
 }
 
@@ -25,7 +26,7 @@ impl Value {
             Self::Bool(value) => *value,
             Self::Number(value) => *value != 0.0 && !value.is_nan(),
             Self::String(value) => !value.is_empty(),
-            Self::Object(_) | Self::List(_) => true,
+            Self::Object(_) | Self::Namespace(_) | Self::List(_) => true,
         }
     }
 
@@ -37,7 +38,9 @@ impl Value {
             Self::Undefined => f64::NAN,
             Self::String(s) if s.trim().is_empty() => 0.0,
             Self::String(s) => s.trim().parse().unwrap_or(f64::NAN),
-            Self::Object(_) | Self::List(_) => return Err(Error::new("expected a scalar number")),
+            Self::Object(_) | Self::Namespace(_) | Self::List(_) => {
+                return Err(Error::new("expected a scalar number"))
+            }
         })
     }
 
@@ -55,7 +58,7 @@ impl Value {
             Self::Bool(b) => b.to_string(),
             Self::Null => "null".into(),
             Self::Undefined => "undefined".into(),
-            Self::Object(_) => "[object Object]".into(),
+            Self::Object(_) | Self::Namespace(_) => "[object Object]".into(),
             Self::List(values) => values
                 .iter()
                 .map(|v| match v {
