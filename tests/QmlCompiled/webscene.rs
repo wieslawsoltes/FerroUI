@@ -53,3 +53,39 @@ fn source_and_cargo_embedded_modules_execute_on_webscene_v8() {
 
 #[path = "webscene_promise.rs"]
 mod promises;
+
+mod baseline {
+    use super::*;
+    include!(concat!(env!("OUT_DIR"), "/webscene_reference.rs"));
+
+    fn check(source: &impl ComponentSource) {
+        let engine = Rc::new(WebSceneEngine::from_env().unwrap());
+        let mut instance =
+            Instance::with_engine(source, &TypeRegistry::new(), Default::default(), engine)
+                .unwrap();
+        for row in include_str!("reference/qt-6.12.0.tsv").lines() {
+            let (name, expected) = row.split_once('\t').unwrap();
+            // V8 preserves the trailing hole in slice(1). Qt 6.12 trims it.
+            let expected = if name == "arrayIdentity" {
+                "true/false/1,2,3,/2:3/undefined"
+            } else {
+                expected
+            };
+            let actual = instance.call(instance.root(), name, vec![]).unwrap();
+            assert_eq!(actual, Value::String(expected.into()), "{name}");
+        }
+    }
+
+    #[test]
+    fn v8_preserves_the_existing_qml_behavior_contracts() {
+        let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("reference/Probe.qml");
+        check(
+            &Compiler::new()
+                .with_javascript()
+                .load(path)
+                .unwrap()
+                .document,
+        );
+        check(&compiled_qml());
+    }
+}
