@@ -73,3 +73,18 @@ fn static_rows_reject_dynamic_mode_role_type_changes_and_nonconstant_bindings() 
     };
     assert_eq!(instance.model_role(row, "cost").unwrap(), Value::Number(5.));
 }
+
+#[test]
+fn append_and_insert_batches_preserve_order_and_roll_back_failed_role_conversions() {
+    let mut engine=model(r#"
+        function init(){ append([{x:1},{x:2}]); insert(0,[{x:3},{x:4}]); return get(0).x + '/' + get(1).x + '/' + count }
+        function bad(){ insert(1,[{x:7},{x:"not a number"}]) }
+    "#).unwrap();
+    let root = engine.root();
+    assert_eq!(
+        engine.call(root, "init", vec![]).unwrap(),
+        Value::String("3/4/4".into())
+    );
+    assert!(engine.call(root, "bad", vec![]).is_err());
+    assert_eq!(engine.get(root, "count").unwrap(), Value::Number(4.));
+}

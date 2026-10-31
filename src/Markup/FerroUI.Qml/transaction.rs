@@ -258,15 +258,18 @@ impl Transaction<'_> {
         if matches!(name, "parent" | "this" | "NaN" | "Infinity") {
             return None;
         }
+        // QML ids shadow a same-named property even on the binding owner.
+        if self.model.ids.contains_key(name) {
+            return None;
+        }
         let owner = self.model.properties[key].owner;
         if let Ok(slot) = self.model.key_in(owner, name, self.model.slots[key].scope) {
             return Some(slot);
         }
-        if self.model.ids.contains_key(name)
-            || self.model.nodes[owner.index]
-                .type_scope
-                .member(name)
-                .is_some()
+        if self.model.nodes[owner.index]
+            .type_scope
+            .member(name)
+            .is_some()
         {
             return None;
         }

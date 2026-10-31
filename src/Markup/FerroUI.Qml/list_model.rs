@@ -371,7 +371,40 @@ impl Transaction<'_> {
                 } else {
                     position(&args[0], size, true)?
                 };
-                self.insert_row(id, at, self.model_dict(value)?, dynamic)?;
+                let batch = match value {
+                    Value::Record(array) if array.is_array() => {
+                        Some(self.model.array_values(array)?)
+                    }
+                    Value::List(rows) => Some(rows.clone()),
+                    _ => None,
+                };
+                if let Some(rows) = batch {
+                    if rows.is_empty() {
+                        return Ok(Value::Undefined);
+                    }
+                    // Append contiguously then rotate once. Repeated insertions
+                    // at the front would shift the pre-existing rows N times.
+                    for (i, row) in rows.iter().enumerate() {
+                        self.insert_row(id, size + i, self.model_dict(row)?, dynamic)?;
+                    }
+                    if at != size {
+                        self.model
+                            .models
+                            .get_mut(&id)
+                            .expect("registered model")
+                            .move_range(size, at, rows.len());
+                        self.model_edits.push((
+                            id,
+                            Undo::Move {
+                                from: size,
+                                to: at,
+                                count: rows.len(),
+                            },
+                        ));
+                    }
+                } else {
+                    self.insert_row(id, at, self.model_dict(value)?, dynamic)?;
+                }
             }
             ("set", [index, value]) => {
                 let at = position(index, size, true)?;

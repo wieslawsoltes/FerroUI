@@ -34,3 +34,10 @@ fn forward_chains_use_an_explicit_stack_and_opaque_calls_fail_with_a_diagnostic(
         .join()
         .unwrap();
 }
+
+#[test]
+fn mandatory_read_hint_does_not_schedule_an_id_as_its_shadowed_property() {
+    let doc = ir::parse("import QtQml\nQtObject { id: same; property var same: same }").unwrap();
+    let vm = Instance::new(&doc, &TypeRegistry::new(), Default::default()).unwrap();
+    assert_eq!(vm.get(vm.root(), "same").unwrap(), Value::Object(vm.root()));
+}
