@@ -40,6 +40,33 @@ Any compatibility shim must have a concrete consumer, a documented necessity, an
 
 Module files use `snake_case`. A module's `mod.rs` only declares and re-exports.
 
+## API shape: .NET names, Rust types
+
+The owner's decision of 2026-10-31 for every port and for the 0.5 cleanup ([#423](https://github.com/wieslawsoltes/FerroUI/issues/423), [docs/idiomatic-rust.md](../idiomatic-rust.md)). The goal is idiomatic Rust and the standard library; only the names stay close to .NET.
+
+1. **Names stay .NET-like.** Keep these close to upstream, so developers coming from .NET recognize the API and ports stay traceable:
+   - control types (`Button`, `TextBox`) and their methods, properties and events;
+   - the `get_`/`set_` accessors that mirror .NET properties (rule of "Naming" below);
+   - upstream interface names (`ICommand`, `IValueConverter`, `IBrush`);
+   - the `...EventArgs` types;
+   - `INotifyPropertyChanged`, `INotifyCollectionChanged` and `ObservableCollection`.
+   
+   They are never renamed to Rust API-guideline names.
+2. **XAML names never change.** Markup type and member names (`ferro_markup_type!`, the names XAML sees) stay as they are when a Rust type changes underneath; a rename keeps its markup name explicit.
+3. **Types and mechanisms are idiomatic Rust and std,** in public signatures and underneath:
+   - `std::time::Duration` instead of `TimeSpan`;
+   - std collections (`Vec`, `HashMap`, or `IndexMap` where insertion order matters) instead of a port of `Dictionary`;
+   - `Result` with `...Error` types implementing `std::error::Error` instead of `...Exception` types;
+   - futures driven by the UI dispatcher instead of `Task`, `TaskCompletionSource` and `SynchronizationContext`;
+   - `Drop` and RAII guards instead of `IDisposable` for resource lifetime.
+   
+   Where std has nothing, use one established crate, the same everywhere: `url` (for `Uri`), ICU4X (for `CultureInfo`; already in the workspace) and `uuid` (for `Guid`).
+4. **No new ports of `System.*` types.** Do not add Rust copies of BCL types or .NET-shaped infrastructure (`TimeSpan`, `DateTime`, `Uri`, `CultureInfo`, `Guid`, `Dictionary`, `Task`, exception hierarchies, `IDisposable` plumbing) in new code. `scripts/idioms/inventory.py --check` in CI flags new ones beyond its baseline.
+5. **Replace, do not wrap.** An existing .NET-named infrastructure type is replaced by the Rust one, not wrapped. In 0.5 the old name stays for one release as a `#[deprecated]` alias or conversion (`From`/`Into` both ways), with a migration note in the CHANGELOG, and is removed after that.
+6. **Behaviour stays the same unless recorded.** A replacement keeps the behaviour the controls rely on, with a test, unless a change is recorded in DEVIATIONS.md with a test. Examples: the enumeration order of a dictionary, the tick rounding of a duration, culture-specific formatting.
+7. **The upstream-name map.** The port docs keep a map from each upstream name to its Rust name, so review against the reference sources still works.
+8. **API compatibility.** 0.4.x stays compatible with 0.4.0 (the API gate of CI). Changes of public signatures land in 0.5.
+
 ## Types
 
 | C# | Rust |
@@ -54,13 +81,20 @@ Module files use `snake_case`. A module's `mod.rs` only declares and re-exports.
 | `Nullable<T>` / `Optional<T>` | `Option<T>` |
 | `object` | `BoxedValue` (`Rc<dyn Any>` holding exactly the property's value type) |
 | `Type` | `&'static TypeInfo` (`Border::TYPE`, `obj.get_type()`) |
-| `IDisposable` | `Rc<dyn IDisposable>` with explicit `dispose()` (not `Drop`: ignoring the handle must keep the subscription alive, as in C#) |
+| `IDisposable` | `Drop` and RAII guards (a subscription token that ends the subscription when dropped; an explicit `detach()`/`forget()` where upstream lets a subscription outlive its handle) — rule 3 of "API shape". Existing `Rc<dyn IDisposable>` handles with explicit `dispose()` move to this in 0.5 (#423) |
 | `IObservable<T>` / `IObserver<T>` | `reactive::{IObservable, IObserver}`; `Rc<dyn IObservable<T>>` |
 | `event EventHandler<T> Foo` | `HandlerList<dyn Fn(&T)>` field + `pub fn foo(&self, handler) -> Rc<dyn IDisposable>` |
 | `Action` / `Func<..>` | `Rc<dyn Fn(..)>` (stored) or `impl Fn(..)` (parameter) |
 | `string` | `String` / `&str`; `double` → `f64`; `float` → `f32`; `int` → `i32` |
 | `IList<T>`, `List<T>` | `Vec<T>` for values and snapshots; observable collections, and any list a get-only property exposes by reference → `FerroList<T>` (a shared handle, see "Collections are handles") |
-| exceptions on parse/validation paths | `Result<_, Error>`; programmer errors → `panic!` |
+| exceptions on parse/validation paths | `Result<_, XError>` with `XError` implementing `std::error::Error` (named `...Error`, never `...Exception`); programmer errors → `panic!` |
+| `TimeSpan` | `std::time::Duration` (a signed duration newtype only where negative spans are needed) |
+| `DateTime` / `DateTimeOffset` | `std::time::SystemTime` and the calendar type chosen in #423 |
+| `Uri` | `url::Url` |
+| `CultureInfo` | the ICU4X `Locale` (with the formatting data FerroUI uses) |
+| `Guid` | `uuid::Uuid` |
+| `Dictionary<K, V>` | `HashMap<K, V>`, or `IndexMap<K, V>` where insertion order is observable (test the order) |
+| `Task` / `Task<T>`, `TaskCompletionSource`, `SynchronizationContext`, `CancellationToken` | futures driven by the dispatcher (`DispatcherTask<T>` today), a oneshot channel for a completion source, and the one cancellation type chosen in #423 |
 | `static` class with attached properties | unit struct + `ferro_static_type!(X);` |
 | `ToString()` | `Display` (invariant culture) ; `Parse(string)` | `FromStr` + `parse(&str) -> Result` |
 
@@ -71,6 +105,7 @@ Module files use `snake_case`. A module's `mod.rs` only declares and re-exports.
 - Property definitions: C# `public static readonly StyledProperty<IBrush?> BackgroundProperty` → `Border::background_property()`.
 - Routed events: `Button.ClickEvent` → `Button::click_event()`.
 - Names visible to XAML stay PascalCase strings: property name `"Background"`, type name `Border`.
+- The names of controls, members, events and upstream interfaces stay close to .NET; the types in their signatures are Rust and std types ("API shape" above).
 
 ## Classes
 

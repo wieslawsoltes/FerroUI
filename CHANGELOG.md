@@ -4,6 +4,10 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ## [Unreleased]
 
+### Changed
+
+- **Porting guide: .NET names, Rust types** ([docs/porting/PORTING-GUIDE.md](docs/porting/PORTING-GUIDE.md), #423): the rules of the owner for every port and the 0.5 cleanup. Control, member, event and interface names stay close to .NET and XAML names never change; types and mechanisms are idiomatic Rust and std (`Duration`, std collections, `Result` with `...Error` types, futures, `Drop`/RAII; `url`, ICU4X and `uuid` where std has nothing); no new ports of `System.*` types; replaced types stay one release as deprecated aliases; behaviour changes are recorded with tests. The type table, the worker rules and the application conventions follow them.
+
 ## [0.4.0] - 2026-10-31
 
 The fourth release. It completes the declarative Rust API of `0.4.0-preview.1` and adds, among the entries below:
