@@ -49,6 +49,7 @@ impl Instance {
                 } if legacy => (
                     name,
                     Rc::new(Procedure {
+                        scope: member.scope,
                         parameters: parameters
                             .iter()
                             .map(|name| Parameter {

@@ -82,12 +82,27 @@ pub struct Frame<'a, 'model> {
 }
 
 pub enum Receiver {
+    Array(crate::Record),
+    ArrayConstructor,
     Object(ObjectId),
     Math,
     Qt,
 }
 
 impl Frame<'_, '_> {
+    pub fn array(&mut self, items: Vec<Value>) -> Value {
+        self.tx.new_array(items)
+    }
+    pub fn binary(&self, op: &str, a: Value, b: Value) -> Result<Value, Error> {
+        self.tx.model.js_binary(op, a, b)
+    }
+    pub fn unary(&self, op: &str, v: Value) -> Result<Value, Error> {
+        self.tx.model.js_unary(op, v)
+    }
+
+    pub fn record(&mut self, fields: std::collections::BTreeMap<String, Value>) -> Value {
+        self.tx.new_record(fields)
+    }
     fn root(&self, root: Option<&str>) -> Result<ObjectId, Error> {
         root.map_or_else(|| Ok(self.tx.model.root()), |id| self.tx.scope_id(id))
     }
@@ -102,7 +117,7 @@ impl Frame<'_, '_> {
         name: &str,
     ) -> Result<Value, Error> {
         if !self.locals.contains_key(base) {
-            if let Ok(key) = self.tx.model.key(self.owner, &format!("{base}.{name}")) {
+            if let Ok(key) = self.tx.scoped_key(self.owner, &format!("{base}.{name}")) {
                 return self.tx.read(key, self.reads);
             }
             if base == "Math" {
@@ -120,7 +135,7 @@ impl Frame<'_, '_> {
         self.tx.member(base, name, self.reads)
     }
     pub fn index(&mut self, base: Value, key: Value) -> Result<Value, Error> {
-        self.member(base, &key.js_string())
+        self.member(base, &self.tx.model.value_string(&key)?)
     }
     pub fn local_receiver(&self, name: &str, root: Option<&str>) -> Result<Receiver, Error> {
         Ok(Receiver::Object(self.tx.call_receiver(
@@ -130,7 +145,9 @@ impl Frame<'_, '_> {
         )))
     }
     pub fn named_receiver(&mut self, name: &str, root: Option<&str>) -> Result<Receiver, Error> {
-        if name == "Qt" && !self.locals.contains_key(name) {
+        if name == "Array" && !self.locals.contains_key(name) {
+            Ok(Receiver::ArrayConstructor)
+        } else if name == "Qt" && !self.locals.contains_key(name) {
             Ok(Receiver::Qt)
         } else if name == "Math" && !self.locals.contains_key(name) {
             Ok(Receiver::Math)
@@ -145,6 +162,11 @@ impl Frame<'_, '_> {
         args: Vec<Value>,
     ) -> Result<Value, Error> {
         match receiver {
+            Receiver::Array(array) => self.tx.array_method(&array, name, args),
+            Receiver::ArrayConstructor if name == "isArray" => Ok(Value::Bool(
+                matches!(args.first(),Some(Value::Record(r)) if r.is_array()),
+            )),
+            Receiver::ArrayConstructor => Err(Error::new(format!("unsupported Array.{name}"))),
             Receiver::Object(id) => self.tx.invoke(id, name, args, self.reads),
             Receiver::Qt => crate::enums::qt(name, &args),
             Receiver::Math => math(name, &args),
@@ -152,6 +174,11 @@ impl Frame<'_, '_> {
     }
 }
 pub fn receiver(value: Value) -> Result<Receiver, Error> {
+    if let Value::Record(r) = &value {
+        if r.is_array() {
+            return Ok(Receiver::Array(r.clone()));
+        }
+    }
     object(value).map(Receiver::Object)
 }
 pub fn truthy(value: &Value) -> bool {
@@ -165,8 +192,10 @@ pub struct Target {
     location: Location,
 }
 enum Location {
+    ModelRole(crate::RowId, String),
     Local(String),
     Property(SlotId),
+    Record(crate::Record, String),
 }
 
 impl Frame<'_, '_> {
@@ -197,7 +226,7 @@ impl Frame<'_, '_> {
         name: &str,
     ) -> Result<Target, Error> {
         if !self.locals.contains_key(base) {
-            if let Ok(key) = self.tx.model.key(self.owner, &format!("{base}.{name}")) {
+            if let Ok(key) = self.tx.scoped_key(self.owner, &format!("{base}.{name}")) {
                 return Ok(self.target(Location::Property(key)));
             }
         }
@@ -205,11 +234,18 @@ impl Frame<'_, '_> {
         self.target_member(base, name)
     }
     pub fn target_member(&self, base: Value, name: &str) -> Result<Target, Error> {
-        let key = self.tx.model.key(object(base)?, name)?;
+        if let Value::ModelRow(row) = base {
+            return Ok(self.target(Location::ModelRole(row, name.to_owned())));
+        }
+        if let Value::Record(record) = base {
+            self.tx.model.record_entries(&record)?;
+            return Ok(self.target(Location::Record(record, name.into())));
+        }
+        let key = self.tx.scoped_key(object(base)?, name)?;
         Ok(self.target(Location::Property(key)))
     }
     pub fn target_index(&self, base: Value, key: Value) -> Result<Target, Error> {
-        self.target_member(base, &key.js_string())
+        self.target_member(base, &self.tx.model.value_string(&key)?)
     }
     pub fn assign(
         &mut self,
@@ -225,11 +261,19 @@ impl Frame<'_, '_> {
             rhs(self)?
         } else {
             let old = match &place.location {
+                Location::ModelRole(row, name) => self.tx.read_role(*row, name, self.reads)?,
                 Location::Local(name) => self
                     .locals
                     .get(name)
                     .ok_or_else(|| Error::new("local is out of scope"))?
                     .clone(),
+                Location::Record(record, name) => self
+                    .tx
+                    .model
+                    .record_entries(record)?
+                    .get(name)
+                    .cloned()
+                    .unwrap_or(Value::Undefined),
                 Location::Property(key) => self.tx.read(*key, self.reads)?,
             };
             match op {
@@ -248,19 +292,24 @@ impl Frame<'_, '_> {
                 "||=" if old.truthy() => return Ok(old),
                 "??=" if !matches!(old, Value::Null | Value::Undefined) => return Ok(old),
                 "&&=" | "||=" | "??=" => rhs(self)?,
-                _ => binary(
-                    op.strip_suffix('=')
-                        .ok_or_else(|| Error::new("invalid assignment operator"))?,
-                    old,
-                    rhs(self)?,
-                )?,
+                _ => {
+                    let rhs = rhs(self)?;
+                    self.binary(
+                        op.strip_suffix('=')
+                            .ok_or_else(|| Error::new("invalid assignment operator"))?,
+                        old,
+                        rhs,
+                    )?
+                }
             }
         };
         let completion = postfix.unwrap_or_else(|| value.clone());
         match place.location {
+            Location::ModelRole(row, name) => self.tx.write_role(row, &name, value)?,
             Location::Local(name) => {
                 self.locals.insert(name, value);
             }
+            Location::Record(record, key) => self.tx.set_record_field(&record, &key, value)?,
             Location::Property(key) => {
                 self.tx.write(key, value)?;
                 // A subsequent statement can observe a QML change handler's writes.

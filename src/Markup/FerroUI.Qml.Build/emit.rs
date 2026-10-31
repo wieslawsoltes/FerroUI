@@ -62,6 +62,12 @@ impl Rust for String {
         quote!(String::from(#self))
     }
 }
+impl Rust for (String, Expr) {
+    fn rust(&self) -> TokenStream {
+        let (key, value) = (self.0.rust(), self.1.rust());
+        quote!((#key,#value))
+    }
+}
 impl Rust for (String, i32) {
     fn rust(&self) -> TokenStream {
         let (name, value) = (self.0.rust(), self.1);
@@ -73,7 +79,7 @@ macro_rules! primitive {
         impl Rust for $ty { fn rust(&self) -> TokenStream { quote!(#self) } }
     )*};
 }
-primitive!(bool, usize);
+primitive!(bool, usize, u32);
 
 macro_rules! structure {
     ($ty:ident { $($field:ident),+ }) => {
@@ -102,14 +108,20 @@ structure!(Import {
     span
 });
 structure!(Pragma { name, values, span });
+structure!(PropertyShadow {
+    scope,
+    name,
+    storage
+});
 structure!(Object {
+    shadows,
     type_name,
     members,
     span,
     type_imports,
     composite_types
 });
-structure!(Member { kind, span });
+structure!(Member { scope, kind, span });
 structure!(Parameter { name, ty });
 structure!(Modifiers {
     required,
@@ -204,6 +216,7 @@ impl Rust for Expr {
             Self::Name(v) => tuple!(Expr::Name(v)),
             Self::ScopedName { name, root } => record!(Expr::ScopedName { name, root }),
             Self::Array(v) => tuple!(Expr::Array(v)),
+            Self::Record(v) => tuple!(Expr::Record(v)),
             Self::Member(base, name) => tuple!(Expr::Member(base, name)),
             Self::Index(base, index) => tuple!(Expr::Index(base, index)),
             Self::Unary(op, input) => tuple!(Expr::Unary(op, input)),

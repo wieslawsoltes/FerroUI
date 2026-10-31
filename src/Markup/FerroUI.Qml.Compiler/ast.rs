@@ -37,6 +37,9 @@ pub struct Import {
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Object {
+    /// Lexical property lookup entries introduced when flattening source inheritance.
+    #[serde(default)]
+    pub shadows: Vec<PropertyShadow>,
     /// Nominal component identities assigned by the linker, in inheritance order.
     pub composite_types: Vec<String>,
     /// Imports in force at the declaration site after linking external components.
@@ -47,7 +50,17 @@ pub struct Object {
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct PropertyShadow {
+    pub scope: u32,
+    pub name: String,
+    pub storage: String,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Member {
+    /// The source type that declared this member, if it came from a template.
+    #[serde(default)]
+    pub scope: Option<u32>,
     pub kind: MemberKind,
     pub span: Span,
 }
@@ -142,6 +155,7 @@ pub enum Expr {
     Member(Box<Expr>, String),
     Index(Box<Expr>, Box<Expr>),
     Array(Vec<Expr>),
+    Record(Vec<(String, Expr)>),
     Unary(String, Box<Expr>),
     Binary(String, Box<Expr>, Box<Expr>),
     Conditional(Box<Expr>, Box<Expr>, Box<Expr>),

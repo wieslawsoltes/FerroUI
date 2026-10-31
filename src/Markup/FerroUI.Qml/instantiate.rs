@@ -10,7 +10,7 @@ struct Builder<'a> {
     registry: &'a TypeRegistry,
     imports: &'a [Import],
     assigned: BTreeSet<SlotId>,
-    aliases: Vec<(SlotId, Expr)>,
+    aliases: Vec<(SlotId, Expr, Option<u32>)>,
     implicit: Vec<(SlotId, Vec<Value>)>,
 }
 
@@ -45,7 +45,7 @@ impl Instance {
         let mut builder = Builder::prepare(name, source, registry)?;
         let root = builder.instance.root();
         for (name, value) in initial {
-            let key = builder.instance.key(root, &name)?;
+            let key = builder.instance.public_key(root, &name)?;
             let key = builder.instance.write_target(key)?;
             builder.instance.slots[key].value = builder
                 .instance
@@ -90,11 +90,13 @@ impl Instance {
         }
     }
 
-    fn validate_handles(&self, value: &Value) -> Result<(), Error> {
+    pub(crate) fn validate_handles(&self, value: &Value) -> Result<(), Error> {
         match value {
+            Value::ModelRow(row) => self.model_role(*row, "").map(|_| ()),
             Value::Object(id) if self.node(*id).is_none() => {
                 Err(Error::new("foreign object handle"))
             }
+            Value::Record(record) => self.record_entries(record).map(|_| ()),
             Value::List(values) => values.iter().try_for_each(|v| self.validate_handles(v)),
             _ => Ok(()),
         }
@@ -112,6 +114,9 @@ impl Instance {
                 if n.is_finite() && (i32::MIN as f64..=i32::MAX as f64).contains(&n.trunc()) =>
             {
                 return Ok(Value::Number(n.trunc()))
+            }
+            (list, Value::Record(r)) if list_element(list).is_some() && r.is_array() => {
+                return self.typed(list, Value::List(self.array_values(r)?));
             }
             (list, Value::List(items)) if list_element(list).is_some() => {
                 let element = list_element(list).unwrap();
@@ -189,6 +194,8 @@ impl<'a> Builder<'a> {
         let mut builder = Self {
             scopes: enums::Scopes::named(name, &document.root)?,
             instance: Instance {
+                records: Default::default(),
+                models: BTreeMap::new(),
                 bindings: BTreeSet::new(),
                 native_functions: source.evaluators(),
                 native_first_reads: source.first_reads(),
@@ -287,6 +294,7 @@ impl Builder<'_> {
         }
         self.instance.properties.push(property);
         self.instance.slots.push(Slot {
+            scope: None,
             overlay: None,
             active_target: None,
             assigned: false,
@@ -310,6 +318,7 @@ impl Builder<'_> {
             instance: self.instance.identity,
         };
         self.instance.nodes.push(Node {
+            shadows: source.shadows.clone(),
             type_scope: self.scopes.imports(imports, self.registry),
             composite_types: source.composite_types.clone(),
             lineage: definition.lineage.clone(),
@@ -333,12 +342,19 @@ impl Builder<'_> {
                     owner: id,
                     name: name.clone(),
                     ty: ty.clone(),
-                    readonly: false,
+                    readonly: definition.readonly.contains(name),
                     required: false,
                     alias: None,
                 },
                 default.clone(),
             )?;
+        }
+        let model = module == list_model::MODULE && name == "ListModel";
+        if model {
+            self.instance.models.insert(id, Default::default());
+        }
+        if module == list_model::MODULE && name == "ListElement" {
+            return Err(Error::new("ListElement must appear inside ListModel"));
         }
         if module == "QtQml" && name == "Binding" {
             self.instance.bindings.insert(id);
@@ -366,6 +382,11 @@ impl Builder<'_> {
                     modifiers,
                     value,
                 } => {
+                    if modifiers.override_ {
+                        return Err(Error::new(format!(
+                            "no virtual source property '{name}' to override"
+                        )));
+                    }
                     if modifiers.readonly && value.is_none() {
                         return Err(Error::new(format!(
                             "readonly property '{name}' requires an initializer"
@@ -386,7 +407,7 @@ impl Builder<'_> {
                         let Some(Binding::Expr(expr)) = value else {
                             return Err(Error::new("alias requires an id or id.property"));
                         };
-                        self.aliases.push((key, expr.clone()));
+                        self.aliases.push((key, expr.clone(), member.scope));
                     }
                     if modifiers.default {
                         self.instance.nodes[id.index].default_property = Some(name.clone());
@@ -409,6 +430,7 @@ impl Builder<'_> {
                     body,
                 } => {
                     let proc = Procedure {
+                        scope: member.scope,
                         parameters: self.parameters(imports, parameters)?,
                         result: return_type
                             .as_deref()
@@ -435,6 +457,19 @@ impl Builder<'_> {
         let mut implicit = Vec::new();
         for member in &source.members {
             match &member.kind {
+                MemberKind::Child(child) if model => {
+                    let child_imports = child.type_imports.as_deref().unwrap_or(imports);
+                    let (module, name, _) =
+                        self.registry.resolve(child_imports, &child.type_name)?;
+                    if (module, name) != (list_model::MODULE, "ListElement") {
+                        return Err(Error::new("ListModel children must be ListElement objects"));
+                    }
+                    self.instance
+                        .models
+                        .get_mut(&id)
+                        .unwrap()
+                        .static_row(child)?;
+                }
                 MemberKind::Child(child) => {
                     implicit.push(Value::Object(self.object(child, Some(id))?))
                 }
@@ -446,20 +481,31 @@ impl Builder<'_> {
                             object.type_name
                         )));
                     }
-                    self.bind(child, "target", &Binding::Expr(Expr::Name("parent".into())))?;
+                    self.bind(
+                        child,
+                        "target",
+                        &Binding::Expr(Expr::Name("parent".into())),
+                        member.scope,
+                    )?;
                     self.bind(
                         child,
                         "property",
                         &Binding::Expr(Expr::String(name.clone())),
+                        member.scope,
                     )?;
                 }
-                MemberKind::Binding { name, value } => self.bind(id, name, value)?,
+                MemberKind::Binding { name, .. } if definition.readonly.contains(name) => {
+                    return Err(Error::new(format!(
+                        "cannot initialize readonly native property '{name}'"
+                    )))
+                }
+                MemberKind::Binding { name, value } => self.bind(id, name, value, member.scope)?,
                 MemberKind::Group { name, members } => self.group(id, name, members)?,
                 MemberKind::Property {
                     name,
                     value: Some(value),
                     ..
-                } => self.bind(id, name, value)?,
+                } => self.bind(id, name, value, member.scope)?,
                 MemberKind::Handler { name, .. }
                     if connections && name != "Component.onCompleted" =>
                 {
@@ -469,9 +515,14 @@ impl Builder<'_> {
                     name,
                     parameters,
                     body,
-                } => self.handler(id, name, parameters, body)?,
+                } => self.handler(id, name, parameters, body, member.scope)?,
                 _ => (),
             }
+        }
+        if model {
+            let count = self.instance.key(id, "count")?;
+            self.instance.slots[count].value =
+                Value::Number(self.instance.models[&id].len() as f64);
         }
         if connections {
             self.instance.connect_handlers(id, source)?;
@@ -513,7 +564,7 @@ impl Builder<'_> {
         for member in members {
             match &member.kind {
                 MemberKind::Binding { name, value } => {
-                    self.bind(owner, &format!("{prefix}.{name}"), value)?
+                    self.bind(owner, &format!("{prefix}.{name}"), value, member.scope)?
                 }
                 MemberKind::Group { name, members } => {
                     self.group(owner, &format!("{prefix}.{name}"), members)?
@@ -534,9 +585,16 @@ impl Builder<'_> {
         Ok(())
     }
 
-    fn bind(&mut self, owner: ObjectId, name: &str, binding: &Binding) -> Result<(), Error> {
+    fn bind(
+        &mut self,
+        owner: ObjectId,
+        name: &str,
+        binding: &Binding,
+        scope: Option<u32>,
+    ) -> Result<(), Error> {
         let key = self.instance.key(owner, name)?;
         self.assign_once(key)?;
+        self.instance.slots[key].scope = scope;
         let value = match binding {
             Binding::Object(child) => Value::Object(self.object(child, Some(owner))?),
             Binding::Objects(children) => Value::List(
@@ -546,13 +604,7 @@ impl Builder<'_> {
                     .collect::<Result<_, _>>()?,
             ),
             Binding::Expr(expr) if expr.as_literal().is_some() => {
-                match expr.as_literal().expect("matched a literal") {
-                    ir::Literal::Null => Value::Null,
-                    ir::Literal::Undefined => Value::Undefined,
-                    ir::Literal::Bool(b) => Value::Bool(b),
-                    ir::Literal::Number(n) => Value::Number(n),
-                    ir::Literal::String(s) => Value::String(s.into()),
-                }
+                Value::from(expr.as_literal().expect("matched a literal"))
             }
             expr => {
                 self.instance.slots[key].binding = Some(Rc::new(expr.clone()));
@@ -572,6 +624,7 @@ impl Builder<'_> {
         name: &str,
         parameters: &[String],
         body: &[Stmt],
+        scope: Option<u32>,
     ) -> Result<(), Error> {
         let node = &mut self.instance.nodes[owner.index];
         let (signal, formal) = if name == "Component.onCompleted" {
@@ -614,6 +667,7 @@ impl Builder<'_> {
             .insert(
                 signal,
                 Rc::new(Procedure {
+                    scope,
                     parameters,
                     result: None,
                     body: body.to_vec(),
@@ -627,7 +681,7 @@ impl Builder<'_> {
     }
 
     fn link_aliases(&mut self) -> Result<(), Error> {
-        for (key, expr) in &self.aliases {
+        for (key, expr, scope) in &self.aliases {
             let alias = match expr {
                 Expr::Name(name) => Alias::Object(
                     self.instance
@@ -651,16 +705,16 @@ impl Builder<'_> {
                         .get(id)
                         .copied()
                         .ok_or_else(|| Error::new(format!("unknown alias id '{id}'")))?;
-                    let key = if let Ok(key) = self.instance.key(obj, &path) {
+                    let key = if let Ok(key) = self.instance.key_in(obj, &path, *scope) {
                         key
                     } else if let Some((first, second)) = path.split_once('.') {
-                        let key = self.instance.key(obj, first)?;
+                        let key = self.instance.key_in(obj, first, *scope)?;
                         let Value::Object(nested) = self.instance.slots[key].value else {
                             return Err(Error::new(format!(
                                 "unresolved nested alias target '{id}.{path}'"
                             )));
                         };
-                        self.instance.key(nested, second)?
+                        self.instance.key_in(nested, second, *scope)?
                     } else {
                         return Err(Error::new(format!("unknown alias target '{id}.{path}'")));
                     };
@@ -670,7 +724,7 @@ impl Builder<'_> {
             };
             self.instance.properties[*key].alias = Some(alias);
         }
-        for (key, _) in &self.aliases {
+        for (key, _, _) in &self.aliases {
             let mut visited = BTreeSet::new();
             let mut current = *key;
             while let Some(Alias::Slot(next)) = self.instance.properties[current].alias {

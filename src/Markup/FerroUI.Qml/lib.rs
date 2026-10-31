@@ -1,6 +1,7 @@
 //! A component owns its objects, bindings, dependency graph and signal dispatch.
 //! Native integrations register their type contracts before constructing an instance.
 //! Public mutations settle bindings and handlers atomically before exposing changes.
+mod arrays;
 mod binding_object;
 pub mod compiled;
 mod connections;
@@ -9,7 +10,11 @@ mod enums;
 pub use enums::Namespace;
 mod evaluation;
 mod instantiate;
+mod list_model;
+pub use list_model::RowId;
+mod records;
 mod registry;
+pub use records::Record;
 mod timers;
 mod transaction;
 mod value;
@@ -28,12 +33,14 @@ type Locals = BTreeMap<String, Value>;
 
 #[derive(Clone)]
 struct Procedure {
+    scope: Option<u32>,
     parameters: Vec<Parameter>,
     result: Option<String>,
     body: Vec<Stmt>,
 }
 
 struct Node {
+    shadows: Vec<ir::PropertyShadow>,
     type_scope: Rc<Namespace>,
     module: String,
     name: String,
@@ -76,6 +83,7 @@ struct Property {
 
 #[derive(Clone)]
 struct Slot {
+    scope: Option<u32>,
     overlay: Option<Box<binding_object::Overlay>>,
     active_target: Option<SlotId>,
     assigned: bool,
@@ -105,6 +113,8 @@ pub struct SignalEmission {
 }
 
 pub struct Instance {
+    models: BTreeMap<ObjectId, list_model::Model>,
+    records: records::Heap,
     native_first_reads: &'static [compiled::FirstRead],
     bindings: BTreeSet<ObjectId>,
     native_scripts: &'static [compiled::Script],
@@ -163,14 +173,41 @@ impl Instance {
 
     pub fn property_names(&self, object: ObjectId) -> Vec<String> {
         self.node(object)
-            .map(|n| n.properties.keys().cloned().collect())
+            .map(|n| {
+                n.properties
+                    .keys()
+                    .filter(|name| !name.starts_with("$qml:"))
+                    .cloned()
+                    .collect()
+            })
             .unwrap_or_default()
     }
 
+    fn public_key(&self, object: ObjectId, name: &str) -> Result<SlotId, Error> {
+        if name.starts_with("$qml:") {
+            return Err(Error::new("private QML property"));
+        }
+        self.key(object, name)
+    }
+
     fn key(&self, object: ObjectId, property: &str) -> Result<SlotId, Error> {
+        self.key_in(object, property, None)
+    }
+
+    fn key_in(
+        &self,
+        object: ObjectId,
+        property: &str,
+        scope: Option<u32>,
+    ) -> Result<SlotId, Error> {
         let node = self
             .node(object)
             .ok_or_else(|| Error::new("foreign or unknown object"))?;
+        let property = node
+            .shadows
+            .iter()
+            .find(|s| Some(s.scope) == scope && s.name == property)
+            .map_or(property, |s| s.storage.as_str());
         node.properties
             .get(property)
             .copied()
@@ -180,12 +217,12 @@ impl Instance {
     /// True if QML or Rust supplied a local value or binding. Reflection-based
     /// hosts use this to preserve theme/style precedence for untouched defaults.
     pub fn is_assigned(&self, object: ObjectId, property: &str) -> bool {
-        self.key(object, property)
+        self.public_key(object, property)
             .is_ok_and(|key| self.slots[key].assigned)
     }
 
     pub fn get(&self, object: ObjectId, property: &str) -> Result<Value, Error> {
-        Ok(self.slots[self.key(object, property)?].value.clone())
+        Ok(self.slots[self.public_key(object, property)?].value.clone())
     }
 
     /// A native projection can reject unsupported final property values before
@@ -203,7 +240,7 @@ impl Instance {
         let node = self
             .node(object)
             .ok_or_else(|| Error::new("foreign or unknown object"))?;
-        if node.signal(name).is_none() {
+        if name.starts_with("$qml:") || node.signal(name).is_none() {
             return Err(Error::new(format!("unknown signal '{name}'")));
         }
         self.watched.insert((object, name.to_owned()));
@@ -220,7 +257,7 @@ impl Instance {
 
     /// Replaces an existing binding, even if its current value equals the assigned value.
     pub fn set(&mut self, object: ObjectId, property: &str, value: Value) -> Result<(), Error> {
-        let key = self.key(object, property)?;
+        let key = self.public_key(object, property)?;
         self.transaction(|tx| tx.write(key, value))
     }
 
@@ -230,6 +267,9 @@ impl Instance {
         signal: &str,
         arguments: Vec<Value>,
     ) -> Result<(), Error> {
+        if signal.starts_with("$qml:shadow:") {
+            return Err(Error::new("private QML signal"));
+        }
         self.transaction(|tx| tx.signal(object, signal, arguments))
     }
 

@@ -36,7 +36,12 @@ impl Transaction<'_> {
                 let Value::String(name) = self.model.get(object, "property")? else {
                     return Err(Error::new("Binding.property must be a property name"));
                 };
-                Some(self.model.write_target(self.model.key(target, &name)?)?)
+                let property = self.model.key(object, "property")?;
+                let scope = self.model.slots[property].scope;
+                Some(
+                    self.model
+                        .write_target(self.model.key_in(target, &name, scope)?)?,
+                )
             }
             _ => None,
         };

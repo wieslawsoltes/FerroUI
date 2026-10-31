@@ -2,7 +2,7 @@
 use crate::{Binding, Expr, Member, MemberKind, Object, Stmt};
 use std::collections::{HashMap, HashSet};
 
-pub(super) fn isolate(root: &mut Object, serial: usize, root_id: &str) {
+pub(super) fn isolate(root: &mut Object, serial: usize, root_id: &str, scope: u32) {
     let mut ids = HashMap::new();
     let previous = super::link::object_id(root).map(str::to_owned);
     visit_objects(root, &mut |object| {
@@ -14,13 +14,14 @@ pub(super) fn isolate(root: &mut Object, serial: usize, root_id: &str) {
         ids.insert(previous, root_id.to_owned());
     } else {
         root.members.push(Member {
+            scope: Some(scope),
             kind: MemberKind::Id(root_id.to_owned()),
             span: root.span,
         });
     }
     visit_objects(root, &mut |object| {
         for member in &mut object.members {
-            rewrite(member, &ids, root_id);
+            rewrite(member, &ids, root_id, scope);
         }
     });
 }
@@ -54,7 +55,8 @@ fn visit_members(members: &mut [Member], visit: &mut impl FnMut(&mut Object)) {
     }
 }
 
-fn rewrite(member: &mut Member, ids: &HashMap<String, String>, root: &str) {
+fn rewrite(member: &mut Member, ids: &HashMap<String, String>, root: &str, scope: u32) {
+    member.scope = Some(scope);
     match &mut member.kind {
         MemberKind::Id(id) => {
             if let Some(new) = ids.get(id) {
@@ -71,7 +73,7 @@ fn rewrite(member: &mut Member, ids: &HashMap<String, String>, root: &str) {
         },
         MemberKind::Group { members, .. } => {
             for m in members {
-                rewrite(m, ids, root);
+                rewrite(m, ids, root, scope);
             }
         }
         MemberKind::Handler {
@@ -119,6 +121,11 @@ fn expression(
             expression(callee, ids, root, locals);
             for arg in args {
                 expression(arg, ids, root, locals);
+            }
+        }
+        Expr::Record(fields) => {
+            for (_, value) in fields {
+                expression(value, ids, root, locals);
             }
         }
         Expr::Array(items) => {

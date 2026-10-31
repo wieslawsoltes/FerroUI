@@ -159,12 +159,12 @@ fn preserves_newlines_in_comments_for_automatic_termination() {
 
 #[test]
 fn pragma_and_modifier_syntax() {
-    let doc = parse("pragma Singleton\nItem { virtual property int value: 4; override final property int count: 1; required property string label }").unwrap();
+    let doc = parse("pragma Singleton\nItem { virtual property int value: 4; final property int count: 1; required property string label }").unwrap();
     assert!(
         matches!(&doc.root.members[0].kind,MemberKind::Property{modifiers,..} if modifiers.virtual_)
     );
     assert!(
-        matches!(&doc.root.members[1].kind,MemberKind::Property{modifiers,..} if modifiers.override_ && modifiers.final_)
+        matches!(&doc.root.members[1].kind,MemberKind::Property{modifiers,..} if modifiers.final_)
     );
     assert!(
         matches!(&doc.root.members[2].kind,MemberKind::Property{modifiers,..} if modifiers.required)
@@ -255,4 +255,67 @@ fn parentheses_disambiguate_nullish_and_exponentiation_grammar() {
     ] {
         expression(expr);
     }
+}
+
+#[test]
+fn validates_override_modifiers_across_composite_inheritance() {
+    use std::collections::HashMap;
+    use std::rc::Rc;
+    struct Types(HashMap<String, Rc<Document>>);
+    impl ComponentResolver for Types {
+        fn resolve(
+            &mut self,
+            _: &str,
+            _: &[Import],
+            ty: &str,
+        ) -> Result<Option<ComponentSource>, String> {
+            Ok(self.0.get(ty).map(|doc| ComponentSource {
+                key: ty.into(),
+                document: doc.clone(),
+            }))
+        }
+    }
+    for (base, middle, leaf, valid) in [
+        ("virtual", "override", "final", true),
+        ("virtual", "", "override", true),
+        ("", "virtual", "override", true),
+        ("", "", "", true),
+        ("virtual", "final", "override", false),
+        ("final", "", "", false),
+        ("", "override", "", false),
+    ] {
+        let mut types = Types(HashMap::new());
+        for (name, parent, modifier) in [("Base", "QtObject", base), ("Middle", "Base", middle)] {
+            let source = format!("{parent} {{ {modifier} property int count: 1 }}");
+            types
+                .0
+                .insert(name.into(), Rc::new(parse(&source).unwrap()));
+        }
+        let entry = Rc::new(
+            parse(&format!(
+                "Middle {{ {leaf} property string count: 'three' }}"
+            ))
+            .unwrap(),
+        );
+        let result = link(
+            ComponentSource {
+                key: "leaf".into(),
+                document: entry,
+            },
+            &mut types,
+        );
+        assert_eq!(result.is_ok(), valid, "{base}/{middle}/{leaf}: {result:?}");
+    }
+    for modifiers in ["virtual override", "override final", "final virtual"] {
+        assert!(parse(&format!("Item {{ {modifiers} property int count: 1 }}")).is_err());
+    }
+    let orphan = Rc::new(parse("QtObject { override property int orphan: 1 }").unwrap());
+    assert!(link(
+        ComponentSource {
+            key: "entry".into(),
+            document: orphan
+        },
+        &mut Types(HashMap::new())
+    )
+    .is_err());
 }

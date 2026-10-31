@@ -5,6 +5,9 @@ use std::collections::VecDeque;
 /// The undo log only touches slots affected by this write, including dependency edges.
 /// A failed handler or binding therefore cannot leave a half-applied native update.
 pub(crate) struct Transaction<'a> {
+    pub(crate) model_edits: Vec<(ObjectId, list_model::Undo)>,
+    model_modes: BTreeSet<ObjectId>,
+    pub(crate) record_changes: records::Journal,
     pub(crate) model: &'a mut Instance,
     original: BTreeMap<SlotId, Slot>,
     emitted: Vec<SignalEmission>,
@@ -13,6 +16,7 @@ pub(crate) struct Transaction<'a> {
     evaluating: BTreeSet<SlotId>,
     notifications: VecDeque<(ObjectId, String)>,
     initializing: bool,
+    scope: Option<u32>,
     pub(crate) depth: usize,
     steps: usize,
     pub(crate) timer_changes: timers::TimerChanges,
@@ -24,7 +28,10 @@ impl Instance {
         operation: impl FnOnce(&mut Transaction<'_>) -> Result<T, Error>,
     ) -> Result<T, Error> {
         let mut tx = Transaction {
+            record_changes: self.records.journal(),
             model: self,
+            model_edits: Vec::new(),
+            model_modes: BTreeSet::new(),
             original: BTreeMap::new(),
             emitted: Vec::new(),
             pending: BTreeSet::new(),
@@ -32,6 +39,7 @@ impl Instance {
             evaluating: BTreeSet::new(),
             notifications: VecDeque::new(),
             initializing: false,
+            scope: None,
             depth: 0,
             steps: 0,
             timer_changes: Default::default(),
@@ -39,6 +47,7 @@ impl Instance {
         let result = operation(&mut tx).and_then(|value| {
             tx.settle()?;
             tx.model.validate_connections()?;
+            tx.model.validate_model_modes(&tx.model_modes)?;
             if let Some(validate) = &tx.model.validator {
                 let changes = tx
                     .original
@@ -51,6 +60,9 @@ impl Instance {
                             return None;
                         }
                         let property = &tx.model.properties[*key];
+                        if property.name.starts_with("$qml:") {
+                            return None;
+                        }
                         Some(Change {
                             object: property.owner,
                             property: property.name.clone(),
@@ -63,6 +75,12 @@ impl Instance {
             Ok(value)
         });
         if result.is_err() {
+            for (id, undo) in tx.model_edits.into_iter().rev() {
+                undo.restore(tx.model.models.get_mut(&id).unwrap());
+            }
+            tx.model
+                .records
+                .rollback(std::mem::take(&mut tx.record_changes));
             tx.timer_changes.rollback(&mut tx.model.timers);
             for (key, old) in tx.original {
                 tx.model.slots[key] = old;
@@ -71,16 +89,36 @@ impl Instance {
             tx.model.emissions.append(&mut tx.emitted);
             for (key, old) in tx.original {
                 let value = &tx.model.slots[key].value;
+                if tx.model.properties[key].name.starts_with("$qml:") {
+                    continue;
+                }
                 if !old.value.unchanged(value) || old.assigned != tx.model.slots[key].assigned {
                     tx.model.changes.insert(key, value.clone());
                 }
             }
         }
+        drop(tx.record_changes);
+        tx.model.records.maybe_collect();
         result
     }
 }
 
 impl Transaction<'_> {
+    pub(crate) fn scoped_key(&self, object: ObjectId, name: &str) -> Result<SlotId, Error> {
+        self.model.key_in(object, name, self.scope)
+    }
+
+    pub(crate) fn with_scope<T>(
+        &mut self,
+        scope: Option<u32>,
+        operation: impl FnOnce(&mut Self) -> Result<T, Error>,
+    ) -> Result<T, Error> {
+        let previous = std::mem::replace(&mut self.scope, scope);
+        let result = operation(self);
+        self.scope = previous;
+        result
+    }
+
     pub(crate) fn touched(&mut self, key: SlotId) -> &mut Slot {
         self.original
             .entry(key)
@@ -102,6 +140,7 @@ impl Transaction<'_> {
 
     pub(crate) fn initialize(&mut self) -> Result<(), Error> {
         self.initializing = true;
+        self.model_modes.extend(self.model.models.keys().copied());
         self.pending_bindings
             .extend(self.model.bindings.iter().copied());
         self.pending.extend(
@@ -192,7 +231,7 @@ impl Transaction<'_> {
             key = next;
         }
         for key in chain.into_iter().rev() {
-            self.evaluate_one(key)?;
+            self.with_scope(self.model.slots[key].scope, |tx| tx.evaluate_one(key))?;
         }
         Ok(())
     }
@@ -220,8 +259,8 @@ impl Transaction<'_> {
             return None;
         }
         let owner = self.model.properties[key].owner;
-        if let Some(key) = self.model.nodes[owner.index].properties.get(name) {
-            return Some(*key);
+        if let Ok(slot) = self.model.key_in(owner, name, self.model.slots[key].scope) {
+            return Some(slot);
         }
         if self.model.ids.contains_key(name)
             || self.model.nodes[owner.index]
@@ -236,8 +275,11 @@ impl Transaction<'_> {
             None => self.model.root(),
         };
         self.model
-            .key(root, name)
-            .or_else(|_| self.model.key(self.model.root(), name))
+            .key_in(root, name, self.model.slots[key].scope)
+            .or_else(|_| {
+                self.model
+                    .key_in(self.model.root(), name, self.model.slots[key].scope)
+            })
             .ok()
     }
 
@@ -319,6 +361,9 @@ impl Transaction<'_> {
             }
         }
         let property = &self.model.properties[key];
+        if property.name == "dynamicRoles" && self.model.models.contains_key(&property.owner) {
+            self.model_modes.insert(property.owner);
+        }
         if self.model.bindings.contains(&property.owner)
             && matches!(
                 property.name.as_str(),
@@ -416,7 +461,7 @@ impl Transaction<'_> {
             .zip(arguments)
             .map(|(p, v)| match &p.ty {
                 Some(ty) => self.model.typed(ty, v),
-                None => Ok(v),
+                None => self.model.typed("var", v),
             })
             .collect()
     }

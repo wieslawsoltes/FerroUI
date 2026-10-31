@@ -134,7 +134,7 @@ struct Linker<'a, R> {
     stack: Vec<String>,
     serial: usize,
     nodes: usize,
-    types: HashMap<String, String>,
+    types: HashMap<String, u32>,
     singleton_ids: HashMap<String, String>,
     singletons: Vec<Object>,
 }
@@ -152,6 +152,7 @@ impl<R: ComponentResolver> Linker<'_, R> {
 
         if let Some(template) = context.inline.get(&site.type_name) {
             return self.expand(
+                context,
                 context,
                 format!("{}#{}", context.origin, site.type_name),
                 template,
@@ -173,18 +174,32 @@ impl<R: ComponentResolver> Linker<'_, R> {
                 ));
             }
             let defining = Context::new(source.key.clone(), &source.document, self.resolver)?;
-            return self.expand(&defining, source.key, &source.document.root, site);
+            return self.expand(context, &defining, source.key, &source.document.root, site);
+        }
+        for member in &site.members {
+            if let MemberKind::Property {
+                name, modifiers, ..
+            } = &member.kind
+            {
+                if modifiers.override_ {
+                    return Err(context.error(
+                        member.span,
+                        format!("no virtual source property '{name}' to override"),
+                    ));
+                }
+            }
         }
         site.type_imports = Some(context.native_imports.clone());
         Ok(())
     }
 
     fn type_id(&mut self, key: &str) -> String {
-        let index = self.types.len();
-        self.types
-            .entry(key.to_owned())
-            .or_insert_with(|| format!("Qml$Type{index}"))
-            .clone()
+        format!("Qml$Type{}", self.scope_id(key))
+    }
+
+    fn scope_id(&mut self, key: &str) -> u32 {
+        let index = self.types.len() as u32;
+        *self.types.entry(key.to_owned()).or_insert(index)
     }
 
     fn annotation(
@@ -269,6 +284,7 @@ impl<R: ComponentResolver> Linker<'_, R> {
 
     fn expand(
         &mut self,
+        site_context: &Context,
         context: &Context,
         key: String,
         template: &Object,
@@ -280,6 +296,7 @@ impl<R: ComponentResolver> Linker<'_, R> {
                 format!("recursive component: {} -> {key}", self.stack.join(" -> ")),
             ));
         }
+        let scope = self.scope_id(&key);
         let type_id = self.type_id(&key);
         self.stack.push(key);
         self.serial += 1;
@@ -287,10 +304,11 @@ impl<R: ComponentResolver> Linker<'_, R> {
         let root_id = object_id(site)
             .map(str::to_owned)
             .unwrap_or_else(|| format!("$qml:{}:root", self.serial));
-        super::scope::isolate(&mut base, self.serial, &root_id);
+        super::scope::isolate(&mut base, self.serial, &root_id, scope);
         self.object(context, &mut base)?;
         self.stack.pop();
-        merge_site(&mut base, site, context)?;
+        shadow_properties(&mut base, site, site_context, scope)?;
+        merge_site(&mut base, site, site_context)?;
         base.composite_types.push(type_id);
         *site = base;
         Ok(())
@@ -302,6 +320,95 @@ pub(crate) fn object_id(object: &Object) -> Option<&str> {
         MemberKind::Id(id) => Some(id.as_str()),
         _ => None,
     })
+}
+
+/// Keep the former declaration in the same object. Each source layer that
+/// could see it retains its own lookup entry, including accesses through
+/// computed indices and object-valued parameters.
+fn shadow_properties(
+    base: &mut Object,
+    site: &mut Object,
+    context: &Context,
+    scope: u32,
+) -> Result<(), LinkError> {
+    for member in &mut site.members {
+        let MemberKind::Property {
+            name, modifiers, ..
+        } = &mut member.kind
+        else {
+            continue;
+        };
+        let inherited = base.members.iter().find_map(|m| match &m.kind {
+            MemberKind::Property {
+                name: n,
+                modifiers: old,
+                ..
+            } if n == name => Some((m.scope.unwrap_or(scope), *old)),
+            _ => None,
+        });
+        let Some((declaring, old)) = inherited else {
+            if modifiers.override_ {
+                return Err(context.error(
+                    member.span,
+                    format!("no virtual source property '{name}' to override"),
+                ));
+            }
+            continue;
+        };
+        if old.final_ {
+            return Err(context.error(
+                member.span,
+                format!("cannot redeclare final property '{name}'"),
+            ));
+        }
+        if modifiers.override_ && !old.virtual_ {
+            return Err(context.error(
+                member.span,
+                format!("cannot override non-virtual property '{name}'"),
+            ));
+        }
+        // Override and ordinary redeclaration both inherit existing virtuality.
+        modifiers.virtual_ |= old.virtual_ && !modifiers.final_;
+        modifiers.override_ = false;
+        let storage = format!("$qml:shadow:{declaring}:{name}");
+        let lineage = base
+            .composite_types
+            .iter()
+            .filter_map(|ty| ty.strip_prefix("Qml$Type")?.parse::<u32>().ok())
+            .chain(std::iter::once(scope));
+        for view in lineage.skip_while(|s| *s != declaring) {
+            base.shadows.push(PropertyShadow {
+                scope: view,
+                name: name.clone(),
+                storage: storage.clone(),
+            });
+        }
+        let mut chars = name.chars();
+        let change = format!(
+            "on{}{}Changed",
+            chars
+                .next()
+                .ok_or_else(|| context.error(member.span, "empty property name"))?
+                .to_uppercase(),
+            chars.as_str()
+        );
+        for base_member in &mut base.members {
+            match &mut base_member.kind {
+                MemberKind::Property { name: n, .. }
+                | MemberKind::Binding { name: n, .. }
+                | MemberKind::OnProperty { name: n, .. }
+                    if n == name =>
+                {
+                    n.clone_from(&storage)
+                }
+                MemberKind::Handler { name: n, .. } if *n == change => {
+                    *n = format!("on{storage}Changed")
+                }
+                _ => (),
+            }
+        }
+    }
+    Ok(())
 }
 
 fn merge_site(base: &mut Object, site: &mut Object, context: &Context) -> Result<(), LinkError> {

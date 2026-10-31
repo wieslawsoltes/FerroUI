@@ -60,7 +60,8 @@ impl<R: ComponentResolver> Linker<'_, R> {
                 let id = format!("$qml:singleton:{}", self.serial);
                 self.singleton_ids.insert(source.key.clone(), id.clone());
                 let mut root = source.document.root.clone();
-                crate::scope::isolate(&mut root, self.serial, &id);
+                let scope = self.scope_id(&source.key);
+                crate::scope::isolate(&mut root, self.serial, &id, scope);
                 let defining = Context::new(source.key.clone(), &source.document, self.resolver)?;
                 self.stack.push(source.key);
                 self.object(&defining, &mut root)?;
@@ -155,6 +156,11 @@ fn expression(
         Expr::Conditional(c, a, b) => {
             for arg in [c, a, b] {
                 expression(arg, locals, resolve)?;
+            }
+        }
+        Expr::Record(fields) => {
+            for (_, value) in fields {
+                expression(value, locals, resolve)?;
             }
         }
         Expr::Array(args) => {

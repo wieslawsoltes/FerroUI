@@ -227,6 +227,7 @@ impl<'s> Parser<'s> {
         }
         let members = self.members()?;
         Ok(Object {
+            shadows: Vec::new(),
             type_imports: None,
             composite_types: Vec::new(),
             type_name,
@@ -248,6 +249,7 @@ impl<'s> Parser<'s> {
                 let start = p.token().span.start;
                 let kind = p.member()?;
                 members.push(Member {
+                    scope: None,
                     kind,
                     span: p.span(start),
                 });
@@ -281,6 +283,11 @@ impl<'s> Parser<'s> {
             }
             *slot = true;
             self.pos += 1;
+        }
+        if u8::from(modifiers.virtual_) + u8::from(modifiers.override_) + u8::from(modifiers.final_)
+            > 1
+        {
+            return Err(self.error("choose one of 'virtual', 'override' and 'final'"));
         }
         if self.eat("property") {
             let ty = self.ty()?;
@@ -507,7 +514,16 @@ impl<'s> Parser<'s> {
         is_type(name) && self.tokens.get(i).is_some_and(|t| token_is(&t.kind, "{"))
     }
     fn binding(&mut self) -> Result<Binding> {
-        if self.at("{") {
+        if self.at("{")
+            && !(self
+                .tokens
+                .get(self.pos + 1)
+                .is_some_and(|t| matches!(t.kind, Kind::String(_) | Kind::Number(_)))
+                && self
+                    .tokens
+                    .get(self.pos + 2)
+                    .is_some_and(|t| token_is(&t.kind, ":")))
+        {
             return self.block().map(Binding::Script);
         }
         if self.object_ahead(self.pos) {
@@ -827,6 +843,7 @@ impl<'s> Parser<'s> {
                 value.grouped = true;
                 value
             }
+            Kind::Symbol("{") => self.record()?,
             Kind::Symbol("[") => {
                 self.pos += 1;
                 let (args, depth) = self.arguments("]")?;
@@ -907,6 +924,48 @@ impl<'s> Parser<'s> {
         }
         Ok(node)
     }
+    fn record(&mut self) -> Result<Node> {
+        self.expect("{")?;
+        let mut fields = Vec::new();
+        let mut depth = 1;
+        while !self.eat("}") {
+            let key = match &self.token().kind {
+                Kind::String(s) => s.clone(),
+                Kind::Ident(s) => (*s).to_owned(),
+                Kind::Number(n) => number_value(n)
+                    .filter(|n| n.is_finite())
+                    .ok_or_else(|| self.error("invalid numeric object key"))?
+                    .to_string(),
+                _ => return Err(self.error("expected an object property name")),
+            };
+            let shorthand = matches!(self.token().kind,Kind::Ident(name) if !reserved(name));
+            self.pos += 1;
+            let value = if self.eat(":") {
+                self.expr_bp(0)?
+            } else if shorthand {
+                Node::leaf(Expr::Name(key.clone()))
+            } else {
+                return Err(self.error("expected ':' after object key"));
+            };
+            // Prototype mutation requires an ECMAScript prototype chain; rejecting
+            // this spelling avoids treating it as an ordinary data property.
+            if key == "__proto__" && !matches!(&value.expr,Expr::Name(n) if n==&key) {
+                return Err(self.error("object prototype initializers are unsupported"));
+            }
+            depth = depth.max(value.depth + 1);
+            fields.push((key, value.expr));
+            if self.eat("}") {
+                break;
+            }
+            self.expect(",")?;
+        }
+        Ok(Node {
+            grouped: false,
+            depth,
+            expr: Expr::Record(fields),
+        })
+    }
+
     fn arguments(&mut self, close: &str) -> Result<(Vec<Expr>, usize)> {
         let mut values = Vec::new();
         let mut depth = 1;

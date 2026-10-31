@@ -24,10 +24,9 @@ impl Transaction<'_> {
         root: ObjectId,
         name: &str,
     ) -> Result<SlotId, Error> {
-        self.model
-            .key(owner, name)
-            .or_else(|_| self.model.key(root, name))
-            .or_else(|_| self.model.key(self.model.root(), name))
+        self.scoped_key(owner, name)
+            .or_else(|_| self.scoped_key(root, name))
+            .or_else(|_| self.scoped_key(self.model.root(), name))
     }
 
     pub(crate) fn name(
@@ -57,7 +56,7 @@ impl Transaction<'_> {
         if let Some(id) = self.model.ids.get(name) {
             return Ok(Value::Object(*id));
         }
-        if let Ok(key) = self.model.key(owner, name) {
+        if let Ok(key) = self.scoped_key(owner, name) {
             return self.read(key, reads);
         }
         if let Some(value) = self.model.nodes[owner.index].type_scope.member(name) {
@@ -117,12 +116,20 @@ impl Transaction<'_> {
             ScopedName { name, root } => {
                 self.name(owner, self.scope_id(root)?, name, locals, reads)?
             }
-            Array(items) => Value::List(
-                items
+            Record(fields) => {
+                let mut values = BTreeMap::new();
+                for (key, expr) in fields {
+                    values.insert(key.clone(), self.expr(owner, expr, locals, reads)?);
+                }
+                self.new_record(values)
+            }
+            Array(items) => {
+                let items = items
                     .iter()
                     .map(|e| self.expr(owner, e, locals, reads))
-                    .collect::<Result<_, _>>()?,
-            ),
+                    .collect::<Result<Vec<_>, _>>()?;
+                self.new_array(items)
+            }
             Member(base, name) => {
                 if let Some((group, root)) = lexical_name(base) {
                     return compiled::Frame {
@@ -139,11 +146,11 @@ impl Transaction<'_> {
             Index(base, index) => {
                 let base = self.expr(owner, base, locals, reads)?;
                 let index = self.expr(owner, index, locals, reads)?;
-                self.member(base, &index.js_string(), reads)?
+                self.member(base, &self.model.value_string(&index)?, reads)?
             }
             Unary(op, expr) => {
                 let value = self.expr(owner, expr, locals, reads)?;
-                unary(op, value)?
+                self.model.js_unary(op, value)?
             }
             Binary(op, left, right) => {
                 let a = self.expr(owner, left, locals, reads)?;
@@ -152,7 +159,10 @@ impl Transaction<'_> {
                     "||" if a.truthy() => a,
                     "??" if !matches!(a, Value::Null | Value::Undefined) => a,
                     "&&" | "||" | "??" => self.expr(owner, right, locals, reads)?,
-                    _ => binary(op, a, self.expr(owner, right, locals, reads)?)?,
+                    _ => {
+                        let b = self.expr(owner, right, locals, reads)?;
+                        self.model.js_binary(op, a, b)?
+                    }
                 }
             }
             Conditional(test, yes, no) => {
@@ -212,6 +222,13 @@ impl Transaction<'_> {
         reads: &mut BTreeSet<SlotId>,
     ) -> Result<Value, Error> {
         match base {
+            Value::ModelRow(row) => self.read_role(row, name, reads),
+            Value::Record(record) => Ok(self
+                .model
+                .record_entries(&record)?
+                .get(name)
+                .cloned()
+                .unwrap_or(Value::Undefined)),
             Value::Namespace(namespace) => namespace
                 .member(name)
                 .ok_or_else(|| Error::new(format!("unknown type or enum member '{name}'"))),
@@ -220,7 +237,7 @@ impl Transaction<'_> {
                 .parent(id)
                 .map(Value::Object)
                 .unwrap_or(Value::Null)),
-            Value::Object(id) => self.read(self.model.key(id, name)?, reads),
+            Value::Object(id) => self.read(self.scoped_key(id, name)?, reads),
             Value::List(values) if name == "length" => Ok(Value::Number(values.len() as f64)),
             Value::List(values) => Ok(name
                 .parse::<usize>()
@@ -240,6 +257,7 @@ impl Transaction<'_> {
             if node.methods.contains_key(name)
                 || node.signals.contains_key(name)
                 || node.native.contains_key(name)
+                || (self.model.models.contains_key(&object) && list_model::is_method(name))
                 || (self.model.timers.is_timer(object)
                     && matches!(name, "start" | "stop" | "restart"))
             {
@@ -274,6 +292,9 @@ impl Transaction<'_> {
             self.signal(owner, name, arguments)?;
             return Ok(Value::Undefined);
         }
+        if self.model.models.contains_key(&owner) && list_model::is_method(name) {
+            return self.model_call(owner, name, &arguments, reads);
+        }
         if self.model.timers.is_timer(owner) && matches!(name, "start" | "stop" | "restart") {
             return self.timer_method(owner, name, &arguments);
         }
@@ -293,7 +314,9 @@ impl Transaction<'_> {
             .map(|p| p.name.clone())
             .zip(args)
             .collect();
-        let result = self.with_stack(4, |tx| tx.statements(owner, &proc.body, &mut locals, reads));
+        let result = self.with_scope(proc.scope, |tx| {
+            tx.with_stack(4, |tx| tx.statements(owner, &proc.body, &mut locals, reads))
+        });
         let value = match result? {
             Flow::Next(_) => Value::Undefined,
             Flow::Return(value) => value,

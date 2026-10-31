@@ -137,3 +137,76 @@ mod qt_reference;
 fn both_backends_match_qt_6_12_behaviors() {
     qt_reference::run(|mode, case, actual, expected| assert_eq!(actual, expected, "{mode}/{case}"));
 }
+
+#[cfg(test)]
+mod shadows {
+    use ferroui_qml::{Instance, TypeRegistry, Value};
+    include!(concat!(env!("OUT_DIR"), "/shadow.rs"));
+    #[test]
+    fn each_declaration_retains_independent_storage_notify_and_lexical_access() {
+        let mut engine =
+            Instance::new(&compiled_qml(), &TypeRegistry::new(), Default::default()).unwrap();
+        let root = engine.root();
+        assert_eq!(
+            engine.call(root, "observe", Vec::new()).unwrap(),
+            Value::String("2/7/25/2/2/2/7/25".into())
+        );
+        assert!(engine
+            .property_names(root)
+            .iter()
+            .all(|p| !p.starts_with('$')));
+        assert!(engine
+            .drain_changes()
+            .iter()
+            .all(|change| !change.property.starts_with('$')));
+    }
+}
+
+#[cfg(test)]
+mod models {
+    use ferroui_qml::{ir, ComponentSource, Instance, TypeRegistry, Value};
+    include!(concat!(env!("OUT_DIR"), "/inventory.rs"));
+
+    fn verify(source: &impl ComponentSource) {
+        let mut instance = Instance::new(source, &TypeRegistry::new(), Default::default()).unwrap();
+        let root = instance.root();
+        let model = instance.id("stock").unwrap();
+        assert_eq!(
+            instance.get(root, "firstName").unwrap(),
+            Value::String("A".into())
+        );
+        assert_eq!(
+            instance.call(root, "edit", vec![]).unwrap(),
+            Value::String("3/C/4/8".into())
+        );
+        assert_eq!(
+            instance.get(root, "firstName").unwrap(),
+            Value::String("C".into())
+        );
+        let Value::ModelRow(row) = instance
+            .call(model, "get", vec![Value::Number(1.)])
+            .unwrap()
+        else {
+            panic!("missing row")
+        };
+        assert!(instance.call(root, "invalid", vec![]).is_err());
+        assert_eq!(instance.get(model, "count").unwrap(), Value::Number(3.));
+        assert_eq!(
+            instance.model_role(row, "price").unwrap(),
+            Value::Number(8.)
+        );
+        assert!(instance.set(model, "count", Value::Number(1.)).is_err());
+        instance.call(model, "clear", vec![]).unwrap();
+        assert!(instance.model_role(row, "price").is_err());
+        assert_eq!(
+            instance.get(root, "firstName").unwrap(),
+            Value::String(String::new())
+        );
+    }
+
+    #[test]
+    fn qml_models_support_editing_reordering_and_transactional_row_handles() {
+        verify(&compiled_qml());
+        verify(&ir::parse(include_str!("models/Inventory.qml")).unwrap());
+    }
+}
