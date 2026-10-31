@@ -28,7 +28,7 @@ from the reference, or nothing is drawn).
 
 | Path | Skia (Ganesh, Graphite, raster) | Vello (CPU, hybrid, GPU, WebGL2) | Tests |
 |---|---|---|---|
-| Scene lighting (Reveal backgrounds and borders) | GPU: the lighting shader (#456) | CPU fallback: the light map sampled and uploaded per paint (a solid colour when the light is the same everywhere) | `composition_effect_tests.rs` (exact light, CPU light map, no image of pixels per frame), `gpu/metal/tests.rs` (Graphite), `composition_winui_material_tests.rs` (no bitmap per frame) |
+| Scene lighting (Reveal backgrounds and borders) | GPU: the lighting shader (#456) | Hybrid and GPU modes: GPU, a render pass of FerroUI evaluates the lights into a pooled texture of the device the scene paints with (#459); CPU mode: the CPU light map (the reference); WebGL2: CPU fallback (gap: no device textures there yet) | `composition_effect_tests.rs` (exact light, CPU light map, no image of pixels per frame), `gpu/metal/tests.rs` (Graphite), `composition_winui_material_tests.rs` (no bitmap per frame), `src/Vello/FerroUI.Vello/gpu/effect_pass_tests.rs` (hybrid and GPU modes: the exact light, no allocation over steady frames) |
 | Lit visuals (`push_multiply_layer` with a light map) | GPU: the lighting shader and the multiply blender (#456) | CPU fallback: the content drawn by the CPU renderer and multiplied on the processor | `composition_effect_tests.rs`, `composition_winui_lighting_tests.rs` |
 | Pixel operations (the blend modes the layers lack, the arithmetic composite of two images, `MaskInvert`) | GPU: layers with runtime blenders, Skia's arithmetic blender, the `Dissolve` noise shader (#456) | CPU fallback: each source into a render target bitmap, read back, combined, uploaded | `composition_effect_tests.rs` (each operation against `PixelOperation::apply_to_premultiplied_rgba8`), `composition_winui_lighting_tests.rs` |
 | `push_blend_layer` | GPU: a save layer with the blend mode | GPU: a layer of the scene | `layer_effect_tests.rs` of both backends |
@@ -83,24 +83,26 @@ no hook for a custom shader. The GPU renderer and WebGL2 have no filter layers e
 paths draw their content with the CPU renderer and upload the result on every frame, in every
 mode; this is the gap the rule closes.
 
-The route, a pull request stacked on the Skia ones:
+The route, in pull requests stacked on the Skia ones:
 
-1. **A pass FerroUI owns.** For a layer that needs an effect (colour matrix, multiply by lights,
-   pixel operation, blur without filter layers), the content of the layer is rendered by the mode's
-   own renderer into a texture of the device (the GPU and hybrid renderers render scenes to
-   textures already; WebGL2 to a framebuffer texture). A wgpu render pass of FerroUI (WGSL ports
-   of the programs of `ferroui-skia/composition_effects.rs`, compiled once per device, with the
-   parameters as uniforms) reads that texture and writes the result into another, and the result
-   is composed into the outer scene through the `VelloSceneTexture` route (an image of the scene
-   backed by a device texture). The lighting needs no input texture: the pass evaluates the
-   lights into a texture the scene multiplies by, or draws.
-2. **Ordering.** A layer with an effect splits the scene of the frame: what is under the layer is
-   rendered first, the layer's content to its texture, the effect pass runs, and the rest of the
-   scene is rendered over it with the result as an image. The textures are pooled per size and
-   kept between frames.
+1. **A pass FerroUI owns** (`src/Vello/FerroUI.Vello/gpu/effect_passes.rs`, #459). A wgpu render
+   pass with a WGSL port of the programs of `ferroui-skia/composition_effects.rs`, compiled once
+   per device, with the parameters as uniforms, writes a texture of the device from a pool (sizes
+   rounded up to 32 pixels, reused once the scene that painted with a texture was rendered); the
+   scene paints with it through the `VelloSceneTexture` route, one texel per device pixel.
+   Done for the scene lighting (`draw_lighting`) in the hybrid and GPU modes.
+2. **Layers with an effect** (next): the multiply layer of lit visuals, the colour matrix layers
+   and the pixel operations need the content of the layer as an input. The content is recorded
+   into a scene of the device (`create_filter_scene`, as the blur of the hybrid mode does),
+   rendered into a pooled texture (`render_to_texture`), and a pass reads it (and, for the multiply
+   layer, evaluates the lights) into another texture the outer scene paints with. Ordering is
+   that of the queue: the content, the pass, then the frame that paints with the result. The
+   blur and drop shadow of the GPU mode (no filter layers in `vello`) take the same route with a
+   two-pass Gaussian.
 3. **WebGL2.** The same programs in GLSL ES 3.0 on the WebGL2 context the renderer uses, with
-   framebuffer textures in place of wgpu textures.
+   framebuffer textures in place of wgpu textures (`hybrid-webgl` has no device textures yet: the
+   sink has to learn to paint with a framebuffer texture first).
 4. **The CPU renderer** keeps the CPU path: it is the reference.
-5. **Validation:** `tests/FerroUI.RenderBackends.Comparison` scenes of each effect in each mode
-   against the CPU reference, and a counter of the images the scene sinks upload per frame
-   (the `VelloSceneImage` uploads) that stays at zero over steady frames.
+5. **Validation:** each pass against the exact result or the CPU reference in each GPU mode
+   (`gpu/effect_pass_tests.rs`), `tests/FerroUI.RenderBackends.Comparison` scenes against Skia, and
+   the allocation counter of the pool, which stays constant over steady frames.
