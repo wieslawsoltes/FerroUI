@@ -210,3 +210,6 @@ mod models {
         verify(&ir::parse(include_str!("models/Inventory.qml")).unwrap());
     }
 }
+
+#[cfg(all(test, feature = "webscene"))]
+mod webscene;

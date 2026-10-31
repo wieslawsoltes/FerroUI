@@ -1,4 +1,7 @@
 use super::*;
+mod compiled_async {
+    include!(concat!(env!("OUT_DIR"), "/async_model.rs"));
+}
 use ferroui_qml::PromiseState;
 use std::time::{Duration, Instant};
 
@@ -71,7 +74,7 @@ fn promises(source: &impl ComponentSource) {
 
 #[test]
 fn v8_promises_settle_with_bounds_rollback_and_no_late_qml_callbacks() {
-    let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("webscene/App.qml");
+    let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("webscene/Async.qml");
     promises(
         &Compiler::new()
             .with_javascript()
@@ -79,5 +82,5 @@ fn v8_promises_settle_with_bounds_rollback_and_no_late_qml_callbacks() {
             .unwrap()
             .document,
     );
-    promises(&compiled_qml());
+    promises(&compiled_async::compiled_qml());
 }
