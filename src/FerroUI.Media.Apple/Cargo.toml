@@ -1,0 +1,28 @@
+[package]
+name = "ferroui-media-apple"
+description = "CoreVideo ownership and IOSurface imports shared by media producers"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+[lib]
+path = "lib.rs"
+[dependencies]
+ferroui-base.workspace = true
+ferroui-media.workspace = true
+[build-dependencies]
+cc.workspace = true
+
+[features]
+controls = ["dep:ferroui-media-controls"]
+[dependencies.ferroui-media-controls]
+workspace = true
+optional = true
+
+[package.metadata.release]
+group = "platforms"

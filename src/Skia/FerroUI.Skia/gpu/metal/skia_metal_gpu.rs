@@ -77,6 +77,12 @@ impl SkiaMetalGpu {
         if let Some(max_resource_bytes) = max_resource_bytes {
             context.set_resource_cache_limit(max_resource_bytes);
         }
+        let queue = device.command_queue() as usize;
+        context.set_frame_completion_handler(Box::new(move |completion| {
+            // SAFETY: the Metal GPU owns the device/queue through context
+            // submission. The native command buffer retains its queue.
+            unsafe { super::frame_completion::schedule(queue as *mut _, completion); }
+        }));
         let context: SharedContext = Rc::new(RefCell::new(Some(Rc::new(context))));
 
         let features: &dyn IOptionalFeatureProvider = &*device;

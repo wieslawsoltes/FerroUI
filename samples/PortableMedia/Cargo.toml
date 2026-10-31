@@ -1,0 +1,23 @@
+[package]
+name = "portable-media"
+description = "Independent shared-texture playback and lifetime sample"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+[[bin]]
+name = "portable-media"
+path = "main.rs"
+[target.'cfg(target_os = "macos")'.dependencies]
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+ferroui-media-controls.workspace = true
+ferroui-media-video-controls.workspace = true
+ferroui-media-video.workspace = true
+ferroui-media-camera.workspace = true
+ferroui-media-video-apple = {workspace=true,features=["controls"]}
+ferroui-media-camera-apple = {workspace=true,features=["controls"]}
+image = { version = "0.25", default-features = false, features = ["jpeg"] }
+ferroui-desktop.workspace = true
+ferroui-themes-fluent.workspace = true

@@ -119,6 +119,42 @@ impl IPlatformRenderInterfaceImportedObject for ImportedImage {
 }
 
 impl IPlatformRenderInterfaceImportedImage for ImportedImage {
+    #[cfg(not(ferro_skia_apple_ganesh))]
+    fn acquire_shared_bitmap(
+        &self,
+        frame: ferroui_base::rendering::composition::frames::FrameLease,
+    ) -> Result<Arc<SharedBitmapImpl>, ferroui_base::rendering::composition::frames::FrameError> {
+        use ferroui_base::rendering::composition::frames::{DeviceIdentity, FrameAlpha, FrameColor, FrameError, FrameFormat};
+        let m = frame.metadata();
+        m.validate(8192)?;
+        if !m.top_left_origin || m.width != self.texture.width() as u32 || m.height != self.texture.height() as u32 {
+            return Err(FrameError::InvalidDimensions);
+        }
+        if m.device != self.feature.device_luid().map(DeviceIdentity::Luid) || m.device.is_none() {
+            return Err(FrameError::DeviceMismatch);
+        }
+        crate::leased_gpu_bitmap::frame_color_filter(m.color)?;
+        if m.color == FrameColor::Rec709Full && m.alpha != FrameAlpha::Opaque {
+            return Err(FrameError::UnsupportedColor);
+        }
+        if !matches!((m.format, self.color_type), (FrameFormat::Bgra8, ColorType::BGRA8888)
+            | (FrameFormat::Rgba8, ColorType::RGBA8888)) { return Err(FrameError::UnsupportedFormat); }
+        let alpha = match m.alpha {
+            FrameAlpha::Opaque => skia_safe::AlphaType::Opaque,
+            FrameAlpha::Premultiplied => skia_safe::AlphaType::Premul,
+            FrameAlpha::Straight => return Err(FrameError::UnsupportedFormat),
+        };
+        let gr = self.gr_context();
+        let backend = unsafe { backend_textures::make_metal((self.texture.width(), self.texture.height()), self.texture.handle()) };
+        // Wrap, never snapshot: the frame owns producer storage and each draw
+        // registers it with the context's native GPU completion handler.
+        let image = gr.with_recorder(|recorder| skia_safe::gpu::graphite::images::wrap_texture(
+            recorder, &backend, self.color_type, alpha, None)).ok_or(FrameError::MissingImporter)?;
+        let id = gr.frame_context_id().ok_or(FrameError::MissingSynchronization)?;
+        frame.counters().gpu_import();
+        Ok(Arc::new(crate::leased_gpu_bitmap::LeasedGpuBitmap::new(image, frame, id)))
+    }
+
     /// # Panics
     /// Always: Metal has no keyed mutexes.
     fn snapshot_with_keyed_mutex(&self, _acquire_index: u32, _release_index: u32) -> Arc<SharedBitmapImpl> {
@@ -290,3 +326,7 @@ impl IExternalObjectsRenderInterfaceContextFeature for SkiaMetalExternalObjectsF
         self.inner.device_luid()
     }
 }
+
+#[cfg(all(test, feature="native-frame-tests", not(ferro_skia_apple_ganesh)))]
+#[path="shared_frame_tests.rs"]
+mod shared_frame_tests;

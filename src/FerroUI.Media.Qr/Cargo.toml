@@ -1,0 +1,40 @@
+[package]
+name = "ferroui-media-qr"
+description = "Optional offline QR analysis of shared camera frames"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-media.workspace = true
+
+[features]
+default = ["rust-decoder"]
+rust-decoder = ["dep:rxing"]
+
+[dependencies.rxing]
+version = "=0.9.3"
+optional = true
+default-features = false
+features = ["qrcode", "decoders", "multi_barcode_readers", "encoding_rs"]
+
+[target.'cfg(target_arch = "wasm32")'.dependencies.rxing]
+version = "=0.9.3"
+optional = true
+default-features = false
+features = ["qrcode", "decoders", "multi_barcode_readers", "encoding_rs", "wasm_support"]
+
+[dev-dependencies]
+rxing = { version = "=0.9.3", default-features = false, features = ["qrcode", "decoders", "encoders", "multi_barcode_readers", "encoding_rs"] }
+
+[package.metadata.release]
+group = "core"

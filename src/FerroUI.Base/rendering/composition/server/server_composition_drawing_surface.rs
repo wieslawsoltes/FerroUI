@@ -111,6 +111,33 @@ impl ServerCompositionDrawingSurface {
         result
     }
 
+    pub fn clear(&self) {
+        let previous = self.bitmap.borrow_mut().take();
+        if let Some(bitmap) = previous { bitmap.dispose(); }
+        self.created_with_context.borrow_mut().take();
+        self.changed.invoke();
+    }
+
+    pub fn update_shared_frame(
+        &self,
+        image: &ServerImportedGpuImage,
+        frame: crate::rendering::composition::frames::FrameLease,
+        ready: crate::rendering::composition::frames::GpuCompletion,
+    ) -> UpdateResult {
+        use crate::rendering::composition::frames::{FrameError, GpuCompletionStatus};
+        self.with_current_context(|| {
+            self.perform_sanity_checks(image)?;
+            if !frame.is_current() { return Err(Arc::new(FrameError::StaleGeneration)); }
+            if ready.status() != GpuCompletionStatus::Complete {
+                return Err(Arc::new(FrameError::ProducerNotReady));
+            }
+            let bitmap = image.image().acquire_shared_bitmap(frame)
+                .map_err(|e| Arc::new(e) as crate::rendering::composition::ServerJobError)?;
+            self.update(bitmap, image.context().clone());
+            Ok(())
+        })
+    }
+
     pub fn update_with_automatic_sync(&self, image: &ServerImportedGpuImage) -> UpdateResult {
         self.with_current_context(|| {
             self.perform_sanity_checks(image)?;

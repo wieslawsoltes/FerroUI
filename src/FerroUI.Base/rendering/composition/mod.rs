@@ -44,6 +44,7 @@
 //! The browser target has no threads; it uses the same single-thread mode
 //! with a UI-thread render timer.
 
+pub mod frames;
 pub mod animations;
 pub mod brushes;
 pub mod drawing;

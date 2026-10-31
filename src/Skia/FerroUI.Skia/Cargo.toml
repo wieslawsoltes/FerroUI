@@ -85,6 +85,8 @@ name = "vulkan_frames"
 path = "gpu/vulkan/frames_test.rs"
 
 [features]
+# Development-only independent native GPU fixtures.
+native-frame-tests = []
 # The Vulkan GPU of the backend (`gpu/vulkan`) on a target whose table above does not have it: Skia
 # with Ganesh on Vulkan. Off by default. On Linux the GPU is always built and the feature changes
 # nothing. A binary of Skia with the resulting feature set is published for Android; on Windows

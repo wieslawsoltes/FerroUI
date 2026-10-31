@@ -84,6 +84,15 @@ pub trait IPlatformRenderInterfaceImportedObject {
 
 /// A GPU image imported into the render context.
 pub trait IPlatformRenderInterfaceImportedImage: IPlatformRenderInterfaceImportedObject {
+    /// Wrap immutable producer storage without a snapshot. A backend must retain
+    /// `frame` through every actual GPU read; unsupported backends fail explicitly.
+    fn acquire_shared_bitmap(
+        &self,
+        _frame: crate::rendering::composition::frames::FrameLease,
+    ) -> Result<Arc<crate::platform::SharedBitmapImpl>, crate::rendering::composition::frames::FrameError> {
+        Err(crate::rendering::composition::frames::FrameError::MissingImporter)
+    }
+
     fn snapshot_with_keyed_mutex(&self, acquire_index: u32, release_index: u32) -> std::sync::Arc<crate::platform::SharedBitmapImpl>;
 
     fn snapshot_with_semaphores(

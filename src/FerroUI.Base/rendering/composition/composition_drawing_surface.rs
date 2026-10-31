@@ -146,6 +146,25 @@ impl CompositionDrawingSurface {
         self.invoke(move |compositor, server| server.update_with_automatic_sync(img.get(compositor)))
     }
 
+    /// Publishes a directly sampled immutable frame. Producer readiness is
+    /// independent of this render job; no snapshot fallback is performed here.
+    pub fn update_shared_frame_async(
+        &self,
+        image: &dyn ICompositionImportedGpuImage,
+        frame: super::frames::FrameLease,
+        producer_ready: super::frames::GpuCompletion,
+    ) -> ServerJobTask<()> {
+        let image = imported_image(image);
+        self.invoke(move |compositor, server| {
+            server.update_shared_frame(image.get(compositor), frame, producer_ready)
+        })
+    }
+
+    /// Clears presentation without pretending outstanding GPU reads completed.
+    pub fn clear_async(&self) -> ServerJobTask<()> {
+        self.invoke(|_, server| { server.clear(); Ok(()) })
+    }
+
     pub fn dispose(&self) {
         self.0.dispose()
     }

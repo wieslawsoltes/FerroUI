@@ -17,6 +17,15 @@ pub enum SkiaGpuBackend {
 /// reading surfaces back. A Graphite implementation backs them with a
 /// context and its recorder, a Ganesh one with a direct context.
 pub trait ISkiaGrContext {
+    /// Direct imported images are bound to one context generation.
+    fn frame_context_id(&self) -> Option<u64> { None }
+
+    /// Retains producer storage until the commands about to be recorded finish.
+    fn retain_frame(&self, _frame: ferroui_base::rendering::composition::frames::FrameLease)
+        -> Result<(), ferroui_base::rendering::composition::frames::FrameError> {
+        Err(ferroui_base::rendering::composition::frames::FrameError::MissingImporter)
+    }
+
     /// The Skia GPU backend of the context.
     fn backend(&self) -> SkiaGpuBackend;
 

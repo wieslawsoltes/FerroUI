@@ -1,6 +1,16 @@
 [workspace]
 resolver = "2"
 members = [
+    "samples/PortableMedia",
+    "src/FerroUI.Media.Controls",
+    "src/FerroUI.Media.Video.Controls",
+    "src/FerroUI.Media.Video",
+    "src/FerroUI.Media.Camera",
+    "src/FerroUI.Media.Video.Apple",
+    "src/FerroUI.Media.Camera.Apple",
+    "src/FerroUI.Media.Apple",
+    "src/FerroUI.Media",
+    "src/FerroUI.Media.Qr",
     "src/FerroUI.Designer.Core",
     "src/FerroUI.Designer.Project",
     "src/FerroUI.Designer.Tools",
@@ -234,6 +244,15 @@ categories = ["gui"]
 # that the crates of a release are only ever resolved together (docs/release.md, "Version scheme").
 # `scripts/release/set-version.sh <version>` writes the version above and these keys.
 [workspace.dependencies]
+ferroui-media-video = { version = "=0.4.0", path = "src/FerroUI.Media.Video" }
+ferroui-media-camera = { version = "=0.4.0", path = "src/FerroUI.Media.Camera" }
+ferroui-media-video-controls = { version = "=0.4.0", path = "src/FerroUI.Media.Video.Controls" }
+ferroui-media-video-apple = { version = "=0.4.0", path = "src/FerroUI.Media.Video.Apple" }
+ferroui-media-camera-apple = { version = "=0.4.0", path = "src/FerroUI.Media.Camera.Apple" }
+ferroui-media-controls = { version = "=0.4.0", path = "src/FerroUI.Media.Controls" }
+ferroui-media-apple = { version = "=0.4.0", path = "src/FerroUI.Media.Apple" }
+ferroui-media = { version = "=0.4.0", path = "src/FerroUI.Media" }
+ferroui-media-qr = { version = "=0.4.0", path = "src/FerroUI.Media.Qr" }
 # The Dock port (docs/porting/dock): its crates and the dependencies only it has.
 ferrodock-controls-recycling-model = { path = "src/Dock/FerroDock.Controls.Recycling.Model" }
 ferrodock-controls-recycling-model-ferro = { path = "src/Dock/FerroDock.Controls.Recycling.Model.Ferro" }
