@@ -230,6 +230,12 @@ impl ScriptEngine for WebSceneEngine {
     ) -> Result<ferroui_qml::PromiseState, Error> {
         self.realm(ctx.instance()).observe(ctx, value, timeout)
     }
+    fn is_reference_live(&self, value: &ExternalValue) -> bool {
+        self.realms
+            .borrow()
+            .get(&value.instance())
+            .is_some_and(|realm| realm.handle(value).is_ok())
+    }
     fn release_instance(&self, id: ScriptInstance) {
         self.realms.borrow_mut().remove(&id);
     }

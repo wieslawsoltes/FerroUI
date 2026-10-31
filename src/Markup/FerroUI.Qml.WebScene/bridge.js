@@ -7,6 +7,7 @@
     if (typeof fetchText !== "function") throw new Error("Missing WebScene synchronous text loader");
     const functions = new Map(), objects = new Map(), reverse = new WeakMap(), atoms = new Map();
     const proxies = new Map(), proxyIds = new WeakMap(), scopes = new Map();
+    const boundMethods = new Map(), callbackAdapters = new WeakMap();
     const denied = new Set(["window","document","self","navigator","location","fetch","XMLHttpRequest",
         "WebSocket","EventSource","Worker","SharedWorker","indexedDB","localStorage","sessionStorage"]);
     for (const key of Object.getOwnPropertyNames(globalThis)) {
@@ -59,6 +60,33 @@
         if ("error" in msg) throw new Error(msg.error);
         return msg.ok;
     }
+    // Method projections are stable across qualified/unqualified reads. A
+    // method used as a slot ignores surplus signal arguments, while ordinary
+    // JS functions receive every argument the signal declared.
+    function method(value) {
+        const [_,id,key,signature,isSignal]=value;
+        let slots=boundMethods.get(id);
+        if(!slots){slots=new Map();boundMethods.set(id,slots);}
+        if(slots.has(key)) return slots.get(key);
+        const bound=(...args)=>decode(rpc(["call",id,key,args.map((v,i)=>encode(v,signature[i]))]));
+        callbackAdapters.set(bound,(...args)=>bound(...args.slice(0,signature.length)));
+        if(isSignal){
+            function change(action,args){
+                if(!args.length) throw new Error(action+": no arguments given");
+                const target=args.length===1?globalThis:args[0];
+                const fn=args.length===1?args[0]:args[1];
+                if(target!=null && typeof target!=="object" && typeof target!=="function") throw new Error(action+": target this is not an object");
+                if(typeof fn!=="function") throw new Error(action+": target is not a function");
+                rpc([action,id,key,encode(target==null?globalThis:target),atom(callbackAdapters.get(fn)||fn)]);
+            }
+            Object.defineProperties(bound,{
+                connect:{value:(...args)=>change("connect",args)},
+                disconnect:{value:(...args)=>change("disconnect",args)}
+            });
+        }
+        slots.set(key,bound);
+        return bound;
+    }
     function decode(value) {
         switch(value[0]) {
             case "u": return undefined;
@@ -70,10 +98,7 @@
                 if (!objects.has(value[1])) throw new ReferenceError("Released JavaScript reference");
                 return objects.get(value[1]);
             case "h": return proxy(value[1],value[2]);
-            case "fn": {
-                const [_,id,key,signature]=value;
-                return (...args)=>decode(rpc(["call",id,key,args.map((v,i)=>encode(v,signature[i]))]));
-            }
+            case "fn": return method(value);
             default: throw new Error("Unknown QML value tag");
         }
     }

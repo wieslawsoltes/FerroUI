@@ -18,6 +18,7 @@ pub use promises::PromiseState;
 mod registry;
 pub use records::Record;
 mod scripting;
+mod signal_callbacks;
 pub use scripting::{ExternalValue, ScriptContext, ScriptEngine, ScriptInstance, ScriptScope};
 mod timers;
 mod transaction;

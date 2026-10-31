@@ -82,6 +82,10 @@ pub trait ScriptEngine {
     }
     fn end_transaction(&self, _instance: ScriptInstance, _committed: bool) {}
     fn release_instance(&self, _instance: ScriptInstance) {}
+    /// Permanently expired callbacks may be discarded after their worker realm restarts.
+    fn is_reference_live(&self, _value: &ExternalValue) -> bool {
+        true
+    }
 
     /// Optional interop when the built-in evaluator reads a foreign JS object.
     fn get_external(
@@ -120,6 +124,7 @@ pub trait ScriptEngine {
 
 #[derive(Default)]
 pub(crate) struct ScriptState {
+    pub(crate) connections: signal_callbacks::SignalCallbacks,
     pub(crate) engine: Option<Rc<dyn ScriptEngine>>,
     pub(crate) resources: BTreeMap<String, ir::ScriptResource>,
 }
@@ -322,6 +327,12 @@ impl ScriptContext<'_, '_> {
         let mut names: BTreeSet<String> =
             self.tx.model.property_names(object).into_iter().collect();
         names.extend(
+            node.properties
+                .keys()
+                .filter(|n| !private(n))
+                .map(|name| format!("{name}Changed")),
+        );
+        names.extend(
             node.methods
                 .keys()
                 .chain(node.native.keys())
@@ -403,6 +414,38 @@ impl ScriptContext<'_, '_> {
     fn read_key(&mut self, key: SlotId) -> Result<Value, Error> {
         let result = self.tx.read(key, self.reads);
         self.tx.host_result(result)
+    }
+
+    pub fn is_signal(&self, object: ObjectId, name: &str) -> bool {
+        !private(name)
+            && self
+                .tx
+                .model
+                .node(object)
+                .is_some_and(|node| node.signal(name).is_some())
+    }
+
+    /// Connect a validated guest function, optionally with its explicit this object.
+    pub fn connect_signal(
+        &mut self,
+        sender: ObjectId,
+        signal: &str,
+        receiver: Value,
+        function: ExternalValue,
+    ) -> Result<(), Error> {
+        self.tx
+            .change_signal_connection(sender, signal, receiver, function, true)
+    }
+
+    pub fn disconnect_signal(
+        &mut self,
+        sender: ObjectId,
+        signal: &str,
+        receiver: Value,
+        function: ExternalValue,
+    ) -> Result<(), Error> {
+        self.tx
+            .change_signal_connection(sender, signal, receiver, function, false)
     }
 
     pub fn is_method(&self, object: ObjectId, name: &str) -> bool {
@@ -565,7 +608,7 @@ impl Instance {
         self.node(object).is_some_and(|node| {
             node.methods.contains_key(name)
                 || node.native.contains_key(name)
-                || node.signals.contains_key(name)
+                || node.signal(name).is_some()
                 || self.models.contains_key(&object) && list_model::is_method(name)
                 || self.timers.is_timer(object) && matches!(name, "start" | "stop" | "restart")
         })

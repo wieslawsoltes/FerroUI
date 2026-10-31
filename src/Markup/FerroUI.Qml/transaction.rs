@@ -24,6 +24,7 @@ pub(crate) struct Transaction<'a> {
     scope: Option<u32>,
     pub(crate) depth: usize,
     steps: usize,
+    pub(crate) connection_changes: signal_callbacks::Journal,
     pub(crate) timer_changes: timers::TimerChanges,
 }
 
@@ -52,6 +53,7 @@ impl Instance {
             scope: None,
             depth: 0,
             steps: 0,
+            connection_changes: Default::default(),
             timer_changes: Default::default(),
         };
         let result = operation(&mut tx).and_then(|value| {
@@ -88,6 +90,10 @@ impl Instance {
             Ok(value)
         });
         if result.is_err() {
+            tx.model
+                .javascript
+                .connections
+                .rollback(std::mem::take(&mut tx.connection_changes));
             for (id, undo) in tx.model_edits.into_iter().rev() {
                 undo.restore(tx.model.models.get_mut(&id).unwrap());
             }
@@ -423,6 +429,11 @@ impl Transaction<'_> {
                 || self.model.listeners.contains_key(&signal)
                 || self
                     .model
+                    .javascript
+                    .connections
+                    .has(property.owner, &signal)
+                || self
+                    .model
                     .watched
                     .contains(&(property.owner, signal.clone()))
             {
@@ -507,6 +518,7 @@ impl Transaction<'_> {
         signal: &str,
         arguments: Vec<Value>,
     ) -> Result<(), Error> {
+        let boundary = self.model.javascript.connections.boundary();
         if !self.model.watched.is_empty()
             && self.model.watched.contains(&(owner, signal.to_owned()))
         {
@@ -519,6 +531,7 @@ impl Transaction<'_> {
         if let Some(handler) = self.model.nodes[owner.index].handlers.get(signal).cloned() {
             self.run(owner, &handler, arguments.clone(), &mut BTreeSet::new())?;
         }
-        self.dispatch_connections(owner, signal, &arguments)
+        self.dispatch_connections(owner, signal, &arguments)?;
+        self.dispatch_script_callbacks(owner, signal, &arguments, boundary)
     }
 }

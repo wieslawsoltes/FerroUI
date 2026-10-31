@@ -166,7 +166,7 @@ impl Realm {
                 signature[index] = Some("data");
             }
         }
-        json!(["fn", id, key, signature])
+        json!(["fn", id, key, signature, ctx.is_signal(object, key)])
     }
     pub(super) fn host(&self, ctx: &mut ScriptContext<'_, '_>, v: &[Json]) -> Result<Json, Error> {
         ctx.consume_work()?;
@@ -235,6 +235,22 @@ impl Realm {
                     .collect::<Result<Vec<_>, _>>()?;
                 let result = ctx.call(object, text(v, 2)?, args)?;
                 self.encode(instance, &result)
+            }
+            "connect" | "disconnect" => {
+                let Value::Object(sender) = value else {
+                    return Err(Error::new("signal receiver is not a QML object"));
+                };
+                let signal = text(v, 2)?;
+                let receiver = self.decode(ctx, field(v, 3)?)?;
+                let Value::External(function) = self.decode(ctx, field(v, 4)?)? else {
+                    return Err(Error::new("expected a guest function reference"));
+                };
+                if op == "connect" {
+                    ctx.connect_signal(sender, signal, receiver, function)?;
+                } else {
+                    ctx.disconnect_signal(sender, signal, receiver, function)?;
+                }
+                Ok(Json::Null)
             }
             "keys" => Ok(json!(ctx.keys(&value)?)),
             _ => Err(Error::new(format!("unknown V8 host operation '{op}'"))),

@@ -2,6 +2,12 @@ fn main() {
     #[cfg(feature = "webscene")]
     ferroui_qml_build::Compiler::new()
         .with_javascript()
+        .compile_file("webscene/Signals.qml", "webscene_signals.rs")
+        .expect("compile dynamic signal connections");
+
+    #[cfg(feature = "webscene")]
+    ferroui_qml_build::Compiler::new()
+        .with_javascript()
         .compile_file("reads/Main.qml", "direct_reads.rs")
         .expect("compile native property read fixture");
     #[cfg(feature = "webscene")]

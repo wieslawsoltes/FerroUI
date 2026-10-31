@@ -90,3 +90,6 @@ mod baseline {
         check(&compiled_qml());
     }
 }
+
+#[path = "webscene_signals.rs"]
+mod signals;

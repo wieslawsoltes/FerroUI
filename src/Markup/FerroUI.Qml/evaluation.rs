@@ -295,7 +295,7 @@ impl Transaction<'_> {
             let value = (method.callback)(&arguments)?;
             return self.model.typed(&method.result, value);
         }
-        if node.signals.contains_key(name) {
+        if node.signal(name).is_some() {
             self.signal(owner, name, arguments)?;
             return Ok(Value::Undefined);
         }
