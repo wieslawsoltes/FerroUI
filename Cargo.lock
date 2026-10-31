@@ -1445,6 +1445,8 @@ dependencies = [
  "ferroui-pretext",
  "ferroui-pretext-layout",
  "ferroui-pretext-media",
+ "ferroui-qml",
+ "ferroui-qml-controls",
  "ferroui-reactive",
  "ferroui-reactiveui",
  "ferroui-reactiveui-controls",
@@ -2241,6 +2243,39 @@ dependencies = [
  "serde_json",
  "tempfile",
  "url",
+]
+
+[[package]]
+name = "ferroui-qml"
+version = "0.4.0"
+dependencies = [
+ "ferroui-qml-compiler",
+]
+
+[[package]]
+name = "ferroui-qml-build"
+version = "0.4.0"
+dependencies = [
+ "ferroui-qml-compiler",
+ "proc-macro2",
+ "quote",
+]
+
+[[package]]
+name = "ferroui-qml-compiler"
+version = "0.4.0"
+dependencies = [
+ "serde",
+]
+
+[[package]]
+name = "ferroui-qml-controls"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-qml",
+ "ferroui-qml-compiler",
 ]
 
 [[package]]
@@ -4581,6 +4616,25 @@ name = "profiling"
 version = "1.0.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3d595e54a326bc53c1c197b32d295e14b169e3cfeaa8dc82b529f947fba6bcf5"
+
+[[package]]
+name = "qml-compiled-tests"
+version = "0.4.0"
+dependencies = [
+ "ferroui-qml",
+ "ferroui-qml-build",
+]
+
+[[package]]
+name = "qml-gallery"
+version = "0.4.0"
+dependencies = [
+ "ferroui-qml",
+ "ferroui-qml-build",
+ "ferroui-qml-controls",
+ "ferroui-themes-winui",
+ "ferroui-view",
+]
 
 [[package]]
 name = "quick-xml"

@@ -1,0 +1,16 @@
+[package]
+name = "qml-compiled-tests"
+description = "Rust integration tests for ahead-of-time compiled QML components"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-qml.workspace = true
+
+[build-dependencies]
+ferroui-qml-build.workspace = true

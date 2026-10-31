@@ -28,6 +28,7 @@
 //! | `themes_winui` | `ferroui-themes-winui` | `winui-theme` | no |
 //! | `themes_macos` | `ferroui-themes-macos` | `macos-theme` | no |
 //! | `themes_material` | `ferroui-themes-material` | `material-theme` | no |
+//! | `qml`, `qml_controls` | QML engine and native control adapter | `qml` | no |
 //! | `markup_xaml`, `markup_xaml_loader` | `ferroui-markup-xaml`, `ferroui-markup-xaml-loader` (run-time loading) | `xaml` | no |
 //! | `markup_xaml_winui` | `ferroui-markup-xaml-winui` (the WinUI XAML importer and x:Bind) | `winui-xaml` | no |
 //! | `controls_color_picker` | `ferroui-controls-color-picker` | `color-picker` | no |
@@ -162,6 +163,10 @@ pub use ferroui_themes_material as themes_material;
 pub use ferroui_markup_xaml as markup_xaml;
 #[cfg(feature = "xaml")]
 pub use ferroui_markup_xaml_loader as markup_xaml_loader;
+#[cfg(feature = "qml")]
+pub use ferroui_qml as qml;
+#[cfg(feature = "qml")]
+pub use ferroui_qml_controls as qml_controls;
 #[cfg(feature = "winui-xaml")]
 pub use ferroui_markup_xaml_winui as markup_xaml_winui;
 

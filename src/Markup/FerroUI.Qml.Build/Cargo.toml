@@ -1,0 +1,27 @@
+[package]
+name = "ferroui-qml-build"
+description = "Ahead-of-time QML compilation for Cargo build scripts and the command line"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-qml-compiler.workspace = true
+proc-macro2 = "1"
+quote = "1"
+
+[[bin]]
+name = "ferroui-qmlc"
+path = "main.rs"
+
+[package.metadata.release]
+group = "markup"

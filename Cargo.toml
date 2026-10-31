@@ -74,6 +74,12 @@ members = [
     "src/StaticViewLocator/FerroUI.StaticViewLocator",
     "src/StaticViewLocator/FerroUI.StaticViewLocator.Macros",
     "src/StaticViewLocator/FerroUI.StaticViewLocator.Build",
+    "src/Markup/FerroUI.Qml",
+    "src/Markup/FerroUI.Qml.Compiler",
+    "src/Markup/FerroUI.Qml.Build",
+    "src/Markup/FerroUI.Qml.Controls",
+    "samples/QmlGallery",
+    "tests/QmlCompiled",
     "src/Markup/FerroUI.Markup",
     "src/Markup/FerroUI.Markup.Xaml",
     "src/Markup/FerroUI.Markup.Xaml.WinUI",
@@ -291,6 +297,10 @@ ferroui-controls-treedatagrid = { version = "=0.4.0", path = "src/TreeDataGrid/F
 ferroui-static-view-locator = { version = "=0.4.0", path = "src/StaticViewLocator/FerroUI.StaticViewLocator" }
 ferroui-static-view-locator-macros = { version = "=0.4.0", path = "src/StaticViewLocator/FerroUI.StaticViewLocator.Macros" }
 ferroui-static-view-locator-build = { version = "=0.4.0", path = "src/StaticViewLocator/FerroUI.StaticViewLocator.Build" }
+ferroui-qml = { version = "=0.4.0", path = "src/Markup/FerroUI.Qml" }
+ferroui-qml-compiler = { version = "=0.4.0", path = "src/Markup/FerroUI.Qml.Compiler" }
+ferroui-qml-build = { version = "=0.4.0", path = "src/Markup/FerroUI.Qml.Build" }
+ferroui-qml-controls = { version = "=0.4.0", path = "src/Markup/FerroUI.Qml.Controls" }
 ferroui-markup = { version = "=0.4.0", path = "src/Markup/FerroUI.Markup" }
 ferroui-markup-xaml = { version = "=0.4.0", path = "src/Markup/FerroUI.Markup.Xaml" }
 ferroui-markup-xaml-winui = { version = "=0.4.0", path = "src/Markup/FerroUI.Markup.Xaml.WinUI" }
