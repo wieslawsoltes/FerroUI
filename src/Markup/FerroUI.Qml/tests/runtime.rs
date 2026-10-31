@@ -233,3 +233,57 @@ fn native_subtypes_preserve_contract_and_object_assignability() {
     let ui = Instance::new(&doc, &registry, BTreeMap::new()).unwrap();
     assert_eq!(ui.get(ui.root(), "childWidth").unwrap(), Value::Number(21.));
 }
+
+#[test]
+fn connections_follow_target_changes_and_deliver_typed_signal_arguments() {
+    let mut ui = component(
+        "
+        id: root
+        signal accepted(int n)
+        property int total: 0
+        property QtObject child: QtObject { id: other; signal accepted(int n) }
+        property Connections connection: Connections {
+            target: root
+            function onAccepted(n) { root.total += n }
+        }
+    ",
+    )
+    .unwrap();
+    let root = ui.root();
+    let other = ui.id("other").unwrap();
+    let Value::Object(listener) = ui.get(root, "connection").unwrap() else {
+        panic!("expected listener")
+    };
+    ui.emit(root, "accepted", vec![Value::Number(2.)]).unwrap();
+    ui.set(listener, "target", Value::Object(other)).unwrap();
+    ui.emit(root, "accepted", vec![Value::Number(9.)]).unwrap();
+    ui.emit(other, "accepted", vec![Value::Number(5.)]).unwrap();
+    ui.set(listener, "enabled", Value::Bool(false)).unwrap();
+    ui.emit(other, "accepted", vec![Value::Number(4.)]).unwrap();
+    assert_eq!(ui.get(root, "total").unwrap(), Value::Number(7.));
+    assert!(ui.set(listener, "target", Value::Object(listener)).is_err());
+    assert_eq!(ui.get(listener, "target").unwrap(), Value::Object(other));
+    ui.set(listener, "ignoreUnknownSignals", Value::Bool(true))
+        .unwrap();
+    ui.set(listener, "target", Value::Object(listener)).unwrap();
+}
+
+#[test]
+fn property_notify_reaches_parent_connections_and_rust_observers() {
+    let mut ui = component(
+        "
+        id: root
+        property int n: 1
+        property int observed: 0
+        property Connections watcher: Connections {
+            function onNChanged() { root.observed = root.n }
+        }
+    ",
+    )
+    .unwrap();
+    let root = ui.root();
+    ui.watch_signal(root, "nChanged").unwrap();
+    ui.set(root, "n", Value::Number(42.)).unwrap();
+    assert_eq!(ui.get(root, "observed").unwrap(), Value::Number(42.));
+    assert_eq!(ui.drain_signals()[0].signal, "nChanged");
+}

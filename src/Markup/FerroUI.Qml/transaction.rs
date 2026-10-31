@@ -34,13 +34,16 @@ impl Instance {
         };
         let result = operation(&mut tx).and_then(|value| {
             tx.settle()?;
+            tx.model.validate_connections()?;
             if let Some(validate) = &tx.model.validator {
                 let changes = tx
                     .original
                     .iter()
                     .filter_map(|(key, old)| {
                         let value = &tx.model.slots[*key].value;
-                        if old.value.unchanged(value) {
+                        if old.value.unchanged(value)
+                            && old.assigned == tx.model.slots[*key].assigned
+                        {
                             return None;
                         }
                         let property = &tx.model.properties[*key];
@@ -63,7 +66,7 @@ impl Instance {
             tx.model.emissions.append(&mut tx.emitted);
             for (key, old) in tx.original {
                 let value = &tx.model.slots[key].value;
-                if !old.value.unchanged(value) {
+                if !old.value.unchanged(value) || old.assigned != tx.model.slots[key].assigned {
                     tx.model.changes.insert(key, value.clone());
                 }
             }
@@ -80,7 +83,7 @@ impl Transaction<'_> {
         &mut self.model.slots[key]
     }
 
-    fn budget(&mut self) -> Result<(), Error> {
+    pub(crate) fn budget(&mut self) -> Result<(), Error> {
         self.steps += 1;
         // A fixed overhead handles event feedback from small components; the
         // per-slot term permits initialization of legitimately large documents.
@@ -216,6 +219,11 @@ impl Transaction<'_> {
             if self.model.nodes[property.owner.index]
                 .handlers
                 .contains_key(&signal)
+                || self.model.listeners.contains_key(&signal)
+                || self
+                    .model
+                    .watched
+                    .contains(&(property.owner, signal.clone()))
             {
                 self.notifications.push_back((property.owner, signal));
             }
@@ -232,6 +240,7 @@ impl Transaction<'_> {
         let value = self.model.typed(&self.model.properties[key].ty, value)?;
         self.replace_reads(key, BTreeSet::new());
         let slot = self.touched(key);
+        slot.assigned = true;
         slot.binding = None;
         slot.dirty = false;
         self.pending.remove(&key);
@@ -257,18 +266,9 @@ impl Transaction<'_> {
             .node(owner)
             .ok_or_else(|| Error::new("foreign or unknown object"))?;
         let formals = node
-            .signals
-            .get(name)
+            .signal(name)
             .ok_or_else(|| Error::new(format!("unknown signal '{name}'")))?;
         let arguments = self.arguments(formals, arguments)?;
-        if !self.model.watched.is_empty() && self.model.watched.contains(&(owner, name.to_owned()))
-        {
-            self.emitted.push(SignalEmission {
-                object: owner,
-                signal: name.to_owned(),
-                arguments: arguments.clone(),
-            });
-        }
         self.dispatch(owner, name, arguments)
     }
 
@@ -300,9 +300,18 @@ impl Transaction<'_> {
         signal: &str,
         arguments: Vec<Value>,
     ) -> Result<(), Error> {
-        if let Some(handler) = self.model.nodes[owner.index].handlers.get(signal).cloned() {
-            self.run(owner, &handler, arguments, &mut BTreeSet::new())?;
+        if !self.model.watched.is_empty()
+            && self.model.watched.contains(&(owner, signal.to_owned()))
+        {
+            self.emitted.push(SignalEmission {
+                object: owner,
+                signal: signal.to_owned(),
+                arguments: arguments.clone(),
+            });
         }
-        Ok(())
+        if let Some(handler) = self.model.nodes[owner.index].handlers.get(signal).cloned() {
+            self.run(owner, &handler, arguments.clone(), &mut BTreeSet::new())?;
+        }
+        self.dispatch_connections(owner, signal, &arguments)
     }
 }

@@ -93,6 +93,14 @@ impl TypeRegistry {
             .entry("QtQml".into())
             .or_default()
             .insert("QtObject".into(), qt_object);
+        let connections = TypeDefinition::default()
+            .inherits("QtQml", "QtObject")
+            .property("target", "QtObject", Value::Null)
+            .property("enabled", "bool", Value::Bool(true))
+            .property("ignoreUnknownSignals", "bool", Value::Bool(false));
+        registry
+            .register("QtQml", "Connections", connections)
+            .expect("built-in Connections contract");
         registry.set_module_version("QtQml", 2, 15);
         registry.set_module_version("QtQml", 6, 12);
         registry

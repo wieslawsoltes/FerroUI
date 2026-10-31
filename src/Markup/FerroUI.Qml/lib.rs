@@ -1,6 +1,7 @@
 //! A component owns its objects, bindings, dependency graph and signal dispatch.
 //! Native integrations register their type contracts before constructing an instance.
 //! Public mutations settle bindings and handlers atomically before exposing changes.
+mod connections;
 mod evaluation;
 mod instantiate;
 mod registry;
@@ -30,6 +31,7 @@ struct Node {
     module: String,
     name: String,
     lineage: Vec<(String, String)>,
+    composite_types: Vec<String>,
     parent: Option<ObjectId>,
     children: Vec<ObjectId>,
     properties: BTreeMap<String, SlotId>,
@@ -38,6 +40,17 @@ struct Node {
     native: BTreeMap<String, registry::NativeMethod>,
     methods: BTreeMap<String, Rc<Procedure>>,
     handlers: BTreeMap<String, Rc<Procedure>>,
+}
+
+impl Node {
+    fn signal(&self, name: &str) -> Option<&[Parameter]> {
+        if let Some(args) = self.signals.get(name) {
+            return Some(args.as_slice());
+        }
+        name.strip_suffix("Changed")
+            .filter(|n| self.properties.contains_key(*n))
+            .map(|_| [].as_slice())
+    }
 }
 
 enum Alias {
@@ -56,6 +69,7 @@ struct Property {
 
 #[derive(Clone)]
 struct Slot {
+    assigned: bool,
     value: Value,
     binding: Option<Rc<Binding>>,
     dirty: bool,
@@ -82,6 +96,7 @@ pub struct SignalEmission {
 }
 
 pub struct Instance {
+    listeners: BTreeMap<String, Vec<connections::Listener>>,
     validator: Option<Validator>,
     watched: BTreeSet<(ObjectId, String)>,
     emissions: Vec<SignalEmission>,
@@ -148,6 +163,13 @@ impl Instance {
             .ok_or_else(|| Error::new(format!("{} has no property '{property}'", node.name)))
     }
 
+    /// True if QML or Rust supplied a local value or binding. Reflection-based
+    /// hosts use this to preserve theme/style precedence for untouched defaults.
+    pub fn is_assigned(&self, object: ObjectId, property: &str) -> bool {
+        self.key(object, property)
+            .is_ok_and(|key| self.slots[key].assigned)
+    }
+
     pub fn get(&self, object: ObjectId, property: &str) -> Result<Value, Error> {
         Ok(self.slots[self.key(object, property)?].value.clone())
     }
@@ -167,7 +189,7 @@ impl Instance {
         let node = self
             .node(object)
             .ok_or_else(|| Error::new("foreign or unknown object"))?;
-        if !node.signals.contains_key(name) {
+        if node.signal(name).is_none() {
             return Err(Error::new(format!("unknown signal '{name}'")));
         }
         self.watched.insert((object, name.to_owned()));

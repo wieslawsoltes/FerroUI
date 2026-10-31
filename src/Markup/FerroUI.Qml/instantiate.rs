@@ -29,6 +29,7 @@ impl Instance {
         }
         let mut builder = Builder {
             instance: Self {
+                listeners: BTreeMap::new(),
                 validator: None,
                 watched: BTreeSet::new(),
                 emissions: Vec::new(),
@@ -63,6 +64,9 @@ impl Instance {
                     property.name
                 )));
             }
+        }
+        for key in builder.assigned {
+            builder.instance.slots[key].assigned = true;
         }
         let mut instance = builder.instance;
         instance.transaction(|tx| tx.initialize())?;
@@ -125,6 +129,7 @@ impl Instance {
             (ty, Value::Object(id))
                 if self.node(*id).is_some_and(|node| {
                     ty == "QtObject"
+                        || node.composite_types.iter().any(|candidate| ty == candidate)
                         || ty == node.name
                         || ty == format!("{}.{}", node.module, node.name)
                         || node
@@ -161,7 +166,9 @@ impl Builder<'_> {
                 Value::List(Vec::new())
             }
             name if is_object_type(name) => {
-                self.registry.resolve(imports, name)?;
+                if !name.starts_with("Qml$Type") {
+                    self.registry.resolve(imports, name)?;
+                }
                 Value::Null
             }
             _ => return Err(Error::new(format!("unsupported property type '{ty}'"))),
@@ -179,6 +186,7 @@ impl Builder<'_> {
         }
         self.instance.properties.push(property);
         self.instance.slots.push(Slot {
+            assigned: false,
             value,
             binding: None,
             dirty: false,
@@ -199,6 +207,7 @@ impl Builder<'_> {
             instance: self.instance.identity,
         };
         self.instance.nodes.push(Node {
+            composite_types: source.composite_types.clone(),
             lineage: definition.lineage.clone(),
             module: module.into(),
             name: name.into(),
@@ -226,6 +235,11 @@ impl Builder<'_> {
                 },
                 default.clone(),
             )?;
+        }
+        let connections = module == "QtQml" && name == "Connections";
+        if connections {
+            let target = self.instance.key(id, "target")?;
+            self.instance.slots[target].value = parent.map(Value::Object).unwrap_or(Value::Null);
         }
         let mut has_id = false;
         for member in &source.members {
@@ -320,6 +334,11 @@ impl Builder<'_> {
                     value: Some(value),
                     ..
                 } => self.bind(id, name, value)?,
+                MemberKind::Handler { name, .. }
+                    if connections && name != "Component.onCompleted" =>
+                {
+                    ()
+                }
                 MemberKind::Handler {
                     name,
                     parameters,
@@ -327,6 +346,9 @@ impl Builder<'_> {
                 } => self.handler(id, name, parameters, body)?,
                 _ => (),
             }
+        }
+        if connections {
+            self.instance.connect_handlers(id, source)?;
         }
         if !implicit.is_empty() {
             let name = self.instance.nodes[id.index]
