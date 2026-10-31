@@ -10,6 +10,7 @@ publish = false
 
 [features]
 default = ["desktop"]
+webscene = ["dep:ferroui-qml-webscene", "ferroui-qml-build/javascript"]
 desktop = ["dep:ferroui-view", "dep:ferroui-themes-winui"]
 
 [lib]
@@ -24,6 +25,7 @@ required-features = ["desktop"]
 ferroui-controls.workspace = true
 ferroui-qml.workspace = true
 ferroui-qml-controls.workspace = true
+ferroui-qml-webscene = { workspace = true, optional = true }
 ferroui-view = { workspace = true, features = ["desktop"], optional = true }
 ferroui-themes-winui = { workspace = true, optional = true }
 

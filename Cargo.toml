@@ -78,6 +78,7 @@ members = [
     "src/Markup/FerroUI.Qml.Compiler",
     "src/Markup/FerroUI.Qml.Build",
     "src/Markup/FerroUI.Qml.Controls",
+    "src/Markup/FerroUI.Qml.WebScene",
     "samples/QmlGallery",
     "tests/QmlCompiled",
     "src/Markup/FerroUI.Markup",
@@ -300,6 +301,7 @@ ferroui-static-view-locator-build = { version = "=0.4.0", path = "src/StaticView
 ferroui-qml = { version = "=0.4.0", path = "src/Markup/FerroUI.Qml" }
 ferroui-qml-compiler = { version = "=0.4.0", path = "src/Markup/FerroUI.Qml.Compiler" }
 ferroui-qml-build = { version = "=0.4.0", path = "src/Markup/FerroUI.Qml.Build" }
+ferroui-qml-webscene = { version = "=0.4.0", path = "src/Markup/FerroUI.Qml.WebScene" }
 ferroui-qml-controls = { version = "=0.4.0", path = "src/Markup/FerroUI.Qml.Controls" }
 ferroui-markup = { version = "=0.4.0", path = "src/Markup/FerroUI.Markup" }
 ferroui-markup-xaml = { version = "=0.4.0", path = "src/Markup/FerroUI.Markup.Xaml" }

@@ -7,6 +7,14 @@ include!(concat!(env!("OUT_DIR"), "/main_qml.rs"));
 pub fn create() -> Result<QmlView, ferroui_qml::Error> {
     let mut registry = ControlRegistry::standard()?;
     registry.register_ferro_control("FerroUI.Controls", ferroui_controls::TextBlock::new)?;
+    #[cfg(feature = "webscene")]
+    return QmlView::with_script_engine(
+        &compiled_qml(),
+        &registry,
+        Default::default(),
+        std::rc::Rc::new(ferroui_qml_webscene::WebSceneEngine::from_env()?),
+    );
+    #[cfg(not(feature = "webscene"))]
     QmlView::new(&compiled_qml(), &registry, Default::default())
 }
 

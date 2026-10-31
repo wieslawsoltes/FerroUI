@@ -30,6 +30,7 @@ macos-theme = ["dep:ferroui-themes-macos"]
 material-theme = ["dep:ferroui-themes-material"]
 # The XAML run-time library and the run-time loader of markup.
 qml = ["dep:ferroui-qml", "dep:ferroui-qml-controls"]
+qml-webscene = ["qml", "dep:ferroui-qml-webscene"]
 xaml = ["dep:ferroui-markup-xaml", "dep:ferroui-markup-xaml-loader"]
 # The WinUI XAML compatibility: the importer, its loading entry points and x:Bind.
 winui-xaml = ["xaml", "dep:ferroui-markup-xaml-winui"]
@@ -79,6 +80,7 @@ ferroui-themes-winui = { workspace = true, optional = true }
 ferroui-themes-macos = { workspace = true, optional = true }
 ferroui-themes-material = { workspace = true, optional = true }
 ferroui-qml = { workspace = true, optional = true }
+ferroui-qml-webscene = { workspace = true, optional = true }
 ferroui-qml-controls = { workspace = true, optional = true }
 ferroui-markup-xaml = { workspace = true, optional = true }
 ferroui-markup-xaml-loader = { workspace = true, optional = true, features = ["runtime"] }

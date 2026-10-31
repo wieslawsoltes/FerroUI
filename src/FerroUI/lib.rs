@@ -167,6 +167,8 @@ pub use ferroui_markup_xaml_loader as markup_xaml_loader;
 pub use ferroui_qml as qml;
 #[cfg(feature = "qml")]
 pub use ferroui_qml_controls as qml_controls;
+#[cfg(feature = "qml-webscene")]
+pub use ferroui_qml_webscene as qml_webscene;
 #[cfg(feature = "winui-xaml")]
 pub use ferroui_markup_xaml_winui as markup_xaml_winui;
 
