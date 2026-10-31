@@ -24,6 +24,7 @@ struct Tables {
     next: u64,
     scopes: BTreeMap<(ScriptScope, String, BTreeMap<String, String>), u64>,
     scope_values: BTreeMap<u64, (ScriptInstance, ScriptScope)>,
+    scope_names: BTreeMap<u64, Rc<Vec<String>>>,
     objects: BTreeMap<ObjectId, u64>,
     other: BTreeMap<ScriptInstance, Vec<(Value, u64)>>,
     values: BTreeMap<u64, (ScriptInstance, Value)>,
@@ -34,6 +35,29 @@ impl Tables {
     fn allocate(&mut self) -> u64 {
         self.next += 1;
         self.next
+    }
+    fn scope(
+        &mut self,
+        ctx: &mut ScriptContext<'_, '_>,
+        lexical: ScriptScope,
+        script: &ir::JavaScript,
+    ) -> Result<(u64, Rc<Vec<String>>), Error> {
+        let key = (
+            lexical.clone(),
+            script.origin.clone(),
+            script.imports.clone(),
+        );
+        if let Some(id) = self.scopes.get(&key) {
+            return Ok((*id, self.scope_names[id].clone()));
+        }
+        // Exclude arguments belonging to the activating function. The V8
+        // function owns those variables, while this lexical scope is reusable.
+        let names = Rc::new(ctx.in_scope(&lexical, |scope| Ok(scope.names()))?);
+        let id = self.allocate();
+        self.scope_values.insert(id, (ctx.instance(), lexical));
+        self.scope_names.insert(id, names.clone());
+        self.scopes.insert(key, id);
+        Ok((id, names))
     }
     fn host_id(&mut self, instance: ScriptInstance, value: &Value) -> u64 {
         if let Value::Object(object) = value {
@@ -198,9 +222,13 @@ impl ScriptEngine for WebSceneEngine {
         self.realm(ctx.instance())
             .call_external(ctx, v, receiver, args)
     }
-    fn observe_promise(&self, ctx:&mut ScriptContext<'_, '_>, value:&ExternalValue, timeout:Duration)
-        -> Result<ferroui_qml::PromiseState,Error> {
-        self.realm(ctx.instance()).observe(ctx,value,timeout)
+    fn observe_promise(
+        &self,
+        ctx: &mut ScriptContext<'_, '_>,
+        value: &ExternalValue,
+        timeout: Duration,
+    ) -> Result<ferroui_qml::PromiseState, Error> {
+        self.realm(ctx.instance()).observe(ctx, value, timeout)
     }
     fn release_instance(&self, id: ScriptInstance) {
         self.realms.borrow_mut().remove(&id);
@@ -223,13 +251,13 @@ impl Realm {
             .read(deadline);
         result.map_err(|e| self.poison(e))
     }
-    fn send(&self, value: &Json) -> Result<(), Error> {
+    fn send(&self, value: Json, deadline: Instant) -> Result<(), Error> {
         let result = self
             .worker
             .borrow_mut()
             .as_mut()
             .ok_or_else(|| Error::new("WebScene worker unavailable"))?
-            .send(value);
+            .send(value, deadline);
         result.map_err(|e| self.poison(e))
     }
     fn ensure_worker(&self, deadline: Instant) -> Result<(), Error> {
@@ -237,9 +265,13 @@ impl Realm {
             return Ok(());
         }
         *self.worker.borrow_mut() = Some(process::Worker::spawn(&self.executable, &self.library)?);
-        let hello=self.read(deadline)?;
+        let hello = self.read(deadline)?;
         if hello["ready"] != true {
-            return Err(self.poison(Error::new(hello["failure"].as_str().unwrap_or("invalid WebScene worker handshake"))));
+            return Err(self.poison(Error::new(
+                hello["failure"]
+                    .as_str()
+                    .unwrap_or("invalid WebScene worker handshake"),
+            )));
         }
         Ok(())
     }
@@ -276,9 +308,9 @@ impl Realm {
         }
         let result = (|| {
             if outer.is_some() {
-                self.send(&json!({"nested":command}))?;
+                self.send(json!({"nested":command}), deadline)?;
             } else {
-                self.send(&command)?;
+                self.send(command, deadline)?;
             }
             loop {
                 let msg = self.read(deadline)?;
@@ -306,7 +338,7 @@ impl Realm {
                     Ok(value) => json!({"ok":value}),
                     Err(e) => json!({"error":e.message}),
                 };
-                self.send(&answer)?;
+                self.send(answer, deadline)?;
             }
         })();
         if outer.is_none() {
@@ -342,19 +374,12 @@ impl Realm {
         script: &ir::JavaScript,
     ) -> Result<Value, Error> {
         let instance = ctx.instance();
-        let (scope, graph) = {
+        let (scope, names, component_scope, component_names, graph) = {
             let mut t = self.tables.borrow_mut();
             let root = t.host_id(instance, &Value::Object(ctx.root()));
-            let scope = ctx.capture_scope();
-            let key = (scope.clone(), script.origin.clone(), script.imports.clone());
-            let scope_id = if let Some(id) = t.scopes.get(&key) {
-                *id
-            } else {
-                let id = t.allocate();
-                t.scope_values.insert(id, (instance, scope));
-                t.scopes.insert(key, id);
-                id
-            };
+            let (scope_id, names) = t.scope(ctx, ctx.capture_scope(), script)?;
+            let (component_scope, component_names) =
+                t.scope(ctx, ctx.capture_component_scope(), script)?;
             let key = (ctx.root(), script.origin.clone(), script.imports.clone());
             let graph = if let Some(graph) = t.modules.get(&key) {
                 graph.clone()
@@ -368,15 +393,15 @@ impl Realm {
                 t.modules.insert(key, graph.clone());
                 graph
             };
-            (scope_id, graph)
+            (scope_id, names, component_scope, component_names, graph)
         };
         let mut args = serde_json::Map::new();
         for (k, v) in ctx.arguments() {
             args.insert(k.clone(), self.encode(instance, v)?);
         }
-        let mut command = json!({"op":"eval","scope":scope,"graph":graph.aliases,
-            "source":script.source,"form":if script.form==ir::ScriptForm::Expression{"expr"}else{"body"},
-            "owner":self.encode(instance,&Value::Object(ctx.owner()))?,"names":ctx.names(),"args":args,
+        let mut command = json!({"op":"eval","scope":scope,"componentScope":component_scope,"componentNames":&*component_names,"graph":graph.aliases,
+            "source":script.code(),"hook":script.import_hook,"form":match script.form {ir::ScriptForm::Expression=>"expr",ir::ScriptForm::BindingBlock=>"block",_=>"body"},
+            "owner":self.encode(instance,&Value::Object(ctx.owner()))?,"names":&*names,"args":args,
             "parameters":ctx.parameter_names(),"origin":script.origin,"mode":host::mode(ctx.expected_type())});
         let need_modules = !self.tables.borrow().prepared.contains(&instance);
         if need_modules && !graph.files.is_empty() {

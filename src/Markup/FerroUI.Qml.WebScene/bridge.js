@@ -13,7 +13,7 @@
         if (denied.has(key) || key.startsWith("__webScene")) Reflect.deleteProperty(globalThis,key);
     }
     let serial = 0, next = 0, preparing = "ready";
-    const intrinsicPromise=Promise;
+    const intrinsicPromise=Promise, intrinsicEval=eval;
     function atom(value) {
         // Install a rejection handler before WebScene drains its microtask queue.
         // Otherwise a rejected return value is reported as an unhandled engine
@@ -121,7 +121,12 @@
             has(_,k){return typeof k==="string"&&(names.has(k)||groups.has(k)||modules.has(graph,k)||denied.has(k)||k.startsWith("__webScene"));},
             get(_,k){
                 if(typeof k!=="string") return undefined;
-                if(modules.has(graph,k)) return modules.get(graph,k,scope);
+                if(modules.has(graph,k)) {
+                    const root=c.componentScope===c.scope ? scope : environment({
+                        scope:c.componentScope,componentScope:c.componentScope,names:c.componentNames,graph
+                    });
+                    return modules.get(graph,k,root);
+                }
                 if(groups.has(k)&&!names.has(k)) return groups.get(k);
                 if(!names.has(k)) return undefined;
                 return decode(rpc(["resolve",c.scope,k]));
@@ -158,17 +163,24 @@
                 let factory=functions.get(key);
                 if(!factory){
                     const origin=c.origin.replace(/[\n\r\u2028\u2029]/g,"");
-                    const body=c.form==="expr" ? "return (\n"+c.source+"\n);" : c.source;
+                    // Direct eval returns the block's ECMAScript completion
+                    // value, including branch/loop/finally completions.
+                    const body=c.form==="expr" ? "return (\n"+c.source+"\n);"
+                        : c.form==="block" ? "return eval("+JSON.stringify(c.source)+");" : c.source;
                     const fn="function("+args.join(",")+"){\n"+body+"\n}";
                     // Bind the generated import helper outside user parameters.
                     // Closures retain it, and it never appears in arguments.
-                    const scoped=c.hook?"function("+c.hook+"){return "+fn+"}":fn;
+                    const bindings=[...(c.hook?[c.hook]:[]),...(c.form==="block"?["eval"]:[])];
+                    const scoped=bindings.length?"function("+bindings.join(",")+"){return "+fn+"}":fn;
                     factory=Function("with(arguments[0]){return "+scoped+"}\n//# sourceURL="+origin);
                     if(functions.size>=4096)functions.delete(functions.keys().next().value);
                     functions.set(key,factory);
                 }
                 let invoke=factory(environment(c));
-                if(c.hook) invoke=invoke(modules.context(c.graph,c.origin));
+                const bindings=[];
+                if(c.hook) bindings.push(modules.context(c.graph,c.origin));
+                if(c.form==="block") bindings.push(intrinsicEval);
+                if(bindings.length) invoke=invoke(...bindings);
                 result=invoke.apply(decode(c.owner),args.map(k=>decode(c.args[k])));
             }else{
                 const value=decode(c.target);

@@ -3,7 +3,7 @@
 use super::*;
 use std::{
     io::{BufReader, BufWriter},
-    process::{Child, ChildStdin, Command, Stdio},
+    process::{Child, Command, Stdio},
     sync::mpsc,
     thread,
     time::Instant,
@@ -11,7 +11,7 @@ use std::{
 
 pub(super) struct Worker {
     child: Child,
-    input: BufWriter<ChildStdin>,
+    input: mpsc::Sender<(Json, mpsc::Sender<std::io::Result<()>>)>,
     output: mpsc::Receiver<Result<Json, String>>,
 }
 impl Worker {
@@ -30,7 +30,7 @@ impl Worker {
         let mut child = command
             .spawn()
             .map_err(|e| Error::new(format!("launch WebScene worker: {e}")))?;
-        let input = BufWriter::new(child.stdin.take().expect("piped stdin"));
+        let mut stream = BufWriter::new(child.stdin.take().expect("piped stdin"));
         let mut stdout = BufReader::new(child.stdout.take().expect("piped stdout"));
         let (sender, output) = mpsc::sync_channel(1);
         let reader = thread::Builder::new()
@@ -53,26 +53,47 @@ impl Worker {
             let _ = child.wait();
             return Err(Error::new(error.to_string()));
         }
+        // A guest can stop consuming input. Keep pipe writes off the UI
+        // thread so large frames obey the same deadline as result reads.
+        let (input, writes) = mpsc::channel::<(Json, mpsc::Sender<std::io::Result<()>>)>();
+        let writer = thread::Builder::new()
+            .name("qml-webscene-input".into())
+            .spawn(move || {
+                while let Ok((message, acknowledgement)) = writes.recv() {
+                    let status = framing::send(&mut stream, &message);
+                    let failed = status.is_err();
+                    let _ = acknowledgement.send(status);
+                    if failed {
+                        break;
+                    }
+                }
+            });
+        if let Err(error) = writer {
+            let _ = child.kill();
+            let _ = child.wait();
+            return Err(Error::new(error.to_string()));
+        }
         Ok(Self {
             child,
             input,
             output,
         })
     }
-    pub fn send(&mut self, msg: &Json) -> Result<(), Error> {
-        framing::send(&mut self.input, msg)
+    pub fn send(&self, msg: Json, deadline: Instant) -> Result<(), Error> {
+        let (ack, written) = mpsc::channel();
+        self.input
+            .send((msg, ack))
+            .map_err(|_| Error::new("WebScene worker disconnected"))?;
+        written
+            .recv_timeout(deadline.saturating_duration_since(Instant::now()))
+            .map_err(protocol_timeout)?
             .map_err(|e| Error::new(format!("WebScene worker write: {e}")))
     }
     pub fn read(&self, deadline: Instant) -> Result<Json, Error> {
         let remaining = deadline.saturating_duration_since(Instant::now());
         self.output
             .recv_timeout(remaining)
-            .map_err(|e| match e {
-                mpsc::RecvTimeoutError::Timeout => {
-                    Error::new("WebScene execution deadline exceeded")
-                }
-                _ => Error::new("WebScene worker disconnected"),
-            })?
+            .map_err(protocol_timeout)?
             .map_err(|e| Error::new(format!("WebScene worker stopped: {e}")))
     }
 }
@@ -80,5 +101,12 @@ impl Drop for Worker {
     fn drop(&mut self) {
         let _ = self.child.kill();
         let _ = self.child.wait();
+    }
+}
+
+fn protocol_timeout(error: mpsc::RecvTimeoutError) -> Error {
+    match error {
+        mpsc::RecvTimeoutError::Timeout => Error::new("WebScene execution deadline exceeded"),
+        _ => Error::new("WebScene worker disconnected"),
     }
 }

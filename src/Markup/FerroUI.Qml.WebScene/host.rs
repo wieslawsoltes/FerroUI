@@ -209,10 +209,6 @@ impl Realm {
                     if ctx.is_method(object, name) {
                         return Ok(self.method(ctx, object, name));
                     }
-                    if name != "parent" && !ctx.members(object).iter().any(|member| member == name)
-                    {
-                        return Ok(json!(["u"]));
-                    }
                 }
                 let result = ctx.read_member(&value, name)?;
                 self.encode(instance, &result)

@@ -30,4 +30,6 @@ unicode-ident = "1"
 group = "markup"
 
 [dev-dependencies]
+tempfile = "3"
+ferroui-qml-build = { workspace = true, features = ["javascript"] }
 ferroui-qml-compiler = { workspace = true, features = ["javascript"] }
