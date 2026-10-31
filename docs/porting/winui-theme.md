@@ -339,8 +339,12 @@ no `TODO`.
   (`KeySpline="0,0,0,1"` is `Easing="0,0,0,1"`, `ControlFastOutSlowInKeySpline`). A transition
   also animates the return to the base value, which WinUI does at once; `BeginTime` has no
   counterpart.
-- `ContentPresenter.BackgroundTransition` (`BrushTransition`) is a `BrushTransition` of
-  `Background` in `ContentPresenter.Transitions`.
+- `ContentPresenter.BackgroundTransition` (`BrushTransition`), and every other
+  `BackgroundTransition`, is a `SolidColorBrushTransition` of `Background` in the element's
+  `Transitions`: WinUI's `BrushTransition` interpolates from no brush or a solid colour brush to a
+  solid colour brush and changes any other brush at once, which is what that class does. FerroUI's
+  `BrushTransition` (the upstream class) switches a brush it cannot interpolate half-way through
+  its duration (DEVIATIONS.md, BTN-3).
 - `RenderTransform` animations of a `ScaleTransform`/`TranslateTransform` are a `RenderTransform`
   setter with transform operations (`scale(0.875)`, `translateX(2px)`); the value of a resource
   (`ScrollBarButtonArrowScalePressed`, `ScrollBarThumbOffset`) is written and named in a comment.

@@ -44,7 +44,8 @@
     KeyboardAcceleratorTextVisibility are left out (FerroUI's command bar buttons have no
     accelerator text, flyout chevron or input mode). AllowFocusOnInteraction="False" is left
     out: FerroUI's CommandBar moves the keyboard focus between its buttons.
-  - Border.BackgroundTransition is a BrushTransition of the background of the inner border.
+  - Border.BackgroundTransition is a SolidColorBrushTransition (WinUI's BrushTransition, BTN-3) of
+    the background of the inner border.
   - The check glyph of the overflow toggle button (E73E in a TextBlock of 16 px, 14 x 14) is a
     path of GlyphGeometryE73E; the ellipsis of the More button (FontIcon E712 of 20 px whose
     height is AppBarExpandButtonCircleDiameter) is a path of GlyphGeometryE712, 15 x 3.
@@ -137,7 +138,7 @@
                   BackgroundSizing="{TemplateBinding BackgroundSizing}">
             <Border.Transitions>
               <Transitions>
-                <BrushTransition Property="Background" Duration="0:0:0.083" />
+                <SolidColorBrushTransition Property="Background" Duration="0:0:0.083" />
               </Transitions>
             </Border.Transitions>
           </Border>
@@ -345,7 +346,7 @@
                   BackgroundSizing="{TemplateBinding BackgroundSizing}">
             <Border.Transitions>
               <Transitions>
-                <BrushTransition Property="Background" Duration="0:0:0.083" />
+                <SolidColorBrushTransition Property="Background" Duration="0:0:0.083" />
               </Transitions>
             </Border.Transitions>
           </Border>
