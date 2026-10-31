@@ -24,16 +24,7 @@ impl Modules {
         for (url, resource) in resources {
             if !url
                 .strip_prefix("https://qml.invalid/modules/")
-                .is_some_and(|path| {
-                    path.split('/').all(|part| {
-                        !part.is_empty()
-                            && part != "."
-                            && part != ".."
-                            && part
-                                .bytes()
-                                .all(|b| b.is_ascii_alphanumeric() || b"._-".contains(&b))
-                    })
-                })
+                .is_some_and(|path| path.split('/').all(valid_segment))
             {
                 return Err(Error::new(format!("invalid embedded module URL '{url}'")));
             }
@@ -49,7 +40,16 @@ impl Modules {
                 ScriptKind::Library => ("library", classic_module(resource, url)?),
                 ScriptKind::Script => ("script", classic_module(resource, url)?),
             };
-            manifest.insert(url, json!({"kind": kind, "imports": resource.imports, "preload":resource.preload,"dependencies": resource.dependencies,"hook":resource.import_hook}));
+            manifest.insert(
+                url,
+                json!({
+                    "kind": kind,
+                    "imports": resource.imports,
+                    "preload": resource.preload,
+                    "dependencies": resource.dependencies,
+                    "hook": resource.import_hook,
+                }),
+            );
             files.insert(url.clone(), source);
         }
         for (alias, target) in imports {
@@ -64,6 +64,24 @@ impl Modules {
             aliases: json!({"names": imports, "resources": manifest, "context": [origin, component.to_string()]}),
         })
     }
+}
+
+/// Accept the linker's unreserved characters and percent-encoded file names.
+fn valid_segment(segment: &str) -> bool {
+    if matches!(segment, "" | "." | "..") {
+        return false;
+    }
+    let mut bytes = segment.bytes();
+    while let Some(byte) = bytes.next() {
+        if byte == b'%' {
+            if !(0..2).all(|_| bytes.next().is_some_and(|b| b.is_ascii_hexdigit())) {
+                return false;
+            }
+        } else if !byte.is_ascii_alphanumeric() && !b"._-~".contains(&byte) {
+            return false;
+        }
+    }
+    true
 }
 
 /// A classic QML script acquires a fresh lexical environment when its importing

@@ -4,6 +4,7 @@ use ferroui_qml_compiler::{
     javascript::{import_sites, parse_resource, visit_scripts, Dependency},
     Document, ScriptForm, ScriptKind, ScriptResource,
 };
+use percent_encoding::{percent_encode, AsciiSet, NON_ALPHANUMERIC};
 use std::{
     collections::BTreeMap,
     fs,
@@ -39,7 +40,7 @@ impl Resources {
             self.preload.insert(key.clone());
             imports.insert(alias.clone(), key);
         }
-        let origin = format!("https://qml.invalid/components/{index}/component.qml");
+        let origin = resource_url("components", index, path)?;
         visit_scripts(&mut document.root, &mut |script| {
             script.origin.clone_from(&origin);
             script.imports.clone_from(&imports);
@@ -90,10 +91,7 @@ impl Resources {
         let source = fs::read_to_string(&path).map_err(|e| format!("{}: {e}", path.display()))?;
         let parsed =
             parse_resource(&source, ext == "mjs").map_err(|e| format!("{}:{e}", path.display()))?;
-        let key = format!(
-            "https://qml.invalid/modules/{}/module.{ext}",
-            self.paths.len()
-        );
+        let key = resource_url("modules", self.paths.len(), &path)?;
         self.paths.insert(path.clone(), key.clone());
         let mut resource = parsed.resource;
         let mut edits = Vec::new();
@@ -126,10 +124,29 @@ impl Resources {
     }
 }
 
+/// Keep stack traces and import.meta.url useful after relocation. The index
+/// distinguishes files with the same name without exposing build-machine paths.
+fn resource_url(directory: &str, index: usize, path: &Path) -> Result<String, String> {
+    const ENCODE: &AsciiSet = &NON_ALPHANUMERIC
+        .remove(b'-')
+        .remove(b'.')
+        .remove(b'_')
+        .remove(b'~');
+    let name = path
+        .file_name()
+        .ok_or("JavaScript resource has no file name")?;
+    let segment = percent_encode(name.as_encoded_bytes(), ENCODE);
+    Ok(format!("https://qml.invalid/{directory}/{index}/{segment}"))
+}
+
 fn local_path(origin: &Path, specifier: &str) -> Result<PathBuf, String> {
-    if specifier.is_empty() || specifier.contains([':', '?', '#']) || specifier.starts_with("//") {
+    if specifier.is_empty()
+        || specifier.starts_with('/')
+        || specifier.contains([':', '?', '#', '\\'])
+        || specifier.chars().any(char::is_control)
+    {
         return Err(format!(
-            "expected a local JavaScript resource path: {specifier}"
+            "expected a relative JavaScript resource path: {specifier}"
         ));
     }
     Ok(origin
@@ -143,7 +160,7 @@ fn push_edit(
     dep: Dependency,
     target: &str,
 ) {
-    // Generated URLs contain only fixed URL characters, digits and the checked extension.
+    // File names in generated URLs have already been encoded as URL path segments.
     if let Some(span) = dep.span {
         edits.push((span, format!("\"{target}\"")));
     }
@@ -152,5 +169,30 @@ fn replace(source: &mut String, mut edits: Vec<(ferroui_qml_compiler::SourceSpan
     edits.sort_by_key(|(s, _)| std::cmp::Reverse(s.start));
     for (range, value) in edits {
         source.replace_range(range.start..range.end, &value);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn imports_use_relative_url_paths_on_every_platform() {
+        let origin = Path::new("app").join("View.qml");
+        for path in [
+            "/absolute.mjs",
+            "file:///abs.mjs",
+            "C:/file.js",
+            r"\\host\share\file.js",
+            r"dir\name.mjs",
+            "./file?x",
+            "./file#id",
+        ] {
+            assert!(local_path(&origin, path).is_err(), "{path}");
+        }
+        assert_eq!(
+            local_path(&origin, "../lib/math.mjs").unwrap(),
+            Path::new("app").join("../lib/math.mjs")
+        );
     }
 }

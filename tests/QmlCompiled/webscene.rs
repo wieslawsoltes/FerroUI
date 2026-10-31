@@ -35,6 +35,7 @@ fn exercise(source: &impl ComponentSource) {
         failure.to_string().contains("fixture rollback"),
         "{failure}"
     );
+    assert!(failure.message.contains("/App.qml"), "{failure}");
     assert_eq!(app.get(root, "left").unwrap(), n(5.));
     assert_eq!(app.get(root, "caption").unwrap(), s("qty-030"));
 }

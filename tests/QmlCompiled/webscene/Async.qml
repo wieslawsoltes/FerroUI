@@ -31,6 +31,7 @@ QtObject {
         throw new TypeError("outer failed")
     }
     function afterFailure() { return globalThis.afterFailedOuter }
+    function moduleOrigin() { return import("./math/café data.mjs").then(module => module.url) }
     function importAndSettle(n: int) {
         return import("./math/promise-sum.mjs").then(module => module.delayedSum(n))
     }

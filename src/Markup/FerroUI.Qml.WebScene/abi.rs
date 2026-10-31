@@ -176,11 +176,7 @@ impl Engine {
     }
 
     unsafe fn copy_result(view: &ResultView) -> Result<String, String> {
-        unsafe fn bytes(
-            _lease: &ResultView,
-            ptr: *const u8,
-            len: usize,
-        ) -> Result<&[u8], String> {
+        unsafe fn bytes(_lease: &ResultView, ptr: *const u8, len: usize) -> Result<&[u8], String> {
             if len == 0 {
                 return Ok(&[]);
             }

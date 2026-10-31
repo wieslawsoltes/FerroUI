@@ -40,6 +40,14 @@ fn promises(source: &impl ComponentSource) {
         panic!("expected retained Promise")
     };
     assert_eq!(app.promise_state(&handle).unwrap(), PromiseState::Pending);
+    let Value::String(origin) = app
+        .call_and_await(root, "moduleOrigin", vec![], deadline)
+        .unwrap()
+    else {
+        panic!("missing module URL")
+    };
+    assert!(origin.ends_with("/caf%C3%A9%20data.mjs"), "{origin}");
+
     let started = Instant::now();
     let timeout = app
         .settle_promise(&handle, Duration::from_millis(20))
