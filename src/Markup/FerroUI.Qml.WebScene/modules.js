@@ -46,7 +46,11 @@
             return specifier;
         }
         const edges = catalog.get(parent)?.dependencies;
-        if (edges && owns(edges, specifier)) return edges[specifier];
+        if (edges && owns(edges, specifier)) {
+            const url = edges[specifier];
+            if (catalog.get(url)?.kind === "module") return url;
+            throw new TypeError("A classic QML script is not an ES module");
+        }
         const url = relativeModule(specifier, parent);
         if (url && catalog.has(url)) return url;
         throw new TypeError("Unknown embedded module " + specifier);

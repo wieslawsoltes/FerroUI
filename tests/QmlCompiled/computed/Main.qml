@@ -30,6 +30,7 @@ QtObject {
         const classicCount = Dual.marker()
         return import(name).then(module => classicCount + "/" + typeof module.marker + "/" + globalThis.dualExecutions)
     }
+    function rejectsClassicFactory() { return Classic.rejectsClassicFactory() }
     function rejectUnknown(path: string) {
         return import(path).then(() => false, error => error instanceof TypeError)
     }

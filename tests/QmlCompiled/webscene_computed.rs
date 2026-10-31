@@ -57,6 +57,11 @@ fn exercise_computed(source: &impl ComponentSource) {
             .unwrap(),
         string("1/undefined/2")
     );
+    assert_eq!(
+        vm.call_and_await(root, "rejectsClassicFactory", vec![], wait)
+            .unwrap(),
+        Value::Bool(true)
+    );
     for path in [
         "./missing.js",
         "../outside.mjs",
