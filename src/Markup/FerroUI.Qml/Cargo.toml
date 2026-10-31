@@ -1,0 +1,21 @@
+[package]
+name = "ferroui-qml"
+description = "Native QML object, binding and signal runtime for FerroUI"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-qml-compiler.workspace = true
+
+[package.metadata.release]
+group = "markup"
