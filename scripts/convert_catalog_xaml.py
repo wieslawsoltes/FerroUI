@@ -200,6 +200,8 @@ PORT_DOCUMENTS = [
     ("Pages/IconElementPage.xaml", "the page of the icons of WinUI (SymbolIcon, FontIcon; docs/porting/winui-controls.md)"),
     ("Pages/ItemsRepeaterPage.xaml", "the page of the ItemsRepeater of the port"),
     ("Pages/VisualStatesPage.xaml", "the page of WinUI's visual state manager (docs/porting/winui-calculator-gaps.md)"),
+    ("Pages/CartesianChartPage.xaml", "the page of the Cartesian chart of the LiveCharts2 port (docs/porting/livecharts2.md)"),
+    ("Pages/PieChartPage.xaml", "the page of the pie chart of the LiveCharts2 port (docs/porting/livecharts2.md)"),
 ]
 
 

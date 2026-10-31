@@ -278,6 +278,9 @@ cargo run -p treedatagrid-demo
 # Charts: compiled XAML, line/area/bar series, shared live data and light/dark resources
 cargo run -p charts-demo --features desktop
 
+# LiveCharts: Cartesian and pie charts of the LiveCharts2 port, compiled XAML and live data
+cargo run -p livecharts-demo --features desktop --bin livecharts-demo
+
 # ReactiveDemo, the getting-started sample of ReactiveUI: a crates.io browser on the WinUI 3
 # theme (add --no-default-features to search an in-memory catalogue instead of crates.io)
 cargo run -p reactive-demo
@@ -510,6 +513,7 @@ The layout follows the upstream project so that files can be compared side by si
 - [Tracking](docs/porting/TRACKING.md) and [what is left](docs/porting/REMAINING.md): generated per-file, per-type and per-member status.
 - [Deviations](docs/porting/DEVIATIONS.md): every place where the port differs from upstream, and why.
 - [XAML design](docs/porting/xaml.md): the markup pipeline, the run-time loader and the compiler of markup to Rust.
+- [LiveCharts2 port](docs/porting/livecharts2.md): the landing plan, the accounting of every upstream source, API member and test, and the [compiled sample](samples/LiveChartsDemo/README.md).
 - [WinUI Charts port](docs/porting/winui-charts.md): the published-contract boundary, native implementation, complete source/test mapping, adaptations and [compiled sample](samples/ChartsDemo/README.md).
 - [WinUI controls](docs/porting/winui-controls.md): the plan, inventory and rules of the native ports of WinUI 3 controls (icons, InfoBar, NumberBox, NavigationView and others), the WinUI-only templates, the symbol font and the two navigation models.
 - [Windows Calculator framework gaps](docs/porting/winui-calculator-gaps.md): the inventory, design and plan of VisualStateManager with state triggers and storyboards, ListView and GridView, SwipeControl, Pivot and system high contrast, the framework features the Calculator port found missing.

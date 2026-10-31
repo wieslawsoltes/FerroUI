@@ -20,8 +20,8 @@
   },
   "test_declarations": 1066,
   "test_status": {
-    "partial": 12,
-    "pending": 960,
+    "partial": 66,
+    "pending": 906,
     "ported": 94
   },
   "test_declarations_by_suite": {

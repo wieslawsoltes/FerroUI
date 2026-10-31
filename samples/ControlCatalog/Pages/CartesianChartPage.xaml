@@ -1,0 +1,80 @@
+<ContentPage Theme="{StaticResource ScrollPage}" xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:lc="https://ferroui.dev/livecharts"
+             Header="CartesianChart"
+             x:Class="ControlCatalog.Pages.CartesianChartPage">
+  <!-- Not from upstream: the Cartesian chart of the LiveCharts2 port (docs/porting/livecharts2.md). -->
+  <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Orientation="Vertical" Spacing="16">
+      <TextBlock Classes="h2">Columns, lines, areas and financial series on X and Y axes</TextBlock>
+
+      <TextBlock Classes="h3">Columns and a line</TextBlock>
+      <lc:CartesianChart Height="300" LegendPosition="Bottom" ZoomMode="X">
+        <lc:CartesianChart.XAxes>
+          <lc:Axis />
+        </lc:CartesianChart.XAxes>
+        <lc:CartesianChart.YAxes>
+          <lc:Axis MinLimit="0" />
+        </lc:CartesianChart.YAxes>
+        <lc:ColumnSeries Name="Completed" MaxBarWidth="28" CornerRadius="4">
+            <lc:ChartPoint X="0" Y="24" />
+            <lc:ChartPoint X="1" Y="31" />
+            <lc:ChartPoint X="2" Y="28" />
+            <lc:ChartPoint X="3" Y="43" />
+            <lc:ChartPoint X="4" Y="38" />
+            <lc:ChartPoint X="5" Y="52" />
+        </lc:ColumnSeries>
+        <lc:LineSeries Name="Planned" StrokeThickness="2.5" GeometrySize="7">
+            <lc:ChartPoint X="0" Y="28" />
+            <lc:ChartPoint X="1" Y="32" />
+            <lc:ChartPoint X="2" Y="35" />
+            <lc:ChartPoint X="3" Y="39" />
+            <lc:ChartPoint X="4" Y="43" />
+            <lc:ChartPoint X="5" Y="48" />
+        </lc:LineSeries>
+      </lc:CartesianChart>
+
+      <TextBlock Classes="h3">Stacked areas</TextBlock>
+      <lc:CartesianChart Height="260" LegendPosition="Bottom">
+        <lc:StackedAreaSeries Name="Europe" GeometrySize="0">
+            <lc:ChartPoint X="0" Y="3" />
+            <lc:ChartPoint X="1" Y="2" />
+            <lc:ChartPoint X="2" Y="3" />
+            <lc:ChartPoint X="3" Y="5" />
+            <lc:ChartPoint X="4" Y="3" />
+            <lc:ChartPoint X="5" Y="4" />
+            <lc:ChartPoint X="6" Y="6" />
+        </lc:StackedAreaSeries>
+        <lc:StackedAreaSeries Name="Americas" GeometrySize="0">
+            <lc:ChartPoint X="0" Y="6" />
+            <lc:ChartPoint X="1" Y="5" />
+            <lc:ChartPoint X="2" Y="6" />
+            <lc:ChartPoint X="3" Y="3" />
+            <lc:ChartPoint X="4" Y="8" />
+            <lc:ChartPoint X="5" Y="5" />
+            <lc:ChartPoint X="6" Y="2" />
+        </lc:StackedAreaSeries>
+        <lc:StackedAreaSeries Name="Asia" GeometrySize="0">
+            <lc:ChartPoint X="0" Y="4" />
+            <lc:ChartPoint X="1" Y="8" />
+            <lc:ChartPoint X="2" Y="2" />
+            <lc:ChartPoint X="3" Y="8" />
+            <lc:ChartPoint X="4" Y="9" />
+            <lc:ChartPoint X="5" Y="5" />
+            <lc:ChartPoint X="6" Y="3" />
+        </lc:StackedAreaSeries>
+      </lc:CartesianChart>
+
+      <TextBlock Classes="h3">Rows</TextBlock>
+      <lc:CartesianChart Height="220">
+        <lc:RowSeries Name="Hours" MaxBarWidth="20">
+            <lc:ChartPoint X="0" Y="6" />
+            <lc:ChartPoint X="1" Y="3" />
+            <lc:ChartPoint X="2" Y="5" />
+            <lc:ChartPoint X="3" Y="7" />
+            <lc:ChartPoint X="4" Y="4" />
+        </lc:RowSeries>
+      </lc:CartesianChart>
+    </StackPanel>
+  </ScrollViewer>
+</ContentPage>

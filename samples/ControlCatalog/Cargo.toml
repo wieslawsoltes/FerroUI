@@ -76,6 +76,10 @@ treedatagrid-demo = { path = "../TreeDataGridDemo", default-features = false }
 ferroui-controls-repeater = { workspace = true }
 # The inking controls and their WinUI styles (the page Inking, not in the original).
 ferroui-controls-inking = { workspace = true }
+# The Cartesian and pie charts of the LiveCharts2 port (the pages CartesianChart and PieChart,
+# not in the original).
+ferroui-controls-livecharts = { workspace = true }
+ferroui-livecharts = { workspace = true }
 # The about dialog.
 ferroui-dialogs = { workspace = true }
 ferroui-markup = { workspace = true }
