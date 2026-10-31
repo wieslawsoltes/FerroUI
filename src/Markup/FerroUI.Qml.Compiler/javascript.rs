@@ -257,7 +257,7 @@ struct Inspect {
     imports: Vec<Dependency>,
     identifiers: std::collections::BTreeSet<String>,
     sites: Vec<(SourceSpan, bool)>,
-    missing: Option<SourceSpan>,
+    invalid_literal: Option<SourceSpan>,
 }
 
 impl Visit for Inspect {
@@ -300,10 +300,8 @@ impl Visit for Inspect {
                         span: Some(span(s.span)),
                     });
                 } else {
-                    self.missing = Some(span(s.span));
+                    self.invalid_literal = Some(span(s.span));
                 }
-            } else {
-                self.missing = Some(span(e.span));
             }
         }
         e.visit_children_with(self);
@@ -312,11 +310,11 @@ impl Visit for Inspect {
 
 impl Inspect {
     fn dependencies(self, source: &str) -> Result<Vec<Dependency>, Diagnostic> {
-        if let Some(span) = self.missing {
+        if let Some(span) = self.invalid_literal {
             return Err(Diagnostic::new(
                 source,
                 span,
-                "embedded dynamic imports require a string literal module path",
+                "a literal module path must be valid Unicode",
             ));
         }
         Ok(self.imports)
@@ -607,11 +605,11 @@ pub fn import_sites(source: &str, expression: bool) -> Result<ImportSites, Diagn
             .map_err(|e| error(source, e))?
             .visit_with(&mut inspect);
     }
-    if let Some(span) = inspect.missing {
+    if let Some(span) = inspect.invalid_literal {
         return Err(Diagnostic::new(
             source,
             span,
-            "embedded dynamic imports require a string literal module path",
+            "a literal module path must be valid Unicode",
         ));
     }
     let mut hook = "__ferroModuleContext".to_owned();

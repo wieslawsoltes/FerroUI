@@ -6,21 +6,70 @@ use ferroui_qml_compiler::{
 };
 use percent_encoding::{percent_encode, AsciiSet, NON_ALPHANUMERIC};
 use std::{
-    collections::BTreeMap,
+    collections::{BTreeMap, BTreeSet},
     fs,
     path::{Path, PathBuf},
 };
 
-#[derive(Default)]
+#[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd)]
+enum LoadKind {
+    Classic,
+    Module,
+}
+
 pub(super) struct Resources {
-    paths: BTreeMap<PathBuf, String>,
+    project: PathBuf,
+    paths: BTreeMap<(PathBuf, LoadKind), String>,
     embedded: BTreeMap<String, ScriptResource>,
-    preload: std::collections::BTreeSet<String>,
+    preload: BTreeSet<String>,
 }
 
 impl Resources {
+    pub(super) fn new(input: &Path, entries: &BTreeSet<PathBuf>) -> Result<Self, String> {
+        let input = input
+            .canonicalize()
+            .map_err(|err| format!("{}: {err}", input.display()))?;
+        let project = input
+            .parent()
+            .ok_or("entry QML file has no parent directory")?
+            .to_owned();
+        let mut resources = Self {
+            project,
+            paths: BTreeMap::new(),
+            embedded: BTreeMap::new(),
+            preload: BTreeSet::new(),
+        };
+        for entry in entries {
+            if entry.is_absolute()
+                || entry.has_root()
+                || matches!(
+                    entry.components().next(),
+                    Some(std::path::Component::Prefix(_))
+                )
+            {
+                return Err(format!(
+                    "JavaScript entry must be relative to the QML project: {}",
+                    entry.display()
+                ));
+            }
+            let file = resources
+                .project
+                .join(entry)
+                .canonicalize()
+                .map_err(|err| format!("{}: {err}", entry.display()))?;
+            if !file.starts_with(&resources.project) {
+                return Err(format!(
+                    "JavaScript entry escapes the QML project: {}",
+                    entry.display()
+                ));
+            }
+            resources.load(&file, 0, LoadKind::Module)?;
+        }
+        Ok(resources)
+    }
+
     pub(super) fn watched(&self) -> impl Iterator<Item = &PathBuf> {
-        self.paths.keys()
+        self.paths.keys().map(|(path, _)| path)
     }
 
     pub(super) fn attach(
@@ -36,11 +85,11 @@ impl Resources {
                 .as_ref()
                 .ok_or("JavaScript imports require a namespace")?;
             let file = local_path(path, &import.uri)?;
-            let key = self.load(&file, 0)?;
+            let key = self.load(&file, 0, LoadKind::Classic)?;
             self.preload.insert(key.clone());
             imports.insert(alias.clone(), key);
         }
-        let origin = resource_url("components", index, path)?;
+        let origin = resource_url("components", index, path, &self.project)?;
         visit_scripts(&mut document.root, &mut |script| {
             script.origin.clone_from(&origin);
             script.imports.clone_from(&imports);
@@ -49,7 +98,7 @@ impl Resources {
             script.import_hook = sites.hook;
             let mut edits = sites.edits;
             for dep in sites.dependencies {
-                let target = self.load(&local_path(path, &dep.specifier)?, 0)?;
+                let target = self.load(&local_path(path, &dep.specifier)?, 0, LoadKind::Module)?;
                 push_edit(&mut edits, dep, &target);
             }
             if !edits.is_empty() {
@@ -71,17 +120,20 @@ impl Resources {
         self.embedded
     }
 
-    fn load(&mut self, path: &Path, depth: usize) -> Result<String, String> {
+    fn load(&mut self, path: &Path, depth: usize, kind: LoadKind) -> Result<String, String> {
         let path = path
             .canonicalize()
             .map_err(|e| format!("{}: {e}", path.display()))?;
-        if let Some(existing) = self.paths.get(&path) {
+        let ext = path.extension().and_then(|s| s.to_str()).unwrap_or("");
+        let kind = if ext == "mjs" { LoadKind::Module } else { kind };
+        let identity = (path.clone(), kind);
+        if let Some(existing) = self.paths.get(&identity) {
             return Ok(existing.clone());
         }
         if depth >= 128 {
             return Err("JavaScript import nesting limit exceeded".into());
         }
-        let ext = path.extension().and_then(|s| s.to_str()).unwrap_or("");
+
         if !matches!(ext, "js" | "mjs") {
             return Err(format!(
                 "unsupported JavaScript resource extension: {}",
@@ -89,14 +141,23 @@ impl Resources {
             ));
         }
         let source = fs::read_to_string(&path).map_err(|e| format!("{}: {e}", path.display()))?;
-        let parsed =
-            parse_resource(&source, ext == "mjs").map_err(|e| format!("{}:{e}", path.display()))?;
-        let key = resource_url("modules", self.paths.len(), &path)?;
-        self.paths.insert(path.clone(), key.clone());
+        let parsed = parse_resource(&source, kind == LoadKind::Module)
+            .map_err(|e| format!("{}:{e}", path.display()))?;
+        let directory = match kind {
+            LoadKind::Module => "modules",
+            LoadKind::Classic => "modules/classic",
+        };
+        let key = resource_url(directory, self.paths.len(), &path, &self.project)?;
+        self.paths.insert(identity, key.clone());
         let mut resource = parsed.resource;
         let mut edits = Vec::new();
         for dep in parsed.dependencies {
-            let dependency = self.load(&local_path(&path, &dep.specifier)?, depth + 1)?;
+            let kind = if dep.namespace.is_some() {
+                LoadKind::Classic
+            } else {
+                LoadKind::Module
+            };
+            let dependency = self.load(&local_path(&path, &dep.specifier)?, depth + 1, kind)?;
             if let Some(alias) = &dep.namespace {
                 resource.imports.insert(alias.clone(), dependency.clone());
             }
@@ -124,14 +185,28 @@ impl Resources {
     }
 }
 
-/// Keep stack traces and import.meta.url useful after relocation. The index
-/// distinguishes files with the same name without exposing build-machine paths.
-fn resource_url(directory: &str, index: usize, path: &Path) -> Result<String, String> {
+/// Preserve directory relationships inside the project, so dynamic import()
+/// resolves relative to its actual importer. External, statically linked files
+/// retain opaque identities without exposing their host directory names.
+fn resource_url(
+    directory: &str,
+    index: usize,
+    path: &Path,
+    project: &Path,
+) -> Result<String, String> {
     const ENCODE: &AsciiSet = &NON_ALPHANUMERIC
         .remove(b'-')
         .remove(b'.')
         .remove(b'_')
         .remove(b'~');
+    if let Ok(relative) = path.strip_prefix(project) {
+        let mut url = format!("https://qml.invalid/{directory}/project");
+        for segment in relative {
+            url.push('/');
+            url.push_str(&percent_encode(segment.as_encoded_bytes(), ENCODE).to_string());
+        }
+        return Ok(url);
+    }
     let name = path
         .file_name()
         .ok_or("JavaScript resource has no file name")?;

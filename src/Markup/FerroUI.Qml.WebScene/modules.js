@@ -11,10 +11,44 @@
     const readText = globalThis.__webSceneFetchText;
     const catalog = new Map();
     loader.prepareImport = () => undefined;
+    const moduleRoot = "https://qml.invalid/modules/project/";
+    const classicRoot = "https://qml.invalid/modules/classic/project/";
+    const componentRoot = "https://qml.invalid/components/project/";
+    // Only the embedded catalog can satisfy an import. Directory relationships
+    // are virtual and independent of the working directory and operating system.
+    function relativeModule(specifier, parent) {
+        const root = parent?.startsWith(moduleRoot) ? moduleRoot
+            : parent?.startsWith(componentRoot) ? componentRoot
+            : parent?.startsWith(classicRoot) ? classicRoot : null;
+        if (!root || !specifier || specifier.startsWith("/") ||
+            /[:?#\\\x00-\x1f\x7f]/.test(specifier)) return null;
+        const parts = parent.slice(root.length).split("/");
+        parts.pop();
+        for (const raw of specifier.split("/")) {
+            let segment;
+            try { segment=decodeURIComponent(raw); } catch { return null; }
+            if (!segment || segment === ".") continue;
+            if (segment === "..") {
+                if (!parts.length) return null;
+                parts.pop();
+            } else {
+                if (/[/\\\x00-\x1f\x7f]/.test(segment)) return null;
+                parts.push(encodeURIComponent(segment).replace(/[!'()*]/g,
+                    c => "%" + c.charCodeAt(0).toString(16).toUpperCase()));
+            }
+        }
+        return moduleRoot + parts.join("/");
+    }
     loader.resolve = (specifier, parent) => {
-        if (catalog.has(specifier)) return specifier;
+        if (catalog.has(specifier)) {
+            if (parent && catalog.get(specifier).kind !== "module")
+                throw new TypeError("A classic QML script is not an ES module");
+            return specifier;
+        }
         const edges = catalog.get(parent)?.dependencies;
         if (edges && owns(edges, specifier)) return edges[specifier];
+        const url = relativeModule(specifier, parent);
+        if (url && catalog.has(url)) return url;
         throw new TypeError("Unknown embedded module " + specifier);
     };
     loader.instantiate = url => {
@@ -34,12 +68,20 @@
             Object.defineProperty(facade, Symbol.toStringTag, {value: "Module"});
             Object.freeze(facade);
             readonly.set(ns, facade);
+            readonly.set(facade, facade);
         }
         return facade;
     }
+    const systemImport = loader.import.bind(loader);
+    loader.import = (specifier, parent, options) => {
+        // Coerce at the call site (inside the current QML invocation) but
+        // report coercion and resolution failures through the returned Promise.
+        try { return systemImport(`${specifier}`, parent, options).then(publicNamespace); }
+        catch (error) { return Promise.reject(error); }
+    };
     function context(_graph, origin) {
         return Object.freeze({
-            import: specifier => loader.import(specifier, origin).then(publicNamespace),
+            import: (specifier, options) => loader.import(specifier, origin, options),
             meta: loader.createContext(origin),
         });
     }

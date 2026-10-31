@@ -29,6 +29,8 @@ type Validate<'a> = Box<dyn Fn(&ferroui_qml_compiler::Document) -> Result<(), St
 pub struct Compiler<'a> {
     #[cfg(feature = "javascript")]
     javascript: bool,
+    #[cfg(feature = "javascript")]
+    javascript_entries: BTreeSet<PathBuf>,
     validate: Option<Validate<'a>>,
     import_paths: Vec<PathBuf>,
 }
@@ -55,6 +57,16 @@ impl<'a> Compiler<'a> {
     #[cfg(feature = "javascript")]
     pub fn with_javascript(mut self) -> Self {
         self.javascript = true;
+        self
+    }
+
+    /// Add a lazy JavaScript module to the embedded catalog and enable the
+    /// external engine. Entries are paths relative to the entry QML directory.
+    /// Their literal dependencies are also embedded and watched by Cargo.
+    #[cfg(feature = "javascript")]
+    pub fn javascript_entry(mut self, path: impl Into<PathBuf>) -> Self {
+        self.javascript = true;
+        self.javascript_entries.insert(path.into());
         self
     }
 
@@ -89,7 +101,9 @@ impl<'a> Compiler<'a> {
         let mut files = files::Files::new(self.import_paths.clone());
         #[cfg(feature = "javascript")]
         if self.javascript {
-            files.with_javascript();
+            files
+                .with_javascript(input.as_ref(), &self.javascript_entries)
+                .map_err(BuildError)?;
         }
         let source = files.load(input.as_ref()).map_err(BuildError)?;
         let document = ferroui_qml_compiler::link(source, &mut files)

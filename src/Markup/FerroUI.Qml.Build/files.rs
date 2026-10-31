@@ -24,8 +24,13 @@ impl Files {
     }
 
     #[cfg(feature = "javascript")]
-    pub(crate) fn with_javascript(&mut self) {
-        self.resources = Some(Default::default());
+    pub(crate) fn with_javascript(
+        &mut self,
+        input: &Path,
+        entries: &BTreeSet<PathBuf>,
+    ) -> Result<(), String> {
+        self.resources = Some(crate::javascript::Resources::new(input, entries)?);
+        Ok(())
     }
 
     #[cfg(feature = "javascript")]

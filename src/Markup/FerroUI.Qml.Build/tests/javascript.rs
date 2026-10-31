@@ -135,11 +135,8 @@ fn relocation_preserves_generated_output_and_malformed_imports_fail_the_build() 
         "lazy.mjs",
         "export function importUnknown(name){return import(name)}",
     );
-    assert!(compile(&a.0)
-        .err()
-        .unwrap()
-        .to_string()
-        .contains("string literal"));
+    // No guessed dynamic target is read at build time.
+    assert!(compile(&a.0).is_ok());
 }
 
 #[test]
@@ -214,4 +211,60 @@ QtObject {
     };
     assert!(script.source.contains("import.meta"));
     assert!(script.code().contains("__ferroModuleContext_.meta.url"));
+}
+
+#[test]
+fn extra_javascript_entries_are_lazy_relocatable_and_watched_with_their_literal_dependencies() {
+    let compile = |p: &Project| {
+        p.file(
+            "Main.qml",
+            "import QtQml\nQtObject { function load(name) { return import(name) } }",
+        );
+        p.file("plugins/en/index.mjs", "export {value} from './child.mjs';");
+        p.file("plugins/en/child.mjs", "export const value='en';");
+        p.file("plugins/pl/index.mjs", "export const value='pl';");
+        p.file(
+            "plugins/unlisted.mjs",
+            "throw new Error('unlisted file must not be included');",
+        );
+        Compiler::new()
+            .javascript_entry("plugins/pl/index.mjs")
+            .javascript_entry("plugins/en/index.mjs")
+            .compile(p.0.join("Main.qml"))
+            .unwrap()
+    };
+    let a = Project::new();
+    let b = Project::new();
+    let result = compile(&a);
+    assert_eq!(result.rust, compile(&b).rust);
+    assert!(!result.rust.contains(a.0.to_str().unwrap()));
+    for file in [
+        "plugins/en/index.mjs",
+        "plugins/en/child.mjs",
+        "plugins/pl/index.mjs",
+    ] {
+        assert!(result
+            .dependencies
+            .contains(&a.0.join(file).canonicalize().unwrap()));
+        assert!(result
+            .rust
+            .contains(&format!("https://qml.invalid/modules/project/{file}")));
+    }
+    assert!(!result
+        .dependencies
+        .contains(&a.0.join("plugins/unlisted.mjs").canonicalize().unwrap()));
+    assert!(!result.rust.contains("unlisted file must not be included"));
+    let error = Compiler::new()
+        .javascript_entry(&b.0)
+        .load(a.0.join("Main.qml"))
+        .err()
+        .unwrap();
+    assert!(error.to_string().contains("relative"), "{error}");
+    let outside = b.0.file_name().unwrap();
+    let error = Compiler::new()
+        .javascript_entry(Path::new("..").join(outside).join("plugins/pl/index.mjs"))
+        .load(a.0.join("Main.qml"))
+        .err()
+        .unwrap();
+    assert!(error.to_string().contains("escapes"), "{error}");
 }

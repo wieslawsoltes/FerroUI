@@ -3,7 +3,7 @@ use std::ffi::OsString;
 use std::path::PathBuf;
 use std::process::ExitCode;
 
-const USAGE: &str = "Usage: ferroui-qmlc [-I MODULE_ROOT]... [--check] [--javascript] INPUT.qml\nEmits a Rust module on stdout; --check only validates source and component linkage.";
+const USAGE: &str = "Usage: ferroui-qmlc [-I MODULE_ROOT]... [--check] [--javascript] [--js-entry FILE]... INPUT.qml\nEmits a Rust module on stdout; --check only validates source and component linkage.";
 
 fn run() -> Result<(), Box<dyn std::error::Error>> {
     let mut args = std::env::args_os().skip(1);
@@ -26,6 +26,16 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             }
             #[cfg(not(feature = "javascript"))]
             return Err("--javascript requires ferroui-qml-build's javascript feature".into());
+        } else if arg == "--js-entry" {
+            #[cfg(feature = "javascript")]
+            {
+                compiler = compiler.javascript_entry(PathBuf::from(
+                    args.next()
+                        .ok_or("--js-entry requires a relative module path")?,
+                ));
+            }
+            #[cfg(not(feature = "javascript"))]
+            return Err("--js-entry requires ferroui-qml-build's javascript feature".into());
         } else if arg == "--check" {
             check = true;
         } else if arg.to_string_lossy().starts_with('-') || input.replace(arg).is_some() {

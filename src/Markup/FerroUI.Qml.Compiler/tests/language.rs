@@ -374,9 +374,12 @@ fn module_dependencies_are_ast_based_and_classic_directives_preserve_offsets() {
         .collect::<Vec<_>>();
     imports.sort();
     assert_eq!(imports, ["./lazy.mjs", "./other.mjs", "./x.mjs"]);
+    // A computed module specifier is resolved against the final in-memory catalog.
     assert!(
         javascript::parse_resource("export function dynamic(key){return import(key)}", true)
-            .is_err()
+            .unwrap()
+            .dependencies
+            .is_empty()
     );
     let source="/* directives */\n.pragma library\r\n.import 'tools.js' as Tools\nconst { title: label } = Tools.data(); function get(){ return label }";
     let classic = javascript::parse_resource(source, false).unwrap();
