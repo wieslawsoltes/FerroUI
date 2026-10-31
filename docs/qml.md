@@ -72,6 +72,68 @@ cargo run --locked -p ferroui-qml-build --bin ferroui-qmlc -- --check samples/Qm
 cargo run --locked -p ferroui-qml-build --bin ferroui-qmlc -- samples/QmlGallery/ui/Main.qml > main_qml.rs
 ```
 
+## Modern JavaScript with WebScene V8
+
+Enable `javascript` on the build helper and use `ferroui-qml-webscene` in the application. The published WebScene 1.0.37 native package contains V8 15.3.10 and ABI 3. The gallery can run the same native controls with either execution backend.
+
+```sh
+export FERROUI_WEBSCENE_LIBRARY="$(python3 scripts/qml/webscene-runtime.py target/webscene-runtime)"
+cargo build --locked -p ferroui-qml-webscene --bin ferroui-qml-webscene-worker
+cargo run --locked -p qml-gallery --features webscene
+```
+
+The setup helper checks the SHA-256 of the published NuGet package and extracts the library, ICU data, snapshot and licenses together. It supports Linux x64 and ARM64, macOS x64 and ARM64, and Windows x64. Keep the native files together when distributing an application. Put the worker beside the application executable or specify both absolute paths with `WebSceneEngine::new(worker, library)`. `WebSceneEngine::from_env()` also accepts `FERROUI_WEBSCENE_WORKER`.
+
+For a workspace application, keep the regular runtime dependencies above and select the build helper feature.
+
+```toml
+[dependencies]
+ferroui-qml.workspace = true
+ferroui-qml-controls.workspace = true
+ferroui-qml-webscene.workspace = true
+
+[build-dependencies]
+ferroui-qml-build = { workspace = true, features = ["javascript"] }
+```
+
+```rust
+// build.rs
+fn main() {
+    ferroui_qml_build::Compiler::new()
+        .with_javascript()
+        .compile_file("ui/Main.qml", "main_qml.rs")
+        .expect("compile QML and its JavaScript imports");
+}
+```
+
+```rust
+use ferroui_qml::Error;
+use ferroui_qml_controls::{ControlRegistry, QmlView};
+use ferroui_qml_webscene::WebSceneEngine;
+use std::{rc::Rc, time::Duration};
+
+include!(concat!(env!("OUT_DIR"), "/main_qml.rs"));
+
+fn create_view() -> Result<QmlView, Error> {
+    let engine = WebSceneEngine::from_env()?.with_timeout(Duration::from_secs(2));
+    QmlView::with_script_engine(
+        &compiled_qml(), &ControlRegistry::standard()?, Default::default(), Rc::new(engine)
+    )
+}
+```
+
+The compiler parses JavaScript with SWC, resolves relative files, watches the transitive dependency graph for Cargo and embeds executable scripts in the generated Rust. V8 compiles the JavaScript functions in the worker and caches their factories. The default build mode continues to generate native Rust for the built-in language profile. To load a file at runtime, use `Compiler::new().with_javascript().load(path)?.document` and pass the linked document to `Instance::with_engine` or `QmlView::with_script_engine`.
+
+### Scopes, modules and host objects
+
+- Classic `.js` code-behind has state per importing component. Local `.import` aliases have their own scope, and `.pragma library` state is shared inside one instance's JavaScript realm.
+- ES module exports, re-exports, cycles, top-level await, `import.meta.url` and literal dynamic imports run in V8. The released WebScene ABI lacks a native module-import callback. The build helper lowers ESM to `System.register` with SWC and an in-memory SystemJS linker executes the resulting module graph. Deferred modules execute when imported. Static resources and dynamic imports must resolve to local files at build time.
+- A property read through a JavaScript proxy goes through the active QML transaction, so a binding subscribes to the branch it actually executes. Proxy writes and nested calls use the same transaction and notification order. Guest functions and objects keep identity across synchronous Rust calls in the same instance.
+- One backend can serve several QML instances. Each instance owns a separate worker and V8 realm. A timed-out worker is terminated. Committed QML slots survive the reset, and references into the old JavaScript heap become stale. Rollback applies to QML-managed changes. Arbitrary mutations of V8-owned closure state and module globals follow JavaScript semantics.
+- Rust can inspect a retained Promise with `Instance::promise_state`, wait for it with a time budget via `settle_promise`, or call and await a method as one QML transaction via `call_and_await`. A rejection rolls back QML writes made by that atomic call. V8 microtasks can compute and import modules. A continuation that attempts QML host access after the synchronous invocation ends receives an error. Model the later UI update as an explicit host call handling the settled result.
+
+The module tests use a shared QML fixture that also runs on Qt 6.12.0 and a separate async fixture for extended V8 behavior. Direct V8 execution follows ECMAScript semantics where Qt differs. For example, V8 preserves a trailing hole when slicing a sparse array, whereas Qt 6.12 trims it. [Shared fixture](../tests/QmlCompiled/webscene/App.qml) · [Promise fixture](../tests/QmlCompiled/webscene/Async.qml) · [Published Linux runtime](https://www.nuget.org/packages/WebScene.NativeEngine.Runtime.linux-x64/1.0.37)
+
 ## Architecture
 
 | Crate | Responsibility |
@@ -79,6 +141,7 @@ cargo run --locked -p ferroui-qml-build --bin ferroui-qmlc -- samples/QmlGallery
 | `ferroui-qml-compiler` | Tokenizes UTF-8, parses object and script syntax, records source spans, validates declarations and links component definitions. The module resolver is supplied by the caller. |
 | `ferroui-qml-build` | Resolves local files and versioned module exports, tracks Cargo inputs and emits readable Rust. Rust compiles the expressions, methods, signal handlers and control flow in the supported language. |
 | `ferroui-qml` | Owns object identity, typed slots, component scopes, aliases, reactive dependencies, signal dispatch and native callback registration. Both execution paths share property reads, writes and conversions. |
+| `ferroui-qml-webscene` | Provides the WebScene V8 backend, its worker executable, bounded request protocol and embedded JavaScript module loader. |
 | `ferroui-qml-controls` | Creates FerroUI controls, validates and applies native property updates, projects child collections and forwards native input. It also supports registration from FerroUI class and property metadata. |
 
 Each instance owns its object arena. Object references carry an instance identity. The linker gives each composite instance a private ID scope and resolves each type using its defining document's imports. Statically referenced module singletons share the same dependency graph as their consuming components. They are allocated eagerly, once per instance arena.
@@ -91,7 +154,7 @@ When a binding runs, the runtime tracks the properties it actually reads. A cond
 |---|---|---|
 | Components and modules | File and inline components, typed composite properties and lists, private IDs, import aliases, local directory imports, versioned `qmldir` exports and source singletons | Dynamic creation, incubation, destruction and loader lifecycle, multiple independently loaded roots in one engine, complete pragma behavior |
 | Object model | Required, readonly and default properties, lexical source property shadowing with virtual, override and final declarations, aliases, typed signals and methods, property change handlers, `Component.onCompleted`, source and registered enums | Complete Qt value-type library, attached properties, interception, aliasing and inheritance edge cases, including overriding properties supplied by native Rust types |
-| Scripting | Numeric, boolean and string expressions, object and array literals with identity, indexed reads and writes, function and signal calls, local declarations, assignment, branching, loops and returns | Full ECMAScript built-ins, prototypes, closures, exceptions, promises and imported JS modules |
+| Scripting | Numeric, boolean and string expressions, object and array literals with identity, indexed reads and writes, function and signal calls, local declarations, assignment, branching, loops and returns | The built-in Rust evaluator covers a JavaScript subset. The optional WebScene backend supplies V8 built-ins, prototypes, closures, exceptions, Promises and local script modules. Computed import paths, WorkerScript, and async QML host callbacks remain open. |
 | Reactive infrastructure | Dependency tracking, signal connections, conditional Binding overlays with restoration, Timer with a deterministic clock and native dispatcher integration | Delayed and multi-target Binding forms, the complete Qt global object, network and resource loading |
 | Models | `QtQml.Models.ListModel` and flat `ListElement` declarations, fixed and dynamic role types, insertion, moves, removal, role edits, row handles and rollback | Nested list roles, function-valued roles, model/view delegates, proxy and worker-thread models |
 | Native visuals | Item, Rectangle, Row, Column, Flow, Text, TextInput and TextEdit. The Controls module supplies Label, Button, CheckBox, TextField and TextArea. Parent fill and center anchors participate in native arrangement. | Sibling and edge anchors, complete implicit geometry, visual delegates, animation/state systems and the rest of Qt Quick and Controls |
