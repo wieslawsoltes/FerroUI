@@ -16,6 +16,11 @@ use std::rc::Rc;
 
 type Result<T> = std::result::Result<T, String>;
 
+fn canonical(path: &Path) -> Result<PathBuf> {
+    path.canonicalize()
+        .map_err(|err| format!("{}: {err}", path.display()))
+}
+
 #[derive(Clone)]
 struct Module {
     dir: PathBuf,
@@ -74,12 +79,12 @@ impl IdentifiedModules {
             Ok(source) => {
                 let definition = parse_directory_manifest(&source)
                     .map_err(|error| format!("{}:{error}", path.display()))?;
-                self.watched.insert(path.clone());
+                self.watched.insert(canonical(&path)?);
                 Some(Rc::new(definition))
             }
             Err(error) if error.kind() == ErrorKind::NotFound => {
                 if let Some(parent) = dir.ancestors().find(|candidate| candidate.is_dir()) {
-                    self.watched.insert(parent.to_owned());
+                    self.watched.insert(canonical(parent)?);
                 }
                 None
             }
@@ -103,7 +108,7 @@ impl IdentifiedModules {
         }
         let version = manifest.select(request)?.version;
         Ok(Module {
-            dir: dir.to_owned(),
+            dir: canonical(dir)?,
             manifest,
             version,
         })
@@ -284,9 +289,7 @@ impl IdentifiedModules {
             }
         };
         let path = dir.join(file.expect("internal or public source"));
-        let canonical = path
-            .canonicalize()
-            .map_err(|error| format!("{}: {error}", path.display()))?;
+        let canonical = canonical(&path)?;
         if let Some(origin) = self.origins.get(&canonical) {
             if origin.dir != module.dir || origin.version != module.version {
                 return Err(format!(
@@ -339,9 +342,7 @@ impl IdentifiedModules {
                 dir.display()
             ));
         }
-        let canonical = dir
-            .canonicalize()
-            .map_err(|error| format!("{}: {error}", dir.display()))?;
+        let canonical = canonical(dir)?;
         if let Some(manifest) = self.manifest(&canonical)? {
             let module = self.select(&canonical, manifest, RequestedVersion::Latest)?;
             return self.exported(&module, ty, private, lookup);

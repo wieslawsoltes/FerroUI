@@ -101,7 +101,10 @@ impl ComponentResolver for Files {
                         dir.display()
                     ));
                 }
-                self.directories.insert(dir);
+                self.directories.insert(
+                    dir.canonicalize()
+                        .map_err(|err| format!("{}: {err}", dir.display()))?,
+                );
             } else {
                 native.extend(self.modules.native_imports(import)?);
             }
