@@ -127,6 +127,9 @@ tag!(ScriptKind {
     Library
 });
 structure!(JavaScript {
+    executable,
+    import_hook,
+    references,
     form,
     source,
     span,
@@ -136,6 +139,11 @@ structure!(JavaScript {
     imports
 });
 structure!(ScriptResource {
+    writable_exports,
+    executable,
+    import_hook,
+    preload,
+    imports,
     source,
     kind,
     dependencies,

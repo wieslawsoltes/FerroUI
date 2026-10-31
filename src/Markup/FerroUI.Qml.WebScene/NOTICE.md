@@ -1,0 +1,3 @@
+The V8 worker embeds the module-linking core of SystemJS 6.15.1. SystemJS is copyright 2013–2022 Guy Bedford and distributed under the MIT License. The license accompanies the crate in [vendor/SystemJS-LICENSE](vendor/SystemJS-LICENSE).
+
+The source is the production `SystemJS Core` section and its `errMsg` and `hasSymbol` helpers from the upstream npm distribution's `dist/s.js`. The wrapper returns a private loader instance. FerroUI supplies the resolution and instantiation hooks against its embedded module catalog. [SystemJS revision 240a070](https://github.com/systemjs/systemjs/tree/240a07038fb208306daecd9ab46dac5bf41d8ffb)

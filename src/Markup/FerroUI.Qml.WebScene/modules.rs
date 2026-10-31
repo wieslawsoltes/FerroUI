@@ -22,7 +22,19 @@ impl Modules {
         let mut files = BTreeMap::new();
         let mut manifest = BTreeMap::new();
         for (url, resource) in resources {
-            if !url.starts_with("https://qml.invalid/modules/") {
+            if !url
+                .strip_prefix("https://qml.invalid/modules/")
+                .is_some_and(|path| {
+                    path.split('/').all(|part| {
+                        !part.is_empty()
+                            && part != "."
+                            && part != ".."
+                            && part
+                                .bytes()
+                                .all(|b| b.is_ascii_alphanumeric() || b"._-".contains(&b))
+                    })
+                })
+            {
                 return Err(Error::new(format!("invalid embedded module URL '{url}'")));
             }
             for (specifier, target) in &resource.dependencies {
@@ -33,11 +45,11 @@ impl Modules {
                 }
             }
             let (kind, source) = match resource.kind {
-                ScriptKind::Module => ("module", resource.source.clone()),
+                ScriptKind::Module => ("module", resource.executable.clone()),
                 ScriptKind::Library => ("library", classic_module(resource, url)?),
                 ScriptKind::Script => ("script", classic_module(resource, url)?),
             };
-            manifest.insert(url, json!({"kind": kind, "imports": resource.dependencies}));
+            manifest.insert(url, json!({"kind": kind, "imports": resource.imports, "preload":resource.preload,"dependencies": resource.dependencies,"hook":resource.import_hook}));
             files.insert(url.clone(), source);
         }
         for (alias, target) in imports {
@@ -56,10 +68,10 @@ impl Modules {
 
 /// A classic QML script acquires a fresh lexical environment when its importing
 /// component is instantiated. Its export accessors continue to see reassigned
-/// variables. ES modules use V8's own namespace and live-binding machinery.
+/// variables. The surrounding factory is registered with the same module linker as ESM.
 fn classic_module(resource: &ScriptResource, url: &str) -> Result<String, Error> {
     let mut body = String::from("with (arguments[0]) { return (function () {\n");
-    body.push_str(&resource.source);
+    body.push_str(&resource.executable);
     body.push_str("\nreturn {\n");
     for name in &resource.exports {
         // Names originate in the ECMAScript syntax tree. Also validate a
@@ -70,12 +82,24 @@ fn classic_module(resource: &ScriptResource, url: &str) -> Result<String, Error>
             )));
         }
         let key = serde_json::to_string(name).expect("serialize string");
-        body.push_str(&format!("get [{key}]() {{ return {name}; }},\n"));
+        let argument = if name == "nextValue" {
+            "newValue"
+        } else {
+            "nextValue"
+        };
+        let assignment = if resource.writable_exports.contains(name) {
+            format!("{name} = {argument};")
+        } else {
+            format!("throw new TypeError('Cannot assign to a read-only script export: ' + {key});")
+        };
+        body.push_str(&format!(
+            "get [{key}]() {{ return {name}; }}, set [{key}]({argument}) {{ {assignment} }},\n"
+        ));
     }
     body.push_str("};\n}).call(undefined); }\n//# sourceURL=");
     body.push_str(url);
     let body = serde_json::to_string(&body).expect("serialize string");
-    Ok(format!("export default Function({body});\n"))
+    Ok(format!("System.register([],function(publish){{return {{execute(){{publish('default',Function({body}));}}}};}});\n"))
 }
 
 fn valid_identifier(name: &str) -> bool {
