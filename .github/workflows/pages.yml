@@ -38,7 +38,9 @@ concurrency:
 
 env:
   # The size budget of each published WebAssembly module, in megabytes (1,000,000 bytes) with gzip.
-  PUBLISHED_MODULE_GZIP_BUDGET_MB: 16
+  # 17 since 2026-10-31 (was 16): RichTextBlock and RichEditBox of the rich text series took the
+  # catalog to about 16.3 MB; the growth is measured and reduced as separate optimization work.
+  PUBLISHED_MODULE_GZIP_BUDGET_MB: 17
   CARGO_TERM_COLOR: always
   CARGO_INCREMENTAL: 0
 

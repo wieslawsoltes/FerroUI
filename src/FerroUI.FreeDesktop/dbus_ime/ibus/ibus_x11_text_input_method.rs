@@ -1,8 +1,12 @@
 //! The input method of IBus, through its portal (the port of
 //! `IBusX11TextInputMethod.cs`).
 
-use super::dbus::{InputContextProxy, PortalProxy, ServiceProxy};
+use super::dbus::{
+    CommitText, ForwardKeyEvent, HidePreeditText, InputContextProxy, PortalProxy, ServiceProxy, ShowPreeditText,
+    UpdatePreeditText,
+};
 use super::ibus_enums::{IBusCapability, IBusModifierMask};
+use super::ibus_input_options::IBusInputOptions;
 use crate::dbus_call_queue::DBusResult;
 use crate::dbus_ime::dbus_text_input_method_base::{DBusTextInputMethodBase, DBusTextInputMethodCore};
 use crate::ix11_input_method::X11InputMethodForwardedKey;
@@ -10,6 +14,7 @@ use crate::signal_watch::watch_stream;
 use ferroui_base::input::raw::{IRawInputEventArgs, RawKeyEventArgs, RawKeyEventType};
 use ferroui_base::input::text_input::TextInputOptions;
 use ferroui_base::input::{KeyModifiers, LocalBoxFuture, RawInputModifiers};
+use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use ferroui_base::PixelRect;
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
@@ -18,11 +23,23 @@ use zbus::proxy::CacheProperties;
 use zbus::zvariant::Value;
 use zbus::Connection;
 
+/// The `ContentType` of an input context until it is set: a free-form purpose and no hints.
+const DEFAULT_CONTENT_TYPE: (u32, u32) = (0, 0);
+
 pub struct IBusX11TextInputMethod {
     base: Weak<DBusTextInputMethodBase>,
     weak_self: Weak<IBusX11TextInputMethod>,
     service: RefCell<Option<ServiceProxy<'static>>>,
     context: RefCell<Option<InputContextProxy<'static>>>,
+    /// Advanced with every context and when it is gone: a `ContentType` reply of an older
+    /// context changes nothing.
+    context_generation: Cell<u64>,
+    /// The options set last (`SetOptions`), kept for the next context.
+    options: RefCell<Option<TextInputOptions>>,
+    /// The `ContentType` the context was given; `None` while it has the one it was created with.
+    content_type: Cell<Option<(u32, u32)>>,
+    /// The context refused `ContentType`: it is not set again on that context.
+    content_type_refused: Cell<bool>,
     preedit_text: RefCell<String>,
     preedit_cursor: Cell<i32>,
     inside_reset: Cell<i32>,
@@ -124,6 +141,10 @@ impl IBusX11TextInputMethod {
                 weak_self: weak_self.clone(),
                 service: RefCell::new(None),
                 context: RefCell::new(None),
+                context_generation: Cell::new(0),
+                options: RefCell::new(None),
+                content_type: Cell::new(None),
+                content_type_refused: Cell::new(false),
                 preedit_text: RefCell::new(String::new()),
                 preedit_cursor: Cell::new(0),
                 inside_reset: Cell::new(0),
@@ -134,6 +155,66 @@ impl IBusX11TextInputMethod {
 
     fn context(&self) -> Option<InputContextProxy<'static>> {
         self.context.borrow().clone()
+    }
+
+    /// The `ContentType` the context is to have: the purpose and hints of the options for a
+    /// client of the exact-edit connection, with the input scope of its owner; for any other
+    /// client, or none, the one a context is created with, which upstream never changes
+    /// (`SetOptions` is a no-op; `docs/porting/winui-rich-text.md`, decisions D5 and D8).
+    fn wanted_content_type(&self) -> (u32, u32) {
+        let connection = self.base.upgrade().and_then(|base| base.client()).and_then(|client| client.input_method_connection());
+        let (Some(connection), Some(options)) = (connection, self.options.borrow().clone()) else {
+            return DEFAULT_CONTENT_TYPE;
+        };
+        IBusInputOptions::from_options(&options, connection.effective_input_scope()).wire_value()
+    }
+
+    /// Queues [`apply_content_type`](Self::apply_content_type) behind the calls already queued.
+    fn enqueue_content_type(&self) {
+        let Some(base) = self.base.upgrade() else {
+            return;
+        };
+        let weak = self.weak_self.clone();
+        base.enqueue(move || async move {
+            if let Some(this) = weak.upgrade() {
+                this.apply_content_type(this.context_generation.get()).await;
+            }
+            Ok(())
+        });
+    }
+
+    /// Gives the context the `ContentType` it is to have, when it has another. A refusal is not
+    /// an error of the queue: it is logged, the context keeps the input method connected, and
+    /// the property is not set on that context again.
+    async fn apply_content_type(&self, generation: u64) {
+        loop {
+            if self.context_generation.get() != generation || self.content_type_refused.get() {
+                return;
+            }
+            let Some(context) = self.context() else {
+                return;
+            };
+            let wanted = self.wanted_content_type();
+            if wanted == self.content_type.get().unwrap_or(DEFAULT_CONTENT_TYPE) {
+                return;
+            }
+            // No borrow is held across the call: a signal can change the client or the options
+            // while it waits, and the loop then applies the latest value.
+            let result = context.set_content_type(wanted).await;
+            if self.context_generation.get() != generation {
+                return;
+            }
+            match result {
+                Ok(()) => self.content_type.set(Some(wanted)),
+                Err(error) => {
+                    self.content_type_refused.set(true);
+                    if let Some(logger) = Logger::try_get(LogEventLevel::Warning, LogArea::FREE_DESKTOP_PLATFORM) {
+                        logger.log(None, &format!("IBus did not take the ContentType {wanted:?}; the input method stays connected without it: {error}"));
+                    }
+                    return;
+                }
+            }
+        }
     }
 
     fn supports_preedit(&self) -> bool {
@@ -209,10 +290,17 @@ impl DBusTextInputMethodCore for IBusX11TextInputMethod {
             let (Some(this), Some(base)) = (this.upgrade(), base.upgrade()) else {
                 return Ok(false);
             };
+            let signals = base.signal_guard();
             let connection = base.connection().clone();
+            // Deviation (DEVIATIONS.md, X11 platform): the proxies are bound to the unique name
+            // that owns the portal now, not to its well-known name: a later owner of the name
+            // never gets the calls or the Destroy meant for this context.
+            let dbus = zbus::fdo::DBusProxy::new(&connection).await?;
+            let bus_name = zbus::names::BusName::try_from(name.as_str()).map_err(zbus::Error::from)?;
+            let owner = dbus.get_name_owner(bus_name).await?.to_string();
 
             let portal = PortalProxy::builder(&connection)
-                .destination(name.clone())?
+                .destination(owner.clone())?
                 .path("/org/freedesktop/IBus")?
                 .cache_properties(CacheProperties::No)
                 .build()
@@ -220,63 +308,84 @@ impl DBusTextInputMethodCore for IBusX11TextInputMethod {
             let path = portal.create_input_context(&base.get_app_name()).await?;
 
             let service = ServiceProxy::builder(&connection)
-                .destination(name.clone())?
+                .destination(owner.clone())?
                 .path(path.clone().into_inner())?
                 .cache_properties(CacheProperties::No)
                 .build()
                 .await?;
             let context = InputContextProxy::builder(&connection)
-                .destination(name)?
+                .destination(owner)?
                 .path(path.into_inner())?
                 .cache_properties(CacheProperties::No)
                 .build()
                 .await?;
             *this.service.borrow_mut() = Some(service);
             *this.context.borrow_mut() = Some(context.clone());
+            let generation = this.context_generation.get().wrapping_add(1);
+            this.context_generation.set(generation);
+            this.content_type.set(None);
+            this.content_type_refused.set(false);
 
+            // Deviation (DEVIATIONS.md, X11 platform): a signal is delivered only while this
+            // context is current (`DBusSignalGuard`).
             let weak = Rc::downgrade(&this);
-            base.add_disposable(watch_stream(context.receive_commit_text().await?, {
+            signals.register(watch_stream(context.receive_commit_text().await?, signals.handler({
                 let weak = weak.clone();
-                move |signal| {
+                move |signal: CommitText| {
                     if let (Some(this), Ok(args)) = (weak.upgrade(), signal.args()) {
                         this.on_commit_text(args.text(), signal.message().recv_position());
                     }
                 }
-            }));
-            base.add_disposable(watch_stream(context.receive_forward_key_event().await?, {
+            })));
+            signals.register(watch_stream(context.receive_forward_key_event().await?, signals.handler({
                 let weak = weak.clone();
-                move |signal| {
+                move |signal: ForwardKeyEvent| {
                     if let (Some(this), Ok(args)) = (weak.upgrade(), signal.args()) {
                         this.on_forward_key(*args.keyval(), *args.keycode(), *args.state());
                     }
                 }
-            }));
-            base.add_disposable(watch_stream(context.receive_update_preedit_text().await?, {
+            })));
+            signals.register(watch_stream(context.receive_update_preedit_text().await?, signals.handler({
                 let weak = weak.clone();
-                move |signal| {
+                move |signal: UpdatePreeditText| {
                     if let (Some(this), Ok(args)) = (weak.upgrade(), signal.args()) {
                         this.on_update_preedit(args.text(), *args.cursor_pos(), *args.visible());
                     }
                 }
-            }));
-            base.add_disposable(watch_stream(context.receive_show_preedit_text().await?, {
+            })));
+            signals.register(watch_stream(context.receive_show_preedit_text().await?, signals.handler({
                 let weak = weak.clone();
-                move |_| {
+                move |_: ShowPreeditText| {
                     if let Some(this) = weak.upgrade() {
                         this.on_show_preedit();
                     }
                 }
-            }));
-            base.add_disposable(watch_stream(context.receive_hide_preedit_text().await?, {
+            })));
+            signals.register(watch_stream(context.receive_hide_preedit_text().await?, signals.handler({
                 let weak = weak.clone();
-                move |_| {
+                move |_: HidePreeditText| {
                     if let Some(this) = weak.upgrade() {
                         this.on_hide_preedit();
                     }
                 }
-            }));
+            })));
+            let weak = this.weak_self.clone();
             base.enqueue(move || async move {
-                context.set_capabilities(IBusCapability::CAP_FOCUS.bits()).await?;
+                let Some(this) = weak.upgrade() else {
+                    return Ok(());
+                };
+                // A context retired before the call ran, or while it ran, is not called and does
+                // not disconnect the one after it (DEVIATIONS.md, X11 platform).
+                if this.context_generation.get() != generation {
+                    return Ok(());
+                }
+                let result = context.set_capabilities(IBusCapability::CAP_FOCUS.bits()).await;
+                if this.context_generation.get() != generation {
+                    return Ok(());
+                }
+                result?;
+                // A connection client bound before the context was there gets its content type.
+                this.apply_content_type(generation).await;
                 Ok(())
             });
             Ok(true)
@@ -294,6 +403,8 @@ impl DBusTextInputMethodCore for IBusX11TextInputMethod {
     }
 
     fn on_disconnected(&self) {
+        self.context_generation.set(self.context_generation.get().wrapping_add(1));
+        self.content_type.set(None);
         *self.service.borrow_mut() = None;
         *self.context.borrow_mut() = None;
     }
@@ -361,8 +472,13 @@ impl DBusTextInputMethodCore for IBusX11TextInputMethod {
         })
     }
 
-    fn set_options(&self, _options: &TextInputOptions) {
-        // No-op, because ibus
+    fn set_options(&self, options: &TextInputOptions) {
+        // No-op, because ibus: for every client but one of the exact-edit connection, whose
+        // options and input scope become the ContentType property (D5; not in the reference).
+        *self.options.borrow_mut() = Some(options.clone());
+        if self.context.borrow().is_some() {
+            self.enqueue_content_type();
+        }
     }
 
     fn set_capabilities_core(
@@ -370,7 +486,7 @@ impl DBusTextInputMethodCore for IBusX11TextInputMethod {
         supports_preedit: bool,
         _supports_surrounding_text: bool,
     ) -> LocalBoxFuture<DBusResult> {
-        let context = self.context();
+        let (this, context) = (self.weak_self.clone(), self.context());
         Box::pin(async move {
             let mut caps = IBusCapability::CAP_FOCUS;
             if supports_preedit {
@@ -379,6 +495,11 @@ impl DBusTextInputMethodCore for IBusX11TextInputMethod {
 
             if let Some(context) = context {
                 context.set_capabilities(caps.bits()).await?;
+            }
+            // The client changed (not in the reference): a connection client gets its content
+            // type, and a context that has one goes back to its default for any other client.
+            if let Some(this) = this.upgrade() {
+                this.apply_content_type(this.context_generation.get()).await;
             }
             Ok(())
         })

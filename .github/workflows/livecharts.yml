@@ -2,8 +2,9 @@ name: LiveCharts2 port
 
 on:
   pull_request:
-    # The accounting of the port against the pinned LiveCharts2 sources (docs/porting/livecharts2.md):
-    # the scanner, its reviewed map and report. The crates of the port add their own jobs here.
+    # The port of LiveCharts2 (docs/porting/livecharts2.md): the accounting against the pinned
+    # sources, the generated declarations of the controls, the tests of the crates and the sample,
+    # the browser target, and the renders of the sample and of the upstream snapshot scenarios.
     paths:
       - '.github/workflows/livecharts.yml'
       - 'scripts/livecharts2/**'
@@ -11,6 +12,7 @@ on:
       - 'docs/porting/livecharts2/**'
       - 'src/FerroUI.LiveCharts/**'
       - 'src/FerroUI.Controls.LiveCharts/**'
+      - 'samples/LiveChartsDemo/**'
   schedule:
     - cron: '23 4 * * *'
   workflow_dispatch:
@@ -22,7 +24,105 @@ concurrency:
   group: livecharts-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: '0'
+  RUST_BACKTRACE: '1'
+
 jobs:
+  tests:
+    name: Engines, controls and sample (${{ matrix.os }})
+    # The nightly run is for the drift of the accounting only.
+    if: github.event_name != 'schedule'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      # Algorithms, bindings, compiled and runtime XAML, input and lifecycle, and the snapshot
+      # scenarios of the sample measuring their data.
+      - name: Tests
+        run: cargo test --locked -p ferroui-livecharts -p ferroui-controls-livecharts -p livecharts-demo --lib --tests --no-fail-fast
+
+  browser:
+    name: Browser target compilation
+    # The nightly run is for the drift of the accounting only.
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+        with:
+          targets: wasm32-unknown-emscripten
+      # The crates use the framework's drawing contracts and have no graphics backend or C/C++
+      # dependency: a check of the target, without linking a browser host.
+      - name: The engines, the controls and the sample for the browser target
+        run: cargo check --locked --target wasm32-unknown-emscripten -p ferroui-livecharts -p ferroui-controls-livecharts -p livecharts-demo
+
+  render:
+    name: Renders of the sample and the upstream snapshot scenarios
+    # The nightly run is for the drift of the accounting only.
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      # The reference images of the upstream snapshot suite, at the pin of
+      # docs/porting/livecharts2/sources.lock.json.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: Live-Charts/LiveCharts2
+          ref: 8537b90ffb100a947cd0b1f6be49f896ae6050eb
+          path: upstream/LiveCharts2
+          fetch-depth: 1
+          sparse-checkout: tests/SnapshotTests/Snapshots
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - name: Native font dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libfontconfig1-dev libfreetype6-dev fonts-dejavu-core pkg-config
+      - name: Render the compiled sample
+        run: cargo run --locked -p livecharts-demo --features render --bin livecharts-render -- target/livecharts/livecharts-demo.png
+      - name: Render the sample after a live-data update
+        run: cargo run --locked -p livecharts-demo --features render --bin livecharts-render -- target/livecharts/livecharts-demo-updated.png --mutated
+      - name: Render the ported snapshot scenarios
+        run: cargo run --locked -p livecharts-demo --features render --bin livecharts-snapshots -- target/livecharts/snapshots
+      # Each native render beside the upstream reference image of the same name (SkiaSharp), for
+      # review: the scenarios are visual references, not a pixel comparison.
+      - name: The upstream reference images of the rendered scenarios
+        run: |
+          mkdir -p target/livecharts/upstream
+          for file in target/livecharts/snapshots/*.png; do
+            name="$(basename "$file")"
+            cp "upstream/LiveCharts2/tests/SnapshotTests/Snapshots/$name" target/livecharts/upstream/
+          done
+          echo "$(ls target/livecharts/snapshots | wc -l) native renders with their upstream references" >> "$GITHUB_STEP_SUMMARY"
+      - name: Keep the renders
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: livecharts-renders
+          path: target/livecharts/
+          if-no-files-found: error
+          retention-days: 14
+
+  generated:
+    name: Generated chart control declarations
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+        with:
+          components: rustfmt
+      - name: The declarations of ferroui-controls-livecharts match their generator
+        run: python3 scripts/livecharts2/generate_controls.py --check
+
   scan:
     name: Source, API and test accounting against the pinned LiveCharts2
     runs-on: ubuntu-latest

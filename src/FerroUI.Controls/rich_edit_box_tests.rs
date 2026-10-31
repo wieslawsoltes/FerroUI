@@ -2945,3 +2945,50 @@ fn rich_edit_canceled_flyout_focus_keeps_editor_state_and_replacement_ends_reten
         window.close();
     }
 }
+
+fn rich_edit_press_key_with(editor: &RichEditBox, key: ferroui_base::input::Key, modifiers: ferroui_base::input::KeyModifiers) {
+    use ferroui_base::input::{InputElement, KeyEventArgs};
+    let mut event = KeyEventArgs::new();
+    event.key = key;
+    event.key_modifiers = modifiers;
+    event.set_routed_event(Some(InputElement::key_down_event()));
+    editor.raise_event(&event);
+    assert!(event.handled());
+}
+
+#[test]
+fn rich_edit_shift_enter_inserts_a_soft_line_break_and_enter_a_paragraph() {
+    use ferroui_base::input::{Key, KeyModifiers};
+    let _scope = crate::test_support::test_scope();
+    let editor = RichEditBox::new();
+    editor.set_template(Some(rich_edit_box_template()));
+    let _root = crate::test_support::TestRoot::with_child(editor.clone());
+    editor.set_text("ab").unwrap();
+    editor.select(0, 2);
+    editor
+        .apply_paragraph_format(&ParagraphFormat { text_alignment: Some(TextAlignment::Center), ..Default::default() })
+        .unwrap();
+    editor.editor().clear_history();
+    editor.select(1, 1);
+    // RichEdit (Msftedit) inserts U+000B for Shift+Enter and a paragraph for Enter (#243 review N2,
+    // observed in the Windows VM); the model keeps the soft break as one LineBreak (decision D10).
+    rich_edit_press_key_with(&editor, Key::Enter, KeyModifiers::SHIFT);
+    assert_eq!(editor.rich_document().text(), "a\u{000B}b");
+    assert_eq!(editor.caret_index(), 2);
+    let snapshot = editor.rich_document().snapshot();
+    assert_eq!(snapshot.paragraphs.len(), 1);
+    assert_eq!(snapshot.paragraphs[0].format.text_alignment, Some(TextAlignment::Center));
+    assert!(snapshot.paragraphs[0]
+        .inlines
+        .iter()
+        .any(|inline| matches!(inline.kind, InlineSnapshotKind::LineBreak)));
+    rich_edit_press_key_with(&editor, Key::Enter, KeyModifiers::empty());
+    assert_eq!(editor.rich_document().text(), "a\u{000B}\nb");
+    assert_eq!(editor.rich_document().snapshot().paragraphs.len(), 2);
+    for _ in 0..2 {
+        if editor.rich_document().text() != "ab" {
+            editor.undo().unwrap();
+        }
+    }
+    assert_eq!(editor.rich_document().text(), "ab");
+}

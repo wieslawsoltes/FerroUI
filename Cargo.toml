@@ -1,6 +1,15 @@
 [workspace]
 resolver = "2"
 members = [
+    "src/FerroUI.Designer.Core",
+    "src/FerroUI.Designer.Project",
+    "src/FerroUI.Designer.Tools",
+    "src/FerroUI.Designer.Language",
+    "src/FerroUI.Designer.Animation",
+    "src/FerroUI.Designer.Collaboration",
+    "src/FerroUI.Designer.Collaboration.Host",
+    "src/FerroUI.Designer",
+    "samples/DesignerStudio",
     # The Dock port (docs/porting/dock).
     "samples/Dock/FerroDockReactiveUISample",
     "src/Dock/FerroDock.Controls.DeferredContentControl",
@@ -57,6 +66,7 @@ members = [
     "src/FerroUI.Controls.ColorPicker",
     "src/FerroUI.Controls.Charts",
     "src/FerroUI.LiveCharts",
+    "src/FerroUI.Controls.LiveCharts",
     "src/FerroUI.Controls.Repeater",
     "src/FerroUI.Controls.Inking",
     "src/TreeDataGrid/FerroUI.TreeDataGrid.Core",
@@ -115,6 +125,7 @@ members = [
     "src/Vello/FerroUI.Vello",
     "src/HarfBuzz/FerroUI.HarfBuzz",
     "src/tools/MicroCom.CodeGenerator",
+    "src/tools/RichTextOracle",
     "external/XamlX/src/XamlX",
     "tests/FerroUI.Markup.Xaml.UnitTests",
     "tests/FerroUI.Reactive.Tests",
@@ -182,6 +193,7 @@ members = [
     "samples/VirtualizationDemo",
     "samples/TreeDataGridDemo",
     "samples/ChartsDemo",
+    "samples/LiveChartsDemo",
     "samples/ReactiveDemo",
     "samples/ReactiveUIExample",
     "samples/StaticViewLocatorDemo",
@@ -237,6 +249,14 @@ ferroui-pretext-contracts = { version = "=0.4.0", path = "src/Pretext/FerroUI.Pr
 ferroui-pretext = { version = "=0.4.0", path = "src/Pretext/FerroUI.Pretext" }
 ferroui-pretext-layout = { version = "=0.4.0", path = "src/Pretext/FerroUI.Pretext.Layout" }
 ferroui-pretext-media = { version = "=0.4.0", path = "src/Pretext/FerroUI.Pretext.Media" }
+ferroui-designer-core = { version = "=0.4.0", path = "src/FerroUI.Designer.Core" }
+ferroui-designer-project = { version = "=0.4.0", path = "src/FerroUI.Designer.Project" }
+ferroui-designer-tools = { version = "=0.4.0", path = "src/FerroUI.Designer.Tools" }
+ferroui-designer-language = { version = "=0.4.0", path = "src/FerroUI.Designer.Language" }
+ferroui-designer-animation = { version = "=0.4.0", path = "src/FerroUI.Designer.Animation" }
+ferroui-designer-collaboration = { version = "=0.4.0", path = "src/FerroUI.Designer.Collaboration" }
+ferroui-designer-collaboration-host = { version = "=0.4.0", path = "src/FerroUI.Designer.Collaboration.Host" }
+ferroui-designer = { version = "=0.4.0", path = "src/FerroUI.Designer" }
 ferroui-hot-reload = { version = "=0.4.0", path = "src/FerroUI.HotReload" }
 ferroui-hot-patch = { version = "=0.4.0", path = "src/FerroUI.HotPatch" }
 ferroui-inspect = { version = "=0.4.0", path = "src/FerroUI.Inspect" }
@@ -263,6 +283,7 @@ ferroui-view-macros = { version = "=0.4.0", path = "src/FerroUI.View.Macros" }
 ferroui-controls-color-picker = { version = "=0.4.0", path = "src/FerroUI.Controls.ColorPicker" }
 ferroui-controls-charts = { version = "=0.4.0", path = "src/FerroUI.Controls.Charts" }
 ferroui-livecharts = { version = "=0.4.0", path = "src/FerroUI.LiveCharts" }
+ferroui-controls-livecharts = { version = "=0.4.0", path = "src/FerroUI.Controls.LiveCharts" }
 ferroui-controls-repeater = { version = "=0.4.0", path = "src/FerroUI.Controls.Repeater" }
 ferroui-controls-inking = { version = "=0.4.0", path = "src/FerroUI.Controls.Inking" }
 ferroui-treedatagrid-core = { version = "=0.4.0", path = "src/TreeDataGrid/FerroUI.TreeDataGrid.Core" }

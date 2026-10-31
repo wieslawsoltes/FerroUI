@@ -11,6 +11,8 @@ mod adorner_layer_page;
 mod auto_complete_box_page;
 mod bitmap_cache_page;
 mod border_page;
+mod cartesian_chart_page;
+mod pie_chart_page;
 mod button_spinner_page;
 mod buttons_page;
 mod calendar_date_picker_page;
@@ -139,6 +141,8 @@ pub use adorner_layer_page::AdornerLayerPage;
 pub use auto_complete_box_page::AutoCompleteBoxPage;
 pub use bitmap_cache_page::BitmapCachePage;
 pub use border_page::BorderPage;
+pub use cartesian_chart_page::CartesianChartPage;
+pub use pie_chart_page::PieChartPage;
 pub use button_spinner_page::ButtonSpinnerPage;
 pub use buttons_page::{ButtonsPage, RelayCommand};
 pub use calendar_date_picker_page::CalendarDatePickerPage;
@@ -336,6 +340,8 @@ const ROOT_TYPES: &[&TypeInfo] = &[
     AutoCompleteBoxPage::TYPE,
     BitmapCachePage::TYPE,
     BorderPage::TYPE,
+    CartesianChartPage::TYPE,
+    PieChartPage::TYPE,
     ButtonSpinnerPage::TYPE,
     ButtonsPage::TYPE,
     CanvasPage::TYPE,
@@ -436,6 +442,8 @@ const ROOT_CLASSES: &[&XamlClass] = &[
     &AutoCompleteBoxPage::XAML_CLASS,
     &BitmapCachePage::XAML_CLASS,
     &BorderPage::XAML_CLASS,
+    &CartesianChartPage::XAML_CLASS,
+    &PieChartPage::XAML_CLASS,
     &ButtonSpinnerPage::XAML_CLASS,
     &ButtonsPage::XAML_CLASS,
     &CanvasPage::XAML_CLASS,

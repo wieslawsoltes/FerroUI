@@ -1,0 +1,149 @@
+name: Rich text
+
+# The Msftedit oracle and the case tables of the editor's tests (docs/porting/winui-rich-text.md,
+# section 8). The tests of the controls themselves run in the CI workflow; this one holds only what
+# CI does not:
+# - on a pull request that changes the oracle, the observation extractor or a case table: the tests
+#   of the extractor and of the reader of the case tables (every table is read), and, when the oracle
+#   changed, a check of the oracle on Windows;
+# - by hand (gh workflow run rich-text.yml --ref <branch>): the oracle on a Windows runner, its output
+#   extracted into a record and the case tables checked against it, all kept as an artifact. The
+#   records are not committed (decision D11).
+
+on:
+  pull_request:
+    paths:
+      - 'src/tools/RichTextOracle/**'
+      - 'src/FerroUI.MicroCom/**'
+      - 'scripts/winui-rich-text/**'
+      - 'src/FerroUI.Controls/rich_text/*_native_cases.rs'
+      - '.github/workflows/rich-text.yml'
+  workflow_dispatch:
+    inputs:
+      runner:
+        description: 'The Windows runner the oracle characterises the Msftedit of'
+        type: choice
+        options:
+          - windows-latest
+          - windows-11-arm
+        default: windows-latest
+
+concurrency:
+  # A run of the oracle on one runner does not cancel a run on the other.
+  group: rich-text-${{ github.event.pull_request.number || github.ref }}-${{ github.event_name }}-${{ inputs.runner }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  CARGO_PROFILE_DEV_DEBUG: 0
+  RUST_BACKTRACE: 1
+
+jobs:
+  extractor:
+    name: Observation extractor and case tables
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      oracle: ${{ steps.areas.outputs.oracle }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Tests of the extractor and of the reader of the case tables
+        run: python3 -m unittest discover -s scripts/winui-rich-text -p 'test_*.py' -v
+      # The Windows check of the oracle runs only when the oracle or what it is built from changed.
+      - name: Changed areas
+        id: areas
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR/files" -q '.[].filename' > "$RUNNER_TEMP/files.txt"
+          if grep -qE '^(\.github/workflows/rich-text\.yml|src/tools/RichTextOracle/|src/FerroUI\.MicroCom/)' "$RUNNER_TEMP/files.txt"; then
+            echo "oracle=true" >> "$GITHUB_OUTPUT"; echo "the oracle changed: it is checked on Windows"
+          else
+            echo "the oracle did not change"
+          fi
+
+  oracle-builds:
+    name: The oracle builds (Windows)
+    needs: extractor
+    if: needs.extractor.outputs.oracle == 'true'
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - name: Check the oracle
+        run: cargo check --locked -p ferroui-rich-text-oracle
+
+  oracle:
+    # A plain name: a pull request lists this job as skipped, and an expression in it is not evaluated there.
+    name: Msftedit oracle (on demand)
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ${{ inputs.runner }}
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash
+    env:
+      # The output holds the text of the fixtures (emoji, joiners); the console code page of the
+      # runner would not encode it.
+      PYTHONUTF8: 1
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - name: Build the oracle
+        run: cargo build --locked -p ferroui-rich-text-oracle
+      - name: Run the oracle
+        run: |
+          mkdir -p oracle
+          {
+            echo "runner=${{ inputs.runner }} arch=$RUNNER_ARCH image=${ImageOS:-unknown} ${ImageVersion:-unknown}"
+            echo "commit=$(git rev-parse HEAD)"
+            echo "probes=$(git rev-parse HEAD:src/tools/RichTextOracle/probes.rs)"
+            rustc -vV
+          } > oracle/environment.txt
+          cat oracle/environment.txt
+          cargo run --locked -p ferroui-rich-text-oracle > oracle/msftedit.log 2> oracle/oracle-stderr.log || status=$?
+          cat oracle/oracle-stderr.log
+          echo "$(grep -c SYSTEM_MSFTEDIT_ oracle/msftedit.log) observation lines"
+          exit "${status:-0}"
+      - name: Extract the record
+        run: |
+          python scripts/winui-rich-text/rich-text-tom-observations.py extract \
+            --log oracle/msftedit.log \
+            --commit "$(git rev-parse HEAD)" \
+            --probe-blob "$(git rev-parse HEAD:src/tools/RichTextOracle/probes.rs)" \
+            --run-url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/attempts/$GITHUB_RUN_ATTEMPT" \
+            --output oracle/msftedit-record.json
+      # Fails when an entry of a case table differs from what this Msftedit does: the report names
+      # each one (docs/porting/winui-rich-text.md, section 8, for what to do then).
+      - name: Check the case tables against the record
+        run: |
+          set -o pipefail
+          python scripts/winui-rich-text/rich-text-tom-observations.py check-cases \
+            --record oracle/msftedit-record.json --limit 50 | tee oracle/check-cases.txt
+      - name: Summary
+        if: ${{ !cancelled() }}
+        run: |
+          {
+            echo "### Msftedit oracle on ${{ inputs.runner }}"
+            echo '```'
+            cat oracle/environment.txt 2>/dev/null | head -n 3
+            cat oracle/check-cases.txt 2>/dev/null || echo "no check of the case tables (an earlier step failed)"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Keep the output, the record and the report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: msftedit-oracle-${{ inputs.runner }}
+          retention-days: 30
+          path: oracle/

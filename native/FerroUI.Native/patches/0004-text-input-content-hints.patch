@@ -1,0 +1,139 @@
+diff --git a/native/FerroUI.Native/src/OSX/FrnTextInputMethod.h b/native/FerroUI.Native/src/OSX/FrnTextInputMethod.h
+index a55c8f31a..19fa0b867 100644
+--- a/native/FerroUI.Native/src/OSX/FrnTextInputMethod.h
++++ b/native/FerroUI.Native/src/OSX/FrnTextInputMethod.h
+@@ -15,7 +15,7 @@
+ #include "ferro-native.h"
+ #import "FrnTextInputMethodDelegate.h"
+ 
+-class FrnTextInputMethod: public virtual ComObject, public virtual IFrnTextInputMethod{
++class FrnTextInputMethod: public virtual ComObject, public virtual IFrnTextInputMethod, public virtual IFrnTextInputMethodOptions{
+ private:
+     id<FrnTextInputMethodDelegate> _inputMethodDelegate;
+ public:
+@@ -23,6 +23,7 @@ public:
+     
+     BEGIN_INTERFACE_MAP()
+     INTERFACE_MAP_ENTRY(IFrnTextInputMethod, IID_IFrnTextInputMethod)
++    INTERFACE_MAP_ENTRY(IFrnTextInputMethodOptions, IID_IFrnTextInputMethodOptions)
+     END_INTERFACE_MAP()
+     
+     virtual ~FrnTextInputMethod();
+@@ -40,6 +41,8 @@ public:
+     virtual void SetSurroundingText (char* text, int start, int end) override;
+     
+     virtual void SetSelectionInSurroundingText (int start, int end) override;
++
++    virtual void SetContentType (FrnTextInputContentType contentType) override;
+     
+ public:
+     ComPtr<IFrnTextInputMethodClient> Client;
+diff --git a/native/FerroUI.Native/src/OSX/FrnTextInputMethod.mm b/native/FerroUI.Native/src/OSX/FrnTextInputMethod.mm
+index 063c72b4d..f40203017 100644
+--- a/native/FerroUI.Native/src/OSX/FrnTextInputMethod.mm
++++ b/native/FerroUI.Native/src/OSX/FrnTextInputMethod.mm
+@@ -46,3 +46,7 @@ void FrnTextInputMethod::SetCursorRect(FrnRect rect) {
+ void FrnTextInputMethod::SetSelectionInSurroundingText(int start, int end) {
+     [_inputMethodDelegate setSelection: start:end];
+ }
++
++void FrnTextInputMethod::SetContentType(FrnTextInputContentType contentType) {
++    [_inputMethodDelegate setInputContentType:contentType];
++}
+diff --git a/native/FerroUI.Native/src/OSX/FrnTextInputMethodDelegate.h b/native/FerroUI.Native/src/OSX/FrnTextInputMethodDelegate.h
+index 57533c85b..0131f440f 100644
+--- a/native/FerroUI.Native/src/OSX/FrnTextInputMethodDelegate.h
++++ b/native/FerroUI.Native/src/OSX/FrnTextInputMethodDelegate.h
+@@ -14,6 +14,7 @@
+ -(void) setCursorRect:(FrnRect) cursorRect;
+ -(void) setSelection: (int) start : (int) end;
+ -(void) resetInputMethod;
++-(void) setInputContentType:(FrnTextInputContentType) contentType;
+ 
+ @end
+ 
+diff --git a/native/FerroUI.Native/src/OSX/FrnView.h b/native/FerroUI.Native/src/OSX/FrnView.h
+index ca9068ab2..441dda586 100644
+--- a/native/FerroUI.Native/src/OSX/FrnView.h
++++ b/native/FerroUI.Native/src/OSX/FrnView.h
+@@ -9,7 +9,8 @@
+ @class FrnAccessibilityElement;
+ @protocol IRenderTarget;
+ 
+-@interface FrnView : NSView<NSTextInputClient, NSDraggingDestination, FrnTextInputMethodDelegate, CALayerDelegate>
++@interface FrnView : NSView<NSTextInputClient, NSTextContent, NSDraggingDestination, FrnTextInputMethodDelegate, CALayerDelegate>
++@property (copy, nullable) NSTextContentType contentType;
+ -(FrnView* _Nonnull) initWithParent: (TopLevelImpl* _Nonnull) parent;
+ -(NSEvent* _Nonnull) lastMouseDownEvent;
+ -(FrnPoint) translateLocalPoint:(FrnPoint)pt;
+diff --git a/native/FerroUI.Native/src/OSX/FrnView.mm b/native/FerroUI.Native/src/OSX/FrnView.mm
+index 8165eef41..c37a42156 100644
+--- a/native/FerroUI.Native/src/OSX/FrnView.mm
++++ b/native/FerroUI.Native/src/OSX/FrnView.mm
+@@ -23,6 +23,8 @@
+     bool _keyboardInputSourceComposes;
+ }
+ 
++@synthesize contentType = _contentType;
++
+ - (void)onClosed
+ {
+     @synchronized (self)
+@@ -1215,6 +1217,27 @@ static bool KeyboardInputSourceComposes(NSString* sourceId)
+     _selectedRange = NSMakeRange((NSUInteger)start, (NSUInteger)(end - start));
+ }
+ 
++- (void)setInputContentType:(FrnTextInputContentType)contentType
++{
++    NSTextContentType nativeType = nil;
++    // These public semantic types were added in macOS 14. Earlier supported
++    // systems retain the default; no private string constants are invented.
++    if (@available(macOS 14.0, *))
++    {
++        switch (contentType)
++        {
++            case FrnTextInputContentUrl: nativeType = NSTextContentTypeURL; break;
++            case FrnTextInputContentEmailAddress: nativeType = NSTextContentTypeEmailAddress; break;
++            case FrnTextInputContentName: nativeType = NSTextContentTypeName; break;
++            case FrnTextInputContentTelephoneNumber: nativeType = NSTextContentTypeTelephoneNumber; break;
++            default: break;
++        }
++    }
++    // This updates the protocol consumed by AppKit on the existing input
++    // client. It neither replaces its context nor discards its marked text.
++    self.contentType = nativeType;
++}
++
+ - (void) resetInputMethod{
+     auto parent = _parent.tryGet();
+ 
+diff --git a/src/FerroUI.Native/frn.idl b/src/FerroUI.Native/frn.idl
+index 2db5c5618..0b6d8aaa0 100644
+--- a/src/FerroUI.Native/frn.idl
++++ b/src/FerroUI.Native/frn.idl
+@@ -885,6 +885,25 @@ interface IFrnTextInputMethod : IUnknown
+     void SetSelectionInSurroundingText(int start, int end);
+ }
+ 
++enum FrnTextInputContentType
++{
++    FrnTextInputContentNone = 0,
++    FrnTextInputContentUrl = 1,
++    FrnTextInputContentEmailAddress = 2,
++    FrnTextInputContentName = 3,
++    FrnTextInputContentTelephoneNumber = 4
++}
++
++// Optional extension of the text input method, as IFrnAccessibilitySettings: the vtable and IID of
++// IFrnTextInputMethod stay unchanged. The semantic content type of the view (NSTextContent), sent
++// only for a client of the exact-edit connection. A FerroUI addition
++// (docs/porting/winui-rich-text.md, R12).
++[uuid(8b73203e-0e92-493d-b290-fe3fd801fdb8)]
++interface IFrnTextInputMethodOptions : IUnknown
++{
++    void SetContentType(FrnTextInputContentType contentType);
++}
++
+ [uuid(e34ae0f8-18b4-48a3-b09d-2e6b19a3cf5e)]
+ interface IFrnMacOptions : IUnknown
+ {

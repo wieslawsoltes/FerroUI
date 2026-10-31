@@ -21,6 +21,7 @@ use ferroui_base::media::{
 use ferroui_base::utilities::ValueSpan;
 use ferroui_base::{Point, Rect, Ref, Size, Vector};
 use rustc_hash::FxHashMap;
+use std::cell::RefCell;
 use std::ops::Range;
 use std::rc::Rc;
 
@@ -31,8 +32,102 @@ pub(crate) struct RichParagraphSource {
     pub length: usize,
     pub properties: Rc<dyn TextRunProperties>,
     pub default_tab_stop: f64,
-    pub cache: TextRunCache,
+    /// The shaping cache of the paragraph, shared with the next source while the paragraph
+    /// does not change (F1, #243 review S7).
+    pub cache: Rc<TextRunCache>,
+    /// The formatting overrides of the paragraph (selection, highlighters), relative to it.
+    modifiers: Option<Rc<[ValueSpan<Rc<dyn TextRunProperties>>]>>,
+    /// The lines of the whole paragraph from its last layout, shared with the next source while
+    /// the paragraph does not change: a page that formats it again with the same width and
+    /// paragraph properties takes them instead (F1).
+    lines: Rc<RefCell<Option<ParagraphLines>>>,
     has_embedded_controls: bool,
+}
+
+/// What a paragraph's lines were formatted with, apart from the runs (shared with the source).
+#[derive(Clone, PartialEq)]
+struct ParagraphLinesKey {
+    width: u64,
+    wrapping: TextWrapping,
+    first_indent: u64,
+    rtl: bool,
+    alignment: TextAlignment,
+    line_height: u64,
+    strategy: LineStackingStrategy,
+    spacing_rule: LineSpacingRule,
+    spacing: u64,
+    letter_spacing: u64,
+    tabs: TextTabStops,
+    margin_left: u64,
+    margin_right: u64,
+    default_indent: u64,
+    text_line_bounds: TextLineBounds,
+}
+
+struct CachedParagraphLine {
+    line: Rc<dyn TextLine>,
+    advance: f64,
+    offset: f64,
+    origin_x: f64,
+    right_margin: f64,
+    use_line_advance_for_bounds: bool,
+    extent: f64,
+}
+
+struct ParagraphLines {
+    key: ParagraphLinesKey,
+    lines: Vec<CachedParagraphLine>,
+}
+
+impl Drop for ParagraphLines {
+    fn drop(&mut self) {
+        for cached in &self.lines {
+            if Rc::strong_count(&cached.line) == 1 {
+                cached.line.dispose();
+            }
+        }
+    }
+}
+
+impl RichParagraphSource {
+    /// Whether this paragraph of an earlier source formats as the runs, properties and overrides
+    /// of a new one: then its runs and shaping cache serve the new source.
+    fn formats_as(
+        &self,
+        runs: &[Rc<dyn TextRun>],
+        properties: &Rc<dyn TextRunProperties>,
+        default_tab_stop: f64,
+        modifiers: &Option<Rc<[ValueSpan<Rc<dyn TextRunProperties>>]>>,
+    ) -> bool {
+        fn same_properties(a: &Rc<dyn TextRunProperties>, b: &Rc<dyn TextRunProperties>) -> bool {
+            **a == **b && a.baseline_alignment() == b.baseline_alignment()
+        }
+        let old_runs = self.source.text_runs();
+        !self.has_embedded_controls
+            && self.default_tab_stop.to_bits() == default_tab_stop.to_bits()
+            && same_properties(&self.properties, properties)
+            && old_runs.len() == runs.len()
+            && old_runs.iter().zip(runs).all(|(old, new)| {
+                old.as_any().type_id() == new.as_any().type_id()
+                    && old.length() == new.length()
+                    && old.text_span() == new.text_span()
+                    && match (old.properties(), new.properties()) {
+                        (None, None) => true,
+                        (Some(a), Some(b)) => same_properties(a, b),
+                        _ => false,
+                    }
+            })
+            && match (&self.modifiers, modifiers) {
+                (None, None) => true,
+                (Some(a), Some(b)) => {
+                    a.len() == b.len()
+                        && a.iter().zip(b.iter()).all(|(a, b)| {
+                            a.start() == b.start() && a.length() == b.length() && same_properties(a.value(), b.value())
+                        })
+                }
+                _ => false,
+            }
+    }
 }
 
 /// A revision of the document's formatter input, shared by all overflow views.
@@ -47,7 +142,20 @@ pub(crate) struct RichTextSource {
 }
 
 impl RichTextSource {
-    pub fn new(document: &RichTextDocument, view: &crate::RichTextBlock) -> Rc<Self> {
+    /// The source of the document for the view. The paragraphs of `previous` (the source the
+    /// view had before its document or its selection changed) that format as before keep their
+    /// runs and shaping caches, so an edit reshapes the paragraphs it changed, not the document
+    /// (F1, #243 review S7).
+    pub fn new(document: &RichTextDocument, view: &crate::RichTextBlock, previous: Option<&RichTextSource>) -> Rc<Self> {
+        let previous_paragraphs: FxHashMap<usize, &RichParagraphSource> = previous
+            .map(|previous| {
+                previous
+                    .paragraphs
+                    .iter()
+                    .map(|paragraph| (&*paragraph.block as *const Block as *const () as usize, paragraph))
+                    .collect()
+            })
+            .unwrap_or_default();
         let mut blocks = document.blocks().snapshot().to_vec();
         // The empty editor still has a line with a measurable caret.
         let empty = blocks.is_empty();
@@ -119,16 +227,37 @@ impl RichTextSource {
                 );
             let modifiers = formatting_overrides(&runs, offset, &highlights, view);
             let has_embedded_controls = runs.iter().any(|run| run.is::<EmbeddedControlRun>());
-            paragraphs.push(RichParagraphSource {
-                block,
-                source: InlinesTextSource::new(Rc::new(runs), modifiers),
-                offset,
-                length,
-                properties,
-                default_tab_stop,
-                cache: TextRunCache::new(),
-                has_embedded_controls,
-            });
+            let unchanged = (!empty && !has_embedded_controls)
+                .then(|| previous_paragraphs.get(&(&*block as *const Block as *const () as usize)))
+                .flatten()
+                .filter(|old| old.formats_as(&runs, &properties, default_tab_stop, &modifiers));
+            if let Some(old) = unchanged {
+                paragraphs.push(RichParagraphSource {
+                    block,
+                    source: old.source.clone(),
+                    offset,
+                    length,
+                    properties: old.properties.clone(),
+                    default_tab_stop,
+                    cache: old.cache.clone(),
+                    modifiers: old.modifiers.clone(),
+                    lines: old.lines.clone(),
+                    has_embedded_controls,
+                });
+            } else {
+                paragraphs.push(RichParagraphSource {
+                    block,
+                    source: InlinesTextSource::new(Rc::new(runs), modifiers.clone()),
+                    offset,
+                    length,
+                    properties,
+                    default_tab_stop,
+                    cache: Rc::new(TextRunCache::new()),
+                    modifiers,
+                    lines: Rc::new(RefCell::new(None)),
+                    has_embedded_controls,
+                });
+            }
             offset += length + 1;
         }
         let has_embedded_controls = paragraphs
@@ -229,7 +358,10 @@ fn formatting_overrides(
 impl Drop for RichTextSource {
     fn drop(&mut self) {
         for paragraph in &self.paragraphs {
-            paragraph.cache.dispose();
+            // A cache the next source took over stays alive with it.
+            if Rc::strong_count(&paragraph.cache) == 1 {
+                paragraph.cache.dispose();
+            }
         }
     }
 }
@@ -403,7 +535,10 @@ fn collapse_line(
 
 impl Drop for RichTextLine {
     fn drop(&mut self) {
-        self.line.dispose();
+        // A line a paragraph's line cache or a later layout still holds stays alive.
+        if Rc::strong_count(&self.line) == 1 {
+            self.line.dispose();
+        }
     }
 }
 
@@ -626,6 +761,77 @@ impl RichTextLayout {
                 ),
                 host,
             );
+            // A whole paragraph that fits on the page: the lines of its last layout serve again
+            // while its runs (the source keeps them), its width and its properties are the same.
+            let lines_key = (local == 0
+                && previous.is_none()
+                && hosted.is_none()
+                && max_lines == 0
+                && Rc::ptr_eq(trimming, &<dyn TextTrimming>::none())
+                && !paragraph.has_embedded_controls)
+                .then(|| {
+                    let rich = block.to_ref().cast::<Paragraph>();
+                    let (spacing_rule, spacing) = rich
+                        .as_ref()
+                        .map(|p| (p.line_spacing_rule(), p.line_spacing()))
+                        .unwrap_or((LineSpacingRule::Undefined, 1.0));
+                    ParagraphLinesKey {
+                        width: paragraph_width.to_bits(),
+                        wrapping,
+                        first_indent: rich
+                            .as_ref()
+                            .filter(|p| p.is_set(Paragraph::text_indent_property().as_property()))
+                            .map_or(result.source.default_indent, |p| p.text_indent())
+                            .to_bits(),
+                        rtl: block.flow_direction() == ferroui_base::media::FlowDirection::RightToLeft,
+                        alignment: block.text_alignment(),
+                        line_height: block.line_height().to_bits(),
+                        strategy: block.line_stacking_strategy(),
+                        spacing_rule,
+                        spacing: spacing.to_bits(),
+                        letter_spacing: block.letter_spacing().to_bits(),
+                        tabs: rich.as_ref().map_or_else(TextTabStops::default, |p| p.tab_stops()),
+                        margin_left: margin.left.to_bits(),
+                        margin_right: margin.right.to_bits(),
+                        default_indent: result.source.default_indent.to_bits(),
+                        text_line_bounds: result.source.text_line_bounds,
+                    }
+                });
+            if let Some(key) = &lines_key {
+                let cached = paragraph.lines.borrow();
+                let fits = |cached: &&ParagraphLines| {
+                    !height.is_finite()
+                        || y + cached.lines.iter().map(|entry| entry.advance.max(f64::MIN_POSITIVE)).sum::<f64>()
+                            <= height + 1e-8
+                };
+                if let Some(cached) = cached.as_ref().filter(|cached| &cached.key == key).filter(fits) {
+                    for entry in &cached.lines {
+                        widest = widest.max(entry.extent);
+                        result.lines.push(RichTextLine {
+                            line: entry.line.clone(),
+                            paragraph_offset: paragraph.offset,
+                            paragraph_length: paragraph.length,
+                            origin: Point::new(entry.origin_x, y + entry.offset),
+                            advance: entry.advance,
+                            allocation_y: y,
+                            use_line_advance_for_bounds: entry.use_line_advance_for_bounds,
+                            right_margin: entry.right_margin,
+                            source_spans: None,
+                        });
+                        y += entry.advance;
+                    }
+                    y += margin.bottom;
+                    preceding_bottom_margin = block_margin.bottom;
+                    result.next = RichTextBreak {
+                        paragraph: paragraph_index + 1,
+                        local_position: 0,
+                        position: (paragraph.offset + paragraph.length + 1).min(result.source.length),
+                        previous_line_break: None,
+                    };
+                    continue 'paragraphs;
+                }
+            }
+            let mut recorded: Option<Vec<CachedParagraphLine>> = lines_key.as_ref().map(|_| Vec::new());
             let line_height = block.line_height();
             let strategy = block.line_stacking_strategy();
             let (spacing_rule, spacing) = block
@@ -795,12 +1001,22 @@ impl RichTextLayout {
                         ));
                     (line, source_spans) = collapse_line(line, collapsing);
                 }
-                widest = widest.max(
-                    line_origin_x
-                        + line.start()
-                        + line.width_including_trailing_whitespace()
-                        + line_right_margin,
-                );
+                let extent = line_origin_x
+                    + line.start()
+                    + line.width_including_trailing_whitespace()
+                    + line_right_margin;
+                widest = widest.max(extent);
+                if let Some(recorded) = &mut recorded {
+                    recorded.push(CachedParagraphLine {
+                        line: line.clone(),
+                        advance,
+                        offset: stacking.offset,
+                        origin_x: line_origin_x,
+                        right_margin: line_right_margin,
+                        use_line_advance_for_bounds: spacing_rule == LineSpacingRule::Undefined,
+                        extent,
+                    });
+                }
                 result.lines.push(RichTextLine {
                     line,
                     paragraph_offset: paragraph.offset,
@@ -818,6 +1034,11 @@ impl RichTextLayout {
                 previous = line_break;
                 previous_is_shared = false;
                 if end_of_paragraph || consumed == 0 {
+                    if end_of_paragraph {
+                        if let (Some(key), Some(lines)) = (lines_key.clone(), recorded.take()) {
+                            *paragraph.lines.borrow_mut() = Some(ParagraphLines { key, lines });
+                        }
+                    }
                     y += margin.bottom;
                     preceding_bottom_margin = block_margin.bottom;
                     result.next = RichTextBreak {
@@ -1060,6 +1281,9 @@ mod family_metrics_tests;
 #[cfg(test)]
 #[path = "rich_text_fallback_scale_tests.rs"]
 mod fallback_scale_tests;
+#[cfg(test)]
+#[path = "rich_text_reuse_tests.rs"]
+mod reuse_tests;
 
 #[cfg(test)]
 #[path = "rich_text_hosted_object_tests.rs"]

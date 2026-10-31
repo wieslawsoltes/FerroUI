@@ -1,7 +1,7 @@
 use crate::automation::provider::TextEditChangeType;
 use crate::documents::{
     BlockCollection, CharacterFormat, DocumentSnapshot, InlineSnapshot, InlineSnapshotKind,
-    LineStackingStrategy, ParagraphFormat, RichTextDocument, TextHighlighterCollection,
+    LineStackingStrategy, ParagraphFormat, ParagraphSnapshot, RichTextDocument, TextHighlighterCollection,
     TextPosition,
 };
 use crate::flyouts::PopupFlyoutBase;
@@ -33,7 +33,7 @@ use ferroui_base::input::text_input::{
 };
 use ferroui_base::input::{
     FocusChangedEventArgs, InputElement, InputElementImpl, InputElementImplExt, InputScope, Key, KeyEventArgs,
-    KeyGesture, KeyboardDevice, LocalBoxFuture, PointerPressedEventArgs, TextInputEventArgs,
+    KeyGesture, KeyModifiers, KeyboardDevice, LocalBoxFuture, PointerPressedEventArgs, TextInputEventArgs,
 };
 use ferroui_base::interactivity::{
     IRoutedEventArgs, Interactive, InteractiveImpl, RoutedEvent, RoutedEventArgs, RoutedEventHandlerToken,
@@ -709,7 +709,13 @@ impl InputElementImpl for RichEditBox {
                 }
                 Key::Enter if this.accepts_return() => {
                     if !this.is_read_only() {
-                        this.handle_edit(this.insert_text("\n"));
+                        // Shift+Enter is a soft line break in RichEdit (U+000B, a `LineBreak`;
+                        // observed with Msftedit, #243 review N2), Enter a paragraph.
+                        if event.key_modifiers.contains(KeyModifiers::SHIFT) {
+                            this.handle_edit(this.insert_line_break());
+                        } else {
+                            this.handle_edit(this.insert_text("\n"));
+                        }
                     }
                 }
                 Key::Tab if this.accepts_tab() => {
@@ -1962,6 +1968,23 @@ impl RichEditBox {
         } else {
             editor.insert_text(&self.filter_input(text), EditKind::Typing)
         }
+    }
+    /// Replaces the selection with a soft line break (a `LineBreak`, U+000B in the text;
+    /// decision D10), with the typing format: what Shift+Enter inserts.
+    pub(crate) fn insert_line_break(&self) -> Result<bool, EditError> {
+        let editor = self.editor();
+        self.synchronize_editor_selection(&editor)?;
+        let fragment = DocumentSnapshot {
+            paragraphs: vec![ParagraphSnapshot {
+                format: ParagraphFormat::default(),
+                inlines: vec![InlineSnapshot {
+                    format: editor.typing_format(),
+                    kind: InlineSnapshotKind::LineBreak,
+                }],
+            }],
+            ..Default::default()
+        };
+        editor.insert_fragment(&fragment, EditKind::Typing)
     }
     pub fn replace_selection(&self, fragment: &DocumentSnapshot) -> Result<bool, EditError> {
         let editor = self.editor();

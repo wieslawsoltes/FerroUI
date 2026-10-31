@@ -1,0 +1,43 @@
+<ContentPage Theme="{StaticResource ScrollPage}" xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:lc="https://ferroui.dev/livecharts"
+             Header="PieChart"
+             x:Class="ControlCatalog.Pages.PieChartPage">
+  <!-- Not from upstream: the pie chart of the LiveCharts2 port (docs/porting/livecharts2.md). -->
+  <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Orientation="Vertical" Spacing="16">
+      <TextBlock Classes="h2">Pies, doughnuts and gauges</TextBlock>
+      <WrapPanel Orientation="Horizontal" ItemSpacing="16" LineSpacing="16">
+        <StackPanel Spacing="8" Width="300">
+          <TextBlock Classes="h3">Pie</TextBlock>
+          <lc:PieChart Height="280" LegendPosition="Bottom">
+            <lc:PieSeries Name="Product"><lc:ChartPoint Y="42" /></lc:PieSeries>
+            <lc:PieSeries Name="Platform"><lc:ChartPoint Y="28" /></lc:PieSeries>
+            <lc:PieSeries Name="Research"><lc:ChartPoint Y="18" /></lc:PieSeries>
+            <lc:PieSeries Name="Operations" PushOut="12"><lc:ChartPoint Y="12" /></lc:PieSeries>
+          </lc:PieChart>
+        </StackPanel>
+        <StackPanel Spacing="8" Width="300">
+          <TextBlock Classes="h3">Doughnut</TextBlock>
+          <lc:PieChart Height="280" LegendPosition="Bottom">
+            <lc:PieSeries Name="Desktop" InnerRadius="60"><lc:ChartPoint Y="45" /></lc:PieSeries>
+            <lc:PieSeries Name="Mobile" InnerRadius="60"><lc:ChartPoint Y="24" /></lc:PieSeries>
+            <lc:PieSeries Name="Web" InnerRadius="60"><lc:ChartPoint Y="18" /></lc:PieSeries>
+          </lc:PieChart>
+        </StackPanel>
+        <StackPanel Spacing="8" Width="300">
+          <TextBlock Classes="h3">Gauge</TextBlock>
+          <lc:PieChart Height="280" InitialRotation="-225" MaxAngle="270" MinValue="0" MaxValue="100">
+            <lc:PieSeries Name="Completed" IsGauge="True" MaxRadialColumnWidth="30" CornerRadius="8"
+                          DataLabels="True" DataLabelsSize="28" PolarLabelsPosition="ChartCenter">
+              <lc:ChartPoint Y="72" />
+            </lc:PieSeries>
+            <lc:PieSeries Name="Track" Fill="#1A1E1E1E" IsGauge="True" IsFillSeries="True" MaxRadialColumnWidth="30">
+              <lc:ChartPoint Y="0" />
+            </lc:PieSeries>
+          </lc:PieChart>
+        </StackPanel>
+      </WrapPanel>
+    </StackPanel>
+  </ScrollViewer>
+</ContentPage>

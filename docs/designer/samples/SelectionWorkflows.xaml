@@ -1,0 +1,64 @@
+<Canvas xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Background="#FFF2F5FA">
+  <TextBlock Canvas.Left="32" Canvas.Top="24" Text="A consistent collection"
+             FontSize="26" FontWeight="SemiBold" Foreground="#FF172033" />
+  <TextBlock Canvas.Left="32" Canvas.Top="60"
+             Text="Copy appearance, match card sizes, and select overlapping layers."
+             FontSize="13" Foreground="#FF596579" />
+
+  <!-- Select SourceCard and use Transfer > Copy appearance properties. -->
+  <Border Name="SourceCard" Canvas.Left="32" Canvas.Top="108"
+          Width="220" Height="164" Padding="20" CornerRadius="18"
+          BorderBrush="#FF9DC0FF" BorderThickness="1">
+    <Border.Background>
+      <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+        <GradientStop Offset="0" Color="#FFDFEAFF" />
+        <GradientStop Offset="1" Color="#FFC4DBFF" />
+      </LinearGradientBrush>
+    </Border.Background>
+    <StackPanel Spacing="10">
+      <TextBlock Text="01 / SOURCE" FontSize="11" FontWeight="SemiBold" Foreground="#FF335C98" />
+      <TextBlock Text="Design system" FontSize="22" FontWeight="SemiBold" Foreground="#FF172033" />
+      <TextBlock Text="Shared appearance.&#10;Independent content." FontSize="13" Foreground="#FF335C98" />
+    </StackPanel>
+  </Border>
+
+  <!-- Select both destinations to inspect compatible property-paste targets.
+       For size matching, select SourceCard first in Layers, then Ctrl/Cmd-click
+       ResearchCard and PrototypeCard. Use Arrange > Match first selected > Width and height.
+       Arrange > Reset size and alignment removes only the chosen local layout values. -->
+  <Border Name="ResearchCard" Canvas.Left="282" Canvas.Top="108"
+          Width="184" Height="142" Padding="20" Background="White" CornerRadius="6">
+    <StackPanel Spacing="10">
+      <TextBlock Text="02 / DESTINATION" FontSize="11" Foreground="#FF68758A" />
+      <TextBlock Text="Research" FontSize="22" FontWeight="SemiBold" Foreground="#FF172033" />
+      <TextBlock Text="Understand the details." FontSize="13" TextWrapping="Wrap" Foreground="#FF596579" />
+    </StackPanel>
+  </Border>
+  <Border Name="PrototypeCard" Canvas.Left="496" Canvas.Top="108"
+          Width="184" Height="142" Padding="20" Background="White" CornerRadius="6">
+    <StackPanel Spacing="10">
+      <TextBlock Text="03 / DESTINATION" FontSize="11" Foreground="#FF68758A" />
+      <TextBlock Text="Prototype" FontSize="22" FontWeight="SemiBold" Foreground="#FF172033" />
+      <TextBlock Text="Explore the next idea." FontSize="13" TextWrapping="Wrap" Foreground="#FF596579" />
+    </StackPanel>
+  </Border>
+
+  <TextBlock Canvas.Left="32" Canvas.Top="312" Text="OVERLAPPING LAYERS"
+             FontSize="11" FontWeight="SemiBold" Foreground="#FF68758A" />
+  <!-- Right-click where these cards overlap and choose BackCard or FrontCard.
+       With a named card selected, Layers > ... > Select same control type selects the Borders. -->
+  <Border Name="BackCard" Canvas.Left="32" Canvas.Top="344" Width="240" Height="116"
+          Background="#FF334C72" CornerRadius="12" Padding="18">
+    <TextBlock Text="Foundation" Foreground="White" FontSize="18" FontWeight="SemiBold" />
+  </Border>
+  <Border Name="FrontCard" Canvas.Left="188" Canvas.Top="370" Width="240" Height="116"
+          Background="#FFE4D8FF" BorderBrush="#FFB3A0D2" BorderThickness="1"
+          CornerRadius="12" Padding="18">
+    <TextBlock Text="Exploration" Foreground="#FF443161" FontSize="18" FontWeight="SemiBold" />
+  </Border>
+  <TextBlock Canvas.Left="480" Canvas.Top="352" Width="232" TextWrapping="Wrap"
+             Text="Right-click the overlap to choose a layer. Use Layers actions to select every visible card of the same control type."
+             FontSize="14" Foreground="#FF596579" />
+</Canvas>

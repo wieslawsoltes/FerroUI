@@ -38,6 +38,7 @@ charts = ["dep:ferroui-controls-charts"]
 repeater = ["dep:ferroui-controls-repeater"]
 inking = ["dep:ferroui-controls-inking"]
 pretext = ["dep:ferroui-pretext", "dep:ferroui-pretext-layout", "dep:ferroui-pretext-media"]
+livecharts = ["dep:ferroui-livecharts", "dep:ferroui-controls-livecharts"]
 treedatagrid = ["dep:ferroui-controls-treedatagrid", "dep:ferroui-treedatagrid-core"]
 dialogs = ["dep:ferroui-dialogs"]
 # The developer tools (F12 on a window or an application in debug builds).
@@ -86,6 +87,8 @@ ferroui-controls-inking = { workspace = true, optional = true }
 ferroui-pretext = { workspace = true, optional = true }
 ferroui-pretext-layout = { workspace = true, optional = true }
 ferroui-pretext-media = { workspace = true, optional = true }
+ferroui-livecharts = { workspace = true, optional = true }
+ferroui-controls-livecharts = { workspace = true, optional = true }
 ferroui-controls-treedatagrid = { workspace = true, optional = true }
 ferroui-treedatagrid-core = { workspace = true, optional = true }
 ferroui-dialogs = { workspace = true, optional = true }
@@ -122,7 +125,7 @@ required-features = ["desktop", "fluent"]
 # docs.rs documents the default features with the libraries that need no more than the host
 # (docs/release.md, section 7).
 [package.metadata.docs.rs]
-features = ["simple", "winui-theme", "xaml", "winui-xaml", "color-picker", "charts", "inking", "repeater", "treedatagrid", "dialogs", "diagnostics", "reactive", "dynamic-data", "reactiveui", "headless", "opengl", "metal", "vulkan"]
+features = ["simple", "winui-theme", "xaml", "winui-xaml", "color-picker", "charts", "livecharts", "inking", "repeater", "treedatagrid", "dialogs", "diagnostics", "reactive", "dynamic-data", "reactiveui", "headless", "opengl", "metal", "vulkan"]
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]
