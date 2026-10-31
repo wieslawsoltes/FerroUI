@@ -23,6 +23,8 @@ bitflags.workspace = true
 # Unix systems only; the crate has only its event type elsewhere.
 [target.'cfg(unix)'.dependencies]
 zbus.workspace = true
+# The random part of the object path of a menu (`Guid.NewGuid`).
+uuid = { workspace = true, features = ["v4"] }
 futures-util.workspace = true
 
 # The tests talk to doubles of the input method services over a socket pair, without a bus.

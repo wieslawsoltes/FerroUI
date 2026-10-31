@@ -38,7 +38,7 @@ mod self_observing_person;
 pub use animal::{Animal, AnimalEqualityComparer, AnimalFamily};
 pub use animal_owner::AnimalOwner;
 pub use fakers::{Commerce, FakeEnum, FakePerson, Faker, FakerContext, Hacker, Randomizer};
-pub use guid::Guid;
+pub use guid::{new_guid, Guid};
 pub use market::{FixedMarket, IMarket, Market, PriceChangeSets};
 pub use market_price::{MarketPrice, MarketPriceComparer, MarketPriceEqualityComparer};
 pub use parent_and_children::ParentAndChildren;
