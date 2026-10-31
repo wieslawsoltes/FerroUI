@@ -372,6 +372,14 @@ mod app {
             fn set_capabilities(&self, caps: u32) {
                 self.log.lock().unwrap().push(format!("SetCapabilities({caps})"));
             }
+
+            // IBus has ContentType as a writable (uu) property of the context, also through its
+            // portal: the double keeps the protocol of the daemon and of the platform's proxy.
+            #[zbus(property)]
+            fn set_content_type(&self, value: (u32, u32)) -> zbus::fdo::Result<()> {
+                self.log.lock().unwrap().push(format!("SetContentType({}, {})", value.0, value.1));
+                Ok(())
+            }
         }
 
         struct Service {
@@ -1072,7 +1080,9 @@ mod app {
         use ferroui_base::input::{DragDropEffects, Key};
         use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
         use ferroui_base::{Point, Thickness, Vector};
-        use ferroui_controls::TextBox;
+        use ferroui_base::input::text_input::{TextInputContentType, TextInputOptions};
+        use ferroui_base::input::InputScopeNameValue;
+        use ferroui_controls::{RichEditBox, TextBox};
         use ferroui_freedesktop::IX11InputMethodFactory;
         use std::any::TypeId;
         use ferroui_controls::primitives::popup_positioning::{PopupAnchor, PopupGravity};
@@ -3200,6 +3210,16 @@ mod app {
             text_box.set_horizontal_alignment(HorizontalAlignment::Left);
             text_box.set_vertical_alignment(VerticalAlignment::Top);
             text_box.set_margin(Thickness::uniform(8.0));
+            if kind == "ibus" {
+                // A text box keeps the upstream input method (decision D5 of
+                // `docs/porting/winui-rich-text.md`): its content type and input scopes never
+                // reach IBus.
+                TextInputOptions::set_content_type(&text_box, TextInputContentType::Number);
+                TextInputOptions::set_input_scope_names(
+                    &text_box,
+                    Some(Rc::from([InputScopeNameValue::EmailSmtpAddress, InputScopeNameValue::Url])),
+                );
+            }
             content.set_child(&text_box);
             delay(Duration::from_millis(300)).await;
             // Key events go to the window with the focus or, without a window manager, to the one
@@ -3244,6 +3264,13 @@ mod app {
                     "focus of the input context",
                     focus_in,
                     format!("the service was called with {:?}", ibus_double::calls()),
+                );
+                let content_type_of_text_box =
+                    ibus_double::calls().iter().any(|call| call.starts_with("SetContentType("));
+                report.check(
+                    "no content type for a text box",
+                    !content_type_of_text_box,
+                    format!("a text box keeps the upstream input method: {:?}", ibus_double::calls()),
                 );
 
                 // The key the input method consumes: the application gets the committed text and
@@ -3335,6 +3362,70 @@ mod app {
                         "the last location reported is {location:?}; the window is at {:?} of the root",
                         origin.map(|(x, y, _)| (x, y))
                     ),
+                );
+
+                // A client of the exact-edit connection (a rich edit box): its first input scope,
+                // else its content type, becomes the ContentType property of the context.
+                let content_type_after = |from: usize, purpose: u32| {
+                    let prefix = format!("SetContentType({purpose}, ");
+                    move || ibus_double::calls().iter().skip(from).any(|call| call.starts_with(&prefix))
+                };
+                let rich = RichEditBox::new();
+                rich.set_width(240.0);
+                rich.set_height(64.0);
+                rich.set_horizontal_alignment(HorizontalAlignment::Left);
+                rich.set_vertical_alignment(VerticalAlignment::Top);
+                rich.set_margin(Thickness::uniform(8.0));
+                TextInputOptions::set_content_type(&rich, TextInputContentType::Number);
+                TextInputOptions::set_input_scope_names(
+                    &rich,
+                    Some(Rc::from([InputScopeNameValue::EmailSmtpAddress, InputScopeNameValue::Url])),
+                );
+                content.set_child(&rich);
+                delay(Duration::from_millis(300)).await;
+                let before = ibus_double::calls().len();
+                let focused = rich.focus();
+                let scoped = wait_for(STEP_TIMEOUT, content_type_after(before, 6)).await;
+                report.check(
+                    "input scope of a rich edit box",
+                    focused && scoped,
+                    format!("focus {focused}; the first scope is Email, before Url and Number: {:?}", ibus_double::calls()),
+                );
+                let before = ibus_double::calls().len();
+                TextInputOptions::set_input_scope_names(&rich, Some(Rc::from([InputScopeNameValue::Digits])));
+                let changed = wait_for(STEP_TIMEOUT, content_type_after(before, 2)).await;
+                report.check(
+                    "live input scope of a rich edit box",
+                    changed,
+                    format!("the focused context received the Digits scope: {:?}", ibus_double::calls()),
+                );
+                let before = ibus_double::calls().len();
+                TextInputOptions::set_input_scope_names(&rich, None);
+                let fallback = wait_for(STEP_TIMEOUT, content_type_after(before, 3)).await;
+                report.check(
+                    "content type of a rich edit box without a scope",
+                    fallback,
+                    format!("the focused context returned to the Number content type: {:?}", ibus_double::calls()),
+                );
+                let tapped = tap(display, u64::from(ibus_double::CONSUMED_KEY)).await;
+                let in_rich = wait_for(STEP_TIMEOUT, || rich.text().starts_with(committed)).await;
+                report.check(
+                    "committed text in a rich edit box",
+                    tapped && in_rich,
+                    format!("the rich edit box has {:?}, expected {committed:?}", rich.text()),
+                );
+                let before = ibus_double::calls().len();
+                content.set_child(&text_box);
+                delay(Duration::from_millis(300)).await;
+                let focused = text_box.focus();
+                let restored = wait_for(STEP_TIMEOUT, || {
+                    ibus_double::calls().iter().skip(before).any(|call| call == "SetContentType(0, 0)")
+                })
+                .await;
+                report.check(
+                    "default content type for a text box again",
+                    focused && restored,
+                    format!("focus {focused}; the context went back to its default: {:?}", ibus_double::calls()),
                 );
             } else {
                 // A key produces its text through the input context.

@@ -250,7 +250,15 @@ Not taken from #243 in R8: its manager tests for a client without exact editing 
 
 Not taken from #243 in R10: its tests of input options and preedit resets for clients without the connection (`browser_text_input_method.rs`); such clients keep the upstream path (D5), which ignores options and is tested as such.
 
-### 11.6 The WinUI host's CoreText input (R9c)
+### 11.6 Input methods on Linux: IBus, Fcitx, Wayland (R11)
+
+| WinUI | FerroUI | Why |
+|---|---|---|
+| `InputScope` is the hint of the touch keyboard and the IME of Windows. | For RichEditBox (a client of the exact-edit connection) the first input scope becomes the IBus `ContentType` purpose, the Fcitx capability flags and the `zwp_text_input_v3` content purpose; without a scope, the content type. A scope never takes away the privacy hints of a Password content type. TextBox keeps upstream behaviour: IBus gets no `ContentType`. | Decision D5. |
+| Scopes select width and script (`AlphanumericFullWidth`, `Hiragana`, `KatakanaHalfWidth`, `Hangul*`). | IBus, Fcitx and the Wayland protocol have no width or script selector: these scopes are free-form; only `AlphanumericHalfWidth` asks Wayland for Latin. | No counterpart in the protocols. |
+| The IME accepts every scope. | An IBus that refuses `ContentType` (older than 1.5.32 or a portal without it) keeps the IME connected without the hint; a warning is logged. | #243 review P24. |
+
+### 11.7 The WinUI host's CoreText input (R9c)
 
 | WinUI | FerroUI | Why |
 |---|---|---|
@@ -258,7 +266,7 @@ Not taken from #243 in R10: its tests of input options and preedit resets for cl
 
 The differences from the upstream-ported adapter (`WinUITextInputMethod`) are in `DEVIATIONS.md`, "WinUI integration": they apply to connection clients only (D5).
 
-### 11.7 The UI Automation text pattern on Windows (R9a)
+### 11.8 The UI Automation text pattern on Windows (R9a)
 
 | WinUI | FerroUI | Why |
 |---|---|---|
