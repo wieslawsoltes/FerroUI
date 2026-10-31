@@ -21,7 +21,7 @@ use crate::window_impl::WindowImpl;
 use crate::window_impl_base::get;
 use ferroui_base::input::raw::{RawKeyEventArgs, RawKeyEventType, RawTextInputEventArgs};
 use ferroui_base::input::text_input::{ITextInputMethodImpl, TextInputMethodClient, TextInputOptions, TextSelection};
-use ferroui_base::input::{Key, KeyDeviceType, PhysicalKey, RawInputModifiers};
+use ferroui_base::input::{InputScopeNameValue, Key, KeyDeviceType, PhysicalKey, RawInputModifiers};
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::Rect;
@@ -76,6 +76,15 @@ impl WaylandTextInputMethod {
         self.client.borrow().clone()
     }
 
+    /// The first input scope of the owner of the client, for a client of the exact-edit
+    /// connection; `None` for any other client, whose options are converted as upstream
+    /// (not in the reference; `docs/porting/winui-rich-text.md`, decisions D5 and D8).
+    fn connection_input_scope(&self) -> Option<InputScopeNameValue> {
+        self.current_client()
+            .and_then(|client| client.input_method_connection())
+            .and_then(|connection| connection.effective_input_scope())
+    }
+
     /// Called by the sink of the window after a new worker surface
     /// is created (Show following Hide). Re-registers the sink on the
     /// freshly created worker surface and re-applies the current
@@ -123,7 +132,7 @@ impl WaylandTextInputMethod {
         proxy.set_text_input_active(has_client, supports_preedit, supports_surrounding, self.client_epoch.get());
         if has_client {
             if let Some(options) = &*self.options.borrow() {
-                proxy.set_text_input_options(options);
+                proxy.set_text_input_options_with_input_scope(options, self.connection_input_scope());
             }
         }
     }
@@ -203,7 +212,7 @@ impl ITextInputMethodImpl for WaylandTextInputMethod {
     fn set_options(&self, options: &TextInputOptions) {
         *self.options.borrow_mut() = Some(options.clone());
         if let Some(proxy) = self.owner.upgrade().and_then(|owner| owner.surface_proxy()) {
-            proxy.set_text_input_options(options);
+            proxy.set_text_input_options_with_input_scope(options, self.connection_input_scope());
         }
     }
 

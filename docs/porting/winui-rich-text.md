@@ -252,7 +252,15 @@ Not taken from #243 in R8: its manager tests for a client without exact editing 
 | A password scope turns off prediction and learning. | The same for RichEditBox on iOS and Android; on macOS no content hint is set for a password, a PIN, sensitive content or `IsTextPredictionEnabled = false`. A scope never turns on secure (masked) entry. | The scope advises the keyboard; masking is the control's. |
 | Changing `InputScope` while the field has focus updates the keyboard. | The same: macOS updates the view's `contentType`, iOS calls `reloadInputViews`, Android restarts the input when the `EditorInfo` changes and keeps the composing region. | |
 
-### 11.6 The WinUI host's CoreText input (R9c)
+### 11.6 Input methods on Linux: IBus, Fcitx, Wayland (R11)
+
+| WinUI | FerroUI | Why |
+|---|---|---|
+| `InputScope` is the hint of the touch keyboard and the IME of Windows. | For RichEditBox (a client of the exact-edit connection) the first input scope becomes the IBus `ContentType` purpose, the Fcitx capability flags and the `zwp_text_input_v3` content purpose; without a scope, the content type. A scope never takes away the privacy hints of a Password content type. TextBox keeps upstream behaviour: IBus gets no `ContentType`. | Decision D5. |
+| Scopes select width and script (`AlphanumericFullWidth`, `Hiragana`, `KatakanaHalfWidth`, `Hangul*`). | IBus, Fcitx and the Wayland protocol have no width or script selector: these scopes are free-form; only `AlphanumericHalfWidth` asks Wayland for Latin. | No counterpart in the protocols. |
+| The IME accepts every scope. | An IBus that refuses `ContentType` (older than 1.5.32 or a portal without it) keeps the IME connected without the hint; a warning is logged. | #243 review P24. |
+
+### 11.7 The WinUI host's CoreText input (R9c)
 
 | WinUI | FerroUI | Why |
 |---|---|---|
@@ -260,7 +268,7 @@ Not taken from #243 in R8: its manager tests for a client without exact editing 
 
 The differences from the upstream-ported adapter (`WinUITextInputMethod`) are in `DEVIATIONS.md`, "WinUI integration": they apply to connection clients only (D5).
 
-### 11.7 The UI Automation text pattern on Windows (R9a)
+### 11.8 The UI Automation text pattern on Windows (R9a)
 
 | WinUI | FerroUI | Why |
 |---|---|---|
