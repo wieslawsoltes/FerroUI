@@ -1,0 +1,27 @@
+[package]
+name = "ferroui-qml-controls"
+description = "Native FerroUI controls and Rust visual type registration for QML components"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+ferroui-qml.workspace = true
+
+[dev-dependencies]
+ferroui-qml-compiler.workspace = true
+ferroui-controls = { workspace = true, features = ["testing"] }
+
+[package.metadata.release]
+group = "markup"
