@@ -1,0 +1,22 @@
+<Canvas xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Width="800" Height="520" Background="#FFF8FAFC">
+  <!-- Move and resize these controls on the artboard; the source stays synchronized. -->
+  <Border Name="Card" Canvas.Left="72" Canvas.Top="64" Width="656" Height="352"
+          Background="White" BorderBrush="#FFE2E8F0" BorderThickness="1" CornerRadius="16">
+    <Grid Margin="32" RowDefinitions="Auto,Auto,*,Auto" ColumnDefinitions="*,Auto">
+      <TextBlock Name="Heading" Text="Create something remarkable" FontSize="28" />
+      <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Margin="0,12,0,0"
+                 Text="A native FerroUI workspace. Every edit is real XAML." FontSize="15" />
+      <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Margin="0,24,0,0" Spacing="12">
+        <TextBox Name="ProjectName" Text="My next application" />
+        <CheckBox Content="Enable animated transitions" IsChecked="True" />
+      </StackPanel>
+      <Button Name="Action" Grid.Row="3" Content="Start designing" Padding="24,12"
+              HorizontalAlignment="Left" />
+      <TextBlock Grid.Row="3" Grid.Column="1" VerticalAlignment="Center" Text="FerroUI" />
+    </Grid>
+  </Border>
+  <TextBlock Name="Caption" Canvas.Left="76" Canvas.Top="452" FontSize="13"
+             Foreground="#FF64748B" Text="Select any element to inspect and edit its properties." />
+</Canvas>

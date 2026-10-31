@@ -32,7 +32,7 @@ use super::interop::{
     IExpandCollapseProvider, IInvokeProvider, IInvokeProviderImpl, IRangeValueProvider, IRawElementProviderFragment,
     IRawElementProviderFragmentImpl, IRawElementProviderFragmentRoot, IRawElementProviderFragmentRootImpl,
     IRawElementProviderSimple, IRawElementProviderSimple2, IRawElementProviderSimple2Impl, IRawElementProviderSimpleImpl,
-    IScrollItemProvider, IScrollProvider, ISelectionItemProvider, ISelectionProvider, IToggleProvider, IValueProvider,
+    IScrollItemProvider, IScrollProvider, ISelectionItemProvider, ISelectionProvider, ITextProvider2, ITextChildProvider, ITextEditProvider, IToggleProvider, IValueProvider,
     NavigateDirection, ProviderOptions, StructureChangeType, UiaControlTypeId, UiaCoreProviderApi, UiaCoreTypesApi,
     UiaEventId, UiaHeadingLevel, UiaLandmarkType, UiaLiveSetting, UiaPatternId, UiaPropertyId, UiaRect,
 };
@@ -114,6 +114,9 @@ struct NodeTable {
     /// The number of the node of a peer, by the address of the peer.
     by_peer: HashMap<usize, i32>,
     by_id: HashMap<i32, Rc<NodeEntry>>,
+    /// The number of the node of a provider, by the address of its canonical
+    /// `IUnknown` (the table holds the provider, so the address stays its own).
+    by_identity: HashMap<usize, i32>,
     /// The size at which the entries of peers that are gone are removed.
     sweep_at: usize,
 }
@@ -214,6 +217,9 @@ impl AutomationNode {
                     InterfaceEntry::of::<ISelectionItemProvider>(),
                     InterfaceEntry::of::<IToggleProvider>(),
                     InterfaceEntry::of::<IValueProvider>(),
+                    InterfaceEntry::of::<ITextProvider2>(),
+                    InterfaceEntry::of::<ITextChildProvider>(),
+                    InterfaceEntry::of::<ITextEditProvider>(),
                 ]
             };
         }
@@ -222,10 +228,10 @@ impl AutomationNode {
         let provider: ComPtr<IRawElementProviderSimple2> = match kind {
             NodeKind::Node => make_com_with(node, patterns!()),
             NodeKind::Root | NodeKind::Interop { .. } => {
-                let [a, b, c, d, e, f, g, h, i, j] = patterns!();
+                let [a, b, c, d, e, f, g, h, i, j, k, l, m] = patterns!();
                 make_com_with(
                     node,
-                    [a, b, c, d, e, f, g, h, i, j, InterfaceEntry::of::<IRawElementProviderFragmentRoot>()],
+                    [a, b, c, d, e, f, g, h, i, j, k, l, m, InterfaceEntry::of::<IRawElementProviderFragmentRoot>()],
                 )
             }
         };
@@ -239,6 +245,7 @@ impl AutomationNode {
             let mut nodes = nodes.borrow_mut();
             nodes.sweep();
             nodes.by_peer.insert(peer_key(peer), id);
+            nodes.by_identity.insert(entry.provider.as_ptr() as usize, id);
             nodes.by_id.insert(id, entry.clone());
         });
 
@@ -246,6 +253,7 @@ impl AutomationNode {
             peer.children_changed(move || Self::on_peer_children_changed(id)),
             peer.property_changed(move |e| Self::on_peer_property_changed(id, e)),
         ];
+        subscriptions.extend(Self::text_subscriptions(peer, id));
         if let Some(embedded_root) = peer.get_provider::<dyn aap::IEmbeddedRootProvider>() {
             subscriptions.push(embedded_root.focus_changed(Rc::new(move || Self::on_embedded_root_focus_changed(id))));
         }
@@ -269,9 +277,27 @@ impl AutomationNode {
         Self::entry(id)?.peer.upgrade().filter(|peer| peer.is_element_available())
     }
 
+    /// Resolves the actual text container's node for a range returned by a
+    /// TextChild provider. The range must outlive removal of that child.
+    pub(crate) fn id_for_peer(peer: &Ref<AutomationPeer>) -> Option<i32> {
+        Self::get_or_create(Some(peer))?;
+        S_NODES.with(|nodes| nodes.borrow().by_peer.get(&peer_key(peer)).copied())
+    }
+
     /// The provider of the node with the number `id`, on the UI thread.
     pub(crate) fn provider_of(id: i32) -> Option<ComPtr<IRawElementProviderSimple>> {
         Self::entry(id).map(|entry| entry.provider.clone())
+    }
+
+    /// Resolves a canonical native identity without dereferencing an arbitrary
+    /// client's COM object as a Rust node. Every entry's first interface is its
+    /// canonical IUnknown, including its inherited simple-provider interface.
+    /// The lookup is indexed: it does not scan the table.
+    pub(crate) fn peer_from_identity(identity: usize) -> Option<Ref<AutomationPeer>> {
+        S_NODES.with(|nodes| {
+            let nodes = nodes.borrow();
+            nodes.by_id.get(nodes.by_identity.get(&identity)?)?.peer.upgrade()
+        })
     }
 
     /// The number of nodes the table of the calling thread holds.
@@ -359,6 +385,10 @@ impl AutomationNode {
             UiaPatternId::ScrollItem => true,
             UiaPatternId::Selection => has::<dyn aap::ISelectionProvider>(self)?,
             UiaPatternId::SelectionItem => has::<dyn aap::ISelectionItemProvider>(self)?,
+            UiaPatternId::Text => has::<dyn aap::ITextProvider>(self)?,
+            UiaPatternId::Text2 => has::<dyn aap::ITextProvider2>(self)?,
+            UiaPatternId::TextChild => has::<dyn aap::ITextChildProvider>(self)?,
+            UiaPatternId::TextEdit => has::<dyn aap::ITextEditProvider>(self)?,
             UiaPatternId::Toggle => has::<dyn aap::IToggleProvider>(self)?,
             UiaPatternId::Value => has::<dyn aap::IValueProvider>(self)?,
             _ => false,
@@ -405,6 +435,10 @@ impl AutomationNode {
             UiaPropertyId::IsEnabled => Plain::Bool(peer.is_enabled()),
             UiaPropertyId::IsKeyboardFocusable => Plain::Bool(peer.is_keyboard_focusable()),
             UiaPropertyId::IsOffscreen => Plain::Bool(peer.is_offscreen()),
+            UiaPropertyId::IsTextPatternAvailable => Plain::Bool(peer.get_provider::<dyn aap::ITextProvider>().is_some()),
+            UiaPropertyId::IsTextPattern2Available => Plain::Bool(peer.get_provider::<dyn aap::ITextProvider2>().is_some()),
+            UiaPropertyId::IsTextEditPatternAvailable => Plain::Bool(peer.get_provider::<dyn aap::ITextEditProvider>().is_some()),
+            UiaPropertyId::IsTextChildPatternAvailable => Plain::Bool(peer.get_provider::<dyn aap::ITextChildProvider>().is_some()),
             UiaPropertyId::ItemType => Plain::Text(peer.get_item_type()),
             UiaPropertyId::ItemStatus => Plain::Text(peer.get_item_status()),
             UiaPropertyId::LocalizedControlType => Plain::Text(Some(peer.get_localized_control_type())),
@@ -485,7 +519,9 @@ impl AutomationNode {
         let entry = S_NODES.with(|nodes| {
             let mut nodes = nodes.borrow_mut();
             let id = nodes.by_peer.remove(&peer_key(peer))?;
-            nodes.by_id.remove(&id)
+            let entry = nodes.by_id.remove(&id)?;
+            nodes.by_identity.remove(&(entry.provider.as_ptr() as usize));
+            Some(entry)
         });
         if let Some(entry) = entry {
             for subscription in entry.subscriptions.take() {
@@ -735,6 +771,7 @@ impl NodeTable {
         self.by_id.retain(|_, entry| entry.peer.upgrade().is_some());
         let by_id = &self.by_id;
         self.by_peer.retain(|_, id| by_id.contains_key(id));
+        self.by_identity.retain(|_, id| by_id.contains_key(id));
         self.sweep_at = self.by_id.len() * 2;
     }
 }

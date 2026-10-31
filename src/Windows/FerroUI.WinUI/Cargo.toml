@@ -44,6 +44,12 @@ windows-sys = { workspace = true, features = [
     "Win32_System_Threading",
 ] }
 
+[dev-dependencies]
+# The tests of the CoreText host install a RichEditBox, a client of the exact-edit input
+# connection, on the windowing platform of the unit tests of the controls.
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+
 [build-dependencies]
 # The port's MicroCom generator: the standard library alone.
 microcom-codegen.workspace = true

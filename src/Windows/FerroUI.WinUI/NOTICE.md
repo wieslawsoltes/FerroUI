@@ -2,7 +2,7 @@
 
 ## Avalonia
 
-The WinUI integration is a port of `src/Windows/Avalonia.WinUI` of the Avalonia project (MIT, Copyright (c) AvaloniaUI OÜ; the license text is in the `NOTICE.md` at the root of the repository): its structure, its names, its logic and the comments that explain that logic are derived from it, file by file. The mapping of the files is in `docs/porting/winui.md`.
+The WinUI integration is a port of `src/Windows/Avalonia.WinUI` of the Avalonia project (MIT, Copyright (c) AvaloniaUI OÜ; the license text is in the `NOTICE.md` at the root of the repository): its structure, its names, its logic and the comments that explain that logic are derived from it, file by file. The mapping of the files is in `docs/porting/winui.md`. The CoreText host of clients of the exact-edit input connection (`win_ui_text_input_method_exact.rs`, `win_ui_text_input_method_layout.rs`, `core_text_input_options.rs`, `core_text_layout.rs`, `core_text_synchronization.rs`) is an addition of FerroUI, not derived from it.
 
 ## WinUI 3 and the Windows App SDK
 

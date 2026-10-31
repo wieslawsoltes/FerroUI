@@ -63,6 +63,9 @@ mod tests {
         assert_eq!(ITableItemProvider::IID, iid("b9734fa6-771f-4d78-9c90-2517999349cd"));
         assert_eq!(ITableProvider::IID, iid("9c860395-97b3-490a-b52a-858cc22af166"));
         assert_eq!(ITextProvider::IID, iid("3589c92c-63f3-4367-99bb-ada653b77cf2"));
+        assert_eq!(ITextProvider2::IID, iid("0dc5e6ed-3e16-4bf1-8f9a-a979878bc195"));
+        assert_eq!(ITextEditProvider::IID, iid("ea3605b4-3a05-400e-b5f9-4e91b40f6176"));
+        assert_eq!(ITextChildProvider::IID, iid("4c2de2b9-c88f-4f88-a111-f1d336b7d1a9"));
         assert_eq!(ITextRangeProvider::IID, iid("5347ad7b-c355-46f8-aff5-909033582f63"));
         assert_eq!(ITransformProvider::IID, iid("6829ddc4-4f91-4ffa-b86f-bd3e2987cb4c"));
         assert_eq!(IWindowProvider::IID, iid("987df77b-db06-4d77-8f8a-86a9c3bb90b9"));
@@ -97,6 +100,9 @@ mod tests {
         assert_eq!(3 + 2, slots::<ITableItemProvider>());
         assert_eq!(3 + 3, slots::<ITableProvider>());
         assert_eq!(3 + 6, slots::<ITextProvider>());
+        assert_eq!(3 + 6 + 2, slots::<ITextProvider2>());
+        assert_eq!(3 + 6 + 2, slots::<ITextEditProvider>());
+        assert_eq!(3 + 2, slots::<ITextChildProvider>());
         assert_eq!(3 + 18, slots::<ITextRangeProvider>());
         assert_eq!(3 + 6, slots::<ITransformProvider>());
         assert_eq!(3 + 9, slots::<IWindowProvider>());
@@ -118,6 +124,7 @@ mod tests {
         assert_eq!(30086, UiaPropertyId::ToggleToggleState.0);
         assert_eq!(30090, UiaPropertyId::IsLegacyIAccessiblePatternAvailable.0);
         assert_eq!(30135, UiaPropertyId::LiveSetting.0);
+        assert_eq!(30149, UiaPropertyId::IsTextEditPatternAvailable.0);
         assert_eq!(30157, UiaPropertyId::LandmarkType.0);
         assert_eq!(30158, UiaPropertyId::LocalizedLandmarkType.0);
         assert_eq!(30166, UiaPropertyId::Rotatation.0);
@@ -131,6 +138,9 @@ mod tests {
         assert_eq!(10010, UiaPatternId::SelectionItem.0);
         assert_eq!(10015, UiaPatternId::Toggle.0);
         assert_eq!(10017, UiaPatternId::ScrollItem.0);
+        assert_eq!(10024, UiaPatternId::Text2.0);
+        assert_eq!(10029, UiaPatternId::TextChild.0);
+        assert_eq!(10032, UiaPatternId::TextEdit.0);
         assert_eq!(10033, UiaPatternId::CustomNavigation.0);
 
         assert_eq!(50000, UiaControlTypeId::Button.0);
@@ -149,6 +159,8 @@ mod tests {
         assert_eq!(20005, UiaEventId::AutomationFocusChanged.0);
         assert_eq!(20009, UiaEventId::Invoke_Invoked.0);
         assert_eq!(20024, UiaEventId::LiveRegionChanged.0);
+        assert_eq!(20032, UiaEventId::TextEdit_TextChanged.0);
+        assert_eq!(20033, UiaEventId::TextEdit_ConversionTargetChanged.0);
         assert_eq!(20034, UiaEventId::Changes.0);
 
         assert_eq!(80000, UiaLandmarkType::Custom.0);
@@ -160,6 +172,11 @@ mod tests {
 
     #[test]
     fn the_enumerations_have_the_values_of_the_system() {
+        assert_eq!(0, TextEditChangeType::None.0);
+        assert_eq!(1, TextEditChangeType::AutoCorrect.0);
+        assert_eq!(2, TextEditChangeType::Composition.0);
+        assert_eq!(3, TextEditChangeType::CompositionFinalized.0);
+        assert_eq!(4, TextEditChangeType::AutoComplete.0);
         assert_eq!(1, ProviderOptions::ClientSideProvider.0);
         assert_eq!(2, ProviderOptions::ServerSideProvider.0);
         assert_eq!(8, ProviderOptions::OverrideProvider.0);
