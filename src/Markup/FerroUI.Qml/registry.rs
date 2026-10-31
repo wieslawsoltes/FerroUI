@@ -93,6 +93,16 @@ impl TypeRegistry {
             .entry("QtQml".into())
             .or_default()
             .insert("QtObject".into(), qt_object);
+        let timer = TypeDefinition::default()
+            .inherits("QtQml", "QtObject")
+            .property("interval", "int", Value::Number(1000.))
+            .property("repeat", "bool", Value::Bool(false))
+            .property("running", "bool", Value::Bool(false))
+            .property("triggeredOnStart", "bool", Value::Bool(false))
+            .signal("triggered", Vec::new());
+        registry
+            .register("QtQml", "Timer", timer)
+            .expect("built-in Timer contract");
         let connections = TypeDefinition::default()
             .inherits("QtQml", "QtObject")
             .property("target", "QtObject", Value::Null)

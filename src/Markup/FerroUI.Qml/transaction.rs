@@ -14,6 +14,7 @@ pub(crate) struct Transaction<'a> {
     initializing: bool,
     pub(crate) depth: usize,
     steps: usize,
+    pub(crate) timer_changes: timers::TimerChanges,
 }
 
 impl Instance {
@@ -31,6 +32,7 @@ impl Instance {
             initializing: false,
             depth: 0,
             steps: 0,
+            timer_changes: Default::default(),
         };
         let result = operation(&mut tx).and_then(|value| {
             tx.settle()?;
@@ -59,6 +61,7 @@ impl Instance {
             Ok(value)
         });
         if result.is_err() {
+            tx.timer_changes.rollback(&mut tx.model.timers);
             for (key, old) in tx.original {
                 tx.model.slots[key] = old;
             }
@@ -107,6 +110,10 @@ impl Transaction<'_> {
         );
         self.settle()?;
         self.initializing = false;
+        self.timer_changes
+            .pending
+            .extend(self.model.timers.objects());
+        self.settle()?;
         for index in (0..self.model.nodes.len()).rev() {
             let object = ObjectId {
                 instance: self.model.identity,
@@ -118,10 +125,16 @@ impl Transaction<'_> {
         Ok(())
     }
 
-    fn settle(&mut self) -> Result<(), Error> {
+    pub(crate) fn settle(&mut self) -> Result<(), Error> {
         loop {
             while let Some(key) = self.pending.pop_first() {
                 self.evaluate(key)?;
+            }
+            if !self.initializing {
+                if let Some(timer) = self.timer_changes.pending.pop_first() {
+                    self.schedule_timer(timer)?;
+                    continue;
+                }
             }
             let Some((object, name)) = self.notifications.pop_front() else {
                 break;
@@ -215,6 +228,14 @@ impl Transaction<'_> {
         }
         if !self.initializing {
             let property = &self.model.properties[key];
+            if self.model.timers.is_timer(property.owner)
+                && matches!(
+                    property.name.as_str(),
+                    "running" | "interval" | "repeat" | "triggeredOnStart"
+                )
+            {
+                self.timer_changes.pending.insert(property.owner);
+            }
             let signal = format!("{}Changed", property.name);
             if self.model.nodes[property.owner.index]
                 .handlers
