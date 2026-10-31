@@ -3,6 +3,8 @@
 mod emit;
 mod files;
 mod identified;
+#[cfg(feature = "javascript")]
+mod javascript;
 mod native;
 mod scripts;
 
@@ -23,6 +25,8 @@ type Validate<'a> = Box<dyn Fn(&ferroui_qml_compiler::Document) -> Result<(), St
 
 #[derive(Default)]
 pub struct Compiler<'a> {
+    #[cfg(feature = "javascript")]
+    javascript: bool,
     validate: Option<Validate<'a>>,
     import_paths: Vec<PathBuf>,
 }
@@ -33,9 +37,23 @@ pub struct Output {
     pub dependencies: BTreeSet<PathBuf>,
 }
 
+/// A linked component that can be run directly or lowered to generated Rust.
+pub struct LinkedDocument {
+    pub document: ferroui_qml_compiler::Document,
+    pub dependencies: BTreeSet<PathBuf>,
+}
+
 impl<'a> Compiler<'a> {
     pub fn new() -> Self {
         Self::default()
+    }
+
+    /// Delegate QML script bodies to an external ECMAScript engine and embed
+    /// their local resource graph. The application must provide that engine.
+    #[cfg(feature = "javascript")]
+    pub fn with_javascript(mut self) -> Self {
+        self.javascript = true;
+        self
     }
 
     /// Add a directory containing URI modules such as `Acme/Controls/qmldir`.
@@ -57,17 +75,37 @@ impl<'a> Compiler<'a> {
     }
 
     pub fn compile(&self, input: impl AsRef<Path>) -> Result<Output, BuildError> {
+        let linked = self.load(input)?;
+        Ok(Output {
+            rust: emit::module(linked.document).map_err(BuildError)?,
+            dependencies: linked.dependencies,
+        })
+    }
+
+    /// Parse, resolve and validate without generating a Rust module.
+    pub fn load(&self, input: impl AsRef<Path>) -> Result<LinkedDocument, BuildError> {
         let mut files = files::Files::new(self.import_paths.clone());
+        #[cfg(feature = "javascript")]
+        if self.javascript {
+            files.with_javascript();
+        }
         let source = files.load(input.as_ref()).map_err(BuildError)?;
         let document = ferroui_qml_compiler::link(source, &mut files)
             .map_err(|e| BuildError(e.to_string()))?;
+        let dependencies = files.dependencies();
+        #[cfg(feature = "javascript")]
+        let document = {
+            let mut doc = document;
+            files.finish(&mut doc);
+            doc
+        };
         if let Some(validate) = &self.validate {
             validate(&document)
                 .map_err(|reason| BuildError(format!("{}: {reason}", input.as_ref().display())))?;
         }
-        Ok(Output {
-            rust: emit::module(document).map_err(BuildError)?,
-            dependencies: files.dependencies(),
+        Ok(LinkedDocument {
+            document,
+            dependencies,
         })
     }
 

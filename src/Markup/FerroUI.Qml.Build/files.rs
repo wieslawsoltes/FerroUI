@@ -5,6 +5,8 @@ use std::path::{Path, PathBuf};
 use std::rc::Rc;
 
 pub(crate) struct Files {
+    #[cfg(feature = "javascript")]
+    resources: Option<crate::javascript::Resources>,
     modules: IdentifiedModules,
     documents: BTreeMap<PathBuf, Rc<Document>>,
     directories: BTreeSet<PathBuf>,
@@ -13,9 +15,23 @@ pub(crate) struct Files {
 impl Files {
     pub(crate) fn new(roots: Vec<PathBuf>) -> Self {
         Self {
+            #[cfg(feature = "javascript")]
+            resources: None,
             modules: IdentifiedModules::new(roots),
             documents: BTreeMap::new(),
             directories: BTreeSet::new(),
+        }
+    }
+
+    #[cfg(feature = "javascript")]
+    pub(crate) fn with_javascript(&mut self) {
+        self.resources = Some(Default::default());
+    }
+
+    #[cfg(feature = "javascript")]
+    pub(crate) fn finish(&mut self, document: &mut Document) {
+        if let Some(graph) = self.resources.take() {
+            document.scripts = graph.into_embedded();
         }
     }
 
@@ -26,6 +42,15 @@ impl Files {
         if !self.documents.contains_key(&path) {
             let text =
                 std::fs::read_to_string(&path).map_err(|e| format!("{}: {e}", path.display()))?;
+            #[cfg(feature = "javascript")]
+            let document = if let Some(resources) = &mut self.resources {
+                let document = ferroui_qml_compiler::parse_external(&text)
+                    .map_err(|e| format!("{}:{e}", path.display()))?;
+                resources.attach(&path, self.documents.len(), document)?
+            } else {
+                parse(&text).map_err(|e| format!("{}:{e}", path.display()))?
+            };
+            #[cfg(not(feature = "javascript"))]
             let document = parse(&text).map_err(|e| format!("{}:{e}", path.display()))?;
             self.documents.insert(path.clone(), Rc::new(document));
         }
@@ -39,12 +64,15 @@ impl Files {
     }
 
     pub(crate) fn dependencies(&self) -> BTreeSet<PathBuf> {
-        self.documents
+        let paths = self
+            .documents
             .keys()
             .chain(&self.directories)
             .cloned()
-            .chain(self.modules.watched().map(Path::to_owned))
-            .collect()
+            .chain(self.modules.watched().map(Path::to_owned));
+        #[cfg(feature = "javascript")]
+        let paths = paths.chain(self.resources.iter().flat_map(|r| r.watched().cloned()));
+        paths.collect()
     }
 }
 
@@ -55,6 +83,16 @@ impl ComponentResolver for Files {
             .ok_or("component has no directory")?;
         let mut native = Vec::new();
         for import in imports {
+            if import.is_script() {
+                #[cfg(feature = "javascript")]
+                if self.resources.is_some() {
+                    continue;
+                }
+                return Err(format!(
+                    "JavaScript import '{}' requires the JavaScript compiler mode",
+                    import.uri
+                ));
+            }
             if import.is_path {
                 let dir = base.join(&import.uri);
                 if !dir.is_dir() {
@@ -104,7 +142,11 @@ impl Files {
         let (namespace, ty) = ty
             .split_once('.')
             .map_or((None, ty), |(ns, ty)| (Some(ns), ty));
-        let visible = || imports.iter().filter(|i| i.alias.as_deref() == namespace);
+        let visible = || {
+            imports
+                .iter()
+                .filter(|i| !i.is_script() && i.alias.as_deref() == namespace)
+        };
         // Identified module types have precedence over explicit and implicit
         // directory imports, regardless of the order of the import statements.
         for import in visible().rev().filter(|i| !i.is_path) {
