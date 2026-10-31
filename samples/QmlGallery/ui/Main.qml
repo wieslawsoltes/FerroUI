@@ -1,15 +1,15 @@
 import QtQuick
 import QtQuick.Controls
+import FerroUI.Controls as Ferro
 
 Column {
     id: page
     spacing: 12
     property int count: 0
 
-    Text {
+    Ferro.TextBlock {
         text: "FerroUI QML"
-        font.pixelSize: 28
-        font.bold: true
+        fontSize: 28
     }
 
     TextField {
@@ -25,10 +25,12 @@ Column {
     Row {
         spacing: 8
         Button {
+            id: increment
             text: "Increment"
             onClicked: page.count = page.count + 1
         }
         Text {
+            id: countText
             text: "Count: " + page.count
         }
     }

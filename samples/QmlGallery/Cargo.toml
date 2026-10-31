@@ -8,15 +8,27 @@ license.workspace = true
 repository.workspace = true
 publish = false
 
+[features]
+default = ["desktop"]
+desktop = ["dep:ferroui-view", "dep:ferroui-themes-winui"]
+
+[lib]
+path = "lib.rs"
+
 [[bin]]
 name = "qml-gallery"
 path = "main.rs"
+required-features = ["desktop"]
 
 [dependencies]
+ferroui-controls.workspace = true
 ferroui-qml.workspace = true
 ferroui-qml-controls.workspace = true
-ferroui-view = { workspace = true, features = ["desktop"] }
-ferroui-themes-winui.workspace = true
+ferroui-view = { workspace = true, features = ["desktop"], optional = true }
+ferroui-themes-winui = { workspace = true, optional = true }
 
 [build-dependencies]
 ferroui-qml-build.workspace = true
+
+[dev-dependencies]
+ferroui-controls = { workspace = true, features = ["testing"] }
