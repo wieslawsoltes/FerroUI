@@ -74,7 +74,13 @@ impl IRenderTarget for SkiaGpuRenderTarget {
             ..CreateInfo::default()
         };
 
-        let context = DrawingContextImpl::new(nfo, vec![Box::new(move || session.dispose())]);
+        let gr_context = session.gr_context();
+        let mut context = DrawingContextImpl::new(nfo, vec![Box::new(move || session.dispose())]);
+        // The programs of the runtime effects are made with the first frame
+        // of a GPU context, not with the frame that first needs them.
+        if first_frame_of(&gr_context) {
+            context.prewarm_runtime_effects();
+        }
 
         Ok((Box::new(context), RenderTargetDrawingContextProperties::default()))
     }
@@ -86,4 +92,24 @@ impl IRenderTarget for SkiaGpuRenderTarget {
     fn dispose(&self) {
         self.render_target.dispose();
     }
+}
+
+ferroui_base::ferro_thread_local! {
+    /// The GPU contexts whose runtime effects were prewarmed.
+    static PREWARMED: std::cell::RefCell<Vec<std::rc::Weak<dyn super::ISkiaGrContext>>> =
+        std::cell::RefCell::new(Vec::new());
+}
+
+/// Whether this is the first frame of `gr_context` on this thread: true
+/// once per context.
+pub(crate) fn first_frame_of(gr_context: &Rc<dyn super::ISkiaGrContext>) -> bool {
+    PREWARMED.with(|prewarmed| {
+        let mut prewarmed = prewarmed.borrow_mut();
+        prewarmed.retain(|context| context.strong_count() > 0);
+        if prewarmed.iter().any(|context| std::ptr::addr_eq(context.as_ptr(), Rc::as_ptr(gr_context))) {
+            return false;
+        }
+        prewarmed.push(Rc::downgrade(gr_context));
+        true
+    })
 }

@@ -1,7 +1,7 @@
-//! The clips of rounded rectangles that a GPU surface could not apply
-//! analytically (under a rotation, or with complex radii) drawn as coverage
-//! shaders, compared with Skia's own clip on a raster surface (the
-//! reference).
+//! The clips of rounded rectangles drawn as coverage shaders, as every
+//! rounded clip is on a GPU surface, compared with Skia's own clip on a
+//! raster surface: rotated, skewed, with complex radii, nested with a shared
+//! edge, and the clips of box shadows.
 //!
 //! Both are compared with the exact coverage of each pixel (the area of
 //! the pixel inside the clip, by 16 by 16 samples of the rounded rectangle
@@ -86,46 +86,90 @@ impl ClipScene {
 
     /// Whether `(x, y)` of the drawing is inside the rounded rectangle.
     fn contains(&self, x: f64, y: f64) -> bool {
-        let rect = card();
-        if x < rect.x || y < rect.y || x > rect.right() || y > rect.bottom() {
-            return false;
-        }
-        let corners = [
-            (self.radius.top_left, rect.x + self.radius.top_left, rect.y + self.radius.top_left, x < rect.x + self.radius.top_left && y < rect.y + self.radius.top_left),
-            (self.radius.top_right, rect.right() - self.radius.top_right, rect.y + self.radius.top_right, x > rect.right() - self.radius.top_right && y < rect.y + self.radius.top_right),
-            (self.radius.bottom_right, rect.right() - self.radius.bottom_right, rect.bottom() - self.radius.bottom_right, x > rect.right() - self.radius.bottom_right && y > rect.bottom() - self.radius.bottom_right),
-            (self.radius.bottom_left, rect.x + self.radius.bottom_left, rect.bottom() - self.radius.bottom_left, x < rect.x + self.radius.bottom_left && y > rect.bottom() - self.radius.bottom_left),
-        ];
-        for (radius, cx, cy, inside_corner) in corners {
-            if radius > 0.0 && inside_corner {
-                return (x - cx).powi(2) + (y - cy).powi(2) <= radius * radius;
-            }
-        }
-        true
+        rounded_rect_contains(card(), self.radius, x, y)
     }
 
     /// The exact coverage of each pixel, as an alpha.
     pub(crate) fn exact(&self) -> Vec<u8> {
-        let inverse = self.transform.try_invert().unwrap();
-        let mut result = vec![0u8; (SIZE * SIZE) as usize];
-        const SAMPLES: i32 = 16;
-        for y in 0..SIZE {
-            for x in 0..SIZE {
-                let mut inside = 0;
-                for sy in 0..SAMPLES {
-                    for sx in 0..SAMPLES {
-                        let device = ferroui_base::Point::new(
-                            x as f64 + (sx as f64 + 0.5) / SAMPLES as f64,
-                            y as f64 + (sy as f64 + 0.5) / SAMPLES as f64,
-                        );
-                        let local = inverse.transform(device);
-                        inside += i32::from(self.contains(local.x, local.y));
-                    }
-                }
-                result[(y * SIZE + x) as usize] = (f64::from(inside) / f64::from(SAMPLES * SAMPLES) * 255.0).round() as u8;
-            }
+        exact_coverage(self.transform, &|x, y| self.contains(x, y))
+    }
+}
+
+/// Whether `(x, y)` is inside `rect` with the corners of `radius`.
+fn rounded_rect_contains(rect: Rect, radius: CornerRadius, x: f64, y: f64) -> bool {
+    if x < rect.x || y < rect.y || x > rect.right() || y > rect.bottom() {
+        return false;
+    }
+    let corners = [
+        (radius.top_left, rect.x + radius.top_left, rect.y + radius.top_left, x < rect.x + radius.top_left && y < rect.y + radius.top_left),
+        (radius.top_right, rect.right() - radius.top_right, rect.y + radius.top_right, x > rect.right() - radius.top_right && y < rect.y + radius.top_right),
+        (radius.bottom_right, rect.right() - radius.bottom_right, rect.bottom() - radius.bottom_right, x > rect.right() - radius.bottom_right && y > rect.bottom() - radius.bottom_right),
+        (radius.bottom_left, rect.x + radius.bottom_left, rect.bottom() - radius.bottom_left, x < rect.x + radius.bottom_left && y > rect.bottom() - radius.bottom_left),
+    ];
+    for (r, cx, cy, inside_corner) in corners {
+        if r > 0.0 && inside_corner {
+            return (x - cx).powi(2) + (y - cy).powi(2) <= r * r;
         }
-        result
+    }
+    true
+}
+
+/// The exact coverage of each pixel under `transform` of the area `inside`
+/// says, by 16 by 16 samples, as an alpha.
+pub(crate) fn exact_coverage(transform: Matrix, inside: &dyn Fn(f64, f64) -> bool) -> Vec<u8> {
+    let inverse = transform.try_invert().unwrap();
+    let mut result = vec![0u8; (SIZE * SIZE) as usize];
+    const SAMPLES: i32 = 16;
+    for y in 0..SIZE {
+        for x in 0..SIZE {
+            let mut count = 0;
+            for sy in 0..SAMPLES {
+                for sx in 0..SAMPLES {
+                    let device = ferroui_base::Point::new(
+                        x as f64 + (sx as f64 + 0.5) / SAMPLES as f64,
+                        y as f64 + (sy as f64 + 0.5) / SAMPLES as f64,
+                    );
+                    let local = inverse.transform(device);
+                    count += i32::from(inside(local.x, local.y));
+                }
+            }
+            result[(y * SIZE + x) as usize] = (f64::from(count) / f64::from(SAMPLES * SAMPLES) * 255.0).round() as u8;
+        }
+    }
+    result
+}
+
+/// A card clipping to its rounded corners and a picture in it clipping to
+/// its own, the two sharing their right edge: the clips Ganesh merges into
+/// one rounded rectangle with different corners (the software masks
+/// measured in the Ferro Store).
+pub(crate) struct NestedClips {
+    pub(crate) transform: Matrix,
+}
+
+impl NestedClips {
+    const CARD: Rect = Rect { x: 5.0, y: 5.0, width: 120.0, height: 90.0 };
+    const PICTURE: Rect = Rect { x: 60.0, y: 20.0, width: 65.0, height: 110.0 };
+
+    pub(crate) fn draw(&self, context: &mut dyn IDrawingContextImpl) {
+        context.set_transform(self.transform);
+        context.push_clip_rounded(RoundedRect::from_corner_radius(Self::CARD, CornerRadius::uniform(13.0)));
+        context.push_clip_rounded(RoundedRect::from_corner_radius(Self::PICTURE, CornerRadius::uniform(10.0)));
+        fill(context);
+        context.pop_clip();
+        context.pop_clip();
+    }
+
+    /// The exact coverage of each clip, multiplied: anti-aliased clips
+    /// combine their coverages by multiplying them (Ganesh's analytic clips
+    /// and Skia's raster clips alike), which at the shared edge is less
+    /// than the area of the intersection (a quarter for a pixel half covered
+    /// by both).
+    pub(crate) fn exact(&self) -> Vec<u8> {
+        let card = exact_coverage(self.transform, &|x, y| rounded_rect_contains(Self::CARD, CornerRadius::uniform(13.0), x, y));
+        let picture =
+            exact_coverage(self.transform, &|x, y| rounded_rect_contains(Self::PICTURE, CornerRadius::uniform(10.0), x, y));
+        card.iter().zip(&picture).map(|(a, b)| ((u32::from(*a) * u32::from(*b) + 127) / 255) as u8).collect()
     }
 }
 
@@ -211,27 +255,42 @@ fn the_shadows_of_rotated_cards_keep_their_clips() {
 }
 
 #[test]
-fn only_clips_a_gpu_surface_cannot_apply_analytically_are_coverage_shaders() {
+fn nested_rounded_clips_sharing_an_edge_match_the_exact_coverage() {
+    let scene = NestedClips { transform: Matrix::create_translation(3.25, 4.5) };
+    let exact = scene.exact();
+    let shader = alphas(true, &|context| scene.draw(context));
+    let skia = alphas(false, &|context| scene.draw(context));
+    let (largest, mean, _) = compare_alphas(&exact, &shader);
+    let (_, skia_mean, _) = compare_alphas(&exact, &skia);
+    assert!(largest <= 16, "within 16 levels of the exact coverage: {largest}");
+    assert!(mean <= skia_mean + 0.5, "as close to the exact coverage as Skia's clip: {mean} {skia_mean}");
+    assert!(shader.iter().any(|alpha| *alpha == 255));
+}
+
+#[test]
+fn on_a_gpu_surface_every_rounded_clip_is_a_coverage_shader() {
     let previous = set_coverage_clips_on_raster(true);
     let (before, _) = rounded_clip_counts();
     let target = PlatformRenderInterface::default()
         .create_render_target_bitmap(PixelSize::new(SIZE, SIZE), Vector::new(96.0, 96.0));
     let mut context = target.create_drawing_context();
-    // Upright with the same radius at every corner: analytic.
-    context.push_clip_rounded(RoundedRect::from_corner_radius(card(), CornerRadius::uniform(10.0)));
+    // A rectangle, upright or rotated, is not rounded: Skia's clip (a
+    // scissor or a convex polygon).
+    context.push_clip_rounded(RoundedRect::from_rect(card()));
     context.pop_clip();
-    // A rectangle under a rotation: a rotated rectangle is a convex polygon, analytic.
     context.set_transform(card_transform(0.4));
     context.push_clip_rounded(RoundedRect::from_rect(card()));
     context.pop_clip();
     assert_eq!(before, rounded_clip_counts().0);
-    // Rotated rounded corners and complex radii are not.
+    // Rounded corners, rotated or upright, simple or complex, are shaders.
     context.push_clip_rounded(RoundedRect::from_corner_radius(card(), CornerRadius::uniform(10.0)));
     context.pop_clip();
     context.set_transform(Matrix::IDENTITY);
+    context.push_clip_rounded(RoundedRect::from_corner_radius(card(), CornerRadius::uniform(10.0)));
+    context.pop_clip();
     context.push_clip_rounded(RoundedRect::from_corner_radius(card(), CornerRadius::new(2.0, 9.0, 4.0, 0.0)));
     context.pop_clip();
-    assert_eq!(before + 2, rounded_clip_counts().0);
+    assert_eq!(before + 3, rounded_clip_counts().0);
     context.dispose();
     set_coverage_clips_on_raster(previous);
     // Without the setting a raster surface keeps Skia's clips.
@@ -242,4 +301,24 @@ fn only_clips_a_gpu_surface_cannot_apply_analytically_are_coverage_shaders() {
     context.pop_clip();
     context.dispose();
     assert_eq!((before, masks), rounded_clip_counts());
+}
+
+/// The prewarm of the runtime effects compiles every program, draws each
+/// once, and leaves the target as it was (the corner it drew in cleared).
+#[test]
+fn the_prewarm_compiles_every_program_and_leaves_nothing_drawn() {
+    let target = PlatformRenderInterface::default()
+        .create_render_target_bitmap(PixelSize::new(SIZE, SIZE), Vector::new(96.0, 96.0));
+    let mut context = target.create_drawing_context();
+    context.set_transform(Matrix::create_translation(10.0, 10.0));
+    let skia = context.as_any_mut().downcast_mut::<crate::DrawingContextImpl>().unwrap();
+    assert_eq!(7, skia.prewarm_runtime_effects());
+    // The transform of the context is kept.
+    assert_eq!(Matrix::create_translation(10.0, 10.0), context.transform());
+    context.dispose();
+    let framebuffer = target.lock();
+    let mut any = false;
+    framebuffer.with_data(&mut |data| any = data.iter().any(|byte| *byte != 0));
+    framebuffer.dispose();
+    assert!(!any, "nothing is left drawn");
 }

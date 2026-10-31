@@ -368,6 +368,16 @@ pub(crate) fn pixel_image_count() -> u64 {
     PIXEL_IMAGES.with(std::cell::Cell::get)
 }
 
+/// Every program of the compositor's GPU effects, compiled (the SkSL
+/// compiler's part of the prewarm, `DrawingContextImpl::prewarm_runtime_effects`).
+/// Returns how many compiled.
+pub(crate) fn compile_all() -> usize {
+    [&LIGHTING, &MULTIPLY, &BLEND, &MASK_INVERT, &DISSOLVE_NOISE, &DISSOLVE_SELECT, &ROUNDED_RECT_COVERAGE]
+        .iter()
+        .filter(|program| program.effect().is_some())
+        .count()
+}
+
 /// What the lighting shader gives.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum LightingOutput {
