@@ -60,6 +60,36 @@ extern "C" {
     #[wasm_bindgen(js_namespace = InputHelper, js_name = setBounds)]
     pub fn set_bounds(html_element: &JsObject, x: i32, y: i32, width: i32, height: i32, caret: i32);
 
+    // Not in the original: the textarea of a client of the exact-edit connection
+    // (docs/porting/browser-platform.md, section 14). The functions above keep their signatures
+    // and serve the input element of every other client.
+
+    /// The textarea beside the hidden input element, or `null` when the page has none.
+    #[wasm_bindgen(js_namespace = InputHelper, js_name = getTextInputElement)]
+    pub fn get_text_input_element(input_element: &JsObject) -> JsObject;
+
+    /// Empties the textarea; `revision` identifies the empty snapshot.
+    #[wasm_bindgen(js_namespace = InputHelper, js_name = clearTextInput)]
+    pub fn clear_text_input_element(html_element: &JsObject, revision: u32);
+
+    /// Mirrors a snapshot of the client into the textarea: its text with LF line ends, the
+    /// directed selection in UTF-16 units and the revision events about it must carry.
+    #[wasm_bindgen(js_namespace = InputHelper, js_name = setTextInputState)]
+    pub fn set_text_input_state(html_element: &JsObject, text: &str, anchor: i32, active: i32, revision: u32);
+
+    /// Sets the keyboard and prediction hints of the textarea as attributes, without
+    /// replacing the element or touching its value and selection.
+    #[wasm_bindgen(js_namespace = InputHelper, js_name = setInputOptions)]
+    pub fn set_input_options(
+        html_element: &JsObject,
+        input_mode: &str,
+        enter_key_hint: &str,
+        capitalization: &str,
+        suggestions: bool,
+        sensitive: bool,
+        language: &str,
+    );
+
     /// Installs the handlers of the page that are not bound to a view.
     #[wasm_bindgen(js_namespace = InputHelper, js_name = initializeBackgroundHandlers)]
     pub fn initialize_background_handlers(global_this: &JsObject);
@@ -308,6 +338,64 @@ pub fn on_composition_update(top_level_id: i32, data: Option<String>) {
 pub fn on_composition_end(top_level_id: i32, data: Option<String>) {
     if let Some(top_level) = BrowserTopLevelImpl::try_get_top_level(top_level_id) {
         top_level.input_handler().text_input_method().on_composition_end(data.as_deref());
+    }
+}
+
+// Not in the original: the events of the textarea of a client of the exact-edit connection
+// (docs/porting/browser-platform.md, section 14). `revision` is the revision of the snapshot the
+// textarea showed, `value`, `start` and `end` its value and directed selection at the event.
+
+/// A `beforeinput` of the textarea. Returns the token of the edit, or 0 when the edit is rejected
+/// (the page then prevents it when it can).
+#[wasm_bindgen(js_name = InputHelper_OnConnectionBeforeInput)]
+pub fn on_connection_before_input(
+    top_level_id: i32,
+    revision: u32,
+    input_type: &str,
+    value: &str,
+    start: i32,
+    end: i32,
+) -> u32 {
+    BrowserTopLevelImpl::try_get_top_level(top_level_id).map_or(0, |top_level| {
+        top_level.input_handler().text_input_method().on_dom_before_input(revision, input_type, value, start, end)
+    })
+}
+
+/// An `input` of the textarea: `token` is the token of its `beforeinput`, 0 without one.
+#[wasm_bindgen(js_name = InputHelper_OnConnectionInput)]
+pub fn on_connection_input(
+    top_level_id: i32,
+    revision: u32,
+    token: u32,
+    input_type: &str,
+    value: &str,
+    start: i32,
+    end: i32,
+) {
+    if let Some(top_level) = BrowserTopLevelImpl::try_get_top_level(top_level_id) {
+        top_level.input_handler().text_input_method().on_dom_input(revision, token, input_type, value, start, end);
+    }
+}
+
+/// A composition of the textarea started. Returns its token, or 0 when it is rejected.
+#[wasm_bindgen(js_name = InputHelper_OnConnectionCompositionStart)]
+pub fn on_connection_composition_start(top_level_id: i32, revision: u32, value: &str, start: i32, end: i32) -> u32 {
+    BrowserTopLevelImpl::try_get_top_level(top_level_id).map_or(0, |top_level| {
+        top_level.input_handler().text_input_method().on_dom_composition_start(revision, value, start, end)
+    })
+}
+
+#[wasm_bindgen(js_name = InputHelper_OnConnectionCompositionUpdate)]
+pub fn on_connection_composition_update(top_level_id: i32, token: u32, data: &str) {
+    if let Some(top_level) = BrowserTopLevelImpl::try_get_top_level(top_level_id) {
+        top_level.input_handler().text_input_method().on_dom_composition_update(token, data);
+    }
+}
+
+#[wasm_bindgen(js_name = InputHelper_OnConnectionCompositionEnd)]
+pub fn on_connection_composition_end(top_level_id: i32, token: u32, data: &str, value: &str, start: i32, end: i32) {
+    if let Some(top_level) = BrowserTopLevelImpl::try_get_top_level(top_level_id) {
+        top_level.input_handler().text_input_method().on_dom_composition_end(token, data, value, start, end);
     }
 }
 
