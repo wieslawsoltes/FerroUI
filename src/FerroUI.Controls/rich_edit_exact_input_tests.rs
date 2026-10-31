@@ -35,6 +35,42 @@ fn rich_exact_input_replaces_requested_range_independently_of_selection_and_undo
     );
 }
 
+/// #243 review M6: the WinUI host sends each character typed outside a composition as a
+/// one-character exact edit at the caret; consecutive ones are one undo unit, as RichEdit
+/// groups typing.
+#[test]
+fn rich_exact_input_typed_characters_at_the_caret_are_one_undo_unit() {
+    let f = Fixture::new(true);
+    f.owner.set_text("ab").unwrap();
+    f.owner.select(2, 2);
+    f.owner.editor().clear_history();
+    for (index, character) in ["c", "d", "e"].into_iter().enumerate() {
+        let at = 2 + index as i32;
+        assert!(f
+            .connection()
+            .apply_edit(&edit(at, at, character, at + 1, at + 1), 1)
+            .unwrap());
+    }
+    assert_eq!(f.owner.text(), "abcde");
+    assert!(f.owner.undo().unwrap());
+    assert_eq!(f.owner.text(), "ab");
+    assert!(!f.owner.undo().unwrap());
+    // A replacement of a range ends the typing unit and is a unit of its own.
+    for (index, character) in ["x", "y"].into_iter().enumerate() {
+        let at = 2 + index as i32;
+        assert!(f
+            .connection()
+            .apply_edit(&edit(at, at, character, at + 1, at + 1), 1)
+            .unwrap());
+    }
+    assert!(f.connection().apply_edit(&edit(0, 1, "Z", 1, 1), 1).unwrap());
+    assert_eq!(f.owner.text(), "Zbxy");
+    assert!(f.owner.undo().unwrap());
+    assert_eq!(f.owner.text(), "abxy");
+    assert!(f.owner.undo().unwrap());
+    assert_eq!(f.owner.text(), "ab");
+}
+
 #[test]
 fn rich_exact_input_empty_replacement_deletes_real_range() {
     let f = Fixture::new(true);
