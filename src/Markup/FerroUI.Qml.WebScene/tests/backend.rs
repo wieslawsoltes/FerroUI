@@ -221,3 +221,37 @@ fn collecting_transient_host_proxies_releases_records_but_preserves_retained_cyc
         Value::Bool(true)
     );
 }
+
+#[test]
+#[ignore = "requires the WebScene native ABI 3 package"]
+fn reflecting_qml_members_returns_their_values_and_qt_descriptor_flags() {
+    let mut app = load(
+        r#"
+        import QtQml
+        QtObject {
+            id: root
+            property int count: 7
+            readonly property int fixedCount: 3
+            function report(): string {
+                const d = Object.getOwnPropertyDescriptor(root, "count")
+                const fixed = Object.getOwnPropertyDescriptor(root, "fixedCount")
+                const method = Object.getOwnPropertyDescriptor(root, "report")
+                return [d.value,d.writable,d.enumerable,d.configurable,
+                    fixed.value,fixed.writable,method.value===root.report,
+                    Object.getOwnPropertyDescriptor(root, "missing")===undefined].join("/")
+            }
+        }
+    "#,
+        engine(Duration::from_secs(4)),
+    );
+    let root = app.root();
+    assert_eq!(
+        app.call(root, "report", vec![]).unwrap(),
+        Value::String("7/true/true/true/3/true/true/true".into())
+    );
+    app.set(root, "count", Value::Number(9.)).unwrap();
+    assert_eq!(
+        app.call(root, "report", vec![]).unwrap(),
+        Value::String("9/true/true/true/3/true/true/true".into())
+    );
+}

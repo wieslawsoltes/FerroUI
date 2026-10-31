@@ -140,10 +140,16 @@
             has(t,key){return typeof key === "string" && (Reflect.has(t,key)||rpc(["keys",id]).includes(key));},
             ownKeys(){return [...new Set([...Reflect.ownKeys(target), ...rpc(["keys",id])])];},
             getOwnPropertyDescriptor(t,key){
-                const desc=Reflect.getOwnPropertyDescriptor(t,key);
-                if(desc) return desc;
-                return typeof key === "string" && rpc(["keys",id]).includes(key)
-                    ? {configurable:true,enumerable:true} : undefined;
+                const own = Reflect.getOwnPropertyDescriptor(t,key);
+                if (array && key === "length") {
+                    return {...own, value:decode(rpc(["get",id,key]))};
+                }
+                if (own) return own;
+                if (typeof key !== "string" || !rpc(["keys",id]).includes(key)) return undefined;
+                // Qt exposes QObject members as ordinary data descriptors,
+                // including readonly properties. Its write path enforces readonly.
+                return {value:decode(rpc(["get",id,key])), writable:true,
+                    enumerable:true, configurable:true};
             }
         });
         proxyIds.set(result,id);
