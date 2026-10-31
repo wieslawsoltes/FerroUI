@@ -3,7 +3,7 @@ name: LiveCharts2 port
 on:
   pull_request:
     # The accounting of the port against the pinned LiveCharts2 sources (docs/porting/livecharts2.md):
-    # the scanner, its reviewed map and report. The crates of the port add their own jobs here.
+    # the scanner, its reviewed map and report, and the generated declarations of the controls.
     paths:
       - '.github/workflows/livecharts.yml'
       - 'scripts/livecharts2/**'
@@ -23,6 +23,18 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  generated:
+    name: Generated chart control declarations
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+        with:
+          components: rustfmt
+      - name: The declarations of ferroui-controls-livecharts match their generator
+        run: python3 scripts/livecharts2/generate_controls.py --check
+
   scan:
     name: Source, API and test accounting against the pinned LiveCharts2
     runs-on: ubuntu-latest

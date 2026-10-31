@@ -136,7 +136,7 @@ The Vulkan platform contracts (`src/FerroUI.Vulkan`) use `ash` 0.38.0 (MIT OR Ap
 
 - Project: <https://github.com/Live-Charts/LiveCharts2> (commit `8537b90ffb100a947cd0b1f6be49f896ae6050eb`)
 - License: MIT, Copyright (c) 2021 Alberto Rodriguez Orozco.
-- Used for: the chart calculation, geometry, motion and paints of `src/FerroUI.LiveCharts` (`ferroui-livecharts`), ported from LiveCharts2's `LiveChartsCore`; the crate's `NOTICE.md` holds the licence text, and `docs/porting/livecharts2.md` records the port.
+- Used for: the chart calculation, geometry, motion and paints of `src/FerroUI.LiveCharts` (`ferroui-livecharts`), ported from LiveCharts2's `LiveChartsCore`, and the chart controls of `src/FerroUI.Controls.LiveCharts` (`ferroui-controls-livecharts`), the native counterpart of its UI packages; each crate's `NOTICE.md` holds the licence text, and `docs/porting/livecharts2.md` records the port.
 
 ## ProTranslate
 

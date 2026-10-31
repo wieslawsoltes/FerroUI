@@ -1422,6 +1422,7 @@ dependencies = [
  "ferroui-controls-charts",
  "ferroui-controls-color-picker",
  "ferroui-controls-inking",
+ "ferroui-controls-livecharts",
  "ferroui-controls-repeater",
  "ferroui-controls-treedatagrid",
  "ferroui-desktop",
@@ -1431,6 +1432,7 @@ dependencies = [
  "ferroui-dynamic-data",
  "ferroui-harfbuzz",
  "ferroui-headless",
+ "ferroui-livecharts",
  "ferroui-markup",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
@@ -1593,6 +1595,18 @@ dependencies = [
  "ferroui-win32",
  "microcom-codegen",
  "windows-sys 0.61.2",
+]
+
+[[package]]
+name = "ferroui-controls-livecharts"
+version = "0.4.0"
+dependencies = [
+ "bitflags",
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-livecharts",
+ "ferroui-markup-xaml-loader",
 ]
 
 [[package]]

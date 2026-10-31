@@ -8,14 +8,14 @@
   "source_members": 4859,
   "source_status": {
     "native-replacement": 17,
-    "partial": 9,
-    "pending": 651,
+    "partial": 26,
+    "pending": 634,
     "ported": 21
   },
   "member_status": {
-    "native-replacement": 12,
+    "native-replacement": 17,
     "partial": 1,
-    "pending": 4845,
+    "pending": 4840,
     "ported": 1
   },
   "test_declarations": 1066,
