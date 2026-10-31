@@ -10,6 +10,8 @@ cargo run --locked -p qml-gallery
 
 The gallery combines a native FerroUI TextBlock, Qt Quick positioners, a text field and a button. Typing edits the greeting. Clicking Increment changes a QML property and updates the count label. The desktop binary and headless test mount the same compiled component. [QML source](../samples/QmlGallery/ui/Main.qml) · [Rust host](../samples/QmlGallery/lib.rs)
 
+![The Linux desktop gallery after entering Ada and clicking Increment.](images/qml-gallery-linux.png)
+
 ## Compile a component in Cargo
 
 Applications inside the workspace can use these dependencies.
