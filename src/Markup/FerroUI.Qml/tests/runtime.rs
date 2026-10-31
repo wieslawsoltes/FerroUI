@@ -187,3 +187,49 @@ fn failed_initialization_reports_unknowns_and_binding_cycles() {
         assert!(component(body).is_err(), "{body}");
     }
 }
+
+#[test]
+fn validator_rolls_back_derived_changes_and_observed_emissions() {
+    let mut ui = component("property int n: 0; signal changed(int next); function update(next: int) { n = next; changed(n) }").unwrap();
+    let root = ui.root();
+    ui.watch_signal(root, "changed").unwrap();
+    ui.set_validator(move |view, changes| {
+        if changes.iter().any(|c| c.property == "n") && view.get(root, "n")? == Value::Number(-1.) {
+            return Err(Error::new("invalid native value"));
+        }
+        Ok(())
+    });
+    assert!(ui.call(root, "update", vec![Value::Number(-1.)]).is_err());
+    assert!(ui.drain_signals().is_empty());
+    assert!(ui.drain_changes().is_empty());
+    assert_eq!(ui.get(root, "n").unwrap(), Value::Number(0.));
+    ui.call(root, "update", vec![Value::Number(10.)]).unwrap();
+    let emissions = ui.drain_signals();
+    assert_eq!(emissions.len(), 1);
+    assert_eq!(emissions[0].arguments, [Value::Number(10.)]);
+    ui.unwatch_signal(root, "changed");
+    ui.emit(root, "changed", vec![Value::Number(2.)]).unwrap();
+    assert!(ui.drain_signals().is_empty());
+}
+
+#[test]
+fn native_subtypes_preserve_contract_and_object_assignability() {
+    let mut registry = TypeRegistry::new();
+    registry
+        .register(
+            "Demo",
+            "Base",
+            TypeDefinition::default().property("width", "int", Value::Number(10.)),
+        )
+        .unwrap();
+    registry
+        .register(
+            "Demo",
+            "Derived",
+            TypeDefinition::default().inherits("Demo", "Base"),
+        )
+        .unwrap();
+    let doc=ir::parse("import Demo\nBase { property Base item: Derived { width: 21 }; property int childWidth: item.width }").unwrap();
+    let ui = Instance::new(&doc, &registry, BTreeMap::new()).unwrap();
+    assert_eq!(ui.get(ui.root(), "childWidth").unwrap(), Value::Number(21.));
+}

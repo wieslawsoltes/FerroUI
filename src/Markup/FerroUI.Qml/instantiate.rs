@@ -29,6 +29,9 @@ impl Instance {
         }
         let mut builder = Builder {
             instance: Self {
+                validator: None,
+                watched: BTreeSet::new(),
+                emissions: Vec::new(),
                 nodes: Vec::new(),
                 ids: BTreeMap::new(),
                 properties: Vec::new(),
@@ -86,14 +89,20 @@ impl Instance {
         }
     }
 
+    fn validate_handles(&self, value: &Value) -> Result<(), Error> {
+        match value {
+            Value::Object(id) if self.node(*id).is_none() => {
+                Err(Error::new("foreign object handle"))
+            }
+            Value::List(values) => values.iter().try_for_each(|v| self.validate_handles(v)),
+            _ => Ok(()),
+        }
+    }
+
     pub(crate) fn typed(&self, ty: &str, value: Value) -> Result<Value, Error> {
         match (ty, &value) {
             ("var" | "variant" | "alias", _) => {
-                if let Value::Object(id) = &value {
-                    if self.node(*id).is_none() {
-                        return Err(Error::new("foreign object handle"));
-                    }
-                }
+                self.validate_handles(&value)?;
             }
             ("bool", Value::Bool(_))
             | ("real" | "double" | "float", Value::Number(_))
@@ -118,6 +127,10 @@ impl Instance {
                     ty == "QtObject"
                         || ty == node.name
                         || ty == format!("{}.{}", node.module, node.name)
+                        || node
+                            .lineage
+                            .iter()
+                            .any(|(module, name)| ty == name || ty == format!("{module}.{name}"))
                 }) =>
             {
                 ()
@@ -186,6 +199,7 @@ impl Builder<'_> {
             instance: self.instance.identity,
         };
         self.instance.nodes.push(Node {
+            lineage: definition.lineage.clone(),
             module: module.into(),
             name: name.into(),
             parent,

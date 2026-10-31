@@ -13,6 +13,8 @@ pub(crate) struct NativeMethod {
 
 #[derive(Clone, Debug, Default)]
 pub struct TypeDefinition {
+    base: Option<(String, String)>,
+    pub(crate) lineage: Vec<(String, String)>,
     pub(crate) properties: BTreeMap<String, (String, Value)>,
     pub(crate) signals: BTreeMap<String, Vec<Parameter>>,
     pub(crate) native: BTreeMap<String, NativeMethod>,
@@ -20,6 +22,13 @@ pub struct TypeDefinition {
 }
 
 impl TypeDefinition {
+    /// Extend a previously registered native type, retaining its members and
+    /// assignability. A derived definition may specialize inherited defaults.
+    pub fn inherits(mut self, module: &str, name: &str) -> Self {
+        self.base = Some((module.into(), name.into()));
+        self
+    }
+
     pub fn property(mut self, name: &str, ty: &str, default: Value) -> Self {
         self.properties.insert(name.into(), (ty.into(), default));
         self
@@ -98,8 +107,26 @@ impl TypeRegistry {
         &mut self,
         module: &str,
         name: &str,
-        definition: TypeDefinition,
+        mut definition: TypeDefinition,
     ) -> Result<(), Error> {
+        if let Some((base_module, base_name)) = definition.base.take() {
+            let base = self
+                .modules
+                .get(&base_module)
+                .and_then(|types| types.get(&base_name))
+                .ok_or_else(|| {
+                    Error::new(format!("unknown base type {base_module}.{base_name}"))
+                })?;
+            let mut merged = base.clone();
+            merged.lineage.push((base_module, base_name));
+            merged.properties.append(&mut definition.properties);
+            merged.signals.append(&mut definition.signals);
+            merged.native.append(&mut definition.native);
+            if definition.default_property.is_some() {
+                merged.default_property = definition.default_property;
+            }
+            definition = merged;
+        }
         if let Some(default) = &definition.default_property {
             if !definition.properties.contains_key(default) {
                 return Err(Error::new(format!(

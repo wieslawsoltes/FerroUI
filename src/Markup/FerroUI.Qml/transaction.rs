@@ -7,6 +7,7 @@ use std::collections::VecDeque;
 pub(crate) struct Transaction<'a> {
     pub(crate) model: &'a mut Instance,
     original: BTreeMap<SlotId, Slot>,
+    emitted: Vec<SignalEmission>,
     pending: BTreeSet<SlotId>,
     evaluating: BTreeSet<SlotId>,
     notifications: VecDeque<(ObjectId, String)>,
@@ -23,6 +24,7 @@ impl Instance {
         let mut tx = Transaction {
             model: self,
             original: BTreeMap::new(),
+            emitted: Vec::new(),
             pending: BTreeSet::new(),
             evaluating: BTreeSet::new(),
             notifications: VecDeque::new(),
@@ -32,6 +34,25 @@ impl Instance {
         };
         let result = operation(&mut tx).and_then(|value| {
             tx.settle()?;
+            if let Some(validate) = &tx.model.validator {
+                let changes = tx
+                    .original
+                    .iter()
+                    .filter_map(|(key, old)| {
+                        let value = &tx.model.slots[*key].value;
+                        if old.value.unchanged(value) {
+                            return None;
+                        }
+                        let property = &tx.model.properties[*key];
+                        Some(Change {
+                            object: property.owner,
+                            property: property.name.clone(),
+                            value: value.clone(),
+                        })
+                    })
+                    .collect::<Vec<_>>();
+                validate(tx.model, &changes)?;
+            }
             Ok(value)
         });
         if result.is_err() {
@@ -39,6 +60,7 @@ impl Instance {
                 tx.model.slots[key] = old;
             }
         } else {
+            tx.model.emissions.append(&mut tx.emitted);
             for (key, old) in tx.original {
                 let value = &tx.model.slots[key].value;
                 if !old.value.unchanged(value) {
@@ -239,6 +261,14 @@ impl Transaction<'_> {
             .get(name)
             .ok_or_else(|| Error::new(format!("unknown signal '{name}'")))?;
         let arguments = self.arguments(formals, arguments)?;
+        if !self.model.watched.is_empty() && self.model.watched.contains(&(owner, name.to_owned()))
+        {
+            self.emitted.push(SignalEmission {
+                object: owner,
+                signal: name.to_owned(),
+                arguments: arguments.clone(),
+            });
+        }
         self.dispatch(owner, name, arguments)
     }
 

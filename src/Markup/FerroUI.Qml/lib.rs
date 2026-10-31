@@ -29,6 +29,7 @@ struct Procedure {
 struct Node {
     module: String,
     name: String,
+    lineage: Vec<(String, String)>,
     parent: Option<ObjectId>,
     children: Vec<ObjectId>,
     properties: BTreeMap<String, SlotId>,
@@ -70,7 +71,20 @@ pub struct Change {
     pub value: Value,
 }
 
+type Validator = Box<dyn Fn(&Instance, &[Change]) -> Result<(), Error>>;
+
+/// One observed emission from a successfully committed mutation.
+#[derive(Clone, Debug, PartialEq)]
+pub struct SignalEmission {
+    pub object: ObjectId,
+    pub signal: String,
+    pub arguments: Vec<Value>,
+}
+
 pub struct Instance {
+    validator: Option<Validator>,
+    watched: BTreeSet<(ObjectId, String)>,
+    emissions: Vec<SignalEmission>,
     nodes: Vec<Node>,
     ids: BTreeMap<String, ObjectId>,
     properties: Vec<Property>,
@@ -136,6 +150,36 @@ impl Instance {
 
     pub fn get(&self, object: ObjectId, property: &str) -> Result<Value, Error> {
         Ok(self.slots[self.key(object, property)?].value.clone())
+    }
+
+    /// A native projection can reject unsupported final property values before
+    /// any change is published. A validator must have no external side effects.
+    pub fn set_validator(
+        &mut self,
+        validate: impl Fn(&Instance, &[Change]) -> Result<(), Error> + 'static,
+    ) {
+        self.validator = Some(Box::new(validate));
+    }
+
+    /// Observe a declared signal from Rust. Emissions are released only after
+    /// the QML handler, dependent bindings and projection validator succeed.
+    pub fn watch_signal(&mut self, object: ObjectId, name: &str) -> Result<(), Error> {
+        let node = self
+            .node(object)
+            .ok_or_else(|| Error::new("foreign or unknown object"))?;
+        if !node.signals.contains_key(name) {
+            return Err(Error::new(format!("unknown signal '{name}'")));
+        }
+        self.watched.insert((object, name.to_owned()));
+        Ok(())
+    }
+
+    pub fn unwatch_signal(&mut self, object: ObjectId, name: &str) {
+        self.watched.remove(&(object, name.to_owned()));
+    }
+
+    pub fn drain_signals(&mut self) -> Vec<SignalEmission> {
+        std::mem::take(&mut self.emissions)
     }
 
     /// Replaces an existing binding, even if its current value equals the assigned value.
