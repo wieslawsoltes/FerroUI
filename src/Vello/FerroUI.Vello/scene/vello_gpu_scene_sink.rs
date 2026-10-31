@@ -1,4 +1,5 @@
 use crate::gpu::{log_render_failure, premultiply_pixel, VelloGpuTexture, VelloWgpuDevice};
+use crate::scene::image_textures::{release_unused_textures, rgba_bytes};
 use crate::scene::vello_cpu_scene_sink::{prepare, stroke_outline};
 use crate::scene::{
     IVelloSceneSink, VelloSceneBrush, VelloSceneCapabilities, VelloSceneGlyphRun, VelloScenePaint, VelloScenePixelRect,
@@ -94,10 +95,6 @@ enum ImageSource {
     /// rendered.
     Pixels(peniko::ImageData),
 }
-
-/// The number of renders the texture of an image that is no longer drawn is
-/// kept for, as in the hybrid mode.
-const IMAGE_TEXTURE_LIFETIME: u64 = 16;
 
 const _: fn() = || {
     fn assert_send<T: Send>() {}
@@ -566,7 +563,12 @@ impl VelloGpuSceneSink {
                 }),
             );
         }
-        state.image_textures.retain(|_, (_, last_used)| render_count - *last_used < IMAGE_TEXTURE_LIFETIME);
+        release_unused_textures(
+            &mut state.image_textures,
+            render_count,
+            |(texture, last_used)| (*last_used, rgba_bytes(texture.width(), texture.height())),
+            drop,
+        );
 
         let result = {
             let _perf = crate::perf::scope(crate::perf::Phase::Render, u64::from(width) * u64::from(height) * 4);
