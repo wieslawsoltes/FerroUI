@@ -1,0 +1,50 @@
+name: QML conformance
+
+on:
+  pull_request:
+    paths:
+      - 'src/Markup/FerroUI.Qml*/**'
+      - 'samples/QmlGallery/**'
+      - 'tests/QmlCompiled/**'
+      - '.github/workflows/qml.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: qml-conformance-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_PROFILE_TEST_DEBUG: 0
+  CARGO_PROFILE_DEV_DEBUG: 0
+
+jobs:
+  qml:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+        with:
+          toolchain: stable
+          components: rustfmt
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: qml-conformance
+      - name: Check formatting
+        run: >-
+          cargo fmt --check
+          -p ferroui-qml-compiler -p ferroui-qml-build -p ferroui-qml
+          -p ferroui-qml-controls -p qml-compiled-tests -p qml-gallery
+      - name: Test the compiler, runtime, compiled components and native controls
+        run: >-
+          cargo test --locked --no-default-features
+          -p ferroui-qml-compiler -p ferroui-qml-build -p ferroui-qml
+          -p ferroui-qml-controls -p qml-compiled-tests -p qml-gallery
+      - name: Compare source and compiled behavior with the Qt 6.12.0 binary distribution
+        run: |
+          python3 -m venv "$RUNNER_TEMP/qt-reference"
+          "$RUNNER_TEMP/qt-reference/bin/pip" install --only-binary=:all: PySide6-Essentials==6.12.0
+          "$RUNNER_TEMP/qt-reference/bin/python" tests/QmlCompiled/reference/qt_reference.py
