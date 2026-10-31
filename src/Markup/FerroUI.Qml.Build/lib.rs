@@ -4,6 +4,7 @@ mod emit;
 mod files;
 mod identified;
 mod native;
+mod scripts;
 
 use std::collections::BTreeSet;
 use std::fmt;
@@ -18,8 +19,11 @@ impl fmt::Display for BuildError {
 }
 impl std::error::Error for BuildError {}
 
+type Validate<'a> = Box<dyn Fn(&ferroui_qml_compiler::Document) -> Result<(), String> + 'a>;
+
 #[derive(Default)]
-pub struct Compiler {
+pub struct Compiler<'a> {
+    validate: Option<Validate<'a>>,
     import_paths: Vec<PathBuf>,
 }
 
@@ -29,7 +33,7 @@ pub struct Output {
     pub dependencies: BTreeSet<PathBuf>,
 }
 
-impl Compiler {
+impl<'a> Compiler<'a> {
     pub fn new() -> Self {
         Self::default()
     }
@@ -40,11 +44,27 @@ impl Compiler {
         self
     }
 
+    /// Apply the host's type registry during compilation, before emitting Rust.
+    /// A build script can pass `|doc| registry.check(doc)` here.
+    pub fn check_with<E: fmt::Display>(
+        mut self,
+        validate: impl Fn(&ferroui_qml_compiler::Document) -> Result<(), E> + 'a,
+    ) -> Self {
+        self.validate = Some(Box::new(move |doc| {
+            validate(doc).map_err(|e| e.to_string())
+        }));
+        self
+    }
+
     pub fn compile(&self, input: impl AsRef<Path>) -> Result<Output, BuildError> {
         let mut files = files::Files::new(self.import_paths.clone());
         let source = files.load(input.as_ref()).map_err(BuildError)?;
         let document = ferroui_qml_compiler::link(source, &mut files)
             .map_err(|e| BuildError(e.to_string()))?;
+        if let Some(validate) = &self.validate {
+            validate(&document)
+                .map_err(|reason| BuildError(format!("{}: {reason}", input.as_ref().display())))?;
+        }
         Ok(Output {
             rust: emit::module(document).map_err(BuildError)?,
             dependencies: files.dependencies(),

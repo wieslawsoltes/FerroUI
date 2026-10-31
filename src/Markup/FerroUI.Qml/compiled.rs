@@ -5,13 +5,18 @@ use crate::transaction::Transaction;
 use crate::{Document, Error, Locals, ObjectId, SlotId, Value};
 use std::collections::BTreeSet;
 
-pub use crate::evaluation::{binary, unary};
+pub use crate::evaluation::{binary, unary, Flow};
 
 /// An expression emitted as a native Rust function. The frame borrows the
 /// active transaction only for the duration of one evaluation.
 pub type Evaluator = fn(&mut Frame<'_, '_>) -> Result<Value, Error>;
 
+pub type Script = fn(&mut Frame<'_, '_>) -> Result<Flow, Error>;
+
 pub trait ComponentSource {
+    fn scripts(&self) -> &'static [Script] {
+        &[]
+    }
     fn document(&self) -> &Document;
     fn evaluators(&self) -> &'static [Evaluator] {
         &[]
@@ -25,18 +30,27 @@ impl ComponentSource for Document {
 
 pub struct CompiledComponent {
     document: Document,
+    scripts: &'static [Script],
     evaluators: &'static [Evaluator],
 }
 
 impl CompiledComponent {
-    pub fn new(document: Document, evaluators: &'static [Evaluator]) -> Self {
+    pub fn new(
+        document: Document,
+        evaluators: &'static [Evaluator],
+        scripts: &'static [Script],
+    ) -> Self {
         Self {
             document,
             evaluators,
+            scripts,
         }
     }
 }
 impl ComponentSource for CompiledComponent {
+    fn scripts(&self) -> &'static [Script] {
+        self.scripts
+    }
     fn document(&self) -> &Document {
         &self.document
     }
@@ -48,7 +62,7 @@ impl ComponentSource for CompiledComponent {
 pub struct Frame<'a, 'model> {
     pub(crate) tx: &'a mut Transaction<'model>,
     pub(crate) owner: ObjectId,
-    pub(crate) locals: &'a Locals,
+    pub(crate) locals: &'a mut Locals,
     pub(crate) reads: &'a mut BTreeSet<SlotId>,
 }
 
@@ -127,4 +141,143 @@ pub fn receiver(value: Value) -> Result<Receiver, Error> {
 }
 pub fn truthy(value: &Value) -> bool {
     value.truthy()
+}
+
+/// A resolved assignment target. Resolving the target precedes evaluation of
+/// the right hand side, including for indexed and compound assignments.
+pub struct Target {
+    instance: u64,
+    location: Location,
+}
+enum Location {
+    Local(String),
+    Property(SlotId),
+}
+
+impl Frame<'_, '_> {
+    pub(crate) fn interpret(&mut self, expr: &crate::ir::Expr) -> Result<Value, Error> {
+        self.tx.expr(self.owner, expr, self.locals, self.reads)
+    }
+    fn target(&self, location: Location) -> Target {
+        Target {
+            instance: self.owner.instance,
+            location,
+        }
+    }
+    pub fn target_name(&self, name: &str, root: Option<&str>) -> Result<Target, Error> {
+        let location = if self.locals.contains_key(name) {
+            Location::Local(name.to_owned())
+        } else {
+            Location::Property(
+                self.tx
+                    .lookup_property(self.owner, self.root(root)?, name)?,
+            )
+        };
+        Ok(self.target(location))
+    }
+    pub fn target_named_member(
+        &mut self,
+        base: &str,
+        root: Option<&str>,
+        name: &str,
+    ) -> Result<Target, Error> {
+        if !self.locals.contains_key(base) {
+            if let Ok(key) = self.tx.model.key(self.owner, &format!("{base}.{name}")) {
+                return Ok(self.target(Location::Property(key)));
+            }
+        }
+        let base = self.name(base, root)?;
+        self.target_member(base, name)
+    }
+    pub fn target_member(&self, base: Value, name: &str) -> Result<Target, Error> {
+        let key = self.tx.model.key(object(base)?, name)?;
+        Ok(self.target(Location::Property(key)))
+    }
+    pub fn target_index(&self, base: Value, key: Value) -> Result<Target, Error> {
+        self.target_member(base, &key.js_string())
+    }
+    pub fn assign(
+        &mut self,
+        place: Target,
+        op: &str,
+        rhs: impl FnOnce(&mut Self) -> Result<Value, Error>,
+    ) -> Result<Value, Error> {
+        if place.instance != self.owner.instance {
+            return Err(Error::new("foreign assignment target"));
+        }
+        let mut postfix = None;
+        let value = if op == "=" {
+            rhs(self)?
+        } else {
+            let old = match &place.location {
+                Location::Local(name) => self
+                    .locals
+                    .get(name)
+                    .ok_or_else(|| Error::new("local is out of scope"))?
+                    .clone(),
+                Location::Property(key) => self.tx.read(*key, self.reads)?,
+            };
+            match op {
+                "post++" | "post--" | "++" | "--" => {
+                    let number = old.number()?;
+                    if op.starts_with("post") {
+                        postfix = Some(Value::Number(number));
+                    }
+                    Value::Number(if op.ends_with("++") {
+                        number + 1.0
+                    } else {
+                        number - 1.0
+                    })
+                }
+                "&&=" if !old.truthy() => return Ok(old),
+                "||=" if old.truthy() => return Ok(old),
+                "??=" if !matches!(old, Value::Null | Value::Undefined) => return Ok(old),
+                "&&=" | "||=" | "??=" => rhs(self)?,
+                _ => binary(
+                    op.strip_suffix('=')
+                        .ok_or_else(|| Error::new("invalid assignment operator"))?,
+                    old,
+                    rhs(self)?,
+                )?,
+            }
+        };
+        let completion = postfix.unwrap_or_else(|| value.clone());
+        match place.location {
+            Location::Local(name) => {
+                self.locals.insert(name, value);
+            }
+            Location::Property(key) => {
+                self.tx.write(key, value)?;
+                // A subsequent statement can observe a QML change handler's writes.
+                // External observers still see only the committed transaction.
+                self.tx.settle()?;
+            }
+        }
+        Ok(completion)
+    }
+    pub fn declare(&mut self, name: &str, value: Value) {
+        self.locals.insert(name.to_owned(), value);
+    }
+    pub fn iteration(&mut self) -> Result<(), Error> {
+        self.tx.budget()
+    }
+    pub fn block(
+        &mut self,
+        names: &[&str],
+        body: impl FnOnce(&mut Self) -> Result<Flow, Error>,
+    ) -> Result<Flow, Error> {
+        let previous: Vec<_> = names
+            .iter()
+            .map(|&name| (name, self.locals.get(name).cloned()))
+            .collect();
+        let result = body(self);
+        for (name, value) in previous {
+            if let Some(value) = value {
+                self.locals.insert(name.to_owned(), value);
+            } else {
+                self.locals.remove(name);
+            }
+        }
+        result
+    }
 }

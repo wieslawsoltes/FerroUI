@@ -42,46 +42,8 @@ impl Instance {
         registry: &TypeRegistry,
         initial: BTreeMap<String, Value>,
     ) -> Result<Self, Error> {
-        let document = source.document();
-        registry.validate_imports(&document.imports)?;
-        if let Some(pragma) = document.pragmas.first() {
-            return Err(Error::new(format!(
-                "unsupported document pragma '{}'",
-                pragma.name
-            )));
-        }
-        let mut builder = Builder {
-            scopes: enums::Scopes::named(name, &document.root)?,
-            instance: Self {
-                bindings: BTreeSet::new(),
-                native_functions: source.evaluators(),
-                native_scripts: source.scripts(),
-                timers: timers::Timers::default(),
-                listeners: BTreeMap::new(),
-                validator: None,
-                watched: BTreeSet::new(),
-                emissions: Vec::new(),
-                nodes: Vec::new(),
-                ids: BTreeMap::new(),
-                properties: Vec::new(),
-                slots: Vec::new(),
-                changes: BTreeMap::new(),
-                identity: NEXT_INSTANCE.fetch_add(1, Ordering::Relaxed),
-            },
-            registry,
-            imports: &document.imports,
-            assigned: BTreeSet::new(),
-            aliases: Vec::new(),
-            implicit: Vec::new(),
-        };
-        let root = builder.object(&document.root, None)?;
-        // Module objects share this engine's slots and dependency graph. They
-        // have no visual parent and are allocated before any binding runs.
-        for singleton in &document.singletons {
-            builder.object(singleton, None)?;
-        }
-        builder.link_aliases()?;
-        builder.default_children()?;
+        let mut builder = Builder::prepare(name, source, registry)?;
+        let root = builder.instance.root();
         for (name, value) in initial {
             let key = builder.instance.key(root, &name)?;
             let key = builder.instance.write_target(key)?;
@@ -189,6 +151,75 @@ fn is_object_type(ty: &str) -> bool {
         .next()
         .and_then(|part| part.chars().next())
         .is_some_and(char::is_uppercase)
+}
+
+impl TypeRegistry {
+    /// Check native types, member names, handlers, aliases, object-valued properties
+    /// and required child properties without executing a binding, method or callback.
+    /// Required properties on the root can be supplied by the eventual host.
+    pub fn check(&self, document: &Document) -> Result<(), Error> {
+        let builder = Builder::prepare(None, document, self)?;
+        let root = builder.instance.root();
+        for (key, property) in builder.instance.properties.iter().enumerate() {
+            if property.required && property.owner != root && !builder.assigned.contains(&key) {
+                return Err(Error::new(format!(
+                    "required property '{}' was not initialized",
+                    property.name
+                )));
+            }
+        }
+        Ok(())
+    }
+}
+
+impl<'a> Builder<'a> {
+    fn prepare(
+        name: Option<&str>,
+        source: &'a impl ComponentSource,
+        registry: &'a TypeRegistry,
+    ) -> Result<Self, Error> {
+        let document = source.document();
+        registry.validate_imports(&document.imports)?;
+        if let Some(pragma) = document.pragmas.first() {
+            return Err(Error::new(format!(
+                "unsupported document pragma '{}'",
+                pragma.name
+            )));
+        }
+        let mut builder = Self {
+            scopes: enums::Scopes::named(name, &document.root)?,
+            instance: Instance {
+                bindings: BTreeSet::new(),
+                native_functions: source.evaluators(),
+                native_scripts: source.scripts(),
+                timers: timers::Timers::default(),
+                listeners: BTreeMap::new(),
+                validator: None,
+                watched: BTreeSet::new(),
+                emissions: Vec::new(),
+                nodes: Vec::new(),
+                ids: BTreeMap::new(),
+                properties: Vec::new(),
+                slots: Vec::new(),
+                changes: BTreeMap::new(),
+                identity: NEXT_INSTANCE.fetch_add(1, Ordering::Relaxed),
+            },
+            registry,
+            imports: &document.imports,
+            assigned: BTreeSet::new(),
+            aliases: Vec::new(),
+            implicit: Vec::new(),
+        };
+        builder.object(&document.root, None)?;
+        // Module objects share this engine's slots and dependency graph. They
+        // have no visual parent and are allocated before any binding runs.
+        for singleton in &document.singletons {
+            builder.object(singleton, None)?;
+        }
+        builder.link_aliases()?;
+        builder.default_children()?;
+        Ok(builder)
+    }
 }
 
 impl Builder<'_> {

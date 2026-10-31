@@ -330,3 +330,31 @@ fn equal_type_names_from_distinct_imports_cannot_cross_typed_slots_or_signatures
     assert!(view.emit(root, "assign", vec![b.clone()]).is_err());
     assert!(view.call(root, "accept", vec![b]).is_err());
 }
+
+#[test]
+fn structural_check_resolves_native_members_without_executing_user_code() {
+    let types = TypeRegistry::new();
+    let parse = |body: &str| ir::parse(&format!("import QtQml\nQtObject {{ {body} }}")).unwrap();
+    types
+        .check(&parse(
+            "required property int input; Component.onCompleted: missingMethod()",
+        ))
+        .unwrap();
+    assert!(types.check(&parse("misspelled: 7")).is_err());
+    assert!(types
+        .check(&parse(
+            "property QtObject child: QtObject { required property int input }"
+        ))
+        .is_err());
+}
+
+#[test]
+fn exponential_method_calls_are_bounded_and_roll_back() {
+    let doc=ir::parse("import QtQml\nQtObject { property int count: 0; function fan(n) { count++; if (n < 1) return 1; return fan(n-1) + fan(n-1) } }").unwrap();
+    let mut instance = Instance::new(&doc, &TypeRegistry::new(), Default::default()).unwrap();
+    let root = instance.root();
+    assert!(instance
+        .call(root, "fan", vec![Value::Number(20.)])
+        .is_err());
+    assert_eq!(instance.get(root, "count").unwrap(), Value::Number(0.));
+}

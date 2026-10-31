@@ -22,7 +22,12 @@ impl Diagnostic {
         let mut line = 1;
         let mut column = 1;
         let mut was_cr = false;
-        for ch in source[..span.start].chars() {
+        // Public validators can receive an externally constructed IR.
+        let mut start = span.start.min(source.len());
+        while !source.is_char_boundary(start) {
+            start -= 1;
+        }
+        for ch in source[..start].chars() {
             match ch {
                 '\r' => {
                     line += 1;

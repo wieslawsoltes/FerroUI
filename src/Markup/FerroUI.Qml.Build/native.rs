@@ -4,20 +4,25 @@ use ferroui_qml_compiler::{Binding, Document, Expr, Member, MemberKind, Stmt};
 use proc_macro2::TokenStream;
 use quote::quote;
 
-pub(crate) fn lower(document: &mut Document) -> Result<Vec<TokenStream>, String> {
-    let mut functions = Vec::new();
+#[derive(Default)]
+pub(crate) struct Functions {
+    pub expressions: Vec<TokenStream>,
+    pub scripts: Vec<TokenStream>,
+}
+pub(crate) fn lower(document: &mut Document) -> Result<Functions, String> {
+    let mut functions = Functions::default();
     for root in std::iter::once(&mut document.root).chain(&mut document.singletons) {
         members(&mut root.members, &mut functions)?;
     }
     Ok(functions)
 }
 
-fn members(group: &mut [Member], out: &mut Vec<TokenStream>) -> Result<(), String> {
+fn members(group: &mut [Member], out: &mut Functions) -> Result<(), String> {
     for member in group {
         match &mut member.kind {
-            MemberKind::Child(object) | MemberKind::Component { object, .. } => {
-                members(&mut object.members, out)?
-            }
+            MemberKind::Child(object)
+            | MemberKind::OnProperty { object, .. }
+            | MemberKind::Component { object, .. } => members(&mut object.members, out)?,
             MemberKind::Group { members: group, .. } => members(group, out)?,
             MemberKind::Property { ty, .. } if ty == "alias" => (),
             MemberKind::Property {
@@ -31,7 +36,7 @@ fn members(group: &mut [Member], out: &mut Vec<TokenStream>) -> Result<(), Strin
                         members(&mut object.members, out)?;
                     }
                 }
-                Binding::Expr(expr) => replace(expr, out)?,
+                Binding::Expr(expr) => replace(expr, &mut out.expressions)?,
                 Binding::Script(body) => statements(body, out)?,
             },
             MemberKind::Function { body, .. } | MemberKind::Handler { body, .. } => {
@@ -43,39 +48,14 @@ fn members(group: &mut [Member], out: &mut Vec<TokenStream>) -> Result<(), Strin
     Ok(())
 }
 
-fn statements(body: &mut [Stmt], out: &mut Vec<TokenStream>) -> Result<(), String> {
-    for stmt in body {
-        match stmt {
-            Stmt::Expr(expr)
-            | Stmt::Let {
-                value: Some(expr), ..
-            }
-            | Stmt::Return(Some(expr)) => replace(expr, out)?,
-            Stmt::Assign { target, value, .. } => {
-                match target {
-                    Expr::Member(base, _) => replace(base, out)?,
-                    Expr::Index(base, key) => {
-                        replace(base, out)?;
-                        replace(key, out)?;
-                    }
-                    Expr::Name(_) | Expr::ScopedName { .. } => (),
-                    _ => return Err("invalid assignment target".into()),
-                }
-                replace(value, out)?;
-            }
-            Stmt::Block(body) => statements(body, out)?,
-            Stmt::If {
-                test,
-                then_body,
-                else_body,
-            } => {
-                replace(test, out)?;
-                statements(then_body, out)?;
-                statements(else_body, out)?;
-            }
-            _ => (),
-        }
+fn statements(body: &mut Vec<Stmt>, out: &mut Functions) -> Result<(), String> {
+    if body.is_empty() {
+        return Ok(());
     }
+    let code = super::scripts::body(body)?;
+    let index = out.scripts.len();
+    out.scripts.push(quote!(|frame| { let _ = &frame; #code }));
+    *body = vec![Stmt::Native(index)];
     Ok(())
 }
 
@@ -86,14 +66,14 @@ fn replace(expr: &mut Expr, functions: &mut Vec<TokenStream>) -> Result<(), Stri
     Ok(())
 }
 
-fn name(expr: &Expr) -> Option<(&str, TokenStream)> {
+pub(super) fn name(expr: &Expr) -> Option<(&str, TokenStream)> {
     match expr {
         Expr::Name(ident) => Some((ident, quote!(None))),
         Expr::ScopedName { name, root } => Some((name, quote!(Some(#root)))),
         _ => None,
     }
 }
-fn emit(expr: &Expr) -> Result<TokenStream, String> {
+pub(super) fn emit(expr: &Expr) -> Result<TokenStream, String> {
     Ok(match expr {
         Expr::Native(_) => return Err("cannot compile a previously lowered expression".into()),
         Expr::Null => quote!(V::Null),

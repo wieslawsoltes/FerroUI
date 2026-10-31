@@ -2257,8 +2257,10 @@ name = "ferroui-qml-build"
 version = "0.4.0"
 dependencies = [
  "ferroui-qml-compiler",
+ "prettyplease",
  "proc-macro2",
  "quote",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -2275,7 +2277,6 @@ dependencies = [
  "ferroui-base",
  "ferroui-controls",
  "ferroui-qml",
- "ferroui-qml-compiler",
 ]
 
 [[package]]
@@ -4629,6 +4630,7 @@ dependencies = [
 name = "qml-gallery"
 version = "0.4.0"
 dependencies = [
+ "ferroui-controls",
  "ferroui-qml",
  "ferroui-qml-build",
  "ferroui-qml-controls",

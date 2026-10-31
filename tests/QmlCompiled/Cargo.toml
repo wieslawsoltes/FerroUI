@@ -13,4 +13,5 @@ path = "lib.rs"
 ferroui-qml.workspace = true
 
 [build-dependencies]
+ferroui-qml.workspace = true
 ferroui-qml-build.workspace = true

@@ -2,20 +2,23 @@ use super::*;
 use crate::transaction::Transaction;
 use ferroui_qml_compiler::Expr;
 
-pub(crate) enum Flow {
+pub enum Flow {
     Next(Value),
     Return(Value),
+    Break,
+    Continue,
 }
 impl Flow {
-    pub(crate) fn value(self) -> Value {
+    pub(crate) fn value(self) -> Result<Value, Error> {
         match self {
-            Self::Next(v) | Self::Return(v) => v,
+            Self::Next(v) | Self::Return(v) => Ok(v),
+            Self::Break | Self::Continue => Err(Error::new("loop control outside a loop")),
         }
     }
 }
 
 impl Transaction<'_> {
-    fn lookup_property(
+    pub(crate) fn lookup_property(
         &self,
         owner: ObjectId,
         root: ObjectId,
@@ -241,6 +244,7 @@ impl Transaction<'_> {
         arguments: Vec<Value>,
         reads: &mut BTreeSet<SlotId>,
     ) -> Result<Value, Error> {
+        self.budget()?;
         let node = self
             .model
             .node(owner)
@@ -286,6 +290,7 @@ impl Transaction<'_> {
         let value = match result? {
             Flow::Next(_) => Value::Undefined,
             Flow::Return(value) => value,
+            Flow::Break | Flow::Continue => return Err(Error::new("loop control outside a loop")),
         };
         match proc.result.as_deref() {
             None | Some("var") => Ok(value),
@@ -318,85 +323,92 @@ impl Transaction<'_> {
                         None => Value::Undefined,
                     }))
                 }
+                Stmt::Native(index) => {
+                    let script = *self
+                        .model
+                        .native_scripts
+                        .get(*index)
+                        .ok_or_else(|| Error::new("invalid compiled script index"))?;
+                    return script(&mut compiled::Frame {
+                        tx: self,
+                        owner,
+                        locals,
+                        reads,
+                    });
+                }
                 Stmt::Assign { target, op, value } => {
+                    let mut frame = compiled::Frame {
+                        tx: self,
+                        owner,
+                        locals,
+                        reads,
+                    };
                     let place = match target {
-                        Expr::Name(name) | Expr::ScopedName { name, .. }
-                            if locals.contains_key(name) =>
-                        {
-                            Place::Local(name.clone())
-                        }
-                        Expr::Name(name) => {
-                            Place::Slot(self.lookup_property(owner, self.model.root(), name)?)
-                        }
-                        Expr::ScopedName { name, root } => {
-                            Place::Slot(self.lookup_property(owner, self.scope_id(root)?, name)?)
-                        }
+                        Expr::Name(name) => frame.target_name(name, None)?,
+                        Expr::ScopedName { name, root } => frame.target_name(name, Some(root))?,
                         Expr::Member(base, name) => {
-                            let receiver = object(self.expr(owner, base, locals, reads)?)?;
-                            Place::Slot(self.model.key(receiver, name)?)
+                            if let Some((base, scope)) = lexical_name(base) {
+                                frame.target_named_member(base, scope, name)?
+                            } else {
+                                let base = frame.interpret(base)?;
+                                frame.target_member(base, name)?
+                            }
                         }
                         Expr::Index(base, index) => {
-                            let receiver = object(self.expr(owner, base, locals, reads)?)?;
-                            let name = self.expr(owner, index, locals, reads)?.js_string();
-                            Place::Slot(self.model.key(receiver, &name)?)
+                            let base = frame.interpret(base)?;
+                            let key = frame.interpret(index)?;
+                            frame.target_index(base, key)?
                         }
                         _ => return Err(Error::new("invalid assignment target")),
                     };
-                    let previous = if op == "=" {
-                        None
-                    } else {
-                        Some(match &place {
-                            Place::Slot(key) => self.read(*key, reads)?,
-                            Place::Local(name) => locals[name].clone(),
-                        })
+                    completion = frame.assign(place, op, |f| f.interpret(value))?;
+                }
+                Stmt::Break => return Ok(Flow::Break),
+                Stmt::Continue => return Ok(Flow::Continue),
+                Stmt::While {
+                    test,
+                    body,
+                    post_test,
+                } => {
+                    match self.iterate(owner, Some(test), body, None, *post_test, locals, reads)? {
+                        Flow::Next(v) => completion = v,
+                        flow => return Ok(flow),
+                    }
+                }
+                Stmt::For {
+                    init,
+                    test,
+                    update,
+                    body,
+                } => {
+                    let previous = match init.as_deref() {
+                        Some(Stmt::Let { name, .. }) => {
+                            Some((name.clone(), locals.get(name).cloned()))
+                        }
+                        _ => None,
                     };
-                    let assigned = match (op.as_str(), previous) {
-                        ("++" | "--" | "post++" | "post--", Some(old)) => {
-                            let old = old.number()?;
-                            let updated = Value::Number(if op.ends_with("++") {
-                                old + 1.0
-                            } else {
-                                old - 1.0
-                            });
-                            completion = if op.starts_with("post") {
-                                Value::Number(old)
-                            } else {
-                                updated.clone()
-                            };
-                            updated
+                    if let Some(init) = init {
+                        self.statements(owner, std::slice::from_ref(init), locals, reads)?;
+                    }
+                    let flow = self.iterate(
+                        owner,
+                        test.as_ref(),
+                        body,
+                        update.as_deref(),
+                        false,
+                        locals,
+                        reads,
+                    )?;
+                    if let Some((name, previous)) = previous {
+                        if let Some(value) = previous {
+                            locals.insert(name, value);
+                        } else {
+                            locals.remove(&name);
                         }
-                        ("&&=" | "||=" | "??=", Some(old)) => {
-                            let skip = match op.as_str() {
-                                "&&=" => !old.truthy(),
-                                "||=" => old.truthy(),
-                                _ => !matches!(old, Value::Null | Value::Undefined),
-                            };
-                            if skip {
-                                completion = old;
-                                continue;
-                            }
-                            completion = self.expr(owner, value, locals, reads)?;
-                            completion.clone()
-                        }
-                        (_, previous) => {
-                            let rhs = self.expr(owner, value, locals, reads)?;
-                            completion = match previous {
-                                None => rhs,
-                                Some(old) => binary(
-                                    op.strip_suffix('=')
-                                        .ok_or_else(|| Error::new("invalid assignment operator"))?,
-                                    old,
-                                    rhs,
-                                )?,
-                            };
-                            completion.clone()
-                        }
-                    };
-                    match place {
-                        Place::Local(name) => {
-                            locals.insert(name, assigned);
-                        }
-                        Place::Slot(key) => self.write(key, assigned)?,
+                    }
+                    match flow {
+                        Flow::Next(v) => completion = v,
+                        flow => return Ok(flow),
                     }
                 }
                 Stmt::If {
@@ -411,19 +423,53 @@ impl Transaction<'_> {
                         locals,
                         reads,
                     )? {
-                        Flow::Return(v) => return Ok(Flow::Return(v)),
                         Flow::Next(v) => completion = v,
+                        flow => return Ok(flow),
                     }
                 }
                 Stmt::Block(body) => match self.block(owner, body, locals, reads)? {
-                    Flow::Return(v) => return Ok(Flow::Return(v)),
                     Flow::Next(v) => completion = v,
+                    flow => return Ok(flow),
                 },
             }
         }
         Ok(Flow::Next(completion))
     }
 
+    #[allow(clippy::too_many_arguments)]
+    fn iterate(
+        &mut self,
+        owner: ObjectId,
+        test: Option<&Expr>,
+        body: &[Stmt],
+        update: Option<&Stmt>,
+        mut skip_first_test: bool,
+        locals: &mut Locals,
+        reads: &mut BTreeSet<SlotId>,
+    ) -> Result<Flow, Error> {
+        let mut completion = Value::Undefined;
+        loop {
+            self.budget()?;
+            if !skip_first_test {
+                if let Some(test) = test {
+                    if !self.expr(owner, test, locals, reads)?.truthy() {
+                        break;
+                    }
+                }
+            }
+            skip_first_test = false;
+            match self.block(owner, body, locals, reads)? {
+                Flow::Next(v) => completion = v,
+                Flow::Continue => (),
+                Flow::Break => break,
+                flow @ Flow::Return(_) => return Ok(flow),
+            }
+            if let Some(update) = update {
+                self.statements(owner, std::slice::from_ref(update), locals, reads)?;
+            }
+        }
+        Ok(Flow::Next(completion))
+    }
     fn block(
         &mut self,
         owner: ObjectId,
@@ -450,11 +496,6 @@ impl Transaction<'_> {
         }
         Ok(flow)
     }
-}
-
-enum Place {
-    Slot(SlotId),
-    Local(String),
 }
 
 pub(crate) fn object(value: Value) -> Result<ObjectId, Error> {
