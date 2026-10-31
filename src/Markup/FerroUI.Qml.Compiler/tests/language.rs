@@ -95,7 +95,7 @@ fn parses_signal_and_method_signatures_and_handler_forms() {
         matches!(&doc.root.members[3].kind, MemberKind::Handler { parameters, body, .. } if parameters==&["v","reason"] && matches!(body[0],Stmt::If{..}))
     );
     assert!(
-        matches!(&doc.root.members[4].kind, MemberKind::Handler { body, .. } if matches!(&body[0],Stmt::Assign{op,value:Expr::Number(1.), ..} if op=="+="))
+        matches!(&doc.root.members[4].kind, MemberKind::Handler { body, .. } if matches!(&body[0],Stmt::Assign{op,value:Expr::Undefined, ..} if op=="post++"))
     );
     assert!(
         matches!(&doc.root.members[5].kind, MemberKind::Handler {name, ..} if name=="Component.onCompleted")

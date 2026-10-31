@@ -1,0 +1,2 @@
+module Ui.State
+singleton Session 1.0 state.qml

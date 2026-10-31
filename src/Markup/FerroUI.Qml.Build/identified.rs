@@ -36,6 +36,12 @@ enum Dependency {
     Native(Import),
 }
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub(crate) enum Lookup {
+    Component,
+    Singleton,
+}
+
 pub(crate) struct IdentifiedModules {
     roots: Vec<PathBuf>,
     manifests: BTreeMap<PathBuf, Option<Rc<ModuleDefinition>>>,
@@ -217,10 +223,15 @@ impl IdentifiedModules {
             .collect())
     }
 
-    pub(crate) fn component(&mut self, import: &Import, ty: &str) -> Result<Option<PathBuf>> {
+    pub(crate) fn component(
+        &mut self,
+        import: &Import,
+        ty: &str,
+        lookup: Lookup,
+    ) -> Result<Option<PathBuf>> {
         for dependency in self.closure(import)?.into_iter().rev() {
             if let Dependency::Module(module) = dependency {
-                if let Some(path) = self.exported(&module, ty, false)? {
+                if let Some(path) = self.exported(&module, ty, false, lookup)? {
                     return Ok(Some(path));
                 }
             }
@@ -228,8 +239,14 @@ impl IdentifiedModules {
         Ok(None)
     }
 
-    fn exported(&mut self, module: &Module, ty: &str, private: bool) -> Result<Option<PathBuf>> {
-        let mut file = if private {
+    fn exported(
+        &mut self,
+        module: &Module,
+        ty: &str,
+        private: bool,
+        lookup: Lookup,
+    ) -> Result<Option<PathBuf>> {
+        let mut file = if private && lookup == Lookup::Component {
             module.manifest.internal.get(ty).map(String::as_str)
         } else {
             None
@@ -238,15 +255,17 @@ impl IdentifiedModules {
             let Some(export) = module.manifest.select(module.selected())?.get(ty) else {
                 return Ok(None);
             };
-            match export.kind {
-                ExportKind::Object => file = Some(&export.file),
-                ExportKind::Singleton => {
+            match (lookup, export.kind) {
+                (Lookup::Singleton, ExportKind::Singleton) => file = Some(&export.file),
+                (Lookup::Singleton, _) => return Ok(None),
+                (Lookup::Component, ExportKind::Object) => file = Some(&export.file),
+                (Lookup::Component, ExportKind::Singleton) => {
                     return Err(format!(
                         "cannot construct singleton '{}.{ty}'",
                         module.manifest.uri
                     ))
                 }
-                ExportKind::Script => {
+                (Lookup::Component, ExportKind::Script) => {
                     return Err(format!(
                         "script '{}.{ty}' is not a constructible object",
                         module.manifest.uri
@@ -281,22 +300,38 @@ impl IdentifiedModules {
     }
 
     /// Public, explicit directory import.
-    pub(crate) fn directory_component(&mut self, dir: &Path, ty: &str) -> Result<Option<PathBuf>> {
-        self.directory(dir, ty, false)
+    pub(crate) fn directory_component(
+        &mut self,
+        dir: &Path,
+        ty: &str,
+        lookup: Lookup,
+    ) -> Result<Option<PathBuf>> {
+        self.directory(dir, ty, false, lookup)
     }
 
     /// The component's own directory may additionally resolve private types.
-    pub(crate) fn local_component(&mut self, from: &Path, ty: &str) -> Result<Option<PathBuf>> {
+    pub(crate) fn local_component(
+        &mut self,
+        from: &Path,
+        ty: &str,
+        lookup: Lookup,
+    ) -> Result<Option<PathBuf>> {
         if let Some(module) = self.origins.get(from).cloned() {
-            return self.exported(&module, ty, true);
+            return self.exported(&module, ty, true, lookup);
         }
         let dir = from
             .parent()
             .ok_or_else(|| format!("component path '{}' has no parent", from.display()))?;
-        self.directory(dir, ty, true)
+        self.directory(dir, ty, true, lookup)
     }
 
-    fn directory(&mut self, dir: &Path, ty: &str, private: bool) -> Result<Option<PathBuf>> {
+    fn directory(
+        &mut self,
+        dir: &Path,
+        ty: &str,
+        private: bool,
+        lookup: Lookup,
+    ) -> Result<Option<PathBuf>> {
         if !dir.is_dir() {
             return Err(format!(
                 "QML import directory '{}' does not exist",
@@ -308,9 +343,10 @@ impl IdentifiedModules {
             .map_err(|error| format!("{}: {error}", dir.display()))?;
         if let Some(manifest) = self.manifest(&canonical)? {
             let module = self.select(&canonical, manifest, RequestedVersion::Latest)?;
-            return self.exported(&module, ty, private);
+            return self.exported(&module, ty, private, lookup);
         }
-        if !ty.chars().next().is_some_and(char::is_uppercase)
+        if lookup == Lookup::Singleton
+            || !ty.chars().next().is_some_and(char::is_uppercase)
             || !ty.chars().all(|ch| ch == '_' || ch.is_alphanumeric())
         {
             return Ok(None);

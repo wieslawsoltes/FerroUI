@@ -1,4 +1,4 @@
-use crate::identified::IdentifiedModules;
+use crate::identified::{IdentifiedModules, Lookup};
 use ferroui_qml_compiler::{parse, ComponentResolver, ComponentSource, Document, Import};
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
@@ -71,11 +71,32 @@ impl ComponentResolver for Files {
         Ok(native)
     }
 
+    fn singleton(
+        &mut self,
+        from: &str,
+        imports: &[Import],
+        ty: &str,
+    ) -> Result<Option<ComponentSource>, String> {
+        self.lookup(from, imports, ty, Lookup::Singleton)
+    }
+
     fn resolve(
         &mut self,
         from: &str,
         imports: &[Import],
         ty: &str,
+    ) -> Result<Option<ComponentSource>, String> {
+        self.lookup(from, imports, ty, Lookup::Component)
+    }
+}
+
+impl Files {
+    fn lookup(
+        &mut self,
+        from: &str,
+        imports: &[Import],
+        ty: &str,
+        kind: Lookup,
     ) -> Result<Option<ComponentSource>, String> {
         let base = Path::new(from)
             .parent()
@@ -87,14 +108,14 @@ impl ComponentResolver for Files {
         // Identified module types have precedence over explicit and implicit
         // directory imports, regardless of the order of the import statements.
         for import in visible().rev().filter(|i| !i.is_path) {
-            if let Some(file) = self.modules.component(import, ty)? {
+            if let Some(file) = self.modules.component(import, ty, kind)? {
                 return self.load(&file).map(Some);
             }
         }
         let mut candidates = BTreeSet::new();
         if namespace.is_none() {
             self.directories.insert(base.to_owned());
-            if let Some(file) = self.modules.local_component(Path::new(from), ty)? {
+            if let Some(file) = self.modules.local_component(Path::new(from), ty, kind)? {
                 candidates.insert(
                     file.canonicalize()
                         .map_err(|e| format!("{}: {e}", file.display()))?,
@@ -102,9 +123,9 @@ impl ComponentResolver for Files {
             }
         }
         for import in visible().filter(|i| i.is_path) {
-            if let Some(file) = self
-                .modules
-                .directory_component(&base.join(&import.uri), ty)?
+            if let Some(file) =
+                self.modules
+                    .directory_component(&base.join(&import.uri), ty, kind)?
             {
                 candidates.insert(
                     file.canonicalize()

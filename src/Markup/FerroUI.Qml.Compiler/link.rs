@@ -4,6 +4,9 @@ use std::collections::{BTreeMap, HashMap};
 use std::fmt;
 use std::rc::Rc;
 
+#[path = "singletons.rs"]
+mod singletons;
+
 #[derive(Clone)]
 pub struct ComponentSource {
     /// A stable identity, e.g. a canonical filesystem path or resource URL.
@@ -17,6 +20,16 @@ pub trait ComponentResolver {
     /// Imports that are to be resolved by the host, after consuming source modules.
     fn native_imports(&mut self, _from: &str, imports: &[Import]) -> Result<Vec<Import>, String> {
         Ok(imports.iter().filter(|i| !i.is_path).cloned().collect())
+    }
+
+    /// Look up a singleton expression name under this document's imports.
+    fn singleton(
+        &mut self,
+        _from: &str,
+        _imports: &[Import],
+        _name: &str,
+    ) -> Result<Option<ComponentSource>, String> {
+        Ok(None)
     }
 
     fn resolve(
@@ -57,11 +70,14 @@ pub fn link(
         serial: 0,
         nodes: 0,
         types: HashMap::new(),
+        singleton_ids: HashMap::new(),
+        singletons: Vec::new(),
     };
     let context = Context::new(source.key, &source.document, linker.resolver)?;
     let mut root = source.document.root.clone();
     linker.object(&context, &mut root)?;
     Ok(Document {
+        singletons: linker.singletons,
         root,
         pragmas: source.document.pragmas.clone(),
         imports: context.native_imports,
@@ -119,6 +135,8 @@ struct Linker<'a, R> {
     serial: usize,
     nodes: usize,
     types: HashMap<String, String>,
+    singleton_ids: HashMap<String, String>,
+    singletons: Vec<Object>,
 }
 
 impl<R: ComponentResolver> Linker<'_, R> {
@@ -129,6 +147,7 @@ impl<R: ComponentResolver> Linker<'_, R> {
         }
         site.members
             .retain(|m| !matches!(m.kind, MemberKind::Component { .. }));
+        self.singleton_names(context, &mut site.members)?;
         self.members(context, &mut site.members)?;
 
         if let Some(template) = context.inline.get(&site.type_name) {

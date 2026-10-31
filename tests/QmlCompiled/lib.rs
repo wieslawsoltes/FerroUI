@@ -28,3 +28,32 @@ mod tests {
         assert!(instance.set(root, "second", Value::Object(left)).is_ok());
     }
 }
+
+#[cfg(test)]
+mod singleton_tests {
+    use ferroui_qml::{Instance, TypeRegistry, Value};
+    include!(concat!(env!("OUT_DIR"), "/singletons.rs"));
+
+    #[test]
+    fn source_singleton_is_shared_by_components_and_isolated_between_engines() {
+        let document = compiled_qml();
+        assert_eq!(ferroui_qml::ComponentSource::document(&document).singletons.len(), 1);
+        let registry = TypeRegistry::new();
+        let mut first = Instance::new(&document, &registry, Default::default()).unwrap();
+        let second = Instance::new(&document, &registry, Default::default()).unwrap();
+        let root = first.root();
+        let Value::Object(state) = first.get(root, "state").unwrap() else {
+            panic!("missing state");
+        };
+        let Value::Object(consumer) = first.get(root, "first").unwrap() else {
+            panic!("missing consumer");
+        };
+        assert_eq!(first.parent(state), None);
+        first.call(consumer, "tick", vec![]).unwrap();
+        assert_eq!(first.get(root, "total").unwrap(), Value::Number(9.));
+        assert_eq!(
+            second.get(second.root(), "total").unwrap(),
+            Value::Number(6.)
+        );
+    }
+}

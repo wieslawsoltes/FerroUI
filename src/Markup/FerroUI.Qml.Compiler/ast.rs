@@ -10,6 +10,9 @@ pub struct Span {
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Document {
+    /// Referenced module singletons, each privately scoped and owned by the engine.
+    #[serde(default)]
+    pub singletons: Vec<Object>,
     pub pragmas: Vec<Pragma>,
     pub imports: Vec<Import>,
     pub root: Object,
@@ -118,6 +121,8 @@ pub enum Binding {
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum Expr {
+    /// Index in the native expression table of a compiled component.
+    Native(usize),
     Null,
     Undefined,
     Bool(bool),

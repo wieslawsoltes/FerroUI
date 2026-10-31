@@ -131,6 +131,7 @@ impl<'s> Parser<'s> {
             return Err(self.error("expected end of document after the root object"));
         }
         Ok(Document {
+            singletons: Vec::new(),
             pragmas,
             imports,
             root,
@@ -661,8 +662,9 @@ impl<'s> Parser<'s> {
                     self.pos += 1;
                 }
                 let (op, value) = match op {
-                    "++" => ("+=", Expr::Number(1.0)),
-                    "--" => ("-=", Expr::Number(1.0)),
+                    "++" | "--" if prefix.is_some() => (op, Expr::Undefined),
+                    "++" => ("post++", Expr::Undefined),
+                    "--" => ("post--", Expr::Undefined),
                     _ => (op, self.expression()?),
                 };
                 Stmt::Assign {
