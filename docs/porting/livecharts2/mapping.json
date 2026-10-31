@@ -1657,13 +1657,669 @@
       ],
       "status": "ported"
     },
-    "tests/SnapshotTests/PieChartTests.cs::SnapshotTests.PieChartTests::void GaugeInTightBounds()#L184": {
-      "reason": "Uses the reporter's exact 240x100 size, inner/relative offsets and maximum radial widths from source #2131.",
+    "tests/SnapshotTests/BoxSeriesTests.cs::SnapshotTests.BoxSeriesTests::void BasicBox()#L11": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
       "remaining": [
-        "Numerical geometry only; upstream snapshot PNG has not been compared."
+        "The native engine draws the boxes of several series at one position of a category instead of side by side, with a cap on every whisker.",
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
       ],
       "rust": [
-        "src/FerroUI.LiveCharts/pie_chart_engine.rs::tests::tight_gauge_preserves_negative_offsets_and_does_not_reserve_hover_pushout"
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/CandlesticksSeriesTests.cs::SnapshotTests.CandlesticksSeriesTests::void Basic()#L11": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/ColumnSeriesTests.cs::SnapshotTests.ColumnSeriesTests::void BackgroundColumns()#L85": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/ColumnSeriesTests.cs::SnapshotTests.ColumnSeriesTests::void BasicColumn()#L14": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/ColumnSeriesTests.cs::SnapshotTests.ColumnSeriesTests::void LayeredColumns()#L39": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/ColumnSeriesTests.cs::SnapshotTests.ColumnSeriesTests::void SpacingColumns()#L65": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/LineSeriesTests.cs::SnapshotTests.LineSeriesTests::void Area()#L30": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/LineSeriesTests.cs::SnapshotTests.LineSeriesTests::void Basic()#L13": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/LineSeriesTests.cs::SnapshotTests.LineSeriesTests::void Curved()#L71": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/LineSeriesTests.cs::SnapshotTests.LineSeriesTests::void Gaps()#L309": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "The single remaining point does not render, and the axis of a zero-width range lays out dozens of separators.",
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/LineSeriesTests.cs::SnapshotTests.LineSeriesTests::void Issue2132_InterpolatedInsertsWithGaps()#L365": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/LineSeriesTests.cs::SnapshotTests.LineSeriesTests::void Straight()#L52": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/LineSeriesTests.cs::SnapshotTests.LineSeriesTests::void VectorOperationsAdd()#L163": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/LineSeriesTests.cs::SnapshotTests.LineSeriesTests::void VectorOperationsClear()#L285": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "An empty series gives an inverted default axis range.",
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/LineSeriesTests.cs::SnapshotTests.LineSeriesTests::void VectorOperationsInsertEnd()#L236": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/LineSeriesTests.cs::SnapshotTests.LineSeriesTests::void VectorOperationsInsertMiddle()#L187": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/LineSeriesTests.cs::SnapshotTests.LineSeriesTests::void VectorOperationsInsertStart()#L213": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/LineSeriesTests.cs::SnapshotTests.LineSeriesTests::void VectorOperationsRemoveEnd()#L90": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/LineSeriesTests.cs::SnapshotTests.LineSeriesTests::void VectorOperationsRemoveMiddle()#L139": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/LineSeriesTests.cs::SnapshotTests.LineSeriesTests::void VectorOperationsRemoveStart()#L116": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/LineSeriesTests.cs::SnapshotTests.LineSeriesTests::void VectorOperationsReplace()#L259": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/PieChartTests.cs::SnapshotTests.PieChartTests::void Basic()#L12": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/PieChartTests.cs::SnapshotTests.PieChartTests::void Gauge()#L85": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/PieChartTests.cs::SnapshotTests.PieChartTests::void GaugeInTightBounds()#L184": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/PieChartTests.cs::SnapshotTests.PieChartTests::void GaugeMultiple()#L160": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "The data label formatter of the source (value and series name) has no native counterpart; labels show the value.",
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/PieChartTests.cs::SnapshotTests.PieChartTests::void GaugeValueExceedsMaxValue()#L108": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/PieChartTests.cs::SnapshotTests.PieChartTests::void GaugeValueExceedsRangeWithMinValue()#L134": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/PieChartTests.cs::SnapshotTests.PieChartTests::void InnerRadius()#L47": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/PieChartTests.cs::SnapshotTests.PieChartTests::void OuterRadius()#L25": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/PieChartTests.cs::SnapshotTests.PieChartTests::void Pushout()#L66": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/RangeSeriesTests.cs::SnapshotTests.RangeSeriesTests::void RangeColumn()#L10": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/RangeSeriesTests.cs::SnapshotTests.RangeSeriesTests::void RangeColumn_SwappedEndpoints()#L63": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/RangeSeriesTests.cs::SnapshotTests.RangeSeriesTests::void RangeLine()#L84": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/RangeSeriesTests.cs::SnapshotTests.RangeSeriesTests::void RangeLine_SwappedEndpoints()#L112": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/RangeSeriesTests.cs::SnapshotTests.RangeSeriesTests::void RangeRow()#L35": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/RowSeriesTests.cs::SnapshotTests.RowSeriesTests::void BackgroundRows()#L86": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/RowSeriesTests.cs::SnapshotTests.RowSeriesTests::void BasicRow()#L15": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/RowSeriesTests.cs::SnapshotTests.RowSeriesTests::void LayeredRows()#L40": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/RowSeriesTests.cs::SnapshotTests.RowSeriesTests::void SpacingRows()#L66": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/ScatterSeriesTests.cs::SnapshotTests.ScatterSeriesTests::void Basic()#L11": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/ScatterSeriesTests.cs::SnapshotTests.ScatterSeriesTests::void Bubbles()#L41": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/StackedAreaTests.cs::SnapshotTests.StackedAreaTests::void Basic()#L12": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/StackedAreaTests.cs::SnapshotTests.StackedAreaTests::void Issue1923_LineOverStacked()#L85": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/StackedAreaTests.cs::SnapshotTests.StackedAreaTests::void Issue2073_MixedSigns()#L60": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/StackedAreaTests.cs::SnapshotTests.StackedAreaTests::void Step()#L36": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "The stacked step areas leave unfilled cells between the steps of adjacent series.",
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/StackedColumnsTests.cs::SnapshotTests.StackedColumnsTests::void Basic()#L11": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "The tooltip label formatter of the source has no native counterpart.",
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/StackedColumnsTests.cs::SnapshotTests.StackedColumnsTests::void StackGroup()#L53": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/StackedRowSeriesTests.cs::SnapshotTests.StackedRowSeriesTests::void Basic()#L11": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/StackedRowSeriesTests.cs::SnapshotTests.StackedRowSeriesTests::void Issue2152_MixedSigns()#L88": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/StackedRowSeriesTests.cs::SnapshotTests.StackedRowSeriesTests::void StackGroup()#L35": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/StepLineSeriesTests.cs::SnapshotTests.StepLineSeriesTests::void Area()#L30": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/StepLineSeriesTests.cs::SnapshotTests.StepLineSeriesTests::void Basic()#L13": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/StepLineSeriesTests.cs::SnapshotTests.StepLineSeriesTests::void Gaps()#L105": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/StepLineSeriesTests.cs::SnapshotTests.StepLineSeriesTests::void Styled()#L60": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
+      ],
+      "status": "partial"
+    },
+    "tests/SnapshotTests/StepLineSeriesTests.cs::SnapshotTests.StepLineSeriesTests::void WithDataLabels()#L83": {
+      "reason": "Restated in samples/LiveChartsDemo/snapshots.rs with the source chart, series, values, axes and size; the render job of livecharts.yml draws it beside the upstream reference image, and upstream_snapshot_scenarios_measure_their_data checks that it measures its data. Source settings without a native counterpart are named in a comment at the scenario.",
+      "remaining": [
+        "Pixel comparison with the upstream reference image: the native image is drawn by Vello CPU and the native text stack, the upstream one by SkiaSharp.",
+        "Native defaults differ from the source theme: the series palette, the area under line series, and the density of axis separators."
+      ],
+      "rust": [
+        "samples/LiveChartsDemo/snapshots.rs",
+        "samples/LiveChartsDemo/tests.rs::tests::upstream_snapshot_scenarios_measure_their_data"
       ],
       "status": "partial"
     }

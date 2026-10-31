@@ -1,0 +1,105 @@
+<Grid xmlns="https://github.com/ferroui"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:lc="https://ferroui.dev/livecharts"
+      RowDefinitions="108,*,*,50" ColumnDefinitions="*,*,*"
+      Background="#F3F5F9">
+  <Grid Grid.ColumnSpan="3" Margin="28,24,28,12" ColumnDefinitions="*,Auto">
+    <StackPanel Spacing="5">
+      <TextBlock Text="FerroUI / LiveCharts" FontSize="28" FontWeight="Bold" Foreground="#14243A" />
+      <TextBlock Text="Cartesian and pie charts · compiled XAML · live observable data"
+                 FontSize="14" Foreground="#65758A" />
+    </StackPanel>
+    <Button x:Name="UpdateButton" Grid.Column="1" Content="Update live data"
+            VerticalAlignment="Center" Padding="20,11" FontSize="14" />
+  </Grid>
+
+  <Border Grid.Row="1" Margin="20,0,8,12" Padding="16" Background="White" CornerRadius="14">
+    <Grid RowDefinitions="Auto,Auto,*">
+      <TextBlock Text="01 / CARTESIAN" FontSize="11" FontWeight="Bold" Foreground="#62738C" />
+      <TextBlock Grid.Row="1" Text="Delivery momentum" FontSize="19" FontWeight="SemiBold" Margin="0,5,0,8" />
+      <lc:CartesianChart x:Name="CartesianDemo" Grid.Row="2" LegendPosition="Bottom">
+        <lc:CartesianChart.XAxes><lc:Axis TextSize="11" /></lc:CartesianChart.XAxes>
+        <lc:CartesianChart.YAxes><lc:Axis MinLimit="0" TextSize="11" /></lc:CartesianChart.YAxes>
+        <lc:ColumnSeries Name="Completed" MaxBarWidth="24" CornerRadius="5">
+          <lc:ColumnSeries.FillBrush>
+            <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+              <GradientStop Offset="0" Color="#48C7C8" />
+              <GradientStop Offset="1" Color="#2877C9" />
+            </LinearGradientBrush>
+          </lc:ColumnSeries.FillBrush>
+        </lc:ColumnSeries>
+        <lc:LineSeries Name="Planned" Stroke="#DF8651" StrokeThickness="2.5" GeometrySize="6" LineSmoothness="0.6" />
+      </lc:CartesianChart>
+    </Grid>
+  </Border>
+
+  <Border Grid.Row="1" Grid.Column="1" Margin="8,0,8,12" Padding="16" Background="White" CornerRadius="14">
+    <Grid RowDefinitions="Auto,Auto,*">
+      <TextBlock Text="02 / PIE &amp; DOUGHNUT" FontSize="11" FontWeight="Bold" Foreground="#62738C" />
+      <TextBlock Grid.Row="1" Text="Work by discipline" FontSize="19" FontWeight="SemiBold" Margin="0,5,0,8" />
+      <lc:PieChart x:Name="PieDemo" Grid.Row="2" LegendPosition="Bottom">
+        <lc:PieSeries Name="Product" Fill="#2877C9" InnerRadius="56" />
+        <lc:PieSeries Name="Platform" Fill="#47BDB5" InnerRadius="56" />
+        <lc:PieSeries Name="Research" Fill="#DDA25D" InnerRadius="56" />
+        <lc:PieSeries Name="Operations" Fill="#9186CF" InnerRadius="56" />
+      </lc:PieChart>
+    </Grid>
+  </Border>
+
+  <Border Grid.Row="1" Grid.Column="2" Margin="8,0,20,12" Padding="16" Background="White" CornerRadius="14">
+    <Grid RowDefinitions="Auto,Auto,*">
+      <TextBlock Text="03 / STACKED AREAS" FontSize="11" FontWeight="Bold" Foreground="#62738C" />
+      <TextBlock Grid.Row="1" Text="Load by region" FontSize="19" FontWeight="SemiBold" Margin="0,5,0,8" />
+      <lc:CartesianChart x:Name="StackedDemo" Grid.Row="2" LegendPosition="Bottom">
+        <lc:CartesianChart.XAxes><lc:Axis TextSize="10" /></lc:CartesianChart.XAxes>
+        <lc:CartesianChart.YAxes><lc:Axis MinLimit="0" TextSize="10" /></lc:CartesianChart.YAxes>
+        <lc:StackedAreaSeries Name="Europe" Fill="#B02877C9" Stroke="#2877C9" GeometrySize="0" />
+        <lc:StackedAreaSeries Name="Americas" Fill="#B047BDB5" Stroke="#289EAB" GeometrySize="0" />
+        <lc:StackedAreaSeries Name="Asia" Fill="#B0DDA25D" Stroke="#C98A3E" GeometrySize="0" />
+      </lc:CartesianChart>
+    </Grid>
+  </Border>
+
+  <Border Grid.Row="2" Grid.Column="0" Margin="20,0,8,0" Padding="16" Background="White" CornerRadius="14">
+    <Grid RowDefinitions="Auto,Auto,*">
+      <TextBlock Text="04 / SCATTER" FontSize="11" FontWeight="Bold" Foreground="#62738C" />
+      <TextBlock Grid.Row="1" Text="Latency against throughput" FontSize="19" FontWeight="SemiBold" Margin="0,5,0,8" />
+      <lc:CartesianChart x:Name="ScatterDemo" Grid.Row="2" LegendPosition="Bottom">
+        <lc:CartesianChart.XAxes><lc:Axis Name="Requests / s" TextSize="10" /></lc:CartesianChart.XAxes>
+        <lc:CartesianChart.YAxes><lc:Axis Name="ms" MinLimit="0" TextSize="10" /></lc:CartesianChart.YAxes>
+        <lc:ScatterSeries Name="Region A" Fill="#A02877C9" GeometrySize="12" />
+        <lc:ScatterSeries Name="Region B" Fill="#A0DF8651" GeometrySize="12" />
+      </lc:CartesianChart>
+    </Grid>
+  </Border>
+
+  <Border Grid.Row="2" Grid.Column="1" Margin="8,0,8,0" Padding="16" Background="White" CornerRadius="14">
+    <Grid RowDefinitions="Auto,Auto,*">
+      <TextBlock Text="05 / FINANCIAL" FontSize="11" FontWeight="Bold" Foreground="#62738C" />
+      <TextBlock Grid.Row="1" Text="Weekly index" FontSize="19" FontWeight="SemiBold" Margin="0,5,0,8" />
+      <lc:CartesianChart x:Name="FinancialDemo" Grid.Row="2">
+        <lc:CartesianChart.XAxes><lc:Axis TextSize="10" /></lc:CartesianChart.XAxes>
+        <lc:CartesianChart.YAxes><lc:Axis TextSize="10" /></lc:CartesianChart.YAxes>
+        <lc:CandlesticksSeries Name="Index" MaxBarWidth="14" />
+      </lc:CartesianChart>
+    </Grid>
+  </Border>
+
+  <Border Grid.Row="2" Grid.Column="2" Margin="8,0,20,0" Padding="16" Background="White" CornerRadius="14">
+    <Grid RowDefinitions="Auto,Auto,*">
+      <TextBlock Text="06 / GAUGE" FontSize="11" FontWeight="Bold" Foreground="#62738C" />
+      <TextBlock Grid.Row="1" Text="Sprint completion" FontSize="19" FontWeight="SemiBold" Margin="0,5,0,8" />
+      <lc:PieChart x:Name="GaugeDemo" Grid.Row="2" InitialRotation="-225" MaxAngle="270" MinValue="0" MaxValue="100">
+        <lc:PieSeries Name="Completed" Fill="#2877C9" IsGauge="True" MaxRadialColumnWidth="34" CornerRadius="8" DataLabels="True" DataLabelsSize="28" PolarLabelsPosition="ChartCenter" />
+        <lc:PieSeries Name="Track" Fill="#E3E9F1" IsGauge="True" IsFillSeries="True" MaxRadialColumnWidth="34" />
+      </lc:PieChart>
+    </Grid>
+  </Border>
+
+  <Grid Grid.Row="3" Grid.ColumnSpan="3" Margin="28,0" ColumnDefinitions="*,Auto">
+    <TextBlock x:Name="StatusText" Text="Ready · hover to inspect values; press Update live data to change every chart"
+               VerticalAlignment="Center" FontSize="12" Foreground="#65758A" />
+    <TextBlock Grid.Column="1" Text="RUST + FERROUI" VerticalAlignment="Center"
+               FontSize="11" FontWeight="Bold" Foreground="#65758A" />
+  </Grid>
+</Grid>

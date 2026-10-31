@@ -88,6 +88,8 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add("/Pages/TableViewPage.xaml", "TableView", Icons::GRID, "Tabular data with resizable, sortable columns");
             // Not in the original: the pages of the TreeDataGrid demo.
             s.add("/Pages/TreeDataGridPage.xaml", "TreeDataGrid", Icons::GRID, "Virtualized rows and columns of flat and hierarchical data");
+            s.add("/Pages/CartesianChartPage.xaml", "CartesianChart", Icons::GRID, "Column, line, area and row series on X and Y axes");
+            s.add("/Pages/PieChartPage.xaml", "PieChart", Icons::GRID, "Pies, doughnuts and gauges");
             s.add("/Pages/TreeViewPage.xaml", "TreeView", Icons::TREE, "Hierarchical data with expandable nodes");
         }),
         section("Date & Time", Icons::DATE, &mut unavailable, |s| {

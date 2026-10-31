@@ -193,6 +193,7 @@ members = [
     "samples/VirtualizationDemo",
     "samples/TreeDataGridDemo",
     "samples/ChartsDemo",
+    "samples/LiveChartsDemo",
     "samples/ReactiveDemo",
     "samples/ReactiveUIExample",
     "samples/StaticViewLocatorDemo",
