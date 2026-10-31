@@ -7,6 +7,7 @@ mod anchors;
 mod builtins;
 mod clock;
 mod composition;
+mod positioner;
 mod reflected;
 
 use ferroui_base::{reactive::IDisposable, Ref};

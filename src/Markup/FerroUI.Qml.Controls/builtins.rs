@@ -56,7 +56,9 @@ pub(super) fn register(registry: &mut ControlRegistry) -> Result<(), Error> {
         registry.types_mut().set_module_version(module, 2, 15);
         for &(name, kind) in types {
             registry.register(module, name, kind.definition(), move || {
-                Box::new(kind.create())
+                let peer = kind.create();
+                super::positioner::Positioner::mark_item(&peer.control());
+                Box::new(peer)
             })?;
         }
     }
@@ -121,8 +123,7 @@ impl Kind {
         match self {
             Self::Item => Peer::Canvas(super::anchors::AnchorCanvas::create()),
             Self::Row | Self::Column => {
-                let stack = StackPanel::new();
-                stack.set_orientation(if matches!(self, Self::Row) {
+                let stack = super::positioner::Positioner::create(if matches!(self, Self::Row) {
                     Orientation::Horizontal
                 } else {
                     Orientation::Vertical

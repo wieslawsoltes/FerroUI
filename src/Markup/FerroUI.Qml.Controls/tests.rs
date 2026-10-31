@@ -278,3 +278,46 @@ fn invalid_native_edit_restores_the_originating_widget_and_reports_one_error() {
         Value::String("blue".into())
     );
 }
+
+#[test]
+fn positioners_keep_quick_item_cross_axis_geometry_and_native_alignment_on_resize() {
+    use ferroui_base::{layout::HorizontalAlignment, Rect, Size};
+    let _scope = UnitTestApplication::start(TestServices::new());
+    let mut registry = ControlRegistry::standard().unwrap();
+    registry
+        .register_ferro_control("Workbench", Canvas::new)
+        .unwrap();
+    let document = parse(
+        r#"
+        import QtQuick
+        import Workbench as Native
+        Column {
+            Item { id: top; width: 24; height: 10; x: 3 }
+            Row {
+                id: row; height: 40
+                Item { id: middle; width: 16; height: 12; y: 5 }
+            }
+            Native.Canvas { id: native; width: 20; height: 8 }
+        }
+    "#,
+    )
+    .unwrap();
+    let view = QmlView::new(&document, &registry, BTreeMap::new()).unwrap();
+    let root = view.root();
+    let element = |name: &str| view.control(view.id(name).unwrap()).unwrap();
+    let top = element("top");
+    let middle = element("middle");
+    let native = element("native");
+    native.set_horizontal_alignment(HorizontalAlignment::Right);
+    for width in [120., 190.] {
+        root.measure(Size::new(width, 100.));
+        root.arrange(Rect::new(0., 0., width, 100.));
+        assert_eq!(top.bounds(), Rect::new(3., 0., 24., 10.));
+        assert_eq!(middle.bounds(), Rect::new(0., 5., 16., 12.));
+        assert_eq!(native.bounds(), Rect::new(width - 20., 50., 20., 8.));
+    }
+    view.set(view.id("top").unwrap(), "x", Value::Number(11.))
+        .unwrap();
+    root.arrange(Rect::new(0., 0., 190., 100.));
+    assert_eq!(top.bounds().x, 11.);
+}
