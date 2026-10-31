@@ -138,10 +138,7 @@ impl Instance {
                             .lineage
                             .iter()
                             .any(|(module, name)| ty == name || ty == format!("{module}.{name}"))
-                }) =>
-            {
-                ()
-            }
+                }) => {}
             _ => return Err(Error::new(format!("cannot assign {value:?} to '{ty}'"))),
         }
         Ok(value)
@@ -507,10 +504,7 @@ impl Builder<'_> {
                     ..
                 } => self.bind(id, name, value, member.scope)?,
                 MemberKind::Handler { name, .. }
-                    if connections && name != "Component.onCompleted" =>
-                {
-                    ()
-                }
+                    if connections && name != "Component.onCompleted" => {}
                 MemberKind::Handler {
                     name,
                     parameters,

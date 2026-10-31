@@ -12,9 +12,12 @@ pub(crate) fn module(mut document: Document) -> Result<String, String> {
     let ir = document.rust();
     let module = quote! {
         // ECMAScript exposes a statement completion value, including in script bindings.
-        #[allow(unused_assignments, unused_braces)]
+        // A uniform Result and completion-value convention also represents simple leaves.
+            #[allow(unused_assignments, unused_braces, clippy::needless_return, clippy::needless_question_mark)]
         pub fn compiled_qml() -> ::ferroui_qml::CompiledComponent {
             use ::ferroui_qml::ir as q;
+                #[allow(unused_imports)]
+                use ::std::{boxed::Box, string::String, vec, vec::Vec, result::Result::Ok, option::Option::{Some, None}};
             #[allow(unused_imports)]
             use ::ferroui_qml::{compiled as c, Value as V};
             static FUNCTIONS: &[::ferroui_qml::compiled::Evaluator] = &[#(#expressions),*];
