@@ -1,0 +1,35 @@
+[package]
+name = "portable-media-mobile"
+description = "Independent iOS and Android media integration sample"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+[lib]
+name = "portable_media_mobile"
+path = "lib.rs"
+crate-type = ["cdylib"]
+[[bin]]
+name = "portable-media-mobile"
+path = "main.rs"
+[dependencies]
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+ferroui-media.workspace = true
+ferroui-media-controls.workspace = true
+ferroui-media-video-controls.workspace = true
+ferroui-media-video.workspace = true
+ferroui-media-camera.workspace = true
+ferroui-media-camera-controls.workspace = true
+image = { version="0.25", default-features=false, features=["jpeg"] }
+ferroui-themes-simple.workspace = true
+[target.'cfg(target_os = "ios")'.dependencies]
+ferroui-ios.workspace = true
+ferroui-media-video-apple = {workspace=true,features=["controls"]}
+ferroui-media-camera-apple = {workspace=true,features=["controls"]}
+[target.'cfg(target_os = "android")'.dependencies]
+ferroui-android.workspace = true
+ferroui-media-android = {workspace=true,features=["controls"]}
+ferroui-media-video-android = {workspace=true,features=["controls"]}
+ferroui-media-camera-android = {workspace=true,features=["controls"]}

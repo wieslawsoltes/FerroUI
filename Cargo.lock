@@ -2053,6 +2053,7 @@ dependencies = [
  "objc2",
  "objc2-core-foundation",
  "objc2-foundation",
+ "objc2-io-surface",
  "objc2-metal",
  "objc2-open-gl-es",
  "objc2-quartz-core",
@@ -2167,6 +2168,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-media-android"
+version = "0.4.0"
+dependencies = [
+ "ferroui-android",
+ "ferroui-base",
+ "ferroui-media",
+ "ferroui-media-opengl",
+ "ferroui-opengl",
+]
+
+[[package]]
 name = "ferroui-media-apple"
 version = "0.4.0"
 dependencies = [
@@ -2196,6 +2208,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-media-camera-android"
+version = "0.4.0"
+dependencies = [
+ "ferroui-android",
+ "ferroui-media",
+ "ferroui-media-android",
+ "ferroui-media-camera",
+ "serde_json",
+]
+
+[[package]]
 name = "ferroui-media-camera-apple"
 version = "0.4.0"
 dependencies = [
@@ -2219,6 +2242,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-media-camera-controls"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-media",
+ "ferroui-media-camera",
+ "ferroui-media-controls",
+]
+
+[[package]]
 name = "ferroui-media-controls"
 version = "0.4.0"
 dependencies = [
@@ -2226,6 +2261,16 @@ dependencies = [
  "ferroui-build-scan",
  "ferroui-controls",
  "ferroui-media",
+]
+
+[[package]]
+name = "ferroui-media-opengl"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-media",
+ "ferroui-media-controls",
+ "ferroui-opengl",
 ]
 
 [[package]]
@@ -2241,6 +2286,16 @@ name = "ferroui-media-video"
 version = "0.4.0"
 dependencies = [
  "ferroui-media",
+]
+
+[[package]]
+name = "ferroui-media-video-android"
+version = "0.4.0"
+dependencies = [
+ "ferroui-android",
+ "ferroui-media",
+ "ferroui-media-android",
+ "ferroui-media-video",
 ]
 
 [[package]]
@@ -4537,6 +4592,7 @@ dependencies = [
  "block2",
  "objc2",
  "objc2-foundation",
+ "objc2-io-surface",
 ]
 
 [[package]]
@@ -4814,6 +4870,29 @@ dependencies = [
  "ferroui-media-video-controls",
  "ferroui-themes-fluent",
  "wasm-bindgen",
+]
+
+[[package]]
+name = "portable-media-mobile"
+version = "0.4.0"
+dependencies = [
+ "ferroui-android",
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-ios",
+ "ferroui-media",
+ "ferroui-media-android",
+ "ferroui-media-camera",
+ "ferroui-media-camera-android",
+ "ferroui-media-camera-apple",
+ "ferroui-media-camera-controls",
+ "ferroui-media-controls",
+ "ferroui-media-video",
+ "ferroui-media-video-android",
+ "ferroui-media-video-apple",
+ "ferroui-media-video-controls",
+ "ferroui-themes-simple",
+ "image",
 ]
 
 [[package]]

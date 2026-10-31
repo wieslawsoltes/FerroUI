@@ -14,6 +14,7 @@
 #   --name <name>          the display name                           (default: the executable)
 #   --out <directory>      where the bundle is put                    (default: <target dir>/ios-bundles)
 #   --no-build             bundle the executable that is already built
+#   --camera-usage-description TEXT  declare explicit camera use for a camera application
 #   --high-refresh-rate    states CADisableMinimumFrameDurationOnPhone in the property list, which an
 #                          iPhone application needs to render above 60 Hz on a ProMotion display
 #
@@ -43,6 +44,7 @@ display_name=
 out=
 build=1
 high_refresh_rate=0
+camera_usage=
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -56,6 +58,7 @@ while [ $# -gt 0 ]; do
     --name) display_name="$2"; shift 2 ;;
     --out) out="$2"; shift 2 ;;
     --no-build) build=0; shift ;;
+    --camera-usage-description) camera_usage="$2"; shift 2 ;;
     --high-refresh-rate) high_refresh_rate=1; shift ;;
     -h|--help) sed -n '2,31p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "bundle.sh: unknown argument: $1" >&2; exit 2 ;;
@@ -207,6 +210,9 @@ fi
 # warning at startup when it is missing.
 if [ "$high_refresh_rate" = 1 ]; then
   /usr/libexec/PlistBuddy -c "Add :CADisableMinimumFrameDurationOnPhone bool true" "$plist" >/dev/null
+fi
+if [ -n "$camera_usage" ]; then
+  plutil -insert NSCameraUsageDescription -string "$camera_usage" "$plist"
 fi
 plutil -lint "$plist" >&2
 plutil -convert binary1 "$plist"

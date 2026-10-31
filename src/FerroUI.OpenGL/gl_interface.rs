@@ -89,6 +89,10 @@ gl_entry_points! {
 
     required safe pub fn finish() = get("glFinish");
 
+    optional safe pub fn fence_sync(condition: u32, flags: u32) -> isize = get("glFenceSync");
+    optional safe pub fn client_wait_sync(sync: isize, flags: u32, timeout: u64) -> u32 = get("glClientWaitSync");
+    optional safe pub fn delete_sync(sync: isize) = get("glDeleteSync");
+
     required unsafe pub fn read_pixels(x: i32, y: i32, width: i32, height: i32, format: i32, type_: i32, data: *mut c_void)
         = get("glReadPixels");
 

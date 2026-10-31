@@ -319,7 +319,14 @@ impl Drop for SessionInner {
 }
 #[derive(Clone)]
 pub struct CameraSession(Rc<SessionInner>);
+#[derive(Clone)]
+pub struct WeakCameraSession(std::rc::Weak<SessionInner>);
+impl WeakCameraSession {
+    pub fn upgrade(&self) -> Option<CameraSession> { self.0.upgrade().map(CameraSession) }
+}
 impl CameraSession {
+    pub fn downgrade(&self) -> WeakCameraSession { WeakCameraSession(Rc::downgrade(&self.0)) }
+    pub fn is_stopped(&self) -> bool { self.0.stopped.get() }
     pub fn settings(&self) -> CameraSettings {
         self.0.native.settings()
     }

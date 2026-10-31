@@ -1,0 +1,8 @@
+// Requires the common FerroUI.Media.Android/packaging.gradle, independently of Video/QR.
+def ferroRoot = file(providers.gradleProperty('ferroUiRoot').get())
+android.sourceSets.main.java.srcDirs += new File(ferroRoot, 'src/FerroUI.Media.Camera.Android/java')
+dependencies {
+    implementation 'androidx.camera:camera-core:1.5.2'
+    implementation 'androidx.camera:camera-camera2:1.5.2'
+    implementation 'androidx.camera:camera-lifecycle:1.5.2'
+}

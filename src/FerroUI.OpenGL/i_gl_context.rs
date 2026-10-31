@@ -12,6 +12,9 @@ use std::sync::Arc;
 /// optional features: `try_get_feature(TypeId::of::<dyn IGlContext>())`
 /// returns an `Rc<dyn IGlContext>`.
 pub trait IGlContext: IPlatformGraphicsContext {
+    fn shared_frame_retirement_queue(&self) -> Option<crate::SharedGlTextureRetirementQueue> {
+        None
+    }
     /// Available only when direct immutable frame sampling and asynchronous
     /// GPU completion are implemented for this context/profile.
     fn shared_frame_context_id(&self) -> Option<u64> {

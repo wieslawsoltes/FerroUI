@@ -1,6 +1,11 @@
 [workspace]
 resolver = "2"
 members = [
+    "src/FerroUI.Media.OpenGL",
+    "src/FerroUI.Media.Android",
+    "src/FerroUI.Media.Video.Android",
+    "src/FerroUI.Media.Camera.Android",
+    "src/FerroUI.Media.Camera.Controls",
     "src/FerroUI.Media",
     "src/FerroUI.Media.Video",
     "src/FerroUI.Media.Camera",
@@ -14,6 +19,7 @@ members = [
     "src/FerroUI.Media.Video.Browser",
     "src/FerroUI.Media.Camera.Browser",
     "samples/PortableMedia",
+    "samples/PortableMedia.Mobile",
     "samples/PortableMedia.Browser",
     "src/FerroUI.Designer.Core",
     "src/FerroUI.Designer.Project",
@@ -259,6 +265,11 @@ ferroui-media-browser = { version = "=0.4.0", path = "src/FerroUI.Media.Browser"
 ferroui-media-video-browser = { version = "=0.4.0", path = "src/FerroUI.Media.Video.Browser" }
 ferroui-media-camera-browser = { version = "=0.4.0", path = "src/FerroUI.Media.Camera.Browser" }
 ferroui-media = { version = "=0.4.0", path = "src/FerroUI.Media" }
+ferroui-media-opengl = { version = "=0.4.0", path = "src/FerroUI.Media.OpenGL" }
+ferroui-media-android = { version = "=0.4.0", path = "src/FerroUI.Media.Android" }
+ferroui-media-video-android = { version = "=0.4.0", path = "src/FerroUI.Media.Video.Android" }
+ferroui-media-camera-android = { version = "=0.4.0", path = "src/FerroUI.Media.Camera.Android" }
+ferroui-media-camera-controls = { version = "=0.4.0", path = "src/FerroUI.Media.Camera.Controls" }
 ferroui-media-qr = { version = "=0.4.0", path = "src/FerroUI.Media.Qr" }
 # The Dock port (docs/porting/dock): its crates and the dependencies only it has.
 ferrodock-controls-recycling-model = { path = "src/Dock/FerroDock.Controls.Recycling.Model" }

@@ -188,6 +188,9 @@ impl CompositionInterop {
 }
 
 impl ICompositionGpuInterop for CompositionInterop {
+    fn render_compositor(&self) -> Option<Rc<Compositor>> {
+        Some(self.compositor.clone())
+    }
     fn shared_context_id(&self) -> Option<u64> {
         self.shared_context_id
     }
@@ -344,7 +347,10 @@ impl ImportHandle {
 
     fn platform_handle(&self) -> Rc<dyn IPlatformHandle> {
         match self {
-            ImportHandle::Frame { handle, .. } => handle.platform_handle(),
+            ImportHandle::Frame { handle, _owner } => {
+                let native=handle.platform_handle();
+                Rc::new(crate::platform::LeasedPlatformHandle::new(native.handle(),native.handle_descriptor(),_owner.clone()))
+            }
             ImportHandle::Wrapped(wrapped) => wrapped.clone().as_platform_handle(),
             ImportHandle::Copied(handle) => Rc::new(handle.clone()),
         }

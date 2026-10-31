@@ -1,0 +1,23 @@
+[package]
+name = "ferroui-media-opengl"
+description = "Render-thread immutable native GL frame production and presentation"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+[lib]
+path = "lib.rs"
+[dependencies]
+ferroui-base.workspace = true
+ferroui-media.workspace = true
+ferroui-opengl.workspace = true
+ferroui-media-controls = { workspace = true, optional = true }
+[features]
+controls = ["dep:ferroui-media-controls"]
+[package.metadata.release]
+group = "platforms"

@@ -1,16 +1,30 @@
 use super::egl_consts::*;
 use super::egl_external_objects_feature::EglExternalObjectsFeature;
-use super::{EglContextFeature, EglContextFeatureFactory, EglContextOptions, EglDisplay, EglInterface, EglSurface};
-use crate::{GetProcAddress, GlInterface, GlVersion, IGlContext, IGlContextExternalObjectsFeature, OpenGlException};
+use super::{
+    EglContextFeature, EglContextFeatureFactory, EglContextOptions, EglDisplay, EglInterface,
+    EglSurface,
+};
+use crate::SharedGlTextureRetirementQueue;
+use crate::{
+    GetProcAddress, GlInterface, GlVersion, IGlContext, IGlContextExternalObjectsFeature,
+    OpenGlException,
+};
 use ferroui_base::logging::{LogEventLevel, Logger};
-use ferroui_base::platform::{IOptionalFeatureProvider, IPlatformGraphicsContext, PlatformGraphicsContextLostException};
+use ferroui_base::platform::{
+    IOptionalFeatureProvider, IPlatformGraphicsContext, PlatformGraphicsContextLostException,
+};
 use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::rendering::composition::frames::GpuCompletion;
 use std::any::{Any, TypeId};
 use std::cell::{Cell, OnceCell, RefCell};
 use std::collections::HashMap;
 use std::error::Error;
 use std::ffi::{c_void, CString};
 use std::rc::{Rc, Weak};
+use std::sync::atomic::{AtomicU64, Ordering};
+
+// Keep native IDs distinct from browser context-table indices.
+static NEXT_FRAME_CONTEXT: AtomicU64 = AtomicU64::new(1 << 32);
 
 /// A context of an EGL display.
 // The original guards the context with a monitor (its own, or the one of the display);
@@ -32,6 +46,9 @@ pub struct EglContext {
     gl_interface: OnceCell<Rc<GlInterface>>,
     sample_count: i32,
     stencil_size: i32,
+    frame_context_id: u64,
+    frame_fences: RefCell<Vec<(isize, GpuCompletion)>>,
+    frame_retirement: SharedGlTextureRetirementQueue,
 }
 
 impl EglContext {
@@ -63,12 +80,17 @@ impl EglContext {
             gl_interface: OnceCell::new(),
             sample_count,
             stencil_size,
+            frame_context_id: NEXT_FRAME_CONTEXT.fetch_add(1, Ordering::Relaxed),
+            frame_fences: RefCell::new(Vec::new()),
+            frame_retirement: SharedGlTextureRetirementQueue::default(),
         });
 
         let current = match this.make_current_with_surface(None) {
             Ok(current) => current,
             Err(MakeCurrentError::ContextLost) => {
-                return Err(OpenGlException::new(PlatformGraphicsContextLostException.to_string()));
+                return Err(OpenGlException::new(
+                    PlatformGraphicsContextLostException.to_string(),
+                ));
             }
             Err(MakeCurrentError::OpenGl(error)) => return Err(error),
         };
@@ -86,8 +108,10 @@ impl EglContext {
         let gl_interface = unsafe { GlInterface::new(version, get_proc_address) };
         let _ = this.gl_interface.set(Rc::new(gl_interface));
 
-        let created: Vec<(TypeId, EglContextFeature)> =
-            features.iter().map(|(key, factory)| (*key, factory(&this))).collect();
+        let created: Vec<(TypeId, EglContextFeature)> = features
+            .iter()
+            .map(|(key, factory)| (*key, factory(&this)))
+            .collect();
         this.features.borrow_mut().extend(created);
 
         let external_objects_key = TypeId::of::<dyn IGlContextExternalObjectsFeature>();
@@ -102,7 +126,10 @@ impl EglContext {
                 // the context.
                 this.features.borrow_mut().insert(
                     external_objects_key,
-                    EglContextFeature { feature: Rc::new(external_objects), disposable: Some(Disposable::empty()) },
+                    EglContextFeature {
+                        feature: Rc::new(external_objects),
+                        disposable: Some(Disposable::empty()),
+                    },
                 );
             }
         }
@@ -164,14 +191,21 @@ impl EglContext {
         let surface_handle = surf.map_or(0, |surf| surf.dangerous_get_handle());
         self.egl.bind_api(self.api);
         self.egl.make_current(self.disp.handle(), 0, 0, 0);
-        if !self.egl.make_current(self.disp.handle(), surface_handle, surface_handle, self.context()) {
+        if !self.egl.make_current(
+            self.disp.handle(),
+            surface_handle,
+            surface_handle,
+            self.context(),
+        ) {
             let error = self.egl.get_error();
             if error == EGL_CONTEXT_LOST {
                 self.notify_context_lost();
                 return Err(MakeCurrentError::ContextLost);
             }
 
-            return Err(MakeCurrentError::OpenGl(OpenGlException::get_formatted_egl_exception("eglMakeCurrent", error)));
+            return Err(MakeCurrentError::OpenGl(
+                OpenGlException::get_formatted_egl_exception("eglMakeCurrent", error),
+            ));
         }
 
         Ok(Rc::new(old))
@@ -235,7 +269,14 @@ impl RestoreContext {
         let display = egl.get_current_display();
         if display == 0 {
             // Fallback display, it's invalid to call eglMakeCurrent without a display
-            Self { egl: egl.clone(), display: def_display, context: 0, read: 0, draw: 0, api }
+            Self {
+                egl: egl.clone(),
+                display: def_display,
+                context: 0,
+                read: 0,
+                draw: 0,
+                api,
+            }
         } else {
             Self {
                 egl: egl.clone(),
@@ -252,7 +293,8 @@ impl RestoreContext {
 impl IDisposable for RestoreContext {
     fn dispose(&self) {
         self.egl.bind_api(self.api);
-        self.egl.make_current(self.display, self.draw, self.read, self.context);
+        self.egl
+            .make_current(self.display, self.draw, self.read, self.context);
     }
 }
 
@@ -271,10 +313,62 @@ impl IOptionalFeatureProvider for EglContext {
 }
 
 impl IPlatformGraphicsContext for EglContext {
+    fn poll_pending_gpu_work(&self) -> bool {
+        let fences = std::mem::take(&mut *self.frame_fences.borrow_mut());
+        if self.is_lost() {
+            for (_, completion) in fences {
+                completion.mark_indeterminate();
+            }
+            self.frame_retirement.close();
+            return false;
+        }
+        if fences.is_empty() && !self.frame_retirement.has_pending() {
+            return false;
+        }
+        let current = match self.make_current_with_surface(None) {
+            Ok(current) => current,
+            Err(_) => {
+                for (_, completion) in fences {
+                    completion.mark_indeterminate();
+                }
+                self.frame_retirement.close();
+                return false;
+            }
+        };
+        let gl = self.gl_interface();
+        let mut pending = Vec::new();
+        for (fence, completion) in fences {
+            // timeout=0 is a poll, never a render/UI-thread wait.
+            match gl.client_wait_sync(fence, 0, 0) {
+                0x911A | 0x911C => {
+                    // ALREADY_SIGNALED / CONDITION_SATISFIED
+                    gl.delete_sync(fence);
+                    completion.complete();
+                }
+                0x911B => pending.push((fence, completion)), // TIMEOUT_EXPIRED
+                _ => {
+                    gl.delete_sync(fence);
+                    completion.mark_indeterminate();
+                }
+            }
+        }
+        self.frame_fences.borrow_mut().extend(pending);
+        for (texture, retirement) in self.frame_retirement.take() {
+            // SAFETY: deletion runs in the owning context after all frame
+            // references and submitted reads have retired.
+            unsafe {
+                gl.delete_textures(1, &(texture as i32));
+            }
+            drop(retirement);
+        }
+        let native_pending = self.frame_retirement.poll_native(&gl);
+        current.dispose();
+        native_pending || !self.frame_fences.borrow().is_empty()
+    }
     // As in the original, asking a disposed context whose display is not lost reads its
     // handle, which fails.
     fn is_lost(&self) -> bool {
-        self.is_lost.get() || self.disp.is_lost() || self.context() == 0
+        self.is_lost.get() || self.disp.is_lost() || self.context.get() == 0
     }
 
     fn ensure_current(&self) -> Rc<dyn IDisposable> {
@@ -289,11 +383,22 @@ impl IPlatformGraphicsContext for EglContext {
             return;
         }
 
+        self.poll_pending_gpu_work();
+        for (_, completion) in self.frame_fences.borrow_mut().drain(..) {
+            completion.mark_indeterminate();
+        }
+        self.frame_retirement.close();
+
         let disposable: Vec<(TypeId, Rc<dyn IDisposable>)> = self
             .features
             .borrow()
             .iter()
-            .filter_map(|(key, feature)| feature.disposable.clone().map(|disposable| (*key, disposable)))
+            .filter_map(|(key, feature)| {
+                feature
+                    .disposable
+                    .clone()
+                    .map(|disposable| (*key, disposable))
+            })
             .collect();
         for (key, d) in disposable {
             d.dispose();
@@ -317,12 +422,57 @@ impl IPlatformGraphicsContext for EglContext {
 }
 
 impl IGlContext for EglContext {
+    fn shared_frame_context_id(&self) -> Option<u64> {
+        let gl = self.gl_interface();
+        // GL sync is core in ES 3 / desktop 3.2. Do not advertise merely
+        // because a driver returned addresses for an unsupported ES 2 context.
+        let v = self.version;
+        let version_supported = match v.type_() {
+            crate::GlProfileType::OpenGLES => v.major() >= 3,
+            crate::GlProfileType::OpenGL => v.major() > 3 || (v.major() == 3 && v.minor() >= 2),
+        };
+        (version_supported
+            && !self.is_lost()
+            && gl.is_fence_sync_available()
+            && gl.is_client_wait_sync_available()
+            && gl.is_delete_sync_available())
+        .then_some(self.frame_context_id)
+    }
+    fn shared_frame_retirement_queue(&self) -> Option<SharedGlTextureRetirementQueue> {
+        self.shared_frame_context_id()
+            .map(|_| self.frame_retirement.clone())
+    }
+    fn schedule_frame_completion(&self, completion: GpuCompletion) {
+        if self.shared_frame_context_id().is_none() {
+            completion.mark_indeterminate();
+            return;
+        }
+        let current = match self.make_current_with_surface(None) {
+            Ok(current) => current,
+            Err(_) => {
+                completion.mark_indeterminate();
+                return;
+            }
+        };
+        let gl = self.gl_interface();
+        let fence = gl.fence_sync(0x9117, 0); // SYNC_GPU_COMMANDS_COMPLETE
+        if fence == 0 {
+            completion.mark_indeterminate();
+        } else {
+            gl.flush();
+            self.frame_fences.borrow_mut().push((fence, completion));
+        }
+        current.dispose();
+    }
     fn version(&self) -> GlVersion {
         self.version
     }
 
     fn gl_interface(&self) -> Rc<GlInterface> {
-        self.gl_interface.get().expect("the interface is set by the constructor").clone()
+        self.gl_interface
+            .get()
+            .expect("the interface is set by the constructor")
+            .clone()
     }
 
     fn sample_count(&self) -> i32 {
@@ -350,8 +500,13 @@ impl IGlContext for EglContext {
             panic!("Unable to cast the context to type 'EglContext'.");
         };
         Self::is_same(c, self)
-            || c.shared_with.as_ref().is_some_and(|shared| Self::is_same(shared, self))
-            || self.shared_with.as_ref().is_some_and(|shared| Self::is_same(shared, c))
+            || c.shared_with
+                .as_ref()
+                .is_some_and(|shared| Self::is_same(shared, self))
+            || self
+                .shared_with
+                .as_ref()
+                .is_some_and(|shared| Self::is_same(shared, c))
             || match (&self.shared_with, &c.shared_with) {
                 (Some(a), Some(b)) => Self::is_same(a, b),
                 _ => false,
@@ -365,17 +520,27 @@ impl IGlContext for EglContext {
     /// Creates a context that shares its objects with this one. As in the original the
     /// preferred versions are not used: the context has the version of the display. A
     /// failure is logged and gives `None` (the original throws).
-    fn create_shared_context(&self, _preferred_versions: Option<&[GlVersion]>) -> Option<Rc<dyn IGlContext>> {
+    fn create_shared_context(
+        &self,
+        _preferred_versions: Option<&[GlVersion]>,
+    ) -> Option<Rc<dyn IGlContext>> {
         let share_with = match &self.shared_with {
             Some(shared_with) => shared_with.clone(),
             None => self.this.upgrade()?,
         };
-        match self.disp.create_context(Some(EglContextOptions { share_with: Some(share_with), ..Default::default() })) {
+        match self.disp.create_context(Some(EglContextOptions {
+            share_with: Some(share_with),
+            ..Default::default()
+        })) {
             Ok(context) => Some(context),
             Err(error) => {
                 if let Some(logger) = Logger::try_get(LogEventLevel::Error, "OpenGL") {
                     let source: &dyn Any = &"EglContext";
-                    logger.log_with_values(Some(source), "Unable to create a shared context: {0}", &[&error]);
+                    logger.log_with_values(
+                        Some(source),
+                        "Unable to create a shared context: {0}",
+                        &[&error],
+                    );
                 }
                 None
             }

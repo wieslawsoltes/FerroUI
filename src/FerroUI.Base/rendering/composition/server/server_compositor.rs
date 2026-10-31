@@ -798,8 +798,12 @@ impl ServerCompositor {
 
         self.execute_server_jobs(&self.received_post_target_job_queue);
 
+        // Completion is independent of whether a visual still requests
+        // presentation. Retire submitted reads even after the last view detaches.
+        let pending_gpu_work = self.render_interface.value().poll_pending_gpu_work();
+
         // Request a tick if we have active animations or if there are recent batches
-        if self.animations.need_next_tick() || self.ticks_since_last_commit.get() < COMMIT_GRACE_TICKS {
+        if pending_gpu_work || self.animations.need_next_tick() || self.ticks_since_last_commit.get() < COMMIT_GRACE_TICKS {
             return true;
         }
 

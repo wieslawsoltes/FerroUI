@@ -72,12 +72,16 @@ copy or commit.
 | Existing Vulkan importer requiring a new direct route | `src/Skia/FerroUI.Skia/gpu/vulkan/vulkan_skia_external_objects_feature.rs` |
 | MediaPlayer/MediaSource/session and native provider traits | `src/FerroUI.Media.Video/player.rs` |
 | Camera discovery/capture/session/photo and native provider traits | `src/FerroUI.Media.Camera/lib.rs` |
+| Camera preview and weak/owned session attachment | `src/FerroUI.Media.Camera.Controls/` |
+| Native EGL completion, retirement and render-thread frame jobs | `src/FerroUI.OpenGL/egl/egl_context.rs`; `src/FerroUI.Media.OpenGL/` |
+| Android shared surface, Media3 video and CameraX capture | `src/FerroUI.Media.Android/`; `.Video.Android/`; `.Camera.Android/` |
+| iOS leased IOSurface views on the active Metal device | `src/iOS/FerroUI.iOS/metal/external_frames.rs` |
 | Shared presentation control and importer adapter | `src/FerroUI.Media.Controls/texture_presenter.rs` |
 | Video presentation and accessible transport controls | `src/FerroUI.Media.Video.Controls/` |
 | Scheduling, viewport/input mapping and planar projection contracts | `src/FerroUI.Media/renderer.rs` |
 | Optional QR scheduling, results and borrowed luma | `src/FerroUI.Media.Qr/` |
 | Audited platform examples | `src/FerroUI.Media.Apple`, `.Video.Apple`, `.Camera.Apple`, `.Browser`, `.Video.Browser`, `.Camera.Browser` |
-| Independent applications | `samples/PortableMedia`; `samples/PortableMedia.Browser` |
+| Independent applications | `samples/PortableMedia`; `samples/PortableMedia.Browser`; `samples/PortableMedia.Mobile` (including separate provider Gradle scripts) |
 | Synthetic audiovisual fixture | `tests/media/fixtures/avc-aac.mp4`; generator `tests/media/make-fixture.swift` |
 
 Paths abbreviated with `gpu/` in this table are under `src/Skia/FerroUI.Skia`.
@@ -206,7 +210,10 @@ They are functional evidence, not a frozen performance acceptance profile.
 | Browser media/capture | File resources, native seek/overlapping seek/Stop frame zero, autoplay denial and gesture recovery, diagnostic decoded AAC audio samples, CORS rejection, discovery without acquisition, denial, synthetic camera and independently decoded JPEG, late permission cancellation |
 | Browser negative controls | CPU-backed preview upload rejected/counted before frame allocation; known SwiftShader adapter rejected; normal production preview counters remain zero |
 | Browser tooling | TypeScript/lint/bundle passed; 60 build-tooling tests passed, including the repaired macOS symlink entry-point check |
-| iOS native providers | `aarch64-apple-ios` compilation passed at deployment target 14.0 after using the portable IOSurfaceRef header; no iOS app, GPU, camera, audio or packaging runtime acceptance |
+| iOS native providers | Device-target compilation at deployment target 14.0; independent mobile app built, signed, installed and run on iOS 27.0 simulator. Shared Metal playback → pause → seek 750 ms → resume → Stop/frame zero → detach passed with zero preview CPU transfers and zero retained frames. Simulator camera discovery returned no devices. Physical camera/audio and minimum-OS runtime gates remain open. |
+| Android foundation | Native EGL render-thread jobs, nonblocking GL fences and deferred native surface retirement. On an API 35 ARM64 emulator with a verified 16,384-byte kernel page size, one independent texture fed two views and retired; zero preview CPU transfers and zero GPU copies. |
+| Android camera | Separate CameraX 1.5.2 provider and camera preview controls. Emulator permission denial/grant, live GPU preview, native JPEG independently decoded at 1856×1392, and Stop returning camera-service active clients to an empty list. The request-owned/background-copy version also produced a decoded native JPEG and rejected capture completion after Stop. Host JVM contracts check independent photo bytes and late cancellation. |
+| Android playback | Separate Media3 1.8.0 provider with native decoder/audio timing, a bounded presentation-time table, coalesced commands and a dedicated player looper. API 35/16 KiB run passed independent GPU sharing, playback, pause, achieved seek, resume, Stop/frame zero, frame retirement and native surface/player cleanup. Earlier failing runs remain separate evidence; fixes address surface-clock mapping, async command settling and obsolete queued acquisition. |
 
 The development machine is an Apple M4 Mac, macOS 27.0.1, with the iOS SDK
 27.1 and the pinned browser Rust 1.99.0/Emscripten 6.0.10 tools. Current Xcode's
@@ -248,16 +255,18 @@ were used to limit disk/memory use; the target cache is private to this worktree
 
 ## Work still open beyond these handoffs
 
-- Windows, Linux and Android native providers are unimplemented in this branch.
-  Android still needs native playback/CameraX/external GLES integration and a
+- Windows and Linux native providers are unimplemented at this checkpoint.
+  Android now has native playback/CameraX/external GLES integration and a
   separate active-media/camera run on a 16 KiB kernel.
 - Native QR engines are unimplemented. The optional Rust adapter does not expose
   complete payload bytes, and its internal input-copy behavior still needs
   profiling. Do not infer zero copying from its borrowed input interface.
-- A dedicated CameraPreview control, complete markup/source APIs, native 3D
-  texture-reuse examples and automatic device-loss recovery remain unfinished.
+- `FerroUI.Media.Camera.Controls` now provides CameraPreview with explicit
+  start, owned-session teardown and weak caller-session attachment. Complete
+  markup/source APIs, native 3D texture-reuse examples and automatic device-loss
+  recovery remain unfinished.
 - Apple source orientation/crop parity, physical capture/denial/hotplug, minimum
-  OS linking/runtime, iOS execution and the broader browser/device matrix need
+  OS linking/runtime and the broader browser/device matrix need
   separate evidence. Browser native frame output currently requires a page-owned
   single-threaded WebGL2 context, frame callbacks and matching decoded/upload
   dimensions; it rejects CPU-backed uploads. Worker media bridges are deferred.

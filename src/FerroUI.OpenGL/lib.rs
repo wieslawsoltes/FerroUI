@@ -30,7 +30,7 @@ mod open_gl_exception;
 mod register_types;
 mod rust_paths;
 mod shared_frame_texture;
-pub use shared_frame_texture::SharedFrameTexture;
+pub use shared_frame_texture::{SharedFrameTexture, SharedGlTextureOwner, SharedGlTextureRetirementQueue};
 
 pub use entry_points::GetProcAddress;
 pub use gl_basic_info_interface::GlBasicInfoInterface;

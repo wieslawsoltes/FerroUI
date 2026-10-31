@@ -1,0 +1,39 @@
+plugins { id 'com.android.application' version '8.13.0' }
+def ferroRoot = file(providers.gradleProperty('ferroUiRoot').get())
+layout.buildDirectory = new File(ferroRoot, 'target/android-media-gradle')
+android {
+    namespace 'org.ferroui.portablemedia'
+    compileSdk 36
+    ndkVersion '28.2.13676358'
+    defaultConfig {
+        applicationId 'org.ferroui.portablemedia'
+        minSdk 26
+        targetSdk 36
+        versionCode 1
+        versionName '1.0'
+        ndk { abiFilters 'arm64-v8a' }
+    }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_11; targetCompatibility JavaVersion.VERSION_11 }
+    sourceSets.main {
+        manifest.srcFile 'AndroidManifest.xml'
+        java.srcDirs = [new File(ferroRoot, 'src/Android/FerroUI.Android/java')]
+        jniLibs.srcDirs = [new File(layout.buildDirectory.get().asFile, 'native')]
+    }
+    packaging { jniLibs { useLegacyPackaging = false } }
+}
+apply from: new File(ferroRoot, 'src/FerroUI.Media.Android/packaging.gradle')
+apply from: new File(ferroRoot, 'src/FerroUI.Media.Video.Android/packaging.gradle')
+apply from: new File(ferroRoot, 'src/FerroUI.Media.Camera.Android/packaging.gradle')
+tasks.register('verifyRustLibrary') {
+    doLast {
+        if (!new File(ferroRoot, 'target/aarch64-linux-android/debug/libportable_media_mobile.so').isFile()) {
+            throw new GradleException('Build portable-media-mobile for aarch64-linux-android before packaging.')
+        }
+    }
+}
+tasks.register('copyRustLibrary', Copy) {
+    dependsOn 'verifyRustLibrary'
+    from new File(ferroRoot, 'target/aarch64-linux-android/debug/libportable_media_mobile.so')
+    into new File(layout.buildDirectory.get().asFile, 'native/arm64-v8a')
+}
+tasks.named('preBuild').configure { dependsOn 'copyRustLibrary' }

@@ -9,6 +9,11 @@ use std::sync::Arc;
 /// The import of GPU objects created outside of the framework into the
 /// compositor.
 pub trait ICompositionGpuInterop {
+    /// Compositor whose render thread owns this interop context. Custom
+    /// interop implementations may decline native producer jobs.
+    fn render_compositor(&self) -> Option<Rc<super::Compositor>> {
+        None
+    }
     fn shared_context_id(&self) -> Option<u64> {
         None
     }

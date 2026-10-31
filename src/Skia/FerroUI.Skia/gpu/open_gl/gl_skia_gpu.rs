@@ -275,6 +275,9 @@ impl IOptionalFeatureProvider for GlSkiaGpu {
     /// The GPU itself as the texture sharing feature, its external objects
     /// feature, and the handle wrapping feature of the OpenGL context.
     fn try_get_feature(&self, feature_type: TypeId) -> Option<Rc<dyn Any>> {
+        if feature_type == TypeId::of::<dyn IGlContext>() {
+            return Some(Rc::new(self.gl_context.clone()));
+        }
         if feature_type == TypeId::of::<dyn IOpenGlTextureSharingRenderInterfaceContextFeature>() {
             let this: Rc<dyn IOpenGlTextureSharingRenderInterfaceContextFeature> =
                 self.this.upgrade()?;
@@ -295,6 +298,9 @@ impl IOptionalFeatureProvider for GlSkiaGpu {
 }
 
 impl IPlatformGraphicsContext for GlSkiaGpu {
+    fn poll_pending_gpu_work(&self) -> bool {
+        self.gl_context.poll_pending_gpu_work()
+    }
     fn is_lost(&self) -> bool {
         self.gl_context.is_lost()
             || self.gr_context.is_lost()

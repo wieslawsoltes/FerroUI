@@ -31,6 +31,7 @@ pub struct MediaPlayerElement {
     owns_player: Cell<bool>,
     subscription: RefCell<Option<MediaSubscription>>,
     timer: RefCell<Option<Rc<dyn IDisposable>>>,
+    settling_ticks: Cell<u32>,
     errors: MediaEvent<MediaError>,
     presentation_subscription: RefCell<Option<MediaSubscription>>,
     placeholder: RefCell<Option<Ref<TextBlock>>>,
@@ -137,6 +138,7 @@ impl MediaPlayerElement {
             owns_player: Cell::new(false),
             subscription: RefCell::new(None),
             timer: RefCell::new(None),
+            settling_ticks: Cell::new(0),
             errors: MediaEvent::default(),
             presentation_subscription: RefCell::new(None),
             placeholder: RefCell::new(None),
@@ -316,11 +318,14 @@ impl MediaPlayerElement {
         }
     }
     fn start_polling(&self) {
+        // Native commands may be accepted on another looper before actual
+        // playback changes. A paused frame must not stop polling before that
+        // transition, or before a newly sought frame reaches the producer fence.
+        self.settling_ticks.set(30);
         if !self.is_attached_to_visual_tree() || self.timer.borrow().is_some() {
             return;
         }
         let weak = self.to_ref().downgrade();
-        let attempts = Cell::new(0u32);
         let timer = DispatcherTimer::run(
             move || {
                 let Some(view) = weak.upgrade() else {
@@ -350,7 +355,8 @@ impl MediaPlayerElement {
                 if player.frames().latest().is_none() {
                     view.show_placeholder(true);
                 }
-                attempts.set(attempts.get() + 1);
+                let settling = view.settling_ticks.get();
+                view.settling_ticks.set(settling.saturating_sub(1));
                 let state = player.playback_session().state;
                 // Bounded readiness/seek retry; static/paused images never keep a
                 // full-rate timer alive. A later Play/seek starts another interval.
@@ -359,9 +365,7 @@ impl MediaPlayerElement {
                     MediaPlaybackState::Playing
                         | MediaPlaybackState::Buffering
                         | MediaPlaybackState::Opening
-                ) || (attempts.get() < 30
-                    && player.frames().latest().is_none()
-                    && state == MediaPlaybackState::Paused);
+                ) || (settling > 0 && state == MediaPlaybackState::Paused);
                 if !keep {
                     view.timer.borrow_mut().take();
                 }
