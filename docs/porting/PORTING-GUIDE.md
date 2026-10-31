@@ -9,6 +9,12 @@ How C# from the upstream project (Avalonia, MIT) maps to Rust in this repository
 3. **Attribution.** Code copied or derived from third-party sources gets a `NOTICE.md` next to it with the upstream copyright line and license text.
 4. **Idiomatic, safe, fast.** No `unsafe` outside the class model (`type_system.rs`, the root vtable in `ferro_object.rs`), one audited hot-path downcast in `property_store/effective_value.rs`, and FFI crates. No panics on user input (parsing returns `Result`); panics are for programmer errors where C# throws `InvalidOperationException`/`ArgumentException`. No allocations on hot paths that upstream avoids. No blocking waits, no threads assumed, no `std::time::Instant` or `std::fs` in core paths (the browser target has neither).
 5. **Things not ported yet** are left out, not stubbed with `todo!()`. Record every skipped member in the report/tracking data.
+6. **GPU rendering in every backend, validated.** Every rendering feature (effects and effect graphs, lights, blend modes, masks, shadows, materials, filters, images, text) has a proper GPU implementation in every rendering backend: Skia (Ganesh, Graphite) and Vello (GPU, hybrid, WebGL2). The render path of a frame does no CPU rasterization of pixels, no GPU readback and no texture upload of content that did not change: an effect graph is compiled once (per effect factory, per backend) into a cached GPU program, as WinUI's `CompositionEffectFactory` compiles its effect description, and what animates or moves (a property, a light, a transform) changes its uniforms, not its pixels. A CPU implementation is kept only as the reference the GPU output is tested against and as the fallback of surfaces without a GPU (raster surfaces, headless tests). Validate each feature on each backend:
+   - render tests that compare the GPU output with the CPU reference within a stated tolerance (`tests/FerroUI.RenderBackends.Comparison` compares the backends);
+   - a test that a steady-state frame (scrolling, animating a property, moving a light) creates no new bitmaps or textures;
+   - for a feature apps use on phones or in the browser, a measurement on a device or simulator (frame times, texture uploads).
+
+   A backend that cannot express a feature on its GPU yet records the gap and the plan in the porting documents of the feature; it does not fall back silently.
 
 ## Scope: product behavior, not runtime emulation
 
