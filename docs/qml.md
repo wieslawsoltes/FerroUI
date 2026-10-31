@@ -89,9 +89,10 @@ When a binding runs, the runtime tracks the properties it actually reads. A cond
 |---|---|---|
 | Components and modules | File and inline components, typed composite properties and lists, private IDs, import aliases, local directory imports, versioned `qmldir` exports and source singletons | Dynamic creation, incubation, destruction and loader lifecycle, multiple independently loaded roots in one engine, complete pragma behavior |
 | Object model | Required, readonly and default properties, lexical source property shadowing with virtual, override and final declarations, aliases, typed signals and methods, property change handlers, `Component.onCompleted`, source and registered enums | Complete Qt value-type library, attached properties, interception, aliasing and inheritance edge cases, including overriding properties supplied by native Rust types |
-| Scripting | Numeric, boolean and string expressions, arrays, member/index reads, function and signal calls, local declarations, assignments, conditionals, loops, short-circuit operators and returns | Full ECMAScript object and array identity, object literals, closures, prototypes, exceptions, promises and imported JS modules |
+| Scripting | Numeric, boolean and string expressions, object and array literals with identity, indexed reads and writes, function and signal calls, local declarations, assignment, branching, loops and returns | Full ECMAScript built-ins, prototypes, closures, exceptions, promises and imported JS modules |
 | Reactive infrastructure | Dependency tracking, signal connections, conditional Binding overlays with restoration, Timer with a deterministic clock and native dispatcher integration | Delayed and multi-target Binding forms, the complete Qt global object, network and resource loading |
-| Native visuals | Item, Rectangle, Row, Column, Flow, Text, TextInput and TextEdit. The Controls module supplies Label, Button, CheckBox, TextField and TextArea. Parent fill and center anchors participate in native arrangement. | Sibling and edge anchors, complete implicit geometry, models/delegates, animation/state systems and the rest of Qt Quick and Controls |
+| Models | `QtQml.Models.ListModel` and flat `ListElement` declarations, fixed and dynamic role types, insertion, moves, removal, role edits, row handles and rollback | Nested list roles, function-valued roles, model/view delegates, proxy and worker-thread models |
+| Native visuals | Item, Rectangle, Row, Column, Flow, Text, TextInput and TextEdit. The Controls module supplies Label, Button, CheckBox, TextField and TextArea. Parent fill and center anchors participate in native arrangement. | Sibling and edge anchors, complete implicit geometry, visual delegates, animation/state systems and the rest of Qt Quick and Controls |
 | FerroUI API | Register a Rust type, properties, signals, enum values and deterministic methods. Register visual factories or expose supported scalar styled properties with `register_ferro_control`. | Property types outside the reflected scalar set require an explicit native adapter |
 | Tooling | Cargo build integration, native Rust code generation, command-line checks, source diagnostics, headless tests and a Qt reference harness | Language server, debugger, profiler, designer support and Qt binary plugin/toolchain interoperability |
 
@@ -104,6 +105,8 @@ cargo test --locked -p qml-gallery --no-default-features
 ```
 
 The compiled fixtures exercise duplicate internal IDs across instances, writes through aliases, typed Rust calls, singleton identity, method control flow and transaction rollback. A separate fixture compares the two FerroUI backends with the published Qt runtime on original inputs. Qt and Python are only needed to repeat the live comparison. [Behavioral reference and reproduction steps](../tests/QmlCompiled/reference/README.md)
+
+The inventory fixture checks a sequence of edits against the same resulting row order and role values observed in Qt 6.12.0. It also tests FerroUI rollback and rejection of stale row handles. [Inventory component](../tests/QmlCompiled/models/Inventory.qml)
 
 ## Public references
 
