@@ -19,6 +19,7 @@ name = "ferroui-qml-webscene-worker"
 path = "worker.rs"
 
 [dependencies]
+getrandom.workspace = true
 ferroui-qml.workspace = true
 serde_json.workspace = true
 libloading = "0.8"
@@ -27,3 +28,6 @@ unicode-ident = "1"
 
 [package.metadata.release]
 group = "markup"
+
+[dev-dependencies]
+ferroui-qml-compiler = { workspace = true, features = ["javascript"] }

@@ -1,5 +1,8 @@
 // Private per-worker V8 state. Host capabilities cross only the component transaction.
-(function (modules) {
+(function (modules,observePromise,controlKey) {
+    "use strict";
+    let activeCalls=0;
+    function authorize(key){if(key!==controlKey)throw new Error("Private WebScene QML entry point");}
     const fetchText = globalThis.__webSceneFetchText;
     if (typeof fetchText !== "function") throw new Error("Missing WebScene synchronous text loader");
     const functions = new Map(), objects = new Map(), reverse = new WeakMap(), atoms = new Map();
@@ -10,7 +13,12 @@
         if (denied.has(key) || key.startsWith("__webScene")) Reflect.deleteProperty(globalThis,key);
     }
     let serial = 0, next = 0, preparing = "ready";
+    const intrinsicPromise=Promise;
     function atom(value) {
+        // Install a rejection handler before WebScene drains its microtask queue.
+        // Otherwise a rejected return value is reported as an unhandled engine
+        // exception before Rust has the chance to observe the Promise handle.
+        if(value instanceof intrinsicPromise) observePromise(value);
         const table = (typeof value === "object" || typeof value === "function") ? reverse : atoms;
         let id = table.get(value);
         if (!id) { id = ++next; table.set(value,id); }
@@ -40,9 +48,10 @@
     }
 
     function transport(request) {
-        return JSON.parse(fetchText("https://qml.invalid/rpc/"+(++serial)+"/"+encodeURIComponent(JSON.stringify(request))));
+        return JSON.parse(fetchText("https://qml.invalid/rpc/"+controlKey+"/"+(++serial)+"/"+encodeURIComponent(JSON.stringify(request))));
     }
     function rpc(request) {
+        if (!activeCalls) throw new Error("QML host access outside a synchronous JavaScript invocation");
         let msg = transport(request);
         // During a host call a dependent property or QML method can itself run
         // JavaScript. Enter it on this stack in the same V8 realm, then resume.
@@ -125,30 +134,42 @@
         });
         scopes.set(c.scope,scope); return scope;
     }
-    function execute(c) {
-        try {
+    function release(c){
+            for(const id of c.dropScopes || []) scopes.delete(id);
+            for(const id of c.dropHosts || []) proxies.delete(id);
             for(const id of c.release || []) {
                 const value=objects.get(id);
                 if(typeof value === "bigint"||typeof value === "symbol") atoms.delete(value);
                 objects.delete(id);
             }
+    }
+    function execute(c) {
+        activeCalls++;
+        try {
+            release(c);
             let result;
             if(c.op==="eval"){
-                const args=Object.keys(c.args);
+                const args=c.parameters || Object.keys(c.args);
                 // Names originate in QML method/signal declarations, but user-
                 // assembled IR must not turn an argument name into executable text.
-                if(args.some(k=>!/^[$_\p{ID_Start}][$\u200c\u200d_\p{ID_Continue}]*$/u.test(k)))
+                if([...args,...(c.hook?[c.hook]:[])].some(k=>!/^[$_\p{ID_Start}][$\u200c\u200d_\p{ID_Continue}]*$/u.test(k)))
                     throw new SyntaxError("Invalid QML parameter");
-                const key=JSON.stringify([c.source,c.form,c.origin,args]);
+                const key=JSON.stringify([c.source,c.form,c.origin,args,c.hook]);
                 let factory=functions.get(key);
                 if(!factory){
                     const origin=c.origin.replace(/[\n\r\u2028\u2029]/g,"");
                     const body=c.form==="expr" ? "return (\n"+c.source+"\n);" : c.source;
-                    factory=Function("with(arguments[0]){return function("+args.join(",")+"){\n"+body+"\n}}\n//# sourceURL="+origin);
+                    const fn="function("+args.join(",")+"){\n"+body+"\n}";
+                    // Bind the generated import helper outside user parameters.
+                    // Closures retain it, and it never appears in arguments.
+                    const scoped=c.hook?"function("+c.hook+"){return "+fn+"}":fn;
+                    factory=Function("with(arguments[0]){return "+scoped+"}\n//# sourceURL="+origin);
                     if(functions.size>=4096)functions.delete(functions.keys().next().value);
                     functions.set(key,factory);
                 }
-                result=factory(environment(c)).apply(decode(c.owner),args.map(k=>decode(c.args[k])));
+                let invoke=factory(environment(c));
+                if(c.hook) invoke=invoke(modules.context(c.graph,c.origin));
+                result=invoke.apply(decode(c.owner),args.map(k=>decode(c.args[k])));
             }else{
                 const value=decode(c.target);
                 switch(c.op){
@@ -160,13 +181,21 @@
             }
             return {ok:encode(result,c.mode)};
         }catch(e){return {error:String(e?.stack||e)};}
+        finally{activeCalls--;}
     }
     return Object.freeze({
-        prepare(graph){
+        prepare(key,graph){authorize(key);
             preparing="pending";
             modules.prepare(graph).then(()=>{preparing="ready"},e=>{preparing=String(e?.stack||e)});
         },
-        preparation(){return preparing},
-        run(c){return JSON.stringify(execute(c))}
+        preparation(key){authorize(key);return preparing},
+        run(key,c){authorize(key);return JSON.stringify(execute(c))},
+        promise(key,c){
+            authorize(key); release(c);
+            try {
+                const {state,value}=observePromise(decode(c.target));
+                return JSON.stringify({ok:["a",[["s",state],encode(value)]]});
+            } catch(e) {return JSON.stringify({error:String(e?.stack||e)});}
+        }
     });
 })
