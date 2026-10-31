@@ -4,6 +4,10 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ## [Unreleased]
 
+### Added
+
+- **Idiomatic Rust inventory and rules** (C0 of #423): `scripts/idioms/inventory.py` counts, per crate and exactly, the .NET-shaped types and mechanisms of the Rust sources (`I...` traits, `IDisposable`, `...Exception` types, `TimeSpan`, `DateTime`, `CultureInfo`, `Uri`, `Guid`, `Dictionary`, `Task`, `CancellationToken`, `EventArgs`, `INotifyPropertyChanged`, `ObservableCollection`), skipping comments, literals and generated files. Its `--check`, in the Source conventions job of CI, fails on a new declaration of a `...Exception` type or of a port of a `System.*` type beyond `scripts/idioms/baseline.json`. [docs/idiomatic-rust.md](docs/idiomatic-rust.md) holds the naming rules (the control API keeps its .NET names), the type replacement table, the deprecation policy for 0.5 and the format of the upstream-name map.
+
 ## [0.4.0] - 2026-10-31
 
 The fourth release. It completes the declarative Rust API of `0.4.0-preview.1` and adds, among the entries below:

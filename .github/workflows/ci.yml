@@ -97,6 +97,15 @@ jobs:
       # library (docs/porting/android-platform.md, section 5.1). The allow-list is in the script.
       - name: No thread_local! outside of ferro_thread_local!
         run: python3 scripts/android/convert-thread-locals.py --check
+      # The types and mechanisms of the API become idiomatic Rust and std, under the .NET names of
+      # the control API (docs/idiomatic-rust.md, #423): a new declaration of a .NET-shaped
+      # infrastructure type (a `...Exception`, or a port of a `System.*` type such as `TimeSpan`,
+      # `Uri`, `Guid` or `Dictionary`) beyond scripts/idioms/baseline.json fails, and the baseline
+      # only shrinks.
+      - name: Tests of the idioms inventory
+        run: python3 -m unittest discover -s scripts/idioms -p 'test_*.py'
+      - name: No new .NET-shaped infrastructure types
+        run: python3 scripts/idioms/inventory.py --check
       # The crates that are published stay publishable (docs/release.md): the manifests state what
       # crates.io needs, the crates of the workspace are pinned to one another at the version of the
       # workspace, every package is assembled and is below the size limit, and the crate table of the
