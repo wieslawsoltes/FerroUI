@@ -123,6 +123,38 @@ export class FerroDOM {
         inputElement.oncopy = function () { return false; };
         inputElement.oncut = function () { return false; };
 
+        // Not in the original: the hidden element of a client of the exact-edit connection
+        // (docs/porting/browser-platform.md, section 14), today RichEditBox. Every other client keeps
+        // the input element above. One persistent textarea keeps the newlines of the document and
+        // its UTF-16 offsets, which an input of type text loses, and its native composition; it is
+        // never replaced. Its paste is not blocked: a paste the framework does not take in its
+        // keydown (a context menu, a virtual keyboard) arrives as a checked edit (textInput.ts).
+        const textInputElement = document.createElement("textarea");
+        textInputElement.id = `textInputElement${containerId}`;
+        textInputElement.classList.add("ferroui-text-input-element");
+        textInputElement.tabIndex = -1;
+        textInputElement.autocapitalize = "none";
+        textInputElement.rows = 1;
+        textInputElement.wrap = "off";
+        textInputElement.spellcheck = false;
+        textInputElement.style.padding = "0";
+        textInputElement.style.margin = "0";
+        textInputElement.style.borderWidth = "0";
+        textInputElement.style.position = "absolute";
+        textInputElement.style.overflow = "hidden";
+        textInputElement.style.resize = "none";
+        textInputElement.style.borderStyle = "hidden";
+        textInputElement.style.outline = "none";
+        textInputElement.style.background = "transparent";
+        textInputElement.style.color = "transparent";
+        textInputElement.style.display = "none";
+        textInputElement.style.height = "20px";
+        textInputElement.style.fontSize = "16px";
+        textInputElement.style.zIndex = "-1";
+        textInputElement.oncopy = function () { return false; };
+        textInputElement.oncut = function () { return false; };
+
+        host.prepend(textInputElement);
         host.prepend(inputElement);
         host.prepend(nativeHost);
         host.prepend(accessibilityHost);
