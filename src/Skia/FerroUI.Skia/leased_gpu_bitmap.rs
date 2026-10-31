@@ -91,7 +91,7 @@ impl IDrawableBitmapImpl for LeasedGpuBitmap {
                 Some(outer) => outer.composed(conversion),
                 None => Some(conversion),
             });
-            counters.gpu_conversion();
+            counters.gpu_conversion(ferroui_base::rendering::composition::frames::GpuTransferReason::ColorSpaceConversion);
         }
         self.image.draw(
             Some(gr),

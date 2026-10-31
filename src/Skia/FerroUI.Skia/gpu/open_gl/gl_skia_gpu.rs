@@ -1,23 +1,26 @@
 use super::{
-    FboSkiaSurface, GlRenderTarget, GlSkiaExternalObjectsFeature, GlSkiaSharedTextureForComposition,
-    IGlSkiaSpecificOptionsFeature,
+    FboSkiaSurface, GlRenderTarget, GlSkiaExternalObjectsFeature,
+    GlSkiaSharedTextureForComposition, IGlSkiaSpecificOptionsFeature,
 };
 use crate::gpu::ganesh::GaneshGrContext;
 use crate::gpu::{
-    ISkiaGpu, ISkiaGpuRenderSession, ISkiaGpuRenderTarget, ISkiaGrContext, ISkiaSurface, ScopedGrContext,
-    SkiaSurfaceOrigin,
+    ISkiaGpu, ISkiaGpuRenderSession, ISkiaGpuRenderTarget, ISkiaGrContext, ISkiaSurface,
+    ScopedGrContext, SkiaSurfaceOrigin,
 };
 use crate::skia_options::SkiaOptions;
 use ferroui_base::logging::{LogEventLevel, Logger};
 use ferroui_base::platform::surfaces::IPlatformRenderSurface;
 use ferroui_base::platform::{
-    IExternalObjectsHandleWrapRenderInterfaceContextFeature, IExternalObjectsRenderInterfaceContextFeature,
-    IOptionalFeatureProvider, IPlatformGraphicsContext,
+    IExternalObjectsHandleWrapRenderInterfaceContextFeature,
+    IExternalObjectsRenderInterfaceContextFeature, IOptionalFeatureProvider,
+    IPlatformGraphicsContext,
 };
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::PixelSize;
 use ferroui_opengl::gl_consts::*;
-use ferroui_opengl::surfaces::{try_get_gl_surface, IGlPlatformSurface, IGlPlatformSurfaceRenderTarget};
+use ferroui_opengl::surfaces::{
+    try_get_gl_surface, IGlPlatformSurface, IGlPlatformSurfaceRenderTarget,
+};
 use ferroui_opengl::{
     GlProfileType, GlVersion, ICompositionImportableOpenGlSharedTexture, IGlContext,
     IGlContextExternalObjectsFeature, IGlPlatformSurfaceRenderTargetFactory,
@@ -49,7 +52,11 @@ impl GlSkiaGpu {
     ///
     /// # Panics
     /// Panics when Skia cannot create a context for the OpenGL context.
-    pub fn new(context: Rc<dyn IGlContext>, max_resource_bytes: Option<i64>, use_stencil_buffers: Option<bool>) -> Rc<Self> {
+    pub fn new(
+        context: Rc<dyn IGlContext>,
+        max_resource_bytes: Option<i64>,
+        use_stencil_buffers: Option<bool>,
+    ) -> Rc<Self> {
         let current = context.ensure_current();
 
         let features: &dyn IOptionalFeatureProvider = &*context;
@@ -64,18 +71,27 @@ impl GlSkiaGpu {
             let gl = context.gl_interface();
             Interface::new_load_with(|proc| gl.get_proc_address(proc))
         };
-        let iface = iface.unwrap_or_else(|| panic!("Unable to create a Skia OpenGL interface for the context."));
+        let iface = iface
+            .unwrap_or_else(|| panic!("Unable to create a Skia OpenGL interface for the context."));
 
         let avoid_stencil_buffers = SkiaOptions::should_avoid_stencil_buffers(use_stencil_buffers);
         let mut options = ContextOptions::default();
         options.avoid_stencil_buffers = avoid_stencil_buffers;
         let gr_context = direct_contexts::make_gl(iface, &options)
             .map(GaneshGrContext::new)
-            .unwrap_or_else(|| panic!("Unable to create a Skia GPU context from the OpenGL context."));
+            .unwrap_or_else(|| {
+                panic!("Unable to create a Skia GPU context from the OpenGL context.")
+            });
         if let Some(max_resource_bytes) = max_resource_bytes {
             gr_context.set_resource_cache_limit(max_resource_bytes);
         }
         let gr_context = Rc::new(gr_context);
+        if context.shared_frame_context_id().is_some() {
+            let frame_context = context.clone();
+            gr_context.set_frame_completion_handler(Rc::new(move |completion| {
+                frame_context.schedule_frame_completion(completion)
+            }));
+        }
 
         let external_objects = features.try_get::<dyn IGlContextExternalObjectsFeature>();
         let share_group = Arc::new(());
@@ -117,7 +133,10 @@ impl GlSkiaGpu {
 
     /// Creates an OpenGL context that shares its objects with the one of the
     /// GPU.
-    pub fn create_shared_context(&self, preferred_versions: Option<&[GlVersion]>) -> Option<Rc<dyn IGlContext>> {
+    pub fn create_shared_context(
+        &self,
+        preferred_versions: Option<&[GlVersion]>,
+    ) -> Option<Rc<dyn IGlContext>> {
         self.gl_context.create_shared_context(preferred_versions)
     }
 
@@ -145,7 +164,9 @@ impl GlSkiaGpu {
         let old_texture = gl.get_integerv(GL_TEXTURE_BINDING_2D);
         let tex = gl.gen_texture();
 
-        let format = if context.version().type_() == GlProfileType::OpenGLES && context.version().major() == 2 {
+        let format = if context.version().type_() == GlProfileType::OpenGLES
+            && context.version().major() == 2
+        {
             GL_RGBA
         } else {
             GL_RGBA8
@@ -174,13 +195,21 @@ impl GlSkiaGpu {
 
         current.dispose();
 
-        Arc::new(GlSkiaSharedTextureForComposition::new(context.clone(), tex, format, size, self.share_group.clone()))
+        Arc::new(GlSkiaSharedTextureForComposition::new(
+            context.clone(),
+            tex,
+            format,
+            size,
+            self.share_group.clone(),
+        ))
     }
 
     /// Runs `dispose` after the Skia context has been released, when the
     /// GPU is disposed.
     pub fn add_post_dispose(&self, dispose: impl FnOnce() + 'static) {
-        self.post_dispose_callbacks.borrow_mut().push(Box::new(dispose));
+        self.post_dispose_callbacks
+            .borrow_mut()
+            .push(Box::new(dispose));
     }
 
     fn render_target_factory(&self) -> Option<Rc<dyn IGlPlatformSurfaceRenderTargetFactory>> {
@@ -209,7 +238,10 @@ impl IPlatformRenderSurface for SurfaceWrapper {
 }
 
 impl IGlPlatformSurface for SurfaceWrapper {
-    fn create_gl_render_target(&self, context: &Rc<dyn IGlContext>) -> Rc<dyn IGlPlatformSurfaceRenderTarget> {
+    fn create_gl_render_target(
+        &self,
+        context: &Rc<dyn IGlContext>,
+    ) -> Rc<dyn IGlPlatformSurfaceRenderTarget> {
         let features: &dyn IOptionalFeatureProvider = &**context;
         let feature = features
             .try_get::<dyn IGlPlatformSurfaceRenderTargetFactory>()
@@ -223,7 +255,10 @@ impl IOpenGlTextureSharingRenderInterfaceContextFeature for GlSkiaGpu {
         GlSkiaGpu::can_create_shared_context(self)
     }
 
-    fn create_shared_context(&self, preferred_versions: Option<&[GlVersion]>) -> Option<Rc<dyn IGlContext>> {
+    fn create_shared_context(
+        &self,
+        preferred_versions: Option<&[GlVersion]>,
+    ) -> Option<Rc<dyn IGlContext>> {
         GlSkiaGpu::create_shared_context(self, preferred_versions)
     }
 
@@ -241,14 +276,18 @@ impl IOptionalFeatureProvider for GlSkiaGpu {
     /// feature, and the handle wrapping feature of the OpenGL context.
     fn try_get_feature(&self, feature_type: TypeId) -> Option<Rc<dyn Any>> {
         if feature_type == TypeId::of::<dyn IOpenGlTextureSharingRenderInterfaceContextFeature>() {
-            let this: Rc<dyn IOpenGlTextureSharingRenderInterfaceContextFeature> = self.this.upgrade()?;
+            let this: Rc<dyn IOpenGlTextureSharingRenderInterfaceContextFeature> =
+                self.this.upgrade()?;
             return Some(Rc::new(this));
         }
         if feature_type == TypeId::of::<dyn IExternalObjectsRenderInterfaceContextFeature>() {
-            let feature: Rc<dyn IExternalObjectsRenderInterfaceContextFeature> = self.external_objects_feature.clone();
+            let feature: Rc<dyn IExternalObjectsRenderInterfaceContextFeature> =
+                self.external_objects_feature.clone();
             return Some(Rc::new(feature));
         }
-        if feature_type == TypeId::of::<dyn IExternalObjectsHandleWrapRenderInterfaceContextFeature>() {
+        if feature_type
+            == TypeId::of::<dyn IExternalObjectsHandleWrapRenderInterfaceContextFeature>()
+        {
             return self.gl_context.try_get_feature(feature_type);
         }
         None
@@ -258,6 +297,11 @@ impl IOptionalFeatureProvider for GlSkiaGpu {
 impl IPlatformGraphicsContext for GlSkiaGpu {
     fn is_lost(&self) -> bool {
         self.gl_context.is_lost()
+            || self.gr_context.is_lost()
+            || self.external_objects_feature.shared_context_id()
+                != self.gl_context.shared_frame_context_id()
+            || self.external_objects_feature.shared_context_generation()
+                != self.gl_context.shared_frame_context_generation()
     }
 
     fn ensure_current(&self) -> Rc<dyn IDisposable> {
@@ -293,18 +337,31 @@ impl ISkiaGpu for GlSkiaGpu {
                 .as_ref()
                 .is_some_and(|factory| factory.can_render_to_surface(&self.gl_context, surface))
             {
-                let wrapper = SurfaceWrapper { surface: surface.clone() };
-                return Some(Rc::new(GlRenderTarget::new(self.gr_context.clone(), &self.gl_context, &wrapper)));
+                let wrapper = SurfaceWrapper {
+                    surface: surface.clone(),
+                };
+                return Some(Rc::new(GlRenderTarget::new(
+                    self.gr_context.clone(),
+                    &self.gl_context,
+                    &wrapper,
+                )));
             }
             if let Some(gl_surface) = try_get_gl_surface(&**surface) {
-                return Some(Rc::new(GlRenderTarget::new(self.gr_context.clone(), &self.gl_context, &*gl_surface)));
+                return Some(Rc::new(GlRenderTarget::new(
+                    self.gr_context.clone(),
+                    &self.gl_context,
+                    &*gl_surface,
+                )));
             }
         }
 
         None
     }
 
-    fn is_ready_to_create_render_target(&self, surfaces: &[std::sync::Arc<dyn IPlatformRenderSurface>]) -> bool {
+    fn is_ready_to_create_render_target(
+        &self,
+        surfaces: &[std::sync::Arc<dyn IPlatformRenderSurface>],
+    ) -> bool {
         let custom_render_target_factory = self.render_target_factory();
         for surface in surfaces {
             if custom_render_target_factory
@@ -331,7 +388,11 @@ impl ISkiaGpu for GlSkiaGpu {
         }
 
         // Blit feature requires glBlitFramebuffer
-        if !self.gl_context.gl_interface().is_blit_framebuffer_available() {
+        if !self
+            .gl_context
+            .gl_interface()
+            .is_blit_framebuffer_available()
+        {
             return None;
         }
 
@@ -345,7 +406,9 @@ impl ISkiaGpu for GlSkiaGpu {
             self.gr_context.clone(),
             self.gl_context.clone(),
             size,
-            session.map_or(SkiaSurfaceOrigin::TopLeft, |session| session.surface_origin()),
+            session.map_or(SkiaSurfaceOrigin::TopLeft, |session| {
+                session.surface_origin()
+            }),
             surface_props,
         ) {
             Ok(surface) => {
@@ -354,7 +417,10 @@ impl ISkiaGpu for GlSkiaGpu {
             }
             Err(_) => {
                 if let Some(logger) = Logger::try_get(LogEventLevel::Error, "OpenGL") {
-                    logger.log(Some(self as &dyn Any), "Unable to create a Skia-compatible FBO manually");
+                    logger.log(
+                        Some(self as &dyn Any),
+                        "Unable to create a Skia-compatible FBO manually",
+                    );
                 }
                 if self.can_create_surfaces.get().is_none() {
                     self.can_create_surfaces.set(Some(false));

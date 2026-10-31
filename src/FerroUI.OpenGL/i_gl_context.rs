@@ -12,6 +12,20 @@ use std::sync::Arc;
 /// optional features: `try_get_feature(TypeId::of::<dyn IGlContext>())`
 /// returns an `Rc<dyn IGlContext>`.
 pub trait IGlContext: IPlatformGraphicsContext {
+    /// Available only when direct immutable frame sampling and asynchronous
+    /// GPU completion are implemented for this context/profile.
+    fn shared_frame_context_id(&self) -> Option<u64> {
+        None
+    }
+    fn shared_frame_context_generation(&self) -> u64 {
+        1
+    }
+    fn schedule_frame_completion(
+        &self,
+        completion: ferroui_base::rendering::composition::frames::GpuCompletion,
+    ) {
+        completion.mark_indeterminate();
+    }
     /// The version of the API the context implements.
     fn version(&self) -> GlVersion;
 
@@ -36,7 +50,10 @@ pub trait IGlContext: IPlatformGraphicsContext {
     fn can_create_shared_context(&self) -> bool;
 
     /// Creates a context that shares its objects with this one.
-    fn create_shared_context(&self, preferred_versions: Option<&[GlVersion]>) -> Option<Rc<dyn IGlContext>>;
+    fn create_shared_context(
+        &self,
+        preferred_versions: Option<&[GlVersion]>,
+    ) -> Option<Rc<dyn IGlContext>>;
 }
 
 /// Lets a context render to surfaces that are not OpenGL surfaces
@@ -47,7 +64,11 @@ pub trait IGlContext: IPlatformGraphicsContext {
 /// returns an `Rc<dyn IGlPlatformSurfaceRenderTargetFactory>`.
 pub trait IGlPlatformSurfaceRenderTargetFactory {
     /// Whether the context can render to the surface.
-    fn can_render_to_surface(&self, context: &Rc<dyn IGlContext>, surface: &Arc<dyn IPlatformRenderSurface>) -> bool;
+    fn can_render_to_surface(
+        &self,
+        context: &Rc<dyn IGlContext>,
+        surface: &Arc<dyn IPlatformRenderSurface>,
+    ) -> bool;
 
     /// Creates the render target of the surface.
     fn create_render_target(

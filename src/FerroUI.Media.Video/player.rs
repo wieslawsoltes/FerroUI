@@ -97,6 +97,11 @@ pub trait NativeMediaSession {
     fn state(&self) -> Result<MediaPlaybackSession, MediaError>;
     fn play(&self) -> MediaFuture<()>;
     fn pause(&self) -> Result<(), MediaError>;
+    /// Retires pending preview output while preserving source ownership. The
+    /// player separately resets seekable media and owns frame-zero publication.
+    fn stop(&self) -> Result<(), MediaError> {
+        self.pause()
+    }
     fn seek(&self, position: Duration) -> MediaFuture<Duration>;
     fn set_audio(&self, volume: f64, muted: bool) -> Result<(), MediaError>;
     fn take_frame(&self) -> Result<Option<FrameLease>, MediaError>;
@@ -163,6 +168,14 @@ impl Drop for PlayerInner {
         self.frames.clear();
         if let Some(request) = self.pending_seek.get_mut().take() {
             request.finish(Err(MediaError::cancelled()));
+        }
+        // Caller-owned views hold weak player references. Notify them while
+        // subscriptions still exist so a paused view can clear its presentation
+        // without a perpetual polling timer or keeping the player alive.
+        if self.state.get_mut().state != MediaPlaybackState::Closed {
+            self.events.emit(&MediaPlayerEvent::StateChanged(
+                MediaPlaybackSession::default(),
+            ));
         }
     }
 }
@@ -598,7 +611,7 @@ impl MediaPlayer {
         let command = self.next_command();
         let generation = self.0.generation.get();
         let native = self.0.native.borrow().clone();
-        let paused = native.map_or(Ok(()), |native| native.pause());
+        let paused = native.map_or(Ok(()), |native| native.stop());
         if self.0.generation.get() != generation || self.0.command.get() != command {
             return Box::pin(async { Err(MediaError::cancelled()) });
         }

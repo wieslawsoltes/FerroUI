@@ -1,0 +1,23 @@
+[package]
+name = "ferroui-media-video-browser"
+description = "Native browser playback with shared WebGL frame output"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+[lib]
+path = "lib.rs"
+[dependencies]
+ferroui-media-video.workspace = true
+ferroui-media-browser.workspace = true
+ferroui-browser.workspace = true
+wasm-bindgen.workspace = true
+[features]
+controls = ["ferroui-media-browser/controls"]
+[package.metadata.release]
+group = "platforms"

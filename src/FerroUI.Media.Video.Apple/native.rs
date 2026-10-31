@@ -29,7 +29,7 @@ extern "C" {
     fn ferroui_portable_player_seek(p: *mut c_void, seconds: f64) -> *mut c_void;
     fn ferroui_portable_seek_state(p: *mut c_void, position: *mut f64) -> i32;
     fn ferroui_portable_seek_release(p: *mut c_void);
-    fn ferroui_portable_player_frame(p: *mut c_void) -> *mut c_void;
+    fn ferroui_portable_player_frame(p: *mut c_void, timestamp: *mut f64) -> *mut c_void;
 }
 pub struct Player {
     handle: NonNull<c_void>,
@@ -96,8 +96,15 @@ impl Player {
             _thread: PhantomData,
         })
     }
-    pub fn frame(&self) -> Option<PixelBuffer> {
-        unsafe { PixelBuffer::from_owned(ferroui_portable_player_frame(self.handle.as_ptr())) }
+    pub fn frame(&self) -> Option<(PixelBuffer, f64)> {
+        let mut timestamp = f64::NAN;
+        unsafe {
+            PixelBuffer::from_owned(ferroui_portable_player_frame(
+                self.handle.as_ptr(),
+                &mut timestamp,
+            ))
+        }
+        .map(|buffer| (buffer, timestamp))
     }
 }
 impl Drop for Player {

@@ -209,7 +209,7 @@ impl NativeMediaSession for AppleSession {
         if self.budget.usage().frames >= self.budget.limits().frames {
             return Ok(None);
         }
-        let Some(buffer) = self.player.frame() else {
+        let Some((buffer, timestamp)) = self.player.frame() else {
             return Ok(None);
         };
         let (width, height, stride, bytes, color) = buffer.info();
@@ -249,7 +249,12 @@ impl NativeMediaSession for AppleSession {
             rotation: FrameRotation::None,
             mirrored: false,
             top_left_origin: true,
-            timestamp: self.state()?.position,
+            timestamp: duration(timestamp).ok_or_else(|| {
+                MediaError::new(
+                    MediaErrorKind::NativeFailure,
+                    "Native decoded-frame timestamp is unavailable",
+                )
+            })?,
             device: Some(self.device.clone()),
             device_generation: self.device_generation,
             planes: vec![FramePlane {

@@ -1,0 +1,23 @@
+[package]
+name = "portable-media-browser"
+version.workspace = true
+edition.workspace = true
+publish = false
+[[bin]]
+name = "portable-media-browser"
+path = "main.rs"
+[dependencies]
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+ferroui-browser.workspace = true
+ferroui-media.workspace = true
+ferroui-media-browser = {workspace=true,features=["controls"]}
+ferroui-media-controls.workspace = true
+ferroui-media-video.workspace = true
+ferroui-media-video-controls.workspace = true
+ferroui-media-video-browser = {workspace=true,features=["controls"]}
+ferroui-media-camera.workspace = true
+ferroui-media-camera-browser = {workspace=true,features=["controls"]}
+ferroui-themes-fluent.workspace = true
+ferroui-fonts-inter.workspace = true
+wasm-bindgen.workspace = true

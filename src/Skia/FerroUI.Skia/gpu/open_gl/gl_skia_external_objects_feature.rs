@@ -3,18 +3,20 @@ use crate::gpu::ganesh::GaneshGrContext;
 use crate::gpu::ISkiaGrContext;
 use crate::immutable_bitmap::ImmutableBitmap;
 use ferroui_base::platform::{
-    IExternalObjectsRenderInterfaceContextFeature, IPlatformHandle, IPlatformRenderInterfaceImportedImage,
-    IPlatformRenderInterfaceImportedObject, IPlatformRenderInterfaceImportedSemaphore, PlatformGraphicsDrmFormat,
+    IExternalObjectsRenderInterfaceContextFeature, IPlatformHandle,
+    IPlatformRenderInterfaceImportedImage, IPlatformRenderInterfaceImportedObject,
+    IPlatformRenderInterfaceImportedSemaphore, PlatformGraphicsDrmFormat,
     PlatformGraphicsExternalImageFormat, PlatformGraphicsExternalImageProperties, SharedBitmapImpl,
 };
 use ferroui_base::rendering::composition::{
-    CompositionGpuImportedImageSynchronizationCapabilities, ICompositionImportableSharedGpuContextImage,
+    CompositionGpuImportedImageSynchronizationCapabilities,
+    ICompositionImportableSharedGpuContextImage,
 };
 use ferroui_base::utilities::ThreadBound;
 use ferroui_opengl::gl_consts::*;
 use ferroui_opengl::{
-    ICompositionImportableOpenGlSharedTexture, IGlContext, IGlContextExternalObjectsFeature, IGlExternalImageTexture,
-    IGlExternalSemaphore,
+    ICompositionImportableOpenGlSharedTexture, IGlContext, IGlContextExternalObjectsFeature,
+    IGlExternalImageTexture, IGlExternalSemaphore,
 };
 use skia_safe::gpu::gl::TextureInfo;
 use skia_safe::gpu::{backend_textures, images, Mipmapped, SurfaceOrigin};
@@ -40,6 +42,8 @@ pub struct GlSkiaExternalObjectsFeature {
     share_group: Arc<()>,
     feature: Option<Rc<dyn IGlContextExternalObjectsFeature>>,
     fbo: Cell<i32>,
+    frame_context_id: Option<u64>,
+    frame_generation: u64,
 }
 
 impl GlSkiaExternalObjectsFeature {
@@ -53,6 +57,8 @@ impl GlSkiaExternalObjectsFeature {
         share_group: Arc<()>,
         feature: Option<Rc<dyn IGlContextExternalObjectsFeature>>,
     ) -> Rc<Self> {
+        let frame_context_id = gl_context.shared_frame_context_id();
+        let frame_generation = gl_context.shared_frame_context_generation();
         Rc::new_cyclic(|this| Self {
             this: this.clone(),
             gr_context,
@@ -60,17 +66,35 @@ impl GlSkiaExternalObjectsFeature {
             share_group,
             feature,
             fbo: Cell::new(0),
+            frame_context_id,
+            frame_generation,
         })
     }
 
     fn fbo_provider(&self) -> Rc<dyn IGlSkiaFboProvider> {
-        self.this.upgrade().expect("a feature that is called is alive")
+        self.this
+            .upgrade()
+            .expect("a feature that is called is alive")
     }
 }
 
 impl IExternalObjectsRenderInterfaceContextFeature for GlSkiaExternalObjectsFeature {
+    fn shared_context_id(&self) -> Option<u64> {
+        self.frame_context_id
+    }
+    fn shared_context_generation(&self) -> u64 {
+        self.frame_generation
+    }
     fn supported_image_handle_types(&self) -> Vec<String> {
-        self.feature.as_ref().map(|feature| feature.supported_importable_external_image_types()).unwrap_or_default()
+        let mut types = self
+            .feature
+            .as_ref()
+            .map(|feature| feature.supported_importable_external_image_types())
+            .unwrap_or_default();
+        if self.frame_context_id.is_some() {
+            types.push(ferroui_base::platform::KnownPlatformGraphicsExternalImageHandleTypes::SHARED_GL_TEXTURE.into());
+        }
+        types
     }
 
     fn supported_semaphore_types(&self) -> Vec<String> {
@@ -81,7 +105,9 @@ impl IExternalObjectsRenderInterfaceContextFeature for GlSkiaExternalObjectsFeat
     }
 
     fn supported_dma_buf_formats(&self) -> Option<Vec<PlatformGraphicsDrmFormat>> {
-        self.feature.as_ref().and_then(|feature| feature.supported_dma_buf_formats())
+        self.feature
+            .as_ref()
+            .and_then(|feature| feature.supported_dma_buf_formats())
     }
 
     /// # Panics
@@ -93,6 +119,11 @@ impl IExternalObjectsRenderInterfaceContextFeature for GlSkiaExternalObjectsFeat
         handle: Rc<dyn IPlatformHandle>,
         properties: PlatformGraphicsExternalImageProperties,
     ) -> Rc<dyn IPlatformRenderInterfaceImportedImage> {
+        if handle.handle_descriptor()==Some(ferroui_base::platform::KnownPlatformGraphicsExternalImageHandleTypes::SHARED_GL_TEXTURE) {
+            let context_id=self.frame_context_id.expect("Direct frame sampling is unavailable");
+            let texture_id=u32::try_from(handle.handle()).ok().filter(|id|*id!=0).expect("Invalid frame texture name");
+            return Rc::new(GlSkiaImportedImage::new(self.gr_context.clone(),self.gl_context.clone(),self.fbo_provider(),ImportedImageSource::Frame{texture_id,properties,context_id,generation:self.frame_generation}));
+        }
         let Some(feature) = &self.feature else {
             panic!("Importing this platform handle is not supported");
         };
@@ -142,7 +173,10 @@ impl IExternalObjectsRenderInterfaceContextFeature for GlSkiaExternalObjectsFeat
     /// Panics when the OpenGL context has no external objects feature and
     /// when the context fails to import the handle (the exceptions of the
     /// original).
-    fn import_semaphore(&self, handle: Rc<dyn IPlatformHandle>) -> Rc<dyn IPlatformRenderInterfaceImportedSemaphore> {
+    fn import_semaphore(
+        &self,
+        handle: Rc<dyn IPlatformHandle>,
+    ) -> Rc<dyn IPlatformRenderInterfaceImportedSemaphore> {
         let Some(feature) = &self.feature else {
             panic!("Importing this platform handle is not supported");
         };
@@ -157,6 +191,9 @@ impl IExternalObjectsRenderInterfaceContextFeature for GlSkiaExternalObjectsFeat
         &self,
         image_handle_type: &str,
     ) -> CompositionGpuImportedImageSynchronizationCapabilities {
+        if image_handle_type==ferroui_base::platform::KnownPlatformGraphicsExternalImageHandleTypes::SHARED_GL_TEXTURE && self.frame_context_id.is_some() {
+            return CompositionGpuImportedImageSynchronizationCapabilities::AUTOMATIC;
+        }
         self.feature
             .as_ref()
             .map(|feature| feature.get_synchronization_capabilities(image_handle_type))
@@ -164,18 +201,23 @@ impl IExternalObjectsRenderInterfaceContextFeature for GlSkiaExternalObjectsFeat
     }
 
     fn device_uuid(&self) -> Option<Vec<u8>> {
-        self.feature.as_ref().and_then(|feature| feature.device_uuid())
+        self.feature
+            .as_ref()
+            .and_then(|feature| feature.device_uuid())
     }
 
     fn device_luid(&self) -> Option<Vec<u8>> {
-        self.feature.as_ref().and_then(|feature| feature.device_luid())
+        self.feature
+            .as_ref()
+            .and_then(|feature| feature.device_luid())
     }
 }
 
 impl IGlSkiaFboProvider for GlSkiaExternalObjectsFeature {
     fn fbo(&self) -> i32 {
         if self.fbo.get() == 0 {
-            self.fbo.set(self.gl_context.gl_interface().gen_framebuffer());
+            self.fbo
+                .set(self.gl_context.gl_interface().gen_framebuffer());
         }
 
         self.fbo.get()
@@ -190,7 +232,9 @@ pub(crate) trait IGlSkiaFboProvider {
 
 /// The shared texture behind an image of a context of the share group (the
 /// cast of the original).
-fn shared_texture(image: &Arc<dyn ICompositionImportableSharedGpuContextImage>) -> &GlSkiaSharedTextureForComposition {
+fn shared_texture(
+    image: &Arc<dyn ICompositionImportableSharedGpuContextImage>,
+) -> &GlSkiaSharedTextureForComposition {
     image
         .as_any()
         .downcast_ref::<GlSkiaSharedTextureForComposition>()
@@ -198,7 +242,9 @@ fn shared_texture(image: &Arc<dyn ICompositionImportableSharedGpuContextImage>) 
 }
 
 /// The imported semaphore behind the contract (the cast of the original).
-fn imported_semaphore(semaphore: &Rc<dyn IPlatformRenderInterfaceImportedSemaphore>) -> &GlSkiaImportedSemaphore {
+fn imported_semaphore(
+    semaphore: &Rc<dyn IPlatformRenderInterfaceImportedSemaphore>,
+) -> &GlSkiaImportedSemaphore {
     semaphore
         .as_any()
         .downcast_ref::<GlSkiaImportedSemaphore>()
@@ -245,6 +291,12 @@ impl IPlatformRenderInterfaceImportedSemaphore for GlSkiaImportedSemaphore {
 /// What an imported image is backed by: the two fields of the original, of
 /// which one is set.
 enum ImportedImageSource {
+    Frame {
+        texture_id: u32,
+        properties: PlatformGraphicsExternalImageProperties,
+        context_id: u64,
+        generation: u64,
+    },
     /// The texture of an image of another graphics API.
     External(Rc<dyn IGlExternalImageTexture>),
     /// A texture of a context of the share group; a
@@ -268,7 +320,12 @@ impl GlSkiaImportedImage {
         fbo_provider: Rc<dyn IGlSkiaFboProvider>,
         source: ImportedImageSource,
     ) -> Self {
-        Self { gr_context, gl_context, fbo_provider, source }
+        Self {
+            gr_context,
+            gl_context,
+            fbo_provider,
+            source,
+        }
     }
 
     /// The external image, for the snapshots that synchronize with it.
@@ -279,6 +336,9 @@ impl GlSkiaImportedImage {
         match &self.source {
             ImportedImageSource::External(image) => image,
             ImportedImageSource::Shared(_) => panic!("Only supported with an external image"),
+            ImportedImageSource::Frame { .. } => {
+                panic!("An immutable frame requires lease-backed presentation")
+            }
         }
     }
 
@@ -300,7 +360,11 @@ impl GlSkiaImportedImage {
         height: i32,
         top_left: bool,
     ) -> Option<Image> {
-        let origin = if top_left { SurfaceOrigin::TopLeft } else { SurfaceOrigin::BottomLeft };
+        let origin = if top_left {
+            SurfaceOrigin::TopLeft
+        } else {
+            SurfaceOrigin::BottomLeft
+        };
 
         // SAFETY: `texture_id` names a texture of the current context that
         // was just created with this size (see `copy_to_new_texture`).
@@ -308,13 +372,25 @@ impl GlSkiaImportedImage {
             backend_textures::make_gl(
                 (width, height),
                 Mipmapped::No,
-                TextureInfo { target: target as u32, id: texture_id as u32, format: format as u32, ..Default::default() },
+                TextureInfo {
+                    target: target as u32,
+                    id: texture_id as u32,
+                    format: format as u32,
+                    ..Default::default()
+                },
                 "",
             )
         };
 
         let image = self.gr_context.with_context(|context| {
-            images::adopt_texture_from(context, &texture, origin, ColorType::RGBA8888, AlphaType::Premul, None)
+            images::adopt_texture_from(
+                context,
+                &texture,
+                origin,
+                ColorType::RGBA8888,
+                AlphaType::Premul,
+                None,
+            )
         });
         if image.is_some() {
             return image;
@@ -331,34 +407,59 @@ impl GlSkiaImportedImage {
         };
 
         self.gr_context.with_context(|context| {
-            images::adopt_texture_from(context, &unformatted, origin, ColorType::RGBA8888, AlphaType::Premul, None)
+            images::adopt_texture_from(
+                context,
+                &unformatted,
+                origin,
+                ColorType::RGBA8888,
+                AlphaType::Premul,
+                None,
+            )
         })
     }
 
     fn take_snapshot(&self) -> Arc<SharedBitmapImpl> {
-        let (width, height, internal_format, texture_id, top_left, texture_type) = match &self.source {
-            ImportedImageSource::External(image) => {
-                let properties = image.properties();
-                (
-                    properties.width,
-                    properties.height,
-                    image.internal_format(),
-                    image.texture_id(),
-                    properties.top_left_origin,
-                    image.texture_type(),
-                )
-            }
-            ImportedImageSource::Shared(image) => {
-                let texture = shared_texture(image);
-                let size = texture.size();
-                (size.width, size.height, texture.internal_format(), texture.texture_id(), false, GL_TEXTURE_2D)
-            }
-        };
+        let (width, height, internal_format, texture_id, top_left, texture_type) =
+            match &self.source {
+                ImportedImageSource::External(image) => {
+                    let properties = image.properties();
+                    (
+                        properties.width,
+                        properties.height,
+                        image.internal_format(),
+                        image.texture_id(),
+                        properties.top_left_origin,
+                        image.texture_type(),
+                    )
+                }
+                ImportedImageSource::Shared(image) => {
+                    let texture = shared_texture(image);
+                    let size = texture.size();
+                    (
+                        size.width,
+                        size.height,
+                        texture.internal_format(),
+                        texture.texture_id(),
+                        false,
+                        GL_TEXTURE_2D,
+                    )
+                }
+                ImportedImageSource::Frame { .. } => {
+                    panic!("An immutable frame cannot use a snapshot importer")
+                }
+            };
 
         let context = self.gl_context.clone();
-        let snapshot_texture_id = self.copy_to_new_texture(texture_type, texture_id, internal_format, width, height);
-        let snapshot_image =
-            self.try_create_image(texture_type, snapshot_texture_id, internal_format, width, height, top_left);
+        let snapshot_texture_id =
+            self.copy_to_new_texture(texture_type, texture_id, internal_format, width, height);
+        let snapshot_image = self.try_create_image(
+            texture_type,
+            snapshot_texture_id,
+            internal_format,
+            width,
+            height,
+            top_left,
+        );
 
         let Some(snapshot_image) = snapshot_image else {
             context.gl_interface().delete_texture(snapshot_texture_id);
@@ -413,7 +514,13 @@ impl GlSkiaImportedImage {
         // Bind source texture
         gl.bind_framebuffer(GL_FRAMEBUFFER, self.fbo_provider.fbo());
         gl.disable(GL_SCISSOR_TEST);
-        gl.framebuffer_texture_2d(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture_type, source_texture_id, 0);
+        gl.framebuffer_texture_2d(
+            GL_FRAMEBUFFER,
+            GL_COLOR_ATTACHMENT0,
+            texture_type,
+            source_texture_id,
+            0,
+        );
 
         // Create destination texture
         let dest_texture_id = gl.gen_texture();
@@ -457,16 +564,110 @@ impl IPlatformRenderInterfaceImportedObject for GlSkiaImportedImage {
     fn dispose(&self) {
         match &self.source {
             ImportedImageSource::External(image) => image.dispose(),
-            ImportedImageSource::Shared(image) => shared_texture(image).dispose_with(&*self.gl_context),
+            ImportedImageSource::Shared(image) => {
+                shared_texture(image).dispose_with(&*self.gl_context)
+            }
+            ImportedImageSource::Frame { .. } => {} // The frame lease owns storage.
         }
     }
 }
 
 impl IPlatformRenderInterfaceImportedImage for GlSkiaImportedImage {
+    fn acquire_shared_bitmap(
+        &self,
+        frame: ferroui_base::rendering::composition::frames::FrameLease,
+    ) -> Result<Arc<SharedBitmapImpl>, ferroui_base::rendering::composition::frames::FrameError>
+    {
+        use ferroui_base::rendering::composition::frames::{
+            DeviceIdentity, FrameAlpha, FrameColor, FrameError, FrameFormat,
+        };
+        let ImportedImageSource::Frame {
+            texture_id,
+            properties,
+            context_id,
+            generation,
+        } = &self.source
+        else {
+            return Err(FrameError::MissingImporter);
+        };
+        let owner = frame
+            .resource::<ferroui_opengl::SharedFrameTexture>()
+            .ok_or(FrameError::MissingImporter)?;
+        let m = frame.metadata();
+        m.validate(8192)?;
+        if !frame.is_current()
+            || m.device_generation != *generation
+            || owner.generation() != *generation
+        {
+            return Err(FrameError::StaleGeneration);
+        }
+        if m.device != Some(DeviceIdentity::Context(*context_id))
+            || owner.context_id() != *context_id
+            || owner.texture() != *texture_id
+        {
+            return Err(FrameError::DeviceMismatch);
+        }
+        if m.width as i32 != properties.width || m.height as i32 != properties.height {
+            return Err(FrameError::InvalidDimensions);
+        }
+        if m.format != FrameFormat::Rgba8
+            || properties.format != PlatformGraphicsExternalImageFormat::R8G8B8A8UNorm
+        {
+            return Err(FrameError::UnsupportedFormat);
+        }
+        crate::leased_gpu_bitmap::frame_color_filter(m.color)?;
+        if m.color == FrameColor::Rec709Full && m.alpha != FrameAlpha::Opaque {
+            return Err(FrameError::UnsupportedColor);
+        }
+        let alpha = match m.alpha {
+            FrameAlpha::Opaque => AlphaType::Opaque,
+            FrameAlpha::Premultiplied => AlphaType::Premul,
+            _ => return Err(FrameError::UnsupportedFormat),
+        };
+        let current = self.gl_context.ensure_current();
+        self.gr_context.reset_context();
+        // Borrow: ownership remains in SharedFrameTexture/FrameLease. Adopting
+        // would let Skia destroy producer storage while another consumer uses it.
+        let backend = unsafe {
+            backend_textures::make_gl(
+                (properties.width, properties.height),
+                Mipmapped::No,
+                TextureInfo {
+                    target: GL_TEXTURE_2D as u32,
+                    id: *texture_id,
+                    format: GL_RGBA8 as u32,
+                    ..Default::default()
+                },
+                "",
+            )
+        };
+        let origin = if m.top_left_origin {
+            SurfaceOrigin::TopLeft
+        } else {
+            SurfaceOrigin::BottomLeft
+        };
+        let image = self.gr_context.with_context(|gr| {
+            images::borrow_texture_from(gr, &backend, origin, ColorType::RGBA8888, alpha, None)
+        });
+        current.dispose();
+        let image = image.ok_or(FrameError::MissingImporter)?;
+        let context = self
+            .gr_context
+            .frame_context_id()
+            .ok_or(FrameError::MissingSynchronization)?;
+        frame.counters().gpu_import();
+        Ok(Arc::new(crate::leased_gpu_bitmap::LeasedGpuBitmap::new(
+            image, frame, context,
+        )))
+    }
     /// # Panics
     /// Panics when the image is a shared texture and when the texture
     /// cannot be consumed (the exceptions of the original).
-    fn snapshot_with_keyed_mutex(&self, acquire_index: u32, release_index: u32) -> Arc<SharedBitmapImpl> {
+    fn snapshot_with_keyed_mutex(
+        &self,
+        acquire_index: u32,
+        release_index: u32,
+    ) -> Arc<SharedBitmapImpl> {
         let image = self.external_image();
 
         let current = self.gl_context.ensure_current();
@@ -518,9 +719,14 @@ impl IPlatformRenderInterfaceImportedImage for GlSkiaImportedImage {
         let wait = imported_semaphore(wait_for_semaphore);
         let signal = imported_semaphore(signal_semaphore);
         let current = self.gl_context.ensure_current();
-        wait.semaphore().wait_timeline_semaphore(&**image, wait_for_value);
+        wait.semaphore()
+            .wait_timeline_semaphore(&**image, wait_for_value);
         let snapshot = {
-            let _signal = Finally(|| signal.semaphore().signal_timeline_semaphore(&**image, signal_value));
+            let _signal = Finally(|| {
+                signal
+                    .semaphore()
+                    .signal_timeline_semaphore(&**image, signal_value)
+            });
             self.take_snapshot()
         };
         current.dispose();

@@ -4,13 +4,15 @@
 #[allow(unsafe_code)]
 mod native;
 use ferroui_base::{
-    platform::{IPlatformHandle, KnownPlatformGraphicsExternalImageHandleTypes},
+    platform::{
+        IPlatformHandle, KnownPlatformGraphicsExternalImageHandleTypes, LeasedPlatformHandle,
+    },
     reactive::IDisposable,
     threading::{DispatcherPriority, DispatcherTimer},
 };
 use ferroui_media::{frames::*, *};
 pub use native::PixelBuffer;
-use std::{any::Any, rc::Rc, task::Poll, time::Duration};
+use std::{rc::Rc, task::Poll, time::Duration};
 struct TimerRegistration(Rc<dyn IDisposable>);
 impl Drop for TimerRegistration {
     fn drop(&mut self) {
@@ -37,22 +39,6 @@ pub fn poll_native<T: 'static, E: 'static>(
         }
     }))
 }
-struct SurfaceHandle {
-    frame: FrameLease,
-    surface: usize,
-}
-impl IPlatformHandle for SurfaceHandle {
-    fn handle(&self) -> isize {
-        self.surface as isize
-    }
-    fn handle_descriptor(&self) -> Option<&str> {
-        Some(KnownPlatformGraphicsExternalImageHandleTypes::IO_SURFACE_REF)
-    }
-    fn as_any(&self) -> &dyn Any {
-        let _ = &self.frame;
-        self
-    }
-}
 /// Returns an owning import handle; it keeps the decoder allocation leased even
 /// if the source is replaced while the compositor import job is still queued.
 pub fn frame_surface(frame: &FrameLease) -> Result<Rc<dyn IPlatformHandle>, MediaError> {
@@ -62,10 +48,11 @@ pub fn frame_surface(frame: &FrameLease) -> Result<Rc<dyn IPlatformHandle>, Medi
         .ok_or_else(|| {
             MediaError::new(MediaErrorKind::Unsupported, "Not a CoreVideo-backed frame")
         })?;
-    Ok(Rc::new(SurfaceHandle {
-        frame: frame.clone(),
-        surface,
-    }))
+    Ok(Rc::new(LeasedPlatformHandle::new(
+        surface as isize,
+        Some(KnownPlatformGraphicsExternalImageHandleTypes::IO_SURFACE_REF),
+        frame.clone(),
+    )))
 }
 
 #[cfg(feature = "controls")]
@@ -81,6 +68,12 @@ impl ferroui_media_controls::TextureFrameImporter for AppleTextureImporter {
             PlatformGraphicsExternalImageFormat, PlatformGraphicsExternalImageProperties,
         };
         let m = frame.metadata();
+        if m.device_generation != interop.shared_context_generation() {
+            return Err(MediaError::new(
+                MediaErrorKind::Unsupported,
+                "Frame belongs to a retired renderer generation",
+            ));
+        }
         if Some(DeviceIdentity::Luid(interop.device_luid().ok_or_else(
             || {
                 MediaError::new(

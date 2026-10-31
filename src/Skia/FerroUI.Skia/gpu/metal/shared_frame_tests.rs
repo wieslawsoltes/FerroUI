@@ -163,7 +163,7 @@ fn native_shared_metal_frame_samples_without_snapshot_and_retires_after_gpu() {
                     top_left_origin: true,
                     timestamp: Duration::ZERO,
                     device: Some(DeviceIdentity::Luid(id)),
-                    device_generation: 1,
+                    device_generation: gr.frame_context_id().unwrap(),
                     planes: vec![FramePlane {
                         offset: 0,
                         stride: 32,
@@ -178,6 +178,13 @@ fn native_shared_metal_frame_samples_without_snapshot_and_retires_after_gpu() {
             )
             .unwrap();
         let counters = frame.counters();
+        let mut stale = frame.metadata().clone();
+        stale.device_generation += 1;
+        let stale = budget.lease(stale, ()).unwrap();
+        assert!(matches!(
+            imported.acquire_shared_bitmap(stale),
+            Err(FrameError::StaleGeneration)
+        ));
         let bitmap = imported.acquire_shared_bitmap(frame.clone()).unwrap();
         // The Skia Metal wrapper must own its native texture view. Keep only
         // source storage after import, so the fixture cannot mask a missing

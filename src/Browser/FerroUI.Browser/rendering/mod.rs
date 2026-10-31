@@ -35,6 +35,7 @@ mod browser_web_gl_render_target;
 mod render_statistics;
 mod render_target_browser_surface;
 mod render_worker;
+mod web_gl_frame_completion;
 mod web_render_target;
 
 pub use browser_render_surface::BrowserRenderSurface;
@@ -47,6 +48,8 @@ pub use browser_web_gl_render_target::{BrowserWebGlRenderTarget, WebGlContext};
 pub use render_statistics::RenderStatistics;
 pub use render_target_browser_surface::RenderTargetBrowserSurface;
 pub use render_worker::RenderWorker;
+pub use web_gl_frame_completion::schedule_webgl_completion;
 pub use web_render_target::{
-    get_render_target, initialize_worker, remove_render_target, BrowserRenderTarget, PENDING_RENDER_THREAD,
+    get_render_target, initialize_worker, remove_render_target, BrowserRenderTarget,
+    PENDING_RENDER_THREAD,
 };

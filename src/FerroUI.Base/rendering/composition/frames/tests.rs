@@ -45,6 +45,32 @@ impl Drop for Resource {
     }
 }
 #[test]
+fn reservations_bound_allocation_before_creation_and_queued_native_retirement() {
+    let budget = FrameBudget::new(FrameBudgetLimits {
+        frames: 1,
+        ..Default::default()
+    });
+    let reserved = budget.reserve(metadata(1)).unwrap();
+    assert_eq!(budget.usage().frames, 1);
+    assert!(matches!(
+        budget.reserve(metadata(2)),
+        Err(FrameError::BudgetExceeded)
+    ));
+    let retired = reserved.retirement();
+    let frame = reserved.lease(());
+    drop(frame);
+    assert_eq!(
+        budget.usage().frames,
+        1,
+        "queued native delete remains charged"
+    );
+    drop(retired);
+    assert_eq!(budget.usage().frames, 0);
+    let unused = budget.reserve(metadata(3)).unwrap();
+    drop(unused);
+    assert_eq!(budget.usage().frames, 0);
+}
+#[test]
 fn dropping_a_mailbox_invalidates_queued_views_without_releasing_gpu_storage() {
     let budget = FrameBudget::new(Default::default());
     let mailbox = FrameMailbox::new(1, 1);

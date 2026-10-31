@@ -115,6 +115,24 @@ fn defaults_and_shared_ownership_do_not_duplicate_decode() {
     assert_eq!(native.plays.get(), 1);
 }
 #[test]
+fn dropping_last_player_notifies_weak_views_to_clear_paused_presentation() {
+    let (player, _, _) = player();
+    ready(player.set_source(source())).unwrap();
+    let closed = Rc::new(Cell::new(0));
+    let seen = closed.clone();
+    let weak = player.downgrade();
+    let _subscription=player.events().subscribe(move|event|{
+        if matches!(event,MediaPlayerEvent::StateChanged(state) if state.state==MediaPlaybackState::Closed){
+            assert!(weak.upgrade().is_none());seen.set(seen.get()+1);
+        }
+    });
+    let other = player.clone();
+    drop(other);
+    assert_eq!(closed.get(), 0);
+    drop(player);
+    assert_eq!(closed.get(), 1);
+}
+#[test]
 fn synchronous_opened_callback_can_pause_autoplay_before_play_is_applied() {
     let (player, native, _) = player();
     player

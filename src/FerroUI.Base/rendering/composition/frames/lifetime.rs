@@ -72,6 +72,12 @@ impl FrameBudget {
         metadata: FrameMetadata,
         resource: T,
     ) -> Result<FrameLease, FrameError> {
+        Ok(self.reserve(metadata)?.lease(resource))
+    }
+    /// Reserves capacity before allocating/submitting GPU storage. An unused
+    /// reservation returns its capacity automatically; saturation allocates no
+    /// native resource and never waits for another consumer.
+    pub fn reserve(&self, metadata: FrameMetadata) -> Result<FrameReservation, FrameError> {
         metadata.validate(self.0.limits.max_dimension)?;
         let mut usage = self.0.usage.lock().unwrap();
         let bytes = usage
@@ -87,29 +93,74 @@ impl FrameBudget {
         }
         *usage = FrameBudgetUsage { bytes, frames };
         drop(usage);
-        Ok(FrameLease(
+        let retained_bytes = metadata.retained_bytes;
+        Ok(FrameReservation {
+            metadata,
+            retirement: FrameRetirement(Arc::new(RetirementInner {
+                budget: self.clone(),
+                retained_bytes,
+            })),
+        })
+    }
+}
+/// Admission held before native allocation. Keep its retirement token when
+/// native destruction must be queued to an owning context/thread.
+pub struct FrameReservation {
+    metadata: FrameMetadata,
+    retirement: FrameRetirement,
+}
+impl FrameReservation {
+    pub fn retirement(&self) -> FrameRetirement {
+        self.retirement.clone()
+    }
+    pub fn lease<T: Any + Send + Sync>(self, resource: T) -> FrameLease {
+        FrameLease(
             Arc::new(FrameInner {
-                metadata,
+                metadata: self.metadata,
                 acquired_at: std::time::Instant::now(),
                 resource: Some(Box::new(resource)),
-                budget: self.clone(),
+                retirement: self.retirement,
             }),
             None,
-        ))
+        )
+    }
+}
+/// Holds allocation accounting through asynchronous native destruction. Drop
+/// only after storage has actually retired. Quarantine when native destruction
+/// cannot be established, including a rejected owning-thread cleanup request.
+#[derive(Clone)]
+pub struct FrameRetirement(Arc<RetirementInner>);
+impl FrameRetirement {
+    pub fn quarantine(self) {
+        std::mem::forget(self);
+    }
+}
+struct RetirementInner {
+    budget: FrameBudget,
+    retained_bytes: u64,
+}
+impl Drop for RetirementInner {
+    fn drop(&mut self) {
+        let mut usage = self.budget.0.usage.lock().unwrap();
+        usage.frames -= 1;
+        usage.bytes -= self.retained_bytes;
     }
 }
 struct FrameInner {
     metadata: FrameMetadata,
     acquired_at: std::time::Instant,
     resource: Option<Box<dyn Any + Send + Sync>>,
-    budget: FrameBudget,
+    retirement: FrameRetirement,
+}
+impl FrameInner {
+    fn budget(&self) -> &FrameBudget {
+        &self.retirement.0.budget
+    }
 }
 impl Drop for FrameInner {
     fn drop(&mut self) {
+        // Destruction/queued retirement starts before accounting is released.
         drop(self.resource.take());
-        let mut usage = self.budget.0.usage.lock().unwrap();
-        usage.frames -= 1;
-        usage.bytes -= self.metadata.retained_bytes;
     }
 }
 /// Clones share native storage. A UI view, camera session and each submitted
@@ -135,7 +186,7 @@ impl FrameLease {
             .is_none_or(|validity| validity.epoch.load(Ordering::Acquire) == validity.version)
     }
     pub fn counters(&self) -> super::FrameTransferCounters {
-        self.0.budget.0.counters.clone()
+        self.0.budget().0.counters.clone()
     }
     pub fn metadata(&self) -> &FrameMetadata {
         &self.0.metadata
@@ -198,7 +249,7 @@ impl GpuCompletion {
         }
         // Deduplicate one allocation used repeatedly in the same submission.
         if !state.frames.iter().any(|f| f.same_storage(&frame)) {
-            let budget = &frame.0.budget.0;
+            let budget = &frame.0.budget().0;
             budget
                 .gpu_reads
                 .fetch_update(Ordering::AcqRel, Ordering::Acquire, |reads| {
@@ -227,11 +278,11 @@ impl GpuCompletion {
         };
         // Native destruction can reenter a backend: never release under lock.
         for frame in &frames {
-            frame.0.budget.0.gpu_reads.fetch_sub(1, Ordering::AcqRel);
+            frame.0.budget().0.gpu_reads.fetch_sub(1, Ordering::AcqRel);
             if indeterminate {
                 frame
                     .0
-                    .budget
+                    .budget()
                     .0
                     .quarantined_reads
                     .fetch_sub(1, Ordering::AcqRel);
@@ -251,7 +302,7 @@ impl GpuCompletion {
                 for frame in &state.frames {
                     frame
                         .0
-                        .budget
+                        .budget()
                         .0
                         .quarantined_reads
                         .fetch_add(1, Ordering::AcqRel);

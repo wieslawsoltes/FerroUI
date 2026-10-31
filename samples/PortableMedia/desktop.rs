@@ -97,7 +97,7 @@ impl ApplicationImpl for App {
                     let Some(device)=interop.device_luid() else {FAILED.store(true,Ordering::Relaxed);if let Some(window)=weak_window.upgrade() {window.close();}return;};
                     let Some(view)=weak.upgrade() else {return;};
                     let budget=FrameBudget::new(FrameBudgetLimits::default());
-                    let provider=Rc::new(AppleVideoProvider {device:DeviceIdentity::Luid(device),device_generation:1,budget:budget.clone()});
+                    let provider=Rc::new(AppleVideoProvider {device:DeviceIdentity::Luid(device),device_generation:interop.shared_context_generation(),budget:budget.clone()});
                     let path=std::env::args().nth(1).expect("media source argument");
                     let source=if std::env::args().any(|a|a=="--resource") {
                         let encoded=match std::fs::read(&path){Ok(encoded)=>encoded,Err(error)=>{eprintln!("RESOURCE_READ_FAILED {error}");FAILED.store(true,Ordering::Relaxed);if let Some(window)=weak_window.upgrade(){window.close();}return;}};

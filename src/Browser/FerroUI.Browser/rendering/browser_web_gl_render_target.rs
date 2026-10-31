@@ -3,12 +3,18 @@ use super::{BrowserSurfaceShared, RenderStatistics};
 use crate::interop::canvas_helper::{GlInfo, RENDER_TARGET_KIND_WEB_GL};
 use crate::interop::{thread_proxy, JsObject};
 use ferroui_base::platform::surfaces::IPlatformRenderSurfaceRenderTarget;
-use ferroui_base::platform::{IOptionalFeatureProvider, IPlatformGraphicsContext, RenderTargetSceneInfo};
+use ferroui_base::platform::{
+    IOptionalFeatureProvider, IPlatformGraphicsContext, RenderTargetSceneInfo,
+};
 use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::PixelSize;
 use ferroui_opengl::gl_consts;
-use ferroui_opengl::surfaces::{IGlPlatformSurfaceRenderTarget, IGlPlatformSurfaceRenderingSession};
-use ferroui_opengl::{GetProcAddress, GlInterface, GlProfileType, GlVersion, IGlContext, OpenGlException};
+use ferroui_opengl::surfaces::{
+    IGlPlatformSurfaceRenderTarget, IGlPlatformSurfaceRenderingSession,
+};
+use ferroui_opengl::{
+    GetProcAddress, GlInterface, GlProfileType, GlVersion, IGlContext, OpenGlException,
+};
 #[cfg(feature = "skia")]
 use ferroui_skia::gpu::open_gl::IGlSkiaSpecificOptionsFeature;
 use std::any::{Any, TypeId};
@@ -59,6 +65,12 @@ extern "C" {
 
     #[wasm_bindgen(js_namespace = WebGlRenderTarget, js_name = makeContextCurrent)]
     fn make_context_current(context: i32) -> bool;
+
+    #[wasm_bindgen(js_namespace = WebGlRenderTarget, js_name = frameGeneration)]
+    fn frame_generation(context: i32) -> u32;
+
+    #[wasm_bindgen(js_namespace = WebGlRenderTarget, js_name = contextLost)]
+    fn context_lost(context: i32) -> bool;
 }
 
 /// A canvas that is rendered to with WebGL, as the thread that draws to it
@@ -102,7 +114,11 @@ impl BrowserWebGlRenderTarget {
             #[cfg(feature = "vello")]
             (version > 1).then(|| target.canvas()),
         );
-        Rc::new(Self { js, gl_info, gl_context })
+        Rc::new(Self {
+            js,
+            gl_info,
+            gl_context,
+        })
     }
 
     /// The WebGL context of the canvas.
@@ -116,7 +132,10 @@ impl BrowserWebGlRenderTarget {
         self: &Rc<Self>,
         shared: Arc<BrowserSurfaceShared>,
     ) -> Rc<dyn IGlPlatformSurfaceRenderTarget> {
-        Rc::new(GlSurface { target: self.clone(), shared })
+        Rc::new(GlSurface {
+            target: self.clone(),
+            shared,
+        })
     }
 
     fn update_size(&self, size: PixelSize) {
@@ -178,7 +197,10 @@ struct GlSurface {
 impl IPlatformRenderSurfaceRenderTarget for GlSurface {}
 
 impl IGlPlatformSurfaceRenderTarget for GlSurface {
-    fn begin_draw(&self, _scene_info: &RenderTargetSceneInfo) -> Rc<dyn IGlPlatformSurfaceRenderingSession> {
+    fn begin_draw(
+        &self,
+        _scene_info: &RenderTargetSceneInfo,
+    ) -> Rc<dyn IGlPlatformSurfaceRenderingSession> {
         // The size as the thread of the user interface last wrote it. The
         // canvas is given that size here, by the thread that draws to it:
         // for a canvas that was transferred to a worker no other can.
@@ -214,7 +236,9 @@ mod native {
     /// The address of the entry point of the WebGL emulation of the module,
     /// or null.
     pub(super) fn get_proc_address(name: &str) -> *const c_void {
-        let Ok(name) = CString::new(name) else { return std::ptr::null() };
+        let Ok(name) = CString::new(name) else {
+            return std::ptr::null();
+        };
         // SAFETY: the function reads the NUL-terminated name, which outlives
         // the call, and returns the address of an entry point or null.
         unsafe { emscripten_GetProcAddress(name.as_ptr()) }
@@ -269,9 +293,13 @@ impl WebGlContext {
     ) -> Rc<Self> {
         let old = get_current_context();
         if !make_context_current(context_id) {
-            panic!("{}", OpenGlException::new("Unable to make the context current"));
+            panic!(
+                "{}",
+                OpenGlException::new("Unable to make the context current")
+            );
         }
-        let get_proc_address: GetProcAddress = Rc::new(|name: &str| -> *const c_void { native::get_proc_address(name) });
+        let get_proc_address: GetProcAddress =
+            Rc::new(|name: &str| -> *const c_void { native::get_proc_address(name) });
         // SAFETY: in the WebAssembly module the loader resolves names in the
         // WebGL emulation the module is linked with, whose entry points have
         // the signatures of OpenGL ES under the calling convention of the
@@ -319,7 +347,9 @@ impl IOptionalFeatureProvider for WebGlContext {
         // Not from upstream: the Vello backend draws with the WebGL2
         // context of the page, which it gets from its canvas.
         #[cfg(feature = "vello")]
-        if feature_type == TypeId::of::<dyn ferroui_vello::web_gl::IWebGlCanvasFeature>() && self.canvas.is_some() {
+        if feature_type == TypeId::of::<dyn ferroui_vello::web_gl::IWebGlCanvasFeature>()
+            && self.canvas.is_some()
+        {
             let this: Rc<dyn ferroui_vello::web_gl::IWebGlCanvasFeature> = self.this.upgrade()?;
             return Some(Rc::new(this));
         }
@@ -328,9 +358,9 @@ impl IOptionalFeatureProvider for WebGlContext {
 }
 
 impl IPlatformGraphicsContext for WebGlContext {
-    // TODO: Implement
     fn is_lost(&self) -> bool {
-        false
+        self.verify_access();
+        context_lost(self.context_id)
     }
 
     fn ensure_current(&self) -> Rc<dyn IDisposable> {
@@ -351,6 +381,36 @@ impl IPlatformGraphicsContext for WebGlContext {
 }
 
 impl IGlContext for WebGlContext {
+    fn shared_frame_context_id(&self) -> Option<u64> {
+        self.verify_access();
+        if cfg!(all(
+            target_os = "emscripten",
+            not(target_feature = "atomics")
+        )) && self.version.major() >= 3
+            && self.context_id > 0
+            && frame_generation(self.context_id) > 0
+            && !context_lost(self.context_id)
+        {
+            Some(self.context_id as u64)
+        } else {
+            None
+        }
+    }
+    fn shared_frame_context_generation(&self) -> u64 {
+        self.verify_access();
+        frame_generation(self.context_id) as u64
+    }
+    fn schedule_frame_completion(
+        &self,
+        completion: ferroui_base::rendering::composition::frames::GpuCompletion,
+    ) {
+        self.verify_access();
+        if self.shared_frame_context_id().is_some() {
+            super::schedule_webgl_completion(self.context_id, completion);
+        } else {
+            completion.mark_indeterminate();
+        }
+    }
     fn version(&self) -> GlVersion {
         self.version
     }
@@ -371,9 +431,14 @@ impl IGlContext for WebGlContext {
         self.verify_access();
         let old = get_current_context();
         if !make_context_current(self.context_id) {
-            panic!("{}", OpenGlException::new("Unable to make the context current"));
+            panic!(
+                "{}",
+                OpenGlException::new("Unable to make the context current")
+            );
         }
-        Rc::new(RestoreContext { context_id: Cell::new(Some(old)) })
+        Rc::new(RestoreContext {
+            context_id: Cell::new(Some(old)),
+        })
     }
 
     fn is_shared_with(&self, _context: &dyn IGlContext) -> bool {
@@ -384,7 +449,10 @@ impl IGlContext for WebGlContext {
         false
     }
 
-    fn create_shared_context(&self, _preferred_versions: Option<&[GlVersion]>) -> Option<Rc<dyn IGlContext>> {
+    fn create_shared_context(
+        &self,
+        _preferred_versions: Option<&[GlVersion]>,
+    ) -> Option<Rc<dyn IGlContext>> {
         panic!("Specified method is not supported.");
     }
 }
@@ -393,7 +461,9 @@ impl IGlContext for WebGlContext {
 impl ferroui_vello::web_gl::IWebGlCanvasFeature for WebGlContext {
     fn canvas(&self) -> JsValue {
         self.verify_access();
-        self.canvas.clone().expect("the feature is handed out for a context with a canvas")
+        self.canvas
+            .clone()
+            .expect("the feature is handed out for a context with a canvas")
     }
 }
 

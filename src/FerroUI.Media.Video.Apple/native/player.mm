@@ -61,7 +61,11 @@ void ferroui_portable_player_state(void *p,FerroPortableState *out) {
     CGSize size=owner.item.presentationSize;
     out->width=std::isfinite(size.width)&&size.width>0?(uint32_t)size.width:0;
     out->height=std::isfinite(size.height)&&size.height>0?(uint32_t)size.height:0;
-    out->seekable=owner.item.seekableTimeRanges.count>0;
+    out->seekable=0;
+    for (NSValue *value in owner.item.seekableTimeRanges) {
+        double duration=CMTimeGetSeconds(value.CMTimeRangeValue.duration);
+        if (std::isfinite(duration) && duration>0) {out->seekable=1;break;}
+    }
     if (owner.item.status==AVPlayerItemStatusFailed || owner.player.status==AVPlayerStatusFailed) out->state=5;
     else if (owner.item.status!=AVPlayerItemStatusReadyToPlay) out->state=0;
     else if (owner.ended) out->state=4;
@@ -102,10 +106,13 @@ void *ferroui_portable_player_seek(void *p,double seconds) {
 }
 int ferroui_portable_seek_state(void *p,double *position) {FerroPortableSeek *request=(__bridge FerroPortableSeek *)p;*position=request.position;return request.result;}
 void ferroui_portable_seek_release(void *p) {id request=(__bridge_transfer id)p;(void)request;}
-void *ferroui_portable_player_frame(void *p) {
+void *ferroui_portable_player_frame(void *p,double *timestamp) {
     FerroPortablePlayer *owner=(__bridge FerroPortablePlayer *)p;
     CMTime time=owner.item.currentTime;
     if (![owner.output hasNewPixelBufferForItemTime:time]) return nullptr;
-    return [owner.output copyPixelBufferForItemTime:time itemTimeForDisplay:nullptr];
+    CMTime display=kCMTimeInvalid;
+    CVPixelBufferRef buffer=[owner.output copyPixelBufferForItemTime:time itemTimeForDisplay:&display];
+    *timestamp=CMTimeGetSeconds(display);
+    return buffer;
 }
 }

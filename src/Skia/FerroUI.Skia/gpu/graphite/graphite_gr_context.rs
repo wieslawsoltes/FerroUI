@@ -81,7 +81,6 @@ impl GraphiteGrContext {
     /// the recorder cannot be created.
     pub fn new(mut context: graphite::Context) -> Option<Self> {
         let recorder = context.make_recorder(None)?;
-        static NEXT_CONTEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
         Some(Self {
             state: RefCell::new(Some(GraphiteState {
                 uploaded_images: HashMap::new(),
@@ -90,7 +89,7 @@ impl GraphiteGrContext {
                 frame_completion: GpuCompletion::new(),
                 completion_handler: None,
             })),
-            frame_context_id: NEXT_CONTEXT.fetch_add(1, std::sync::atomic::Ordering::Relaxed),
+            frame_context_id: crate::gpu::next_frame_context_id(),
         })
     }
 
@@ -145,6 +144,8 @@ impl GraphiteGrContext {
                 completion.mark_indeterminate();
             }
         } else {
+            // Preserve the context's ordinary empty-flush processing too.
+            let _ = state.context.submit(None);
             // A fully clipped draw can retain a lease without recording a GPU
             // read. No recording means no read was submitted, so no fence is
             // required and an empty-submit result must not quarantine storage.

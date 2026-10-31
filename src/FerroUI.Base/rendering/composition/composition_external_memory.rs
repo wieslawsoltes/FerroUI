@@ -1,5 +1,7 @@
 use super::ServerJobTask;
-use crate::platform::{IPlatformHandle, PlatformGraphicsDrmFormat, PlatformGraphicsExternalImageProperties};
+use crate::platform::{
+    IPlatformHandle, PlatformGraphicsDrmFormat, PlatformGraphicsExternalImageProperties,
+};
 use bitflags::bitflags;
 use std::rc::Rc;
 use std::sync::Arc;
@@ -7,6 +9,12 @@ use std::sync::Arc;
 /// The import of GPU objects created outside of the framework into the
 /// compositor.
 pub trait ICompositionGpuInterop {
+    fn shared_context_id(&self) -> Option<u64> {
+        None
+    }
+    fn shared_context_generation(&self) -> u64 {
+        1
+    }
     /// Returns the list of image handle types supported by the current GPU backend, see [`KnownPlatformGraphicsExternalImageHandleTypes`](crate::platform::KnownPlatformGraphicsExternalImageHandleTypes)
     fn supported_image_handle_types(&self) -> Vec<String>;
 
@@ -21,8 +29,10 @@ pub trait ICompositionGpuInterop {
     }
 
     /// Returns the supported ways to synchronize access to the imported GPU image
-    fn get_synchronization_capabilities(&self, image_handle_type: &str)
-        -> CompositionGpuImportedImageSynchronizationCapabilities;
+    fn get_synchronization_capabilities(
+        &self,
+        image_handle_type: &str,
+    ) -> CompositionGpuImportedImageSynchronizationCapabilities;
 
     /// Asynchronously imports a texture. The returned object is immediately usable.
     fn import_image(
@@ -35,12 +45,17 @@ pub trait ICompositionGpuInterop {
     /// If import operation fails, the caller is responsible for destroying the handle
     ///
     /// `image` is an image that belongs to the same GPU context or the same GPU context sharing group as one used by compositor
-    fn import_shared_image(&self, image: Arc<dyn ICompositionImportableSharedGpuContextImage>)
-        -> Rc<dyn ICompositionImportedGpuImage>;
+    fn import_shared_image(
+        &self,
+        image: Arc<dyn ICompositionImportableSharedGpuContextImage>,
+    ) -> Rc<dyn ICompositionImportedGpuImage>;
 
     /// Asynchronously imports a semaphore object. The returned object is immediately usable.
     /// If import operation fails, the caller is responsible for destroying the handle
-    fn import_semaphore(&self, handle: Rc<dyn IPlatformHandle>) -> Rc<dyn ICompositionImportedGpuSemaphore>;
+    fn import_semaphore(
+        &self,
+        handle: Rc<dyn IPlatformHandle>,
+    ) -> Rc<dyn ICompositionImportedGpuSemaphore>;
 
     /// Asynchronously imports a semaphore object. The returned object is immediately usable.
     ///

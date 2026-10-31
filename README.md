@@ -41,6 +41,7 @@ The state per subsystem is tracked in [docs/porting/CRITICAL-PATH.md](docs/porti
 | Property system, trees, layout, input, styling, resources | Ported, with the upstream test suites |
 | Data binding, animation, transitions | Ported |
 | Media, text layout, fonts | Ported |
+| Portable video, camera and shared textures | Initial modular [FerroUI.Media implementation](docs/media/README.md): shared frame leases, Apple and browser providers; remaining native providers and release gates are unfinished |
 | Compositor and render loop | Ported, including composition animations, custom visuals and the import of external GPU objects; the render loop runs on its own thread on the desktop |
 | Controls | The control set, including items controls, text input, menus, pickers, calendar, pages, the colour picker, the managed dialogs and automation peers |
 | XAML | The run-time loader with the upstream test suites, and compilation of markup to Rust source in build scripts (used by the themes, the dialogs and the ControlCatalog sample); hot reload and parts of the build integration are open |

@@ -15,6 +15,12 @@ This is an initial implementation, not a declaration of six-platform support.
   imported frame without taking a snapshot. Unsupported backends return an error.
   Metal/Skia Graphite wraps the existing texture and retains native storage until
   an asynchronous completion on the actual Skia command queue.
+  Page-owned Skia WebGL2 borrows textures in the active context and retires reads
+  through native fences polled with zero timeout. Reservations bound allocation
+  before GPU storage creation; retirement tokens cover queued native cleanup.
+  `LeasedPlatformHandle` keeps native source storage alive while composition
+  carries its handle across a queued import, including cancellation.
+
 The packages are independently installable and use the `FerroUI.Media.*` family:
 
 | Crate directory | Cargo package | Responsibility |
@@ -28,6 +34,9 @@ The packages are independently installable and use the `FerroUI.Media.*` family:
 | `FerroUI.Media.Apple` | `ferroui-media-apple` | Shared CoreVideo ownership and IOSurface imports |
 | `FerroUI.Media.Video.Apple` | `ferroui-media-video-apple` | AVFoundation playback, native audio and timing |
 | `FerroUI.Media.Camera.Apple` | `ferroui-media-camera-apple` | AVFoundation camera acquisition and JPEG capture |
+| `FerroUI.Media.Browser` | `ferroui-media-browser` | Shared WebGL2 ownership, producer fences and direct texture imports |
+| `FerroUI.Media.Video.Browser` | `ferroui-media-video-browser` | Native browser playback/audio and shared frame output |
+| `FerroUI.Media.Camera.Browser` | `ferroui-media-camera-browser` | Explicit video-only acquisition, preview and owned JPEG capture |
 
 Video and camera do not depend on each other. Installing Video brings the shared
 Media base; installing Camera adds capture contracts separately. UI controls and
@@ -35,6 +44,10 @@ native providers are separate dependencies. The native Apple providers expose an
 optional `controls` feature for the common AppleTextureImporter. Camera's native
 acquisition code is absent from the video provider, and playback code is absent
 from the camera provider.
+The browser providers likewise contain separate playback and capture modules;
+neither imports the other. `BrowserCameraProvider::discovery()` works before a
+compositor exists and never acquires hardware. Starting capture requires a
+producer admitted from the active composition interop.
 
 Playback handles reentrant events, preparation-time intent, latest-seek/source
 cancellation and native achieved seek positions. Views release only their own
@@ -48,6 +61,8 @@ fractional negotiated frame rates, permission outcomes, disconnect/runtime error
 and native JPEG capability; optional device controls are reported unavailable.
 The compositor device identity must be supplied from the active renderer. Decode
 acceleration remains unknown. Unknown native color metadata is rejected.
+Frame timestamps come from AVFoundation's decoded-item display time, and
+imports reject a retired renderer generation even when its adapter identity matches.
 
 The optional Rust rxing adapter bounds analysis, rejects stale results and handles
 multiple symbols. Packed luma is borrowed; adapter stride/pixel repacking is counted
@@ -55,6 +70,7 @@ separately from preview. Corrected codewords and byte-mode segments are distinct
 from full payload bytes, which this adapter does not currently expose. Finder
 extrapolation is labeled estimated geometry. Expiry uses acquisition age and the
 caller's scheduler clock, independently of source media timestamps.
+Internal decoder input-copy behavior still needs profiling beyond adapter repacking.
 
 ## Native sample and checks
 
@@ -92,17 +108,69 @@ Those readbacks are outside production preview and are counted separately.
 The camera lifetime fixture exercises asynchronous native delegate/session
 retirement using Foundation-only fakes; it does not acquire camera hardware.
 
+## Browser sample and checks
+
+Activate the pinned tools from `scripts/browser/setup.sh`, then run:
+
+```sh
+scripts/build-browser.sh portable-media-browser --debug
+FERROUI_BROWSER_ANGLE=metal node scripts/browser/tests/portable_media.test.mjs
+```
+
+The site starts with an independent four-quadrant GPU producer feeding two
+ordinary controls. It includes file playback, explicit camera acquisition, JPEG
+capture and closing/navigation cleanup. Playback defaults remain paused; the
+transport controls supply Play. Browser file input supplies owned encoded
+resources; `MediaSource::File` names the Emscripten virtual filesystem. Relative
+and absolute HTTP(S) URLs and caller-owned blob URLs use native browser loading,
+including CORS and native seek-range restrictions.
+
+The browser test uses real Skia/WebGL2 in Chrome with the selected ANGLE backend.
+It checks deterministic pixels, sibling ordering, delayed completion notification,
+retained storage after detach, native playback/seek/stop, encoded resources, native
+autoplay denial/recovery, diagnostic decoded audio samples, CORS rejection,
+non-prompting discovery, permission denial, synthetic camera preview, independently
+decoded JPEGs, late acquisition cancellation and software-adapter rejection.
+An explicit CPU-backed upload negative control must be rejected and counted
+without allocating frame storage or transferring preview bytes.
+Synthetic camera evidence is separate from physical-device acceptance. Delaying
+fence notification is not evidence of delayed hardware execution.
+
+`tests/media/fixtures/avc-aac.mp4` is a synthetic three-second H.264/AAC fixture
+with four colored quadrants and a 440 Hz tone. The adjacent Swift generator
+reproduces its content using system codecs; encoded bytes can vary by OS. No
+application assets are included in this fixture.
+
 ## Capability and evidence boundaries
 
-Only the direct Metal/Graphite importer is implemented. Other importers retain
+The direct Metal/Graphite and page-owned WebGL2 importers are implemented. Other importers retain
 their existing snapshot behavior and reject the new direct acquisition API.
 The current native video provider does not implement CPU presentation fallback.
 Rec.709 full-range opaque RGB is converted to the compositor's untagged sRGB
 values in a GPU sampling color filter using the BT.1886 reference EOTF. Unknown
 color, HDR, multiplane YUV, straight alpha and bottom-origin direct imports are
-not admitted by this initial bridge.
+not admitted by the Metal bridge. WebGL2 supports top/bottom origins, opaque and
+premultiplied RGBA8 in the common importer; native video/camera output is opaque
+and browser-converted to sRGB. Framework counters do not expose decoder/driver
+internals or independently establish hardware acceleration. WebGL byte accounting
+covers RGBA8 storage payload, while driver padding/cache overhead remains opaque;
+allocation count and dimensions are bounded. Native image-to-GL transfers have
+an explicit reason and counter, distinct from CPU preview transfers.
 
-Windows/Linux/Android/browser providers and native QR engines are not implemented
+The browser profile requires a single-threaded, page-owned WebGL2 Skia context.
+Workers, WebGL1, Vello and WebGPU do not advertise this route. Software adapters
+are rejected; there is no declared CPU preview fallback in this profile. Native
+frame output requires requestVideoFrameCallback for decoded-frame timestamps.
+Pixel-aspect conversions whose decoded and upload dimensions differ are rejected;
+CPU-backed image/canvas upload routes are forbidden and counted as attempted
+preview transfers. Camera still output is encoded to JPEG separately
+from preview, with native-still/preview-snapshot provenance, a single photo in
+flight, a 4096×4096 encoding limit and a 64 MiB encoded-output limit. Native codec
+work is opaque; the encoded transfer to Rust is counted as Photo. Browser camera
+controls are reported unavailable. Context loss quarantines unfinished reads;
+automatic recovery and a broader browser/device matrix remain unverified.
+
+Windows/Linux/Android providers and native QR engines are not implemented
 in this new framework. Apple camera acquisition/photos compile but lack physical
 device/denial/hotplug acceptance evidence. The capture callback keeps a single
 native latest-frame slot in addition to the admitted frame budget; native pool

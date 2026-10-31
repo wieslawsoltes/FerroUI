@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <CoreVideo/CoreVideo.h>
-#import <IOSurface/IOSurface.h>
+#import <IOSurface/IOSurfaceRef.h>
 #include <stdint.h>
 void ferroui_portable_buffer_info(void *p,uint32_t *width,uint32_t *height,uint64_t *stride,uint64_t *bytes,int32_t *color) {
     CVPixelBufferRef buffer=(CVPixelBufferRef)p;

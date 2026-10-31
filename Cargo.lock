@@ -2177,6 +2177,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-media-browser"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-browser",
+ "ferroui-media",
+ "ferroui-media-controls",
+ "ferroui-opengl",
+ "wasm-bindgen",
+]
+
+[[package]]
 name = "ferroui-media-camera"
 version = "0.4.0"
 dependencies = [
@@ -2192,6 +2204,18 @@ dependencies = [
  "ferroui-media-apple",
  "ferroui-media-camera",
  "serde_json",
+]
+
+[[package]]
+name = "ferroui-media-camera-browser"
+version = "0.4.0"
+dependencies = [
+ "ferroui-browser",
+ "ferroui-media",
+ "ferroui-media-browser",
+ "ferroui-media-camera",
+ "serde_json",
+ "wasm-bindgen",
 ]
 
 [[package]]
@@ -2227,6 +2251,16 @@ dependencies = [
  "ferroui-media",
  "ferroui-media-apple",
  "ferroui-media-video",
+]
+
+[[package]]
+name = "ferroui-media-video-browser"
+version = "0.4.0"
+dependencies = [
+ "ferroui-browser",
+ "ferroui-media-browser",
+ "ferroui-media-video",
+ "wasm-bindgen",
 ]
 
 [[package]]
@@ -4760,6 +4794,26 @@ dependencies = [
  "ferroui-media-video-controls",
  "ferroui-themes-fluent",
  "image",
+]
+
+[[package]]
+name = "portable-media-browser"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-browser",
+ "ferroui-controls",
+ "ferroui-fonts-inter",
+ "ferroui-media",
+ "ferroui-media-browser",
+ "ferroui-media-camera",
+ "ferroui-media-camera-browser",
+ "ferroui-media-controls",
+ "ferroui-media-video",
+ "ferroui-media-video-browser",
+ "ferroui-media-video-controls",
+ "ferroui-themes-fluent",
+ "wasm-bindgen",
 ]
 
 [[package]]

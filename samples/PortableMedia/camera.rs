@@ -207,7 +207,7 @@ pub fn create(window: &Ref<Window>) -> Ref<Panel> {
                 let Some(interop)=compositor.try_get_composition_gpu_interop().await else{return;};
                 let Some(luid)=interop.device_luid() else{return;};
                 let Some(state)=weak.upgrade() else{return;};
-                let capture=CameraCapture::new(Rc::new(AppleCameraProvider{device:DeviceIdentity::Luid(luid),device_generation:1}),FrameBudget::new(Default::default()));
+                let capture=CameraCapture::new(Rc::new(AppleCameraProvider{device:DeviceIdentity::Luid(luid),device_generation:interop.shared_context_generation()}),FrameBudget::new(Default::default()));
                 let before=capture.permission();let devices=capture.devices().await;let after=capture.permission();
                 match devices {
                     Ok(devices)=>{

@@ -102,6 +102,22 @@ pub struct FrameTransferSnapshot {
     pub gpu_imports: u64,
     pub gpu_copies: u64,
     pub gpu_conversions: u64,
+    pub gpu_operations: Vec<GpuTransferCount>,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum GpuTransferReason {
+    /// A browser-owned video/image is transferred directly to the active GL
+    /// texture. Browser/driver internals remain opaque to framework counters.
+    NativeImageTransfer,
+    ColorSpaceConversion,
+    PixelFormatConversion,
+    DeviceCompatibility,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct GpuTransferCount {
+    pub reason: GpuTransferReason,
+    pub copies: u64,
+    pub conversions: u64,
 }
 /// Counters are always present: a disabled diagnostic feature cannot turn a
 /// prohibited transfer into a convincing zero. Call before touching pixels.
@@ -136,12 +152,33 @@ impl FrameTransferCounters {
         let mut c = self.0.lock().unwrap();
         c.gpu_imports = c.gpu_imports.saturating_add(1);
     }
-    pub fn gpu_conversion(&self) {
+    pub fn gpu_conversion(&self, reason: GpuTransferReason) {
         let mut c = self.0.lock().unwrap();
         c.gpu_conversions = c.gpu_conversions.saturating_add(1);
+        Self::operation(&mut c, reason, false);
     }
-    pub fn gpu_copy(&self) {
+    pub fn gpu_copy(&self, reason: GpuTransferReason) {
         let mut c = self.0.lock().unwrap();
         c.gpu_copies = c.gpu_copies.saturating_add(1);
+        Self::operation(&mut c, reason, true);
+    }
+    fn operation(c: &mut FrameTransferSnapshot, reason: GpuTransferReason, copy: bool) {
+        if !c.gpu_operations.iter().any(|v| v.reason == reason) {
+            c.gpu_operations.push(GpuTransferCount {
+                reason,
+                copies: 0,
+                conversions: 0,
+            });
+        }
+        let operation = c
+            .gpu_operations
+            .iter_mut()
+            .find(|v| v.reason == reason)
+            .unwrap();
+        if copy {
+            operation.copies = operation.copies.saturating_add(1);
+        } else {
+            operation.conversions = operation.conversions.saturating_add(1);
+        }
     }
 }

@@ -13,21 +13,26 @@
 
 use super::server::{LockBound, LockedServerCompositor, ServerCompositor};
 use super::{
-    CompositionGpuImportedImageSynchronizationCapabilities, Compositor, ICompositionGpuImportedObject,
-    ICompositionGpuInterop, ICompositionImportableSharedGpuContextImage, ICompositionImportableSharedGpuContextSemaphore,
+    CompositionGpuImportedImageSynchronizationCapabilities, Compositor,
+    ICompositionGpuImportedObject, ICompositionGpuInterop,
+    ICompositionImportableSharedGpuContextImage, ICompositionImportableSharedGpuContextSemaphore,
     ICompositionImportedGpuImage, ICompositionImportedGpuSemaphore, ServerJobError, ServerJobTask,
 };
 use crate::platform::{
-    IExternalObjectsHandleWrapRenderInterfaceContextFeature, IExternalObjectsRenderInterfaceContextFeature,
-    IExternalObjectsWrappedGpuHandle, IPlatformHandle, IPlatformRenderInterfaceContext,
-    IPlatformRenderInterfaceImportedImage, IPlatformRenderInterfaceImportedSemaphore, PlatformGraphicsContextLostException,
+    IExternalObjectsHandleWrapRenderInterfaceContextFeature,
+    IExternalObjectsRenderInterfaceContextFeature, IExternalObjectsWrappedGpuHandle,
+    IPlatformHandle, IPlatformRenderInterfaceContext, IPlatformRenderInterfaceImportedImage,
+    IPlatformRenderInterfaceImportedSemaphore, PlatformGraphicsContextLostException,
     PlatformGraphicsDrmFormat, PlatformGraphicsExternalImageProperties, PlatformHandle,
 };
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::Arc;
 
-fn same_context(a: &Rc<dyn IPlatformRenderInterfaceContext>, b: &Rc<dyn IPlatformRenderInterfaceContext>) -> bool {
+fn same_context(
+    a: &Rc<dyn IPlatformRenderInterfaceContext>,
+    b: &Rc<dyn IPlatformRenderInterfaceContext>,
+) -> bool {
     std::ptr::addr_eq(Rc::as_ptr(a), Rc::as_ptr(b))
 }
 
@@ -37,7 +42,8 @@ fn same_context(a: &Rc<dyn IPlatformRenderInterfaceContext>, b: &Rc<dyn IPlatfor
 struct InteropState {
     context: Rc<dyn IPlatformRenderInterfaceContext>,
     external_objects: Rc<dyn IExternalObjectsRenderInterfaceContextFeature>,
-    external_objects_with_handle_wrap: Option<Rc<dyn IExternalObjectsHandleWrapRenderInterfaceContextFeature>>,
+    external_objects_with_handle_wrap:
+        Option<Rc<dyn IExternalObjectsHandleWrapRenderInterfaceContextFeature>>,
 }
 
 impl InteropState {
@@ -58,6 +64,8 @@ pub(crate) struct CompositionInteropServerPart {
     state: LockBound<InteropState>,
     device_luid: Option<Vec<u8>>,
     device_uuid: Option<Vec<u8>>,
+    shared_context_id: Option<u64>,
+    shared_context_generation: u64,
 }
 
 /// The interop of a compositor with the GPU objects of its render
@@ -67,6 +75,8 @@ pub struct CompositionInterop {
     state: LockBound<InteropState>,
     device_luid: RefCell<Option<Vec<u8>>>,
     device_uuid: RefCell<Option<Vec<u8>>>,
+    shared_context_id: Option<u64>,
+    shared_context_generation: u64,
 }
 
 impl CompositionInterop {
@@ -104,8 +114,9 @@ impl CompositionInterop {
     ) -> Option<Rc<CompositionInterop>> {
         let locked = compositor.locked_server();
         let may_create_context = !compositor.is_confined_to_render_thread();
-        let part =
-            compositor.with_server(|server| Self::server_part(&locked, server, external_objects, may_create_context))?;
+        let part = compositor.with_server(|server| {
+            Self::server_part(&locked, server, external_objects, may_create_context)
+        })?;
         Some(Self::from_server_part(compositor, part))
     }
 
@@ -135,19 +146,30 @@ impl CompositionInterop {
             features.try_get::<dyn IExternalObjectsHandleWrapRenderInterfaceContextFeature>()
         };
         Some(CompositionInteropServerPart {
+            shared_context_id: external_objects.shared_context_id(),
+            shared_context_generation: external_objects.shared_context_generation(),
             device_luid: external_objects.device_luid(),
             device_uuid: external_objects.device_uuid(),
             state: LockBound::new(
                 locked,
                 server,
-                InteropState { context, external_objects, external_objects_with_handle_wrap },
+                InteropState {
+                    context,
+                    external_objects,
+                    external_objects_with_handle_wrap,
+                },
             ),
         })
     }
 
     /// The interop of `compositor` around its server part.
-    pub(crate) fn from_server_part(compositor: &Rc<Compositor>, part: CompositionInteropServerPart) -> Rc<Self> {
+    pub(crate) fn from_server_part(
+        compositor: &Rc<Compositor>,
+        part: CompositionInteropServerPart,
+    ) -> Rc<Self> {
         Rc::new(CompositionInterop {
+            shared_context_id: part.shared_context_id,
+            shared_context_generation: part.shared_context_generation,
             compositor: compositor.clone(),
             device_luid: RefCell::new(part.device_luid),
             device_uuid: RefCell::new(part.device_uuid),
@@ -166,6 +188,12 @@ impl CompositionInterop {
 }
 
 impl ICompositionGpuInterop for CompositionInterop {
+    fn shared_context_id(&self) -> Option<u64> {
+        self.shared_context_id
+    }
+    fn shared_context_generation(&self) -> u64 {
+        self.shared_context_generation
+    }
     fn supported_image_handle_types(&self) -> Vec<String> {
         self.with_state(|_, state| state.external_objects.supported_image_handle_types())
     }
@@ -178,8 +206,15 @@ impl ICompositionGpuInterop for CompositionInterop {
         self.with_state(|_, state| state.external_objects.supported_dma_buf_formats())
     }
 
-    fn get_synchronization_capabilities(&self, image_handle_type: &str) -> CompositionGpuImportedImageSynchronizationCapabilities {
-        self.with_state(|_, state| state.external_objects.get_synchronization_capabilities(image_handle_type))
+    fn get_synchronization_capabilities(
+        &self,
+        image_handle_type: &str,
+    ) -> CompositionGpuImportedImageSynchronizationCapabilities {
+        self.with_state(|_, state| {
+            state
+                .external_objects
+                .get_synchronization_capabilities(image_handle_type)
+        })
     }
 
     fn import_image(
@@ -193,29 +228,44 @@ impl ICompositionGpuInterop for CompositionInterop {
                 .as_ref()
                 .and_then(|wrap| wrap.wrap_image_handle_on_any_thread(&handle, properties.clone()));
             let source = ImageSource::Handle(ImportHandle::new(wrapped, &*handle), properties);
-            Arc::new(self.compositor.bind_to_lock(server, ServerImportedGpuImage::new(state, source)))
+            Arc::new(
+                self.compositor
+                    .bind_to_lock(server, ServerImportedGpuImage::new(state, source)),
+            )
         });
         CompositionImportedGpuImage::new(&self.compositor, server)
     }
 
-    fn import_shared_image(&self, image: Arc<dyn ICompositionImportableSharedGpuContextImage>) -> Rc<dyn ICompositionImportedGpuImage> {
+    fn import_shared_image(
+        &self,
+        image: Arc<dyn ICompositionImportableSharedGpuContextImage>,
+    ) -> Rc<dyn ICompositionImportedGpuImage> {
         // The image is shared with the caller, who keeps it (see
         // `ImageSource::Shared`).
         let source = ImageSource::Shared(image);
         let server = self.with_state(|server, state| {
-            Arc::new(self.compositor.bind_to_lock(server, ServerImportedGpuImage::new(state, source)))
+            Arc::new(
+                self.compositor
+                    .bind_to_lock(server, ServerImportedGpuImage::new(state, source)),
+            )
         });
         CompositionImportedGpuImage::new(&self.compositor, server)
     }
 
-    fn import_semaphore(&self, handle: Rc<dyn IPlatformHandle>) -> Rc<dyn ICompositionImportedGpuSemaphore> {
+    fn import_semaphore(
+        &self,
+        handle: Rc<dyn IPlatformHandle>,
+    ) -> Rc<dyn ICompositionImportedGpuSemaphore> {
         let server = self.with_state(|server, state| {
             let wrapped = state
                 .external_objects_with_handle_wrap
                 .as_ref()
                 .and_then(|wrap| wrap.wrap_semaphore_handle_on_any_thread(&handle));
             let handle = ImportHandle::new(wrapped, &*handle);
-            Arc::new(self.compositor.bind_to_lock(server, ServerImportedGpuSemaphore::new(state, handle)))
+            Arc::new(
+                self.compositor
+                    .bind_to_lock(server, ServerImportedGpuSemaphore::new(state, handle)),
+            )
         });
         CompositionImportedGpuSemaphore::new(&self.compositor, server)
     }
@@ -251,6 +301,11 @@ impl ICompositionGpuInterop for CompositionInterop {
 
 /// The handle an object is imported from, as the render thread gets it.
 enum ImportHandle {
+    /// Retains immutable storage through the queued native import.
+    Frame {
+        handle: Box<ImportHandle>,
+        _owner: super::frames::FrameLease,
+    },
     /// The handle the backend wrapped for the import. Made inside the
     /// compositor lock and never handed to the caller: an object of the
     /// server side.
@@ -263,15 +318,33 @@ enum ImportHandle {
 }
 
 impl ImportHandle {
-    fn new(wrapped: Option<Rc<dyn IExternalObjectsWrappedGpuHandle>>, handle: &dyn IPlatformHandle) -> ImportHandle {
-        match wrapped {
+    fn new(
+        wrapped: Option<Rc<dyn IExternalObjectsWrappedGpuHandle>>,
+        handle: &dyn IPlatformHandle,
+    ) -> ImportHandle {
+        let native = match wrapped {
             Some(wrapped) => ImportHandle::Wrapped(wrapped),
-            None => ImportHandle::Copied(PlatformHandle::new(handle.handle(), handle.handle_descriptor())),
+            None => ImportHandle::Copied(PlatformHandle::new(
+                handle.handle(),
+                handle.handle_descriptor(),
+            )),
+        };
+        if let Some(leased) = handle
+            .as_any()
+            .downcast_ref::<crate::platform::LeasedPlatformHandle>()
+        {
+            ImportHandle::Frame {
+                handle: Box::new(native),
+                _owner: leased.frame().clone(),
+            }
+        } else {
+            native
         }
     }
 
     fn platform_handle(&self) -> Rc<dyn IPlatformHandle> {
         match self {
+            ImportHandle::Frame { handle, .. } => handle.platform_handle(),
             ImportHandle::Wrapped(wrapped) => wrapped.clone().as_platform_handle(),
             ImportHandle::Copied(handle) => Rc::new(handle.clone()),
         }
@@ -279,8 +352,13 @@ impl ImportHandle {
 
     /// Releases a wrapped handle: once the import has run.
     fn dispose(self) {
-        if let ImportHandle::Wrapped(wrapped) = self {
-            wrapped.dispose();
+        match self {
+            ImportHandle::Frame { handle, _owner } => {
+                handle.dispose();
+                drop(_owner);
+            }
+            ImportHandle::Wrapped(wrapped) => wrapped.dispose(),
+            ImportHandle::Copied(_) => {}
         }
     }
 }
@@ -301,7 +379,9 @@ impl ImageSource {
         feature: &dyn IExternalObjectsRenderInterfaceContextFeature,
     ) -> Result<Rc<dyn IPlatformRenderInterfaceImportedImage>, ServerJobError> {
         match self {
-            ImageSource::Handle(handle, properties) => Ok(feature.import_image(handle.platform_handle(), properties.clone())),
+            ImageSource::Handle(handle, properties) => {
+                Ok(feature.import_image(handle.platform_handle(), properties.clone()))
+            }
             ImageSource::Shared(image) => Ok(feature.import_shared_image(image.clone())),
         }
     }
@@ -378,7 +458,11 @@ impl<T: IServerGpuImportedObject> CompositionGpuImportedObjectBase<T> {
             },
             false,
         );
-        Self { compositor: compositor.clone(), server, import_completed }
+        Self {
+            compositor: compositor.clone(),
+            server,
+            import_completed,
+        }
     }
 
     pub fn compositor(&self) -> &Rc<Compositor> {
@@ -397,7 +481,8 @@ impl<T: IServerGpuImportedObject> CompositionGpuImportedObjectBase<T> {
     /// Upstream reads the context from the UI thread as it is; here this
     /// thread enters the compositor lock for it.
     pub fn is_lost(&self) -> bool {
-        self.compositor.with_server(|server| self.server.get(server).base().context.is_lost())
+        self.compositor
+            .with_server(|server| self.server.get(server).base().context.is_lost())
     }
 
     fn dispose_async(&self) -> ServerJobTask<()> {
@@ -439,7 +524,9 @@ impl ServerImportedGpuImage {
     pub fn image(&self) -> Rc<dyn IPlatformRenderInterfaceImportedImage> {
         match self.image.borrow().clone() {
             Some(image) => image,
-            None => panic!("Cannot access a disposed object.\nObject name: 'CompositionImportedGpuImage'."),
+            None => panic!(
+                "Cannot access a disposed object.\nObject name: 'CompositionImportedGpuImage'."
+            ),
         }
     }
 
@@ -491,8 +578,13 @@ pub struct CompositionImportedGpuImage {
 }
 
 impl CompositionImportedGpuImage {
-    fn new(compositor: &Rc<Compositor>, server: Arc<LockBound<ServerImportedGpuImage>>) -> Rc<CompositionImportedGpuImage> {
-        Rc::new(CompositionImportedGpuImage { base: CompositionGpuImportedObjectBase::new(compositor, server) })
+    fn new(
+        compositor: &Rc<Compositor>,
+        server: Arc<LockBound<ServerImportedGpuImage>>,
+    ) -> Rc<CompositionImportedGpuImage> {
+        Rc::new(CompositionImportedGpuImage {
+            base: CompositionGpuImportedObjectBase::new(compositor, server),
+        })
     }
 
     pub fn base(&self) -> &CompositionGpuImportedObjectBase<ServerImportedGpuImage> {
@@ -546,7 +638,9 @@ impl ServerImportedGpuSemaphore {
     pub fn semaphore(&self) -> Rc<dyn IPlatformRenderInterfaceImportedSemaphore> {
         match self.semaphore.borrow().clone() {
             Some(semaphore) => semaphore,
-            None => panic!("Cannot access a disposed object.\nObject name: 'CompositionImportedGpuSemaphore'."),
+            None => panic!(
+                "Cannot access a disposed object.\nObject name: 'CompositionImportedGpuSemaphore'."
+            ),
         }
     }
 
@@ -563,7 +657,8 @@ impl IServerGpuImportedObject for ServerImportedGpuSemaphore {
     fn import(&self, _server: &ServerCompositor) -> Result<(), ServerJobError> {
         let handle = self.handle.borrow_mut().take();
         if let Some(handle) = handle {
-            *self.semaphore.borrow_mut() = Some(self.base.feature.import_semaphore(handle.platform_handle()));
+            *self.semaphore.borrow_mut() =
+                Some(self.base.feature.import_semaphore(handle.platform_handle()));
             // A wrapped handle is released once the import has run.
             handle.dispose();
         }
@@ -587,7 +682,9 @@ impl CompositionImportedGpuSemaphore {
         compositor: &Rc<Compositor>,
         server: Arc<LockBound<ServerImportedGpuSemaphore>>,
     ) -> Rc<CompositionImportedGpuSemaphore> {
-        Rc::new(CompositionImportedGpuSemaphore { base: CompositionGpuImportedObjectBase::new(compositor, server) })
+        Rc::new(CompositionImportedGpuSemaphore {
+            base: CompositionGpuImportedObjectBase::new(compositor, server),
+        })
     }
 
     pub fn base(&self) -> &CompositionGpuImportedObjectBase<ServerImportedGpuSemaphore> {
@@ -617,5 +714,61 @@ impl ICompositionGpuImportedObject for CompositionImportedGpuSemaphore {
 impl ICompositionImportedGpuSemaphore for CompositionImportedGpuSemaphore {
     fn as_imported_gpu_semaphore(&self) -> Option<&CompositionImportedGpuSemaphore> {
         Some(self)
+    }
+}
+
+#[cfg(test)]
+mod shared_frame_handle_tests {
+    use super::*;
+    use crate::{platform::LeasedPlatformHandle, rendering::composition::frames::*};
+    #[test]
+    fn queued_import_handle_keeps_its_native_frame_after_the_callers_drop() {
+        let budget = FrameBudget::new(FrameBudgetLimits::default());
+        let frame = budget
+            .lease(
+                FrameMetadata {
+                    identity: FrameIdentity {
+                        source: 1,
+                        generation: 1,
+                        sequence: 1,
+                    },
+                    width: 2,
+                    height: 2,
+                    visible: FrameRegion {
+                        x: 0,
+                        y: 0,
+                        width: 2,
+                        height: 2,
+                    },
+                    format: FrameFormat::Rgba8,
+                    color: FrameColor::Srgb,
+                    alpha: FrameAlpha::Opaque,
+                    rotation: FrameRotation::None,
+                    mirrored: false,
+                    top_left_origin: true,
+                    timestamp: std::time::Duration::ZERO,
+                    device: Some(DeviceIdentity::Context(1)),
+                    device_generation: 1,
+                    planes: vec![FramePlane {
+                        offset: 0,
+                        stride: 8,
+                        length: 16,
+                    }],
+                    retained_bytes: 16,
+                },
+                (),
+            )
+            .unwrap();
+        let handle = LeasedPlatformHandle::new(123, Some("NativeFrameTest"), frame);
+        let queued = ImportHandle::new(None, &handle);
+        drop(handle);
+        assert_eq!(budget.usage().frames, 1);
+        assert_eq!(queued.platform_handle().handle(), 123);
+        assert_eq!(
+            queued.platform_handle().handle_descriptor(),
+            Some("NativeFrameTest")
+        );
+        queued.dispose();
+        assert_eq!(budget.usage().frames, 0);
     }
 }

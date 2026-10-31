@@ -1,16 +1,20 @@
 [workspace]
 resolver = "2"
 members = [
-    "samples/PortableMedia",
-    "src/FerroUI.Media.Controls",
-    "src/FerroUI.Media.Video.Controls",
+    "src/FerroUI.Media",
     "src/FerroUI.Media.Video",
     "src/FerroUI.Media.Camera",
+    "src/FerroUI.Media.Qr",
+    "src/FerroUI.Media.Controls",
+    "src/FerroUI.Media.Video.Controls",
+    "src/FerroUI.Media.Apple",
     "src/FerroUI.Media.Video.Apple",
     "src/FerroUI.Media.Camera.Apple",
-    "src/FerroUI.Media.Apple",
-    "src/FerroUI.Media",
-    "src/FerroUI.Media.Qr",
+    "src/FerroUI.Media.Browser",
+    "src/FerroUI.Media.Video.Browser",
+    "src/FerroUI.Media.Camera.Browser",
+    "samples/PortableMedia",
+    "samples/PortableMedia.Browser",
     "src/FerroUI.Designer.Core",
     "src/FerroUI.Designer.Project",
     "src/FerroUI.Designer.Tools",
@@ -251,6 +255,9 @@ ferroui-media-video-apple = { version = "=0.4.0", path = "src/FerroUI.Media.Vide
 ferroui-media-camera-apple = { version = "=0.4.0", path = "src/FerroUI.Media.Camera.Apple" }
 ferroui-media-controls = { version = "=0.4.0", path = "src/FerroUI.Media.Controls" }
 ferroui-media-apple = { version = "=0.4.0", path = "src/FerroUI.Media.Apple" }
+ferroui-media-browser = { version = "=0.4.0", path = "src/FerroUI.Media.Browser" }
+ferroui-media-video-browser = { version = "=0.4.0", path = "src/FerroUI.Media.Video.Browser" }
+ferroui-media-camera-browser = { version = "=0.4.0", path = "src/FerroUI.Media.Camera.Browser" }
 ferroui-media = { version = "=0.4.0", path = "src/FerroUI.Media" }
 ferroui-media-qr = { version = "=0.4.0", path = "src/FerroUI.Media.Qr" }
 # The Dock port (docs/porting/dock): its crates and the dependencies only it has.

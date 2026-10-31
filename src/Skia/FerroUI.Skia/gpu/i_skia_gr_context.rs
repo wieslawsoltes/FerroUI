@@ -18,11 +18,15 @@ pub enum SkiaGpuBackend {
 /// context and its recorder, a Ganesh one with a direct context.
 pub trait ISkiaGrContext {
     /// Direct imported images are bound to one context generation.
-    fn frame_context_id(&self) -> Option<u64> { None }
+    fn frame_context_id(&self) -> Option<u64> {
+        None
+    }
 
     /// Retains producer storage until the commands about to be recorded finish.
-    fn retain_frame(&self, _frame: ferroui_base::rendering::composition::frames::FrameLease)
-        -> Result<(), ferroui_base::rendering::composition::frames::FrameError> {
+    fn retain_frame(
+        &self,
+        _frame: ferroui_base::rendering::composition::frames::FrameLease,
+    ) -> Result<(), ferroui_base::rendering::composition::frames::FrameError> {
         Err(ferroui_base::rendering::composition::frames::FrameError::MissingImporter)
     }
 
@@ -30,7 +34,11 @@ pub trait ISkiaGrContext {
     fn backend(&self) -> SkiaGpuBackend;
 
     /// Creates an offscreen GPU surface.
-    fn create_surface(&self, image_info: &ImageInfo, surface_props: &SurfaceProps) -> Option<Surface>;
+    fn create_surface(
+        &self,
+        image_info: &ImageInfo,
+        surface_props: &SurfaceProps,
+    ) -> Option<Surface>;
 
     /// The largest render target the context can create, when known.
     fn max_render_target_size(&self) -> Option<i32>;
@@ -75,7 +83,11 @@ pub trait ISkiaGrContext {
 /// The form of `image` that a canvas drawing with `gr_context` draws; see
 /// [`ISkiaGrContext::drawable_image`]. Without a GPU context the canvas is
 /// a raster one and draws the image as it is.
-pub fn drawable_image(gr_context: Option<&dyn ISkiaGrContext>, image: Image, mipmapped: bool) -> Image {
+pub fn drawable_image(
+    gr_context: Option<&dyn ISkiaGrContext>,
+    image: Image,
+    mipmapped: bool,
+) -> Image {
     match gr_context {
         Some(gr_context) => gr_context.drawable_image(&image, mipmapped),
         None => image,
@@ -85,4 +97,13 @@ pub fn drawable_image(gr_context: Option<&dyn ISkiaGrContext>, image: Image, mip
 /// Whether sampling an image with `sampling_options` reads its mipmaps.
 pub fn needs_mipmaps(sampling_options: &SamplingOptions) -> bool {
     !sampling_options.use_cubic && sampling_options.mipmap != MipmapMode::None
+}
+pub(crate) fn next_frame_context_id() -> u64 {
+    static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
+    NEXT.fetch_update(
+        std::sync::atomic::Ordering::Relaxed,
+        std::sync::atomic::Ordering::Relaxed,
+        |id| id.checked_add(1),
+    )
+    .expect("frame context identity exhausted")
 }
