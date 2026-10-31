@@ -223,6 +223,13 @@ The port binds through compiled paths and through the metadata types declare, ne
 | `DataAnnotationsValidationPlugin` | None | See the register above. |
 | `MethodToCommandConverter` (compiled `Expression` lambdas over a `Delegate`) | `MethodToCommandConverter` over a `metadata::MarkupDelegate` (`converters/method_to_command_converter.rs`) | The delegate carries its method metadata, from which the `Can<Name>` companion and its `DependsOn` properties are read. |
 
+### Animation (`src/FerroUI.Base/animation/`)
+
+| Upstream | Port | Kind | Why | Since |
+|---|---|---|---|---|
+| `DoubleTransition` interpolates any two values with `DoubleAnimator`: a change from or to `double.NaN` (the `Width` or `Height` that is not set) is `NaN` for the whole duration. | `DoubleTransition` takes a value that is not a number at once (when the delay has passed) instead of interpolating it (`double_transition.rs`). | Behaviour | An interpolation with `NaN` has no meaning, and for a size it is the automatic size for the whole duration: the pane of the split view of the WinUI theme, whose width goes from not set to the closed width when its template is applied, was laid out at its full open width over the content for the 120 ms of its closing transition after the window was shown. Test: `double_transition_does_not_interpolate_not_a_number`. | 2026-10-31 |
+| (none: upstream has `BrushTransition` only) | `SolidColorBrushTransition` (an addition): the rules of WinUI's `BrushTransition` (`WUCBrushManager::SetUpBrushTransitionIfAllowedHelper` of microsoft-ui-xaml): from no brush (which fades in from transparent) or a solid colour brush to a solid colour brush the colour is interpolated; any other change is applied at once, when the delay has passed. Upstream's `BrushTransition` is unchanged (it interpolates gradient brushes and switches a brush it cannot interpolate half-way through the duration). | Addition | The WinUI theme translates WinUI's `BackgroundTransition`s with it (`winui-theme/DEVIATIONS.md`, BTN-3): with `BrushTransition` the acrylic background of an overlaying NavigationView pane was missing for the first half of its 150 ms transition while the content of the pane was already drawn over the content. Tests: `brush_transition_tests.rs`. | 2026-10-31 |
+
 ### ControlCatalog sample (`samples/ControlCatalog/`)
 
 | Upstream | Port | Kind | Why | Since |

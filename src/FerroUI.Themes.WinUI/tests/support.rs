@@ -39,7 +39,8 @@ pub fn start_themed_application() -> UnitTestApplicationScope {
 }
 
 /// The global clock of the themed application: the transitions of the control themes need one.
-/// It never pulses, so a transition keeps its start value.
+/// It pulses only when a test pulses it ([`MockGlobalClock::pulse`]), so a transition otherwise
+/// keeps its start value.
 pub struct MockGlobalClock {
     subject: ferroui_base::reactive::LightweightSubject<ferroui_base::animation::TimeSpan>,
     play_state: std::cell::Cell<ferroui_base::animation::PlayState>,
@@ -52,6 +53,26 @@ impl MockGlobalClock {
             play_state: std::cell::Cell::new(ferroui_base::animation::PlayState::Run),
         }
     }
+
+    /// Pulses the clock with the time `now` since it started (what the render passes of the media
+    /// context do), for the tests that step the transitions.
+    pub fn pulse(&self, now: ferroui_base::animation::TimeSpan) {
+        use ferroui_base::reactive::IObserver;
+        self.subject.on_next(now);
+    }
+}
+
+/// Starts the themed application of [`start_themed_application`] with a global clock the test
+/// pulses.
+pub fn start_themed_application_with_clock() -> (UnitTestApplicationScope, Rc<MockGlobalClock>) {
+    register_types();
+    let clock = Rc::new(MockGlobalClock::new());
+    let services = TestServices::styled_window()
+        .with_global_clock(clock.clone())
+        .with_theme(|| WinUITheme::new().as_style());
+    let scope = UnitTestApplication::start(services);
+    FerroRuntimeXamlLoader::register();
+    (scope, clock)
 }
 
 impl ferroui_base::reactive::IObservable<ferroui_base::animation::TimeSpan> for MockGlobalClock {
