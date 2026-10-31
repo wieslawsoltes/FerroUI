@@ -37,11 +37,17 @@ mod singleton_tests {
     #[test]
     fn source_singleton_is_shared_by_components_and_isolated_between_engines() {
         let document = compiled_qml();
-        assert_eq!(ferroui_qml::ComponentSource::document(&document).singletons.len(), 1);
+        assert_eq!(
+            ferroui_qml::ComponentSource::document(&document)
+                .singletons
+                .len(),
+            1
+        );
         let registry = TypeRegistry::new();
         let mut first = Instance::new(&document, &registry, Default::default()).unwrap();
         let second = Instance::new(&document, &registry, Default::default()).unwrap();
         let root = first.root();
+        assert_eq!(first.get(root, "contrast").unwrap(), Value::Number(3.));
         let Value::Object(state) = first.get(root, "state").unwrap() else {
             panic!("missing state");
         };
@@ -56,4 +62,61 @@ mod singleton_tests {
             Value::Number(6.)
         );
     }
+}
+
+#[cfg(test)]
+mod scripts {
+    use ferroui_qml::{ir, ComponentSource, Instance, TypeRegistry, Value};
+    include!(concat!(env!("OUT_DIR"), "/scripts.rs"));
+
+    fn run(source: &impl ComponentSource) -> Vec<Value> {
+        let mut vm = Instance::new(source, &TypeRegistry::new(), Default::default()).unwrap();
+        let root = vm.root();
+        let mut observed = vec![vm.get(root, "reading").unwrap()];
+        let n = Value::Number;
+        vm.emit(root, "calculate", vec![n(9.)]).unwrap();
+        observed.push(vm.get(root, "amount").unwrap());
+        observed.push(vm.get(root, "reading").unwrap());
+        observed.push(vm.call(root, "fold", vec![n(3.)]).unwrap());
+        observed.push(vm.call(root, "fold", vec![n(8.)]).unwrap());
+        observed.push(vm.call(root, "lazy", vec![]).unwrap());
+        assert!(vm.call(root, "fail", vec![]).is_err());
+        observed.push(vm.get(root, "amount").unwrap());
+        vm.set(root, "active", Value::Bool(false)).unwrap();
+        observed.push(vm.get(root, "reading").unwrap());
+        observed
+    }
+
+    #[test]
+    fn native_and_source_scripts_agree_on_control_flow_and_transaction_rollback() {
+        let compiled = compiled_qml();
+        assert!(!compiled.scripts().is_empty());
+        assert!(!compiled.evaluators().is_empty());
+        let source = ir::parse(include_str!("scripts/ControlFlow.qml")).unwrap();
+        let actual = run(&compiled);
+        assert_eq!(actual, run(&source));
+        let n = Value::Number;
+        assert_eq!(
+            actual,
+            vec![
+                n(4.),
+                n(8.),
+                n(8.),
+                n(9.),
+                n(-1.),
+                Value::Bool(true),
+                n(8.),
+                n(7.)
+            ]
+        );
+    }
+}
+
+#[cfg(test)]
+#[path = "reference/fixture.rs"]
+mod qt_reference;
+
+#[test]
+fn both_backends_match_qt_6_12_behaviors() {
+    qt_reference::run(|mode, case, actual, expected| assert_eq!(actual, expected, "{mode}/{case}"));
 }

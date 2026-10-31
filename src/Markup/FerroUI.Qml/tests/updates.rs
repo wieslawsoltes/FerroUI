@@ -70,3 +70,25 @@ fn loops_preserve_initializer_scope_and_propagate_nested_control_flow() {
         assert!(parse(bad).is_err());
     }
 }
+
+#[test]
+fn synchronous_notification_feedback_is_bounded_and_rolled_back() {
+    let doc = parse(
+        r#"
+        import QtQml
+        QtObject {
+            property int level: 0
+            onLevelChanged: { level += 1 }
+            function beginFeedback() { level = 1 }
+        }
+    "#,
+    )
+    .unwrap();
+    let mut model = Instance::new(&doc, &TypeRegistry::new(), Default::default()).unwrap();
+    let root = model.root();
+    model.watch_signal(root, "levelChanged").unwrap();
+    assert!(model.call(root, "beginFeedback", vec![]).is_err());
+    assert_eq!(model.get(root, "level").unwrap(), Value::Number(0.));
+    assert!(model.drain_changes().is_empty());
+    assert!(model.drain_signals().is_empty());
+}
