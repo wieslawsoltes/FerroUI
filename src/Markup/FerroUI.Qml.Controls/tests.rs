@@ -239,3 +239,42 @@ fn parent_anchors_follow_native_arrangement_and_unfill_restores_explicit_dimensi
         .is_err());
     assert_eq!(view.get(backdrop_id, "anchors.fill").unwrap(), Value::Null);
 }
+
+#[test]
+fn invalid_native_edit_restores_the_originating_widget_and_reports_one_error() {
+    let _scope = UnitTestApplication::start(TestServices::new());
+    let document = parse(
+        r#"
+        import QtQuick
+        import QtQuick.Controls
+        Column {
+            TextField { id: editor; text: "red" }
+            Rectangle { id: swatch; color: editor.text }
+        }
+    "#,
+    )
+    .unwrap();
+    let errors = Rc::new(RefCell::new(vec![]));
+    let received = errors.clone();
+    let view = QmlView::with_error_handler(
+        &document,
+        &ControlRegistry::standard().unwrap(),
+        BTreeMap::new(),
+        move |error| received.borrow_mut().push(error),
+    )
+    .unwrap();
+    let editor_id = view.id("editor").unwrap();
+    let editor = view.control(editor_id).unwrap().cast::<TextBox>().unwrap();
+    editor.set_text(Some("not-a-color"));
+    assert_eq!(editor.text().as_deref(), Some("red"));
+    assert_eq!(
+        view.get(editor_id, "text").unwrap(),
+        Value::String("red".into())
+    );
+    assert_eq!(errors.borrow().len(), 1);
+    editor.set_text(Some("blue"));
+    assert_eq!(
+        view.get(view.id("swatch").unwrap(), "color").unwrap(),
+        Value::String("blue".into())
+    );
+}
