@@ -17,6 +17,7 @@ pub(crate) struct NativeMethod {
 
 #[derive(Clone, Debug, Default)]
 pub struct TypeDefinition {
+    pub(crate) readonly: BTreeSet<String>,
     pub(crate) enums: Rc<Namespace>,
     base: Option<(String, String)>,
     pub(crate) lineage: Vec<(String, String)>,
@@ -50,6 +51,10 @@ impl TypeDefinition {
         self
     }
 
+    pub fn readonly_property(mut self, name: &str, ty: &str, default: Value) -> Self {
+        self.readonly.insert(name.to_owned());
+        self.property(name, ty, default)
+    }
     pub fn signal(mut self, name: &str, parameters: Vec<Parameter>) -> Self {
         self.signals.insert(name.into(), parameters);
         self
@@ -150,6 +155,7 @@ impl TypeRegistry {
         registry
             .register("QtQml", "Connections", connections)
             .expect("built-in Connections contract");
+        crate::list_model::register(&mut registry).expect("built-in list model contracts");
         registry.set_module_version("QtQml", 2, 15);
         registry.set_module_version("QtQml", 6, 12);
         registry
@@ -213,6 +219,7 @@ impl TypeRegistry {
             let mut merged = base.clone();
             merged.lineage.push((base_module, base_name));
             Rc::make_mut(&mut merged.enums).inherit(&definition.enums);
+            merged.readonly.append(&mut definition.readonly);
             merged.properties.append(&mut definition.properties);
             merged.signals.append(&mut definition.signals);
             merged.native.append(&mut definition.native);

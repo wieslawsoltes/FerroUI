@@ -15,6 +15,8 @@ pub enum Value {
     Number(f64),
     String(String),
     Object(ObjectId),
+    ModelRow(crate::RowId),
+    Record(crate::Record),
     Namespace(std::rc::Rc<crate::Namespace>),
     List(Vec<Value>),
 }
@@ -26,7 +28,11 @@ impl Value {
             Self::Bool(value) => *value,
             Self::Number(value) => *value != 0.0 && !value.is_nan(),
             Self::String(value) => !value.is_empty(),
-            Self::Object(_) | Self::Namespace(_) | Self::List(_) => true,
+            Self::ModelRow(_)
+            | Self::Record(_)
+            | Self::Object(_)
+            | Self::Namespace(_)
+            | Self::List(_) => true,
         }
     }
 
@@ -38,9 +44,11 @@ impl Value {
             Self::Undefined => f64::NAN,
             Self::String(s) if s.trim().is_empty() => 0.0,
             Self::String(s) => s.trim().parse().unwrap_or(f64::NAN),
-            Self::Object(_) | Self::Namespace(_) | Self::List(_) => {
-                return Err(Error::new("expected a scalar number"))
-            }
+            Self::ModelRow(_)
+            | Self::Record(_)
+            | Self::Object(_)
+            | Self::Namespace(_)
+            | Self::List(_) => return Err(Error::new("expected a scalar number")),
         })
     }
 
@@ -58,7 +66,9 @@ impl Value {
             Self::Bool(b) => b.to_string(),
             Self::Null => "null".into(),
             Self::Undefined => "undefined".into(),
-            Self::Object(_) | Self::Namespace(_) => "[object Object]".into(),
+            Self::ModelRow(_) | Self::Record(_) | Self::Object(_) | Self::Namespace(_) => {
+                "[object Object]".into()
+            }
             Self::List(values) => values
                 .iter()
                 .map(|v| match v {
@@ -95,3 +105,15 @@ impl fmt::Display for Error {
     }
 }
 impl std::error::Error for Error {}
+
+impl From<crate::ir::Literal<'_>> for Value {
+    fn from(literal: crate::ir::Literal<'_>) -> Self {
+        match literal {
+            crate::ir::Literal::Null => Self::Null,
+            crate::ir::Literal::Undefined => Self::Undefined,
+            crate::ir::Literal::Bool(b) => Self::Bool(b),
+            crate::ir::Literal::Number(n) => Self::Number(n),
+            crate::ir::Literal::String(s) => Self::String(s.into()),
+        }
+    }
+}
