@@ -512,6 +512,7 @@ The layout follows the upstream project so that files can be compared side by si
 
 ## Documentation
 
+- Write components in QML, compile them into Rust and mount native controls. [QML integration and compatibility](docs/qml.md)
 - [Porting guide](docs/porting/PORTING-GUIDE.md): the class model, naming and mapping rules, and the conventions every ported file follows.
 - [Critical path](docs/porting/CRITICAL-PATH.md): the state of each subsystem and what is open.
 - [Tracking](docs/porting/TRACKING.md) and [what is left](docs/porting/REMAINING.md): generated per-file, per-type and per-member status.
