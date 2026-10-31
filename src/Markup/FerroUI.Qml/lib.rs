@@ -86,13 +86,19 @@ struct Property {
 }
 
 #[derive(Clone)]
+enum InstalledBinding {
+    Expression(Rc<Binding>),
+    PropertyRead(SlotId),
+}
+
+#[derive(Clone)]
 struct Slot {
     scope: Option<u32>,
     overlay: Option<Box<binding_object::Overlay>>,
     active_target: Option<SlotId>,
     assigned: bool,
     value: Value,
-    binding: Option<Rc<Binding>>,
+    binding: Option<InstalledBinding>,
     dirty: bool,
     reads: BTreeSet<SlotId>,
     dependents: BTreeSet<SlotId>,

@@ -12,6 +12,7 @@ struct Builder<'a> {
     assigned: BTreeSet<SlotId>,
     aliases: Vec<(SlotId, Expr, Option<u32>)>,
     implicit: Vec<(SlotId, Vec<Value>)>,
+    read_candidates: Vec<SlotId>,
 }
 
 impl Instance {
@@ -81,9 +82,72 @@ impl Instance {
             builder.instance.slots[key].assigned = true;
         }
         let mut instance = builder.instance;
+        // A module initializer can have side effects or fail. Keep the normal
+        // first evaluation when static imports still need the guest engine.
+        let preload = source.document().scripts.values().any(|r| r.preload);
+        if !preload {
+            instance.specialize_reads(&builder.read_candidates);
+        }
         instance.transaction(|tx| tx.initialize())?;
+        if preload {
+            instance.specialize_reads(&builder.read_candidates);
+        }
         instance.changes.clear();
         Ok(instance)
+    }
+
+    fn specialize_reads(&mut self, candidates: &[SlotId]) {
+        for &key in candidates {
+            let Some(InstalledBinding::Expression(binding)) = &self.slots[key].binding else {
+                continue;
+            };
+            let Binding::Expr(Expr::JavaScript(script)) = binding.as_ref() else {
+                continue;
+            };
+            if let Some(source) = self.scalar_read(key, script) {
+                self.slots[key].binding = Some(InstalledBinding::PropertyRead(source));
+            }
+        }
+    }
+
+    fn scalar_read(&self, key: SlotId, script: &ir::JavaScript) -> Option<SlotId> {
+        let read = script.property_read.as_ref()?;
+        let owner = self.properties[key].owner;
+        let name = read.property.as_str();
+        let id = |name: &str| {
+            if let Some(local) = script.ids.get(name) {
+                self.ids.get(local).copied()
+            } else if script.root.is_none() {
+                self.id(name)
+            } else {
+                None
+            }
+        };
+        let receiver = match read.receiver.as_deref() {
+            Some("this") => owner,
+            Some("parent") => self.parent(owner)?,
+            Some(name) if !script.imports.contains_key(name) => id(name)?,
+            None if id(name).is_none()
+                && self.id(name).is_none()
+                && !script.imports.contains_key(name)
+                && !matches!(
+                    name,
+                    "this" | "parent" | "undefined" | "globalThis" | "eval" | "console"
+                ) =>
+            {
+                owner
+            }
+            _ => return None,
+        };
+        if self.script_method(receiver, name) {
+            return None;
+        }
+        let source = self.key_in(receiver, name, self.slots[key].scope).ok()?;
+        matches!(
+            self.properties[source].ty.as_str(),
+            "bool" | "int" | "real" | "double" | "float" | "string" | "color" | "url"
+        )
+        .then_some(source)
     }
 
     pub(crate) fn write_target(&self, mut key: SlotId) -> Result<SlotId, Error> {
@@ -233,6 +297,7 @@ impl<'a> Builder<'a> {
             assigned: BTreeSet::new(),
             aliases: Vec::new(),
             implicit: Vec::new(),
+            read_candidates: Vec::new(),
         };
         builder.object(&document.root, None)?;
         // Module objects share this engine's slots and dependency graph. They
@@ -620,7 +685,12 @@ impl Builder<'_> {
                 Value::from(expr.as_literal().expect("matched a literal"))
             }
             expr => {
-                self.instance.slots[key].binding = Some(Rc::new(expr.clone()));
+                if matches!(expr,Binding::Expr(Expr::JavaScript(script)) if script.property_read.is_some())
+                {
+                    self.read_candidates.push(key);
+                }
+                self.instance.slots[key].binding =
+                    Some(InstalledBinding::Expression(Rc::new(expr.clone())));
                 self.instance.slots[key].dirty = true;
                 return Ok(());
             }

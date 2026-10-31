@@ -126,7 +126,9 @@ tag!(ScriptKind {
     Script,
     Library
 });
+structure!(PropertyRead { receiver, property });
 structure!(JavaScript {
+    property_read,
     executable,
     import_hook,
     references,

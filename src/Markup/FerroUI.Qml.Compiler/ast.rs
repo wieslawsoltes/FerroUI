@@ -30,8 +30,19 @@ pub enum ScriptForm {
     HandlerBody,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct PropertyRead {
+    /// None for an unqualified name; otherwise this, parent, or a lexical object ID.
+    pub receiver: Option<String>,
+    pub property: String,
+}
+
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct JavaScript {
+    /// An exact read identified by the JS parser. The runtime must still
+    /// prove the receiver and storage type before replacing this expression.
+    #[serde(default)]
+    pub property_read: Option<PropertyRead>,
     /// Generated invocation or import lowering, separate from the source the user wrote.
     pub executable: Option<String>,
     pub import_hook: Option<String>,

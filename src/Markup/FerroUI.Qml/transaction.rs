@@ -268,7 +268,11 @@ impl Transaction<'_> {
         if let Some(Alias::Slot(target)) = self.model.properties[key].alias {
             return Some(target);
         }
-        let Binding::Expr(expr) = self.model.slots[key].binding.as_deref()? else {
+        let binding = match self.model.slots[key].binding.as_ref()? {
+            InstalledBinding::PropertyRead(source) => return Some(*source),
+            InstalledBinding::Expression(binding) => binding,
+        };
+        let Binding::Expr(expr) = binding.as_ref() else {
             return None;
         };
         let (name, scope) = match expr {
@@ -342,14 +346,17 @@ impl Transaction<'_> {
                         .binding
                         .clone()
                         .ok_or_else(|| Error::new("missing dirty binding"))?;
-                    match binding.as_ref() {
-                        Binding::Expr(expr) => {
-                            self.expr(owner, expr, &mut Locals::new(), &mut reads)?
-                        }
-                        Binding::Script(body) => self
-                            .statements(owner, body, &mut Locals::new(), &mut reads)?
-                            .value()?,
-                        _ => return Err(Error::new("unresolved object-valued binding")),
+                    match binding {
+                        InstalledBinding::PropertyRead(source) => self.read(source, &mut reads)?,
+                        InstalledBinding::Expression(binding) => match binding.as_ref() {
+                            Binding::Expr(expr) => {
+                                self.expr(owner, expr, &mut Locals::new(), &mut reads)?
+                            }
+                            Binding::Script(body) => self
+                                .statements(owner, body, &mut Locals::new(), &mut reads)?
+                                .value()?,
+                            _ => return Err(Error::new("unresolved object-valued binding")),
+                        },
                     }
                 }
             }

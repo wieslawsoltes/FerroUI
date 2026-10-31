@@ -213,3 +213,6 @@ mod models {
 
 #[cfg(all(test, feature = "webscene"))]
 mod webscene;
+
+#[cfg(all(test, feature = "webscene"))]
+mod direct_reads;

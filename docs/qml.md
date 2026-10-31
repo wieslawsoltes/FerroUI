@@ -122,7 +122,7 @@ fn create_view() -> Result<QmlView, Error> {
 }
 ```
 
-The compiler parses JavaScript with SWC, resolves relative files, watches the transitive dependency graph for Cargo and embeds executable scripts in the generated Rust. V8 compiles the JavaScript functions in the worker and caches their factories. The default build mode continues to generate native Rust for the built-in language profile. To load a file at runtime, use `Compiler::new().with_javascript().load(path)?.document` and pass the linked document to `Instance::with_engine` or `QmlView::with_script_engine`.
+The compiler parses JavaScript with SWC, resolves relative files, watches the transitive dependency graph for Cargo and embeds executable scripts in the generated Rust. V8 compiles the JavaScript functions in the worker and caches their factories. For a binding such as `parent.width`, the runtime checks the actual receiver, declaration scope and property type. A proven read of a scalar QML slot stays on the UI thread and participates in normal dependency tracking. Method references, JavaScript-object members and general expressions retain guest execution. Static module initialization runs before this optimization takes effect. The default build mode continues to generate native Rust for the built-in language profile. To load a file at runtime, use `Compiler::new().with_javascript().load(path)?.document` and pass the linked document to `Instance::with_engine` or `QmlView::with_script_engine`.
 
 ### Scopes, modules and host objects
 

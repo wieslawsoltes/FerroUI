@@ -139,6 +139,7 @@ impl ScriptEngine for Probe {
 
 fn script(source: &str, form: ScriptForm) -> Box<JavaScript> {
     Box::new(JavaScript {
+        property_read: None,
         executable: None,
         import_hook: None,
         source: source.into(),

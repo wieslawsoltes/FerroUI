@@ -7,7 +7,7 @@ use crate::transaction::Transaction;
 #[derive(Clone)]
 pub(crate) struct Overlay {
     source_value: Value,
-    source_binding: Option<Rc<Binding>>,
+    source_binding: Option<InstalledBinding>,
     source_assigned: bool,
     stack: Vec<SlotId>,
 }

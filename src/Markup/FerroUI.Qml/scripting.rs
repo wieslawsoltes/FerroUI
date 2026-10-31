@@ -406,17 +406,7 @@ impl ScriptContext<'_, '_> {
     }
 
     pub fn is_method(&self, object: ObjectId, name: &str) -> bool {
-        if private(name) {
-            return false;
-        }
-        self.tx.model.node(object).is_some_and(|node| {
-            node.methods.contains_key(name)
-                || node.native.contains_key(name)
-                || node.signals.contains_key(name)
-                || self.tx.model.models.contains_key(&object) && list_model::is_method(name)
-                || self.tx.model.timers.is_timer(object)
-                    && matches!(name, "start" | "stop" | "restart")
-        })
+        self.tx.model.script_method(object, name)
     }
 
     pub fn method_owner(&self, name: &str) -> Option<ObjectId> {
@@ -564,6 +554,21 @@ impl Drop for Instance {
         if let Some(engine) = &self.javascript.engine {
             engine.release_instance(self.script_instance());
         }
+    }
+}
+
+impl Instance {
+    pub(crate) fn script_method(&self, object: ObjectId, name: &str) -> bool {
+        if private(name) {
+            return false;
+        }
+        self.node(object).is_some_and(|node| {
+            node.methods.contains_key(name)
+                || node.native.contains_key(name)
+                || node.signals.contains_key(name)
+                || self.models.contains_key(&object) && list_model::is_method(name)
+                || self.timers.is_timer(object) && matches!(name, "start" | "stop" | "restart")
+        })
     }
 }
 

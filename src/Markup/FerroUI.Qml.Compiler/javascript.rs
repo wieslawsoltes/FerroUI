@@ -50,6 +50,7 @@ fn check_errors(source: &str, parser: &mut Parser<Lexer<'_>>) -> Result<(), Diag
 }
 fn script(source: &str, range: SourceSpan, form: ScriptForm) -> JavaScript {
     JavaScript {
+        property_read: None,
         executable: None,
         import_hook: None,
         references: Vec::new(),
@@ -67,6 +68,41 @@ fn parsed_expr(source: &str, start: usize) -> Result<(SourceSpan, Box<js::Expr>)
     let expr = p.parse_expr().map_err(|e| error(source, e))?;
     check_errors(source, &mut p)?;
     Ok((span(expr.span()), expr))
+}
+fn property_read(expr: &js::Expr) -> Option<crate::PropertyRead> {
+    fn unparen(mut expr: &js::Expr) -> &js::Expr {
+        while let js::Expr::Paren(group) = expr {
+            expr = &group.expr;
+        }
+        expr
+    }
+    let (receiver, property) = match unparen(expr) {
+        js::Expr::Ident(name) => (None, name.sym.as_str()),
+        js::Expr::Member(member) => {
+            let js::MemberProp::Ident(property) = &member.prop else {
+                return None;
+            };
+            let receiver = match unparen(&member.obj) {
+                js::Expr::This(_) => "this",
+                js::Expr::Ident(name) => name.sym.as_str(),
+                _ => return None,
+            };
+            (Some(receiver), property.sym.as_str())
+        }
+        _ => return None,
+    };
+    let lexical = |name: &str| {
+        name.chars()
+            .next()
+            .is_some_and(|c| c == '_' || c.is_lowercase())
+    };
+    if !lexical(property) || receiver.is_some_and(|r| !lexical(r)) {
+        return None;
+    }
+    Some(crate::PropertyRead {
+        receiver: receiver.map(str::to_owned),
+        property: property.to_owned(),
+    })
 }
 pub(super) fn expression(source: &str, start: usize) -> Result<(SourceSpan, Expr), Diagnostic> {
     let (range, expr) = parsed_expr(source, start)?;
@@ -95,6 +131,7 @@ pub(super) fn expression(source: &str, start: usize) -> Result<(SourceSpan, Expr
         _ => Expr::JavaScript(Box::new(script(source, range, ScriptForm::Expression))),
     };
     if let Expr::JavaScript(js) = &mut value {
+        js.property_read = property_read(&expr);
         let mut inspect = Inspect::default();
         expr.visit_with(&mut inspect);
         js.references = inspect.names.into_iter().collect();
