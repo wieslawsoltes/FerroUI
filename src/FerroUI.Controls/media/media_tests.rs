@@ -130,6 +130,76 @@ fn the_effects_of_reveal_load() {
     }
 }
 
+fn assert_border_light_positions(services: &CompositorTestServices, position: ferroui_base::Point) {
+    use ferroui_base::rendering::composition::server::ServerSpotLight;
+    use ferroui_base::Vector3D;
+
+    // In particular, process the batch that releases temporary UI composition
+    // objects: a light that only works during creation must not pass this test.
+    services.run_jobs();
+    services.run_jobs();
+    let mut count = 0;
+    for light in services.top_level().lights().to_vec() {
+        let Some(border) = light.downcast_ref::<RevealBorderLight>() else { continue };
+        let spot = border.spot_light().expect("border light resources");
+        let expected = Vector3D::new(position.x, position.y, if border.is_wide_light() { 256.0 } else { 128.0 });
+        spot.compositor().with_server(|server| {
+            let object = server.get_object(spot.server()).expect("server light");
+            let light = object.as_any().downcast_ref::<ServerSpotLight>().expect("spot light");
+            assert_eq!(light.props().offset(), expected, "normal/wide border lights must follow the pointer, in both themes");
+        });
+        count += 1;
+    }
+    assert_eq!(count, 4);
+}
+
+#[test]
+fn reveal_border_lights_follow_pointer_after_creation_returns() {
+    use crate::mouse_test_helper::MouseTestHelper;
+    use ferroui_base::Point;
+
+    let services = CompositorTestServices::new(Size::new(400.0, 300.0));
+    let border = Border::new();
+    border.set_border_thickness(Thickness::uniform(1.0));
+    border.set_border_brush(Some(RevealBorderBrush::new().into()));
+    services.set_content(&border.clone().upcast::<Control>());
+    services.run_jobs();
+    let mouse = MouseTestHelper::new();
+    for position in [Point::new(70.0, 80.0), Point::new(210.0, 170.0)] {
+        mouse.move_(&border, position);
+        assert_border_light_positions(&services, position);
+    }
+}
+
+#[test]
+fn reveal_border_lights_follow_pointer_after_policy_recreation() {
+    use crate::mouse_test_helper::MouseTestHelper;
+    use ferroui_base::media::MaterialPolicy;
+    use ferroui_base::Point;
+
+    let services = CompositorTestServices::new(Size::new(400.0, 300.0));
+    let border = Border::new();
+    border.set_border_thickness(Thickness::uniform(1.0));
+    border.set_border_brush(Some(RevealBorderBrush::new().into()));
+    services.set_content(&border.clone().upcast::<Control>());
+    services.run_jobs();
+    let mouse = MouseTestHelper::new();
+    mouse.move_(&border, Point::new(30.0, 40.0));
+    assert_border_light_positions(&services, Point::new(30.0, 40.0));
+
+    MaterialPolicy::set_simulate_disabled_by_policy(true);
+    services.run_jobs();
+    for light in services.top_level().lights().to_vec() {
+        if let Some(border) = light.downcast_ref::<RevealBorderLight>() {
+            assert!(border.spot_light().is_none());
+        }
+    }
+    MaterialPolicy::set_simulate_disabled_by_policy(false);
+    services.run_jobs();
+    mouse.move_(&border, Point::new(180.0, 120.0));
+    assert_border_light_positions(&services, Point::new(180.0, 120.0));
+}
+
 fn template_with_fallback() -> Option<Rc<dyn crate::templates::IControlTemplate>> {
     Some(FuncControlTemplate::new(|_, scope| {
         let panel = Panel::new();
