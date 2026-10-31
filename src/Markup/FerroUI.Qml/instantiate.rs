@@ -22,7 +22,7 @@ impl Instance {
         registry: &TypeRegistry,
         initial: BTreeMap<String, Value>,
     ) -> Result<Self, Error> {
-        Self::construct(None, source, registry, initial)
+        Self::construct(None, source, registry, initial, None)
     }
 
     /// Load an in-memory document with the type name normally supplied by its
@@ -33,7 +33,17 @@ impl Instance {
         registry: &TypeRegistry,
         initial: BTreeMap<String, Value>,
     ) -> Result<Self, Error> {
-        Self::construct(Some(name), source, registry, initial)
+        Self::construct(Some(name), source, registry, initial, None)
+    }
+
+    /// Attach a JavaScript runtime before initial bindings and completion handlers execute.
+    pub fn with_engine(
+        source: &impl ComponentSource,
+        registry: &TypeRegistry,
+        initial: BTreeMap<String, Value>,
+        engine: Rc<dyn ScriptEngine>,
+    ) -> Result<Self, Error> {
+        Self::construct(None, source, registry, initial, Some(engine))
     }
 
     fn construct(
@@ -41,8 +51,13 @@ impl Instance {
         source: &impl ComponentSource,
         registry: &TypeRegistry,
         initial: BTreeMap<String, Value>,
+        engine: Option<Rc<dyn ScriptEngine>>,
     ) -> Result<Self, Error> {
         let mut builder = Builder::prepare(name, source, registry)?;
+        if engine.is_some() {
+            builder.instance.javascript.resources = source.document().scripts.clone();
+        }
+        builder.instance.javascript.engine = engine;
         let root = builder.instance.root();
         for (name, value) in initial {
             let key = builder.instance.public_key(root, &name)?;
@@ -92,6 +107,9 @@ impl Instance {
 
     pub(crate) fn validate_handles(&self, value: &Value) -> Result<(), Error> {
         match value {
+            Value::External(value) if value.instance() != self.script_instance() => {
+                Err(Error::new("foreign JavaScript value"))
+            }
             Value::ModelRow(row) => self.model_role(*row, "").map(|_| ()),
             Value::Object(id) if self.node(*id).is_none() => {
                 Err(Error::new("foreign object handle"))
@@ -191,6 +209,7 @@ impl<'a> Builder<'a> {
         let mut builder = Self {
             scopes: enums::Scopes::named(name, &document.root)?,
             instance: Instance {
+                javascript: Default::default(),
                 records: Default::default(),
                 models: BTreeMap::new(),
                 bindings: BTreeSet::new(),

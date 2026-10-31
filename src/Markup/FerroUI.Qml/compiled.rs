@@ -82,6 +82,8 @@ pub struct Frame<'a, 'model> {
 }
 
 pub enum Receiver {
+    External(crate::ExternalValue),
+    Callable(crate::ExternalValue),
     Array(crate::Record),
     ArrayConstructor,
     Object(ObjectId),
@@ -138,6 +140,12 @@ impl Frame<'_, '_> {
         self.member(base, &self.tx.model.value_string(&key)?)
     }
     pub fn local_receiver(&self, name: &str, root: Option<&str>) -> Result<Receiver, Error> {
+        if let Some(local) = self.locals.get(name) {
+            return match local {
+                Value::External(value) => Ok(Receiver::Callable(value.clone())),
+                _ => Err(Error::new(format!("'{name}' is not callable"))),
+            };
+        }
         Ok(Receiver::Object(self.tx.call_receiver(
             self.owner,
             self.root(root)?,
@@ -162,6 +170,22 @@ impl Frame<'_, '_> {
         args: Vec<Value>,
     ) -> Result<Value, Error> {
         match receiver {
+            Receiver::Callable(value) => {
+                self.tx
+                    .with_external(self.owner, &value, self.reads, |engine, ctx| {
+                        engine.call_external(ctx, &value, Value::Undefined, args)
+                    })
+            }
+            Receiver::External(base) => {
+                self.tx
+                    .with_external(self.owner, &base, self.reads, |engine, ctx| {
+                        let Value::External(callable) = engine.get_external(ctx, &base, name)?
+                        else {
+                            return Err(Error::new(format!("'{name}' is not callable")));
+                        };
+                        engine.call_external(ctx, &callable, Value::External(base.clone()), args)
+                    })
+            }
             Receiver::Array(array) => self.tx.array_method(&array, name, args),
             Receiver::ArrayConstructor if name == "isArray" => Ok(Value::Bool(
                 matches!(args.first(),Some(Value::Record(r)) if r.is_array()),
@@ -174,6 +198,9 @@ impl Frame<'_, '_> {
     }
 }
 pub fn receiver(value: Value) -> Result<Receiver, Error> {
+    if let Value::External(value) = value {
+        return Ok(Receiver::External(value));
+    }
     if let Value::Record(r) = &value {
         if r.is_array() {
             return Ok(Receiver::Array(r.clone()));
@@ -192,6 +219,7 @@ pub struct Target {
     location: Location,
 }
 enum Location {
+    External(crate::ExternalValue, String),
     ModelRole(crate::RowId, String),
     Local(String),
     Property(SlotId),
@@ -234,6 +262,12 @@ impl Frame<'_, '_> {
         self.target_member(base, name)
     }
     pub fn target_member(&self, base: Value, name: &str) -> Result<Target, Error> {
+        if let Value::External(value) = base {
+            self.tx
+                .model
+                .validate_handles(&Value::External(value.clone()))?;
+            return Ok(self.target(Location::External(value, name.into())));
+        }
         if let Value::ModelRow(row) = base {
             return Ok(self.target(Location::ModelRole(row, name.to_owned())));
         }
@@ -261,6 +295,12 @@ impl Frame<'_, '_> {
             rhs(self)?
         } else {
             let old = match &place.location {
+                Location::External(value, name) => {
+                    self.tx
+                        .with_external(self.owner, value, self.reads, |engine, ctx| {
+                            engine.get_external(ctx, value, name)
+                        })?
+                }
                 Location::ModelRole(row, name) => self.tx.read_role(*row, name, self.reads)?,
                 Location::Local(name) => self
                     .locals
@@ -305,6 +345,12 @@ impl Frame<'_, '_> {
         };
         let completion = postfix.unwrap_or_else(|| value.clone());
         match place.location {
+            Location::External(external, key) => {
+                self.tx
+                    .with_external(self.owner, &external, self.reads, |engine, ctx| {
+                        engine.set_external(ctx, &external, &key, value)
+                    })?
+            }
             Location::ModelRole(row, name) => self.tx.write_role(row, &name, value)?,
             Location::Local(name) => {
                 self.locals.insert(name, value);

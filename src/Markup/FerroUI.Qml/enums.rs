@@ -10,6 +10,9 @@ pub struct Namespace {
 }
 
 impl Namespace {
+    pub(crate) fn names(&self) -> impl Iterator<Item = &str> {
+        self.members.keys().map(String::as_str)
+    }
     pub(crate) fn inherit(&mut self, derived: &Self) {
         self.members.extend(derived.members.clone());
     }

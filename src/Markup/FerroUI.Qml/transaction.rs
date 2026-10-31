@@ -5,6 +5,11 @@ use std::collections::VecDeque;
 /// The undo log only touches slots affected by this write, including dependency edges.
 /// A failed handler or binding therefore cannot leave a half-applied native update.
 pub(crate) struct Transaction<'a> {
+    pub(crate) current_binding: Option<SlotId>,
+    pub(crate) guest_return_type: Option<String>,
+    pub(crate) guest_parameters: Vec<String>,
+    pub(crate) used_engine: bool,
+    pub(crate) failed_host_call: Option<Error>,
     pub(crate) model_edits: Vec<(ObjectId, list_model::Undo)>,
     model_modes: BTreeSet<ObjectId>,
     pub(crate) record_changes: records::Journal,
@@ -28,6 +33,11 @@ impl Instance {
         operation: impl FnOnce(&mut Transaction<'_>) -> Result<T, Error>,
     ) -> Result<T, Error> {
         let mut tx = Transaction {
+            current_binding: None,
+            guest_return_type: None,
+            guest_parameters: Vec::new(),
+            used_engine: false,
+            failed_host_call: None,
             record_changes: self.records.journal(),
             model: self,
             model_edits: Vec::new(),
@@ -46,6 +56,9 @@ impl Instance {
         };
         let result = operation(&mut tx).and_then(|value| {
             tx.settle()?;
+            if let Some(error) = tx.failed_host_call.take() {
+                return Err(error);
+            }
             tx.model.validate_connections()?;
             tx.model.validate_model_modes(&tx.model_modes)?;
             if let Some(validate) = &tx.model.validator {
@@ -97,6 +110,11 @@ impl Instance {
                 }
             }
         }
+        if tx.used_engine {
+            if let Some(engine) = &tx.model.javascript.engine {
+                engine.end_transaction(tx.model.script_instance(), result.is_ok());
+            }
+        }
         drop(tx.record_changes);
         tx.model.records.maybe_collect();
         result
@@ -104,6 +122,10 @@ impl Instance {
 }
 
 impl Transaction<'_> {
+    pub(crate) fn declaration_scope(&self) -> Option<u32> {
+        self.scope
+    }
+
     pub(crate) fn scoped_key(&self, object: ObjectId, name: &str) -> Result<SlotId, Error> {
         self.model.key_in(object, name, self.scope)
     }
@@ -231,7 +253,10 @@ impl Transaction<'_> {
             key = next;
         }
         for key in chain.into_iter().rev() {
-            self.with_scope(self.model.slots[key].scope, |tx| tx.evaluate_one(key))?;
+            let previous = self.current_binding.replace(key);
+            let result = self.with_scope(self.model.slots[key].scope, |tx| tx.evaluate_one(key));
+            self.current_binding = previous;
+            result?;
         }
         Ok(())
     }

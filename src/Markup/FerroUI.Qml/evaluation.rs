@@ -94,6 +94,7 @@ impl Transaction<'_> {
     ) -> Result<Value, Error> {
         use Expr::*;
         Ok(match expression {
+            JavaScript(script) => self.guest(owner, script, locals, reads)?,
             Native(index) => {
                 let eval = *self
                     .model
@@ -222,6 +223,11 @@ impl Transaction<'_> {
         reads: &mut BTreeSet<SlotId>,
     ) -> Result<Value, Error> {
         match base {
+            Value::External(ref value) => {
+                self.with_external(self.model.root(), value, reads, |engine, ctx| {
+                    engine.get_external(ctx, value, name)
+                })
+            }
             Value::ModelRow(row) => self.read_role(row, name, reads),
             Value::Record(record) => Ok(self
                 .model
@@ -257,6 +263,7 @@ impl Transaction<'_> {
             if node.methods.contains_key(name)
                 || node.signals.contains_key(name)
                 || node.native.contains_key(name)
+                || self.scoped_key(object, name).is_ok()
                 || (self.model.models.contains_key(&object) && list_model::is_method(name))
                 || (self.model.timers.is_timer(object)
                     && matches!(name, "start" | "stop" | "restart"))
@@ -298,6 +305,13 @@ impl Transaction<'_> {
         if self.model.timers.is_timer(owner) && matches!(name, "start" | "stop" | "restart") {
             return self.timer_method(owner, name, &arguments);
         }
+        if let Ok(key) = self.scoped_key(owner, name) {
+            if let Value::External(value) = self.read(key, reads)? {
+                return self.with_external(owner, &value, reads, |engine, ctx| {
+                    engine.call_external(ctx, &value, Value::Object(owner), arguments)
+                });
+            }
+        }
         Err(Error::new(format!("unknown method or signal '{name}'")))
     }
 
@@ -314,9 +328,19 @@ impl Transaction<'_> {
             .map(|p| p.name.clone())
             .zip(args)
             .collect();
+        let previous = std::mem::take(&mut self.guest_return_type);
+        let old_names = std::mem::take(&mut self.guest_parameters);
+        if self.model.javascript.engine.is_some()
+            && matches!(proc.body.as_slice(), [Stmt::JavaScript(_)])
+        {
+            self.guest_return_type = proc.result.clone();
+            self.guest_parameters = proc.parameters.iter().map(|p| p.name.clone()).collect();
+        }
         let result = self.with_scope(proc.scope, |tx| {
             tx.with_stack(4, |tx| tx.statements(owner, &proc.body, &mut locals, reads))
         });
+        self.guest_return_type = previous;
+        self.guest_parameters = old_names;
         let value = match result? {
             Flow::Next(_) => Value::Undefined,
             Flow::Return(value) => value,
@@ -339,6 +363,17 @@ impl Transaction<'_> {
         let mut completion = Value::Undefined;
         for stmt in body {
             match stmt {
+                Stmt::JavaScript(script) => {
+                    let value = self.guest(owner, script, locals, reads)?;
+                    match script.form {
+                        ir::ScriptForm::FunctionBody | ir::ScriptForm::HandlerBody => {
+                            return Ok(Flow::Return(value))
+                        }
+                        ir::ScriptForm::BindingBlock | ir::ScriptForm::Expression => {
+                            completion = value
+                        }
+                    }
+                }
                 Stmt::Expr(expr) => completion = self.expr(owner, expr, locals, reads)?,
                 Stmt::Let { name, value } => {
                     let value = match value {

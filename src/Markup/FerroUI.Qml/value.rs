@@ -10,6 +10,7 @@ pub struct ObjectId {
 #[derive(Clone, Debug, PartialEq)]
 pub enum Value {
     Undefined,
+    External(crate::ExternalValue),
     Null,
     Bool(bool),
     Number(f64),
@@ -28,7 +29,8 @@ impl Value {
             Self::Bool(value) => *value,
             Self::Number(value) => *value != 0.0 && !value.is_nan(),
             Self::String(value) => !value.is_empty(),
-            Self::ModelRow(_)
+            Self::External(_)
+            | Self::ModelRow(_)
             | Self::Record(_)
             | Self::Object(_)
             | Self::Namespace(_)
@@ -44,7 +46,8 @@ impl Value {
             Self::Undefined => f64::NAN,
             Self::String(s) if s.trim().is_empty() => 0.0,
             Self::String(s) => s.trim().parse().unwrap_or(f64::NAN),
-            Self::ModelRow(_)
+            Self::External(_)
+            | Self::ModelRow(_)
             | Self::Record(_)
             | Self::Object(_)
             | Self::Namespace(_)
@@ -66,9 +69,11 @@ impl Value {
             Self::Bool(b) => b.to_string(),
             Self::Null => "null".into(),
             Self::Undefined => "undefined".into(),
-            Self::ModelRow(_) | Self::Record(_) | Self::Object(_) | Self::Namespace(_) => {
-                "[object Object]".into()
-            }
+            Self::External(_)
+            | Self::ModelRow(_)
+            | Self::Record(_)
+            | Self::Object(_)
+            | Self::Namespace(_) => "[object Object]".into(),
             Self::List(values) => values
                 .iter()
                 .map(|v| match v {

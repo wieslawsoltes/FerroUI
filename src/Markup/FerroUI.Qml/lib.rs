@@ -15,6 +15,8 @@ pub use list_model::RowId;
 mod records;
 mod registry;
 pub use records::Record;
+mod scripting;
+pub use scripting::{ExternalValue, ScriptContext, ScriptEngine, ScriptInstance, ScriptScope};
 mod timers;
 mod transaction;
 mod value;
@@ -113,6 +115,7 @@ pub struct SignalEmission {
 }
 
 pub struct Instance {
+    javascript: scripting::ScriptState,
     models: BTreeMap<ObjectId, list_model::Model>,
     records: records::Heap,
     native_first_reads: &'static [compiled::FirstRead],
