@@ -96,6 +96,8 @@ mod layer_effect_tests;
 #[cfg(test)]
 mod composition_effect_tests;
 #[cfg(test)]
+mod coverage_clip_tests;
+#[cfg(test)]
 mod tests;
 #[cfg(test)]
 mod compositing_tests;

@@ -1378,7 +1378,7 @@ impl IDrawingContextImpl for DrawingContextImpl {
                     if spread != 0.0 {
                         shadow_rect.outset((spread, spread));
                     }
-                    self.canvas.get().clip_rrect(sk_round_rect, clip_operation, true);
+                    self.clip_rounded_rect(sk_round_rect, clip_operation);
 
                     let old_transform = self.transform();
                     self.set_transform(
@@ -1437,7 +1437,7 @@ impl IDrawingContextImpl for DrawingContextImpl {
                 if spread != 0.0 {
                     shadow_rect.inset((spread, spread));
                 }
-                self.canvas.get().clip_rrect(sk_round_rect, clip_operation, true);
+                self.clip_rounded_rect(sk_round_rect, clip_operation);
 
                 let old_transform = self.transform();
                 self.set_transform(
@@ -1568,9 +1568,8 @@ impl IDrawingContextImpl for DrawingContextImpl {
         // Get a round rect from the cache.
         let round_rect = SkRoundRectCache::get_and_set_radii(&rc, &clip);
 
-        let canvas = self.canvas.get();
-        canvas.save();
-        canvas.clip_rrect(round_rect, None, true);
+        self.canvas.get().save();
+        self.clip_rounded_rect(&round_rect, sk::ClipOp::Intersect);
 
         // Should not need to reset as setting the radii overrides the values.
         SkRoundRectCache::return_item(round_rect);
@@ -2056,7 +2055,65 @@ struct PixelOperationLayer {
     inherited_opacity: f64,
 }
 
+ferroui_base::ferro_thread_local! {
+    /// Whether the clips of rounded rectangles are coverage shaders on
+    /// raster surfaces too (the tests compare them with Skia's clips).
+    static COVERAGE_CLIPS_ON_RASTER: Cell<bool> = Cell::new(false);
+    /// How many clips of rounded rectangles were coverage shaders, and how
+    /// many were handed to a GPU surface's clip stack under a transform or
+    /// with radii it cannot clip analytically (the clips Ganesh draws as a
+    /// software mask, rasterized on the CPU and uploaded).
+    static ROUNDED_CLIPS: Cell<(u64, u64)> = Cell::new((0, 0));
+}
+
+/// Makes the clips of rounded rectangles coverage shaders on raster
+/// surfaces too; returns the previous setting.
+#[allow(dead_code)]
+pub(crate) fn set_coverage_clips_on_raster(value: bool) -> bool {
+    COVERAGE_CLIPS_ON_RASTER.with(|cell| cell.replace(value))
+}
+
+/// The clips of rounded rectangles of this thread: (coverage shaders,
+/// clips a GPU surface would draw as software masks).
+#[allow(dead_code)]
+pub(crate) fn rounded_clip_counts() -> (u64, u64) {
+    ROUNDED_CLIPS.with(Cell::get)
+}
+
 impl DrawingContextImpl {
+    /// Clips to `rrect` (anti-aliased) with `op`.
+    ///
+    /// Ganesh clips a rounded rectangle analytically only in device space
+    /// (a transform that keeps rectangles on the axes) and only for radii
+    /// its rounded-rectangle effects take (not the complex ones); any other
+    /// anti-aliased one becomes a software mask on a target without MSAA,
+    /// rasterized on the CPU and uploaded as an A8 texture each time the
+    /// clip moves on the device (Graphite similarly rasterizes such clips
+    /// into an atlas). On a GPU surface such a clip is a clip shader, the
+    /// coverage of the rounded rectangle evaluated per pixel
+    /// (`composition_effects::rounded_rect_coverage`); the raster backend
+    /// keeps Skia's clip, the reference.
+    fn clip_rounded_rect(&mut self, rrect: &sk::RRect, op: sk::ClipOp) {
+        let canvas = self.canvas.get();
+        let matrix = canvas.local_to_device_as_3x3();
+        let analytic = matrix.rect_stays_rect() && rrect.get_type() != sk::rrect::Type::Complex;
+        let gpu = self.gr_context.is_some();
+        if !analytic
+            && !matches!(rrect.get_type(), sk::rrect::Type::Empty | sk::rrect::Type::Rect)
+            && (gpu || COVERAGE_CLIPS_ON_RASTER.with(Cell::get))
+        {
+            if let Some(shader) = crate::composition_effects::rounded_rect_coverage(rrect, &matrix) {
+                canvas.clip_shader(shader, op);
+                ROUNDED_CLIPS.with(|counts| counts.set((counts.get().0 + 1, counts.get().1)));
+                return;
+            }
+            if gpu {
+                ROUNDED_CLIPS.with(|counts| counts.set((counts.get().0, counts.get().1 + 1)));
+            }
+        }
+        canvas.clip_rrect(rrect, op, true);
+    }
+
     /// Composes the layer of the latest next source of a pixel operation,
     /// if one is open.
     fn close_pixel_operation_source(&mut self) {

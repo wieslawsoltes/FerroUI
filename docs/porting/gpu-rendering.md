@@ -35,9 +35,9 @@ from the reference, or nothing is drawn).
 | `push_color_matrix_layer` (colour matrix, saturation, tint, invert, grayscale, luminance to alpha, the arithmetic composite with a colour, the shadow effect) | GPU: a colour filter of a save layer | CPU fallback: the content drawn by the CPU renderer, the matrix applied on the processor, uploaded | `layer_effect_tests.rs` |
 | `Visual.Effect`: blur, drop shadow, their transitions | GPU: an image filter of a save layer | GPU where the scene has filter layers and no clip is open; CPU fallback otherwise (the GPU renderer and WebGL2 have no filter layers) | `src/Vello/FerroUI.Vello/effect_tests.rs`, `tests/FerroUI.RenderTests/media/effect_tests.rs`, `tests/FerroUI.RenderBackends.Comparison/effect_tests.rs` |
 | Luminance to alpha (`ImmutableLuminanceToAlphaEffect`) | GPU: a colour filter | CPU fallback | `tests/FerroUI.RenderTests/media/effect_tests.rs` |
-| Box shadows, outer | GPU: a blurred draw (image filter) outside a clip of the box. A clip of a rounded box under a rotation (or with corner radii Ganesh cannot clip analytically) was a software mask of Ganesh: rasterized on the CPU into an A8 mask and uploaded each frame the box moved (the A8 uploads measured while scrolling the Ferro Store); see the next section | GPU: a closed-form blurred rounded rectangle where it agrees with the Gaussian; cached otherwise (the picture of the blurred shape, made by the CPU renderer, kept per shape) | `tests/FerroUI.RenderTests/media/box_shadow_tests.rs` |
-| Box shadows, inset | as the outer ones | as the outer ones | `tests/FerroUI.RenderTests/media/box_shadow_tests.rs` |
-| Clips: rectangles, rounded rectangles | GPU: analytic clips; a rounded rectangle under a rotation or with complex radii: see the next section | GPU: clip layers of the scene | `tests/FerroUI.RenderTests/geometry_clipping_tests.rs` |
+| Box shadows, outer | GPU: a blurred draw (image filter) outside a clip of the box; the clip of a rounded box under a rotation, or with radii Ganesh cannot clip analytically, is a coverage shader (#457; it was a software mask of Ganesh, see the next section) | GPU: a closed-form blurred rounded rectangle where it agrees with the Gaussian; cached otherwise (the picture of the blurred shape, made by the CPU renderer, kept per shape) | `tests/FerroUI.RenderTests/media/box_shadow_tests.rs`, `coverage_clip_tests.rs` (`the_shadows_of_rotated_cards_keep_their_clips`) |
+| Box shadows, inset | as the outer ones | as the outer ones | the same |
+| Clips: rectangles, rounded rectangles | GPU: analytic clips; a rounded rectangle under a rotation or with complex radii is a coverage shader on GPU surfaces (#457) | GPU: clip layers of the scene | `tests/FerroUI.RenderTests/geometry_clipping_tests.rs`, `coverage_clip_tests.rs` (exact coverage), `gpu/metal/tests.rs` (Graphite, no clip left to the GPU's clip stack over moving frames) |
 | Clips: geometry (`push_geometry_clip`) | GPU for convex paths of a few edges and with MSAA or stencil; a software mask of Ganesh otherwise (gap) | GPU: clip layers | `tests/FerroUI.RenderTests/geometry_clipping_tests.rs` |
 | Opacity masks (`push_opacity_mask`), the alpha masks of composition (`CompositionMaskBrush`, the masks of shapes, images and text) | GPU: a save layer and a destination-in draw of the mask brush | GPU: a layer with a destination-in blend | `tests/FerroUI.RenderTests/opacity_mask_tests.rs` |
 | `GetAlphaMask` | made on request (a snapshot), not per frame | the same | - (no pixel test) |
@@ -64,10 +64,15 @@ card clips to a rounded rectangle under a rotation (the `ClipToBounds`) and to t
 are in device space only, so both are software masks, made again whenever the card moves on the
 screen (a scroll moves every card).
 
-The fix is a stacked pull request (masks and shadows): on GPU surfaces such a clip is a clip
-shader, an SkSL coverage of the rounded rectangle in the coordinates of the drawing (its distance
-in device pixels through the inverse of the transform), which Ganesh and Graphite apply per pixel;
-the raster backend keeps Skia's exact clip, the reference.
+The fix (#457): on GPU surfaces such a clip is a clip shader, an SkSL coverage of the rounded
+rectangle in the coordinates of the drawing (`composition_effects::rounded_rect_coverage`: the
+distance to the edge, or to first order to the arc of a corner, in device pixels through the
+inverse transpose of the transform, ramped over a pixel as Ganesh's analytic clips are), which
+Ganesh and Graphite apply per pixel without a mask. The raster backend keeps Skia's clip. Against
+the exact coverage of each pixel (16 by 16 samples) the coverage shader is within 14 levels at the
+edge and 2 to 4 on average; Skia's raster clip, which flattens the arcs, is 8 to 13 off on average
+(`coverage_clip_tests.rs`). A clip of a geometry (`push_geometry_clip`) that is not a convex path
+of a few edges stays a software mask on Ganesh without MSAA (gap).
 
 ## Vello: what is missing and the GPU route
 

@@ -536,8 +536,98 @@ mod tests {
 
     #[test]
     fn every_program_compiles() {
-        for program in [&LIGHTING, &MULTIPLY, &BLEND, &MASK_INVERT, &DISSOLVE_NOISE, &DISSOLVE_SELECT] {
+        for program in [&LIGHTING, &MULTIPLY, &BLEND, &MASK_INVERT, &DISSOLVE_NOISE, &DISSOLVE_SELECT, &ROUNDED_RECT_COVERAGE] {
             assert!(program.effect().is_some(), "{} compiles", program.name);
         }
     }
+}
+
+// --- clips of rounded rectangles on GPU surfaces ---------------------------------------
+
+/// The coverage of a rounded rectangle at a point of the drawing: the
+/// distance to its edge in device pixels (the gradient of the edge
+/// functions mapped through the inverse transpose of the transform),
+/// anti-aliased over a pixel, as Ganesh's analytic clips are. Used as a
+/// clip shader where Ganesh and Graphite would otherwise rasterize the
+/// clip into a mask on the CPU and upload it.
+static ROUNDED_RECT_COVERAGE: RuntimeProgram = RuntimeProgram {
+    name: "rounded rectangle coverage",
+    kind: ProgramKind::Shader,
+    source: r#"
+// left, top, right, bottom
+uniform float4 bounds;
+// The radii of the corners: upper left, upper right, lower right, lower left.
+uniform float4 radiiX;
+uniform float4 radiiY;
+// The inverse transpose of the linear part of the transform, row by row:
+// a gradient of the drawing to one of the device.
+uniform float4 toDevice;
+
+float deviceDistance(float f, float2 gradient) {
+    float2 g = float2(toDevice.x * gradient.x + toDevice.y * gradient.y, toDevice.z * gradient.x + toDevice.w * gradient.y);
+    float len = length(g);
+    if (len <= 0.0) {
+        return f < 0.0 ? -10000.0 : 10000.0;
+    }
+    return f / len;
+}
+
+// The implicit function of the ellipse of a corner over the length of its
+// gradient: the distance to the arc, to first order.
+float cornerDistance(float2 p, float2 center, float2 radii) {
+    float2 q = (p - center) / radii;
+    return deviceDistance(dot(q, q) - 1.0, 2.0 * q / radii);
+}
+
+half4 main(float2 p) {
+    float l = bounds.x;
+    float t = bounds.y;
+    float r = bounds.z;
+    float b = bounds.w;
+    float d = max(
+        max(deviceDistance(l - p.x, float2(-1.0, 0.0)), deviceDistance(p.x - r, float2(1.0, 0.0))),
+        max(deviceDistance(t - p.y, float2(0.0, -1.0)), deviceDistance(p.y - b, float2(0.0, 1.0))));
+    if (radiiX.x > 0.0 && radiiY.x > 0.0 && p.x < l + radiiX.x && p.y < t + radiiY.x) {
+        d = cornerDistance(p, float2(l + radiiX.x, t + radiiY.x), float2(radiiX.x, radiiY.x));
+    } else if (radiiX.y > 0.0 && radiiY.y > 0.0 && p.x > r - radiiX.y && p.y < t + radiiY.y) {
+        d = cornerDistance(p, float2(r - radiiX.y, t + radiiY.y), float2(radiiX.y, radiiY.y));
+    } else if (radiiX.z > 0.0 && radiiY.z > 0.0 && p.x > r - radiiX.z && p.y > b - radiiY.z) {
+        d = cornerDistance(p, float2(r - radiiX.z, b - radiiY.z), float2(radiiX.z, radiiY.z));
+    } else if (radiiX.w > 0.0 && radiiY.w > 0.0 && p.x < l + radiiX.w && p.y > b - radiiY.w) {
+        d = cornerDistance(p, float2(l + radiiX.w, b - radiiY.w), float2(radiiX.w, radiiY.w));
+    }
+    return half4(clamp(0.5 - d, 0.0, 1.0));
+}
+"#,
+};
+
+/// The clip shader of `rrect` drawn under `matrix` (the transform of the
+/// canvas when the clip is set); `None` under a perspective or a
+/// transform that cannot be inverted, or without runtime effects.
+pub(crate) fn rounded_rect_coverage(rrect: &sk::RRect, matrix: &sk::Matrix) -> Option<sk::Shader> {
+    if matrix.has_perspective() {
+        return None;
+    }
+    let (a, b, c, d) = (matrix.scale_x(), matrix.skew_y(), matrix.skew_x(), matrix.scale_y());
+    let determinant = a * d - b * c;
+    if !determinant.is_finite() || determinant.abs() < 1e-12 {
+        return None;
+    }
+    let effect = ROUNDED_RECT_COVERAGE.effect()?;
+    let rect = rrect.rect();
+    let radii = [
+        rrect.radii(sk::rrect::Corner::UpperLeft),
+        rrect.radii(sk::rrect::Corner::UpperRight),
+        rrect.radii(sk::rrect::Corner::LowerRight),
+        rrect.radii(sk::rrect::Corner::LowerLeft),
+    ];
+    let mut uniforms = Uniforms::new(&effect);
+    uniforms
+        .float4("bounds", [rect.left, rect.top, rect.right, rect.bottom])
+        .float4("radiiX", radii.map(|radius| radius.x))
+        .float4("radiiY", radii.map(|radius| radius.y))
+        // J = [[a, c], [b, d]] maps the drawing to the device; a gradient
+        // maps through J^-T = [[d, -b], [-c, a]] / det.
+        .float4("toDevice", [d / determinant, -b / determinant, -c / determinant, a / determinant]);
+    make_shader(&effect, &uniforms, &[], None)
 }
