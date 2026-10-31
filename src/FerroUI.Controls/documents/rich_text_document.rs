@@ -225,6 +225,12 @@ struct RichTextDocumentData {
     /// The UTF-16 length of `cached_text` (F1: no scan of the text per query).
     cached_text_length: Cell<usize>,
     observed_text: RefCell<Rc<str>>,
+    /// The mutation version `observed_text` was taken at (F1b): when it is still current,
+    /// `publish_change` takes the text from it instead of reading the tree again.
+    observed_version: Cell<u64>,
+    /// Set while the fast path of `replace_text_core` splices one run: the tree's text is then
+    /// the observed text with the pending edit applied, without reading the tree (F1b).
+    exact_splice: Cell<bool>,
     text_changes: RefCell<Vec<DocumentTextChange>>,
     installing: Cell<bool>,
     delivering: Cell<bool>,
@@ -307,6 +313,8 @@ impl RichTextDocument {
             cached_text_length: Cell::new(text.encode_utf16().count()),
             cached_text: RefCell::new(text.clone()),
             observed_text: RefCell::new(text),
+            observed_version: Cell::new(u64::MAX),
+            exact_splice: Cell::new(false),
             text_changes: RefCell::new(Vec::new()),
             installing: Cell::new(false),
             delivering: Cell::new(false),
@@ -622,6 +630,7 @@ impl RichTextDocument {
         if range.is_empty() && text.is_empty() {
             return Ok(());
         }
+        let start_version = self.mutation_version();
         let normalized = normalize_paragraph_breaks(text);
         // The explicit range SetText reports its own operation span (paired tracking);
         // every other replacement reports its real range instead of a text diff.
@@ -654,7 +663,13 @@ impl RichTextDocument {
                 } else {
                     None
                 };
+                // Only a splice of a tree whose text was observed and that no reentrant read
+                // changed is known exactly; any other is read and compared.
+                self.0.exact_splice.set(
+                    self.mutation_version() == start_version && self.0.observed_version.get() == start_version,
+                );
                 found.run.set_text(Some(&value));
+                self.0.exact_splice.set(false);
                 if tracking
                     .as_ref()
                     .is_some_and(|scope| scope.was_interrupted())
@@ -1118,6 +1133,29 @@ impl RichTextDocument {
         }
     }
 
+    /// Replaces the whole text of the run that holds exactly `range` and whose text is
+    /// `expected` with `text`, in place (one run, its format kept). Returns `false`, and changes
+    /// nothing, when no such run exists or the document has link fields.
+    pub(crate) fn replace_run_text_in_place(
+        &self,
+        range: Range<usize>,
+        expected: &str,
+        text: &str,
+    ) -> Result<bool, DocumentError> {
+        if !self.0.link_fields.borrow().is_empty() || text.contains('\n') {
+            return Ok(false);
+        }
+        let Some(found) = self.find_splice_run(range.clone()) else {
+            return Ok(false);
+        };
+        let current = found.run.text().unwrap_or_default();
+        if found.offset != range.start || current != expected {
+            return Ok(false);
+        }
+        self.replace_text(range, text)?;
+        Ok(true)
+    }
+
     fn find_splice_run(&self, range: Range<usize>) -> Option<RunLocation> {
         let mut offset = 0;
         for block in self.0.blocks.snapshot().iter() {
@@ -1220,7 +1258,26 @@ impl RichTextDocument {
             |tracked| tracked.handlers.clone(),
         );
         let mutation = self.mutation_version();
-        let text = self.0.blocks.text();
+        // One run spliced by the editor's fast path: the new text is the observed one with the
+        // edit applied (no read of the tree, which can call application code, and no diff).
+        let spliced = if self.0.exact_splice.get() {
+            pending_edit.as_ref().and_then(|(range, inserted)| {
+                let before = self.0.observed_text.borrow().clone();
+                let start = utf16_to_byte(&before, range.start)?;
+                let end = utf16_to_byte(&before, range.end)?;
+                let mut text = String::with_capacity(before.len() - (end - start) + inserted.len());
+                text.push_str(&before[..start]);
+                text.push_str(inserted);
+                text.push_str(&before[end..]);
+                Some(text)
+            })
+        } else {
+            None
+        };
+        let text = match spliced {
+            Some(text) => text,
+            None => self.0.blocks.text(),
+        };
         if self.mutation_version() != mutation {
             // A virtual text read accepted a nested model mutation. Its own
             // observation already owns the current text and coordinates; this
@@ -1231,6 +1288,7 @@ impl RichTextDocument {
             return;
         }
         let previous = self.0.observed_text.replace(Rc::from(text.as_str()));
+        self.0.observed_version.set(mutation);
         let change = (previous.as_ref() != text).then(|| {
             let (range, inserted_length) = pending_edit
                 .as_ref()
@@ -1373,14 +1431,25 @@ impl RichTextDocument {
         if !self.0.dirty.replace(false) {
             return;
         }
-        let new_text = self.0.blocks.text();
-        let old_text = self.0.cached_text.replace(Rc::from(new_text.as_str()));
+        // The text the last observation read is current when nothing changed since (F1b).
+        let observed = (self.0.observed_version.get() == self.mutation_version())
+            .then(|| self.0.observed_text.borrow().clone());
+        let new_text: Rc<str> = observed.unwrap_or_else(|| Rc::from(self.0.blocks.text().as_str()));
+        let old_text = self.0.cached_text.replace(new_text.clone());
         let old_length = self.0.cached_text_length.get();
         let new_length = new_text.encode_utf16().count();
         self.0.cached_text_length.set(new_length);
-        let (range, inserted_length) = changed_range(&old_text, &new_text);
+        // One recorded replacement since the last publication is the change itself; any other
+        // sequence is compared.
+        let recorded = {
+            let changes = self.0.text_changes.borrow();
+            (changes.len() == 1
+                && old_length + changes[0].inserted_length == new_length + changes[0].range.len())
+            .then(|| (changes[0].range.clone(), changes[0].inserted_length))
+        };
+        let (range, inserted_length) = recorded.unwrap_or_else(|| changed_range(&old_text, &new_text));
         let requested_kind = self.0.change_kind.take();
-        let kind = if old_text.as_ref() != new_text {
+        let kind = if old_text.as_ref() != new_text.as_ref() {
             DocumentChangeKind::Content
         } else {
             requested_kind.unwrap_or(DocumentChangeKind::Formatting)
@@ -1717,6 +1786,11 @@ struct ParagraphEntry {
 struct ContentPool {
     paragraphs: Vec<ParagraphEntry>,
     inlines: Vec<InlineEntry>,
+    /// Where the next lookups start: a rebuild meets the pooled elements mostly in their old
+    /// order, so the entry after the last one taken usually matches (F1b, #243 review S9:
+    /// no scan of the pool per element).
+    next_paragraph: usize,
+    next_inline: usize,
 }
 
 impl ContentPool {
@@ -1724,6 +1798,8 @@ impl ContentPool {
         let mut pool = Self {
             paragraphs: Vec::new(),
             inlines: Vec::new(),
+            next_paragraph: 0,
+            next_inline: 0,
         };
         for paragraph in blocks
             .snapshot()
@@ -1770,12 +1846,20 @@ impl ContentPool {
     }
 
     fn build_paragraph(&mut self, snapshot: &ParagraphSnapshot) -> Ref<Paragraph> {
+        let hint = self.next_paragraph;
         let index = self
             .paragraphs
-            .iter()
-            .position(|entry| !entry.used && entry.snapshot == *snapshot)
+            .get(hint)
+            .filter(|entry| !entry.used && entry.snapshot == *snapshot)
+            .map(|_| hint)
+            .or_else(|| {
+                self.paragraphs
+                    .iter()
+                    .position(|entry| !entry.used && entry.snapshot == *snapshot)
+            })
             .or_else(|| self.paragraphs.iter().position(|entry| !entry.used));
         let paragraph = if let Some(index) = index {
+            self.next_paragraph = index + 1;
             self.paragraphs[index].used = true;
             self.paragraphs[index].value.clone()
         } else {
@@ -1789,16 +1873,24 @@ impl ContentPool {
     }
 
     fn build_inline(&mut self, snapshot: &InlineSnapshot) -> Ref<Inline> {
+        let hint = self.next_inline;
         let index = self
             .inlines
-            .iter()
-            .position(|entry| !entry.used && entry.snapshot == *snapshot)
+            .get(hint)
+            .filter(|entry| !entry.used && entry.snapshot == *snapshot)
+            .map(|_| hint)
+            .or_else(|| {
+                self.inlines
+                    .iter()
+                    .position(|entry| !entry.used && entry.snapshot == *snapshot)
+            })
             .or_else(|| {
                 self.inlines.iter().position(|entry| {
                     !entry.used && compatible(&entry.snapshot.kind, &snapshot.kind)
                 })
             });
         let inline = if let Some(index) = index {
+            self.next_inline = index + 1;
             self.inlines[index].used = true;
             self.inlines[index].value.clone()
         } else {
