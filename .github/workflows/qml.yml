@@ -4,6 +4,10 @@ on:
   pull_request:
     paths:
       - 'src/Markup/FerroUI.Qml*/**'
+      - 'src/FerroUI/Cargo.toml'
+      - 'src/FerroUI/lib.rs'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
       - 'samples/QmlGallery/**'
       - 'tests/QmlCompiled/**'
       - 'scripts/qml/**'
@@ -50,6 +54,29 @@ jobs:
           "$RUNNER_TEMP/qt-reference/bin/pip" install --only-binary=:all: PySide6-Essentials==6.12.0
           "$RUNNER_TEMP/qt-reference/bin/python" tests/QmlCompiled/reference/qt_reference.py
           "$RUNNER_TEMP/qt-reference/bin/python" tests/QmlCompiled/webscene/qt_reference.py
+
+  portability:
+    name: Rust 1.89 and Emscripten
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d
+        with:
+          toolchain: '1.89.0'
+          targets: wasm32-unknown-emscripten
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: qml-rust-1.89
+      - name: Check the native WebScene adapter and JavaScript compiler at the workspace MSRV
+        run: >-
+          cargo check --locked -p ferroui-qml-webscene -p ferroui-qml-build
+          --features ferroui-qml-build/javascript
+      - name: Cross-check the compiler, runtime and generated components
+        run: >-
+          cargo check --locked --target wasm32-unknown-emscripten
+          -p ferroui-qml-build -p ferroui-qml -p qml-compiled-tests
+          --features ferroui-qml-build/javascript
 
   webscene:
     name: WebScene V8 (${{ matrix.os }})
