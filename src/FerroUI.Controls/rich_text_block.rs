@@ -62,6 +62,9 @@ pub struct RichTextBlock {
     document_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
     font_features_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
     source: RefCell<Option<Rc<RichTextSource>>>,
+    /// The source before the last invalidation, whose unchanged paragraphs the next source
+    /// takes over (F1).
+    previous_source: RefCell<Option<Rc<RichTextSource>>>,
     layout: RefCell<Option<Rc<RichTextLayout>>>,
     layout_generation: Cell<u64>,
     collapse_paragraph_margins: Cell<bool>,
@@ -932,6 +935,7 @@ impl RichTextBlock {
             document_subscription: RefCell::new(None),
             font_features_subscription: RefCell::new(None),
             source: RefCell::new(None),
+            previous_source: RefCell::new(None),
             layout: RefCell::new(None),
             layout_generation: Cell::new(0),
             collapse_paragraph_margins: Cell::new(true),
@@ -1057,7 +1061,7 @@ impl RichTextBlock {
         let weak = self.to_ref().downgrade();
         let subscription = document.changed(move |change| {
             if let Some(this) = weak.upgrade() {
-                this.invalidate_document_layout();
+                this.invalidate_changed_paragraphs();
                 let start = change
                     .map_position(TextPosition::new(
                         this.selection_start(),
@@ -1309,7 +1313,7 @@ impl RichTextBlock {
             || args.start != args.end
             || args.old_start != args.old_end
         {
-            self.invalidate_document_layout();
+            self.invalidate_changed_paragraphs();
         } else {
             self.invalidate_visual();
         }
@@ -1786,8 +1790,21 @@ impl RichTextBlock {
             .as_ref()
             .and_then(WeakRef::upgrade)
     }
+    /// Rebuilds the formatter input of the whole document: for a change of the view's
+    /// properties, of the text services or of the document itself.
     pub(crate) fn invalidate_document_layout(&self) {
+        self.previous_source.borrow_mut().take();
         self.source.borrow_mut().take();
+        self.invalidate_layout();
+    }
+    /// Rebuilds the formatter input after an edit of the document or a change of the selection:
+    /// the paragraphs that format as before keep their runs and shaping caches (F1, #243 review
+    /// S7), so a keystroke reshapes the paragraphs it changed, not the document.
+    pub(crate) fn invalidate_changed_paragraphs(&self) {
+        let stale = self.source.borrow_mut().take();
+        if let Some(stale) = stale {
+            *self.previous_source.borrow_mut() = Some(stale);
+        }
         self.invalidate_layout();
     }
     fn invalidate_layout(&self) {
@@ -1857,8 +1874,10 @@ impl RichTextBlock {
             // Building runs can call custom text elements. Release the cache
             // borrow before doing so and preserve any newer reentrant source.
             let cached_source = self.source.borrow().clone();
-            let source =
-                cached_source.unwrap_or_else(|| RichTextSource::new(&self.document(), self));
+            let source = cached_source.unwrap_or_else(|| {
+                let previous = self.previous_source.borrow_mut().take();
+                RichTextSource::new(&self.document(), self, previous.as_deref())
+            });
             if self.layout_generation.get() == generation {
                 *self.source.borrow_mut() = Some(source.clone());
             }
@@ -1950,7 +1969,7 @@ struct RichBlockInlineHost(WeakRef<RichTextBlock>);
 impl IInlineHost for RichBlockInlineHost {
     fn invalidate(&self) {
         if let Some(this) = self.0.upgrade() {
-            this.invalidate_document_layout();
+            this.invalidate_changed_paragraphs();
         }
     }
     fn invalidate_render(&self) {

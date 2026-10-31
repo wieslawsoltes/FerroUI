@@ -154,7 +154,7 @@ Each pull request carries its tests, its `DEVIATIONS.md` rows and a line in `CHA
 
 | R12 | macOS, iOS, Android: content hints, input options; `patches/0003` regenerated | R8 | P33-P37 | iOS simulator and Android emulator (never with a VM) |
 | R13 | The Msftedit oracle as a tool (`src/tools/RichTextOracle`, S15), the extractor with its check and writer of the case tables, the rich-text workflow (the extractor's tests and the on-demand oracle job, actions pinned by SHA) | R8 | | no |
-| F1 | Performance: a layout cache per paragraph, the selection drawn as an overlay, an incremental IME preview, the fast path near fields, delta undo units if not in R7 | R8 | S7, S8, S9 | no |
+| F1 | Performance: a layout cache per paragraph (runs, shaping cache and lines of the paragraphs an edit or a selection change did not change), the benchmark `text::RichTextEditing`. Still open: the selection drawn as an overlay, an incremental IME preview and the identity lookup of the content pool (S9), the fast path near fields, delta undo units | R8 | S7 (S8, S9 open) | no |
 
 R1, R3 and R4 are independent; R6 to R8 are sequential; R9 to R12 may land in any order after R8.
 
@@ -283,3 +283,17 @@ The differences from the upstream-ported adapter (`WinUITextInputMethod`) are in
 |---|---|---|
 | `TextBlockAutomationPeer` has the Text pattern, and so do the text boxes. | On Windows only the nodes of RichEditBox and RichTextBlock (and their hyperlinks, through TextChild) have the Text, Text2, TextEdit and TextChild patterns; the nodes of TextBlock and TextBox keep what upstream has (TextBox: the Value pattern). | Decision D5: TextBox keeps upstream behaviour until it moves to the connection; TextBlock has no portable text provider. |
 | The text pattern wrappers call RichEdit's and the core's text objects on the UI thread. | The native ranges are COM objects with a number; the portable range stays in a table of the UI thread and is released when the client releases the native one, from any thread. A range resolves a range passed back by a client by its COM identity, so a range of another provider is `E_INVALIDARG`. | The node and range objects are called on threads of the automation core (`win32-platform.md`, section 13.3). |
+
+## 12. Performance (F1)
+
+- **Per-paragraph reuse.** After an edit of the document, a change of an inline or of the selection, `RichTextSource` takes over from the source the view had before every paragraph whose block, runs, run properties, tab stop and formatting overrides (selection, highlighters) are the same: its text source and its shaping cache (`TextRunCache`). The lines of such a paragraph are kept with what they were formatted with (width, wrapping, first-line indent, flow direction, alignment, line height and stacking, line spacing, letter spacing, tab stops, margins, line bounds); a page that formats the whole paragraph again with the same key and room for all of it places those lines instead of breaking the paragraph again. Continuations, hosted objects, a line limit and trimming always format. Every other invalidation (a property of the view, the text services, a new document) rebuilds the whole source; a change of the text services that the view does not see needs `invalidate_document_layout`.
+- **The benchmark** `text::RichTextEditing` of `ferroui-benchmarks` (`FERROUI_BENCH_FILTER=RichTextEditing`): a typed character (and its deletion), a selection step and an IME preview update in the middle of documents of 10, 100 and 1000 paragraphs, each with measure and arrange. Release build on the development Mac (2026-10-30):
+
+| Step, 1000 paragraphs | main before F1 | F1 |
+|---|---|---|
+| type_character | 42.7 ms | 6.1 ms |
+| move_selection | 38.8 ms | 2.0 ms |
+| update_ime_preview | 47.5 ms | 11.0 ms |
+
+- **Still linear in the document:** the text of the document is rebuilt and diffed on each change (`publish_change`), and an IME preview restores the composition's snapshot through the content pool (S9). These remain for a follow-up, with the selection as an overlay and delta undo units (S8).
+
