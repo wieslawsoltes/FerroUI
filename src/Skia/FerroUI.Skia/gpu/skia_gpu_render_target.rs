@@ -76,10 +76,11 @@ impl IRenderTarget for SkiaGpuRenderTarget {
 
         let gr_context = session.gr_context();
         let mut context = DrawingContextImpl::new(nfo, vec![Box::new(move || session.dispose())]);
-        // The programs of the runtime effects are made with the first frame
-        // of a GPU context, not with the frame that first needs them.
-        if first_frame_of(&gr_context) {
-            context.prewarm_runtime_effects();
+        // The programs of the runtime effects are made a stage a frame from
+        // the second frame of a GPU context on, not with the frame that
+        // first needs them.
+        if let Some(stage) = prewarm_stage(&gr_context) {
+            context.prewarm_runtime_effects_stage(stage);
         }
 
         Ok((Box::new(context), RenderTargetDrawingContextProperties::default()))
@@ -95,21 +96,76 @@ impl IRenderTarget for SkiaGpuRenderTarget {
 }
 
 ferroui_base::ferro_thread_local! {
-    /// The GPU contexts whose runtime effects were prewarmed.
-    static PREWARMED: std::cell::RefCell<Vec<std::rc::Weak<dyn super::ISkiaGrContext>>> =
+    /// The GPU contexts of this thread and how many frames each drew.
+    static FRAMES: std::cell::RefCell<Vec<(std::rc::Weak<dyn super::ISkiaGrContext>, usize)>> =
         std::cell::RefCell::new(Vec::new());
 }
 
-/// Whether this is the first frame of `gr_context` on this thread: true
-/// once per context.
-pub(crate) fn first_frame_of(gr_context: &Rc<dyn super::ISkiaGrContext>) -> bool {
-    PREWARMED.with(|prewarmed| {
-        let mut prewarmed = prewarmed.borrow_mut();
-        prewarmed.retain(|context| context.strong_count() > 0);
-        if prewarmed.iter().any(|context| std::ptr::addr_eq(context.as_ptr(), Rc::as_ptr(gr_context))) {
-            return false;
-        }
-        prewarmed.push(Rc::downgrade(gr_context));
-        true
+/// The stage of the prewarm of the runtime effects the frame of
+/// `gr_context` that is beginning runs: none on its first frame (the first
+/// paint of the application is not delayed), stage `n - 1` on its frame
+/// `n`, none once every stage ran.
+pub(crate) fn prewarm_stage(gr_context: &Rc<dyn super::ISkiaGrContext>) -> Option<usize> {
+    FRAMES.with(|frames| {
+        let mut frames = frames.borrow_mut();
+        frames.retain(|(context, _)| context.strong_count() > 0);
+        let index = match frames.iter().position(|(context, _)| std::ptr::addr_eq(context.as_ptr(), Rc::as_ptr(gr_context))) {
+            Some(index) => index,
+            None => {
+                frames.push((Rc::downgrade(gr_context), 0));
+                frames.len() - 1
+            }
+        };
+        let frame = frames[index].1;
+        frames[index].1 = frame.saturating_add(1);
+        (1..=DrawingContextImpl::PREWARM_STAGES).contains(&frame).then(|| frame - 1)
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::gpu::{ISkiaGrContext, SkiaGpuBackend};
+    use skia_safe::{Image, ImageInfo, Surface, SurfaceProps};
+
+    struct NoContext;
+
+    impl ISkiaGrContext for NoContext {
+        fn backend(&self) -> SkiaGpuBackend {
+            SkiaGpuBackend::Graphite
+        }
+        fn create_surface(&self, _image_info: &ImageInfo, _surface_props: &SurfaceProps) -> Option<Surface> {
+            None
+        }
+        fn max_render_target_size(&self) -> Option<i32> {
+            None
+        }
+        fn flush(&self) {}
+        fn reset_context(&self) {}
+        fn set_resource_cache_limit(&self, _max_resource_bytes: i64) {}
+        fn snapshot_to_raster(&self, _surface: &mut Surface) -> Option<Image> {
+            None
+        }
+        fn is_lost(&self) -> bool {
+            false
+        }
+        fn as_any(&self) -> &dyn std::any::Any {
+            self
+        }
+    }
+
+    #[test]
+    fn the_prewarm_runs_a_stage_a_frame_from_the_second_frame_of_a_context() {
+        let context: Rc<dyn ISkiaGrContext> = Rc::new(NoContext);
+        let other: Rc<dyn ISkiaGrContext> = Rc::new(NoContext);
+        let stages: Vec<_> = (0..DrawingContextImpl::PREWARM_STAGES + 3).map(|_| prewarm_stage(&context)).collect();
+        assert_eq!(None, stages[0], "the first paint is not delayed");
+        for (stage, scheduled) in stages[1..=DrawingContextImpl::PREWARM_STAGES].iter().enumerate() {
+            assert_eq!(Some(stage), *scheduled);
+        }
+        assert!(stages[DrawingContextImpl::PREWARM_STAGES + 1..].iter().all(Option::is_none));
+        // Each context has stages of its own.
+        assert_eq!(None, prewarm_stage(&other));
+        assert_eq!(Some(0), prewarm_stage(&other));
+    }
 }

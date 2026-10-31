@@ -2133,27 +2133,41 @@ impl DrawingContextImpl {
         }
     }
 
+    /// How many stages [`prewarm_runtime_effects_stage`](Self::prewarm_runtime_effects_stage) has.
+    pub(crate) const PREWARM_STAGES: usize = 7;
+
     /// Makes the GPU programs of the runtime effects before an interactive
-    /// frame needs them: compiles every SkSL program of the compositor's
-    /// effects and draws each once, in the forms the drawing context draws
-    /// them (the lighting, the multiply layer of the lights, a coverage
-    /// clip over a fill and a rounded fill, each pixel operation), into the
-    /// top left 4 by 4 device pixels of the target, which are cleared to
-    /// transparent afterwards. The GPU links each program on its first draw
-    /// (on WebGL, ANGLE translates and links it: hundreds of milliseconds on
-    /// a cold cache); called before the first frame of a GPU target, that
-    /// happens while the application starts, not while it scrolls. Returns
-    /// how many programs compiled.
+    /// frame needs them: every stage of
+    /// [`prewarm_runtime_effects_stage`](Self::prewarm_runtime_effects_stage)
+    /// at once. Returns how many SkSL programs compiled.
     pub(crate) fn prewarm_runtime_effects(&mut self) -> usize {
+        let compiled = crate::composition_effects::compile_all();
+        for stage in 0..Self::PREWARM_STAGES {
+            self.prewarm_runtime_effects_stage(stage);
+        }
+        compiled
+    }
+
+    /// One stage of the prewarm of the runtime effects: the GPU links the
+    /// program of a draw on its first draw (on WebGL, ANGLE translates and
+    /// links it: tens to hundreds of milliseconds on a cold cache), so each
+    /// stage compiles the SkSL programs and draws one effect, in the forms
+    /// the drawing context draws it, into the top left 4 by 4 device pixels
+    /// of the target, cleared to transparent afterwards. The stages are the
+    /// lighting, the multiply layer of the lights, a coverage clip (a rounded
+    /// clip inside another) over a fill, a rounded fill, a circle and an
+    /// image, and each pixel operation. A GPU render target runs one stage a
+    /// frame from its second frame on, so neither the first frame nor an
+    /// interactive one waits for them all.
+    pub(crate) fn prewarm_runtime_effects_stage(&mut self, stage: usize) {
         use ferroui_base::media::immutable::ImmutableSolidColorBrush;
         use ferroui_base::platform::{IDrawingContextImplWithLayerEffects, LightingParameters, PixelOperation, PositionedLight};
         use ferroui_base::rendering::composition::effects::BlendEffectMode;
         use ferroui_base::rendering::composition::server::{LightAttenuation, LightColor, LightSource, LightingMaterial};
 
         self.check_lease();
-        let compiled = crate::composition_effects::compile_all();
-        if compiled == 0 {
-            return 0;
+        if crate::composition_effects::compile_all() == 0 || stage >= Self::PREWARM_STAGES {
+            return;
         }
         let saved_opacity = std::mem::replace(&mut self.current_opacity, 1.0);
         let corner = sk::Rect::from_wh(4.0, 4.0);
@@ -2175,40 +2189,75 @@ impl DrawingContextImpl {
             }],
             material: LightingMaterial { ambient: 1.0, diffuse: 1.0, specular: 0.5, shine: 16.0 },
         };
-        self.draw_lighting(pixel, &lighting);
-        if self.push_lighting_multiply_layer(pixel, &lighting) {
-            self.draw_rectangle(Some(&brush), None, RoundedRect::from_rect(pixel), &BoxShadows::default());
-            self.pop_multiply_layer();
-        }
-        // A rounded clip inside another: the inner one is a coverage shader.
-        let rounded = RoundedRect::from_radius(Rect::new(0.0, 0.0, 4.0, 4.0), 1.0);
-        self.push_clip_rounded(rounded);
-        self.push_clip_rounded(rounded);
-        self.draw_rectangle(Some(&brush), None, RoundedRect::from_rect(pixel), &BoxShadows::default());
-        self.draw_rectangle(Some(&brush), None, RoundedRect::from_radius(Rect::new(0.0, 0.0, 2.0, 2.0), 0.5), &BoxShadows::default());
-        self.pop_clip();
-        self.pop_clip();
         let grid = Rect::new(0.0, 0.0, 4.0, 4.0);
-        for operation in [
-            PixelOperation::Blend { mode: BlendEffectMode::Subtract, noise_grid: grid, noise_size: ferroui_base::PixelSize::new(4, 4) },
-            PixelOperation::Blend { mode: BlendEffectMode::Dissolve, noise_grid: grid, noise_size: ferroui_base::PixelSize::new(4, 4) },
-            PixelOperation::Arithmetic { k: [0.5, 0.5, 0.5, 0.0] },
-            PixelOperation::MaskInvert,
-        ] {
-            if self.push_pixel_operation(pixel, &operation) {
+        let operation = |stage: usize| match stage {
+            3 => PixelOperation::Blend { mode: BlendEffectMode::Subtract, noise_grid: grid, noise_size: ferroui_base::PixelSize::new(4, 4) },
+            4 => PixelOperation::Blend { mode: BlendEffectMode::Dissolve, noise_grid: grid, noise_size: ferroui_base::PixelSize::new(4, 4) },
+            5 => PixelOperation::Arithmetic { k: [0.5, 0.5, 0.5, 0.0] },
+            _ => PixelOperation::MaskInvert,
+        };
+        match stage {
+            0 => {
+                self.draw_lighting(pixel, &lighting);
+            }
+            1 => {
+                if self.push_lighting_multiply_layer(pixel, &lighting) {
+                    self.draw_rectangle(Some(&brush), None, RoundedRect::from_rect(pixel), &BoxShadows::default());
+                    self.pop_multiply_layer();
+                }
+            }
+            2 => {
+                // A rounded clip inside another: the inner one is a coverage
+                // shader.
+                let rounded = RoundedRect::from_radius(Rect::new(0.0, 0.0, 4.0, 4.0), 1.0);
+                self.push_clip_rounded(rounded);
+                self.push_clip_rounded(rounded);
                 self.draw_rectangle(Some(&brush), None, RoundedRect::from_rect(pixel), &BoxShadows::default());
-                self.next_pixel_operation_source();
-                self.draw_rectangle(Some(&brush), None, RoundedRect::from_rect(pixel), &BoxShadows::default());
-                self.pop_pixel_operation();
+                self.draw_rectangle(
+                    Some(&brush),
+                    None,
+                    RoundedRect::from_radius(Rect::new(0.0, 0.0, 2.0, 2.0), 0.5),
+                    &BoxShadows::default(),
+                );
+                // A circle and an image, sampled as the bitmaps of the
+                // drawing context are.
+                let mut paint = SkPaintCache::get();
+                paint.set_anti_alias(true);
+                paint.set_color(sk::Color::WHITE);
+                self.canvas.get().draw_circle((1.0, 1.0), 1.0, &paint);
+                let info = sk::ImageInfo::new((2, 2), sk::ColorType::RGBA8888, sk::AlphaType::Premul, None);
+                if let Some(image) = sk::images::raster_from_data(&info, sk::Data::new_copy(&[255u8; 16]), 8) {
+                    let image = crate::gpu::drawable_image(self.gr_context.as_deref(), image, false);
+                    for filter in [sk::FilterMode::Nearest, sk::FilterMode::Linear] {
+                        let sampling = sk::SamplingOptions::new(filter, sk::MipmapMode::None);
+                        self.canvas.get().draw_image_rect_with_sampling_options(
+                            &image,
+                            None,
+                            sk::Rect::from_wh(2.0, 2.0),
+                            sampling,
+                            &paint,
+                        );
+                    }
+                }
+                SkPaintCache::return_reset(paint);
+                self.pop_clip();
+                self.pop_clip();
+            }
+            _ => {
+                if self.push_pixel_operation(pixel, &operation(stage)) {
+                    self.draw_rectangle(Some(&brush), None, RoundedRect::from_rect(pixel), &BoxShadows::default());
+                    self.next_pixel_operation_source();
+                    self.draw_rectangle(Some(&brush), None, RoundedRect::from_rect(pixel), &BoxShadows::default());
+                    self.pop_pixel_operation();
+                }
             }
         }
 
-        // What the prewarm drew goes; the frame starts from what was there.
+        // What the stage drew goes; the frame goes on from what was there.
         self.canvas.get().clear(sk::Color::TRANSPARENT);
         // The transform of the context is read back from the canvas.
         self.restore_canvas();
         self.current_opacity = saved_opacity;
-        compiled
     }
 
     /// Composes the layer of the latest next source of a pixel operation,
