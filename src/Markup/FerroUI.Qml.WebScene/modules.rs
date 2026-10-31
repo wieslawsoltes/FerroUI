@@ -9,16 +9,11 @@ use std::collections::BTreeMap;
 
 pub(crate) struct Modules {
     pub files: BTreeMap<String, String>,
-    pub aliases: Json,
+    pub manifest: Json,
 }
 
 impl Modules {
-    pub fn prepare(
-        resources: &BTreeMap<String, ScriptResource>,
-        imports: &BTreeMap<String, String>,
-        component: u64,
-        origin: &str,
-    ) -> Result<Self, Error> {
+    pub fn prepare(resources: &BTreeMap<String, ScriptResource>) -> Result<Self, Error> {
         let mut files = BTreeMap::new();
         let mut manifest = BTreeMap::new();
         for (url, resource) in resources {
@@ -52,16 +47,9 @@ impl Modules {
             );
             files.insert(url.clone(), source);
         }
-        for (alias, target) in imports {
-            if !resources.contains_key(target) {
-                return Err(Error::new(format!(
-                    "missing embedded script for import '{alias}'"
-                )));
-            }
-        }
         Ok(Self {
             files,
-            aliases: json!({"names": imports, "resources": manifest, "context": [origin, component.to_string()]}),
+            manifest: json!(manifest),
         })
     }
 }

@@ -13,7 +13,7 @@ use ferroui_qml::{
 use serde_json::{json, Value as Json};
 use std::{
     cell::{Cell, RefCell},
-    collections::{BTreeMap, BTreeSet},
+    collections::BTreeMap,
     path::{Path, PathBuf},
     rc::{Rc, Weak},
     time::{Duration, Instant},
@@ -28,8 +28,8 @@ struct Tables {
     objects: BTreeMap<ObjectId, u64>,
     other: BTreeMap<ScriptInstance, Vec<(Value, u64)>>,
     values: BTreeMap<u64, (ScriptInstance, Value)>,
-    modules: BTreeMap<(ObjectId, String, BTreeMap<String, String>), Rc<modules::Modules>>,
-    prepared: BTreeSet<ScriptInstance>,
+    modules: Option<Rc<modules::Modules>>,
+    prepared: bool,
 }
 impl Tables {
     fn allocate(&mut self) -> u64 {
@@ -49,6 +49,13 @@ impl Tables {
         );
         if let Some(id) = self.scopes.get(&key) {
             return Ok((*id, self.scope_names[id].clone()));
+        }
+        for (alias, target) in &script.imports {
+            if !ctx.resources().contains_key(target) {
+                return Err(Error::new(format!(
+                    "missing embedded script for import '{alias}'"
+                )));
+            }
         }
         // Exclude arguments belonging to the activating function. The V8
         // function owns those variables, while this lexical scope is reusable.
@@ -244,7 +251,7 @@ impl Realm {
     fn poison(&self, err: Error) -> Error {
         self.worker.borrow_mut().take();
         self.generation.set(self.generation.get() + 1);
-        self.tables.borrow_mut().prepared.clear();
+        self.tables.borrow_mut().prepared = false;
         self.handles.borrow_mut().clear();
         err
     }
@@ -380,43 +387,64 @@ impl Realm {
         script: &ir::JavaScript,
     ) -> Result<Value, Error> {
         let instance = ctx.instance();
-        let (scope, names, component_scope, component_names, graph) = {
-            let mut t = self.tables.borrow_mut();
-            let root = t.host_id(instance, &Value::Object(ctx.root()));
-            let (scope_id, names) = t.scope(ctx, ctx.capture_scope(), script)?;
+        let (root, scope, names, component_scope, component_names, catalog) = {
+            let mut tables = self.tables.borrow_mut();
+            let root = tables.host_id(instance, &Value::Object(ctx.root()));
+            let (scope, names) = tables.scope(ctx, ctx.capture_scope(), script)?;
             let (component_scope, component_names) =
-                t.scope(ctx, ctx.capture_component_scope(), script)?;
-            let key = (ctx.root(), script.origin.clone(), script.imports.clone());
-            let graph = if let Some(graph) = t.modules.get(&key) {
-                graph.clone()
+                tables.scope(ctx, ctx.capture_component_scope(), script)?;
+            // Every component in this instance uses the same linked resource catalog.
+            // Only its aliases and lexical owner vary. Nested evaluations run after
+            // the worker has installed the outer call's catalog.
+            let catalog = if !tables.prepared && self.deadline.get().is_none() {
+                if tables.modules.is_none() {
+                    tables.modules = Some(Rc::new(modules::Modules::prepare(ctx.resources())?));
+                }
+                tables.modules.clone()
             } else {
-                let graph = Rc::new(modules::Modules::prepare(
-                    ctx.resources(),
-                    &script.imports,
-                    root,
-                    &script.origin,
-                )?);
-                t.modules.insert(key, graph.clone());
-                graph
+                None
             };
-            (scope_id, names, component_scope, component_names, graph)
+            (
+                root,
+                scope,
+                names,
+                component_scope,
+                component_names,
+                catalog,
+            )
         };
         let mut args = serde_json::Map::new();
-        for (k, v) in ctx.arguments() {
-            args.insert(k.clone(), self.encode(instance, v)?);
+        for (name, value) in ctx.arguments() {
+            args.insert(name.clone(), self.encode(instance, value)?);
         }
-        let mut command = json!({"op":"eval","scope":scope,"componentScope":component_scope,"componentNames":&*component_names,"graph":graph.aliases,
-            "source":script.code(),"hook":script.import_hook,"form":match script.form {ir::ScriptForm::Expression=>"expr",ir::ScriptForm::BindingBlock=>"block",_=>"body"},
-            "owner":self.encode(instance,&Value::Object(ctx.owner()))?,"names":&*names,"args":args,
-            "parameters":ctx.parameter_names(),"origin":script.origin,"mode":host::mode(ctx.expected_type())});
-        let need_modules = !self.tables.borrow().prepared.contains(&instance);
-        if need_modules && !graph.files.is_empty() {
-            command["prepare"] = graph.aliases.clone();
-            command["files"] = json!(graph.files);
+        let form = match script.form {
+            ir::ScriptForm::Expression => "expr",
+            ir::ScriptForm::BindingBlock => "block",
+            _ => "body",
+        };
+        let mut command = json!({
+            "op": "eval",
+            "scope": scope,
+            "componentScope": component_scope,
+            "componentNames": &*component_names,
+            "graph": {"names": script.imports, "context": [&script.origin, &root.to_string()]},
+            "source": script.code(),
+            "hook": script.import_hook,
+            "form": form,
+            "owner": self.encode(instance, &Value::Object(ctx.owner()))?,
+            "names": &*names,
+            "args": args,
+            "parameters": ctx.parameter_names(),
+            "origin": script.origin,
+            "mode": host::mode(ctx.expected_type()),
+        });
+        if let Some(catalog) = catalog.as_ref().filter(|modules| !modules.files.is_empty()) {
+            command["prepare"] = json!({"resources": catalog.manifest, "names": script.imports});
+            command["files"] = json!(catalog.files);
         }
         let result = self.invoke(ctx, command);
-        if result.is_ok() && !graph.files.is_empty() {
-            self.tables.borrow_mut().prepared.insert(instance);
+        if result.is_ok() && catalog.is_some() {
+            self.tables.borrow_mut().prepared = true;
         }
         result
     }

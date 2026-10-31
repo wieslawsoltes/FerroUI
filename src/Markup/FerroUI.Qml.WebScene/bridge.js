@@ -2,6 +2,7 @@
 (function (modules,observePromise,controlKey) {
     "use strict";
     let activeCalls=0;
+    let resources = Object.create(null);
     function authorize(key){if(key!==controlKey)throw new Error("Private WebScene QML entry point");}
     const fetchText = globalThis.__webSceneFetchText;
     if (typeof fetchText !== "function") throw new Error("Missing WebScene synchronous text loader");
@@ -206,6 +207,7 @@
     }
 
     function evaluate(script) {
+        script.graph.resources = resources;
         const parameters = script.parameters || Object.keys(script.args);
         const factory = functionFactory(script, parameters);
         let invoke = factory(environment(script));
@@ -241,9 +243,14 @@
         }
     }
     return Object.freeze({
-        prepare(key,graph){authorize(key);
-            preparing="pending";
-            modules.prepare(graph).then(()=>{preparing="ready"},e=>{preparing=String(e?.stack||e)});
+        prepare(key, graph) {
+            authorize(key);
+            preparing = "pending";
+            resources = graph.resources;
+            modules.prepare(graph).then(
+                () => { preparing = "ready"; },
+                error => { preparing = String(error?.stack || error); }
+            );
         },
         preparation(key){authorize(key);return preparing},
         run(key,c){authorize(key);return JSON.stringify(execute(c))},
