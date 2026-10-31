@@ -2,15 +2,16 @@
 //! (a text box that has the focus) with the input method of the system.
 
 use super::ferro_input_connection::FerroInputConnection;
-use super::text_edit_buffer::{ExtractedText, IAndroidInputMethod, KeyEventToDispatch};
+use super::text_edit_buffer::{ExtractedText, IAndroidInputMethod, IInputConnectionTopLevel, KeyEventToDispatch};
 use crate::i_init_editor_info::{EditorInfo, IInitEditorInfo, InitEditorInfo};
 use ferroui_base::input::text_input::{
-    ITextInputMethodImpl, TextInputContentType, TextInputMethodClient, TextInputOptions, TextInputReturnKeyType,
-    TextSelection,
+    ITextInputMethodImpl, TextInputContentType, TextInputMethodClient, TextInputMethodConnection, TextInputOptions,
+    TextInputReturnKeyType, TextSelection,
 };
+use ferroui_base::input::InputScopeNameValue;
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::Rect;
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
 
 /// `android.text.InputType`.
@@ -89,6 +90,18 @@ pub(crate) struct AndroidInputMethod {
     input_connection: RefCell<Option<Rc<FerroInputConnection>>>,
     /// The three subscriptions to the events of the client.
     client_events: RefCell<Vec<Rc<dyn IDisposable>>>,
+    // The state of a client of the exact-edit connection (R12 of
+    // docs/porting/winui-rich-text.md, decision D5); unused for any other client.
+    /// Advanced by every `set_client`.
+    client_generation: Cell<u64>,
+    /// The generation of the client the current input connection was made for.
+    input_connection_generation: Cell<u64>,
+    /// Only a restart for changed options carries the composing region of the
+    /// current input connection into the next one; a client assignment cancels it.
+    options_restart_connection: RefCell<Option<Weak<FerroInputConnection>>>,
+    /// The editor info the system was last given for the current client, and the
+    /// connection it was made for.
+    delivered_editor_info: RefCell<Option<(Weak<TextInputMethodConnection>, EditorInfo)>>,
 }
 
 impl AndroidInputMethod {
@@ -102,7 +115,89 @@ impl AndroidInputMethod {
             client: RefCell::new(None),
             input_connection: RefCell::new(None),
             client_events: RefCell::new(Vec::new()),
+            client_generation: Cell::new(0),
+            input_connection_generation: Cell::new(0),
+            options_restart_connection: RefCell::new(None),
+            delivered_editor_info: RefCell::new(None),
         })
+    }
+
+    /// The connection of the client, when it is a client of the exact-edit connection.
+    fn client_connection(&self) -> Option<Rc<TextInputMethodConnection>> {
+        self.client()
+            .and_then(|client| client.input_method_connection())
+            .filter(|connection| connection.is_current())
+    }
+
+    /// The editor info and input connection of a client of the exact-edit connection:
+    /// the first input scope of its owner chooses the keyboard
+    /// ([`fill_connection_editor_info`](Self::fill_connection_editor_info)), and the
+    /// composing region survives a restart for changed options.
+    fn init_connection_editor_info(
+        &self,
+        options: &TextInputOptions,
+        connection: &Rc<TextInputMethodConnection>,
+        top_level: &Rc<dyn IInputConnectionTopLevel>,
+        out_attrs: &mut EditorInfo,
+    ) -> Option<Rc<FerroInputConnection>> {
+        let generation = self.client_generation.get();
+        let previous = self.options_restart_connection.borrow_mut().take().and_then(|weak| weak.upgrade());
+        let composition = previous.and_then(|previous| {
+            self.input_connection()
+                .filter(|current| Rc::ptr_eq(current, &previous))
+                .and_then(|current| current.edit_buffer().composition())
+        });
+
+        let input_method: Weak<dyn IAndroidInputMethod> = self.this.clone();
+        let input_connection = FerroInputConnection::new(Rc::downgrade(top_level), input_method);
+        if let Some(composition) = composition {
+            input_connection.edit_buffer().set_composition(Some(composition));
+            // Clamping the region reads the surrounding text of the client, which can
+            // replace the focus in application code.
+            if self.client_generation.get() != generation {
+                return None;
+            }
+        }
+        *self.input_connection.borrow_mut() = Some(input_connection.clone());
+        self.input_connection_generation.set(generation);
+
+        AndroidInputMethod::fill_connection_editor_info(
+            options,
+            connection.effective_input_scope(),
+            out_attrs,
+            self.api_level,
+        );
+        *self.delivered_editor_info.borrow_mut() = Some((Rc::downgrade(connection), out_attrs.clone()));
+
+        Some(input_connection)
+    }
+
+    /// Restarts the input of a client of the exact-edit connection whose options (or
+    /// input scopes) changed while it has the keyboard, only when the editor info
+    /// changes. Upstream installs the new function only, which every other client
+    /// keeps (decision D5).
+    fn restart_for_changed_options(&self, options: &TextInputOptions) {
+        let Some(connection) = self.client_connection() else {
+            return;
+        };
+        let mut next = EditorInfo::default();
+        Self::fill_connection_editor_info(options, connection.effective_input_scope(), &mut next, self.api_level);
+        // Only the editor info of this binding counts: the manager publishes the options
+        // of a new binding before it sets the client, which restarts the input anyway.
+        let changed = self.delivered_editor_info.borrow().as_ref().is_some_and(|(delivered_for, delivered)| {
+            delivered_for.upgrade().is_some_and(|delivered_for| Rc::ptr_eq(&delivered_for, &connection))
+                && *delivered != next
+        });
+        if !changed || !self.is_active() {
+            return;
+        }
+        *self.options_restart_connection.borrow_mut() =
+            if self.input_connection_generation.get() == self.client_generation.get() {
+                self.input_connection().as_ref().map(Rc::downgrade)
+            } else {
+                None
+            };
+        self.host.restart_input();
     }
 
     fn input_connection(&self) -> Option<Rc<FerroInputConnection>> {
@@ -226,6 +321,151 @@ impl AndroidInputMethod {
             out_attrs.hint_locales = Some(locale_hints.to_vec());
         }
     }
+
+    /// [`fill_editor_info`](Self::fill_editor_info) for a client of the exact-edit
+    /// connection (R12 of docs/porting/winui-rich-text.md, decision D5), with the first
+    /// input scope of its owner (decision D8):
+    /// - the scope, when there is one, chooses the input type instead of the content type;
+    /// - the text flags (capitalization, multiline) are not added to a numeric or phone
+    ///   class a scope chose;
+    /// - a password or PIN (content type or scope) also turns off suggestions and
+    ///   personalized learning, as sensitive content does.
+    pub(crate) fn fill_connection_editor_info(
+        options: &TextInputOptions,
+        scope: Option<InputScopeNameValue>,
+        out_attrs: &mut EditorInfo,
+        api_level: i32,
+    ) {
+        use input_types::*;
+
+        out_attrs.input_type = match scope {
+            Some(scope) => input_type_for_scope(scope),
+            None => match options.content_type {
+                TextInputContentType::Email => CLASS_TEXT | TEXT_VARIATION_EMAIL_ADDRESS,
+                TextInputContentType::Number => CLASS_NUMBER | NUMBER_FLAG_DECIMAL | NUMBER_FLAG_SIGNED,
+                TextInputContentType::Password => CLASS_TEXT | TEXT_VARIATION_PASSWORD,
+                TextInputContentType::Pin => CLASS_NUMBER | NUMBER_VARIATION_PASSWORD,
+                TextInputContentType::Digits => CLASS_PHONE,
+                TextInputContentType::Url => CLASS_TEXT | TEXT_VARIATION_URI,
+                TextInputContentType::Name => CLASS_TEXT | TEXT_VARIATION_PERSON_NAME,
+                _ => CLASS_TEXT,
+            },
+        };
+
+        // The flags of an input type belong to its class: a numeric pad a scope chose
+        // gets no text flags.
+        let accepts_text_flags = scope.is_none() || (out_attrs.input_type & MASK_CLASS) == CLASS_TEXT;
+        if options.auto_capitalization && accepts_text_flags {
+            out_attrs.initial_caps_mode = CAPITALIZATION_MODE_SENTENCES;
+            out_attrs.input_type |= TEXT_FLAG_CAP_SENTENCES;
+        }
+
+        if options.multiline && accepts_text_flags {
+            out_attrs.input_type |= TEXT_FLAG_MULTI_LINE;
+        }
+
+        out_attrs.ime_options = match options.return_key_type {
+            TextInputReturnKeyType::Return => ime_flags::NO_ENTER_ACTION,
+            TextInputReturnKeyType::Go => CustomImeFlags::ActionGo as i32,
+            TextInputReturnKeyType::Send => CustomImeFlags::ActionSend as i32,
+            TextInputReturnKeyType::Search => CustomImeFlags::ActionSearch as i32,
+            TextInputReturnKeyType::Next => CustomImeFlags::ActionNext as i32,
+            TextInputReturnKeyType::Previous => CustomImeFlags::ActionPrevious as i32,
+            TextInputReturnKeyType::Done => CustomImeFlags::ActionDone as i32,
+            TextInputReturnKeyType::Default => {
+                if options.multiline {
+                    ime_flags::NO_ENTER_ACTION
+                } else {
+                    CustomImeFlags::ActionDone as i32
+                }
+            }
+        };
+
+        out_attrs.ime_options |= ime_flags::NO_FULLSCREEN | ime_flags::NO_EXTRACT_UI;
+
+        if options.show_suggestions == Some(false) && (out_attrs.input_type & MASK_CLASS) == CLASS_TEXT {
+            out_attrs.input_type |= TEXT_FLAG_NO_SUGGESTIONS;
+
+            if (out_attrs.input_type & MASK_VARIATION) == TEXT_VARIATION_NORMAL {
+                out_attrs.input_type |= TEXT_VARIATION_VISIBLE_PASSWORD;
+            }
+        }
+
+        let scope_is_secret = matches!(
+            scope,
+            Some(
+                InputScopeNameValue::Password
+                    | InputScopeNameValue::NumericPassword
+                    | InputScopeNameValue::NumericPin
+                    | InputScopeNameValue::AlphanumericPin
+            )
+        );
+        let content_is_secret =
+            matches!(options.content_type, TextInputContentType::Password | TextInputContentType::Pin);
+        if options.is_sensitive || scope_is_secret || content_is_secret {
+            if (scope.is_none() && options.is_sensitive) || (out_attrs.input_type & MASK_CLASS) == CLASS_TEXT {
+                out_attrs.input_type |= TEXT_FLAG_NO_SUGGESTIONS;
+            }
+
+            if api_level >= 26 {
+                out_attrs.ime_options |= ime_flags::NO_PERSONALIZED_LEARNING;
+            }
+        }
+
+        if let Some(locale_hints) = options.locale_hints.as_ref().filter(|hints| !hints.is_empty()) {
+            out_attrs.hint_locales = Some(locale_hints.to_vec());
+        }
+    }
+}
+
+/// The input type of an input scope, for a client of the exact-edit connection. The
+/// editor info only advises the input method. Android has no script- or width-specific
+/// input type: the script and width scopes are normal text, full-width numbers the
+/// numeric pad.
+fn input_type_for_scope(scope: InputScopeNameValue) -> i32 {
+    use input_types::*;
+    use InputScopeNameValue as Scope;
+    match scope {
+        Scope::Url => CLASS_TEXT | TEXT_VARIATION_URI,
+        Scope::EmailSmtpAddress | Scope::EmailNameOrAddress => CLASS_TEXT | TEXT_VARIATION_EMAIL_ADDRESS,
+        Scope::PersonalFullName | Scope::NameOrPhoneNumber => CLASS_TEXT | TEXT_VARIATION_PERSON_NAME,
+        Scope::CurrencyAmountAndSymbol
+        | Scope::CurrencyAmount
+        | Scope::Number
+        | Scope::NumberFullWidth
+        | Scope::FormulaNumber => CLASS_NUMBER | NUMBER_FLAG_DECIMAL | NUMBER_FLAG_SIGNED,
+        Scope::DateMonthNumber
+        | Scope::DateDayNumber
+        | Scope::DateYear
+        | Scope::Digits
+        | Scope::TimeHour
+        | Scope::TimeMinutesOrSeconds => CLASS_NUMBER,
+        Scope::TelephoneNumber
+        | Scope::TelephoneCountryCode
+        | Scope::TelephoneAreaCode
+        | Scope::TelephoneLocalNumber => CLASS_PHONE,
+        Scope::Password | Scope::AlphanumericPin => CLASS_TEXT | TEXT_VARIATION_PASSWORD,
+        Scope::NumericPassword | Scope::NumericPin => CLASS_NUMBER | NUMBER_VARIATION_PASSWORD,
+        Scope::Default
+        | Scope::AlphanumericHalfWidth
+        | Scope::AlphanumericFullWidth
+        | Scope::Hiragana
+        | Scope::KatakanaHalfWidth
+        | Scope::KatakanaFullWidth
+        | Scope::Hanja
+        | Scope::HangulHalfWidth
+        | Scope::HangulFullWidth
+        | Scope::Search
+        | Scope::Formula
+        | Scope::SearchIncremental
+        | Scope::ChineseHalfWidth
+        | Scope::ChineseFullWidth
+        | Scope::NativeScript
+        | Scope::Text
+        | Scope::Chat
+        | Scope::Maps
+        | Scope::ChatWithoutEmoji => CLASS_TEXT,
+    }
 }
 
 impl IAndroidInputMethod for AndroidInputMethod {
@@ -262,6 +502,9 @@ impl ITextInputMethodImpl for AndroidInputMethod {
     fn reset(&self) {}
 
     fn set_client(&self, client: Option<Rc<dyn TextInputMethodClient>>) {
+        self.client_generation.set(self.client_generation.get().wrapping_add(1));
+        drop(self.options_restart_connection.borrow_mut().take());
+        drop(self.delivered_editor_info.borrow_mut().take());
         let subscriptions = std::mem::take(&mut *self.client_events.borrow_mut());
         for subscription in subscriptions {
             subscription.dispose();
@@ -304,12 +547,16 @@ impl ITextInputMethodImpl for AndroidInputMethod {
     fn set_cursor_rect(&self, _rect: Rect) {}
 
     fn set_options(&self, options: &TextInputOptions) {
+        let restart_options = options;
         let this = self.this.clone();
         let options = options.clone();
         let init: InitEditorInfo = Rc::new(move |top_level, out_attrs: &mut EditorInfo| {
             let this = this.upgrade()?;
             if this.client.borrow().is_none() {
                 return None;
+            }
+            if let Some(connection) = this.client_connection() {
+                return this.init_connection_editor_info(&options, &connection, top_level, out_attrs);
             }
 
             let input_method: Weak<dyn IAndroidInputMethod> = this.this.clone();
@@ -321,6 +568,7 @@ impl ITextInputMethodImpl for AndroidInputMethod {
             Some(input_connection)
         });
         self.host.init_editor_info(init);
+        self.restart_for_changed_options(restart_options);
     }
 }
 
@@ -332,7 +580,7 @@ mod tests {
     use super::*;
 
     #[derive(Clone, Debug, PartialEq, Eq)]
-    enum HostCall {
+    pub(super) enum HostCall {
         SetFocusable,
         RequestFocus,
         RestartInput,
@@ -344,18 +592,18 @@ mod tests {
     }
 
     #[derive(Default)]
-    struct Host {
+    pub(super) struct Host {
         calls: RefCell<Vec<HostCall>>,
-        init: RefCell<Option<InitEditorInfo>>,
+        pub(super) init: RefCell<Option<InitEditorInfo>>,
     }
 
     impl Host {
-        fn take_calls(&self) -> Vec<HostCall> {
+        pub(super) fn take_calls(&self) -> Vec<HostCall> {
             std::mem::take(&mut *self.calls.borrow_mut())
         }
 
         /// What the view does when the system asks for an input connection.
-        fn create_input_connection(&self) -> Option<(Rc<FerroInputConnection>, EditorInfo)> {
+        pub(super) fn create_input_connection(&self) -> Option<(Rc<FerroInputConnection>, EditorInfo)> {
             // The top-level of the tests of the buffer: it only records.
             let top_level: Rc<dyn IInputConnectionTopLevel> = TestInputMethod::new(None);
             TOP_LEVELS.with(|top_levels| top_levels.borrow_mut().push(top_level.clone()));
@@ -415,14 +663,14 @@ mod tests {
         }
     }
 
-    fn input_method() -> (Rc<Host>, Rc<AndroidInputMethod>) {
+    pub(super) fn input_method() -> (Rc<Host>, Rc<AndroidInputMethod>) {
         let host = Rc::new(Host::default());
         let input_method = AndroidInputMethod::new(host.clone(), 36);
         assert_eq!(host.take_calls(), vec![HostCall::SetFocusable]);
         (host, input_method)
     }
 
-    fn info(options: &TextInputOptions) -> EditorInfo {
+    pub(super) fn info(options: &TextInputOptions) -> EditorInfo {
         let mut out_attrs = EditorInfo::default();
         AndroidInputMethod::fill_editor_info(options, &mut out_attrs, 36);
         out_attrs
@@ -591,6 +839,10 @@ mod tests {
         assert_eq!(info(&TextInputOptions { locale_hints: Some(empty), ..Default::default() }).hint_locales, None);
     }
 }
+
+#[cfg(test)]
+#[path = "android_input_method_connection_tests.rs"]
+mod connection_tests;
 
 #[cfg(target_os = "android")]
 pub(crate) use imp::{extracted_text_to_java, ViewInputMethodHost};

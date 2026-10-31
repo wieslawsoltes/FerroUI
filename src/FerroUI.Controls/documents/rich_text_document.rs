@@ -222,6 +222,8 @@ struct RichTextDocumentData {
     pending_edit: RefCell<Option<(Range<usize>, String)>>,
     range_change_generation: Cell<u64>,
     cached_text: RefCell<Rc<str>>,
+    /// The UTF-16 length of `cached_text` (F1: no scan of the text per query).
+    cached_text_length: Cell<usize>,
     observed_text: RefCell<Rc<str>>,
     text_changes: RefCell<Vec<DocumentTextChange>>,
     installing: Cell<bool>,
@@ -302,6 +304,7 @@ impl RichTextDocument {
             pending_range_change: RefCell::new(None),
             pending_edit: RefCell::new(None),
             range_change_generation: Cell::new(0),
+            cached_text_length: Cell::new(text.encode_utf16().count()),
             cached_text: RefCell::new(text.clone()),
             observed_text: RefCell::new(text),
             text_changes: RefCell::new(Vec::new()),
@@ -377,7 +380,19 @@ impl RichTextDocument {
         if self.0.dirty.get() {
             self.0.blocks.text_length()
         } else {
-            self.0.cached_text.borrow().encode_utf16().count()
+            self.0.cached_text_length.get()
+        }
+    }
+
+    /// Calls `f` with the text, borrowed when it is current (no copy of the document).
+    fn with_text<R>(&self, f: impl FnOnce(&str, usize) -> R) -> R {
+        if self.0.dirty.get() {
+            let text = self.0.blocks.text();
+            let length = text.encode_utf16().count();
+            f(&text, length)
+        } else {
+            let text = self.0.cached_text.borrow().clone();
+            f(&text, self.0.cached_text_length.get())
         }
     }
 
@@ -548,19 +563,20 @@ impl RichTextDocument {
     }
 
     pub fn validate_range(&self, range: Range<usize>) -> Result<(), DocumentError> {
-        validate_text_range(&self.text(), range)
+        self.with_text(|text, length| validate_text_range_of_length(text, length, range))
     }
 
     pub fn get_text(&self, range: Range<usize>) -> Result<String, DocumentError> {
-        let text = self.text();
-        validate_text_range(&text, range.clone())?;
-        let start =
-            utf16_to_byte(&text, range.start).ok_or(DocumentError::InvalidUtf16Boundary {
-                offset: range.start,
-            })?;
-        let end = utf16_to_byte(&text, range.end)
-            .ok_or(DocumentError::InvalidUtf16Boundary { offset: range.end })?;
-        Ok(text[start..end].to_owned())
+        self.with_text(|text, length| {
+            validate_text_range_of_length(text, length, range.clone())?;
+            let start =
+                utf16_to_byte(text, range.start).ok_or(DocumentError::InvalidUtf16Boundary {
+                    offset: range.start,
+                })?;
+            let end = utf16_to_byte(text, range.end)
+                .ok_or(DocumentError::InvalidUtf16Boundary { offset: range.end })?;
+            Ok(text[start..end].to_owned())
+        })
     }
 
     pub fn slice(&self, range: Range<usize>) -> Result<DocumentSnapshot, DocumentError> {
@@ -1359,8 +1375,9 @@ impl RichTextDocument {
         }
         let new_text = self.0.blocks.text();
         let old_text = self.0.cached_text.replace(Rc::from(new_text.as_str()));
-        let old_length = old_text.encode_utf16().count();
+        let old_length = self.0.cached_text_length.get();
         let new_length = new_text.encode_utf16().count();
+        self.0.cached_text_length.set(new_length);
         let (range, inserted_length) = changed_range(&old_text, &new_text);
         let requested_kind = self.0.change_kind.take();
         let kind = if old_text.as_ref() != new_text {
@@ -1420,7 +1437,8 @@ impl Drop for DocumentEditBatch {
     }
 }
 
-fn validate_text_range(text: &str, range: Range<usize>) -> Result<(), DocumentError> {
+/// Checks `range` against `text`, whose UTF-16 length is `length`.
+fn validate_text_range_of_length(text: &str, length: usize, range: Range<usize>) -> Result<(), DocumentError> {
     if range.start > range.end {
         return Err(DocumentError::ReversedRange {
             start: range.start,

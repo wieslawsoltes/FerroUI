@@ -34,6 +34,10 @@ jni-sys.workspace = true
 libc.workspace = true
 
 # The smoke application reads the frames it draws back from their Skia surface.
+[dev-dependencies]
+# The unit-test application, for the tests of a client of the exact-edit connection.
+ferroui-controls = { workspace = true, features = ["testing"] }
+
 [target.'cfg(target_os = "android")'.dev-dependencies]
 skia-safe.workspace = true
 

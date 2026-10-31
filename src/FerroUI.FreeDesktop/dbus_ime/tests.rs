@@ -16,15 +16,17 @@ use ferroui_base::input::text_input::{
     TextSelection,
 };
 use ferroui_base::input::{
-    FocusManager, IInputDevice, IInputRoot, InputElement, Key, KeyDeviceType, KeyModifiers, PhysicalKey,
-    RawInputModifiers,
+    FocusManager, IInputDevice, IInputRoot, InputElement, InputScopeNameValue, Key, KeyDeviceType, KeyModifiers,
+    PhysicalKey, RawInputModifiers,
 };
 use ferroui_base::{PixelPoint, Rect, Ref, Visual};
 use std::any::Any;
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::rc::Rc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
+use std::task::{Poll, Waker};
 use zbus::zvariant::{ObjectPath, OwnedObjectPath, Structure, Value};
 
 const IBUS_NAME: &str = "org.freedesktop.portal.IBus";
@@ -51,20 +53,69 @@ fn ibus_text(text: &str) -> Value<'static> {
 // ---------------------------------------------------------------------
 // IBus.
 
+/// A call of a double that a test holds until it releases it.
+#[derive(Default)]
+struct DeferredCall {
+    state: Mutex<(bool, Option<Waker>)>,
+}
+
+impl DeferredCall {
+    fn hold(&self) {
+        self.state.lock().unwrap().0 = true;
+    }
+
+    fn release(&self) {
+        let waker = {
+            let mut state = self.state.lock().unwrap();
+            state.0 = false;
+            state.1.take()
+        };
+        if let Some(waker) = waker {
+            waker.wake();
+        }
+    }
+
+    async fn wait(&self) {
+        futures_util::future::poll_fn(|cx| {
+            let mut state = self.state.lock().unwrap();
+            if state.0 {
+                state.1 = Some(cx.waker().clone());
+                Poll::Pending
+            } else {
+                Poll::Ready(())
+            }
+        })
+        .await;
+    }
+}
+
+/// What a test asks of the IBus double: to hold the creation of a context or the reply to
+/// `ContentType`, to refuse the next `ContentType`, to commit text while setting it.
+#[derive(Default)]
+struct IBusCalls {
+    create: DeferredCall,
+    content_type: DeferredCall,
+    refuse_next_content_type: AtomicBool,
+    commit_in_next_content_type: AtomicBool,
+}
+
 struct IBusPortal {
     log: Log,
+    calls: Arc<IBusCalls>,
 }
 
 #[zbus::interface(name = "org.freedesktop.IBus.Portal")]
 impl IBusPortal {
-    fn create_input_context(&self, client_name: &str) -> OwnedObjectPath {
+    async fn create_input_context(&self, client_name: &str) -> OwnedObjectPath {
         log(&self.log, format!("CreateInputContext({})", if client_name.is_empty() { "empty" } else { "name" }));
+        self.calls.create.wait().await;
         ObjectPath::try_from(IBUS_CONTEXT_PATH).unwrap().into()
     }
 }
 
 struct IBusContext {
     log: Log,
+    calls: Arc<IBusCalls>,
 }
 
 #[zbus::interface(name = "org.freedesktop.IBus.InputContext")]
@@ -108,6 +159,26 @@ impl IBusContext {
 
     fn set_capabilities(&self, caps: u32) {
         log(&self.log, format!("SetCapabilities({caps})"));
+    }
+
+    // A write-only (uu) property, as IBus has it: a call of a method instead would not reach it.
+    #[zbus(property)]
+    async fn set_content_type(
+        &self,
+        value: (u32, u32),
+        #[zbus(connection)] connection: &zbus::Connection,
+    ) -> zbus::fdo::Result<()> {
+        log(&self.log, format!("SetContentType({}, {})", value.0, value.1));
+        let refuse = self.calls.refuse_next_content_type.swap(false, Ordering::SeqCst);
+        if self.calls.commit_in_next_content_type.swap(false, Ordering::SeqCst) {
+            emit_from_service(connection, IBUS_CONTEXT_PATH, "org.freedesktop.IBus.InputContext", "CommitText", &(ibus_text("while setting"),)).await;
+        }
+        self.calls.content_type.wait().await;
+        if refuse {
+            Err(zbus::fdo::Error::UnknownProperty("ContentType".to_string()))
+        } else {
+            Ok(())
+        }
     }
 }
 
@@ -256,6 +327,7 @@ impl Fcitx5Context {
 struct TestBus {
     connections: TestConnections,
     log: Log,
+    ibus_calls: Arc<IBusCalls>,
 }
 
 impl std::ops::Deref for TestBus {
@@ -269,13 +341,15 @@ impl std::ops::Deref for TestBus {
 impl TestBus {
     fn new() -> TestBus {
         let log: Log = Arc::new(Mutex::new(Vec::new()));
+        let ibus_calls = Arc::new(IBusCalls::default());
 
         let serve = {
             let log = log.clone();
+            let calls = ibus_calls.clone();
             move |builder: ServiceBuilder| {
                 builder
-                    .serve_at("/org/freedesktop/IBus", IBusPortal { log: log.clone() })?
-                    .serve_at(IBUS_CONTEXT_PATH, IBusContext { log: log.clone() })?
+                    .serve_at("/org/freedesktop/IBus", IBusPortal { log: log.clone(), calls: calls.clone() })?
+                    .serve_at(IBUS_CONTEXT_PATH, IBusContext { log: log.clone(), calls })?
                     .serve_at(IBUS_CONTEXT_PATH, IBusService { log: log.clone() })?
                     .serve_at("/inputmethod", Fcitx4Method { log: log.clone() })?
                     .serve_at(FCITX4_CONTEXT_PATH, Fcitx4Context { log: log.clone() })?
@@ -284,7 +358,7 @@ impl TestBus {
             }
         };
 
-        TestBus { connections: TestConnections::new("/org/freedesktop/IBus", serve), log }
+        TestBus { connections: TestConnections::new("/org/freedesktop/IBus", serve), log, ibus_calls }
     }
 
     fn take_log(&self) -> Vec<String> {
@@ -708,6 +782,518 @@ fn ibus_destroys_its_context_when_disposed_and_when_a_call_fails() {
     assert!(!handle(&im, key(RawKeyEventType::KeyDown, RawInputModifiers::empty(), 2), KEY_A, 38));
     bus.settle();
     assert!(bus.take_log().is_empty());
+}
+
+#[test]
+fn ibus_drops_the_signals_of_a_context_whose_call_failed() {
+    // Not upstream, whose subscriptions live until the owner of the name changes: the context is
+    // retired before it is destroyed (DEVIATIONS.md, X11 platform).
+    let _scope = scope();
+    let bus = TestBus::new();
+    bus.start(IBUS_NAME);
+    let im = IBusX11TextInputMethod::new(bus.client.clone());
+    let recorded = record(&im);
+    bus.expect_calls(&["CreateInputContext(name)", &caps(IBusCapability::CAP_FOCUS)]);
+    pump_until(|| im.is_connected());
+    assert!(!handle(&im, key(RawKeyEventType::KeyDown, RawInputModifiers::empty(), 1), KEY_FAILS, 52));
+    bus.expect_calls(&["ProcessKeyEvent(0x7a, 52, 0x0)", "Destroy"]);
+    assert!(!im.is_connected());
+    bus.emit(IBUS_CONTEXT_PATH, "org.freedesktop.IBus.InputContext", "CommitText", &(ibus_text("late"),));
+    bus.settle();
+    assert!(recorded.commits.borrow().is_empty());
+}
+
+#[test]
+fn ibus_dispose_during_connect_destroys_the_late_context_without_publishing_it() {
+    let _scope = scope();
+    let bus = TestBus::new();
+    bus.ibus_calls.create.hold();
+    bus.start(IBUS_NAME);
+    let im = IBusX11TextInputMethod::new(bus.client.clone());
+    let recorded = record(&im);
+    pump_until(|| !bus.log.lock().unwrap().is_empty());
+    assert_eq!(bus.take_log(), ["CreateInputContext(name)"]);
+    im.dispose();
+    assert!(!im.is_connected());
+    bus.ibus_calls.create.release();
+    bus.expect_calls(&["Destroy"]);
+    assert!(!im.is_connected());
+    bus.emit(IBUS_CONTEXT_PATH, "org.freedesktop.IBus.InputContext", "CommitText", &(ibus_text("late"),));
+    bus.settle();
+    assert!(recorded.commits.borrow().is_empty());
+    assert!(bus.take_log().is_empty());
+}
+
+#[test]
+fn ibus_owner_loss_during_connect_retires_the_attempt_and_connects_to_the_next_owner() {
+    let _scope = scope();
+    let bus = TestBus::new();
+    bus.ibus_calls.create.hold();
+    bus.start(IBUS_NAME);
+    let im = IBusX11TextInputMethod::new(bus.client.clone());
+    pump_until(|| !bus.log.lock().unwrap().is_empty());
+    assert_eq!(bus.take_log(), ["CreateInputContext(name)"]);
+    bus.stop(IBUS_NAME);
+    bus.settle();
+    bus.start(IBUS_NAME);
+    bus.settle();
+    assert!(!im.is_connected());
+    bus.ibus_calls.create.release();
+    bus.expect_calls(&["Destroy", "CreateInputContext(name)", &caps(IBusCapability::CAP_FOCUS)]);
+    assert!(im.is_connected());
+}
+
+#[test]
+fn ibus_follows_a_portal_whose_owner_is_replaced_directly() {
+    // Not upstream, which reacts only to the name losing its owner and keeps a context of the
+    // old owner (DEVIATIONS.md, X11 platform).
+    const NEW_OWNER: &str = ":1.43";
+    let _scope = scope();
+    let bus = TestBus::new();
+    bus.start(IBUS_NAME);
+    let im = IBusX11TextInputMethod::new(bus.client.clone());
+    let recorded = record(&im);
+    bus.expect_calls(&["CreateInputContext(name)", &caps(IBusCapability::CAP_FOCUS)]);
+    pump_until(|| im.is_connected());
+    if !bus.replace_owner(IBUS_NAME, NEW_OWNER) {
+        // A bus gives every connection its own unique name: only its double can do this.
+        return;
+    }
+    bus.expect_calls(&["CreateInputContext(name)", &caps(IBusCapability::CAP_FOCUS)]);
+    assert!(im.is_connected());
+    let interface = "org.freedesktop.IBus.InputContext";
+    bus.emit(IBUS_CONTEXT_PATH, interface, "CommitText", &(ibus_text("old owner"),));
+    bus.emit_as(NEW_OWNER, IBUS_CONTEXT_PATH, interface, "CommitText", &(ibus_text("new owner"),));
+    bus.settle();
+    assert_eq!(*recorded.commits.borrow(), ["new owner"]);
+}
+
+fn assert_pending_ibus_signal_fence(dispose: bool) {
+    use crate::signal_watch::watch_stream;
+    use ferroui_base::reactive::IDisposable;
+    use ferroui_base::threading::Dispatcher;
+
+    struct TrackedSubscription {
+        inner: Rc<dyn IDisposable>,
+        cleaned_up: Rc<Cell<bool>>,
+    }
+
+    impl IDisposable for TrackedSubscription {
+        fn dispose(&self) {
+            self.cleaned_up.set(true);
+            self.inner.dispose();
+        }
+    }
+
+    let _scope = scope();
+    let bus = TestBus::new();
+    bus.ibus_calls.create.hold();
+    bus.start(IBUS_NAME);
+    let im = IBusX11TextInputMethod::new(bus.client.clone());
+    let recorded = record(&im);
+    let client = TestClient::new(true);
+    im.set_client(Some(client.clone()));
+    pump_until(|| !bus.log.lock().unwrap().is_empty());
+    assert_eq!(bus.take_log(), ["CreateInputContext(name)"]);
+
+    // The guard of the pending connect. A callback of a subscription can be queued while the
+    // subscription is not registered yet: the handle is kept unregistered on purpose.
+    let signals = im.signal_guard();
+    let deliveries = Rc::new(Cell::new(0));
+    let mut guarded = signals.handler({
+        let deliveries = deliveries.clone();
+        let weak = Rc::downgrade(&im);
+        move |()| {
+            deliveries.set(deliveries.get() + 1);
+            let im = weak.upgrade().unwrap();
+            im.fire_commit("queued text".to_string());
+            im.fire_forward(super::ibus::ibus_x11_text_input_method::forwarded_key(KEY_A, 0));
+            im.client().unwrap().set_preedit_text_with_cursor(Some("queued preedit"), Some(1));
+        }
+    });
+    // The context being created gets its signals: the guard asks for nothing more.
+    guarded(());
+    assert_eq!(deliveries.get(), 1);
+    assert_eq!(std::mem::take(&mut *recorded.commits.borrow_mut()), ["queued text"]);
+    assert_eq!(recorded.forwarded.borrow_mut().drain(..).count(), 1);
+    assert_eq!(client.take_preedit(), [(Some("queued preedit".to_string()), Some(1))]);
+
+    let release = Arc::new(DeferredCall::default());
+    release.hold();
+    let stream = futures_util::stream::once({
+        let release = release.clone();
+        async move {
+            release.wait().await;
+        }
+    });
+    let attempted = Rc::new(Cell::new(false));
+    let subscription = watch_stream(stream, {
+        let attempted = attempted.clone();
+        move |item| {
+            attempted.set(true);
+            guarded(item);
+        }
+    });
+    let cleaned_up = Rc::new(Cell::new(false));
+    let subscription = Rc::new(TrackedSubscription { inner: subscription, cleaned_up: cleaned_up.clone() });
+    Dispatcher::ui_thread().run_jobs(None);
+    assert!(!attempted.get());
+
+    if dispose {
+        im.dispose();
+    } else {
+        bus.stop(IBUS_NAME);
+        bus.settle();
+    }
+    release.release();
+    pump_until(|| attempted.get());
+    assert!(!cleaned_up.get(), "the queued callback ran before the subscription was cleaned up");
+    assert_eq!(deliveries.get(), 1, "a callback of a retired context reaches nobody");
+    assert!(recorded.commits.borrow().is_empty());
+    assert!(recorded.forwarded.borrow().is_empty());
+    assert!(client.take_preedit().is_empty());
+
+    signals.register(subscription);
+    assert!(cleaned_up.get(), "a late registration is disposed at once");
+    if dispose {
+        // What is delivered directly after the disposal reaches nobody either.
+        im.fire_commit("late direct text".to_string());
+        im.fire_forward(super::ibus::ibus_x11_text_input_method::forwarded_key(KEY_A, 0));
+        assert!(recorded.commits.borrow().is_empty());
+        assert!(recorded.forwarded.borrow().is_empty());
+    }
+
+    bus.ibus_calls.create.release();
+    bus.expect_calls(&["Destroy"]);
+    assert!(!im.is_connected());
+    if !dispose {
+        bus.start(IBUS_NAME);
+        bus.expect_calls(&["CreateInputContext(name)", &caps(IBusCapability::CAP_FOCUS)]);
+        bus.emit(IBUS_CONTEXT_PATH, "org.freedesktop.IBus.InputContext", "CommitText", &(ibus_text("new context"),));
+        bus.settle();
+        assert_eq!(*recorded.commits.borrow(), ["new context"]);
+        im.dispose();
+        bus.expect_calls(&["Destroy"]);
+    }
+}
+
+#[test]
+fn ibus_dispose_fences_queued_signals_before_their_subscriptions_are_cleaned_up() {
+    assert_pending_ibus_signal_fence(true);
+}
+
+#[test]
+fn ibus_owner_loss_fences_queued_signals_before_their_subscriptions_are_cleaned_up() {
+    assert_pending_ibus_signal_fence(false);
+}
+
+// ---------------------------------------------------------------------
+// The IBus content type: for a client of the exact-edit connection only (decision D5 of
+// `docs/porting/winui-rich-text.md`; upstream's `SetOptions` is a no-op for IBus).
+
+#[test]
+fn ibus_never_sets_the_content_type_for_a_legacy_client() {
+    let _scope = scope();
+    let bus = TestBus::new();
+    bus.start(IBUS_NAME);
+    let im = IBusX11TextInputMethod::new(bus.client.clone());
+    bus.expect_calls(&["CreateInputContext(name)", &caps(IBusCapability::CAP_FOCUS)]);
+    pump_until(|| im.is_connected());
+    im.set_window_active(true);
+    bus.expect_calls(&["FocusOut"]);
+    let options = TextInputOptions {
+        content_type: TextInputContentType::Password,
+        is_sensitive: true,
+        show_suggestions: Some(false),
+        ..Default::default()
+    };
+    im.set_options(&options);
+    im.set_client(Some(TestClient::new(true)));
+    bus.expect_calls(&["FocusIn", &caps(IBusCapability::CAP_FOCUS | IBusCapability::CAP_PREEDIT_TEXT)]);
+    im.set_options(&TextInputOptions { content_type: TextInputContentType::Email, ..options });
+    im.set_client(None);
+    bus.expect_calls(&["FocusOut", &caps(IBusCapability::CAP_FOCUS)]);
+}
+
+/// The input method under test as the feature of every window of a unit-test application, so
+/// that the input method manager binds the focused element to it.
+type InputMethodSlot = Rc<RefCell<Option<Rc<DBusTextInputMethodBase>>>>;
+
+fn application_with_input_method() -> (ferroui_controls::testing::UnitTestApplicationScope, InputMethodSlot) {
+    use ferroui_controls::testing::{MockWindowingPlatform, TestServices, UnitTestApplication};
+    let slot = InputMethodSlot::default();
+    let method = slot.clone();
+    let app = UnitTestApplication::start(TestServices::focusable_window().with_windowing_platform(
+        MockWindowingPlatform::with_window_impl(move || {
+            let window = MockWindowingPlatform::create_window_mock();
+            if let Some(im) = method.borrow().clone() {
+                window.setup_feature::<dyn ITextInputMethodImpl>(im);
+            }
+            window
+        }),
+    ));
+    (app, slot)
+}
+
+/// A rich edit box (a client of the exact-edit connection) and a focusable border in a window.
+struct RichWindow {
+    window: Ref<ferroui_controls::Window>,
+    rich: Ref<ferroui_controls::RichEditBox>,
+    outside: Ref<ferroui_controls::Border>,
+    _text: ferroui_base::media::text_formatting::testing::TextTestScope,
+}
+
+impl RichWindow {
+    fn show(slot: &InputMethodSlot, im: &Rc<DBusTextInputMethodBase>, scopes: &[InputScopeNameValue]) -> RichWindow {
+        use ferroui_controls::{Border, Control, RichEditBox, StackPanel, Window};
+        *slot.borrow_mut() = Some(im.clone());
+        let text = ferroui_base::media::text_formatting::testing::TextTestScope::new();
+        let rich = RichEditBox::new();
+        rich.set_height(40.0);
+        TextInputOptions::set_content_type(&rich, TextInputContentType::Email);
+        TextInputOptions::set_input_scope_names(&rich, Some(Rc::from(scopes)));
+        let outside = Border::new();
+        outside.set_focusable(true);
+        outside.set_height(20.0);
+        let panel = StackPanel::new();
+        panel.children().add(rich.clone());
+        panel.children().add(outside.clone());
+        let window = Window::new();
+        window.set_width(200.0);
+        window.set_height(100.0);
+        window.set_content(Some(Control::boxed(panel)));
+        window.show();
+        RichWindow { window, rich, outside, _text: text }
+    }
+
+    fn set_scopes(&self, scopes: Option<&[InputScopeNameValue]>) {
+        TextInputOptions::set_input_scope_names(&self.rich, scopes.map(Rc::from));
+    }
+}
+
+impl Drop for RichWindow {
+    fn drop(&mut self) {
+        self.window.close();
+    }
+}
+
+fn content_types(log: &[String]) -> Vec<String> {
+    log.iter().filter(|call| call.starts_with("SetContentType(")).cloned().collect()
+}
+
+/// Runs the dispatcher until the context was given `entries` as its `ContentType`, in that
+/// order, and forgets the calls so far: what else the window reports (focus, the cursor) is not
+/// what these tests are about.
+fn expect_content_types(bus: &TestBus, entries: &[&str]) {
+    pump_until(|| content_types(&bus.log.lock().unwrap()).len() >= entries.len());
+    bus.settle();
+    let log = bus.take_log();
+    assert_eq!(content_types(&log), entries, "all calls: {log:?}");
+}
+
+/// The hints of the options of a rich edit box: text prediction is on (`SPELLCHECK`,
+/// `WORD_COMPLETION`).
+const RICH_HINTS: u32 = 5;
+
+fn ibus_connected(bus: &TestBus) -> Rc<DBusTextInputMethodBase> {
+    bus.start(IBUS_NAME);
+    let im = IBusX11TextInputMethod::new(bus.client.clone());
+    bus.expect_calls(&["CreateInputContext(name)", &caps(IBusCapability::CAP_FOCUS)]);
+    pump_until(|| im.is_connected());
+    im
+}
+
+#[test]
+fn ibus_gives_a_connection_client_its_input_scope_and_any_other_client_the_default() {
+    use InputScopeNameValue as Scope;
+    let (_app, slot) = application_with_input_method();
+    let bus = TestBus::new();
+    let im = ibus_connected(&bus);
+    let f = RichWindow::show(&slot, &im, &[Scope::Digits, Scope::TelephoneNumber]);
+    assert!(f.rich.focus());
+    // The first scope, before the second and the content type (Email).
+    expect_content_types(&bus, &[&format!("SetContentType(2, {RICH_HINTS})")]);
+    f.set_scopes(Some(&[Scope::TelephoneNumber]));
+    expect_content_types(&bus, &[&format!("SetContentType(4, {RICH_HINTS})")]);
+    f.set_scopes(Some(&[Scope::Default]));
+    expect_content_types(&bus, &[&format!("SetContentType(0, {RICH_HINTS})")]);
+    // No scope: the content type.
+    f.set_scopes(Some(&[]));
+    expect_content_types(&bus, &[&format!("SetContentType(6, {RICH_HINTS})")]);
+    f.set_scopes(None);
+    bus.settle();
+    assert!(content_types(&bus.take_log()).is_empty());
+
+    // The focus leaves the rich edit box: the context goes back to its default, and gets the
+    // content type again with the focus.
+    assert!(f.outside.focus());
+    expect_content_types(&bus, &["SetContentType(0, 0)"]);
+    assert!(f.rich.focus());
+    expect_content_types(&bus, &[&format!("SetContentType(6, {RICH_HINTS})")]);
+
+    // A legacy client: the default again, and nothing of its options.
+    im.set_options(&TextInputOptions { content_type: TextInputContentType::Url, ..Default::default() });
+    im.set_client(Some(TestClient::new(true)));
+    expect_content_types(&bus, &["SetContentType(0, 0)"]);
+    im.set_options(&TextInputOptions { content_type: TextInputContentType::Number, ..Default::default() });
+    bus.settle();
+    assert!(content_types(&bus.take_log()).is_empty());
+}
+
+#[test]
+fn ibus_keeps_the_input_method_when_the_content_type_is_refused() {
+    use InputScopeNameValue as Scope;
+    let (_app, slot) = application_with_input_method();
+    let bus = TestBus::new();
+    let im = ibus_connected(&bus);
+    let recorded = record(&im);
+    bus.ibus_calls.refuse_next_content_type.store(true, Ordering::SeqCst);
+    let f = RichWindow::show(&slot, &im, &[Scope::Digits]);
+    assert!(f.rich.focus());
+    expect_content_types(&bus, &[&format!("SetContentType(2, {RICH_HINTS})")]);
+    assert!(im.is_connected());
+    // The context goes on taking keys and committing text.
+    assert!(handle(&im, key(RawKeyEventType::KeyDown, RawInputModifiers::empty(), 1), KEY_A, 38));
+    bus.settle();
+    assert_eq!(*recorded.commits.borrow(), ["あ"]);
+    assert!(im.is_connected());
+    // The property is not set on that context again.
+    f.set_scopes(Some(&[Scope::TelephoneNumber]));
+    bus.settle();
+    assert!(content_types(&bus.take_log()).is_empty());
+    assert!(im.is_connected());
+
+    // A new context is given it again.
+    bus.stop(IBUS_NAME);
+    pump_until(|| !im.is_connected());
+    bus.start(IBUS_NAME);
+    expect_content_types(&bus, &[&format!("SetContentType(4, {RICH_HINTS})")]);
+    assert!(im.is_connected());
+}
+
+#[test]
+fn ibus_gives_a_context_created_late_the_latest_content_type() {
+    use InputScopeNameValue as Scope;
+    let (_app, slot) = application_with_input_method();
+    let bus = TestBus::new();
+    let im = IBusX11TextInputMethod::new(bus.client.clone());
+    let f = RichWindow::show(&slot, &im, &[Scope::Digits]);
+    assert!(f.rich.focus());
+    bus.settle();
+    assert!(bus.take_log().is_empty());
+    bus.ibus_calls.create.hold();
+    bus.start(IBUS_NAME);
+    pump_until(|| !bus.log.lock().unwrap().is_empty());
+    assert_eq!(bus.take_log(), ["CreateInputContext(name)"]);
+    f.set_scopes(Some(&[Scope::TelephoneNumber, Scope::EmailSmtpAddress]));
+    bus.ibus_calls.create.release();
+    expect_content_types(&bus, &[&format!("SetContentType(4, {RICH_HINTS})")]);
+    assert!(im.is_connected());
+}
+
+#[test]
+fn ibus_coalesces_content_types_queued_behind_a_pending_one() {
+    use InputScopeNameValue as Scope;
+    let (_app, slot) = application_with_input_method();
+    let bus = TestBus::new();
+    let im = ibus_connected(&bus);
+    bus.ibus_calls.content_type.hold();
+    let f = RichWindow::show(&slot, &im, &[Scope::Digits]);
+    assert!(f.rich.focus());
+    pump_until(|| !content_types(&bus.log.lock().unwrap()).is_empty());
+    f.set_scopes(Some(&[Scope::EmailSmtpAddress]));
+    f.set_scopes(Some(&[Scope::TelephoneNumber]));
+    bus.ibus_calls.content_type.release();
+    expect_content_types(&bus, &[&format!("SetContentType(2, {RICH_HINTS})"), &format!("SetContentType(4, {RICH_HINTS})")]);
+    // Another scope with the same value is not sent.
+    f.set_scopes(Some(&[Scope::TelephoneAreaCode, Scope::Digits]));
+    bus.settle();
+    assert!(content_types(&bus.take_log()).is_empty());
+}
+
+#[test]
+fn ibus_applies_a_content_type_changed_by_a_signal_while_the_previous_one_waits() {
+    use InputScopeNameValue as Scope;
+    let (_app, slot) = application_with_input_method();
+    let bus = TestBus::new();
+    let im = ibus_connected(&bus);
+    let f = Rc::new(RichWindow::show(&slot, &im, &[Scope::Digits]));
+    let reentered = Rc::new(Cell::new(false));
+    {
+        let (f, reentered) = (Rc::downgrade(&f), reentered.clone());
+        im.commit().subscribe(move |_| {
+            if let Some(f) = f.upgrade() {
+                f.set_scopes(Some(&[Scope::EmailSmtpAddress]));
+            }
+            reentered.set(true);
+        });
+    }
+    bus.ibus_calls.content_type.hold();
+    bus.ibus_calls.commit_in_next_content_type.store(true, Ordering::SeqCst);
+    assert!(f.rich.focus());
+    pump_until(|| reentered.get());
+    bus.ibus_calls.content_type.release();
+    expect_content_types(&bus, &[&format!("SetContentType(2, {RICH_HINTS})"), &format!("SetContentType(6, {RICH_HINTS})")]);
+    assert!(im.is_connected());
+}
+
+#[test]
+fn ibus_ignores_the_failed_content_type_reply_of_a_retired_context() {
+    use InputScopeNameValue as Scope;
+    let (_app, slot) = application_with_input_method();
+    let bus = TestBus::new();
+    let im = ibus_connected(&bus);
+    bus.ibus_calls.content_type.hold();
+    bus.ibus_calls.refuse_next_content_type.store(true, Ordering::SeqCst);
+    let f = RichWindow::show(&slot, &im, &[Scope::Digits]);
+    assert!(f.rich.focus());
+    pump_until(|| !content_types(&bus.log.lock().unwrap()).is_empty());
+    bus.stop(IBUS_NAME);
+    pump_until(|| !im.is_connected());
+    f.set_scopes(Some(&[Scope::TelephoneNumber]));
+    bus.start(IBUS_NAME);
+    pump_until(|| im.is_connected());
+    bus.ibus_calls.content_type.release();
+    // The refusal belongs to the old context; the new one gets the latest value.
+    expect_content_types(&bus, &[&format!("SetContentType(2, {RICH_HINTS})"), &format!("SetContentType(4, {RICH_HINTS})")]);
+    assert!(im.is_connected());
+    f.set_scopes(Some(&[Scope::TelephoneLocalNumber]));
+    bus.settle();
+    assert!(content_types(&bus.take_log()).is_empty());
+}
+
+#[test]
+fn fcitx_gives_a_connection_client_the_capabilities_of_its_input_scope() {
+    use InputScopeNameValue as Scope;
+    let (_app, slot) = application_with_input_method();
+    let bus = TestBus::new();
+    bus.start(FCITX5_NAME);
+    let im = FcitxX11TextInputMethod::new(bus.client.clone());
+    bus.expect_calls(&["CreateInputContext(appName)"]);
+    pump_until(|| im.is_connected());
+    let capabilities = |log: &[String]| -> Vec<String> {
+        log.iter().filter(|call| call.starts_with("SetCapability(")).cloned().collect()
+    };
+    let expect_capability = |flags: FcitxCapabilityFlags| {
+        let flags = flags | FcitxCapabilityFlags::CAPACITY_PREEDIT | FcitxCapabilityFlags::CAPACITY_NOAUTOUPPERCASE;
+        pump_until(|| capabilities(&bus.log.lock().unwrap()).last() == Some(&format!("SetCapability({})", flags.bits())));
+        bus.settle();
+        bus.take_log();
+    };
+    let f = RichWindow::show(&slot, &im, &[Scope::Digits, Scope::TelephoneNumber]);
+    assert!(f.rich.focus());
+    expect_capability(FcitxCapabilityFlags::CAPACITY_DIGIT);
+    f.set_scopes(Some(&[Scope::TelephoneNumber]));
+    expect_capability(FcitxCapabilityFlags::CAPACITY_DIALABLE);
+    // Without a scope, the content type (Email) as upstream.
+    f.set_scopes(None);
+    expect_capability(FcitxCapabilityFlags::CAPACITY_EMAIL);
+    // A legacy client is given the flags of its content type only.
+    f.set_scopes(Some(&[Scope::Digits]));
+    expect_capability(FcitxCapabilityFlags::CAPACITY_DIGIT);
+    im.set_options(&TextInputOptions { content_type: TextInputContentType::Url, ..Default::default() });
+    im.set_client(Some(TestClient::new(true)));
+    expect_capability(FcitxCapabilityFlags::CAPACITY_URL);
 }
 
 // ---------------------------------------------------------------------

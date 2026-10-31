@@ -364,6 +364,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "block-buffer"
+version = "0.12.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d2f6c7dbe95a6ed67ad9f18e57daf93a2f034c524b99fd2b76d18fdfeb6660aa"
+dependencies = [
+ "hybrid-array",
+]
+
+[[package]]
 name = "block2"
 version = "0.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -525,6 +534,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "const-oid"
+version = "0.10.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a6ef517f0926dd24a1582492c791b6a4818a4d94e789a334894aa15b0d12f55c"
+
+[[package]]
 name = "control-catalog"
 version = "0.4.0"
 dependencies = [
@@ -672,6 +687,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "cpufeatures"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5ca28b0ae3115b884660db4118d803791fd6756b6e88f39c0f3f7859060d7566"
+dependencies = [
+ "libc",
+]
+
+[[package]]
 name = "crc32fast"
 version = "1.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -784,13 +808,38 @@ dependencies = [
 ]
 
 [[package]]
+name = "designer-studio"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-designer",
+ "ferroui-desktop",
+ "ferroui-headless",
+ "ferroui-markup-xaml",
+ "ferroui-themes-winui",
+ "sample-support",
+]
+
+[[package]]
 name = "digest"
 version = "0.10.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9ed9a281f7bc9b7576e61468ba615a66a5c8cfdff42420a70aa82701a3b1e292"
 dependencies = [
- "block-buffer",
+ "block-buffer 0.10.4",
  "crypto-common 0.1.7",
+]
+
+[[package]]
+name = "digest"
+version = "0.11.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f1dd6dbb5841937940781866fa1281a1ff7bd3bf827091440879f9994983d5c2"
+dependencies = [
+ "block-buffer 0.12.1",
+ "const-oid",
+ "crypto-common 0.2.2",
 ]
 
 [[package]]
@@ -1606,6 +1655,39 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-designer"
+version = "0.4.0"
+dependencies = [
+ "base64",
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-controls-color-picker",
+ "ferroui-controls-treedatagrid",
+ "ferroui-designer-animation",
+ "ferroui-designer-collaboration",
+ "ferroui-designer-collaboration-host",
+ "ferroui-designer-core",
+ "ferroui-designer-language",
+ "ferroui-designer-project",
+ "ferroui-designer-tools",
+ "ferroui-harfbuzz",
+ "ferroui-hot-reload",
+ "ferroui-inspect",
+ "ferroui-markup",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-mcp",
+ "ferroui-themes-winui",
+ "ferroui-treedatagrid-core",
+ "ferroui-vello",
+ "ferroui-xaml-interactions",
+ "ferroui-xaml-interactions-custom",
+ "ferroui-xaml-interactivity",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "ferroui-designer-animation"
 version = "0.4.0"
 dependencies = [
@@ -1614,6 +1696,31 @@ dependencies = [
  "serde",
  "serde_json",
  "uuid",
+]
+
+[[package]]
+name = "ferroui-designer-collaboration"
+version = "0.4.0"
+dependencies = [
+ "ferroui-designer-core",
+ "serde",
+ "serde_json",
+ "sha2",
+]
+
+[[package]]
+name = "ferroui-designer-collaboration-host"
+version = "0.4.0"
+dependencies = [
+ "ferroui-designer-collaboration",
+ "ferroui-designer-core",
+ "ferroui-mcp",
+ "getrandom 0.4.3",
+ "serde",
+ "serde_json",
+ "sha2",
+ "ureq",
+ "url",
 ]
 
 [[package]]
@@ -2237,6 +2344,14 @@ dependencies = [
  "ferroui-themes-simple",
  "ferroui-vello",
  "png",
+]
+
+[[package]]
+name = "ferroui-rich-text-oracle"
+version = "0.4.0"
+dependencies = [
+ "ferroui-microcom",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -3586,7 +3701,7 @@ version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cb26cec98cce3a3d96cbb7bced3c4b16e3d13f27ec56dbd62cbc8f39cfb9d653"
 dependencies = [
- "cpufeatures",
+ "cpufeatures 0.2.17",
 ]
 
 [[package]]
@@ -5252,8 +5367,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a978451301f4db1d02937a4ab3ccce137717b81826e79b7d49ffe3244a13c3b8"
 dependencies = [
  "cfg-if",
- "cpufeatures",
- "digest",
+ "cpufeatures 0.2.17",
+ "digest 0.10.7",
+]
+
+[[package]]
+name = "sha2"
+version = "0.11.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "47d7069beb7d6ac7b9acd1039986e73443f24234f41074da099d6f994ac9ad19"
+dependencies = [
+ "cfg-if",
+ "cpufeatures 0.3.1",
+ "digest 0.11.3",
 ]
 
 [[package]]
@@ -5262,7 +5388,7 @@ version = "0.10.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "77fd7028345d415a4034cf8777cd4f8ab1851274233b45f84e3d955502d93874"
 dependencies = [
- "digest",
+ "digest 0.10.7",
  "keccak",
 ]
 

@@ -45,5 +45,10 @@ is a TypeScript form of the worker of that polyfill (`example/sw.js`, MIT, Copyr
 Its second part, the response headers of cross-origin isolation that it adds when it is registered with
 `?coi=1`, is written for this project after the widely used pattern known as `coi-serviceworker`.
 
+The protocol of the hidden textarea of a client of the exact-edit IME connection is written for this project
+(not ported): `browser_text_input_dom.rs`, `browser_text_input_edit.rs`, `browser_text_input_options.rs`,
+`browser_text_input_projection.rs`, `webapp/modules/ferroui/textInput.ts` and `webapp/modules/ferroui/inputOptions.ts`
+(`docs/porting/browser-platform.md`, section 14).
+
 Build-time tools, not distributed with the crate: esbuild (MIT) and TypeScript (Apache-2.0), pinned in
 `webapp/package.json` and `webapp/package-lock.json`.

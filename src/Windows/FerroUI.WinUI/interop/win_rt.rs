@@ -64,6 +64,15 @@ mod imp {
         HStringInterop::from_handle(handle, true).value().unwrap_or_default()
     }
 
+    /// Takes an owned HSTRING, rejecting malformed UTF-16 rather than changing
+    /// an exact native edit into a replacement-character edit. Ownership is
+    /// released on both success and failure.
+    pub(crate) fn take_string_exact(handle: isize) -> Result<String, HResult> {
+        HStringInterop::from_handle(handle, true)
+            .try_value()
+            .map(Option::unwrap_or_default)
+    }
+
     /// The text of a string handle a method of an object of the integration
     /// is given: the caller's, which is not deleted; none for the null
     /// handle (the null string of C#).

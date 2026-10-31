@@ -113,8 +113,23 @@ The changes #243 made on default paths and what the landing pull requests do wit
 ## 8. Evidence and the Msftedit oracle
 
 - #243 committed 1.57 million lines of evidence JSON (per-run observations of the system Msftedit, inventories and maps). None of it lands (D11).
-- What lands: the observation extractor (`scripts/winui-rich-text/`), the case tables it writes (`src/FerroUI.Controls/rich_text/*_native_cases.rs`, included from test modules only, each with the hash of its source), and the oracle that characterises the system Msftedit, moved from `ferroui-win32`'s tests into a tool and run by an on-demand job (R9, R13).
-- Native observations are test oracles for the editor; a case table is regenerated with the extractor, never edited by hand.
+- What lands (R13):
+  - **The oracle**, `src/tools/RichTextOracle` (crate `ferroui-rich-text-oracle`, `publish = false`): #243's `rich_text_tom_oracle_tests.rs`, moved out of `ferroui-win32`'s tests into a Windows program (S15). It creates hidden `RICHEDIT50W` windows of the system `Msftedit.dll`, drives them through the text object model (TOM) and prints one `SYSTEM_MSFTEDIT_*` line per observation: Home/End and directional movement, selection options and `TypeText`, links, range gravity and formatting affinity, the gravity of the live selection, passive ranges across `SetText`. It asserts nothing about FerroUI. On other systems it builds as a program that only says it runs on Windows.
+  - **The observation extractor**, `scripts/winui-rich-text/rich-text-tom-observations.py` (W11). `extract` turns the output of a run into a record (JSON, with the commit, the blob of `probes.rs` and the run), rejecting unknown rows, incomplete probes and contradictory setup. `check-cases` compares the case tables with a record (or directly with an output) and names every entry that differs; `native_cases.py` holds, per table, which observations it replays, and `rust_literals.py` reads the tables without a Rust toolchain.
+  - **The case tables**, `src/FerroUI.Controls/rich_text/*_native_cases.rs` (six files, included from test modules only), the literal observations the editor's tests replay. `write-cases` writes them from a record (`case_writer.py`): it rewrites only the literals that differ from the record, writes added entries in the layout of their neighbours, and gives each table a header that names the record, its SHA-256, the run of the on-demand job it came from and the engine version; a table is never edited by hand. The records are not in the repository: the record a header names is in the artifact of that run.
+  - **The workflow** `.github/workflows/rich-text.yml` (S14): on a pull request that changes the oracle, the extractor or a case table, the tests of the extractor and of the reader of the tables, and a `cargo check` of the oracle on Windows when the oracle changed; by hand, the oracle job. The tests of the controls run in `ci.yml` only.
+- **Running the oracle on demand:** `gh workflow run rich-text.yml --ref <branch>` (the input `runner` chooses `windows-latest`, the default, or `windows-11-arm`). The job builds and runs the oracle, extracts the record, checks the case tables against it and keeps `msftedit.log`, `msftedit-record.json`, `check-cases.txt` and the environment as the artifact `msftedit-oracle-<runner>` (30 days). It fails when a table differs from the Msftedit of the runner.
+- **Running it on a Windows machine:**
+
+  ```text
+  cargo run --locked -p ferroui-rich-text-oracle > msftedit.log
+  python scripts/winui-rich-text/rich-text-tom-observations.py extract --log msftedit.log \
+      --commit <commit> --probe-blob <git rev-parse <commit>:src/tools/RichTextOracle/probes.rs> --output msftedit-record.json
+  python scripts/winui-rich-text/rich-text-tom-observations.py check-cases --record msftedit-record.json
+  ```
+
+  Arguments of the oracle name the probes to run (`--help` lists them); `check-cases` needs a run of all of them. `RICH_TEXT_ORACLE_RECORDS=<directory>` makes the extractor's tests also read the records of that directory.
+- **When a table differs:** native observations are test oracles for the editor, so a difference is a change of the system engine (a new Msftedit) or of the oracle. Download the record of the run (`gh run download <run> -n msftedit-oracle-<runner>`), run `rich-text-tom-observations.py write-cases --record msftedit-record.json`, check that `check-cases` passes, and fix the editor if its tests fail. The artifact of the run is kept 30 days; the header still names the run and the hash of its record after that, and a new run of the job reproduces it.
 
 ## 9. Landing plan
 
@@ -131,12 +146,15 @@ Each pull request carries its tests, its `DEVIATIONS.md` rows and a line in `CHA
 | R6 | RichTextBlock, RichTextBlockOverflow, the rich layout, the context menu through the R4 hook, the automation providers and peers; catalog page | R4, R5 | S10 | no |
 | R7 | Editor services: `RichTextEditor`, TOM, units, find, case, stream, clipboard, RTF (`rtf-codepages`) | R5 | M6, S1, S2, S3, S6, S8 (at least shared snapshots), N3 | no |
 | R8 | RichEditBox, its presenter, IME client and format commands; the converted WinUI template; `WINUI_ONLY_CONTROLS`; the theme tracking; catalog page | R3, R6, R7 | S4, S5, N1, N2, N4, S13 (D3) | yes: RichEditBox in the WinUI theme |
-| R9 | Windows: IMM32 for connection clients, the UIA text pattern, the WinUI CoreText host; the oracle as a tool | R8 | P1-P22 as opt-in | yes: Japanese, Chinese and Korean IMEs in TextBox and RichEditBox; Narrator and Inspect |
+| R9 | Windows, in three pull requests: the UIA text pattern (R9a), IMM32 for connection clients (R9b), the WinUI CoreText host (R9c) | R8 | P1-P22 as opt-in | yes: Japanese, Chinese and Korean IMEs in TextBox and RichEditBox; Narrator and Inspect |
 | R10 | Browser: the connection protocol with the old public functions kept; `browser-platform.md` section 14 | R8 | P28-P32 as opt-in | no |
 | R11 | FreeDesktop, Wayland, X11: the connection for IBus and Fcitx, the IBus content-type property non-fatal | R8 | P23-P27 | Ubuntu VM (IBus, Fcitx) |
-| R12 | macOS, iOS, Android: content hints, input options; `patches/0003` regenerated | R8 | P33-P37 | iOS simulator and Android emulator (never with a VM) |
+| R12 | macOS, iOS, Android: content hints, input options; the native patch regenerated (`patches/0004`, after main's backdrop patch `0003`) | R8 | P33-P37 | iOS simulator and Android emulator (never with a VM) |
 | R13 | CI: the regeneration check repository-wide and the on-demand oracle job, actions pinned by SHA | R9 | | no |
-| F1 | Performance: a layout cache per paragraph, the selection drawn as an overlay, an incremental IME preview, the fast path near fields, delta undo units if not in R7 | R8 | S7, S8, S9 | no |
+
+| R12 | macOS, iOS, Android: content hints, input options; `patches/0003` regenerated | R8 | P33-P37 | iOS simulator and Android emulator (never with a VM) |
+| R13 | The Msftedit oracle as a tool (`src/tools/RichTextOracle`, S15), the extractor with its check and writer of the case tables, the rich-text workflow (the extractor's tests and the on-demand oracle job, actions pinned by SHA) | R8 | | no |
+| F1 | Performance: a layout cache per paragraph (runs, shaping cache and lines of the paragraphs an edit or a selection change did not change), the benchmark `text::RichTextEditing`. Still open: the selection drawn as an overlay, an incremental IME preview and the identity lookup of the content pool (S9), the fast path near fields, delta undo units | R8 | S7 (S8, S9 open) | no |
 
 R1, R3 and R4 are independent; R6 to R8 are sequential; R9 to R12 may land in any order after R8.
 
@@ -214,9 +232,68 @@ What remains outside the port (RT-P of #243): the exact LineServices metrics, th
 | A click or focus loss terminates the composition and keeps its text (`TextBoxBase.cpp`). | The same: the preview is committed, then the IME is reset (#243 discarded it). | #243 review S5. |
 | `TextCompositionStarted` precedes the first `TextChanging` of a composition. | The same, at the caret with no composed text yet. | #243 review N1. |
 | The caret rectangle is current in `TextChanging`. | While an edit is published, the caret rectangle (and so the IME candidate window) follows the editor, not the view's earlier selection. | #243 review N4. |
-| Shift+Enter inserts a soft line break. | It inserts a paragraph, as #243 did, until the Windows check confirms RichEdit's behaviour. | #243 review N2 (open). |
 | The context menu is `TextCommandBarFlyout`. | A `MenuFlyout` with the same commands (`docs/porting/winui-theme/DEVIATIONS.md`, G-30). | FerroUI has no command bar flyout. |
 | The template is in every theme. | The WinUI theme has it (`WINUI_ONLY_CONTROLS`), and so do the macOS and Material themes, which derive every control theme of the WinUI theme; Fluent and Simple show nothing. | Decision D4. |
 
+### 11.4 The input method on Windows (R9b)
+
+| WinUI | FerroUI | Why |
+|---|---|---|
+| RichEdit talks to the text services framework (TSF) of the system: the composition, reconversion and the input scopes of the document. | The Win32 backend serves RichEditBox through IMM32 (with TSF behind it as the system provides): the composition is a preview of the exact-edit connection and the result one undo unit; no reconversion. Input scopes are set on the window (`SetInputScopes`); a touch keyboard that is already shown is not told of a change. | The backend's input method is IMM32 (`win32-platform.md`, section 8.2); TSF for the backend is not in the reference. |
+| Terminating a composition keeps its text in the document and ends the composition of the text service. | The editor commits the preview, and the composition of the input method is cancelled (`CPS_CANCEL`), so the input method does not send the text a second time. | S5 (R8) with the backend's reset. |
+
 Not taken from #243 in R8: its manager tests for a client without exact editing whose cursor query moves focus or replaces the client (`rich_edit_input_geometry_tests.rs`). Such a client keeps the upstream manager (D5), which has no such guarantees. While a connection client's flyout has focus, the manager keeps the input method of the owner's root, also when the flyout is in a popup root of its own.
+
+### 11.5 Input scopes on macOS, iOS and Android (R12)
+
+| WinUI | FerroUI | Why |
+|---|---|---|
+| `InputScope` chooses the touch keyboard and the text services of the field. | For RichEditBox (a client of the exact-edit connection) the first scope chooses what the platform has: the semantic `contentType` of the AppKit view (URL, email address, name, telephone number, macOS 14 and later), the `UIKeyboardType` and `UITextContentType` of the iOS responder, the `inputType` of the Android `EditorInfo`. Scopes of a script or a width (Hiragana, Hangul, full-width) have no counterpart there and give the default keyboard. TextBox keeps the upstream behaviour of each backend. | D5, D8; the platforms have no script or width selector. |
+| A password scope turns off prediction and learning. | The same for RichEditBox on iOS and Android; on macOS no content hint is set for a password, a PIN, sensitive content or `IsTextPredictionEnabled = false`. A scope never turns on secure (masked) entry. | The scope advises the keyboard; masking is the control's. |
+| Changing `InputScope` while the field has focus updates the keyboard. | The same: macOS updates the view's `contentType`, iOS calls `reloadInputViews`, Android restarts the input when the `EditorInfo` changes and keeps the composing region. | |
+
+### 11.6 Browser input (R10)
+
+| WinUI | FerroUI | Why |
+|---|---|---|
+| The touch keyboard follows `InputScope` through the text services of the system. | In the browser the first input scope of the owner picks the `inputmode` of the hidden textarea (`tel`, `numeric`, `decimal`, `email`, `url`, `search`, else `text`); the keyboard shown is the browser's choice. | HTML has hints only (`browser-platform.md`, section 14). |
+| The IME edits the story directly, CR and CRLF included. | The textarea shows LF; a caret between CR and LF of a raw Run cannot start a native edit there (the edit is rejected and the textarea restored). | `<textarea>` normalizes line ends. |
+
+Not taken from #243 in R10: its tests of input options and preedit resets for clients without the connection (`browser_text_input_method.rs`); such clients keep the upstream path (D5), which ignores options and is tested as such.
+
+### 11.7 Input methods on Linux: IBus, Fcitx, Wayland (R11)
+
+| WinUI | FerroUI | Why |
+|---|---|---|
+| `InputScope` is the hint of the touch keyboard and the IME of Windows. | For RichEditBox (a client of the exact-edit connection) the first input scope becomes the IBus `ContentType` purpose, the Fcitx capability flags and the `zwp_text_input_v3` content purpose; without a scope, the content type. A scope never takes away the privacy hints of a Password content type. TextBox keeps upstream behaviour: IBus gets no `ContentType`. | Decision D5. |
+| Scopes select width and script (`AlphanumericFullWidth`, `Hiragana`, `KatakanaHalfWidth`, `Hangul*`). | IBus, Fcitx and the Wayland protocol have no width or script selector: these scopes are free-form; only `AlphanumericHalfWidth` asks Wayland for Latin. | No counterpart in the protocols. |
+| The IME accepts every scope. | An IBus that refuses `ContentType` (older than 1.5.32 or a portal without it) keeps the IME connected without the hint; a warning is logged. | #243 review P24. |
+
+### 11.8 The WinUI host's CoreText input (R9c)
+
+| WinUI | FerroUI | Why |
+|---|---|---|
+| RichEdit applies the IME's format requests (`FormatUpdating`: the conversion clauses and their underlines). | The request is answered `Failed` and not applied. | The clause formats are not projected onto the rich document yet. |
+
+The differences from the upstream-ported adapter (`WinUITextInputMethod`) are in `DEVIATIONS.md`, "WinUI integration": they apply to connection clients only (D5).
+
+### 11.9 The UI Automation text pattern on Windows (R9a)
+
+| WinUI | FerroUI | Why |
+|---|---|---|
+| `TextBlockAutomationPeer` has the Text pattern, and so do the text boxes. | On Windows only the nodes of RichEditBox and RichTextBlock (and their hyperlinks, through TextChild) have the Text, Text2, TextEdit and TextChild patterns; the nodes of TextBlock and TextBox keep what upstream has (TextBox: the Value pattern). | Decision D5: TextBox keeps upstream behaviour until it moves to the connection; TextBlock has no portable text provider. |
+| The text pattern wrappers call RichEdit's and the core's text objects on the UI thread. | The native ranges are COM objects with a number; the portable range stays in a table of the UI thread and is released when the client releases the native one, from any thread. A range resolves a range passed back by a client by its COM identity, so a range of another provider is `E_INVALIDARG`. | The node and range objects are called on threads of the automation core (`win32-platform.md`, section 13.3). |
+
+## 12. Performance (F1)
+
+- **Per-paragraph reuse.** After an edit of the document, a change of an inline or of the selection, `RichTextSource` takes over from the source the view had before every paragraph whose block, runs, run properties, tab stop and formatting overrides (selection, highlighters) are the same: its text source and its shaping cache (`TextRunCache`). The lines of such a paragraph are kept with what they were formatted with (width, wrapping, first-line indent, flow direction, alignment, line height and stacking, line spacing, letter spacing, tab stops, margins, line bounds); a page that formats the whole paragraph again with the same key and room for all of it places those lines instead of breaking the paragraph again. Continuations, hosted objects, a line limit and trimming always format. Every other invalidation (a property of the view, the text services, a new document) rebuilds the whole source; a change of the text services that the view does not see needs `invalidate_document_layout`.
+- **The benchmark** `text::RichTextEditing` of `ferroui-benchmarks` (`FERROUI_BENCH_FILTER=RichTextEditing`): a typed character (and its deletion), a selection step and an IME preview update in the middle of documents of 10, 100 and 1000 paragraphs, each with measure and arrange. Release build on the development Mac (2026-10-30):
+
+| Step, 1000 paragraphs | main before F1 | F1 |
+|---|---|---|
+| type_character | 42.7 ms | 6.1 ms |
+| move_selection | 38.8 ms | 2.0 ms |
+| update_ime_preview | 47.5 ms | 11.0 ms |
+
+- **Still linear in the document:** the text of the document is rebuilt and diffed on each change (`publish_change`), and an IME preview restores the composition's snapshot through the content pool (S9). These remain for a follow-up, with the selection as an overlay and delta undo units (S8).
 

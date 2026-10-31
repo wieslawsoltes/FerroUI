@@ -23,6 +23,12 @@ pub trait InputContext {
 
     fn set_capabilities(&self, caps: u32) -> zbus::Result<()>;
 
+    // Not in the reference, which never sets it. IBus 1.5.32 (commit 0fd4e408a52d3d15179c643fd54d310aafd8875f):
+    // bus/inputcontext.c declares ContentType as a writable (uu) property; portal/portal.c forwards it
+    // through org.freedesktop.DBus.Properties.Set.
+    #[zbus(property)]
+    fn set_content_type(&self, content_type: (u32, u32)) -> zbus::Result<()>;
+
     #[zbus(signal)]
     fn commit_text(&self, text: Value<'_>) -> zbus::Result<()>;
 
