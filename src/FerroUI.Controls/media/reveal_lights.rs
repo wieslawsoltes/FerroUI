@@ -772,6 +772,9 @@ pub const BORDER_LIGHT_SWITCH_DURATION: Duration = Duration::from_millis(250);
 
 struct BorderResources {
     light: SpotLight,
+    // Expression snapshots hold live reference parameters weakly. Retain the
+    // expression (and thus its pointer/height sets) for the light's lifetime.
+    _offset_animation: Option<Rc<ExpressionAnimation>>,
     colors_proxy: Rc<CompositionPropertySet>,
     window_handlers: Vec<(WeakRef<TopLevel>, &'static str, RoutedEventHandlerToken)>,
 }
@@ -921,15 +924,18 @@ impl RevealBorderLight {
         colors_proxy.insert_color("OuterConeColor", Colors::WHITE);
         light.set_is_enabled(false);
 
-        if let Some(pointer) = ElementCompositionPreview::get_pointer_position_property_set(&element) {
+        let offset_animation = ElementCompositionPreview::get_pointer_position_property_set(&element).map(|pointer| {
             let offset = compositor.create_expression_animation_with("pointer.Position + Vector3(0,0,props.SpotlightHeight)");
             offset.set_reference_parameter("props", offset_props);
             offset.set_reference_parameter("pointer", pointer);
             light.start_animation("Offset", &*offset);
-        }
+            offset
+        });
 
         let window_handlers = self.hook_window_pointer_handlers(&element);
-        self.state.borrow_mut().resources = Some(BorderResources { light: light.clone(), colors_proxy, window_handlers });
+        self.state.borrow_mut().resources = Some(BorderResources {
+            light: light.clone(), _offset_animation: offset_animation, colors_proxy, window_handlers,
+        });
         self.set_composition_light(Some((*light).clone()));
     }
 
