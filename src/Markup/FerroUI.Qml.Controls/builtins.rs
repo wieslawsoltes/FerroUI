@@ -66,24 +66,22 @@ pub(super) fn register(registry: &mut ControlRegistry) -> Result<(), Error> {
 impl Kind {
     fn definition(self) -> TypeDefinition {
         use Value::{Bool, List, Number, Undefined};
-        let mut ty = TypeDefinition::default()
-            .property("objectName", "string", Value::String(String::new()))
-            .property("visible", "bool", Bool(true))
-            .property("enabled", "bool", Bool(true))
-            .property("width", "real", Undefined)
-            .property("height", "real", Undefined)
-            .property("x", "real", Number(0.0))
-            .property("y", "real", Number(0.0))
-            .property("clip", "bool", Bool(false))
-            .property("opacity", "real", Number(1.0));
-        if matches!(
-            self,
-            Self::Item | Self::Rectangle | Self::Row | Self::Column | Self::Flow
-        ) {
-            ty = ty
+        let mut ty = if matches!(self, Self::Item) {
+            TypeDefinition::default()
+                .inherits("QtQml", "QtObject")
+                .property("visible", "bool", Bool(true))
+                .property("enabled", "bool", Bool(true))
+                .property("width", "real", Undefined)
+                .property("height", "real", Undefined)
+                .property("x", "real", Number(0.0))
+                .property("y", "real", Number(0.0))
+                .property("clip", "bool", Bool(false))
+                .property("opacity", "real", Number(1.0))
                 .property("data", "list<QtObject>", List(vec![]))
-                .default_property("data");
-        }
+                .default_property("data")
+        } else {
+            TypeDefinition::default().inherits("QtQuick", "Item")
+        };
         if matches!(
             self,
             Self::Text | Self::Button | Self::CheckBox | Self::TextField | Self::TextArea
@@ -181,6 +179,10 @@ impl NativeObject for Peer {
         }
     }
 
+    fn children_property(&self) -> Option<&str> {
+        Some("data")
+    }
+
     fn content(&self) -> Option<(&str, Controls)> {
         let children = match self {
             Self::Canvas(c) => c.children(),
@@ -190,6 +192,31 @@ impl NativeObject for Peer {
             _ => return None,
         };
         Some(("data", children))
+    }
+
+    fn validate(&self, property: &str, value: &Value) -> Result<(), Error> {
+        // Types are checked by the engine. Native domains add finite geometry
+        // and parseable colors. Custom QML properties have no native constraints.
+        if *value == Value::Undefined {
+            return Ok(());
+        }
+        match (self, property) {
+            (_, "width" | "height" | "x" | "y" | "opacity")
+            | (Self::Rectangle { .. }, "border.width" | "radius")
+            | (Self::Flow(_) | Self::Stack(_), "spacing")
+            | (
+                Self::Text(_) | Self::Button(_) | Self::Input(_) | Self::CheckBox(_),
+                "font.pixelSize",
+            ) => {
+                number(property, value)?;
+            }
+            (Self::Rectangle { .. }, "color" | "border.color")
+            | (Self::Text(_) | Self::Input(_), "color") => {
+                brush(property, value)?;
+            }
+            _ => {}
+        }
+        Ok(())
     }
 
     fn apply(&self, property: &str, value: &Value) -> Result<(), Error> {
@@ -243,7 +270,7 @@ impl NativeObject for Peer {
                 (Self::CheckBox(c), "checked") => c.set_is_checked(Some(boolean(property, value)?)),
                 (Self::Input(c), "text") => c.set_text(Some(string(property, value)?)),
                 (Self::Input(c), "placeholderText") => {
-                    c.set_watermark(Some(string(property, value)?))
+                    c.set_placeholder_text(Some(string(property, value)?))
                 }
                 (Self::Input(c), "readOnly") => c.set_is_read_only(boolean(property, value)?),
                 (Self::Input(c), "color") => {

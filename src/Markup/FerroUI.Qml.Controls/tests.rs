@@ -113,3 +113,82 @@ fn nested_visuals_are_distinct_from_object_property_ownership() {
     assert_eq!(Canvas::get_left(&label), 12.0);
     assert_eq!(Canvas::get_top(&label), 22.0);
 }
+
+#[test]
+fn native_projection_can_reject_a_transaction_without_splitting_model_and_view() {
+    let _scope = UnitTestApplication::start(TestServices::new());
+    let view = mount(
+        r#"
+        import QtQuick
+        Item {
+            id: page
+            property string shade: "red"
+            Rectangle { id: boxItem; width: 100; color: page.shade }
+        }
+    "#,
+    );
+    let root = view.root_id();
+    let child = view.id("boxItem").unwrap();
+    let err = view
+        .set(root, "shade", Value::String("unparseable-color".into()))
+        .unwrap_err();
+    assert!(err.to_string().contains("color"));
+    assert_eq!(
+        view.get(root, "shade").unwrap(),
+        Value::String("red".into())
+    );
+    assert_eq!(
+        view.get(child, "color").unwrap(),
+        Value::String("red".into())
+    );
+
+    let err = view
+        .set(root, "data", Value::List(vec![Value::Object(root)]))
+        .unwrap_err();
+    assert!(err.to_string().contains("root"));
+    assert_eq!(
+        view.get(root, "data").unwrap(),
+        Value::List(vec![Value::Object(child)])
+    );
+    assert_eq!(view.root().cast::<Canvas>().unwrap().children().count(), 1);
+}
+
+#[test]
+fn reflected_controls_use_native_owners_defaults_validation_and_input_notifications() {
+    let _scope = UnitTestApplication::start(TestServices::new());
+    let mut types = ControlRegistry::default();
+    types
+        .register_ferro_control("Workbench", StackPanel::new)
+        .unwrap();
+    types
+        .register_ferro_control("Workbench", TextBlock::new)
+        .unwrap();
+    types
+        .register_ferro_control("Workbench", TextBox::new)
+        .unwrap();
+    let document = parse(
+        r#"
+        import Workbench
+        StackPanel {
+            spacing: 10
+            TextBox { id: input; text: "editable" }
+            TextBlock { id: output; text: input.text; fontSize: 22 }
+        }
+    "#,
+    )
+    .unwrap();
+    let view = QmlView::new(&document, &types, BTreeMap::new()).unwrap();
+    let panel = view.root().cast::<StackPanel>().unwrap();
+    let input = panel.children().get(0).cast::<TextBox>().unwrap();
+    let output = panel.children().get(1).cast::<TextBlock>().unwrap();
+    assert_eq!(panel.spacing(), 10.0);
+    assert!(!output.is_set(ferroui_base::layout::Layoutable::width_property().as_property()));
+    assert_eq!(output.font_size(), 22.0);
+    assert_eq!(output.text().as_deref(), Some("editable"));
+    input.set_text(Some("draft"));
+    assert_eq!(output.text().as_deref(), Some("draft"));
+    let id = view.id("output").unwrap();
+    let err = view.set(id, "width", Value::Number(-42.0)).unwrap_err();
+    assert!(err.to_string().contains("Width"));
+    assert!(output.width().is_nan());
+}

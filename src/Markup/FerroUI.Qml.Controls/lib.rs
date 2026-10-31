@@ -4,11 +4,15 @@
 //! The view owns a single instance and native subscriptions. Subscribers hold weak
 //! handles back to the view, and dropping its last owner disconnects them.
 mod builtins;
+mod clock;
 mod composition;
+mod reflected;
 
 use ferroui_base::{reactive::IDisposable, Ref};
 use ferroui_controls::{Control, Controls};
-use ferroui_qml::{Document, Error, Instance, ObjectId, TypeDefinition, TypeRegistry, Value};
+use ferroui_qml::{
+    ComponentSource, Error, Instance, ObjectId, TypeDefinition, TypeRegistry, Value,
+};
 use std::{
     cell::RefCell,
     collections::BTreeMap,
@@ -19,7 +23,23 @@ use std::{
 /// also supplied to `apply`; ignore names that do not map to native state.
 pub trait NativeObject {
     fn control(&self) -> Ref<Control>;
+    /// Check additional constraints (e.g. native colors) without mutating a control.
+    /// Run before a settled transaction commits. After validation, applying the
+    /// same value must succeed.
+    fn validate(&self, _property: &str, _value: &Value) -> Result<(), Error> {
+        Ok(())
+    }
     fn apply(&self, property: &str, value: &Value) -> Result<(), Error>;
+
+    /// Native types with meaningful default or inherited values may skip unassigned
+    /// properties, preserving FerroUI style precedence at mount time.
+    fn apply_initial(&self, property: &str, value: &Value, _assigned: bool) -> Result<(), Error> {
+        self.apply(property, value)
+    }
+
+    fn children_property(&self) -> Option<&str> {
+        self.content().map(|(name, _)| name)
+    }
 
     /// A list property whose objects become children of a FerroUI panel.
     fn content(&self) -> Option<(&str, Controls)> {
@@ -89,8 +109,20 @@ impl NativeEndpoint {
         self.dispatch(|view| {
             // Applying a QML value to a native input also raises its native
             // change notification. An echo must preserve the original binding.
-            if view.get(self.object, name)? != value {
-                view.set(self.object, name, value)?;
+            let previous = view.get(self.object, name)?;
+            let equal = previous == value
+                || matches!((&previous, &value), (Value::Number(a), Value::Number(b)) if a.is_nan() && b.is_nan());
+            if !equal {
+                let outcome = view.0.instance.borrow_mut().set(self.object, name, value.clone());
+                if let Err(error) = outcome {
+                    // A failed handler or native validator rolls back the model.
+                    // Restore the originating widget as well.
+                    if let Some(node) = view.0.nodes.get(&self.object) {
+                        node.apply(name, &previous)?;
+                    }
+                    return Err(error);
+                }
+                view.flush_from(Some((self.object, name, &value)))?;
             }
             Ok(())
         });
@@ -112,6 +144,7 @@ impl NativeEndpoint {
 }
 
 struct Inner {
+    clock: std::cell::OnceCell<clock::ViewClock>,
     instance: RefCell<Instance>,
     nodes: BTreeMap<ObjectId, Box<dyn NativeObject>>,
     root: Ref<Control>,
@@ -121,6 +154,9 @@ struct Inner {
 
 impl Drop for Inner {
     fn drop(&mut self) {
+        if let Some(clock) = self.clock.get() {
+            clock.stop();
+        }
         for subscription in self.subscriptions.get_mut().drain(..) {
             subscription.dispose();
         }
@@ -132,7 +168,7 @@ pub struct QmlView(Rc<Inner>);
 
 impl QmlView {
     pub fn new(
-        document: &Document,
+        document: &impl ComponentSource,
         registry: &ControlRegistry,
         initial: BTreeMap<String, Value>,
     ) -> Result<Self, Error> {
@@ -142,7 +178,7 @@ impl QmlView {
     }
 
     pub fn with_error_handler(
-        document: &Document,
+        document: &impl ComponentSource,
         registry: &ControlRegistry,
         initial: BTreeMap<String, Value>,
         on_error: impl Fn(Error) + 'static,
@@ -159,7 +195,9 @@ impl QmlView {
             if let Some(factory) = factory {
                 let node = factory();
                 for name in instance.property_names(object) {
-                    node.apply(&name, &instance.get(object, &name)?)?;
+                    let value = instance.get(object, &name)?;
+                    node.validate(&name, &value)?;
+                    node.apply_initial(&name, &value, instance.is_assigned(object, &name))?;
                 }
                 nodes.insert(object, node);
             }
@@ -171,12 +209,34 @@ impl QmlView {
         composition::reconcile(&instance, &nodes)?;
         instance.drain_changes();
         let view = Self(Rc::new(Inner {
+            clock: std::cell::OnceCell::new(),
             instance: RefCell::new(instance),
             nodes,
             root,
             subscriptions: RefCell::default(),
             on_error: Box::new(on_error),
         }));
+        let weak = Rc::downgrade(&view.0);
+        view.0
+            .instance
+            .borrow_mut()
+            .set_validator(move |instance, changes| {
+                let Some(inner) = weak.upgrade() else {
+                    return Ok(());
+                };
+                let mut layout_changed = false;
+                for change in changes {
+                    if let Some(node) = inner.nodes.get(&change.object) {
+                        node.validate(&change.property, &change.value)?;
+                        layout_changed |=
+                            node.children_property() == Some(change.property.as_str());
+                    }
+                }
+                if layout_changed {
+                    composition::plan(instance, &inner.nodes)?;
+                }
+                Ok(())
+            });
         for (&object, node) in &view.0.nodes {
             let endpoint = NativeEndpoint {
                 inner: Rc::downgrade(&view.0),
@@ -187,6 +247,7 @@ impl QmlView {
                 .borrow_mut()
                 .extend(node.connect(endpoint));
         }
+        view.install_clock();
         Ok(view)
     }
 
@@ -235,22 +296,31 @@ impl QmlView {
     }
 
     fn flush(&self) -> Result<(), Error> {
+        self.flush_from(None)
+    }
+
+    fn flush_from(&self, source: Option<(ObjectId, &str, &Value)>) -> Result<(), Error> {
         let changes = self.0.instance.borrow_mut().drain_changes();
         let mut layout_changed = false;
         for change in changes {
             if let Some(node) = self.0.nodes.get(&change.object) {
-                layout_changed |= node
-                    .content()
-                    .is_some_and(|(name, _)| name == change.property);
+                layout_changed |= node.children_property() == Some(change.property.as_str());
                 // A native subscriber can synchronously update a later slot in this batch.
                 let latest = self.get(change.object, &change.property)?;
-                node.apply(&change.property, &latest)?;
+                // Preserve the native source's priority (e.g. an inherited style)
+                // unless a handler produced a different final value.
+                if !source.is_some_and(|(id, name, value)| {
+                    id == change.object && name == change.property && value == &latest
+                }) {
+                    node.apply(&change.property, &latest)?;
+                }
             }
         }
         if layout_changed {
             let plan = composition::plan(&self.0.instance.borrow(), &self.0.nodes)?;
             composition::apply(plan);
         }
+        self.refresh_clock();
         Ok(())
     }
 }

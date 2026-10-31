@@ -13,7 +13,7 @@ pub(super) fn plan(
     let mut parents = BTreeMap::new();
     let mut plan = Vec::new();
     for (&parent, node) in nodes {
-        let Some((name, collection)) = node.content() else {
+        let Some(name) = node.children_property() else {
             continue;
         };
         let Value::List(entries) = instance.get(parent, name)? else {
@@ -35,7 +35,16 @@ pub(super) fn plan(
             }
             children.push(child.control());
         }
-        plan.push((collection, children));
+        match node.content() {
+            Some((_, collection)) => plan.push((collection, children)),
+            None if !children.is_empty() => {
+                return Err(Error::new(format!(
+                    "{} has no native visual child host",
+                    instance.type_name(parent).unwrap_or("object")
+                )))
+            }
+            None => {}
+        }
     }
 
     // Detect cycles before changing the retained tree. Finished paths are memoized.
@@ -68,7 +77,11 @@ pub(super) fn apply(plan: Plan) {
     }
     for (collection, children) in plan {
         for (target, child) in children.into_iter().enumerate() {
-            if target < collection.count() && collection.get(target) == child {
+            if target == collection.count() {
+                collection.add(child);
+                continue;
+            }
+            if collection.get(target) == child {
                 continue;
             }
             match collection.index_of(&child) {
