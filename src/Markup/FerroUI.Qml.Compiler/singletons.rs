@@ -1,4 +1,4 @@
-//! Rewrite singleton names in the importing document's lexical scope. References
+//! Resolve type constants and singleton names in each document. References
 //! from other files converge on the same private object identity in the linked IR.
 use super::*;
 use std::collections::HashSet;
@@ -11,16 +11,41 @@ impl<R: ComponentResolver> Linker<'_, R> {
     ) -> Result<(), LinkError> {
         for member in members {
             let span = member.span;
-            let mut resolve = |name: &str| -> Result<Option<String>, LinkError> {
-                let Some(source) = self
+            let mut resolve = |parts: &[&str]| -> Result<Option<Expr>, LinkError> {
+                let qualified = context
+                    .imports
+                    .iter()
+                    .any(|i| i.alias.as_deref() == Some(parts[0]));
+                let (name, tail) = match (qualified, parts) {
+                    (true, [ns, ty, tail @ ..]) => (format!("{ns}.{ty}"), tail),
+                    (false, [ty, tail @ ..]) => (ty.to_string(), tail),
+                    _ => return Ok(None),
+                };
+                let singleton = self
                     .resolver
-                    .singleton(&context.origin, &context.imports, name)
-                    .map_err(|m| context.error(span, m))?
-                else {
+                    .singleton(&context.origin, &context.imports, &name)
+                    .map_err(|m| context.error(span, m))?;
+                if !tail.is_empty() {
+                    let source = if let Some(template) = context.inline.get(&name) {
+                        return enum_value(template, tail).map_err(|m| context.error(span, m));
+                    } else if singleton.is_some() {
+                        singleton
+                    } else {
+                        self.resolver
+                            .resolve(&context.origin, &context.imports, &name)
+                            .map_err(|m| context.error(span, m))?
+                    };
+                    return match source {
+                        Some(source) => enum_value(&source.document.root, tail)
+                            .map_err(|m| context.error(span, m)),
+                        None => Ok(None),
+                    };
+                }
+                let Some(source) = singleton else {
                     return Ok(None);
                 };
                 if let Some(id) = self.singleton_ids.get(&source.key) {
-                    return Ok(Some(id.clone()));
+                    return Ok(Some(Expr::Name(id.clone())));
                 }
                 if !matches!(&source.document.pragmas[..], [pragma] if pragma.name=="Singleton" && pragma.values.is_empty())
                 {
@@ -41,7 +66,7 @@ impl<R: ComponentResolver> Linker<'_, R> {
                 self.object(&defining, &mut root)?;
                 self.stack.pop();
                 self.singletons.push(root);
-                Ok(Some(id))
+                Ok(Some(Expr::Name(id)))
             };
             match &mut member.kind {
                 MemberKind::Binding { value, .. }
@@ -70,17 +95,43 @@ impl<R: ComponentResolver> Linker<'_, R> {
     }
 }
 
-type Lookup<'a> = dyn FnMut(&str) -> Result<Option<String>, LinkError> + 'a;
-
-fn name(expr: &Expr) -> Option<&str> {
-    match expr {
-        Expr::Name(name) | Expr::ScopedName { name, .. }
-            if name.chars().next().is_some_and(char::is_uppercase) =>
-        {
-            Some(name)
+fn enum_value(template: &Object, path: &[&str]) -> Result<Option<Expr>, String> {
+    let (group, key) = match path {
+        [key] => (None, *key),
+        [group, key] => (Some(*group), *key),
+        _ => return Ok(None),
+    };
+    let mut result = None;
+    for member in &template.members {
+        if let MemberKind::Enum { name, values } = &member.kind {
+            if group.is_some_and(|g| g != name) {
+                continue;
+            }
+            if let Some((_, n)) = values.iter().find(|(k, _)| k == key) {
+                if result.is_some() {
+                    return Err(format!("ambiguous enum key '{key}'; qualify the enum name"));
+                }
+                result = Some(Expr::Number(f64::from(*n)));
+            }
         }
-        _ => None,
     }
+    Ok(result)
+}
+
+type Lookup<'a> = dyn FnMut(&[&str]) -> Result<Option<Expr>, LinkError> + 'a;
+
+/// A type export, enum scope and key, optionally preceded by a module qualifier.
+fn type_path<'a>(expr: &'a Expr, parts: &mut Vec<&'a str>) -> bool {
+    let name = match expr {
+        Expr::Name(name) | Expr::ScopedName { name, .. } => name,
+        Expr::Member(base, name) if type_path(base, parts) => name,
+        _ => return false,
+    };
+    if parts.len() == 4 || !name.chars().next().is_some_and(char::is_uppercase) {
+        return false;
+    }
+    parts.push(name);
+    true
 }
 
 fn expression(
@@ -88,21 +139,12 @@ fn expression(
     locals: &HashSet<String>,
     resolve: &mut Lookup<'_>,
 ) -> Result<(), LinkError> {
-    if let Expr::Member(qualifier, ty) = expr {
-        if let Some(ns) = name(qualifier).filter(|n| !locals.contains(*n)) {
-            if ty.chars().next().is_some_and(char::is_uppercase) {
-                if let Some(id) = resolve(&format!("{ns}.{ty}"))? {
-                    *expr = Expr::Name(id);
-                    return Ok(());
-                }
-            }
+    let mut parts = Vec::new();
+    if type_path(expr, &mut parts) && !locals.contains(parts[0]) {
+        if let Some(value) = resolve(&parts)? {
+            *expr = value;
+            return Ok(());
         }
-    }
-    if let Some(ty) = name(expr).filter(|n| !locals.contains(*n)) {
-        if let Some(id) = resolve(ty)? {
-            *expr = Expr::Name(id);
-        }
-        return Ok(());
     }
     match expr {
         Expr::Unary(_, arg) | Expr::Member(arg, _) => expression(arg, locals, resolve)?,
@@ -160,6 +202,31 @@ fn statements(
                 expression(test, &locals, resolve)?;
                 statements(then_body, locals.clone(), resolve)?;
                 statements(else_body, locals.clone(), resolve)?;
+            }
+            Stmt::While { test, body, .. } => {
+                expression(test, &locals, resolve)?;
+                statements(body, locals.clone(), resolve)?;
+            }
+            Stmt::For {
+                init,
+                test,
+                update,
+                body,
+            } => {
+                let mut scope = locals.clone();
+                if let Some(init) = init {
+                    if let Stmt::Let { name, .. } = init.as_ref() {
+                        scope.insert(name.clone());
+                    }
+                    statements(std::slice::from_mut(init), scope.clone(), resolve)?;
+                }
+                if let Some(test) = test {
+                    expression(test, &scope, resolve)?;
+                }
+                if let Some(update) = update {
+                    statements(std::slice::from_mut(update), scope.clone(), resolve)?;
+                }
+                statements(body, scope, resolve)?;
             }
             Stmt::Block(stmts) => statements(stmts, locals.clone(), resolve)?,
             _ => (),

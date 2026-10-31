@@ -66,6 +66,11 @@ pub enum MemberKind {
         value: Binding,
     },
     Child(Object),
+    /// A property value source or interceptor, outside the default property list.
+    OnProperty {
+        name: String,
+        object: Object,
+    },
     Group {
         name: String,
         members: Vec<Member>,
@@ -145,6 +150,8 @@ pub enum Expr {
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum Stmt {
+    /// Index in the compiled module's native statement table.
+    Native(usize),
     Expr(Expr),
     Assign {
         target: Expr,
@@ -162,4 +169,17 @@ pub enum Stmt {
         else_body: Vec<Stmt>,
     },
     Block(Vec<Stmt>),
+    While {
+        test: Expr,
+        body: Vec<Stmt>,
+        post_test: bool,
+    },
+    For {
+        init: Option<Box<Stmt>>,
+        test: Option<Expr>,
+        update: Option<Box<Stmt>>,
+        body: Vec<Stmt>,
+    },
+    Break,
+    Continue,
 }

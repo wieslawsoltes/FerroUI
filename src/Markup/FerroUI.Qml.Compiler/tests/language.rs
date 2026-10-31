@@ -217,3 +217,42 @@ fn bounds_depth_even_for_flat_chains() {
         assert!(parse(&bad).is_err());
     }
 }
+
+#[test]
+fn value_sources_are_separate_from_default_children_and_keywords_are_contextual() {
+    let doc = parse(
+        "Item { Q.Binding on width { value: 20 } Binding { property: 'height'; target: parent } }",
+    )
+    .unwrap();
+    assert!(
+        matches!(&doc.root.members[0].kind,MemberKind::OnProperty{name,object} if name=="width" && object.type_name=="Q.Binding")
+    );
+    assert!(
+        matches!(&doc.root.members[1].kind,MemberKind::Child(child) if matches!(&child.members[0].kind,MemberKind::Binding{name,..} if name=="property"))
+    );
+}
+
+#[test]
+fn parentheses_disambiguate_nullish_and_exponentiation_grammar() {
+    for expr in [
+        "a ?? b || c",
+        "a && b ?? c",
+        "a ?? b && c",
+        "-2 ** 3",
+        "typeof a ** 4",
+    ] {
+        assert!(
+            parse(&format!("Item {{ width: {expr} }}")).is_err(),
+            "accepted {expr}"
+        );
+    }
+    for expr in [
+        "a ?? (b || c)",
+        "(a && b) ?? c",
+        "(-2) ** 3",
+        "2 ** -3",
+        "-(2 ** 3)",
+    ] {
+        expression(expr);
+    }
+}

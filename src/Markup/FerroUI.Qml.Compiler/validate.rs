@@ -32,29 +32,56 @@ fn validate_object<'a>(
         };
         if let Some(name) = declaration {
             if name == "id" || !names.insert(name.as_str()) {
-                return Err(Diagnostic::new(source, span, format!("duplicate or reserved member '{name}'")));
+                return Err(Diagnostic::new(
+                    source,
+                    span,
+                    format!("duplicate or reserved member '{name}'"),
+                ));
             }
         }
         match &member.kind {
             MemberKind::Id(name) => {
                 if has_id || !ids.insert(name) {
-                    return Err(Diagnostic::new(source, span, format!("duplicate id '{name}'")));
+                    return Err(Diagnostic::new(
+                        source,
+                        span,
+                        format!("duplicate id '{name}'"),
+                    ));
                 }
                 has_id = true;
             }
-            MemberKind::Property { name, ty, modifiers, value } => {
+            MemberKind::Property {
+                name,
+                ty,
+                modifiers,
+                value,
+            } => {
                 if modifiers.default && has_default {
                     return Err(Diagnostic::new(source, span, "multiple default properties"));
                 }
                 has_default |= modifiers.default;
                 if modifiers.required && value.is_some() {
-                    return Err(Diagnostic::new(source, span, "a required property cannot declare an initializer"));
+                    return Err(Diagnostic::new(
+                        source,
+                        span,
+                        "a required property cannot declare an initializer",
+                    ));
                 }
                 if modifiers.readonly && value.is_none() {
-                    return Err(Diagnostic::new(source, span, "a readonly property requires an initializer"));
+                    return Err(Diagnostic::new(
+                        source,
+                        span,
+                        "a readonly property requires an initializer",
+                    ));
                 }
-                if ty == "alias" && !matches!(value, Some(Binding::Expr(e)) if alias_depth(e).is_some_and(|d| d <= 2)) {
-                    return Err(Diagnostic::new(source, span, "an alias must refer to an id or its property"));
+                if ty == "alias"
+                    && !matches!(value, Some(Binding::Expr(e)) if alias_depth(e).is_some_and(|d| d <= 2))
+                {
+                    return Err(Diagnostic::new(
+                        source,
+                        span,
+                        "an alias must refer to an id or its property",
+                    ));
                 }
                 if let Some(value) = value {
                     assign(&mut bindings, name.clone(), source, span)?;
@@ -65,9 +92,13 @@ fn validate_object<'a>(
                 assign(&mut bindings, name.clone(), source, span)?;
                 binding(value, ids, source)?;
             }
-            MemberKind::Group { name, members } => group(name, members, &mut bindings, ids, source)?,
+            MemberKind::Group { name, members } => {
+                group(name, members, &mut bindings, ids, source)?
+            }
             MemberKind::Handler { name, .. } => assign(&mut bindings, name.clone(), source, span)?,
-            MemberKind::Child(child) => validate_object(child, ids, source)?,
+            MemberKind::Child(child) | MemberKind::OnProperty { object: child, .. } => {
+                validate_object(child, ids, source)?
+            }
             MemberKind::Component { object, .. } => component(object, source)?,
             _ => {}
         }
@@ -75,33 +106,62 @@ fn validate_object<'a>(
     Ok(())
 }
 
-fn assign(bindings: &mut HashSet<String>, name: String, source: &str, span: Span) -> Result<(), Diagnostic> {
+fn assign(
+    bindings: &mut HashSet<String>,
+    name: String,
+    source: &str,
+    span: Span,
+) -> Result<(), Diagnostic> {
     if bindings.contains(&name) {
-        return Err(Diagnostic::new(source, span, format!("duplicate binding for '{name}'")));
+        return Err(Diagnostic::new(
+            source,
+            span,
+            format!("duplicate binding for '{name}'"),
+        ));
     }
     bindings.insert(name);
     Ok(())
 }
 
-fn group<'a>(prefix: &str, members: &'a [Member], bindings: &mut HashSet<String>, ids: &mut HashSet<&'a str>, source: &str) -> Result<(), Diagnostic> {
+fn group<'a>(
+    prefix: &str,
+    members: &'a [Member],
+    bindings: &mut HashSet<String>,
+    ids: &mut HashSet<&'a str>,
+    source: &str,
+) -> Result<(), Diagnostic> {
     for member in members {
         match &member.kind {
             MemberKind::Binding { name, value } => {
                 assign(bindings, format!("{prefix}.{name}"), source, member.span)?;
                 binding(value, ids, source)?;
             }
-            MemberKind::Group { name, members } => group(&format!("{prefix}.{name}"), members, bindings, ids, source)?,
-            _ => return Err(Diagnostic::new(source, member.span, "expected a grouped property assignment")),
+            MemberKind::Group { name, members } => {
+                group(&format!("{prefix}.{name}"), members, bindings, ids, source)?
+            }
+            _ => {
+                return Err(Diagnostic::new(
+                    source,
+                    member.span,
+                    "expected a grouped property assignment",
+                ))
+            }
         }
     }
     Ok(())
 }
 
-fn binding<'a>(value: &'a Binding, ids: &mut HashSet<&'a str>, source: &str) -> Result<(), Diagnostic> {
+fn binding<'a>(
+    value: &'a Binding,
+    ids: &mut HashSet<&'a str>,
+    source: &str,
+) -> Result<(), Diagnostic> {
     match value {
         Binding::Object(object) => validate_object(object, ids, source)?,
         Binding::Objects(objects) => {
-            for object in objects { validate_object(object, ids, source)?; }
+            for object in objects {
+                validate_object(object, ids, source)?;
+            }
         }
         _ => {}
     }

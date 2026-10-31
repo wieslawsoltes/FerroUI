@@ -245,7 +245,9 @@ impl<R: ComponentResolver> Linker<'_, R> {
                 _ => (),
             }
             match &mut member.kind {
-                MemberKind::Child(object) => self.object(context, object)?,
+                MemberKind::Child(object) | MemberKind::OnProperty { object, .. } => {
+                    self.object(context, object)?
+                }
                 MemberKind::Group { members, .. } => self.members(context, members)?,
                 MemberKind::Binding { value, .. }
                 | MemberKind::Property {

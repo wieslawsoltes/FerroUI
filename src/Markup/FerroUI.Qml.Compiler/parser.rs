@@ -14,6 +14,7 @@ pub fn parse(source: &str) -> Result<Document> {
         tokens: tokenize(source)?,
         pos: 0,
         depth: 0,
+        loops: 0,
     }
     .document()?;
     validate(&document, source)?;
@@ -25,6 +26,7 @@ struct Parser<'s> {
     tokens: Vec<Token<'s>>,
     pos: usize,
     depth: usize,
+    loops: usize,
 }
 
 impl<'s> Parser<'s> {
@@ -255,6 +257,14 @@ impl<'s> Parser<'s> {
     }
     fn member(&mut self) -> Result<MemberKind> {
         let start = self.token().span.start;
+        // Contextual keywords can also name native properties (Binding.property).
+        if self
+            .tokens
+            .get(self.pos + 1)
+            .is_some_and(|t| token_is(&t.kind, ":"))
+        {
+            return self.named_member(start);
+        }
         let mut modifiers = Modifiers::default();
         loop {
             let slot = match self.token().kind {
@@ -352,7 +362,17 @@ impl<'s> Parser<'s> {
         if self.eat("enum") {
             return self.enumeration();
         }
+        self.named_member(start)
+    }
+    fn named_member(&mut self, start: usize) -> Result<MemberKind> {
         let name = self.qualified()?;
+        if is_type(&name) && self.eat("on") {
+            let target = self.qualified()?;
+            return Ok(MemberKind::OnProperty {
+                name: target,
+                object: self.object_body(start, name)?,
+            });
+        }
         if self.at("{") {
             if is_type(&name) {
                 return self.object_body(start, name).map(MemberKind::Child);
@@ -622,7 +642,88 @@ impl<'s> Parser<'s> {
             self.end_statement()?;
             return Ok(Stmt::Return(value));
         }
-        if self.eat("let") {
+        if self.eat("while") {
+            self.expect("(")?;
+            let test = self.expression()?;
+            self.expect(")")?;
+            let body = self.loop_body()?;
+            return Ok(Stmt::While {
+                test,
+                body,
+                post_test: false,
+            });
+        }
+        if self.eat("do") {
+            let body = self.loop_body()?;
+            self.expect("while")?;
+            self.expect("(")?;
+            let test = self.expression()?;
+            self.expect(")")?;
+            self.eat(";");
+            return Ok(Stmt::While {
+                test,
+                body,
+                post_test: true,
+            });
+        }
+        if self.eat("for") {
+            self.expect("(")?;
+            let init = if self.at(";") {
+                None
+            } else {
+                Some(Box::new(self.simple_statement(true)?))
+            };
+            self.expect(";")?;
+            let test = if self.at(";") {
+                None
+            } else {
+                Some(self.expression()?)
+            };
+            self.expect(";")?;
+            let update = if self.at(")") {
+                None
+            } else {
+                Some(Box::new(self.simple_statement(false)?))
+            };
+            self.expect(")")?;
+            let body = self.loop_body()?;
+            return Ok(Stmt::For {
+                init,
+                test,
+                update,
+                body,
+            });
+        }
+        if self.at("break") || self.at("continue") {
+            if self.loops == 0 {
+                return Err(self.error("loop control outside a loop"));
+            }
+            let stmt = if self.eat("break") {
+                Stmt::Break
+            } else {
+                self.expect("continue")?;
+                Stmt::Continue
+            };
+            self.end_statement()?;
+            return Ok(stmt);
+        }
+        if self.eat(";") {
+            return Ok(Stmt::Block(Vec::new()));
+        }
+        let stmt = self.simple_statement(true)?;
+        self.end_statement()?;
+        Ok(stmt)
+    }
+
+    fn loop_body(&mut self) -> Result<Vec<Stmt>> {
+        self.loops += 1;
+        let stmt = self.statement();
+        self.loops -= 1;
+        Ok(vec![stmt?])
+    }
+
+    fn simple_statement(&mut self, declaration: bool) -> Result<Stmt> {
+        if declaration && self.eat("let") {
             let name = self.ident()?;
             if reserved(&name) {
                 return Err(self.error("invalid local name"));
@@ -632,7 +733,6 @@ impl<'s> Parser<'s> {
             } else {
                 None
             };
-            self.end_statement()?;
             return Ok(Stmt::Let { name, value });
         }
         let prefix = match self.token().kind {
@@ -675,7 +775,6 @@ impl<'s> Parser<'s> {
             }
             None => Stmt::Expr(target),
         };
-        self.end_statement()?;
         Ok(result)
     }
 
@@ -692,6 +791,7 @@ impl<'s> Parser<'s> {
                 self.pos += 1;
                 let operand = self.expr_bp(27)?;
                 Node {
+                    grouped: false,
                     depth: operand.depth + 1,
                     expr: Expr::Unary(op, Box::new(operand.expr)),
                 }
@@ -722,14 +822,16 @@ impl<'s> Parser<'s> {
             }
             Kind::Symbol("(") => {
                 self.pos += 1;
-                let value = self.expr_bp(0)?;
+                let mut value = self.expr_bp(0)?;
                 self.expect(")")?;
+                value.grouped = true;
                 value
             }
             Kind::Symbol("[") => {
                 self.pos += 1;
                 let (args, depth) = self.arguments("]")?;
                 Node {
+                    grouped: false,
                     expr: Expr::Array(args),
                     depth,
                 }
@@ -742,6 +844,7 @@ impl<'s> Parser<'s> {
             }
             if self.eat(".") {
                 node = Node {
+                    grouped: false,
                     depth: node.depth + 1,
                     expr: Expr::Member(Box::new(node.expr), self.ident()?),
                 };
@@ -749,12 +852,14 @@ impl<'s> Parser<'s> {
                 let sub = self.expr_bp(0)?;
                 self.expect("]")?;
                 node = Node {
+                    grouped: false,
                     depth: node.depth.max(sub.depth) + 1,
                     expr: Expr::Index(Box::new(node.expr), Box::new(sub.expr)),
                 };
             } else if self.eat("(") {
                 let (args, depth) = self.arguments(")")?;
                 node = Node {
+                    grouped: false,
                     depth: (node.depth + 1).max(depth),
                     expr: Expr::Call(Box::new(node.expr), args),
                 };
@@ -763,6 +868,7 @@ impl<'s> Parser<'s> {
                 self.expect(":")?;
                 let no = self.expr_bp(1)?;
                 node = Node {
+                    grouped: false,
                     depth: node.depth.max(yes.depth).max(no.depth) + 1,
                     expr: Expr::Conditional(
                         Box::new(node.expr),
@@ -777,9 +883,21 @@ impl<'s> Parser<'s> {
                 if left < min {
                     break;
                 }
+                if op == "**" && !node.grouped && matches!(node.expr, Expr::Unary(..)) {
+                    return Err(self.error("parenthesize the unary base of exponentiation"));
+                }
+                let operator = self.token().span;
                 self.pos += 1;
                 let rhs = self.expr_bp(right)?;
+                if node.mixes_nullish(op) || rhs.mixes_nullish(op) {
+                    return Err(Diagnostic::new(
+                        self.source,
+                        operator,
+                        "parenthesize mixed nullish and logical operators",
+                    ));
+                }
                 node = Node {
+                    grouped: false,
                     depth: node.depth.max(rhs.depth) + 1,
                     expr: Expr::Binary(op.to_owned(), Box::new(node.expr), Box::new(rhs.expr)),
                 };
@@ -806,12 +924,23 @@ impl<'s> Parser<'s> {
 }
 
 struct Node {
+    grouped: bool,
     expr: Expr,
     depth: usize,
 }
 impl Node {
+    fn mixes_nullish(&self, op: &str) -> bool {
+        if self.grouped {
+            return false;
+        }
+        matches!(&self.expr,Expr::Binary(inner,..) if matches!((op,inner.as_str()),("??","&&"|"||")|("&&"|"||","??")))
+    }
     fn leaf(expr: Expr) -> Self {
-        Self { expr, depth: 1 }
+        Self {
+            expr,
+            depth: 1,
+            grouped: false,
+        }
     }
 }
 

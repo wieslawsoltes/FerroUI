@@ -32,7 +32,9 @@ fn visit_objects(object: &mut Object, visit: &mut impl FnMut(&mut Object)) {
 fn visit_members(members: &mut [Member], visit: &mut impl FnMut(&mut Object)) {
     for member in members {
         match &mut member.kind {
-            MemberKind::Child(child) => visit_objects(child, visit),
+            MemberKind::Child(child) | MemberKind::OnProperty { object: child, .. } => {
+                visit_objects(child, visit)
+            }
             MemberKind::Group { members, .. } => visit_members(members, visit),
             MemberKind::Binding { value, .. }
             | MemberKind::Property {
@@ -157,6 +159,31 @@ fn statements(
                 expression(test, ids, root, &locals);
                 statements(then_body, ids, root, locals.clone());
                 statements(else_body, ids, root, locals.clone());
+            }
+            Stmt::While { test, body, .. } => {
+                expression(test, ids, root, &locals);
+                statements(body, ids, root, locals.clone());
+            }
+            Stmt::For {
+                init,
+                test,
+                update,
+                body,
+            } => {
+                let mut scope = locals.clone();
+                if let Some(init) = init {
+                    if let Stmt::Let { name, .. } = init.as_ref() {
+                        scope.insert(name.clone());
+                    }
+                    statements(std::slice::from_mut(init), ids, root, scope.clone());
+                }
+                if let Some(test) = test {
+                    expression(test, ids, root, &scope);
+                }
+                if let Some(update) = update {
+                    statements(std::slice::from_mut(update), ids, root, scope.clone());
+                }
+                statements(body, ids, root, scope);
             }
             Stmt::Block(body) => statements(body, ids, root, locals.clone()),
             _ => (),
