@@ -250,7 +250,15 @@ Not taken from #243 in R8: its manager tests for a client without exact editing 
 
 Not taken from #243 in R10: its tests of input options and preedit resets for clients without the connection (`browser_text_input_method.rs`); such clients keep the upstream path (D5), which ignores options and is tested as such.
 
-### 11.6 The UI Automation text pattern on Windows (R9a)
+### 11.6 The WinUI host's CoreText input (R9c)
+
+| WinUI | FerroUI | Why |
+|---|---|---|
+| RichEdit applies the IME's format requests (`FormatUpdating`: the conversion clauses and their underlines). | The request is answered `Failed` and not applied. | The clause formats are not projected onto the rich document yet. |
+
+The differences from the upstream-ported adapter (`WinUITextInputMethod`) are in `DEVIATIONS.md`, "WinUI integration": they apply to connection clients only (D5).
+
+### 11.7 The UI Automation text pattern on Windows (R9a)
 
 | WinUI | FerroUI | Why |
 |---|---|---|
