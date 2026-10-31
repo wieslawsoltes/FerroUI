@@ -1,0 +1,29 @@
+[package]
+name = "ferroui-qml-webscene"
+description = "WebScene V8 execution backend for FerroUI QML"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[[bin]]
+name = "ferroui-qml-webscene-worker"
+path = "worker.rs"
+
+[dependencies]
+ferroui-qml.workspace = true
+serde_json.workspace = true
+libloading = "0.8"
+percent-encoding = "2"
+unicode-ident = "1"
+
+[package.metadata.release]
+group = "markup"
