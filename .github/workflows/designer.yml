@@ -1,13 +1,27 @@
 name: Visual designer
 
-# The designer crates of #345 (docs: the series C1-C6 and D1-D9 of its review). Each part of the
-# stack adds its crates to the jobs here; the schema of the language service is checked by the
-# source conventions of ci.yml, since any framework crate can change it.
+# The designer crates of #345. The portable job tests the engines on every platform; the native job
+# runs the studio's tests with MCP and the render-smoke suites, which draw with Vello and the WinUI
+# theme, so it also runs when the framework crates the studio is built on change. The schema of
+# the language service is checked by the source conventions of ci.yml.
 on:
   pull_request:
     paths:
       - 'src/FerroUI.Designer*/**'
       - 'docs/designer/samples/**'
+      - 'samples/DesignerStudio/**'
+      - 'src/FerroUI.Mcp/**'
+      - 'src/FerroUI.HotReload/**'
+      - 'src/FerroUI.Inspect/**'
+      - 'src/FerroUI.Base/**'
+      - 'src/FerroUI.Controls/**'
+      - 'src/FerroUI.Controls.ColorPicker/**'
+      - 'src/TreeDataGrid/**'
+      - 'src/FerroUI.Themes.WinUI/**'
+      - 'src/Markup/FerroUI.Markup.Xaml/**'
+      - 'src/Markup/FerroUI.Markup.Xaml.Loader/**'
+      - 'external/XamlX/**'
+      - 'src/Vello/**'
       - 'Cargo.toml'
       - 'Cargo.lock'
       - '.github/workflows/designer.yml'
@@ -50,7 +64,42 @@ jobs:
         with:
           toolchain: ${{ matrix.rust }}
           components: clippy
-      - name: Source preservation, transaction, language and timeline regressions
-        run: cargo test --locked -p ferroui-designer-core -p ferroui-designer-project -p ferroui-designer-tools -p ferroui-designer-language -p ferroui-designer-animation
+      - name: Source preservation, transaction, language, timeline and convergence regressions
+        run: cargo test --locked -p ferroui-designer-core -p ferroui-designer-project -p ferroui-designer-tools -p ferroui-designer-language -p ferroui-designer-animation -p ferroui-designer-collaboration -p ferroui-designer-collaboration-host --features ferroui-designer-collaboration-host/client,ferroui-designer-collaboration-host/server
       - name: Portable public APIs are warning-free
-        run: cargo clippy --locked -p ferroui-designer-core -p ferroui-designer-project -p ferroui-designer-tools -p ferroui-designer-language -p ferroui-designer-animation --all-targets -- -D warnings
+        run: cargo clippy --locked -p ferroui-designer-core -p ferroui-designer-project -p ferroui-designer-tools -p ferroui-designer-language -p ferroui-designer-animation -p ferroui-designer-collaboration -p ferroui-designer-collaboration-host --features ferroui-designer-collaboration-host/client,ferroui-designer-collaboration-host/server --all-targets --no-deps -- -D warnings
+
+  native:
+    name: Native studio, MCP and render smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+        with:
+          components: clippy
+      - name: Fonts for native rendering
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libfontconfig1-dev libfreetype6-dev fonts-dejavu-core
+      - name: Studio, MCP tools and render-smoke suites
+        env:
+          FERROUI_DESIGNER_RENDER_OUTPUT: ${{ github.workspace }}/designer-render
+        run: cargo test --locked -p ferroui-designer -p designer-studio --no-default-features --features ferroui-designer/mcp,ferroui-designer/render-smoke,designer-studio/headless,designer-studio/mcp -- --test-threads=1
+      - name: The studio is warning-free
+        run: cargo clippy --locked -p ferroui-designer -p designer-studio --no-default-features --features ferroui-designer/mcp,ferroui-designer/render-smoke,designer-studio/headless,designer-studio/mcp --all-targets --no-deps -- -D warnings
+      - name: Headless studio startup and clean shutdown, with the sample documents
+        env:
+          FERROUI_SMOKE_EXIT_MS: '1500'
+        run: |
+          cargo run --locked -p designer-studio --no-default-features --features headless,mcp -- --headless
+          for file in DesignWorkflows PreviewStages PrototypeFlow PrototypeOverlays; do
+            cargo run --locked -p designer-studio --no-default-features --features headless,mcp -- --headless --file docs/designer/samples/$file.xaml
+          done
+      - name: Release build without development hot reload
+        run: cargo check --locked -p ferroui-designer --features mcp --release
+      - name: Render evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: designer-native-renders
+          path: designer-render
+          if-no-files-found: warn

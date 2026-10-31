@@ -92,7 +92,7 @@ The life cycle is the reference's: `Loaded` creates the surface, the top-level a
 | `WinUICursorFactory.cs` | 91 | `win_ui_cursor_factory.rs` | ported; the shape of each standard cursor tested on every host |
 | `WinUIDragSource.cs` | 42 | `win_ui_drag_source.rs` | ported; the drag runs as a future on the dispatcher |
 | `WinUIKeyInterop.cs` | 62 | `win_ui_key_interop.rs` | ported; the key data and the modifiers tested on every host |
-| `WinUITextInputMethod.cs` | 384 | `win_ui_text_input_method.rs` | ported; the text is kept as UTF-16, as the ranges of the edit context count; the operations on it tested on every host |
+| `WinUITextInputMethod.cs` | 384 | `win_ui_text_input_method.rs` | ported; the text is kept as UTF-16, as the ranges of the edit context count; the operations on it tested on every host. Clients of the exact-edit connection (RichEditBox) take the additions of `win_ui_text_input_method_exact.rs`, `win_ui_text_input_method_layout.rs` and the `core_text_*.rs` files (`winui-rich-text.md`, R9c; `DEVIATIONS.md`, "WinUI integration"); every other client keeps the adapter of the reference, which `win_ui_text_input_method_core_text_tests.rs` checks with test doubles of the edit context |
 | `Automation/AvaloniaSwapChainPanelAutomationPeer.cs` | 143 | `automation/ferro_swap_chain_panel_automation_peer.rs` | ported (composed `FrameworkElementAutomationPeer`) |
 | `Automation/AvaloniaToXamlPeerProxy.cs` | 141 | `automation/ferro_to_xaml_peer_proxy.rs` | ported (composed `AutomationPeer`) |
 | `Automation/AvaloniaToXamlPeerProxy.*.cs` (7) | 178 | `automation/ferro_to_xaml_peer_proxy_*.rs` | ported, one file per pattern as the partial class has; the state mappings tested on every host |
