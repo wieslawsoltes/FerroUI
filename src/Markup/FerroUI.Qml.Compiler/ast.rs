@@ -34,6 +34,8 @@ pub struct Import {
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Object {
+    /// Nominal component identities assigned by the linker, in inheritance order.
+    pub composite_types: Vec<String>,
     /// Imports in force at the declaration site after linking external components.
     pub type_imports: Option<Vec<Import>>,
     pub type_name: String,

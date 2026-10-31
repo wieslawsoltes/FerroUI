@@ -225,6 +225,7 @@ impl<'s> Parser<'s> {
         let members = self.members()?;
         Ok(Object {
             type_imports: None,
+            composite_types: Vec::new(),
             type_name,
             members,
             span: self.span(start),
