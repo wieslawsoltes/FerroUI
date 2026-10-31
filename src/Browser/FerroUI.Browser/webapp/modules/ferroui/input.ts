@@ -91,8 +91,8 @@ const isTextInputElement = (target: EventTarget | null): boolean =>
     (target as Element | null)?.classList?.contains(textInputElementClass) === true;
 
 type TextEditor = HTMLInputElement | HTMLTextAreaElement;
-type EditorSelection = { domStart: number; domEnd: number; direction: string | null; sourceStart: number; sourceEnd: number };
-type EditorState = {
+interface EditorSelection { domStart: number; domEnd: number; direction: string | null; sourceStart: number; sourceEnd: number }
+interface EditorState {
     active: TextEditor;
     sensitive: boolean;
     textarea?: HTMLTextAreaElement;
@@ -101,7 +101,7 @@ type EditorState = {
     removed: number[];
     normalizedRemoved: number[];
     selection?: EditorSelection;
-};
+}
 
 export class InputHelper {
     private static readonly editors = new WeakMap<HTMLElement, EditorState>();
@@ -819,8 +819,14 @@ export class InputHelper {
     private static editorState(input: HTMLInputElement): EditorState {
         let state = this.editors.get(input);
         if (!state) {
-            state = { active: input, sensitive: input.type === "password", sourceLength: input.value.length, normalizedLength: input.value.length,
-                removed: [], normalizedRemoved: [] };
+            state = {
+                active: input,
+                sensitive: input.type === "password",
+                sourceLength: input.value.length,
+                normalizedLength: input.value.length,
+                removed: [],
+                normalizedRemoved: []
+            };
             this.editors.set(input, state);
         }
         return state;
@@ -841,7 +847,7 @@ export class InputHelper {
     // Sorted code-unit offsets of characters normalized away by the DOM. Build once
     // per text snapshot; selection-only updates use binary searches and retain no text.
     private static countBefore(offsets: number[], offset: number): number {
-        let low = 0, high = offsets.length;
+        let low = 0; let high = offsets.length;
         while (low < high) {
             const middle = (low + high) >>> 1;
             if (offsets[middle] < offset) low = middle + 1;
@@ -872,7 +878,7 @@ export class InputHelper {
     }
 
     public static setBounds(inputElement: HTMLInputElement, x: number, y: number, caretWidth: number, caretHeight: number, caret: number) {
-        const state = this.editorState(inputElement), editor = state.active;
+        const state = this.editorState(inputElement); const editor = state.active;
         editor.style.left = x.toFixed(0) + "px";
         editor.style.top = y.toFixed(0) + "px";
         const offset = Math.min(Math.max(caret, 0), state.sourceLength);
@@ -892,7 +898,7 @@ export class InputHelper {
 
     public static setSurroundingText(inputElement: HTMLInputElement, text: string, start: number, end: number) {
         if (!inputElement) return;
-        const state = this.editorState(inputElement), editor = state.active;
+        const state = this.editorState(inputElement); const editor = state.active;
         const multiline = editor.tagName === "TEXTAREA";
         state.removed = [];
         state.normalizedRemoved = [];
@@ -915,7 +921,7 @@ export class InputHelper {
     // Preserve source UTF16 offsets even where CRLF collapses to one native LF.
     // No value assignment, resize, focus, or full-buffer walk on this path.
     public static setSelection(inputElement: HTMLInputElement, start: number, end: number) {
-        const state = this.editorState(inputElement), editor = state.active;
+        const state = this.editorState(inputElement); const editor = state.active;
         if (editor.value.length !== state.normalizedLength) this.clearMapping(state);
         let low = Math.min(Math.min(start, end) >>> 0, state.sourceLength);
         const high = Math.min(Math.max(start, end) >>> 0, state.sourceLength);
@@ -924,14 +930,19 @@ export class InputHelper {
         const domLow = low - this.countBefore(state.removed, low);
         const domHigh = high - this.countBefore(state.removed, high);
         editor.setSelectionRange(domLow, domHigh, start > end ? "backward" : "forward");
-        state.selection = { domStart: editor.selectionStart ?? 0, domEnd: editor.selectionEnd ?? 0,
-            direction: editor.selectionDirection, sourceStart: low, sourceEnd: high };
+        state.selection = {
+            domStart: editor.selectionStart ?? 0,
+            domEnd: editor.selectionEnd ?? 0,
+            direction: editor.selectionDirection,
+            sourceStart: low,
+            sourceEnd: high
+        };
     }
 
     private static sourceSelection(inputElement: HTMLInputElement, end: boolean): number {
-        const state = this.editorState(inputElement), editor = state.active;
+        const state = this.editorState(inputElement); const editor = state.active;
         if (editor.value.length !== state.normalizedLength) this.clearMapping(state);
-        const start = editor.selectionStart ?? 0, finish = editor.selectionEnd ?? 0;
+        const start = editor.selectionStart ?? 0; const finish = editor.selectionEnd ?? 0;
         const previous = state.selection;
         // A source caret inside a CRLF has no unique DOM position. Retain exactly
         // the last forwarded source interval while its native interval is unchanged.
@@ -955,7 +966,7 @@ export class InputHelper {
 
     public static setOptions(inputElement: HTMLInputElement, type: string, mode: string,
         enter: string, capitalization: string, suggestions: number, language: string, multiline = false, sensitive = false) {
-        const state = this.editorState(inputElement), previous = state.active;
+        const state = this.editorState(inputElement); const previous = state.active;
         const privateInput = type === "password" || sensitive;
         if (state.sensitive && !privateInput) {
             previous.value = "";
@@ -980,7 +991,7 @@ export class InputHelper {
             parent.insertBefore(textarea, inputElement);
             state.textarea = textarea;
         }
-        const editor = useTextarea ? state.textarea! : inputElement;
+        const editor = useTextarea && state.textarea ? state.textarea : inputElement;
         if (editor !== previous) {
             const focused = previous.ownerDocument.activeElement === previous;
             // Options precede set_client in InputMethodManager. Retire all old

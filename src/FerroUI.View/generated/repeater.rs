@@ -75,11 +75,6 @@ impl<T: ObjectType + Upcast<ferroui_controls_repeater::FlowLayout>> FlowLayoutPr
 
 /// The properties and routed events of [`ItemsRepeater`](ferroui_controls_repeater::ItemsRepeater).
 pub trait ItemsRepeaterProps: ElementBuilder {
-    /// Sets [`ItemsRepeater::items_source_property`](ferroui_controls_repeater::ItemsRepeater::items_source_property).
-    fn items_source<M>(self, value: impl IntoProp<Option<ferroui_controls::ItemsSource>, M>) -> Self {
-        self.prop(<ferroui_controls_repeater::ItemsRepeater>::items_source_property(), value)
-    }
-
     /// Sets [`ItemsRepeater::item_template_property`](ferroui_controls_repeater::ItemsRepeater::item_template_property).
     fn item_template<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls_repeater::ItemsRepeater>::item_template_property(), value)

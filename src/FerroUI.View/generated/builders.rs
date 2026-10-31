@@ -2280,11 +2280,6 @@ pub trait AutoCompleteBoxProps: ElementBuilder {
         self.prop(<ferroui_controls::AutoCompleteBox>::filter_mode_property(), value)
     }
 
-    /// Sets [`AutoCompleteBox::items_source_property`](ferroui_controls::AutoCompleteBox::items_source_property).
-    fn items_source<M>(self, value: impl IntoProp<Option<ferroui_controls::ItemsSource>, M>) -> Self {
-        self.prop(<ferroui_controls::AutoCompleteBox>::items_source_property(), value)
-    }
-
     /// Sets [`AutoCompleteBox::max_length_property`](ferroui_controls::AutoCompleteBox::max_length_property).
     fn max_length<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::AutoCompleteBox>::max_length_property(), value)
@@ -4485,6 +4480,11 @@ pub trait InputElementProps: ElementBuilder {
         self.prop(<ferroui_base::input::InputElement>::focusable_property(), value)
     }
 
+    /// Sets [`InputElement::allow_focus_on_interaction_property`](ferroui_base::input::InputElement::allow_focus_on_interaction_property).
+    fn allow_focus_on_interaction<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_base::input::InputElement>::allow_focus_on_interaction_property(), value)
+    }
+
     /// Sets [`InputElement::is_enabled_property`](ferroui_base::input::InputElement::is_enabled_property).
     fn is_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_base::input::InputElement>::is_enabled_property(), value)
@@ -4705,11 +4705,6 @@ pub trait ItemsControlProps: ElementBuilder {
     /// Sets [`ItemsControl::items_panel_property`](ferroui_controls::ItemsControl::items_panel_property).
     fn items_panel<M>(self, value: impl IntoProp<std::rc::Rc<dyn ferroui_controls::ITemplateOf<Option<ferroui_base::Ref<ferroui_controls::Panel>>>>, M>) -> Self {
         self.prop(<ferroui_controls::ItemsControl>::items_panel_property(), value)
-    }
-
-    /// Sets [`ItemsControl::items_source_property`](ferroui_controls::ItemsControl::items_source_property).
-    fn items_source<M>(self, value: impl IntoProp<Option<ferroui_controls::ItemsSource>, M>) -> Self {
-        self.prop(<ferroui_controls::ItemsControl>::items_source_property(), value)
     }
 
     /// Sets [`ItemsControl::item_template_property`](ferroui_controls::ItemsControl::item_template_property).
@@ -4939,11 +4934,6 @@ impl<T: ObjectType + Upcast<ferroui_controls::MenuBase>> MenuBaseProps for El<T>
 
 /// The properties and routed events of [`MenuFlyout`](ferroui_controls::MenuFlyout).
 pub trait MenuFlyoutProps: ElementBuilder {
-    /// Sets [`MenuFlyout::items_source_property`](ferroui_controls::MenuFlyout::items_source_property).
-    fn items_source<M>(self, value: impl IntoProp<Option<ferroui_controls::ItemsSource>, M>) -> Self {
-        self.prop(<ferroui_controls::MenuFlyout>::items_source_property(), value)
-    }
-
     /// Sets [`MenuFlyout::item_template_property`](ferroui_controls::MenuFlyout::item_template_property).
     fn item_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::MenuFlyout>::item_template_property(), value)
@@ -5046,11 +5036,6 @@ impl<T: ObjectType + Upcast<ferroui_controls::media::MicaBackdrop>> MicaBackdrop
 
 /// The properties and routed events of [`MultiPage`](ferroui_controls::MultiPage).
 pub trait MultiPageProps: ElementBuilder {
-    /// Sets [`MultiPage::items_source_property`](ferroui_controls::MultiPage::items_source_property).
-    fn items_source<M>(self, value: impl IntoProp<Option<ferroui_controls::ItemsSource>, M>) -> Self {
-        self.prop(<ferroui_controls::MultiPage>::items_source_property(), value)
-    }
-
     /// Sets [`MultiPage::page_template_property`](ferroui_controls::MultiPage::page_template_property).
     fn page_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::MultiPage>::page_template_property(), value)
@@ -5308,16 +5293,6 @@ pub trait NavigationViewProps: ElementBuilder {
         self.prop(<ferroui_controls::NavigationView>::auto_suggest_box_property(), value)
     }
 
-    /// Sets [`NavigationView::menu_items_source_property`](ferroui_controls::NavigationView::menu_items_source_property).
-    fn menu_items_source<M>(self, value: impl IntoProp<Option<ferroui_controls::ItemsSource>, M>) -> Self {
-        self.prop(<ferroui_controls::NavigationView>::menu_items_source_property(), value)
-    }
-
-    /// Sets [`NavigationView::footer_menu_items_source_property`](ferroui_controls::NavigationView::footer_menu_items_source_property).
-    fn footer_menu_items_source<M>(self, value: impl IntoProp<Option<ferroui_controls::ItemsSource>, M>) -> Self {
-        self.prop(<ferroui_controls::NavigationView>::footer_menu_items_source_property(), value)
-    }
-
     /// Sets [`NavigationView::menu_item_template_property`](ferroui_controls::NavigationView::menu_item_template_property).
     fn menu_item_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::NavigationView>::menu_item_template_property(), value)
@@ -5365,11 +5340,6 @@ pub trait NavigationViewItemProps: ElementBuilder {
     /// Sets [`NavigationViewItem::is_child_selected_property`](ferroui_controls::NavigationViewItem::is_child_selected_property).
     fn is_child_selected<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::NavigationViewItem>::is_child_selected_property(), value)
-    }
-
-    /// Sets [`NavigationViewItem::menu_items_source_property`](ferroui_controls::NavigationViewItem::menu_items_source_property).
-    fn menu_items_source<M>(self, value: impl IntoProp<Option<ferroui_controls::ItemsSource>, M>) -> Self {
-        self.prop(<ferroui_controls::NavigationViewItem>::menu_items_source_property(), value)
     }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::NavigationViewItem>> NavigationViewItemProps for El<T> {}

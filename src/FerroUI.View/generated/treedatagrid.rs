@@ -187,11 +187,6 @@ pub trait TreeDataGridProps: ElementBuilder {
         self.prop(<ferroui_controls_treedatagrid::TreeDataGrid>::presentation_options_property(), value)
     }
 
-    /// Sets [`TreeDataGrid::items_source_property`](ferroui_controls_treedatagrid::TreeDataGrid::items_source_property).
-    fn items_source<M>(self, value: impl IntoProp<Option<ferroui_controls::ItemsSource>, M>) -> Self {
-        self.prop(<ferroui_controls_treedatagrid::TreeDataGrid>::items_source_property(), value)
-    }
-
     /// Sets [`TreeDataGrid::selection_mode_property`](ferroui_controls_treedatagrid::TreeDataGrid::selection_mode_property).
     fn selection_mode<M>(self, value: impl IntoProp<ferroui_controls_treedatagrid::TreeDataGridSelectionMode, M>) -> Self {
         self.prop(<ferroui_controls_treedatagrid::TreeDataGrid>::selection_mode_property(), value)
