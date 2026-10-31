@@ -1,11 +1,11 @@
 //! Identified module manifests. Parsing performs no filesystem access or plugin loading.
-use crate::{Diagnostic, Span};
+use crate::{Diagnostic, SourceSpan};
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;
 use std::str::FromStr;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Version {
+pub struct ModuleVersion {
     pub major: u16,
     pub minor: u16,
 }
@@ -15,7 +15,7 @@ pub enum RequestedVersion {
     #[default]
     Latest,
     Major(u16),
-    Exact(Version),
+    Exact(ModuleVersion),
 }
 
 impl FromStr for RequestedVersion {
@@ -29,7 +29,7 @@ impl FromStr for RequestedVersion {
         }
         let invalid = || format!("invalid module version '{text}'");
         if let Some((major, minor)) = text.split_once('.') {
-            Ok(Self::Exact(Version {
+            Ok(Self::Exact(ModuleVersion {
                 major: part(major).ok_or_else(invalid)?,
                 minor: part(minor).ok_or_else(invalid)?,
             }))
@@ -39,7 +39,7 @@ impl FromStr for RequestedVersion {
     }
 }
 
-impl fmt::Display for Version {
+impl fmt::Display for ModuleVersion {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}.{}", self.major, self.minor)
     }
@@ -83,8 +83,8 @@ pub struct Plugin {
 pub struct ModuleDefinition {
     pub uri: String,
     /// Actual versions exported by this manifest.
-    versions: BTreeSet<Version>,
-    exports: BTreeMap<String, BTreeMap<Option<Version>, Export>>,
+    versions: BTreeSet<ModuleVersion>,
+    exports: BTreeMap<String, BTreeMap<Option<ModuleVersion>, Export>>,
     pub internal: BTreeMap<String, String>,
     pub imports: Vec<ModuleImport>,
     pub dependencies: Vec<(String, RequestedVersion)>,
@@ -103,8 +103,8 @@ impl ModuleDefinition {
         let version = match request {
             RequestedVersion::Latest => self.versions.last().copied(),
             RequestedVersion::Major(major) => {
-                let first = Version { major, minor: 0 };
-                let last = Version {
+                let first = ModuleVersion { major, minor: 0 };
+                let last = ModuleVersion {
                     major,
                     minor: u16::MAX,
                 };
@@ -141,14 +141,14 @@ impl ModuleDefinition {
 /// A version-selected set of public module types. Internal entries are separate.
 pub struct ModuleView<'m> {
     module: &'m ModuleDefinition,
-    pub version: Option<Version>,
+    pub version: Option<ModuleVersion>,
 }
 
 impl<'m> ModuleView<'m> {
     pub fn get(&self, name: &str) -> Option<&'m Export> {
         let editions = self.module.exports.get(name)?;
         if let Some(version) = self.version {
-            let first = Version {
+            let first = ModuleVersion {
                 major: version.major,
                 minor: 0,
             };
@@ -184,7 +184,7 @@ fn parse_manifest(source: &str, require_uri: bool) -> Result<ModuleDefinition, D
         if stripped.is_empty() || stripped.starts_with('#') {
             continue;
         }
-        let span = Span {
+        let span = SourceSpan {
             start,
             end: start + stripped.len(),
         };
@@ -220,7 +220,7 @@ fn parse_manifest(source: &str, require_uri: bool) -> Result<ModuleDefinition, D
     if require_uri && module.uri.is_empty() {
         return Err(Diagnostic::new(
             source,
-            Span { start: 0, end: 0 },
+            SourceSpan { start: 0, end: 0 },
             "missing module identifier",
         ));
     }

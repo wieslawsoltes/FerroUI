@@ -102,7 +102,7 @@ structure!(Document {
     imports,
     root
 });
-structure!(Span { start, end });
+structure!(SourceSpan { start, end });
 structure!(Import {
     uri,
     is_path,

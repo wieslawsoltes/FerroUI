@@ -1,5 +1,5 @@
 //! Lexical scanning. Newline trivia is retained for statement boundaries.
-use crate::{Diagnostic, Span};
+use crate::{Diagnostic, SourceSpan};
 
 #[derive(Debug, PartialEq)]
 pub(crate) enum Kind<'s> {
@@ -13,7 +13,7 @@ pub(crate) enum Kind<'s> {
 #[derive(Debug)]
 pub(crate) struct Token<'s> {
     pub kind: Kind<'s>,
-    pub span: Span,
+    pub span: SourceSpan,
     pub line_break: bool,
 }
 
@@ -27,7 +27,7 @@ pub(crate) fn tokenize(source: &str) -> Result<Vec<Token<'_>>, Diagnostic> {
         let done = kind == Kind::End;
         tokens.push(Token {
             kind,
-            span: Span {
+            span: SourceSpan {
                 start,
                 end: scanner.pos,
             },
@@ -76,7 +76,7 @@ impl<'s> Scanner<'s> {
     fn error(&self, start: usize, message: &str) -> Diagnostic {
         Diagnostic::new(
             self.source,
-            Span {
+            SourceSpan {
                 start,
                 end: self.pos,
             },

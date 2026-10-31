@@ -11,14 +11,14 @@ pub use parser::parse;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Diagnostic {
-    pub span: Span,
+    pub span: SourceSpan,
     pub message: String,
     pub line: usize,
     pub column: usize,
 }
 
 impl Diagnostic {
-    pub(crate) fn new(source: &str, span: Span, message: impl Into<String>) -> Self {
+    pub(crate) fn new(source: &str, span: SourceSpan, message: impl Into<String>) -> Self {
         let mut line = 1;
         let mut column = 1;
         let mut was_cr = false;

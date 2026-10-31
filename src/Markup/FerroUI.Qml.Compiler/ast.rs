@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 /// Half-open byte range in the original UTF-8 source.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
-pub struct Span {
+pub struct SourceSpan {
     pub start: usize,
     pub end: usize,
 }
@@ -22,7 +22,7 @@ pub struct Document {
 pub struct Pragma {
     pub name: String,
     pub values: Vec<String>,
-    pub span: Span,
+    pub span: SourceSpan,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -32,7 +32,7 @@ pub struct Import {
     /// Decimal spelling is preserved, so 6.10 is distinct from 6.1.
     pub version: Option<String>,
     pub alias: Option<String>,
-    pub span: Span,
+    pub span: SourceSpan,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -46,7 +46,7 @@ pub struct Object {
     pub type_imports: Option<Vec<Import>>,
     pub type_name: String,
     pub members: Vec<Member>,
-    pub span: Span,
+    pub span: SourceSpan,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -62,7 +62,7 @@ pub struct Member {
     #[serde(default)]
     pub scope: Option<u32>,
     pub kind: MemberKind,
-    pub span: Span,
+    pub span: SourceSpan,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]

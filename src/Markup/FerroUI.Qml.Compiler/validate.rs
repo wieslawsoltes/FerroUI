@@ -1,5 +1,5 @@
 //! Source-level invariants shared by interpreted and Cargo-compiled components.
-use crate::{Binding, Diagnostic, Document, Expr, Member, MemberKind, Object, Span};
+use crate::{Binding, Diagnostic, Document, Expr, Member, MemberKind, Object, SourceSpan};
 use std::collections::HashSet;
 
 /// Validate declarations and assignments before creating any runtime objects.
@@ -110,7 +110,7 @@ fn assign(
     bindings: &mut HashSet<String>,
     name: String,
     source: &str,
-    span: Span,
+    span: SourceSpan,
 ) -> Result<(), Diagnostic> {
     if bindings.contains(&name) {
         return Err(Diagnostic::new(

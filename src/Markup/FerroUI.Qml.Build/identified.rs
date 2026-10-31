@@ -3,8 +3,8 @@
 //! happen to be present in the directory.
 use ferroui_qml_compiler::{
     qmldir::{
-        parse_directory_manifest, ExportKind, ImportVersion, ModuleDefinition, RequestedVersion,
-        Version,
+        parse_directory_manifest, ExportKind, ImportVersion, ModuleDefinition, ModuleVersion,
+        RequestedVersion,
     },
     Import,
 };
@@ -20,7 +20,7 @@ type Result<T> = std::result::Result<T, String>;
 struct Module {
     dir: PathBuf,
     manifest: Rc<ModuleDefinition>,
-    version: Option<Version>,
+    version: Option<ModuleVersion>,
 }
 
 impl Module {
@@ -126,7 +126,8 @@ impl IdentifiedModules {
             candidates.push(relative.with_extension(v.to_string()));
         }
         match request {
-            RequestedVersion::Major(major) | RequestedVersion::Exact(Version { major, .. }) => {
+            RequestedVersion::Major(major)
+            | RequestedVersion::Exact(ModuleVersion { major, .. }) => {
                 candidates.push(relative.with_extension(major.to_string()))
             }
             RequestedVersion::Latest => (),

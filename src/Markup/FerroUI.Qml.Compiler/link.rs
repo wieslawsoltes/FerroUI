@@ -43,7 +43,7 @@ pub trait ComponentResolver {
 #[derive(Debug)]
 pub struct LinkError {
     pub origin: String,
-    pub span: Span,
+    pub span: SourceSpan,
     pub message: String,
 }
 
@@ -120,7 +120,7 @@ impl Context {
             inline,
         })
     }
-    fn error(&self, span: Span, message: impl Into<String>) -> LinkError {
+    fn error(&self, span: SourceSpan, message: impl Into<String>) -> LinkError {
         LinkError {
             origin: self.origin.clone(),
             span,
@@ -206,7 +206,7 @@ impl<R: ComponentResolver> Linker<'_, R> {
         &mut self,
         context: &Context,
         ty: &mut String,
-        span: Span,
+        span: SourceSpan,
     ) -> Result<(), LinkError> {
         let list = ty.strip_prefix("list<").and_then(|ty| ty.strip_suffix('>'));
         let name = list.unwrap_or(ty);

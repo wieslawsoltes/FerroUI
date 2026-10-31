@@ -54,8 +54,8 @@ impl<'s> Parser<'s> {
     fn error(&self, message: impl Into<String>) -> Diagnostic {
         Diagnostic::new(self.source, self.token().span, message)
     }
-    fn span(&self, start: usize) -> Span {
-        Span {
+    fn span(&self, start: usize) -> SourceSpan {
+        SourceSpan {
             start,
             end: self.tokens[self.pos - 1].span.end,
         }
