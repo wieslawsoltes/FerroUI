@@ -37,6 +37,7 @@ fn members(group: &mut [Member], out: &mut Functions) -> Result<(), String> {
                         members(&mut object.members, out)?;
                     }
                 }
+                Binding::Expr(Expr::JavaScript(_)) => (),
                 Binding::Expr(expr) if expr.as_literal().is_some() => (),
                 Binding::Expr(expr) => replace(expr, out)?,
                 Binding::Script(body) => statements(body, out)?,
@@ -51,7 +52,7 @@ fn members(group: &mut [Member], out: &mut Functions) -> Result<(), String> {
 }
 
 fn statements(body: &mut Vec<Stmt>, out: &mut Functions) -> Result<(), String> {
-    if body.is_empty() {
+    if body.is_empty() || matches!(body.as_slice(), [Stmt::JavaScript(_)]) {
         return Ok(());
     }
     let code = super::scripts::body(body)?;
@@ -83,6 +84,9 @@ pub(super) fn name(expr: &Expr) -> Option<(&str, TokenStream)> {
 }
 pub(super) fn emit(expr: &Expr) -> Result<TokenStream, String> {
     Ok(match expr {
+        Expr::JavaScript(_) => {
+            return Err("an external JavaScript expression must own its execution boundary".into())
+        }
         Expr::Native(_) => return Err("cannot compile a previously lowered expression".into()),
         Expr::Null => quote!(V::Null),
         Expr::Undefined => quote!(V::Undefined),

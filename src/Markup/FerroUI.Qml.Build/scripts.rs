@@ -59,6 +59,9 @@ fn value(expr: Option<&Expr>) -> Result<TokenStream, String> {
 
 fn step(stmt: &Stmt) -> Result<TokenStream, String> {
     Ok(match stmt {
+        Stmt::JavaScript(_) => {
+            return Err("an external JavaScript script must own its execution boundary".into())
+        }
         Stmt::Native(_) => return Err("cannot lower an already compiled script".into()),
         Stmt::Expr(expr) => {
             let expr = emit(expr)?;

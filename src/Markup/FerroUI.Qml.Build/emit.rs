@@ -60,6 +60,16 @@ impl<T: Rust> Rust for Vec<T> {
         quote!(vec![#(#values),*])
     }
 }
+impl<T: Rust> Rust for std::collections::BTreeMap<String, T> {
+    fn rust(&self) -> TokenStream {
+        let pairs = self.iter().map(|(key, value)| {
+            let (key, value) = (key.rust(), value.rust());
+            quote!((#key,#value))
+        });
+        quote!(::std::collections::BTreeMap::from([#(#pairs),*]))
+    }
+}
+
 impl Rust for String {
     fn rust(&self) -> TokenStream {
         quote!(String::from(#self))
@@ -96,7 +106,43 @@ macro_rules! structure {
         }
     };
 }
+macro_rules! tag {
+    ($ty:ident { $($variant:ident),+ }) => {
+        impl Rust for $ty {
+            fn rust(&self) -> TokenStream {
+                match self { $(Self::$variant => quote!(q::$ty::$variant)),+ }
+            }
+        }
+    };
+}
+tag!(ScriptForm {
+    Expression,
+    BindingBlock,
+    FunctionBody,
+    HandlerBody
+});
+tag!(ScriptKind {
+    Module,
+    Script,
+    Library
+});
+structure!(JavaScript {
+    form,
+    source,
+    span,
+    origin,
+    root,
+    ids,
+    imports
+});
+structure!(ScriptResource {
+    source,
+    kind,
+    dependencies,
+    exports
+});
 structure!(Document {
+    scripts,
     singletons,
     pragmas,
     imports,
@@ -207,6 +253,7 @@ impl Rust for Binding {
 impl Rust for Expr {
     fn rust(&self) -> TokenStream {
         match self {
+            Self::JavaScript(js) => tuple!(Expr::JavaScript(js)),
             Self::Native(index) => tuple!(Expr::Native(index)),
             Self::Null => quote!(q::Expr::Null),
             Self::Undefined => quote!(q::Expr::Undefined),
@@ -232,6 +279,7 @@ impl Rust for Expr {
 impl Rust for Stmt {
     fn rust(&self) -> TokenStream {
         match self {
+            Self::JavaScript(js) => tuple!(Stmt::JavaScript(js)),
             Self::Native(index) => tuple!(Stmt::Native(index)),
             Self::While {
                 test,

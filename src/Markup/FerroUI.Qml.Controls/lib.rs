@@ -13,7 +13,7 @@ mod reflected;
 use ferroui_base::{reactive::IDisposable, Ref};
 use ferroui_controls::{Control, Controls};
 use ferroui_qml::{
-    ComponentSource, Error, Instance, ObjectId, TypeDefinition, TypeRegistry, Value,
+    ComponentSource, Error, Instance, ObjectId, ScriptEngine, TypeDefinition, TypeRegistry, Value,
 };
 use std::{
     cell::RefCell,
@@ -192,7 +192,44 @@ impl QmlView {
         initial: BTreeMap<String, Value>,
         on_error: impl Fn(Error) + 'static,
     ) -> Result<Self, Error> {
-        let mut instance = Instance::new(document, &registry.types, initial)?;
+        Self::mount(
+            Instance::new(document, &registry.types, initial)?,
+            registry,
+            on_error,
+        )
+    }
+
+    /// Mount a component that uses an external ECMAScript engine.
+    pub fn with_script_engine(
+        document: &impl ComponentSource,
+        registry: &ControlRegistry,
+        initial: BTreeMap<String, Value>,
+        engine: Rc<dyn ScriptEngine>,
+    ) -> Result<Self, Error> {
+        Self::with_script_engine_and_error_handler(document, registry, initial, engine, |error| {
+            eprintln!("QML event: {error}")
+        })
+    }
+
+    pub fn with_script_engine_and_error_handler(
+        document: &impl ComponentSource,
+        registry: &ControlRegistry,
+        initial: BTreeMap<String, Value>,
+        engine: Rc<dyn ScriptEngine>,
+        on_error: impl Fn(Error) + 'static,
+    ) -> Result<Self, Error> {
+        Self::mount(
+            Instance::with_engine(document, &registry.types, initial, engine)?,
+            registry,
+            on_error,
+        )
+    }
+
+    fn mount(
+        mut instance: Instance,
+        registry: &ControlRegistry,
+        on_error: impl Fn(Error) + 'static,
+    ) -> Result<Self, Error> {
         let mut pending = vec![instance.root()];
         let mut nodes = BTreeMap::new();
         while let Some(object) = pending.pop() {
