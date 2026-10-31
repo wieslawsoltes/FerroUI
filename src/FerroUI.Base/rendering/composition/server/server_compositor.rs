@@ -1,6 +1,6 @@
 use super::{
-    CompositorPools, IServerObject, IServerRenderResource, ReadbackIndices, ServerCompositionTarget,
-    ServerCompositionVisual, ServerCompositorAnimations, ServerObjectId,
+    CompositorPools, IServerCompositionLight, IServerObject, IServerRenderResource, ReadbackIndices,
+    ServerCompositionTarget, ServerCompositionVisual, ServerCompositorAnimations, ServerObjectId,
 };
 use crate::platform::surfaces::IPlatformRenderSurface;
 use crate::platform::{IBitmapImpl, IPlatformGraphics, IRenderTarget, LtrbRect};
@@ -125,6 +125,9 @@ pub struct ServerCompositor {
     adorner_update_queue: RefCell<VecDeque<Rc<ServerCompositionVisual>>>,
     /// The visual surfaces of the compositor, for their live updates.
     visual_surfaces: RefCell<Vec<Weak<super::ServerCompositionVisualSurface>>>,
+    // Synchronous UI-thread frames and render-thread frames share this graph
+    // under its lock. Lights must follow the graph, rather than a thread.
+    lights: RefCell<Vec<Weak<dyn IServerCompositionLight>>>,
     active_targets: RefCell<Vec<Rc<ServerCompositionTarget>>>,
     pools: CompositorPools,
     animations: ServerCompositorAnimations,
@@ -137,6 +140,16 @@ pub struct ServerCompositor {
 }
 
 impl ServerCompositor {
+    pub(super) fn register_light(&self, light: Weak<dyn IServerCompositionLight>) {
+        let mut lights = self.lights.borrow_mut();
+        lights.retain(|light| light.strong_count() > 0);
+        lights.push(light);
+    }
+
+    pub(super) fn live_lights(&self) -> Vec<Rc<dyn IServerCompositionLight>> {
+        self.lights.borrow().iter().filter_map(Weak::upgrade).filter(|light| !light.is_disposed()).collect()
+    }
+
     /// Creates the server compositor on the thread that renders. The queue of
     /// batches and the readback are what it shares with its compositor, which
     /// creates them.
@@ -171,6 +184,7 @@ impl ServerCompositor {
             visual_readback_update_pass_queue: RefCell::new(VecDeque::new()),
             adorner_update_queue: RefCell::new(VecDeque::new()),
             visual_surfaces: RefCell::new(Vec::new()),
+            lights: RefCell::new(Vec::new()),
             active_targets: RefCell::new(Vec::new()),
             pools: CompositorPools::default(),
             animations: ServerCompositorAnimations::new(),
@@ -758,7 +772,7 @@ impl ServerCompositor {
         // A light whose coordinate space moved in this pass draws what it
         // lights again (winui-materials.md): the content it invalidates is
         // recomputed in a second pass.
-        if super::invalidate_lights_with_moved_spaces() {
+        if super::invalidate_lights_with_moved_spaces(self) {
             self.visual_own_properties_update_pass();
         }
         // Adorners need to be updated after own properties recompute pass,
