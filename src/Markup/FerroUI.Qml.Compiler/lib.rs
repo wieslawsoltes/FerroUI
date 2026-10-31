@@ -1,5 +1,8 @@
 //! Clean-room QML frontend for FerroUI. Source offsets are UTF-8 byte offsets.
 mod ast;
+mod link;
+mod scope;
+pub use link::{link, ComponentResolver, ComponentSource, LinkError};
 mod lexer;
 mod parser;
 
@@ -57,3 +60,5 @@ pub use validate::validate;
 #[cfg(test)]
 #[path = "tests/language.rs"]
 mod tests;
+
+pub mod qmldir;
