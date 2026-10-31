@@ -60,6 +60,7 @@ pub(super) fn register(registry: &mut ControlRegistry) -> Result<(), Error> {
             })?;
         }
     }
+    registry.types_mut().reexport("QtQuick", "QtQml")?;
     Ok(())
 }
 

@@ -54,11 +54,11 @@ impl Transaction<'_> {
             "Infinity" => return Ok(Value::Number(f64::INFINITY)),
             _ => (),
         }
-        if let Ok(key) = self.model.key(owner, name) {
-            return self.read(key, reads);
-        }
         if let Some(id) = self.model.ids.get(name) {
             return Ok(Value::Object(*id));
+        }
+        if let Ok(key) = self.model.key(owner, name) {
+            return self.read(key, reads);
         }
         if let Some(value) = self.model.nodes[owner.index].type_scope.member(name) {
             return Ok(value);

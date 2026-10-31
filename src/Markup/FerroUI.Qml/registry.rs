@@ -1,7 +1,10 @@
 use super::{Error, Parameter, Value};
 use crate::Namespace;
 use ferroui_qml_compiler::Import;
-use std::{collections::BTreeMap, rc::Rc};
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    rc::Rc,
+};
 
 pub type NativeCallback = fn(&[Value]) -> Result<Value, Error>;
 
@@ -80,6 +83,7 @@ impl TypeDefinition {
 
 /// A registry explicitly owns the modules visible to a QML component.
 pub struct TypeRegistry {
+    imports: BTreeMap<String, Vec<String>>,
     pub(crate) modules: BTreeMap<String, BTreeMap<String, TypeDefinition>>,
     versions: BTreeMap<(String, u16), u16>,
 }
@@ -93,6 +97,7 @@ impl Default for TypeRegistry {
 impl TypeRegistry {
     pub fn new() -> Self {
         let mut registry = Self {
+            imports: BTreeMap::new(),
             modules: BTreeMap::new(),
             versions: BTreeMap::new(),
         };
@@ -148,6 +153,42 @@ impl TypeRegistry {
         registry.set_module_version("QtQml", 2, 15);
         registry.set_module_version("QtQml", 6, 12);
         registry
+    }
+
+    /// Export another native module in the same import namespace and version.
+    /// This is the native counterpart of a qmldir `import Module auto`.
+    pub fn reexport(&mut self, module: &str, dependency: &str) -> Result<(), Error> {
+        if !self.modules.contains_key(dependency) {
+            return Err(Error::new(format!(
+                "unknown re-exported module '{dependency}'"
+            )));
+        }
+        if self.module_order(dependency).contains(&module) {
+            return Err(Error::new(format!(
+                "cyclic module import {module} -> {dependency}"
+            )));
+        }
+        self.modules.entry(module.to_owned()).or_default();
+        let imports = self.imports.entry(module.to_owned()).or_default();
+        if !imports.iter().any(|uri| uri == dependency) {
+            imports.push(dependency.to_owned());
+        }
+        Ok(())
+    }
+
+    pub(crate) fn module_order<'a>(&'a self, uri: &'a str) -> Vec<&'a str> {
+        let mut pending = vec![uri];
+        let mut order = Vec::new();
+        let mut seen = BTreeSet::new();
+        while let Some(current) = pending.pop() {
+            if seen.insert(current) {
+                order.push(current);
+                if let Some(more) = self.imports.get(current) {
+                    pending.extend(more.iter().map(String::as_str));
+                }
+            }
+        }
+        order
     }
 
     /// Permit versioned imports of this major up to the given minor version.
@@ -214,15 +255,16 @@ impl TypeRegistry {
                 let minor = minor
                     .parse::<u16>()
                     .map_err(|_| Error::new("invalid module minor version"))?;
-                if !self
-                    .versions
-                    .get(&(import.uri.clone(), major))
-                    .is_some_and(|maximum| minor <= *maximum)
-                {
-                    return Err(Error::new(format!(
-                        "unavailable module version {} {version}",
-                        import.uri
-                    )));
+                for uri in self.module_order(&import.uri) {
+                    if !self
+                        .versions
+                        .get(&(uri.to_owned(), major))
+                        .is_some_and(|maximum| minor <= *maximum)
+                    {
+                        return Err(Error::new(format!(
+                            "unavailable module version {uri} {version}"
+                        )));
+                    }
                 }
             }
         }
@@ -242,11 +284,12 @@ impl TypeRegistry {
             .rev()
             .filter(|i| i.alias.as_deref() == namespace)
         {
-            let Some((module, types)) = self.modules.get_key_value(&import.uri) else {
-                continue;
-            };
-            if let Some((name, ty)) = types.get_key_value(name) {
-                return Ok((module, name, ty));
+            for uri in self.module_order(&import.uri) {
+                if let Some((module, types)) = self.modules.get_key_value(uri) {
+                    if let Some((name, ty)) = types.get_key_value(name) {
+                        return Ok((module, name, ty));
+                    }
+                }
             }
         }
         Err(Error::new(format!(

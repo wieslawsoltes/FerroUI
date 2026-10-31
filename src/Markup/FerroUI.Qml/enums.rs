@@ -88,15 +88,16 @@ impl Scopes {
             .or_insert_with(|| {
                 let mut scope = Namespace::default();
                 for import in imports {
-                    let Some(types) = registry.modules.get(&import.uri) else {
-                        continue;
-                    };
                     let mut module = Namespace::default();
-                    for (name, ty) in types {
-                        if !ty.enums.members.is_empty() {
-                            module
-                                .members
-                                .insert(name.clone(), Value::Namespace(ty.enums.clone()));
+                    for uri in registry.module_order(&import.uri).into_iter().rev() {
+                        if let Some(types) = registry.modules.get(uri) {
+                            for (name, ty) in types {
+                                if !ty.enums.members.is_empty() {
+                                    module
+                                        .members
+                                        .insert(name.clone(), Value::Namespace(ty.enums.clone()));
+                                }
+                            }
                         }
                     }
                     if let Some(alias) = &import.alias {

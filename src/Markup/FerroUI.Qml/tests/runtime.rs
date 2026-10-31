@@ -358,3 +358,33 @@ fn exponential_method_calls_are_bounded_and_roll_back() {
         .is_err());
     assert_eq!(instance.get(root, "count").unwrap(), Value::Number(0.));
 }
+
+#[test]
+fn native_module_reexports_share_the_import_qualifier_and_version() {
+    let mut types = TypeRegistry::new();
+    types.reexport("App.Core", "QtQml").unwrap();
+    types.set_module_version("App.Core", 6, 12);
+    assert!(types.reexport("QtQml", "App.Core").is_err());
+    let source=ir::parse("import App.Core 6.12 as A\nA.QtObject { property int mode: A.Binding.RestoreValue; property A.Timer timer: A.Timer {} }").unwrap();
+    let instance = Instance::new(&source, &types, Default::default()).unwrap();
+    let root = instance.root();
+    assert_eq!(instance.get(root, "mode").unwrap(), Value::Number(2.));
+    let Value::Object(timer) = instance.get(root, "timer").unwrap() else {
+        panic!("expected a Timer")
+    };
+    assert_eq!(instance.module(timer), Some("QtQml"));
+}
+
+#[test]
+fn ids_take_precedence_over_object_properties_and_parameters_take_precedence_over_ids() {
+    let doc=ir::parse("import QtQml\nQtObject { id: obj; property int obj: 7; property bool resolved: obj === this; function local(obj: int): int { return obj } }").unwrap();
+    let mut instance = Instance::new(&doc, &TypeRegistry::new(), Default::default()).unwrap();
+    let root = instance.root();
+    assert_eq!(instance.get(root, "resolved").unwrap(), Value::Bool(true));
+    assert_eq!(
+        instance
+            .call(root, "local", vec![Value::Number(3.)])
+            .unwrap(),
+        Value::Number(3.)
+    );
+}
