@@ -262,33 +262,48 @@ fn nested_rounded_clips_sharing_an_edge_match_the_exact_coverage() {
     let skia = alphas(false, &|context| scene.draw(context));
     let (largest, mean, _) = compare_alphas(&exact, &shader);
     let (_, skia_mean, _) = compare_alphas(&exact, &skia);
-    assert!(largest <= 16, "within 16 levels of the exact coverage: {largest}");
+    // The outer clip is Skia's own here (an element of the clip stack, as on
+    // a GPU surface), the inner a shader: Skia's raster clip is up to 40
+    // levels off at its edge (`coverage_clips_match_the_exact_coverage`).
+    assert!(largest <= 40, "within 40 levels of the exact coverage: {largest}");
     assert!(mean <= skia_mean + 0.5, "as close to the exact coverage as Skia's clip: {mean} {skia_mean}");
     assert!(shader.iter().any(|alpha| *alpha == 255));
 }
 
 #[test]
-fn on_a_gpu_surface_every_rounded_clip_is_a_coverage_shader() {
+fn only_rounded_clips_a_gpu_clip_stack_cannot_apply_analytically_are_coverage_shaders() {
     let previous = set_coverage_clips_on_raster(true);
     let (before, _) = rounded_clip_counts();
     let target = PlatformRenderInterface::default()
         .create_render_target_bitmap(PixelSize::new(SIZE, SIZE), Vector::new(96.0, 96.0));
     let mut context = target.create_drawing_context();
-    // A rectangle, upright or rotated, is not rounded: Skia's clip (a
-    // scissor or a convex polygon).
-    context.push_clip_rounded(RoundedRect::from_rect(card()));
+    // Upright with simple radii, alone: an element of the clip stack. A
+    // rectangle, upright or rotated, is not rounded.
+    context.push_clip_rounded(RoundedRect::from_corner_radius(card(), CornerRadius::uniform(10.0)));
     context.pop_clip();
+    context.push_clip_rounded(RoundedRect::from_rect(card()));
     context.set_transform(card_transform(0.4));
     context.push_clip_rounded(RoundedRect::from_rect(card()));
     context.pop_clip();
+    context.pop_clip();
     assert_eq!(before, rounded_clip_counts().0);
-    // Rounded corners, rotated or upright, simple or complex, are shaders.
+    // Rotated rounded corners and complex radii are shaders (popping a clip
+    // restores the transform it was pushed under).
+    context.set_transform(card_transform(0.4));
     context.push_clip_rounded(RoundedRect::from_corner_radius(card(), CornerRadius::uniform(10.0)));
     context.pop_clip();
     context.set_transform(Matrix::IDENTITY);
-    context.push_clip_rounded(RoundedRect::from_corner_radius(card(), CornerRadius::uniform(10.0)));
-    context.pop_clip();
     context.push_clip_rounded(RoundedRect::from_corner_radius(card(), CornerRadius::new(2.0, 9.0, 4.0, 0.0)));
+    context.pop_clip();
+    assert_eq!(before + 2, rounded_clip_counts().0);
+    // A rounded clip inside another: a shader (Ganesh would merge the two);
+    // once the outer one is popped, the next is an element again.
+    context.push_clip_rounded(RoundedRect::from_corner_radius(card(), CornerRadius::uniform(10.0)));
+    context.push_clip_rounded(RoundedRect::from_corner_radius(card(), CornerRadius::uniform(6.0)));
+    context.pop_clip();
+    context.pop_clip();
+    assert_eq!(before + 3, rounded_clip_counts().0);
+    context.push_clip_rounded(RoundedRect::from_corner_radius(card(), CornerRadius::uniform(6.0)));
     context.pop_clip();
     assert_eq!(before + 3, rounded_clip_counts().0);
     context.dispose();

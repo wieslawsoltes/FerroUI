@@ -1297,11 +1297,12 @@ fn graphite_evaluates_the_lights_and_the_pixel_operations_as_the_raster_backend(
     context.dispose();
 }
 
-/// The clips of rounded rectangles are coverage shaders on Graphite: never
-/// a clip the GPU would rasterize on the CPU, over frames in which the card
-/// moves (rotated cards, complex radii, and nested clips sharing an edge,
-/// which Ganesh merges into a mask), and within 16 levels of the exact
-/// coverage (as on the raster backend, `coverage_clip_tests.rs`).
+/// The clips of rounded rectangles a GPU clip stack cannot apply
+/// analytically are coverage shaders on Graphite: never a clip the GPU would
+/// rasterize on the CPU, over frames in which the card moves (rotated
+/// cards, complex radii, and nested clips sharing an edge, which Ganesh
+/// merges into a mask), and within 16 levels of the exact coverage (as on
+/// the raster backend, `coverage_clip_tests.rs`).
 #[test]
 fn graphite_clips_rotated_rounded_rectangles_with_coverage_shaders() {
     use crate::coverage_clip_tests::{clip_scenes, compare_alphas, NestedClips, SIZE};
@@ -1365,9 +1366,9 @@ fn graphite_clips_rotated_rounded_rectangles_with_coverage_shaders() {
         layer.dispose();
     }
     let (shaders, masks) = rounded_clip_counts();
-    // Every rounded clip of every frame is a coverage shader: one a frame
-    // for each scene, two for the nested clips.
-    assert_eq!(shaders_before + 3 * scenes.len() as u64 + 3 * 2, shaders);
+    // Every scene is rotated, skewed or has complex radii: a coverage shader
+    // each frame; of the nested clips, the inner one.
+    assert_eq!(shaders_before + 3 * scenes.len() as u64 + 3, shaders);
     assert_eq!(masks_before, masks, "no clip was left to the GPU's clip stack");
     context.dispose();
 }

@@ -290,6 +290,9 @@ pub struct DrawingContextImpl {
     multiply_stack: Vec<MultiplyLayer>,
     /// The pixel operations that are pushed.
     pixel_operation_stack: Vec<PixelOperationLayer>,
+    /// The save counts of the canvas at which a rounded rectangle is in the
+    /// clip stack of the canvas as a clip of its own (not a shader).
+    rounded_clip_elements: Vec<usize>,
     opacity_stack: Vec<(f64, bool)>,
     compositing_opacity_stack: Vec<f64>,
     render_options_stack: Vec<RenderOptions>,
@@ -351,6 +354,7 @@ impl DrawingContextImpl {
             mask_stack: Vec::new(),
             multiply_stack: Vec::new(),
             pixel_operation_stack: Vec::new(),
+            rounded_clip_elements: Vec::new(),
             opacity_stack: Vec::new(),
             compositing_opacity_stack: Vec::new(),
             render_options_stack: Vec::new(),
@@ -478,6 +482,8 @@ impl DrawingContextImpl {
     fn restore_canvas(&mut self) {
         let canvas = self.canvas.get();
         canvas.restore();
+        let level = canvas.save_count();
+        self.rounded_clip_elements.retain(|saved| *saved <= level);
         // Deviation (DEVIATIONS.md, Skia backend): upstream reads the
         // transform back from the canvas (`Canvas.TotalMatrix44`), post
         // transform included, so a scaled context (a render target bitmap of
@@ -2060,8 +2066,10 @@ ferroui_base::ferro_thread_local! {
     /// raster surfaces too (the tests compare them with Skia's clips).
     static COVERAGE_CLIPS_ON_RASTER: Cell<bool> = Cell::new(false);
     /// How many clips of rounded rectangles were coverage shaders, and how
-    /// many were handed to a GPU surface's clip stack (where Ganesh may
-    /// draw them as a software mask, rasterized on the CPU and uploaded).
+    /// many were handed to a GPU surface's clip stack under a transform, with
+    /// radii or with other rounded clips it cannot apply analytically (the
+    /// clips Ganesh draws as a software mask, rasterized on the CPU and
+    /// uploaded).
     static ROUNDED_CLIPS: Cell<(u64, u64)> = Cell::new((0, 0));
 }
 
@@ -2082,25 +2090,34 @@ pub(crate) fn rounded_clip_counts() -> (u64, u64) {
 impl DrawingContextImpl {
     /// Clips to `rrect` (anti-aliased) with `op`.
     ///
-    /// On a GPU surface every clip of a rounded rectangle is a clip shader,
-    /// the coverage of the rounded rectangle evaluated per pixel
-    /// (`composition_effects::rounded_rect_coverage`), never an element of
-    /// the GPU's clip stack. Ganesh applies a rounded rectangle analytically
+    /// Ganesh applies a rounded rectangle of its clip stack analytically
     /// only in device space and only for the radii its effects take, at most
-    /// four elements a draw, and it merges the elements of a stack: two
+    /// four elements a draw, and it merges the elements of the stack: two
     /// rounded clips that share an edge (a card and the picture in it)
-    /// become one rounded rectangle with different corners, which no
-    /// effect takes. Any of those is a software mask on a target without
-    /// MSAA, rasterized on the CPU and uploaded as an A8 texture each time
-    /// the clip moves on the device (Graphite similarly rasterizes such
-    /// clips into an atlas). Clip shaders are not merged and have no limit.
-    /// The raster backend keeps Skia's clip, the reference.
+    /// become one rounded rectangle with different corners, which no effect
+    /// takes. Any of those is a software mask on a target without MSAA,
+    /// rasterized on the CPU and uploaded as an A8 texture each time the
+    /// clip moves on the device (Graphite similarly rasterizes such clips
+    /// into an atlas). So on a GPU surface a rounded clip is an element of
+    /// the clip stack only when it is upright, its radii are not complex,
+    /// and no other rounded element is in the stack; otherwise it is a clip
+    /// shader, the coverage of the rounded rectangle evaluated per pixel
+    /// (`composition_effects::rounded_rect_coverage`), which is not merged
+    /// and has no limit. A clip shader makes the programs of the draws under
+    /// it programs of their own, so the single upright clips, the common
+    /// case, stay elements. The raster backend keeps Skia's clip, the
+    /// reference.
     fn clip_rounded_rect(&mut self, rrect: &sk::RRect, op: sk::ClipOp) {
         let canvas = self.canvas.get();
+        let level = canvas.save_count();
+        self.rounded_clip_elements.retain(|saved| *saved <= level);
+        let matrix = canvas.local_to_device_as_3x3();
         let rounded = !matches!(rrect.get_type(), sk::rrect::Type::Empty | sk::rrect::Type::Rect);
+        let element = matrix.rect_stays_rect()
+            && rrect.get_type() != sk::rrect::Type::Complex
+            && self.rounded_clip_elements.is_empty();
         let gpu = self.gr_context.is_some();
-        if rounded && (gpu || COVERAGE_CLIPS_ON_RASTER.with(Cell::get)) {
-            let matrix = canvas.local_to_device_as_3x3();
+        if rounded && !element && (gpu || COVERAGE_CLIPS_ON_RASTER.with(Cell::get)) {
             if let Some(shader) = crate::composition_effects::rounded_rect_coverage(rrect, &matrix) {
                 canvas.clip_shader(shader, op);
                 ROUNDED_CLIPS.with(|counts| counts.set((counts.get().0 + 1, counts.get().1)));
@@ -2111,12 +2128,15 @@ impl DrawingContextImpl {
             }
         }
         canvas.clip_rrect(rrect, op, true);
+        if rounded {
+            self.rounded_clip_elements.push(level);
+        }
     }
 
     /// Makes the GPU programs of the runtime effects before an interactive
     /// frame needs them: compiles every SkSL program of the compositor's
     /// effects and draws each once, in the forms the drawing context draws
-    /// them (the lighting, the multiply layer of the lights, a rounded
+    /// them (the lighting, the multiply layer of the lights, a coverage
     /// clip over a fill and a rounded fill, each pixel operation), into the
     /// top left 4 by 4 device pixels of the target, which are cleared to
     /// transparent afterwards. The GPU links each program on its first draw
@@ -2160,10 +2180,13 @@ impl DrawingContextImpl {
             self.draw_rectangle(Some(&brush), None, RoundedRect::from_rect(pixel), &BoxShadows::default());
             self.pop_multiply_layer();
         }
+        // A rounded clip inside another: the inner one is a coverage shader.
         let rounded = RoundedRect::from_radius(Rect::new(0.0, 0.0, 4.0, 4.0), 1.0);
+        self.push_clip_rounded(rounded);
         self.push_clip_rounded(rounded);
         self.draw_rectangle(Some(&brush), None, RoundedRect::from_rect(pixel), &BoxShadows::default());
         self.draw_rectangle(Some(&brush), None, RoundedRect::from_radius(Rect::new(0.0, 0.0, 2.0, 2.0), 0.5), &BoxShadows::default());
+        self.pop_clip();
         self.pop_clip();
         let grid = Rect::new(0.0, 0.0, 4.0, 4.0);
         for operation in [
