@@ -149,9 +149,14 @@ Each pull request carries its tests, its `DEVIATIONS.md` rows and a line in `CHA
 | R9 | Windows, in three pull requests: the UIA text pattern (R9a), IMM32 for connection clients (R9b), the WinUI CoreText host (R9c) | R8 | P1-P22 as opt-in | yes: Japanese, Chinese and Korean IMEs in TextBox and RichEditBox; Narrator and Inspect |
 | R10 | Browser: the connection protocol with the old public functions kept; `browser-platform.md` section 14 | R8 | P28-P32 as opt-in | no |
 | R11 | FreeDesktop, Wayland, X11: the connection for IBus and Fcitx, the IBus content-type property non-fatal | R8 | P23-P27 | Ubuntu VM (IBus, Fcitx) |
+| R12 | macOS, iOS, Android: content hints, input options; the native patch regenerated (`patches/0004`, after main's backdrop patch `0003`) | R8 | P33-P37 | iOS simulator and Android emulator (never with a VM) |
+| R13 | CI: the regeneration check repository-wide and the on-demand oracle job, actions pinned by SHA | R9 | | no |
+
 | R12 | macOS, iOS, Android: content hints, input options; `patches/0003` regenerated | R8 | P33-P37 | iOS simulator and Android emulator (never with a VM) |
 | R13 | The Msftedit oracle as a tool (`src/tools/RichTextOracle`, S15), the extractor with its check and writer of the case tables, the rich-text workflow (the extractor's tests and the on-demand oracle job, actions pinned by SHA) | R8 | | no |
-| F1 | Performance: a layout cache per paragraph, the selection drawn as an overlay, an incremental IME preview, the fast path near fields, delta undo units if not in R7 | R8 | S7, S8, S9 | no |
+| F1 | Performance: a layout cache per paragraph (runs, shaping cache and lines of the paragraphs an edit or a selection change did not change), the benchmark `text::RichTextEditing`. Still open: the selection drawn as an overlay, an incremental IME preview and the identity lookup of the content pool (S9), the fast path near fields, delta undo units | R8 | S7 (S8, S9 open) | no |
+| F1b | Incremental IME preview, exact splices without a text read or diff, ASCII offsets, the ordered content-pool lookup; the paragraph-break benchmark | F1 | S9 (structural rebuild open) | no |
+| F1c | The selection as an overlay, delta undo units, a structural edit without a rebuild from a snapshot | F1b | S8, S9 | no |
 
 R1, R3 and R4 are independent; R6 to R8 are sequential; R9 to R12 may land in any order after R8.
 
@@ -241,7 +246,15 @@ What remains outside the port (RT-P of #243): the exact LineServices metrics, th
 
 Not taken from #243 in R8: its manager tests for a client without exact editing whose cursor query moves focus or replaces the client (`rich_edit_input_geometry_tests.rs`). Such a client keeps the upstream manager (D5), which has no such guarantees. While a connection client's flyout has focus, the manager keeps the input method of the owner's root, also when the flyout is in a popup root of its own.
 
-### 11.5 Browser input (R10)
+### 11.5 Input scopes on macOS, iOS and Android (R12)
+
+| WinUI | FerroUI | Why |
+|---|---|---|
+| `InputScope` chooses the touch keyboard and the text services of the field. | For RichEditBox (a client of the exact-edit connection) the first scope chooses what the platform has: the semantic `contentType` of the AppKit view (URL, email address, name, telephone number, macOS 14 and later), the `UIKeyboardType` and `UITextContentType` of the iOS responder, the `inputType` of the Android `EditorInfo`. Scopes of a script or a width (Hiragana, Hangul, full-width) have no counterpart there and give the default keyboard. TextBox keeps the upstream behaviour of each backend. | D5, D8; the platforms have no script or width selector. |
+| A password scope turns off prediction and learning. | The same for RichEditBox on iOS and Android; on macOS no content hint is set for a password, a PIN, sensitive content or `IsTextPredictionEnabled = false`. A scope never turns on secure (masked) entry. | The scope advises the keyboard; masking is the control's. |
+| Changing `InputScope` while the field has focus updates the keyboard. | The same: macOS updates the view's `contentType`, iOS calls `reloadInputViews`, Android restarts the input when the `EditorInfo` changes and keeps the composing region. | |
+
+### 11.6 Browser input (R10)
 
 | WinUI | FerroUI | Why |
 |---|---|---|
@@ -250,7 +263,7 @@ Not taken from #243 in R8: its manager tests for a client without exact editing 
 
 Not taken from #243 in R10: its tests of input options and preedit resets for clients without the connection (`browser_text_input_method.rs`); such clients keep the upstream path (D5), which ignores options and is tested as such.
 
-### 11.6 Input methods on Linux: IBus, Fcitx, Wayland (R11)
+### 11.7 Input methods on Linux: IBus, Fcitx, Wayland (R11)
 
 | WinUI | FerroUI | Why |
 |---|---|---|
@@ -258,7 +271,7 @@ Not taken from #243 in R10: its tests of input options and preedit resets for cl
 | Scopes select width and script (`AlphanumericFullWidth`, `Hiragana`, `KatakanaHalfWidth`, `Hangul*`). | IBus, Fcitx and the Wayland protocol have no width or script selector: these scopes are free-form; only `AlphanumericHalfWidth` asks Wayland for Latin. | No counterpart in the protocols. |
 | The IME accepts every scope. | An IBus that refuses `ContentType` (older than 1.5.32 or a portal without it) keeps the IME connected without the hint; a warning is logged. | #243 review P24. |
 
-### 11.7 The WinUI host's CoreText input (R9c)
+### 11.8 The WinUI host's CoreText input (R9c)
 
 | WinUI | FerroUI | Why |
 |---|---|---|
@@ -266,9 +279,28 @@ Not taken from #243 in R10: its tests of input options and preedit resets for cl
 
 The differences from the upstream-ported adapter (`WinUITextInputMethod`) are in `DEVIATIONS.md`, "WinUI integration": they apply to connection clients only (D5).
 
-### 11.8 The UI Automation text pattern on Windows (R9a)
+### 11.9 The UI Automation text pattern on Windows (R9a)
 
 | WinUI | FerroUI | Why |
 |---|---|---|
 | `TextBlockAutomationPeer` has the Text pattern, and so do the text boxes. | On Windows only the nodes of RichEditBox and RichTextBlock (and their hyperlinks, through TextChild) have the Text, Text2, TextEdit and TextChild patterns; the nodes of TextBlock and TextBox keep what upstream has (TextBox: the Value pattern). | Decision D5: TextBox keeps upstream behaviour until it moves to the connection; TextBlock has no portable text provider. |
 | The text pattern wrappers call RichEdit's and the core's text objects on the UI thread. | The native ranges are COM objects with a number; the portable range stays in a table of the UI thread and is released when the client releases the native one, from any thread. A range resolves a range passed back by a client by its COM identity, so a range of another provider is `E_INVALIDARG`. | The node and range objects are called on threads of the automation core (`win32-platform.md`, section 13.3). |
+
+## 12. Performance (F1, F1b)
+
+- **Per-paragraph reuse (F1).** After an edit of the document, a change of an inline or of the selection, `RichTextSource` takes over from the source the view had before every paragraph whose block, runs, run properties, tab stop and formatting overrides (selection, highlighters) are the same: its text source and its shaping cache (`TextRunCache`). The lines of such a paragraph are kept with what they were formatted with (width, wrapping, first-line indent, flow direction, alignment, line height and stacking, line spacing, letter spacing, tab stops, margins, line bounds); a page that formats the whole paragraph again with the same key and room for all of it places those lines instead of breaking the paragraph again. Continuations, hosted objects, a line limit and trimming always format. Every other invalidation (a property of the view such as its font family or size, the text services, a new document) rebuilds the whole source (tests `rich_text_reuse_tests.rs`); a change of the text services that the view does not see needs `invalidate_document_layout`.
+- **Incremental edits (F1b, #243 review S9).**
+  - A new preview of a composition that began at a caret replaces the text of its underlined preview run in place, instead of restoring the document from the snapshot taken before the composition and formatting the preview again. A replaced selection, a length limit, link fields, an external edit since the last preview or an empty preview take the general path.
+  - A splice of one run by the editor's fast path is known exactly: the document applies it to the text it observed, instead of reading the tree and comparing texts, and publishes it without a second read or diff. A splice that a reentrant read changed, or of a tree whose text was not observed, is read and compared as before.
+  - UTF-16 offsets are converted over ASCII stretches a block at a time.
+  - The content pool of a rebuild from a snapshot looks first at the entry after the one it took last, so that a rebuild in document order does not scan the pool per element.
+- **The benchmark** `text::RichTextEditing` of `ferroui-benchmarks` (`FERROUI_BENCH_FILTER=RichTextEditing`): a typed character (and its deletion), a selection step, an IME preview update and a paragraph break (and its deletion) in the middle of documents of 10, 100 and 1000 paragraphs, each with measure and arrange. Release build on the development Mac:
+
+| Step, 1000 paragraphs | before F1 | F1 | F1b |
+|---|---|---|---|
+| type_character | 42.7 ms | 6.1 ms | 4.2 ms |
+| move_selection | 38.8 ms | 2.0 ms | 1.8 ms |
+| update_ime_preview | 47.5 ms | 11.0 ms | 3.2 ms |
+| split_paragraph | | | 21.6 ms |
+
+- **Still linear in the document (F1c):** a structural edit (a paragraph break, a format change, undo) rebuilds the document from a snapshot through the content pool; the document's text is kept as one string; the selection is drawn as a formatting change instead of an overlay; undo units are snapshots, not deltas (S8).

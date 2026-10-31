@@ -259,7 +259,9 @@ impl TextEditBuffer {
 #[cfg(test)]
 pub(crate) mod test_support {
     use super::*;
-    use ferroui_base::input::text_input::{ContextMenuAction, TextInputMethodClientEvents};
+    use ferroui_base::input::text_input::{
+        ContextMenuAction, TextInputMethodClientEvents, TextInputMethodEditing, TextInputMethodError,
+    };
     use ferroui_base::{Rect, Ref, Visual};
     use std::cell::RefCell;
 
@@ -268,6 +270,8 @@ pub(crate) mod test_support {
         pub text: RefCell<Vec<u16>>,
         pub selection: Cell<TextSelection>,
         pub actions: RefCell<Vec<ContextMenuAction>>,
+        /// Whether the client opts in to the exact-edit connection (R12).
+        editing: bool,
     }
 
     impl TestClient {
@@ -277,6 +281,19 @@ pub(crate) mod test_support {
                 text: RefCell::new(text.encode_utf16().collect()),
                 selection: Cell::new(TextSelection::new(start, end)),
                 actions: RefCell::new(Vec::new()),
+                editing: false,
+            })
+        }
+
+        /// A client of the exact-edit connection: the input method manager gives it a
+        /// connection once an element that offers it has the focus.
+        pub fn editing(text: &str, start: i32, end: i32) -> Rc<TestClient> {
+            Rc::new(TestClient {
+                events: TextInputMethodClientEvents::new(),
+                text: RefCell::new(text.encode_utf16().collect()),
+                selection: Cell::new(TextSelection::new(start, end)),
+                actions: RefCell::new(Vec::new()),
+                editing: true,
             })
         }
 
@@ -317,9 +334,27 @@ pub(crate) mod test_support {
         }
     }
 
+    impl TextInputMethodEditing for TestClient {
+        fn begin_composition(&self) -> Result<(), TextInputMethodError> {
+            Ok(())
+        }
+
+        fn update_composition(&self, _text: &str, _cursor: Option<i32>) -> Result<(), TextInputMethodError> {
+            Ok(())
+        }
+
+        fn cancel_composition(&self) -> Result<bool, TextInputMethodError> {
+            Ok(true)
+        }
+    }
+
     impl TextInputMethodClient for TestClient {
         fn events(&self) -> &TextInputMethodClientEvents {
             &self.events
+        }
+
+        fn input_method_editing(&self) -> Option<&dyn TextInputMethodEditing> {
+            self.editing.then_some(self as &dyn TextInputMethodEditing)
         }
 
         fn text_view_visual(&self) -> Option<Ref<Visual>> {

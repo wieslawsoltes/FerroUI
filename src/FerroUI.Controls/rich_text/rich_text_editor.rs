@@ -1417,6 +1417,11 @@ impl RichTextEditor {
         let external_generation = self.external_change_generation();
         let history_generation = self.history_clear_generation.get();
         let previous = self.history.borrow().composition.clone();
+        if let Some(previous) = &previous {
+            if self.update_preview_in_place(previous, text, cursor)? {
+                return Ok(());
+            }
+        }
         let visible = self.capture();
         let before = previous.as_ref().map_or_else(
             || Rc::new(visible.clone()),
@@ -1499,6 +1504,57 @@ impl RichTextEditor {
         self.known_revision.set(self.document.revision());
         self.publish_changed();
         Ok(())
+    }
+
+    /// A new preview text that replaces the previous one where it stands: the preview of a
+    /// composition that began at a caret is one underlined run, so its text is set in place,
+    /// without restoring the document from the snapshot taken before the composition (F1b,
+    /// #243 review S9). Any other case (a selection was replaced, a length limit, an external
+    /// edit since the previous preview, link fields, an empty preview) takes the general path.
+    fn update_preview_in_place(
+        &self,
+        previous: &Composition,
+        text: &str,
+        cursor: Option<usize>,
+    ) -> Result<bool, EditError> {
+        if previous.exact.is_some()
+            || !previous.before.selection.is_empty()
+            || previous.preview_text.is_empty()
+            || self.max_length() != 0
+            || self.document.mutation_version() != previous.preview_version
+        {
+            return Ok(false);
+        }
+        let text = normalize_text(text);
+        if text.is_empty() || text.contains('\n') {
+            return Ok(false);
+        }
+        let start = previous.before.selection.range().start;
+        let old_length = previous.preview_text.encode_utf16().count();
+        let batch = self.document.begin_edit();
+        if !self
+            .document
+            .replace_run_text_in_place(start..start + old_length, &previous.preview_text, &text)?
+        {
+            return Ok(false);
+        }
+        let length = text.encode_utf16().count();
+        let offset = start + cursor.unwrap_or(length).min(length);
+        self.selection.set(EditorSelection::caret(self.scalar_boundary(offset)));
+        let changed_text = changed_composition_text(&previous.preview_text, &text);
+        self.history.borrow_mut().composition = Some(Composition {
+            before: previous.before.clone(),
+            preview_version: self.document.mutation_version(),
+            preview_text: text,
+            exact: None,
+        });
+        if let Some(changed_text) = changed_text {
+            self.queue_composition_change(RichTextCompositionChange::Preview { changed_text });
+        }
+        drop(batch);
+        self.known_revision.set(self.document.revision());
+        self.publish_changed();
+        Ok(true)
     }
 
     /// Cancels only our preview. An intervening external edit is preserved and invalidates history.

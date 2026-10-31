@@ -5,6 +5,7 @@ use crate::harness::Registry;
 pub mod codepoint_benchmark;
 pub mod glyph_bounds_benchmark;
 pub mod huge_text_layout;
+pub mod rich_text_editing;
 pub mod shaped_buffer_ops;
 pub mod text_layout_profile;
 pub mod text_run_cache_benchmark;
@@ -24,4 +25,5 @@ pub fn register(registry: &mut Registry) {
     codepoint_benchmark::register(registry);
     unicode_trie_benchmark::register(registry);
     glyph_bounds_benchmark::register(registry);
+    rich_text_editing::register(registry);
 }

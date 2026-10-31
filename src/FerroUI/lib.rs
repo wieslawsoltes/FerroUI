@@ -179,6 +179,10 @@ pub use ferroui_pretext as pretext;
 pub use ferroui_pretext_layout as pretext_layout;
 #[cfg(feature = "pretext")]
 pub use ferroui_pretext_media as pretext_media;
+#[cfg(feature = "livecharts")]
+pub use ferroui_livecharts as livecharts;
+#[cfg(feature = "livecharts")]
+pub use ferroui_controls_livecharts as controls_livecharts;
 #[cfg(feature = "treedatagrid")]
 pub use ferroui_controls_treedatagrid as controls_treedatagrid;
 #[cfg(feature = "treedatagrid")]
