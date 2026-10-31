@@ -15,6 +15,7 @@ categories = ["gui", "development-tools::ffi"]
 path = "lib.rs"
 
 [dependencies]
+uuid = { workspace = true }
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]

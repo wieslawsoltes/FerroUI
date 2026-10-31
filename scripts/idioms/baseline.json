@@ -119,7 +119,6 @@
     "ferroui-dynamic-data-tests": {
       "Comparer": 9,
       "Decimal": 1,
-      "Guid": 1,
       "KeyValuePair": 1,
       "UnsynchronizedNotificationException": 1
     },

@@ -1,6 +1,6 @@
 //! `IMarket`, `Market` and `FixedMarket` (`Domain/Market.cs`).
 
-use super::{compare_f64, Guid, MarketPrice, Randomizer};
+use super::{compare_f64, new_guid, Guid, MarketPrice, Randomizer};
 use ferroui_dynamic_data::cache::{Change, ChangeReason, ChangeSet, IConnectableCache, SourceCache};
 use ferroui_reactive::disposables::Disposable;
 use ferroui_reactive::Observable;
@@ -62,12 +62,12 @@ impl Market {
 
     /// `new Market(string name)`: a new identifier.
     pub fn new(name: impl Into<String>) -> Rc<Self> {
-        Self::create(name.into(), Guid::new_guid())
+        Self::create(name.into(), new_guid())
     }
 
     /// `new Market(int name)`: the name `Market #{name}`.
     pub fn from_number(name: i32) -> Rc<Self> {
-        Self::create(format!("Market #{name}"), Guid::new_guid())
+        Self::create(format!("Market #{name}"), new_guid())
     }
 
     /// `new Market(Market market)`: the name and identifier of `market`, without its prices.
@@ -280,7 +280,7 @@ impl FixedMarket {
     /// .AsObservableChangeSet(cp => cp.ItemId, completable)`, written out here: upstream's
     /// enumerable is lazy, so each subscription makes new prices with `get_price`.
     pub fn new(get_price: impl Fn() -> f64 + 'static, min_id: i32, max_id: i32, completable: bool) -> Rc<Self> {
-        let id = Guid::new_guid();
+        let id = new_guid();
         let get_price: Rc<dyn Fn() -> f64> = Rc::new(get_price);
         let latest_prices = Observable::create(move |observer: Rc<dyn IObserver<ChangeSet<Rc<MarketPrice>, i32>>>| {
             let changes: ChangeSet<Rc<MarketPrice>, i32> = (min_id..max_id)
@@ -302,7 +302,7 @@ impl FixedMarket {
 impl IMarket for FixedMarket {
     /// The identifier in braces (`Id.ToString("B")`).
     fn name(&self) -> String {
-        self.id.to_string_b()
+        self.id.braced().to_string()
     }
 
     fn rating(&self) -> f64 {

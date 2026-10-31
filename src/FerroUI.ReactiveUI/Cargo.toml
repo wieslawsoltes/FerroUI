@@ -22,6 +22,7 @@ path = "lib.rs"
 ferroui-system = { workspace = true }
 ferroui-reactive = { workspace = true }
 ferroui-splat = { workspace = true }
+uuid = { workspace = true }
 # The names of the accessors that `reactive_properties!` writes (`set_<field>`, the PascalCase
 # property name).
 paste = { workspace = true }
