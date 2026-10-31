@@ -12,6 +12,10 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 - **One identifier type, `uuid`** (C1 of #423, [docs/idiomatic-rust.md](docs/idiomatic-rust.md)): the `Guid` of `ferroui-splat` and of `ferroui-remote-protocol` hold a `uuid::Uuid`, the COM `Guid` of `ferroui-microcom` keeps its layout, and all three convert to and from `uuid::Uuid` with `From`. Parsing, formatting, the .NET byte layout and new random identifiers (`Uuid::new_v4`, from the system's generator) come from `uuid`, which replaces the copies of that code in the ReactiveUI converters, the designer support, the D-Bus menu exporter and the DynamicData tests. `ferroui_microcom::Guid::parse` now rejects misplaced hyphens and unpaired braces, as `Guid.Parse` does. No public signature changes.
 
+### Fixed
+
+- **Scrolling through images in the browser** (the Vello backend): a texture of an image that is no longer drawn is kept while the textures of images fit 128 MiB (the ones drawn the longest ago released first, any not drawn for 3600 renders released), where it was released 16 renders after the image left the scene. Content that scrolled out of view and back was uploaded again, a copy and premultiplication of every pixel in the module and a texture upload per image, which on a phone made a fast scroll through a page of screenshots run at 20 frames a second. The WebGL2 renderer, the hybrid and the GPU mode share the rule (`scene/image_textures.rs`).
+
 ## [0.4.0] - 2026-10-31
 
 The fourth release. It completes the declarative Rust API of `0.4.0-preview.1` and adds, among the entries below:
