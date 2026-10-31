@@ -1,0 +1,101 @@
+# GPU rendering of the effects and rendering features
+
+The rule (PORTING-GUIDE.md, "Rendering: every backend draws on the GPU"): every backend draws every
+rendering feature on the GPU, validated by tests; the CPU path of a feature is the reference and
+the fallback of raster surfaces only. A frame that changes positions, uniforms or animated values
+makes no new bitmap or texture.
+
+This page is the audit of the effects and rendering features against that rule: for each path, how
+each backend draws it, what is wrong with it, and the test that covers it. It is kept up to date by
+the pull requests that change a path.
+
+## Backends and modes
+
+- **Skia** draws through Ganesh (OpenGL, WebGL2 in the browser, Vulkan, Metal on iOS), Graphite
+  (Metal on macOS) or the raster backend (CPU surfaces, render target bitmaps, the render tests).
+  Runtime effects (SkSL) run on all three.
+- **Vello** has four modes: the CPU renderer (`vello_cpu`), the hybrid renderer (`vello_hybrid`:
+  CPU coarse rasterization, GPU fine rasterization), the GPU renderer (`vello` over wgpu) and
+  the WebGL2 renderer of the browser. The renderers have layers with blend modes, clips,
+  gradients, images and (CPU and hybrid) filter layers; none has a hook for a custom shader.
+
+## Status
+
+Status: **GPU** (drawn by the GPU, nothing uploaded or read back per frame), **cached** (an image
+made once and kept while its inputs stay the same), **CPU fallback** (the CPU path draws it on this
+backend and uploads the result: a violation of the rule), **gap** (what the backend draws differs
+from the reference, or nothing is drawn).
+
+| Path | Skia (Ganesh, Graphite, raster) | Vello (CPU, hybrid, GPU, WebGL2) | Tests |
+|---|---|---|---|
+| Scene lighting (Reveal backgrounds and borders) | GPU: the lighting shader (#456) | CPU fallback: the light map sampled and uploaded per paint (a solid colour when the light is the same everywhere) | `composition_effect_tests.rs` (exact light, CPU light map, no image of pixels per frame), `gpu/metal/tests.rs` (Graphite), `composition_winui_material_tests.rs` (no bitmap per frame) |
+| Lit visuals (`push_multiply_layer` with a light map) | GPU: the lighting shader and the multiply blender (#456) | CPU fallback: the content drawn by the CPU renderer and multiplied on the processor | `composition_effect_tests.rs`, `composition_winui_lighting_tests.rs` |
+| Pixel operations (the blend modes the layers lack, the arithmetic composite of two images, `MaskInvert`) | GPU: layers with runtime blenders, Skia's arithmetic blender, the `Dissolve` noise shader (#456) | CPU fallback: each source into a render target bitmap, read back, combined, uploaded | `composition_effect_tests.rs` (each operation against `PixelOperation::apply_to_premultiplied_rgba8`), `composition_winui_lighting_tests.rs` |
+| `push_blend_layer` | GPU: a save layer with the blend mode | GPU: a layer of the scene | `layer_effect_tests.rs` of both backends |
+| `push_color_matrix_layer` (colour matrix, saturation, tint, invert, grayscale, luminance to alpha, the arithmetic composite with a colour, the shadow effect) | GPU: a colour filter of a save layer | CPU fallback: the content drawn by the CPU renderer, the matrix applied on the processor, uploaded | `layer_effect_tests.rs` |
+| `Visual.Effect`: blur, drop shadow, their transitions | GPU: an image filter of a save layer | GPU where the scene has filter layers and no clip is open; CPU fallback otherwise (the GPU renderer and WebGL2 have no filter layers) | `src/Vello/FerroUI.Vello/effect_tests.rs`, `tests/FerroUI.RenderTests/media/effect_tests.rs`, `tests/FerroUI.RenderBackends.Comparison/effect_tests.rs` |
+| Luminance to alpha (`ImmutableLuminanceToAlphaEffect`) | GPU: a colour filter | CPU fallback | `tests/FerroUI.RenderTests/media/effect_tests.rs` |
+| Box shadows, outer | GPU: a blurred draw (image filter) outside a clip of the box. A clip of a rounded box under a rotation (or with corner radii Ganesh cannot clip analytically) was a software mask of Ganesh: rasterized on the CPU into an A8 mask and uploaded each frame the box moved (the A8 uploads measured while scrolling the Ferro Store); see the next section | GPU: a closed-form blurred rounded rectangle where it agrees with the Gaussian; cached otherwise (the picture of the blurred shape, made by the CPU renderer, kept per shape) | `tests/FerroUI.RenderTests/media/box_shadow_tests.rs` |
+| Box shadows, inset | as the outer ones | as the outer ones | `tests/FerroUI.RenderTests/media/box_shadow_tests.rs` |
+| Clips: rectangles, rounded rectangles | GPU: analytic clips; a rounded rectangle under a rotation or with complex radii: see the next section | GPU: clip layers of the scene | `tests/FerroUI.RenderTests/geometry_clipping_tests.rs` |
+| Clips: geometry (`push_geometry_clip`) | GPU for convex paths of a few edges and with MSAA or stencil; a software mask of Ganesh otherwise (gap) | GPU: clip layers | `tests/FerroUI.RenderTests/geometry_clipping_tests.rs` |
+| Opacity masks (`push_opacity_mask`), the alpha masks of composition (`CompositionMaskBrush`, the masks of shapes, images and text) | GPU: a save layer and a destination-in draw of the mask brush | GPU: a layer with a destination-in blend | `tests/FerroUI.RenderTests/opacity_mask_tests.rs` |
+| `GetAlphaMask` | made on request (a snapshot), not per frame | the same | - (no pixel test) |
+| `ThemeShadow`, the composition `DropShadow` | GPU: blurred layers; the colour of a drop shadow is a small bitmap made once per colour (cached) | the same through the Vello effects (GPU or CPU fallback as `Visual.Effect`) | `tests/FerroUI.RenderTests/composition/winui_shadow_tests.rs`, `composition_theme_shadow_tests.rs`, `composition_shadow_tests.rs` |
+| Acrylic and backdrop brushes, Mica, desktop acrylic | GPU: the backdrop drawn again under a blur image filter, the tint and luminosity layers; the noise texture is decoded once (cached) | the backdrop through the Vello effects (GPU or CPU fallback); the noise image cached | `composition_winui_material_tests.rs` |
+| Reveal focus and border lights | as the scene lighting | as the scene lighting | as the scene lighting |
+| Connected-animation cross-fade | GPU: the frozen image of the source (made once, at `prepare_to_animate`) drawn with an animated opacity | the same | - (no pixel test) |
+| Noise and tiled-surface brushes | GPU: an image shader with repeat tiling; the image is made once | GPU: a tiled image | `a_border_effect_tiles_a_surface_brush` |
+| Image brushes | GPU: an image shader; a raster image is uploaded once and cached by the GPU context | GPU: an image of the scene, uploaded once per image | `tests/FerroUI.RenderTests/media/image_brush_tests.rs`, `tile_brush_tests.rs` |
+| Render target bitmaps (`RenderTargetBitmap`) | made by the application, not per frame | the same | - |
+| The visual cache (`CacheMode`) | a GPU layer kept while the content is the same | the same | - (no pixel test) |
+
+## The software masks of Ganesh (the A8 uploads)
+
+While scrolling the Ferro Store on WebGL2, single-channel textures of 322 by 408, 605 by 433, 322 by
+269 and 605 by 210 pixels were uploaded through `make_bmp_proxy` and
+`createNonMippedProxyFromBitmap`, more each time content was revealed. Those are Ganesh's software
+masks (`GrSWMaskHelper`): when Ganesh cannot draw a clip or a coverage analytically, and the
+render target has neither MSAA nor a stencil it may use for an anti-aliased clip, it rasterizes the
+shape on the CPU into an A8 bitmap and uploads it. The store's cards are rotated
+(`RotateTransform`) frames with `ClipToBounds` and rounded corners and an outer box shadow: each
+card clips to a rounded rectangle under a rotation (the `ClipToBounds`) and to the outside of one
+(the box shadow keeps the shadow out of the box), and Ganesh's analytic clips of rounded rectangles
+are in device space only, so both are software masks, made again whenever the card moves on the
+screen (a scroll moves every card).
+
+The fix is a stacked pull request (masks and shadows): on GPU surfaces such a clip is a clip
+shader, an SkSL coverage of the rounded rectangle in the coordinates of the drawing (its distance
+in device pixels through the inverse of the transform), which Ganesh and Graphite apply per pixel;
+the raster backend keeps Skia's exact clip, the reference.
+
+## Vello: what is missing and the GPU route
+
+vello's renderers cannot express the lighting, the colour matrix, the multiply layer or the pixel
+operations: they compose layers with the blend modes of the Compositing and Blending
+specification, and have no colour matrix, no blend that multiplies and keeps the alpha below, and
+no hook for a custom shader. The GPU renderer and WebGL2 have no filter layers either. Today those
+paths draw their content with the CPU renderer and upload the result on every frame, in every
+mode; this is the gap the rule closes.
+
+The route, a pull request stacked on the Skia ones:
+
+1. **A pass FerroUI owns.** For a layer that needs an effect (colour matrix, multiply by lights,
+   pixel operation, blur without filter layers), the content of the layer is rendered by the mode's
+   own renderer into a texture of the device (the GPU and hybrid renderers render scenes to
+   textures already; WebGL2 to a framebuffer texture). A wgpu render pass of FerroUI (WGSL ports
+   of the programs of `ferroui-skia/composition_effects.rs`, compiled once per device, with the
+   parameters as uniforms) reads that texture and writes the result into another, and the result
+   is composed into the outer scene through the `VelloSceneTexture` route (an image of the scene
+   backed by a device texture). The lighting needs no input texture: the pass evaluates the
+   lights into a texture the scene multiplies by, or draws.
+2. **Ordering.** A layer with an effect splits the scene of the frame: what is under the layer is
+   rendered first, the layer's content to its texture, the effect pass runs, and the rest of the
+   scene is rendered over it with the result as an image. The textures are pooled per size and
+   kept between frames.
+3. **WebGL2.** The same programs in GLSL ES 3.0 on the WebGL2 context the renderer uses, with
+   framebuffer textures in place of wgpu textures.
+4. **The CPU renderer** keeps the CPU path: it is the reference.
+5. **Validation:** `tests/FerroUI.RenderBackends.Comparison` scenes of each effect in each mode
+   against the CPU reference, and a counter of the images the scene sinks upload per frame
+   (the `VelloSceneImage` uploads) that stays at zero over steady frames.
