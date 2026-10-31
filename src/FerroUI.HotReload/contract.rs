@@ -101,7 +101,7 @@ impl BuildContracts {
     fn known(&self, namespace: &str, name: &str) -> bool {
         self.types
             .get(&(namespace.into(), name.into()))
-            .map_or_else(|| !types(namespace, name).is_empty(), |(known, _)| *known)
+            .map_or_else(|| runtime_known(namespace, name), |(known, _)| *known)
     }
     fn event(
         &self,
@@ -211,6 +211,18 @@ fn data_type(node: roxmltree::Node<'_, '_>, value: &str) -> String {
     format!("{value}|{namespaces:?}")
 }
 
+/// Whether a type the build did not describe resolves at run time, by the rules the build uses
+/// to describe one (`Catalog::describe` of ferroui-build): `Binding` of the FerroUI namespace
+/// is rewritten to `CompiledBinding` or `ReflectionBinding` before type resolution, and a name
+/// also resolves to its markup extension (`Name` to `NameExtension`). A document whose build
+/// never used a type falls back to this, so the two must agree, or an edit of a member value
+/// of such a type reads as a contract change.
+fn runtime_known(namespace: &str, name: &str) -> bool {
+    if namespace == "https://github.com/ferroui" && name == "Binding" {
+        return runtime_known(namespace, "CompiledBinding") && runtime_known(namespace, "ReflectionBinding");
+    }
+    !types(namespace, name).is_empty() || !types(namespace, &format!("{name}Extension")).is_empty()
+}
 // Match the namespace forms accepted by XAML without invoking constructors or getters.
 // Ambiguous mappings are deliberately a union: a possible event must not evade admission.
 fn types(namespace: &str, name: &str) -> Vec<&'static MarkupType> {
@@ -363,6 +375,20 @@ mod metadata_tests {
         assert!(matches!(validate_routed_events(source), Err(ReloadError::RestartRequired(_))));
         ferroui_controls::register_types();
         assert!(validate_routed_events(r#"<Button xmlns="https://github.com/ferroui" Click="Handler"/>"#).is_ok());
+    }
+    #[test]
+    fn a_binding_element_the_build_did_not_describe_keeps_its_member_values_out_of_the_contract() {
+        // The build describes only the types its documents use; a document that adds a
+        // `<Binding>` element is resolved at run time, as the build would have described it.
+        ferroui_controls::register_types();
+        ferroui_markup_xaml::register_types();
+        let contracts = BuildContracts::default();
+        let source = |path: &str| {
+            format!(r#"<TextBlock xmlns="https://github.com/ferroui"><TextBlock.Text><Binding Path="{path}"/></TextBlock.Text></TextBlock>"#)
+        };
+        assert!(contracts.known("https://github.com/ferroui", "Binding"));
+        assert_eq!(contracts.fingerprint(&source("Tag")).unwrap(), contracts.fingerprint(&source("Content")).unwrap());
+        assert!(contracts.fingerprint(&source("Tag")).unwrap().is_empty());
     }
     #[test]
     fn built_handler_contract_is_stable_across_lazy_runtime_registration() {
