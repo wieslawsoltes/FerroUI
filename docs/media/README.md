@@ -46,6 +46,12 @@ The packages are independently installable and use the `FerroUI.Media.*` family:
 | `FerroUI.Media.Camera.Controls` | `ferroui-media-camera-controls` | Explicit-start CameraPreview and weak supplied sessions |
 | `FerroUI.Media.Qr.Apple` | `ferroui-media-qr-apple` | Optional native Vision analysis of retained CoreVideo storage |
 | `FerroUI.Media.Qr.Android` | `ferroui-media-qr-android` | Optional bundled offline ML Kit analysis of borrowed CameraX images |
+| `FerroUI.Media.Windows` | `ferroui-media-windows` | Retained MF/DXGI storage and compatible ANGLE device import; native build pending |
+| `FerroUI.Media.Video.Windows` | `ferroui-media-video-windows` | MF source reader, WASAPI audio/clock, shared video leases |
+| `FerroUI.Media.Camera.Windows` | `ferroui-media-camera-windows` | Metadata discovery, explicit MF capture and JPEG preview snapshots |
+| `FerroUI.Media.Linux` | `ferroui-media-linux` | System GStreamer, negotiated DMA-BUF storage and EGL import; native build pending |
+| `FerroUI.Media.Video.Linux` | `ferroui-media-video-linux` | One native GStreamer video/audio pipeline |
+| `FerroUI.Media.Camera.Linux` | `ferroui-media-camera-linux` | Separate portal/PipeWire dependencies, explicit V4L2 profiles, JPEG snapshots |
 | `FerroUI.Media.Camera.Browser` | `ferroui-media-camera-browser` | Explicit video-only acquisition, preview and owned JPEG capture |
 
 Video and camera do not depend on each other. Installing Video brings the shared
@@ -227,7 +233,9 @@ work is opaque; the encoded transfer to Rust is counted as Photo. Browser camera
 controls are reported unavailable. Context loss quarantines unfinished reads;
 automatic recovery and a broader browser/device matrix remain unverified.
 
-Windows and Linux native providers remain unimplemented at this checkpoint.
+Windows and Linux provider source and desktop routing are now present. Their
+Rust bindings cross-check on the Mac; native C/C++ compilation, packaging and
+runtime behavior remain unverified. See [NATIVE-DESKTOP-PROFILES.md](NATIVE-DESKTOP-PROFILES.md).
 Android Media3 playback, CameraX capture, bundled offline ML Kit QR and GLES
 renderer output have run together on a 16 KiB emulator. Apple playback, Vision
 QR and Metal renderer output have run on macOS and the iOS simulator. Apple

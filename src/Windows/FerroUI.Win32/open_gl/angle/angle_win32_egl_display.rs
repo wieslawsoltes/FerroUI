@@ -263,10 +263,16 @@ impl AngleWin32EglDisplay {
         let (d3d_device, _) = DirectXUnmanagedMethods::d3d11_create_device(
             chosen_adapter.as_deref(),
             D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_UNKNOWN,
-            0,
+            0x20 | 0x800, // BGRA_SUPPORT | VIDEO_SUPPORT for compatible MF device sharing.
             &feature_levels,
             7,
         )
+        // Older adapters remain usable by ordinary UI rendering. Native media
+        // independently rejects devices without the required video capability.
+        .or_else(|_| DirectXUnmanagedMethods::d3d11_create_device(
+            chosen_adapter.as_deref(), D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_UNKNOWN,
+            0, &feature_levels, 7,
+        ))
         .map_err(|error| OpenGlException::new(format!("D3D11CreateDevice failed: {error}")))?;
         drop(chosen_adapter);
 

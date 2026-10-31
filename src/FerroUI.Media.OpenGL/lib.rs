@@ -17,7 +17,9 @@ impl Drop for CurrentContext {
     }
 }
 
+mod native_view;
 mod renderer;
+pub use native_view::NativeTextureView;
 pub use renderer::{GlTextureRender, GlTextureRenderer};
 
 fn unsupported(message: impl Into<String>) -> MediaError {
@@ -111,9 +113,17 @@ impl NativeGlFrameProducer {
                     .unwrap_or("")
                     .to_ascii_lowercase();
                 if renderer.is_empty()
-                    || ["swiftshader", "llvmpipe", "softpipe", "software rasterizer"]
-                        .iter()
-                        .any(|name| renderer.contains(name))
+                    || [
+                        "swiftshader",
+                        "llvmpipe",
+                        "softpipe",
+                        "lavapipe",
+                        "software rasterizer",
+                        "microsoft basic render",
+                        "warp",
+                    ]
+                    .iter()
+                    .any(|name| renderer.contains(name))
                 {
                     return Ok(Err(unsupported(
                         "Software/unknown GL has no admitted GPU media route",

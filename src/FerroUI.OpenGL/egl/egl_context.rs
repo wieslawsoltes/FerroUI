@@ -422,6 +422,9 @@ impl IPlatformGraphicsContext for EglContext {
 }
 
 impl IGlContext for EglContext {
+    fn native_egl_display(&self) -> Option<isize> {
+        (!self.is_lost.get()).then(|| self.disp.handle())
+    }
     fn shared_frame_context_id(&self) -> Option<u64> {
         let gl = self.gl_interface();
         // GL sync is core in ES 3 / desktop 3.2. Do not advertise merely

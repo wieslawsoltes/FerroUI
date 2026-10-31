@@ -9,21 +9,38 @@ publish = false
 [[bin]]
 name = "portable-media"
 path = "main.rs"
-[target.'cfg(target_os = "macos")'.dependencies]
+[target.'cfg(any(target_os = "macos", windows, target_os = "linux"))'.dependencies]
 ferroui-base.workspace = true
 ferroui-media.workspace = true
-ferroui-media-metal.workspace = true
-ferroui-media-apple.workspace = true
 ferroui-controls.workspace = true
 ferroui-media-controls.workspace = true
 ferroui-media-video-controls.workspace = true
 ferroui-media-video.workspace = true
 ferroui-media-camera.workspace = true
-ferroui-media-video-apple = {workspace=true,features=["controls"]}
-ferroui-media-camera-apple = {workspace=true,features=["controls"]}
 image = { version = "0.25", default-features = false, features = ["jpeg"] }
 ferroui-desktop.workspace = true
 ferroui-themes-fluent.workspace = true
+
+[target.'cfg(target_os = "macos")'.dependencies]
+ferroui-media-metal.workspace = true
+ferroui-media-apple.workspace = true
+ferroui-media-video-apple = {workspace=true,features=["controls"]}
+ferroui-media-camera-apple = {workspace=true,features=["controls"]}
+
+[target.'cfg(windows)'.dependencies]
+ferroui-opengl.workspace = true
+ferroui-media-windows = {workspace=true,features=["controls"]}
+ferroui-media-video-windows.workspace = true
+ferroui-media-camera-windows.workspace = true
+ferroui-media-opengl.workspace = true
+
+[target.'cfg(target_os = "linux")'.dependencies]
+ferroui-media-linux = {workspace=true,features=["controls"]}
+ferroui-media-video-linux.workspace = true
+ferroui-media-camera-linux.workspace = true
+ferroui-media-opengl.workspace = true
+ferroui-x11.workspace = true
+ferroui-opengl.workspace = true
 
 [build-dependencies]
 cc.workspace = true

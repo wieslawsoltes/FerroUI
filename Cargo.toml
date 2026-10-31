@@ -1,6 +1,12 @@
 [workspace]
 resolver = "2"
 members = [
+    "src/FerroUI.Media.Camera.Windows",
+    "src/FerroUI.Media.Video.Windows",
+    "src/FerroUI.Media.Windows",
+    "src/FerroUI.Media.Linux",
+    "src/FerroUI.Media.Video.Linux",
+    "src/FerroUI.Media.Camera.Linux",
     "src/FerroUI.Media.OpenGL",
     "src/FerroUI.Media.Metal",
     "src/FerroUI.Media.Android",
@@ -257,6 +263,12 @@ categories = ["gui"]
 # that the crates of a release are only ever resolved together (docs/release.md, "Version scheme").
 # `scripts/release/set-version.sh <version>` writes the version above and these keys.
 [workspace.dependencies]
+ferroui-media-camera-windows = { path = "src/FerroUI.Media.Camera.Windows" }
+ferroui-media-video-windows = { path = "src/FerroUI.Media.Video.Windows" }
+ferroui-media-windows = { path = "src/FerroUI.Media.Windows" }
+ferroui-media-camera-linux = { path = "src/FerroUI.Media.Camera.Linux" }
+ferroui-media-video-linux = { path = "src/FerroUI.Media.Video.Linux" }
+ferroui-media-linux = { path = "src/FerroUI.Media.Linux" }
 ferroui-media-video = { version = "=0.4.0", path = "src/FerroUI.Media.Video" }
 ferroui-media-camera = { version = "=0.4.0", path = "src/FerroUI.Media.Camera" }
 ferroui-media-video-controls = { version = "=0.4.0", path = "src/FerroUI.Media.Video.Controls" }

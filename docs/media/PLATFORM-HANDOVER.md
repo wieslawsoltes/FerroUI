@@ -141,24 +141,28 @@ output, while already submitted GPU leases retire through completion.
 
 ## Windows agent
 
-Introduce the corresponding `FerroUI.Media.Video.Windows` and
-`FerroUI.Media.Camera.Windows` packages; add a shared `FerroUI.Media.Windows`
-helper only where ownership/import code is reusable. Reuse the common controls.
-Do not add a CaptureElement compatibility control or port the full WinRT model.
+Provider source is now present in `FerroUI.Media.Windows`,
+`FerroUI.Media.Video.Windows` and `FerroUI.Media.Camera.Windows`. The
+`PortableMedia` desktop harness selects these providers on Windows. Native
+C++ compilation and all native verification are deferred to this host; a Rust
+FFI check on `x86_64-pc-windows-gnu` passed with native compilation explicitly
+skipped. A full cross-build of the sample could not find the Windows C compiler.
+This is not evidence that its native SDK bridge compiles or runs.
 
-The selected backend is Media Foundation with compatible D3D11 device management,
-retained native output surfaces and native audio/timing. Establish how the active
-renderer exposes/shares its D3D11 device, including adapter LUID and generation,
-before integrating decode. A new private decode device with silent copies is
-not the preferred route. Media-engine frame-server transfers must not become the
-default primary path merely because they are easier to capture.
+Read [NATIVE-DESKTOP-PROFILES.md](NATIVE-DESKTOP-PROFILES.md) before building.
+The bridge selects the active ANGLE D3D11 device, probes compatible video and
+threading interfaces, configures an MF DXGI device manager and advanced RGB
+processing, and rejects system-memory video samples. It retains MF samples,
+texture slices and readiness queries through native alias retirement. WASAPI
+provides native audio output/clock. The UI backend first attempts a BGRA/video
+capable D3D11 device, preserving its ordinary graphics fallback when unavailable.
 
-The common Ganesh hook currently has a working completion provider only for the
-browser profile. Native contexts still opt out. Add native completion on the
-actual consuming context/queue and direct native-image acquisition; do not infer
-native Windows support from browser GL passing. Check default ANGLE/D3D paths
-and explicitly identify any narrower renderer profile. Necessary format/color
-conversion must stay on the GPU and retain its input storage until completion.
+Native EGL/Ganesh consumer completion and the lease-backed GL importer now
+exist. WGL, legacy snapshot imports and Vulkan do not gain direct media sampling
+from this change. The selected native output profile is SDR RGB32 with validated
+color, aperture, size and adapter identity. Missing native tags are rejected;
+verify that the requested MF processor actually negotiates those tags and
+compatible shader-readable DXGI storage on each selected codec/driver.
 
 Start validation with an independent D3D11 producer and deterministic pixels,
 then native playback and camera. Cover compatible device management, WARP/software
@@ -169,25 +173,30 @@ keyboard/UI Automation evidence separately from implementation.
 
 ## Linux agent
 
-Introduce `FerroUI.Media.Video.Linux`, `FerroUI.Media.Camera.Linux` and a shared
-helper only where useful. Use system GStreamer/plugins for playback, with native
-audio and timing. Negotiate DMA-BUF memory, format, plane offsets/strides and DRM
-modifiers against what the **active renderer** admits. An FD alone is not proof
-of compatible storage or synchronization. Own native buffers and FDs through
-actual GPU retirement.
+Provider source is now present in `FerroUI.Media.Linux`,
+`FerroUI.Media.Video.Linux` and `FerroUI.Media.Camera.Linux`. The desktop harness
+explicitly selects EGL/GLES on X11. Rust FFI/provider checks passed on the
+`x86_64-unknown-linux-gnu` target with native compilation explicitly skipped.
+The GStreamer/EGL C bridge and portal/PipeWire C bridge have not been compiled,
+linked or run on Linux. Fix native integration failures on this host before
+claiming a functional provider.
 
-Investigate the repository's default Skia Vulkan path as well as EGL/Ganesh.
-The existing Vulkan and other legacy snapshot importers have no new direct
-acquisition implementation. A successful GL-only experiment must not be reported
-as completion of a different default renderer profile. Do not insert CPU
-`videoconvert`/download/re-upload stages to conceal negotiation failures.
+The selected profile uses system GStreamer 1.24+, exact DMA_DRM format/modifier
+caps from the active EGL display, retained samples and bounded native slots.
+Compatible XRGB/XBGR frames create direct EGL aliases. NV12 uses the required
+counted external-texture GPU conversion; it currently needs GLES3 and known
+BT.709 tags. Unknown/implicit layouts, unsupported color, crop, interlacing and
+pixel-aspect conversions fail admission. No CPU preview fallback is declared.
+GLX and Vulkan direct sampling remain implementation work for the broader
+primary-renderer gates; do not report a successful EGL profile as those routes.
 
-Camera uses portal-authorized PipeWire, plus an explicit direct V4L2 host profile.
-Direct V4L2 must not silently bypass a denied portal request. Discovery remains
-non-prompting; native permissions and formats can remain unknown until consent.
-Ensure cancellation closes portal requests/sessions, late streams and native
-buffer callbacks without UI waits. Capture output and optional controls must be
-reported as actually supported by the chosen profile.
+Portal access is in the Camera crate, so Video has no portal/PipeWire development
+dependency. Discovery is metadata-only, consent is explicit, canceled requests
+close their portal handles, and only authorized nodes are enumerated. Enumeration
+and capture each consume a fresh portal remote connection. Direct V4L2 is an
+explicit configured-device profile and never a denial fallback. Camera stills
+are independently owned JPEG preview snapshots with counted Photo transfers;
+modifier-backed snapshots outside the linear profile fail honestly.
 
 Validate independent DMA-BUF production first, then negotiated playback/capture,
 missing plugins, incompatible modifiers/formats/devices, software adapters,
@@ -202,6 +211,10 @@ They are functional evidence, not a frozen performance acceptance profile.
 
 | Check | Result and limit |
 | --- | --- |
+| Windows/Linux provider adapters | Rust cross-checks passed with the native bridge deliberately skipped; C/C++ compilation, linking, codec/driver behavior and native samples remain unverified |
+| Native alias contracts | Three GL producer/retirement unit tests passed, including retention through consumer completion, queued native cleanup and lost-context quarantine; this does not prove a native DMA-BUF/DXGI import |
+| Android renderer accessibility | Updated APK's native automation tree reports RendererHost focusable; camera stop again released hardware and renderer storage. Full keyboard/screen-reader acceptance remains open. |
+| Browser regression after renderer changes | Actual Chrome suite passed shared WebGL, native video, synthetic capture/JPEG, canceled acquisition, software rejection, autoplay/audio and CORS cases again |
 | Targeted Rust contracts | 62 tests across frame/admission/retirement, queued-handle ownership, existing surface jobs, player ordering/lifetime, camera contracts, QR scheduling/adapter, geometry, renderer host and native fixtures; runs are recorded separately |
 | Independent Metal producer | Real GPU rendering and completion delay, direct sampling, opaque/premultiplied/Rec.709 pixels, stale-generation rejection, native texture ownership and counted diagnostic reads |
 | Native macOS playback | Synthetic AVC/AAC resource → shared Metal frame → pause → achieved seek → resume → Stop/frame zero → clear; zero preview CPU transfers and zero retained frames after cleanup |
@@ -239,7 +252,10 @@ files or automatically available on another machine. Important names include
 `android16k-renderer-smoke.log`, `renderer-source-contracts.log`,
 `renderer-native-job-contracts.log`, `renderer-geometry-contracts.log`,
 `android16k-camera-qr-renderer.log`, `android-unknown-color-negative.log` and
-`android-frame-orientation-contracts.log`. Re-run applicable gates on the receiving host.
+`android-frame-orientation-contracts.log`, `native-alias-contracts.log`,
+`windows-rust-bindings-check.log`, `linux-rust-bindings-check.log`,
+`windows-sample-bindings-check.log`, `desktop-gl-scene-bindings-check.log`,
+`desktop-provider-routing-smoke.log` and `ios-final-renderer-smoke.log`. Re-run applicable gates on the receiving host.
 
 Useful commands, from the repository root:
 
@@ -265,7 +281,9 @@ were used to limit disk/memory use; the target cache is private to this worktree
 
 ## Work still open beyond these handoffs
 
-- Windows and Linux native providers are unimplemented at this checkpoint.
+- Windows and Linux provider source is implemented for the explicitly described
+  profiles, with native C/C++ compilation, packaging and runtime verification
+  deferred. Broader primary-renderer routes remain open.
   Android now has native playback/CameraX/external GLES integration and a
   separate active-media/camera run on a 16 KiB kernel.
 - Apple Vision and bundled Android ML Kit QR engines are implemented. Physical

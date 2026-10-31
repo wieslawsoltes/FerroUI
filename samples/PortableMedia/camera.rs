@@ -10,7 +10,7 @@ use ferroui_controls::{
     automation::AutomationProperties, Button, Panel, StackPanel, TextBlock, Window,
 };
 use ferroui_media_camera::{CameraCapture, CameraSession};
-use ferroui_media_camera_apple::{AppleCameraProvider, AppleTextureImporter};
+
 use ferroui_media_controls::TexturePresenter;
 use std::{
     cell::{Cell, RefCell},
@@ -129,7 +129,7 @@ pub fn create(window: &Ref<Window>) -> Ref<Panel> {
                     if let Some(presenter) = state.presenter.upgrade() {
                         presenter.set_frame_source(
                             Some(session.frames()),
-                            Some(Rc::new(AppleTextureImporter)),
+                            Some(super::providers::importer()),
                         );
                     }
                     if let (Some(root), Some(interop)) =
@@ -224,9 +224,10 @@ pub fn create(window: &Ref<Window>) -> Ref<Panel> {
                 state.initializing.set(true);
                 Dispatcher::ui_thread().invoke_async_task_local(move||async move{
                 let Some(interop)=compositor.try_get_composition_gpu_interop().await else{return;};
-                let Some(luid)=interop.device_luid() else{return;};
                 let Some(state)=weak.upgrade() else{return;};
-                let capture=CameraCapture::new(Rc::new(AppleCameraProvider{device:DeviceIdentity::Luid(luid),device_generation:interop.shared_context_generation()}),FrameBudget::new(Default::default()));
+                let budget=FrameBudget::new(Default::default());
+                let provider=match super::providers::camera(&*interop,budget.clone()){Ok(v)=>v,Err(e)=>{state.status(&format!("PROVIDER_FAILED {e}"));return;}};
+                let capture=CameraCapture::new(provider,budget);
                 let before=capture.permission();let devices=capture.devices().await;let after=capture.permission();
                 match devices {
                     Ok(devices)=>{

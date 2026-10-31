@@ -12,6 +12,11 @@ use std::sync::Arc;
 /// optional features: `try_get_feature(TypeId::of::<dyn IGlContext>())`
 /// returns an `Rc<dyn IGlContext>`.
 pub trait IGlContext: IPlatformGraphicsContext {
+    /// Borrowed EGLDisplay, valid only while this context is current on its
+    /// owning thread. Native media importers must not store it across jobs.
+    fn native_egl_display(&self) -> Option<isize> {
+        None
+    }
     fn shared_frame_retirement_queue(&self) -> Option<crate::SharedGlTextureRetirementQueue> {
         None
     }

@@ -9,7 +9,8 @@ JPEG output is decoded independently in memory with the Rust `image` crate.
 ## iOS
 
 ```sh
-CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0 \
+IPHONEOS_DEPLOYMENT_TARGET=14.0 IOS_DEPLOYMENT_TARGET=14.0 \
+  CARGO_BUILD_JOBS=1 CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0 \
   cargo build -p portable-media-mobile --bin portable-media-mobile --target aarch64-apple-ios-sim
 scripts/ios/bundle.sh --package portable-media-mobile --bin portable-media-mobile \
   --bundle-id org.ferroui.portablemedia --no-build \

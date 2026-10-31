@@ -2255,6 +2255,31 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-media-camera-linux"
+version = "0.4.0"
+dependencies = [
+ "cc",
+ "ferroui-media",
+ "ferroui-media-camera",
+ "ferroui-media-linux",
+ "ferroui-media-opengl",
+ "jpeg-encoder",
+ "pkg-config",
+]
+
+[[package]]
+name = "ferroui-media-camera-windows"
+version = "0.4.0"
+dependencies = [
+ "ferroui-media",
+ "ferroui-media-camera",
+ "ferroui-media-opengl",
+ "ferroui-media-windows",
+ "jpeg-encoder",
+ "serde_json",
+]
+
+[[package]]
 name = "ferroui-media-controls"
 version = "0.4.0"
 dependencies = [
@@ -2262,6 +2287,18 @@ dependencies = [
  "ferroui-build-scan",
  "ferroui-controls",
  "ferroui-media",
+]
+
+[[package]]
+name = "ferroui-media-linux"
+version = "0.4.0"
+dependencies = [
+ "cc",
+ "ferroui-base",
+ "ferroui-media",
+ "ferroui-media-opengl",
+ "ferroui-opengl",
+ "pkg-config",
 ]
 
 [[package]]
@@ -2364,6 +2401,37 @@ dependencies = [
  "ferroui-controls",
  "ferroui-media-controls",
  "ferroui-media-video",
+]
+
+[[package]]
+name = "ferroui-media-video-linux"
+version = "0.4.0"
+dependencies = [
+ "ferroui-media",
+ "ferroui-media-linux",
+ "ferroui-media-opengl",
+ "ferroui-media-video",
+]
+
+[[package]]
+name = "ferroui-media-video-windows"
+version = "0.4.0"
+dependencies = [
+ "ferroui-media",
+ "ferroui-media-opengl",
+ "ferroui-media-video",
+ "ferroui-media-windows",
+]
+
+[[package]]
+name = "ferroui-media-windows"
+version = "0.4.0"
+dependencies = [
+ "cc",
+ "ferroui-base",
+ "ferroui-media",
+ "ferroui-media-opengl",
+ "ferroui-opengl",
 ]
 
 [[package]]
@@ -4884,12 +4952,21 @@ dependencies = [
  "ferroui-media-apple",
  "ferroui-media-camera",
  "ferroui-media-camera-apple",
+ "ferroui-media-camera-linux",
+ "ferroui-media-camera-windows",
  "ferroui-media-controls",
+ "ferroui-media-linux",
  "ferroui-media-metal",
+ "ferroui-media-opengl",
  "ferroui-media-video",
  "ferroui-media-video-apple",
  "ferroui-media-video-controls",
+ "ferroui-media-video-linux",
+ "ferroui-media-video-windows",
+ "ferroui-media-windows",
+ "ferroui-opengl",
  "ferroui-themes-fluent",
+ "ferroui-x11",
  "image",
 ]
 

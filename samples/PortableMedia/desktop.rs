@@ -11,7 +11,7 @@ use ferroui_controls::{
 };
 use ferroui_desktop::AppBuilderDesktopExtensions;
 use ferroui_media_video::{MediaPlaybackState, MediaSource};
-use ferroui_media_video_apple::{AppleTextureImporter, AppleVideoProvider};
+
 use ferroui_media_video_controls::MediaPlayerElement;
 use std::{
     cell::Cell,
@@ -22,7 +22,13 @@ use std::{
 static FAILED: AtomicBool = AtomicBool::new(false);
 #[path = "camera.rs"]
 mod camera;
+#[path = "providers.rs"]
+mod providers;
+#[cfg(target_os = "macos")]
 #[path = "renderer.rs"]
+mod renderer;
+#[cfg(not(target_os = "macos"))]
+#[path = "native_renderer.rs"]
 mod renderer;
 #[repr(C)]
 struct App {
@@ -99,24 +105,77 @@ impl ApplicationImpl for App {
                     let weak = view.downgrade();
                     let weak_window = weak_window.clone();
                     let weak_root = weak_root.clone();
-                    Dispatcher::ui_thread().invoke_async_task_local(move||async move {
-                    let Some(interop)=compositor.try_get_composition_gpu_interop().await else {FAILED.store(true,Ordering::Relaxed);if let Some(window)=weak_window.upgrade() {window.close();}return;};
-                    let Some(device)=interop.device_luid() else {FAILED.store(true,Ordering::Relaxed);if let Some(window)=weak_window.upgrade() {window.close();}return;};
-                    let Some(view)=weak.upgrade() else {return;};
-                    let budget=FrameBudget::new(FrameBudgetLimits::default());
-                    let provider=Rc::new(AppleVideoProvider {device:DeviceIdentity::Luid(device),device_generation:interop.shared_context_generation(),budget:budget.clone()});
-                    let path=std::env::args().nth(1).expect("media source argument");
-                    let source=if std::env::args().any(|a|a=="--resource") {
-                        let encoded=match std::fs::read(&path){Ok(encoded)=>encoded,Err(error)=>{eprintln!("RESOURCE_READ_FAILED {error}");FAILED.store(true,Ordering::Relaxed);if let Some(window)=weak_window.upgrade(){window.close();}return;}};
-                        MediaSource::Resource{name:"portable-media-fixture.mp4".into(),content_type:"video/mp4".into(),encoded:encoded.into()}
-                    } else if path.starts_with("https://") || path.starts_with("http://") {MediaSource::Url(path)} else {MediaSource::File(path.into())};
-                    let pending=view.set_source(source,provider,Rc::new(AppleTextureImporter));
-                    if let Err(error)=pending.await {eprintln!("OPEN_FAILED {error}");FAILED.store(true,Ordering::Relaxed);if let Some(window)=weak_window.upgrade() {window.close();}return;}
-                    println!("OPENED native=AVFoundation presentation=MetalSharedTexture decode=unknown");
-                    if let (Some(root),Some(player))=(weak_root.upgrade(),view.media_player()){renderer::install(&root,player.frames(),&*interop);}
+                    Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+                        let Some(interop) = compositor.try_get_composition_gpu_interop().await
+                        else {
+                            FAILED.store(true, Ordering::Relaxed);
+                            if let Some(window) = weak_window.upgrade() {
+                                window.close();
+                            }
+                            return;
+                        };
+                        let Some(view) = weak.upgrade() else {
+                            return;
+                        };
+                        let budget = FrameBudget::new(FrameBudgetLimits::default());
+                        let provider = match providers::video(&*interop, budget.clone()) {
+                            Ok(v) => v,
+                            Err(e) => {
+                                eprintln!("PROVIDER_FAILED {e}");
+                                FAILED.store(true, Ordering::Relaxed);
+                                if let Some(window) = weak_window.upgrade() {
+                                    window.close();
+                                }
+                                return;
+                            }
+                        };
+                        let path = std::env::args().nth(1).expect("media source argument");
+                        let source = if std::env::args().any(|a| a == "--resource") {
+                            let encoded = match std::fs::read(&path) {
+                                Ok(encoded) => encoded,
+                                Err(error) => {
+                                    eprintln!("RESOURCE_READ_FAILED {error}");
+                                    FAILED.store(true, Ordering::Relaxed);
+                                    if let Some(window) = weak_window.upgrade() {
+                                        window.close();
+                                    }
+                                    return;
+                                }
+                            };
+                            MediaSource::Resource {
+                                name: "portable-media-fixture.mp4".into(),
+                                content_type: "video/mp4".into(),
+                                encoded: encoded.into(),
+                            }
+                        } else if path.starts_with("https://") || path.starts_with("http://") {
+                            MediaSource::Url(path)
+                        } else {
+                            MediaSource::File(path.into())
+                        };
+                        let pending = view.set_source(source, provider, providers::importer());
+                        if let Err(error) = pending.await {
+                            eprintln!("OPEN_FAILED {error}");
+                            FAILED.store(true, Ordering::Relaxed);
+                            if let Some(window) = weak_window.upgrade() {
+                                window.close();
+                            }
+                            return;
+                        }
+                        println!(
+                            "OPENED native_platform_provider shared_texture=true decode=unknown"
+                        );
+                        if let (Some(root), Some(player)) =
+                            (weak_root.upgrade(), view.media_player())
+                        {
+                            renderer::install(&root, player.frames(), &*interop);
+                        }
 
-                    if std::env::args().any(|a|a=="--smoke") {if let Some(window)=weak_window.upgrade() {smoke(&window,&view,budget);}}
-                });
+                        if std::env::args().any(|a| a == "--smoke") {
+                            if let Some(window) = weak_window.upgrade() {
+                                smoke(&window, &view, budget);
+                            }
+                        }
+                    });
                     false
                 },
                 Duration::from_millis(50),
@@ -257,9 +316,18 @@ pub fn run() -> std::process::ExitCode {
         return std::process::ExitCode::FAILURE;
     }
     let args: Vec<_> = std::env::args().skip(1).collect();
-    let result = AppBuilder::configure::<App>()
-        .use_platform_detect()
-        .start_with_classic_desktop_lifetime(&args);
+    let builder = AppBuilder::configure::<App>().use_platform_detect();
+    #[cfg(target_os = "linux")]
+    let builder = builder.with(Rc::new(ferroui_x11::X11PlatformOptions {
+        rendering_mode: vec![ferroui_x11::X11RenderingMode::Egl],
+        gl_profiles: vec![ferroui_opengl::GlVersion::new(
+            ferroui_opengl::GlProfileType::OpenGLES,
+            3,
+            0,
+        )],
+        ..Default::default()
+    }));
+    let result = builder.start_with_classic_desktop_lifetime(&args);
     if FAILED.load(Ordering::Relaxed) {
         std::process::ExitCode::FAILURE
     } else {
