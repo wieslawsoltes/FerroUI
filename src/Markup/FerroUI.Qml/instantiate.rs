@@ -5,12 +5,13 @@ use std::sync::atomic::{AtomicU64, Ordering};
 static NEXT_INSTANCE: AtomicU64 = AtomicU64::new(1);
 
 struct Builder<'a> {
-    scopes:enums::Scopes,
+    scopes: enums::Scopes,
     instance: Instance,
     registry: &'a TypeRegistry,
     imports: &'a [Import],
     assigned: BTreeSet<SlotId>,
     aliases: Vec<(SlotId, Expr)>,
+    implicit: Vec<(SlotId, Vec<Value>)>,
 }
 
 impl Instance {
@@ -21,16 +22,26 @@ impl Instance {
         registry: &TypeRegistry,
         initial: BTreeMap<String, Value>,
     ) -> Result<Self, Error> {
-        Self::construct(None,source,registry,initial)
+        Self::construct(None, source, registry, initial)
     }
 
     /// Load an in-memory document with the type name normally supplied by its
     /// filename, so its own enumerations can be accessed from expressions.
-    pub fn new_named(name:&str, source:&impl ComponentSource, registry:&TypeRegistry, initial:BTreeMap<String,Value>) -> Result<Self,Error> {
-        Self::construct(Some(name),source,registry,initial)
+    pub fn new_named(
+        name: &str,
+        source: &impl ComponentSource,
+        registry: &TypeRegistry,
+        initial: BTreeMap<String, Value>,
+    ) -> Result<Self, Error> {
+        Self::construct(Some(name), source, registry, initial)
     }
 
-    fn construct(name:Option<&str>, source:&impl ComponentSource, registry:&TypeRegistry, initial:BTreeMap<String,Value>) -> Result<Self,Error> {
+    fn construct(
+        name: Option<&str>,
+        source: &impl ComponentSource,
+        registry: &TypeRegistry,
+        initial: BTreeMap<String, Value>,
+    ) -> Result<Self, Error> {
         let document = source.document();
         registry.validate_imports(&document.imports)?;
         if let Some(pragma) = document.pragmas.first() {
@@ -40,10 +51,12 @@ impl Instance {
             )));
         }
         let mut builder = Builder {
-            scopes:enums::Scopes::named(name,&document.root)?,
+            scopes: enums::Scopes::named(name, &document.root)?,
             instance: Self {
+                bindings: BTreeSet::new(),
                 native_functions: source.evaluators(),
-                timers:timers::Timers::default(),
+                native_scripts: source.scripts(),
+                timers: timers::Timers::default(),
                 listeners: BTreeMap::new(),
                 validator: None,
                 watched: BTreeSet::new(),
@@ -59,6 +72,7 @@ impl Instance {
             imports: &document.imports,
             assigned: BTreeSet::new(),
             aliases: Vec::new(),
+            implicit: Vec::new(),
         };
         let root = builder.object(&document.root, None)?;
         // Module objects share this engine's slots and dependency graph. They
@@ -67,6 +81,7 @@ impl Instance {
             builder.object(singleton, None)?;
         }
         builder.link_aliases()?;
+        builder.default_children()?;
         for (name, value) in initial {
             let key = builder.instance.key(root, &name)?;
             let key = builder.instance.write_target(key)?;
@@ -148,7 +163,7 @@ impl Instance {
             (object, Value::Null) if is_object_type(object) => (),
             (ty, Value::Object(id))
                 if self.node(*id).is_some_and(|node| {
-                    ty == "QtObject"
+                    matches!(ty, "QtObject" | "QtQml.QtObject")
                         || node.composite_types.iter().any(|candidate| ty == candidate)
                         || ty == node.name
                         || ty == format!("{}.{}", node.module, node.name)
@@ -170,10 +185,44 @@ fn list_element(ty: &str) -> Option<&str> {
     ty.strip_prefix("list<")?.strip_suffix('>')
 }
 fn is_object_type(ty: &str) -> bool {
-    ty.chars().next().is_some_and(char::is_uppercase)
+    ty.rsplit('.')
+        .next()
+        .and_then(|part| part.chars().next())
+        .is_some_and(char::is_uppercase)
 }
 
 impl Builder<'_> {
+    fn canonical_type(&self, imports: &[Import], ty: &str) -> Result<String, Error> {
+        if let Some(element) = list_element(ty) {
+            return Ok(format!("list<{}>", self.canonical_type(imports, element)?));
+        }
+        if is_object_type(ty) && !ty.starts_with("Qml$Type") {
+            let (module, name, _) = self.registry.resolve(imports, ty)?;
+            return Ok(format!("{module}.{name}"));
+        }
+        Ok(ty.into())
+    }
+
+    fn parameters(
+        &self,
+        imports: &[Import],
+        params: &[Parameter],
+    ) -> Result<Vec<Parameter>, Error> {
+        params
+            .iter()
+            .map(|p| {
+                Ok(Parameter {
+                    name: p.name.clone(),
+                    ty: p
+                        .ty
+                        .as_deref()
+                        .map(|s| self.canonical_type(imports, s))
+                        .transpose()?,
+                })
+            })
+            .collect()
+    }
+
     fn default_value(&self, imports: &[Import], ty: &str) -> Result<Value, Error> {
         Ok(match ty {
             "alias" | "var" | "variant" => Value::Undefined,
@@ -206,6 +255,8 @@ impl Builder<'_> {
         }
         self.instance.properties.push(property);
         self.instance.slots.push(Slot {
+            overlay: None,
+            active_target: None,
             assigned: false,
             value,
             binding: None,
@@ -227,7 +278,7 @@ impl Builder<'_> {
             instance: self.instance.identity,
         };
         self.instance.nodes.push(Node {
-            type_scope:self.scopes.imports(imports,self.registry),
+            type_scope: self.scopes.imports(imports, self.registry),
             composite_types: source.composite_types.clone(),
             lineage: definition.lineage.clone(),
             module: module.into(),
@@ -256,6 +307,9 @@ impl Builder<'_> {
                 },
                 default.clone(),
             )?;
+        }
+        if module == "QtQml" && name == "Binding" {
+            self.instance.bindings.insert(id);
         }
         let connections = module == "QtQml" && name == "Connections";
         if connections {
@@ -289,7 +343,7 @@ impl Builder<'_> {
                         Property {
                             owner: id,
                             name: name.clone(),
-                            ty: ty.clone(),
+                            ty: self.canonical_type(imports, ty)?,
                             readonly: modifiers.readonly,
                             required: modifiers.required,
                             alias: None,
@@ -307,9 +361,10 @@ impl Builder<'_> {
                     }
                 }
                 MemberKind::Signal { name, parameters } => {
+                    let signature = self.parameters(imports, parameters)?;
                     if self.instance.nodes[id.index]
                         .signals
-                        .insert(name.clone(), parameters.clone())
+                        .insert(name.clone(), signature)
                         .is_some()
                     {
                         return Err(Error::new(format!("duplicate signal '{name}'")));
@@ -322,8 +377,11 @@ impl Builder<'_> {
                     body,
                 } => {
                     let proc = Procedure {
-                        parameters: parameters.clone(),
-                        result: return_type.clone(),
+                        parameters: self.parameters(imports, parameters)?,
+                        result: return_type
+                            .as_deref()
+                            .map(|s| self.canonical_type(imports, s))
+                            .transpose()?,
                         body: body.clone(),
                     };
                     if self.instance.nodes[id.index]
@@ -347,6 +405,21 @@ impl Builder<'_> {
             match &member.kind {
                 MemberKind::Child(child) => {
                     implicit.push(Value::Object(self.object(child, Some(id))?))
+                }
+                MemberKind::OnProperty { name, object } => {
+                    let child = self.object(object, Some(id))?;
+                    if !self.instance.bindings.contains(&child) {
+                        return Err(Error::new(format!(
+                            "'{}' is not a supported property value source",
+                            object.type_name
+                        )));
+                    }
+                    self.bind(child, "target", &Binding::Expr(Expr::Name("parent".into())))?;
+                    self.bind(
+                        child,
+                        "property",
+                        &Binding::Expr(Expr::String(name.clone())),
+                    )?;
                 }
                 MemberKind::Binding { name, value } => self.bind(id, name, value)?,
                 MemberKind::Group { name, members } => self.group(id, name, members)?,
@@ -379,21 +452,29 @@ impl Builder<'_> {
                     Error::new(format!("'{}' has no default property", source.type_name))
                 })?;
             let key = self.instance.key(id, &name)?;
-            self.assign_once(key)?;
-            let value = if list_element(&self.instance.properties[key].ty).is_some() {
-                Value::List(implicit)
-            } else if implicit.len() == 1 {
-                implicit.pop().unwrap()
-            } else {
-                return Err(Error::new(format!(
-                    "default property '{name}' accepts only one child"
-                )));
-            };
-            self.instance.slots[key].value = self
-                .instance
-                .typed(&self.instance.properties[key].ty, value)?;
+            self.implicit.push((key, implicit));
         }
         Ok(id)
+    }
+
+    fn default_children(&mut self) -> Result<(), Error> {
+        for (key, mut children) in std::mem::take(&mut self.implicit) {
+            let key = self.instance.write_target(key)?;
+            self.assign_once(key)?;
+            let property = &self.instance.properties[key];
+            let value = if list_element(&property.ty).is_some() {
+                Value::List(children)
+            } else if children.len() == 1 {
+                children.pop().unwrap()
+            } else {
+                return Err(Error::new(format!(
+                    "default property '{}' accepts only one child",
+                    property.name
+                )));
+            };
+            self.instance.slots[key].value = self.instance.typed(&property.ty, value)?;
+        }
+        Ok(())
     }
 
     fn group(&mut self, owner: ObjectId, prefix: &str, members: &[Member]) -> Result<(), Error> {
@@ -515,8 +596,13 @@ impl Builder<'_> {
                         .ok_or_else(|| Error::new(format!("unknown alias id '{name}'")))?,
                 ),
                 Expr::Member(base, name) => {
-                    let Expr::Name(id) = base.as_ref() else {
-                        return Err(Error::new("alias requires id.property"));
+                    let (id, path) = match base.as_ref() {
+                        Expr::Name(id) => (id, name.clone()),
+                        Expr::Member(group, part) => match group.as_ref() {
+                            Expr::Name(id) => (id, format!("{part}.{name}")),
+                            _ => return Err(Error::new("alias target is too deeply nested")),
+                        },
+                        _ => return Err(Error::new("alias requires id.property")),
                     };
                     let obj = self
                         .instance
@@ -524,7 +610,20 @@ impl Builder<'_> {
                         .get(id)
                         .copied()
                         .ok_or_else(|| Error::new(format!("unknown alias id '{id}'")))?;
-                    Alias::Slot(self.instance.key(obj, name)?)
+                    let key = if let Ok(key) = self.instance.key(obj, &path) {
+                        key
+                    } else if let Some((first, second)) = path.split_once('.') {
+                        let key = self.instance.key(obj, first)?;
+                        let Value::Object(nested) = self.instance.slots[key].value else {
+                            return Err(Error::new(format!(
+                                "unresolved nested alias target '{id}.{path}'"
+                            )));
+                        };
+                        self.instance.key(nested, second)?
+                    } else {
+                        return Err(Error::new(format!("unknown alias target '{id}.{path}'")));
+                    };
+                    Alias::Slot(key)
                 }
                 _ => return Err(Error::new("alias requires an id or id.property")),
             };

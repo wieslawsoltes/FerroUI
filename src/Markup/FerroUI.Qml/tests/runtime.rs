@@ -287,3 +287,46 @@ fn property_notify_reaches_parent_connections_and_rust_observers() {
     assert_eq!(ui.get(root, "observed").unwrap(), Value::Number(42.));
     assert_eq!(ui.drain_signals()[0].signal, "nChanged");
 }
+
+#[test]
+fn default_alias_and_grouped_alias_resolve_forward_references() {
+    let mut registry = TypeRegistry::new();
+    registry
+        .register(
+            "Demo",
+            "Panel",
+            TypeDefinition::default()
+                .property("data", "list<QtObject>", Value::List(vec![]))
+                .property("font.size", "int", Value::Number(8.)),
+        )
+        .unwrap();
+    let doc=ir::parse("import QtQml\nimport Demo as D\nQtObject { default property alias content: panel.data; property alias size: panel.font.size; property D.Panel holder: D.Panel { id: panel }; QtObject { id: added } }").unwrap();
+    let mut view = Instance::new(&doc, &registry, BTreeMap::new()).unwrap();
+    let root = view.root();
+    assert_eq!(
+        view.get(root, "content").unwrap(),
+        Value::List(vec![Value::Object(view.id("added").unwrap())])
+    );
+    view.set(root, "size", Value::Number(12.)).unwrap();
+    assert_eq!(
+        view.get(view.id("panel").unwrap(), "font.size").unwrap(),
+        Value::Number(12.)
+    );
+}
+
+#[test]
+fn equal_type_names_from_distinct_imports_cannot_cross_typed_slots_or_signatures() {
+    let mut registry = TypeRegistry::new();
+    for module in ["First", "Second"] {
+        registry
+            .register(module, "Device", TypeDefinition::default())
+            .unwrap();
+    }
+    let doc=ir::parse("import QtQml\nimport First as A\nimport Second as B\nQtObject { property A.Device a: A.Device {}; property B.Device b: B.Device {}; signal assign(x: A.Device); function accept(obj: A.Device): A.Device { return obj } }").unwrap();
+    let mut view = Instance::new(&doc, &registry, BTreeMap::new()).unwrap();
+    let root = view.root();
+    let b = view.get(root, "b").unwrap();
+    assert!(view.set(root, "a", b.clone()).is_err());
+    assert!(view.emit(root, "assign", vec![b.clone()]).is_err());
+    assert!(view.call(root, "accept", vec![b]).is_err());
+}

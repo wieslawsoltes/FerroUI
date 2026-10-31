@@ -106,6 +106,27 @@ impl TypeRegistry {
             .entry("QtQml".into())
             .or_default()
             .insert("QtObject".into(), qt_object);
+        let binding = TypeDefinition::default()
+            .inherits("QtQml", "QtObject")
+            .property("target", "QtObject", Value::Null)
+            .property("property", "string", Value::String(String::new()))
+            .property("value", "var", Value::Undefined)
+            .property("when", "bool", Value::Bool(true))
+            .property("delayed", "bool", Value::Bool(false))
+            .property("restoreMode", "int", Value::Number(3.))
+            .enumeration(
+                "RestoreMode",
+                &[
+                    ("RestoreNone", 0),
+                    ("RestoreBinding", 1),
+                    ("RestoreValue", 2),
+                    ("RestoreBindingOrValue", 3),
+                ],
+            )
+            .expect("built-in restore modes");
+        registry
+            .register("QtQml", "Binding", binding)
+            .expect("built-in Binding contract");
         let timer = TypeDefinition::default()
             .inherits("QtQml", "QtObject")
             .property("interval", "int", Value::Number(1000.))

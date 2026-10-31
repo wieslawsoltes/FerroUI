@@ -1,8 +1,9 @@
 //! A component owns its objects, bindings, dependency graph and signal dispatch.
 //! Native integrations register their type contracts before constructing an instance.
 //! Public mutations settle bindings and handlers atomically before exposing changes.
-mod connections;
+mod binding_object;
 pub mod compiled;
+mod connections;
 pub use compiled::{CompiledComponent, ComponentSource};
 mod enums;
 pub use enums::Namespace;
@@ -33,7 +34,7 @@ struct Procedure {
 }
 
 struct Node {
-    type_scope:Rc<Namespace>,
+    type_scope: Rc<Namespace>,
     module: String,
     name: String,
     lineage: Vec<(String, String)>,
@@ -75,6 +76,8 @@ struct Property {
 
 #[derive(Clone)]
 struct Slot {
+    overlay: Option<Box<binding_object::Overlay>>,
+    active_target: Option<SlotId>,
     assigned: bool,
     value: Value,
     binding: Option<Rc<Binding>>,
@@ -102,8 +105,10 @@ pub struct SignalEmission {
 }
 
 pub struct Instance {
+    bindings: BTreeSet<ObjectId>,
+    native_scripts: &'static [compiled::Script],
     native_functions: &'static [compiled::Evaluator],
-    timers:timers::Timers,
+    timers: timers::Timers,
     listeners: BTreeMap<String, Vec<connections::Listener>>,
     validator: Option<Validator>,
     watched: BTreeSet<(ObjectId, String)>,

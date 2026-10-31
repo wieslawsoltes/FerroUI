@@ -8,7 +8,8 @@ pub(crate) struct Transaction<'a> {
     pub(crate) model: &'a mut Instance,
     original: BTreeMap<SlotId, Slot>,
     emitted: Vec<SignalEmission>,
-    pending: BTreeSet<SlotId>,
+    pub(crate) pending: BTreeSet<SlotId>,
+    pending_bindings: BTreeSet<ObjectId>,
     evaluating: BTreeSet<SlotId>,
     notifications: VecDeque<(ObjectId, String)>,
     initializing: bool,
@@ -27,6 +28,7 @@ impl Instance {
             original: BTreeMap::new(),
             emitted: Vec::new(),
             pending: BTreeSet::new(),
+            pending_bindings: BTreeSet::new(),
             evaluating: BTreeSet::new(),
             notifications: VecDeque::new(),
             initializing: false,
@@ -79,7 +81,7 @@ impl Instance {
 }
 
 impl Transaction<'_> {
-    fn touched(&mut self, key: SlotId) -> &mut Slot {
+    pub(crate) fn touched(&mut self, key: SlotId) -> &mut Slot {
         self.original
             .entry(key)
             .or_insert_with(|| self.model.slots[key].clone());
@@ -100,6 +102,8 @@ impl Transaction<'_> {
 
     pub(crate) fn initialize(&mut self) -> Result<(), Error> {
         self.initializing = true;
+        self.pending_bindings
+            .extend(self.model.bindings.iter().copied());
         self.pending.extend(
             self.model
                 .slots
@@ -129,6 +133,10 @@ impl Transaction<'_> {
         loop {
             while let Some(key) = self.pending.pop_first() {
                 self.evaluate(key)?;
+            }
+            if let Some(binding) = self.pending_bindings.pop_first() {
+                self.update_binding(binding)?;
+                continue;
             }
             if !self.initializing {
                 if let Some(timer) = self.timer_changes.pending.pop_first() {
@@ -173,22 +181,27 @@ impl Transaction<'_> {
         }
         let owner = self.model.properties[key].owner;
         let mut reads = BTreeSet::new();
-        let value = match self.model.properties[key].alias {
-            Some(Alias::Slot(target)) => self.read(target, &mut reads)?,
-            Some(Alias::Object(target)) => Value::Object(target),
-            None => {
-                let binding = self.model.slots[key]
-                    .binding
-                    .clone()
-                    .ok_or_else(|| Error::new("missing dirty binding"))?;
-                match binding.as_ref() {
-                    Binding::Expr(expr) => {
-                        self.expr(owner, expr, &mut Locals::new(), &mut reads)?
+        let overlay = self.model.slots[key].overlay.as_ref().map(|o| o.input());
+        let value = if let Some(input) = overlay {
+            self.read(input, &mut reads)?
+        } else {
+            match self.model.properties[key].alias {
+                Some(Alias::Slot(target)) => self.read(target, &mut reads)?,
+                Some(Alias::Object(target)) => Value::Object(target),
+                None => {
+                    let binding = self.model.slots[key]
+                        .binding
+                        .clone()
+                        .ok_or_else(|| Error::new("missing dirty binding"))?;
+                    match binding.as_ref() {
+                        Binding::Expr(expr) => {
+                            self.expr(owner, expr, &mut Locals::new(), &mut reads)?
+                        }
+                        Binding::Script(body) => self
+                            .statements(owner, body, &mut Locals::new(), &mut reads)?
+                            .value()?,
+                        _ => return Err(Error::new("unresolved object-valued binding")),
                     }
-                    Binding::Script(body) => self
-                        .statements(owner, body, &mut Locals::new(), &mut reads)?
-                        .value(),
-                    _ => return Err(Error::new("unresolved object-valued binding")),
                 }
             }
         };
@@ -200,7 +213,7 @@ impl Transaction<'_> {
         Ok(())
     }
 
-    fn replace_reads(&mut self, key: SlotId, reads: BTreeSet<SlotId>) {
+    pub(crate) fn replace_reads(&mut self, key: SlotId, reads: BTreeSet<SlotId>) {
         let old = std::mem::replace(&mut self.touched(key).reads, reads.clone());
         for dep in old.difference(&reads) {
             self.touched(*dep).dependents.remove(&key);
@@ -210,7 +223,7 @@ impl Transaction<'_> {
         }
     }
 
-    fn set_value(&mut self, key: SlotId, value: Value) {
+    pub(crate) fn set_value(&mut self, key: SlotId, value: Value) {
         if self.model.slots[key].value.unchanged(&value) {
             return;
         }
@@ -226,8 +239,16 @@ impl Transaction<'_> {
                 self.pending.insert(dep);
             }
         }
+        let property = &self.model.properties[key];
+        if self.model.bindings.contains(&property.owner)
+            && matches!(
+                property.name.as_str(),
+                "when" | "target" | "property" | "restoreMode" | "delayed"
+            )
+        {
+            self.pending_bindings.insert(property.owner);
+        }
         if !self.initializing {
-            let property = &self.model.properties[key];
             if self.model.timers.is_timer(property.owner)
                 && matches!(
                     property.name.as_str(),
@@ -259,7 +280,13 @@ impl Transaction<'_> {
         }
         let key = self.model.write_target(key)?;
         let value = self.model.typed(&self.model.properties[key].ty, value)?;
-        self.replace_reads(key, BTreeSet::new());
+        let inputs = self.model.slots[key]
+            .overlay
+            .as_ref()
+            .map(|o| o.input())
+            .into_iter()
+            .collect();
+        self.replace_reads(key, inputs);
         let slot = self.touched(key);
         slot.assigned = true;
         slot.binding = None;
