@@ -340,6 +340,7 @@
     }
 
     function perform(command) {
+        if (command.op === "catalog") return undefined;
         if (command.op === "eval") {
             const result = evaluate(command);
             if (command.form !== "body" && bindingCallbacks.has(result)) {

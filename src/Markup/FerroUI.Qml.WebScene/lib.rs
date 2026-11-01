@@ -292,6 +292,16 @@ impl ScriptEngine for WebSceneEngine {
         }
     }
 
+    fn prepare_script_resources(&self, ctx: &mut ScriptContext<'_, '_>) -> Result<(), Error> {
+        let realm = self.realm(ctx.instance());
+        let modules = Rc::new(modules::Modules::prepare(ctx.resources())?);
+        realm.invoke(ctx,json!({"op":"catalog","files": modules.files,"prepare":{"resources":modules.manifest,"names":{}}}))?;
+        let mut tables = realm.tables.borrow_mut();
+        tables.modules = Some(modules);
+        tables.prepared = true;
+        Ok(())
+    }
+
     fn get_external(
         &self,
         ctx: &mut ScriptContext<'_, '_>,

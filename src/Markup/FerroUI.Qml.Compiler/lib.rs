@@ -14,6 +14,10 @@ pub use parser::parse_external;
 pub mod async_functions;
 #[cfg(feature = "javascript")]
 pub mod javascript;
+#[cfg(feature = "javascript")]
+pub mod script_resource;
+#[cfg(feature = "javascript")]
+mod system_module;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Diagnostic {

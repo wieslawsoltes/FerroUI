@@ -179,6 +179,9 @@ fn run(library: &Path, isolated: bool) -> Result<(), String> {
         let result = (|| {
             if let Some(files) = command.get("files").and_then(Value::as_object) {
                 let mut resources = resources.lock().map_err(|_| "poisoned module table")?;
+                // Each prepare carries the complete manifest, including when
+                // restoring it after an ES module failed during initialization.
+                resources.files.retain(|url, _| files.contains_key(url));
                 for (url, text) in files {
                     let text = text.as_str().ok_or("invalid module source")?;
                     if !url.starts_with(MODULES) {

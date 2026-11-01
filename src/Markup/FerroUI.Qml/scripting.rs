@@ -61,6 +61,14 @@ pub trait ScriptEngine {
         script: &ir::JavaScript,
     ) -> Result<Value, Error>;
 
+    /// Validate and install a linked extension to this instance's script catalog,
+    /// preserving its existing realm. The catalog is exposed by context.resources().
+    fn prepare_script_resources(&self, _context: &mut ScriptContext<'_, '_>) -> Result<(), Error> {
+        Err(Error::new(
+            "the JavaScript engine cannot extend its script catalog",
+        ))
+    }
+
     /// Check a retained value; the backend must return within its configured
     /// execution limit and must not wait beyond the supplied timeout for a
     /// pending Promise. A zero duration requests an immediate inspection.
@@ -902,7 +910,7 @@ impl Transaction<'_> {
         result
     }
 
-    fn script_engine(&mut self) -> Result<Rc<dyn ScriptEngine>, Error> {
+    pub(crate) fn script_engine(&mut self) -> Result<Rc<dyn ScriptEngine>, Error> {
         let engine = self
             .model
             .javascript

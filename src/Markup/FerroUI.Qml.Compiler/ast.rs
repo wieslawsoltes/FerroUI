@@ -110,7 +110,8 @@ pub struct Import {
 
 impl Import {
     pub fn is_script(&self) -> bool {
-        self.is_path && (self.uri.ends_with(".js") || self.uri.ends_with(".mjs"))
+        let path = self.uri.split(['?', '#']).next().unwrap_or_default();
+        self.is_path && (path.ends_with(".js") || path.ends_with(".mjs"))
     }
 }
 

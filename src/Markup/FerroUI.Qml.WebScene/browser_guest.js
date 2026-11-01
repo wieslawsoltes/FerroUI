@@ -26,6 +26,9 @@
     async function run() {
         const cmd = JSON.parse(input.read(Infinity));
         if (typeof cmd.turn !== "string") throw new Error("Missing QML owner turn");
+        if (cmd.files) {
+            for (const url of modules.keys()) if (!Object.prototype.hasOwnProperty.call(cmd.files,url)) modules.delete(url);
+        }
         for (const [url, text] of Object.entries(cmd.files || {})) {
             if (!url.startsWith("https://qml.invalid/modules/") || typeof text !== "string" ||
                 (modules.has(url) && modules.get(url) !== text))

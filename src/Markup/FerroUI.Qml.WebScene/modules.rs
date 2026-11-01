@@ -35,10 +35,12 @@ impl Modules {
                 ScriptKind::Library => ("library", classic_module(resource, url)?),
                 ScriptKind::Script => ("script", classic_module(resource, url)?),
             };
+            let origin = remote_origin(url)?;
             manifest.insert(
                 url,
                 json!({
                     "kind": kind,
+                    "origin":origin,
                     "imports": resource.imports,
                     "preload": resource.preload,
                     "dependencies": resource.dependencies,
@@ -52,6 +54,30 @@ impl Modules {
             manifest: json!(manifest),
         })
     }
+}
+
+// Remote files are served to V8 from the same private in-memory reader as
+// bundled files. Restore the declaration URL for import.meta and Qt helpers.
+fn remote_origin(key: &str) -> Result<Option<String>, Error> {
+    let Some(rest) = key.strip_prefix("https://qml.invalid/modules/remote/") else {
+        return Ok(None);
+    };
+    let (kind, hex) = rest
+        .split_once('/')
+        .ok_or_else(|| Error::new("invalid remote module identity"))?;
+    if !matches!(kind, "module" | "classic") || hex.len() % 2 != 0 || hex.len() > 4096 {
+        return Err(Error::new("invalid remote module identity"));
+    }
+    let bytes = (0..hex.len())
+        .step_by(2)
+        .map(|i| u8::from_str_radix(&hex[i..i + 2], 16))
+        .collect::<Result<Vec<_>, _>>()
+        .map_err(|_| Error::new("invalid remote module identity"))?;
+    let origin = String::from_utf8(bytes).map_err(|_| Error::new("invalid remote module URL"))?;
+    if !origin.starts_with("https://") && !origin.starts_with("http://") {
+        return Err(Error::new("invalid remote module URL"));
+    }
+    Ok(Some(origin))
 }
 
 /// Accept the linker's unreserved characters and percent-encoded file names.

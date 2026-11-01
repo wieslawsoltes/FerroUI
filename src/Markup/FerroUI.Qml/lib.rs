@@ -28,6 +28,8 @@ pub mod network;
 pub use list_model::RowId;
 mod promises;
 mod records;
+#[cfg(feature = "javascript")]
+mod remote_scripts;
 mod repeater;
 pub use promises::PromiseState;
 mod registry;

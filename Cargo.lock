@@ -2377,13 +2377,6 @@ dependencies = [
  "prettyplease",
  "proc-macro2",
  "quote",
- "swc_common",
- "swc_ecma_ast",
- "swc_ecma_codegen",
- "swc_ecma_compat_es2017",
- "swc_ecma_parser",
- "swc_ecma_transforms_base",
- "swc_ecma_transforms_module",
  "syn 2.0.119",
 ]
 
@@ -2398,6 +2391,7 @@ dependencies = [
  "swc_ecma_compat_es2017",
  "swc_ecma_parser",
  "swc_ecma_transforms_base",
+ "swc_ecma_transforms_module",
  "swc_ecma_visit",
 ]
 

@@ -11,6 +11,8 @@ mod delegates;
 #[cfg(test)]
 mod nested_roles;
 #[cfg(test)]
+mod remote_scripts;
+#[cfg(test)]
 mod views;
 #[cfg(test)]
 fn quick_registry() -> ferroui_qml::TypeRegistry {

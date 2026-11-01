@@ -1,8 +1,8 @@
 //! Embed local JavaScript resources in the compiled component. Stable virtual
 //! URLs preserve module identity through cycles without encoding host paths.
 use ferroui_qml_compiler::{
-    javascript::{import_sites, parse_resource, visit_scripts, Dependency},
-    Binding, Document, Expr, Member, MemberKind, Object, ScriptForm, ScriptKind, ScriptResource,
+    javascript::visit_scripts, script_resource, Binding, Document, Expr, Member, MemberKind,
+    Object, ScriptKind, ScriptResource,
 };
 use percent_encoding::{percent_encode, AsciiSet, NON_ALPHANUMERIC};
 use std::{
@@ -104,22 +104,9 @@ impl Resources {
         let origin = resource_url("components", index, path, &self.project)?;
         self.worker_sources(path, &mut document.root)?;
         visit_scripts(&mut document.root, &mut |script| {
-            script.origin.clone_from(&origin);
-            script.imports.clone_from(&imports);
-            let sites = import_sites(script.code(), script.form == ScriptForm::Expression)
-                .map_err(|e| format!("{}:{e}", path.display()))?;
-            script.import_hook = sites.hook;
-            let mut edits = sites.edits;
-            for dep in sites.dependencies {
-                let target = self.load(&local_path(path, &dep.specifier)?, 0, LoadKind::Module)?;
-                push_edit(&mut edits, dep, &target);
-            }
-            if !edits.is_empty() {
-                let mut code = script.code().to_owned();
-                replace(&mut code, edits);
-                script.executable = Some(code);
-            }
-            Ok::<_, String>(())
+            script_resource::attach(script, &origin, &imports, |specifier| {
+                self.load(&local_path(path, specifier)?, 0, LoadKind::Module)
+            })
         })?;
         Ok(document)
     }
@@ -216,51 +203,29 @@ impl Resources {
             ));
         }
         let source = fs::read_to_string(&path).map_err(|e| format!("{}: {e}", path.display()))?;
-        let parsed = parse_resource(&source, kind == LoadKind::Module)
-            .map_err(|e| format!("{}:{e}", path.display()))?;
         let directory = match kind {
             LoadKind::Module => "modules",
             LoadKind::Classic => "modules/classic",
         };
         let key = resource_url(directory, self.paths.len(), &path, &self.project)?;
         self.paths.insert(identity, key.clone());
-        let mut resource = parsed.resource;
-        let mut edits = Vec::new();
-        for dep in parsed.dependencies {
-            let kind = if dep.namespace.is_some() {
-                LoadKind::Classic
-            } else {
-                LoadKind::Module
-            };
-            let dependency = self.load(&local_path(&path, &dep.specifier)?, depth + 1, kind)?;
-            if let Some(alias) = &dep.namespace {
-                resource.imports.insert(alias.clone(), dependency.clone());
-            }
-            resource.dependencies.insert(
-                dep.namespace
-                    .clone()
-                    .unwrap_or_else(|| dep.specifier.clone()),
-                dependency.clone(),
-            );
-            push_edit(&mut edits, dep, &dependency);
-        }
-        if resource.kind == ScriptKind::Module {
-            replace(&mut resource.executable, edits);
-            resource.executable = crate::system_module::compile(&key, &resource.executable)
-                .map_err(|why| format!("{}: {why}", path.display()))?;
-        } else {
-            let sites = import_sites(&resource.executable, false)
-                .map_err(|e| format!("{}:{e}", path.display()))?;
-            resource.import_hook = sites.hook;
-            edits.extend(sites.edits);
-            replace(&mut resource.executable, edits);
-            if let Some(lowered) =
-                ferroui_qml_compiler::async_functions::lower(&resource.executable, false)
-                    .map_err(|e| format!("{}:{e}", path.display()))?
-            {
-                resource.executable = lowered;
-            }
-        }
+        let resource = script_resource::compile(
+            &key,
+            &source,
+            kind == LoadKind::Module,
+            |specifier, module| {
+                self.load(
+                    &local_path(&path, specifier)?,
+                    depth + 1,
+                    if module {
+                        LoadKind::Module
+                    } else {
+                        LoadKind::Classic
+                    },
+                )
+            },
+        )
+        .map_err(|e| format!("{}:{e}", path.display()))?;
         self.embedded.insert(key.clone(), resource);
         Ok(key)
     }
@@ -309,23 +274,6 @@ fn local_path(origin: &Path, specifier: &str) -> Result<PathBuf, String> {
         .parent()
         .ok_or("JavaScript resource has no containing directory")?
         .join(specifier))
-}
-
-fn push_edit(
-    edits: &mut Vec<(ferroui_qml_compiler::SourceSpan, String)>,
-    dep: Dependency,
-    target: &str,
-) {
-    // File names in generated URLs have already been encoded as URL path segments.
-    if let Some(span) = dep.span {
-        edits.push((span, format!("\"{target}\"")));
-    }
-}
-fn replace(source: &mut String, mut edits: Vec<(ferroui_qml_compiler::SourceSpan, String)>) {
-    edits.sort_by_key(|(s, _)| std::cmp::Reverse(s.start));
-    for (range, value) in edits {
-        source.replace_range(range.start..range.end, &value);
-    }
 }
 
 #[cfg(test)]

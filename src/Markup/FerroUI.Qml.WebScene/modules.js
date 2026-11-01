@@ -10,6 +10,18 @@
     // the global hook. The catalog is the complete set of resolvable module URLs.
     const readText = globalThis.__webSceneFetchText;
     const catalog = new Map();
+    // SystemJS caches failures as well as successes. A URL that was absent
+    // from the last committed manifest gets a fresh private execution identity
+    // on retry. Unaffected URLs keep their original namespace and live exports.
+    const executions = new Map(), logicalUrls = new Map(), removed = new Set();
+    let attempt = 0;
+    const originalContext = loader.createContext.bind(loader);
+    loader.createContext = parent => {
+        const context = originalContext(parent);
+        const origin = catalog.get(logicalUrls.get(parent) || parent)?.origin;
+        if (origin) context.url = origin;
+        return context;
+    };
     loader.prepareImport = () => undefined;
     const moduleRoot = "https://qml.invalid/modules/project/";
     const classicRoot = "https://qml.invalid/modules/classic/project/";
@@ -39,23 +51,52 @@
         }
         return moduleRoot + parts.join("/");
     }
+    const remoteModules = new Map();
+    const originOf = url => catalog.get(url)?.origin || url || "";
+    function site(url) { return /^https?:\/\/[^/]+/i.exec(url)?.[0]; }
+    function checked(url, parent) {
+        const source = originOf(parent);
+        if (site(source) && !source.startsWith("https://qml.invalid/") &&
+            site(source) !== site(originOf(url))) throw new TypeError("Cross-origin module import");
+        return executions.get(url) || url;
+    }
+    function remoteTarget(specifier, parent) {
+        if (!site(parent) || /[\\#\x00-\x1f]/.test(specifier)) return null;
+        if (/^https?:\/\//i.test(specifier)) return remoteModules.get(specifier);
+        if (!specifier || specifier.startsWith("//") || /^[A-Za-z][A-Za-z0-9+.-]*:/.test(specifier)) return null;
+        const origin = site(parent);
+        const base = parent.slice(origin.length).split("?")[0];
+        const q = specifier.indexOf("?");
+        const path = q < 0 ? specifier : specifier.slice(0, q);
+        const query = q < 0 ? "" : specifier.slice(q);
+        const pieces = path.startsWith("/") ? [] : base.split("/").slice(1,-1);
+        for (const part of path.split("/")) {
+            if (!part || part === ".") continue;
+            if (part === "..") pieces.pop(); else pieces.push(part);
+        }
+        return remoteModules.get(origin + "/" + pieces.join("/") + query);
+    }
     loader.resolve = (specifier, parent) => {
+        parent = logicalUrls.get(parent) || parent;
         if (catalog.has(specifier)) {
             if (parent && catalog.get(specifier).kind !== "module")
                 throw new TypeError("A classic QML script is not an ES module");
-            return specifier;
+            return checked(specifier,parent);
         }
         const edges = catalog.get(parent)?.dependencies;
         if (edges && owns(edges, specifier)) {
             const url = edges[specifier];
-            if (catalog.get(url)?.kind === "module") return url;
+            if (catalog.get(url)?.kind === "module") return checked(url,parent);
             throw new TypeError("A classic QML script is not an ES module");
         }
+        const remote = remoteTarget(specifier, originOf(parent));
+        if (remote) return checked(remote,parent);
         const url = relativeModule(specifier, parent);
-        if (url && catalog.has(url)) return url;
+        if (url && catalog.has(url)) return checked(url,parent);
         throw new TypeError("Unknown embedded module " + specifier);
     };
-    loader.instantiate = url => {
+    loader.instantiate = execution => {
+        const url = logicalUrls.get(execution) || execution;
         if (!catalog.has(url)) throw new TypeError("Unregistered module " + url);
         const code = readText(url);
         if (typeof code !== "string") throw new TypeError("Missing module " + url);
@@ -91,7 +132,25 @@
     }
 
     async function prepare(graph) {
-        for (const [url, definition] of Object.entries(graph.resources)) catalog.set(url, definition);
+        for (const url of catalog.keys()) {
+            if (owns(graph.resources, url)) continue;
+            removed.add(url);
+            logicalUrls.delete(executions.get(url));
+            executions.delete(url);
+            modules.delete(url);
+            libraries.delete(url);
+        }
+        catalog.clear();
+        remoteModules.clear();
+        for (const [url, definition] of Object.entries(graph.resources)) {
+            catalog.set(url,definition);
+            if (removed.delete(url)) {
+                const execution = url + "?qml-attempt=" + (++attempt);
+                executions.set(url,execution);
+                logicalUrls.set(execution,url);
+            }
+            if (definition.kind === "module" && definition.origin) remoteModules.set(definition.origin,url);
+        }
         // Static dependencies are instantiated by SystemJS in this V8 realm. Classic
         // imports need their factories prepared before synchronous QML calls.
         // A module reached exclusively via import() must keep its lazy effects.
@@ -142,7 +201,7 @@
             }
             {
                 const contextScope = Object.create(outer);
-                Object.defineProperty(contextScope,"Qt",{value:qtAt(url,definition.kind === "library")});
+                Object.defineProperty(contextScope,"Qt",{value:qtAt(definition.origin || url,definition.kind === "library")});
                 if (definition.hook)
                 Object.defineProperty(contextScope, definition.hook, {value: context(graph, url)});
                 outer = contextScope;

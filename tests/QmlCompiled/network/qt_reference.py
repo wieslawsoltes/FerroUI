@@ -28,6 +28,17 @@ def main():
             assert component.isReady(), [error.toString() for error in component.errors()]
             item = component.createWithInitialProperties({"amount": 41})
             assert item is not None and item.format() == "42 points"
+            scripts = QQmlComponent(engine)
+            base = f"http://127.0.0.1:{server.server_port}/scripts/"
+            scripts.loadUrl(QUrl(base + "Remote.qml"))
+            scripts.statusChanged.connect(lambda status: loop.quit() if status != QQmlComponent.Loading else None)
+            if scripts.isLoading():
+                QTimer.singleShot(10000, loop.quit)
+                loop.exec()
+            assert scripts.isReady(), [error.toString() for error in scripts.errors()]
+            first, second = scripts.create(), scripts.create()
+            assert (first.compute(), first.compute(), second.compute()) == ("5/41", "6/42", "5/43")
+            assert first.classicOrigin() == base + "parts/relative.qml", first.classicOrigin()
             print("Qt 6.12 remote component, relative dependency and initial property fixture passed")
         finally:
             server.shutdown()

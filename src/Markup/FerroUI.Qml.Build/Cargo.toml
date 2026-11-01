@@ -15,26 +15,10 @@ categories.workspace = true
 path = "lib.rs"
 
 [features]
-javascript = [
-    "ferroui-qml-compiler/javascript",
-    "dep:swc_common",
-    "dep:swc_ecma_ast",
-    "dep:swc_ecma_parser",
-    "dep:swc_ecma_transforms_base",
-    "dep:swc_ecma_transforms_module",
-    "dep:swc_ecma_codegen",
-    "dep:swc_ecma_compat_es2017",
-]
+javascript = ["ferroui-qml-compiler/javascript"]
 
 [dependencies]
 percent-encoding = "2"
-swc_ecma_compat_es2017 = { version = "52", optional = true }
-swc_common = { version = "27", optional = true }
-swc_ecma_ast = { version = "30", optional = true }
-swc_ecma_parser = { version = "47", default-features = false, optional = true }
-swc_ecma_transforms_base = { version = "51", optional = true }
-swc_ecma_transforms_module = { version = "58", optional = true }
-swc_ecma_codegen = { version = "33", optional = true }
 ferroui-qml-compiler.workspace = true
 proc-macro2 = "1"
 quote = "1"

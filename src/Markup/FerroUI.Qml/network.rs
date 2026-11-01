@@ -102,11 +102,15 @@ impl Drop for ComponentReply {
 pub(crate) struct Network {
     inbox: Arc<Mutex<Inbox>>,
     graphs: BTreeMap<ObjectId, Graph>,
+    #[cfg(feature = "javascript")]
+    pub(crate) failed_script_cost: (usize, usize),
 }
 
 pub(crate) struct Graph {
     entry: Url,
     pending: Url,
+    #[cfg(feature = "javascript")]
+    scripts: crate::remote_scripts::Scripts,
     files: HashMap<Url, Option<Rc<ir::Document>>>,
     manifests: HashMap<Url, Option<ModuleDefinition>>,
     bytes: usize,
@@ -114,7 +118,7 @@ pub(crate) struct Graph {
 
 enum Progress {
     Fetch(Url),
-    Ready(Template),
+    Ready(Template, BTreeMap<String, ir::ScriptResource>),
 }
 
 impl Network {
@@ -134,6 +138,8 @@ impl Network {
             Graph {
                 entry: url.clone(),
                 pending: url.clone(),
+                #[cfg(feature = "javascript")]
+                scripts: Default::default(),
                 files: HashMap::new(),
                 manifests: HashMap::new(),
                 bytes: 0,
@@ -201,15 +207,24 @@ impl Instance {
                 }
                 done => {
                     self.network.retire(id);
-                    match done {
-                        Ok(Progress::Ready(template)) => {
+                    let result = done.and_then(|progress| match progress {
+                        Progress::Ready(template, scripts) => {
+                            #[cfg(feature = "javascript")]
+                            self.install_remote_scripts(id, scripts)?;
+                            #[cfg(not(feature = "javascript"))]
+                            let _ = scripts;
+                            Ok(template)
+                        }
+                        _ => unreachable!(),
+                    });
+                    match result {
+                        Ok(template) => {
                             self.dynamic.file_errors.remove(&id);
                             self.dynamic.templates.insert(id, template);
                         }
                         Err(error) => {
                             self.dynamic.file_errors.insert(id, error);
                         }
-                        _ => unreachable!(),
                     }
                     if let Err(error) = self.transaction(|tx| tx.finish_factory(id)) {
                         self.dynamic.templates.remove(&id);
@@ -251,7 +266,14 @@ impl Graph {
             .map(std::str::from_utf8)
             .transpose()
             .map_err(|e| format!("{url}: {e}"))?;
-        if url != &self.entry && url.path().ends_with("/qmldir") {
+        #[cfg(feature = "javascript")]
+        let script = self.scripts.waiting(url);
+        #[cfg(not(feature = "javascript"))]
+        let script = false;
+        if script {
+            #[cfg(feature = "javascript")]
+            self.scripts.receive(url, text)?;
+        } else if url != &self.entry && url.path().ends_with("/qmldir") {
             let manifest = text
                 .map(ir::qmldir::parse_directory_manifest)
                 .transpose()
@@ -259,10 +281,33 @@ impl Graph {
             self.manifests.insert(url.clone(), manifest);
         } else {
             let doc = text
-                .map(|source| parse(url, source, javascript).map(Rc::new))
+                .map(|source| {
+                    let doc = parse(url, source, javascript)?;
+                    #[cfg(feature = "javascript")]
+                    let doc = if javascript {
+                        let mut doc = doc;
+                        self.scripts.attach(&mut doc, url)?;
+                        doc
+                    } else {
+                        doc
+                    };
+                    Ok::<_, String>(Rc::new(doc))
+                })
                 .transpose()?;
             self.files.insert(url.clone(), doc);
         }
+        let count = self.files.len() + self.manifests.len();
+        #[cfg(feature = "javascript")]
+        let count = {
+            let count = count + self.scripts.source_count();
+            if let Some(next) = self.scripts.next()? {
+                if count >= MAX_DOCUMENTS {
+                    return Err(format!("{}: too many QML dependencies", self.entry));
+                }
+                return Ok(Progress::Fetch(next));
+            }
+            count
+        };
         let root = self.files[&self.entry].clone().expect("root QML document");
         let mut resolver = Resolver {
             files: &self.files,
@@ -276,7 +321,7 @@ impl Graph {
         };
         let linked = ir::link(source, &mut resolver);
         if let Some(next) = resolver.missing {
-            if self.files.len() + self.manifests.len() >= MAX_DOCUMENTS {
+            if count >= MAX_DOCUMENTS {
                 return Err(format!("{}: too many QML dependencies", self.entry));
             }
             return Ok(Progress::Fetch(next));
@@ -287,8 +332,12 @@ impl Graph {
         types
             .check(&doc)
             .map_err(|e| format!("{}: {e}", self.entry))?;
+        #[cfg(feature = "javascript")]
+        let scripts = self.scripts.finish();
+        #[cfg(not(feature = "javascript"))]
+        let scripts = BTreeMap::new();
         Template::from_object(doc.root, &doc.imports)
-            .map(Progress::Ready)
+            .map(|template| Progress::Ready(template, scripts))
             .map_err(|e| e.to_string())
     }
 }
@@ -303,19 +352,12 @@ fn parse(url: &Url, source: &str, _javascript: bool) -> Result<ir::Document, Str
     #[cfg(not(feature = "javascript"))]
     let parsed = ir::parse(source);
     let mut doc = parsed.map_err(|e| format!("{url}: {e}"))?;
-    if doc.imports.iter().any(|i| i.is_script()) {
+    if !(_javascript && cfg!(feature = "javascript")) && doc.imports.iter().any(|i| i.is_script()) {
         return Err(format!(
             "{url}: remote JavaScript module imports require a compiled resource catalog"
         ));
     }
     doc.root.set_source_url(url.as_str());
-    #[cfg(feature = "javascript")]
-    if _javascript {
-        ir::javascript::visit_scripts(&mut doc.root, &mut |script| {
-            script.origin = url.to_string();
-            Ok::<_, String>(())
-        })?;
-    }
     Ok(doc)
 }
 
