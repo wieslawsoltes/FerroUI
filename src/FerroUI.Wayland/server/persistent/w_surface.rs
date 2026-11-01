@@ -655,8 +655,13 @@ mod imp {
         /// acknowledged yet (not in the reference): the UI thread answers a configure with
         /// its serial some time later, and a popup that was created again in between has
         /// another `xdg_surface`, for which that serial is a protocol error.
-        configure_serials: Vec<u32>,
-        initial_configure_acknowledged: bool,
+        configure_serials: Vec<(u32, PixelSize)>,
+        /// Role geometry is sealed with the serial, then becomes usable when the UI
+        /// accepts that configure. Later configure events may already be in flight.
+        offered_geometry: PixelSize,
+        acknowledged_geometry: Option<PixelSize>,
+        /// Client choice for any axis the compositor leaves unspecified.
+        client_logical_size: Size,
         // True once we've attached a buffer + acked the initial configure
         // following the most recent OnConnected — i.e. the surface is now
         // *mapped* in xdg-shell terms.
@@ -689,7 +694,9 @@ mod imp {
                 layer_surface: None,
                 pending_ack_serial: None,
                 configure_serials: Vec::new(),
-                initial_configure_acknowledged: false,
+                offered_geometry: PixelSize::default(),
+                acknowledged_geometry: None,
+                client_logical_size: Size::new(640.0, 480.0),
                 mapped: false,
                 pending_child_popups: Vec::new(),
                 children_to_attach: Vec::new(),
@@ -785,14 +792,15 @@ mod imp {
             if self.configure_serials.len() >= KEPT {
                 self.configure_serials.remove(0);
             }
-            self.configure_serials.push(serial);
+            self.configure_serials.push((serial, self.offered_geometry));
         }
 
         fn connect_base(&mut self, cx: &ConnectionContext<'_>) {
             self.surface.on_connected(cx);
             self.pending_ack_serial = None;
             self.configure_serials.clear();
-            self.initial_configure_acknowledged = false;
+            self.offered_geometry = PixelSize::default();
+            self.acknowledged_geometry = None;
             self.mapped = false;
         }
 
@@ -809,7 +817,8 @@ mod imp {
             }
             self.pending_ack_serial = None;
             self.configure_serials.clear();
-            self.initial_configure_acknowledged = false;
+            self.offered_geometry = PixelSize::default();
+            self.acknowledged_geometry = None;
             self.mapped = false;
             self.pending_child_popups.clear();
             self.children_to_attach.clear();
@@ -824,21 +833,34 @@ mod imp {
         /// configure of an object that is gone (a popup that was created again, a connection
         /// that was lost), and acknowledging it would be a protocol error.
         pub fn set_pending_ack_serial(&mut self, serial: u32) {
-            let Some(index) = self.configure_serials.iter().position(|known| *known == serial) else {
+            let Some(index) = self.configure_serials.iter().position(|&(known, _)| known == serial) else {
                 return;
             };
             // The serials before it are answered with it.
+            self.acknowledged_geometry = Some(self.configure_serials[index].1);
             self.configure_serials.drain(..=index);
-            self.initial_configure_acknowledged = true;
             self.pending_ack_serial = Some(serial);
         }
 
         pub fn state(&self) -> PlatformRenderTargetState {
-            if self.initial_configure_acknowledged {
+            if self.acknowledged_geometry.is_some() {
                 self.surface.state()
             } else {
                 PlatformRenderTargetState::NOT_READY_WILL_WAKEUP_RENDER_LOOP
             }
+        }
+
+        /// Extent for renderers drawing without a layout scene. XDG configures describe
+        /// window geometry in logical units, excluding the shadows of the client.
+        pub(crate) fn negotiated_scene(&self) -> Option<RenderTargetSceneInfo> {
+            let logical_size = crate::window_impl::configured_client_size(
+                self.acknowledged_geometry?, self.client_logical_size, self.shadow_extents(),
+            );
+            let scaling = self.surface.current_scale();
+            let size = PixelSize::from_size_ceiling(logical_size, scaling);
+            let mut scene = RenderTargetSceneInfo::new(size, scaling, Default::default());
+            scene.logical_size = logical_size;
+            Some(scene)
         }
 
         pub fn on_before_new_buffer_attached(&mut self, globals: &WaylandGlobals, scene_info: &RenderTargetSceneInfo) {
@@ -847,6 +869,7 @@ mod imp {
                 if let Some(layer) = &self.layer_surface { layer.ack_configure(serial); }
             }
 
+            self.client_logical_size = scene_info.logical_size;
             self.maybe_emit_window_geometry(scene_info.size, scene_info.scaling, scene_info.logical_size);
 
             self.surface.on_before_new_buffer_attached(globals, scene_info);
@@ -1009,7 +1032,7 @@ mod imp {
             self.basic_init_completed.take();
             self.shell.configure_serials.clear();
             self.shell.pending_ack_serial = None;
-            self.shell.initial_configure_acknowledged = false;
+            self.shell.acknowledged_geometry = None;
             self.shell.mapped = false;
             self.top_level_event_sink.on_layer_closed();
         }
@@ -1449,6 +1472,7 @@ mod imp {
             globals: Option<&WaylandGlobals>,
             has_attached_children: bool,
         ) -> PopupAttach {
+            self.shell.client_logical_size = positioner.size;
             let previous = self.positioner.replace(positioner);
             let rect = positioner.anchor_rect;
             self.placement.requested_anchor_rect = Some((rect.x, rect.y, rect.width, rect.height));
@@ -1525,7 +1549,7 @@ mod imp {
 
             self.shell.pending_ack_serial = None;
             self.shell.configure_serials.clear();
-            self.shell.initial_configure_acknowledged = false;
+            self.shell.acknowledged_geometry = None;
             self.shell.mapped = false;
             self.shell.last_window_geometry = None;
             self.shell.surface.forget_frame_callback();
@@ -1690,6 +1714,7 @@ mod imp {
             match event {
                 xdg_popup::Event::Configure { x, y, width, height } => {
                     popup.pending_batch.geometry = Some(PixelRect::new(x, y, width, height));
+                    popup.shell.offered_geometry = PixelSize::new(width, height);
                 }
                 xdg_popup::Event::PopupDone => popup.popup_event_sink.on_popup_done(),
                 // Repositioned(token) acks a previous Reposition request. We don't
@@ -1808,6 +1833,7 @@ mod imp {
                             .or_else(|| g.outputs.outputs().first()).map(|o| o.logical_size())
                     }).unwrap_or(PixelSize::new(1, 1));
                     window.pending_batch.size = role.config.configured_size(width, height, fallback);
+                    window.shell.offered_geometry = window.pending_batch.size;
                     window.shell.note_configure_serial(serial);
                     window.on_configure_batch_complete(serial, state.globals.as_ref());
                 }
@@ -1861,6 +1887,7 @@ mod imp {
                 }
                 xdg_toplevel::Event::Configure { width, height, states } => {
                     top_level.pending_batch.size = PixelSize::new(width, height);
+                    top_level.shell.offered_geometry = top_level.pending_batch.size;
                     top_level.pending_batch.states = XdgConfigureBatch::parse_states(&states);
                 }
                 xdg_toplevel::Event::Close => top_level.top_level_event_sink.on_close(),

@@ -233,7 +233,11 @@ impl IPlatformRenderSurfaceRenderTarget for Target {
 }
 impl IVulkanRenderTarget for Target {
     fn begin_draw(&self) -> Rc<dyn IVulkanRenderSession> {
-        panic!("A Wayland Vulkan frame needs its negotiated scene extent")
+        let scene = with_worker_thread(|worker| worker.state.shell(self.id)?.negotiated_scene())
+            .flatten()
+            .expect("Wayland Vulkan target has no acknowledged configure on this render thread");
+        self.try_begin_draw(&scene)
+            .unwrap_or_else(|error| panic!("Cannot begin a Wayland Vulkan frame: {error}"))
     }
     fn try_begin_draw(
         &self,

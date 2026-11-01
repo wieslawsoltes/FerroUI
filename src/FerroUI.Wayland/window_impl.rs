@@ -97,7 +97,7 @@ pub(crate) struct ConfigureOutcome {
 }
 
 /// A positive configured dimension names the window geometry, excluding CSD shadows.
-fn configured_client_size(geometry: PixelSize, fallback: Size, shadows: Thickness) -> Size {
+pub(crate) fn configured_client_size(geometry: PixelSize, fallback: Size, shadows: Thickness) -> Size {
     Size::new(
         if geometry.width > 0 { f64::from(geometry.width) + shadows.left + shadows.right } else { fallback.width },
         if geometry.height > 0 { f64::from(geometry.height) + shadows.top + shadows.bottom } else { fallback.height },
