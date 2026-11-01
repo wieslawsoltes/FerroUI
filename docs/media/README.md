@@ -253,8 +253,12 @@ CameraPreview, RendererHost and client-owned Metal/GLES plane examples are
 implemented. Automatic device-loss recovery, complete markup/source APIs,
 six-platform packaging and native accessibility acceptance remain unfinished.
 The independent mobile sample combines camera, opt-in QR, JPEG capture, renderer
-output and detach/stop cleanup; the broader navigation matrix remains open. Apple source-image
-orientation/crop parity and audible output have not passed native acceptance.
+output and detach/stop cleanup; the broader navigation matrix remains open. Apple playback now reads the selected track transform asynchronously and publishes
+cardinal rotation/reflection plus an integral clean aperture. Non-square pixels,
+fractional aperture boundaries and non-orthogonal transforms are rejected. The
+rotated/mirrored and off-centre cropped fixtures passed native macOS and iOS
+simulator metadata and independent projected colour probes. Wider geometry/color
+profiles and physical audible output still need acceptance.
 A public contract or simulated lifetime test is not
 functional support for a missing provider. Earlier media-branch evidence is not
 acceptance of this implementation.

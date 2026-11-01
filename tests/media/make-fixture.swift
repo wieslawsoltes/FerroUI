@@ -8,12 +8,25 @@ let destination = URL(fileURLWithPath: CommandLine.arguments[1])
 try FileManager.default.createDirectory(at: destination.deletingLastPathComponent(), withIntermediateDirectories: true)
 // Refuse replacement: fixture regeneration should be an intentional change.
 let writer = try AVAssetWriter(outputURL: destination, fileType: .mp4)
-let video = AVAssetWriterInput(mediaType: .video, outputSettings: [
+var videoSettings: [String: Any] = [
     AVVideoCodecKey: AVVideoCodecType.h264, AVVideoWidthKey: 160, AVVideoHeightKey: 90,
     AVVideoColorPropertiesKey: [AVVideoColorPrimariesKey: AVVideoColorPrimaries_ITU_R_709_2,
         AVVideoTransferFunctionKey: AVVideoTransferFunction_ITU_R_709_2, AVVideoYCbCrMatrixKey: AVVideoYCbCrMatrix_ITU_R_709_2],
     AVVideoCompressionPropertiesKey: [AVVideoAverageBitRateKey: 160_000]
-])
+]
+if CommandLine.arguments.contains("--crop") {
+    videoSettings[AVVideoCleanApertureKey] = [
+        AVVideoCleanApertureWidthKey: 144, AVVideoCleanApertureHeightKey: 80,
+        AVVideoCleanApertureHorizontalOffsetKey: 2, AVVideoCleanApertureVerticalOffsetKey: 1
+    ]
+}
+let video = AVAssetWriterInput(mediaType: .video, outputSettings: videoSettings)
+if CommandLine.arguments.contains("--rotate90") {
+    video.transform = CGAffineTransform(a: 0, b: 1, c: -1, d: 0, tx: 90, ty: 0)
+}
+if CommandLine.arguments.contains("--mirror") {
+    video.transform = video.transform.concatenating(CGAffineTransform(scaleX: -1, y: 1))
+}
 let adaptor = AVAssetWriterInputPixelBufferAdaptor(assetWriterInput: video,
     sourcePixelBufferAttributes: [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
         kCVPixelBufferWidthKey as String: 160, kCVPixelBufferHeightKey as String: 90])
@@ -73,4 +86,5 @@ let finished=DispatchSemaphore(value:0)
 writer.finishWriting { finished.signal() }
 precondition(finished.wait(timeout:.now()+20) == .success)
 precondition(writer.status == .completed, "\(String(describing: writer.error))")
+print("Track transform: \(video.transform)")
 print("Synthetic AVC/AAC fixture: 160×90, 30 fps, 3 s, mono 440 Hz at 48 kHz")

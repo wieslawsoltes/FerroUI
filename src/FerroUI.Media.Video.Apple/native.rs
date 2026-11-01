@@ -1,5 +1,6 @@
 //! Native ownership is confined here. Players/seeks are main-thread objects;
 //! immutable CoreVideo buffer owners can retire from a GPU completion thread.
+use crate::geometry::Geometry;
 use ferroui_media::{MediaError, MediaErrorKind};
 use ferroui_media_apple::PixelBuffer;
 use std::{
@@ -30,6 +31,11 @@ extern "C" {
     fn ferroui_portable_seek_state(p: *mut c_void, position: *mut f64) -> i32;
     fn ferroui_portable_seek_release(p: *mut c_void);
     fn ferroui_portable_player_frame(p: *mut c_void, timestamp: *mut f64) -> *mut c_void;
+    fn ferroui_portable_player_geometry(
+        p: *mut c_void,
+        pixels: *mut c_void,
+        out: *mut Geometry,
+    ) -> i32;
 }
 pub struct Player {
     handle: NonNull<c_void>,
@@ -105,6 +111,20 @@ impl Player {
             ))
         }
         .map(|buffer| (buffer, timestamp))
+    }
+    pub fn geometry(&self, buffer: &PixelBuffer) -> Result<Geometry, MediaError> {
+        let mut geometry = Geometry::default();
+        // Both handles remain owned throughout this synchronous metadata query.
+        if unsafe {
+            ferroui_portable_player_geometry(self.handle.as_ptr(), buffer.as_raw(), &mut geometry)
+        } == 0
+        {
+            return Err(MediaError::new(
+                MediaErrorKind::Unsupported,
+                "Video geometry is not ready",
+            ));
+        }
+        Ok(geometry)
     }
 }
 impl Drop for Player {

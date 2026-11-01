@@ -252,17 +252,40 @@ pub use gl::Scene;
 
 /// Independent expected coverage: four transparent margins, center, and four
 /// points distinguishing the projected trapezoid from an axis-aligned quad.
-pub fn validate_probe(alpha: &[u8]) -> Result<(), MediaError> {
+pub fn validate_probe(alpha: &[u8], geometry: bool) -> Result<(), MediaError> {
     let expected = [0u8, 0, 0, 0, 217, 217, 0, 217, 0];
-    if alpha.len() != expected.len() || alpha.iter().zip(expected).any(|(a, b)| a.abs_diff(b) > 1) {
+    if alpha.len() != 25
+        || alpha[..9]
+            .iter()
+            .zip(expected)
+            .any(|(a, b)| a.abs_diff(b) > 1)
+    {
         return Err(error(format!(
             "Unexpected projected coverage/alpha {alpha:?}"
         )));
     }
+    if geometry {
+        // The fixture's clockwise-90 + destination-X reflection transposes
+        // red/green/blue/yellow cells. These expected colours are not produced
+        // by the framework geometry helper used by the renderer.
+        let expected = [
+            217, 0, 0, 217, 0, 0, 217, 217, 0, 217, 0, 217, 217, 217, 0, 217,
+        ];
+        if alpha[9..]
+            .iter()
+            .zip(expected)
+            .any(|(a, b)| a.abs_diff(b) > 20)
+        {
+            return Err(error(format!(
+                "Unexpected oriented quadrant colours {:?}",
+                &alpha[9..]
+            )));
+        }
+    }
     Ok(())
 }
 #[cfg(target_vendor = "apple")]
-pub fn probe(frame: &FrameLease) -> Result<(), MediaError> {
+pub fn probe(frame: &FrameLease, geometry: bool) -> Result<(), MediaError> {
     use std::ffi::c_void;
     extern "C" {
         fn portable_media_plane_probe(buffer: *mut c_void, alpha: *mut u8) -> i32;
@@ -278,16 +301,17 @@ pub fn probe(frame: &FrameLease) -> Result<(), MediaError> {
             PresentationRoute::SharedTexture,
         )
         .map_err(|e| error(e.to_string()))?;
-    let mut alpha = [0; 9];
+    let mut alpha = [0; 25];
     if unsafe { portable_media_plane_probe(buffer.as_raw(), alpha.as_mut_ptr()) } == 0 {
         return Err(error("Native projection probe failed"));
     }
-    validate_probe(&alpha)
+    validate_probe(&alpha, geometry)
 }
 #[cfg(target_os = "android")]
 pub async fn probe(
     frame: FrameLease,
     producer: ferroui_media_android::NativeGlFrameProducer,
+    geometry: bool,
 ) -> Result<(), MediaError> {
     use ferroui_android::interop::java::*;
     use ferroui_opengl::SharedFrameTexture;
@@ -298,7 +322,7 @@ pub async fn probe(
                 .counters()
                 .cpu_transfer(
                     PixelTransferPurpose::Diagnostic,
-                    9 * 4,
+                    13 * 4,
                     PresentationRoute::SharedTexture,
                 )
                 .map_err(|e| error(e.to_string()))?;
@@ -322,7 +346,7 @@ pub async fn probe(
                 .map(str::parse::<u8>)
                 .collect::<Result<Vec<_>, _>>()
                 .map_err(|_| error("Native GL projection probe failed"))?;
-            validate_probe(&alpha)
+            validate_probe(&alpha, geometry)
         })
         .await
 }

@@ -71,11 +71,15 @@ pub fn build() -> AppBuilder {
     use ferroui_android::AndroidApplicationExtensions;
     AppBuilder::configure::<App>().use_android()
 }
-fn is_smoke() -> bool {
+fn launch_flag(ios: &str, android: &str) -> bool {
     #[cfg(target_os = "ios")]
-    return std::env::args().any(|v| v == "--smoke");
+    {
+        let _ = android;
+        std::env::args().any(|v| v == ios)
+    }
     #[cfg(target_os = "android")]
     {
+        let _ = ios;
         use ferroui_android::{interop::java::*, FerroActivity};
         FerroActivity::current_main_activity()
             .and_then(|v| {
@@ -91,66 +95,25 @@ fn is_smoke() -> bool {
                     &v,
                     "getBooleanExtra",
                     "(Ljava/lang/String;Z)Z",
-                    &[JavaValue::String("mediaSmoke"), JavaValue::Boolean(false)],
+                    &[JavaValue::String(android), JavaValue::Boolean(false)],
                 )
             })
     }
+}
+fn is_smoke() -> bool {
+    launch_flag("--smoke", "mediaSmoke")
 }
 fn saturation_smoke() -> bool {
-    #[cfg(target_os = "ios")]
-    return std::env::args().any(|v| v == "--saturation-smoke");
-    #[cfg(target_os = "android")]
-    {
-        use ferroui_android::{interop::java::*, FerroActivity};
-        FerroActivity::current_main_activity()
-            .and_then(|v| {
-                call_object(
-                    v.java_object(),
-                    "getIntent",
-                    "()Landroid/content/Intent;",
-                    &[],
-                )
-            })
-            .is_some_and(|v| {
-                call_boolean(
-                    &v,
-                    "getBooleanExtra",
-                    "(Ljava/lang/String;Z)Z",
-                    &[
-                        JavaValue::String("saturationSmoke"),
-                        JavaValue::Boolean(false),
-                    ],
-                )
-            })
-    }
+    launch_flag("--saturation-smoke", "saturationSmoke")
 }
 fn renderer_smoke() -> bool {
-    #[cfg(target_os = "ios")]
-    return std::env::args().any(|v| v == "--renderer-smoke");
-    #[cfg(target_os = "android")]
-    {
-        use ferroui_android::{interop::java::*, FerroActivity};
-        FerroActivity::current_main_activity()
-            .and_then(|v| {
-                call_object(
-                    v.java_object(),
-                    "getIntent",
-                    "()Landroid/content/Intent;",
-                    &[],
-                )
-            })
-            .is_some_and(|v| {
-                call_boolean(
-                    &v,
-                    "getBooleanExtra",
-                    "(Ljava/lang/String;Z)Z",
-                    &[
-                        JavaValue::String("rendererSmoke"),
-                        JavaValue::Boolean(false),
-                    ],
-                )
-            })
-    }
+    launch_flag("--renderer-smoke", "rendererSmoke")
+}
+fn crop_smoke() -> bool {
+    launch_flag("--crop-smoke", "cropSmoke")
+}
+fn geometry_smoke() -> bool {
+    launch_flag("--geometry-smoke", "geometrySmoke")
 }
 #[cfg(target_os = "android")]
 fn declared_camera_color() -> Option<FrameColor> {
@@ -315,9 +278,19 @@ fn create() -> Ref<Control> {
                 let source = MediaSource::Resource {
                     name: "avc-aac.mp4".into(),
                     content_type: "video/mp4".into(),
-                    encoded: include_bytes!("../../tests/media/fixtures/avc-aac.mp4")
-                        .as_slice()
-                        .into(),
+                    encoded: if crop_smoke() {
+                        include_bytes!("../../tests/media/fixtures/avc-aac-geometry-crop.mp4")
+                            .as_slice()
+                            .into()
+                    } else if geometry_smoke() {
+                        include_bytes!("../../tests/media/fixtures/avc-aac-rotate90-mirror.mp4")
+                            .as_slice()
+                            .into()
+                    } else {
+                        include_bytes!("../../tests/media/fixtures/avc-aac.mp4")
+                            .as_slice()
+                            .into()
+                    },
                 };
                 match view.set_source(source, provider, importer).await {
                     Err(e) => report(&format!("RESULT: FAIL open {e}")),
@@ -670,6 +643,30 @@ fn start_smoke(view: &Ref<MediaPlayerElement>, budget: FrameBudget) {
                     }
                     report(&format!("PRESENTED {:?}", counts));
                     if let Some(frame) = player.frames().latest() {
+                        if geometry_smoke() {
+                            report(&format!(
+                                "VIDEO_GEOMETRY {:?} natural={:?}",
+                                frame.metadata(),
+                                state.natural_size
+                            ));
+                            #[cfg(target_os = "ios")]
+                            if frame.metadata().rotation != FrameRotation::Clockwise90
+                                || !frame.metadata().mirrored
+                                || state.natural_size
+                                    != Some(if crop_smoke() { (80, 144) } else { (90, 160) })
+                            {
+                                report("RESULT: FAIL native track orientation");
+                                return false;
+                            }
+                        }
+                        #[cfg(target_os = "ios")]
+                        if crop_smoke() {
+                            let r = frame.metadata().visible;
+                            if (r.x, r.y, r.width, r.height) != (10, 6, 144, 80) {
+                                report(&format!("RESULT: FAIL native crop {r:?}"));
+                                return false;
+                            }
+                        }
                         report(&format!(
                             "PRESENTED_FRAME timestamp={:?} size={}x{}",
                             frame.metadata().timestamp,
@@ -1055,14 +1052,14 @@ fn renderer_action(
                 if let Some(frame) = output.clone() {
                     probed.set(true);
                     #[cfg(target_os = "ios")]
-                    match scene::probe(&frame) {
+                    match scene::probe(&frame, geometry_smoke()) {
                         Ok(()) => report("RENDERER_PIXELS_PASS transparent projection coverage"),
                         Err(e) => report(&format!("RENDERER_PIXELS_FAIL {e}")),
                     }
                     #[cfg(target_os = "android")]
                     if let Some(producer) = probe_producer.clone() {
                         Dispatcher::ui_thread().invoke_async_task_local(move || async move {
-                            match scene::probe(frame, producer).await {
+                            match scene::probe(frame, producer, geometry_smoke()).await {
                                 Ok(()) => {
                                     report("RENDERER_PIXELS_PASS transparent projection coverage")
                                 }

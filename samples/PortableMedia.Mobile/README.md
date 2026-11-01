@@ -114,3 +114,26 @@ past 1.5 seconds, releases the leases after two seconds and requires a new pause
 frame before resuming. Stop must still present frame zero and teardown must
 retire all source storage. This tests real provider saturation, separately from
 mocked completion or a diagnostic GPU readback.
+
+## Video geometry regression
+
+Add `--geometry-smoke` with `--smoke --renderer-smoke` on iOS to select the
+synthetic 90° rotated and mirrored AVC/AAC fixture. Add `--crop-smoke` to use its
+off-centre clean-aperture variant. The Apple checks require the native transform,
+visible crop and natural size to match independently specified fixture geometry.
+The renderer diagnostics additionally check four projected quadrant colours,
+using fixed expected positions and colours rather than the framework mapping.
+Android accepts the corresponding `geometrySmoke` and `cropSmoke` launch extras
+for provider investigation; its container geometry profile needs its own evidence.
+
+Generate new copies without replacing existing fixtures:
+
+```sh
+swift tests/media/make-fixture.swift /path/to/rotated.mp4 --rotate90 --mirror
+swift tests/media/make-fixture.swift /path/to/cropped.mp4 --rotate90 --mirror --crop
+```
+
+These test-only producer operations allocate synthetic CPU pixels. Production
+preview retains its zero CPU-transfer policy. Metal diagnostic mapping counts
+the mapped output allocation; GLES diagnostic probes count 13 RGBA pixels
+(52 bytes). No diagnostic probe runs during ordinary playback/camera presentation.

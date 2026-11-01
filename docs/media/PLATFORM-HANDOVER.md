@@ -216,6 +216,8 @@ They are functional evidence, not a frozen performance acceptance profile.
 | Check | Result and limit |
 | --- | --- |
 | Windows/Linux provider adapters | Rust cross-checks passed with the native bridge deliberately skipped; C/C++ compilation, linking, codec/driver behavior and native samples remain unverified |
+| Android reflected-track negative control | The same reflected MP4 plays and retires, but Media3/SurfaceTexture output omits its reflection. Independent quadrant probes detect the incorrect colours. Container-transform admission/correction remains implementation work; the ordinary video/camera orientation evidence does not close this case. |
+| Apple playback geometry | macOS and iOS simulator runs decoded rotated/mirrored and off-centre clean-aperture fixtures. The native crop `(10,6,144,80)`, natural size, cardinal rotation/reflection and independent projected quadrant colour probes passed, with zero preview CPU transfers and final source/renderer retirement. Two Rust geometry contracts separately exercise affine point mapping and rejection. |
 | Paused producer saturation | Android 16 KiB and iOS 27.0 simulator runs retained three real source leases across a paused seek, observed pending work after 1.5 seconds, then published the sought frame after release. Stop/frame-zero and zero retained source frames passed; preview CPU counters stayed zero. A UI contract test separately checks polling beyond the settling interval and idle shutdown. |
 | Renderer scheduling | Four mailbox notification/lifetime tests and two UI scheduling tests cover worker dispatch, disposal, static idle, ancestor visibility and continuous work. macOS/iOS native playback/Metal projection and Android 16 KiB playback/GLES projection and teardown passed again. Android camera + QR + JPEG also continued through rotation and released hardware/output after Stop. |
 | Native alias contracts | Three GL producer/retirement unit tests passed, including retention through consumer completion, queued native cleanup and lost-context quarantine; this does not prove a native DMA-BUF/DXGI import |
@@ -269,7 +271,9 @@ and `renderer-notification-browser-regression.log`, `pending-frame-ui-tests.log`
 `pending-frame-contracts.log`, `pending-frame-ios-saturation.log` and
 `pending-frame-android-saturation.log`, `pending-frame-macos-smoke.log`,
 `pending-frame-browser-regression.log`, `pending-frame-windows-bindings.log` and
-`pending-frame-linux-bindings.log`. Re-run applicable gates on the receiving host.
+`pending-frame-linux-bindings.log`, `apple-track-crop-pixels-macos.log`,
+`apple-track-crop-pixels-ios.log`, `apple-geometry-affine-contracts.log` and
+`video-geometry-android-negative.log`. Re-run applicable gates on the receiving host.
 
 Useful commands, from the repository root:
 
@@ -311,7 +315,7 @@ were used to limit disk/memory use; the target cache is private to this worktree
   RendererHost, native Metal/GLES adapters and client-owned video/camera plane
   examples now exist; wider input/accessibility and physical geometry gates
   remain open.
-- Apple source orientation/crop parity, physical capture/denial/hotplug, minimum
+- Wider Apple geometry/color profiles, physical capture/denial/hotplug, minimum
   OS linking/runtime and the broader browser/device matrix need
   separate evidence. Browser native frame output currently requires a page-owned
   single-threaded WebGL2 context, frame callbacks and matching decoded/upload

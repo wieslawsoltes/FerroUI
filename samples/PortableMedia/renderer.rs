@@ -69,7 +69,7 @@ pub fn install(
             if !probed.get() && std::env::args().any(|a| a == "--smoke") {
                 if let Some(frame) = host.output().and_then(|s| s.latest()) {
                     probed.set(true);
-                    match scene::probe(&frame) {
+                    match scene::probe(&frame, std::env::args().any(|v| v == "--geometry-smoke")) {
                         Ok(()) => println!("RENDERER_PIXELS_PASS transparent projection coverage"),
                         Err(e) => {
                             eprintln!("RENDERER_PIXELS_FAILED {e}");

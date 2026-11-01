@@ -54,6 +54,11 @@ public final class PlaneRenderer {
             java.nio.ByteBuffer pixel=java.nio.ByteBuffer.allocateDirect(4);int[] x={2,98,98,2,50,78,78,18,18},y={2,2,98,98,50,30,65,70,20};
             StringBuilder result=new StringBuilder();
             for(int i=0;i<9;i++){pixel.clear();GLES30.glReadPixels(width*x[i]/100,height-1-height*y[i]/100,1,1,GLES30.GL_RGBA,GLES30.GL_UNSIGNED_BYTE,pixel);if(i!=0)result.append(',');result.append(pixel.get(3)&255);}
+            int[] qx={3833,6683,3385,6136},qy={3389,3606,6302,6136};
+            for(int i=0;i<4;i++){
+                pixel.clear();GLES30.glReadPixels(width*qx[i]/10000,height-1-height*qy[i]/10000,1,1,GLES30.GL_RGBA,GLES30.GL_UNSIGNED_BYTE,pixel);
+                for(int channel=0;channel<4;channel++)result.append(',').append(pixel.get(channel)&255);
+            }
             return GLES30.glGetError()==0?result.toString():"";
         }finally{
             GLES30.glBindFramebuffer(GLES30.GL_READ_FRAMEBUFFER,old);GLES30.glBindBuffer(GLES30.GL_PIXEL_PACK_BUFFER,pack);GLES30.glPixelStorei(GLES30.GL_PACK_ALIGNMENT,alignment);GLES30.glDeleteFramebuffers(1,name,0);

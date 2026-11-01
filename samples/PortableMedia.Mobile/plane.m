@@ -59,5 +59,11 @@ int portable_media_plane_probe(void *pointer,unsigned char *alpha){
     size_t width=CVPixelBufferGetWidth(buffer),height=CVPixelBufferGetHeight(buffer);
     const int x[]={2,98,98,2,50,78,78,18,18},y[]={2,2,98,98,50,30,65,70,20};
     for(int i=0;i<9;i++)alpha[i]=pixels[(height*y[i]/100)*stride+(width*x[i]/100)*4+3];
+    // Projected quarter-cell centres derived independently from PLANE.
+    const int qx[]={3833,6683,3385,6136},qy[]={3389,3606,6302,6136};
+    for(int i=0;i<4;i++){
+        const unsigned char *pixel=pixels+(height*qy[i]/10000)*stride+(width*qx[i]/10000)*4;
+        alpha[9+i*4]=pixel[2];alpha[10+i*4]=pixel[1];alpha[11+i*4]=pixel[0];alpha[12+i*4]=pixel[3];
+    }
     CVPixelBufferUnlockBaseAddress(buffer,kCVPixelBufferLock_ReadOnly);return 1;
 }

@@ -1,6 +1,7 @@
 //! AVFoundation playback, native timing/audio and retained CoreVideo storage.
 #![cfg(target_vendor = "apple")]
 #![deny(unsafe_code)]
+mod geometry;
 #[allow(unsafe_code)]
 mod native;
 pub use ferroui_media_apple::frame_surface;
@@ -241,6 +242,8 @@ impl NativeMediaSession for AppleSession {
             return Ok(None);
         };
         let (width, height, stride, bytes, color) = buffer.info();
+        let (visible, rotation, mirrored) =
+            self.player.geometry(&buffer)?.decompose(width, height)?;
         if buffer.surface().is_none() {
             return Err(MediaError::new(
                 MediaErrorKind::Unsupported,
@@ -261,12 +264,7 @@ impl NativeMediaSession for AppleSession {
             },
             width,
             height,
-            visible: FrameRegion {
-                x: 0,
-                y: 0,
-                width,
-                height,
-            },
+            visible,
             format: FrameFormat::Bgra8,
             color: match color {
                 1 => FrameColor::Srgb,
@@ -274,8 +272,8 @@ impl NativeMediaSession for AppleSession {
                 _ => FrameColor::Unsupported,
             },
             alpha: FrameAlpha::Opaque,
-            rotation: FrameRotation::None,
-            mirrored: false,
+            rotation,
+            mirrored,
             top_left_origin: true,
             timestamp: duration(timestamp).ok_or_else(|| {
                 MediaError::new(

@@ -228,6 +228,38 @@ fn smoke(window: &Ref<Window>, view: &Ref<MediaPlayerElement>, budget: FrameBudg
                     && state.position > Duration::from_millis(200) =>
                 {
                     let frame = player.frames().latest().unwrap();
+                    if std::env::args().any(|v| v == "--geometry-smoke") {
+                        println!(
+                            "VIDEO_GEOMETRY {:?} natural={:?}",
+                            frame.metadata(),
+                            state.natural_size
+                        );
+                        #[cfg(target_os = "macos")]
+                        if frame.metadata().rotation != FrameRotation::Clockwise90
+                            || !frame.metadata().mirrored
+                            || state.natural_size
+                                != Some(if std::env::args().any(|v| v == "--crop-smoke") {
+                                    (80, 144)
+                                } else {
+                                    (90, 160)
+                                })
+                        {
+                            eprintln!("NATIVE_GEOMETRY_FAILED");
+                            FAILED.store(true, Ordering::Relaxed);
+                            window.close();
+                            return false;
+                        }
+                    }
+                    #[cfg(target_os = "macos")]
+                    if std::env::args().any(|v| v == "--crop-smoke") {
+                        let r = frame.metadata().visible;
+                        if (r.x, r.y, r.width, r.height) != (10, 6, 144, 80) {
+                            eprintln!("NATIVE_CROP_FAILED {r:?}");
+                            FAILED.store(true, Ordering::Relaxed);
+                            window.close();
+                            return false;
+                        }
+                    }
                     let counts = frame.counters().snapshot();
                     if counts.gpu_imports == 0 {
                         return true;
