@@ -112,7 +112,18 @@ separately from preview. Corrected codewords and byte-mode segments are distinct
 from full payload bytes, which this adapter does not currently expose. Finder
 extrapolation is labeled estimated geometry. Expiry uses acquisition age and the
 caller's scheduler clock, independently of source media timestamps.
-Internal decoder input-copy behavior still needs profiling beyond adapter repacking.
+A development-only `input_copy_audit` executable measures actual Rust heap
+requests around the real pinned rxing 0.9.3 decode path. Its forced full-plane
+clone is a negative control. The 1280×720 two-symbol fixture produced no
+full-plane-sized heap request for packed input and one exact 921,600-byte buffer
+for padded input. Reserving the repack once removed ten extra allocation/growth
+requests; cumulative requested heap bytes fell from 3,057,896 to 1,359,336 for
+that padded case. Adapter counters separately measured 0/921,600 analysis bytes.
+These observations exclude stack/inline copies, native SDK internals and other
+workloads; they are not a universal zero-copy or performance-acceptance claim.
+Run `cargo run -p ferroui-media-qr --example input_copy_audit` to reproduce them.
+The allocator observer belongs only to that executable; production library
+allocation behavior remains under the application's allocator.
 
 Native Apple QR uses one bounded Vision worker; cancellation retains its input
 until native recognition finishes and rejects late publication. Analysis geometry

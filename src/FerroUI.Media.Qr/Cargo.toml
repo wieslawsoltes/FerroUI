@@ -38,3 +38,8 @@ rxing = { version = "=0.9.3", default-features = false, features = ["qrcode", "d
 
 [package.metadata.release]
 group = "core"
+
+[[example]]
+name = "input_copy_audit"
+path = "examples/input_copy_audit.rs"
+required-features = ["rust-decoder"]

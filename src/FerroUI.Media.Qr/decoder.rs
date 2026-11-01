@@ -71,11 +71,16 @@ impl LuminanceSource for Source<'_> {
             Cow::Borrowed(&self.plane.data[..len])
         } else {
             self.copy(len);
-            Cow::Owned(
-                (0..self.get_height())
-                    .flat_map(|y| (0..self.get_width()).map(move |x| self.at(x, y)))
-                    .collect(),
-            )
+            // Flat-map collection grows its backing vector while repacking.
+            // Reserve the validated plane size once so analysis does not add
+            // hidden realloc/copy traffic beyond the counted output bytes.
+            let mut packed = Vec::with_capacity(len);
+            for y in 0..self.get_height() {
+                for x in 0..self.get_width() {
+                    packed.push(self.at(x, y));
+                }
+            }
+            Cow::Owned(packed)
         }
     }
     fn invert(&mut self) {

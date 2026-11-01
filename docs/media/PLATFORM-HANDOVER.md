@@ -242,6 +242,7 @@ They are functional evidence, not a frozen performance acceptance profile.
 | Android camera | Separate CameraX 1.5.2 provider and camera preview controls. Emulator permission denial/grant, live GPU preview, native JPEG independently decoded at 1856×1392, and Stop returning camera-service active clients to an empty list. The request-owned/background-copy version also produced a decoded native JPEG and rejected capture completion after Stop. Host JVM contracts check independent photo bytes and late cancellation. |
 | Renderer host | Normal composition control plus client-owned Metal/GLES adapters and projected-plane examples. macOS and iOS 27.0 simulator runs checked transparent coverage/alpha, playback/seek/Stop and renderer-frame retirement. Android GLES ran the corresponding video/plane and counted diagnostic pixel probe on the 16 KiB emulator. Pure Rust/JVM contracts cover input replacement, detach/reattach, queued-job rollback, unknown completion, crop/orientation/mirror and planar QR projection. |
 | QR result geometry | Results own a geometry snapshot without retaining native input. Six Rust contracts cover lifetime, crop/orientation and invalid bounds; macOS Vision and iOS simulator fixtures passed. Android live CameraX analysis ran alongside preview, 3D and independently decoded JPEG on the 16 KiB emulator, then Stop retired renderer frames. |
+| Rust QR input-copy audit | Real rxing 0.9.3 adapter decode of two symbols at 1280×720, three packed and three padded runs. A forced full-plane clone is detected. Packed input had zero adapter bytes and no heap request at least one luminance plane in size. Padded input measured 921,600 repack bytes and one exactly sized buffer after removing vector growth; cumulative requested bytes fell from 3,057,896 to 1,359,336. Six QR contracts pass. Heap observations exclude stack/inline copies and are not a performance release gate. |
 | Native QR | macOS Vision decoded two synthetic symbols from retained CoreVideo input; iOS 27.0 simulator did so using the revision-1 CPU analysis profile. Android bundled ML Kit 17.3.0 decoded the same two symbols and checked geometry/raw bytes with network services disabled on the 16 KiB emulator. CameraX live analysis ran at about 10 Hz, dropped excess frames and allowed a separately decoded native JPEG; Stop returned active camera clients to an empty list. Native SDK internal copies remain opaque. |
 | Android playback | Separate Media3 1.8.0 provider with native decoder/audio timing, a bounded presentation-time table, coalesced commands and a dedicated player looper. API 35/16 KiB run passed independent GPU sharing, playback, pause, achieved seek, resume, Stop/frame zero, frame retirement and native surface/player cleanup. Earlier failing runs remain separate evidence; fixes address surface-clock mapping, async command settling and obsolete queued acquisition. |
 
@@ -299,7 +300,9 @@ and `camera-late-photo-cancellation-contracts.log`, `camera-late-photo-cancellat
 `camera-late-photo-cancellation-android-service.log`, `context-retirement-android-video-final.log`,
 `context-retirement-android-camera-final.log` and
 `context-retirement-android-camera-service-final.log` and
-`context-retirement-ios-final.log`. Re-run applicable gates on the receiving host.
+`context-retirement-ios-final.log`, `qr-input-copy-audit-before.log`,
+`qr-input-copy-audit-final.log` and `qr-input-copy-contracts.log`.
+Re-run applicable gates on the receiving host.
 
 Useful commands, from the repository root:
 
@@ -333,8 +336,10 @@ were used to limit disk/memory use; the target cache is private to this worktree
 - Apple Vision and bundled Android ML Kit QR engines are implemented. Physical
   camera geometry/encoding and the wider native QR fixture matrix still need
   verification. The optional Rust adapter does not expose complete payload bytes,
-  and its internal input-copy behavior still needs profiling. Do not infer zero
-  copying from a borrowed input interface or zero framework transfer counters.
+  and broader internal-copy profiles remain open. The pinned Rust 1280×720
+  packed/padded fixture now has a measured heap-allocation audit with a forced
+  clone negative control. It does not observe stack/inline copies or native SDK
+  internals; do not generalize it to universal zero copying.
 - `FerroUI.Media.Camera.Controls` now provides CameraPreview with explicit
   start, owned-session teardown and weak caller-session attachment. Complete
   markup/source APIs remain unfinished. Owned playback, camera and renderer
