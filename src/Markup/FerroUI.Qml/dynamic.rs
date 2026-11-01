@@ -8,6 +8,7 @@ pub(crate) struct Template {
     pub scopes: enums::Scopes,
 }
 pub(crate) struct Context {
+    pub bound: bool,
     pub row_revision: Option<repeater::ProjectedRow>,
     pub delegate_inputs: Option<BTreeMap<String, SlotId>>,
     pub declaration: ObjectId,
@@ -97,6 +98,37 @@ impl Instance {
             current = self.node(context.declaration)?.context;
         }
         self.ids.get(name).copied()
+    }
+    pub(crate) fn id_shadow(
+        &self,
+        owner: ObjectId,
+        source: &str,
+        actual: &str,
+        scope: Option<u32>,
+    ) -> Option<SlotId> {
+        let root = self.node(owner)?.context?;
+        let context = self.dynamic.contexts.get(&root)?;
+        if context.bound || context.ids.contains_key(actual) {
+            return None;
+        }
+        let key = self
+            .key_in(owner, source, scope)
+            .or_else(|_| self.key_in(root, source, scope))
+            .ok()?;
+        self.lexical_id(owner, actual).map(|_| key)
+    }
+    pub(crate) fn visible_id(
+        &self,
+        owner: ObjectId,
+        source: &str,
+        actual: &str,
+        scope: Option<u32>,
+    ) -> Option<ObjectId> {
+        if self.id_shadow(owner, source, actual, scope).is_some() {
+            None
+        } else {
+            self.lexical_id(owner, actual)
+        }
     }
     pub(crate) fn lexical_names(&self, owner: ObjectId, names: &mut BTreeSet<String>) {
         let mut current = self.node(owner).and_then(|n| n.context);
@@ -292,6 +324,7 @@ impl crate::transaction::Transaction<'_> {
             root,
             Context {
                 declaration,
+                bound: template.object.bound_component,
                 row_revision: None,
                 delegate_inputs: delegate_inputs.map(|_| BTreeMap::new()),
                 ids: Default::default(),

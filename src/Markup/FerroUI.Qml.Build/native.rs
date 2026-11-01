@@ -100,6 +100,7 @@ pub(super) fn emit(expr: &Expr) -> Result<TokenStream, String> {
         }
         Expr::String(value) => quote!(V::String(String::from(#value))),
         Expr::Name(ident) => quote!(frame.name(#ident,None)?),
+        Expr::ResolvedId { name, target } => quote!(frame.resolved_name(#name,#target)?),
         Expr::ScopedName { name, root } => quote!(frame.name(#name,Some(#root))?),
         Expr::Record(fields) => {
             let pairs = fields
@@ -133,6 +134,10 @@ pub(super) fn emit(expr: &Expr) -> Result<TokenStream, String> {
         Expr::Index(base, key) => {
             let (base, key) = (emit(base)?, emit(key)?);
             quote!({ let value=#base; let index=#key; frame.index(value,index)? })
+        }
+        Expr::Unary(op, value) if op == "typeof" && name(value).is_some() => {
+            let (ident, root) = name(value).unwrap();
+            quote!(frame.typeof_name(#ident,#root)?)
         }
         Expr::Unary(op, value) => {
             let value = emit(value)?;

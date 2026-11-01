@@ -379,6 +379,7 @@ impl<R: ComponentResolver> Linker<'_, R> {
             }
         }
         merge_site(&mut base, site, site_context)?;
+        base.bound_component = site.bound_component;
         if let Some(url) = &template.source_url {
             base.source_layers.push(SourceLayer {
                 scope: Some(scope),

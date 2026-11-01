@@ -121,9 +121,17 @@ fn expression(
             js.ids
                 .extend(ids.iter().map(|(a, b)| (a.clone(), b.clone())));
         }
+        Expr::ResolvedId { target, .. } => {
+            if let Some(id) = ids.get(target) {
+                target.clone_from(id);
+            }
+        }
         Expr::Name(name) if !locals.contains(name) => {
             if let Some(id) = ids.get(name) {
-                name.clone_from(id);
+                *expr = Expr::ResolvedId {
+                    name: std::mem::take(name),
+                    target: id.clone(),
+                };
             } else {
                 *expr = Expr::ScopedName {
                     name: std::mem::take(name),

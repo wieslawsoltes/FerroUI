@@ -162,6 +162,10 @@ def main():
     root.change()
     assert root.report() == "2/base/sub/1/new/3/old/retained/0/6/5/6/0/0", root.report()
     print("Qt 6.12.0 inherited list assignment, function signatures and structured geometry passed")
+    component, root = load(folder.parent / "pragmas/Scopes.qml")
+    assert root.report() == "outer/undefined/undefined/local/outer/A0/outer;local/number/string/local/local/A0/local", root.report()
+    assert root.edit() == "changed"
+    print("Qt 6.12.0 bound and unbound Repeater, ListView and component creation scopes passed")
     del window, root, component, engine, app
 
 

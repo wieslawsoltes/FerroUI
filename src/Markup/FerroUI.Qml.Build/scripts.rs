@@ -36,6 +36,7 @@ fn completion(flow: TokenStream) -> TokenStream {
 fn target(expr: &Expr) -> Result<TokenStream, String> {
     Ok(match expr {
         Expr::Name(ident) => quote!(frame.target_name(#ident,None)?),
+        Expr::ResolvedId { name, target } => quote!(frame.target_resolved_name(#name,#target)?),
         Expr::ScopedName { name, root } => quote!(frame.target_name(#name,Some(#root))?),
         Expr::Member(base, field) => {
             if let Some((base, root)) = name(base) {

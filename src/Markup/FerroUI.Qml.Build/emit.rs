@@ -200,6 +200,7 @@ impl Rust for ListAssignment {
     }
 }
 structure!(Object {
+    bound_component,
     list_assignment,
     source_url,
     source_layers,
@@ -309,6 +310,7 @@ impl Rust for Expr {
             Self::Bool(v) => tuple!(Expr::Bool(v)),
             Self::String(v) => tuple!(Expr::String(v)),
             Self::Name(v) => tuple!(Expr::Name(v)),
+            Self::ResolvedId { name, target } => record!(Expr::ResolvedId { name, target }),
             Self::ScopedName { name, root } => record!(Expr::ScopedName { name, root }),
             Self::Array(v) => tuple!(Expr::Array(v)),
             Self::Record(v) => tuple!(Expr::Record(v)),

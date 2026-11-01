@@ -43,3 +43,49 @@ fn imported_pragmas_with_webscene() {
         .unwrap(),
     );
 }
+
+mod scopes {
+    use super::*;
+    include!(concat!(env!("OUT_DIR"), "/bound_contexts.rs"));
+    const EXPECTED: &str =
+        "outer/undefined/undefined/local/outer/A0/outer;local/number/string/local/local/A0/local";
+    fn check(mut ui: Instance) {
+        assert_eq!(
+            ui.call(ui.root(), "report", vec![]).unwrap(),
+            Value::String(EXPECTED.into())
+        );
+        assert_eq!(
+            ui.call(ui.root(), "edit", vec![]).unwrap(),
+            Value::String("changed".into())
+        );
+    }
+    #[test]
+    fn bound_and_unbound_delegates_keep_their_source_policy() {
+        check(
+            Instance::new(
+                &compiled_qml(),
+                &crate::quick_registry(),
+                Default::default(),
+            )
+            .unwrap(),
+        );
+    }
+    #[cfg(feature = "webscene")]
+    #[test]
+    fn guest_delegates_keep_their_source_policy() {
+        use std::{path::Path, rc::Rc};
+        let unit = ferroui_qml_build::Compiler::new()
+            .with_javascript()
+            .load(Path::new(env!("CARGO_MANIFEST_DIR")).join("pragmas/Scopes.qml"))
+            .unwrap();
+        check(
+            Instance::with_engine(
+                &unit.document,
+                &crate::quick_registry(),
+                Default::default(),
+                Rc::new(ferroui_qml_webscene::WebSceneEngine::from_env().unwrap()),
+            )
+            .unwrap(),
+        );
+    }
+}

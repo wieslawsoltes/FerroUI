@@ -22,6 +22,7 @@ fn shape(ty: &str, url: &str, imports: Vec<ir::Import>) -> ir::Object {
         source_url: Some(url.into()),
         source_layers: vec![],
         shadows: vec![],
+        bound_component: false,
         list_assignment: Default::default(),
         composite_types: vec![],
         type_imports: Some(imports),
@@ -274,6 +275,7 @@ impl Transaction<'_> {
             id,
             Context {
                 declaration: owner,
+                bound: false,
                 row_revision: None,
                 delegate_inputs: None,
                 ids: Default::default(),

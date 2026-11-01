@@ -415,6 +415,9 @@ impl ScriptContext<'_, '_> {
         if self.locals.contains_key(name) || self.id(name).is_some() {
             return None;
         }
+        if let Some(key) = self.shadow_key(name) {
+            return Some(&self.tx.model.properties[key].ty);
+        }
         [
             self.owner,
             self.root,
@@ -640,14 +643,33 @@ impl ScriptContext<'_, '_> {
         names.into_iter().collect()
     }
 
+    fn mapped_id<'n>(&'n self, name: &'n str) -> &'n str {
+        self.ids
+            .and_then(|ids| ids.get(name))
+            .map_or(name, String::as_str)
+    }
+    fn shadow_key(&self, name: &str) -> Option<SlotId> {
+        self.tx.model.id_shadow(
+            self.owner,
+            name,
+            self.mapped_id(name),
+            self.tx.declaration_scope(),
+        )
+    }
+    fn lookup_name_key(&self, name: &str) -> Result<SlotId, Error> {
+        self.shadow_key(name)
+            .map_or_else(|| self.tx.lookup_property(self.owner, self.root, name), Ok)
+    }
     fn id(&self, name: &str) -> Option<ObjectId> {
         if private(name) {
             return None;
         }
-        if let Some(mapped) = self.ids.and_then(|ids| ids.get(name)) {
-            return self.tx.model.lexical_id(self.owner, mapped);
-        }
-        self.tx.model.lexical_id(self.owner, name)
+        self.tx.model.visible_id(
+            self.owner,
+            name,
+            self.mapped_id(name),
+            self.tx.declaration_scope(),
+        )
     }
 
     pub fn resolve(&mut self, name: &str) -> Result<Option<Value>, Error> {
@@ -671,6 +693,9 @@ impl ScriptContext<'_, '_> {
             }
             _ => (),
         }
+        if let Some(key) = self.shadow_key(name) {
+            return self.read_key(key).map(Some);
+        }
         if let Some(id) = self.id(name) {
             return Ok(Some(Value::Object(id)));
         }
@@ -683,7 +708,7 @@ impl ScriptContext<'_, '_> {
         {
             return Ok(Some(v));
         }
-        if let Ok(key) = self.tx.lookup_property(self.owner, self.root, name) {
+        if let Ok(key) = self.lookup_name_key(name) {
             return self.read_key(key).map(Some);
         }
         Ok(None)
@@ -752,7 +777,7 @@ impl ScriptContext<'_, '_> {
         if private(name) || self.id(name).is_some() || matches!(name, "parent" | "this") {
             return Err(Error::new(format!("cannot assign to '{name}'")));
         }
-        let key = self.tx.lookup_property(self.owner, self.root, name)?;
+        let key = self.lookup_name_key(name)?;
         self.write_key(key, value)
     }
 
@@ -776,7 +801,7 @@ impl ScriptContext<'_, '_> {
             {
                 return Err(Error::new(format!("cannot install a binding on '{name}'")));
             }
-            self.tx.lookup_property(self.owner, self.root, name)?
+            self.lookup_name_key(name)?
         };
         self.tx.budget()?;
         let result = self.tx.install_guest_binding(key, callback);

@@ -145,6 +145,66 @@ impl Frame<'_, '_> {
         self.tx
             .name(self.owner, self.root(root)?, name, self.locals, self.reads)
     }
+    pub fn resolved_name(&mut self, source: &str, actual: &str) -> Result<Value, Error> {
+        if let Some(id) =
+            self.tx
+                .model
+                .visible_id(self.owner, source, actual, self.tx.declaration_scope())
+        {
+            return Ok(Value::Object(id));
+        }
+        if let Some(key) =
+            self.tx
+                .model
+                .id_shadow(self.owner, source, actual, self.tx.declaration_scope())
+        {
+            return self.tx.script_read(key, self.reads);
+        }
+        self.name(source, None)
+    }
+
+    pub fn target_resolved_name(&self, source: &str, actual: &str) -> Result<Target, Error> {
+        if self
+            .tx
+            .model
+            .visible_id(self.owner, source, actual, self.tx.declaration_scope())
+            .is_some()
+        {
+            return Err(Error::new(format!("cannot assign to id '{source}'")));
+        }
+        if let Some(key) =
+            self.tx
+                .model
+                .id_shadow(self.owner, source, actual, self.tx.declaration_scope())
+        {
+            return Ok(self.target(Location::Property(key)));
+        }
+        self.target_name(source, None)
+    }
+
+    pub fn typeof_name(&mut self, name: &str, root: Option<&str>) -> Result<Value, Error> {
+        let context = self.root(root)?;
+        let model = &self.tx.model;
+        let known = self.locals.contains_key(name)
+            || matches!(name, "parent" | "this" | "Infinity" | "NaN")
+            || model
+                .visible_id(self.owner, name, name, self.tx.declaration_scope())
+                .is_some()
+            || model.nodes[self.owner.index]
+                .type_scope
+                .member(name)
+                .is_some()
+            || self.tx.lookup_property(self.owner, context, name).is_ok()
+            || [self.owner, context, model.document_root(self.owner)]
+                .into_iter()
+                .any(|o| model.script_method(o, name));
+        if !known {
+            return Ok(Value::String("undefined".into()));
+        }
+        let value = self.name(name, root)?;
+        self.unary("typeof", value)
+    }
+
     pub fn named_member(
         &mut self,
         base: &str,
@@ -355,6 +415,13 @@ impl Frame<'_, '_> {
     pub fn target_name(&self, name: &str, root: Option<&str>) -> Result<Target, Error> {
         let location = if self.locals.contains_key(name) {
             Location::Local(name.to_owned())
+        } else if self
+            .tx
+            .model
+            .visible_id(self.owner, name, name, self.tx.declaration_scope())
+            .is_some()
+        {
+            return Err(Error::new(format!("cannot assign to id '{name}'")));
         } else {
             Location::Property(
                 self.tx

@@ -336,6 +336,7 @@ impl TypeRegistry {
             builder.instance.dynamic.contexts.insert(
                 id,
                 dynamic::Context {
+                    bound: template.object.bound_component,
                     row_revision: None,
                     delegate_inputs: None,
                     declaration,
@@ -1014,6 +1015,7 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
                         source_url: child.source_url.clone(),
                         source_layers: child.source_layers.clone(),
                         shadows: Vec::new(),
+                        bound_component: child.bound_component,
                         list_assignment: Default::default(),
                         composite_types: Vec::new(),
                         type_imports: Some(scope),
@@ -1130,16 +1132,18 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
     fn link_aliases(&mut self) -> Result<(), Error> {
         for (key, expr, scope) in &self.aliases {
             let alias = match expr {
-                Expr::Name(name) => Alias::Object(
+                Expr::Name(name) | Expr::ResolvedId { target: name, .. } => Alias::Object(
                     self.instance
                         .lexical_id(self.instance.properties[*key].owner, name)
                         .ok_or_else(|| Error::new(format!("unknown alias id '{name}'")))?,
                 ),
                 Expr::Member(base, name) => {
                     let (id, path) = match base.as_ref() {
-                        Expr::Name(id) => (id, name.clone()),
+                        Expr::Name(id) | Expr::ResolvedId { target: id, .. } => (id, name.clone()),
                         Expr::Member(group, part) => match group.as_ref() {
-                            Expr::Name(id) => (id, format!("{part}.{name}")),
+                            Expr::Name(id) | Expr::ResolvedId { target: id, .. } => {
+                                (id, format!("{part}.{name}"))
+                            }
                             _ => return Err(Error::new("alias target is too deeply nested")),
                         },
                         _ => return Err(Error::new("alias requires id.property")),
@@ -1292,6 +1296,7 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
             id,
             dynamic::Context {
                 declaration,
+                bound: object.bound_component,
                 row_revision: None,
                 delegate_inputs: None,
                 ids: BTreeMap::new(),

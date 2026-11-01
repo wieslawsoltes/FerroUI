@@ -107,7 +107,9 @@ impl Document {
     pub fn unsupported_pragma(&self, singleton: bool) -> Option<&Pragma> {
         self.pragmas.iter().find(|p| match p.name.as_str() {
             "Singleton" => !singleton || !p.values.is_empty(),
-            "FunctionSignatureBehavior" | "ListPropertyAssignBehavior" => !p.valid_behavior(),
+            "ComponentBehavior" | "FunctionSignatureBehavior" | "ListPropertyAssignBehavior" => {
+                !p.valid_behavior()
+            }
             _ => true,
         })
     }
@@ -117,6 +119,7 @@ impl Pragma {
     pub(crate) fn valid_behavior(&self) -> bool {
         !self.values.is_empty()
             && self.values.iter().all(|s| match self.name.as_str() {
+                "ComponentBehavior" => matches!(s.as_str(), "Bound" | "Unbound"),
                 "FunctionSignatureBehavior" => matches!(s.as_str(), "Ignored" | "Enforced"),
                 "ListPropertyAssignBehavior" => {
                     matches!(s.as_str(), "Append" | "Replace" | "ReplaceIfNotDefault")
@@ -155,6 +158,9 @@ pub struct Object {
     /// Policy declared on the root of this source component.
     #[serde(default)]
     pub list_assignment: ListAssignment,
+    /// Components instantiated from this template retain the defining lexical context.
+    #[serde(default)]
+    pub bound_component: bool,
     /// Virtual source location for declaration-relative resources.
     #[serde(default)]
     pub source_url: Option<String>,
@@ -281,6 +287,11 @@ pub enum Expr {
     Number(f64),
     String(String),
     Name(String),
+    /// Carry the original name through ID isolation so a local member can shadow an outer ID.
+    ResolvedId {
+        name: String,
+        target: String,
+    },
     /// Unqualified lookup anchored to the declaring component after linking.
     ScopedName {
         name: String,

@@ -24,6 +24,7 @@ fn parse_tokens<'s>(source: &'s str, tokens: Tokens<'s>) -> Result<Document> {
         pos: 0,
         depth: 0,
         loops: 0,
+        bound_component: false,
         ignored_signatures: false,
         list_assignment: ListAssignment::Append,
     }
@@ -78,6 +79,7 @@ struct Parser<'s> {
     pos: usize,
     depth: usize,
     loops: usize,
+    bound_component: bool,
     ignored_signatures: bool,
     list_assignment: ListAssignment,
 }
@@ -183,7 +185,7 @@ impl<'s> Parser<'s> {
             let p = self.pragma()?;
             if matches!(
                 p.name.as_str(),
-                "FunctionSignatureBehavior" | "ListPropertyAssignBehavior"
+                "ComponentBehavior" | "FunctionSignatureBehavior" | "ListPropertyAssignBehavior"
             ) {
                 if pragmas
                     .iter()
@@ -203,7 +205,9 @@ impl<'s> Parser<'s> {
                     ));
                 }
                 let value = p.values.last().unwrap().as_str();
-                if p.name == "FunctionSignatureBehavior" {
+                if p.name == "ComponentBehavior" {
+                    self.bound_component = value == "Bound";
+                } else if p.name == "FunctionSignatureBehavior" {
                     self.ignored_signatures = value == "Ignored";
                 } else {
                     self.list_assignment = match value {
@@ -351,6 +355,7 @@ impl<'s> Parser<'s> {
             shadows: Vec::new(),
             type_imports: None,
             list_assignment: ListAssignment::Append,
+            bound_component: self.bound_component,
             composite_types: Vec::new(),
             type_name,
             members,

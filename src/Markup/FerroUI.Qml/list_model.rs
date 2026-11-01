@@ -725,6 +725,7 @@ pub(crate) fn list_model_object(imports: &[ir::Import], items: Vec<ir::Object>) 
         source_url: None,
         source_layers: vec![],
         shadows: vec![],
+        bound_component: false,
         list_assignment: Default::default(),
         composite_types: vec![],
         type_imports: Some(imports),

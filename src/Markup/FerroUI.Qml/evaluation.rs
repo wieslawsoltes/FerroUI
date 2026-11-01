@@ -25,6 +25,11 @@ impl Transaction<'_> {
         name: &str,
     ) -> Result<SlotId, Error> {
         self.scoped_key(owner, name)
+            .or_else(|err| {
+                self.model
+                    .id_shadow(owner, name, name, self.declaration_scope())
+                    .ok_or(err)
+            })
             .or_else(|_| self.scoped_key(root, name))
             .or_else(|error| self.model.delegate_context_key(owner, name).ok_or(error))
             .or_else(|_| self.scoped_key(self.model.document_root(owner), name))
@@ -54,7 +59,10 @@ impl Transaction<'_> {
             "Infinity" => return Ok(Value::Number(f64::INFINITY)),
             _ => (),
         }
-        if let Some(id) = self.model.lexical_id(owner, name) {
+        if let Some(id) = self
+            .model
+            .visible_id(owner, name, name, self.declaration_scope())
+        {
             return Ok(Value::Object(id));
         }
         if let Ok(key) = self.scoped_key(owner, name) {
@@ -125,6 +133,13 @@ impl Transaction<'_> {
             Number(n) => Value::Number(*n),
             String(s) => Value::String(s.clone()),
             Name(name) => self.name(owner, self.model.context_root(owner), name, locals, reads)?,
+            ResolvedId { name, target } => compiled::Frame {
+                tx: self,
+                owner,
+                locals,
+                reads,
+            }
+            .resolved_name(name, target)?,
             ScopedName { name, root } => {
                 self.name(owner, self.scope_id(owner, root)?, name, locals, reads)?
             }
@@ -159,6 +174,16 @@ impl Transaction<'_> {
                 let base = self.expr(owner, base, locals, reads)?;
                 let index = self.expr(owner, index, locals, reads)?;
                 self.member(base, &self.model.value_string(&index)?, reads)?
+            }
+            Unary(op, expr) if op == "typeof" && lexical_name(expr).is_some() => {
+                let (name, root) = lexical_name(expr).unwrap();
+                compiled::Frame {
+                    tx: self,
+                    owner,
+                    locals,
+                    reads,
+                }
+                .typeof_name(name, root)?
             }
             Unary(op, expr) => {
                 let value = self.expr(owner, expr, locals, reads)?;
@@ -530,6 +555,9 @@ impl Transaction<'_> {
                     };
                     let place = match target {
                         Expr::Name(name) => frame.target_name(name, None)?,
+                        Expr::ResolvedId { name, target } => {
+                            frame.target_resolved_name(name, target)?
+                        }
                         Expr::ScopedName { name, root } => frame.target_name(name, Some(root))?,
                         Expr::Member(base, name) => {
                             if let Some((base, scope)) = lexical_name(base) {

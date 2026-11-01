@@ -39,6 +39,8 @@ fn main() {
         .expect("compile mirrored anchor fixture");
     ferroui_qml_build::compile_file("anchors/Main.qml", "anchors.rs")
         .expect("compile native anchor lines fixture");
+    ferroui_qml_build::compile_file("pragmas/Scopes.qml", "bound_contexts.rs")
+        .expect("compile bound contexts");
     ferroui_qml_build::compile_file("pragmas/Main.qml", "pragmas.rs")
         .expect("compile semantic pragmas");
     ferroui_qml_build::compile_file("ranges/Main.qml", "ranges.rs")

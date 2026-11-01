@@ -362,10 +362,11 @@ impl Transaction<'_> {
         {
             return Err(Error::new("Repeater delegates must inherit QtQuick.Item"));
         }
-        let required = node
-            .properties
-            .values()
-            .any(|key| self.model.properties[*key].required);
+        let required = self.model.dynamic.contexts[&root].bound
+            || node
+                .properties
+                .values()
+                .any(|key| self.model.properties[*key].required);
         if let Some(fields) = &inputs.attached {
             let mut scope = (*self.model.nodes[root.index].type_scope).clone();
             scope.attach_list_view(root, fields.keys());

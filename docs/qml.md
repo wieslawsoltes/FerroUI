@@ -163,6 +163,8 @@ The compiler parses JavaScript with SWC, resolves relative files, watches the tr
 
 ### Document behavior pragmas
 
+With `pragma ComponentBehavior: Bound`, Repeater and ListView delegates take their model inputs through required properties. IDs from the declaring component take precedence over same-named local members. In the default `Unbound` mode local members shadow outer IDs and delegates without required properties receive implicit model data. A component created with `createObject(parent)` retains the lexical scope of its declaration. [Bound and unbound scope fixtures](../tests/QmlCompiled/pragmas/Scopes.qml)
+
 `pragma FunctionSignatureBehavior: Ignored` leaves the arguments and results of QML functions untyped within that source file. The default `Enforced` mode converts scalar arguments and results according to their annotations. Native method and signal signatures retain their registered types.
 
 `pragma ListPropertyAssignBehavior` controls declarative object lists in source components. `Append` adds instances to the inherited list, `Replace` replaces its contents, and `ReplaceIfNotDefault` appends only to the default list. Replaced base instances retain their IDs for inherited code. An ordinary array assignment replaces a sequence.
