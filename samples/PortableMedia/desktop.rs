@@ -130,6 +130,7 @@ impl ApplicationImpl for App {
                             }
                         };
                         let path = std::env::args().nth(1).expect("media source argument");
+                        let uri = path.clone();
                         let source = if std::env::args().any(|a| a == "--resource") {
                             let encoded = match std::fs::read(&path) {
                                 Ok(encoded) => encoded,
@@ -152,7 +153,6 @@ impl ApplicationImpl for App {
                         } else {
                             MediaSource::File(path.into())
                         };
-                        let pending = view.set_source(source, provider, providers::importer());
                         let recovery_budget = budget.clone();
                         view.set_provider_factory(Some(Rc::new(move |interop| {
                             Ok((
@@ -160,6 +160,18 @@ impl ApplicationImpl for App {
                                 providers::importer(),
                             ))
                         })));
+                        #[cfg(target_os = "macos")]
+                        let pending = if std::env::args().any(|a| a == "--source-uri") {
+                            view.set_source_uri(Some(uri));
+                            wait_for_declared_source(&view)
+                        } else {
+                            view.set_source(source, provider, providers::importer())
+                        };
+                        #[cfg(not(target_os = "macos"))]
+                        let pending = {
+                            let _ = uri;
+                            view.set_source(source, provider, providers::importer())
+                        };
                         if let Err(error) = pending.await {
                             eprintln!("OPEN_FAILED {error}");
                             FAILED.store(true, Ordering::Relaxed);
@@ -192,6 +204,38 @@ impl ApplicationImpl for App {
         }
         Self::parent_on_framework_initialization_completed(this);
     }
+}
+#[cfg(target_os = "macos")]
+fn wait_for_declared_source(
+    view: &Ref<MediaPlayerElement>,
+) -> ferroui_media_video::MediaFuture<()> {
+    let weak = view.downgrade();
+    let started = Instant::now();
+    ferroui_media_apple::poll_native(move || {
+        use std::task::Poll;
+        let Some(view) = weak.upgrade() else {
+            return Poll::Ready(Err(ferroui_media::MediaError::cancelled()));
+        };
+        if let Some(player) = view.media_player() {
+            let state = player.playback_session();
+            if state.state == MediaPlaybackState::Failed {
+                return Poll::Ready(Err(state.error.unwrap()));
+            }
+            if !matches!(
+                state.state,
+                MediaPlaybackState::Closed | MediaPlaybackState::Opening
+            ) {
+                return Poll::Ready(Ok(()));
+            }
+        }
+        if started.elapsed() > Duration::from_secs(15) {
+            return Poll::Ready(Err(ferroui_media::MediaError::new(
+                ferroui_media::MediaErrorKind::NativeFailure,
+                "Source binding did not prepare",
+            )));
+        }
+        Poll::Pending
+    })
 }
 fn smoke(window: &Ref<Window>, view: &Ref<MediaPlayerElement>, budget: FrameBudget) {
     let view = view.downgrade();

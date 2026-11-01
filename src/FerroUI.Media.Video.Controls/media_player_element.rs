@@ -50,6 +50,9 @@ pub struct MediaPlayerElement {
     context_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
     device_suspended: Cell<bool>,
     recovery_generation: Cell<u64>,
+    source_request: Cell<u64>,
+    source_uri_suppressed: Cell<bool>,
+    source_waiting_for_context: Cell<bool>,
 }
 ferro_class!(MediaPlayerElement:Panel);
 ferro_class_info!(MediaPlayerElement {
@@ -57,6 +60,7 @@ ferro_class_info!(MediaPlayerElement {
 });
 ferro_impl_classes!(MediaPlayerElement:StyledElementImpl,LayoutableImpl,InteractiveImpl,InputElementImpl,ControlImpl,PanelImpl);
 ferro_properties! {impl MediaPlayerElement {
+    pub fn source_property()->StyledProperty<Option<String>> {FerroProperty::register::<Self,_>("Source",None)}
     pub fn autoplay_property()->StyledProperty<bool> {FerroProperty::register::<Self,_>("AutoPlay",false)}
     pub fn are_transport_controls_enabled_property()->StyledProperty<bool> {FerroProperty::register::<Self,_>("AreTransportControlsEnabled",false)}
     pub fn stretch_property()->StyledProperty<Stretch> {FerroProperty::register::<Self,_>("Stretch",Stretch::Uniform)}
@@ -106,7 +110,11 @@ impl FerroObjectImpl for MediaPlayerElement {
     }
     fn on_property_changed(this: &Self, args: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, args);
-        if args.property() == Self::stretch_property().as_property() {
+        if args.property() == Self::source_property().as_property() {
+            if !this.source_uri_suppressed.get() || this.source_uri().is_some() {
+                this.apply_source_uri();
+            }
+        } else if args.property() == Self::stretch_property().as_property() {
             if let Some(presenter) = this.presenter.borrow().as_ref() {
                 presenter.set_stretch(this.stretch());
             }
@@ -130,10 +138,15 @@ impl VisualImpl for MediaPlayerElement {
         Self::parent_on_attached_to_visual_tree(this, args);
         this.subscribe();
         this.subscribe_context();
+        if this.source_uri().is_some() {
+            this.apply_source_uri();
+        }
         this.start_polling();
     }
     fn on_detached_from_visual_tree(this: &Self, args: &VisualTreeAttachmentEventArgs) {
         this.stop_polling();
+        this.next_source_request();
+        this.source_waiting_for_context.set(false);
         this.cancel_recovery();
         if let Some(subscription) = this.context_subscription.borrow_mut().take() {
             subscription.dispose();
@@ -170,10 +183,192 @@ impl MediaPlayerElement {
             context_subscription: RefCell::new(None),
             device_suspended: Cell::new(false),
             recovery_generation: Cell::new(0),
+            source_request: Cell::new(0),
+            source_uri_suppressed: Cell::new(false),
+            source_waiting_for_context: Cell::new(false),
         }
     }
     pub fn new() -> Ref<Self> {
         instantiate(Self::construct())
+    }
+    /// The focused markup `Source` property accepts a file path or supported
+    /// network/file URL. Encoded resources use `set_source`; shared sessions use
+    /// `set_media_player`. Configure a provider factory before attaching a new
+    /// declarative view. Selection alone never enables autoplay.
+    pub fn source_uri(&self) -> Option<String> {
+        self.get_value(Self::source_property())
+    }
+    pub fn set_source_uri(&self, source: Option<String>) {
+        self.set_value(Self::source_property(), source);
+    }
+    fn next_source_request(&self) -> u64 {
+        let next = self
+            .source_request
+            .get()
+            .checked_add(1)
+            .expect("source request exhausted");
+        self.source_request.set(next);
+        next
+    }
+    fn clear_source_uri_selection(&self) -> bool {
+        let request = self.next_source_request();
+        self.source_waiting_for_context.set(false);
+        if self.source_uri().is_some() {
+            self.source_uri_suppressed.set(true);
+            self.set_value(Self::source_property(), None::<String>);
+            self.source_uri_suppressed.set(false);
+        }
+        self.source_request.get() == request
+    }
+    fn source_uri_error(&self, error: &MediaError) {
+        if let Some(placeholder) = self.placeholder.borrow().clone() {
+            placeholder.set_text(Some("Media source is unavailable"));
+        }
+        self.show_placeholder(true);
+        let already_reported = self
+            .media_player()
+            .is_some_and(|p| p.playback_session().error.as_ref() == Some(error));
+        if !already_reported {
+            self.errors.emit(error);
+        }
+    }
+    fn apply_source_uri(&self) {
+        let request = self.next_source_request();
+        self.cancel_recovery();
+        self.source_waiting_for_context.set(false);
+        let player = self.media_player().filter(|_| self.owns_player.get());
+        if player.is_none() && self.media_player().is_some() {
+            // Selecting a URI detaches this view from a caller-owned player;
+            // clear its presentation without changing the caller's source.
+            self.set_media_player_core(None, None);
+        }
+        if let Some(player) = &player {
+            player.clear_source();
+        }
+        if self.source_request.get() != request {
+            return;
+        }
+        self.show_placeholder(true);
+        let Some(value) = self.source_uri() else {
+            self.set_media_player_core(None, None);
+            return;
+        };
+        let value = value.trim();
+        if value.is_empty() {
+            self.source_uri_error(&MediaError::new(
+                MediaErrorKind::InvalidSource,
+                "Media source path or URL is empty",
+            ));
+            return;
+        }
+        let source = if value.contains("://")
+            || value
+                .get(..5)
+                .is_some_and(|v| v.eq_ignore_ascii_case("file:"))
+        {
+            MediaSource::Url(value.to_owned())
+        } else {
+            MediaSource::File(value.into())
+        };
+        self.source_waiting_for_context.set(true);
+        if !self.is_attached_to_visual_tree() {
+            return;
+        }
+        if let Some(placeholder) = self.placeholder.borrow().clone() {
+            placeholder.set_text(Some("Opening media"));
+        }
+        let weak = self.to_ref().downgrade();
+        let factory = self.provider_factory.borrow().clone();
+        if factory.is_none() {
+            let Some(player) = player else {
+                self.source_waiting_for_context.set(false);
+                self.source_uri_error(&MediaError::new(
+                    MediaErrorKind::Unsupported,
+                    "Source needs a platform provider factory or an existing owned player",
+                ));
+                return;
+            };
+            self.source_waiting_for_context.set(false);
+            let pending = player.set_source(source);
+            Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+                if let Err(error) = pending.await {
+                    if error.kind != MediaErrorKind::Cancelled {
+                        if let Some(view) =
+                            weak.upgrade().filter(|v| v.source_request.get() == request)
+                        {
+                            view.source_uri_error(&error);
+                        }
+                    }
+                }
+            });
+            return;
+        }
+        self.subscribe_context();
+        let Some(visual) = ElementComposition::get_element_visual(&self.to_ref()) else {
+            // Attachment may precede composition-visual creation. Retry once
+            // on the existing render dispatcher; never start an idle poller.
+            Dispatcher::ui_thread().post_local(
+                move || {
+                    if let Some(view) = weak.upgrade().filter(|v| {
+                        v.source_request.get() == request && v.is_attached_to_visual_tree()
+                    }) {
+                        view.subscribe_context();
+                        if ElementComposition::get_element_visual(&view).is_some() {
+                            view.apply_source_uri();
+                        } else {
+                            view.source_uri_error(&MediaError::new(
+                                MediaErrorKind::Unsupported,
+                                "Source has no composition renderer",
+                            ));
+                        }
+                    }
+                },
+                DispatcherPriority::RENDER,
+            );
+            return;
+        };
+        let compositor = visual.compositor().clone();
+        let factory = factory.unwrap();
+        Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+            let interop = compositor.try_get_composition_gpu_interop().await;
+            let Some(view) = weak
+                .upgrade()
+                .filter(|v| v.source_request.get() == request && v.is_attached_to_visual_tree())
+            else {
+                return;
+            };
+            let Some(interop) = interop.filter(|i| !i.is_lost()) else {
+                // A later ContextCreated can retry an initially unavailable
+                // Android surface. Unsupported profiles still receive an error.
+                view.source_uri_error(&MediaError::new(
+                    MediaErrorKind::Unsupported,
+                    "Renderer has no admitted media texture interop",
+                ));
+                return;
+            };
+            let (provider, importer) = match factory(&*interop) {
+                Ok(value) => value,
+                Err(error) => {
+                    view.source_waiting_for_context.set(false);
+                    view.source_uri_error(&error);
+                    return;
+                }
+            };
+            if view.source_request.get() != request {
+                return;
+            }
+            view.source_waiting_for_context.set(false);
+            let pending = view.set_source_core(source, provider, importer);
+            drop(view);
+            if let Err(error) = pending.await {
+                if error.kind != MediaErrorKind::Cancelled {
+                    if let Some(view) = weak.upgrade().filter(|v| v.source_request.get() == request)
+                    {
+                        view.source_uri_error(&error);
+                    }
+                }
+            }
+        });
     }
     pub fn autoplay(&self) -> bool {
         self.get_value(Self::autoplay_property())
@@ -233,6 +428,16 @@ impl MediaPlayerElement {
         player: Option<&MediaPlayer>,
         importer: Option<Rc<dyn TextureFrameImporter>>,
     ) {
+        if !self.clear_source_uri_selection() {
+            return;
+        }
+        self.set_media_player_core(player, importer);
+    }
+    fn set_media_player_core(
+        &self,
+        player: Option<&MediaPlayer>,
+        importer: Option<Rc<dyn TextureFrameImporter>>,
+    ) {
         self.stop_polling();
         self.cancel_recovery();
         self.subscription.borrow_mut().take();
@@ -273,13 +478,24 @@ impl MediaPlayerElement {
         provider: Rc<dyn MediaPlayerProvider>,
         importer: Rc<dyn TextureFrameImporter>,
     ) -> MediaFuture<()> {
+        if !self.clear_source_uri_selection() {
+            return Box::pin(async { Err(MediaError::cancelled()) });
+        }
+        self.set_source_core(source, provider, importer)
+    }
+    fn set_source_core(
+        &self,
+        source: MediaSource,
+        provider: Rc<dyn MediaPlayerProvider>,
+        importer: Rc<dyn TextureFrameImporter>,
+    ) -> MediaFuture<()> {
         let player = MediaPlayer::new(provider);
         let mut options = player.options();
         options.autoplay = self.autoplay();
         if let Err(error) = player.set_options(options) {
             return Box::pin(async move { Err(error) });
         }
-        self.set_media_player(Some(&player), Some(importer));
+        self.set_media_player_core(Some(&player), Some(importer));
         self.owns_player.set(true);
         *self.player.borrow_mut() = Some(player.clone());
         player.set_source(source)
@@ -294,6 +510,11 @@ impl MediaPlayerElement {
         }
         *self.provider_factory.borrow_mut() = factory;
         self.subscribe_context();
+        if self.source_uri().is_some()
+            && (self.source_waiting_for_context.get() || self.media_player().is_none())
+        {
+            self.apply_source_uri();
+        }
     }
     fn cancel_recovery(&self) {
         self.recovery_generation.set(
@@ -339,6 +560,9 @@ impl MediaPlayerElement {
                 if let Some(view) = weak.upgrade() {
                     match state {
                         RenderContextState::Lost => view.suspend_device(),
+                        RenderContextState::Created if view.source_waiting_for_context.get() => {
+                            view.apply_source_uri()
+                        }
                         RenderContextState::Created if view.device_suspended.get() => {
                             view.recover_device()
                         }
@@ -602,6 +826,194 @@ mod readiness_tests {
             Dispatcher::force_fire_timer_for_unit_tests(&timer);
         }
         Dispatcher::ui_thread().run_jobs(None);
+    }
+    struct Importer;
+    impl TextureFrameImporter for Importer {
+        fn import(
+            &self,
+            _: &dyn ICompositionGpuInterop,
+            _: &FrameLease,
+        ) -> Result<ferroui_media_controls::ImportedTextureFrame, MediaError> {
+            unreachable!("source-selection fixture produces no GPU frames")
+        }
+    }
+    fn ready<T>(mut work: MediaFuture<T>) -> Result<T, MediaError> {
+        match work
+            .as_mut()
+            .poll(&mut std::task::Context::from_waker(std::task::Waker::noop()))
+        {
+            std::task::Poll::Ready(value) => value,
+            _ => panic!("expected ready"),
+        }
+    }
+    fn owned_view() -> (Ref<MediaPlayerElement>, MediaPlayer) {
+        let view = MediaPlayerElement::new();
+        // This fixture checks source selection. The mock renderer has no GPU;
+        // native smoke tests independently exercise admission and presentation.
+        view.presentation_subscription.borrow_mut().take();
+        let native = Rc::new(Native {
+            pending: Cell::new(false),
+            reads: Cell::new(0),
+        });
+        ready(view.set_source(
+            MediaSource::File("initial.mp4".into()),
+            Rc::new(Provider(native)),
+            Rc::new(Importer),
+        ))
+        .unwrap();
+        let player = view.media_player().unwrap();
+        (view, player)
+    }
+    #[test]
+    fn bound_uri_replaces_owned_source_latest_wins_and_none_clears_immediately() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let (view, player) = owned_view();
+        view.set_source_uri(Some("second.mp4".into()));
+        assert!(
+            player.source().is_none(),
+            "selection invalidates the previous source before attachment"
+        );
+        let window = Window::new();
+        window.set_content(Some(Control::boxed(view.clone())));
+        window.show();
+        tick();
+        assert!(
+            matches!(player.source(), Some(MediaSource::File(path)) if path == std::path::Path::new("second.mp4"))
+        );
+        assert!(!player.options().autoplay);
+        view.set_source_uri(Some("https://example.invalid/third.mp4".into()));
+        view.set_source_uri(Some("fourth.mp4".into()));
+        tick();
+        assert!(
+            matches!(player.source(), Some(MediaSource::File(path)) if path == std::path::Path::new("fourth.mp4"))
+        );
+        view.set_source_uri(None);
+        assert!(player.source().is_none());
+        assert!(view.media_player().is_none());
+        window.close();
+        tick();
+    }
+    #[test]
+    fn explicit_shared_player_cancels_pending_uri_without_stopping_the_caller() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let (view, old) = owned_view();
+        let external = MediaPlayer::new(Rc::new(Provider(Rc::new(Native {
+            pending: Cell::new(false),
+            reads: Cell::new(0),
+        }))));
+        ready(external.set_source(MediaSource::File("external.mp4".into()))).unwrap();
+        let window = Window::new();
+        window.set_content(Some(Control::boxed(view.clone())));
+        window.show();
+        tick();
+        view.set_source_uri(Some("superseded.mp4".into()));
+        view.set_media_player(Some(&external), None);
+        tick();
+        assert!(view.source_uri().is_none());
+        assert!(view.media_player().unwrap().same_player(&external));
+        assert!(old.source().is_none());
+        window.close();
+        tick();
+        assert!(
+            matches!(external.source(), Some(MediaSource::File(path)) if path == std::path::Path::new("external.mp4"))
+        );
+    }
+    #[test]
+    fn new_uri_supersedes_suspended_device_recovery() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let (view, player) = owned_view();
+        view.suspend_device();
+        assert!(view.device_suspended.get());
+        let previous = view.recovery_generation.get();
+        view.set_source_uri(Some("replacement.mp4".into()));
+        assert!(!view.device_suspended.get());
+        assert!(view.recovery_generation.get() > previous);
+        assert!(player.source().is_none());
+        assert!(view.source_waiting_for_context.get());
+        let window = Window::new();
+        window.set_content(Some(Control::boxed(view.clone())));
+        window.show();
+        tick();
+        assert!(
+            matches!(player.source(), Some(MediaSource::File(path)) if path == std::path::Path::new("replacement.mp4"))
+        );
+        window.close();
+        tick();
+    }
+    #[test]
+    fn configuring_recovery_factory_does_not_reopen_a_prepared_uri() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let (view, player) = owned_view();
+        let window = Window::new();
+        window.set_content(Some(Control::boxed(view.clone())));
+        window.show();
+        tick();
+        view.set_source_uri(Some("selected.mp4".into()));
+        tick();
+        let calls = Rc::new(Cell::new(0));
+        let seen = calls.clone();
+        view.set_provider_factory(Some(Rc::new(move |_| {
+            seen.set(seen.get() + 1);
+            Err(MediaError::new(
+                MediaErrorKind::Unsupported,
+                "No GPU fixture",
+            ))
+        })));
+        tick();
+        assert_eq!(calls.get(), 0);
+        assert!(view.media_player().unwrap().same_player(&player));
+        assert!(
+            matches!(player.source(), Some(MediaSource::File(path)) if path == std::path::Path::new("selected.mp4"))
+        );
+        window.close();
+        tick();
+    }
+    #[test]
+    fn uri_selection_releases_a_shared_view_without_clearing_the_external_source() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let view = MediaPlayerElement::new();
+        let external = MediaPlayer::new(Rc::new(Provider(Rc::new(Native {
+            pending: Cell::new(false),
+            reads: Cell::new(0),
+        }))));
+        ready(external.set_source(MediaSource::File("caller.mp4".into()))).unwrap();
+        view.set_media_player(Some(&external), None);
+        view.set_source_uri(Some("deferred.mp4".into()));
+        assert!(view.media_player().is_none());
+        assert!(
+            matches!(external.source(), Some(MediaSource::File(path)) if path == std::path::Path::new("caller.mp4"))
+        );
+    }
+    #[test]
+    fn empty_uri_clears_previous_source_and_reports_invalid_source() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let (view, player) = owned_view();
+        let errors = Rc::new(RefCell::new(Vec::new()));
+        let seen = errors.clone();
+        let _subscription = view
+            .errors()
+            .subscribe(move |e| seen.borrow_mut().push(e.kind));
+        view.set_source_uri(Some("  ".into()));
+        assert!(player.source().is_none());
+        assert_eq!(&*errors.borrow(), &[MediaErrorKind::InvalidSource]);
+    }
+    #[test]
+    fn unattached_uri_does_not_invoke_a_provider_factory() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let view = MediaPlayerElement::new();
+        let calls = Rc::new(Cell::new(0));
+        let seen = calls.clone();
+        view.set_provider_factory(Some(Rc::new(move |_| {
+            seen.set(seen.get() + 1);
+            Err(MediaError::new(
+                MediaErrorKind::Unsupported,
+                "No GPU fixture",
+            ))
+        })));
+        view.set_source_uri(Some("deferred.mp4".into()));
+        tick();
+        assert_eq!(calls.get(), 0);
+        assert!(view.media_player().is_none());
     }
     #[test]
     fn paused_producer_outlives_settling_interval_then_sleeps() {

@@ -68,9 +68,26 @@ producer admitted from the active composition interop.
 Playback handles reentrant events, preparation-time intent, latest-seek/source
 cancellation and native achieved seek positions. Views release only their own
 subscriptions and frame leases for caller-owned sessions. A Rust-supplied custom
-placeholder/poster is normal styled content. Current video markup properties are
-Stretch, AutoPlay and AreTransportControlsEnabled; providers/sessions are supplied
-from Rust.
+placeholder/poster is normal styled content. Video markup supports `Source`
+(nullable file-path/URL text), `Stretch`, `AutoPlay` and
+`AreTransportControlsEnabled`. `set_source_uri` uses that same styled property;
+configure `set_provider_factory` from Rust before attaching a new declarative
+view. An existing owned player can reuse its provider. Selection clears old
+presentation immediately; latest selection wins, None clears, and detach cancels
+pending work. An unattached selection does not invoke a provider. Configuring
+recovery for an already prepared URI does not reopen it.
+
+```xml
+<video:MediaPlayerElement xmlns:video="using:FerroUI.Media.Video.Controls"
+    Source="file:///absolute/path/video.mp4" AutoPlay="False"
+    Stretch="Uniform" AreTransportControlsEnabled="True" />
+```
+
+Encoded `MediaSource::Resource` values and caller-supplied sessions use the Rust
+`set_source`/`set_media_player` APIs. Those explicit assignments clear URI
+selection. Switching a borrowed view to a URI releases the view without clearing
+the caller's source. This focused metadata does not reflect the player/session
+object graph into markup.
 
 Apple camera configuration/start/stop run on a serial capture queue. It reports
 fractional negotiated frame rates, permission outcomes, disconnect/runtime errors
@@ -302,8 +319,8 @@ implemented. Owned native sessions and renderers have opt-in context recovery
 factories; controlled macOS/iOS simulator/Android reset runs check pixels before/after recovery
 and final allocation retirement. Healthy EGL contexts drain leased resources
 before destruction, while unknown completion remains quarantined. Broader
-markup/source APIs, six-platform packaging and native accessibility acceptance
-remain unfinished.
+typed resource/session-object markup, six-platform packaging and native
+accessibility acceptance remain outside the currently verified subset.
 The independent mobile sample combines camera, opt-in QR, JPEG capture, renderer
 output and detach/stop cleanup; the broader navigation matrix remains open. Apple playback now reads the selected track transform asynchronously and publishes
 cardinal rotation/reflection plus an integral clean aperture. Non-square pixels,
