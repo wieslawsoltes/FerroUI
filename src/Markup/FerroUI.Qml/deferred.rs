@@ -60,7 +60,7 @@ impl Queue {
     pub(crate) fn retire(&mut self, dead: &BTreeSet<ObjectId>) {
         self.jobs.retain(|_, task| {
             let (owner, arguments) = match task {
-                Task::Binding(owner) => (*owner, None),
+                Task::Binding(owner) | Task::Loader(owner) => (*owner, None),
                 Task::Call {
                     owner, arguments, ..
                 } => (*owner, Some(arguments)),
