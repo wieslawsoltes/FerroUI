@@ -153,6 +153,11 @@ impl Instance {
         self.transaction(|tx| tx.url_factory(owner, None, url, false, parent))
     }
 }
+enum FactoryDefinition {
+    Bundled(Result<Template, String>),
+    Network(Url),
+}
+
 impl Transaction<'_> {
     pub(crate) fn component_call(
         &mut self,
@@ -199,8 +204,14 @@ impl Transaction<'_> {
                     Template::from_object(shape(ty, "", imports.clone()), &imports)
                         .map_err(|e| e.message)
                 });
-            self.make_factory(owner, parent, "", definition, later)
-                .map(Value::Object)
+            self.make_factory(
+                owner,
+                parent,
+                "",
+                FactoryDefinition::Bundled(definition),
+                later,
+            )
+            .map(Value::Object)
         } else {
             self.url_factory(owner, origin, name, later, parent)
                 .map(Value::Object)
@@ -219,13 +230,23 @@ impl Transaction<'_> {
             .node(owner)
             .ok_or_else(|| Error::new("invalid declaration context"))?;
         let url = resolve(origin.or(node.source_url.as_deref()), spec)?;
-        let definition = self
-            .model
-            .dynamic
-            .catalog
-            .get(&url)
-            .cloned()
-            .ok_or_else(|| format!("{url}: outside the compiled QML catalog"));
+        let parsed = Url::parse(&url).map_err(|e| Error::new(e.to_string()))?;
+        let definition = if let Some(template) = self.model.dynamic.catalog.get(&url) {
+            FactoryDefinition::Bundled(Ok(template.clone()))
+        } else if matches!(parsed.scheme(), "https" | "http")
+            && parsed.host_str() != Some("qml.invalid")
+            && self
+                .model
+                .dynamic
+                .registry
+                .as_ref()
+                .is_some_and(|r| r.component_transport.is_some())
+        {
+            network::allow_request(self.model.network.count() + self.network_loads.len())?;
+            FactoryDefinition::Network(parsed)
+        } else {
+            FactoryDefinition::Bundled(Err(format!("{url}: outside the compiled QML catalog")))
+        };
         self.make_factory(owner, parent, &url, definition, later)
     }
     fn make_factory(
@@ -233,7 +254,7 @@ impl Transaction<'_> {
         owner: ObjectId,
         parent: Option<ObjectId>,
         url: &str,
-        definition: Result<Template, String>,
+        definition: FactoryDefinition,
         later: bool,
     ) -> Result<ObjectId, Error> {
         if self.model.node(owner).is_none() || parent.is_some_and(|p| self.model.node(p).is_none())
@@ -257,11 +278,18 @@ impl Transaction<'_> {
                 ids: Default::default(),
             },
         );
+        let fetching = matches!(definition, FactoryDefinition::Network(_));
         match definition {
-            Ok(template) => {
+            FactoryDefinition::Network(url) => {
+                // A URL factory is a valid Component without an inline child.
+                // errorString() is empty while the request is outstanding.
+                self.model.dynamic.file_errors.insert(id, String::new());
+                self.network_loads.push((id, url));
+            }
+            FactoryDefinition::Bundled(Ok(template)) => {
                 self.model.dynamic.templates.insert(id, template);
             }
-            Err(error) => {
+            FactoryDefinition::Bundled(Err(error)) => {
                 self.model.dynamic.file_errors.insert(id, error);
             }
         }
@@ -269,10 +297,12 @@ impl Transaction<'_> {
         self.model
             .allocate_template(id, parent, &shell, &registry)?;
         self.set_value(self.model.key(id, "url")?, Value::String(url.into()));
-        if later {
+        if later || fetching {
             self.set_value(self.model.key(id, "status")?, Value::Number(2.));
             self.set_value(self.model.key(id, "progress")?, Value::Number(0.));
-            self.model.dynamic.loading.insert(id);
+            if !fetching {
+                self.model.dynamic.loading.insert(id);
+            }
         } else {
             self.finish_factory(id)?;
         }

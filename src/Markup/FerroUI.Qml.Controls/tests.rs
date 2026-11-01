@@ -632,3 +632,49 @@ fn list_view_scrolls_million_row_native_canvas_from_both_sides() {
     assert!(matches!(view.get(id,"data").unwrap(),Value::List(items) if items.len()<12));
     window.close();
 }
+
+#[test]
+fn network_completion_wakes_a_mounted_loader_on_its_dispatcher() {
+    use ferroui_base::threading::Dispatcher;
+    use ferroui_qml::network::{ComponentReply, ComponentTransport, Url};
+    #[derive(Default)]
+    struct Download(RefCell<Option<ComponentReply>>);
+    impl ComponentTransport for Download {
+        fn request(&self, url: &Url, reply: ComponentReply) {
+            assert_eq!(url.path(), "/Panel.qml");
+            self.0.replace(Some(reply));
+        }
+    }
+    let _scope = UnitTestApplication::start(TestServices::new());
+    let download = Rc::new(Download::default());
+    let mut types = ControlRegistry::standard().unwrap();
+    types.types_mut().set_component_transport(download.clone());
+    let doc = parse(
+        r#"import QtQuick
+        Loader { source: "https://widgets.test/Panel.qml" }"#,
+    )
+    .unwrap();
+    let view = QmlView::new(&doc, &types, Default::default()).unwrap();
+    let reply = download.0.take().unwrap();
+    std::thread::spawn(move || {
+        reply.complete(Ok(br#"import QtQuick
+        Text { text: "Fetched and mounted" }"#
+            .to_vec()))
+    })
+    .join()
+    .unwrap();
+    assert_eq!(view.get(view.root_id(), "item").unwrap(), Value::Null);
+    Dispatcher::current_dispatcher().run_jobs(None);
+    let Value::Object(item) = view.get(view.root_id(), "item").unwrap() else {
+        panic!("remote text")
+    };
+    assert_eq!(
+        view.control(item)
+            .unwrap()
+            .cast::<TextBlock>()
+            .unwrap()
+            .text()
+            .as_deref(),
+        Some("Fetched and mounted")
+    );
+}

@@ -34,6 +34,7 @@ pub(crate) struct Transaction<'a> {
     pub(crate) deferred: Vec<deferred::Task>,
     pub(crate) structure: dynamic::Checkpoint,
     pub(crate) worker_sources: BTreeSet<ObjectId>,
+    pub(crate) network_loads: Vec<(ObjectId, url::Url)>,
     pub(crate) worker_actions: Vec<workers::Action>,
     pub(crate) loader_changes: loader::Changes,
     pub(crate) repeater_changes: repeater::Changes,
@@ -45,9 +46,16 @@ impl Instance {
     /// terminal status must survive an exception in an error observer. Settle
     /// and validate the status first, then deliver its changes transactionally.
     pub(crate) fn report_loader_failure(&mut self, id: ObjectId) -> Result<(), Error> {
+        self.publish_then_notify(|tx| tx.fail_loader(id))
+    }
+
+    pub(crate) fn publish_then_notify(
+        &mut self,
+        change: impl FnOnce(&mut Transaction<'_>) -> Result<(), Error>,
+    ) -> Result<(), Error> {
         let notifications = self.transaction(|tx| {
             tx.hold_notifications = true;
-            tx.fail_loader(id)?;
+            change(tx)?;
             tx.settle()?;
             Ok(std::mem::take(&mut tx.notifications))
         })?;
@@ -97,6 +105,7 @@ impl Instance {
             loader_changes: Default::default(),
             repeater_changes: Default::default(),
             timer_changes: Default::default(),
+            network_loads: Vec::new(),
             worker_actions: Default::default(),
             worker_sources: Default::default(),
         };
@@ -174,6 +183,18 @@ impl Instance {
                 }
             }
             tx.model.retire_objects(&tx.structure.removed);
+            for (id, url) in tx.network_loads {
+                if tx.model.node(id).is_some() {
+                    let transport = tx
+                        .model
+                        .dynamic
+                        .registry
+                        .as_ref()
+                        .and_then(|r| r.component_transport.as_deref())
+                        .expect("registered component transport");
+                    tx.model.network.start(transport, id, url);
+                }
+            }
         }
         if tx.used_engine {
             if let Some(engine) = &tx.model.javascript.engine {

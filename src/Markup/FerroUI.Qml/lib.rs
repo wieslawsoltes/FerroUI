@@ -22,6 +22,7 @@ mod evaluation;
 mod instantiate;
 mod list_model;
 mod loader;
+pub mod network;
 pub use list_model::RowId;
 mod promises;
 mod records;
@@ -183,6 +184,7 @@ pub struct Instance {
     bindings: BTreeMap<ObjectId, Vec<binding_object::Declaration>>,
     native_scripts: &'static [compiled::Script],
     native_functions: &'static [compiled::Evaluator],
+    network: network::Network,
     workers: workers::Workers,
     timers: timers::Timers,
     listeners: BTreeMap<String, Vec<connections::Listener>>,

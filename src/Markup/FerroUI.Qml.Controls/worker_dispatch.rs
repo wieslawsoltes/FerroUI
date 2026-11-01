@@ -6,20 +6,26 @@ use std::sync::Arc;
 
 impl QmlView {
     pub(super) fn install_worker_dispatch(&self) {
-        if self.0.worker_wake.get().is_some() || !self.0.instance.borrow().has_worker_scripts() {
+        let model = self.0.instance.borrow();
+        if self.0.worker_wake.get().is_some()
+            || !(model.has_worker_scripts() || model.has_pending_component_loads())
+        {
             return;
         }
+        drop(model);
         let (wake, notifications) = async_channel::bounded(1);
         self.0
             .worker_wake
             .set(wake.clone())
             .expect("one worker dispatcher");
-        self.0
-            .instance
-            .borrow_mut()
-            .set_worker_waker(Some(Arc::new(move || {
-                let _ = wake.try_send(());
-            })));
+        let notify: Arc<dyn Fn() + Send + Sync> = Arc::new(move || {
+            let _ = wake.try_send(());
+        });
+        {
+            let mut model = self.0.instance.borrow_mut();
+            model.set_worker_waker(Some(notify.clone()));
+            model.set_component_waker(Some(notify));
+        }
         let weak = Rc::downgrade(&self.0);
         Dispatcher::current_dispatcher().invoke_async_task_local_with_priority(
             move || async move {
@@ -31,7 +37,13 @@ impl QmlView {
                         let view = QmlView(inner);
                         let mut drained = false;
                         for _ in 0..64 {
-                            match view.poll_worker_scripts(1) {
+                            let delivered = {
+                                let mut model = view.0.instance.borrow_mut();
+                                let network = model.poll_component_loads(1);
+                                let workers = model.poll_worker_scripts(1);
+                                network.and_then(|n| workers.map(|w| n + w))
+                            };
+                            match view.flush().and(delivered) {
                                 Ok(0) => {
                                     drained = true;
                                     break;
@@ -50,6 +62,14 @@ impl QmlView {
             },
             DispatcherPriority::BACKGROUND,
         );
+    }
+
+    /// Incorporate downloaded QML on the owner. Mounted views are also woken
+    /// automatically when their configured transport completes a request.
+    pub fn poll_component_loads(&self, limit: usize) -> Result<usize, Error> {
+        let delivered = self.0.instance.borrow_mut().poll_component_loads(limit);
+        self.flush()?;
+        delivered
     }
 
     /// Dispatch pending WorkerScript messages on the view's owner. A mounted

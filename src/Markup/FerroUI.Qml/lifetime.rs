@@ -34,6 +34,7 @@ impl Instance {
             self.workers.retire_model_grants(dead);
         }
         for &id in dead {
+            self.network.retire(id);
             self.dynamic.deadlines.remove(&id);
             self.dynamic.file_errors.remove(&id);
             self.dynamic.loading.remove(&id);

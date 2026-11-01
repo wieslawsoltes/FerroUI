@@ -274,3 +274,6 @@ mod native_host;
 mod dynamic_components;
 #[cfg(all(test, feature = "webscene"))]
 mod workers;
+
+#[cfg(test)]
+mod remote_components;

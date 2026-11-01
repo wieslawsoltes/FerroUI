@@ -45,7 +45,7 @@ jobs:
           -p ferroui-qml-controls -p qml-compiled-tests -p qml-gallery -p ferroui-qml-webscene
       - name: Test the compiler, runtime, compiled components and native controls
         run: >-
-          cargo test --locked --no-default-features
+          cargo test --locked --no-default-features --features ferroui-qml/http
           -p ferroui-qml-compiler -p ferroui-qml-build -p ferroui-qml
           -p ferroui-qml-controls -p qml-compiled-tests -p qml-gallery -p ferroui-qml-webscene
       - name: Install shared libraries used by the headless Qt Quick oracle
@@ -59,6 +59,7 @@ jobs:
           "$RUNNER_TEMP/qt-reference/bin/python" tests/QmlCompiled/reference/qt_reference.py
           "$RUNNER_TEMP/qt-reference/bin/python" tests/QmlCompiled/webscene/qt_reference.py
           "$RUNNER_TEMP/qt-reference/bin/python" tests/QmlCompiled/workers/qt_reference.py
+          "$RUNNER_TEMP/qt-reference/bin/python" tests/QmlCompiled/network/qt_reference.py
           "$RUNNER_TEMP/qt-reference/bin/python" tests/QmlCompiled/creation/qt_reference.py
           QT_QPA_PLATFORM=offscreen "$RUNNER_TEMP/qt-reference/bin/python" tests/QmlCompiled/states/qt_reference.py
           QT_QPA_PLATFORM=offscreen "$RUNNER_TEMP/qt-reference/bin/python" tests/QmlCompiled/loader/qt_reference.py

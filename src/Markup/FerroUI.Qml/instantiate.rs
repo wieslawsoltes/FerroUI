@@ -388,6 +388,7 @@ impl<'a> Builder<'a> {
                 native_functions: source.evaluators(),
                 native_first_reads: source.first_reads(),
                 native_scripts: source.scripts(),
+                network: Default::default(),
                 workers: Default::default(),
                 timers: timers::Timers::default(),
                 listeners: BTreeMap::new(),

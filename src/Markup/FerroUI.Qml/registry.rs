@@ -157,6 +157,7 @@ impl TypeDefinition {
 /// A registry explicitly owns the modules visible to a QML component.
 #[derive(Clone)]
 pub struct TypeRegistry {
+    pub(crate) component_transport: Option<Rc<dyn crate::network::ComponentTransport>>,
     imports: BTreeMap<String, Vec<String>>,
     pub(crate) modules: BTreeMap<String, BTreeMap<String, TypeDefinition>>,
     versions: BTreeMap<(String, u16), u16>,
@@ -169,8 +170,18 @@ impl Default for TypeRegistry {
 }
 
 impl TypeRegistry {
+    /// Configure asynchronous HTTP(S) component sources for instances built from this registry.
+    /// Without a transport only bundled components are accessible.
+    pub fn set_component_transport(
+        &mut self,
+        transport: Rc<dyn crate::network::ComponentTransport>,
+    ) {
+        self.component_transport = Some(transport);
+    }
+
     pub fn new() -> Self {
         let mut registry = Self {
+            component_transport: None,
             imports: BTreeMap::new(),
             modules: BTreeMap::new(),
             versions: BTreeMap::new(),
