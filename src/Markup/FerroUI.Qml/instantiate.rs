@@ -247,18 +247,30 @@ impl TypeRegistry {
     /// and required child properties without executing a binding, method or callback.
     /// Required properties on the root can be supplied by the eventual host.
     pub fn check(&self, document: &Document) -> Result<(), Error> {
-        let builder = Builder::prepare(None, document, self)?;
-        let root = builder.instance.root();
-        for (key, property) in builder.instance.properties.iter().enumerate() {
-            if property.required && property.owner != root && !builder.assigned.contains(&key) {
-                return Err(Error::new(format!(
-                    "required property '{}' was not initialized",
-                    property.name
-                )));
-            }
+        let mut builder=Builder::prepare(None,document,self)?;
+        let root=builder.instance.root();
+        verify_required(&builder.instance, 0, root, &builder.assigned)?;
+        let mut pending:Vec<_>=builder.instance.dynamic.templates.iter().map(|(&owner,template)|(owner,template.clone())).collect();
+        pending.extend(builder.instance.dynamic.catalog.values().cloned().map(|template|(root,template)));
+        while let Some((declaration,template))=pending.pop() {
+            let id=builder.instance.next_object();
+            let first=builder.instance.slots.len();
+            builder.instance.dynamic.contexts.insert(id,dynamic::Context { declaration, ids:Default::default() });
+            let supplied=builder.instance.allocate_template(id,None,&template,self)?;
+            verify_required(&builder.instance,first,id,&supplied)?;
+            pending.extend(builder.instance.dynamic.templates.range(id..).map(|(&id,template)|(id,template.clone())));
         }
         Ok(())
     }
+}
+
+fn verify_required(instance:&Instance, first:usize, root:ObjectId, assigned:&BTreeSet<SlotId>)->Result<(),Error>{
+    for (offset,property) in instance.properties[first..].iter().enumerate() {
+        if property.required && property.owner!=root && !assigned.contains(&(first+offset)) {
+            return Err(Error::new(format!("required property '{}' was not initialized",property.name)));
+        }
+    }
+    Ok(())
 }
 
 impl<'a> Builder<'a> {

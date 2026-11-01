@@ -209,3 +209,46 @@ fn linked_file_and_string_factories_in_both_javascript_profiles() {
         .unwrap(),
     );
 }
+
+#[cfg(feature = "webscene")]
+#[test]
+fn factory_origins_survive_closures_and_script_imports() {
+    mod compiled {
+        include!(concat!(env!("OUT_DIR"), "/catalog_origin.rs"));
+    }
+    let file = Path::new(env!("CARGO_MANIFEST_DIR")).join("creation/origin/Main.qml");
+    let engine = std::rc::Rc::new(ferroui_qml_webscene::WebSceneEngine::from_env().unwrap());
+    let reg = TypeRegistry::new();
+    let loaded = ferroui_qml_build::Compiler::new()
+        .with_javascript()
+        .qml_entry("Part.qml")
+        .qml_entry("sub/Part.qml")
+        .qml_entry("sub/scripts/Part.qml")
+        .load(file)
+        .unwrap();
+    let source =
+        Instance::with_engine(&loaded.document, &reg, Default::default(), engine.clone()).unwrap();
+    let built =
+        Instance::with_engine(&compiled::compiled_qml(), &reg, Default::default(), engine).unwrap();
+    for mut app in [source, built] {
+        let root = app.root();
+        app.call(root, "capture", vec![]).unwrap();
+        assert_eq!(
+            app.call(root, "run", vec![]).unwrap(),
+            Value::String("73/84/95".into())
+        );
+    }
+}
+#[test]
+fn deferred_type_contracts_are_checked_without_running_javascript() {
+    let reg = TypeRegistry::new();
+    for (body,valid) in [
+        ("QtObject { required property string supplied; Component.onCompleted: unknownAtRuntime() }",true),
+        ("QtObject { nonExistent: 42 }",false),
+        ("QtObject { property QtObject nested: QtObject { required property int missing } }",false),
+        ("QtObject { property Component deeper: Component { QtObject { bad: 0 } } }",false),
+    ]{
+        let qml=format!("import QtQml; QtObject {{ property Component deferred: Component {{ {body} }} }}");
+        let doc=ferroui_qml::ir::parse(&qml).unwrap();assert_eq!(reg.check(&doc).is_ok(),valid,"{qml}");
+    }
+}

@@ -33,6 +33,10 @@ def main():
         component, root = load(path)
         for method, expected in cases:
             assert getattr(root, method)() == expected
+    engine.setBaseUrl(QUrl.fromLocalFile(str(folder / "origin") + "/"))
+    component, root = load("origin/Main.qml")
+    root.capture()
+    assert root.run() == "73/84/95"
     print("Qt 6.12.0 dynamic component, factory, binding and lifetime probes passed")
 
 if __name__ == "__main__":

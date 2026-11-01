@@ -240,7 +240,7 @@ impl Realm {
         if matches!(op,"createComponent"|"createQmlObject"){
             let args=field(v,2)?.as_array().ok_or_else(||Error::new("invalid factory args"))?.iter().map(|arg|self.decode(ctx,arg)).collect::<Result<Vec<_>,_>>()?;
             let value=if op=="createQmlObject"{ctx.qml_from_arguments(&args)?}else if id==0{
-                ctx.component_from_arguments(Some("https://qml.invalid/components/project/"),&args)?
+                ctx.component_from_arguments(v.get(3).and_then(Json::as_str).or(Some("https://qml.invalid/components/project/")),&args)?
             }else{
                 let scope=self.tables.borrow().scope_values.get(&id).filter(|(owner,_)|*owner==instance).map(|(_,scope)|scope.clone()).ok_or_else(||Error::new("expired component scope"))?;
                 ctx.in_scope(&scope,|ctx|ctx.component_from_arguments(v.get(3).and_then(Json::as_str),&args))?

@@ -181,10 +181,15 @@
         return result;
     }
 
+    function qtAt(scope, origin) {
+        return Object.freeze({...globalThis.Qt, createComponent(...args) {
+            return decode(rpc(["createComponent",scope,args.map(value=>encode(value)),origin]));
+        }});
+    }
     function environment(c) {
         if(scopes.has(c.scope)) return scopes.get(c.scope);
         const names=new Set(c.names), graph=c.graph;
-        const scopedQt=Object.freeze({...globalThis.Qt,createComponent(...args){return decode(rpc(["createComponent",c.scope,args.map(v=>encode(v)),c.origin]));}});
+        const scopedQt=qtAt(c.scope,c.origin);
         const groups=new Map();
         for (const name of names) if(name.includes(".")) {
             const [prefix,leaf]=name.split(".");
@@ -201,7 +206,7 @@
                     const root=c.componentScope===c.scope ? scope : environment({
                         scope:c.componentScope,componentScope:c.componentScope,names:c.componentNames,graph
                     });
-                    return modules.get(graph,k,root);
+                    return modules.get(graph,k,root,(url,shared)=>qtAt(shared ? 0 : c.componentScope,url));
                 }
                 if(groups.has(k)&&!names.has(k)) return groups.get(k);
                 if(!names.has(k)) return undefined;

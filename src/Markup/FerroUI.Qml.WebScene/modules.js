@@ -108,7 +108,7 @@
         for (const root of Object.values(graph.names)) await load(root);
     }
 
-    function namespace(graph, url, scope) {
+    function namespace(graph, url, scope, qtAt) {
         const definition = graph.resources[url];
         const module = modules.get(url);
         if (!module || !definition) throw new ReferenceError("Unprepared QML script " + url);
@@ -134,14 +134,16 @@
             if (Object.keys(imports).length) {
                 outer = Object.create(null);
                 for (const name of Object.keys(imports)) {
-                    Object.defineProperty(outer, name, {get: () => namespace(graph, imports[name], null)});
+                    Object.defineProperty(outer, name, {get: () => namespace(graph, imports[name], null, qtAt)});
                 }
             } else {
                 // .pragma library and scripts with explicit imports have their own scope.
                 outer = definition.kind === "script" && scope ? scope : Object.create(null);
             }
-            if (definition.hook) {
+            {
                 const contextScope = Object.create(outer);
+                Object.defineProperty(contextScope,"Qt",{value:qtAt(url,definition.kind === "library")});
+                if (definition.hook)
                 Object.defineProperty(contextScope, definition.hook, {value: context(graph, url)});
                 outer = contextScope;
             }
@@ -158,9 +160,9 @@
         prepare, context,
         forgetHost(id) { components.delete(String(id)); },
         has: (graph, name) => owns(graph.names, name),
-        get(graph, name, scope) {
+        get(graph, name, scope, qtAt) {
             if (!owns(graph.names, name)) throw new ReferenceError("Unknown QML script import " + name);
-            return namespace(graph, graph.names[name], scope);
+            return namespace(graph, graph.names[name], scope, qtAt);
         },
     };
 })
