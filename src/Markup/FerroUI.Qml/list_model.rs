@@ -140,6 +140,13 @@ impl Model {
             .collect()
     }
 
+    pub(crate) fn row_at(&self, model: ObjectId, index: usize) -> Option<RowId> {
+        self.order.get(index).map(|&serial| RowId { model, serial })
+    }
+    pub(crate) fn row_index(&self, row: RowId) -> Option<usize> {
+        self.order.iter().position(|serial| *serial == row.serial)
+    }
+
     pub(crate) fn row_ids(&self, model: ObjectId) -> impl Iterator<Item = RowId> + '_ {
         self.order
             .iter()
@@ -208,6 +215,14 @@ pub(crate) fn register(types: &mut TypeRegistry) -> Result<(), Error> {
             .readonly_property(REVISION, "real", Value::Number(0.)),
     )?;
     types.register(MODULE, "ListElement", TypeDefinition::default())?;
+    types.register(
+        MODULE,
+        "DelegateModel",
+        TypeDefinition::default().enumeration(
+            "DelegateModelAccess",
+            &[("Qt5ReadWrite", 0), ("ReadOnly", 1), ("ReadWrite", 2)],
+        )?,
+    )?;
     types.set_module_version(MODULE, 2, 15);
     types.set_module_version(MODULE, 6, 12);
     types.reexport("QtQml", MODULE)

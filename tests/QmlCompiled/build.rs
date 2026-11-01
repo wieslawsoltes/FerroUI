@@ -1,4 +1,6 @@
 fn main() {
+    ferroui_qml_build::compile_file("views/Main.qml", "views.rs")
+        .expect("compile virtualized list fixture");
     ferroui_qml_build::compile_file("delegates/Main.qml", "delegates.rs")
         .expect("compile the delegate fixture");
     #[cfg(feature = "webscene")]

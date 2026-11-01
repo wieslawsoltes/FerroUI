@@ -60,7 +60,21 @@ def main():
     root.eraseRow()
     assert root.savedAt(0) and root.summary() == "5/2/1/0=updated/-"
     print("Qt 6.12.0 multi-target Binding, Repeater order and delegate identity passed")
-    del root, component, engine, app
+    from PySide6.QtQuick import QQuickWindow
+    component, root = load(folder.parent / "views/Main.qml")
+    window = QQuickWindow()
+    window.resize(100, 60)
+    root.setParentItem(window.contentItem())
+    window.show()
+    app.processEvents()
+    root.scrollMiddle()
+    assert root.report() == "1000000/20000000/10000000/500000/500000/true", root.report()
+    root.changeCurrent()
+    assert root.selection() == "0/updated/updated", root.selection()
+    window.hide()
+    root.setParentItem(None)
+    print("Qt 6.12.0 ListView scrolling, model edits and selection passed")
+    del window, root, component, engine, app
 
 
 if __name__ == "__main__":

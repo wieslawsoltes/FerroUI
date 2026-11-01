@@ -135,6 +135,7 @@ enum InstalledBinding {
 
 #[derive(Clone)]
 struct Slot {
+    delegate_local: bool,
     scope: Option<u32>,
     overlay: Option<Box<binding_object::Overlay>>,
     active_target: Option<SlotId>,

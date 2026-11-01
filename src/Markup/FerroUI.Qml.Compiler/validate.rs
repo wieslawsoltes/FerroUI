@@ -90,7 +90,11 @@ fn validate_object<'a>(
             }
             MemberKind::Binding { name, value } => {
                 assign(&mut bindings, name.clone(), source, span)?;
-                if object.type_name.rsplit('.').next() == Some("Repeater") && name == "delegate" {
+                if matches!(
+                    object.type_name.rsplit('.').next(),
+                    Some("Repeater" | "ListView")
+                ) && name == "delegate"
+                {
                     binding(value, &mut HashSet::new(), source)?;
                 } else {
                     binding(value, ids, source)?;

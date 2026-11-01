@@ -22,6 +22,7 @@ impl Slot {
     pub(super) fn initial(value: Value) -> Self {
         Self {
             scope: None,
+            delegate_local: false,
             overlay: None,
             active_target: None,
             assigned: false,
@@ -543,6 +544,17 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
                 .lineage
                 .iter()
                 .any(|(m, n)| m == "QtQuick" && n == "Repeater");
+        if (module == "QtQuick" && name == "ListView")
+            || definition
+                .lineage
+                .iter()
+                .any(|(m, n)| m == "QtQuick" && n == "ListView")
+        {
+            self.instance
+                .dynamic
+                .repeaters
+                .insert(id, repeater::State::list_view());
+        }
         if is_repeater {
             self.instance
                 .dynamic

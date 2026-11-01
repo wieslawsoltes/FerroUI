@@ -595,6 +595,47 @@ impl Transaction<'_> {
         if property.name == "source" && self.model.workers.contains(property.owner) {
             self.worker_sources.insert(property.owner);
         }
+        if self
+            .model
+            .dynamic
+            .repeaters
+            .get(&property.owner)
+            .is_some_and(|v| v.is_list_view())
+        {
+            if property.name == "model" {
+                self.repeater_changes.list_models.insert(property.owner);
+            }
+            if matches!(
+                property.name.as_str(),
+                "width"
+                    | "height"
+                    | "contentX"
+                    | "contentY"
+                    | "cacheBuffer"
+                    | "currentIndex"
+                    | "spacing"
+                    | "orientation"
+            ) {
+                self.repeater_changes.pending.insert(property.owner);
+            }
+        }
+        if matches!(
+            property.name.as_str(),
+            "width" | "height" | "implicitWidth" | "implicitHeight"
+        ) {
+            if let Some(parent) = self.model.parent(property.owner) {
+                if self
+                    .model
+                    .dynamic
+                    .repeaters
+                    .get(&parent)
+                    .is_some_and(|state| state.is_list_view())
+                    && !self.repeater_changes.busy.contains(&parent)
+                {
+                    self.repeater_changes.pending.insert(parent);
+                }
+            }
+        }
         if matches!(property.name.as_str(), "model" | "delegate")
             && self.model.dynamic.repeaters.contains_key(&property.owner)
         {
@@ -657,6 +698,9 @@ impl Transaction<'_> {
             return Err(Error::new(
                 "a binding cannot imperatively modify the object graph",
             ));
+        }
+        if self.write_delegate_input(key, &value)? {
+            return Ok(());
         }
         let key = self.model.write_target(key)?;
         let fallback = self.loader_dimension_assignment(key, value == Value::Undefined);

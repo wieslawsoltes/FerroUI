@@ -1,6 +1,8 @@
 #[cfg(test)]
 mod delegates;
 #[cfg(test)]
+mod views;
+#[cfg(test)]
 fn quick_registry() -> ferroui_qml::TypeRegistry {
     use ferroui_qml::{TypeDefinition, TypeRegistry, Value};
     let mut types = TypeRegistry::new();
@@ -10,6 +12,8 @@ fn quick_registry() -> ferroui_qml::TypeRegistry {
             "Item",
             TypeDefinition::default()
                 .inherits("QtQml", "QtObject")
+                .property("x", "real", Value::Number(0.))
+                .property("y", "real", Value::Number(0.))
                 .property("width", "real", Value::Undefined)
                 .property("height", "real", Value::Undefined)
                 .property("implicitWidth", "real", Value::Number(0.))
@@ -24,6 +28,9 @@ fn quick_registry() -> ferroui_qml::TypeRegistry {
         .unwrap();
     types
         .register("QtQuick", "Repeater", TypeDefinition::quick_repeater())
+        .unwrap();
+    types
+        .register("QtQuick", "ListView", TypeDefinition::quick_list_view())
         .unwrap();
     types.reexport("QtQuick", "QtQml").unwrap();
     types

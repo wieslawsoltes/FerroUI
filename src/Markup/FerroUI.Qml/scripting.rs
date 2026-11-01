@@ -469,6 +469,10 @@ impl ScriptContext<'_, '_> {
         Ok(())
     }
 
+    pub(crate) fn list_view_call(&mut self, name: &str, args: &[Value]) -> Result<Value, Error> {
+        self.tx.list_view_call(self.owner, name, args, self.reads)
+    }
+
     pub(crate) fn repeated_item(&mut self, index: i32) -> Result<Value, Error> {
         self.tx.repeated_item(self.owner, index, self.reads)
     }

@@ -3,6 +3,9 @@
 use super::*;
 use crate::transaction::Transaction;
 
+#[path = "list_view.rs"]
+mod list_view;
+
 const MAX_ROWS: usize = 65_536;
 const REVISION: &str = "$qml:repeatedItems";
 const CONTEXT: &str = "$qml:delegate:";
@@ -23,6 +26,7 @@ impl TypeDefinition {
             .inherits("QtQuick", "Item")
             .property("model", "var", Value::Undefined)
             .property("delegate", "Component", Value::Null)
+            .property("delegateModelAccess", "int", Value::Number(0.))
             .default_property("delegate")
             .readonly_property("count", "int", Value::Number(0.))
             .readonly_property(REVISION, "real", Value::Number(0.))
@@ -45,6 +49,7 @@ enum Key {
 
 #[derive(Clone, Default)]
 pub(crate) struct State {
+    list: Option<Box<list_view::State>>,
     roles: Option<Rc<[String]>>,
     rows: BTreeMap<RowId, (usize, ObjectId)>,
     factory: Option<ObjectId>,
@@ -53,13 +58,29 @@ pub(crate) struct State {
 }
 
 impl State {
+    pub(crate) fn list_view() -> Self {
+        Self {
+            list: Some(Default::default()),
+            ..Default::default()
+        }
+    }
+
+    pub(crate) fn is_list_view(&self) -> bool {
+        self.list.is_some()
+    }
+
     pub(crate) fn items(&self) -> impl Iterator<Item = ObjectId> + '_ {
-        self.entries.iter().filter_map(|(_, id)| *id)
+        self.entries
+            .iter()
+            .filter_map(|(_, id)| *id)
+            .chain(self.list.iter().flat_map(|state| state.items()))
     }
 }
 
 #[derive(Default)]
 pub(crate) struct Changes {
+    pub(crate) list_models: BTreeSet<ObjectId>,
+    pub(crate) list_structure: BTreeSet<ObjectId>,
     pub(crate) pending: BTreeSet<ObjectId>,
     pub(crate) busy: BTreeSet<ObjectId>,
     before: BTreeMap<ObjectId, State>,
@@ -72,11 +93,13 @@ impl Changes {
 }
 
 pub(crate) struct Inputs {
+    view: ObjectId,
     values: BTreeMap<String, Value>,
     roles: Option<Rc<[String]>>,
 }
 
 pub(crate) struct ProjectedRow {
+    view: ObjectId,
     pub(crate) source: RowId,
     pub(crate) revision: SlotId,
     index: SlotId,
@@ -192,7 +215,11 @@ impl Instance {
             values.insert("modelData".into(), value.clone());
         }
         values.insert("index".into(), Value::Number(index as f64));
-        Ok(Inputs { values, roles })
+        Ok(Inputs {
+            view: repeater,
+            values,
+            roles,
+        })
     }
 }
 
@@ -234,12 +261,61 @@ impl Transaction<'_> {
         value: Value,
     ) -> Result<(), Error> {
         let projected = self.model.delegate_row(owner)?;
+        if self.model.get(projected.view, "delegateModelAccess")? == Value::Number(1.) {
+            return Err(Error::new("the delegate model is read-only"));
+        }
         if !projected.has_role(name) {
             return Err(Error::new(format!(
                 "unknown or readonly delegate role '{name}'"
             )));
         }
         self.write_role(projected.source, name, value)
+    }
+
+    pub(crate) fn write_delegate_input(
+        &mut self,
+        key: SlotId,
+        value: &Value,
+    ) -> Result<bool, Error> {
+        let property = &self.model.properties[key];
+        let Some(context) = self.model.dynamic.contexts.get(&property.owner) else {
+            return Ok(false);
+        };
+        let Some(projected) = &context.row_revision else {
+            return Ok(false);
+        };
+        let name = property
+            .name
+            .strip_prefix(CONTEXT)
+            .unwrap_or(&property.name);
+        if context
+            .delegate_inputs
+            .as_ref()
+            .and_then(|map| map.get(name))
+            != Some(&key)
+        {
+            return Ok(false);
+        }
+        let role = if name == "modelData" && projected.roles.len() == 1 {
+            &projected.roles[0]
+        } else if projected.has_role(name) {
+            name
+        } else {
+            return Ok(false);
+        };
+        let access = self.model.get(projected.view, "delegateModelAccess")?;
+        if projected.required && access != Value::Number(2.) {
+            // Assigning a required property breaks its model binding locally.
+            self.touched(key).delegate_local = true;
+            return Ok(false);
+        }
+        if access == Value::Number(1.) {
+            return Err(Error::new("the delegate model is read-only"));
+        }
+        let row = projected.source;
+        let role = role.to_owned();
+        self.write_role(row, &role, value.clone())?;
+        Ok(true)
     }
 
     pub(crate) fn repeated_item(
@@ -304,6 +380,7 @@ impl Transaction<'_> {
                 .get_mut(&root)
                 .expect("delegate context")
                 .row_revision = Some(ProjectedRow {
+                view: inputs.view,
                 source: *row,
                 revision: slot,
                 index,
@@ -358,6 +435,9 @@ impl Transaction<'_> {
         }
         for (name, original) in inputs.values {
             if let Some(key) = self.model.delegate_context_key(item, &name) {
+                if self.model.slots[key].delegate_local {
+                    continue;
+                }
                 let value = projected_input(item, required, &name, &original);
                 let value = self.model.typed(&self.model.properties[key].ty, value)?;
                 self.set_value(key, value);
@@ -405,6 +485,7 @@ impl Transaction<'_> {
                 }
             }
             self.repeater_changes.pending.insert(id);
+            self.repeater_changes.list_structure.insert(id);
         }
         Ok(())
     }
@@ -426,7 +507,13 @@ impl Transaction<'_> {
                 .before
                 .entry(id)
                 .or_insert_with(|| self.model.dynamic.repeaters[&id].clone());
-            let result = self.with_stack(4, |tx| tx.refresh_repeater(id));
+            let result = self.with_stack(4, |tx| {
+                if tx.model.dynamic.repeaters[&id].is_list_view() {
+                    tx.refresh_list_view(id)
+                } else {
+                    tx.refresh_repeater(id)
+                }
+            });
             self.repeater_changes.busy.remove(&id);
             result?;
         }
