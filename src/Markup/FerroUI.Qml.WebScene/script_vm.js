@@ -12,7 +12,7 @@
     let state = "done";
 
     function post(event) {
-        const response = JSON.parse(read("https://qml.invalid/rpc/" + capability + "/" +
+        const response = JSON.parse(read("https://qml.invalid/rpc/" + capability + "/worker/" +
             (++sequence) + "/" + encodeURIComponent(JSON.stringify(event))));
         if ("error" in response) throw new Error(response.error);
         return response.ok;

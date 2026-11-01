@@ -16,7 +16,8 @@ pub(super) fn run(
     {
         let mut state = resources.lock().map_err(|_| "poisoned resource table")?;
         state.files = files;
-        state.rpc_enabled = true;
+        // This process has one data-only channel to its WorkerScript supervisor.
+        state.active_turn = Some("worker".into());
     }
     let loader = format!(
         "({})({})",
