@@ -208,3 +208,64 @@ fn running_openbox_redecorates_the_same_native_client() {
     xlib::x_destroy_window(display, id);
     xlib::x_flush(display);
 }
+
+/// Counts protocol requests on the shell connection. The client connection submits and
+/// serializes each title change before the timed interval so server and shell input are ready.
+#[test]
+#[ignore = "benchmark on a private X11 display: tests/session.sh benchmark"]
+fn window_title_traffic() {
+    use ferroui_base::platform::native_library::NativeLibrary;
+    use std::ffi::{c_ulong, c_void};
+    ferroui_base::native_functions! {
+        struct Sequence(xlib) {
+            xlib::next_request as "XNextRequest": unsafe extern "C" fn(*mut c_void) -> c_ulong;
+        }
+    }
+    let sequence = Sequence::load(&NativeLibrary::open(c"libX11.so.6").unwrap()).unwrap();
+    let platform = initialize_x11_platform(Some(X11PlatformOptions {
+        rendering_mode: vec![X11RenderingMode::Software],
+        ..Default::default()
+    }));
+    let session = Session::connect().unwrap();
+    let info = platform.info();
+    let a = info.atoms();
+    let producer = xlib::x_open_display().unwrap();
+    let mut ids = Vec::new();
+    for i in 0..32 {
+        let id = xlib::x_create_simple_window(producer, info.root_window(), 20+i, 30+i, 140, 110, 0, 0, 0);
+        xlib::x_store_name(producer, id, "Static window");
+        xlib::x_map_window(producer, id);
+        ids.push(id);
+    }
+    xlib::x_sync(producer, false);
+    until(&session, || session.snapshot().windows.len() == ids.len());
+    // SAFETY: platform retains the live UI-thread Xlib display used by this benchmark.
+    let serial = || unsafe { (sequence.next_request)(info.display().as_ptr().cast()) };
+    let mut requests = 0;
+    let mut times = Vec::with_capacity(200);
+    for i in 0..205 {
+        let title = format!("Document {i}");
+        let id = ids[i % ids.len()];
+        xlib::x_change_property_bytes(producer, id, a._NET_WM_NAME, a.UTF8_STRING, PropertyMode::Replace, title.as_bytes());
+        xlib::x_sync(producer, false);
+        xlib::x_sync(info.display(), false);
+        let before = serial();
+        let start = Instant::now();
+        platform.dispatcher_impl().event_dispatcher().dispatch_x11_events(&CancellationToken::none());
+        Dispatcher::ui_thread().run_jobs(None);
+        let elapsed = start.elapsed();
+        let after = serial();
+        assert!(session.snapshot().windows.iter().any(|w| w.id == id as u32 && w.title == title));
+        if i >= 5 {
+            times.push(elapsed);
+            requests += after.wrapping_sub(before);
+        }
+    }
+    times.sort_unstable();
+    println!("32 clients, 200 title updates: {requests} X11 requests, median {:?}, p95 {:?}",
+        times[times.len()/2], times[times.len()*95/100]);
+    for id in ids {
+        xlib::x_destroy_window(producer, id);
+    }
+    xlib::x_flush(producer);
+}

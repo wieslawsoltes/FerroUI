@@ -6,10 +6,14 @@ here=$(cd -- "$(dirname -- "$0")" && pwd)
 case ${1:-test} in
     --session)
         [[ -n ${FERRO_DESKTOP_SESSION_DIR:-} && -n ${FERRO_TEST_PRIVATE_DISPLAY:-} && $DISPLAY == "$FERRO_TEST_PRIVATE_DISPLAY" ]]
+        if [[ ${FERRO_DESKTOP_BENCHMARK_TITLES:-0} == 1 ]]; then
+            exec "$here/../build.sh" test --profile dev -- --ignored window_title_traffic --nocapture
+        fi
         "$here/../build.sh" test --profile dev -- --ignored real_client_lifecycle
         exec "$here/../build.sh" test --profile dev -- --ignored running_openbox_redecorates_the_same_native_client
         ;;
     test) mode=test ;;
+    benchmark) export FERRO_DESKTOP_BENCHMARK_TITLES=1; mode=test ;;
     capture)
         mode=capture
         [[ $# == 3 ]] || { echo "Usage: $0 capture /path/to/ferro-desktop output-directory" >&2; exit 2; }
@@ -17,7 +21,7 @@ case ${1:-test} in
         FERRO_DESKTOP_BINARY=$(realpath "$2")
         mkdir -p -- "$3"; output=$(realpath "$3")
         ;;
-    *) echo "Usage: $0 [test | capture /path/to/ferro-desktop output-directory]" >&2; exit 2 ;;
+    *) echo "Usage: $0 [test | benchmark | capture /path/to/ferro-desktop output-directory]" >&2; exit 2 ;;
 esac
 if [[ -z ${FERRO_TEST_PRIVATE_DISPLAY:-} || ${DISPLAY:-} != "$FERRO_TEST_PRIVATE_DISPLAY" ]]; then
     exec xvfb-run -a -s '-screen 0 1440x960x24 -nolisten tcp' dbus-run-session -- \

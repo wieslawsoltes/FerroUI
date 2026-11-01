@@ -477,10 +477,16 @@ impl Session {
         if count <= 1 || snapshot.windows.iter().any(|client| client.workspace == Some(count - 1)) {
             return false;
         }
-        // Skip-taskbar and transient windows are still real clients. Inspect those too before
-        // asking the WM to remove a workspace, so a hidden task cannot be moved unexpectedly.
-        let a = self.platform.info().atoms();
-        if self.order.borrow().iter().any(|&id| {
+        // A newly mapped or skip-taskbar client may not have made it into this snapshot.
+        // Recheck actual membership before asking the WM to retire the workspace.
+        let info = self.platform.info();
+        let a = info.atoms();
+        let members = xlib::x_get_window_property(info.display(), info.root_window(), a._NET_CLIENT_LIST,
+            0, 16_384, false, a.WINDOW);
+        if members.status != 0 || members.actual_type != a.WINDOW || members.actual_format != 32 || members.bytes_after != 0 {
+            return false;
+        }
+        if members.longs().into_iter().any(|id| {
             self.number(id, a._NET_WM_DESKTOP, a.CARDINAL) == Some((count - 1) as XID)
         }) {
             return false;
@@ -490,7 +496,12 @@ impl Session {
 
     fn set_workspace_count(&self, count: usize) -> bool {
         let info = self.platform.info();
-        self.message(info.root_window(), info.atoms()._NET_NUMBER_OF_DESKTOPS, &[count as XID])
+        let atom = info.atoms()._NET_NUMBER_OF_DESKTOPS;
+        // If the server changed first, or the actual count exceeds the UI's bound,
+        // a delta based on our displayed list must not remove additional workspaces.
+        let displayed = self.snapshot.borrow().workspace_names.len() as XID;
+        self.number(info.root_window(), atom, info.atoms().CARDINAL) == Some(displayed)
+            && self.message(info.root_window(), atom, &[count as XID])
     }
 
     pub fn activate(&self, id: u32) -> bool {
