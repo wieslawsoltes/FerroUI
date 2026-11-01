@@ -58,15 +58,22 @@ impl Shell {
     fn select_appearance(&self, appearance: Appearance) {
         let result = self.themes.select(appearance);
         let applied = self.themes.current();
-        let (top, bottom) = applied.insets();
-        if let Some(session) = &self.session {
-            session.set_panel_insets(top, bottom);
-        }
+        let decorations = apply_session_appearance(self.session.as_deref(), applied);
         self.appearance.set_if_changed(applied);
-        self.status.set(match result {
-            Ok(()) => String::new(),
-            Err(error) => format!("Could not save appearance. {error}"),
-        });
+        self.status.set(
+            [
+                result
+                    .err()
+                    .map(|e| format!("Could not save appearance. {e}")),
+                decorations
+                    .err()
+                    .map(|e| format!("Could not update window decorations. {e}")),
+            ]
+            .into_iter()
+            .flatten()
+            .collect::<Vec<_>>()
+            .join(" "),
+        );
     }
 
     fn dismiss(&self) {
@@ -92,7 +99,11 @@ impl Shell {
             if let Some(shell) = weak.upgrade().filter(|shell| shell.owner.is_alive()) {
                 shell.launching.set(false);
                 match result {
-                    Ok(_) => shell.dismiss(),
+                    Ok(_) => {
+                        shell.dismiss();
+                        shell.query.set_if_changed(String::new());
+                        shell.page.set_if_changed(0);
+                    }
                     Err(error) => shell
                         .status
                         .set(format!("Could not open application. {error}")),
@@ -154,6 +165,18 @@ fn workspace_name(snapshot: &Snapshot) -> String {
         .unwrap_or_else(|| format!("Workspace {}", snapshot.current_workspace.saturating_add(1)))
 }
 
+fn apply_session_appearance(
+    session: Option<&Session>,
+    appearance: Appearance,
+) -> std::io::Result<()> {
+    if let Some(session) = session {
+        let (top, bottom) = appearance.insets();
+        session.set_panel_insets(top, bottom);
+        session.set_window_appearance(appearance)?;
+    }
+    Ok(())
+}
+
 pub fn view(
     initial: Scene,
     catalog: Rc<ApplicationCatalog>,
@@ -162,9 +185,12 @@ pub fn view(
 ) -> Element {
     let appearance = signal(themes.current());
     ferroui_view::provide_context(appearance);
-    if let Some(session) = &session {
-        let (top, bottom) = themes.current().insets();
-        session.set_panel_insets(top, bottom);
+    let initial_status = apply_session_appearance(session.as_deref(), themes.current())
+        .err()
+        .map(|error| format!("Could not update window decorations. {error}"))
+        .unwrap_or_default();
+    if !initial_status.is_empty() {
+        eprintln!("{initial_status}");
     }
     let state = Rc::new(Shell {
         scene: signal(initial),
@@ -176,7 +202,7 @@ pub fn view(
         icons: ApplicationIcons::default(),
         snapshot: signal(session.as_ref().map(|s| s.snapshot()).unwrap_or_default()),
         session,
-        status: signal(String::new()),
+        status: signal(initial_status),
         launching: signal(false),
         owner: Owner::current().expect("desktop view must be mounted in a FerroUI owner"),
         desktop_focus: NodeRef::new(),
@@ -280,6 +306,9 @@ pub fn view(
                     _ => workspaces::view(&shell),
                 };
                 grid()
+                    .keyboard_navigation_tab_navigation(
+                        ferroui_base::input::KeyboardNavigationMode::Cycle,
+                    )
                     .child(
                         border()
                             .background("#65081420")
@@ -305,7 +334,7 @@ fn popup_header(title: &str, caption: &str, state: &Rc<Shell>) -> El<Grid> {
             stack_panel()
                 .spacing(5.0)
                 .child(eyebrow(caption))
-                .child(label(title, 28.0, Ink::Primary).font_weight(FontWeight::SemiBold)),
+                .child(shell_text(title, 28.0, Ink::Primary).font_weight(FontWeight::SemiBold)),
         )
         .child(
             icon_action("Close overview", Icon::Close, move || dismiss.dismiss())
@@ -323,7 +352,7 @@ fn popup_header(title: &str, caption: &str, state: &Rc<Shell>) -> El<Grid> {
 }
 
 fn feedback(status: Signal<String>) -> El<TextBlock> {
-    label("", 12.0, Ink::Accent)
+    shell_text("", 12.0, Ink::Accent)
         .text(status)
         .is_visible(move || status.with(|s| !s.is_empty()))
         .text_wrapping(ferroui_base::media::TextWrapping::Wrap)

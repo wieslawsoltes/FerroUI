@@ -1,6 +1,8 @@
 //! A pager over the X11 connection and event pump that FerroUI already owns. The window manager
 //! owns focus, stacking, workspaces and client lifetime. We never reparent or draw client windows.
 
+mod decorations;
+
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::{FerroLocator, LocatorExtensions, PixelRect, Ref};
@@ -436,6 +438,28 @@ impl Session {
                 info.atoms()._NET_SHOWING_DESKTOP,
                 &[XID::from(showing)],
             )
+    }
+
+    /// Change decorations only on the Openbox instance that the login supervisor started.
+    /// Check its live root property as well as the shell mode so nested sessions cannot
+    /// reload a surrounding desktop's window manager.
+    pub fn set_window_appearance(&self, appearance: crate::shell::appearance::Appearance) -> std::io::Result<()> {
+        use std::os::unix::ffi::OsStrExt;
+        let Some(state) = std::env::var_os("FERRO_DESKTOP_SESSION_DIR").map(std::path::PathBuf::from) else {
+            return Ok(());
+        };
+        if self.desktop.get() == 0 {
+            return Ok(());
+        }
+        let info = self.platform.info();
+        let property = xlib::x_intern_atom(info.display(), "_OB_CONFIG_FILE", true);
+        if property == 0
+            || self.bytes(info.root_window(), property, info.atoms().UTF8_STRING)
+                != state.join("openbox.xml").as_os_str().as_bytes()
+        {
+            return Ok(());
+        }
+        decorations::apply(&state, appearance)
     }
 
     /// Apply these hints before the WM sees MapRequest. A fullscreen application sits above

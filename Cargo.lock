@@ -1025,7 +1025,9 @@ dependencies = [
  "ferroui-themes-material",
  "ferroui-themes-winui",
  "ferroui-view",
+ "ferroui-vulkan",
  "ferroui-x11",
+ "roxmltree 0.20.0",
  "time",
 ]
 

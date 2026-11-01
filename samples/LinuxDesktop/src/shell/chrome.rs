@@ -5,7 +5,7 @@ use ferroui_base::media::{FontWeight, Geometry, Stretch, TextTrimming};
 use ferroui_controls::{Border, Button, StackPanel, TextBlock};
 use ferroui_view::prelude::*;
 
-use super::appearance::{Appearance, Palette};
+use super::appearance::{Appearance, Layout, Palette};
 use ferroui_markup_xaml::markup_extensions::DynamicResourceExtension;
 use std::rc::Rc;
 
@@ -80,7 +80,7 @@ pub(super) fn resource(key: &'static str) -> Bind<Rc<DynamicResourceExtension>> 
     ))))
 }
 
-pub(super) fn label(value: &str, size: f64, color: impl Into<Ink>) -> El<TextBlock> {
+pub(super) fn shell_text(value: &str, size: f64, color: impl Into<Ink>) -> El<TextBlock> {
     let text = text_block()
         .text(value)
         .font_size(size)
@@ -96,7 +96,7 @@ pub(super) fn label(value: &str, size: f64, color: impl Into<Ink>) -> El<TextBlo
 }
 
 pub(super) fn eyebrow(value: &str) -> El<TextBlock> {
-    label(value, 10.0, Ink::Accent)
+    shell_text(value, 10.0, colors().accent)
         .letter_spacing(2.2)
         .font_weight(FontWeight::SemiBold)
 }
@@ -108,7 +108,7 @@ pub(super) fn row(spacing: f64) -> El<StackPanel> {
         .vertical_alignment(V::Center)
 }
 
-pub(super) fn panel() -> El<Border> {
+pub(super) fn shell_panel() -> El<Border> {
     border()
         .background(colors().surface)
         .border_brush(resource("ControlStrokeColorDefaultBrush"))
@@ -117,7 +117,12 @@ pub(super) fn panel() -> El<Border> {
 }
 
 pub(super) fn action(name: &str, callback: impl Fn() + 'static) -> El<Button> {
-    button()
+    let button = if look().layout() == Layout::BottomNavigation {
+        button().class("tonal")
+    } else {
+        button()
+    };
+    button
         .automation_properties_name(name)
         .tool_tip_tip(name)
         .horizontal_content_alignment(H::Center)

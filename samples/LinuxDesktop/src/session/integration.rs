@@ -82,3 +82,50 @@ fn real_client_lifecycle() {
     until(&session, || window().is_none());
     assert!(!session.close(id as u32));
 }
+
+#[test]
+#[ignore = "requires a private X display managed by ferro-desktop-session"]
+fn running_openbox_redecorates_the_same_native_client() {
+    use crate::shell::appearance::Appearance;
+    use std::path::PathBuf;
+    let state = PathBuf::from(std::env::var_os("FERRO_DESKTOP_SESSION_DIR").expect("use the login supervisor"));
+    let platform = initialize_x11_platform(Some(X11PlatformOptions {
+        rendering_mode: vec![X11RenderingMode::Software],
+        ..Default::default()
+    }));
+    let session = Session::connect().unwrap();
+    let display = xlib::x_open_display().unwrap();
+    let a = platform.info().atoms();
+    let root = platform.info().root_window();
+    let theme = xlib::x_intern_atom(display, "_OB_THEME", false);
+    let id = xlib::x_create_simple_window(display, root, 60, 60, 220, 160, 0, 0, 0);
+    xlib::x_store_name(display, id, "Frame appearance probe");
+    xlib::x_map_window(display, id);
+    xlib::x_flush(display);
+    until(&session, || {
+        session.snapshot().windows.iter().any(|w| w.id == id as u32)
+    });
+    let extents = || session.longs(id, a._NET_FRAME_EXTENTS, a.CARDINAL, 4);
+    let theme_name = || session.bytes(root, theme, a.UTF8_STRING);
+    let base = std::fs::read(state.join("base.xml")).unwrap();
+    let mut heights = Vec::new();
+    for appearance in [Appearance::Windows, Appearance::MacOS, Appearance::Material] {
+        let previous = theme_name();
+        decorations::apply(&state, appearance).unwrap();
+        until(&session, || {
+            theme_name() != previous && theme_name().starts_with(b"FerroDesktop-")
+        });
+        until(&session, || {
+            extents().get(2).is_some_and(|h| *h > 0 && heights.last() != Some(h))
+        });
+        heights.push(extents()[2]);
+        assert!(session.snapshot().windows.iter().any(|w| w.id == id as u32));
+        assert_eq!(std::fs::read(state.join("base.xml")).unwrap(), base);
+    }
+    assert!(
+        heights[1] < heights[0] && heights[0] < heights[2],
+        "Native titlebar heights: {heights:?}"
+    );
+    xlib::x_destroy_window(display, id);
+    xlib::x_flush(display);
+}

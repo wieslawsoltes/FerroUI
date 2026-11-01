@@ -44,9 +44,9 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
                 return stack_panel()
                     .spacing(7.0)
                     .margin((8.0, 16.0))
-                    .child(label(heading, 16.0, Ink::Primary))
+                    .child(shell_text(heading, 16.0, Ink::Primary))
                     .child(
-                        label(message, 12.0, Ink::Secondary)
+                        shell_text(message, 12.0, Ink::Secondary)
                             .text_wrapping(ferroui_base::media::TextWrapping::Wrap),
                     )
                     .into();
@@ -70,13 +70,15 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
                         .margin(2)
                         .padding((5.0, 7.0))
                         .height(78.0)
+                        .horizontal_alignment(H::Stretch)
                         .horizontal_content_alignment(H::Stretch)
                         .child(
                             stack_panel()
                                 .spacing(5.0)
                                 .child(app_icon(&result_shell, application))
                                 .child(
-                                    label(name, 12.0, Ink::Primary).horizontal_alignment(H::Center),
+                                    shell_text(name, 12.0, Ink::Primary)
+                                        .horizontal_alignment(H::Center),
                                 ),
                         ),
                     );
@@ -174,7 +176,7 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
                         .grid_row(3)
                         .column_definitions("*,Auto")
                         .margin((0.0, 10.0, 0.0, 0.0))
-                        .child(label("", 12.0, Ink::Secondary).text(move || {
+                        .child(shell_text("", 12.0, Ink::Secondary).text(move || {
                             matches.with(|items| match items.len() {
                                 1 => "1 application".to_owned(),
                                 n => format!("{n} applications"),
@@ -186,7 +188,7 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
                                 .is_visible(move || pages.get() > 1)
                                 .child(previous)
                                 .child(
-                                    label("", 12.0, Ink::Primary).text(move || {
+                                    shell_text("", 12.0, Ink::Primary).text(move || {
                                         format!("{} / {}", page.get() + 1, pages.get())
                                     }),
                                 )
@@ -228,10 +230,10 @@ fn result_button(shell: &Rc<Shell>, index: usize) -> Element {
                     .margin((12.0, 0.0))
                     .vertical_alignment(V::Center)
                     .child(
-                        label(&application.name, 14.0, Ink::Primary)
+                        shell_text(&application.name, 14.0, Ink::Primary)
                             .font_weight(FontWeight::SemiBold),
                     )
-                    .child(label(subtitle, 11.0, Ink::Secondary)),
+                    .child(shell_text(subtitle, 11.0, Ink::Secondary)),
             )
             .child(
                 border()
@@ -278,7 +280,7 @@ fn app_icon(shell: &Shell, application: &DesktopApplication) -> Element {
         .corner_radius(8)
         .background(bg)
         .child(
-            label(&initial, 16.0, fg)
+            shell_text(&initial, 16.0, fg)
                 .font_weight(FontWeight::SemiBold)
                 .horizontal_alignment(H::Center),
         )

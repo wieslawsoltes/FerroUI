@@ -3,7 +3,7 @@
 use super::chrome::*;
 use super::{feedback, popup_header, Shell};
 use crate::session::ClientWindow;
-use ferroui_base::layout::{HorizontalAlignment as H, VerticalAlignment as V};
+use ferroui_base::layout::HorizontalAlignment as H;
 use ferroui_base::media::FontWeight;
 use ferroui_controls::primitives::ScrollBarVisibility;
 use ferroui_view::prelude::*;
@@ -39,7 +39,7 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
                     })
                     .margin((0.0, 0.0, 5.0, 5.0))
                     .max_width(154.0)
-                    .child(label(
+                    .child(shell_text(
                         &title,
                         12.0,
                         if selected {
@@ -86,11 +86,11 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
                         stack_panel()
                             .spacing(6.0)
                             .child(
-                                label("No windows", 17.0, Ink::Primary)
+                                shell_text("No windows", 17.0, Ink::Primary)
                                     .font_weight(FontWeight::Medium),
                             )
                             .child(
-                                label(text, 12.0, Ink::Secondary)
+                                shell_text(text, 12.0, Ink::Secondary)
                                     .text_wrapping(ferroui_base::media::TextWrapping::Wrap),
                             ),
                     )
@@ -162,8 +162,8 @@ fn client_row(shell: &Rc<Shell>, client: &ClientWindow, workspace: usize, count:
                 stack_panel()
                     .grid_column(1)
                     .margin((8.0, 0.0, 0.0, 0.0))
-                    .child(label(title, 14.0, Ink::Primary).font_weight(FontWeight::Medium))
-                    .child(label(
+                    .child(shell_text(title, 14.0, Ink::Primary).font_weight(FontWeight::Medium))
+                    .child(shell_text(
                         if client.minimized {
                             "Minimized"
                         } else if client.active {

@@ -35,19 +35,26 @@ cleanup() {
     [[ -z $shell_pid ]] || kill "$shell_pid" 2>/dev/null || :
     [[ -z $wm_pid ]] || kill "$wm_pid" 2>/dev/null || :
     wait || :
-    rm -f -- "$FERRO_DESKTOP_READY_PIPE"
-    rmdir -- "$state"
+    # This directory is created exclusively by mktemp for this login.
+    rm -rf -- "$state"
 }
 trap cleanup EXIT
 trap 'exit 143' TERM
 trap 'exit 130' INT HUP
 # Openbox runs --startup only after it owns the root window. If another WM owns the
 # display or the shell exits, wait -n tears down the other half without replacing it.
-openbox --sm-disable --config-file "$config" --startup 'ferro-desktop-session --ready' &
+cp -- "$config" "$state/base.xml"
+cp -- "$config" "$state/openbox.xml"
+mkdir -p -- "$state/data/themes"
+# Only Openbox searches the session-local generated window decorations. Other clients
+# retain the full original XDG environment, including their own themes and icon paths.
+XDG_DATA_DIRS="$state/data:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}" \
+    openbox --sm-disable --config-file "$state/openbox.xml" --startup 'ferro-desktop-session --ready' &
 wm_pid=$!
 (
     read -r _ < "$FERRO_DESKTOP_READY_PIPE"
     unset FERRO_DESKTOP_READY_PIPE
+    export FERRO_DESKTOP_SESSION_DIR=$state
     exec "$binary" --session
 ) &
 shell_pid=$!

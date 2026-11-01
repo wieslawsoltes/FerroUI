@@ -84,12 +84,20 @@ pub fn run() -> ExitCode {
     } else {
         X11RenderingMode::Vulkan
     }];
+    let mut vulkan = ferroui_vulkan::VulkanOptions::default();
+    vulkan.vulkan_instance_creation_options.application_name = Some("Ferro Desktop".into());
+    // Graphite probes the two-plane 4:4:4 formats and chooses driver-specific workarounds.
+    vulkan.vulkan_device_creation_options.device_extensions.extend([
+        "VK_KHR_driver_properties".into(),
+        "VK_EXT_ycbcr_2plane_444_formats".into(),
+    ]);
     let theme = options.theme.unwrap_or_else(Appearance::preferred);
     // Let GIO resolve the user's installed entries while X11, Skia and the
     // initial theme load. No native application handles leave the worker.
     let applications = std::thread::spawn(ApplicationCatalog::discover);
     AppBuilder::configure::<Application>()
         .with(Rc::new(platform))
+        .with(Rc::new(vulkan))
         .use_x11()
         .use_harfbuzz()
         .use_skia()

@@ -50,7 +50,7 @@ impl Resolver {
         Ok(Self { api, theme })
     }
 
-    fn resolve(&self, icon: &str) -> Option<Bitmap> {
+    fn decode(&self, icon: &str) -> Option<(PixelSize, Vec<u8>)> {
         const SIZE: i32 = 64; // A 32-DIP launcher tile at 2x.
         const GTK_ICON_LOOKUP_FORCE_SIZE: c_int = 16;
         let icon = CString::new(icon).ok()?;
@@ -106,16 +106,7 @@ impl Resolver {
                 }
             }
             (api.g_object_unref)(pixels);
-            valid.then(|| {
-                Bitmap::from_pixels(
-                    PixelFormat::RGBA8888,
-                    AlphaFormat::Unpremul,
-                    &rgba,
-                    PixelSize::new(width, height),
-                    Vector::new(96.0, 96.0),
-                    width * 4,
-                )
-            })
+            valid.then_some((PixelSize::new(width, height), rgba))
         }
     }
 }
@@ -152,12 +143,46 @@ impl ApplicationIcons {
             .resolver
             .get_or_init(|| Resolver::new().ok())
             .as_ref()?;
-        let image = resolver.resolve(&app.icon).map(Rc::new);
+        let image = resolver.decode(&app.icon).map(|(size, rgba)| {
+            Rc::new(Bitmap::from_pixels(
+                PixelFormat::RGBA8888,
+                AlphaFormat::Unpremul,
+                &rgba,
+                size,
+                Vector::new(96.0, 96.0),
+                size.width * 4,
+            ))
+        });
         let mut entries = self.entries.borrow_mut();
         if entries.len() == 128 {
             entries.pop_front();
         }
         entries.push_back((app.icon.clone(), image.clone()));
         image
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn installed_file_icons_decode_without_a_gtk_display() {
+        // The icon service is optional on minimal systems.
+        let Ok(resolver) = Resolver::new() else {
+            return;
+        };
+        let path =
+            std::env::temp_dir().join(format!("ferro-desktop-icon-{}.xpm", std::process::id()));
+        std::fs::write(
+            &path,
+            b"/* XPM */\nstatic char *icon[] = {\n\"1 1 1 1\",\n\"a c #FF7700\",\n\"a\"};\n",
+        )
+        .unwrap();
+        let image = resolver.decode(path.to_str().unwrap());
+        std::fs::remove_file(path).unwrap();
+        let (size, bytes) = image.expect("decode installed file icon");
+        assert!(size.width <= 64 && size.height <= 64);
+        assert!(bytes.chunks_exact(4).all(|rgba| rgba == [255, 119, 0, 255]));
     }
 }

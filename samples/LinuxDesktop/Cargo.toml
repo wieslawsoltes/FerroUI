@@ -19,5 +19,7 @@ ferroui-themes-macos.workspace = true
 ferroui-themes-material.workspace = true
 ferroui-themes-winui.workspace = true
 ferroui-view.workspace = true
+ferroui-vulkan.workspace = true
 ferroui-x11.workspace = true
+roxmltree.workspace = true
 time = { workspace = true, features = ["local-offset"] }

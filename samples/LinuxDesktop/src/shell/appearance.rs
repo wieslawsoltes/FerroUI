@@ -19,6 +19,7 @@ pub struct Descriptor {
     pub name: &'static str,
     pub insets: (f64, f64),
     pub layout: Layout,
+    pub wallpaper: Wallpaper,
     pub palette: Palette,
     pub tint: fn(Color) -> Color,
     pub style: fn() -> Rc<dyn IStyle>,
@@ -49,16 +50,24 @@ pub enum Layout {
     BottomNavigation,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum Wallpaper {
+    Fold,
+    Horizon,
+    Garden,
+}
+
 #[derive(Clone, Copy)]
 pub struct Appearance(&'static Descriptor);
 
 #[allow(non_upper_case_globals)]
 impl Appearance {
-    pub const Windows: Self = Self(&Descriptor {
+    pub const Windows: Self = Self::new(&Descriptor {
         id: "windows",
         name: "Windows 11",
         insets: (0.0, 52.0),
         layout: Layout::Taskbar,
+        wallpaper: Wallpaper::Fold,
         palette: Palette {
             text: "#1C2025",
             muted: "#555E69",
@@ -78,11 +87,12 @@ impl Appearance {
         style: || ferroui_themes_winui::WinUITheme::new().as_style(),
         variant: ThemeVariant::light,
     });
-    pub const MacOS: Self = Self(&Descriptor {
+    pub const MacOS: Self = Self::new(&Descriptor {
         id: "macos",
         name: "macOS",
         insets: (34.0, 64.0),
         layout: Layout::MenuBarDock,
+        wallpaper: Wallpaper::Horizon,
         palette: Palette {
             text: "#FBF7FE",
             muted: "#D4CADA",
@@ -98,15 +108,16 @@ impl Appearance {
             bar_ink: "#FBF4FF",
             dock_tiles: ["#635BA4", "#3185B1", "#81617E"],
         },
-        tint: |c| Color::from_rgb(c.g.saturating_add(30), c.r, c.b.saturating_add(24)),
+        tint: |c| c,
         style: || ferroui_themes_macos::MacOSTheme::new().as_style(),
         variant: ThemeVariant::dark,
     });
-    pub const Material: Self = Self(&Descriptor {
+    pub const Material: Self = Self::new(&Descriptor {
         id: "material",
         name: "Material 3",
         insets: (0.0, 72.0),
         layout: Layout::BottomNavigation,
+        wallpaper: Wallpaper::Garden,
         palette: Palette {
             text: "#EFF4E9",
             muted: "#B9C9B9",
@@ -153,8 +164,11 @@ impl Appearance {
     pub fn layout(self) -> Layout {
         self.0.layout
     }
+    pub fn wallpaper(self) -> Wallpaper {
+        self.0.wallpaper
+    }
     pub const fn palette(self) -> Palette {
-        self.0.palette
+        self.descriptor().palette
     }
     pub fn tint(self, color: Color) -> Color {
         (self.0.tint)(color)
@@ -289,7 +303,7 @@ mod tests {
 
     #[test]
     fn fourth_descriptor_supplies_its_own_palette_on_an_existing_layout() {
-        const CUSTOM: Appearance = Appearance::new(&Descriptor {
+        static NIGHT_SHIFT: Descriptor = Descriptor {
             id: "night-shift",
             name: "Night shift",
             insets: (0.0, 62.0),
@@ -298,7 +312,8 @@ mod tests {
                 ..Appearance::Windows.palette()
             },
             ..*Appearance::Windows.descriptor()
-        });
+        };
+        const CUSTOM: Appearance = Appearance::new(&NIGHT_SHIFT);
         let registry = [
             Appearance::Windows,
             Appearance::MacOS,

@@ -17,10 +17,11 @@ The setting persists as an appearance ID in `$XDG_CONFIG_HOME/ferro-desktop/appe
 Define a descriptor in `src/shell/appearance.rs` and add its handle to `Appearance::ALL`. Stable IDs identify saved settings and command-line values. Pick a layout, supply its top and bottom screen reservations in device-independent pixels, and provide a native style factory and variant.
 
 ```rust
-const COBALT: Appearance = Appearance::new(&Descriptor {
+static COBALT_DESCRIPTOR: Descriptor = Descriptor {
     id: "cobalt",
     name: "Cobalt",
     layout: Layout::Taskbar,
+    wallpaper: Wallpaper::Fold,
     insets: (0.0, 60.0),
     palette: Palette {
         bar: "#F5DBE8FF",
@@ -31,7 +32,8 @@ const COBALT: Appearance = Appearance::new(&Descriptor {
     tint: |c| Color::from_rgb(c.r / 2, c.b, c.g.saturating_add(35)),
     style: || ferroui_themes_winui::WinUITheme::new().as_style(),
     variant: ThemeVariant::light,
-});
+};
+const COBALT: Appearance = Appearance::new(&COBALT_DESCRIPTOR);
 ```
 
 Include `COBALT` in the registry slice. The chooser, numeric shortcuts, preference reader and command-line parser consume this registry. The profile can use a distinct FerroUI theme crate by supplying its style factory. A new panel placement requires a new layout strategy in `desktop.rs`. The test `fourth_descriptor_supplies_its_own_palette_on_an_existing_layout` exercises registration on a shared layout.

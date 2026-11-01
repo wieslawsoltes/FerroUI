@@ -24,7 +24,7 @@ pub(super) fn surface(
         .child(wallpaper::wallpaper(appearance))
         .child(
             grid()
-                .is_enabled(move || scene.get() == Scene::Desktop)
+                .is_hit_test_visible(move || scene.get() == Scene::Desktop)
                 .child(shell),
         )
         .into()
@@ -95,7 +95,7 @@ fn running_clients(state: &Rc<Shell>) -> Element {
             .child(
                 stack_panel()
                     .spacing(2.0)
-                    .child(label(&initial, 13.0, Ink::Primary).horizontal_alignment(H::Center))
+                    .child(shell_text(&initial, 13.0, Ink::Primary).horizontal_alignment(H::Center))
                     .child(
                         border()
                             .width(if window.active { 13.0 } else { 5.0 })
@@ -127,7 +127,7 @@ fn desktop_shortcut(state: &Rc<Shell>, scene: Scene, name: &str, icon: Icon) -> 
             stack_panel()
                 .spacing(5.0)
                 .child(glyph(icon, 28.0, "#DFF3FF"))
-                .child(label(name, 12.0, "#FFFFFF").horizontal_alignment(H::Center)),
+                .child(shell_text(name, 12.0, "#FFFFFF").horizontal_alignment(H::Center)),
         )
         .into()
 }
@@ -150,18 +150,18 @@ fn taskbar(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
         .child(
             row(9.0)
                 .child(glyph(Icon::Search, 14.0, colors().muted))
-                .child(label("Search", 13.0, Ink::Secondary)),
+                .child(shell_text("Search", 13.0, Ink::Secondary)),
         );
     let tray = stack_panel()
         .horizontal_alignment(H::Right)
         .vertical_alignment(V::Center)
         .child(
-            label("", 12.0, Ink::Primary)
+            shell_text("", 12.0, Ink::Primary)
                 .horizontal_alignment(H::Right)
                 .text(move || time_text(clock.get())),
         )
         .child(
-            label("", 11.0, Ink::Secondary)
+            shell_text("", 11.0, Ink::Secondary)
                 .horizontal_alignment(H::Right)
                 .text(move || date(clock.get())),
         );
@@ -218,7 +218,7 @@ fn taskbar(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
                         .column_definitions("*,Auto,*")
                         .margin((10.0, 0.0))
                         .child(
-                            label("", 11.0, Ink::Secondary)
+                            shell_text("", 11.0, Ink::Secondary)
                                 .margin((5.0, 0.0))
                                 .text(move || snapshot.with(workspace_name)),
                         )
@@ -240,7 +240,7 @@ fn menubar_and_dock(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element
             .background("Transparent")
             .border_thickness(0)
             .padding((7.0, 0.0))
-            .child(label(title, 12.0, Ink::Primary))
+            .child(shell_text(title, 12.0, Ink::Primary))
     };
     let dock_tile = |scene, title: &'static str, icon, fill: &'static str| {
         command(state, scene, title)
@@ -277,7 +277,7 @@ fn menubar_and_dock(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element
                                         row(6.0)
                                             .child(glyph(Icon::Mark, 15.0, colors().bar_ink))
                                             .child(
-                                                label("Ferro", 13.0, colors().bar_ink)
+                                                shell_text("Ferro", 13.0, colors().bar_ink)
                                                     .font_weight(FontWeight::Bold),
                                             ),
                                     ),
@@ -287,7 +287,7 @@ fn menubar_and_dock(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element
                             .child(menu(Scene::Appearance, "Appearance")),
                     )
                     .child(
-                        label("", 12.0, colors().bar_ink)
+                        shell_text("", 12.0, colors().bar_ink)
                             .grid_column(1)
                             .text(move || time_text(clock.get())),
                     ),
@@ -330,22 +330,43 @@ fn menubar_and_dock(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element
 }
 
 fn material_home(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
-    let tab = |scene, name: &'static str, icon| {
-        command(state, scene, name)
-            .height(54.0)
-            .max_width(145.0)
-            .padding((12.0, 2.0))
-            .corner_radius(25)
-            .child(
-                stack_panel()
-                    .spacing(2.0)
-                    .child(glyph(icon, 17.0, colors().accent))
-                    .child(
-                        label(name, 11.0, Ink::Primary)
-                            .font_weight(FontWeight::Medium)
-                            .horizontal_alignment(H::Center),
-                    ),
-            )
+    let scene = state.scene;
+    let tab = |destination, name: &'static str, icon, col| {
+        let shell = state.clone();
+        action(name, move || {
+            if destination == Scene::Desktop {
+                shell.dismiss();
+            } else {
+                shell.open(destination);
+            }
+        })
+        .class("text")
+        .grid_column(col)
+        .horizontal_alignment(H::Stretch)
+        .height(54.0)
+        .min_width(42.0)
+        .padding((1.0, 0.0))
+        .child(
+            stack_panel()
+                .spacing(2.0)
+                .child(
+                    grid()
+                        .width(50.0)
+                        .height(25.0)
+                        .child(
+                            border()
+                                .corner_radius(14)
+                                .background(colors().selected)
+                                .is_visible(move || scene.get() == destination),
+                        )
+                        .child(glyph(icon, 16.0, colors().bar_ink)),
+                )
+                .child(
+                    shell_text(name, 11.0, colors().bar_ink)
+                        .horizontal_alignment(H::Center)
+                        .font_weight(FontWeight::Medium),
+                ),
+        )
     };
     grid()
         .row_definitions(&format!("*,{}", state.themes.current().insets().1))
@@ -354,12 +375,12 @@ fn material_home(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
                 .margin((34.0, 32.0))
                 .horizontal_alignment(H::Left)
                 .vertical_alignment(V::Top)
-                .child(label("", 17.0, "#D4E7D9").text(move || {
+                .child(shell_text("", 17.0, "#D4E7D9").text(move || {
                     let t = clock.get();
                     format!("{}, {} {}", t.weekday(), t.month(), t.day())
                 }))
                 .child(
-                    label("", 76.0, "#E1F9E7")
+                    shell_text("", 76.0, "#E1F9E7")
                         .font_weight(FontWeight::Light)
                         .letter_spacing(-3.0)
                         .text(move || time_text(clock.get())),
@@ -374,15 +395,17 @@ fn material_home(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
                     grid()
                         .row_definitions("*,6")
                         .child(
-                            row(8.0)
-                                .horizontal_alignment(H::Center)
+                            grid()
+                                .max_width(430.0)
+                                .column_definitions("*,*,*,*")
                                 .child(
-                                    tab(Scene::Applications, "Apps", Icon::Applications)
+                                    tab(Scene::Desktop, "Home", Icon::Mark, 0)
                                         .node_ref(state.desktop_focus)
                                         .on_loaded(focus_home(state)),
                                 )
-                                .child(tab(Scene::Workspaces, "Overview", Icon::Workspaces))
-                                .child(tab(Scene::Appearance, "Style", Icon::Appearance)),
+                                .child(tab(Scene::Applications, "Apps", Icon::Applications, 1))
+                                .child(tab(Scene::Workspaces, "Overview", Icon::Workspaces, 2))
+                                .child(tab(Scene::Appearance, "Style", Icon::Appearance, 3)),
                         )
                         .child(
                             border()
@@ -401,16 +424,17 @@ pub(super) fn popup_frame() -> El<Border> {
     let (top, bottom) = look().insets();
     match look().layout() {
         Layout::Taskbar => {
-            panel()
+            shell_panel()
                 .vertical_alignment(V::Bottom)
                 .margin((12.0, 10.0, 12.0, bottom + 9.0))
         }
-        Layout::MenuBarDock => {
-            panel()
-                .vertical_alignment(V::Center)
-                .margin((20.0, top + 5.0, 20.0, bottom + 4.0))
-        }
-        Layout::BottomNavigation => panel()
+        Layout::MenuBarDock => shell_panel().vertical_alignment(V::Center).margin((
+            20.0,
+            top + 5.0,
+            20.0,
+            bottom + 4.0,
+        )),
+        Layout::BottomNavigation => shell_panel()
             .vertical_alignment(V::Bottom)
             .margin((8.0, 12.0, 8.0, 7.0)),
     }
@@ -447,6 +471,7 @@ pub(super) fn picker(state: &Rc<Shell>) -> Element {
                     }
                 }
             })
+            .horizontal_alignment(H::Stretch)
             .horizontal_content_alignment(H::Stretch)
             .padding((12.0, 8.0))
             .child(
@@ -467,12 +492,13 @@ pub(super) fn picker(state: &Rc<Shell>) -> Element {
                             .grid_column(1)
                             .margin((10.0, 0.0))
                             .child(
-                                label(name, 15.0, Ink::Primary).font_weight(FontWeight::SemiBold),
+                                shell_text(name, 15.0, Ink::Primary)
+                                    .font_weight(FontWeight::SemiBold),
                             )
-                            .child(label(description, 11.0, Ink::Secondary)),
+                            .child(shell_text(description, 11.0, Ink::Secondary)),
                     )
                     .child(
-                        label(&hint, 12.0, Ink::Accent)
+                        shell_text(&hint, 12.0, Ink::Accent)
                             .grid_column(2)
                             .horizontal_alignment(H::Right),
                     ),
