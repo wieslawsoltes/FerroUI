@@ -2,7 +2,6 @@ use super::*;
 use crate::documents::TextGravity;
 use crate::{ContextMenu, ContextMenuEventArgs};
 use ferroui_base::input::ContextRequestedEventArgs;
-use ferroui_base::interactivity::InteractiveImplExt;
 use ferroui_base::media::FlowDirection;
 
 impl RichEditBox {

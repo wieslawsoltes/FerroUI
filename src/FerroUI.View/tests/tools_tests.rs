@@ -2,7 +2,7 @@
 
 use crate::generated::builders::*;
 use crate::reactive::{signal, Owner};
-use crate::{rerender, rsx, set_diagnostics_handler, clear_diagnostics_handler, Diagnostic, Element, IntoElement};
+use crate::{rerender, rsx, set_diagnostics_handler, clear_diagnostics_handler, Diagnostic, IntoElement};
 use ferroui_controls::{StackPanel, TextBlock};
 use std::cell::RefCell;
 use std::rc::Rc;

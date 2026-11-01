@@ -11,7 +11,6 @@ use ferroui_base::input::{
     IPointer, KeyModifiers, Pointer, PointerPointProperties, PointerType, PointerUpdateKind, PointerWheelEventArgs,
     RawInputModifiers,
 };
-use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::{Matrix, Point, Ref, Size, Vector, Visual};
 use std::rc::Rc;
 

@@ -71,7 +71,7 @@ impl ImageBrush {
 mod tests {
     use super::*;
     use crate::media::{AlignmentX, BrushExtensions, IBrush, Stretch, TileMode};
-    use crate::platform::IBitmapImpl;
+    
     use crate::utilities::RefCounted;
     use crate::RelativeRect;
     use std::cell::Cell;

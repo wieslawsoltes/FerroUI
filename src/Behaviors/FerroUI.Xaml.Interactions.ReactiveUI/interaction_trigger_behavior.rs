@@ -1,6 +1,5 @@
 //! Port of `InteractionTriggerBehavior.cs` (`InteractionTriggerBehavior<TInput, TOutput>`).
 
-use ferroui_base::data::core::ValueTypes;
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_properties, instantiate, BoxedValue, FerroObjectImpl, FerroProperty, Ref,

@@ -4,7 +4,7 @@
 use ferroui_base::media::imaging::{BitmapBlendingMode, BitmapInterpolationMode};
 use ferroui_base::media::{Color, FillRule, GradientSpreadMethod, PenLineCap, PenLineJoin};
 use ferroui_base::{Matrix, Point, Rect, RoundedRect, Vector};
-use kurbo::{Affine, BezPath, PathEl, Shape};
+use kurbo::{Affine, BezPath, PathEl};
 use peniko::color::{AlphaColor, Srgb};
 use peniko::{BlendMode, Compose, Extend, Fill, ImageQuality, Mix};
 

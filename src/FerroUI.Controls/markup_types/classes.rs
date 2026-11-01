@@ -38,7 +38,7 @@ use ferroui_base::media::{
 use ferroui_base::metadata::{into_markup_value, MarkupDelegate, MarkupType};
 use ferroui_base::styling::*;
 use ferroui_base::utilities::{CancelEventArgs, EventArgs};
-use ferroui_base::{ferro_class_info, BoxedValue, FerroObject, IFerroDependencyResolver, PixelPoint, Rect, Ref, Size, Vector};
+use ferroui_base::{ferro_class_info, BoxedValue, FerroObject, IFerroDependencyResolver, PixelPoint, Rect, Ref, Size};
 use std::rc::Rc;
 use ferroui_base::ferro_markup_type;
 use ferroui_base::metadata::MarkupTyped;

@@ -6,11 +6,11 @@
 //! Copy-menu path is not projected by this configured-menu bridge.
 
 use super::*;
-use crate::primitives::{FlyoutBase, FlyoutBaseImplExt, PopupFlyoutBase};
+use crate::primitives::{FlyoutBase, PopupFlyoutBase};
 use crate::{ContextMenu, ContextMenuEventArgs};
 use ferroui_base::input::ContextRequestedEventArgs;
 use ferroui_base::interactivity::{
-    IRoutedEventArgs, Interactive, InteractiveImplExt, RoutedEventHandlerToken,
+    IRoutedEventArgs, Interactive, RoutedEventHandlerToken,
 };
 
 #[derive(Clone)]

@@ -10,7 +10,7 @@ use crate::primitives::{
 use crate::{Button, Control, ControlImpl, IconSource, TopLevel, Window, WindowBase};
 use ferroui_base::input::{InputElementImpl, WindowDecorationsElementRole};
 use ferroui_base::interactivity::{InteractiveImpl, RoutedEventHandlerToken};
-use ferroui_base::layout::{LayoutableImpl, LayoutableImplExt};
+use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::FlowDirection;
 use ferroui_base::metadata::{into_markup_value, MarkupDelegate};
 use ferroui_base::reactive::IDisposable;

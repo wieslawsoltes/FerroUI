@@ -8,8 +8,6 @@
 //! debug builds ([`open_inspector`]); F12 is left to the DevTools.
 
 use crate::element::{Element, Key};
-use crate::hooks::{use_effect_with, use_hook, use_signal};
-use crate::reactive::on_cleanup;
 use crate::template::template_of;
 use ferroui_base::layout::{Orientation, VerticalAlignment};
 use ferroui_base::BoxedValue;

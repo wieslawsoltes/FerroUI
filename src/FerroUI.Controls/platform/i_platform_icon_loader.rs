@@ -1,5 +1,4 @@
 use super::IWindowIconImpl;
-use ferroui_base::platform::IBitmapImpl;
 use std::io;
 use std::rc::Rc;
 

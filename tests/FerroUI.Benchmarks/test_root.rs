@@ -10,7 +10,6 @@ use ferroui_base::layout::{ILayoutManager, ILayoutRoot, LayoutManager, Layoutabl
 use ferroui_base::media::{Geometry, GeometryHitTestResult};
 use ferroui_base::platform::IPlatformSettings;
 use ferroui_base::reactive::{Disposable, IDisposable};
-use ferroui_base::rendering::composition::RenderInterfaceFeature;
 use ferroui_base::rendering::{
     IHitTester, IPresentationSource, IRenderer, RendererDiagnostics, SceneInvalidatedEventArgs,
 };

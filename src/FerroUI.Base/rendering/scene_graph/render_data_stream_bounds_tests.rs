@@ -2,7 +2,6 @@
 
 use super::scene_graph_test_support::{b, black, black_pen, p, rrect, TestBitmapImpl, TestCustomOperation};
 use crate::media::BoxShadows;
-use crate::platform::IBitmapImpl;
 use crate::rendering::composition::drawing::RenderDataStream;
 use crate::{Matrix, Point, Rect};
 

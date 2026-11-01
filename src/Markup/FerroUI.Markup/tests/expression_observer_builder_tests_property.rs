@@ -1,7 +1,7 @@
 //! Ported from the upstream `ExpressionObserverBuilderTests_Property`.
 
 use super::test_support::*;
-use ferroui_base::data::core::{BindingExpression, ModelRef, Value, ValueType};
+use ferroui_base::data::core::{BindingExpression, ModelRef, Value};
 use ferroui_base::data::model::Model;
 use ferroui_base::data::{BindingChainException, BindingError, BindingErrorType, BindingNotification};
 use ferroui_base::*;

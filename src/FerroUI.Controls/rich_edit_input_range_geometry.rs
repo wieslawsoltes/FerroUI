@@ -3,7 +3,7 @@
 use super::RichEditBoxTextInputMethodClient;
 use crate::rich_text::{EditorSelection, RichTextEditor};
 use crate::rich_text_layout::{RichTextLayout, RichTextLine};
-use crate::{RichEditBox, RichTextBlock, RichTextBlockImplExt};
+use crate::{RichEditBox, RichTextBlock};
 use ferroui_base::input::text_input::{
     TextInputMethodClient, TextInputMethodError, TextInputMethodRangeGeometry,
     TextInputMethodTextBounds, TextSelection,

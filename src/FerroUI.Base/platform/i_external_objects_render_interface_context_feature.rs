@@ -1,4 +1,4 @@
-use super::{IBitmapImpl, IPlatformHandle, PlatformGraphicsDrmFormat, PlatformGraphicsExternalImageProperties};
+use super::{IPlatformHandle, PlatformGraphicsDrmFormat, PlatformGraphicsExternalImageProperties};
 use crate::rendering::composition::{CompositionGpuImportedImageSynchronizationCapabilities, ICompositionImportableSharedGpuContextImage};
 use std::rc::Rc;
 use std::sync::Arc;
