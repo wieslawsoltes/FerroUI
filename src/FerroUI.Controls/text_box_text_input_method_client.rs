@@ -547,14 +547,15 @@ impl TextBoxTextInputMethodClient {
             self.raise_surrounding_text_changed();
         }
 
-        if property == TextBox::selection_start_property().as_property()
-            || property == TextBox::selection_end_property().as_property()
-        {
-            if self.is_in_change.get() {
-                self.selection_changed.set(true);
-            } else {
-                self.raise_selection_changed();
-            }
+    }
+
+    // Selection belongs to the owning control, not to the active platform text
+    // view. Keep the existing change-scope batching for both control and IME users.
+    pub(crate) fn on_selection_changed(&self) {
+        if self.is_in_change.get() {
+            self.selection_changed.set(true);
+        } else {
+            self.raise_selection_changed();
         }
     }
 
