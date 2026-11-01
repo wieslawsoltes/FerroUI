@@ -15,7 +15,7 @@ use smithay::{
             Client, DisplayHandle, Resource,
         },
     },
-    utils::{Logical, Point, Rectangle, Serial, Transform, SERIAL_COUNTER},
+    utils::{Logical, Point, Rectangle, Serial, Size, Transform, SERIAL_COUNTER},
     wayland::{
         buffer::BufferHandler,
         compositor::{
@@ -62,7 +62,7 @@ pub(super) struct Window {
     pub role: ToplevelSurface,
     pub id: u64,
     pub location: Point<i32, Logical>,
-    saved: Option<Rectangle<i32, Logical>>,
+    pub(super) saved: Option<Rectangle<i32, Logical>>,
     pub hidden: bool,
     pub fullscreen: bool,
     pub maximized: bool,
@@ -101,6 +101,7 @@ pub(super) struct State {
     pub(super) hits: Vec<Hit>,
     pub(super) focused: Option<u64>,
     pub(super) pointer_at: Option<Point<f64, Logical>>,
+    pub(super) pointer_target: Option<(WlSurface, Point<f64, Logical>)>,
     pub(super) drag: Option<super::seat::Drag>,
     pub(super) host_keyboard: super::seat::HostKeyboard,
     pending_frames: Vec<PendingFrame>,
@@ -161,6 +162,7 @@ impl State {
             hits: vec![],
             focused: None,
             pointer_at: None,
+            pointer_target: None,
             drag: None,
             host_keyboard: Default::default(),
             pending_frames: Vec::new(),
@@ -341,6 +343,7 @@ impl State {
             });
         }
         self.hits = hits;
+        self.refresh_pointer(self.start.elapsed().as_millis() as u32);
         Some(Scene {
             serial: self.serial,
             surfaces,
@@ -419,6 +422,37 @@ impl State {
         });
         if w.role.is_initial_configure_sent() {
             w.role.send_pending_configure();
+        }
+        self.dirty = true;
+    }
+
+    /// Switch to floating in one configure. Moving a zoomed window reuses
+    /// its saved client size; resizing one reuses its saved normal position.
+    pub(super) fn normal_frame(
+        &mut self,
+        id: u64,
+        position: Option<Point<i32, Logical>>,
+        size: Option<Size<i32, Logical>>,
+    ) {
+        let Some(win) = self.windows.iter_mut().find(|w| w.id == id) else {
+            return;
+        };
+        let was_zoomed = win.maximized || win.fullscreen;
+        let saved = win.saved.take();
+        win.maximized = false;
+        win.fullscreen = false;
+        if let Some(loc) = position.or(saved.map(|r| r.loc)) {
+            win.location = loc;
+        }
+        if was_zoomed || size.is_some() {
+            win.role.with_pending_state(|s| {
+                s.states.unset(xdg_toplevel::State::Fullscreen);
+                s.states.unset(xdg_toplevel::State::Maximized);
+                s.size = size.or(saved.map(|r| r.size));
+            });
+            if win.role.is_initial_configure_sent() {
+                win.role.send_pending_configure();
+            }
         }
         self.dirty = true;
     }
@@ -644,19 +678,20 @@ impl State {
                     w.role.send_close();
                 }
             }
-            Input::Move { id, x, y } => {
-                if let Some(w) = self.windows.iter_mut().find(|w| w.id == id) {
-                    w.location = (x, y).into();
-                    self.dirty = true;
+            Input::Snap { id, right } => {
+                let mut area = self.area();
+                let split = area.size.w / 2;
+                if right {
+                    area.loc.x += split;
+                    area.size.w -= split;
+                } else {
+                    area.size.w = split.max(1);
                 }
+                self.normal_frame(id, Some(area.loc), Some(area.size));
             }
+            Input::Move { id, x, y } => self.normal_frame(id, Some((x, y).into()), None),
             Input::Configure { id, width, height } => {
-                if let Some(w) = self.windows.iter().find(|w| w.id == id) {
-                    w.role.with_pending_state(|s| {
-                        s.size = Some((width.max(1), height.max(1)).into())
-                    });
-                    w.role.send_pending_configure();
-                }
+                self.normal_frame(id, None, Some((width.max(1), height.max(1)).into()))
             }
             _ => self.seat_event(event),
         }

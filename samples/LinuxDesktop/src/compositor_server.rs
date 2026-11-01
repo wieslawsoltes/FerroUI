@@ -130,6 +130,10 @@ pub enum Input {
         width: i32,
         height: i32,
     },
+    Snap {
+        id: u64,
+        right: bool,
+    },
     Activate(u64),
     Close(u64),
     SwitchWorkspace(usize),

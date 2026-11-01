@@ -72,6 +72,29 @@ impl State {
         })
     }
 
+    /// Retarget an unmoving pointer when a new surface covers it, a popup is
+    /// dismissed, or a workspace disappears. Keep ordinary commits input-silent.
+    pub(super) fn refresh_pointer(&mut self, time: u32) {
+        let Some(at) = self.pointer_at else { return };
+        let next = self.hit(at).map(|(wl, origin, _)| (wl, origin));
+        if next == self.pointer_target {
+            return;
+        }
+        self.pointer_target = next.clone();
+        if let Some(pointer) = self.seat.get_pointer() {
+            pointer.motion(
+                self,
+                next,
+                &MotionEvent {
+                    location: at,
+                    serial: SERIAL_COUNTER.next_serial(),
+                    time,
+                },
+            );
+            pointer.frame(self);
+        }
+    }
+
     pub(super) fn seat_event(&mut self, event: Input) {
         let Some(pointer) = self.seat.get_pointer() else {
             return;
@@ -87,6 +110,7 @@ impl State {
                     self.apply_drag(point);
                 }
                 let target = self.hit(point).map(|(wl, origin, _)| (wl, origin));
+                self.pointer_target = target.clone();
                 pointer.motion(
                     self,
                     target,
@@ -100,6 +124,7 @@ impl State {
             }
             Input::Leave { time } => {
                 let point = self.pointer_at.take().unwrap_or_default();
+                self.pointer_target = None;
                 pointer.motion(
                     self,
                     None,
@@ -116,6 +141,7 @@ impl State {
                 pressed,
                 time,
             } => {
+                self.refresh_pointer(time);
                 if pressed && !pointer.is_grabbed() {
                     if let Some((_, _, id)) = self.pointer_at.and_then(|p| self.hit(p)) {
                         self.focus(Some(id));
@@ -310,11 +336,7 @@ impl State {
         let Some((target, _)) = start.focus else {
             return;
         };
-        let Some(window) = self
-            .windows
-            .iter()
-            .find(|w| w.role == role && !w.fullscreen)
-        else {
+        let Some(window) = self.windows.iter().find(|w| w.role == role) else {
             return;
         };
         if !self
@@ -324,9 +346,21 @@ impl State {
         {
             return;
         }
-        let frame = Rectangle::new(window.location, self.geometry(role.wl_surface()).size);
+        let id = window.id;
+        let initial = Rectangle::new(window.location, self.geometry(role.wl_surface()).size);
+        let mut frame = window.saved.unwrap_or(initial);
+        if window.maximized || window.fullscreen {
+            if edge.is_none() {
+                let relative =
+                    (start.location - initial.loc.to_f64()).x / f64::from(initial.size.w.max(1));
+                frame.loc.x = (start.location.x - relative.clamp(0., 1.) * f64::from(frame.size.w))
+                    .round() as i32;
+                frame.loc.y = start.location.y.round() as i32 - 12;
+            }
+            self.normal_frame(id, Some(frame.loc), Some(frame.size));
+        }
         self.drag = Some(Drag {
-            id: window.id,
+            id,
             origin: start.location,
             frame,
             edge,

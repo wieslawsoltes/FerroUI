@@ -1,9 +1,10 @@
 //! An independent Wayland client verifies protocol ordering, client-owned
 //! padded pixels, frame throttling and window state across desktop changes.
 use super::{Input, Scene, Server};
+use smithay::input::keyboard::xkb;
 use std::{
     fs::{self, File},
-    io::Write,
+    io::{Read, Write},
     os::{
         fd::AsFd,
         unix::{fs::DirBuilderExt, net::UnixStream},
@@ -16,7 +17,8 @@ use wayland_client::{
     delegate_noop,
     globals::{registry_queue_init, GlobalListContents},
     protocol::{
-        wl_buffer, wl_callback, wl_compositor, wl_registry, wl_shm, wl_shm_pool, wl_surface,
+        wl_buffer, wl_callback, wl_compositor, wl_keyboard, wl_registry, wl_seat, wl_shm,
+        wl_shm_pool, wl_surface,
     },
     Connection, Dispatch, QueueHandle,
 };
@@ -29,6 +31,9 @@ struct Client {
     released: usize,
     size: (i32, i32),
     closed: bool,
+    keymap_count: usize,
+    keyboard: Option<xkb::State>,
+    typed: String,
 }
 delegate_noop!(Client: ignore wl_compositor::WlCompositor);
 delegate_noop!(Client: ignore wl_shm::WlShm);
@@ -59,6 +64,63 @@ impl Dispatch<wl_buffer::WlBuffer, ()> for Client {
         }
     }
 }
+delegate_noop!(Client: ignore wl_seat::WlSeat);
+impl Dispatch<wl_keyboard::WlKeyboard, ()> for Client {
+    fn event(
+        client: &mut Self,
+        _: &wl_keyboard::WlKeyboard,
+        event: wl_keyboard::Event,
+        _: &(),
+        _: &Connection,
+        _: &QueueHandle<Self>,
+    ) {
+        match event {
+            wl_keyboard::Event::Keymap { fd, .. } => {
+                let mut text = String::new();
+                File::from(fd).read_to_string(&mut text).unwrap();
+                let ctx = xkb::Context::new(xkb::CONTEXT_NO_FLAGS);
+                let map = xkb::Keymap::new_from_string(
+                    &ctx,
+                    text.trim_end_matches(char::from(0)).to_owned(),
+                    xkb::KEYMAP_FORMAT_TEXT_V1,
+                    xkb::KEYMAP_COMPILE_NO_FLAGS,
+                )
+                .unwrap();
+                client.keyboard = Some(xkb::State::new(&map));
+                client.keymap_count += 1;
+            }
+            wl_keyboard::Event::Modifiers {
+                mods_depressed,
+                mods_latched,
+                mods_locked,
+                group,
+                ..
+            } => {
+                client.keyboard.as_mut().unwrap().update_mask(
+                    mods_depressed,
+                    mods_latched,
+                    mods_locked,
+                    0,
+                    0,
+                    group,
+                );
+            }
+            wl_keyboard::Event::Key { key, state, .. }
+                if state == wayland_client::WEnum::Value(wl_keyboard::KeyState::Pressed) =>
+            {
+                client.typed.push_str(
+                    &client
+                        .keyboard
+                        .as_ref()
+                        .unwrap()
+                        .key_get_utf8((key + 8).into()),
+                );
+            }
+            _ => {}
+        }
+    }
+}
+
 impl Dispatch<wl_callback::WlCallback, ()> for Client {
     fn event(
         client: &mut Self,
@@ -174,6 +236,8 @@ fn commit_present_and_switch_workspace() {
     let compositor: wl_compositor::WlCompositor = globals.bind(&handle, 1..=4, ()).unwrap();
     let shm: wl_shm::WlShm = globals.bind(&handle, 1..=1, ()).unwrap();
     let shell: xdg_wm_base::XdgWmBase = globals.bind(&handle, 1..=3, ()).unwrap();
+    let seat: wl_seat::WlSeat = globals.bind(&handle, 1..=7, ()).unwrap();
+    let _kbd = seat.get_keyboard(&handle, ());
     let surface = compositor.create_surface(&handle, ());
     let role = shell.get_xdg_surface(&surface, &handle, ());
     let top = role.get_toplevel(&handle, ());
@@ -210,6 +274,41 @@ fn commit_present_and_switch_workspace() {
     assert_eq!(client.released, 1);
     assert_eq!(client.frames, 0);
     let id = shown.windows[0].id;
+    // Parent uses German layout and holds Shift before the child gained focus.
+    // The same physical key then arrives without Shift, without a second map.
+    let ctx = xkb::Context::new(xkb::CONTEXT_NO_FLAGS);
+    let map = xkb::Keymap::new_from_names(
+        &ctx,
+        "evdev",
+        "pc105",
+        "de",
+        "",
+        None,
+        xkb::KEYMAP_COMPILE_NO_FLAGS,
+    )
+    .unwrap();
+    let shift = 1 << map.mod_get_index(xkb::MOD_NAME_SHIFT);
+    let serialized: std::sync::Arc<str> = map.get_as_string(xkb::KEYMAP_FORMAT_TEXT_V1).into();
+    let previous_maps = client.keymap_count;
+    for depressed in [shift, 0] {
+        for pressed in [true, false] {
+            server.send(Input::WaylandKey {
+                event: ferroui_wayland::WaylandKeyEvent {
+                    code: 21,
+                    keymap: Some(serialized.clone()),
+                    modifiers: ferroui_wayland::WaylandKeyModifiers {
+                        depressed,
+                        latched: 0,
+                        locked: 0,
+                        group: 0,
+                    },
+                    repeat: false,
+                },
+                pressed,
+                time: 42,
+            });
+        }
+    }
     server.send(Input::MoveToWorkspace { id, workspace: 1 });
     let hidden = snapshot(&server, &wake, |s| {
         s.surfaces.is_empty() && s.windows[0].workspace == 1
@@ -219,6 +318,8 @@ fn commit_present_and_switch_workspace() {
     snapshot(&server, &wake, |s| s.current_workspace == 4);
     queue.roundtrip(&mut client).unwrap();
     assert_eq!(client.frames, 0);
+    assert_eq!(client.typed, "Zz");
+    assert_eq!(client.keymap_count, previous_maps + 1);
     server.send(Input::RemoveWorkspace);
     server.send(Input::Activate(id));
     let restored = snapshot(&server, &wake, |s| {
@@ -248,6 +349,17 @@ fn commit_present_and_switch_workspace() {
     snapshot(&server, &wake, |s| !s.windows[0].fullscreen);
     queue.roundtrip(&mut client).unwrap();
     assert_eq!(client.size, (640, 420));
+    server.send(Input::Resize {
+        width: 641,
+        height: 480,
+    });
+    server.send(Input::Snap { id, right: true });
+    let snapped = snapshot(&server, &wake, |s| {
+        !s.windows[0].maximized && s.windows[0].x == 320
+    });
+    queue.roundtrip(&mut client).unwrap();
+    assert!(!snapped.windows[0].fullscreen);
+    assert_eq!(client.size, (321, 420));
     server.send(Input::Minimize(id));
     snapshot(&server, &wake, |s| {
         s.windows[0].minimized && s.surfaces.is_empty()
