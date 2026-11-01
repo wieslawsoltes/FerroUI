@@ -6,20 +6,26 @@ use ferroui_media_camera::{
 };
 use ferroui_media_windows::NativeSession;
 use std::{task::Poll, time::Instant};
+#[path = "camera_recovery.rs"]
+mod recovery;
 
 async fn wait<T: 'static>(
+    check: impl FnMut() -> Result<Option<T>, String> + 'static,
+) -> Result<T, String> {
+    wait_for(Duration::from_secs(5), check).await
+}
+async fn wait_for<T: 'static>(
+    timeout: Duration,
     mut check: impl FnMut() -> Result<Option<T>, String> + 'static,
 ) -> Result<T, String> {
     let started = Instant::now();
     ferroui_media_windows::poll_native(move || match check() {
         Ok(Some(value)) => Poll::Ready(Ok(value)),
         Err(message) => Poll::Ready(Err(MediaError::new(MediaErrorKind::NativeFailure, message))),
-        Ok(None) if started.elapsed() > Duration::from_secs(5) => {
-            Poll::Ready(Err(MediaError::new(
-                MediaErrorKind::NativeFailure,
-                "Synthetic camera stage timed out",
-            )))
-        }
+        Ok(None) if started.elapsed() > timeout => Poll::Ready(Err(MediaError::new(
+            MediaErrorKind::NativeFailure,
+            "Synthetic camera stage timed out",
+        ))),
         _ => Poll::Pending,
     })
     .await
@@ -233,7 +239,11 @@ async fn exercise(state: Rc<State>, budget: FrameBudget) -> Result<(), String> {
         }
         drop(session);
         let observed = budget.clone();
-        wait(move || {
+        // Native teardown may spend five seconds awaiting MF Flush. Allow its
+        // cleanup to finish before the verification deadline, while still
+        // requiring actual zero retention and rejecting quarantine.
+        wait_for(Duration::from_secs(10), move || {
+            if observed.quarantined_reads() != 0 { return Err("Stop quarantined GPU reads".into()); }
             Ok((observed.usage().frames == 0
                 && observed.gpu_reads() == 0
                 && observed.quarantined_reads() == 0
@@ -241,7 +251,8 @@ async fn exercise(state: Rc<State>, budget: FrameBudget) -> Result<(), String> {
                 && !super::super::renderer::retained())
             .then_some(()))
         })
-        .await?;
+        .await.map_err(|e| format!("{e}; stop cycle={cycle} usage={:?} reads={} quarantine={} native={:?} renderer_retained={}",
+            budget.usage(), budget.gpu_reads(), budget.quarantined_reads(), NativeSession::synthetic_usage(), super::super::renderer::retained()))?;
         validate_photo(&completed)?; // Encoded bytes outlive capture and GPU storage.
         println!(
             "SYNTHETIC_CAMERA_STOP_PASS frames=0 native_sources=0 native_textures=0 workers=0"
@@ -308,10 +319,21 @@ pub async fn run(state: Rc<State>, window: Ref<Window>, budget: FrameBudget) {
                 window.close();
             }
         },
-        Duration::from_secs(25),
+        Duration::from_secs(
+            if std::env::args().any(|a| a == "--camera-recovery-smoke") {
+                90
+            } else {
+                25
+            },
+        ),
         DispatcherPriority::NORMAL,
     );
-    let result = exercise(state.clone(), budget).await;
+    let result = exercise(state.clone(), budget.clone()).await;
+    let result = if result.is_ok() && std::env::args().any(|a| a == "--camera-recovery-smoke") {
+        recovery::exercise(state.clone(), window.clone(), budget).await
+    } else {
+        result
+    };
     watchdog.dispose();
     state.stop();
     if let Err(error) = result {

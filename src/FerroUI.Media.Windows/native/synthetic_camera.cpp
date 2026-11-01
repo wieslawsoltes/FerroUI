@@ -11,6 +11,7 @@ using Microsoft::WRL::Make;
 using Microsoft::WRL::RuntimeClass;
 using Microsoft::WRL::RuntimeClassFlags;
 static std::atomic<uint32_t> synthetic_sources{0}, synthetic_textures{0};
+static std::atomic<uint64_t> synthetic_pattern_epoch{0};
 static const GUID texture_credit = {
     0x638caf5a,
     0xb670,
@@ -71,13 +72,15 @@ class SyntheticStream final
   bool running = false;
   uint64_t sequence = 0;
   uint64_t disconnect_after = 0;
+  uint64_t pattern = 0;
   Clock::time_point next;
 
 public:
   HRESULT initialize(IMFMediaSource *source, ID3D11Device *d,
-                     uint64_t disconnect) {
+                     uint64_t disconnect, uint64_t palette) {
     try {
       disconnect_after = disconnect;
+      pattern = palette;
       device = d;
       ComPtr<ID3D11DeviceContext> immediate;
       d->GetImmediateContext(&immediate);
@@ -212,7 +215,20 @@ public:
       for (int i = 0; i < 4; i++) {
         D3D11_RECT rect{(i % 2) * 160, (i / 2) * 120, (i % 2 + 1) * 160,
                         (i / 2 + 1) * 120};
-        context->ClearView(target.Get(), colors[i], &rect, 1);
+        context->ClearView(target.Get(), colors[(i + pattern) % 4], &rect, 1);
+      }
+      if (pattern) {
+        // Asymmetric landmarks distinguish stretch, crop and orientation.
+        const float cyan[] = {0, 1, 1, 1}, yellow[] = {1, 1, 0, 1},
+                    magenta[] = {1, 0, 1, 1};
+        D3D11_RECT vertical{40, 0, 56, 240}, horizontal{0, 90, 320, 102};
+        D3D11_RECT border[] = {{0, 0, 320, 8},
+                               {0, 232, 320, 240},
+                               {0, 0, 8, 240},
+                               {312, 0, 320, 240}};
+        context->ClearView(target.Get(), cyan, &vertical, 1);
+        context->ClearView(target.Get(), yellow, &horizontal, 1);
+        context->ClearView(target.Get(), magenta, border, 4);
       }
       ComPtr<IMFMediaBuffer> buffer;
       check(MFCreateDXGISurfaceBuffer(__uuidof(ID3D11Texture2D), texture.Get(),
@@ -250,13 +266,14 @@ public:
     Shutdown();
     --synthetic_sources;
   }
-  HRESULT initialize(ID3D11Device *device, uint64_t disconnect) {
+  HRESULT initialize(ID3D11Device *device, uint64_t disconnect,
+                     uint64_t palette) {
     try {
       check(MFCreateEventQueue(&events));
       stream = Make<SyntheticStream>();
       if (!stream)
         return E_OUTOFMEMORY;
-      check(stream->initialize(this, device, disconnect));
+      check(stream->initialize(this, device, disconnect, palette));
       ComPtr<IMFStreamDescriptor> d;
       check(stream->GetStreamDescriptor(&d));
       IMFStreamDescriptor *streams[] = {d.Get()};
@@ -339,16 +356,21 @@ public:
 };
 #undef SYNTHETIC_EVENTS
 static HRESULT make_synthetic_camera(ID3D11Device *device, IMFMediaSource **out,
-                                     uint64_t disconnect = 0) {
+                                     uint64_t disconnect = 0,
+                                     bool vary_pattern = false) {
   auto source = Make<SyntheticSource>();
   if (!source)
     return E_OUTOFMEMORY;
-  HRESULT hr = source->initialize(device, disconnect);
+  HRESULT hr = source->initialize(device, disconnect,
+                                  vary_pattern ? ++synthetic_pattern_epoch : 0);
   if (FAILED(hr))
     return hr;
   return source.CopyTo(out);
 }
 } // namespace
+extern "C" uint64_t ferro_windows_synthetic_pattern_epoch() {
+  return synthetic_pattern_epoch.load();
+}
 extern "C" void ferro_windows_synthetic_usage(uint32_t *sources,
                                               uint32_t *textures,
                                               uint32_t *workers) {

@@ -179,6 +179,13 @@ impl Drop for Session {
 #[derive(Clone)]
 pub struct NativeSession(Arc<Session>);
 impl NativeSession {
+    #[cfg(feature = "synthetic-camera")]
+    pub fn synthetic_pattern_epoch() -> u64 {
+        extern "C" {
+            fn ferro_windows_synthetic_pattern_epoch() -> u64;
+        }
+        unsafe { ferro_windows_synthetic_pattern_epoch() }
+    }
     /// Diagnostic counts for the opt-in in-process camera fixture only.
     #[cfg(feature = "synthetic-camera")]
     pub fn synthetic_usage() -> (u32, u32, u32) {

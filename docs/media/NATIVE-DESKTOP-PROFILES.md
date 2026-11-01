@@ -95,6 +95,14 @@ injected MF disconnection are covered in the receiving-host verification note.
 The fixture is absent from default builds and is not an OS camera registration
 or evidence of privacy/hardware behaviour.
 
+The optional `--camera-recovery-smoke` extension exercises owned/borrowed
+`CameraPreview` controls, native MF loss, failed factory retry and cancellation
+over six compositor resets. Independent GL, composition and window-only pixel
+checks cover changing palettes, perspective/premultiplied alpha, resize and all
+three stretch modes; explicit diagnostic reads are counted separately from
+zero-CPU preview. See [WINDOWS-VERIFICATION.md](WINDOWS-VERIFICATION.md) for
+commands, evidence and the distinction from physical driver/display acceptance.
+
 Source-file/resource preparation is limited to four filesystem workers;
 cancellation retains those slots through the actual write.
 Native worker limits are four sessions, three future video samples, one native

@@ -495,8 +495,26 @@ fn smoke(window: &Ref<Window>, view: &Ref<MediaPlayerElement>, budget: FrameBudg
 }
 pub fn run() -> std::process::ExitCode {
     #[cfg(not(all(windows, feature = "synthetic-camera")))]
-    if std::env::args().any(|a| a == "--synthetic-camera" || a == "--camera-smoke") {
+    if std::env::args().any(|a| {
+        matches!(
+            a.as_str(),
+            "--synthetic-camera" | "--camera-smoke" | "--camera-recovery-smoke"
+        )
+    }) {
         eprintln!("Synthetic camera requires a Windows build with --features synthetic-camera");
+        return std::process::ExitCode::FAILURE;
+    }
+    if std::env::args().any(|a| a == "--camera-recovery-smoke")
+        && [
+            "--camera",
+            "--synthetic-camera",
+            "--camera-smoke",
+            "--renderer",
+        ]
+        .into_iter()
+        .any(|required| !std::env::args().any(|a| a == required))
+    {
+        eprintln!("--camera-recovery-smoke requires --camera --synthetic-camera --camera-smoke --renderer");
         return std::process::ExitCode::FAILURE;
     }
     if std::env::args().nth(1).is_none() {

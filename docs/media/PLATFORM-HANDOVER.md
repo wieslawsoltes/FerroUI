@@ -158,6 +158,13 @@ saturation and typed native disconnection. It also fixes production device-loss
 classification. This is an in-process GPU source, separate from physical camera
 and OS virtual-camera/privacy acceptance; see the Windows verification follow-up.
 
+The next follow-up adds six controlled camera/compositor resets, actual
+`CameraPreview` owned/borrowed recovery, failed-factory retry, photo cancellation,
+and independent GL/composition/window pixel checks including resize, crop,
+letterboxing and premultiplied alpha. These pass on this Windows host; physical
+camera/driver and Linux DMA-BUF gates remain open. Exact commands and the
+preserved retirement-timeout investigation are in the verification note.
+
 Provider source is now present in `FerroUI.Media.Windows`,
 `FerroUI.Media.Video.Windows` and `FerroUI.Media.Camera.Windows`. The
 `PortableMedia` desktop harness selects these providers on Windows. Native
@@ -350,8 +357,10 @@ were used to limit disk/memory use; the target cache is private to this worktree
 ## Work still open beyond these handoffs
 
 - Windows and Linux provider source is implemented for the explicitly described
-  profiles, with native C/C++ compilation, packaging and runtime verification
-  deferred. Broader primary-renderer routes remain open.
+  profiles. Receiving-host native builds now pass on both platforms; Windows
+  playback and synthetic camera/presentation/recovery evidence is recorded in
+  its verification note. WSL rejects GPU media because this display lacks
+  DMA-BUF import. Broader primary-renderer routes remain open.
   Android now has native playback/CameraX/external GLES integration and a
   separate active-media/camera run on a 16 KiB kernel.
 - Apple Vision and bundled Android ML Kit QR engines are implemented. Physical

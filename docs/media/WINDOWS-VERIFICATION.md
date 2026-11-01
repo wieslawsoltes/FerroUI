@@ -177,3 +177,83 @@ behaviour with controlled GPU inputs. Physical capture-format negotiation,
 YUY2/MJPEG/NV12 camera conversion, actual privacy denial, OS device hotplug,
 Frame Server registration and abrupt driver-loss recovery still need their own
 profiles. Linux's missing WSL DMA-BUF capability is unchanged by this fixture.
+
+## Camera recovery and presentation pixels — 2026-11-01
+
+The opt-in native smoke now additionally exercises the real `CameraPreview`
+control, rather than manually restarting only the sample's capture controller.
+The `/recovery` MF fixture rotates its GPU quadrant palette on every activation
+and adds asymmetric cyan/yellow stripes and a magenta border. Old imagery,
+orientation, letterboxing and crop therefore have independently observable
+pixel signatures. The ordinary and `/disconnect` fixtures retain their original
+four-colour pattern. No OS device is registered.
+
+```powershell
+cargo build --locked -p portable-media --features synthetic-camera --target x86_64-pc-windows-msvc
+$env:FERROUI_MEDIA_EVIDENCE = 'C:\Users\Dan\.codex\worktrees\portable-media-linux\camera-recovery-evidence'
+& $app --camera --synthetic-camera --camera-smoke --camera-recovery-smoke --renderer
+cargo test --locked -p ferroui-media-camera-controls --target x86_64-pc-windows-msvc --lib
+```
+
+The recovery extension passes six controlled compositor resets:
+
+- Three successful automatic restarts: two during active GPU capture and one
+  after native MF disconnection has already stopped the public session. The
+  latter exercises the control's separate poll-error suspension path.
+- One deliberately failed provider factory, with cleared preview pixels in
+  both composition and window captures, followed by successful retry on the
+  next context creation.
+- Explicit Stop and Detach defeating queued recovery before another native
+  source can be acquired. Reattachment alone never starts capture.
+- A caller-owned session shared by a second `CameraPreview`. Its factory is
+  never invoked; detaching that borrowed control leaves capture publishing.
+- A real native photo job started before reset, whose delivery becomes
+  Cancelled, followed by independently decoded JPEGs from recovered sessions.
+- Holding an old source lease across reset, checking it remains charged and
+  rejecting its import through the restored context. Final source/renderer
+  allocations, GPU reads, quarantine, MF sources, fixture textures and workers
+  all return to zero.
+
+Pixel checks cover three distinct boundaries. An explicit GL diagnostic reads
+the actual projected renderer texture, checking the independent perspective
+calculation, all four RGBA colours, premultiplied opacity and transparent
+corners. A normal composition visual snapshot includes the source controls and
+Skia-composited projection over a known background. Finally, window-only
+`PrintWindow(PW_CLIENTONLY | PW_RENDERFULLCONTENT)` captures check those same
+colours after presentation. These are client-window capture results, not
+physical display/scanout colour measurements. No other desktop content is
+captured.
+
+The initial window and a resized window pass. Both owned and borrowed controls
+pass dense asymmetric pixel probes for Fill, Uniform letterboxing and
+UniformToFill cropping at a non-source aspect ratio. Wrong-palette and
+wrong-stretch negative controls must fail. Source readback/encoding/decoding,
+composition diagnostics, GL probes and window captures are explicitly counted
+as Photo or Diagnostic transfers; preview CPU attempts/bytes remain zero.
+Raw projection diagnostics belong to the renderer's budget; the final camera
+counter line is not an aggregate of both budgets.
+
+A repeated run exposed a verification timing issue: the old five-second
+retirement deadline equalled the native worker's five-second MF Flush allowance.
+Retirement now allows ten seconds for acknowledgement plus cleanup, rejects
+quarantine immediately and reports retained-resource counters on failure.
+Synthetic native Flush timeouts also log explicitly. The original timeout log
+is preserved; it did not contain enough counters to establish its precise cause.
+These functional checks do not establish a frozen teardown/performance target.
+
+Evidence is outside Git beside this worktree: `windows-camera-recovery-final.log`,
+`windows-camera-recovery-repeat.log`, `windows-camera-recovery-native-tests.log`,
+`windows-camera-recovery-controls-tests.log`,
+`windows-camera-recovery-invalid-args.log`,
+`windows-camera-recovery-default-build.log`,
+`windows-camera-recovery-default-rejection.log`,
+`windows-camera-recovery-playback-regression.log`,
+`windows-camera-retirement-failure.log` and `camera-recovery-evidence/*.png`.
+The native D3D11/ANGLE tests and both camera-control contract tests pass. Default
+Windows and WSL sample builds are also checked; Linux's DMA-BUF capability
+restriction remains unchanged.
+
+No camera-control production defect was found in these controlled recovery and
+pixel cases. Actual privacy/Frame Server behaviour, physical camera unplugging,
+abrupt driver removal, other capture formats, wider colour profiles and Linux
+DMA-BUF presentation still require suitable devices/hosts.

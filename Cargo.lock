@@ -3960,6 +3960,7 @@ dependencies = [
  "byteorder-lite",
  "moxcms",
  "num-traits",
+ "png",
  "zune-core",
  "zune-jpeg",
 ]
@@ -4968,6 +4969,7 @@ dependencies = [
  "ferroui-media-apple",
  "ferroui-media-camera",
  "ferroui-media-camera-apple",
+ "ferroui-media-camera-controls",
  "ferroui-media-camera-linux",
  "ferroui-media-camera-windows",
  "ferroui-media-controls",

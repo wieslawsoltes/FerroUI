@@ -89,3 +89,8 @@ now checks native session state first too, including during budget saturation.
 Its native build and descriptor tests are rerun for this change; positive Linux
 GPU/camera behaviour still needs a DMA-BUF-capable host. The Windows in-process
 fixture does not enable Linux camera emulation or change this WSL capability.
+
+The subsequent Windows camera-recovery/presentation work also reruns the native
+WSL sample build successfully (`linux-camera-recovery-regression.log`). Its
+Windows-only fixture/control diagnostics add no Linux preview fallback and
+close none of the positive DMA-BUF gates above.

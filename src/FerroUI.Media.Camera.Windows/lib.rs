@@ -48,6 +48,7 @@ impl WindowsCameraProvider {
                 Ok([
                     "ferroui:synthetic-camera",
                     "ferroui:synthetic-camera/disconnect",
+                    "ferroui:synthetic-camera/recovery",
                 ]
                 .into_iter()
                 .map(|id| CameraDevice {

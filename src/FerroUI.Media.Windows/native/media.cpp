@@ -180,8 +180,8 @@ static void prepare(const std::shared_ptr<Session> &owner){
     if(s.camera){
         s.operation="camera source activation";
 #ifdef FERROUI_SYNTHETIC_CAMERA
-        if(s.source==L"ferroui:synthetic-camera"||s.source==L"ferroui:synthetic-camera/disconnect"){
-            check(make_synthetic_camera(s.device.Get(),&s.camera_source,s.source==L"ferroui:synthetic-camera/disconnect"?30:0));
+        if(s.source==L"ferroui:synthetic-camera"||s.source==L"ferroui:synthetic-camera/disconnect"||s.source==L"ferroui:synthetic-camera/recovery"){
+            check(make_synthetic_camera(s.device.Get(),&s.camera_source,s.source==L"ferroui:synthetic-camera/disconnect"?30:0,s.source==L"ferroui:synthetic-camera/recovery"));
         }else
 #endif
         {
@@ -319,7 +319,12 @@ static void run(const std::shared_ptr<Session> &owner){
         HRESULT flush=s.reader->Flush(MF_SOURCE_READER_ALL_STREAMS);
         if(SUCCEEDED(flush)){
             std::unique_lock<std::mutex> guard(s.lock);
-            s.changed.wait_for(guard,std::chrono::seconds(5),[&]{return s.flushed;});
+            bool acknowledged=s.changed.wait_for(guard,std::chrono::seconds(5),[&]{return s.flushed;});
+#ifdef FERROUI_SYNTHETIC_CAMERA
+            if(!acknowledged&&s.source.rfind(L"ferroui:synthetic-camera",0)==0)fputs("SYNTHETIC_NATIVE_FLUSH_TIMEOUT\n",stderr);
+#else
+            (void)acknowledged;
+#endif
         }
     }
     s.reader.Reset();s.callback.Reset();
