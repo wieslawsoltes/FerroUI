@@ -385,6 +385,75 @@ pub fn view(
     root(state, true)
 }
 
+fn shortcut(shell: &Rc<Shell>, event: &ferroui_base::input::KeyEventArgs) {
+    match (event.key, event.key_modifiers) {
+        (Key::Escape, _) if shell.scene.get_untracked() != Scene::Desktop => {
+            shell.cancel();
+            event.set_handled(true);
+        }
+        (Key::Space, KeyModifiers::CONTROL) | (Key::K, KeyModifiers::CONTROL) => {
+            if shell.scene.get_untracked() == Scene::Applications {
+                shell.dismiss()
+            } else {
+                shell.open(Scene::Applications)
+            }
+            event.set_handled(true);
+        }
+        (key, modifiers)
+            if shell.scene.get_untracked() == Scene::Appearance
+                && modifiers.is_empty()
+                && (Key::D1 as i32..=Key::D9 as i32).contains(&(key as i32)) =>
+        {
+            let index = (key as i32 - Key::D1 as i32) as usize;
+            if let Some(appearance) = Appearance::ALL.get(index).copied() {
+                shell.select_appearance(appearance);
+                event.set_handled(true);
+            }
+        }
+        (Key::C, modifiers) if modifiers == (KeyModifiers::CONTROL | KeyModifiers::SHIFT) => {
+            shell.open(Scene::Calendar);
+            event.set_handled(true);
+        }
+        (key, mods)
+            if shell.scene.get_untracked() == Scene::QuickSettings
+                && quick_settings::handle_key(&shell, key, mods) =>
+        {
+            event.set_handled(true);
+        }
+        (Key::N, KeyModifiers::CONTROL) => {
+            shell.open(Scene::Notifications);
+            event.set_handled(true);
+        }
+        (Key::Q, modifiers) if modifiers == (KeyModifiers::CONTROL | KeyModifiers::SHIFT) => {
+            shell.open(Scene::QuickSettings);
+            event.set_handled(true);
+        }
+        (Key::OemComma, KeyModifiers::CONTROL) => {
+            shell.open(Scene::Appearance);
+            event.set_handled(true);
+        }
+        (Key::W, KeyModifiers::CONTROL) => {
+            shell.open(Scene::Workspaces);
+            event.set_handled(true);
+        }
+        (key, modifiers)
+            if modifiers == (KeyModifiers::CONTROL | KeyModifiers::ALT)
+                && (Key::D1 as i32..=Key::D9 as i32).contains(&(key as i32)) =>
+        {
+            let index = (key as i32 - Key::D1 as i32) as usize;
+            if let Some(session) = shell.session.as_ref().filter(|_| {
+                shell
+                    .snapshot
+                    .with_untracked(|s| index < s.workspace_names.len())
+            }) {
+                session.switch_workspace(index);
+                event.set_handled(true);
+            }
+        }
+        _ => {}
+    }
+}
+
 fn root(state: Rc<Shell>, include_desktop: bool) -> Element {
     let appearance = state.appearance;
     let viewport_width = state.viewport_width;
@@ -415,71 +484,10 @@ fn root(state: Rc<Shell>, include_desktop: bool) -> Element {
             });
         })
         .clip_to_bounds(true)
-        .on_key_down(move |event| match (event.key, event.key_modifiers) {
-            (Key::Escape, _) if current.get_untracked() != Scene::Desktop => {
-                root_state.cancel();
-                event.set_handled(true);
+        .on_key_down(move |event| {
+            if include_desktop {
+                shortcut(&root_state, event);
             }
-            (Key::Space, KeyModifiers::CONTROL) | (Key::K, KeyModifiers::CONTROL) => {
-                if current.get_untracked() == Scene::Applications {
-                    root_state.dismiss()
-                } else {
-                    root_state.open(Scene::Applications)
-                }
-                event.set_handled(true);
-            }
-            (key, modifiers)
-                if current.get_untracked() == Scene::Appearance
-                    && modifiers.is_empty()
-                    && (Key::D1 as i32..=Key::D9 as i32).contains(&(key as i32)) =>
-            {
-                let index = (key as i32 - Key::D1 as i32) as usize;
-                if let Some(appearance) = Appearance::ALL.get(index).copied() {
-                    root_state.select_appearance(appearance);
-                    event.set_handled(true);
-                }
-            }
-            (Key::C, modifiers) if modifiers == (KeyModifiers::CONTROL | KeyModifiers::SHIFT) => {
-                root_state.open(Scene::Calendar);
-                event.set_handled(true);
-            }
-            (key, mods)
-                if current.get_untracked() == Scene::QuickSettings
-                    && quick_settings::handle_key(&root_state, key, mods) =>
-            {
-                event.set_handled(true);
-            }
-            (Key::N, KeyModifiers::CONTROL) => {
-                root_state.open(Scene::Notifications);
-                event.set_handled(true);
-            }
-            (Key::Q, modifiers) if modifiers == (KeyModifiers::CONTROL | KeyModifiers::SHIFT) => {
-                root_state.open(Scene::QuickSettings);
-                event.set_handled(true);
-            }
-            (Key::OemComma, KeyModifiers::CONTROL) => {
-                root_state.open(Scene::Appearance);
-                event.set_handled(true);
-            }
-            (Key::W, KeyModifiers::CONTROL) => {
-                root_state.open(Scene::Workspaces);
-                event.set_handled(true);
-            }
-            (key, modifiers)
-                if modifiers == (KeyModifiers::CONTROL | KeyModifiers::ALT)
-                    && (Key::D1 as i32..=Key::D9 as i32).contains(&(key as i32)) =>
-            {
-                let index = (key as i32 - Key::D1 as i32) as usize;
-                if let Some(session) = root_state.session.as_ref().filter(|_| {
-                    root_state
-                        .snapshot
-                        .with_untracked(|s| index < s.workspace_names.len())
-                }) {
-                    session.switch_workspace(index);
-                    event.set_handled(true);
-                }
-            }
-            _ => {}
         })
         .child(desktop)
         .child(

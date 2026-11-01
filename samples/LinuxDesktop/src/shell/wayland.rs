@@ -47,6 +47,21 @@ impl Surface {
     ) -> Result<Self, String> {
         let window = LayerWindow::new(namespace, Some(output), config)?;
         transparent(&window);
+        if config.keyboard == ferroui_wayland::layer_shell::KeyboardInteractivity::Exclusive {
+            // A newly activated layer may have its Window as the focus root until
+            // the first control is loaded. Route accelerators from that root too.
+            let state = Rc::downgrade(shell);
+            window.add_handler_with(
+                ferroui_base::input::InputElement::key_down_event(),
+                move |_, event| {
+                    if let Some(shell) = state.upgrade() {
+                        super::shortcut(&shell, event);
+                    }
+                },
+                ferroui_base::interactivity::RoutingStrategies::TUNNEL,
+                false,
+            );
+        }
         let owner = Owner::new_root();
         let tree = owner.with(|| {
             provide_context(shell.appearance);
@@ -181,11 +196,15 @@ impl Host {
     }
 
     fn reconcile(&self) -> Result<(), String> {
+        let mut output_set_changed = false;
         if self.output_dirty.replace(false) {
-            *self.widths.borrow_mut() = LayerWindow::outputs()?
+            let updated: BTreeMap<_, _> = LayerWindow::outputs()?
                 .into_iter()
                 .filter_map(|o| Some((o.name?, o.logical_size.width)))
                 .collect();
+            let mut previous = self.widths.borrow_mut();
+            output_set_changed = previous.keys().ne(updated.keys());
+            *previous = updated;
         }
         let widths = self.widths.borrow();
         let mut outputs = self.outputs.borrow_mut();
@@ -222,23 +241,47 @@ impl Host {
         }
         drop(outputs);
         let mut overlay = self.overlay.borrow_mut();
-        if self.shell.scene.get_untracked() == Scene::Desktop || widths.is_empty() {
-            overlay.take();
-            self.shell.clicked_output.take();
-        } else if !overlay
+        if overlay
             .as_ref()
-            .is_some_and(|(name, _)| widths.contains_key(name))
+            .is_some_and(|(name, _)| !widths.contains_key(name))
         {
             overlay.take();
-            let requested = self
-                .shell
-                .clicked_output
-                .take()
-                .or_else(|| self.shell.session.as_ref()?.focused_output());
-            let output = requested
-                .as_ref()
-                .filter(|n| widths.contains_key(*n))
-                .unwrap_or_else(|| widths.keys().next().unwrap());
+        }
+        if self.shell.scene.get_untracked() == Scene::Desktop || widths.is_empty() {
+            if let Some((_, cached)) = overlay.as_ref() {
+                // Unmap the layer to release keyboard focus and stop its render
+                // loop. Keep at most one mounted control tree across invocations.
+                WindowBaseImpl::hide(&*cached.window);
+            }
+            self.shell.clicked_output.take();
+            return Ok(());
+        }
+        if let Some((_, surface)) = overlay
+            .as_ref()
+            .filter(|(_, surface)| surface.window.is_visible())
+        {
+            if output_set_changed {
+                // Sway may clear layer keyboard focus when any head disappears, even
+                // when the focused overlay stays on a surviving head. Remap its role
+                // on the same output without rebuilding the retained control tree.
+                WindowBaseImpl::hide(&*surface.window);
+                WindowBaseImpl::show(&*surface.window);
+            }
+            return Ok(());
+        }
+        let requested = self
+            .shell
+            .clicked_output
+            .take()
+            .or_else(|| self.shell.session.as_ref()?.focused_output());
+        let output = requested
+            .as_ref()
+            .filter(|n| widths.contains_key(*n))
+            .unwrap_or_else(|| widths.keys().next().unwrap());
+        if let Some((_, cached)) = overlay.as_ref().filter(|(name, _)| name == output) {
+            WindowBaseImpl::show(&*cached.window);
+        } else {
+            overlay.take();
             let shell = self.shell.clone();
             let window = Surface::new(
                 &shell,

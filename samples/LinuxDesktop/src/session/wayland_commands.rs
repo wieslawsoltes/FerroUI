@@ -7,7 +7,9 @@ use std::cell::RefCell;
 use std::env;
 use std::fs;
 use std::io;
+use std::os::fd::FromRawFd;
 use std::os::unix::fs::{FileTypeExt, MetadataExt};
+use std::os::unix::net::UnixStream;
 use std::path::PathBuf;
 use std::rc::Rc;
 use std::time::Duration;
@@ -18,9 +20,47 @@ use zbus::proxy::CacheProperties;
 const PATH: &str = "/org/ferroui/Desktop";
 const INTERFACE: &str = "org.ferroui.Desktop1";
 
+fn inherited_display() -> io::Result<Option<PathBuf>> {
+    let Some(value) = env::var_os("WAYLAND_SOCKET") else {
+        return Ok(None);
+    };
+    let fd: i32 = value
+        .to_str()
+        .and_then(|text| text.parse().ok())
+        .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput, "Invalid WAYLAND_SOCKET"))?;
+    // Duplicate first: the backend owns the inherited descriptor. fcntl validates
+    // the environment-provided number before we turn it into an owned Rust handle.
+    let copy = unsafe { libc::fcntl(fd, libc::F_DUPFD_CLOEXEC, 3) };
+    if copy < 0 {
+        return Err(io::Error::last_os_error());
+    }
+    // SAFETY: F_DUPFD_CLOEXEC returned a new descriptor owned by this function.
+    let stream = unsafe { UnixStream::from_raw_fd(copy) };
+    let address = stream.peer_addr()?;
+    address
+        .as_pathname()
+        .map(|p| Some(p.to_owned()))
+        .ok_or_else(|| {
+            io::Error::new(
+                io::ErrorKind::Unsupported,
+                "Managed Wayland commands require a named compositor socket",
+            )
+        })
+}
+
+/// wayland-client consumes WAYLAND_SOCKET as it opens the display. Preserve its
+/// named peer for subsequent compositor IPC discovery and child launchers.
+pub fn prepare_inherited_display() -> io::Result<()> {
+    if let Some(path) = inherited_display()? {
+        env::set_var("WAYLAND_DISPLAY", path);
+    }
+    Ok(())
+}
+
 fn display_name() -> io::Result<String> {
-    let display =
-        PathBuf::from(env::var_os("WAYLAND_DISPLAY").unwrap_or_else(|| "wayland-0".into()));
+    let display = inherited_display()?.unwrap_or_else(|| {
+        PathBuf::from(env::var_os("WAYLAND_DISPLAY").unwrap_or_else(|| "wayland-0".into()))
+    });
     let path = if display.is_absolute() {
         display
     } else {

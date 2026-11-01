@@ -168,6 +168,12 @@ pub fn run() -> ExitCode {
             "VK_KHR_driver_properties".into(),
             "VK_EXT_ycbcr_2plane_444_formats".into(),
         ]);
+    if platform == Platform::Wayland && options.session {
+        if let Err(error) = wayland_commands::prepare_inherited_display() {
+            eprintln!("Managed Wayland display: {error}");
+            return ExitCode::FAILURE;
+        }
+    }
     let theme = options.theme.unwrap_or_else(Appearance::preferred);
     // Let GIO resolve the user's installed entries while the window system, Skia and the
     // initial theme load. No native application handles leave the worker.

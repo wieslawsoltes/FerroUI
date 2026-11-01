@@ -108,7 +108,6 @@ wtype() { command wtype -s 100 "$@" -s 60; }
 scene() { "$binary" --platform=wayland --current-scene 2>/dev/null; }
 is_scene() { [[ $(scene) == "$1" ]]; }
 tree() { swaymsg -r -t get_tree; }
-has_window() { tree | jq -e --arg app "$1" 'any(.. | objects; .app_id? == $app)' >/dev/null; }
 focused() { tree | jq -e --arg app "$1" 'any(.. | objects; .app_id? == $app and .focused? == true)' >/dev/null; }
 output_names() { swaymsg -rt get_outputs | jq -r '[.[] | select(.active)] | length'; }
 capture() {
@@ -127,7 +126,18 @@ capture() {
     cp "$last" "$output/failed-$name.png"; fail "$name did not produce a stable rendered Wayland frame"
 }
 wait_for is_scene desktop
-printf -v bus_name 'org.ferroui.Desktop.Wayland.d%x_%x'     "$(stat -c %d "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY")" "$(stat -c %i "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY")"
+# Explicit inherited sockets take priority over a conflicting named display.
+python3 - "$binary" <<'PYTHON'
+import os, socket, subprocess, sys
+with socket.socket(socket.AF_UNIX) as peer:
+    peer.connect(os.path.join(os.environ["XDG_RUNTIME_DIR"], os.environ["WAYLAND_DISPLAY"]))
+    env = dict(os.environ, WAYLAND_SOCKET=str(peer.fileno()), WAYLAND_DISPLAY="wrong-display")
+    current = subprocess.check_output([sys.argv[1], "--platform=wayland", "--current-scene"],
+                                     env=env, pass_fds=(peer.fileno(),), text=True)
+    assert current.strip() == "desktop"
+PYTHON
+printf -v bus_name 'org.ferroui.Desktop.Wayland.d%x_%x' \
+    "$(stat -c %d "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY")" "$(stat -c %i "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY")"
 duplicate_status=0
 timeout 8 "$binary" --platform=wayland --session >"$output/duplicate.log" 2>&1 || duplicate_status=$?
 [[ $duplicate_status != 0 && $duplicate_status != 124 ]] || fail "Duplicate managed shell claimed the display"
@@ -220,5 +230,6 @@ fi
 swaymsg exit >/dev/null || :
 wait "$supervisor" || :
 supervisor=
-gdbus call --session --dest org.freedesktop.DBus --object-path /org/freedesktop/DBus     --method org.freedesktop.DBus.NameHasOwner "$bus_name" | grep -q false || fail 'Stale shell control service survived logout'
+gdbus call --session --dest org.freedesktop.DBus --object-path /org/freedesktop/DBus \
+    --method org.freedesktop.DBus.NameHasOwner "$bus_name" | grep -q false || fail 'Stale shell control service survived logout'
 echo "Verified native Wayland login, independent GTK/terminal clients, four global scenes, keyboard focus, clipboard and output/workspace movement ($mode)."

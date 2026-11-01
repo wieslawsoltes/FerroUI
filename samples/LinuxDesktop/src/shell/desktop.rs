@@ -297,7 +297,7 @@ fn taskbar(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
         )
         .child(super::launcher::pinned_shortcuts(state))
         .child(
-            border()
+            row(3.0)
                 .is_visible(move || !compact.get())
                 .child(running_clients(state)),
         );
@@ -435,7 +435,7 @@ fn dock(state: &Rc<Shell>) -> Element {
                 ))
                 .child(super::launcher::pinned_shortcuts(state))
                 .child(
-                    border()
+                    row(3.0)
                         .is_visible(move || !compact.get())
                         .child(running_clients(state)),
                 ),
