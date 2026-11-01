@@ -181,7 +181,11 @@ impl Dispatch<xdg_toplevel::XdgToplevel, ()> for Client {
     }
 }
 
-fn snapshot(server: &Server, wake: &mpsc::Receiver<()>, accept: impl Fn(&Scene) -> bool) -> Scene {
+fn snapshot(
+    server: &Server,
+    wake: &mpsc::Receiver<()>,
+    accept: impl Fn(&Scene) -> bool,
+) -> std::sync::Arc<Scene> {
     let deadline = Instant::now() + Duration::from_secs(4);
     loop {
         let scene = server.snapshot();

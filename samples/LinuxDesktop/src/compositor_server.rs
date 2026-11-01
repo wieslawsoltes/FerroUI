@@ -158,7 +158,7 @@ enum Command {
 pub struct Server {
     socket: OsString,
     input: Sender<Command>,
-    latest: Arc<Mutex<Scene>>,
+    latest: Arc<Mutex<Arc<Scene>>>,
     worker: Option<thread::JoinHandle<()>>,
 }
 
@@ -212,7 +212,7 @@ impl Server {
         }
         .map_err(io::Error::other)?;
         let socket = listener.socket_name().to_os_string();
-        let latest = Arc::new(Mutex::new(Scene::default()));
+        let latest = Arc::new(Mutex::new(Arc::new(Scene::default())));
         let published = latest.clone();
         let (input, receiver) = channel();
         let (started, ready) = mpsc::sync_channel(1);
@@ -258,7 +258,11 @@ impl Server {
                             .map_err(io::Error::other)?;
                         display.dispatch_clients(&mut state)?;
                         if let Some(scene) = state.take_scene() {
-                            *published.lock().unwrap() = scene;
+                            let next = Arc::new(scene);
+                            // Only exchange the pointer while holding the lock. A
+                            // retired snapshot may own the last large pixel buffer.
+                            let old = std::mem::replace(&mut *published.lock().unwrap(), next);
+                            drop(old);
                             wake();
                         }
                         display.flush_clients()?;
@@ -283,7 +287,7 @@ impl Server {
     pub fn socket_name(&self) -> &OsStr {
         &self.socket
     }
-    pub fn snapshot(&self) -> Scene {
+    pub fn snapshot(&self) -> Arc<Scene> {
         self.latest.lock().unwrap().clone()
     }
     pub fn send(&self, event: Input) {

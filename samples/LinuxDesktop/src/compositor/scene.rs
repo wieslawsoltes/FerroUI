@@ -73,6 +73,7 @@ struct Layer {
     visual: CompositionSurfaceVisual,
     surface: CompositionDrawingSurface,
     revision: Option<u64>,
+    seen_in: u64,
 }
 
 impl Drop for Layer {
@@ -196,13 +197,6 @@ impl ClientPlane {
             return;
         }
         let children = tree.root.children();
-        tree.layers.retain(|id, layer| {
-            let present = scene.surfaces.iter().any(|s| s.id == *id);
-            if !present {
-                children.remove(&layer.visual);
-            }
-            present
-        });
         let mut regions = self.hit_regions.borrow_mut();
         regions.clear();
         for (index, s) in scene.surfaces.iter().enumerate() {
@@ -214,8 +208,10 @@ impl ClientPlane {
                     visual,
                     surface,
                     revision: None,
+                    seen_in: scene.serial,
                 }
             });
+            layer.seen_in = scene.serial;
             if layer.revision != Some(s.pixels.revision) {
                 let p = &s.pixels;
                 let bitmap = Bitmap::from_pixels(
@@ -245,6 +241,15 @@ impl ClientPlane {
             ));
         }
         drop(regions);
+        // One sweep over retained layers, including on pixel-only updates.
+        // The visible prefix already follows the server's new stacking order.
+        tree.layers.retain(|_, layer| {
+            if layer.seen_in == scene.serial {
+                return true;
+            }
+            children.remove(&layer.visual);
+            false
+        });
         let mut windows = self.windows.borrow_mut();
         windows.clear();
         for w in &scene.windows {
