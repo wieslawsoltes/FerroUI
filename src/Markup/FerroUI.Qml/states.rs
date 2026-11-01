@@ -329,7 +329,22 @@ impl Transaction<'_> {
             .into_iter()
             .rev()
         {
+            let input = &self.model.slots[decl.input];
+            let target = input.active_target;
+            let scope = input.scope;
+            let retained = (mode == 0 && !matches!(decl.expression.as_ref(), Binding::Expr(expr) if expr.as_literal().is_some()))
+                .then(|| input.binding.clone()).flatten();
             self.update_overlay(decl.input, None, false, mode);
+            if let (Some(target), Some(binding)) = (target, retained) {
+                if self.model.slots[target].overlay.is_none() {
+                    // Keep the expression as an ordinary, replaceable target binding.
+                    let slot = self.touched(target);
+                    slot.scope = scope;
+                    slot.binding = Some(binding);
+                    slot.dirty = true;
+                    self.pending.insert(target);
+                }
+            }
             self.replace_reads(decl.input, BTreeSet::new());
             self.touched(decl.input).binding = None;
             self.touched(decl.input).dirty = false;
@@ -354,6 +369,7 @@ impl Transaction<'_> {
             let (receiver, target) = self.model.change_target(change, &decl)?;
             let slot = self.touched(decl.input);
             slot.binding = Some(InstalledBinding::StateExpression {
+                declaration: change,
                 receiver,
                 expression: decl.expression,
             });

@@ -130,6 +130,7 @@ enum InstalledBinding {
         expression: Rc<Binding>,
     },
     StateExpression {
+        declaration: ObjectId,
         receiver: ObjectId,
         expression: Rc<Binding>,
     },

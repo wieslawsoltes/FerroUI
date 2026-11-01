@@ -80,6 +80,7 @@ pub(crate) struct Track {
     paused_at: Option<Duration>,
     loops: i32,
     easing: u8,
+    reversed: bool,
     from: f64,
     to: f64,
 }
@@ -95,7 +96,7 @@ pub(crate) struct Turn {
     before: BTreeMap<SlotId, Option<Track>>,
     held_before: BTreeMap<SlotId, Option<(ObjectId, Value)>>,
     pub pending: BTreeSet<ObjectId>,
-    transitions: BTreeMap<SlotId, (ObjectId, ObjectId)>,
+    transitions: BTreeMap<SlotId, (ObjectId, ObjectId, bool)>,
 }
 
 impl Turn {
@@ -274,12 +275,15 @@ impl Transaction<'_> {
                 }
             }
         }
-        if let Some((_, tr)) = best {
+        if let Some((score, tr)) = best {
+            let reversed = score % 2 == 0;
             for driver in self.model.state_objects(tr, "animations") {
                 if self.model.quick_kind(driver, "NumberAnimation") {
                     for &target in targets {
                         if self.model.animation_matches(driver, target) {
-                            self.animations.transitions.insert(target, (driver, tr));
+                            self.animations
+                                .transitions
+                                .insert(target, (driver, tr, reversed));
                         }
                     }
                 }
@@ -331,13 +335,19 @@ impl Transaction<'_> {
         key: SlotId,
         driver: ObjectId,
         transition: Option<ObjectId>,
+        reversed: bool,
         destination: f64,
     ) -> bool {
         let Value::Number(current) = self.model.slots[key].value else {
             return false;
         };
-        let from = self.model.numeric(driver, "from").unwrap_or(current);
-        let to = self.model.numeric(driver, "to").unwrap_or(destination);
+        let (start, end) = if reversed {
+            ("to", "from")
+        } else {
+            ("from", "to")
+        };
+        let from = self.model.numeric(driver, start).unwrap_or(current);
+        let to = self.model.numeric(driver, end).unwrap_or(destination);
         let ms = self
             .model
             .numeric(driver, "duration")
@@ -363,7 +373,10 @@ impl Transaction<'_> {
             transition,
             start: self.model.timers.now,
             duration: Duration::from_millis(ms),
-            paused_at: None,
+            paused_at: (self.model.standalone_animation(driver)
+                && self.model.get(driver, "paused") == Ok(Value::Bool(true)))
+            .then_some(self.model.timers.now),
+            reversed,
             loops,
             easing: self.model.numeric(driver, "easing.type").unwrap_or(0.) as u8,
             from,
@@ -400,8 +413,8 @@ impl Transaction<'_> {
         let Value::Number(to) = *value else {
             return false;
         };
-        if let Some(&(driver, tr)) = self.animations.transitions.get(&key) {
-            return self.animate(key, driver, Some(tr), to);
+        if let Some(&(driver, tr, reversed)) = self.animations.transitions.get(&key) {
+            return self.animate(key, driver, Some(tr), reversed, to);
         }
         if let Some(&behavior) = self.model.dynamic.behaviors.get(&key) {
             if self.model.get(behavior, "enabled") == Ok(Value::Bool(true)) {
@@ -410,7 +423,7 @@ impl Transaction<'_> {
                         if let Ok(goal) = self.model.key(behavior, "targetValue") {
                             self.set_value_raw(goal, value.clone());
                         }
-                        return self.animate(key, driver, None, to);
+                        return self.animate(key, driver, None, false, to);
                     }
                 }
             }
@@ -480,7 +493,7 @@ impl Transaction<'_> {
                     .numeric(id, "to")
                     .or_else(|| self.model.numeric(target, prop))
                     .ok_or_else(|| Error::new("NumberAnimation requires a numeric property"))?;
-                if !self.animate(key, id, None, to) {
+                if !self.animate(key, id, None, false, to) {
                     self.sample_number(key, to);
                 }
             }
@@ -515,7 +528,13 @@ impl Transaction<'_> {
                     / track.duration.as_nanos() as f64;
                 self.sample_number(
                     key,
-                    track.from + (track.to - track.from) * easing(track.easing, t),
+                    track.from
+                        + (track.to - track.from)
+                            * if track.reversed {
+                                1.0 - easing(track.easing, 1.0 - t)
+                            } else {
+                                easing(track.easing, t)
+                            },
                 );
             }
         }

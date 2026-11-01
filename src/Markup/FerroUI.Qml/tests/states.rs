@@ -182,3 +182,41 @@ fn failed_animation_tick_rolls_back_clock_output_and_transition_ownership() {
     m.advance_time(Duration::from_millis(40)).unwrap();
     assert_eq!(m.get(r, "x").unwrap(), Value::Number(4.));
 }
+
+#[test]
+fn retained_state_expression_is_still_live_and_can_be_replaced_after_exit() {
+    let mut m = model(
+        r#"
+        property real n: 2
+        states: State { name:"retain"; PropertyChanges { target: root; restoreEntryValues:false; x: n * 2 } }
+    "#,
+    );
+    let r = m.root();
+    m.set(r, "state", Value::String("retain".into())).unwrap();
+    m.set(r, "state", Value::String(String::new())).unwrap();
+    m.set(r, "n", Value::Number(12.)).unwrap();
+    assert_eq!(m.get(r, "x").unwrap(), Value::Number(24.));
+    m.set(r, "x", Value::Number(7.)).unwrap();
+    m.set(r, "n", Value::Number(13.)).unwrap();
+    assert_eq!(m.get(r, "x").unwrap(), Value::Number(7.));
+}
+
+#[test]
+fn reversible_transition_reverses_asymmetric_easing() {
+    use std::time::Duration;
+    let mut m = model(
+        r#"
+        states: State { name:"move"; PropertyChanges { root.x: 100 } }
+        transitions: Transition { from:""; to:"move"; reversible:true
+            NumberAnimation { properties:"x"; duration:100; easing.type:Easing.InQuad } }
+    "#,
+    );
+    let r = m.root();
+    m.set(r, "state", Value::String("move".into())).unwrap();
+    m.advance_time(Duration::from_millis(50)).unwrap();
+    assert_eq!(m.get(r, "x").unwrap(), Value::Number(25.));
+    m.advance_time(Duration::from_millis(50)).unwrap();
+    m.set(r, "state", Value::String(String::new())).unwrap();
+    m.advance_time(Duration::from_millis(50)).unwrap();
+    assert_eq!(m.get(r, "x").unwrap(), Value::Number(25.));
+}

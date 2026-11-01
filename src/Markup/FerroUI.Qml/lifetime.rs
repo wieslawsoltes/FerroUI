@@ -244,8 +244,19 @@ impl crate::transaction::Transaction<'_> {
                     .expect("invalidated alias");
                 self.structure.aliases.push((key, alias));
             }
-            if matches!(self.model.slots[key].binding,Some(InstalledBinding::PropertyRead(t)) if dead.contains(&self.model.properties[t].owner))
-            {
+            let expired = match self.model.slots[key].binding {
+                Some(InstalledBinding::PropertyRead(target)) => {
+                    dead.contains(&self.model.properties[target].owner)
+                }
+                Some(InstalledBinding::StateExpression {
+                    declaration,
+                    receiver,
+                    ..
+                }) => dead.contains(&declaration) || dead.contains(&receiver),
+                _ => false,
+            };
+            if expired {
+                self.replace_reads(key, BTreeSet::new());
                 self.touched(key).binding = None;
                 self.touched(key).dirty = false;
                 self.pending.remove(&key);

@@ -481,6 +481,7 @@ impl Transaction<'_> {
                     InstalledBinding::StateExpression {
                         receiver,
                         expression,
+                        ..
                     } => {
                         let value = self.binding_value(receiver, &expression, &mut reads)?;
                         self.check_binding_edges(key, &reads)?;
