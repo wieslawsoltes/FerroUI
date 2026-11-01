@@ -57,7 +57,7 @@ impl Instance {
     ) -> Result<Self, Error> {
         let mut builder = Builder::prepare(name, source, registry)?;
         if engine.is_some() {
-            builder.instance.javascript.resources = source.document().scripts.clone();
+            builder.instance.javascript.resources = source.document().scripts.clone().into();
         }
         builder.instance.javascript.engine = engine;
         let root = builder.instance.root();
@@ -286,6 +286,7 @@ impl<'a> Builder<'a> {
                 native_functions: source.evaluators(),
                 native_first_reads: source.first_reads(),
                 native_scripts: source.scripts(),
+                workers: Default::default(),
                 timers: timers::Timers::default(),
                 listeners: BTreeMap::new(),
                 validator: None,
@@ -449,6 +450,11 @@ impl<I: std::ops::DerefMut<Target=Instance>> Builder<'_,I> {
         if connections {
             let target = self.instance.key(id, "target")?;
             self.instance.slots[target].value = parent.map(Value::Object).unwrap_or(Value::Null);
+        }
+        if module == "QtQml.WorkerScript" && name == "WorkerScript" {
+            self.instance
+                .workers
+                .register(id, "https://qml.invalid/components/project/main.qml");
         }
         if module == "QtQml" && name == "Timer" {
             self.instance.timers.register(id);

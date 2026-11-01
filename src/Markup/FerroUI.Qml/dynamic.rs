@@ -122,6 +122,7 @@ impl Instance {
         self.models.retain(|id, _| id.index < c.nodes);
         self.bindings.retain(|id| id.index < c.nodes);
         self.timers.truncate(c.nodes);
+        self.workers.truncate(c.nodes);
         self.listeners.retain(|_, handlers| {
             handlers.retain(|h| h.receiver.index < c.nodes);
             !handlers.is_empty()

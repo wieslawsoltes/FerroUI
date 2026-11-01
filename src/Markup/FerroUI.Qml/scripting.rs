@@ -77,6 +77,15 @@ pub trait ScriptEngine {
 
     /// Optional VM transaction hooks for engine-owned state. QML slots,
     /// records, models, timers and signal emission have their own undo logs.
+    fn start_worker(
+        &self,
+        _resources: std::sync::Arc<BTreeMap<String, ir::ScriptResource>>,
+        _origin: &str,
+        _source: &str,
+        _events: workers::WorkerDelivery,
+    ) -> Result<Box<dyn workers::WorkerEndpoint>, Error> {
+        Err(Error::new("script backend has no WorkerScript support"))
+    }
     fn begin_transaction(&self, _instance: ScriptInstance) -> Result<(), Error> {
         Ok(())
     }
@@ -138,7 +147,7 @@ pub(crate) struct ScriptState {
     pub(crate) deferred: deferred::Queue,
     pub(crate) connections: signal_callbacks::SignalCallbacks,
     pub(crate) engine: Option<Rc<dyn ScriptEngine>>,
-    pub(crate) resources: BTreeMap<String, ir::ScriptResource>,
+    pub(crate) resources: std::sync::Arc<BTreeMap<String, ir::ScriptResource>>,
 }
 
 /// Reusable lexical QML scope for closures. It contains no reference to the
@@ -278,6 +287,9 @@ impl ScriptContext<'_, '_> {
         params.iter().map(|p| p.ty.as_deref()).collect()
     }
     pub fn is_component(&self, object:ObjectId)->bool{self.tx.model.is_component(object)}
+    pub fn is_worker_script(&self, id: ObjectId) -> bool {
+        self.tx.model.workers.contains(id)
+    }
     pub fn is_list_model(&self, object: ObjectId) -> bool {
         self.tx.model.models.contains_key(&object)
     }
@@ -416,6 +428,9 @@ impl ScriptContext<'_, '_> {
                 .chain(node.signals.keys())
                 .cloned(),
         );
+        if self.is_worker_script(object) {
+            names.insert("sendMessage".into());
+        }
         if self.tx.model.timers.is_timer(object) {
             names.extend(["start", "restart", "stop"].map(str::to_owned));
         }
@@ -714,6 +729,7 @@ impl Instance {
             (self.is_component(object) && name=="createObject") || node.methods.contains_key(name)
                 || node.native.contains_key(name)
                 || node.signal(name).is_some()
+                || self.workers.contains(object) && name == "sendMessage"
                 || self.models.contains_key(&object) && list_model::is_method(name)
                 || self.timers.is_timer(object) && matches!(name, "start" | "stop" | "restart")
         })

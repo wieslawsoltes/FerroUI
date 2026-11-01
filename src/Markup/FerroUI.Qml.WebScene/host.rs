@@ -175,6 +175,9 @@ impl Realm {
             .map(mode)
             .collect::<Vec<_>>();
         if ctx.is_component(object) && key=="createObject" {signature=vec![None,Some("data")];}
+        if ctx.is_worker_script(object) && key == "sendMessage" {
+            signature = vec![Some("data")];
+        }
         if ctx.is_list_model(object) {
             let row = match key {
                 "append" => Some(0),

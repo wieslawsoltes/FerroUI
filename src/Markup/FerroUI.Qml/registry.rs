@@ -207,6 +207,7 @@ impl TypeRegistry {
         registry
             .register("QtQml", "Connections", connections)
             .expect("built-in Connections contract");
+        crate::workers::register(&mut registry).expect("built-in WorkerScript contract");
         crate::list_model::register(&mut registry).expect("built-in list model contracts");
         registry.set_module_version("QtQml", 2, 15);
         registry.set_module_version("QtQml", 6, 12);

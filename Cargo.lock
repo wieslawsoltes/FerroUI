@@ -2358,6 +2358,7 @@ name = "ferroui-qml"
 version = "0.5.0-preview.1"
 dependencies = [
  "ferroui-qml-compiler",
+ "serde",
 ]
 
 [[package]]

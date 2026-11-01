@@ -25,6 +25,7 @@ pub use scripting::{ExternalValue, ScriptContext, ScriptEngine, ScriptInstance, 
 mod timers;
 mod transaction;
 mod value;
+pub mod workers;
 
 pub use ferroui_qml_compiler as ir;
 pub use ferroui_qml_compiler::{Document, Parameter};
@@ -142,6 +143,7 @@ pub struct Instance {
     bindings: BTreeSet<ObjectId>,
     native_scripts: &'static [compiled::Script],
     native_functions: &'static [compiled::Evaluator],
+    workers: workers::Workers,
     timers: timers::Timers,
     listeners: BTreeMap<String, Vec<connections::Listener>>,
     validator: Option<Validator>,

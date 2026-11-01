@@ -28,6 +28,8 @@ pub(crate) struct Transaction<'a> {
     pub(crate) connection_changes: signal_callbacks::Journal,
     pub(crate) deferred: Vec<deferred::Task>,
     pub(crate) structure:dynamic::Checkpoint,
+    pub(crate) worker_sources: BTreeSet<ObjectId>,
+    pub(crate) worker_actions: Vec<workers::Action>,
     pub(crate) timer_changes: timers::TimerChanges,
 }
 
@@ -62,6 +64,8 @@ impl Instance {
             connection_changes: Default::default(),
             deferred: Vec::new(),
             timer_changes: Default::default(),
+            worker_actions: Default::default(),
+            worker_sources: Default::default(),
         };
         let result = operation(&mut tx).and_then(|value| {
             tx.settle()?;
@@ -117,6 +121,8 @@ impl Instance {
                 .javascript
                 .deferred
                 .post(std::mem::take(&mut tx.deferred));
+            tx.model
+                .commit_workers(std::mem::take(&mut tx.worker_actions));
             tx.model.emissions.append(&mut tx.emitted);
             for (key, old) in tx.original {
                 let value = &tx.model.slots[key].value;
@@ -185,6 +191,7 @@ impl Transaction<'_> {
         let end=self.model.nodes.len();
         let previous=self.initializing;
         self.initializing=true;
+        self.initialize_workers(first);
         self.model_modes.extend(self.model.models.keys().copied().filter(|id|id.index>=first));
         self.pending_bindings.extend(self.model.bindings.iter().copied().filter(|id|id.index>=first));
         self.pending.extend(self.model.slots.iter().enumerate().skip(first_slot).filter(|(_,s)|s.dirty).map(|(i,_)|i));
@@ -208,6 +215,7 @@ impl Transaction<'_> {
                 self.update_binding(binding)?;
                 continue;
             }
+            self.stage_workers()?;
             if !self.initializing {
                 if let Some(timer) = self.timer_changes.pending.pop_first() {
                     self.schedule_timer(timer)?;
@@ -473,6 +481,9 @@ impl Transaction<'_> {
             }
         }
         let property = &self.model.properties[key];
+        if property.name == "source" && self.model.workers.contains(property.owner) {
+            self.worker_sources.insert(property.owner);
+        }
         if property.name == "dynamicRoles" && self.model.models.contains_key(&property.owner) {
             self.model_modes.insert(property.owner);
         }

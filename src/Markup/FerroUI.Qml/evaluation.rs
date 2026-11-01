@@ -279,6 +279,7 @@ impl Transaction<'_> {
                 || node.signals.contains_key(name)
                 || node.native.contains_key(name)
                 || self.scoped_key(object, name).is_ok()
+                || (self.model.workers.contains(object) && name == "sendMessage")
                 || (self.model.models.contains_key(&object) && list_model::is_method(name))
                 || (self.model.timers.is_timer(object)
                     && matches!(name, "start" | "stop" | "restart"))
@@ -326,6 +327,9 @@ impl Transaction<'_> {
         if node.signal(name).is_some() {
             self.signal(owner, name, arguments)?;
             return Ok(Value::Undefined);
+        }
+        if self.model.workers.contains(owner) && name == "sendMessage" {
+            return self.send_worker(owner, &arguments);
         }
         if self.model.models.contains_key(&owner) && list_model::is_method(name) {
             return self.model_call(owner, name, &arguments, reads);
