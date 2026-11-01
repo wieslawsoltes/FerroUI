@@ -143,15 +143,23 @@ pub(super) fn row(spacing: f64) -> El<StackPanel> {
 
 pub(super) fn shell_panel() -> El<Border> {
     let frame = if look().winui().is_some() {
-        border().background(resource("SolidBackgroundFillColorSecondaryBrush"))
+        border()
+            .background(resource("FlyoutPresenterBackground"))
             .border_brush(resource("SurfaceStrokeColorFlyoutBrush"))
+            .set(
+                ferroui_base::Visual::shadow_property(),
+                resource("WinUIThemeShadow"),
+            )
+            .set(
+                ferroui_base::Visual::translation_property(),
+                ferroui_base::Vector3D::new(0.0, 0.0, 32.0),
+            )
     } else {
-        border().background(colors().surface)
+        border()
+            .background(colors().surface)
             .border_brush(resource("ControlStrokeColorDefaultBrush"))
     };
-    frame
-        .border_thickness(1)
-        .corner_radius(colors().radius)
+    frame.border_thickness(1).corner_radius(colors().radius)
 }
 
 pub(super) fn action(name: &str, callback: impl Fn() + 'static) -> El<Button> {

@@ -340,14 +340,17 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
                     values.with(|snapshot| match snapshot {
                         Some(snapshot) => device_rows(&state, snapshot),
                         None => {
-                            let label = shell_text("Reading device settings…", 13.0, Ink::Secondary);
+                            let label =
+                                shell_text("Reading device settings…", 13.0, Ink::Secondary);
                             if look().winui().is_some() {
-                                row(10.0).child(progress_ring().is_active(busy).width(20.0).height(20.0))
-                                    .child(label).into()
+                                row(10.0)
+                                    .child(progress_ring().is_active(busy).width(20.0).height(20.0))
+                                    .child(label)
+                                    .into()
                             } else {
                                 label.into()
                             }
-                        },
+                        }
                     })
                 })))
                 .child(feedback(shell.settings.error))

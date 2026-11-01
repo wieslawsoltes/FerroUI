@@ -418,8 +418,10 @@ fn shortcut(shell: &Rc<Shell>, event: &ferroui_base::input::KeyEventArgs) {
             }
         }
         (key, modifiers)
-            if shell.scene.get_untracked() == Scene::Appearance && modifiers.is_empty() &&
-                matches!(key, Key::L | Key::D | Key::H | Key::C) => {
+            if shell.scene.get_untracked() == Scene::Appearance
+                && modifiers.is_empty()
+                && matches!(key, Key::L | Key::D | Key::H | Key::C) =>
+        {
             if let Some(mut settings) = shell.appearance.get_untracked().winui() {
                 match key {
                     Key::L => settings.mode = ColorMode::Light,
@@ -589,15 +591,22 @@ fn popup_header(title: &str, caption: &str, state: &Rc<Shell>) -> El<Grid> {
 
 fn feedback(status: Signal<String>) -> El<Grid> {
     let is_windows = look().winui().is_some();
-    grid().is_visible(move || status.with(|s| !s.is_empty()))
+    grid()
+        .is_visible(move || status.with(|s| !s.is_empty()))
         .child(dynamic(move || {
             if status.with(String::is_empty) {
                 Element::Empty
             } else if is_windows {
-                info_bar().is_open(true).is_closable(false).message(status).into()
+                info_bar()
+                    .is_open(true)
+                    .is_closable(false)
+                    .message(status)
+                    .into()
             } else {
-                shell_text("", 12.0, Ink::Accent).text(status)
-                    .text_wrapping(ferroui_base::media::TextWrapping::Wrap).into()
+                shell_text("", 12.0, Ink::Accent)
+                    .text(status)
+                    .text_wrapping(ferroui_base::media::TextWrapping::Wrap)
+                    .into()
             }
         }))
 }

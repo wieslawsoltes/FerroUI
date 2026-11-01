@@ -1,11 +1,11 @@
 //! Platform-specific desktop composition; scenes use the same session, catalog and input model.
 use super::appearance::{Appearance, ColorMode, Layout, WinUISettings};
-use ferroui_themes_winui::DensityStyle;
 use super::chrome::*;
 use super::{feedback, popup_header, time_text, wallpaper, workspace_name, Scene, Shell};
 use ferroui_base::layout::{HorizontalAlignment as H, VerticalAlignment as V};
 use ferroui_base::media::FontWeight;
 use ferroui_controls::{Border, Button};
+use ferroui_themes_winui::DensityStyle;
 use ferroui_view::prelude::*;
 use std::rc::Rc;
 use time::OffsetDateTime;
@@ -186,17 +186,30 @@ fn notification_button(state: &Rc<Shell>) -> Element {
             .value(move || value.notifications.count().min(i32::MAX as usize) as i32)
             .automation_properties_name("Unread notifications")
             .is_visible(move || counter.notifications.count() != 0)
-            .is_hit_test_visible(false).vertical_alignment(V::Top).horizontal_alignment(H::Right)
+            .is_hit_test_visible(false)
+            .vertical_alignment(V::Top)
+            .horizontal_alignment(H::Right)
             .into_element()
     } else {
-        border().width(7).height(7).corner_radius(4)
-            .background(colors().accent).margin((0.0, 2.0, 3.0, 0.0))
-            .vertical_alignment(V::Top).horizontal_alignment(H::Right)
-            .is_hit_test_visible(false).is_visible(move || counter.notifications.count() != 0)
+        border()
+            .width(7)
+            .height(7)
+            .corner_radius(4)
+            .background(colors().accent)
+            .margin((0.0, 2.0, 3.0, 0.0))
+            .vertical_alignment(V::Top)
+            .horizontal_alignment(H::Right)
+            .is_hit_test_visible(false)
+            .is_visible(move || counter.notifications.count() != 0)
             .into_element()
     };
     grid()
-        .child(status_button(state, Scene::Notifications, "Notification center", Icon::Bell))
+        .child(status_button(
+            state,
+            Scene::Notifications,
+            "Notification center",
+            Icon::Bell,
+        ))
         .child(badge)
         .into()
 }
@@ -302,10 +315,13 @@ fn taskbar(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
                 .child(running_clients(state)),
         );
     let panel = if look().winui().is_some() {
-        border().background(resource("SolidBackgroundFillColorBaseBrush"))
+        border()
+            .background(resource("SolidBackgroundFillColorBaseBrush"))
             .border_brush(resource("CardStrokeColorDefaultBrush"))
     } else {
-        border().background(colors().bar).border_brush(colors().bar_edge)
+        border()
+            .background(colors().bar)
+            .border_brush(colors().bar_edge)
     };
     panel
         .border_thickness((0.0, 1.0, 0.0, 0.0))
@@ -588,13 +604,15 @@ fn windows_settings(shell: &Rc<Shell>, settings: WinUISettings) -> Element {
     let mut modes = wrap_panel().automation_properties_name("Windows color mode");
     for mode in ColorMode::ALL {
         let state = shell.clone();
-        modes = modes.child(radio_button()
-            .group_name("WinUIColorMode")
-            .automation_properties_name(mode.label())
-            .content(mode.label())
-            .margin((0.0, 0.0, 12.0, 0.0))
-            .is_checked(Some(mode == settings.mode))
-            .on_click(move |_| state.select_windows(WinUISettings { mode, ..settings })));
+        modes = modes.child(
+            radio_button()
+                .group_name("WinUIColorMode")
+                .automation_properties_name(mode.label())
+                .content(mode.label())
+                .margin((0.0, 0.0, 12.0, 0.0))
+                .is_checked(Some(mode == settings.mode))
+                .on_click(move |_| state.select_windows(WinUISettings { mode, ..settings })),
+        );
     }
     let state = shell.clone();
     let compact = settings.density == DensityStyle::Compact;
@@ -604,9 +622,16 @@ fn windows_settings(shell: &Rc<Shell>, settings: WinUISettings) -> Element {
         .on_content("On")
         .is_checked(Some(compact))
         .on_is_checked_changed(move |e| {
-            let Some(toggle) = e.source().and_then(|source| source.downcast::<ferroui_controls::ToggleSwitch>().ok()) else { return; };
+            let Some(toggle) = e
+                .source()
+                .and_then(|source| source.downcast::<ferroui_controls::ToggleSwitch>().ok())
+            else {
+                return;
+            };
             let checked = toggle.is_checked() == Some(true);
-            if checked != compact { state.select_windows(settings.toggle_density()); }
+            if checked != compact {
+                state.select_windows(settings.toggle_density());
+            }
         });
     stack_panel()
         .spacing(4.0)
@@ -614,11 +639,25 @@ fn windows_settings(shell: &Rc<Shell>, settings: WinUISettings) -> Element {
         .child(eyebrow("WINDOWS PERSONALIZATION"))
         .child(shell_text("Color mode", 14.0, Ink::Primary).font_weight(FontWeight::SemiBold))
         .child(modes)
-        .child(grid().column_definitions("*,Auto").margin((0.0, 6.0, 0.0, 0.0))
-            .child(stack_panel().vertical_alignment(V::Center)
-                .child(shell_text("Compact controls", 14.0, Ink::Primary).font_weight(FontWeight::SemiBold))
-                .child(shell_text("Use tighter control spacing and a shorter taskbar", 11.0, Ink::Secondary)))
-            .child(toggle.grid_column(1)))
+        .child(
+            grid()
+                .column_definitions("*,Auto")
+                .margin((0.0, 6.0, 0.0, 0.0))
+                .child(
+                    stack_panel()
+                        .vertical_alignment(V::Center)
+                        .child(
+                            shell_text("Compact controls", 14.0, Ink::Primary)
+                                .font_weight(FontWeight::SemiBold),
+                        )
+                        .child(shell_text(
+                            "Use tighter control spacing and a shorter taskbar",
+                            11.0,
+                            Ink::Secondary,
+                        )),
+                )
+                .child(toggle.grid_column(1)),
+        )
         .into()
 }
 

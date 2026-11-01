@@ -101,7 +101,10 @@ pub struct WinUISettings {
 }
 
 impl WinUISettings {
-    const DEFAULT: Self = Self { mode: ColorMode::Light, density: DensityStyle::Normal };
+    const DEFAULT: Self = Self {
+        mode: ColorMode::Light,
+        density: DensityStyle::Normal,
+    };
 
     pub fn toggle_density(self) -> Self {
         let density = match self.density {
@@ -114,7 +117,9 @@ impl WinUISettings {
     fn decode(content: &str) -> Option<Self> {
         let mut words = content.split_whitespace();
         let color_id = words.next()?;
-        let mode = ColorMode::ALL.into_iter().find(|mode| mode.id() == color_id)?;
+        let mode = ColorMode::ALL
+            .into_iter()
+            .find(|mode| mode.id() == color_id)?;
         let density = match words.next()? {
             "compact" => DensityStyle::Compact,
             "normal" => DensityStyle::Normal,
@@ -124,15 +129,24 @@ impl WinUISettings {
     }
 
     fn preferred() -> Self {
-        crate::services::preferences::config_path("windows-style").ok()
+        crate::services::preferences::config_path("windows-style")
+            .ok()
             .and_then(|p| fs::read_to_string(p).ok())
-            .and_then(|s| Self::decode(&s)).unwrap_or_default()
+            .and_then(|s| Self::decode(&s))
+            .unwrap_or_default()
     }
 
     fn save(self) -> io::Result<()> {
         let path = crate::services::preferences::config_path("windows-style")?;
-        let density = if self.density == DensityStyle::Compact { "compact" } else { "normal" };
-        crate::services::preferences::replace(&path, format!("{} {density}\n", self.mode.id()).as_bytes())
+        let density = if self.density == DensityStyle::Compact {
+            "compact"
+        } else {
+            "normal"
+        };
+        crate::services::preferences::replace(
+            &path,
+            format!("{} {density}\n", self.mode.id()).as_bytes(),
+        )
     }
 }
 
@@ -165,7 +179,8 @@ impl Appearance {
         tint: |c| Color::from_rgb(c.r.saturating_sub(12), c.b, c.g.saturating_add(49)),
         style: || ferroui_themes_winui::WinUITheme::new().as_style(),
         variant: ThemeVariant::light,
-    }).with_winui(WinUISettings::DEFAULT);
+    })
+    .with_winui(WinUISettings::DEFAULT);
     pub const MacOS: Self = Self::new(&Descriptor {
         id: "macos",
         name: "macOS",
@@ -221,9 +236,13 @@ impl Appearance {
     pub const fn new(descriptor: &'static Descriptor) -> Self {
         Self(descriptor, None)
     }
-    const fn with_winui(self, settings: WinUISettings) -> Self { Self(self.0, Some(settings)) }
+    const fn with_winui(self, settings: WinUISettings) -> Self {
+        Self(self.0, Some(settings))
+    }
 
-    pub fn winui(self) -> Option<WinUISettings> { self.1 }
+    pub fn winui(self) -> Option<WinUISettings> {
+        self.1
+    }
 
     pub const fn descriptor(self) -> &'static Descriptor {
         self.0
@@ -253,19 +272,41 @@ impl Appearance {
     pub const fn palette(self) -> Palette {
         let base = self.descriptor().palette;
         match self.1 {
-            Some(WinUISettings { mode: ColorMode::Dark, .. }) => Palette {
-                text: "#FFFFFF", muted: "#C8C8C8", accent: "#60CDFF",
-                edge: "#484848", surface: "#202020", tile: "#303030",
-                selected: "#244767", on_selected: "#FFFFFF",
-                bar: "#F3202020", bar_edge: "#30FFFFFF", bar_ink: "#FFFFFF",
-                dock_tiles: ["#60CDFF", "#A7CAEB", "#D0D9E1"], ..base
+            Some(WinUISettings {
+                mode: ColorMode::Dark,
+                ..
+            }) => Palette {
+                text: "#FFFFFF",
+                muted: "#C8C8C8",
+                accent: "#60CDFF",
+                edge: "#484848",
+                surface: "#202020",
+                tile: "#303030",
+                selected: "#244767",
+                on_selected: "#FFFFFF",
+                bar: "#F3202020",
+                bar_edge: "#30FFFFFF",
+                bar_ink: "#FFFFFF",
+                dock_tiles: ["#60CDFF", "#A7CAEB", "#D0D9E1"],
+                ..base
             },
-            Some(WinUISettings { mode: ColorMode::HighContrast, .. }) => Palette {
-                text: "#FFFFFF", muted: "#FFFFFF", accent: "#FFFF00",
-                edge: "#FFFFFF", surface: "#000000", tile: "#000000",
-                selected: "#1AEBFF", on_selected: "#000000",
-                bar: "#000000", bar_edge: "#FFFFFF", bar_ink: "#FFFFFF",
-                dock_tiles: ["#FFFF00", "#1AEBFF", "#FFFFFF"], ..base
+            Some(WinUISettings {
+                mode: ColorMode::HighContrast,
+                ..
+            }) => Palette {
+                text: "#FFFFFF",
+                muted: "#FFFFFF",
+                accent: "#FFFF00",
+                edge: "#FFFFFF",
+                surface: "#000000",
+                tile: "#000000",
+                selected: "#1AEBFF",
+                on_selected: "#000000",
+                bar: "#000000",
+                bar_edge: "#FFFFFF",
+                bar_ink: "#FFFFFF",
+                dock_tiles: ["#FFFF00", "#1AEBFF", "#FFFFFF"],
+                ..base
             },
             _ => base,
         }
@@ -275,9 +316,14 @@ impl Appearance {
     }
     pub fn insets(self) -> (f64, f64) {
         let (top, bottom) = self.0.insets;
-        if self.winui().is_some_and(|s| s.density == DensityStyle::Compact) {
+        if self
+            .winui()
+            .is_some_and(|s| s.density == DensityStyle::Compact)
+        {
             (top, 42.0)
-        } else { (top, bottom) }
+        } else {
+            (top, bottom)
+        }
     }
 
     pub fn preferred() -> Self {
@@ -311,7 +357,11 @@ pub struct ThemeController {
 impl ThemeController {
     pub fn install(app: &Ref<Application>, appearance: Appearance) -> Rc<Self> {
         let windows = WinUISettings::preferred();
-        let appearance = if appearance.winui().is_some() { appearance.with_winui(windows) } else { appearance };
+        let appearance = if appearance.winui().is_some() {
+            appearance.with_winui(windows)
+        } else {
+            appearance
+        };
         let style = (appearance.0.style)();
         Self::configure(app, appearance, &style);
         app.styles().add(style.clone());
@@ -329,7 +379,9 @@ impl ThemeController {
 
     fn configure(app: &Application, appearance: Appearance, style: &Rc<dyn IStyle>) {
         let variant = if let Some(options) = appearance.winui() {
-            let theme = style.as_object().and_then(|object| object.downcast_ref::<WinUITheme>())
+            let theme = style
+                .as_object()
+                .and_then(|object| object.downcast_ref::<WinUITheme>())
                 .expect("Windows appearance installs WinUITheme");
             theme.set_density_style(options.density);
             options.mode.variant()
@@ -341,7 +393,9 @@ impl ThemeController {
 
     fn apply(&self, appearance: Appearance) {
         let previous = self.current.get();
-        if previous == appearance { return; }
+        if previous == appearance {
+            return;
+        }
         if previous.id() != appearance.id() {
             let style = (appearance.0.style)();
             let styles = self.app.styles();
@@ -359,7 +413,9 @@ impl ThemeController {
     pub fn select(&self, appearance: Appearance) -> io::Result<()> {
         let appearance = if appearance.winui().is_some() {
             appearance.with_winui(self.windows.get())
-        } else { appearance };
+        } else {
+            appearance
+        };
         self.apply(appearance);
         save_preference(&preference_path()?, appearance)
     }
@@ -373,7 +429,6 @@ impl ThemeController {
         }
         Ok(())
     }
-
 }
 
 fn preference_path() -> io::Result<PathBuf> {
@@ -420,7 +475,13 @@ mod tests {
                 assert_eq!(profile.insets(), (0.0, height));
             }
         }
-        for invalid in ["", "dark", "light compressed", "solarized compact", "dark compact extra"] {
+        for invalid in [
+            "",
+            "dark",
+            "light compressed",
+            "solarized compact",
+            "dark compact extra",
+        ] {
             assert!(WinUISettings::decode(invalid).is_none());
         }
         assert!(Appearance::MacOS.winui().is_none());

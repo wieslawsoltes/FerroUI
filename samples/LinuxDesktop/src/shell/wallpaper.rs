@@ -249,9 +249,14 @@ fn garden(look: Appearance) -> El<Canvas> {
 }
 
 pub(super) fn wallpaper(look: Appearance) -> Element {
-    if look.winui().is_some_and(|s| s.mode == ColorMode::HighContrast) {
-        return border().background(super::chrome::resource("SolidBackgroundFillColorBaseBrush"))
-            .is_hit_test_visible(false).into();
+    if look
+        .winui()
+        .is_some_and(|s| s.mode == ColorMode::HighContrast)
+    {
+        return border()
+            .background(super::chrome::resource("SolidBackgroundFillColorBaseBrush"))
+            .is_hit_test_visible(false)
+            .into();
     }
     let drawing = match look.wallpaper() {
         Wallpaper::Fold => folded_sheet(look),
