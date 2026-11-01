@@ -1,5 +1,5 @@
 use super::{StyleActivator, StyleActivatorBase};
-use crate::reactive::IDisposable;
+use crate::reactive::Subscription;
 use crate::styling::PropertyEqualsSelector;
 use crate::{BoxedValue, FerroProperty, StyledElement, WeakRef};
 use std::cell::RefCell;
@@ -13,7 +13,7 @@ pub(crate) struct PropertyEqualsActivator {
     control: WeakRef<StyledElement>,
     property: &'static FerroProperty,
     value: BoxedValue,
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
 }
 
 impl PropertyEqualsActivator {
@@ -55,7 +55,7 @@ impl StyleActivator for PropertyEqualsActivator {
                     }
                 }
             });
-            *self.subscription.borrow_mut() = Some(subscription);
+            *self.subscription.borrow_mut() = Some(Subscription::new(subscription));
         }
     }
 

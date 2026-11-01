@@ -3,7 +3,7 @@ use crate::media::{
     FillRule, GeometryImpl, PathFigure, PathFigures, PathMarkupParser, StreamGeometry, StreamGeometryImpl,
 };
 use crate::platform::{self, IGeometryContext, IGeometryImpl, PathGeometryContext};
-use crate::reactive::IDisposable;
+use crate::reactive::{IDisposable, Subscription};
 use crate::utilities::FormatError;
 use crate::{
     ferro_class, ferro_property, instantiate, DirectProperty, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
@@ -22,8 +22,8 @@ type FigureSubscriptions = Rc<RefCell<Vec<(Ref<PathFigure>, Rc<dyn IDisposable>)
 pub struct PathGeometry {
     base: StreamGeometry,
     figures: RefCell<Option<PathFigures>>,
-    figures_observer: RefCell<Option<Rc<dyn IDisposable>>>,
-    figures_properties_observer: RefCell<Option<Rc<dyn IDisposable>>>,
+    figures_observer: RefCell<Option<Subscription>>,
+    figures_properties_observer: RefCell<Option<Subscription>>,
     figure_subscriptions: FigureSubscriptions,
 }
 
@@ -170,10 +170,10 @@ impl PathGeometry {
             },
             invalidate_reset,
         );
-        *self.figures_observer.borrow_mut() = Some(observer);
+        *self.figures_observer.borrow_mut() = Some(Subscription::new(observer));
 
         let observer = track_item_property_changed(&figures, invalidate);
-        *self.figures_properties_observer.borrow_mut() = Some(observer);
+        *self.figures_properties_observer.borrow_mut() = Some(Subscription::new(observer));
     }
 }
 

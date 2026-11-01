@@ -4,7 +4,7 @@ use crate::media::{
 };
 use crate::media::ref_adapter::RefAdapter;
 use crate::platform::IGeometryImpl;
-use crate::reactive::{Disposable, IDisposable};
+use crate::reactive::{Disposable, IDisposable, Subscription};
 use crate::rendering::composition::drawing::{CompositorResourceHolder, ICompositionRenderResource};
 use crate::rendering::composition::generated::ServerCompositionSimpleGeometryProps;
 use crate::rendering::composition::server::{IServerObject, ServerCompositionSimpleGeometry, ServerObjectId};
@@ -27,7 +27,7 @@ pub struct Geometry {
     can_invalidate: bool,
     platform_impl: RefCell<Option<Arc<dyn IGeometryImpl>>>,
     changed: HandlerList<dyn Fn()>,
-    transform_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    transform_subscription: RefCell<Option<Subscription>>,
     resource: CompositorResourceHolder,
 }
 
@@ -232,7 +232,7 @@ impl Geometry {
                     this.transform_changed(Some(&transform));
                 }
             });
-            *self.transform_subscription.borrow_mut() = Some(subscription);
+            *self.transform_subscription.borrow_mut() = Some(Subscription::new(subscription));
         }
 
         self.transform_changed(new_value.as_ref());

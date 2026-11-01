@@ -1,6 +1,6 @@
 use super::BindingSource;
 use crate::data::{BindingValue, BindingValueType};
-use crate::reactive::{IDisposable, IObserver, ObservableError};
+use crate::reactive::{IDisposable, IObserver, ObservableError, Subscription};
 use crate::{BoxedValue, DirectPropertyBase, FerroObject, PropertyValue, Ref, StyledProperty, WeakRef};
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
@@ -12,7 +12,7 @@ pub(crate) struct LocalValueBindingObserver<T: PropertyValue> {
     owner: WeakRef<FerroObject>,
     property: &'static StyledProperty<T>,
     has_data_validation: bool,
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
     default_value: RefCell<Option<T>>,
 }
 
@@ -36,7 +36,7 @@ impl<T: PropertyValue> LocalValueBindingObserver<T> {
             BindingSource::Value(source) => source.subscribe(Rc::new(Value(this.clone()))),
             BindingSource::Untyped(source) => source.subscribe(Rc::new(Untyped(this.clone()))),
         };
-        *self.subscription.borrow_mut() = Some(subscription);
+        *self.subscription.borrow_mut() = Some(Subscription::new(subscription));
     }
 
     fn cached_default_value(&self, owner: &Ref<FerroObject>) -> T {
@@ -180,7 +180,7 @@ pub(crate) struct DirectBindingObserver<T: PropertyValue> {
     has_data_validation: bool,
     /// Whether the source produces untyped values.
     is_untyped: Cell<bool>,
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
 }
 
 impl<T: PropertyValue> DirectBindingObserver<T> {
@@ -204,7 +204,7 @@ impl<T: PropertyValue> DirectBindingObserver<T> {
             BindingSource::Value(source) => source.subscribe(Rc::new(DirectValue(this.clone()))),
             BindingSource::Untyped(source) => source.subscribe(Rc::new(DirectUntyped(this.clone()))),
         };
-        *self.subscription.borrow_mut() = Some(subscription);
+        *self.subscription.borrow_mut() = Some(Subscription::new(subscription));
     }
 
     /// `disposing` is true when the binding is disposed, false when its

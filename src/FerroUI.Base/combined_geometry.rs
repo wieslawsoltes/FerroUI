@@ -1,12 +1,11 @@
 use crate::media::{Geometry, GeometryImpl, Transform};
 use crate::platform::{self, IGeometryImpl};
-use crate::reactive::IDisposable;
+use crate::reactive::Subscription;
 use crate::{
     ferro_class, ferro_property, instantiate, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
     FerroPropertyChangedEventArgs, Nullable, Ref, StyledProperty,
 };
 use std::cell::RefCell;
-use std::rc::Rc;
 use std::sync::Arc;
 
 /// Specifies the different methods by which two geometries can be combined.
@@ -40,8 +39,8 @@ pub enum GeometryCombineMode {
 #[repr(C)]
 pub struct CombinedGeometry {
     base: Geometry,
-    geometry1_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    geometry2_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    geometry1_subscription: RefCell<Option<Subscription>>,
+    geometry2_subscription: RefCell<Option<Subscription>>,
 }
 
 ferro_class!(CombinedGeometry: Geometry);
@@ -70,7 +69,7 @@ impl FerroObjectImpl for CombinedGeometry {
                     this.invalidate_geometry();
                 }
             });
-            *slot.borrow_mut() = Some(subscription);
+            *slot.borrow_mut() = Some(Subscription::new(subscription));
         }
     }
 }
@@ -211,6 +210,7 @@ impl CombinedGeometry {
 mod tests {
     use super::*;
     use std::cell::Cell;
+    use std::rc::Rc;
     use crate::media::{GeometryGroup, PathGeometry};
 
     #[test]

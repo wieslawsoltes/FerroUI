@@ -5,7 +5,7 @@ use crate::data::model::INotifyPropertyChanged;
 use crate::data::{BindingError, BindingExpressionBase, BindingMode, BindingPriority, BindingValueType};
 use crate::logging::{LogArea, LogEventLevel, Logger};
 use crate::property_store::{ImmediateValueFrame, IValueEntry};
-use crate::reactive::IDisposable;
+use crate::reactive::{IDisposable, Subscription};
 use crate::utilities::BooleanBoxes;
 use crate::{AnyValue, BoxedValue, FerroObject, FerroProperty, PropertyValue, StyledElement, WeakRef};
 use std::any::Any;
@@ -280,7 +280,7 @@ pub struct TypedBindingExpression<TSource: PartialEq + 'static, TValue: Property
     source: RefCell<Option<Weak<TSource>>>,
     source_token: Cell<Option<u64>>,
     target: RefCell<Option<WeakRef<FerroObject>>>,
-    target_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    target_subscription: RefCell<Option<Subscription>>,
     source_value: RefCell<Option<TValue>>,
     should_update_one_time_binding_target: Cell<bool>,
 }
@@ -351,7 +351,7 @@ impl<TSource: PartialEq + 'static, TValue: PropertyValue> TypedBindingExpression
                 this.on_target_property_changed(e);
             }
         });
-        self.target_subscription.replace(Some(subscription));
+        self.target_subscription.replace(Some(Subscription::new(subscription)));
         let data_context = target.downcast_ref::<StyledElement>().and_then(|e| e.data_context());
         self.update_source(data_context);
     }

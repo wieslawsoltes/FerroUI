@@ -2,7 +2,7 @@ use super::{ExpressionNode, NodeState, SourceNode};
 use crate::data::core::ValueTypes;
 use crate::data::BindingError;
 use crate::logical_tree::ControlLocator;
-use crate::reactive::{IDisposable, ObservableExt};
+use crate::reactive::{ObservableExt, Subscription};
 use crate::{BoxedValue, FerroObject, Ref, StyledElement, TypeInfo};
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
@@ -15,7 +15,7 @@ pub struct LogicalAncestorElementNode {
     state: NodeState,
     ancestor_type: Option<&'static TypeInfo>,
     ancestor_level: usize,
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
 }
 
 impl LogicalAncestorElementNode {
@@ -101,7 +101,7 @@ impl ExpressionNode for LogicalAncestorElementNode {
                     this.tracked_control_changed(control);
                 }
             });
-            self.subscription.replace(Some(subscription));
+            self.subscription.replace(Some(Subscription::new(subscription)));
         }
     }
 

@@ -1,5 +1,5 @@
 use crate::animation::{Clock, IClock, PlayState, TimeSpan};
-use crate::reactive::{SingleSubscriberObservableBase, IDisposable, IObservable, IObserver, ObservableError};
+use crate::reactive::{SingleSubscriberObservableBase, IDisposable, IObservable, IObserver, ObservableError, Subscription};
 use crate::utilities::MathUtilities;
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
@@ -9,7 +9,7 @@ use std::rc::{Rc, Weak};
 pub struct TransitionInstance {
     this: Weak<TransitionInstance>,
     core: SingleSubscriberObservableBase<f64>,
-    timer_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    timer_subscription: RefCell<Option<Subscription>>,
     delay: TimeSpan,
     duration: TimeSpan,
     base_clock: Rc<dyn IClock>,
@@ -101,7 +101,7 @@ impl TransitionInstance {
         *self.clock.borrow_mut() = Some(clock.clone());
         let Some(this) = self.this.upgrade() else { return };
         let subscription = clock.subscribe(Rc::new(TimerObserver(this)));
-        *self.timer_subscription.borrow_mut() = Some(subscription);
+        *self.timer_subscription.borrow_mut() = Some(Subscription::new(subscription));
         self.core.publish_next(0.0);
     }
 }

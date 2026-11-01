@@ -5,7 +5,7 @@ use super::{
     CompositionDrawListVisual, CompositionTarget, CompositionTransparencyLevel, CompositionVisual, Compositor,
 };
 use crate::media::{DrawingContext, Geometry, GeometryHitTestResult, IntersectionResult, MediaContext};
-use crate::reactive::{Disposable, IDisposable};
+use crate::reactive::{Disposable, IDisposable, Subscription};
 use crate::rendering::{
     IHitTester, IPresentationSource, IRenderer, RendererDiagnostics, SceneInvalidatedEventArgs,
 };
@@ -111,7 +111,7 @@ pub struct CompositingRenderer {
     is_disposed: Cell<bool>,
     composition_target: Rc<CompositionTarget>,
     diagnostics: Rc<RendererDiagnostics>,
-    diagnostics_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    diagnostics_subscription: RefCell<Option<Subscription>>,
     scene_invalidated: HandlerList<dyn Fn(&SceneInvalidatedEventArgs)>,
 }
 
@@ -160,7 +160,7 @@ impl CompositingRenderer {
                 renderer.on_diagnostics_property_changed(diagnostics, property_name);
             }
         });
-        *renderer.diagnostics_subscription.borrow_mut() = Some(subscription);
+        *renderer.diagnostics_subscription.borrow_mut() = Some(Subscription::new(subscription));
         RENDERERS.with(|renderers| {
             let mut renderers = renderers.borrow_mut();
             renderers.retain(|_, r| r.strong_count() > 0);

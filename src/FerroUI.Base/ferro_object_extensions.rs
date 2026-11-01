@@ -3,7 +3,7 @@
 
 use crate::data::core::{UntypedObservableBindingExpression, ValueTypes};
 use crate::data::{BindingBase, BindingExpressionBase, BindingPriority, BindingValue};
-use crate::reactive::{Disposable, IDisposable, IObservable, IObserver, ObservableExt};
+use crate::reactive::{Disposable, IDisposable, IObservable, IObserver, ObservableExt, Subscription};
 use crate::{
     AttachedProperty, BoxedValue, DirectProperty, DirectPropertyBase, FerroObject, FerroProperty,
     FerroPropertyChangedEventArgs, ObjectType, PropertyValue, StyledProperty, WeakRef,
@@ -488,7 +488,7 @@ struct PropertyObservable<TResult: Clone + 'static> {
     value: RefCell<Option<TResult>>,
     observers: RefCell<Vec<(u64, Rc<dyn IObserver<TResult>>)>>,
     next_id: Cell<u64>,
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
 }
 
 impl<TResult: Clone + 'static> PropertyObservable<TResult> {
@@ -521,7 +521,7 @@ impl<TResult: Clone + 'static> PropertyObservable<TResult> {
         // observers, even if the caller dropped its own reference.
         let Some(this) = self.this.upgrade() else { return };
         let subscription = target.property_changed(move |e| this.property_changed(e));
-        *self.subscription.borrow_mut() = Some(subscription);
+        *self.subscription.borrow_mut() = Some(Subscription::new(subscription));
     }
 
     fn deinitialize(&self) {

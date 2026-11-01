@@ -11,7 +11,7 @@ use crate::data::{
 use crate::logging::{LogArea, LogEventLevel, Logger};
 use crate::input::InputElement;
 use crate::interactivity::RoutedEventHandlerToken;
-use crate::reactive::IDisposable;
+use crate::reactive::Subscription;
 use crate::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
 use crate::utilities::CultureInfo;
 use crate::{BoxedValue, FerroObject, FerroProperty, Ref, UnsetValueType};
@@ -68,7 +68,7 @@ impl Default for BindingExpressionOptions {
 struct UncommonFields {
     delay: Duration,
     delay_timer: RefCell<Option<Rc<DispatcherTimer>>>,
-    delay_tick: RefCell<Option<Rc<dyn IDisposable>>>,
+    delay_tick: RefCell<Option<Subscription>>,
     converter: Option<Rc<dyn IValueConverter>>,
     converter_culture: Option<CultureInfo>,
     converter_parameter: Option<BoxedValue>,
@@ -96,7 +96,7 @@ pub struct BindingExpression {
     uncommon: Option<Box<UncommonFields>>,
     update_target_depth: Cell<u32>,
     should_update_one_time_binding_target: Cell<bool>,
-    target_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    target_subscription: RefCell<Option<Subscription>>,
     lost_focus_token: RefCell<Option<RoutedEventHandlerToken>>,
 }
 
@@ -609,7 +609,7 @@ impl BindingExpression {
                         this.write_target_value_to_source();
                     }
                 });
-                uncommon.delay_tick.replace(Some(tick));
+                uncommon.delay_tick.replace(Some(Subscription::new(tick)));
                 uncommon.delay_timer.replace(Some(timer.clone()));
                 timer
             }
@@ -749,7 +749,7 @@ impl UntypedBindingExpression for BindingExpression {
                             }
                         }
                     });
-                    self.target_subscription.replace(Some(subscription));
+                    self.target_subscription.replace(Some(Subscription::new(subscription)));
                 } else if self.update_source_trigger() == UpdateSourceTrigger::LostFocus {
                     if let Some(element) = target.downcast_ref::<InputElement>() {
                         let weak = self.this.clone();
