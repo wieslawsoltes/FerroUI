@@ -69,6 +69,92 @@ impl Sections {
             0.
         }
     }
+    fn section_name(
+        &self,
+        tx: &mut Transaction<'_>,
+        owner: ObjectId,
+        source: &Source,
+        index: usize,
+    ) -> Result<String, Error> {
+        let (_, row) = source.at(tx.model, index).expect("valid row");
+        let field = match &row {
+            Value::ModelRow(row) if self.role == "modelData" => {
+                match tx.model.dynamic.repeaters[&owner].roles.as_deref() {
+                    Some([role]) => tx.model.model_role(*row, role)?,
+                    _ => Value::Undefined,
+                }
+            }
+            Value::ModelRow(row) => tx.model.model_role(*row, &self.role)?,
+            _ if self.role == "modelData" => row,
+            Value::Record(r) => tx
+                .model
+                .record_entries(r)?
+                .get(&self.role)
+                .cloned()
+                .unwrap_or(Value::Undefined),
+            Value::External(value) => {
+                tx.with_external(owner, value, &mut BTreeSet::new(), |engine, ctx| {
+                    engine.get_external(ctx, value, &self.role)
+                })?
+            }
+            Value::Object(o) => tx.model.get(*o, &self.role).unwrap_or(Value::Undefined),
+            _ => Value::Undefined,
+        };
+        let name = match field {
+            Value::Bool(_) | Value::Number(_) | Value::String(_) => {
+                tx.model.value_string(&field)?
+            }
+            _ => String::new(),
+        };
+        Ok(if self.first_character {
+            name.chars().take(1).collect()
+        } else {
+            name
+        })
+    }
+
+    // One role edit can only create, remove or rename a boundary at this row
+    // or the next. Structural edits still rebuild against the new row order.
+    fn update_boundary_pair(
+        &mut self,
+        tx: &mut Transaction<'_>,
+        owner: ObjectId,
+        source: &Source,
+        row: RowId,
+    ) -> Result<bool, Error> {
+        let Source::Rows(model) = source else {
+            return Ok(false);
+        };
+        let Some(index) = tx.model.models[model].row_index(row) else {
+            return Ok(false);
+        };
+        let mut previous = match index.checked_sub(1) {
+            Some(i) => self.section_name(tx, owner, source, i)?.to_lowercase(),
+            None => String::new(),
+        };
+        let mut changed = false;
+        for i in index..(index + 2).min(source.len(tx.model)) {
+            let name = self.section_name(tx, owner, source, i)?;
+            let folded = name.to_lowercase();
+            let boundary = folded != previous;
+            previous = folded;
+            match self.groups.binary_search_by_key(&i, |g| g.0) {
+                Ok(at) if !boundary => {
+                    Rc::make_mut(&mut self.groups).remove(at);
+                }
+                Ok(at) if self.groups[at].1 != name => {
+                    Rc::make_mut(&mut self.groups)[at].1 = name;
+                }
+                Err(at) if boundary => {
+                    Rc::make_mut(&mut self.groups).insert(at, (i, name));
+                }
+                _ => continue,
+            }
+            changed = true;
+        }
+        Ok(changed)
+    }
+
     fn rebuild(
         &mut self,
         tx: &mut Transaction<'_>,
@@ -101,43 +187,7 @@ impl Sections {
             } else {
                 let mut prev = None;
                 for i in 0..count {
-                    let (_, row) = source.at(tx.model, i).expect("valid row");
-                    let field = match &row {
-                        Value::ModelRow(row) if self.role == "modelData" => {
-                            match tx.model.dynamic.repeaters[&owner].roles.as_deref() {
-                                Some([role]) => tx.model.model_role(*row, role)?,
-                                _ => Value::Undefined,
-                            }
-                        }
-                        Value::ModelRow(row) => tx.model.model_role(*row, &self.role)?,
-                        _ if self.role == "modelData" => row,
-                        Value::Record(r) => tx
-                            .model
-                            .record_entries(r)?
-                            .get(&self.role)
-                            .cloned()
-                            .unwrap_or(Value::Undefined),
-                        Value::External(value) => {
-                            tx.with_external(owner, value, &mut BTreeSet::new(), |engine, ctx| {
-                                engine.get_external(ctx, value, &self.role)
-                            })?
-                        }
-                        Value::Object(o) => {
-                            tx.model.get(*o, &self.role).unwrap_or(Value::Undefined)
-                        }
-                        _ => Value::Undefined,
-                    };
-                    let name = match field {
-                        Value::Bool(_) | Value::Number(_) | Value::String(_) => {
-                            tx.model.value_string(&field)?
-                        }
-                        _ => String::new(),
-                    };
-                    let name = if self.first_character {
-                        name.chars().take(1).collect()
-                    } else {
-                        name
-                    };
+                    let name = self.section_name(tx, owner, source, i)?;
                     let folded = name.to_lowercase();
                     if prev.as_deref().unwrap_or("") != folded {
                         prev = Some(folded);
@@ -288,6 +338,7 @@ impl Transaction<'_> {
         id: ObjectId,
         state: &mut State,
         dirty: bool,
+        edited: Option<repeater::SectionEdit>,
     ) -> Result<bool, Error> {
         let sections = &mut state.sections;
         let Value::String(role) = self.model.get(id, "section.property")? else {
@@ -297,22 +348,28 @@ impl Transaction<'_> {
         let next = factory(self.model, id, "section.delegate")?;
         sections.inline =
             real(self.model, id, "section.labelPositioning") as i32 & 1 != 0 && next.is_some();
-        if dirty
+        let rebuild = dirty
             || role != sections.role
             || first != sections.first_character
             || next != sections.factory
-        {
-            self.destroy_subtrees(&sections.items().collect::<Vec<_>>())?;
-            sections.labels.clear();
-            sections.nominal = None;
-            sections.sizes = Default::default();
+            || edited == Some(repeater::SectionEdit::MultipleRows);
+        if rebuild {
             sections.role = role;
             sections.first_character = first;
             sections.factory = next;
             sections.rebuild(self, id, &state.source)?;
-            return Ok(true);
+        } else if let Some(repeater::SectionEdit::Row(row)) = edited {
+            if !sections.update_boundary_pair(self, id, &state.source, row)? {
+                return Ok(false);
+            }
+        } else {
+            return Ok(false);
         }
-        Ok(false)
+        self.destroy_subtrees(&sections.items().collect::<Vec<_>>())?;
+        sections.labels.clear();
+        sections.nominal = None;
+        sections.sizes = Default::default();
+        Ok(true)
     }
 
     pub(super) fn layout_sections(

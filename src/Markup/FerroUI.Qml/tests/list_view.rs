@@ -275,3 +275,41 @@ fn unrelated_role_edits_retain_section_delegates_and_failed_regrouping_rolls_bac
         Value::String("B".into())
     );
 }
+
+#[test]
+fn local_section_edits_match_a_full_rebuild_at_every_boundary() {
+    let mut ui = view(
+        r#"import QtQuick
+        ListView { id: v; height:200; width:100
+            model: ListModel { id: rows; ListElement { category:"" }; ListElement { category:"" }; ListElement { category:"B" }; ListElement { category:"b" } }
+            section.property:"modelData"; section.delegate:Item { required property string section; height:3 }
+            delegate:Item { required property int index; property string group:ListView.section; height:8 }
+            function report() { return itemAtIndex(0).group + "/" + itemAtIndex(1).group + "/" + itemAtIndex(2).group + "/" + itemAtIndex(3).group + "/" + contentHeight }
+        }"#,
+    );
+    let rows = ui.id("rows").unwrap();
+    for (i, name, expected) in [
+        (0, "A", "A//B/B/41"),
+        (1, "a", "A/A/B/B/38"),
+        (2, "a", "A/A/A/b/38"),
+        (0, "a", "a/a/a/b/38"),
+        (3, "a", "a/a/a/a/35"),
+        (0, "", "/a/a/a/35"),
+        (3, "", "/a/a//38"),
+    ] {
+        ui.call(
+            rows,
+            "setProperty",
+            vec![
+                Value::Number(i as f64),
+                Value::String("category".into()),
+                Value::String(name.into()),
+            ],
+        )
+        .unwrap();
+        assert_eq!(
+            ui.call(ui.root(), "report", vec![]).unwrap(),
+            Value::String(expected.into())
+        );
+    }
+}

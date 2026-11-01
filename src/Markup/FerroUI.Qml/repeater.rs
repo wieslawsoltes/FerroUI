@@ -84,10 +84,16 @@ impl State {
     }
 }
 
+#[derive(PartialEq)]
+pub(crate) enum SectionEdit {
+    Row(RowId),
+    MultipleRows,
+}
+
 #[derive(Default)]
 pub(crate) struct Changes {
     pub(crate) reveal_header: BTreeSet<ObjectId>,
-    pub(crate) section_changes: BTreeSet<ObjectId>,
+    pub(crate) section_changes: BTreeMap<ObjectId, SectionEdit>,
     rebound: BTreeMap<ObjectId, RowId>,
     deferred_role_edits: BTreeSet<ObjectId>,
     pub(crate) list_models: BTreeSet<ObjectId>,
@@ -550,7 +556,7 @@ impl Transaction<'_> {
                                 .delegate_inputs(id, index, &Value::ModelRow(row), item)?;
                         self.update_delegate(item, inputs)?;
                     }
-                    if self.repeater_changes.section_changes.contains(&id) {
+                    if self.repeater_changes.section_changes.contains_key(&id) {
                         self.repeater_changes.pending.insert(id);
                     }
                     continue;

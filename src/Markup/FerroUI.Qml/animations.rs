@@ -161,11 +161,7 @@ impl Turn {
             }
         }
         for (key, before) in self.before {
-            if let Some(track) = before {
-                model.timers.tracks.insert(key, track);
-            } else {
-                model.timers.tracks.remove(&key);
-            }
+            model.timers.set_track(key, before);
         }
     }
 }
@@ -234,17 +230,57 @@ impl Instance {
     }
 }
 
+impl timers::Timers {
+    /// Maintain the owner index on both normal updates and rollback. One driver
+    /// or transition may control many properties, and a new driver can retarget
+    /// the same slot while the previous animation is still running.
+    fn set_track(&mut self, key: SlotId, next: Option<Track>) {
+        let previous = match next {
+            Some(track) => self.tracks.insert(key, track),
+            None => self.tracks.remove(&key),
+        };
+        let old = previous.as_ref();
+        let next = self.tracks.get(&key);
+        self.ticking = self.ticking - usize::from(old.is_some_and(Track::ticking))
+            + usize::from(next.is_some_and(Track::ticking));
+        let owners = |t: Option<&Track>| [t.map(|t| t.driver), t.and_then(|t| t.transition)];
+        let before = owners(old);
+        let after = owners(next);
+        for id in before.into_iter().flatten() {
+            if !after.contains(&Some(id)) {
+                let slots = self
+                    .track_owners
+                    .get_mut(&id)
+                    .expect("indexed animation owner");
+                slots.remove(&key);
+                if slots.is_empty() {
+                    self.track_owners.remove(&id);
+                }
+            }
+        }
+        for id in after.into_iter().flatten() {
+            if !before.contains(&Some(id)) {
+                self.track_owners.entry(id).or_default().insert(key);
+            }
+        }
+    }
+    fn driver_keys(&self, driver: ObjectId) -> impl Iterator<Item = SlotId> + '_ {
+        self.track_owners
+            .get(&driver)
+            .into_iter()
+            .flatten()
+            .copied()
+            .filter(move |key| self.tracks[key].driver == driver)
+    }
+}
+
 impl Transaction<'_> {
     fn track(&mut self, key: SlotId, next: Option<Track>) {
         self.animations
             .before
             .entry(key)
             .or_insert_with(|| self.model.timers.tracks.get(&key).cloned());
-        if let Some(track) = next {
-            self.model.timers.tracks.insert(key, track);
-        } else {
-            self.model.timers.tracks.remove(&key);
-        }
+        self.model.timers.set_track(key, next);
     }
 
     fn running(&mut self, id: ObjectId, flag: bool) {
@@ -262,13 +298,7 @@ impl Transaction<'_> {
             .into_iter()
             .flatten()
         {
-            if !self
-                .model
-                .timers
-                .tracks
-                .values()
-                .any(|track| track.driver == id || track.transition == Some(id))
-            {
+            if !self.model.timers.track_owners.contains_key(&id) {
                 self.running(id, false);
             }
         }
@@ -494,13 +524,7 @@ impl Transaction<'_> {
             return Ok(true);
         }
         let running = self.model.get(id, "running")? == Value::Bool(true);
-        let active: Vec<_> = self
-            .model
-            .timers
-            .tracks
-            .iter()
-            .filter_map(|(&key, t)| (t.driver == id).then_some(key))
-            .collect();
+        let active: Vec<_> = self.model.timers.driver_keys(id).collect();
         if !running {
             for key in active {
                 self.remove_track(key);
@@ -533,13 +557,16 @@ impl Transaction<'_> {
             let goal = self.model.slots[key].value.clone();
             self.animate(key, id, None, false, &goal);
         }
-        if !self.model.timers.tracks.values().any(|t| t.driver == id) {
+        if self.model.timers.driver_keys(id).next().is_none() {
             self.running(id, false);
         }
         Ok(true)
     }
 
     pub(crate) fn sample_animations(&mut self, now: Duration) -> Result<(), Error> {
+        if self.model.timers.ticking == 0 {
+            return Ok(());
+        }
         let keys: Vec<_> = self.model.timers.tracks.keys().copied().collect();
         for key in keys {
             let Some(track) = self.model.timers.tracks.get(&key).cloned() else {
@@ -590,10 +617,8 @@ impl Transaction<'_> {
             let tracks: Vec<_> = self
                 .model
                 .timers
-                .tracks
-                .iter()
-                .filter(|(_, t)| t.driver == driver)
-                .map(|(&key, t)| (key, t.timeline.end.as_ref().cloned()))
+                .driver_keys(driver)
+                .map(|key| (key, self.model.timers.tracks[&key].timeline.end.clone()))
                 .collect();
             for (key, goal) in tracks {
                 self.remove_track(key);

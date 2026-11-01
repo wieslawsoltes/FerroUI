@@ -546,7 +546,15 @@ impl Transaction<'_> {
         for (&view, state) in &self.model.dynamic.repeaters {
             if let Some(role) = state.section_role_for(row.model) {
                 if changes.iter().any(|(name, _)| name == role) {
-                    self.repeater_changes.section_changes.insert(view);
+                    self.repeater_changes
+                        .section_changes
+                        .entry(view)
+                        .and_modify(|pending| {
+                            if *pending != repeater::SectionEdit::Row(row) {
+                                *pending = repeater::SectionEdit::MultipleRows;
+                            }
+                        })
+                        .or_insert(repeater::SectionEdit::Row(row));
                 }
             }
         }

@@ -9,16 +9,30 @@ use std::time::Duration;
 pub(crate) struct Timers {
     pub(crate) held: BTreeMap<SlotId, (ObjectId, Value)>,
     pub(crate) tracks: BTreeMap<SlotId, animations::Track>,
+    pub(super) track_owners: BTreeMap<ObjectId, BTreeSet<SlotId>>,
+    pub(super) ticking: usize,
     pub(crate) now: Duration,
+    due: BTreeSet<(Duration, ObjectId)>,
     deadlines: BTreeMap<ObjectId, Option<Duration>>,
 }
 
 impl Timers {
+    fn set_deadline(&mut self, id: ObjectId, next: Option<Duration>) {
+        if let Some(Some(old)) = self.deadlines.insert(id, next) {
+            self.due.remove(&(old, id));
+        }
+        if let Some(time) = next {
+            self.due.insert((time, id));
+        }
+    }
     pub(crate) fn remove(&mut self, id: ObjectId) {
-        self.deadlines.remove(&id);
+        if let Some(Some(old)) = self.deadlines.remove(&id) {
+            self.due.remove(&(old, id));
+        }
     }
     pub(crate) fn truncate(&mut self, index: usize) {
         self.deadlines.retain(|id, _| id.index < index);
+        self.due.retain(|(_, id)| id.index < index);
     }
     pub(crate) fn register(&mut self, object: ObjectId) {
         self.deadlines.insert(object, None);
@@ -39,11 +53,13 @@ pub(crate) struct TimerChanges {
 }
 
 impl TimerChanges {
-    pub(crate) fn rollback(&mut self, timers: &mut Timers) {
+    pub(crate) fn rollback(self, timers: &mut Timers) {
         if let Some(now) = self.previous_time {
             timers.now = now;
         }
-        timers.deadlines.append(&mut self.before);
+        for (id, old) in self.before {
+            timers.set_deadline(id, old);
+        }
     }
 }
 
@@ -53,12 +69,13 @@ impl Instance {
         if !self.dynamic.loading.is_empty() {
             return Some(Duration::ZERO);
         }
-        let animation = (self.timers.tracks.values().any(animations::Track::ticking))
+        let animation = (self.timers.ticking != 0)
             .then(|| self.timers.now.saturating_add(Duration::from_millis(16)));
         self.timers
-            .deadlines
-            .values()
-            .flatten()
+            .due
+            .first()
+            .map(|(deadline, _)| deadline)
+            .into_iter()
             .chain(self.dynamic.deadlines.values())
             .chain(animation.iter())
             .min()
@@ -66,7 +83,7 @@ impl Instance {
     }
 
     pub fn has_timers(&self) -> bool {
-        self.timers.tracks.values().any(animations::Track::ticking)
+        self.timers.ticking != 0
             || !self.timers.deadlines.is_empty()
             || !self.dynamic.deadlines.is_empty()
             || !self.dynamic.loading.is_empty()
@@ -81,14 +98,11 @@ impl Instance {
 
 impl Transaction<'_> {
     fn deadline(&mut self, object: ObjectId, next: Option<Duration>) {
-        let deadline = self
-            .model
-            .timers
-            .deadlines
-            .get_mut(&object)
-            .expect("registered timer");
-        self.timer_changes.before.entry(object).or_insert(*deadline);
-        *deadline = next;
+        let old = self.model.timers.deadlines[&object];
+        if old != next {
+            self.timer_changes.before.entry(object).or_insert(old);
+            self.model.timers.set_deadline(object, next);
+        }
     }
 
     fn interval(&self, object: ObjectId) -> Result<Duration, Error> {
@@ -165,13 +179,16 @@ impl Transaction<'_> {
             .iter()
             .filter_map(|(&id, &due)| (due <= now).then_some(id))
             .collect();
-        let due: Vec<_> = self
+        let mut due: Vec<_> = self
             .model
             .timers
-            .deadlines
+            .due
             .iter()
-            .filter_map(|(&id, deadline)| deadline.is_some_and(|d| d <= now).then_some(id))
+            .take_while(|(time, _)| *time <= now)
+            .map(|(_, id)| *id)
             .collect();
+        // Preserve registration/object order when one tick services several deadlines.
+        due.sort_unstable();
         for id in due {
             // A previous handler can stop or restart this timer.
             if !self.model.timers.deadlines[&id].is_some_and(|deadline| deadline <= now) {

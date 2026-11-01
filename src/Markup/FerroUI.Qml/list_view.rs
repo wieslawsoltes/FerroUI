@@ -547,12 +547,13 @@ impl Transaction<'_> {
         let old_header = state.header.extent;
         self.update_decoration(id, "header", axis, &mut state.header)?;
         self.update_decoration(id, "footer", axis, &mut state.footer)?;
-        let section_dirty = self.repeater_changes.section_changes.remove(&id);
+        let edited_section = self.repeater_changes.section_changes.remove(&id);
         let retained_horizontal = state.horizontal;
         let sections_changed = self.prepare_sections(
             id,
             &mut state,
-            reset || structural || section_dirty || horizontal != retained_horizontal,
+            reset || structural || horizontal != retained_horizontal,
+            edited_section,
         )?;
         let mut offset = axis_position(reversed, real(self.model, id, offset_prop), viewport);
         if (!state.initialized && !self.model.is_assigned(id, offset_prop))
