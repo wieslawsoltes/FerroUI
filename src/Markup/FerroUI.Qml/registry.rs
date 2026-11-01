@@ -46,6 +46,21 @@ pub struct TypeDefinition {
 }
 
 impl TypeDefinition {
+    /// Registered properties, including members inherited from native base types.
+    pub fn property_types(&self) -> impl Iterator<Item = (&str, &str)> {
+        self.properties
+            .iter()
+            .map(|(name, (ty, _))| (name.as_str(), ty.as_str()))
+    }
+
+    pub fn signals(&self) -> impl Iterator<Item = &str> {
+        self.signals.keys().map(String::as_str)
+    }
+
+    pub fn methods(&self) -> impl Iterator<Item = &str> {
+        self.native.keys().map(String::as_str)
+    }
+
     /// Extend a previously registered native type, retaining its members and
     /// assignability. A derived definition may specialize inherited defaults.
     pub fn inherits(mut self, module: &str, name: &str) -> Self {
@@ -422,7 +437,22 @@ impl TypeRegistry {
         Ok(())
     }
 
-    pub(crate) fn resolve<'a>(
+    /// Names of registered native modules.
+    pub fn modules(&self) -> impl Iterator<Item = &str> {
+        self.modules.keys().map(String::as_str)
+    }
+
+    /// Names visible through this module, including its transitive exports.
+    pub fn exported_types(&self, uri: &str) -> BTreeSet<&str> {
+        self.module_order(uri)
+            .into_iter()
+            .filter_map(|m| self.modules.get(m))
+            .flat_map(|types| types.keys().map(String::as_str))
+            .collect()
+    }
+
+    /// Resolve the authored type name with the same aliases and precedence as the engine.
+    pub fn resolve<'a>(
         &'a self,
         imports: &[Import],
         name: &str,

@@ -72,6 +72,16 @@ cargo run --locked -p ferroui-qml-build --bin ferroui-qmlc -- --check samples/Qm
 cargo run --locked -p ferroui-qml-build --bin ferroui-qmlc -- samples/QmlGallery/ui/Main.qml > main_qml.rs
 ```
 
+### Edit QML with the language server
+
+Configure a QML-aware LSP client to launch `ferroui-qml-lsp` over stdio. To run it from a checkout, use the following command.
+
+```sh
+cargo run --quiet --locked -p ferroui-designer-language --features qml --bin ferroui-qml-lsp
+```
+
+The server reports parser and declaration diagnostics as you type. Completion uses the native registry for imported types and inherited members. The outline and folding ranges follow the QML object tree. Definition and hover requests resolve component IDs, authored members and local component types. JavaScript navigation accounts for lexical variables and function arguments. The server reads sibling and directory-imported components inside the editor's local workspace and gives unsaved buffers precedence. Analysis never constructs a QML instance.
+
 ## Modern JavaScript with WebScene V8
 
 Enable `javascript` on the build helper and use `ferroui-qml-webscene` in the application. The published WebScene 1.0.37 native package contains V8 15.3.10 and ABI 3. The gallery can run the same native controls with either execution backend. Use Python 3.11 or newer for the package verification step. On Linux and macOS, run the following from the workspace root.
@@ -265,7 +275,7 @@ An application can enable remote QML on its type registry. HTTP transfers run of
 | Models | `QtQml.Models.ListModel` and nested `ListElement` declarations, WorkerScript model synchronization, fixed and dynamic role types, insertion, moves, removal, role edits, row handles and rollback. Eager Repeater and viewport-bounded ListView delegates, retained row identity, reuse lifecycle, section labels, header and footer components, reversed layout and ListModel delegate access modes | Function-valued roles and proxy models |
 | Native visuals | Item, Repeater, ListView, Rectangle, Row, Column, Flow, Text, TextInput and TextEdit. The Controls module supplies Label, Button, tri-state CheckBox, RadioButton, Switch, ButtonGroup, Slider, SpinBox, ProgressBar, TextField and TextArea. Button input, keyboard activation and accessibility activation use the same transactional selection and signal delivery. Parent and sibling edge, center, baseline, fill and mirrored anchors participate in native arrangement. | Complete implicit geometry, additional animation and state operation types and the rest of Qt Quick and Controls |
 | FerroUI API | Register Rust types, properties, signals, enums, pure methods and receiver-aware methods with reactive reads. Register visual factories or expose supported scalar styled properties with `register_ferro_control`. | Property types outside the reflected scalar set require an explicit native adapter |
-| Tooling | Cargo build integration, native Rust code generation, command-line checks, source diagnostics, headless tests and a Qt reference harness | Language server, debugger, profiler, designer support and Qt binary plugin/toolchain interoperability |
+| Tooling | Cargo build integration, native Rust code generation, command-line checks, source diagnostics, a stdio QML language server, headless tests and a Qt reference harness | Debugger, profiler, designer support and Qt binary plugin/toolchain interoperability |
 
 ## Verification
 

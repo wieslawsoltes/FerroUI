@@ -1850,8 +1850,12 @@ version = "0.5.0-preview.1"
 dependencies = [
  "ferroui-designer-core",
  "ferroui-designer-project",
+ "ferroui-qml",
+ "ferroui-qml-compiler",
+ "ferroui-qml-controls",
  "serde",
  "serde_json",
+ "url",
 ]
 
 [[package]]

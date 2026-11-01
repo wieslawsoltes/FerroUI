@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'src/Markup/FerroUI.Qml*/**'
+      - 'src/FerroUI.Designer.Language/**'
       - 'src/FerroUI/Cargo.toml'
       - 'src/FerroUI/lib.rs'
       - 'Cargo.toml'
@@ -160,3 +161,6 @@ jobs:
       - name: Mount and update native controls from V8
         if: runner.os == 'Linux'
         run: cargo test --locked --no-default-features -p qml-gallery --features webscene
+      - name: Test QML editor protocol over stdio
+        if: runner.os == 'Linux'
+        run: cargo test --locked -p ferroui-designer-language --features qml --test qml_lsp

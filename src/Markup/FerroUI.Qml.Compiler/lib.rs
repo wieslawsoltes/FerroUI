@@ -3,6 +3,8 @@ mod ast;
 mod link;
 mod scope;
 pub use link::{link, ComponentResolver, ComponentSource, LinkError};
+#[cfg(feature = "javascript")]
+pub mod editor;
 mod lexer;
 mod parser;
 

@@ -10,6 +10,8 @@ use std::sync::{mpsc, Arc, Mutex};
 
 pub struct LspServer {
     pub service: LanguageService,
+    #[cfg(feature = "qml")]
+    qml: Option<crate::qml::QmlService>,
     initialized: bool,
     shutdown: bool,
     exit: bool,
@@ -19,6 +21,8 @@ impl Default for LspServer {
     fn default() -> Self {
         Self {
             service: LanguageService::default(),
+            #[cfg(feature = "qml")]
+            qml: None,
             initialized: false,
             shutdown: false,
             exit: false,
@@ -27,6 +31,14 @@ impl Default for LspServer {
     }
 }
 impl LspServer {
+    /// Serve QML documents using the registered Qt Quick and Controls metadata.
+    #[cfg(feature = "qml")]
+    pub fn for_qml() -> Result<Self> {
+        Ok(Self {
+            qml: Some(crate::qml::QmlService::new()?),
+            ..Self::default()
+        })
+    }
     pub fn handle(&mut self, message: Value) -> Vec<Value> {
         let id = message.get("id").cloned();
         let method = message["method"].as_str().unwrap_or("");
@@ -102,6 +114,19 @@ impl LspServer {
         params: &Value,
         notifications: &mut Vec<Value>,
     ) -> Result<Value> {
+        #[cfg(feature = "qml")]
+        if let Some(qml) = self.qml.as_mut() {
+            match method {
+                "initialize" => {
+                    crate::require(!self.initialized, "Already initialized")?;
+                    qml.workspace.configure(params);
+                    self.initialized = true;
+                    return Ok(crate::qml::capabilities());
+                }
+                "shutdown" => {}
+                _ => return qml.dispatch(method, params, notifications),
+            }
+        }
         match method {
             "initialize" => self.initialize(params, notifications),
             "shutdown" => {
@@ -390,20 +415,20 @@ impl LspServer {
         Ok(())
     }
 }
-fn text<'a>(value: &'a Value, key: &str) -> Result<&'a str> {
+pub(crate) fn text<'a>(value: &'a Value, key: &str) -> Result<&'a str> {
     value[key]
         .as_str()
         .ok_or_else(|| LanguageError(format!("{key} must be a string")))
 }
-fn integer(value: &Value, key: &str) -> Result<i64> {
+pub(crate) fn integer(value: &Value, key: &str) -> Result<i64> {
     value[key]
         .as_i64()
         .ok_or_else(|| LanguageError(format!("{key} must be an integer")))
 }
-fn uri(params: &Value) -> Result<&str> {
+pub(crate) fn uri(params: &Value) -> Result<&str> {
     text(&params["textDocument"], "uri")
 }
-fn decode<T: serde::de::DeserializeOwned>(value: &Value) -> Result<T> {
+pub(crate) fn decode<T: serde::de::DeserializeOwned>(value: &Value) -> Result<T> {
     serde_json::from_value(value.clone()).map_err(|e| LanguageError(e.to_string()))
 }
 fn workspace_edit(edit: WorkspaceEdit) -> Value {
@@ -479,11 +504,15 @@ pub fn write_frame(writer: &mut impl Write, message: &Value) -> io::Result<()> {
 }
 /// The reader remains responsive to cancellation while semantic work runs. Source notifications
 /// and queries are processed in arrival order; a cancelled query's result is never published.
-pub fn serve<R: BufRead + Send + 'static, W: Write>(
+pub fn serve<R: BufRead + Send + 'static, W: Write>(reader: R, writer: W) -> io::Result<()> {
+    serve_with(LspServer::default(), reader, writer)
+}
+
+pub fn serve_with<R: BufRead + Send + 'static, W: Write>(
+    mut server: LspServer,
     mut reader: R,
     mut writer: W,
 ) -> io::Result<()> {
-    let mut server = LspServer::default();
     let cancelled = server.cancelled.clone();
     let (send, receive) = mpsc::sync_channel(64);
     std::thread::spawn(move || loop {
