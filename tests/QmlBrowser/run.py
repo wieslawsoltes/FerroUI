@@ -1,5 +1,6 @@
 """Run the compiled Wasm fixture in an isolated Chromium browsing context."""
 import argparse
+import json
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -10,6 +11,8 @@ from threading import Event, Thread
 parser = argparse.ArgumentParser()
 parser.add_argument("--chrome", required=True)
 parser.add_argument("--site", type=Path, required=True)
+parser.add_argument("--benchmark-subscriptions", action="store_true",
+                    help="time change delivery for a 256-row model in the application worker")
 args = parser.parse_args()
 done = Event()
 report = []
@@ -38,14 +41,22 @@ with ThreadingHTTPServer(("127.0.0.1", 0), partial(Handler, directory=args.site)
         browser = subprocess.Popen([
             args.chrome, "--headless", "--no-sandbox", "--disable-dev-shm-usage",
             "--disable-gpu", "--disable-background-networking", "--user-data-dir=" + profile,
-            "http://127.0.0.1:" + str(site.server_port) + "/index.html",
+            "http://127.0.0.1:" + str(site.server_port) + "/index.html" + ("?benchmark-subscriptions" if args.benchmark_subscriptions else ""),
         ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         try:
             if not done.wait(60):
                 raise SystemExit("Browser fixture did not return a result")
-            if report != ["passed"]:
-                raise SystemExit(report[0])
-            print("FerroUI QML browser conformance passed")
+            if args.benchmark_subscriptions:
+                try:
+                    result = json.loads(report[0])
+                except ValueError:
+                    raise SystemExit(report[0])
+                assert result["rows"] == 256 and result["unrelatedEditMs"] >= 0 and result["nestedEditMs"] > 0
+                print(json.dumps(result))
+            else:
+                if report != ["passed"]:
+                    raise SystemExit(report[0])
+                print("FerroUI QML browser conformance passed")
         finally:
             browser.terminate()
             browser.wait(timeout=15)

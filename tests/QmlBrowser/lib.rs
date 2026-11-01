@@ -146,3 +146,35 @@ pub async fn application_model() -> Result<ferroui_qml_webscene::BrowserApplicat
     .map_err(error)?;
     ferroui_qml_webscene::BrowserApplication::new(model, timeout).map_err(error)
 }
+
+/// Two independent ListModels, an owned child model and a mutable record let
+/// the browser harness exercise subscriptions without routing timing through V8.
+#[wasm_bindgen]
+pub fn subscription_model() -> Result<ferroui_qml_webscene::BrowserApplication, JsValue> {
+    let mut source = String::from(
+        r#"import QtQml
+        import QtQml.Models
+        QtObject {
+            property ListModel rows: ListModel { id: watched
+                ListElement { title: "first"; children: [ListElement { n: 1 }] }
+    "#,
+    );
+    for _ in 0..255 {
+        source.push_str("ListElement { title: \"row\"; children: [] }\n");
+    }
+    source.push_str(
+        r#"}
+        property ListModel other: ListModel { id: independent; ListElement { n: 0 } }
+        property var record: ({ n: 0 })
+        function editOther(n: int) { independent.setProperty(0, "n", n) }
+        function editChild(n: int) { watched.get(0).children.setProperty(0, "n", n) }
+        function editRecord(n: int) { record.n = n }
+        function failRecord() { record.n = 999; badName() }
+    }"#,
+    );
+    let doc = ferroui_qml::ir::parse(&source).map_err(|e| JsValue::from_str(&e.to_string()))?;
+    let model = Instance::new(&doc, &TypeRegistry::new(), Default::default())
+        .map_err(|e| JsValue::from_str(&e.to_string()))?;
+    ferroui_qml_webscene::BrowserApplication::new(model, Duration::from_secs(3))
+        .map_err(|e| JsValue::from_str(&e.to_string()))
+}

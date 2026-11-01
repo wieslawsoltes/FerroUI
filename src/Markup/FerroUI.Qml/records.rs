@@ -44,6 +44,7 @@ impl Record {
 }
 
 struct Entry {
+    revision: u64,
     token: Weak<Identity>,
     request: Option<Rc<incubator::Request>>,
     fields: BTreeMap<String, Value>,
@@ -51,6 +52,7 @@ struct Entry {
 
 #[derive(Default)]
 pub(crate) struct Heap {
+    pub(crate) revision: u64,
     next: u64,
     collect_at: usize,
     geometry_refs: BTreeMap<(ObjectId, SlotId), Weak<Identity>>,
@@ -65,6 +67,10 @@ pub(crate) struct Journal {
 }
 
 impl Heap {
+    pub(crate) fn revision_of(&self, id: u64) -> Option<u64> {
+        self.entries.get(&id).map(|e| e.revision)
+    }
+
     pub(crate) fn create(
         &mut self,
         engine: u64,
@@ -128,6 +134,7 @@ impl Heap {
         self.entries.insert(
             index,
             Entry {
+                revision: self.revision,
                 token: Rc::downgrade(&token),
                 request,
                 fields,
@@ -311,13 +318,13 @@ impl transaction::Transaction<'_> {
                 .entry((id, key.into()))
                 .or_insert_with(|| previous.cloned());
         }
-        let fields = &mut self
-            .model
-            .records
-            .entries
-            .get_mut(&id)
-            .expect("validated object")
-            .fields;
+        // A rolled-back write may conservatively invalidate a copy stamp. The
+        // subscriber compares copied values before delivering an indirect edit.
+        let records = &mut self.model.records;
+        records.revision = records.revision.wrapping_add(1);
+        let entry = records.entries.get_mut(&id).expect("validated object");
+        entry.revision = records.revision;
+        let fields = &mut entry.fields;
         match next {
             Some(value) => {
                 fields.insert(key.into(), value);

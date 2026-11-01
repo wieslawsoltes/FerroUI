@@ -29,7 +29,7 @@ pub(crate) struct Transaction<'a> {
     pub(crate) animations: animations::Turn,
     scope: Option<u32>,
     pub(crate) depth: usize,
-    steps: usize,
+    steps: std::cell::Cell<usize>,
     pub(crate) connection_targets_changed: bool,
     pub(crate) connection_changes: signal_callbacks::Journal,
     pub(crate) deferred: Vec<deferred::DeferredWork>,
@@ -112,7 +112,7 @@ impl Instance {
             animations: Default::default(),
             scope: None,
             depth: 0,
-            steps: 0,
+            steps: Default::default(),
             connection_changes: Default::default(),
             connection_targets_changed: false,
             deferred: Vec::new(),
@@ -284,11 +284,12 @@ impl Transaction<'_> {
         slot
     }
 
-    pub(crate) fn budget(&mut self) -> Result<(), Error> {
-        self.steps += 1;
+    pub(crate) fn budget(&self) -> Result<(), Error> {
+        let steps = self.steps.get() + 1;
+        self.steps.set(steps);
         // A fixed overhead handles event feedback from small components; the
         // per-slot term permits initialization of legitimately large documents.
-        if self.steps > 4096 + self.model.slots.len().saturating_mul(64) {
+        if steps > 4096 + self.model.slots.len().saturating_mul(64) {
             return Err(Error::new(
                 "binding or signal feedback exceeded the component work limit",
             ));

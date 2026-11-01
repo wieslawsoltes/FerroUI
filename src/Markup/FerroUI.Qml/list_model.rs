@@ -62,6 +62,39 @@ pub(crate) struct Model {
 }
 
 impl Model {
+    pub(crate) fn worker_token(&self) -> u64 {
+        use std::sync::atomic::{AtomicU64, Ordering};
+        static NEXT: AtomicU64 = AtomicU64::new(1);
+        *self
+            .worker_token
+            .get_or_init(|| NEXT.fetch_add(1, Ordering::Relaxed))
+    }
+
+    /// Visit role values directly in display order. Fixed models expose the
+    /// schema default even if a particular row does not store that field.
+    pub(crate) fn copy_rows<T>(
+        &self,
+        mut copy: impl FnMut(&Value) -> Result<T, Error>,
+    ) -> Result<Vec<BTreeMap<String, T>>, Error> {
+        let mut rows = Vec::with_capacity(self.order.len());
+        for serial in &self.order {
+            let fields = &self.rows[serial];
+            let mut row = BTreeMap::new();
+            for (key, value) in fields {
+                row.insert(key.clone(), copy(value)?);
+            }
+            if self.dynamic == Some(false) {
+                for (key, kind) in &self.roles {
+                    if !fields.contains_key(key) {
+                        row.insert(key.clone(), copy(&kind.default_value())?);
+                    }
+                }
+            }
+            rows.push(row);
+        }
+        Ok(rows)
+    }
+
     fn read_field(&self, roles: &Roles, name: &str) -> Value {
         roles.get(name).cloned().unwrap_or_else(|| {
             if self.dynamic == Some(false) {
@@ -279,32 +312,6 @@ impl Instance {
         self.dynamic.model_revision
     }
 
-    pub(crate) fn worker_model_snapshot(
-        &self,
-        id: ObjectId,
-    ) -> Result<(u64, u64, Vec<Roles>), Error> {
-        use std::sync::atomic::{AtomicU64, Ordering};
-        static NEXT: AtomicU64 = AtomicU64::new(1);
-        let model = self
-            .models
-            .get(&id)
-            .ok_or_else(|| Error::new("invalid ListModel"))?;
-        let token = *model
-            .worker_token
-            .get_or_init(|| NEXT.fetch_add(1, Ordering::Relaxed));
-        let rows = model
-            .order
-            .iter()
-            .map(|&serial| {
-                let row = RowId { model: id, serial };
-                self.model_keys(row)?
-                    .into_iter()
-                    .map(|name| Ok((name.clone(), self.model_role(row, &name)?)))
-                    .collect::<Result<Roles, Error>>()
-            })
-            .collect::<Result<_, _>>()?;
-        Ok((token, self.worker_model_revision(id)?, rows))
-    }
     pub(crate) fn worker_model_revision(&self, id: ObjectId) -> Result<u64, Error> {
         let Value::Number(revision) = self.slots[self.key(id, REVISION)?].value else {
             return Err(Error::new("invalid ListModel revision"));

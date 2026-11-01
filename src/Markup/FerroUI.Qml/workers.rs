@@ -13,7 +13,7 @@ const EVENT_LIMIT: usize = 1024;
 const BYTE_LIMIT: usize = 32 * 1024 * 1024;
 type Wake = Arc<dyn Fn() + Send + Sync>;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "t", content = "v")]
 pub enum WorkerValue {
     Undefined,
@@ -29,6 +29,60 @@ pub enum WorkerValue {
         rows: Vec<BTreeMap<String, Self>>,
     },
 }
+/// Dependencies encountered while copying public application data. Polling a
+/// stamp neither copies role data nor retains a QML object or record handle.
+#[derive(Default)]
+pub struct CopyDependencies {
+    engine: u64,
+    model_epoch: u64,
+    record_epoch: u64,
+    tree_epoch: u64,
+    models: BTreeMap<ObjectId, u64>,
+    records: BTreeMap<u64, u64>,
+}
+
+impl CopyDependencies {
+    pub fn is_empty(&self) -> bool {
+        self.models.is_empty() && self.records.is_empty()
+    }
+    pub fn is_current(&mut self, model: &Instance) -> bool {
+        if self.is_empty() {
+            return true;
+        }
+        if self.engine != model.identity {
+            return false;
+        }
+        let tree = model.structure_revision();
+        let models = model.models_revision();
+        if (models != self.model_epoch || tree != self.tree_epoch)
+            && self
+                .models
+                .iter()
+                .any(|(&id, &version)| model.worker_model_revision(id).ok() != Some(version))
+        {
+            return false;
+        }
+        let records = model.records.revision;
+        if (records != self.record_epoch || tree != self.tree_epoch)
+            && self
+                .records
+                .iter()
+                .any(|(&id, &version)| model.records.revision_of(id) != Some(version))
+        {
+            return false;
+        }
+        self.model_epoch = models;
+        self.record_epoch = records;
+        self.tree_epoch = tree;
+        true
+    }
+}
+enum CopyTarget<'a> {
+    Page,
+    Watch(&'a mut CopyDependencies),
+    Worker(&'a mut BTreeMap<u64, ObjectId>),
+}
+
 impl WorkerValue {
     pub fn estimated_bytes(&self) -> usize {
         let body = match self {
@@ -366,7 +420,32 @@ impl Instance {
     /// Copy application data out of its owning realm, including ListModel
     /// snapshots. QObject pointers, methods and functions cannot cross this boundary.
     pub fn copy_data(&mut self, owner: ObjectId, value: Value) -> Result<WorkerValue, Error> {
-        self.transaction(|tx| tx.copy_data(owner, value))
+        self.transaction(|tx| tx.copy_data(owner, value, &mut CopyTarget::Page))
+    }
+    /// Copy once and retain revision stamps for the reachable ListModels and
+    /// data records. Tags used to authorize WorkerScript edits stay inside the engine.
+    pub fn copy_observed_data(
+        &mut self,
+        owner: ObjectId,
+        value: Value,
+    ) -> Result<(WorkerValue, CopyDependencies), Error> {
+        if matches!(value, Value::External(_)) {
+            // The guest exports a temporary copy of a JS object. Its engine-side
+            // records do not represent the original object's mutable identity.
+            return self
+                .copy_data(owner, value)
+                .map(|data| (data, CopyDependencies::default()));
+        }
+        let mut deps = CopyDependencies {
+            engine: self.identity,
+            model_epoch: self.models_revision(),
+            tree_epoch: self.structure_revision(),
+            record_epoch: self.records.revision,
+            ..Default::default()
+        };
+        let data =
+            self.transaction(|tx| tx.copy_data(owner, value, &mut CopyTarget::Watch(&mut deps)))?;
+        Ok((data, deps))
     }
 
     /// Decode a copied value and assign it in the same transaction.
@@ -398,7 +477,7 @@ impl Instance {
                 .map(|v| tx.import_worker(None, v, 0))
                 .collect::<Result<Vec<_>, _>>()?;
             let value = tx.invoke_await(owner, method, args, timeout)?;
-            tx.copy_data(owner, value)
+            tx.copy_data(owner, value, &mut CopyTarget::Page)
         })
     }
 
@@ -682,11 +761,16 @@ impl Transaction<'_> {
             ));
         }
         let mut grants = BTreeMap::new();
-        let value = self.export_worker(input, 0, Some(&mut grants))?;
+        let value = self.export_worker(input, 0, &mut CopyTarget::Worker(&mut grants))?;
         self.worker_actions.push(Action::Send(id, value, grants));
         Ok(Value::Undefined)
     }
-    fn copy_data(&mut self, owner: ObjectId, value: Value) -> Result<WorkerValue, Error> {
+    fn copy_data(
+        &mut self,
+        owner: ObjectId,
+        value: Value,
+        target: &mut CopyTarget,
+    ) -> Result<WorkerValue, Error> {
         let value = if let Value::External(handle) = &value {
             self.with_external(owner, handle, &mut BTreeSet::new(), |engine, ctx| {
                 engine.copy_external_data(ctx, handle)
@@ -694,7 +778,7 @@ impl Transaction<'_> {
         } else {
             value
         };
-        let data = self.export_worker(&value, 0, None)?;
+        let data = self.export_worker(&value, 0, target)?;
         if data.estimated_bytes() > BYTE_LIMIT {
             return Err(Error::new("copied QML value exceeds 32 MiB"));
         }
@@ -702,10 +786,10 @@ impl Transaction<'_> {
     }
 
     fn export_worker(
-        &mut self,
+        &self,
         input: &Value,
         depth: usize,
-        mut grants: Option<&mut BTreeMap<u64, ObjectId>>,
+        target: &mut CopyTarget,
     ) -> Result<WorkerValue, Error> {
         self.budget()?;
         if depth >= 64 {
@@ -724,34 +808,42 @@ impl Transaction<'_> {
             Value::List(values) => WorkerValue::Array(
                 values
                     .iter()
-                    .map(|v| self.export_worker(v, depth + 1, grants.as_deref_mut()))
+                    .map(|v| self.export_worker(v, depth + 1, target))
                     .collect::<Result<_, _>>()?,
             ),
             Value::Object(id) if self.model.models.contains_key(id) => {
-                let (token, revision, rows) = self.model.worker_model_snapshot(*id)?;
-                let rows = rows
-                    .into_iter()
-                    .map(|row| {
-                        row.into_iter()
-                            .map(|(k, v)| {
-                                Ok((k, self.export_worker(&v, depth + 1, grants.as_deref_mut())?))
-                            })
-                            .collect::<Result<_, Error>>()
-                    })
-                    .collect::<Result<_, _>>()?;
-                if let Some(grants) = grants {
-                    grants.insert(token, *id);
-                    WorkerValue::Model {
-                        id: token,
-                        revision,
-                        rows,
+                let model = &self.model.models[id];
+                let rows = model.copy_rows(|v| self.export_worker(v, depth + 1, target))?;
+                match target {
+                    CopyTarget::Worker(grants) => {
+                        let token = model.worker_token();
+                        grants.insert(token, *id);
+                        WorkerValue::Model {
+                            id: token,
+                            revision: self.model.worker_model_revision(*id)?,
+                            rows,
+                        }
                     }
-                } else {
-                    WorkerValue::Array(rows.into_iter().map(WorkerValue::Object).collect())
+                    page => {
+                        if let CopyTarget::Watch(deps) = page {
+                            deps.models
+                                .insert(*id, self.model.worker_model_revision(*id)?);
+                        }
+                        WorkerValue::Array(rows.into_iter().map(WorkerValue::Object).collect())
+                    }
                 }
             }
             Value::Record(r) => {
-                let fields = self.model.record_entries(r)?.clone();
+                let fields = self.model.record_entries(r)?;
+                if let CopyTarget::Watch(deps) = target {
+                    deps.records.insert(
+                        r.index(),
+                        self.model
+                            .records
+                            .revision_of(r.index())
+                            .expect("validated record"),
+                    );
+                }
                 if r.is_array() {
                     WorkerValue::Array(
                         (0..self.model.array_length(r)?)
@@ -759,7 +851,7 @@ impl Transaction<'_> {
                                 self.export_worker(
                                     fields.get(&i.to_string()).unwrap_or(&Value::Undefined),
                                     depth + 1,
-                                    grants.as_deref_mut(),
+                                    target,
                                 )
                             })
                             .collect::<Result<_, _>>()?,
@@ -769,10 +861,7 @@ impl Transaction<'_> {
                         fields
                             .iter()
                             .map(|(k, v)| {
-                                Ok((
-                                    k.clone(),
-                                    self.export_worker(v, depth + 1, grants.as_deref_mut())?,
-                                ))
+                                Ok((k.clone(), self.export_worker(v, depth + 1, target)?))
                             })
                             .collect::<Result<_, Error>>()?,
                     )
@@ -902,7 +991,8 @@ mod tests {
         let mut app = Instance::new(&doc, &TypeRegistry::new(), Default::default()).unwrap();
         let worker = app.id("actor").unwrap();
         let model = app.id("numbers").unwrap();
-        let (token, revision, _) = app.worker_model_snapshot(model).unwrap();
+        let token = app.models[&model].worker_token();
+        let revision = app.worker_model_revision(model).unwrap();
         let entry = app.workers.entries.get_mut(&worker).unwrap();
         entry.models.insert(token, model);
         let delivery = WorkerDelivery {

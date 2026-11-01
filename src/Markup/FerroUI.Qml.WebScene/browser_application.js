@@ -40,7 +40,8 @@ function decode(data) {
 }
 
 function bounded(text) {
-    if (text.length > limit || new TextEncoder().encode(text).length > limit) throw new RangeError("QML application frame exceeds 32 MiB");
+    // Each UTF-16 code unit needs at most three UTF-8 bytes.
+    if (text.length > limit || (text.length > limit / 3 && new TextEncoder().encode(text).length > limit)) throw new RangeError("QML application frame exceeds 32 MiB");
     return text;
 }
 
@@ -146,7 +147,9 @@ export function serveQmlApplication(create) {
         }
         const wake = () => { notified = true; schedule(0); };
         function changes() {
-            for (const {tokens,update} of JSON.parse(model.changes())) {
+            const packet = model.changes();
+            if (packet === "[]") return;
+            for (const {tokens,update} of JSON.parse(packet)) {
                 try { bounded(JSON.stringify(update)); port.postMessage({tokens,changes:update}); }
                 catch(e) { port.postMessage({tokens, changes:{error:String(e)}}); }
             }

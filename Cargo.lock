@@ -2421,6 +2421,7 @@ dependencies = [
  "getrandom 0.4.3",
  "libloading",
  "percent-encoding",
+ "serde",
  "serde_json",
  "tempfile",
  "unicode-ident",

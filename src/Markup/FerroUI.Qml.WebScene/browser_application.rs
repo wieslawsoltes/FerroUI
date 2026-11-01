@@ -1,7 +1,10 @@
 //! A compiled application's dedicated worker owns this instance and all host
 //! references. Only copied values and explicitly watched properties leave it.
 use super::*;
-use ferroui_qml::workers::WorkerValue;
+use ferroui_qml::workers::{CopyDependencies, WorkerValue};
+use serde::Serialize;
+use serde_json::value::{to_raw_value, RawValue};
+use std::borrow::Cow;
 use std::{collections::BTreeSet, sync::Arc};
 use wasm_bindgen::prelude::*;
 
@@ -23,14 +26,26 @@ pub fn browser_application_module() -> String {
 pub struct BrowserApplication {
     model: ferroui_qml::Instance,
     watches: BTreeMap<(ObjectId, String), Watch>,
-    revision: u64,
     last: Instant,
     timeout: Duration,
 }
 
 struct Watch {
     tokens: BTreeSet<u32>,
-    snapshot: Option<String>,
+    snapshot: Option<(Box<RawValue>, CopyDependencies)>,
+}
+
+#[derive(Serialize)]
+struct Packet<'a> {
+    tokens: &'a BTreeSet<u32>,
+    update: Update<'a>,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "lowercase")]
+enum Update<'a> {
+    Value(Cow<'a, RawValue>),
+    Error(String),
 }
 
 impl BrowserApplication {
@@ -41,7 +56,6 @@ impl BrowserApplication {
         model.set_worker_waker(Some(wake.clone()));
         model.set_component_waker(Some(wake));
         Ok(Self {
-            revision: model.models_revision(),
             model,
             watches: Default::default(),
             last: Instant::now(),
@@ -86,12 +100,9 @@ fn watched_data(
     model: &mut ferroui_qml::Instance,
     owner: ObjectId,
     member: &str,
-) -> Result<(WorkerValue, Option<String>), Error> {
+) -> Result<(WorkerValue, CopyDependencies), Error> {
     let value = model.get(owner, member)?;
-    let is_model = matches!(value, Value::Object(id) if model.is_list_model(id));
-    let data = model.copy_data(owner, value)?;
-    let snapshot = is_model.then(|| serde_json::to_string(&data).expect("model snapshot"));
-    Ok((data, snapshot))
+    model.copy_observed_data(owner, value)
 }
 
 fn error(e: Error) -> JsValue {
@@ -117,7 +128,9 @@ impl BrowserApplication {
             watch.tokens.insert(token);
             return Ok(());
         }
-        let (_, snapshot) = watched_data(&mut self.model, owner, member).map_err(error)?;
+        let (data, deps) = watched_data(&mut self.model, owner, member).map_err(error)?;
+        let snapshot =
+            (!deps.is_empty()).then(|| (to_raw_value(&data).expect("data packet"), deps));
         self.watches.insert(
             key,
             Watch {
@@ -140,30 +153,53 @@ impl BrowserApplication {
             .into_iter()
             .map(|c| (c.object, c.property))
             .collect::<BTreeSet<_>>();
-        let revision = self.model.models_revision();
+
         let mut output = Vec::new();
         for (key, watch) in &mut self.watches {
             let (owner, member) = key;
             let changed = changes.contains(key);
-            if !changed && !(revision != self.revision && watch.snapshot.is_some()) {
+            if !changed
+                && watch
+                    .snapshot
+                    .as_mut()
+                    .is_none_or(|(_, deps)| deps.is_current(&self.model))
+            {
                 continue;
             }
             let update = match watched_data(&mut self.model, *owner, member) {
-                Ok((data, snapshot)) => {
-                    if !changed && snapshot == watch.snapshot {
+                Ok((data, deps)) => {
+                    // Keep one compact representation for equality and the wire
+                    // packet. RawValue writes these exact bytes into the envelope.
+                    let data = to_raw_value(&data).expect("data packet");
+                    if !changed
+                        && watch
+                            .snapshot
+                            .as_ref()
+                            .is_some_and(|(old, _)| old.get() == data.get())
+                    {
+                        // Equal rows can now refer to a different child model.
+                        // Retain the newly traversed dependency set in that case.
+                        watch.snapshot = Some((data, deps));
                         continue;
                     }
-                    watch.snapshot = snapshot;
-                    json!({"value":data})
+                    if deps.is_empty() {
+                        watch.snapshot = None;
+                        Update::Value(Cow::Owned(data))
+                    } else {
+                        let (value, _) = watch.snapshot.insert((data, deps));
+                        Update::Value(Cow::Borrowed(&**value))
+                    }
                 }
                 Err(e) => {
                     watch.snapshot = None;
-                    json!({"error":e.message})
+                    Update::Error(e.message)
                 }
             };
-            output.push(json!({"tokens":watch.tokens,"update":update}));
+            output.push(Packet {
+                tokens: &watch.tokens,
+                update,
+            });
         }
-        self.revision = revision;
         serde_json::to_string(&output).expect("data packet")
     }
     pub fn pump(&mut self) -> Result<(), JsValue> {
