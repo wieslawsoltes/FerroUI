@@ -96,6 +96,22 @@ fn collections() {
             black_box(model.drain_changes());
         },
     );
+    // Reattaching the model captures its delegate role names before realization.
+    model
+        .set(view, "section.property", Value::String(String::new()))
+        .unwrap();
+    model.set(view, "height", Value::Number(0.)).unwrap();
+    model.set(view, "cacheBuffer", Value::Number(0.)).unwrap();
+    model.set(view, "currentIndex", Value::Number(-1.)).unwrap();
+    measure(
+        "attach and detach typed 8k-row model before layout",
+        40,
+        |_| {
+            model.set(view, "model", Value::Null).unwrap();
+            model.set(view, "model", Value::Object(rows)).unwrap();
+            black_box(model.drain_changes());
+        },
+    );
 }
 
 fn eager_repeater() {

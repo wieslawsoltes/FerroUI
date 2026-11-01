@@ -54,6 +54,9 @@ pub(crate) struct Model {
     order: Vec<u64>,
     rows: BTreeMap<u64, Roles>,
     roles: BTreeMap<String, Kind>,
+    // Null-only fields have a name but no type in the fixed-role schema.
+    // This conservative flag need not be reverted when a mutation rolls back.
+    saw_untyped_name: bool,
     next: u64,
     dynamic: Option<bool>,
 }
@@ -72,7 +75,7 @@ impl Model {
         })
     }
     fn prepare(
-        &self,
+        &mut self,
         fields: &Roles,
         dynamic: bool,
         lists: &BTreeSet<String>,
@@ -100,6 +103,8 @@ impl Model {
                     None => added.push((name.clone(), kind)),
                     _ => (),
                 }
+            } else if !self.roles.contains_key(name) {
+                self.saw_untyped_name = true;
             }
         }
         Ok(added)
@@ -124,12 +129,16 @@ impl Model {
         fields: Roles,
         lists: &BTreeSet<String>,
     ) -> Result<(), Error> {
-        self.roles.extend(self.prepare(&fields, false, lists)?);
+        let added = self.prepare(&fields, false, lists)?;
+        self.roles.extend(added);
         self.dynamic = Some(false);
         self.insert(self.order.len(), fields);
         Ok(())
     }
     pub(crate) fn view_roles(&self) -> Rc<[String]> {
+        if !self.saw_untyped_name {
+            return self.roles.keys().cloned().collect();
+        }
         self.roles
             .keys()
             .chain(self.rows.values().flat_map(|fields| fields.keys()))

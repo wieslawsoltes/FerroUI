@@ -313,3 +313,15 @@ fn local_section_edits_match_a_full_rebuild_at_every_boundary() {
         );
     }
 }
+
+#[test]
+fn first_delegate_captures_untyped_role_names_introduced_by_an_edit() {
+    let mut ui = view(
+        r#"import QtQuick
+        ListView { id: v; width:100; height:50; property ListModel rows: ListModel { ListElement { score:1 } }
+            delegate: Item { required property var untyped; height:10 }
+            function start(){ rows.setProperty(0,"untyped",null); model=rows; return itemAtIndex(0).untyped }
+        }"#,
+    );
+    assert_eq!(ui.call(ui.root(), "start", vec![]).unwrap(), Value::Null);
+}
