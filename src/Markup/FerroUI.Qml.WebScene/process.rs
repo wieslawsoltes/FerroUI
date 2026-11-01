@@ -16,6 +16,13 @@ pub(super) struct Worker {
 }
 impl Worker {
     pub fn spawn(executable: &Path, library: &Path) -> Result<Self, Error> {
+        Self::spawn_mode(executable, library, false)
+    }
+    pub fn spawn_mode(
+        executable: &Path,
+        library: &Path,
+        worker_script: bool,
+    ) -> Result<Self, Error> {
         let mut command = Command::new(executable);
         command
             .arg(library)
@@ -23,6 +30,9 @@ impl Worker {
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(Stdio::inherit());
+        if worker_script {
+            command.arg("--workerscript");
+        }
         #[cfg(windows)]
         if let Some(root) = std::env::var_os("SystemRoot") {
             command.env("SystemRoot", root);
@@ -88,6 +98,29 @@ impl Worker {
             .recv_timeout(deadline.saturating_duration_since(Instant::now()))
             .map_err(protocol_timeout)?
             .map_err(|e| Error::new(format!("WebScene worker write: {e}")))
+    }
+    pub fn read_cancellable(
+        &self,
+        deadline: Instant,
+        cancelled: &std::sync::atomic::AtomicBool,
+    ) -> Result<Json, Error> {
+        loop {
+            if cancelled.load(std::sync::atomic::Ordering::Acquire) {
+                return Err(Error::new("WorkerScript stopped"));
+            }
+            let remaining = deadline.saturating_duration_since(Instant::now());
+            match self
+                .output
+                .recv_timeout(remaining.min(Duration::from_millis(25)))
+            {
+                Ok(message) => {
+                    return message
+                        .map_err(|e| Error::new(format!("WorkerScript disconnected: {e}")))
+                }
+                Err(mpsc::RecvTimeoutError::Timeout) if Instant::now() < deadline => continue,
+                Err(e) => return Err(protocol_timeout(e)),
+            }
+        }
     }
     pub fn read(&self, deadline: Instant) -> Result<Json, Error> {
         let remaining = deadline.saturating_duration_since(Instant::now());

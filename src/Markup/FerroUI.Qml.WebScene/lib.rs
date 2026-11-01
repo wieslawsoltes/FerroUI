@@ -7,6 +7,7 @@ mod leases;
 mod modules;
 mod process;
 mod promise;
+mod script_actor;
 use ferroui_qml::{
     ir, Error, ExternalValue, ObjectId, ScriptContext, ScriptEngine, ScriptInstance, ScriptScope,
     Value,
@@ -205,6 +206,15 @@ impl ScriptEngine for WebSceneEngine {
         }
     }
 
+    fn start_worker(
+        &self,
+        resources: std::sync::Arc<BTreeMap<String, ir::ScriptResource>>,
+        origin: &str,
+        source: &str,
+        delivery: ferroui_qml::workers::WorkerDelivery,
+    ) -> Result<Box<dyn ferroui_qml::workers::WorkerEndpoint>, Error> {
+        script_actor::start(self, resources, origin, source, delivery)
+    }
     fn evaluate(
         &self,
         ctx: &mut ScriptContext<'_, '_>,
