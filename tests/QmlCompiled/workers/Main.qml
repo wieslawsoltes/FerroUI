@@ -28,5 +28,6 @@ QtObject {
     function abortSend() { actor.sendMessage({items: [90]}); throw new Error("failed transaction") }
     function restart() { actor.source = ""; actor.source = "calculate.mjs" }
     function spin() { actor.sendMessage({loop: true}) }
+    function selectClassic(url: string) { classic.source = url }
     function control() { classic.sendMessage(5) }
 }

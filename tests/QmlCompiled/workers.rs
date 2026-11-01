@@ -46,11 +46,22 @@ fn exercise(source: &impl ComponentSource) {
         app.get(root, "answer").unwrap(),
         Value::String("1:2/3".into())
     );
+    app.call(
+        root,
+        "selectClassic",
+        vec![Value::String("loose.js".into())],
+    )
+    .unwrap();
+    app.call(root, "control", vec![]).unwrap();
+    until(&mut app, |app| {
+        app.get(root, "localValue").unwrap() == Value::Number(45.)
+    });
 }
 #[test]
 fn source_and_compiled_workers_copy_data_preserve_fifo_and_replace_their_realm() {
     let doc = Compiler::new()
         .with_javascript()
+        .worker_script_entry("loose.js")
         .load(Path::new(env!("CARGO_MANIFEST_DIR")).join("workers/Main.qml"))
         .unwrap();
     exercise(&doc.document);

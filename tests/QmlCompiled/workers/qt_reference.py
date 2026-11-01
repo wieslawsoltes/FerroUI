@@ -24,6 +24,12 @@ def main():
         assert monotonic() < deadline, "model sync timed out"
         loop.processEvents()
         sleep(0.001)
+    root.selectClassic("loose.js")
+    root.control()
+    while root.property("localValue") != 45:
+        assert monotonic() < deadline, "source replacement timed out"
+        loop.processEvents()
+        sleep(0.001)
     print("Qt 6.12.0 WorkerScript module, copy and FIFO checks passed")
 
 if __name__ == "__main__":

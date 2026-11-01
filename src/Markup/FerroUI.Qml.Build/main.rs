@@ -3,7 +3,7 @@ use std::ffi::OsString;
 use std::path::PathBuf;
 use std::process::ExitCode;
 
-const USAGE: &str = "Usage: ferroui-qmlc [-I MODULE_ROOT]... [--check] [--javascript] [--qml-entry FILE.qml]... [--js-entry FILE]... INPUT.qml\nEmits a Rust module on stdout; --check only validates source and component linkage.";
+const USAGE: &str = "Usage: ferroui-qmlc [-I MODULE_ROOT]... [--check] [--javascript] [--qml-entry FILE.qml]... [--js-entry FILE]... [--worker-entry FILE]... INPUT.qml\nEmits a Rust module on stdout; --check only validates source and component linkage.";
 
 fn run() -> Result<(), Box<dyn std::error::Error>> {
     let mut args = std::env::args_os().skip(1);
@@ -27,7 +27,19 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             #[cfg(not(feature = "javascript"))]
             return Err("--javascript requires ferroui-qml-build's javascript feature".into());
         } else if arg == "--qml-entry" {
-            compiler=compiler.qml_entry(PathBuf::from(args.next().ok_or("--qml-entry requires a path")?));
+            compiler = compiler.qml_entry(PathBuf::from(
+                args.next().ok_or("--qml-entry requires a path")?,
+            ));
+        } else if arg == "--worker-entry" {
+            #[cfg(feature = "javascript")]
+            {
+                compiler = compiler.worker_script_entry(PathBuf::from(
+                    args.next()
+                        .ok_or("--worker-entry requires a relative WorkerScript path")?,
+                ));
+            }
+            #[cfg(not(feature = "javascript"))]
+            return Err("--worker-entry requires the javascript feature".into());
         } else if arg == "--js-entry" {
             #[cfg(feature = "javascript")]
             {

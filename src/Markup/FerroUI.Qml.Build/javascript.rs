@@ -25,7 +25,11 @@ pub(super) struct Resources {
 }
 
 impl Resources {
-    pub(super) fn new(input: &Path, entries: &BTreeSet<PathBuf>) -> Result<Self, String> {
+    pub(super) fn new(
+        input: &Path,
+        entries: &BTreeSet<PathBuf>,
+        workers: &BTreeSet<PathBuf>,
+    ) -> Result<Self, String> {
         let input = input
             .canonicalize()
             .map_err(|err| format!("{}: {err}", input.display()))?;
@@ -39,7 +43,11 @@ impl Resources {
             embedded: BTreeMap::new(),
             preload: BTreeSet::new(),
         };
-        for entry in entries {
+        for (entry, kind) in entries
+            .iter()
+            .map(|p| (p, LoadKind::Module))
+            .chain(workers.iter().map(|p| (p, LoadKind::Classic)))
+        {
             if entry.is_absolute()
                 || entry.has_root()
                 || matches!(
@@ -63,7 +71,11 @@ impl Resources {
                     entry.display()
                 ));
             }
-            resources.load(&file, 0, LoadKind::Module)?;
+            if kind == LoadKind::Classic {
+                resources.load_worker(&file)?;
+            } else {
+                resources.load(&file, 0, kind)?;
+            }
         }
         Ok(resources)
     }
