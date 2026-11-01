@@ -13,6 +13,7 @@ mod process;
 #[cfg(target_arch = "wasm32")]
 #[path = "browser_process.rs"]
 mod process;
+mod program_cache;
 mod promise;
 #[cfg(not(target_arch = "wasm32"))]
 mod script_actor;
@@ -29,7 +30,7 @@ use ferroui_qml::{
 use serde_json::{json, Value as Json};
 use std::{
     cell::{Cell, RefCell},
-    collections::BTreeMap,
+    collections::{BTreeMap, BTreeSet},
     rc::{Rc, Weak},
     time::Duration,
 };
@@ -50,6 +51,8 @@ struct Tables {
     scopes: BTreeMap<ScopeKey, u64>,
     scope_values: BTreeMap<u64, (ScriptInstance, ScriptScope)>,
     scope_names: BTreeMap<u64, Rc<Vec<String>>>,
+    installed_scopes: BTreeSet<u64>,
+    programs: program_cache::Programs,
     retired_scopes: Vec<u64>,
     retired_hosts: Vec<u64>,
     objects: BTreeMap<ObjectId, u64>,
@@ -130,6 +133,7 @@ struct Realm {
     pool: Rc<RefCell<Vec<process::Worker>>>,
     deadline: Cell<Option<Instant>>,
     tables: RefCell<Tables>,
+    reuse_descriptors: Cell<bool>,
     generation: Cell<u64>,
     turn: Cell<u64>,
     delivered: Cell<u64>,
@@ -232,6 +236,7 @@ impl WebSceneEngine {
                     pool: self.pool.clone(),
                     deadline: Cell::new(None),
                     tables: Default::default(),
+                    reuse_descriptors: Cell::new(false),
                     generation: Cell::new(1),
                     turn: Cell::new(0),
                     delivered: Cell::new(0),
@@ -396,6 +401,7 @@ impl ScriptEngine for WebSceneEngine {
             scopes,
             scope_values,
             scope_names,
+            installed_scopes,
             retired_scopes,
             ..
         } = &mut *tables;
@@ -403,6 +409,7 @@ impl ScriptEngine for WebSceneEngine {
             if dead.contains(&scope.owner()) || dead.contains(&scope.root()) {
                 scope_values.remove(id);
                 scope_names.remove(id);
+                installed_scopes.remove(id);
                 retired_scopes.push(*id);
                 false
             } else {
@@ -426,6 +433,9 @@ impl Realm {
         self.generation.set(self.generation.get() + 1);
         let mut tables = self.tables.borrow_mut();
         tables.prepared = false;
+        tables.installed_scopes.clear();
+        tables.programs = Default::default();
+        self.reuse_descriptors.set(false);
         tables.dynamic = leases::HostLeases::default();
         drop(tables);
         self.handles.borrow_mut().clear();
@@ -470,6 +480,7 @@ impl Realm {
                     .unwrap_or("invalid WebScene worker handshake"),
             )));
         }
+        self.reuse_descriptors.set(hello["evalCache"] == 1);
         Ok(())
     }
 
@@ -613,8 +624,16 @@ impl Realm {
             let mut tables = self.tables.borrow_mut();
             let root = tables.object_id(instance, ctx.root());
             let (scope, names) = tables.scope(ctx, ctx.capture_scope(), script)?;
-            let (component_scope, component_names) =
-                tables.scope(ctx, ctx.capture_component_scope(), script)?;
+            let (component_scope, component_names) = if ctx.owner() == ctx.root() {
+                (scope, names.clone())
+            } else {
+                tables.scope(ctx, ctx.capture_component_scope(), script)?
+            };
+            let cached = |id| self.reuse_descriptors.get() && tables.installed_scopes.contains(&id);
+            let component_names = (!cached(component_scope)
+                && (component_scope != scope || !self.reuse_descriptors.get()))
+            .then_some(component_names);
+            let names = (!cached(scope)).then_some(names);
             // Every component in this instance uses the same linked resource catalog.
             // Only its aliases and lexical owner vary. Nested evaluations run after
             // the worker has installed the outer call's catalog.
@@ -648,25 +667,69 @@ impl Realm {
             "op": "eval",
             "scope": scope,
             "componentScope": component_scope,
-            "componentNames": &*component_names,
             "graph": {"names": script.imports, "context": [&script.origin, &root.to_string()]},
-            "source": script.code(),
             "hook": script.import_hook,
             "form": form,
             "owner": self.encode(instance, &Value::Object(ctx.owner()))?,
-            "names": &*names,
             "args": args,
             "parameters": ctx.parameter_names(),
             "origin": script.origin,
             "mode": host::mode(ctx.expected_type()),
         });
+        // Nested evaluations can run while a module catalog is still being
+        // installed. Only top-level calls may replace a shared program slot.
+        let program =
+            if self.reuse_descriptors.get() && self.deadline.get().is_none() && catalog.is_none() {
+                self.tables
+                    .borrow_mut()
+                    .programs
+                    .register(program_cache::Signature {
+                        source: script.code(),
+                        form,
+                        origin: &script.origin,
+                        hook: script.import_hook.as_deref(),
+                        parameters: ctx.parameter_names(),
+                    })
+            } else {
+                None
+            };
+        if let Some((slot, _)) = program {
+            command["program"] = json!(slot);
+        }
+        if !matches!(program, Some((_, true))) {
+            command["source"] = json!(script.code());
+        }
+        if let Some(names) = &names {
+            command["names"] = json!(**names);
+        }
+        if let Some(names) = &component_names {
+            command["componentNames"] = json!(**names);
+        }
         if let Some(catalog) = catalog.as_ref().filter(|modules| !modules.files.is_empty()) {
             command["prepare"] = json!({"resources": catalog.manifest, "names": script.imports});
             command["files"] = json!(catalog.files);
         }
         let result = self.invoke(ctx, command);
-        if result.is_ok() && catalog.is_some() {
-            self.tables.borrow_mut().prepared = true;
+        if result.is_ok() {
+            let mut tables = self.tables.borrow_mut();
+            if catalog.is_some() {
+                tables.prepared = true;
+            }
+            if self.reuse_descriptors.get() {
+                // Reentrant user code may already have disposed either object.
+                for (id, sent) in [
+                    (scope, names.is_some()),
+                    (component_scope, component_names.is_some()),
+                ] {
+                    if sent && tables.scope_values.contains_key(&id) {
+                        tables.installed_scopes.insert(id);
+                    }
+                }
+            }
+        } else if let Some((slot, _)) = program {
+            // Preparation or compilation may have failed before the receiver
+            // installed this descriptor. Send it in full on the next call.
+            self.tables.borrow_mut().programs.forget(slot);
         }
         result
     }

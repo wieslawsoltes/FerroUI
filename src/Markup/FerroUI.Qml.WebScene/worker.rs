@@ -169,7 +169,8 @@ fn run(library: &Path, isolated: bool) -> Result<(), String> {
     if engine.eval(&bootstrap)? != "ready" {
         return Err("WebScene bootstrap failed".into());
     }
-    framing::send(&mut io::stdout(), &json!({"ready":true})).map_err(|e| e.to_string())?;
+    framing::send(&mut io::stdout(), &json!({"ready":true,"evalCache":1}))
+        .map_err(|e| e.to_string())?;
     loop {
         let command = match framing::receive(&mut io::stdin().lock()) {
             Ok(v) => v,

@@ -253,15 +253,17 @@
         });
         return qt;
     }
-    function environment(c) {
-        if(scopes.has(c.scope)) return scopes.get(c.scope);
-        const names=new Set(c.names), graph=c.graph;
-        const scopedQt=qtAt(c.scope,c.origin);
+    function environment(id, componentId, members, graph, origin) {
+        if (scopes.has(id)) return scopes.get(id);
+        if (!members) throw new Error("Missing QML scope descriptor");
+        const names = new Set(members);
+        const scopedQt=qtAt(id,origin);
+        const component = scopes.get(componentId);
         const groups=new Map();
         for (const name of names) if(name.includes(".")) {
             const [prefix,leaf]=name.split(".");
             if(!groups.has(prefix)) groups.set(prefix,Object.create(null));
-            Object.defineProperty(groups.get(prefix),leaf,{enumerable:true,get:()=>decode(rpc(["resolve",c.scope,name]))});
+            Object.defineProperty(groups.get(prefix),leaf,{enumerable:true,get:()=>decode(rpc(["resolve",id,name]))});
         }
         const target=Object.create(null);
         const scope=new Proxy(target,{
@@ -270,23 +272,21 @@
                 if(typeof k!=="string") return undefined;
                 if(k==="Qt"&&!names.has(k))return scopedQt;
                 if(modules.has(graph,k)) {
-                    const root=c.componentScope===c.scope ? scope : environment({
-                        scope:c.componentScope,componentScope:c.componentScope,names:c.componentNames,graph
-                    });
-                    return modules.get(graph,k,root,(url,shared)=>qtAt(shared ? 0 : c.componentScope,url));
+                    const root = id === componentId ? scope : component;
+                    return modules.get(graph,k,root,(url,shared)=>qtAt(shared ? 0 : componentId,url));
                 }
                 if(groups.has(k)&&!names.has(k)) return groups.get(k);
                 if(!names.has(k)) return undefined;
-                return decode(rpc(["resolve",c.scope,k]));
+                return decode(rpc(["resolve",id,k]));
             },
             set(_,k,v){
                 if(typeof k!=="string"||!names.has(k)) throw new ReferenceError("Unknown QML property: "+String(k));
-                if (bindingCallbacks.has(v)) rpc(["bindScope",c.scope,k,atom(bindingCallbacks.get(v))]);
-                else rpc(["assign",c.scope,k,encode(v,rpc(["scopeMode",c.scope,k]))]);
+                if (bindingCallbacks.has(v)) rpc(["bindScope",id,k,atom(bindingCallbacks.get(v))]);
+                else rpc(["assign",id,k,encode(v,rpc(["scopeMode",id,k]))]);
                 return true;
             }
         });
-        scopes.set(c.scope,scope); return scope;
+        scopes.set(id,scope); return scope;
     }
     function release(command) {
         for (const id of command.dropScopes || []) scopes.delete(id);
@@ -333,11 +333,27 @@
         return compiled;
     }
 
+    const programs = [];
     function evaluate(script) {
         script.graph.resources = resources;
         const parameters = script.parameters || Object.keys(script.args);
-        const factory = functionFactory(script, parameters);
-        let invoke = factory(environment(script));
+        const slot = script.program;
+        if (slot !== undefined && (!Number.isInteger(slot) || slot < 0 || slot >= 128))
+            throw new Error("Invalid QML program slot");
+        let factory;
+        if (script.source === undefined) {
+            factory = programs[slot];
+            if (!factory) throw new Error("Missing QML program descriptor");
+        } else {
+            factory = functionFactory(script, parameters);
+            if (slot !== undefined) programs[slot] = factory;
+        }
+        // A child may first touch a classic module in a later call. Install its
+        // component environment before acknowledging either scope to the host.
+        if (script.componentScope !== script.scope && !scopes.has(script.componentScope)) {
+            environment(script.componentScope, script.componentScope, script.componentNames, script.graph, script.origin);
+        }
+        let invoke = factory(environment(script.scope, script.componentScope, script.names, script.graph, script.origin));
         const helpers = [];
         if (script.hook) helpers.push(modules.context(script.graph, script.origin));
         if (script.form === "block") helpers.push(intrinsicEval);

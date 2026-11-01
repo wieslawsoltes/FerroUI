@@ -20,6 +20,16 @@
     }
     return {
         write(text, until) {
+            // At most three UTF-8 bytes per UTF-16 unit. When the whole
+            // string fits, encode directly into the exclusively owned slot.
+            if (text.length <= Math.floor(Math.min(limit, data.length) / 3)) {
+                waitFor(true, until);
+                const {written} = encoder.encodeInto(text, data);
+                Atomics.store(words, 1, written);
+                publish(2);
+                return;
+            }
+            if (text.length > limit) throw new Error("QML browser frame exceeds 32 MiB");
             const bytes = encoder.encode(text);
             if (bytes.length > limit) throw new Error("QML browser frame exceeds 32 MiB");
             let offset = 0;
@@ -39,9 +49,12 @@
                 const state = waitFor(false, until), length = Atomics.load(words, 1);
                 if ((state !== 1 && state !== 2) || length < 0 || length > data.length || (total += length) > limit)
                     throw new Error("Invalid QML browser frame");
+                if (state === 2 && !chunks.length) {
+                    try { return decoder.decode(data.subarray(0, length)); }
+                    finally { publish(0); }
+                }
                 const chunk = data.slice(0, length);
                 publish(0);
-                if (state === 2 && !chunks.length) return decoder.decode(chunk);
                 chunks.push(chunk);
                 if (state === 2) break;
             }

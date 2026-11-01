@@ -73,7 +73,7 @@
             try {
                 Object.defineProperty(globalThis, "__webSceneFetchText", {value:readText, configurable:true});
                 runtime = bootstrap(key);
-                output.write('{"ready":true}', Infinity);
+                output.write('{"ready":true,"evalCache":1}', Infinity);
                 handshake({ready:true});
             } catch (error) {
                 handshake({failure:String(error?.stack || error)});
