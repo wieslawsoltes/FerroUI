@@ -1,6 +1,6 @@
 use crate::media::{FillRule, Geometry, GeometryImpl, Points};
 use crate::platform::{self, IGeometryImpl};
-use crate::reactive::IDisposable;
+use crate::reactive::Subscription;
 use crate::{
     ferro_class, ferro_property, instantiate, DirectProperty, FerroObjectImpl, FerroProperty,
     Point, Ref, StyledProperty,
@@ -14,7 +14,7 @@ use std::sync::Arc;
 pub struct PolylineGeometry {
     base: Geometry,
     points: RefCell<Option<Points>>,
-    points_observer: RefCell<Option<Rc<dyn IDisposable>>>,
+    points_observer: RefCell<Option<Subscription>>,
     fill_rule: FillRule,
 }
 
@@ -146,7 +146,7 @@ impl PolylineGeometry {
                     this.invalidate_geometry();
                 }
             });
-            *self.points_observer.borrow_mut() = Some(observer);
+            *self.points_observer.borrow_mut() = Some(Subscription::new(observer));
         }
     }
 }

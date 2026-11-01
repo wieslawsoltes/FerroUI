@@ -1,7 +1,7 @@
 use crate::media::media_collection::track_item_property_changed;
 use crate::media::immutable::ImmutableGradientStop;
 use crate::media::{Brush, BrushImpl, BrushImplExt, GradientSpreadMethod, GradientStops, IImmutableBrush};
-use crate::reactive::IDisposable;
+use crate::reactive::Subscription;
 use crate::rendering::composition::transport::BatchStreamWriter;
 use crate::rendering::composition::Compositor;
 use crate::{
@@ -15,8 +15,8 @@ use std::rc::Rc;
 #[repr(C)]
 pub struct GradientBrush {
     base: Brush,
-    gradient_stops_collection_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    gradient_stops_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    gradient_stops_collection_subscription: RefCell<Option<Subscription>>,
+    gradient_stops_subscription: RefCell<Option<Subscription>>,
 }
 
 ferro_class! {
@@ -56,7 +56,7 @@ impl FerroObjectImpl for GradientBrush {
                         }
                     }
                 });
-                *this.gradient_stops_collection_subscription.borrow_mut() = Some(collection_subscription);
+                *this.gradient_stops_collection_subscription.borrow_mut() = Some(Subscription::new(collection_subscription));
 
                 let subscription = track_item_property_changed(&new_value, move || {
                     if let Some(this) = weak.upgrade() {
@@ -64,7 +64,7 @@ impl FerroObjectImpl for GradientBrush {
                         this.raise_invalidated();
                     }
                 });
-                *this.gradient_stops_subscription.borrow_mut() = Some(subscription);
+                *this.gradient_stops_subscription.borrow_mut() = Some(Subscription::new(subscription));
             }
         }
 

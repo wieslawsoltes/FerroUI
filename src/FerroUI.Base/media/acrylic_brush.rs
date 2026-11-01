@@ -7,7 +7,7 @@ use crate::media::{
     BrushImpl, Color, MaterialPolicy, XamlCompositionBrushBase, XamlCompositionBrushBaseImpl,
 };
 use crate::numerics::Vector2;
-use crate::reactive::IDisposable;
+use crate::reactive::{IDisposable, Subscription};
 use crate::rendering::composition::effects::{
     BlendEffect, BlendEffectMode, BorderEffect, CanvasComposite, CanvasEdgeBehavior, ColorSourceEffect,
     CompositeEffect, CompositionEffectFactory, CompositionEffectSourceParameter, CrossFadeEffect, EffectBorderMode,
@@ -347,8 +347,8 @@ struct AcrylicState {
     /// The cross-fade between the material and the fallback colour that is
     /// running, and the subscription to its end.
     waiting_for_fallback: Option<(Rc<CompositionScopedBatch>, Rc<dyn IDisposable>)>,
-    policy_subscription: Option<Rc<dyn IDisposable>>,
-    activation_subscription: Option<Rc<dyn IDisposable>>,
+    policy_subscription: Option<Subscription>,
+    activation_subscription: Option<Subscription>,
 }
 
 /// A brush that paints the acrylic material of WinUI (WinUI
@@ -413,7 +413,7 @@ impl XamlCompositionBrushBaseImpl for AcrylicBrush {
                 }
             }
         });
-        this.state.borrow_mut().policy_subscription = Some(subscription);
+        this.state.borrow_mut().policy_subscription = Some(Subscription::new(subscription));
         let weak = this.to_ref().downgrade();
         let activation = MaterialPolicy::window_activation_changed(move |_| {
             if let Some(this) = weak.upgrade() {
@@ -422,7 +422,7 @@ impl XamlCompositionBrushBaseImpl for AcrylicBrush {
                 }
             }
         });
-        this.state.borrow_mut().activation_subscription = Some(activation);
+        this.state.borrow_mut().activation_subscription = Some(Subscription::new(activation));
         this.update_acrylic_brush();
     }
 

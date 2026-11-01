@@ -1,6 +1,6 @@
 use crate::media::ref_adapter::RefAdapter;
 use crate::media::{Drawing, DrawingContext, IAffectsRender, IImage};
-use crate::reactive::{Disposable, IDisposable};
+use crate::reactive::{Disposable, IDisposable, Subscription};
 use crate::utilities::HandlerList;
 use crate::{
     ferro_class, ferro_property, instantiate, FerroObject, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
@@ -15,7 +15,7 @@ use std::rc::Rc;
 pub struct DrawingImage {
     base: FerroObject,
     invalidated: HandlerList<dyn Fn()>,
-    drawing_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    drawing_subscription: RefCell<Option<Subscription>>,
 }
 
 ferro_class!(DrawingImage: FerroObject);
@@ -38,7 +38,7 @@ impl FerroObjectImpl for DrawingImage {
                         this.raise_invalidated();
                     }
                 });
-                *this.drawing_subscription.borrow_mut() = Some(subscription);
+                *this.drawing_subscription.borrow_mut() = Some(Subscription::new(subscription));
             }
 
             this.raise_invalidated();

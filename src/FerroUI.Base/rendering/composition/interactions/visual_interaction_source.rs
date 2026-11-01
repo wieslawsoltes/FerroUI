@@ -8,7 +8,7 @@ use crate::input::{
 };
 use crate::interactivity::Interactive;
 use crate::numerics::Vector3;
-use crate::reactive::IDisposable;
+use crate::reactive::{IDisposable, Subscription};
 use crate::rendering::composition::{CompositionDrawListVisual, CompositionVisual, Compositor};
 use crate::{Point, Ref, WeakRef};
 use std::cell::{Cell, RefCell};
@@ -181,7 +181,7 @@ pub struct VisualInteractionSource {
     scale_velocity: Cell<f32>,
     trackers: RefCell<Vec<Weak<InteractionTracker>>>,
     manipulation: RefCell<Option<Manipulation>>,
-    wheel_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    wheel_subscription: RefCell<Option<Subscription>>,
 }
 
 impl VisualInteractionSource {
@@ -659,7 +659,7 @@ impl VisualInteractionSource {
             Interactive::DEFAULT_ROUTES,
             false,
         );
-        *self.wheel_subscription.borrow_mut() = Some(subscription);
+        *self.wheel_subscription.borrow_mut() = Some(Subscription::new(subscription));
     }
 
     fn on_wheel(&self, e: &PointerWheelEventArgs) -> bool {

@@ -1,5 +1,5 @@
 use crate::animation::{ClockBase, IClock, IGlobalClock, PlayState, TimeSpan};
-use crate::reactive::{IDisposable, IObservable, IObserver, ObservableError};
+use crate::reactive::{IDisposable, IObservable, IObserver, ObservableError, Subscription};
 use crate::{FerroLocator, LocatorExtensions};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -13,7 +13,7 @@ use std::rc::Rc;
 /// its play state was set to [`PlayState::Stop`].
 pub struct Clock {
     base: ClockBase,
-    parent_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    parent_subscription: RefCell<Option<Subscription>>,
 }
 
 struct ParentObserver(Rc<Clock>);
@@ -46,7 +46,7 @@ impl Clock {
     pub fn with_parent(parent: &Rc<dyn IClock>) -> Rc<Clock> {
         let clock = Rc::new(Clock { base: ClockBase::new(), parent_subscription: RefCell::new(None) });
         let subscription = parent.subscribe(Rc::new(ParentObserver(clock.clone())));
-        *clock.parent_subscription.borrow_mut() = Some(subscription);
+        *clock.parent_subscription.borrow_mut() = Some(Subscription::new(subscription));
         clock
     }
 

@@ -1,7 +1,7 @@
 use crate::media::media_collection::track_item_property_changed;
 use crate::media::PathSegments;
 use crate::platform::IGeometryContext;
-use crate::reactive::{Disposable, IDisposable};
+use crate::reactive::{Disposable, IDisposable, Subscription};
 use crate::utilities::HandlerList;
 use crate::{
     ferro_class, ferro_property, instantiate, DirectProperty, FerroObject, FerroObjectImpl, FerroObjectImplExt,
@@ -18,8 +18,8 @@ pub struct PathFigure {
     base: FerroObject,
     segments_invalidated: HandlerList<dyn Fn()>,
     segments: RefCell<Option<PathSegments>>,
-    segments_disposable: RefCell<Option<Rc<dyn IDisposable>>>,
-    segments_properties_disposable: RefCell<Option<Rc<dyn IDisposable>>>,
+    segments_disposable: RefCell<Option<Subscription>>,
+    segments_properties_disposable: RefCell<Option<Subscription>>,
 }
 
 ferro_class!(PathFigure: FerroObject);
@@ -107,10 +107,10 @@ impl PathFigure {
 
             let (added, removed, reset) = (invalidate.clone(), invalidate.clone(), invalidate.clone());
             let disposable = segments.for_each_item(move |_, _| added(), move |_, _| removed(), reset);
-            *self.segments_disposable.borrow_mut() = Some(disposable);
+            *self.segments_disposable.borrow_mut() = Some(Subscription::new(disposable));
 
             let disposable = track_item_property_changed(&segments, invalidate);
-            *self.segments_properties_disposable.borrow_mut() = Some(disposable);
+            *self.segments_properties_disposable.borrow_mut() = Some(Subscription::new(disposable));
         }
     }
 

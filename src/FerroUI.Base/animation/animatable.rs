@@ -1,7 +1,7 @@
 use crate::animation::{Clock, IClock, ITransition, TransitionInstance, Transitions};
 use crate::collections::{CollectionChangedHandler, NotifyCollectionChangedAction, NotifyCollectionChangedEventArgs};
 use crate::data::BindingPriority;
-use crate::reactive::IDisposable;
+use crate::reactive::Subscription;
 use crate::{
     ferro_class, ferro_property, instantiate, BoxedValue, FerroObject, FerroObjectExtensions, FerroObjectImpl,
     FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref, StyledProperty, StyledPropertyOptions,
@@ -30,7 +30,7 @@ pub struct Animatable {
 }
 
 struct TransitionState {
-    instance: RefCell<Option<Rc<dyn IDisposable>>>,
+    instance: RefCell<Option<Subscription>>,
     /// The progress behind `instance`, when the transition reported one.
     progress: RefCell<Option<Rc<TransitionInstance>>>,
     base_value: RefCell<BoxedValue>,
@@ -157,7 +157,7 @@ crate::ferro_overrides! { impl FerroObjectImpl for Animatable {
                         let instance = transition.apply(this, clock, &old_value, &new_value);
                         *state.interruption_state.borrow_mut() = context.finish();
                         *state.progress.borrow_mut() = this.applying_transition_instance.borrow_mut().take();
-                        *state.instance.borrow_mut() = Some(instance);
+                        *state.instance.borrow_mut() = Some(Subscription::new(instance));
                         return;
                     }
                 }

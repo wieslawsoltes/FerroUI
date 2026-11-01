@@ -1,7 +1,7 @@
 use super::{AccessorListener, IPropertyAccessor, IPropertyAccessorPlugin, PropertyAccessorBase, PropertyError};
 use crate::data::core::{ValueType, ValueTypes, WeakValue};
 use crate::data::{BindingError, BindingErrorType, BindingNotification, BindingPriority};
-use crate::reactive::IDisposable;
+use crate::reactive::{IDisposable, Subscription};
 use crate::{AnyValue, BoxedValue, FerroObject, FerroProperty, FerroPropertyRegistry, Ref, WeakRef};
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
@@ -82,7 +82,7 @@ pub struct FerroPropertyAccessor {
     base: PropertyAccessorBase,
     reference: Option<WeakRef<FerroObject>>,
     property: &'static FerroProperty,
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
 }
 
 impl FerroPropertyAccessor {
@@ -150,7 +150,7 @@ impl IPropertyAccessor for FerroPropertyAccessor {
                     }
                 }
             });
-            *self.subscription.borrow_mut() = Some(subscription);
+            *self.subscription.borrow_mut() = Some(Subscription::new(subscription));
         }
         self.send_current_value();
     }

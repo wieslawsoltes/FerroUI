@@ -1,6 +1,6 @@
 use crate::media::ref_adapter::RefAdapter;
 use crate::media::{BrushImpl, BrushImplExt, Drawing, DrawingContext, ISceneBrushContent, ServerBrushFactory, TileBrush};
-use crate::reactive::IDisposable;
+use crate::reactive::Subscription;
 use crate::rendering::composition::drawing::{
     CompositionRenderData, CompositionRenderDataSceneBrushContentProperties, RenderDataDrawingContext,
 };
@@ -30,7 +30,7 @@ impl RenderDataItem {
 #[repr(C)]
 pub struct DrawingBrush {
     base: TileBrush,
-    drawing_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    drawing_subscription: RefCell<Option<Subscription>>,
     /// The recorded content per compositor the brush is used with; `None`
     /// for a compositor the content of which is empty.
     render_data_dictionary: RefCell<Vec<(Weak<Compositor>, Option<Rc<RenderDataItem>>)>>,
@@ -56,7 +56,7 @@ impl FerroObjectImpl for DrawingBrush {
                         this.invalidate_content();
                     }
                 });
-                *this.drawing_subscription.borrow_mut() = Some(subscription);
+                *this.drawing_subscription.borrow_mut() = Some(Subscription::new(subscription));
             }
             this.invalidate_content();
         }
