@@ -195,18 +195,24 @@ let meter = TypeDefinition::default()
     });
 ```
 
+### Dynamic trees and background scripts
+
+A `Component` retains its declaration scope. Creating an object assigns a new identity to every node, applies the initial property map, resolves bindings and emits completion within one transaction. The native view validates newly created peers before mounting them. Destroying the instance subtree releases its controls, input subscriptions, worker registrations and deferred calls. Rust can drive the same lifecycle through `QmlView::create_object` and `destroy_object`. [Components, initialization and destruction](qml-components.md)
+
+`QtQml.WorkerScript` runs classic scripts and ES modules in independent WebScene processes. The worker sends copied values back through an owner-thread queue. A `ListModel` proxy sends a revision-checked group of edits when the worker calls `sync()`. The UI dispatcher sleeps between deliveries. [Worker scripts and Rust event-loop integration](qml-workers.md)
+
 ## Compatibility with Qt QML 6.12
 
 | Area | Available in this implementation | Remaining coverage |
 |---|---|---|
-| Components and modules | File and inline components, typed composite properties and lists, private IDs, import aliases, local directory imports, versioned `qmldir` exports and source singletons | Dynamic creation, incubation, destruction and loader lifecycle, multiple independently loaded roots in one engine, complete pragma behavior |
-| Object model | Required, readonly and default properties, lexical source property shadowing with virtual, override and final declarations, aliases, typed signals and methods, property change handlers, `Component.onCompleted`, source and registered enums | Complete Qt value-type library, attached properties, interception, aliasing and inheritance edge cases, including overriding properties supplied by native Rust types |
+| Components and modules | File and inline components, local modules and singletons, dynamic factories, initial property maps and bindings, runtime QML text, owner-thread destruction, embedded URL catalogs and Loader | Frame-budgeted incubation, network components, independently loaded engine roots and complete pragma behavior |
+| Object model | Required, readonly and default properties, lexical source property shadowing with virtual, override and final declarations, aliases, typed signals and methods, property change handlers, `Component.onCompleted`, source and registered enums, `Component.onDestruction` and bound method identity | Complete Qt value-type library, attached properties, interception, aliasing and inheritance edge cases, including overriding properties supplied by native Rust types |
 | Built-in Rust scripting | Numeric, boolean and string expressions, object and array literals with identity, indexed reads and writes, function and signal calls, local declarations, assignment, branching, loops and returns | Closures, prototypes, exceptions, Promises and local script modules require an external engine. |
 | WebScene scripting | V8 built-ins, closures, classes, prototypes, exceptions, Promises, classic scripts and local ES modules. Both the file loader and Cargo-generated components use the same engine. | Qt WorkerScript, host access from uncompiled native-await resumptions and browser-side V8 deployment |
 | Reactive infrastructure | Dependency tracking, signal connections, conditional Binding overlays with restoration, delayed bindings, Qt.callLater and Timer with a deterministic clock and native dispatcher integration | Multi-target Binding forms, the complete Qt global object, network and resource loading |
-| Models | `QtQml.Models.ListModel` and flat `ListElement` declarations, fixed and dynamic role types, insertion, moves, removal, role edits, row handles and rollback | Nested list roles, function-valued roles, model/view delegates, proxy and worker-thread models |
+| Models | `QtQml.Models.ListModel` and flat `ListElement` declarations, WorkerScript model synchronization, fixed and dynamic role types, insertion, moves, removal, role edits, row handles and rollback | Nested list roles, function-valued roles, model/view delegates and proxy models |
 | Native visuals | Item, Rectangle, Row, Column, Flow, Text, TextInput and TextEdit. The Controls module supplies Label, Button, CheckBox, TextField and TextArea. Parent fill and center anchors participate in native arrangement. | Sibling and edge anchors, complete implicit geometry, visual delegates, animation/state systems and the rest of Qt Quick and Controls |
-| FerroUI API | Register a Rust type, properties, signals, enum values and deterministic methods. Register visual factories or expose supported scalar styled properties with `register_ferro_control`. | Property types outside the reflected scalar set require an explicit native adapter |
+| FerroUI API | Register Rust types, properties, signals, enums, pure methods and receiver-aware methods with reactive reads. Register visual factories or expose supported scalar styled properties with `register_ferro_control`. | Property types outside the reflected scalar set require an explicit native adapter |
 | Tooling | Cargo build integration, native Rust code generation, command-line checks, source diagnostics, headless tests and a Qt reference harness | Language server, debugger, profiler, designer support and Qt binary plugin/toolchain interoperability |
 
 ## Verification
