@@ -353,22 +353,26 @@ impl Transaction<'_> {
             || first != sections.first_character
             || next != sections.factory
             || edited == Some(repeater::SectionEdit::MultipleRows);
-        if rebuild {
-            sections.role = role;
-            sections.first_character = first;
-            sections.factory = next;
-            sections.rebuild(self, id, &state.source)?;
-        } else if let Some(repeater::SectionEdit::Row(row)) = edited {
+        if !rebuild {
+            let Some(repeater::SectionEdit::Row(row)) = edited else {
+                return Ok(false);
+            };
             if !sections.update_boundary_pair(self, id, &state.source, row)? {
                 return Ok(false);
             }
-        } else {
-            return Ok(false);
         }
         self.destroy_subtrees(&sections.items().collect::<Vec<_>>())?;
         sections.labels.clear();
         sections.nominal = None;
         sections.sizes = Default::default();
+        if rebuild {
+            // Destruction handlers may edit the model. Read the new grouping
+            // after retiring the old delegates, just as on the first layout.
+            sections.role = role;
+            sections.first_character = first;
+            sections.factory = next;
+            sections.rebuild(self, id, &state.source)?;
+        }
         Ok(true)
     }
 
