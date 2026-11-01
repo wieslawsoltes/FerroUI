@@ -329,6 +329,15 @@ More parts of the declaration forms:
 
 **Recipe for a class** (after the `ferro_properties!` migration above): (1) give it `new:` unless abstract; (2) copy the upstream `[Content]` property name into `content:`; (3) list every public CLR property that is not backed by a registered property and that markup can set or add to (collections are read-only properties), with the attributes it carries upstream; (4) list `Add`/factory/handler methods and plain events markup uses; (5) copy the type-level attributes; (6) list the class in `register_types.rs`. Markup-visible names stay PascalCase and identical to upstream.
 
+## Rendering: every backend draws on the GPU
+
+Every rendering backend has a GPU implementation of every rendering feature, validated by tests. No backend leaves a feature on per-frame CPU rasterization, a per-frame texture upload or a readback of pixels: a frame that changes nothing but positions, uniforms or animated values makes no new bitmap or texture.
+
+- The CPU path of a feature stays as the reference implementation the GPU path is tested against, and as the fallback of raster surfaces without a GPU (and of drawing contexts without the capability). It is not the path of a GPU surface.
+- A feature the GPU path cannot draw yet is recorded as a gap in [gpu-rendering.md](gpu-rendering.md), with the route that closes it; it is not left to fall back silently.
+- Validation, for each backend: render tests that compare the GPU output with the CPU reference (with tolerances that are stated and justified), and a test that steady-state frames create no new bitmap or texture.
+- An effect is compiled once (per program and backend) and given its parameters as uniforms on each draw, as WinUI's compositor compiles an effect factory (winui-composition.md, section 5.3).
+
 ## Threading model
 
 Everything is UI-thread-affine and `Rc`-based. Property definitions and registries are per-thread. Cross-thread work goes through the dispatcher (`Dispatcher::ui_thread().post(..)`), whose callbacks must be `Send`.
