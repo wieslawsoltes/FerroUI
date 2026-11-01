@@ -17,7 +17,6 @@ path = "lib.rs"
 [features]
 javascript = [
     "ferroui-qml-compiler/javascript",
-    "dep:percent-encoding",
     "dep:swc_common",
     "dep:swc_ecma_ast",
     "dep:swc_ecma_parser",
@@ -27,7 +26,7 @@ javascript = [
 ]
 
 [dependencies]
-percent-encoding = { version = "2", optional = true }
+percent-encoding = "2"
 swc_common = { version = "27", optional = true }
 swc_ecma_ast = { version = "30", optional = true }
 swc_ecma_parser = { version = "47", default-features = false, optional = true }

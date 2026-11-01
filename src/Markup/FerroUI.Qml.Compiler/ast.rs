@@ -17,6 +17,9 @@ pub struct Document {
     /// Referenced module singletons, each privately scoped and owned by the engine.
     #[serde(default)]
     pub singletons: Vec<Object>,
+    /// Explicitly linked component entry points, keyed by relocatable project URL.
+    #[serde(default)]
+    pub components: BTreeMap<String,Object>,
     pub pragmas: Vec<Pragma>,
     pub imports: Vec<Import>,
     pub root: Object,

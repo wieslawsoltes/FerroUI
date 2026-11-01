@@ -32,6 +32,12 @@ pub trait ComponentResolver {
         Ok(None)
     }
 
+    /// Return a file exposed for runtime component creation. Definitions share this
+    /// linker's singleton graph, private namespaces and nominal type numbering.
+    fn next_component(&mut self) -> Result<Option<(String, ComponentSource)>, String> {
+        Ok(None)
+    }
+
     fn resolve(
         &mut self,
         from: &str,
@@ -77,7 +83,21 @@ pub fn link(
     let context = Context::new(source.key, &source.document, linker.resolver)?;
     let mut root = source.document.root.clone();
     linker.object(&context, &mut root)?;
+    let mut components = BTreeMap::new();
+    while let Some((url, entry)) = linker.resolver.next_component().map_err(|why| context.error(root.span, why))? {
+        if !entry.document.pragmas.is_empty() {
+            return Err(context.error(entry.document.root.span, "component entries must be instantiable QML documents"));
+        }
+        let scope = Context::new(entry.key.clone(), &entry.document, linker.resolver)?;
+        let mut object = entry.document.root.clone();
+        linker.stack = vec![entry.key.clone()];
+        linker.collect_scripts(&entry)?;
+        linker.object(&scope, &mut object)?;
+        object.type_imports.get_or_insert(scope.native_imports);
+        components.insert(url, object);
+    }
     Ok(Document {
+        components,
         scripts: linker.scripts,
         singletons: linker.singletons,
         root,

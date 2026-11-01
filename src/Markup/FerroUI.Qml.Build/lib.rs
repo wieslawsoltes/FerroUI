@@ -33,6 +33,7 @@ pub struct Compiler<'a> {
     javascript_entries: BTreeSet<PathBuf>,
     validate: Option<Validate<'a>>,
     import_paths: Vec<PathBuf>,
+    component_entries: BTreeSet<PathBuf>,
 }
 
 /// Rust source and the exact files and import directories to watch for changes.
@@ -67,6 +68,13 @@ impl<'a> Compiler<'a> {
     pub fn javascript_entry(mut self, path: impl Into<PathBuf>) -> Self {
         self.javascript = true;
         self.javascript_entries.insert(path.into());
+        self
+    }
+
+    /// Compile a dynamically selectable component and all of its dependencies.
+    /// Paths must resolve below the directory containing the entry document.
+    pub fn qml_entry(mut self, path: impl Into<PathBuf>) -> Self {
+        self.component_entries.insert(path.into());
         self
     }
 
@@ -105,6 +113,7 @@ impl<'a> Compiler<'a> {
                 .with_javascript(input.as_ref(), &self.javascript_entries)
                 .map_err(BuildError)?;
         }
+        files.set_component_entries(input.as_ref(), &self.component_entries).map_err(BuildError)?;
         let source = files.load(input.as_ref()).map_err(BuildError)?;
         let document = ferroui_qml_compiler::link(source, &mut files)
             .map_err(|e| BuildError(e.to_string()))?;

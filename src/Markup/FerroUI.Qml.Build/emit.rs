@@ -152,6 +152,7 @@ structure!(ScriptResource {
     exports
 });
 structure!(Document {
+    components,
     scripts,
     singletons,
     pragmas,

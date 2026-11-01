@@ -189,6 +189,7 @@ impl<'s> Parser<'s> {
         Ok(Document {
             scripts: Default::default(),
             singletons: Vec::new(),
+            components: Default::default(),
             pragmas,
             imports,
             root,

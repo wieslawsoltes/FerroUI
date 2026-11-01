@@ -12,7 +12,7 @@ pub(crate) struct Functions {
 }
 pub(crate) fn lower(document: &mut Document) -> Result<Functions, String> {
     let mut functions = Functions::default();
-    for root in std::iter::once(&mut document.root).chain(&mut document.singletons) {
+    for root in std::iter::once(&mut document.root).chain(&mut document.singletons).chain(document.components.values_mut()) {
         members(&mut root.members, &mut functions)?;
     }
     Ok(functions)

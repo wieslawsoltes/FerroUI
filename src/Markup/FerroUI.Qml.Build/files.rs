@@ -5,6 +5,7 @@ use std::path::{Path, PathBuf};
 use std::rc::Rc;
 
 pub(crate) struct Files {
+    component_entries: BTreeMap<String,PathBuf>,
     #[cfg(feature = "javascript")]
     resources: Option<crate::javascript::Resources>,
     modules: IdentifiedModules,
@@ -15,12 +16,30 @@ pub(crate) struct Files {
 impl Files {
     pub(crate) fn new(roots: Vec<PathBuf>) -> Self {
         Self {
+            component_entries: BTreeMap::new(),
             #[cfg(feature = "javascript")]
             resources: None,
             modules: IdentifiedModules::new(roots),
             documents: BTreeMap::new(),
             directories: BTreeSet::new(),
         }
+    }
+
+    pub(crate) fn set_component_entries(&mut self, input: &Path, entries: &BTreeSet<PathBuf>) -> Result<(), String> {
+        let input=input.canonicalize().map_err(|e|format!("{}: {e}",input.display()))?;
+        let root=input.parent().ok_or("component needs a parent directory")?;
+        for entry in entries {
+            if entry.is_absolute() || entry.has_root() {
+                return Err(format!("QML entry must be project-relative: {}",entry.display()));
+            }
+            let target=root.join(entry).canonicalize().map_err(|e|format!("{}: {e}",entry.display()))?;
+            let relative=target.strip_prefix(root).map_err(|_| format!("QML entry escapes project: {}",entry.display()))?;
+            if target.extension().and_then(|s|s.to_str())!=Some("qml") || !target.is_file() {
+                return Err(format!("expected a local QML file: {}",entry.display()));
+            }
+            self.component_entries.insert(project_url(relative),target);
+        }
+        Ok(())
     }
 
     #[cfg(feature = "javascript")]
@@ -82,6 +101,10 @@ impl Files {
 }
 
 impl ComponentResolver for Files {
+    fn next_component(&mut self) -> Result<Option<(String, ComponentSource)>, String> {
+        self.component_entries.pop_first().map(|(url,path)| self.load(&path).map(|source|(url,source))).transpose()
+    }
+
     fn native_imports(&mut self, from: &str, imports: &[Import]) -> Result<Vec<Import>, String> {
         let base = Path::new(from)
             .parent()
@@ -188,4 +211,16 @@ impl Files {
         }
         candidates.first().map(|path| self.load(path)).transpose()
     }
+}
+
+
+fn project_url(relative: &Path) -> String {
+    use percent_encoding::{percent_encode, AsciiSet, NON_ALPHANUMERIC};
+    const ENCODE: &AsciiSet = &NON_ALPHANUMERIC.remove(b'-').remove(b'.').remove(b'_').remove(b'~');
+    let mut url = String::from("https://qml.invalid/components/project");
+    for part in relative {
+        url.push('/');
+        url.push_str(&percent_encode(part.as_encoded_bytes(), ENCODE).to_string());
+    }
+    url
 }
