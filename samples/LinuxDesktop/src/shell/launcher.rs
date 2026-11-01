@@ -400,7 +400,7 @@ fn result_row(shell: &Rc<Shell>, index: usize, pinned_only: bool) -> Element {
 /// the complete ordered collection even when space on a compact desktop is limited.
 pub(super) fn pinned_shortcuts(shell: &Rc<Shell>) -> Element {
     let favorites = shell.favorites;
-    let pin_limit = shell.pin_limit;
+    let pin_limit = shell.metrics().pins;
     let material_home = look().layout() == Layout::BottomNavigation;
     let catalog = shell.catalog.clone();
     let state = shell.clone();

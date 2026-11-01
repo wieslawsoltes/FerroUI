@@ -9,23 +9,57 @@ use ferroui_view::prelude::*;
 use std::rc::Rc;
 use time::OffsetDateTime;
 
+pub(super) fn background(
+    state: &Rc<Shell>,
+    clock: Signal<OffsetDateTime>,
+    appearance: Appearance,
+) -> Element {
+    grid()
+        .child(wallpaper::wallpaper(appearance))
+        .child(match appearance.layout() {
+            Layout::Taskbar => windows_icons(state),
+            Layout::MenuBarDock => Element::Empty,
+            Layout::BottomNavigation => material_home(state, clock),
+        })
+        .into()
+}
+
+pub(super) fn panel(
+    state: &Rc<Shell>,
+    clock: Signal<OffsetDateTime>,
+    appearance: Appearance,
+    top: bool,
+) -> Element {
+    match (appearance.layout(), top) {
+        (Layout::Taskbar, false) => taskbar(state, clock),
+        (Layout::MenuBarDock, true) => menubar(state, clock),
+        (Layout::MenuBarDock, false) => dock(state),
+        (Layout::BottomNavigation, false) => navigation(state),
+        _ => Element::Empty,
+    }
+}
+
 pub(super) fn surface(
     state: &Rc<Shell>,
     clock: Signal<OffsetDateTime>,
     appearance: Appearance,
 ) -> Element {
     let scene = state.scene;
-    let shell = match appearance.layout() {
-        Layout::Taskbar => taskbar(state, clock),
-        Layout::MenuBarDock => menubar_and_dock(state, clock),
-        Layout::BottomNavigation => material_home(state, clock),
-    };
+    let (top, bottom) = appearance.insets();
     grid()
-        .child(wallpaper::wallpaper(appearance))
+        .is_hit_test_visible(move || scene.get() == Scene::Desktop)
+        .child(background(state, clock, appearance))
         .child(
-            grid()
-                .is_hit_test_visible(move || scene.get() == Scene::Desktop)
-                .child(shell),
+            border()
+                .height(top)
+                .vertical_alignment(V::Top)
+                .child(panel(state, clock, appearance, true)),
+        )
+        .child(
+            border()
+                .height(bottom)
+                .vertical_alignment(V::Bottom)
+                .child(panel(state, clock, appearance, false)),
         )
         .into()
 }
@@ -167,9 +201,30 @@ fn notification_button(state: &Rc<Shell>) -> Element {
         .into()
 }
 
+fn windows_icons(state: &Rc<Shell>) -> Element {
+    stack_panel()
+        .margin((10.0, 17.0))
+        .spacing(5.0)
+        .horizontal_alignment(H::Left)
+        .vertical_alignment(V::Top)
+        .child(desktop_shortcut(
+            state,
+            Scene::Applications,
+            "Applications",
+            Icon::Applications,
+        ))
+        .child(desktop_shortcut(
+            state,
+            Scene::Workspaces,
+            "Task view",
+            Icon::Workspaces,
+        ))
+        .into()
+}
+
 fn taskbar(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
     let snapshot = state.snapshot;
-    let width = state.viewport_width;
+    let width = state.metrics().width;
     let compact = memo(move |_| width.get() < 760.0);
     let start = command(state, Scene::Applications, "Open applications")
         .name("Start")
@@ -246,56 +301,32 @@ fn taskbar(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
                 .is_visible(move || !compact.get())
                 .child(running_clients(state)),
         );
-    grid()
-        .row_definitions(&format!("*,{}", state.themes.current().insets().1))
+    border()
+        .background(colors().bar)
+        .border_brush(colors().bar_edge)
+        .border_thickness((0.0, 1.0, 0.0, 0.0))
         .child(
-            stack_panel()
-                .margin((10.0, 17.0))
-                .spacing(5.0)
-                .horizontal_alignment(H::Left)
-                .vertical_alignment(V::Top)
-                .child(desktop_shortcut(
-                    state,
-                    Scene::Applications,
-                    "Applications",
-                    Icon::Applications,
-                ))
-                .child(desktop_shortcut(
-                    state,
-                    Scene::Workspaces,
-                    "Task view",
-                    Icon::Workspaces,
-                )),
-        )
-        .child(
-            border()
-                .grid_row(1)
-                .background(colors().bar)
-                .border_brush(colors().bar_edge)
-                .border_thickness((0.0, 1.0, 0.0, 0.0))
+            grid()
+                .margin((10.0, 0.0))
                 .child(
-                    grid()
-                        .margin((10.0, 0.0))
-                        .child(
-                            shell_text("", 11.0, Ink::Secondary)
-                                .is_visible(move || !compact.get())
-                                .margin((5.0, 0.0))
-                                .text(move || snapshot.with(workspace_name)),
-                        )
-                        .child(center)
-                        .child(
-                            border()
-                                .horizontal_alignment(H::Right)
-                                .padding((0.0, 0.0, 5.0, 0.0))
-                                .child(tray),
-                        ),
+                    shell_text("", 11.0, Ink::Secondary)
+                        .is_visible(move || !compact.get())
+                        .margin((5.0, 0.0))
+                        .text(move || snapshot.with(workspace_name)),
+                )
+                .child(center)
+                .child(
+                    border()
+                        .horizontal_alignment(H::Right)
+                        .padding((0.0, 0.0, 5.0, 0.0))
+                        .child(tray),
                 ),
         )
         .into()
 }
 
-fn menubar_and_dock(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
-    let width = state.viewport_width;
+fn menubar(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
+    let width = state.metrics().width;
     let compact = memo(move |_| width.get() < 550.0);
     let menu = |scene, title: &'static str| {
         command(state, scene, title)
@@ -305,6 +336,64 @@ fn menubar_and_dock(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element
             .padding((7.0, 0.0))
             .child(shell_text(title, 12.0, Ink::Primary))
     };
+
+    border()
+        .background(colors().bar)
+        .child(
+            grid()
+                .column_definitions("*,Auto")
+                .margin((12.0, 0.0))
+                .child(
+                    row(1.0)
+                        .child(
+                            command(state, Scene::Applications, "Open applications")
+                                .node_ref(state.desktop_focus)
+                                .on_loaded(focus_home(state))
+                                .padding((4.0, 0.0))
+                                .background("Transparent")
+                                .border_thickness(0)
+                                .child(
+                                    row(6.0)
+                                        .child(glyph(Icon::Mark, 15.0, colors().bar_ink))
+                                        .child(
+                                            shell_text("Ferro", 13.0, colors().bar_ink)
+                                                .font_weight(FontWeight::Bold),
+                                        ),
+                                ),
+                        )
+                        .child(menu(Scene::Applications, "Applications"))
+                        .child(menu(Scene::Workspaces, "Window"))
+                        .child(menu(Scene::Appearance, "Appearance")),
+                )
+                .child(
+                    row(2.0)
+                        .grid_column(1)
+                        .child(status_button(
+                            state,
+                            Scene::QuickSettings,
+                            "Control center",
+                            Icon::Settings,
+                        ))
+                        .child(notification_button(state))
+                        .child(
+                            command(state, Scene::Calendar, "Open calendar")
+                                .height(28)
+                                .padding((5.0, 0.0))
+                                .border_thickness(0)
+                                .background("Transparent")
+                                .child(
+                                    shell_text("", 12.0, colors().bar_ink)
+                                        .text(move || time_text(clock.get())),
+                                ),
+                        ),
+                ),
+        )
+        .into()
+}
+
+fn dock(state: &Rc<Shell>) -> Element {
+    let width = state.metrics().width;
+    let compact = memo(move |_| width.get() < 550.0);
     let dock_tile = |scene, title: &'static str, icon, fill: &'static str| {
         command(state, scene, title)
             .width(45.0)
@@ -316,105 +405,72 @@ fn menubar_and_dock(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element
             .border_brush(colors().bar_edge)
             .child(glyph(icon, 22.0, "#FFFFFF"))
     };
-    grid()
-        .row_definitions(&format!(
-            "{},*,{}",
-            state.themes.current().insets().0,
-            state.themes.current().insets().1
-        ))
+    border()
+        .vertical_alignment(V::Center)
+        .horizontal_alignment(H::Center)
+        .corner_radius(19)
+        .border_brush(colors().bar_edge)
+        .border_thickness(1)
+        .padding(5)
+        .background(colors().bar)
         .child(
-            border().background(colors().bar).child(
-                grid()
-                    .column_definitions("*,Auto")
-                    .margin((12.0, 0.0))
-                    .child(
-                        row(1.0)
-                            .child(
-                                command(state, Scene::Applications, "Open applications")
-                                    .node_ref(state.desktop_focus)
-                                    .on_loaded(focus_home(state))
-                                    .padding((4.0, 0.0))
-                                    .background("Transparent")
-                                    .border_thickness(0)
-                                    .child(
-                                        row(6.0)
-                                            .child(glyph(Icon::Mark, 15.0, colors().bar_ink))
-                                            .child(
-                                                shell_text("Ferro", 13.0, colors().bar_ink)
-                                                    .font_weight(FontWeight::Bold),
-                                            ),
-                                    ),
-                            )
-                            .child(menu(Scene::Applications, "Applications"))
-                            .child(menu(Scene::Workspaces, "Window"))
-                            .child(menu(Scene::Appearance, "Appearance")),
-                    )
-                    .child(
-                        row(2.0)
-                            .grid_column(1)
-                            .child(status_button(
-                                state,
-                                Scene::QuickSettings,
-                                "Control center",
-                                Icon::Settings,
-                            ))
-                            .child(notification_button(state))
-                            .child(
-                                command(state, Scene::Calendar, "Open calendar")
-                                    .height(28)
-                                    .padding((5.0, 0.0))
-                                    .border_thickness(0)
-                                    .background("Transparent")
-                                    .child(
-                                        shell_text("", 12.0, colors().bar_ink)
-                                            .text(move || time_text(clock.get())),
-                                    ),
-                            ),
-                    ),
-            ),
-        )
-        .child(
-            border()
-                .grid_row(2)
-                .vertical_alignment(V::Center)
-                .horizontal_alignment(H::Center)
-                .corner_radius(19)
-                .border_brush(colors().bar_edge)
-                .border_thickness(1)
-                .padding(5)
-                .background(colors().bar)
+            row(7.0)
+                .child(dock_tile(
+                    Scene::Applications,
+                    "Applications",
+                    Icon::Applications,
+                    colors().dock_tiles[0],
+                ))
+                .child(dock_tile(
+                    Scene::Workspaces,
+                    "Mission Control",
+                    Icon::Workspaces,
+                    colors().dock_tiles[1],
+                ))
+                .child(dock_tile(
+                    Scene::Appearance,
+                    "Appearance settings",
+                    Icon::Appearance,
+                    colors().dock_tiles[2],
+                ))
+                .child(super::launcher::pinned_shortcuts(state))
                 .child(
-                    row(7.0)
-                        .child(dock_tile(
-                            Scene::Applications,
-                            "Applications",
-                            Icon::Applications,
-                            colors().dock_tiles[0],
-                        ))
-                        .child(dock_tile(
-                            Scene::Workspaces,
-                            "Mission Control",
-                            Icon::Workspaces,
-                            colors().dock_tiles[1],
-                        ))
-                        .child(dock_tile(
-                            Scene::Appearance,
-                            "Appearance settings",
-                            Icon::Appearance,
-                            colors().dock_tiles[2],
-                        ))
-                        .child(super::launcher::pinned_shortcuts(state))
-                        .child(
-                            border()
-                                .is_visible(move || !compact.get())
-                                .child(running_clients(state)),
-                        ),
+                    border()
+                        .is_visible(move || !compact.get())
+                        .child(running_clients(state)),
                 ),
         )
         .into()
 }
 
 fn material_home(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
+    stack_panel()
+        .margin((34.0, 32.0))
+        .horizontal_alignment(H::Left)
+        .vertical_alignment(V::Top)
+        .child(
+            command(state, Scene::Calendar, "Open calendar")
+                .class("text")
+                .padding(0)
+                .horizontal_alignment(H::Left)
+                .background("Transparent")
+                .border_thickness(0)
+                .child(shell_text("", 17.0, "#D4E7D9").text(move || {
+                    let t = clock.get();
+                    format!("{}, {} {}", t.weekday(), t.month(), t.day())
+                })),
+        )
+        .child(
+            shell_text("", 76.0, "#E1F9E7")
+                .font_weight(FontWeight::Light)
+                .letter_spacing(-3.0)
+                .text(move || time_text(clock.get())),
+        )
+        .child(row(2.0).child(super::launcher::pinned_shortcuts(state)))
+        .into()
+}
+
+fn navigation(state: &Rc<Shell>) -> Element {
     let scene = state.scene;
     let tab = |destination, name: &'static str, icon, col| {
         let shell = state.clone();
@@ -453,64 +509,34 @@ fn material_home(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
                 ),
         )
     };
-    grid()
-        .row_definitions(&format!("*,{}", state.themes.current().insets().1))
+    border()
+        .background(colors().bar)
+        .padding((12.0, 3.0))
         .child(
-            stack_panel()
-                .margin((34.0, 32.0))
-                .horizontal_alignment(H::Left)
-                .vertical_alignment(V::Top)
-                .child(
-                    command(state, Scene::Calendar, "Open calendar")
-                        .class("text")
-                        .padding(0)
-                        .horizontal_alignment(H::Left)
-                        .background("Transparent")
-                        .border_thickness(0)
-                        .child(shell_text("", 17.0, "#D4E7D9").text(move || {
-                            let t = clock.get();
-                            format!("{}, {} {}", t.weekday(), t.month(), t.day())
-                        })),
-                )
-                .child(
-                    shell_text("", 76.0, "#E1F9E7")
-                        .font_weight(FontWeight::Light)
-                        .letter_spacing(-3.0)
-                        .text(move || time_text(clock.get())),
-                )
-                .child(row(2.0).child(super::launcher::pinned_shortcuts(state))),
-        )
-        .child(
-            border()
-                .grid_row(1)
-                .background(colors().bar)
-                .padding((12.0, 3.0))
+            grid()
+                .row_definitions("*,6")
                 .child(
                     grid()
-                        .row_definitions("*,6")
+                        .max_width(550.0)
+                        .column_definitions("*,*,*,*,*,*")
                         .child(
-                            grid()
-                                .max_width(550.0)
-                                .column_definitions("*,*,*,*,*,*")
-                                .child(
-                                    tab(Scene::Desktop, "Home", Icon::Mark, 0)
-                                        .node_ref(state.desktop_focus)
-                                        .on_loaded(focus_home(state)),
-                                )
-                                .child(tab(Scene::Applications, "Apps", Icon::Applications, 1))
-                                .child(tab(Scene::Workspaces, "Overview", Icon::Workspaces, 2))
-                                .child(tab(Scene::Notifications, "Inbox", Icon::Bell, 3))
-                                .child(tab(Scene::QuickSettings, "Controls", Icon::Settings, 4))
-                                .child(tab(Scene::Appearance, "Style", Icon::Appearance, 5)),
+                            tab(Scene::Desktop, "Home", Icon::Mark, 0)
+                                .node_ref(state.desktop_focus)
+                                .on_loaded(focus_home(state)),
                         )
-                        .child(
-                            border()
-                                .grid_row(1)
-                                .width(82.0)
-                                .height(3.0)
-                                .corner_radius(2)
-                                .background(colors().bar_ink),
-                        ),
+                        .child(tab(Scene::Applications, "Apps", Icon::Applications, 1))
+                        .child(tab(Scene::Workspaces, "Overview", Icon::Workspaces, 2))
+                        .child(tab(Scene::Notifications, "Inbox", Icon::Bell, 3))
+                        .child(tab(Scene::QuickSettings, "Controls", Icon::Settings, 4))
+                        .child(tab(Scene::Appearance, "Style", Icon::Appearance, 5)),
+                )
+                .child(
+                    border()
+                        .grid_row(1)
+                        .width(82.0)
+                        .height(3.0)
+                        .corner_radius(2)
+                        .background(colors().bar_ink),
                 ),
         )
         .into()
@@ -518,7 +544,7 @@ fn material_home(state: &Rc<Shell>, clock: Signal<OffsetDateTime>) -> Element {
 
 /// System flyouts open at the status area for the active desktop layout.
 pub(super) fn system_frame(shell: &Shell, preferred_width: f64) -> El<Border> {
-    let width = shell.viewport_width;
+    let width = shell.metrics().width;
     let (top, bottom) = look().insets();
     match look().layout() {
         Layout::Taskbar => shell_panel()

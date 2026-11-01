@@ -1,5 +1,5 @@
 //! Native notification history and a passive top-level for banners. A banner has
-//! its own X window so it stays visible above normal applications. No window is
+//! its own native window so it stays visible above normal applications. No window is
 //! allocated until the first notification arrives.
 use super::appearance::Appearance;
 use super::chrome::*;
@@ -11,6 +11,10 @@ use ferroui_base::{FerroLocator, LocatorExtensions, PixelPoint, Ref};
 use ferroui_controls::primitives::ScrollBarVisibility;
 use ferroui_controls::{Control, Window, WindowBaseImpl, WindowDecorations};
 use ferroui_view::prelude::*;
+use ferroui_wayland::{
+    layer_shell::{LayerConfig, LayerWindow},
+    wayland_top_level_factory::WaylandTopLevelFactory,
+};
 use ferroui_x11::xlib::{self, PropertyMode, XID};
 use ferroui_x11::FerroX11Platform;
 use std::cell::{Cell, RefCell};
@@ -246,13 +250,25 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
 }
 
 struct Banner {
+    wayland: bool,
+    output: Option<String>,
     window: Ref<Window>,
     content_owner: Option<Owner>,
 }
 
 impl Banner {
-    fn new() -> Self {
-        let window = Window::new();
+    fn new(wayland: bool, output: Option<String>, height: u32) -> Result<Self, String> {
+        let window = if wayland {
+            let window = LayerWindow::new(
+                "ferro-desktop-notification",
+                output.as_deref(),
+                LayerConfig::notification(356, height, 12, 12),
+            )?;
+            super::wayland::transparent(&window);
+            window
+        } else {
+            Window::new()
+        };
         window.set_title(Some("Ferro Desktop Notification".into()));
         window.set_window_decorations(WindowDecorations::None);
         window.set_show_in_taskbar(false);
@@ -277,10 +293,12 @@ impl Banner {
                 &[atom],
             );
         }
-        Self {
+        Ok(Self {
+            wayland,
+            output,
             window,
             content_owner: None,
-        }
+        })
     }
     fn show(&mut self, shell: &Rc<Shell>, notice: &Notice) {
         let owner = Owner::new_root();
@@ -313,7 +331,20 @@ impl Banner {
             148.0
         };
         let screens = self.window.screens();
-        if let Some(screen) = screens
+        if self.wayland {
+            if let Ok(outputs) = LayerWindow::outputs() {
+                if let Some(output) = outputs.iter().find(|o| o.name == self.output) {
+                    width = width.min(f64::from((output.logical_size.width - 24).max(1)));
+                }
+            }
+            if let Err(e) = LayerWindow::configure(
+                &self.window,
+                LayerConfig::notification(width as u32, height as u32, 12, 12),
+            ) {
+                eprintln!("Wayland notification: {e}");
+                return;
+            }
+        } else if let Some(screen) = screens
             .primary()
             .or_else(|| screens.all().into_iter().next())
         {
@@ -360,7 +391,30 @@ pub(super) fn attach(shell: &Rc<Shell>) {
         }
         let mut mounted = mounted.borrow_mut();
         if let Some((notice, _)) = &desired {
-            mounted.get_or_insert_with(Banner::new).show(&shell, notice);
+            let wayland = FerroLocator::current()
+                .get_service::<WaylandTopLevelFactory>()
+                .is_some();
+            let output = shell.session.as_ref().and_then(|s| s.focused_output());
+            if mounted
+                .as_ref()
+                .is_some_and(|b| b.wayland && b.output != output)
+            {
+                mounted.take();
+            }
+            if mounted.is_none() {
+                match Banner::new(
+                    wayland,
+                    output,
+                    if notice.actions.is_empty() { 110 } else { 148 },
+                ) {
+                    Ok(banner) => *mounted = Some(banner),
+                    Err(e) => {
+                        eprintln!("Desktop notification: {e}");
+                        return;
+                    }
+                }
+            }
+            mounted.as_mut().unwrap().show(&shell, notice);
         } else if let Some(banner) = mounted.as_ref() {
             WindowBaseImpl::hide(&*banner.window);
         }

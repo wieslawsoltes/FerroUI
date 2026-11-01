@@ -8,6 +8,7 @@ mod launcher;
 mod notifications;
 mod quick_settings;
 mod wallpaper;
+pub mod wayland;
 mod workspaces;
 
 use self::chrome::*;
@@ -54,6 +55,7 @@ struct Shell {
     status: Signal<String>,
     launching: Signal<bool>,
     owner: Owner,
+    clicked_output: std::cell::RefCell<Option<String>>,
     desktop_focus: NodeRef<ferroui_controls::Button>,
     shortcut_origin: std::cell::Cell<Option<crate::session::ShortcutOrigin>>,
     // First use mounts the launcher. Keep its template, layout and search input until the theme changes.
@@ -61,7 +63,20 @@ struct Shell {
     search_box: std::cell::RefCell<Option<ferroui_base::WeakRef<ferroui_controls::TextBox>>>,
 }
 
+#[derive(Clone, Copy)]
+struct OutputMetrics {
+    width: Signal<f64>,
+    pins: Signal<usize>,
+}
+
 impl Shell {
+    fn metrics(&self) -> OutputMetrics {
+        ferroui_view::use_context::<OutputMetrics>().unwrap_or(OutputMetrics {
+            width: self.viewport_width,
+            pins: self.pin_limit,
+        })
+    }
+
     fn open(&self, target: Scene) {
         self.status.set_if_changed(String::new());
         self.show(target);
@@ -227,13 +242,13 @@ fn apply_session_appearance(
     Ok(())
 }
 
-pub fn view(
+fn create(
     initial: Scene,
     catalog: Rc<ApplicationCatalog>,
     session: Option<Rc<Session>>,
     themes: Rc<ThemeController>,
     managed: bool,
-) -> Element {
+) -> Rc<Shell> {
     let appearance = signal(themes.current());
     ferroui_view::provide_context(appearance);
     let initial_status = apply_session_appearance(session.as_deref(), themes.current())
@@ -276,6 +291,7 @@ pub fn view(
         session,
         status: signal(initial_status),
         launching: signal(false),
+        clicked_output: Default::default(),
         owner: Owner::current().expect("desktop view must be mounted in a FerroUI owner"),
         desktop_focus: NodeRef::new(),
         shortcut_origin: Default::default(),
@@ -291,16 +307,23 @@ pub fn view(
         if managed {
             let current = state.scene;
             let session = session.clone();
-            effect(move || session.publish_scene(match current.get() {
-                Scene::Desktop => "desktop", Scene::Applications => "applications",
-                Scene::Workspaces => "workspaces", Scene::QuickSettings => "settings",
-                Scene::Notifications => "notifications", Scene::Calendar => "calendar",
-                Scene::Appearance => "appearance",
-            }));
+            effect(move || {
+                session.publish_scene(match current.get() {
+                    Scene::Desktop => "desktop",
+                    Scene::Applications => "applications",
+                    Scene::Workspaces => "workspaces",
+                    Scene::QuickSettings => "settings",
+                    Scene::Notifications => "notifications",
+                    Scene::Calendar => "calendar",
+                    Scene::Appearance => "appearance",
+                })
+            });
         }
         session.on_command(move |command| {
             use crate::session::commands::Command;
-            let Some(state) = weak.upgrade().filter(|shell| shell.owner.is_alive()) else { return };
+            let Some(state) = weak.upgrade().filter(|shell| shell.owner.is_alive()) else {
+                return;
+            };
             let scene = match command {
                 Command::Applications => Scene::Applications,
                 Command::Workspaces => Scene::Workspaces,
@@ -311,7 +334,9 @@ pub fn view(
                 state.cancel();
             } else {
                 if state.shortcut_origin.get().is_none() {
-                    state.shortcut_origin.set(state.session.as_ref().and_then(|s| s.shortcut_origin()));
+                    state
+                        .shortcut_origin
+                        .set(state.session.as_ref().and_then(|s| s.shortcut_origin()));
                 }
                 state.open(scene);
             }
@@ -346,8 +371,32 @@ pub fn view(
         });
     }
 
+    state
+}
+
+pub fn view(
+    initial: Scene,
+    catalog: Rc<ApplicationCatalog>,
+    session: Option<Rc<Session>>,
+    themes: Rc<ThemeController>,
+    managed: bool,
+) -> Element {
+    let state = create(initial, catalog, session, themes, managed);
+    root(state, true)
+}
+
+fn root(state: Rc<Shell>, include_desktop: bool) -> Element {
+    let appearance = state.appearance;
+    let viewport_width = state.viewport_width;
+    let pin_limit = state.pin_limit;
     let current = state.scene;
-    let clock = clock();
+    let desktop = if include_desktop {
+        let state = state.clone();
+        let clock = clock();
+        dynamic(move || desktop::surface(&state, clock, appearance.get())).into_element()
+    } else {
+        Element::Empty
+    };
     let root_state = state.clone();
     let launcher_state = state.clone();
     let overlays = state.clone();
@@ -432,9 +481,7 @@ pub fn view(
             }
             _ => {}
         })
-        .child(dynamic(move || {
-            desktop::surface(&state, clock, appearance.get())
-        }))
+        .child(desktop)
         .child(
             grid()
                 .is_hit_test_visible(move || current.get() != Scene::Desktop)
@@ -444,22 +491,30 @@ pub fn view(
                 .child(
                     // Keep the click target mounted. A transparent hit-test brush
                     // catches outside presses without changing desktop pixels.
-                    border().background("Transparent").on_pointer_pressed(move |e| {
-                        dismiss.dismiss();
-                        e.set_handled(true);
-                    }),
+                    border()
+                        .background("Transparent")
+                        .on_pointer_pressed(move |e| {
+                            dismiss.dismiss();
+                            e.set_handled(true);
+                        }),
                 )
                 .child(
-                    border().background("#65081420").is_hit_test_visible(false)
+                    border()
+                        .background("#65081420")
+                        .is_hit_test_visible(false)
                         .is_visible(move || match current.get() {
                             Scene::Desktop => false,
-                            Scene::Applications => appearance.get().layout() == appearance::Layout::BottomNavigation,
+                            Scene::Applications => {
+                                appearance.get().layout() == appearance::Layout::BottomNavigation
+                            }
                             _ => true,
                         }),
                 )
-                .child(dynamic(move || match launcher_state.cached_launcher.get() {
-                    Some(_) => launcher::view(&launcher_state),
-                    None => Element::Empty,
+                .child(dynamic(move || {
+                    match launcher_state.cached_launcher.get() {
+                        Some(_) => launcher::view(&launcher_state),
+                        None => Element::Empty,
+                    }
                 }))
                 .child(dynamic(move || match (current.get(), appearance.get()) {
                     (Scene::QuickSettings, _) => quick_settings::view(&overlays),
