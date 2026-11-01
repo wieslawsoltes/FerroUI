@@ -339,9 +339,17 @@ impl Transaction<'_> {
         let state = &self.model.dynamic.loaders[&id];
         let origin = state.source_origin.clone();
         if let Some((old_url, old_origin, factory)) = state.owned_factory.clone() {
-            if !matches!(&selection,Selection::File(url) if *url==old_url && old_origin==origin) {
+            let still_selected = match &selection {
+                Selection::File(url) => *url == old_url && old_origin == origin,
+                Selection::Component(component) => *component == Some(factory),
+            };
+            if !still_selected {
                 self.loader_state(id).owned_factory = None;
-                self.publish_loader_property(id, "sourceComponent", Value::Null)?;
+                // An explicit sourceComponent assignment can already have
+                // installed its replacement by the time selection settles.
+                if self.model.get(id, "sourceComponent")? == Value::Object(factory) {
+                    self.publish_loader_property(id, "sourceComponent", Value::Null)?;
+                }
                 if self.model.node(factory).is_some() {
                     self.destroy_object(factory)?;
                 }

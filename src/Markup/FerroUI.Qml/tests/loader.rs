@@ -18,6 +18,9 @@ fn model(source: &str) -> Instance {
     registry
         .register("QtQuick", "Loader", TypeDefinition::quick_loader())
         .unwrap();
+    registry
+        .register("QtQuick", "Repeater", TypeDefinition::quick_repeater())
+        .unwrap();
     registry.reexport("QtQuick", "QtQml").unwrap();
     let doc = parse(source).unwrap();
     Instance::new(&doc, &registry, Default::default()).unwrap()
@@ -349,4 +352,94 @@ fn cancelling_inside_an_aborted_transaction_preserves_the_inflight_preparation()
     }
     assert_eq!(app.get(loader, "status").unwrap(), Value::Number(1.));
     assert_eq!(app.children(item(&app, loader)).len(), 96);
+}
+
+#[test]
+fn selecting_an_inline_component_replaces_an_owned_url_factory_during_incubation() {
+    let mut app = model(
+        r#"import QtQuick
+        Item {
+            Component { id: fallback; Item { width: 37 } }
+            Loader { id: slot; asynchronous: true; source: "Missing.qml" }
+        }"#,
+    );
+    let loader = app.id("slot").unwrap();
+    let fallback = app.id("fallback").unwrap();
+    assert_eq!(app.get(loader, "status").unwrap(), Value::Number(3.));
+    let Value::Object(old_factory) = app.get(loader, "sourceComponent").unwrap() else {
+        panic!("expected URL factory");
+    };
+    app.set(loader, "sourceComponent", Value::Object(fallback))
+        .unwrap();
+    assert_eq!(
+        app.get(loader, "sourceComponent").unwrap(),
+        Value::Object(fallback)
+    );
+    assert!(app.type_name(old_factory).is_none());
+    assert_eq!(app.process_deferred(1).unwrap(), 1);
+    assert_eq!(app.get(loader, "status").unwrap(), Value::Number(1.));
+    assert_eq!(
+        app.get(item(&app, loader), "width").unwrap(),
+        Value::Number(37.)
+    );
+}
+
+#[test]
+fn an_error_status_handler_can_replace_a_missing_file_with_an_async_fallback() {
+    let mut app = model(
+        r#"import QtQuick
+        Item {
+            Component { id: fallback; Item { width: 19 } }
+            Loader { id: slot; asynchronous: true
+                onStatusChanged: { if (slot.status === Loader.Error) slot.sourceComponent = fallback }
+            }
+        }"#,
+    );
+    let loader = app.id("slot").unwrap();
+    app.set(loader, "source", Value::String("Missing.qml".into()))
+        .unwrap();
+    assert_eq!(app.get(loader, "status").unwrap(), Value::Number(2.));
+    app.process_deferred(1).unwrap();
+    assert_eq!(app.get(loader, "status").unwrap(), Value::Number(1.));
+    assert_eq!(
+        app.get(item(&app, loader), "width").unwrap(),
+        Value::Number(19.)
+    );
+}
+
+#[test]
+fn a_loaded_component_captures_delegate_inputs_only_from_its_declaration() {
+    let mut app = model(
+        r#"import QtQuick
+        Item { property int index: 50
+            Component { id: outside; Item { property int seen: index + 7 } }
+            Repeater { id: local; model: 2
+                Loader { asynchronous: true; sourceComponent: Item { property int seen: index + 7 } }
+            }
+            Repeater { id: external; model: 2
+                Loader { asynchronous: true; sourceComponent: outside }
+            }
+        }"#,
+    );
+    while app.has_deferred_work() {
+        app.process_deferred(8).unwrap();
+    }
+    for (rep, expected) in [("local", [7., 8.]), ("external", [57., 57.])] {
+        for (i, wanted) in expected.into_iter().enumerate() {
+            let Value::Object(loader) = app
+                .call(
+                    app.id(rep).unwrap(),
+                    "itemAt",
+                    vec![Value::Number(i as f64)],
+                )
+                .unwrap()
+            else {
+                panic!("missing delegate");
+            };
+            assert_eq!(
+                app.get(item(&app, loader), "seen").unwrap(),
+                Value::Number(wanted)
+            );
+        }
+    }
 }

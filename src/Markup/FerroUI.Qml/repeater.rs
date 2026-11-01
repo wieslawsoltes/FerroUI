@@ -71,9 +71,17 @@ impl Changes {
 }
 
 impl Instance {
-    fn delegate_inputs_in_scope(&self, owner: ObjectId) -> Option<&BTreeMap<String, SlotId>> {
-        let root = self.node(owner)?.context?;
-        self.dynamic.contexts.get(&root)?.delegate_inputs.as_ref()
+    fn delegate_inputs_in_scope(&self, mut owner: ObjectId) -> Option<&BTreeMap<String, SlotId>> {
+        loop {
+            let root = self.node(owner)?.context?;
+            let context = self.dynamic.contexts.get(&root)?;
+            if let Some(inputs) = &context.delegate_inputs {
+                return Some(inputs);
+            }
+            // A component instantiated inside a delegate captures the scope
+            // of its declaration, regardless of its visual or ownership parent.
+            owner = context.declaration;
+        }
     }
 
     pub(crate) fn delegate_context_key(&self, owner: ObjectId, name: &str) -> Option<SlotId> {
