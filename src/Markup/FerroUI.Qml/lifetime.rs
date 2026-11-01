@@ -33,6 +33,8 @@ impl Instance {
         }
         for &id in dead {
             self.dynamic.deadlines.remove(&id);
+            self.dynamic.file_errors.remove(&id);
+            self.dynamic.loading.remove(&id);
             self.dynamic.templates.remove(&id);
             self.dynamic.contexts.remove(&id);
             self.models.remove(&id);

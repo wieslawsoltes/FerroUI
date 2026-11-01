@@ -324,6 +324,7 @@ impl Transaction<'_> {
             }
         }
         if name=="destroy"{return self.destroy_method(owner,&arguments);}
+        if self.model.is_component(owner) && name=="errorString" && arguments.is_empty(){return Ok(Value::String(self.model.dynamic.file_errors.get(&owner).cloned().unwrap_or_default()));}
         if self.model.is_component(owner) && name=="createObject" {return self.create_method(owner,&arguments);}
         if node.signal(name).is_some() {
             self.signal(owner, name, arguments)?;

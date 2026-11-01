@@ -5,6 +5,7 @@ use std::path::{Path, PathBuf};
 use std::rc::Rc;
 
 pub(crate) struct Files {
+    project: PathBuf,
     component_entries: BTreeMap<String, PathBuf>,
     #[cfg(feature = "javascript")]
     resources: Option<crate::javascript::Resources>,
@@ -16,6 +17,7 @@ pub(crate) struct Files {
 impl Files {
     pub(crate) fn new(roots: Vec<PathBuf>) -> Self {
         Self {
+            project:PathBuf::new(),
             component_entries: BTreeMap::new(),
             #[cfg(feature = "javascript")]
             resources: None,
@@ -34,6 +36,7 @@ impl Files {
             .canonicalize()
             .map_err(|e| format!("{}: {e}", input.display()))?;
         let root = input.parent().ok_or("component needs a parent directory")?;
+        self.project = root.to_owned();
         for entry in entries {
             if entry.is_absolute() || entry.has_root() {
                 return Err(format!(
@@ -91,6 +94,8 @@ impl Files {
             };
             #[cfg(not(feature = "javascript"))]
             let document = parse(&text).map_err(|e| format!("{}:{e}", path.display()))?;
+            let mut document=document;
+            if let Ok(path)=path.strip_prefix(&self.project){document.root.set_source_url(&project_url(path));}
             self.documents.insert(path.clone(), Rc::new(document));
         }
         Ok(ComponentSource {

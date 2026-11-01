@@ -174,6 +174,7 @@ structure!(PropertyShadow {
     storage
 });
 structure!(Object {
+    source_url,
     shadows,
     type_name,
     members,

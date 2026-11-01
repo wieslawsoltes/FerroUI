@@ -307,6 +307,9 @@ impl<'a> Builder<'a> {
             implicit: Vec::new(),
             read_candidates: Vec::new(),
         };
+        for (url,shape) in &document.components{
+            builder.instance.dynamic.catalog.insert(url.clone(),dynamic::Template::from_object(shape.clone(),&document.imports)?);
+        }
         builder.object(&document.root, None)?;
         // Module objects share this engine's slots and dependency graph. They
         // have no visual parent and are allocated before any binding runs.
@@ -405,7 +408,7 @@ impl<I: std::ops::DerefMut<Target=Instance>> Builder<'_,I> {
         let id=self.instance.next_object();
         self.instance.dynamic.serial+=1;
         self.instance.nodes.push(NodeEntry{id,live:true,data:Some(Box::new(Node {
-            context:self.context,visual_children:definition.visual_children.clone(),
+            source_url:source.source_url.clone(),context:self.context,visual_children:definition.visual_children.clone(),
             shadows: source.shadows.clone(),
             type_scope: self.scopes.imports(imports, self.registry),
             composite_types: source.composite_types.clone(),
@@ -616,7 +619,7 @@ impl<I: std::ops::DerefMut<Target=Instance>> Builder<'_,I> {
                 _ => (),
             }
         }
-        if module=="QtQml" && name=="Component" && !self.instance.dynamic.templates.contains_key(&id) { return Err(Error::new("Component requires an object definition")); }
+        if module=="QtQml" && name=="Component" && !self.instance.dynamic.templates.contains_key(&id) && !self.instance.dynamic.file_errors.contains_key(&id){ return Err(Error::new("Component requires an object definition")); }
         if model {
             let count = self.instance.key(id, "count")?;
             self.instance.slots[count].value =

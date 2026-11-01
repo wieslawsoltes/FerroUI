@@ -237,6 +237,16 @@ impl Realm {
             }
             return Ok(Json::Null);
         }
+        if matches!(op,"createComponent"|"createQmlObject"){
+            let args=field(v,2)?.as_array().ok_or_else(||Error::new("invalid factory args"))?.iter().map(|arg|self.decode(ctx,arg)).collect::<Result<Vec<_>,_>>()?;
+            let value=if op=="createQmlObject"{ctx.qml_from_arguments(&args)?}else if id==0{
+                ctx.component_from_arguments(Some("https://qml.invalid/components/project/"),&args)?
+            }else{
+                let scope=self.tables.borrow().scope_values.get(&id).filter(|(owner,_)|*owner==instance).map(|(_,scope)|scope.clone()).ok_or_else(||Error::new("expired component scope"))?;
+                ctx.in_scope(&scope,|ctx|ctx.component_from_arguments(v.get(3).and_then(Json::as_str),&args))?
+            };
+            return self.encode(instance,&value);
+        }
         if op=="construct"{
             let Value::Object(factory)=self.lookup(ctx,id)? else{return Err(Error::new("invalid Component"))};
             let parent=match self.decode(ctx,field(v,2)?)?{Value::Object(id)=>Some(id),Value::Null|Value::Undefined=>None,_=>return Err(Error::new("invalid parent"))};

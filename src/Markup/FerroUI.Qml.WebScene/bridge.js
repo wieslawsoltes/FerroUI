@@ -26,6 +26,15 @@
             const method = methodOwners.get(fn);
             rpc(["callLater", method ? method.id : 0, method ? method.key : atom(fn), args.map(value => encode(value))]);
         },
+        createComponent(...args){return decode(rpc(["createComponent",0,args.map(v=>encode(v))]));},
+        createQmlObject(...args){
+            try{return decode(rpc(["createQmlObject",0,args.map(v=>encode(v))]));}
+            catch(error){
+                const match=/^(.*?):(\d+):(\d+): (.*)$/s.exec(error.message);
+                if(match){const [,fileName,line,column,message]=match;error.qmlErrors=[{fileName,lineNumber:+line,columnNumber:+column,message}];}
+                throw error;
+            }
+        },
         binding(fn) {
             if (arguments.length !== 1 || typeof fn !== "function") {
                 throw new Error("Qt.binding expects one function");
@@ -175,6 +184,7 @@
     function environment(c) {
         if(scopes.has(c.scope)) return scopes.get(c.scope);
         const names=new Set(c.names), graph=c.graph;
+        const scopedQt=Object.freeze({...globalThis.Qt,createComponent(...args){return decode(rpc(["createComponent",c.scope,args.map(v=>encode(v)),c.origin]));}});
         const groups=new Map();
         for (const name of names) if(name.includes(".")) {
             const [prefix,leaf]=name.split(".");
@@ -183,9 +193,10 @@
         }
         const target=Object.create(null);
         const scope=new Proxy(target,{
-            has(_,k){return typeof k==="string"&&(names.has(k)||groups.has(k)||modules.has(graph,k)||denied.has(k)||k.startsWith("__webScene"));},
+            has(_,k){return typeof k==="string"&&(k==="Qt"||names.has(k)||groups.has(k)||modules.has(graph,k)||denied.has(k)||k.startsWith("__webScene"));},
             get(_,k){
                 if(typeof k!=="string") return undefined;
+                if(k==="Qt"&&!names.has(k))return scopedQt;
                 if(modules.has(graph,k)) {
                     const root=c.componentScope===c.scope ? scope : environment({
                         scope:c.componentScope,componentScope:c.componentScope,names:c.componentNames,graph

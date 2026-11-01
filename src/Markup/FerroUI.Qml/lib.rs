@@ -7,6 +7,7 @@ pub mod compiled;
 mod connections;
 mod deferred;
 mod dynamic;
+mod catalog;
 mod lifetime;
 mod initial;
 pub use initial::InitialProperty;
@@ -60,6 +61,7 @@ impl std::ops::DerefMut for NodeEntry{
     fn deref_mut(&mut self)->&mut Node{self.data.as_deref_mut().expect("access to retired QML object")}
 }
 struct Node {
+    source_url:Option<String>,
     context:Option<ObjectId>,
     visual_children:Option<String>,
     shadows: Vec<ir::PropertyShadow>,

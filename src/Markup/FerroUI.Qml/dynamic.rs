@@ -20,6 +20,9 @@ pub(crate) struct Components {
     pub contexts: BTreeMap<ObjectId, Context>,
     pub created: Vec<ObjectId>,
     pub deadlines: BTreeMap<ObjectId, std::time::Duration>,
+    pub catalog:BTreeMap<String,Template>,
+    pub file_errors:BTreeMap<ObjectId,String>,
+    pub loading:BTreeSet<ObjectId>,
     pub templates: BTreeMap<ObjectId, Template>,
 }
 impl Instance {
@@ -40,10 +43,11 @@ impl Instance {
         self.dynamic.revision
     }
     pub fn is_component(&self, id: ObjectId) -> bool {
-        self.node(id).is_some() && self.dynamic.templates.contains_key(&id)
+        self.node(id).is_some_and(|n|n.module=="QtQml" && n.name=="Component")
     }
 }
 pub(crate) struct Checkpoint {
+    pub(crate) loaded: BTreeSet<ObjectId>,
     pub(crate) removed: BTreeSet<ObjectId>,
     pub(crate) children: BTreeMap<ObjectId, Vec<ObjectId>>,
     pub(crate) deadlines: BTreeMap<ObjectId, Option<std::time::Duration>>,
@@ -104,6 +108,7 @@ impl Instance {
     }
     pub(crate) fn checkpoint(&self) -> Checkpoint {
         Checkpoint {
+            loaded:Default::default(),
             removed: Default::default(),
             children: Default::default(),
             deadlines: Default::default(),
@@ -115,6 +120,7 @@ impl Instance {
         }
     }
     pub(crate) fn rollback_creation(&mut self, c: Checkpoint) {
+        self.dynamic.loading.extend(c.loaded);
         for (id, old) in c.deadlines {
             match old {
                 Some(when) => {
@@ -153,6 +159,8 @@ impl Instance {
         self.nodes.truncate(c.nodes);
         self.properties.truncate(c.slots);
         self.slots.truncate(c.slots);
+        self.dynamic.loading.retain(|id|id.index<c.nodes);
+        self.dynamic.file_errors.retain(|id,_|id.index<c.nodes);
         self.dynamic.templates.retain(|id, _| id.index < c.nodes);
         self.dynamic.contexts.retain(|id, _| id.index < c.nodes);
         self.dynamic.created.truncate(c.created);
@@ -295,6 +303,7 @@ impl crate::transaction::Transaction<'_> {
             Some(Value::Record(r)) if !r.is_array() => self.model.record_entries(r)?.clone(),
             _ => return Err(Error::new("invalid initial property map")),
         };
+        if self.model.get(component,"status")? != Value::Number(1.) { return Ok(Value::Null); }
         if args.len() > 2 {
             return Err(Error::new(
                 "createObject expects a parent and initial property map",

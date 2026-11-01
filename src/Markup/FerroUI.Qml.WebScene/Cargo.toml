@@ -20,7 +20,7 @@ path = "worker.rs"
 
 [dependencies]
 getrandom.workspace = true
-ferroui-qml.workspace = true
+ferroui-qml = { workspace = true, features = ["javascript"] }
 serde_json.workspace = true
 libloading = "0.8"
 percent-encoding = "2"

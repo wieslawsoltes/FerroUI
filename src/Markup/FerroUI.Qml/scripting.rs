@@ -297,6 +297,14 @@ impl ScriptContext<'_, '_> {
         let result=self.tx.try_create_with_properties(factory,parent,props).map(|id|id.map(Value::Object).unwrap_or(Value::Null));
         self.tx.host_result(result)
     }
+    pub fn component_from_arguments(&mut self, origin:Option<&str>,args:&[Value])->Result<Value,Error>{
+        self.tx.component_call(self.owner,origin,args)
+    }
+    pub fn qml_from_arguments(&mut self,args:&[Value])->Result<Value,Error>{
+        let before=self.tx.model.structure_revision();
+        let result=self.tx.text_component_call(self.owner,args);
+        if result.is_err() && before!=self.tx.model.structure_revision(){self.tx.host_result(result)}else{result}
+    }
     pub fn is_component(&self, object:ObjectId)->bool{self.tx.model.is_component(object)}
     pub fn is_worker_script(&self, id: ObjectId) -> bool {
         self.tx.model.workers.contains(id)
@@ -446,7 +454,7 @@ impl ScriptContext<'_, '_> {
             names.extend(["start", "restart", "stop"].map(str::to_owned));
         }
         if self.tx.model.dynamic.contexts.contains_key(&object){names.insert("destroy".into());}
-        if self.tx.model.is_component(object){names.insert("createObject".into());}
+        if self.tx.model.is_component(object){names.extend(["createObject","errorString"].map(str::to_owned));}
         if self.tx.model.models.contains_key(&object) {
             names.extend(
                 [
@@ -738,7 +746,7 @@ impl Instance {
             return false;
         }
         self.node(object).is_some_and(|node| {
-            (self.dynamic.contexts.contains_key(&object)&&name=="destroy") || (self.is_component(object) && name=="createObject") || node.methods.contains_key(name)
+            (self.dynamic.contexts.contains_key(&object)&&name=="destroy") || (self.is_component(object) && matches!(name,"createObject"|"errorString")) || node.methods.contains_key(name)
                 || node.native.contains_key(name)
                 || node.signal(name).is_some()
                 || self.workers.contains(object) && name == "sendMessage"

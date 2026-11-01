@@ -217,6 +217,8 @@ impl Frame<'_, '_> {
                 }
                 Ok(Value::Undefined)
             }
+            Receiver::Qt if name=="createComponent"=>self.tx.component_call(self.owner,None,&args),
+            Receiver::Qt if name=="createQmlObject"=>self.tx.text_component_call(self.owner,&args),
             Receiver::Qt => crate::enums::qt(name, &args),
             Receiver::Math => math(name, &args),
         }

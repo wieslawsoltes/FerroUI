@@ -146,3 +146,66 @@ fn initial_bindings_run_before_completion() {
         );
     }
 }
+
+mod catalog_native {
+    include!(concat!(env!("OUT_DIR"), "/catalog_native.rs"));
+}
+#[cfg(feature = "webscene")]
+mod catalog_guest {
+    include!(concat!(env!("OUT_DIR"), "/catalog_guest.rs"));
+}
+fn catalog(mut vm: Instance) {
+    let root = vm.root();
+    assert_eq!(vm.call(root, "make", vec![]).unwrap(), Value::Number(11.));
+    assert_eq!(
+        vm.call(root, "makeType", vec![]).unwrap(),
+        Value::String("named".into())
+    );
+    assert_eq!(
+        vm.call(root, "makeViaString", vec![]).unwrap(),
+        Value::Number(13.)
+    );
+    let missing = id(vm.call(root, "missing", vec![]).unwrap());
+    assert_eq!(vm.get(missing, "status").unwrap(), Value::Number(3.));
+    assert!(
+        matches!(vm.call(missing,"errorString",vec![]).unwrap(),Value::String(s) if s.contains("unknown.qml"))
+    );
+    let loading = id(vm.call(root, "startAsync", vec![]).unwrap());
+    assert_eq!(vm.get(loading, "status").unwrap(), Value::Number(2.));
+    vm.advance_time(std::time::Duration::ZERO).unwrap();
+    assert_eq!(vm.get(loading, "status").unwrap(), Value::Number(1.));
+}
+#[test]
+fn cargo_file_factories_are_linked_and_relocatable() {
+    catalog(
+        Instance::new(
+            &catalog_native::compiled_qml(),
+            &TypeRegistry::new(),
+            Default::default(),
+        )
+        .unwrap(),
+    );
+}
+#[cfg(feature = "webscene")]
+#[test]
+fn linked_file_and_string_factories_in_both_javascript_profiles() {
+    let reg = TypeRegistry::new();
+    let engine = std::rc::Rc::new(ferroui_qml_webscene::WebSceneEngine::from_env().unwrap());
+    let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("creation/catalog/Main.qml");
+    let doc = ferroui_qml_build::Compiler::new()
+        .with_javascript()
+        .qml_entry("Part.qml")
+        .load(path)
+        .unwrap()
+        .document;
+    catalog(Instance::with_engine(&doc, &reg, Default::default(), engine.clone()).unwrap());
+    catalog(
+        Instance::with_engine(
+            &catalog_guest::compiled_qml(),
+            &reg,
+            Default::default(),
+            engine,
+        )
+        .unwrap(),
+    );
+}

@@ -116,6 +116,9 @@ impl Import {
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Object {
+    /// Virtual source location for declaration-relative resources.
+    #[serde(default)]
+    pub source_url: Option<String>,
     /// Lexical property lookup entries introduced when flattening source inheritance.
     #[serde(default)]
     pub shadows: Vec<PropertyShadow>,
@@ -323,5 +326,21 @@ impl Expr {
             Self::Binary(_, a, _) => a.first_read(),
             _ => None,
         }
+    }
+}
+
+impl Object{
+    pub fn set_source_url(&mut self,url:&str){
+        fn visit(members:&mut [Member],url:&str){
+            for member in members{
+                match &mut member.kind{
+                    MemberKind::Component{object,..}|MemberKind::Child(object)|MemberKind::OnProperty{object,..}=>object.set_source_url(url),
+                    MemberKind::Group{members,..}=>visit(members,url),
+                    MemberKind::Property{value:Some(binding),..}|MemberKind::Binding{value:binding,..}=>match binding{
+                        Binding::Object(child)=>child.set_source_url(url),Binding::Objects(items)=>for item in items{item.set_source_url(url)},_=>()
+                    },_=>()
+                }
+            }
+        } self.source_url.get_or_insert_with(||url.into());visit(&mut self.members,url);
     }
 }

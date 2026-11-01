@@ -44,6 +44,7 @@ impl TimerChanges {
 impl Instance {
     /// Elapsed time until the earliest active timer should be serviced.
     pub fn next_timer_deadline(&self) -> Option<Duration> {
+        if !self.dynamic.loading.is_empty(){return Some(Duration::ZERO);}
         self.timers
             .deadlines
             .values()
@@ -53,7 +54,7 @@ impl Instance {
     }
 
     pub fn has_timers(&self) -> bool {
-        !self.timers.deadlines.is_empty() || !self.dynamic.deadlines.is_empty()
+        !self.timers.deadlines.is_empty() || !self.dynamic.deadlines.is_empty() || !self.dynamic.loading.is_empty()
     }
 
     /// A deterministic dispatcher tick. A delayed host delivers at most one
@@ -135,6 +136,10 @@ impl Transaction<'_> {
             .checked_add(elapsed)
             .ok_or_else(|| Error::new("component clock overflow"))?;
         self.model.timers.now = now;
+        for id in std::mem::take(&mut self.model.dynamic.loading){
+            self.structure.loaded.insert(id);
+            if self.model.node(id).is_some(){self.finish_factory(id)?;}
+        }
         let pending_destroy:Vec<_>=self.model.dynamic.deadlines.iter().filter_map(|(&id,&due)|(due<=now).then_some(id)).collect();
         let due: Vec<_> = self
             .model

@@ -14,8 +14,12 @@ categories.workspace = true
 [lib]
 path = "lib.rs"
 
+[features]
+javascript = ["ferroui-qml-compiler/javascript"]
+
 [dependencies]
 serde = { workspace = true, features = ["derive"] }
+url = "2"
 ferroui-qml-compiler.workspace = true
 
 [package.metadata.release]

@@ -1,4 +1,6 @@
 fn main() {
+    ferroui_qml_build::Compiler::new().qml_entry("Part.qml").compile_file("creation/catalog/Main.qml","catalog_native.rs").expect("compile file factories");
+    #[cfg(feature="webscene")] ferroui_qml_build::Compiler::new().with_javascript().qml_entry("Part.qml").compile_file("creation/catalog/Main.qml","catalog_guest.rs").expect("compile guest file factories");
     #[cfg(feature="webscene")] ferroui_qml_build::Compiler::new().with_javascript().compile_file("creation/Initial.qml","component_properties.rs").expect("compile initial bindings");
     ferroui_qml_build::compile_file("creation/Main.qml", "dynamic_component.rs")
         .expect("compile dynamic component");
