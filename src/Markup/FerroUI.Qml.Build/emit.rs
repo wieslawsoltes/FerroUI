@@ -184,7 +184,17 @@ structure!(PropertyShadow {
     storage
 });
 structure!(SourceLayer { scope, url });
+impl Rust for ListAssignment {
+    fn rust(&self) -> TokenStream {
+        match self {
+            Self::Append => quote!(q::ListAssignment::Append),
+            Self::Replace => quote!(q::ListAssignment::Replace),
+            Self::ReplaceIfNotDefault => quote!(q::ListAssignment::ReplaceIfNotDefault),
+        }
+    }
+}
 structure!(Object {
+    list_assignment,
     source_url,
     source_layers,
     shadows,

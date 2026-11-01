@@ -111,7 +111,7 @@ impl Engine {
             let registry = tx.model.dynamic.registry.clone().expect("type registry");
             let mut doc = source.document().clone();
             registry.validate_imports(&doc.imports)?;
-            if let Some(p) = doc.pragmas.first() {
+            if let Some(p) = doc.unsupported_pragma(false) {
                 return Err(Error::new(format!(
                     "unsupported document pragma '{}'",
                     p.name

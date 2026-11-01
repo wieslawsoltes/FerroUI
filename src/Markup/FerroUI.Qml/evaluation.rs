@@ -331,7 +331,15 @@ impl Transaction<'_> {
             .node(owner)
             .ok_or_else(|| Error::new("foreign or unknown object"))?;
         if let Some(method) = node.methods.get(name).cloned() {
-            let arguments = self.arguments(&method.parameters, arguments)?;
+            let mut supplied = arguments.into_iter();
+            let arguments = method
+                .parameters
+                .iter()
+                .map(|p| {
+                    let value = supplied.next().unwrap_or(Value::Undefined);
+                    self.model.function_value(p.ty.as_deref(), value)
+                })
+                .collect::<Result<Vec<_>, _>>()?;
             return self.run(owner, &method, arguments, reads);
         }
         if let Some(method) = node.native.get(name) {
@@ -460,7 +468,7 @@ impl Transaction<'_> {
         match proc.result.as_deref() {
             None | Some("var") => Ok(value),
             Some("void") if value == Value::Undefined => Ok(value),
-            Some(ty) => self.model.typed(ty, value),
+            Some(ty) => self.model.function_value(Some(ty), value),
         }
     }
 
@@ -680,6 +688,32 @@ pub(crate) fn object(value: Value) -> Result<ObjectId, Error> {
         Ok(id)
     } else {
         Err(Error::new("expected a QML object"))
+    }
+}
+
+impl Instance {
+    /// QML function annotations use JavaScript scalar conversion; native host
+    /// APIs and declarative property assignments keep their checked types.
+    fn function_value(&self, ty: Option<&str>, value: Value) -> Result<Value, Error> {
+        self.validate_handles(&value)?;
+        match ty {
+            Some("string") => Ok(Value::String(self.value_string(&value)?)),
+            Some("bool") => Ok(Value::Bool(value.truthy())),
+            Some("int" | "real" | "double") => {
+                let n = match value {
+                    Value::List(_) | Value::Record(_) => {
+                        Value::String(self.value_string(&value)?).number()?
+                    }
+                    _ => value.number()?,
+                };
+                Ok(Value::Number(if ty == Some("int") {
+                    f64::from(int32(n))
+                } else {
+                    n
+                }))
+            }
+            _ => self.typed(ty.unwrap_or("var"), value),
+        }
     }
 }
 

@@ -142,6 +142,14 @@ fn create_view() -> Result<QmlView, Error> {
 
 The compiler parses JavaScript with SWC, resolves relative files, watches the transitive dependency graph for Cargo and embeds executable scripts in the generated Rust. V8 compiles the JavaScript functions in the worker and caches their factories. For a binding such as `parent.width`, the runtime checks the actual receiver, declaration scope and property type. A proven read of a scalar QML slot stays on the UI thread and participates in normal dependency tracking. Method references, JavaScript-object members and general expressions retain guest execution. Static module initialization runs before this optimization takes effect. The default build mode continues to generate native Rust for the built-in language profile. To load a file at runtime, use `Compiler::new().with_javascript().load(path)?.document` and pass the linked document to `Instance::with_engine` or `QmlView::with_script_engine`.
 
+### Document behavior pragmas
+
+`pragma FunctionSignatureBehavior: Ignored` leaves the arguments and results of QML functions untyped within that source file. The default `Enforced` mode converts scalar arguments and results according to their annotations. Native method and signal signatures retain their registered types.
+
+`pragma ListPropertyAssignBehavior` controls declarative object lists in source components. `Append` adds instances to the inherited list, `Replace` replaces its contents, and `ReplaceIfNotDefault` appends only to the default list. Replaced base instances retain their IDs for inherited code. An ordinary array assignment replaces a sequence.
+
+Point, size and rectangle properties accept JavaScript objects with named geometry fields. Missing fields use the Qt type defaults, including `-1` for an omitted size dimension. Typed function arguments and return values use the same conversions. [Qt and Rust fixture](../tests/QmlCompiled/pragmas/Main.qml)
+
 ### Bundling modules selected at runtime
 
 Declare additional entry files when JavaScript selects a module by locale, theme or another runtime value. The paths passed to `javascript_entry` are relative to the directory containing the entry QML file. Calling it enables JavaScript compilation. Both `load` and `compile_file` embed the selected files and their literal dependencies. Cargo build scripts also register those files for recompilation.

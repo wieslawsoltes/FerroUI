@@ -2,7 +2,13 @@
 use super::*;
 
 pub(super) fn mode(ty: Option<&str>) -> Option<&'static str> {
-    ty.filter(|t| t.starts_with("list<")).map(|_| "array")
+    match ty? {
+        "point" => Some("point"),
+        "size" => Some("size"),
+        "rect" => Some("rect"),
+        t if t.starts_with("list<") => Some("array"),
+        _ => None,
+    }
 }
 fn field(v: &[Json], i: usize) -> Result<&Json, Error> {
     v.get(i)

@@ -442,3 +442,11 @@ fn nested_javascript_reports_utf8_source_positions() {
     let error = parse_external(src).unwrap_err();
     assert_eq!((error.line, error.column), (3, 31));
 }
+
+#[test]
+fn behavior_pragmas_report_bad_values_and_duplicates_at_source() {
+    for source in [
+        "pragma ListPropertyAssignBehavior: Replace, Unknown\nQtObject{}",
+        "pragma FunctionSignatureBehavior: Ignored\npragma FunctionSignatureBehavior: Enforced\nQtObject{}",
+    ] {assert!(parse(source).unwrap_err().message.contains("pragma"));}
+}

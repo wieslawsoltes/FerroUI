@@ -99,6 +99,12 @@
         const bound = methodOwners.get(value);
         if (bound) return ["bound", bound.id, bound.key];
         if (proxyIds.has(value)) return ["h",proxyIds.get(value)];
+        if ((mode === "point" || mode === "size" || mode === "rect") && typeof value === "object") {
+            return ["geometry", mode, geometryFields[mode].map(key => {
+                const field = value[key];
+                return encode(field === undefined ? (mode === "size" ? -1 : 0) : Number(field));
+            })];
+        }
         if (mode === "elements") {
             return ["a", Array.from({length: value.length}, (_, index) => encode(value[index]))];
         }
@@ -350,6 +356,7 @@
         }
         const target = decode(command.target);
         switch (command.op) {
+            case "copyData": return target;
             case "arrayElements": {
                 if (!Array.isArray(target)) return undefined;
                 const length = target.length;

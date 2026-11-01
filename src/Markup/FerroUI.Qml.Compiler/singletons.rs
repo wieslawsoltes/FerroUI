@@ -47,7 +47,12 @@ impl<R: ComponentResolver> Linker<'_, R> {
                 if let Some(id) = self.singleton_ids.get(&source.key) {
                     return Ok(Some(Expr::Name(id.clone())));
                 }
-                if !matches!(&source.document.pragmas[..], [pragma] if pragma.name=="Singleton" && pragma.values.is_empty())
+                if !source
+                    .document
+                    .pragmas
+                    .iter()
+                    .any(|p| p.name == "Singleton" && p.values.is_empty())
+                    || source.document.unsupported_pragma(true).is_some()
                 {
                     return Err(context.error(
                         span,

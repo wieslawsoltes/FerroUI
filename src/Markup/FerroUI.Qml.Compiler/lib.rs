@@ -1,6 +1,7 @@
 //! Clean-room QML frontend for FerroUI. Source offsets are UTF-8 byte offsets.
 mod ast;
 mod link;
+mod list_assignment;
 mod scope;
 pub use link::{link, ComponentResolver, ComponentSource, LinkError};
 #[cfg(feature = "javascript")]

@@ -95,6 +95,37 @@ pub struct ScriptResource {
     pub writable_exports: Vec<String>,
 }
 
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+pub enum ListAssignment {
+    #[default]
+    Append,
+    ReplaceIfNotDefault,
+    Replace,
+}
+impl Document {
+    /// Return the first pragma with no executable meaning in this document kind.
+    pub fn unsupported_pragma(&self, singleton: bool) -> Option<&Pragma> {
+        self.pragmas.iter().find(|p| match p.name.as_str() {
+            "Singleton" => !singleton || !p.values.is_empty(),
+            "FunctionSignatureBehavior" | "ListPropertyAssignBehavior" => !p.valid_behavior(),
+            _ => true,
+        })
+    }
+}
+
+impl Pragma {
+    pub(crate) fn valid_behavior(&self) -> bool {
+        !self.values.is_empty()
+            && self.values.iter().all(|s| match self.name.as_str() {
+                "FunctionSignatureBehavior" => matches!(s.as_str(), "Ignored" | "Enforced"),
+                "ListPropertyAssignBehavior" => {
+                    matches!(s.as_str(), "Append" | "Replace" | "ReplaceIfNotDefault")
+                }
+                _ => false,
+            })
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Pragma {
     pub name: String,
@@ -121,6 +152,9 @@ impl Import {
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Object {
+    /// Policy declared on the root of this source component.
+    #[serde(default)]
+    pub list_assignment: ListAssignment,
     /// Virtual source location for declaration-relative resources.
     #[serde(default)]
     pub source_url: Option<String>,

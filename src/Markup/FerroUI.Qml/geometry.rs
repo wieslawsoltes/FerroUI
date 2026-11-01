@@ -168,6 +168,37 @@ impl Instance {
             _ => Ok(None),
         }
     }
+    pub(crate) fn structured_geometry(
+        &self,
+        mut shape: Geometry,
+        value: &Value,
+    ) -> Result<Value, Error> {
+        for name in shape.fields() {
+            let field = match value {
+                Value::Record(record) => self.record_entries(record)?.get(*name).cloned(),
+                Value::Object(id) => self.get(*id, name).ok(),
+                Value::Geometry(input) => input.field(name).map(Value::Number),
+                Value::Null | Value::List(_) => None,
+                _ => {
+                    return Err(Error::new(format!(
+                        "cannot assign {value:?} to '{}'",
+                        shape.type_name()
+                    )))
+                }
+            };
+            if let Some(field) = field.filter(|v| *v != Value::Undefined) {
+                let number = match &field {
+                    Value::Record(_) | Value::List(_) => {
+                        Value::String(self.value_string(&field)?).number()?
+                    }
+                    _ => field.number()?,
+                };
+                shape = shape.with(name, number)?;
+            }
+        }
+        Ok(Value::Geometry(shape))
+    }
+
     pub(crate) fn geometry_path(
         &self,
         object: ObjectId,

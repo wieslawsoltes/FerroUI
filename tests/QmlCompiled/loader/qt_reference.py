@@ -155,6 +155,13 @@ def main():
     root.clamp()
     assert root.report() == "10/0/1/0/10/10/4/0/0", root.report()
     print("Qt 6.12.0 descending ranges, step methods and spin wrapping passed")
+    component, root = load(folder.parent / "pragmas/Main.qml")
+    assert root.policies() == "2/base/1/replaced", root.policies()
+    assert root.arities() == "39/0/0/kept", root.arities()
+    assert root.report() == "2/base/sub/1/new/3/old/retained/3/4/7/-1/1/9", root.report()
+    root.change()
+    assert root.report() == "2/base/sub/1/new/3/old/retained/0/6/5/6/0/0", root.report()
+    print("Qt 6.12.0 inherited list assignment, function signatures and structured geometry passed")
     del window, root, component, engine, app
 
 

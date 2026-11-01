@@ -94,7 +94,7 @@ pub fn link(
         .next_component()
         .map_err(|why| context.error(root.span, why))?
     {
-        if !entry.document.pragmas.is_empty() {
+        if entry.document.unsupported_pragma(false).is_some() {
             return Err(context.error(
                 entry.document.root.span,
                 "component entries must be instantiable QML documents",
@@ -204,7 +204,7 @@ impl<R: ComponentResolver> Linker<'_, R> {
             .resolve(&context.origin, &context.imports, &site.type_name)
             .map_err(|message| context.error(site.span, message))?
         {
-            if !source.document.pragmas.is_empty() {
+            if source.document.unsupported_pragma(false).is_some() {
                 return Err(context.error(
                     site.span,
                     format!(
@@ -487,6 +487,8 @@ fn shadow_properties(
 }
 
 fn merge_site(base: &mut Object, site: &mut Object, context: &Context) -> Result<(), LinkError> {
+    base.list_assignment = base.list_assignment.max(site.list_assignment);
+    super::list_assignment::merge(base, site);
     let assigned: HashMap<_, _> = site
         .members
         .iter()

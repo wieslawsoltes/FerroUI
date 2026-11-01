@@ -24,6 +24,8 @@ fn parse_tokens<'s>(source: &'s str, tokens: Tokens<'s>) -> Result<Document> {
         pos: 0,
         depth: 0,
         loops: 0,
+        ignored_signatures: false,
+        list_assignment: ListAssignment::Append,
     }
     .document()?;
     for import in document.imports.iter().filter(|i| i.is_script()) {
@@ -76,6 +78,8 @@ struct Parser<'s> {
     pos: usize,
     depth: usize,
     loops: usize,
+    ignored_signatures: bool,
+    list_assignment: ListAssignment,
 }
 
 impl<'s> Parser<'s> {
@@ -176,13 +180,47 @@ impl<'s> Parser<'s> {
     fn document(&mut self) -> Result<Document> {
         let mut pragmas = Vec::new();
         while self.at("pragma") {
-            pragmas.push(self.pragma()?);
+            let p = self.pragma()?;
+            if matches!(
+                p.name.as_str(),
+                "FunctionSignatureBehavior" | "ListPropertyAssignBehavior"
+            ) {
+                if pragmas
+                    .iter()
+                    .any(|earlier: &Pragma| earlier.name == p.name)
+                {
+                    return Err(Diagnostic::new(
+                        self.source,
+                        p.span,
+                        format!("duplicate {} pragma", p.name),
+                    ));
+                }
+                if !p.valid_behavior() {
+                    return Err(Diagnostic::new(
+                        self.source,
+                        p.span,
+                        format!("invalid {} pragma value '{}'", p.name, p.values.join(", ")),
+                    ));
+                }
+                let value = p.values.last().unwrap().as_str();
+                if p.name == "FunctionSignatureBehavior" {
+                    self.ignored_signatures = value == "Ignored";
+                } else {
+                    self.list_assignment = match value {
+                        "Replace" => ListAssignment::Replace,
+                        "ReplaceIfNotDefault" => ListAssignment::ReplaceIfNotDefault,
+                        _ => ListAssignment::Append,
+                    };
+                }
+            }
+            pragmas.push(p);
         }
         let mut imports = Vec::new();
         while self.at("import") {
             imports.push(self.import()?);
         }
-        let root = self.object()?;
+        let mut root = self.object()?;
+        root.list_assignment = self.list_assignment;
         if self.token().kind != Kind::End {
             return Err(self.error("expected end of document after the root object"));
         }
@@ -312,6 +350,7 @@ impl<'s> Parser<'s> {
             source_layers: vec![],
             shadows: Vec::new(),
             type_imports: None,
+            list_assignment: ListAssignment::Append,
             composite_types: Vec::new(),
             type_name,
             members,
@@ -428,8 +467,8 @@ impl<'s> Parser<'s> {
         }
         if self.eat("function") {
             let name = self.name()?;
-            let parameters = self.parameters(false)?;
-            let return_type = if self.eat(":") {
+            let mut parameters = self.parameters(false)?;
+            let mut return_type = if self.eat(":") {
                 Some(self.ty()?)
             } else {
                 None
@@ -444,6 +483,12 @@ impl<'s> Parser<'s> {
             };
             #[cfg(not(feature = "javascript"))]
             let body = self.block()?;
+            if self.ignored_signatures {
+                for p in &mut parameters {
+                    p.ty = None;
+                }
+                return_type = None;
+            }
             return Ok(MemberKind::Function {
                 name,
                 parameters,
@@ -459,7 +504,8 @@ impl<'s> Parser<'s> {
                 );
             }
             self.expect(":")?;
-            let object = self.object()?;
+            let mut object = self.object()?;
+            object.list_assignment = self.list_assignment;
             return Ok(MemberKind::Component { name, object });
         }
         if self.eat("enum") {

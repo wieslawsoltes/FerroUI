@@ -244,11 +244,14 @@ impl Instance {
         } else {
             value
         };
+        if let Some(default) = Geometry::default_for(ty) {
+            return match &value {
+                Value::Geometry(shape) if shape.type_name() == ty => Ok(value),
+                Value::String(text) => Geometry::parse(ty, text).map(Value::Geometry),
+                _ => self.structured_geometry(default, &value),
+            };
+        }
         match (ty, &value) {
-            (ty, Value::Geometry(shape)) if shape.type_name() == ty => (),
-            (ty, Value::String(text)) if Geometry::default_for(ty).is_some() => {
-                return Geometry::parse(ty, text).map(Value::Geometry)
-            }
             ("var" | "variant" | "alias", _) => {
                 self.validate_handles(&value)?;
             }
@@ -381,7 +384,7 @@ impl<'a> Builder<'a> {
     ) -> Result<Self, Error> {
         let document = source.document();
         registry.validate_imports(&document.imports)?;
-        if let Some(pragma) = document.pragmas.first() {
+        if let Some(pragma) = document.unsupported_pragma(false) {
             return Err(Error::new(format!(
                 "unsupported document pragma '{}'",
                 pragma.name
@@ -1011,6 +1014,7 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
                         source_url: child.source_url.clone(),
                         source_layers: child.source_layers.clone(),
                         shadows: Vec::new(),
+                        list_assignment: Default::default(),
                         composite_types: Vec::new(),
                         type_imports: Some(scope),
                         span: child.span,
