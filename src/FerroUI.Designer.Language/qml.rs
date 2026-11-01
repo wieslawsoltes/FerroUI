@@ -5,10 +5,11 @@ mod workspace;
 use crate::lsp::{decode, integer, text, uri};
 use crate::{require, LanguageError, LineIndex, Range, Result, TextChange};
 use ferroui_qml::TypeRegistry;
-use ferroui_qml_compiler::{parse_external, Diagnostic, SourceSpan};
+use ferroui_qml_compiler::{parse_external, Diagnostic, Document, SourceSpan};
 use model::{Model, Symbol};
 use serde_json::{json, Value};
-use std::collections::{BTreeMap, BTreeSet};
+use std::cell::{Cell, OnceCell, RefCell};
+use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::rc::Rc;
 use url::Url;
 
@@ -22,24 +23,39 @@ pub(crate) fn capabilities() -> Value {
 struct Buffer {
     version: i64,
     index: LineIndex,
-    model: std::result::Result<Model, Diagnostic>,
+    parsed: std::result::Result<Cell<Option<Document>>, Diagnostic>,
+    semantic: OnceCell<Model>,
 }
 impl Buffer {
     fn new(index: LineIndex, version: i64) -> Self {
         let source = index.source();
-        let model = parse_external(source).map(|doc| Model::new(source, doc));
+        let parsed = parse_external(source).map(|doc| Cell::new(Some(doc)));
         Self {
             version,
             index,
-            model,
+            parsed,
+            semantic: OnceCell::new(),
         }
     }
+
+    // Diagnostics only need the syntax tree. Consume it exactly once when an
+    // editor request first needs reference resolution or the document outline.
+    fn model(&self) -> Option<&Model> {
+        let parsed = self.parsed.as_ref().ok()?;
+        Some(self.semantic.get_or_init(|| {
+            Model::new(
+                self.index.source(),
+                parsed.take().expect("first semantic query"),
+            )
+        }))
+    }
+
     fn range(&self, span: SourceSpan) -> Result<Range> {
         self.index
             .range(ferroui_designer_core::SourceSpan::new(span.start, span.end))
     }
     fn publish(&self, uri: &str) -> Result<Value> {
-        let diagnostics = match &self.model {
+        let diagnostics = match &self.parsed {
             Ok(_) => vec![],
             Err(e) => vec![
                 json!({"range":self.range(e.span)?,"source":"FerroUI QML","severity":1,"message":e.message}),
@@ -75,6 +91,7 @@ impl Buffer {
 
 pub(crate) struct QmlService {
     docs: BTreeMap<String, Rc<Buffer>>,
+    disk: RefCell<VecDeque<(Url, Rc<Buffer>)>>,
     types: TypeRegistry,
     pub workspace: workspace::Workspace,
 }
@@ -84,6 +101,7 @@ impl QmlService {
             .map_err(|e| LanguageError(e.to_string()))?;
         Ok(Self {
             docs: BTreeMap::new(),
+            disk: RefCell::default(),
             workspace: workspace::Workspace::default(),
             types: registry.types_mut().clone(),
         })
@@ -122,7 +140,7 @@ impl QmlService {
             "textDocument/documentSymbol" | "textDocument/foldingRange" => {
                 let buffer = self.buffer(uri(p)?)?;
                 let mut items = vec![];
-                if let Ok(model) = &buffer.model {
+                if let Some(model) = buffer.model() {
                     if method == "textDocument/documentSymbol" {
                         items.push(buffer.symbol(&model.outline)?);
                     } else {
@@ -165,10 +183,39 @@ impl QmlService {
                 return Some((url.into(), doc.clone()));
             }
             if let Some(source) = self.workspace.read(&url) {
-                return Some((
-                    url.into(),
-                    Rc::new(Buffer::new(LineIndex::new(&source), -1)),
-                ));
+                // Read through the workspace boundary on each query. Comparing the
+                // actual text observes same-size saves and atomic replacements even
+                // on filesystems with coarse modification times.
+                const MAX_CACHED_FILES: usize = 16;
+                const MAX_CACHED_SOURCE_BYTES: usize = 2 * 1024 * 1024;
+                let mut cache = self.disk.borrow_mut();
+                if let Some(index) = cache.iter().position(|(key, _)| *key == url) {
+                    let entry = cache.remove(index).expect("cached file");
+                    if entry.1.index.source() == source {
+                        let buffer = entry.1.clone();
+                        cache.push_front(entry);
+                        return Some((url.into(), buffer));
+                    }
+                }
+                let buffer = Rc::new(Buffer::new(LineIndex::new(&source), -1));
+                if source.len() <= MAX_CACHED_SOURCE_BYTES {
+                    let mut bytes = source.len()
+                        + cache
+                            .iter()
+                            .map(|(_, b)| b.index.source().len())
+                            .sum::<usize>();
+                    while cache.len() >= MAX_CACHED_FILES || bytes > MAX_CACHED_SOURCE_BYTES {
+                        bytes -= cache
+                            .pop_back()
+                            .expect("cached file")
+                            .1
+                            .index
+                            .source()
+                            .len();
+                    }
+                    cache.push_front((url.clone(), buffer.clone()));
+                }
+                return Some((url.into(), buffer));
             }
         }
         None
@@ -182,6 +229,7 @@ impl QmlService {
         buffer: &Buffer,
         model: &Model,
         index: usize,
+        requested: Option<&str>,
     ) -> Result<BTreeMap<String, MemberInfo>> {
         let mut result = BTreeMap::new();
         let mut visited = BTreeSet::new();
@@ -190,16 +238,28 @@ impl QmlService {
         let mut base;
         while let Some((buffer, model, index)) = next.take() {
             let node = &model.nodes[index];
-            for (name, (detail, span)) in &node.declarations {
-                result.entry(name.clone()).or_insert(MemberInfo {
-                    detail: detail.clone(),
-                    kind: kind(detail),
-                    location: if buffer.model.is_ok() {
-                        Some((from.clone(), buffer.range(*span)?))
-                    } else {
-                        None
-                    },
-                });
+            if let Some(name) = requested {
+                if let Some((detail, span)) = node.declarations.get(name) {
+                    result.insert(
+                        name.to_owned(),
+                        MemberInfo {
+                            detail: detail.clone(),
+                            kind: kind(detail),
+                            location: Some((from, buffer.range(*span)?)),
+                        },
+                    );
+                    return Ok(result);
+                }
+            } else {
+                // Completion does not expose source ranges. In particular this
+                // also handles the temporary model of a repaired partial edit.
+                for (name, (detail, _)) in &node.declarations {
+                    result.entry(name.clone()).or_insert_with(|| MemberInfo {
+                        detail: detail.clone(),
+                        kind: kind(detail),
+                        location: None,
+                    });
+                }
             }
             if visited.len() >= 64 {
                 break;
@@ -210,11 +270,14 @@ impl QmlService {
                 }
                 base = doc;
                 from = path;
-                next = base.model.as_ref().ok().map(|m| (base.as_ref(), m, 0));
+                next = base.model().map(|m| (base.as_ref(), m, 0));
                 continue;
             }
             if let Ok((_, _, def)) = self.types.resolve(&model.imports, &node.ty) {
                 let mut insert = |name: &str, k, detail: &str| {
+                    if requested.is_some_and(|wanted| wanted != name) {
+                        return;
+                    }
                     result.entry(name.to_owned()).or_insert_with(|| MemberInfo {
                         detail: detail.into(),
                         kind: k,
@@ -238,7 +301,7 @@ impl QmlService {
     }
 
     fn lookup(&self, uri: &str, buffer: &Buffer, at: usize, hover: bool) -> Result<Value> {
-        let Ok(model) = &buffer.model else {
+        let Some(model) = buffer.model() else {
             return Ok(Value::Null);
         };
         let Some(owner) = model.owner(at) else {
@@ -255,7 +318,7 @@ impl QmlService {
             {
                 Some((uri.to_owned(), buffer.range(*span)?, node.ty.clone()))
             } else if let Some((path, base)) = self.component(uri, model, &node.ty) {
-                let Ok(base_model) = &base.model else {
+                let Some(base_model) = base.model() else {
                     return Ok(Value::Null);
                 };
                 Some((
@@ -292,10 +355,14 @@ impl QmlService {
                     owner: index,
                     lexical,
                 } => {
-                    let mut info = self.members(uri, buffer, model, index)?.remove(name);
+                    let mut info = self
+                        .members(uri, buffer, model, index, Some(name))?
+                        .remove(name);
                     let scope = model.nodes[index].scope;
                     if info.is_none() && lexical && index != scope {
-                        info = self.members(uri, buffer, model, scope)?.remove(name);
+                        info = self
+                            .members(uri, buffer, model, scope, Some(name))?
+                            .remove(name);
                     }
                     let Some(info) = info else {
                         return Ok(Value::Null);
@@ -335,7 +402,7 @@ impl QmlService {
             for module in self.types.modules() {
                 item(&mut items, module, 9, "QML module");
             }
-            return Ok(json!(items.into_values().collect::<Vec<_>>()));
+            return Ok(Value::Array(items.into_values().collect()));
         }
         let token = word(source, at);
         let prefix = &source[..token.start];
@@ -360,7 +427,7 @@ impl QmlService {
             None
         };
         let repaired;
-        let model = if let Ok(m) = &buffer.model {
+        let model = if let Some(m) = buffer.model() {
             m
         } else {
             repaired = repair();
@@ -376,7 +443,7 @@ impl QmlService {
         }
         if let Some(index) = native_owner {
             let node = &model.nodes[index];
-            for (name, info) in self.members(uri, buffer, model, index)? {
+            for (name, info) in self.members(uri, buffer, model, index, None)? {
                 item(&mut items, &name, info.kind, &info.detail);
             }
             if qualifier.is_none() {
@@ -417,7 +484,7 @@ impl QmlService {
                 }
             }
         }
-        Ok(json!(items.into_values().collect::<Vec<_>>()))
+        Ok(Value::Array(items.into_values().collect()))
     }
 }
 

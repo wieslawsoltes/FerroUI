@@ -226,6 +226,10 @@ fn workspace_file_navigation_prefers_an_unsaved_buffer() {
         false,
     );
     assert_eq!(c.query("textDocument/definition", query.clone()), first);
+    // The disk file has the same size and remains at the same URI.
+    std::fs::write(badge.to_file_path().unwrap(), "import QtQuick\n Item{}").unwrap();
+    let replaced = c.query("textDocument/definition", query.clone());
+    assert_eq!(replaced["range"]["start"]["character"], 1);
     let items = c.query("textDocument/completion", query);
     assert!(items
         .as_array()
