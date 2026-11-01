@@ -1,4 +1,4 @@
-use super::web_render_target::update_size;
+use super::web_render_target::{present, update_size};
 use super::{BrowserSurfaceShared, RenderStatistics};
 use crate::interop::canvas_helper::RENDER_TARGET_KIND_SOFTWARE;
 use crate::interop::{thread_proxy, JsObject};
@@ -52,9 +52,11 @@ impl BrowserSoftwareRenderTarget {
         Rc::new(FramebufferRenderTarget { parent: self.clone(), shared, fb: RefCell::new(None) })
     }
 
-    fn blit(&self, fb: &RetainedFramebuffer) {
+    fn blit(&self, fb: &RetainedFramebuffer, scaling: f64) {
         let size = fb.size();
         put_pixel_data(&self.js, fb.address() as usize as u32, size.width * size.height * 4, size.width, size.height);
+        // The canvas of a render worker hands the frame to the page here.
+        present(&self.js, size, scaling);
         // Not from upstream: where frames are drawn is otherwise invisible
         // to the thread of the page.
         RenderStatistics::frame_presented(
@@ -98,7 +100,7 @@ impl IFramebufferRenderTarget for FramebufferRenderTarget {
             Vector::new(scaling * 96.0, scaling * 96.0),
             move |fb| {
                 if let Some(parent) = blit_target.upgrade() {
-                    parent.blit(fb);
+                    parent.blit(fb, scaling);
                     // The frame is on the canvas: whoever waits for the
                     // first one of this canvas is told.
                     shared.frame_presented();

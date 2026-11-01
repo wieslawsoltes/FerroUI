@@ -3,12 +3,14 @@ import { WebGlRenderTarget } from "./webGlRenderTarget";
 import { WebRenderTarget } from "./webRenderTarget";
 import { SoftwareRenderTarget } from "./softwareRenderTarget";
 import { FerroExports } from "../ferroExports";
+import { CanvasPresenter } from "./canvasPresenter";
 
 export class WebRenderTargetRegistry {
     private static targets: { [id: number]: (WebRenderTarget) } = {};
     private static registry: { [id: number]: ({
         canvas: HTMLCanvasElement;
         worker?: Worker;
+        presenter?: CanvasPresenter;
     }); } = {};
 
     private static nextId = 1;
@@ -25,6 +27,7 @@ export class WebRenderTargetRegistry {
     private static heldBack: Array<{
         id: number;
         canvas: OffscreenCanvas;
+        port: MessagePort;
         modes: BrowserRenderingMode[];
     }> = [];
 
@@ -35,22 +38,34 @@ export class WebRenderTargetRegistry {
                 canvas
             };
             WebRenderTargetRegistry.targets[id] = WebRenderTargetRegistry.createRenderTarget(canvas, preferredModes);
-        } else if (pthreadId === WebRenderTargetRegistry.pendingThread && WebRenderTargetRegistry.workerThreadId === 0) {
+            return id;
+        }
+        // Not in the original, which transfers the control of the canvas to the worker. The worker
+        // draws to an offscreen canvas of its own and the page shows its frames
+        // (`CanvasPresenter`): the size of the canvas element and the frame it shows change
+        // together.
+        const offscreen = new OffscreenCanvas(Math.max(1, canvas.width), Math.max(1, canvas.height));
+        const channel = new MessageChannel();
+        const presenter = new CanvasPresenter(canvas, channel.port1);
+        if (pthreadId === WebRenderTargetRegistry.pendingThread && WebRenderTargetRegistry.workerThreadId === 0) {
             WebRenderTargetRegistry.heldBack.push({
                 id,
-                canvas: canvas.transferControlToOffscreen(),
+                canvas: offscreen,
+                port: channel.port2,
                 modes: preferredModes
             });
             WebRenderTargetRegistry.registry[id] = {
-                canvas
+                canvas,
+                presenter
             };
         } else {
             const worker = WebRenderTargetRegistry.getWorker(
                 pthreadId === WebRenderTargetRegistry.pendingThread ? WebRenderTargetRegistry.workerThreadId : pthreadId);
-            WebRenderTargetRegistry.postCanvas(worker, id, canvas.transferControlToOffscreen(), preferredModes);
+            WebRenderTargetRegistry.postCanvas(worker, id, offscreen, channel.port2, preferredModes);
             WebRenderTargetRegistry.registry[id] = {
                 canvas,
-                worker
+                worker,
+                presenter
             };
         }
         return id;
@@ -66,7 +81,7 @@ export class WebRenderTargetRegistry {
         WebRenderTargetRegistry.heldBack = [];
         const worker = WebRenderTargetRegistry.getWorker(pthreadId);
         for (const held of heldBack) {
-            WebRenderTargetRegistry.postCanvas(worker, held.id, held.canvas, held.modes);
+            WebRenderTargetRegistry.postCanvas(worker, held.id, held.canvas, held.port, held.modes);
             const entry = WebRenderTargetRegistry.registry[held.id];
             if (entry != null) { entry.worker = worker; }
         }
@@ -87,13 +102,14 @@ export class WebRenderTargetRegistry {
         return worker;
     }
 
-    private static postCanvas(worker: Worker, id: number, offscreen: OffscreenCanvas, modes: BrowserRenderingMode[]) {
+    private static postCanvas(worker: Worker, id: number, offscreen: OffscreenCanvas, port: MessagePort, modes: BrowserRenderingMode[]) {
         worker.postMessage({
             ferrouiCmd: "registerCanvas",
             canvas: offscreen,
+            port,
             modes,
             id
-        }, [offscreen]);
+        }, [offscreen, port]);
     }
 
     static initializeWorker() {
@@ -102,6 +118,7 @@ export class WebRenderTargetRegistry {
             const msg = ev;
             if (msg.data.ferrouiCmd === "registerCanvas") {
                 const target = WebRenderTargetRegistry.createRenderTarget(msg.data.canvas, msg.data.modes);
+                target.presentPort = msg.data.port;
                 WebRenderTargetRegistry.targets[msg.data.id] = target;
                 // Not in the original, which asks its registry for the target on each frame. Here
                 // the thread that created the canvas has a registry of its own, which never has
@@ -127,8 +144,10 @@ export class WebRenderTargetRegistry {
         // Our keys are _always_ numbers and are safe to delete
         delete WebRenderTargetRegistry.registry[id];
         /* eslint-enable */
+        entry?.presenter?.close();
         const held = WebRenderTargetRegistry.heldBack.findIndex(canvas => canvas.id === id);
         if (held >= 0) {
+            WebRenderTargetRegistry.heldBack[held].port.close();
             WebRenderTargetRegistry.heldBack.splice(held, 1);
             return;
         }
