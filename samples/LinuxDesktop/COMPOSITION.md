@@ -33,7 +33,7 @@ The input seat targets the topmost eligible client surface, including its popups
 
 ## WinUI appearance
 
-Open Appearance in the Windows profile to select Light, Dark, High Contrast or Compact density. The shell uses FerroUI’s compiled WinUI theme dictionaries, semantic brushes, controls and flyout composition resources. macOS and Material remain independent profiles. GTK and Qt clients draw their content and client-side decorations with their own toolkits. See [appearance profiles and extension points](APPEARANCE.md).
+Open Appearance in the Windows profile to select Light, Dark, High Contrast or Compact density. The shell installs FerroUI’s compiled WinUI theme, including all 95 control dictionaries merged by [WinUIControls.xaml](../../src/FerroUI.Themes.WinUI/Controls/WinUIControls.xaml) in this revision. Controls resolve semantic brushes, flyout materials and elevation from the active resources. Microsoft’s Windows App SDK hosts the Windows-specific WinUI runtime and interop APIs. Linux uses the FerroUI implementations. macOS and Material remain independent profiles. GTK and Qt clients draw their content and client-side decorations with their own toolkits. See [appearance profiles and extension points](APPEARANCE.md).
 
 The dark WinUI personalization flyout below samples the actual GTK and Qt surfaces in the same output. These are independent application processes.
 
@@ -48,7 +48,7 @@ The integration tests use Sway’s headless backend, GTK 3, PyQt5/Qt Wayland, Pi
 ```sh
 samples/LinuxDesktop/build.sh build --profile dev
 samples/LinuxDesktop/tests/ferro-compositor.sh target/debug/ferro-desktop /tmp/ferro-compositor
-samples/LinuxDesktop/tests/wayland-session.sh --ferro target/debug/ferro-desktop /tmp/ferro-composed-login
+FERRO_TEST_BENCHMARK=1 samples/LinuxDesktop/tests/wayland-session.sh --ferro target/debug/ferro-desktop /tmp/ferro-composed-login
 ```
 
 ## Launch the WinUI Control Gallery
