@@ -1,6 +1,6 @@
 use super::{
     VulkanCommandBuffer, VulkanCommandBufferPool, VulkanImage, VulkanKhrSurface, VulkanMemoryHelper,
-    VulkanSemaphorePair,
+    VulkanSemaphore,
 };
 use crate::{
     IVulkanKhrSurfacePlatformSurface, IVulkanPlatformGraphicsContext, VulkanError, VulkanExceptionExtensions,
@@ -17,15 +17,16 @@ use std::time::Duration;
 /// needs.
 pub(crate) struct VulkanDisplay {
     context: Rc<dyn IVulkanPlatformGraphicsContext>,
-    semaphore_pair: VulkanSemaphorePair,
+    acquire_slots: RefCell<Vec<AcquireSlot>>,
+    slot: Cell<usize>,
     next_image: Cell<u32>,
     surface: RefCell<Option<VulkanKhrSurface>>,
     surface_format: Cell<vk::SurfaceFormatKHR>,
     swapchain: Cell<vk::SwapchainKHR>,
     swapchain_extent: Cell<vk::Extent2D>,
     platform_surface: Rc<dyn IVulkanKhrSurfacePlatformSurface>,
-    swapchain_images: RefCell<Vec<vk::Image>>,
-    swapchain_image_views: RefCell<Vec<vk::ImageView>>,
+    swapchain_images: RefCell<Vec<SwapchainImage>>,
+    disposed: Cell<bool>,
     command_buffer_pool: Rc<VulkanCommandBufferPool>,
     size: Cell<PixelSize>,
     /// What the swap chain was created with.
@@ -33,6 +34,32 @@ pub(crate) struct VulkanDisplay {
     /// What the results of the presentation engine said of the swap chain
     /// since it was last checked, before a frame.
     state: Cell<SwapchainState>,
+}
+
+/// The acquire signal can be reused once its consuming queue submission is complete. Keep at
+/// most two frames in flight, and wait only when a slot is about to be reused.
+struct AcquireSlot {
+    available: VulkanSemaphore,
+    last_submission: Option<Rc<VulkanCommandBuffer>>,
+}
+
+impl Drop for AcquireSlot {
+    fn drop(&mut self) {
+        self.available.dispose();
+    }
+}
+
+/// Presentation may still be waiting on the signal after the blit fence fires. Reacquiring
+/// this particular image establishes when it is safe to signal its semaphore again.
+struct SwapchainImage {
+    handle: vk::Image,
+    finished: VulkanSemaphore,
+}
+
+impl Drop for SwapchainImage {
+    fn drop(&mut self) {
+        self.finished.dispose();
+    }
 }
 
 /// What a result of `vkAcquireNextImageKHR` or `vkQueuePresentKHR` means for
@@ -208,11 +235,18 @@ impl VulkanDisplay {
         parameters: SwapchainParameters,
         platform_surface: Rc<dyn IVulkanKhrSurfacePlatformSurface>,
     ) -> Result<Self, VulkanError> {
-        let semaphore_pair = VulkanSemaphorePair::new(context.clone())?;
-        let command_buffer_pool = VulkanCommandBufferPool::new(context.clone(), false)?;
+        let command_buffer_pool = match VulkanCommandBufferPool::new(context.clone(), false) {
+            Ok(pool) => pool,
+            Err(error) => {
+                context.device_api().destroy_swapchain_khr(context.device_handle(), swapchain);
+                surface.dispose();
+                return Err(error);
+            }
+        };
         let display = Self {
             context,
-            semaphore_pair,
+            acquire_slots: RefCell::new(Vec::new()),
+            slot: Cell::new(0),
             next_image: Cell::new(0),
             surface: RefCell::new(Some(surface)),
             surface_format: Cell::new(vk::SurfaceFormatKHR::default()),
@@ -220,7 +254,7 @@ impl VulkanDisplay {
             swapchain_extent: Cell::new(parameters.extent),
             platform_surface,
             swapchain_images: RefCell::new(Vec::new()),
-            swapchain_image_views: RefCell::new(Vec::new()),
+            disposed: Cell::new(false),
             command_buffer_pool,
             size: Cell::new(PixelSize::default()),
             parameters: Cell::new(parameters),
@@ -321,58 +355,43 @@ impl VulkanDisplay {
         surface: Rc<dyn IVulkanKhrSurfacePlatformSurface>,
     ) -> Result<VulkanDisplay, VulkanError> {
         let khr_surface = VulkanKhrSurface::new(context.clone(), surface.clone());
-        let (swapchain, parameters) = Self::create_swapchain(context, &khr_surface, None)?;
+        let (swapchain, parameters) = match Self::create_swapchain(context, &khr_surface, None) {
+            Ok(created) => created,
+            Err(error) => {
+                khr_surface.dispose();
+                return Err(error);
+            }
+        };
         VulkanDisplay::new(context.clone(), khr_surface, swapchain, parameters, surface)
     }
 
-    fn destroy_current_image_views(&self) {
-        let views = std::mem::take(&mut *self.swapchain_image_views.borrow_mut());
-        for image_view in views {
-            self.context.device_api().destroy_image_view(self.context.device_handle(), image_view);
-        }
-    }
-
     fn create_swapchain_images(&self) -> Result<(), VulkanError> {
-        self.destroy_current_image_views();
-        let extent = self.swapchain_extent.get();
-        self.size.set(PixelSize::new(extent.width as i32, extent.height as i32));
-        let images = self
-            .context
-            .device_api()
+        let handles = self.context.device_api()
             .get_swapchain_images_khr(self.context.device_handle(), self.swapchain.get())
             .throw_on_error("vkGetSwapchainImagesKHR")?;
-        let format = self.surface_format()?.format;
-        let mut views = Vec::with_capacity(images.len());
-        for image in &images {
-            views.push(self.create_swapchain_image_view(*image, format)?);
+        if handles.is_empty() {
+            return Err(VulkanError::new("The swap chain has no images"));
         }
-        *self.swapchain_images.borrow_mut() = images;
-        *self.swapchain_image_views.borrow_mut() = views;
+        let slot_count = handles.len().min(2);
+        let mut slots = Vec::with_capacity(slot_count);
+        for _ in 0..slot_count {
+            slots.push(AcquireSlot { available: VulkanSemaphore::new(self.context.clone())?, last_submission: None });
+        }
+        let mut images = Vec::with_capacity(handles.len());
+        for handle in handles {
+            images.push(SwapchainImage { handle, finished: VulkanSemaphore::new(self.context.clone())? });
+        }
+        // The old generation is idle before replacement. Temporaries clean themselves up on failure.
+        self.swapchain_images.replace(images);
+        self.acquire_slots.replace(slots);
+        self.slot.set(0);
+        let extent = self.swapchain_extent.get();
+        self.size.set(PixelSize::new(extent.width as i32, extent.height as i32));
         Ok(())
     }
 
-    fn create_swapchain_image_view(
-        &self,
-        swapchain_image: vk::Image,
-        format: vk::Format,
-    ) -> Result<vk::ImageView, VulkanError> {
-        let image_view_create_info = vk::ImageViewCreateInfo::default()
-            .subresource_range(vk::ImageSubresourceRange {
-                aspect_mask: vk::ImageAspectFlags::COLOR,
-                level_count: 1,
-                layer_count: 1,
-                ..Default::default()
-            })
-            .format(format)
-            .image(swapchain_image)
-            .view_type(vk::ImageViewType::TYPE_2D);
-        self.context
-            .device_api()
-            .create_image_view(self.context.device_handle(), &image_view_create_info)
-            .throw_on_error("vkCreateImageView")
-    }
-
     fn recreate_swapchain(&self) -> Result<(), VulkanError> {
+        self.state.set(SwapchainState::OutOfDate);
         if self.surface.borrow().is_none() {
             return self.recreate_surface();
         }
@@ -385,17 +404,20 @@ impl VulkanDisplay {
         self.swapchain.set(swapchain);
         self.swapchain_extent.set(parameters.extent);
         self.parameters.set(parameters);
+        self.create_swapchain_images()?;
         self.state.set(SwapchainState::Current);
-        self.create_swapchain_images()
+        Ok(())
     }
 
     fn recreate_surface(&self) -> Result<(), VulkanError> {
+        let _ = self.context.device_api().device_wait_idle(self.context.device_handle());
+        self.destroy_swapchain();
+        self.surface_format.set(vk::SurfaceFormatKHR::default());
         if let Some(surface) = self.surface.borrow_mut().take() {
             surface.dispose();
         }
         *self.surface.borrow_mut() =
             Some(VulkanKhrSurface::new(self.context.clone(), self.platform_surface.clone()));
-        self.destroy_swapchain();
         self.recreate_swapchain()
     }
 
@@ -417,11 +439,14 @@ impl VulkanDisplay {
     pub fn start_presentation(&self) -> Result<Rc<VulkanCommandBuffer>, VulkanError> {
         self.next_image.set(0);
         loop {
+            if let Some(previous) = self.acquire_slots.borrow_mut()[self.slot.get()].last_submission.take() {
+                previous.wait_for_completion()?;
+            }
             let (acquire_result, next_image) = self.context.device_api().acquire_next_image_khr(
                 self.context.device_handle(),
                 self.swapchain.get(),
                 u64::MAX,
-                self.semaphore_pair.image_available_semaphore().handle(),
+                self.acquire_slots.borrow()[self.slot.get()].available.handle(),
                 vk::Fence::null(),
             );
             self.next_image.set(next_image);
@@ -439,8 +464,11 @@ impl VulkanDisplay {
             }
         }
 
-        let command_buffer = self.command_buffer_pool.create_command_buffer()?;
-        command_buffer.begin_recording()?;
+        // If recording or submission fails, the acquire semaphore is already signalled.
+        // Retire this generation on retry rather than signal an unconsumed semaphore.
+        let retire_on_error = |_: &VulkanError| self.state.set(SwapchainState::OutOfDate);
+        let command_buffer = self.command_buffer_pool.create_command_buffer().inspect_err(retire_on_error)?;
+        command_buffer.begin_recording().inspect_err(retire_on_error)?;
         VulkanMemoryHelper::transition_layout(
             &*self.context,
             &command_buffer,
@@ -455,7 +483,7 @@ impl VulkanDisplay {
     }
 
     fn current_image(&self) -> vk::Image {
-        self.swapchain_images.borrow()[self.next_image.get() as usize]
+        self.swapchain_images.borrow()[self.next_image.get() as usize].handle
     }
 
     /// Records the copy of `image`, scaled to the size of the swap chain,
@@ -508,33 +536,41 @@ impl VulkanDisplay {
             vk::ImageLayout::TRANSFER_SRC_OPTIMAL,
             vk::AccessFlags::TRANSFER_READ,
             image.current_layout(),
-            vk::AccessFlags::NONE,
+            vk::AccessFlags::COLOR_ATTACHMENT_READ | vk::AccessFlags::COLOR_ATTACHMENT_WRITE,
             image.mip_levels(),
         );
     }
 
     /// Submits the commands and presents the acquired image.
-    pub fn end_presentation(&self, command_buffer: &VulkanCommandBuffer) -> Result<(), VulkanError> {
+    pub fn end_presentation(&self, command_buffer: &Rc<VulkanCommandBuffer>) -> Result<(), VulkanError> {
         VulkanMemoryHelper::transition_layout(
             &*self.context,
             command_buffer,
             self.current_image(),
             vk::ImageLayout::TRANSFER_DST_OPTIMAL,
-            vk::AccessFlags::NONE,
+            vk::AccessFlags::TRANSFER_WRITE,
             vk::ImageLayout::PRESENT_SRC_KHR,
             vk::AccessFlags::NONE,
             1,
         );
+        let images = self.swapchain_images.borrow();
+        let finished = &images[self.next_image.get() as usize].finished;
+        let mut slots = self.acquire_slots.borrow_mut();
+        let slot_index = self.slot.get();
+        let slot = &mut slots[slot_index];
         command_buffer.submit_with(
-            &[self.semaphore_pair.image_available_semaphore()],
-            &[vk::PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT],
-            &[self.semaphore_pair.render_finished_semaphore()],
+            &[&slot.available],
+            // Include the opening layout transition as well as the transfer blit.
+            &[vk::PipelineStageFlags::ALL_COMMANDS],
+            &[finished],
             None,
-        )?;
+        ).inspect_err(|_| self.state.set(SwapchainState::OutOfDate))?;
+        slot.last_submission = Some(command_buffer.clone());
+        self.slot.set((slot_index + 1) % slots.len());
 
         let (call_result, result) = self.context.device_api().vk_queue_present_khr(
             self.context.main_queue_handle(),
-            self.semaphore_pair.render_finished_semaphore().handle(),
+            finished.handle(),
             self.swapchain.get(),
             self.next_image.get(),
         );
@@ -546,20 +582,35 @@ impl VulkanDisplay {
                 self.state.set(self.state.get().after(outcome));
                 Ok(())
             }
-            SwapchainResult::SurfaceLost => vk::Result::ERROR_SURFACE_LOST_KHR.throw_on_error("vkQueuePresentKHR"),
-            SwapchainResult::Failed(result) => result.throw_on_error("vkQueuePresentKHR"),
+            SwapchainResult::SurfaceLost => {
+                self.state.set(SwapchainState::OutOfDate);
+                vk::Result::ERROR_SURFACE_LOST_KHR.throw_on_error("vkQueuePresentKHR")
+            }
+            SwapchainResult::Failed(result) => {
+                self.state.set(SwapchainState::OutOfDate);
+                result.throw_on_error("vkQueuePresentKHR")
+            }
         }
     }
 
     pub fn dispose(&self) {
+        if self.disposed.replace(true) {
+            return;
+        }
         let _ = self.context.device_api().device_wait_idle(self.context.device_handle());
-        self.semaphore_pair.dispose();
-        self.destroy_current_image_views();
+        self.swapchain_images.borrow_mut().clear();
+        self.acquire_slots.borrow_mut().clear();
         self.destroy_swapchain();
         self.command_buffer_pool.dispose();
         if let Some(surface) = self.surface.borrow_mut().take() {
             surface.dispose();
         }
+    }
+}
+
+impl Drop for VulkanDisplay {
+    fn drop(&mut self) {
+        self.dispose();
     }
 }
 

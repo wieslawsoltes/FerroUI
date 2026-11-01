@@ -336,7 +336,8 @@ fn frames_are_presented_through_a_swap_chain_and_the_swap_chain_follows_the_surf
     assert!(target.state().is_ready);
 
     let mut first_image = 0;
-    for frame in 0..3 {
+    // Reuse both acquire slots repeatedly and wrap the swap chain.
+    for frame in 0..24 {
         let session = target.begin_draw();
         // The device is locked for the time of the frame.
         assert_ne!(vk::Handle::as_raw(vulkan.main_queue_handle()), 0);
@@ -346,6 +347,7 @@ fn frames_are_presented_through_a_swap_chain_and_the_swap_chain_follows_the_surf
         let info = session.image_info();
         assert_ne!(info.handle, 0);
         assert_eq!(info.pixel_size, PixelSize::new(320, 200));
+        assert_eq!(info.level_count, 1, "the blit source contains one presentable mip level");
         assert_eq!(info.layout, vk::ImageLayout::COLOR_ATTACHMENT_OPTIMAL.as_raw() as u32);
         let expected = if session.is_rgba() { vk::Format::R8G8B8A8_UNORM } else { vk::Format::B8G8R8A8_UNORM };
         assert_eq!(info.format, expected.as_raw() as u32);

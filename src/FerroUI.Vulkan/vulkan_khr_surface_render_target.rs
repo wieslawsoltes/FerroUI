@@ -64,7 +64,7 @@ impl VulkanKhrRenderTarget {
             display.command_buffer_pool().clone(),
             self.format,
             display.size(),
-            0,
+            1, // Presentation blits only mip level zero.
         )?;
         *self.image.borrow_mut() = Some(Rc::new(image));
         Ok(())
@@ -80,7 +80,7 @@ impl VulkanKhrRenderTarget {
     fn try_begin_draw(&self, lock: &LockGuard) -> Result<Rc<VulkanImage>, VulkanError> {
         let _ = lock;
         let display = self.display();
-        display.command_buffer_pool().free_used_command_buffers();
+        display.command_buffer_pool().free_finished_command_buffers();
         let recreated = display.ensure_swapchain_available()?;
         let image = self.image.borrow().clone();
         match image {
