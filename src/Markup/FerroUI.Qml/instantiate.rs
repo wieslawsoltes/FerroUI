@@ -437,6 +437,9 @@ impl<I: std::ops::DerefMut<Target=Instance>> Builder<'_,I> {
                 default.clone(),
             )?;
         }
+        if (module == "QtQuick" && name == "Loader") || definition.lineage.iter().any(|(m,n)|m=="QtQuick" && n=="Loader") {
+            self.instance.dynamic.loaders.insert(id, Default::default());
+        }
         let model = module == list_model::MODULE && name == "ListModel";
         if model {
             self.instance.models.insert(id, Default::default());

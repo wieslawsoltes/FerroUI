@@ -13,6 +13,7 @@ pub(crate) struct Context {
 }
 #[derive(Default)]
 pub(crate) struct Components {
+    pub loaders: BTreeMap<ObjectId, crate::loader::State>,
     pub serial: u64,
     pub revision: u64,
     pub registry: Option<Rc<TypeRegistry>>,
@@ -150,6 +151,7 @@ impl Instance {
         self.dynamic.contexts.retain(|id, _| id.index < c.nodes);
         self.dynamic.created.truncate(c.created);
         self.dynamic.revision = c.revision;
+        self.dynamic.loaders.retain(|id,_| id.index < c.nodes);
         self.models.retain(|id, _| id.index < c.nodes);
         self.bindings.retain(|id| id.index < c.nodes);
         self.timers.truncate(c.nodes);

@@ -16,6 +16,7 @@ pub use enums::Namespace;
 mod evaluation;
 mod instantiate;
 mod list_model;
+mod loader;
 pub use list_model::RowId;
 mod promises;
 mod records;

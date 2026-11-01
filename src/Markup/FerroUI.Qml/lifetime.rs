@@ -15,6 +15,7 @@ impl Instance {
             return;
         }
         self.dynamic.created.retain(|id| !dead.contains(id));
+        self.dynamic.loaders.retain(|id,_| !dead.contains(id));
         self.javascript.connections.retire(dead);
         self.javascript.deferred.retire(dead);
         self.listeners.retain(|_, list| {

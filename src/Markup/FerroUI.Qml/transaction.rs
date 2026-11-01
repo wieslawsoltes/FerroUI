@@ -30,6 +30,7 @@ pub(crate) struct Transaction<'a> {
     pub(crate) structure:dynamic::Checkpoint,
     pub(crate) worker_sources: BTreeSet<ObjectId>,
     pub(crate) worker_actions: Vec<workers::Action>,
+    pub(crate) loader_changes: loader::Changes,
     pub(crate) timer_changes: timers::TimerChanges,
 }
 
@@ -63,6 +64,7 @@ impl Instance {
             steps: 0,
             connection_changes: Default::default(),
             deferred: Vec::new(),
+            loader_changes: Default::default(),
             timer_changes: Default::default(),
             worker_actions: Default::default(),
             worker_sources: Default::default(),
@@ -111,6 +113,7 @@ impl Instance {
             tx.model
                 .records
                 .rollback(std::mem::take(&mut tx.record_changes));
+            std::mem::take(&mut tx.loader_changes).rollback(tx.model);
             tx.timer_changes.rollback(&mut tx.model.timers);
             for (key, old) in tx.original {
                 tx.model.slots[key] = old;
@@ -193,6 +196,7 @@ impl Transaction<'_> {
         let previous=self.initializing;
         self.initializing=true;
         self.initialize_workers(first);
+        self.initialize_loaders(first);
         self.model_modes.extend(self.model.models.keys().copied().filter(|id|id.index>=first));
         self.pending_bindings.extend(self.model.bindings.iter().copied().filter(|id|id.index>=first));
         self.pending.extend(self.model.slots.iter().enumerate().skip(first_slot).filter(|(_,s)|s.dirty).map(|(i,_)|i));
@@ -216,6 +220,7 @@ impl Transaction<'_> {
                 self.update_binding(binding)?;
                 continue;
             }
+            if self.stage_loader()? {continue}
             self.stage_workers()?;
             if !self.initializing {
                 if let Some(timer) = self.timer_changes.pending.pop_first() {
@@ -450,6 +455,10 @@ impl Transaction<'_> {
     pub(crate) fn set_value(&mut self, key: SlotId, value: Value) {
         if self.model.slots[key].value.unchanged(&value) {
             return;
+        }
+        let property = &self.model.properties[key];
+        if !self.model.dynamic.loaders.is_empty() {
+            self.loader_write(property.owner, &property.name.clone(), &value);
         }
         self.touched(key).value = value;
         if let Some(target) = self.model.slots[key].active_target {

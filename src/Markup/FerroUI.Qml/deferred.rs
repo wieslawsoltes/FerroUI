@@ -5,12 +5,14 @@ use crate::transaction::Transaction;
 
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd)]
 enum Key {
+    Loader(ObjectId),
     Binding(ObjectId),
     Function(u64),
     Method(MethodRef),
 }
 
 pub(crate) enum Task {
+    Loader(ObjectId),
     Method(MethodRef, Vec<Value>),
     Binding(ObjectId),
     Call {
@@ -23,6 +25,7 @@ pub(crate) enum Task {
 impl Task {
     fn key(&self) -> Key {
         match self {
+            Self::Loader(owner) => Key::Loader(*owner),
             Self::Binding(owner) => Key::Binding(*owner),
             Self::Method(method, _) => Key::Method(method.clone()),
             Self::Call { function, .. } => Key::Function(function.id()),
@@ -42,7 +45,7 @@ impl Queue {
         for task in tasks {
             let key = task.key();
             if let Some(previous) = self.positions.get(&key) {
-                if matches!(key, Key::Binding(_)) {
+                if matches!(key, Key::Binding(_) | Key::Loader(_)) {
                     continue;
                 }
                 // Reposting a function changes its place in the queue and its arguments.
@@ -121,6 +124,7 @@ impl Transaction<'_> {
                 )?;
                 Ok(())
             }
+            Task::Loader(owner) => self.finish_loader(owner),
             Task::Binding(owner) if self.model.node(owner).is_some() => self.publish_delayed(owner),
             Task::Call {
                 owner,

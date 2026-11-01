@@ -14,6 +14,7 @@ use ferroui_controls::{
 #[derive(Clone, Copy)]
 enum Kind {
     Item,
+    Loader,
     Rectangle,
     Row,
     Column,
@@ -32,6 +33,7 @@ pub(super) fn register(registry: &mut ControlRegistry) -> Result<(), Error> {
             "QtQuick",
             &[
                 ("Item", Item),
+                ("Loader", Loader),
                 ("Rectangle", Rectangle),
                 ("Row", Row),
                 ("Column", Column),
@@ -102,6 +104,7 @@ impl Kind {
         }
         match self {
             Self::Item => ty,
+            Self::Loader => TypeDefinition::quick_loader(),
             Self::Rectangle => ty
                 .property("color", "color", Value::String("white".into()))
                 .property("border.color", "color", Value::String("black".into()))
@@ -122,7 +125,7 @@ impl Kind {
 
     fn create(self) -> Peer {
         match self {
-            Self::Item => Peer::Canvas(super::anchors::AnchorCanvas::create()),
+            Self::Item | Self::Loader => Peer::Canvas(super::anchors::AnchorCanvas::create()),
             Self::Row | Self::Column => {
                 let stack = super::positioner::Positioner::create(if matches!(self, Self::Row) {
                     Orientation::Horizontal
