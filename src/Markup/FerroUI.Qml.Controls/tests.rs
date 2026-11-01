@@ -889,3 +889,24 @@ fn native_ranges_preserve_descending_bounds_and_propagate_user_input() {
     assert_eq!(spin.value(), Some(Decimal::from(10)));
     assert_eq!(view.get(id, "moves").unwrap(), Value::Number(1.));
 }
+
+#[test]
+fn ancestor_disabled_suppresses_click_and_toggle_still_changes_a_plain_button() {
+    let _scope = UnitTestApplication::start(TestServices::new());
+    let view = mount(
+        r#"import QtQuick
+    import QtQuick.Controls
+    Item { id:box;enabled:false; property int hits:0
+        Button {id:button;onClicked:box.hits+=1}
+        function activate(){button.click()}
+        function invert(){button.toggle()}
+    }"#,
+    );
+    let root = view.root_id();
+    let button = view.id("button").unwrap();
+    view.call(root, "activate", vec![]).unwrap();
+    assert_eq!(view.get(root, "hits").unwrap(), Value::Number(0.));
+    view.call(root, "invert", vec![]).unwrap();
+    assert_eq!(view.get(button, "checked").unwrap(), Value::Bool(true));
+    assert_eq!(view.get(button, "checkable").unwrap(), Value::Bool(false));
+}

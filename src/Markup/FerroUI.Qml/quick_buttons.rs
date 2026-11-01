@@ -371,7 +371,11 @@ impl Transaction<'_> {
             }
         } else {
             let click = name == "click";
-            if click && !yes(self.model, id, "enabled") {
+            let disabled = || {
+                std::iter::successors(Some(id), |o| self.model.parent(*o))
+                    .any(|o| self.model.get(o, "enabled") == Ok(Value::Bool(false)))
+            };
+            if click && disabled() {
                 return Ok(Value::Undefined);
             }
             let exclusive = group(self.model, id).map_or_else(
@@ -379,7 +383,7 @@ impl Transaction<'_> {
                 |g| yes(self.model, g, "exclusive"),
             );
             let checked = yes(self.model, id, "checked");
-            if yes(self.model, id, "checkable") && !(click && checked && exclusive) {
+            if !click || (yes(self.model, id, "checkable") && !(checked && exclusive)) {
                 if click && yes(self.model, id, "tristate") {
                     let Value::Number(n) = self.model.get(id, "checkState")? else {
                         unreachable!()
