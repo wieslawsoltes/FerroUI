@@ -48,6 +48,10 @@ jobs:
           cargo test --locked --no-default-features
           -p ferroui-qml-compiler -p ferroui-qml-build -p ferroui-qml
           -p ferroui-qml-controls -p qml-compiled-tests -p qml-gallery -p ferroui-qml-webscene
+      - name: Install shared libraries used by the headless Qt Quick oracle
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libegl1 libgl1 libx11-6 libxkbcommon0 libfontconfig1
       - name: Compare source and compiled behavior with the Qt 6.12.0 binary distribution
         run: |
           python3 -m venv "$RUNNER_TEMP/qt-reference"
