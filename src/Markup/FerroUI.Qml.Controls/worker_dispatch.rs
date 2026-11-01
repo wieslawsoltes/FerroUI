@@ -60,3 +60,89 @@ impl QmlView {
         delivered
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use ferroui_controls::{
+        testing::{TestServices, UnitTestApplication},
+        TextBlock,
+    };
+    use ferroui_qml::{
+        ir,
+        workers::{WorkerDelivery, WorkerEndpoint, WorkerEvent, WorkerValue},
+        ScriptContext,
+    };
+
+    struct Backend(RefCell<Option<WorkerDelivery>>);
+    struct Endpoint;
+    impl WorkerEndpoint for Endpoint {
+        fn send(&self, _: WorkerValue) -> Result<(), Error> {
+            Ok(())
+        }
+    }
+
+    impl ScriptEngine for Backend {
+        fn evaluate(
+            &self,
+            _: &mut ScriptContext<'_, '_>,
+            _: &ir::JavaScript,
+        ) -> Result<Value, Error> {
+            Err(Error::new(
+                "the dispatcher fixture uses native QML expressions",
+            ))
+        }
+        fn start_worker(
+            &self,
+            _: Arc<BTreeMap<String, ir::ScriptResource>>,
+            _: &str,
+            _: &str,
+            events: WorkerDelivery,
+        ) -> Result<Box<dyn WorkerEndpoint>, Error> {
+            self.0.replace(Some(events));
+            Ok(Box::new(Endpoint))
+        }
+    }
+
+    #[test]
+    fn worker_thread_wakes_the_owner_dispatcher_and_updates_the_native_peer() {
+        let _scope = UnitTestApplication::start(TestServices::new());
+        let document = ir::parse(r#"
+            import QtQuick
+            import QtQml.WorkerScript
+            Column {
+                id: root
+                property string output: "waiting"
+                WorkerScript { source: "echo.js"; onMessage: function(messageObject) { root.output = messageObject } }
+                Text { id: label; text: root.output }
+            }
+        "#).unwrap();
+        let backend = Rc::new(Backend(RefCell::default()));
+        let view = QmlView::with_script_engine(
+            &document,
+            &ControlRegistry::standard().unwrap(),
+            Default::default(),
+            backend.clone(),
+        )
+        .unwrap();
+        let label = view
+            .control(view.id("label").unwrap())
+            .unwrap()
+            .cast::<TextBlock>()
+            .unwrap();
+        let producer = backend
+            .0
+            .take()
+            .expect("worker registered before view mount");
+        std::thread::spawn(move || {
+            assert!(producer.publish(WorkerEvent::Message(WorkerValue::String(
+                "delivered".into()
+            ))));
+        })
+        .join()
+        .unwrap();
+        assert_eq!(label.text().as_deref(), Some("waiting"));
+        Dispatcher::current_dispatcher().run_jobs(None);
+        assert_eq!(label.text().as_deref(), Some("delivered"));
+    }
+}
