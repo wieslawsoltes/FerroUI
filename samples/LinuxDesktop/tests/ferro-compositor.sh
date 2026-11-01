@@ -13,6 +13,12 @@ if [[ ${1:-} != --on-host ]]; then
     mkdir -m700 "$scratch/runtime"
     install -m755 "$here"/{ferro-compositor.sh,composed-clients.py,composed-launcher.sh} "$scratch/tests/"
     install -m755 "$here/../../../scripts/wayland/sway-run.sh" "$scratch/tests/"
+    if [[ -n ${FERRO_TEST_CATALOG:-} ]]; then
+        [[ -x $FERRO_TEST_CATALOG ]] || { echo "Missing gallery binary: $FERRO_TEST_CATALOG" >&2; exit 2; }
+        install -Dsm755 "$FERRO_TEST_CATALOG" "$scratch/libexec/control-catalog-desktop"
+        export FERRO_TEST_CATALOG="$scratch/libexec/control-catalog-desktop"
+        install -m644 "$here/composed-catalog.sh" "$here/../session/org.ferroui.WinUIGallery.desktop" "$scratch/tests/"
+    fi
     # wlroots deliberately rejects root. Run only staged test material and
     # the desktop under an unprivileged uid and an isolated bus.
     as_user=()
@@ -49,6 +55,7 @@ scratch=$(mktemp -d "$XDG_RUNTIME_DIR/composition.XXXXXX")
 inner=ferro-composition-test
 shell= gtk= qt= child= keyboard= modifier= mouse=
 cleanup() {
+    if declare -F stop_gallery_probe >/dev/null; then stop_gallery_probe; fi
     for pid in "$modifier" "$mouse" "$keyboard" "$child" "$qt" "$gtk" "$shell"; do
         [[ -z $pid ]] || kill "$pid" 2>/dev/null || :
     done
@@ -81,6 +88,10 @@ pointer() { printf '%s\n' "$*" >&"$pointer_fd"; }
 click() { pointer set "$1" "$2"; pointer press button1; pointer release button1; }
 source "$here/composed-launcher.sh"
 install_composed_launcher "$XDG_DATA_HOME" "$scratch"
+if [[ -n ${FERRO_TEST_CATALOG:-} ]]; then
+    source "$here/composed-catalog.sh"
+    install_gallery_probe
+fi
 "$binary" --platform=wayland --session --compositor=ferro --socket="$inner" >"$output/shell.log" 2>&1 & shell=$!
 wait_for test -S "$XDG_RUNTIME_DIR/$inner"
 wait_for only_host
@@ -91,6 +102,9 @@ exec {pointer_fd}<>"$scratch/pointer"
 wait_for grep -qx ready "$output/mouse.log"
 wtype -s 145000 & keyboard=$!
 test_composed_launcher "$binary" "$scratch" "$inner"
+if [[ -n ${FERRO_TEST_CATALOG:-} ]]; then
+    test_composed_gallery
+fi
 
 inner_client GDK_BACKEND=wayland /usr/bin/python3 "$here/composed-clients.py" gtk >"$output/gtk.log" 2>&1 & gtk=$!
 wait_for has_color d76a3d
