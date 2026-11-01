@@ -16,7 +16,7 @@ use ferroui_base::animation::{IGlobalClock, TimeSpan};
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{Layoutable, LayoutableImpl};
-use ferroui_base::reactive::{AnonymousObserver, IDisposable};
+use ferroui_base::reactive::{AnonymousObserver, Subscription};
 use ferroui_base::{
     BoxedValue, DirectProperty, FerroLocator, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
     FerroPropertyChangedEventArgs, LocatorExtensions, Rect, Ref, Size, StyledElement,
@@ -198,8 +198,8 @@ pub struct MaterialExtendedFabLayout {
     alpha_motion: RefCell<MaterialSpringState>,
     expansion_progress: Cell<f64>,
     label_opacity: Cell<f64>,
-    clock_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    visibility_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    clock_subscription: RefCell<Option<Subscription>>,
+    visibility_subscription: RefCell<Option<Subscription>>,
     last_frame: Cell<Option<f64>>,
 }
 ferro_class!(MaterialExtendedFabLayout: Panel);
@@ -248,7 +248,7 @@ impl VisualImpl for MaterialExtendedFabLayout {
                 this.update_clock();
             }
         });
-        if let Some(old) = this.visibility_subscription.replace(Some(subscription)) {
+        if let Some(old) = this.visibility_subscription.replace(Some(Subscription::new(subscription))) {
             old.dispose();
         }
         this.publish_frame();
@@ -470,7 +470,7 @@ impl MaterialExtendedFabLayout {
                     }
                 }
             })));
-        *self.clock_subscription.borrow_mut() = Some(subscription);
+        *self.clock_subscription.borrow_mut() = Some(Subscription::new(subscription));
     }
     fn stop_clock(&self) {
         if let Some(subscription) = self.clock_subscription.borrow_mut().take() {

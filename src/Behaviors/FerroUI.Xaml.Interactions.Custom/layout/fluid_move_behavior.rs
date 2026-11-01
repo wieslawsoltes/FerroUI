@@ -2,7 +2,7 @@
 
 use ferroui_base::animation::TimeSpan;
 use ferroui_base::layout::Layoutable;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_markup_enum, ferro_properties, instantiate, FerroObjectImpl, FerroProperty,
     PixelPoint, Point, Ref, StaticType, StyledProperty, Visual,
@@ -11,7 +11,6 @@ use ferroui_controls::{Control, Panel};
 use ferroui_xaml_behaviors_animations::FluidMoveAnimation;
 use ferroui_xaml_interactivity::{BehaviorImpl, BehaviorImplExt, BehaviorOfT};
 use std::cell::RefCell;
-use std::rc::Rc;
 
 /// Determines if the behavior applies to the associated element or its children.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
@@ -43,7 +42,7 @@ pub struct FluidMoveBehavior {
     positions: RefCell<Vec<(Ref<Control>, PixelPoint)>>,
     // The subscription of the layout updated event (`LayoutUpdated -= OnLayoutUpdated` of the
     // reference).
-    layout_updated: RefCell<Option<Rc<dyn IDisposable>>>,
+    layout_updated: RefCell<Option<Subscription>>,
 }
 
 ferro_class!(FluidMoveBehavior: BehaviorOfT);
@@ -75,7 +74,7 @@ ferroui_base::ferro_overrides! {
                         behavior.on_layout_updated();
                     }
                 });
-                *this.layout_updated.borrow_mut() = Some(subscription);
+                *this.layout_updated.borrow_mut() = Some(Subscription::new(subscription));
             }
         }
 

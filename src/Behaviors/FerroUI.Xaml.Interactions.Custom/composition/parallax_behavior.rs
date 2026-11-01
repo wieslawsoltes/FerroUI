@@ -1,7 +1,7 @@
 //! Port of `Composition/ParallaxBehavior.cs`.
 
 use ferroui_base::data::core::ValueTypes;
-use ferroui_base::reactive::{IDisposable, ObservableError, ObservableExt};
+use ferroui_base::reactive::{ObservableError, ObservableExt, Subscription};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_properties, instantiate, ElementRef, FerroObjectExtensions, FerroObjectImpl,
     FerroProperty, Nullable, Ref, StaticType, StyledProperty, Vector,
@@ -23,7 +23,7 @@ use std::rc::Rc;
 #[repr(C)]
 pub struct ParallaxBehavior {
     base: BehaviorOfT,
-    scroll_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    scroll_subscription: RefCell<Option<Subscription>>,
     animation: RefCell<Option<ParallaxAnimation>>,
 }
 
@@ -84,7 +84,7 @@ ferroui_base::ferro_overrides! {
                         }
                     },
                 );
-                let previous = this.scroll_subscription.borrow_mut().replace(subscription);
+                let previous = this.scroll_subscription.borrow_mut().replace(Subscription::new(subscription));
                 if let Some(previous) = previous {
                     previous.dispose();
                 }

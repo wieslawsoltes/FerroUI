@@ -1,7 +1,7 @@
 //! Port of `Helpers/CommandCanExecuteObserver.cs`.
 
 use ferroui_base::input::ICommand;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::{IDisposable, Subscription};
 use ferroui_base::BoxedValue;
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
@@ -166,7 +166,7 @@ impl ObserverState {
 /// itself from the command when the observer is gone.
 struct WeakCanExecuteChangedHandler {
     observer: Weak<ObserverState>,
-    subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    subscription: RefCell<Option<Subscription>>,
 }
 
 impl WeakCanExecuteChangedHandler {
@@ -180,7 +180,7 @@ impl WeakCanExecuteChangedHandler {
         // handler holds the observer weakly.
         let handler = self.clone();
         let subscription = command.can_execute_changed(Rc::new(move || handler.on_can_execute_changed()));
-        let previous = self.subscription.borrow_mut().replace(subscription);
+        let previous = self.subscription.borrow_mut().replace(Subscription::new(subscription));
         if let Some(previous) = previous {
             previous.dispose();
         }

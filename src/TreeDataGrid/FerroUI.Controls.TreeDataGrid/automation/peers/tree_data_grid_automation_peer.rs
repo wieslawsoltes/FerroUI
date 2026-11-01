@@ -5,7 +5,7 @@ use crate::presentation::PresentationRef;
 use crate::selection::ITreeDataGridSelectionInteraction;
 use crate::TreeDataGrid;
 use ferroui_base::data::core::ValueType;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::{ferro_class, instantiate, BoxedValue, FerroObjectImpl, FerroObjectImplExt, FerroPropertyChangedEventArgs, Ref};
 use ferroui_controls::automation::peers::{
     AutomationControlType, AutomationPeer, AutomationPeerImpl, AutomationPeerImplExt, ControlAutomationPeer,
@@ -20,7 +20,7 @@ use std::rc::Rc;
 #[repr(C)]
 pub struct TreeDataGridAutomationPeer {
     base: ControlAutomationPeer,
-    owner_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    owner_subscription: RefCell<Option<Subscription>>,
     source: RefCell<Option<PresentationRef>>,
     source_token: Cell<Option<u64>>,
     row_selection: RefCell<Option<Rc<dyn ITreeDataGridSelectionInteraction>>>,
@@ -42,7 +42,7 @@ impl FerroObjectImpl for TreeDataGridAutomationPeer {
                 this.on_owner_property_changed(e);
             }
         });
-        *this.owner_subscription.borrow_mut() = Some(subscription);
+        *this.owner_subscription.borrow_mut() = Some(Subscription::new(subscription));
         this.attach_source(this.owner().presentation());
     }
 }

@@ -5,7 +5,7 @@ use super::TopLevelGroup;
 use crate::diagnostics::{ClassicDesktopStyleApplicationLifetimeTopLevelGroup, IDevToolsTopLevelGroup};
 use ferroui_base::controls::ResourceDictionary;
 use ferroui_base::input::{ICloseable, InputManager};
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::styling::{Styles, ThemeVariant};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
@@ -29,7 +29,7 @@ pub struct Application {
     closed: HandlerList<dyn Fn()>,
     renderer_root: RefCell<Option<Rc<dyn ITopLevelRenderer>>>,
     /// `_application.PropertyChanged += ApplicationOnPropertyChanged`.
-    application_property_changed: RefCell<Option<Rc<dyn IDisposable>>>,
+    application_property_changed: RefCell<Option<Subscription>>,
 }
 
 ferro_class!(Application: TopLevelGroup);
@@ -94,7 +94,7 @@ impl FerroObjectImpl for Application {
                 this.application_on_property_changed(e);
             }
         });
-        *this.application_property_changed.borrow_mut() = Some(subscription);
+        *this.application_property_changed.borrow_mut() = Some(Subscription::new(subscription));
     }
 
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {

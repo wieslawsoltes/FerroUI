@@ -1,6 +1,6 @@
 //! Port of `Core/AsyncLoadBehavior.cs`.
 
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_properties, instantiate, BoxedValue, FerroObjectImpl, FerroProperty, Ref,
@@ -10,7 +10,6 @@ use ferroui_controls::Control;
 use ferroui_xaml_interactivity::helpers::member_lookup::find_methods;
 use ferroui_xaml_interactivity::{BehaviorImpl, BehaviorImplExt, BehaviorOfT};
 use std::cell::RefCell;
-use std::rc::Rc;
 
 /// Behavior that calls an asynchronous method when the associated control is loaded.
 ///
@@ -22,7 +21,7 @@ use std::rc::Rc;
 pub struct AsyncLoadBehavior {
     base: BehaviorOfT,
     // The subscription of the attached to visual tree event (the reference removes its delegate).
-    loaded_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    loaded_subscription: RefCell<Option<Subscription>>,
 }
 
 ferro_class!(AsyncLoadBehavior: BehaviorOfT);
@@ -61,7 +60,7 @@ ferroui_base::ferro_overrides! {
                         behavior.on_loaded();
                     }
                 });
-                *this.loaded_subscription.borrow_mut() = Some(subscription);
+                *this.loaded_subscription.borrow_mut() = Some(Subscription::new(subscription));
             }
         }
 

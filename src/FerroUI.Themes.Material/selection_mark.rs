@@ -25,7 +25,7 @@ use ferroui_base::media::{
     BrushExtensions, DrawingContext, IBrush, IPen, PenLineCap, PenLineJoin, StreamGeometry,
 };
 use ferroui_base::platform::IGeometryContext;
-use ferroui_base::reactive::{AnonymousObserver, IDisposable};
+use ferroui_base::reactive::{AnonymousObserver, Subscription};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate, FerroLocator,
     FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs,
@@ -40,8 +40,8 @@ use std::rc::Rc;
 pub struct MaterialSelectionMark {
     base: Control,
     motion: RefCell<MarkMotion>,
-    clock_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    visibility_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    clock_subscription: RefCell<Option<Subscription>>,
+    visibility_subscription: RefCell<Option<Subscription>>,
     last_tick: Cell<Option<f64>>,
 }
 ferro_class!(MaterialSelectionMark:Control);
@@ -78,11 +78,11 @@ impl VisualImpl for MaterialSelectionMark {
         Self::parent_on_attached_to_visual_tree(this, event);
         let weak = this.to_ref().downgrade();
         *this.visibility_subscription.borrow_mut() =
-            Some(this.is_effectively_visible_changed(move || {
+            Some(Subscription::new(this.is_effectively_visible_changed(move || {
                 if let Some(this) = weak.upgrade() {
                     this.update_clock();
                 }
-            }));
+            })));
         this.retarget();
     }
     fn on_detached_from_visual_tree(this: &Self, event: &VisualTreeAttachmentEventArgs) {
@@ -203,7 +203,7 @@ impl MaterialSelectionMark {
         };
         self.last_tick.set(None);
         let weak = self.to_ref().downgrade();
-        *self.clock_subscription.borrow_mut() = Some(clock.subscribe(Rc::new(
+        *self.clock_subscription.borrow_mut() = Some(Subscription::new(clock.subscribe(Rc::new(
             AnonymousObserver::new(move |time: TimeSpan| {
                 if let Some(this) = weak.upgrade() {
                     if !animations_enabled(this.reduced_motion()) {
@@ -224,7 +224,7 @@ impl MaterialSelectionMark {
                     this.update_clock();
                 }
             }),
-        )));
+        ))));
     }
     fn stop_clock(&self) {
         if let Some(subscription) = self.clock_subscription.borrow_mut().take() {

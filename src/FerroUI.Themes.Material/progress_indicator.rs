@@ -17,7 +17,7 @@ use ferroui_base::media::{
     StreamGeometry, SweepDirection,
 };
 use ferroui_base::platform::IGeometryContext;
-use ferroui_base::reactive::{AnonymousObserver, IDisposable};
+use ferroui_base::reactive::{AnonymousObserver, Subscription};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate, FerroLocator,
     FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs,
@@ -39,8 +39,8 @@ use rounded_geometry::{path_bounds, Cubic, Morph, PathMeasure, Polygon, Rounding
 #[repr(C)]
 pub struct MaterialProgressIndicator {
     base: Control,
-    clock_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    visibility_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    clock_subscription: RefCell<Option<Subscription>>,
+    visibility_subscription: RefCell<Option<Subscription>>,
     elapsed: Cell<f64>,
     epoch: Cell<Option<f64>>,
     amplitude: Cell<f64>,
@@ -113,11 +113,11 @@ impl VisualImpl for MaterialProgressIndicator {
         Self::parent_on_attached_to_visual_tree(this, e);
         let weak = this.to_ref().downgrade();
         *this.visibility_subscription.borrow_mut() =
-            Some(this.is_effectively_visible_changed(move || {
+            Some(Subscription::new(this.is_effectively_visible_changed(move || {
                 if let Some(this) = weak.upgrade() {
                     this.update_clock();
                 }
-            }));
+            })));
         this.retarget_amplitude();
         this.update_clock();
     }
@@ -359,7 +359,7 @@ impl MaterialProgressIndicator {
                     this.tick(time.total_seconds());
                 }
             })));
-        *self.clock_subscription.borrow_mut() = Some(subscription);
+        *self.clock_subscription.borrow_mut() = Some(Subscription::new(subscription));
     }
     fn stop_clock(&self) {
         if let Some(subscription) = self.clock_subscription.borrow_mut().take() {

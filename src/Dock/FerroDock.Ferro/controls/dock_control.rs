@@ -56,7 +56,7 @@ use ferroui_controls::{
     },
     Control, ControlImpl, ControlImplExt, TopLevel, Window,
 };
-use ferroui_system::{collections::generic::Dictionary, IDisposable};
+use ferroui_system::{collections::generic::Dictionary, Subscription};
 use std::{
     any::TypeId,
     cell::{Cell, RefCell},
@@ -94,11 +94,11 @@ pub struct DockControl {
     activation_order: RefCell<HashMap<usize, ActivationEntry>>,
     activation_counter: Cell<i64>,
     subscribed_factory: RefCell<Option<Rc<dyn IFactory>>>,
-    factory_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    factory_subscription: RefCell<Option<Subscription>>,
     managed_layer_factory: RefCell<Option<Rc<dyn IFactory>>>,
     attached_window: RefCell<Option<Ref<Window>>>,
-    activated_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    closing_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    activated_subscription: RefCell<Option<Subscription>>,
+    closing_subscription: RefCell<Option<Subscription>>,
     external_dock_surfaces: RefCell<Vec<ExternalSurfaceReference>>,
     external_surfaces_version: Cell<u32>,
     drag_offset_calculator: RefCell<Rc<dyn IDragOffsetCalculator>>,
@@ -871,7 +871,7 @@ impl DockControl {
         let owner = self.to_ref();
         let subscription = factory
             .active_dockable_changed(Rc::new(move |e| owner.factory_active_dockable_changed(e)));
-        self.factory_subscription.replace(Some(subscription));
+        self.factory_subscription.replace(Some(Subscription::new(subscription)));
     }
     fn detach_factory_events(&self) {
         if self.subscribed_factory.borrow().is_none() {
@@ -1283,15 +1283,15 @@ impl DockControl {
         self.detach_main_window_handlers();
         self.attached_window.replace(Some(window.clone()));
         let owner = self.to_ref();
-        self.activated_subscription.replace(Some(
+        self.activated_subscription.replace(Some(Subscription::new(
             window.activated(move || owner.on_main_window_activated()),
-        ));
+        )));
         if DockSettings::close_floating_windows_on_main_window_close() {
             let owner = self.to_ref();
             let sender = window.clone();
-            self.closing_subscription.replace(Some(
+            self.closing_subscription.replace(Some(Subscription::new(
                 window.closing(move |_| owner.on_main_window_closing(sender.clone())),
-            ));
+            )));
         }
     }
     fn detach_main_window_handlers(&self) {

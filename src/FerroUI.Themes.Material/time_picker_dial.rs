@@ -25,7 +25,7 @@ use ferroui_base::media::{
     BrushExtensions, DrawingContext, EllipseGeometry, FlowDirection, FormattedText, Geometry,
     IBrush, IPen, PenLineCap, PenLineJoin, Typeface,
 };
-use ferroui_base::reactive::{AnonymousObserver, IDisposable};
+use ferroui_base::reactive::{AnonymousObserver, Subscription};
 use ferroui_base::utilities::CultureInfo;
 use ferroui_base::{
     FerroLocator, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
@@ -96,8 +96,8 @@ pub struct MaterialTimePickerDial {
     inner: Cell<bool>,
     pending_advance: Cell<Option<f64>>,
     drag: RefCell<Option<DialDrag>>,
-    clock_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    visibility_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    clock_subscription: RefCell<Option<Subscription>>,
+    visibility_subscription: RefCell<Option<Subscription>>,
     last_frame: Cell<Option<f64>>,
 }
 ferro_class!(MaterialTimePickerDial: Panel);
@@ -158,7 +158,7 @@ impl VisualImpl for MaterialTimePickerDial {
                 this.update_clock();
             }
         });
-        if let Some(old) = this.visibility_subscription.replace(Some(sub)) {
+        if let Some(old) = this.visibility_subscription.replace(Some(Subscription::new(sub))) {
             old.dispose();
         }
         this.synchronize();
@@ -638,7 +638,7 @@ impl MaterialTimePickerDial {
                     }
                 }
             })));
-        *self.clock_subscription.borrow_mut() = Some(subscription);
+        *self.clock_subscription.borrow_mut() = Some(Subscription::new(subscription));
     }
     fn stop_clock(&self) {
         if let Some(subscription) = self.clock_subscription.borrow_mut().take() {
