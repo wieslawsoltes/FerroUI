@@ -27,6 +27,10 @@ The page must be in a secure context with cross-origin isolation enabled. Serve 
 
 Each transport direction uses a 64 KiB shared slot. Longer UTF-8 messages stream in chunks, up to 32 MiB per frame. The application worker waits for the result with a deadline and services nested QML calls in the meantime. This backend requires blocking `Atomics.wait` support in the application worker. The window thread stays available for painting and input. `QtQml.WorkerScript` currently uses the desktop WebScene backend.
 
+## Fetching QML and ECMAScript modules
+
+An application worker can fetch QML at runtime using `BrowserComponentTransport`. Enable `browser-fetch` on `ferroui-qml` and register the transport before creating the instance. For fetched QML that imports JavaScript, also enable `javascript` so the Wasm application can compile the new source, then construct the instance with the prepared browser script engine. The browser conformance fixture serves both the QML and its imported ES module over HTTP and checks the evaluated result. [Worker fixture](../tests/QmlBrowser/lib.rs) · [Resource loading](qml-network.md)
+
 ## Chromium verification
 
 The [browser fixture](../tests/QmlBrowser) builds the QML component with Cargo, loads real Wasm and a JavaScript module in headless Chromium, and exercises dependency updates, nested calls, imperative closure bindings, Promise settlement, rollback, multichunk UTF-8 data, instance isolation and worker timeout/recovery. [Conformance workflow](../.github/workflows/qml.yml)

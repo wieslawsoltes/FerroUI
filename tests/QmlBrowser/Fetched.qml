@@ -1,2 +1,3 @@
 import QtQml
-QtObject { property int value: 6 * 7 }
+import "./fetched.mjs" as MathLibrary
+QtObject { property int value: MathLibrary.answer(6) }

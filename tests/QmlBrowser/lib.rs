@@ -96,14 +96,23 @@ pub async fn probe_fetch(url: String) -> Result<(), JsValue> {
     let mut registry = TypeRegistry::new();
     registry.set_component_transport(Rc::new(BrowserComponentTransport::default()));
     let err = |error: ferroui_qml::Error| JsValue::from_str(&error.to_string());
-    let doc = ferroui_qml::ir::parse("import QtQml\nQtObject {}").unwrap();
-    let mut model = Instance::new(&doc, &registry, Default::default()).map_err(err)?;
+    let engine = Rc::new(WebSceneEngine::browser().map_err(err)?);
+    engine.prepare_browser_instance().await.map_err(err)?;
+    let doc = ferroui_qml::ir::parse_external("import QtQml\nQtObject {}").unwrap();
+    let mut model =
+        Instance::with_engine(&doc, &registry, Default::default(), engine).map_err(err)?;
     let factory = model
         .create_component(model.root(), &url, None)
         .map_err(err)?;
     while model.has_pending_component_loads() {
         next_turn().await;
         model.poll_component_loads(8).map_err(err)?;
+    }
+    if model.get(factory, "status").map_err(err)? != Value::Number(1.) {
+        return Err(JsValue::from_str(&format!(
+            "remote component error: {:?}",
+            model.call(factory, "errorString", vec![])
+        )));
     }
     let item = model
         .create_object(factory, None, Default::default())
