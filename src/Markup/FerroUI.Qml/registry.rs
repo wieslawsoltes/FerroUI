@@ -41,6 +41,7 @@ pub struct TypeDefinition {
     pub(crate) properties: BTreeMap<String, (String, Value)>,
     pub(crate) signals: BTreeMap<String, Vec<Parameter>>,
     pub(crate) native: BTreeMap<String, NativeMethod>,
+    pub(crate) visual_children: Option<String>,
     pub(crate) default_property: Option<String>,
 }
 
@@ -118,6 +119,11 @@ impl TypeDefinition {
         self
     }
 
+    /// Identify the ownership list to which newly parented visual children are added.
+    pub fn visual_children(mut self,name:&str)->Self {
+        self.visual_children=Some(name.into()); self
+    }
+
     pub fn default_property(mut self, name: &str) -> Self {
         self.default_property = Some(name.into());
         self
@@ -125,6 +131,7 @@ impl TypeDefinition {
 }
 
 /// A registry explicitly owns the modules visible to a QML component.
+#[derive(Clone)]
 pub struct TypeRegistry {
     imports: BTreeMap<String, Vec<String>>,
     pub(crate) modules: BTreeMap<String, BTreeMap<String, TypeDefinition>>,
@@ -154,6 +161,13 @@ impl TypeRegistry {
             .entry("QtQml".into())
             .or_default()
             .insert("QtObject".into(), qt_object);
+        registry.register("QtQml","Component", TypeDefinition::default().inherits("QtQml","QtObject")
+            .readonly_property("status","int",Value::Number(1.))
+            .readonly_property("progress","real",Value::Number(1.))
+            .readonly_property("url","url",Value::String(String::new()))
+            .enumeration("Status",&[("Null",0),("Ready",1),("Loading",2),("Error",3)]).unwrap()
+            .enumeration("CompilationMode",&[("PreferSynchronous",0),("Asynchronous",1)]).unwrap()
+        ).expect("built-in Component");
         let binding = TypeDefinition::default()
             .inherits("QtQml", "QtObject")
             .property("target", "QtObject", Value::Null)
@@ -259,6 +273,7 @@ impl TypeRegistry {
             Rc::make_mut(&mut merged.enums).inherit(&definition.enums);
             merged.readonly.append(&mut definition.readonly);
             merged.properties.append(&mut definition.properties);
+            if definition.visual_children.is_some(){merged.visual_children=definition.visual_children;}
             merged.signals.append(&mut definition.signals);
             merged.native.append(&mut definition.native);
             if definition.default_property.is_some() {

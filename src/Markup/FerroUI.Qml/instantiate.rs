@@ -276,6 +276,7 @@ impl<'a> Builder<'a> {
         let mut builder = Self {
             scopes: enums::Scopes::named(name, &document.root)?,
             instance: Instance {
+                dynamic:dynamic::Components {registry:Some(Rc::new(registry.clone())),..Default::default()},
                 javascript: Default::default(),
                 records: Default::default(),
                 models: BTreeMap::new(),
@@ -397,11 +398,10 @@ impl Builder<'_> {
             self.registry.validate_imports(imports)?;
         }
         let (module, name, definition) = self.registry.resolve(imports, &source.type_name)?;
-        let id = ObjectId {
-            index: self.instance.nodes.len(),
-            instance: self.instance.identity,
-        };
+        let id=self.instance.next_object();
+        self.instance.dynamic.serial+=1;
         self.instance.nodes.push(Node {
+            id,context:None,visual_children:definition.visual_children.clone(),
             shadows: source.shadows.clone(),
             type_scope: self.scopes.imports(imports, self.registry),
             composite_types: source.composite_types.clone(),
@@ -541,6 +541,10 @@ impl Builder<'_> {
         let mut implicit = Vec::new();
         for member in &source.members {
             match &member.kind {
+                MemberKind::Child(child) if module=="QtQml" && name=="Component" => {
+                    let definition=dynamic::Template{object:Rc::new(child.clone()), imports:Rc::from(imports),scopes:self.scopes.clone()};
+                    if self.instance.dynamic.templates.insert(id,definition).is_some(){return Err(Error::new("Component requires exactly one object definition"));}
+                }
                 MemberKind::Child(child) if model => {
                     let child_imports = child.type_imports.as_deref().unwrap_or(imports);
                     let (module, name, _) =
@@ -600,6 +604,7 @@ impl Builder<'_> {
                 _ => (),
             }
         }
+        if module=="QtQml" && name=="Component" && !self.instance.dynamic.templates.contains_key(&id) { return Err(Error::new("Component requires an object definition")); }
         if model {
             let count = self.instance.key(id, "count")?;
             self.instance.slots[count].value =

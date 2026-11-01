@@ -65,7 +65,7 @@ impl Namespace {
 
 type ScopeKey = Vec<(String, Option<String>)>;
 
-#[derive(Default)]
+#[derive(Clone,Default)]
 pub(crate) struct Scopes {
     by_imports: BTreeMap<ScopeKey, Rc<Namespace>>,
     local: Option<(String, Value)>,

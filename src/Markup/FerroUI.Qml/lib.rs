@@ -6,6 +6,7 @@ mod binding_object;
 pub mod compiled;
 mod connections;
 mod deferred;
+mod dynamic;
 pub use compiled::{CompiledComponent, ComponentSource};
 mod enums;
 pub use enums::Namespace;
@@ -46,6 +47,9 @@ struct Procedure {
 }
 
 struct Node {
+    id:ObjectId,
+    context:Option<ObjectId>,
+    visual_children:Option<String>,
     shadows: Vec<ir::PropertyShadow>,
     type_scope: Rc<Namespace>,
     module: String,
@@ -130,6 +134,7 @@ pub struct SignalEmission {
 }
 
 pub struct Instance {
+    dynamic:dynamic::Components,
     javascript: scripting::ScriptState,
     models: BTreeMap<ObjectId, list_model::Model>,
     records: records::Heap,
@@ -154,6 +159,7 @@ impl Instance {
     pub fn root(&self) -> ObjectId {
         ObjectId {
             index: 0,
+            serial:0,
             instance: self.identity,
         }
     }
@@ -168,7 +174,7 @@ impl Instance {
     fn node(&self, object: ObjectId) -> Option<&Node> {
         (object.instance == self.identity)
             .then(|| self.nodes.get(object.index))
-            .flatten()
+            .flatten().filter(|n| n.id==object)
     }
 
     pub fn type_name(&self, object: ObjectId) -> Option<&str> {

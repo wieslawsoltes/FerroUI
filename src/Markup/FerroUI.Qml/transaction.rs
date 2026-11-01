@@ -192,10 +192,7 @@ impl Transaction<'_> {
             .extend(self.model.timers.objects());
         self.settle()?;
         for index in (0..self.model.nodes.len()).rev() {
-            let object = ObjectId {
-                instance: self.model.identity,
-                index,
-            };
+            let object = self.model.nodes[index].id;
             self.dispatch(object, "Component.completed", Vec::new())?;
             self.settle()?;
         }

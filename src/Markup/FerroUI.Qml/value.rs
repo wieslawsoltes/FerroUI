@@ -4,6 +4,7 @@ use std::fmt;
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ObjectId {
     pub(crate) instance: u64,
+    pub(crate) serial: u64,
     pub(crate) index: usize,
 }
 

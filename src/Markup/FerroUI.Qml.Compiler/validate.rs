@@ -96,6 +96,7 @@ fn validate_object<'a>(
                 group(name, members, &mut bindings, ids, source)?
             }
             MemberKind::Handler { name, .. } => assign(&mut bindings, name.clone(), source, span)?,
+            MemberKind::Child(child) if object.type_name.rsplit('.').next()==Some("Component") => { validate_object(child, &mut HashSet::new(), source)?; }
             MemberKind::Child(child) | MemberKind::OnProperty { object: child, .. } => {
                 validate_object(child, ids, source)?
             }
