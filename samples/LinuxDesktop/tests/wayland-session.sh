@@ -57,7 +57,7 @@ if [[ ${1:-} != --private ]]; then
         -u DESKTOP_STARTUP_ID -u XDG_ACTIVATION_TOKEN HOME="$scratch/home" XDG_RUNTIME_DIR="$scratch/runtime" \
         XDG_CONFIG_HOME="$scratch/config" XDG_CACHE_HOME="$scratch/cache" XDG_DATA_HOME="$scratch/data" \
         XDG_DATA_DIRS="$scratch/data:/usr/local/share:/usr/share" FERRO_DESKTOP_NESTED=1 \
-        dbus-run-session -- timeout 150s "$script" --private "$binary" "$output" "$mode"
+        dbus-run-session -- timeout 240s "$script" --private "$binary" "$output" "$mode"
     exit
 fi
 shift; binary=$1; output=$2; mode=$3
@@ -104,7 +104,7 @@ done
 [[ -n ${SWAYSOCK:-} && -n ${WAYLAND_DISPLAY:-} ]] || fail "Missing compositor sockets"
 # Hotplugging the last keyboard changes wl_seat capabilities and removes focus.
 # Keep a virtual device on seat0 while the short-lived wtype clients send events.
-wtype -s 140000 >"$output/keyboard.log" 2>&1 & keyboard=$!
+wtype -s 240000 >"$output/keyboard.log" 2>&1 & keyboard=$!
 # An activated shell scene is published before the compositor round-trips its
 # layer mapping and keyboard focus. Keep each device mapped across dispatch.
 wtype() { command wtype -s 100 "$@" -s 60; }
@@ -143,7 +143,8 @@ printf -v bus_name 'org.ferroui.Desktop.Wayland.d%x_%x' \
     "$(stat -c %d "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY")" "$(stat -c %i "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY")"
 duplicate_status=0
 timeout 8 "$binary" --platform=wayland --session >"$output/duplicate.log" 2>&1 || duplicate_status=$?
-[[ $duplicate_status != 0 && $duplicate_status != 124 ]] || fail "Duplicate managed shell claimed the display"
+[[ $duplicate_status == 1 ]] && grep -q 'already owns this Wayland display' "$output/duplicate.log" ||
+    fail "Duplicate managed shell returned $duplicate_status instead of reporting the existing owner"
 wait_for is_scene desktop
 swaymsg -rt get_outputs > "$output/outputs.json"
 [[ $(output_names) == 2 ]] || fail 'Expected two active Wayland outputs'

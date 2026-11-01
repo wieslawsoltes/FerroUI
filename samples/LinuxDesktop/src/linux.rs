@@ -168,12 +168,17 @@ pub fn run() -> ExitCode {
             "VK_KHR_driver_properties".into(),
             "VK_EXT_ycbcr_2plane_444_formats".into(),
         ]);
-    if platform == Platform::Wayland && options.session {
-        if let Err(error) = wayland_commands::prepare_inherited_display() {
-            eprintln!("Managed Wayland display: {error}");
-            return ExitCode::FAILURE;
+    let wayland_lease = if platform == Platform::Wayland && options.session {
+        match wayland_commands::DisplayLease::acquire() {
+            Ok(lease) => Some(lease),
+            Err(error) => {
+                eprintln!("{error}");
+                return ExitCode::FAILURE;
+            }
         }
-    }
+    } else {
+        None
+    };
     let theme = options.theme.unwrap_or_else(Appearance::preferred);
     // Let GIO resolve the user's installed entries while the window system, Skia and the
     // initial theme load. No native application handles leave the worker.
@@ -229,7 +234,7 @@ pub fn run() -> ExitCode {
                         result.set(ExitCode::FAILURE);
                         return;
                     };
-                    if let Err(error) = manager.claim_commands() {
+                    if let Err(error) = manager.claim_commands(wayland_lease) {
                         eprintln!("{error}");
                         result.set(ExitCode::FAILURE);
                         return;

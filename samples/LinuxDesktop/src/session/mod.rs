@@ -135,12 +135,14 @@ impl Session {
             Backend::Wayland(w) => w.subscribe(callback),
         }
     }
-    pub fn claim_commands(&self) -> io::Result<()> {
+    pub fn claim_commands(&self, lease: Option<wayland_commands::DisplayLease>) -> io::Result<()> {
         match &self.backend {
             Backend::X11(x) => x.claim_commands(),
             Backend::Wayland(_) => {
                 self.wayland_commands
-                    .replace(Some(wayland_commands::Endpoint::claim()?));
+                    .replace(Some(wayland_commands::Endpoint::bind(lease.ok_or_else(
+                        || io::Error::other("Wayland display ownership required"),
+                    )?)?));
                 Ok(())
             }
         }

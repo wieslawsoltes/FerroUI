@@ -50,7 +50,7 @@ fn inherited_display() -> io::Result<Option<PathBuf>> {
 
 /// wayland-client consumes WAYLAND_SOCKET as it opens the display. Preserve its
 /// named peer for subsequent compositor IPC discovery and child launchers.
-pub fn prepare_inherited_display() -> io::Result<()> {
+fn prepare_inherited_display() -> io::Result<()> {
     if let Some(path) = inherited_display()? {
         env::set_var("WAYLAND_DISPLAY", path);
     }
@@ -161,42 +161,44 @@ pub(super) struct Endpoint {
     _connection: Connection,
 }
 
-impl Endpoint {
-    pub(super) fn claim() -> io::Result<Rc<Self>> {
+/// Retain primary ownership from before graphics initialization through logout.
+/// Competing launches can return immediately without starting a renderer.
+pub(crate) struct DisplayLease(Connection);
+
+impl DisplayLease {
+    pub(crate) fn acquire() -> io::Result<Self> {
+        prepare_inherited_display()?;
+        let bus = Builder::session()
+            .map_err(io::Error::other)?
+            .method_timeout(Duration::from_secs(4))
+            .build()
+            .map_err(io::Error::other)?;
         let name = display_name()?;
+        match bus.request_name_with_flags(name.as_str(), RequestNameFlags::DoNotQueue.into()) {
+            Ok(RequestNameReply::PrimaryOwner | RequestNameReply::AlreadyOwner) => Ok(Self(bus)),
+            Ok(_) | Err(zbus::Error::NameTaken) => Err(io::Error::new(
+                io::ErrorKind::AlreadyExists,
+                "Ferro Desktop already owns this Wayland display",
+            )),
+            Err(e) => Err(io::Error::other(e)),
+        }
+    }
+}
+
+impl Endpoint {
+    pub(super) fn bind(lease: DisplayLease) -> io::Result<Rc<Self>> {
         let state = Rc::new(State::default());
         let handle = UiThreadHandle::register(state.clone());
-        let build = || -> io::Result<Connection> {
-            let bus = Builder::session()
-                .map_err(io::Error::other)?
-                .method_timeout(Duration::from_secs(4))
-                .serve_at(PATH, Interface(handle.clone()))
-                .map_err(io::Error::other)?
-                .build()
-                .map_err(io::Error::other)?;
-            match bus.request_name_with_flags(name.as_str(), RequestNameFlags::DoNotQueue.into()) {
-                Ok(RequestNameReply::PrimaryOwner | RequestNameReply::AlreadyOwner) => {}
-                Ok(_) | Err(zbus::Error::NameTaken) => {
-                    return Err(io::Error::new(
-                        io::ErrorKind::AlreadyExists,
-                        "Ferro Desktop already owns this Wayland display",
-                    ))
-                }
-                Err(error) => return Err(io::Error::other(error)),
-            }
-            Ok(bus)
-        };
-        match build() {
-            Ok(connection) => Ok(Rc::new(Self {
-                state,
-                handle,
-                _connection: connection,
-            })),
-            Err(error) => {
-                handle.unregister();
-                Err(error)
-            }
+        let bus = lease.0;
+        if let Err(e) = bus.object_server().at(PATH, Interface(handle.clone())) {
+            handle.unregister();
+            return Err(io::Error::other(e));
         }
+        Ok(Rc::new(Self {
+            state,
+            handle,
+            _connection: bus,
+        }))
     }
 
     pub(super) fn set_handler(&self, handler: Handler) {
