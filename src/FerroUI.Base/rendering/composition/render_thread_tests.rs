@@ -1312,3 +1312,42 @@ fn the_platform_graphics_of_a_confined_compositor_are_asked_by_the_render_thread
     world.assert_every_feature_is_dropped();
     drop(render_thread);
 }
+
+#[test]
+fn render_context_notifications_return_to_ui_in_order_and_can_unsubscribe() {
+    let _dispatcher_scope = Dispatcher::unit_test_scope();
+    let (_locator_scope, render_interface) = MockPlatformRenderInterface::install();
+    let fixture = ConfinedCompositor::new(&render_interface);
+    let _thread = RenderThread::start(&fixture.render_loop);
+    let ui_thread = thread::current().id();
+    let notices = Rc::new(std::cell::RefCell::new(Vec::new()));
+    let observed = notices.clone();
+    let subscription = fixture.compositor.render_context_changed(move |state| {
+        assert_eq!(thread::current().id(), ui_thread);
+        observed.borrow_mut().push(state);
+    });
+    let (target, root) = fixture.show();
+    wait_until("first context notification", || !notices.borrow().is_empty());
+    notices.borrow_mut().clear();
+    let reset = fixture.compositor.invoke_server_job_async(|server| {
+        server.reset_all_gpu_resources();
+        server.render_interface().value();
+        Ok(())
+    }, false);
+    wait_until("reset notifications", || reset.is_completed() && notices.borrow().len() == 2);
+    assert_eq!(&*notices.borrow(), &[super::RenderContextState::Lost, super::RenderContextState::Created]);
+    subscription.dispose();
+    notices.borrow_mut().clear();
+    let reset = fixture.compositor.invoke_server_job_async(|server| {
+        server.reset_all_gpu_resources();
+        server.render_interface().value();
+        Ok(())
+    }, false);
+    wait_until("second reset", || reset.is_completed());
+    Dispatcher::ui_thread().run_jobs(None);
+    assert!(notices.borrow().is_empty());
+    fixture.dispose(target, root);
+    let (render_loop, log) = fixture.drop_compositor();
+    wait_until("render graph released", || render_loop.task_count() == 0);
+    assert!(log.violations().is_empty());
+}

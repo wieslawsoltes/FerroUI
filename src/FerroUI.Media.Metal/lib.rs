@@ -188,7 +188,10 @@ impl TextureRenderer for MetalTextureRenderer {
                         || interop.shared_context_generation() != generation
                         || interop.device_luid().as_ref() != Some(&device)
                     {
-                        return Err(unsupported("Metal renderer device/generation changed"));
+                        return Err(MediaError::new(
+                            MediaErrorKind::DeviceLost,
+                            "Metal renderer device/generation changed",
+                        ));
                     }
                     if inputs.iter().any(|v| !v.is_current()) {
                         return Err(MediaError::cancelled());

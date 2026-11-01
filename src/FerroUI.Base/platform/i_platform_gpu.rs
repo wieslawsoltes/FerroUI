@@ -61,6 +61,11 @@ pub trait IPlatformGraphicsContext: IOptionalFeatureProvider {
     fn poll_pending_gpu_work(&self) -> bool {
         false
     }
+    /// Healthy contexts with externally leased storage cannot be destroyed
+    /// during replacement yet. The render-interface manager polls retirement
+    /// on their owning thread until this becomes false. A quiet retained lease
+    /// must wake the render loop when its native cleanup is queued.
+    fn has_pending_resource_retirement(&self) -> bool { false }
     /// Whether the context is lost and cannot be used anymore.
     fn is_lost(&self) -> bool;
 

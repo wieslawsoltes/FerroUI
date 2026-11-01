@@ -115,6 +115,11 @@ impl SharedGlTextureRetirementQueue {
     pub(crate) fn take(&self) -> Vec<(u32, FrameRetirement)> {
         std::mem::take(&mut self.0.lock().unwrap().textures)
     }
+    /// Includes live native/texture owners that have not queued destruction
+    /// yet. Used only when retiring a healthy context, not as an idle frame clock.
+    pub(crate) fn has_live_resources(&self) -> bool {
+        Arc::strong_count(&self.0) > 1 || self.has_pending()
+    }
     pub(crate) fn has_pending(&self) -> bool {
         let state = self.0.lock().unwrap();
         !state.textures.is_empty() || !state.native.is_empty()
@@ -289,6 +294,24 @@ mod tests {
         drop(frame);
         assert_eq!(budget.usage().bytes, 4);
         assert!(queue.take().is_empty());
+    }
+    #[test]
+    fn healthy_context_retirement_waits_for_live_owners_and_queued_deletion() {
+        let (budget, reservation) = reservation();
+        let queue = SharedGlTextureRetirementQueue::default();
+        assert!(!queue.has_live_resources());
+        let wake = queue.register_wakeup(Arc::new(|| {}));
+        let owner = queue.owner(29, reservation.retirement(), wake);
+        let frame = reservation.lease(owner);
+        assert!(queue.has_live_resources());
+        assert!(!queue.has_pending()); // no spin while an external lease is quiet
+        drop(frame);
+        assert!(queue.has_live_resources());
+        assert!(queue.has_pending());
+        assert_eq!(budget.usage().frames, 1);
+        drop(queue.take()); // owning-context native deletion has completed
+        assert!(!queue.has_live_resources());
+        assert_eq!(budget.usage().frames, 0);
     }
     #[test]
     fn native_surface_ownership_keeps_retirement_ticks_active() {

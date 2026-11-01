@@ -7,6 +7,7 @@ use ferroui_base::{
     layout::LayoutableImpl,
     media::{Brushes, Stretch},
     reactive::IDisposable,
+    rendering::composition::{ElementComposition, ICompositionGpuInterop, RenderContextState},
     threading::{Dispatcher, DispatcherPriority, DispatcherTimer},
     utilities::ThreadBound,
     FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Point, Ref,
@@ -67,6 +68,15 @@ impl RendererWake {
     }
 }
 
+/// Creates client-owned rendering resources on the active context. The new
+/// source identity must be used for the renderer's output. Capture the original
+/// shared budget; do not discard old-generation retirement accounting.
+pub type TextureRendererFactory =
+    dyn Fn(
+        &dyn ICompositionGpuInterop,
+        u64,
+    ) -> Result<(Rc<dyn TextureRenderer>, Rc<dyn TextureFrameImporter>), MediaError>;
+
 /// A normal composition control which schedules a client-owned renderer. Input
 /// mailboxes borrow already-acquired frames; this control never opens a source.
 #[repr(C)]
@@ -85,6 +95,11 @@ pub struct RendererHost {
     presenter_errors: RefCell<Option<MediaSubscription>>,
     failed: Cell<bool>,
     generation: Cell<u64>,
+    renderer_factory: RefCell<Option<Rc<TextureRendererFactory>>>,
+    context_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    device_suspended: Cell<bool>,
+    device_epoch: Cell<u64>,
+    renderer_enabled: Cell<bool>,
 }
 ferro_class!(RendererHost:Panel);
 ferro_class_info!(RendererHost {
@@ -151,16 +166,31 @@ impl FerroObjectImpl for RendererHost {
 impl VisualImpl for RendererHost {
     fn on_attached_to_visual_tree(this: &Self, args: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, args);
-        this.start();
+        this.subscribe_context();
+        if this.device_suspended.get() {
+            this.recover_device();
+        } else {
+            this.start();
+        }
     }
     fn on_detached_from_visual_tree(this: &Self, args: &VisualTreeAttachmentEventArgs) {
-        this.stop();
+        if this.renderer_factory.borrow().is_some() {
+            this.suspend_device();
+        } else {
+            this.stop();
+        }
+        if let Some(subscription) = this.context_subscription.borrow_mut().take() {
+            subscription.dispose();
+        }
         Self::parent_on_detached_from_visual_tree(this, args);
     }
 }
 impl Drop for RendererHost {
     fn drop(&mut self) {
         self.stop();
+        if let Some(subscription) = self.context_subscription.get_mut().take() {
+            subscription.dispose();
+        }
         if let Some(subscription) = self.visibility_subscription.get_mut().take() {
             subscription.dispose();
         }
@@ -183,6 +213,11 @@ impl RendererHost {
             presenter_errors: RefCell::new(None),
             failed: Cell::new(false),
             generation: Cell::new(0),
+            renderer_factory: RefCell::new(None),
+            context_subscription: RefCell::new(None),
+            device_suspended: Cell::new(false),
+            device_epoch: Cell::new(0),
+            renderer_enabled: Cell::new(false),
         }
     }
     pub fn new() -> Ref<Self> {
@@ -205,6 +240,14 @@ impl RendererHost {
         source: u64,
         importer: Option<Rc<dyn TextureFrameImporter>>,
     ) {
+        self.device_epoch.set(
+            self.device_epoch
+                .get()
+                .checked_add(1)
+                .expect("renderer device epoch exhausted"),
+        );
+        self.device_suspended.set(false);
+        self.renderer_enabled.set(renderer.is_some());
         self.stop();
         let host = renderer.map(|renderer| TextureRendererHost::new(renderer, source));
         if let Some(host) = host.as_ref() {
@@ -219,6 +262,103 @@ impl RendererHost {
         if self.is_attached_to_visual_tree() {
             self.start();
         }
+    }
+    /// Enables recreation after context loss. Scene and pipeline recreation
+    /// remain client code; source inputs and scheduling remain on this host.
+    pub fn set_renderer_factory(&self, factory: Option<Rc<TextureRendererFactory>>) {
+        if let Some(subscription) = self.context_subscription.borrow_mut().take() {
+            subscription.dispose();
+        }
+        self.device_epoch.set(
+            self.device_epoch
+                .get()
+                .checked_add(1)
+                .expect("renderer device epoch exhausted"),
+        );
+        *self.renderer_factory.borrow_mut() = factory;
+        self.subscribe_context();
+    }
+    fn subscribe_context(&self) {
+        if self.context_subscription.borrow().is_some()
+            || self.renderer_factory.borrow().is_none()
+            || !self.is_attached_to_visual_tree()
+        {
+            return;
+        }
+        let Some(visual) = ElementComposition::get_element_visual(&self.to_ref()) else {
+            return;
+        };
+        let weak = self.to_ref().downgrade();
+        *self.context_subscription.borrow_mut() =
+            Some(visual.compositor().render_context_changed(move |state| {
+                if let Some(view) = weak.upgrade() {
+                    match state {
+                        RenderContextState::Lost => view.suspend_device(),
+                        RenderContextState::Created if view.device_suspended.get() => {
+                            view.recover_device()
+                        }
+                        _ => {}
+                    }
+                }
+            }));
+    }
+    fn suspend_device(&self) {
+        if !self.renderer_enabled.get() || self.device_suspended.replace(true) {
+            return;
+        }
+        self.device_epoch.set(
+            self.device_epoch
+                .get()
+                .checked_add(1)
+                .expect("renderer device epoch exhausted"),
+        );
+        self.stop();
+        self.host.borrow_mut().take();
+        self.failed.set(true);
+        if let Some(view) = self.presenter.borrow().clone() {
+            view.set_frame_source(None, None);
+        }
+    }
+    fn recover_device(&self) {
+        let Some(factory) = self.renderer_factory.borrow().clone() else {
+            return;
+        };
+        let Some(visual) = ElementComposition::get_element_visual(&self.to_ref()) else {
+            return;
+        };
+        let compositor = visual.compositor().clone();
+        let epoch = self.device_epoch.get();
+        let weak = self.to_ref().downgrade();
+        self.device_suspended.set(false);
+        Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+            let interop = compositor.try_get_composition_gpu_interop().await;
+            let Some(view) = weak
+                .upgrade()
+                .filter(|v| v.device_epoch.get() == epoch && v.is_attached_to_visual_tree())
+            else {
+                return;
+            };
+            let source = ferroui_media::allocate_source_id();
+            let result = match interop {
+                Some(interop) if !interop.is_lost() => factory(&*interop, source),
+                _ => Err(MediaError::new(
+                    MediaErrorKind::DeviceLost,
+                    "No restored renderer GPU context",
+                )),
+            };
+            if view.device_epoch.get() != epoch {
+                return;
+            }
+            match result {
+                Ok((renderer, importer)) => {
+                    view.set_renderer(Some(renderer), source, Some(importer))
+                }
+                Err(error) => {
+                    view.device_suspended.set(true);
+                    view.errors.emit(&error);
+                }
+            }
+        });
     }
     pub fn output(&self) -> Option<Arc<FrameMailbox>> {
         self.host.borrow().as_ref().map(|h| h.output())
@@ -620,5 +760,36 @@ mod scheduling_tests {
         assert!(view.timer.borrow().is_none());
         window.close();
         settle();
+    }
+    #[test]
+    fn context_suspension_retires_output_without_discarding_inputs_or_retained_bytes() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let budget = FrameBudget::new(Default::default());
+        let renderer = Rc::new(Renderer {
+            calls: Cell::new(0),
+            budget: budget.clone(),
+        });
+        let input = Arc::new(FrameMailbox::new(1, 1));
+        let view = RendererHost::new();
+        view.set_renderer(Some(renderer), 9, None);
+        view.set_inputs(vec![input.clone()]);
+        let output = view.output().unwrap();
+        let generation = view.host.borrow().as_ref().unwrap().viewport().generation;
+        output
+            .publish(budget.lease(metadata(9, generation, 1, 2, 2), ()).unwrap())
+            .unwrap();
+        let retained = output.latest().unwrap();
+        view.suspend_device();
+        assert!(view.output().is_none());
+        assert!(output.latest().is_none());
+        assert!(!retained.is_current());
+        assert!(Arc::ptr_eq(&view.inputs.borrow()[0], &input));
+        assert_eq!(budget.usage().frames, 1);
+        assert_eq!(budget.usage().bytes, 16);
+        drop(retained);
+        assert_eq!(budget.usage().frames, 0);
+        view.set_renderer(None, 9, None);
+        assert!(!view.renderer_enabled.get());
+        assert!(!view.device_suspended.get());
     }
 }

@@ -313,6 +313,9 @@ impl IOptionalFeatureProvider for EglContext {
 }
 
 impl IPlatformGraphicsContext for EglContext {
+    fn has_pending_resource_retirement(&self) -> bool {
+        !self.frame_fences.borrow().is_empty() || self.frame_retirement.has_live_resources()
+    }
     fn poll_pending_gpu_work(&self) -> bool {
         let fences = std::mem::take(&mut *self.frame_fences.borrow_mut());
         if self.is_lost() {

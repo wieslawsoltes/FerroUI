@@ -7,6 +7,7 @@ use ferroui_base::{
     layout::{LayoutableImpl, VerticalAlignment},
     media::Stretch,
     reactive::IDisposable,
+    rendering::composition::{ElementComposition, ICompositionGpuInterop, RenderContextState},
     threading::{Dispatcher, DispatcherPriority, DispatcherTimer},
     FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref,
     StyledElementImpl, StyledProperty, VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs,
@@ -21,6 +22,13 @@ use std::{
     rc::Rc,
     time::Duration,
 };
+/// Recreates renderer-bound playback and import resources. Capture a shared
+/// FrameBudget so retirement from old devices remains charged to the same limit.
+pub type MediaPlayerProviderFactory =
+    dyn Fn(
+        &dyn ICompositionGpuInterop,
+    ) -> Result<(Rc<dyn MediaPlayerProvider>, Rc<dyn TextureFrameImporter>), MediaError>;
+
 #[repr(C)]
 pub struct MediaPlayerElement {
     base: Panel,
@@ -38,6 +46,10 @@ pub struct MediaPlayerElement {
     placeholder_content: RefCell<Option<Ref<Control>>>,
     frame_subscription: RefCell<Option<MediaSubscription>>,
     has_presentation: Cell<bool>,
+    provider_factory: RefCell<Option<Rc<MediaPlayerProviderFactory>>>,
+    context_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    device_suspended: Cell<bool>,
+    recovery_generation: Cell<u64>,
 }
 ferro_class!(MediaPlayerElement:Panel);
 ferro_class_info!(MediaPlayerElement {
@@ -64,7 +76,11 @@ impl FerroObjectImpl for MediaPlayerElement {
                 if let Some(view) = weak.upgrade() {
                     if view.owns_player.get() {
                         if let Some(player) = view.media_player() {
-                            player.clear_source();
+                            if error.kind == MediaErrorKind::DeviceLost {
+                                view.suspend_device();
+                            } else {
+                                player.clear_source();
+                            }
                         }
                     }
                     if let Some(placeholder) = view.placeholder.borrow().as_ref() {
@@ -113,10 +129,15 @@ impl VisualImpl for MediaPlayerElement {
     fn on_attached_to_visual_tree(this: &Self, args: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, args);
         this.subscribe();
+        this.subscribe_context();
         this.start_polling();
     }
     fn on_detached_from_visual_tree(this: &Self, args: &VisualTreeAttachmentEventArgs) {
         this.stop_polling();
+        this.cancel_recovery();
+        if let Some(subscription) = this.context_subscription.borrow_mut().take() {
+            subscription.dispose();
+        }
         this.subscription.borrow_mut().take();
         this.show_placeholder(true);
         if this.owns_player.get() {
@@ -145,6 +166,10 @@ impl MediaPlayerElement {
             placeholder_content: RefCell::new(None),
             frame_subscription: RefCell::new(None),
             has_presentation: Cell::new(false),
+            provider_factory: RefCell::new(None),
+            context_subscription: RefCell::new(None),
+            device_suspended: Cell::new(false),
+            recovery_generation: Cell::new(0),
         }
     }
     pub fn new() -> Ref<Self> {
@@ -209,6 +234,7 @@ impl MediaPlayerElement {
         importer: Option<Rc<dyn TextureFrameImporter>>,
     ) {
         self.stop_polling();
+        self.cancel_recovery();
         self.subscription.borrow_mut().take();
         self.show_placeholder(true);
         let old = self.media_player();
@@ -257,6 +283,130 @@ impl MediaPlayerElement {
         self.owns_player.set(true);
         *self.player.borrow_mut() = Some(player.clone());
         player.set_source(source)
+    }
+    /// Enables automatic recovery for sessions owned by this element. Supplied
+    /// players remain caller-owned; their owner calls `rebind_provider` once for
+    /// all consumers. Removing the factory cancels pending element recovery.
+    pub fn set_provider_factory(&self, factory: Option<Rc<MediaPlayerProviderFactory>>) {
+        self.cancel_recovery();
+        if let Some(subscription) = self.context_subscription.borrow_mut().take() {
+            subscription.dispose();
+        }
+        *self.provider_factory.borrow_mut() = factory;
+        self.subscribe_context();
+    }
+    fn cancel_recovery(&self) {
+        self.recovery_generation.set(
+            self.recovery_generation
+                .get()
+                .checked_add(1)
+                .expect("recovery generation exhausted"),
+        );
+        self.device_suspended.set(false);
+    }
+    fn suspend_device(&self) {
+        if !self.owns_player.get() || self.device_suspended.replace(true) {
+            return;
+        }
+        self.recovery_generation.set(
+            self.recovery_generation
+                .get()
+                .checked_add(1)
+                .expect("recovery generation exhausted"),
+        );
+        self.stop_polling();
+        self.show_placeholder(true);
+        if let Some(presenter) = self.presenter.borrow().clone() {
+            presenter.invalidate_device();
+        }
+        if let Some(player) = self.media_player() {
+            player.suspend_for_device_loss();
+        }
+    }
+    fn subscribe_context(&self) {
+        if self.context_subscription.borrow().is_some()
+            || self.provider_factory.borrow().is_none()
+            || !self.is_attached_to_visual_tree()
+        {
+            return;
+        }
+        let Some(visual) = ElementComposition::get_element_visual(&self.to_ref()) else {
+            return;
+        };
+        let weak = self.to_ref().downgrade();
+        *self.context_subscription.borrow_mut() =
+            Some(visual.compositor().render_context_changed(move |state| {
+                if let Some(view) = weak.upgrade() {
+                    match state {
+                        RenderContextState::Lost => view.suspend_device(),
+                        RenderContextState::Created if view.device_suspended.get() => {
+                            view.recover_device()
+                        }
+                        _ => {}
+                    }
+                }
+            }));
+    }
+    fn recover_device(&self) {
+        let Some(factory) = self.provider_factory.borrow().clone() else {
+            return;
+        };
+        let Some(player) = self.media_player().filter(|_| self.owns_player.get()) else {
+            return;
+        };
+        let Some(visual) = ElementComposition::get_element_visual(&self.to_ref()) else {
+            return;
+        };
+        let compositor = visual.compositor().clone();
+        let generation = self.recovery_generation.get();
+        let weak_player = player.downgrade();
+        let weak = self.to_ref().downgrade();
+        self.device_suspended.set(false);
+        Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+            let interop = compositor.try_get_composition_gpu_interop().await;
+            let Some(view) = weak.upgrade().filter(|v| {
+                v.recovery_generation.get() == generation && v.is_attached_to_visual_tree()
+            }) else {
+                return;
+            };
+            let Some(player) = weak_player.upgrade() else {
+                return;
+            };
+            let result = match interop {
+                Some(interop) if !interop.is_lost() => factory(&*interop),
+                _ => Err(MediaError::new(
+                    MediaErrorKind::DeviceLost,
+                    "Renderer has no restored GPU context",
+                )),
+            };
+            let (provider, importer) = match result {
+                Ok(value) => value,
+                Err(error) => {
+                    view.device_suspended.set(true);
+                    view.errors.emit(&error);
+                    return;
+                }
+            };
+            if view.recovery_generation.get() != generation {
+                return;
+            }
+            let pending = player.rebind_provider(provider);
+            if let Some(presenter) = view.presenter.borrow().clone() {
+                presenter.set_frame_source(Some(player.frames()), Some(importer));
+            }
+            drop(view);
+            drop(player);
+            if let Err(error) = pending.await {
+                if error.kind != MediaErrorKind::Cancelled {
+                    if let Some(view) = weak
+                        .upgrade()
+                        .filter(|v| v.recovery_generation.get() == generation)
+                    {
+                        view.errors.emit(&error);
+                    }
+                }
+            }
+        });
     }
     fn subscribe(&self) {
         if self.subscription.borrow().is_some() {
@@ -493,5 +643,16 @@ mod readiness_tests {
         assert_eq!(native.reads.get(), reads);
         window.close();
         tick();
+    }
+}
+
+impl Drop for MediaPlayerElement {
+    fn drop(&mut self) {
+        if let Some(subscription) = self.context_subscription.get_mut().take() {
+            subscription.dispose();
+        }
+        if let Some(timer) = self.timer.get_mut().take() {
+            timer.dispose();
+        }
     }
 }

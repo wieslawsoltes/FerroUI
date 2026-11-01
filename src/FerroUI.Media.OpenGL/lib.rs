@@ -104,7 +104,10 @@ impl NativeGlFrameProducer {
                     || context.shared_frame_context_id() != Some(id)
                     || context.shared_frame_context_generation() != generation
                 {
-                    return Ok(Err(unsupported("The producer GL context was replaced")));
+                    return Ok(Err(MediaError::new(
+                        MediaErrorKind::DeviceLost,
+                        "The producer GL context was replaced",
+                    )));
                 }
                 let _current = CurrentContext(context.ensure_current());
                 let renderer = context

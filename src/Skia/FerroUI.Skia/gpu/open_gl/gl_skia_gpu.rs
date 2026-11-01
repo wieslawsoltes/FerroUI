@@ -33,6 +33,11 @@ use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
 use std::sync::Arc;
 
+struct RestoreGlCurrent(Rc<dyn IDisposable>);
+impl Drop for RestoreGlCurrent {
+    fn drop(&mut self) { self.0.dispose(); }
+}
+
 /// A Skia GPU that renders with a platform OpenGL context through Ganesh.
 pub struct GlSkiaGpu {
     gr_context: Rc<GaneshGrContext>,
@@ -315,7 +320,11 @@ impl IPlatformGraphicsContext for GlSkiaGpu {
     }
 
     fn dispose(&self) {
-        self.gr_context.dispose(!self.gl_context.is_lost());
+        let lost = self.gl_context.is_lost();
+        // Reset can run before a render target makes this context current.
+        // Ganesh flush/release must use its actual owning GL context.
+        let _current = (!lost).then(|| RestoreGlCurrent(self.gl_context.ensure_current()));
+        self.gr_context.dispose(!lost);
 
         let callbacks = std::mem::take(&mut *self.post_dispose_callbacks.borrow_mut());
         for cb in callbacks {

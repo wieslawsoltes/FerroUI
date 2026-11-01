@@ -18,6 +18,7 @@ fn native(error: MediaError) -> CameraError {
         match error.kind {
             ferroui_media::MediaErrorKind::Unsupported => CameraErrorKind::Unsupported,
             ferroui_media::MediaErrorKind::Cancelled => CameraErrorKind::Cancelled,
+            ferroui_media::MediaErrorKind::DeviceLost => CameraErrorKind::DeviceLost,
             _ => CameraErrorKind::NativeFailure,
         },
         error.to_string(),

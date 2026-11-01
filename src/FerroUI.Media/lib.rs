@@ -19,6 +19,7 @@ pub enum MediaErrorKind {
     InvalidSource,
     Permission,
     NativeFailure,
+    DeviceLost,
     Cancelled,
     AutoplayDenied,
 }

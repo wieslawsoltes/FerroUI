@@ -186,7 +186,7 @@ pub use visual::CompositionVisual;
 pub use visual_collection::CompositionVisualCollection;
 pub use composition_transparency_level::CompositionTransparencyLevel;
 pub use compositor::{
-    CompositionVisualSnapshotError, Compositor, ICompositorScheduler, LocalFuture, ServerJobError, ServerJobTask,
+    CompositionVisualSnapshotError, Compositor, ICompositorScheduler, LocalFuture, ServerJobError, ServerJobTask, RenderContextState,
 };
 pub use enums::{
     CompositionBitmapInterpolationMode, CompositionBlendMode, CompositionDropShadowSourcePolicy,

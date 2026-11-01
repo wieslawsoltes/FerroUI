@@ -166,6 +166,11 @@ impl TexturePresenter {
             view.present_latest();
         });
     }
+    /// Retire presentation on context loss while retaining the selected source.
+    /// A fresh provider/importer must be attached after the renderer recreates it.
+    pub fn invalidate_device(&self) {
+        self.release();
+    }
     fn release(&self) {
         self.generation.set(
             self.generation
@@ -219,7 +224,7 @@ impl TexturePresenter {
         if interop.is_lost() {
             self.release();
             self.error(MediaError::new(
-                MediaErrorKind::NativeFailure,
+                MediaErrorKind::DeviceLost,
                 "Graphics device was lost",
             ));
             return;

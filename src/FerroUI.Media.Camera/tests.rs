@@ -218,7 +218,7 @@ fn malformed_requests_never_reach_a_provider_or_native_controls() {
 
 #[test]
 fn a_late_photo_is_canceled_but_completed_encoded_output_is_independent() {
-    struct PhotoNative(Native);
+    struct PhotoNative(Native, bool);
     impl NativeCameraSession for PhotoNative {
         fn settings(&self) -> CameraSettings {
             self.0.settings()
@@ -228,7 +228,14 @@ fn a_late_photo_is_canceled_but_completed_encoded_output_is_independent() {
         }
         fn photo(&self) -> CameraFuture<CameraPhoto> {
             // Opaque ownership fixture; native JPEG validity has its own gate.
-            Box::pin(async {
+            let fail = self.1;
+            Box::pin(async move {
+                if fail {
+                    return Err(CameraError::new(
+                        CameraErrorKind::NativeFailure,
+                        "Native capture aborted",
+                    ));
+                }
                 Ok(CameraPhoto {
                     encoded: Arc::from(&b"owned photo fixture"[..]),
                     content_type: "application/x-test-photo".into(),
@@ -248,22 +255,74 @@ fn a_late_photo_is_canceled_but_completed_encoded_output_is_independent() {
             self.0.stop();
         }
     }
-    let session = || {
+    let session = |fail| {
         CameraSession(Rc::new(SessionInner {
-            native: Rc::new(PhotoNative(Native {
-                stops: Cell::new(0),
-            })),
+            native: Rc::new(PhotoNative(
+                Native {
+                    stops: Cell::new(0),
+                },
+                fail,
+            )),
             frames: Arc::new(FrameMailbox::new(1, 1)),
             stopped: Cell::new(false),
         }))
     };
-    let first = session();
+    let first = session(false);
     let pending = first.photo();
     first.stop();
-    assert_eq!(ready(pending).unwrap_err().kind, CameraErrorKind::Cancelled);
-    let second = session();
+    assert_eq!(
+        ready(pending).err().unwrap().kind,
+        CameraErrorKind::Cancelled
+    );
+    let second = session(false);
     let encoded = ready(second.photo()).unwrap().encoded;
     second.stop();
     drop(second);
     assert_eq!(&*encoded, b"owned photo fixture");
+    let stopped_error = session(true);
+    let pending = stopped_error.photo();
+    stopped_error.stop();
+    assert_eq!(
+        ready(pending).err().unwrap().kind,
+        CameraErrorKind::Cancelled
+    );
+    let active_error = session(true);
+    assert_eq!(
+        ready(active_error.photo()).err().unwrap().kind,
+        CameraErrorKind::NativeFailure
+    );
+}
+
+#[test]
+fn provider_rebind_cancels_provisional_start_and_preserves_capture_identity_and_budget() {
+    let old_native = Rc::new(Native {
+        stops: Cell::new(0),
+    });
+    let old = Rc::new(Provider {
+        native: old_native.clone(),
+        starts: Cell::new(0),
+    });
+    let capture = CameraCapture::new(old.clone(), FrameBudget::new(Default::default()));
+    let source = capture.0.source;
+    let pending = capture.start(Default::default());
+    let native = Rc::new(Native {
+        stops: Cell::new(0),
+    });
+    let next = Rc::new(Provider {
+        native: native.clone(),
+        starts: Cell::new(0),
+    });
+    capture.rebind_provider(next.clone());
+    assert_eq!(
+        ready(pending).err().unwrap().kind,
+        CameraErrorKind::Cancelled
+    );
+    assert_eq!(old_native.stops.get(), 1);
+    assert_eq!(next.starts.get(), 0); // rebinding alone acquires no hardware
+    assert_eq!(capture.0.source, source);
+    assert_eq!(capture.0.budget.usage().frames, 0);
+    let session = ready(capture.start(Default::default())).unwrap();
+    assert_eq!(next.starts.get(), 1);
+    session.stop();
+    assert_eq!(native.stops.get(), 1);
 }

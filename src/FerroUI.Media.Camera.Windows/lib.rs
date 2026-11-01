@@ -38,6 +38,7 @@ fn native(e: MediaError) -> CameraError {
             MediaErrorKind::Permission => CameraErrorKind::Denied,
             MediaErrorKind::Unsupported => CameraErrorKind::Unsupported,
             MediaErrorKind::Cancelled => CameraErrorKind::Cancelled,
+            MediaErrorKind::DeviceLost => CameraErrorKind::DeviceLost,
             _ => CameraErrorKind::NativeFailure,
         },
         e.message,

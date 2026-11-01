@@ -156,3 +156,21 @@ availability. Stop retires its output; restarting/replacing the camera restores
 the requested renderer when the replacement input becomes available. Native
 smoke completion requires the renderer probe when enabled, and any earlier
 reported smoke failure prevents a final success result.
+
+
+## Renderer reset regression
+
+Add `--device-recovery-smoke` to an iOS `--smoke` launch, or add
+`--ez deviceRecoverySmoke true` to Android `mediaSmoke`. The sample pauses an
+owned player, resets through the compositor's existing GPU resource lifecycle,
+requires a frame from a newer source generation at the retained paused position,
+then runs the normal seek/Stop/retirement checks. Renderer smoke may be enabled
+to exercise recreation of the client Metal/GLES pipeline with the same budget.
+Do not combine this case with saturation smoke, which intentionally retains
+all available frame storage.
+
+The interactive `Reset GPU` action exercises the same lifecycle while camera,
+optional QR and the 3D plane are active. Active owned capture is restarted through
+a fresh provider; explicit Stop and Detach cancel automatic restart. This is a
+controlled context reset, separate from abrupt driver loss and physical camera
+permission/hotplug gates.

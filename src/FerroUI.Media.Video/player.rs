@@ -119,7 +119,7 @@ pub trait MediaPlayerProvider {
     ) -> MediaFuture<Rc<dyn NativeMediaSession>>;
 }
 struct PlayerInner {
-    provider: Rc<dyn MediaPlayerProvider>,
+    provider: RefCell<Rc<dyn MediaPlayerProvider>>,
     source_id: u64,
     generation: Cell<u64>,
     command: Cell<u64>,
@@ -205,7 +205,7 @@ impl MediaPlayer {
     pub fn new(provider: Rc<dyn MediaPlayerProvider>) -> Self {
         let id = ferroui_media::allocate_source_id();
         Self(Rc::new(PlayerInner {
-            provider,
+            provider: RefCell::new(provider),
             source_id: id,
             generation: Cell::new(1),
             command: Cell::new(0),
@@ -334,14 +334,79 @@ impl MediaPlayer {
     /// Replacement invalidates callbacks/frames immediately, even if the future
     /// is never polled. Dropping pending creation retires its provisional owner.
     pub fn set_source(&self, source: MediaSource) -> MediaFuture<()> {
-        let generation = self.replace();
-        self.0.preparing.set(true);
-        *self.0.source.borrow_mut() = Some(source.clone());
-        self.0.intent.set(if self.options().autoplay {
+        let intent = if self.options().autoplay {
             PlaybackIntent::Play
         } else {
             PlaybackIntent::Pause
-        });
+        };
+        self.prepare_source(source, intent, None)
+    }
+    /// Replaces the renderer-bound provider without changing source ownership,
+    /// audio options or requested transport state. Old callbacks and frames are
+    /// invalidated immediately. The newest queued seek takes precedence over
+    /// the last achieved position. Budgets belong to providers and must be
+    /// shared across device generations, including retired allocations.
+    pub fn rebind_provider(&self, provider: Rc<dyn MediaPlayerProvider>) -> MediaFuture<()> {
+        let source = self.0.source.borrow().clone();
+        let intent = self.requested_state();
+        let position = self.resume_position();
+        *self.0.provider.borrow_mut() = provider;
+        match source {
+            Some(source) => self.prepare_source(source, intent, position),
+            None => Box::pin(async { Ok(()) }),
+        }
+    }
+    pub fn source(&self) -> Option<MediaSource> {
+        self.0.source.borrow().clone()
+    }
+    fn resume_position(&self) -> Option<Duration> {
+        self.0
+            .pending_seek
+            .borrow()
+            .as_ref()
+            .map(|seek| seek.position)
+            .or_else(|| {
+                self.playback_session()
+                    .seekable
+                    .then(|| self.playback_session().position)
+            })
+    }
+    /// Stop using a lost device immediately. Source and current intent remain
+    /// selected for `rebind_provider`; commands issued while suspended update
+    /// that intent and the latest queued seek. This does not claim completion
+    /// of outstanding native GPU work.
+    pub fn suspend_for_device_loss(&self) {
+        if self.source().is_none() {
+            return;
+        }
+        let position = self.resume_position();
+        let mut state = self.playback_session();
+        self.replace();
+        self.0.preparing.set(true);
+        if let Some(position) = position {
+            drop(self.seek(position));
+        }
+        state.state = MediaPlaybackState::Failed;
+        state.error = Some(MediaError::new(
+            MediaErrorKind::DeviceLost,
+            "Graphics device was lost",
+        ));
+        *self.0.state.borrow_mut() = state.clone();
+        self.0.events.emit(&MediaPlayerEvent::StateChanged(state));
+    }
+    fn prepare_source(
+        &self,
+        source: MediaSource,
+        intent: PlaybackIntent,
+        position: Option<Duration>,
+    ) -> MediaFuture<()> {
+        let generation = self.replace();
+        self.0.preparing.set(true);
+        *self.0.source.borrow_mut() = Some(source.clone());
+        self.0.intent.set(intent);
+        if let Some(position) = position {
+            drop(self.seek(position));
+        }
         let opening = MediaPlaybackSession {
             state: MediaPlaybackState::Opening,
             ..Default::default()
@@ -351,7 +416,8 @@ impl MediaPlayer {
         if self.0.generation.get() != generation {
             return Box::pin(async { Err(MediaError::cancelled()) });
         }
-        let pending = self.0.provider.open(
+        let provider = self.0.provider.borrow().clone();
+        let pending = provider.open(
             source,
             self.0.source_id,
             generation,

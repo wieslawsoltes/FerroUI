@@ -153,6 +153,13 @@ impl ApplicationImpl for App {
                             MediaSource::File(path.into())
                         };
                         let pending = view.set_source(source, provider, providers::importer());
+                        let recovery_budget = budget.clone();
+                        view.set_provider_factory(Some(Rc::new(move |interop| {
+                            Ok((
+                                providers::video(interop, recovery_budget.clone())?,
+                                providers::importer(),
+                            ))
+                        })));
                         if let Err(error) = pending.await {
                             eprintln!("OPEN_FAILED {error}");
                             FAILED.store(true, Ordering::Relaxed);
@@ -193,6 +200,9 @@ fn smoke(window: &Ref<Window>, view: &Ref<MediaPlayerElement>, budget: FrameBudg
     let stage = Rc::new(Cell::new(0u8));
     let changed = Cell::new(Instant::now());
     let imports_before_stop = Cell::new(0u64);
+    let recovery_started = Cell::new(false);
+    let previous_generation = Cell::new(0u64);
+    let previous_position = Cell::new(Duration::ZERO);
     DispatcherTimer::run(
         move || {
             let (Some(view), Some(window)) = (view.upgrade(), window.upgrade()) else {
@@ -209,6 +219,10 @@ fn smoke(window: &Ref<Window>, view: &Ref<MediaPlayerElement>, budget: FrameBudg
                 return false;
             }
             if stage.get() == 7 && budget.usage().frames == 0 && !renderer::retained() {
+                #[cfg(target_os = "macos")]
+                if !renderer::probes_complete() {
+                    return true;
+                }
                 println!("NATIVE_MEDIA_SMOKE_PASS retained_frames=0");
                 window.close();
                 return false;
@@ -217,7 +231,7 @@ fn smoke(window: &Ref<Window>, view: &Ref<MediaPlayerElement>, budget: FrameBudg
                 return true;
             };
             let state = player.playback_session();
-            if state.state == MediaPlaybackState::Failed {
+            if state.state == MediaPlaybackState::Failed && stage.get() != 8 {
                 eprintln!("NATIVE_FAILED {:?}", state.error);
                 FAILED.store(true, Ordering::Relaxed);
                 window.close();
@@ -271,6 +285,63 @@ fn smoke(window: &Ref<Window>, view: &Ref<MediaPlayerElement>, budget: FrameBudg
                     assert_eq!(counts.preview, PixelTransferCount::default());
                     assert_eq!(counts.gpu_copies, 0);
                     player.pause().unwrap();
+                    stage.set(1);
+                    changed.set(Instant::now());
+                }
+                1 if changed.get().elapsed() > Duration::from_millis(150)
+                    && std::env::args().any(|a| a == "--device-recovery-smoke")
+                    && !recovery_started.replace(true) =>
+                {
+                    previous_generation.set(
+                        player
+                            .frames()
+                            .latest()
+                            .unwrap()
+                            .metadata()
+                            .identity
+                            .generation,
+                    );
+                    previous_position.set(state.position);
+                    stage.set(8);
+                    if let Some(visual) = ElementComposition::get_element_visual(&view) {
+                        visual.compositor().invoke_server_job_async(
+                            |server| {
+                                server.reset_all_gpu_resources();
+                                server.render_interface().value();
+                                Ok(())
+                            },
+                            false,
+                        );
+                    }
+                }
+                8 if player.frames().latest().is_some_and(|f| {
+                    f.metadata().identity.generation > previous_generation.get()
+                }) =>
+                {
+                    if player.requested_state() != ferroui_media_video::PlaybackIntent::Pause
+                        || state.position.abs_diff(previous_position.get())
+                            > Duration::from_millis(150)
+                    {
+                        eprintln!(
+                            "DEVICE_RECOVERY_FAILED position={:?} intent={:?}",
+                            state.position,
+                            player.requested_state()
+                        );
+                        FAILED.store(true, Ordering::Relaxed);
+                        window.close();
+                        return false;
+                    }
+                    println!(
+                        "DEVICE_RECOVERY_PASS paused position={:?} generation={}",
+                        state.position,
+                        player
+                            .frames()
+                            .latest()
+                            .unwrap()
+                            .metadata()
+                            .identity
+                            .generation
+                    );
                     stage.set(1);
                     changed.set(Instant::now());
                 }

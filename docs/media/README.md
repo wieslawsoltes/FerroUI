@@ -137,6 +137,39 @@ contains explicit camera, JPEG, Stop, Detach and QR actions. Its native QR smoke
 uses a synthetic analysis-only fixture; this is separate from camera acquisition
 and GPU preview. The framework defaults keep QR disabled.
 
+## Renderer context recovery
+
+`Compositor::render_context_changed` delivers ordered loss/recreation events on
+its owning dispatcher. It uses the existing render-interface lifecycle and has
+a disposable subscription; there is no recovery polling clock. GPU completion
+and old-resource retirement remain separate from these notifications.
+
+`MediaPlayer::suspend_for_device_loss` invalidates old publication while retaining
+the selected source and intent. `rebind_provider` opens it once with a fresh
+renderer-bound provider, restores the latest requested seek (or achieved position
+for seekable media) and applies newer transport commands during preparation.
+Audio options remain selected. Source replacement, clear and detach cancel stale
+recovery. The error kind `DeviceLost` distinguishes this condition.
+
+Owned `MediaPlayerElement` sessions can opt into automatic recovery through
+`set_provider_factory`. `CameraPreview::set_provider_factory` restarts only an
+explicitly started active owned session; pending starts are canceled without
+retrying consent. `CameraCapture::rebind_provider` alone acquires no hardware.
+Owners of supplied players/camera sessions coordinate one recovery for all views.
+A view never silently replaces a caller-owned source.
+
+`RendererHost::set_renderer_factory` lets client code recreate its pipelines on
+the new context. Inputs, viewport layout and scheduling remain on the control;
+recreated output uses a new source identity. Clients still own scenes and native
+rendering resources. The native samples create fresh Metal/GLES example scenes.
+
+Every factory must capture the original `FrameBudget`. Old generations, native
+cleanup and unknown GPU completion remain charged; healthy EGL contexts retain
+their retirement path until leases and native cleanup drain. Recreation does not reset
+limits or release quarantined storage. A device that cannot safely retire its
+old resources may consequently fail admission. Controlled renderer reset tests
+are distinct from abrupt driver/device loss and physical-device recovery gates.
+
 ## Native sample and checks
 
 On macOS, run `cargo run -p portable-media -- /absolute/path/to/video.mp4`.
@@ -254,8 +287,12 @@ allowed across generations, with a 64 MiB encoded-output limit. Canceled native
 still work retains its slot until AVFoundation's final callback.
 
 CameraPreview, RendererHost and client-owned Metal/GLES plane examples are
-implemented. Automatic device-loss recovery, complete markup/source APIs,
-six-platform packaging and native accessibility acceptance remain unfinished.
+implemented. Owned native sessions and renderers have opt-in context recovery
+factories; controlled macOS/iOS simulator/Android reset runs check pixels before/after recovery
+and final allocation retirement. Healthy EGL contexts drain leased resources
+before destruction, while unknown completion remains quarantined. Broader
+markup/source APIs, six-platform packaging and native accessibility acceptance
+remain unfinished.
 The independent mobile sample combines camera, opt-in QR, JPEG capture, renderer
 output and detach/stop cleanup; the broader navigation matrix remains open. Apple playback now reads the selected track transform asynchronously and publishes
 cardinal rotation/reflection plus an integral clean aperture. Non-square pixels,

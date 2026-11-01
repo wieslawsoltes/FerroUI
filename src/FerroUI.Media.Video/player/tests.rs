@@ -445,3 +445,65 @@ fn stop_does_not_republish_the_old_native_position_while_reset_is_pending() {
     player.poll().unwrap();
     assert_eq!(native.frame_reads.get(), 1);
 }
+
+#[test]
+fn renderer_rebind_restores_latest_seek_and_intent_without_duplicate_open() {
+    let (player, old, _) = player();
+    ready(player.set_source(source())).unwrap();
+    ready(player.play()).unwrap();
+    let pending = player.seek(Duration::from_secs(7));
+    player.suspend_for_device_loss();
+    assert!(player.source().is_some());
+    assert_eq!(
+        player.playback_session().error.unwrap().kind,
+        MediaErrorKind::DeviceLost
+    );
+    let _latest = player.seek(Duration::from_secs(9));
+    player.pause().unwrap();
+    let next = Rc::new(Native::default());
+    let provider = Rc::new(Provider {
+        native: next.clone(),
+        opens: Cell::new(0),
+    });
+    let mut recovery = player.rebind_provider(provider.clone());
+    assert!(poll(&mut recovery).is_pending());
+    assert_eq!(&*next.targets.borrow(), &[Duration::from_secs(9)]);
+    assert_eq!(provider.opens.get(), 1);
+    assert_eq!(next.plays.get(), 0);
+    next.seeks.borrow()[0].replace(Some(Duration::from_secs(9)));
+    ready(recovery).unwrap();
+    assert_eq!(player.requested_state(), PlaybackIntent::Pause);
+    assert_eq!(player.playback_session().position, Duration::from_secs(9));
+    assert_eq!(ready(pending).unwrap_err().kind, MediaErrorKind::Cancelled);
+    assert_eq!(old.plays.get(), 1);
+}
+#[test]
+fn recovery_commands_and_source_replacement_supersede_saved_state() {
+    let (player, _, _) = player();
+    ready(player.set_source(source())).unwrap();
+    let next = Rc::new(Native::default());
+    let provider = Rc::new(Provider {
+        native: next.clone(),
+        opens: Cell::new(0),
+    });
+    let mut recovery = player.rebind_provider(provider.clone());
+    assert!(poll(&mut recovery).is_pending()); // restoration seek at zero
+    let latest = player.seek(Duration::from_secs(12));
+    ready(player.play()).unwrap(); // preparation records intent
+    assert!(poll(&mut recovery).is_pending());
+    assert_eq!(next.targets.borrow().last(), Some(&Duration::from_secs(12)));
+    next.seeks
+        .borrow()
+        .last()
+        .unwrap()
+        .replace(Some(Duration::from_secs(12)));
+    ready(recovery).unwrap();
+    assert_eq!(ready(latest).unwrap(), Duration::from_secs(12));
+    assert_eq!(next.plays.get(), 1);
+    let mut stale = player.rebind_provider(provider);
+    assert!(poll(&mut stale).is_pending());
+    player.clear_source();
+    assert_eq!(ready(stale).unwrap_err().kind, MediaErrorKind::Cancelled);
+    assert!(player.source().is_none());
+    assert!(player.frames().latest().is_none());
+}

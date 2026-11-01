@@ -25,6 +25,7 @@ pub enum CameraErrorKind {
     Unsupported,
     Cancelled,
     NativeFailure,
+    DeviceLost,
 }
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct CameraError {
@@ -168,7 +169,7 @@ impl PendingStart {
     }
 }
 struct CaptureInner {
-    provider: Rc<dyn CameraProvider>,
+    provider: RefCell<Rc<dyn CameraProvider>>,
     source: u64,
     generation: Cell<u64>,
     budget: FrameBudget,
@@ -191,18 +192,26 @@ pub struct CameraCapture(Rc<CaptureInner>);
 impl CameraCapture {
     pub fn new(provider: Rc<dyn CameraProvider>, budget: FrameBudget) -> Self {
         Self(Rc::new(CaptureInner {
-            provider,
+            provider: RefCell::new(provider),
             source: ferroui_media::allocate_source_id(),
             generation: Cell::new(0),
             budget,
             pending: RefCell::new(None),
         }))
     }
+    /// Rebinds renderer resources while retaining the source identity and shared
+    /// budget. Active sessions are caller-owned and must be stopped separately.
+    pub fn rebind_provider(&self, provider: Rc<dyn CameraProvider>) {
+        self.cancel_pending_start();
+        *self.0.provider.borrow_mut() = provider;
+    }
     pub fn devices(&self) -> CameraFuture<Vec<CameraDevice>> {
-        self.0.provider.devices()
+        let provider = self.0.provider.borrow().clone();
+        provider.devices()
     }
     pub fn permission(&self) -> CameraPermission {
-        self.0.provider.permission()
+        let provider = self.0.provider.borrow().clone();
+        provider.permission()
     }
     pub fn cancel_pending_start(&self) {
         self.0.generation.set(
@@ -239,10 +248,8 @@ impl CameraCapture {
         self.cancel_pending_start();
         let generation = self.0.generation.get();
         let source = self.0.source;
-        let pending = self
-            .0
-            .provider
-            .start(options, source, generation, self.0.budget.clone());
+        let provider = self.0.provider.borrow().clone();
+        let pending = provider.start(options, source, generation, self.0.budget.clone());
         let slot = Rc::new(PendingStart {
             pending: RefCell::new(Some(pending)),
             cancelled: Cell::new(false),
@@ -372,14 +379,14 @@ impl CameraSession {
         let pending = self.0.native.photo();
         let session = Rc::downgrade(&self.0);
         Box::pin(async move {
-            let photo = pending.await?;
+            let result = pending.await;
             if !session.upgrade().is_some_and(|s| !s.stopped.get()) {
                 return Err(CameraError::new(
                     CameraErrorKind::Cancelled,
                     "Camera stopped before photo capture completed",
                 ));
             }
-            Ok(photo)
+            result
         })
     }
     pub fn set_control(&self, control: CameraControl) -> Result<(), CameraError> {

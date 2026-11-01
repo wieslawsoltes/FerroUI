@@ -53,6 +53,21 @@ pub fn install(
         id,
         Some(super::providers::importer()),
     );
+    let recovery_budget = budget.clone();
+    host.set_renderer_factory(Some(std::rc::Rc::new(move |interop, id| {
+        let producer = ferroui_media_opengl::NativeGlFrameProducer::from_interop(
+            interop,
+            recovery_budget.clone(),
+        )?;
+        Ok((
+            std::rc::Rc::new(ferroui_media_opengl::GlTextureRenderer::new(
+                producer,
+                id,
+                Arc::new(scene::Scene::default()),
+            )),
+            super::providers::importer(),
+        ))
+    })));
     host.set_inputs(vec![source.clone()]);
     root.children().add(&host);
     let errors = host.errors().subscribe(|e| {

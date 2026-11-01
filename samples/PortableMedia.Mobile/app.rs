@@ -9,6 +9,8 @@ use ferroui_base::{
 use ferroui_controls::{
     AppBuilder, Application, ApplicationImpl, ApplicationImplExt, Control, NewApplication, Panel,
 };
+#[cfg(target_os = "android")]
+use ferroui_media_android::{NativeGlFrameProducer, NativeGlTextureImporter};
 use ferroui_media_video::{MediaPlaybackState, MediaSource};
 use ferroui_media_video_controls::MediaPlayerElement;
 use std::{
@@ -103,6 +105,9 @@ fn launch_flag(ios: &str, android: &str) -> bool {
 fn is_smoke() -> bool {
     launch_flag("--smoke", "mediaSmoke")
 }
+fn device_recovery_smoke() -> bool {
+    launch_flag("--device-recovery-smoke", "deviceRecoverySmoke")
+}
 fn saturation_smoke() -> bool {
     launch_flag("--saturation-smoke", "saturationSmoke")
 }
@@ -148,8 +153,7 @@ fn declared_camera_color() -> Option<FrameColor> {
     }
 }
 static SMOKE_FAILED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
-static RENDERER_PROBE_PASSED: std::sync::atomic::AtomicBool =
-    std::sync::atomic::AtomicBool::new(false);
+static RENDERER_PROBE_PASSES: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
 fn report(value: &str) {
     use std::sync::atomic::Ordering;
     let tag = value.split_whitespace().next().unwrap_or("");
@@ -161,7 +165,7 @@ fn report(value: &str) {
         SMOKE_FAILED.store(true, Ordering::SeqCst);
     }
     if value.starts_with("RENDERER_PIXELS_PASS") {
-        RENDERER_PROBE_PASSED.store(true, Ordering::SeqCst);
+        RENDERER_PROBE_PASSES.fetch_add(1, Ordering::SeqCst);
     }
     let value = if value.starts_with("RESULT: PASS") && SMOKE_FAILED.load(Ordering::SeqCst) {
         "RESULT: FAIL an earlier smoke check failed; cleanup completed"
@@ -312,7 +316,42 @@ fn create() -> Ref<Control> {
                             .into()
                     },
                 };
-                match view.set_source(source, provider, importer).await {
+                let pending = view.set_source(source, provider, importer);
+                let recovery_budget = budget.clone();
+                view.set_provider_factory(Some(Rc::new(move |interop| {
+                    #[cfg(target_os = "ios")]
+                    {
+                        use ferroui_media_video_apple::{AppleTextureImporter, AppleVideoProvider};
+                        Ok((
+                            Rc::new(AppleVideoProvider {
+                                device: DeviceIdentity::Luid(interop.device_luid().ok_or_else(
+                                    || {
+                                        ferroui_media::MediaError::new(
+                                            ferroui_media::MediaErrorKind::Unsupported,
+                                            "No restored Metal device",
+                                        )
+                                    },
+                                )?),
+                                device_generation: interop.shared_context_generation(),
+                                budget: recovery_budget.clone(),
+                            }),
+                            Rc::new(AppleTextureImporter),
+                        ))
+                    }
+                    #[cfg(target_os = "android")]
+                    {
+                        Ok((
+                            Rc::new(ferroui_media_video_android::AndroidVideoProvider {
+                                frames: NativeGlFrameProducer::from_interop(
+                                    interop,
+                                    recovery_budget.clone(),
+                                )?,
+                            }),
+                            Rc::new(NativeGlTextureImporter),
+                        ))
+                    }
+                })));
+                match pending.await {
                     Err(e) => report(&format!("RESULT: FAIL open {e}")),
                     Ok(()) => {
                         report("OPENED AVC/AAC resource native audio/timing");
@@ -487,6 +526,39 @@ fn camera_actions(
     let camera = CameraPreview::new();
     camera.set_is_visible(false);
     root.children().add(&camera);
+    let recovery_budget = budget.clone();
+    camera.set_provider_factory(Some(Rc::new(move |interop| {
+        use ferroui_media_camera::{CameraError, CameraErrorKind};
+        #[cfg(target_os = "ios")]
+        {
+            let _ = &recovery_budget;
+            Ok((
+                Rc::new(ferroui_media_camera_apple::AppleCameraProvider {
+                    device: DeviceIdentity::Luid(interop.device_luid().ok_or_else(|| {
+                        CameraError::new(
+                            CameraErrorKind::Unsupported,
+                            "No restored camera Metal device",
+                        )
+                    })?),
+                    device_generation: interop.shared_context_generation(),
+                }),
+                Rc::new(ferroui_media_camera_apple::AppleTextureImporter),
+            ))
+        }
+        #[cfg(target_os = "android")]
+        {
+            let frames = NativeGlFrameProducer::from_interop(interop, recovery_budget.clone())
+                .map_err(|e| CameraError::new(CameraErrorKind::Unsupported, e.to_string()))?;
+            Ok((
+                Rc::new(ferroui_media_camera_android::AndroidCameraProvider {
+                    frames: Some(frames),
+                    untagged_sdr_color: declared_camera_color(),
+                }),
+                Rc::new(NativeGlTextureImporter),
+            ))
+        }
+    })));
+
     let actions = StackPanel::new();
     actions.set_orientation(Orientation::Horizontal);
     actions.set_vertical_alignment(VerticalAlignment::Top);
@@ -529,10 +601,12 @@ fn camera_actions(
         });
     });
     let weak = camera.downgrade();
+    let retirement_budget = budget.clone();
     stop.click(move |_, _| {
         if let Some(camera) = weak.upgrade() {
             camera.stop();
             report("CAMERA_STOPPED");
+            watch_camera_retirement(camera.downgrade(), retirement_budget.clone());
         }
     });
     let weak = camera.downgrade();
@@ -558,16 +632,21 @@ fn camera_actions(
                     )),
                     Err(error) => report(&format!("CAMERA_JPEG_DECODE_ERROR {error}")),
                 },
+                Err(error) if error.kind == ferroui_media_camera::CameraErrorKind::Cancelled => {
+                    report("CAMERA_PHOTO_CANCELLED")
+                }
                 Err(error) => report(&format!("CAMERA_PHOTO_ERROR {error}")),
             }
         });
     });
     let root_weak = root.downgrade();
     let weak = camera.downgrade();
+    let retirement_budget = budget.clone();
     navigate.click(move |_, _| {
         if let (Some(root), Some(camera)) = (root_weak.upgrade(), weak.upgrade()) {
             root.children().remove(&camera);
             report("CAMERA_PREVIEW_DETACHED");
+            watch_camera_retirement(camera.downgrade(), retirement_budget.clone());
         }
     });
     actions.children().add(start);
@@ -575,11 +654,67 @@ fn camera_actions(
     actions.children().add(photo);
     actions.children().add(navigate);
     qr_action(&actions, &camera);
+    let reset = button("Reset GPU");
+    let weak = camera.downgrade();
+    reset.click(move |_, _| {
+        if let Some(camera) = weak.upgrade() {
+            if let Some(visual) = ElementComposition::get_element_visual(&camera) {
+                report("GPU_RESET_REQUESTED");
+                visual.compositor().invoke_server_job_async(
+                    |server| {
+                        server.reset_all_gpu_resources();
+                        server.render_interface().value();
+                        Ok(())
+                    },
+                    false,
+                );
+            }
+        }
+    });
+    actions.children().add(reset);
+
     renderer_action(root, &actions, &camera, video, interop);
     root.children().add(actions);
 }
+fn watch_camera_retirement(
+    camera: ferroui_base::WeakRef<ferroui_media_camera_controls::CameraPreview>,
+    budget: FrameBudget,
+) {
+    let started = Instant::now();
+    DispatcherTimer::run(
+        move || {
+            if camera.upgrade().and_then(|v| v.session()).is_some() {
+                return false;
+            }
+            let usage = budget.usage();
+            if usage.frames == 0 {
+                report(&format!(
+                    "CAMERA_RETIRED frames=0 gpu_reads={} quarantined_reads={}",
+                    budget.gpu_reads(),
+                    budget.quarantined_reads()
+                ));
+                return false;
+            }
+            if started.elapsed() > Duration::from_secs(5) {
+                report(&format!(
+                    "CAMERA_RETIREMENT_FAIL retained={usage:?} gpu_reads={} quarantined_reads={}",
+                    budget.gpu_reads(),
+                    budget.quarantined_reads()
+                ));
+                return false;
+            }
+            true
+        },
+        Duration::from_millis(16),
+        DispatcherPriority::NORMAL,
+    );
+}
+
 fn start_smoke(view: &Ref<MediaPlayerElement>, budget: FrameBudget) {
     let saturation = saturation_smoke();
+    let recovery_started = Cell::new(false);
+    let previous_generation = Cell::new(0u64);
+    let previous_position = Cell::new(Duration::ZERO);
     let held = std::cell::RefCell::new(Vec::<FrameLease>::new());
     let released = Cell::new(false);
     let checked = Cell::new(false);
@@ -596,9 +731,11 @@ fn start_smoke(view: &Ref<MediaPlayerElement>, budget: FrameBudget) {
                 #[cfg(target_os = "android")]
                 report(&ferroui_media_video_android::native_diagnostics());
                 report(&format!(
-                    "RESULT: FAIL timeout stage={} retained={:?}",
+                    "RESULT: FAIL timeout stage={} retained={:?} gpu_reads={} quarantined_reads={}",
                     stage.get(),
-                    budget.usage()
+                    budget.usage(),
+                    budget.gpu_reads(),
+                    budget.quarantined_reads()
                 ));
                 return false;
             }
@@ -610,7 +747,8 @@ fn start_smoke(view: &Ref<MediaPlayerElement>, budget: FrameBudget) {
                     return true;
                 }
                 if renderer_smoke()
-                    && !RENDERER_PROBE_PASSED.load(std::sync::atomic::Ordering::SeqCst)
+                    && RENDERER_PROBE_PASSES.load(std::sync::atomic::Ordering::SeqCst)
+                        < if device_recovery_smoke() { 2 } else { 1 }
                     && !SMOKE_FAILED.load(std::sync::atomic::Ordering::SeqCst)
                 {
                     return true;
@@ -622,7 +760,7 @@ fn start_smoke(view: &Ref<MediaPlayerElement>, budget: FrameBudget) {
                 return true;
             };
             let state = player.playback_session();
-            if state.state == MediaPlaybackState::Failed {
+            if state.state == MediaPlaybackState::Failed && stage.get() != 8 {
                 report(&format!("RESULT: FAIL {:?}", state.error));
                 return false;
             }
@@ -704,6 +842,61 @@ fn start_smoke(view: &Ref<MediaPlayerElement>, budget: FrameBudget) {
                         report(&format!("RESULT: FAIL pause {e}"));
                         return false;
                     }
+                    stage.set(1);
+                    changed.set(Instant::now());
+                }
+                1 if changed.get().elapsed() > Duration::from_millis(200)
+                    && device_recovery_smoke()
+                    && !recovery_started.replace(true) =>
+                {
+                    previous_generation.set(
+                        player
+                            .frames()
+                            .latest()
+                            .unwrap()
+                            .metadata()
+                            .identity
+                            .generation,
+                    );
+                    previous_position.set(state.position);
+                    stage.set(8);
+                    if let Some(visual) = ElementComposition::get_element_visual(&view) {
+                        visual.compositor().invoke_server_job_async(
+                            |server| {
+                                server.reset_all_gpu_resources();
+                                server.render_interface().value();
+                                Ok(())
+                            },
+                            false,
+                        );
+                    }
+                }
+                8 if player.frames().latest().is_some_and(|f| {
+                    f.metadata().identity.generation > previous_generation.get()
+                }) =>
+                {
+                    if player.requested_state() != ferroui_media_video::PlaybackIntent::Pause
+                        || state.position.abs_diff(previous_position.get())
+                            > Duration::from_millis(150)
+                    {
+                        report(&format!(
+                            "RESULT: FAIL recovery position={:?} intent={:?}",
+                            state.position,
+                            player.requested_state()
+                        ));
+                        return false;
+                    }
+                    report(&format!(
+                        "DEVICE_RECOVERY_PASS paused position={:?} generation={}",
+                        state.position,
+                        player
+                            .frames()
+                            .latest()
+                            .unwrap()
+                            .metadata()
+                            .identity
+                            .generation
+                    ));
                     stage.set(1);
                     changed.set(Instant::now());
                 }
@@ -999,8 +1192,9 @@ fn renderer_action(
             },
         );
     #[cfg(target_os = "android")]
-    let probe_producer =
-        ferroui_media_android::NativeGlFrameProducer::from_interop(interop, budget.clone()).ok();
+    let probe_producer = Rc::new(RefCell::new(
+        ferroui_media_android::NativeGlFrameProducer::from_interop(interop, budget.clone()).ok(),
+    ));
     let renderer = match renderer {
         Ok(v) => v,
         Err(e) => {
@@ -1022,6 +1216,36 @@ fn renderer_action(
     let importer = Rc::new(ferroui_media_android::NativeGlTextureImporter)
         as Rc<dyn ferroui_media_controls::TextureFrameImporter>;
     host.set_renderer(Some(renderer), source, Some(importer));
+    let recovery_budget = budget.clone();
+    #[cfg(target_os = "android")]
+    let recovery_probe = probe_producer.clone();
+    host.set_renderer_factory(Some(Rc::new(move |interop, source| {
+        #[cfg(target_os = "ios")]
+        {
+            Ok((
+                Rc::new(ferroui_media_metal::MetalTextureRenderer::from_interop(
+                    interop,
+                    recovery_budget.clone(),
+                    source,
+                    Arc::new(scene::Scene::default()),
+                )?),
+                Rc::new(ferroui_media_video_apple::AppleTextureImporter),
+            ))
+        }
+        #[cfg(target_os = "android")]
+        {
+            let producer = NativeGlFrameProducer::from_interop(interop, recovery_budget.clone())?;
+            recovery_probe.replace(Some(producer.clone()));
+            let scene = Arc::new(scene::Scene::new(producer.retirement_wakeup()));
+            Ok((
+                Rc::new(ferroui_media_opengl::GlTextureRenderer::new(
+                    producer, source, scene,
+                )),
+                Rc::new(NativeGlTextureImporter),
+            ))
+        }
+    })));
+
     // Retain the diagnostic subscription for this view's lifetime.
     let errors = host
         .errors()
@@ -1031,7 +1255,7 @@ fn renderer_action(
     let video = video.downgrade();
     let current = RefCell::new(None::<Arc<FrameMailbox>>);
     let last_message = RefCell::new(String::new());
-    let probed = Cell::new(false);
+    let probed = Cell::new(None::<u64>);
     let retiring = Cell::new(false);
     let wanted = requested.clone();
     let last_report = Cell::new(Instant::now());
@@ -1094,16 +1318,19 @@ fn renderer_action(
             host.set_is_visible(true);
             let input = current.borrow().as_ref().and_then(|s| s.latest());
             let output = host.output().and_then(|s| s.latest());
-            if !probed.get() && is_smoke() && input.is_some() {
-                if let Some(frame) = output.clone() {
-                    probed.set(true);
+            if is_smoke() && input.is_some() {
+                if let Some(frame) = output
+                    .clone()
+                    .filter(|f| probed.get() != Some(f.metadata().identity.source))
+                {
+                    probed.set(Some(frame.metadata().identity.source));
                     #[cfg(target_os = "ios")]
                     match scene::probe(&frame, geometry_smoke()) {
                         Ok(()) => report("RENDERER_PIXELS_PASS transparent projection coverage"),
                         Err(e) => report(&format!("RENDERER_PIXELS_FAIL {e}")),
                     }
                     #[cfg(target_os = "android")]
-                    if let Some(producer) = probe_producer.clone() {
+                    if let Some(producer) = probe_producer.borrow().clone() {
                         Dispatcher::ui_thread().invoke_async_task_local(move || async move {
                             match scene::probe(frame, producer, geometry_smoke()).await {
                                 Ok(()) => {

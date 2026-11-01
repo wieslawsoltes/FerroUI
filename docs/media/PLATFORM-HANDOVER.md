@@ -223,6 +223,8 @@ They are functional evidence, not a frozen performance acceptance profile.
 | Source preparation | Three ownership/cancellation/saturation contracts plus the existing 20 player contracts pass. Native macOS, iOS simulator and Android 16 KiB resource playback, transformed pixels and cleanup passed through the shared worker path. Windows/Linux Rust binding checks passed with native compilation explicitly skipped. |
 | Integration sample restart | Camera restart preserves the requested 3D state across temporary source absence. Android 16 KiB run observed replacement capture generation 3 feeding a new renderer generation, continuing QR/JPEG, then Stop with renderer frames zero and no camera-service clients. Strict transformed-video smokes passed again on Android and iOS. |
 | Renderer scheduling | Four mailbox notification/lifetime tests and two UI scheduling tests cover worker dispatch, disposal, static idle, ancestor visibility and continuous work. macOS/iOS native playback/Metal projection and Android 16 KiB playback/GLES projection and teardown passed again. Android camera + QR + JPEG also continued through rotation and released hardware/output after Stop. |
+| Context recovery and retirement | Owned controls use fresh provider/client-renderer factories while preserving selected playback source, intent and latest seek. macOS, iOS simulator and Android controlled-reset runs passed projected colour/alpha checks before and after recreation, seek/Stop and allocation retirement to zero. Android live camera recovered to capture generation 5 with continuing QR/3D and independently decoded JPEGs; Stop left no camera-service clients. A pre-fix Android negative control caught an old texture credit quarantined after premature context destruction. Nine manager, four GL queue and 14 confined-render-thread contracts pass; healthy retired contexts wait for actual leases/native cleanup without a quiet-lease clock. |
+| Camera consent and pending photos | Android system prompt appeared only after explicit Start. Choosing denial returned Denied, with camera-service clients empty. Shared camera contracts prioritize Stop cancellation over late native successes/errors and preserve independently owned completed output. The Android native pending-photo case now reports Cancelled, with source frames/GPU reads/quarantined reads all zero and no camera-service clients. A final live reset run also checked camera storage retirement to zero. |
 | Native alias contracts | Three GL producer/retirement unit tests passed, including retention through consumer completion, queued native cleanup and lost-context quarantine; this does not prove a native DMA-BUF/DXGI import |
 | Android renderer accessibility | Updated APK's native automation tree reports RendererHost focusable; camera stop again released hardware and renderer storage. Full keyboard/screen-reader acceptance remains open. |
 | Browser regression after renderer changes | Actual Chrome suite passed shared WebGL, native video, synthetic capture/JPEG, canceled acquisition, software rejection, autoplay/audio and CORS cases again |
@@ -286,7 +288,18 @@ and `renderer-notification-browser-regression.log`, `pending-frame-ui-tests.log`
 `native-source-preparation-ios.log`, `native-source-preparation-windows-bindings.log`
 and `native-source-preparation-linux-bindings.log`, `qr-frame-geometry-contracts-final.log`,
 `qr-frame-geometry-apple-final.log`, `qr-frame-geometry-android-camera.log` and
-`qr-frame-geometry-ios.log`. Re-run applicable gates on the receiving host.
+`qr-frame-geometry-ios.log`, `context-retirement-manager-contracts-final.log`,
+`context-retirement-queue-contracts.log`, `context-retirement-render-thread-contracts.log`,
+`device-recovery-player-contracts.log`, `device-recovery-ui-contracts-final-2.log`,
+`context-retirement-macos.log`, `context-retirement-android-video.log`,
+`context-retirement-android-camera.log`, `context-retirement-android-camera-service.log`,
+`device-recovery-android-retirement-negative.log`, `android-camera-permission-denial.log`,
+`android-camera-permission-denial-ui.xml`, `android-camera-permission-denial-service.log`
+and `camera-late-photo-cancellation-contracts.log`, `camera-late-photo-cancellation-android.log`,
+`camera-late-photo-cancellation-android-service.log`, `context-retirement-android-video-final.log`,
+`context-retirement-android-camera-final.log` and
+`context-retirement-android-camera-service-final.log` and
+`context-retirement-ios-final.log`. Re-run applicable gates on the receiving host.
 
 Useful commands, from the repository root:
 
@@ -324,7 +337,9 @@ were used to limit disk/memory use; the target cache is private to this worktree
   copying from a borrowed input interface or zero framework transfer counters.
 - `FerroUI.Media.Camera.Controls` now provides CameraPreview with explicit
   start, owned-session teardown and weak caller-session attachment. Complete
-  markup/source APIs and automatic device-loss recovery remain unfinished.
+  markup/source APIs remain unfinished. Owned playback, camera and renderer
+  controls now offer context recovery factories; abrupt driver loss and broader
+  native recovery profiles still need hardware evidence.
   RendererHost, native Metal/GLES adapters and client-owned video/camera plane
   examples now exist; wider input/accessibility and physical geometry gates
   remain open.

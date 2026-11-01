@@ -134,6 +134,7 @@ pub struct ServerCompositor {
     /// [`diagnostic_text_renderer`](Self::diagnostic_text_renderer).
     diagnostic_text_renderer: RefCell<Option<Rc<super::DiagnosticTextRenderer>>>,
     _context_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
+    context_change_handler: RefCell<Option<Arc<dyn Fn(super::super::RenderContextState) + Send + Sync>>>,
 }
 
 impl ServerCompositor {
@@ -177,6 +178,7 @@ impl ServerCompositor {
             render_interface_feature_cache: RefCell::new(None),
             diagnostic_text_renderer: RefCell::new(None),
             _context_subscriptions: RefCell::new(Vec::new()),
+            context_change_handler: RefCell::new(None),
         });
         let weak = Rc::downgrade(&compositor);
         let disposed = compositor.render_interface.context_disposed(move || {
@@ -550,12 +552,23 @@ impl ServerCompositor {
 
     // --- user APIs ----------------------------------------------------------
 
+    pub(crate) fn set_context_change_handler(&self, handler: Arc<dyn Fn(super::super::RenderContextState) + Send + Sync>) {
+        *self.context_change_handler.borrow_mut() = Some(handler);
+    }
+
+    fn notify_context_changed(&self, state: super::super::RenderContextState) {
+        let handler = self.context_change_handler.borrow().clone();
+        if let Some(handler) = handler { handler(state); }
+    }
+
     fn rt_on_context_created(&self, context: &dyn crate::platform::IPlatformRenderInterfaceContext) {
         *self.render_interface_feature_cache.borrow_mut() = Some(Rc::new(context.public_features()));
+        self.notify_context_changed(super::super::RenderContextState::Created);
     }
 
     fn rt_on_context_disposed(&self) {
         *self.render_interface_feature_cache.borrow_mut() = None;
+        self.notify_context_changed(super::super::RenderContextState::Lost);
     }
 
     /// The public features of the render interface, if a backend context
@@ -800,7 +813,7 @@ impl ServerCompositor {
 
         // Completion is independent of whether a visual still requests
         // presentation. Retire submitted reads even after the last view detaches.
-        let pending_gpu_work = self.render_interface.value().poll_pending_gpu_work();
+        let pending_gpu_work = self.render_interface.poll_pending_gpu_work();
 
         // Request a tick if we have active animations or if there are recent batches
         if pending_gpu_work || self.animations.need_next_tick() || self.ticks_since_last_commit.get() < COMMIT_GRACE_TICKS {
