@@ -312,7 +312,9 @@ impl Transaction<'_> {
             return Ok(());
         }
         self.loader_changes.busy.insert(id);
+        let was_incubating = std::mem::replace(&mut self.incubating, true);
         let result = self.with_stack(4, |tx| tx.refresh_loader(id, Phase::Activate(prepared)));
+        self.incubating = was_incubating;
         self.loader_changes.busy.remove(&id);
         result
     }

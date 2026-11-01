@@ -5,6 +5,7 @@ use crate::transaction::Transaction;
 
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd)]
 enum Key {
+    Incubator(u64),
     Loader(ObjectId),
     Binding(ObjectId),
     Function(u64),
@@ -12,6 +13,8 @@ enum Key {
 }
 
 pub(crate) enum Task {
+    Incubator(Record, Option<Box<incubation::Preparation>>),
+    CancelIncubator(Record),
     Loader(ObjectId, Option<Box<incubation::Preparation>>),
     CancelLoader(ObjectId),
     Method(MethodRef, Vec<Value>),
@@ -26,6 +29,9 @@ pub(crate) enum Task {
 impl Task {
     fn key(&self) -> Key {
         match self {
+            Self::Incubator(handle, _) | Self::CancelIncubator(handle) => {
+                Key::Incubator(handle.index())
+            }
             Self::Loader(owner, _) | Self::CancelLoader(owner) => Key::Loader(*owner),
             Self::Binding(owner) => Key::Binding(*owner),
             Self::Method(method, _) => Key::Method(method.clone()),
@@ -45,14 +51,14 @@ impl Queue {
     pub(crate) fn post(&mut self, tasks: Vec<Task>) {
         for task in tasks {
             let key = task.key();
-            if matches!(task, Task::CancelLoader(_)) {
+            if matches!(task, Task::CancelLoader(_) | Task::CancelIncubator(_)) {
                 if let Some(previous) = self.positions.remove(&key) {
                     self.jobs.remove(&previous);
                 }
                 continue;
             }
             if let Some(previous) = self.positions.get(&key) {
-                if matches!(key, Key::Binding(_) | Key::Loader(_)) {
+                if matches!(key, Key::Binding(_) | Key::Loader(_) | Key::Incubator(_)) {
                     continue;
                 }
                 // Reposting a function changes its place in the queue and its arguments.
@@ -67,6 +73,7 @@ impl Queue {
     pub(crate) fn retire(&mut self, dead: &BTreeSet<ObjectId>) {
         self.jobs.retain(|_, task| {
             let (owner, arguments) = match task {
+                Task::Incubator(_, _) | Task::CancelIncubator(_) => return true,
                 Task::Binding(owner) | Task::Loader(owner, _) | Task::CancelLoader(owner) => {
                     (*owner, None)
                 }
@@ -114,6 +121,15 @@ impl Instance {
             .any(|job| matches!(job, Task::Loader(_, Some(_))))
     }
 
+    /// Whether private construction storage spans multiple owner turns.
+    pub fn has_incubating_work(&self) -> bool {
+        self.javascript
+            .deferred
+            .jobs
+            .values()
+            .any(|job| matches!(job, Task::Incubator(_, Some(_)) | Task::Loader(_, Some(_))))
+    }
+
     /// Execute work enqueued before this turn began. Each job has a separate
     /// transaction. Failure preserves the remaining jobs for the next turn.
     pub fn process_deferred(&mut self, limit: usize) -> Result<usize, Error> {
@@ -134,10 +150,14 @@ impl Instance {
             let Some(task) = self.javascript.deferred.pop(boundary) else {
                 break;
             };
-            if let Task::Loader(owner, preparation) = task {
-                self.advance_loader(owner, preparation, &mut has_time)?;
-            } else {
-                self.transaction(|tx| tx.dispatch_deferred(task))?;
+            match task {
+                Task::Loader(owner, preparation) => {
+                    self.advance_loader(owner, preparation, &mut has_time)?
+                }
+                Task::Incubator(handle, preparation) => {
+                    self.advance_incubator(handle, preparation, &mut has_time)?
+                }
+                task => self.transaction(|tx| tx.dispatch_deferred(task))?,
             }
             processed += 1;
         }

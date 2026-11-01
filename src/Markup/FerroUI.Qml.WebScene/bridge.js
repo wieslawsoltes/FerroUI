@@ -21,6 +21,7 @@
     const bindingCallbacks = new WeakMap();
     const methodOwners = new WeakMap();
     Object.defineProperty(globalThis, "Qt", {value: Object.freeze({
+        Asynchronous: 0, Synchronous: 1,
         callLater(fn, ...args) {
             if (typeof fn !== "function") throw new TypeError("Qt.callLater expects a function");
             const method = methodOwners.get(fn);
@@ -104,11 +105,13 @@
         let slots=boundMethods.get(id);
         if(!slots){slots=new Map();boundMethods.set(id,slots);}
         if(slots.has(key)) return slots.get(key);
-        const bound = (signature[1] === "initial" || signature[1] === "loaderInitial") ? (parent, properties, ...extra) => {
-            if (extra.length || (properties != null && (typeof properties !== "object" || Array.isArray(properties))))
+        const initial = signature[1];
+        const bound = ["initial", "loaderInitial", "incubatorInitial"].includes(initial) ? (parent, properties, ...extra) => {
+            if (extra.length > (initial === "incubatorInitial" ? 1 : 0) || (properties != null && (typeof properties !== "object" || Array.isArray(properties))))
                 throw new TypeError(key + " expects a target and optional initial property map");
             const entries=Object.entries(properties||{}).map(([key,value]) =>
                 bindingCallbacks.has(value) ? [key,true,atom(bindingCallbacks.get(value))] : [key,false,encode(value,"data")]);
+            if (initial === "incubatorInitial") return decode(rpc(["incubateObject", id, encode(parent), entries, encode(extra[0])]));
             return decode(rpc([key === "setSource" ? "loaderSource" : "construct",id,encode(parent),entries]));
         } : (...args)=>decode(rpc(["call",id,key,args.map((v,i)=>encode(v,signature[i]))]));
         methodOwners.set(bound, {id, key});
@@ -152,7 +155,21 @@
         if(!proxies.has(id)) proxies.set(id,makeProxy(id,kind));
         return proxies.get(id);
     }
+    const incubatorPrototype = Object.create(Object.prototype, {
+        status: {get() { return decode(rpc(["get", proxyIds.get(this), "status"])); }},
+        object: {get() { return decode(rpc(["get", proxyIds.get(this), "object"])); }},
+        onStatusChanged: {
+            get() { return decode(rpc(["get", proxyIds.get(this), "onStatusChanged"])); },
+            set(fn) { rpc(["set", proxyIds.get(this), "onStatusChanged", encode(fn)]); }
+        },
+        forceCompletion: {value() { rpc(["forceIncubation", proxyIds.get(this)]); }}
+    });
     function makeProxy(id,kind) {
+        if (kind === "incubator") {
+            const handle = Object.create(incubatorPrototype);
+            proxyIds.set(handle, id);
+            return handle;
+        }
         const array = kind === "array";
         const target = array ? [] : Object.create(null);
         const result=new Proxy(target,{

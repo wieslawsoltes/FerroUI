@@ -47,3 +47,25 @@ QML closures resolve relative component URLs against their declaring QML file. C
 `destroy(delayMs)` schedules destruction of a dynamically created root and its owned children. Zero delay yields to the next engine turn. `Component.onDestruction` can still read the object. After commit, object properties pointing into the deleted subtree become null, visual children detach, and stale handles cannot address replacement objects. Headless Rust hosts drive scheduled destruction with `Instance::advance_time` or request immediate destruction with `Instance::destroy_object`.
 
 Rust hosts can create objects with `Instance::create_object`, pass guest closure bindings through `Instance::create_object_with_properties`, enumerate live objects, and drain newly committed roots. The shared Qt 6.12 oracle exercises creation, destruction, initialization and resource lookup. [Executable fixtures and reference probe](../tests/QmlCompiled/creation)
+
+## Incubating a component
+
+`Component.incubateObject(parent, properties, mode)` accepts the same initial values and `Qt.binding` closures as `createObject`. Omitting the arguments requests an asynchronous, unparented instance. A pending handle exposes `Component.Loading` and a null `object`. The owner dispatcher prepares its private node storage over successive turns. Headless Rust hosts can drive those turns with `Instance::process_deferred_while`.
+
+```qml
+function showCard() {
+    const job = card.incubateObject(page, { amount: 7 })
+    if (!job) return
+    if (job.status === Component.Ready) {
+        page.selectCard(job.object)
+    } else {
+        job.onStatusChanged = function(status) {
+            if (status === Component.Ready) page.selectCard(this.object)
+        }
+    }
+}
+```
+
+The handle exposes its completed object before delivering the status callback. Failed construction produces `Component.Error`. `forceCompletion()` finishes a pending request immediately and is idempotent after completion. `Qt.Synchronous` normally returns a terminal handle. A synchronous request made inside an asynchronous construction phase may itself be deferred. Completion handlers run after that phase. The requested parent is weak while incubation is pending. If it is destroyed before activation, the result is unparented.
+
+Rust callers can use `Instance::incubate_object` with `IncubationMode` and initial properties. Its `Incubator` exposes `status`, `object`, `force_completion` and explicit `cancel`. Cancellation publishes Error. The record heap and the owner queue manage the handle independently of QML object ownership. Object-valued bindings, final linking, user completion handlers and native mounting run within the final activation transaction.

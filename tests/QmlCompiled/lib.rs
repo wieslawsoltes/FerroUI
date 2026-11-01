@@ -1,4 +1,6 @@
 #[cfg(test)]
+mod incubators;
+#[cfg(test)]
 mod delegates;
 #[cfg(test)]
 mod views;

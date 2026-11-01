@@ -320,6 +320,24 @@ impl ScriptContext<'_, '_> {
             .map(|id| id.map(Value::Object).unwrap_or(Value::Null));
         self.tx.host_result(result)
     }
+    pub fn incubate_with_properties(
+        &mut self,
+        factory: ObjectId,
+        parent: Option<ObjectId>,
+        props: BTreeMap<String, InitialProperty>,
+        mode: IncubationMode,
+    ) -> Result<Value, Error> {
+        let result = self
+            .tx
+            .start_incubation(factory, parent, props, mode)
+            .map(|h| h.map_or(Value::Null, |h| Value::Record(h.record().clone())));
+        self.tx.host_result(result)
+    }
+
+    pub fn force_incubation(&mut self, handle: &Record) -> Result<(), Error> {
+        let result = self.tx.force_incubator(handle);
+        self.tx.host_result(result)
+    }
     /// URL helpers share the QML declaration context with component factories.
     pub fn url_from_arguments(
         &self,
@@ -522,6 +540,7 @@ impl ScriptContext<'_, '_> {
         if self.is_worker_script(object) {
             names.insert("sendMessage".into());
         }
+        if self.tx.model.quick_kind(object,"NumberAnimation"){names.extend(animations::METHODS.map(str::to_owned));}
         if self.tx.model.timers.is_timer(object) {
             names.extend(["start", "restart", "stop"].map(str::to_owned));
         }
@@ -532,7 +551,7 @@ impl ScriptContext<'_, '_> {
             names.insert("setSource".to_owned());
         }
         if self.tx.model.is_component(object) {
-            names.extend(["createObject", "errorString"].map(str::to_owned));
+            names.extend(["createObject", "incubateObject", "errorString"].map(str::to_owned));
         }
         if self.tx.model.models.contains_key(&object) {
             names.extend(
@@ -828,12 +847,14 @@ impl Instance {
         self.node(object).is_some_and(|node| {
             (self.dynamic.loaders.contains_key(&object) && name == "setSource")
                 || (self.dynamic.contexts.contains_key(&object) && name == "destroy")
-                || (self.is_component(object) && matches!(name, "createObject" | "errorString"))
+                || (self.is_component(object)
+                    && matches!(name, "createObject" | "incubateObject" | "errorString"))
                 || node.methods.contains_key(name)
                 || node.native.contains_key(name)
                 || node.signal(name).is_some()
                 || self.workers.contains(object) && name == "sendMessage"
                 || self.models.contains_key(&object) && list_model::is_method(name)
+                || self.quick_kind(object,"NumberAnimation") && animations::METHODS.contains(&name)
                 || self.timers.is_timer(object) && matches!(name, "start" | "stop" | "restart")
         })
     }

@@ -8,20 +8,34 @@ use std::rc::Weak;
 struct Identity {
     engine: u64,
     index: u64,
-    array: bool,
+    kind: Kind,
+}
+
+#[derive(Debug, PartialEq, Eq, Hash)]
+enum Kind {
+    Object,
+    Array,
+    Incubator,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Record(Rc<Identity>);
 
 impl Record {
+    pub fn is_incubator(&self) -> bool {
+        self.0.kind == Kind::Incubator
+    }
+    pub(crate) fn index(&self) -> u64 {
+        self.0.index
+    }
     pub fn is_array(&self) -> bool {
-        self.0.array
+        self.0.kind == Kind::Array
     }
 }
 
 struct Entry {
     token: Weak<Identity>,
+    request: Option<Rc<incubator::Request>>,
     fields: BTreeMap<String, Value>,
 }
 
@@ -36,6 +50,7 @@ pub(crate) struct Heap {
 pub(crate) struct Journal {
     first_new: u64,
     previous: BTreeMap<(u64, String), Option<Value>>,
+    removed_requests: Vec<(u64, Rc<incubator::Request>)>,
 }
 
 impl Heap {
@@ -45,17 +60,42 @@ impl Heap {
         array: bool,
         fields: BTreeMap<String, Value>,
     ) -> Record {
+        self.insert(
+            engine,
+            if array { Kind::Array } else { Kind::Object },
+            fields,
+            None,
+        )
+    }
+
+    pub(crate) fn new_incubator(&mut self, engine: u64, request: incubator::Request) -> Record {
+        let fields = BTreeMap::from([
+            ("status".into(), Value::Number(2.)),
+            ("object".into(), Value::Null),
+            ("onStatusChanged".into(), Value::Undefined),
+        ]);
+        self.insert(engine, Kind::Incubator, fields, Some(Rc::new(request)))
+    }
+
+    fn insert(
+        &mut self,
+        engine: u64,
+        kind: Kind,
+        fields: BTreeMap<String, Value>,
+        request: Option<Rc<incubator::Request>>,
+    ) -> Record {
         let index = self.next;
         self.next += 1;
         let token = Rc::new(Identity {
             engine,
             index,
-            array,
+            kind,
         });
         self.entries.insert(
             index,
             Entry {
                 token: Rc::downgrade(&token),
+                request,
                 fields,
             },
         );
@@ -66,11 +106,18 @@ impl Heap {
         Journal {
             first_new: self.next,
             previous: BTreeMap::new(),
+            removed_requests: Vec::new(),
         }
     }
 
     pub(crate) fn rollback(&mut self, journal: Journal) {
         self.entries.split_off(&journal.first_new);
+        for (id, request) in journal.removed_requests {
+            self.entries
+                .get_mut(&id)
+                .expect("pending incubator")
+                .request = Some(request);
+        }
         for ((id, key), value) in journal.previous {
             let fields = &mut self.entries.get_mut(&id).expect("journalled object").fields;
             if let Some(old) = value {
@@ -79,6 +126,23 @@ impl Heap {
                 fields.remove(&key);
             }
         }
+    }
+
+    pub(crate) fn request(&self, record: &Record) -> Option<&Rc<incubator::Request>> {
+        self.entries.get(&record.index())?.request.as_ref()
+    }
+
+    pub(crate) fn take_request(
+        &mut self,
+        record: &Record,
+        journal: &mut Journal,
+    ) -> Option<Rc<incubator::Request>> {
+        let id = record.index();
+        let request = self.entries.get_mut(&id)?.request.take()?;
+        if id < journal.first_new {
+            journal.removed_requests.push((id, request.clone()));
+        }
+        Some(request)
     }
 
     pub(crate) fn maybe_collect(&mut self) {
@@ -175,6 +239,11 @@ impl transaction::Transaction<'_> {
         value: Value,
     ) -> Result<(), Error> {
         self.model.validate_handles(&value)?;
+        if record.is_incubator() && matches!(key, "status" | "object" | "forceCompletion") {
+            return Err(Error::new(format!(
+                "incubator property '{key}' is readonly"
+            )));
+        }
         if key == "__proto__" {
             return Err(Error::new("JavaScript prototype mutation is unsupported"));
         }

@@ -65,6 +65,8 @@ impl Realm {
                     id,
                     if matches!(v,Value::Record(r) if r.is_array()) {
                         "array"
+                    } else if matches!(v, Value::Record(r) if r.is_incubator()) {
+                        "incubator"
                     } else {
                         "leased"
                     }
@@ -177,8 +179,12 @@ impl Realm {
         if ctx.is_loader(object) && key == "setSource" {
             signature = vec![None, Some("loaderInitial")];
         }
-        if ctx.is_component(object) && key == "createObject" {
-            signature = vec![None, Some("initial")];
+        if ctx.is_component(object) {
+            match key {
+                "createObject" => signature = vec![None, Some("initial")],
+                "incubateObject" => signature = vec![None, Some("incubatorInitial"), None],
+                _ => {}
+            }
         }
         if ctx.is_worker_script(object) && key == "sendMessage" {
             signature = vec![Some("data")];
@@ -282,7 +288,7 @@ impl Realm {
             };
             return self.encode(instance, &value);
         }
-        if matches!(op, "loaderSource" | "construct") {
+        if matches!(op, "loaderSource" | "construct" | "incubateObject") {
             let Value::Object(factory) = self.lookup(ctx, id)? else {
                 return Err(Error::new("invalid Component"));
             };
@@ -320,7 +326,17 @@ impl Realm {
                 Value::Null | Value::Undefined => None,
                 _ => return Err(Error::new("invalid parent")),
             };
-            let value = ctx.create_with_properties(factory, parent, properties)?;
+            let value = if op == "incubateObject" {
+                let mode = self.decode(ctx, field(v, 4)?)?;
+                let mode = if mode == Value::Number(1.) {
+                    ferroui_qml::IncubationMode::Synchronous
+                } else {
+                    ferroui_qml::IncubationMode::Asynchronous
+                };
+                ctx.incubate_with_properties(factory, parent, properties, mode)?
+            } else {
+                ctx.create_with_properties(factory, parent, properties)?
+            };
             return self.encode(instance, &value);
         }
         if matches!(op, "resolve" | "assign" | "scopeMode" | "bindScope") {
@@ -354,6 +370,13 @@ impl Realm {
         }
         let value = self.lookup(ctx, id)?;
         match op {
+            "forceIncubation" => {
+                let Value::Record(handle) = value else {
+                    return Err(Error::new("invalid incubator handle"));
+                };
+                ctx.force_incubation(&handle)?;
+                Ok(Json::Null)
+            }
             "get" => {
                 let name = text(v, 2)?;
                 if let Value::Object(object) = value {

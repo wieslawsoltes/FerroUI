@@ -1,7 +1,7 @@
 """Run the dynamic object fixtures against the published Qt runtime."""
 from pathlib import Path
 from PySide6.QtCore import QCoreApplication, QEventLoop, QTimer, QUrl, qVersion
-from PySide6.QtQml import QQmlComponent, QQmlEngine
+from PySide6.QtQml import QQmlComponent, QQmlEngine, QQmlIncubationController
 
 def main():
     assert qVersion() == '6.12.0'
@@ -53,6 +53,15 @@ def main():
     assert root.site() == url("urls/site.svg")
     assert root.objectContext() == url("urls/parent.svg")
     assert root.engineBase() == url("origin/fallback.svg")
+    controller = QQmlIncubationController()
+    engine.setIncubationController(controller)
+    component, root = load("Incubator.qml")
+    assert root.begin() == 2 and root.force() == 1 and root.force() == 1
+    assert root.synchronous() == 9 and root.invalid() == 3
+    assert root.property("called") == 2 and root.property("last") == 3
+    component, root = load("IncubatorGuest.qml")
+    assert root.run() == "true|true/1/10|16|1"
+    engine.setIncubationController(None)
     print("Qt 6.12.0 dynamic component, factory, binding and lifetime probes passed")
 
 if __name__ == "__main__":

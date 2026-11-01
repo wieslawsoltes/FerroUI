@@ -240,6 +240,12 @@ impl Transaction<'_> {
             }
             Value::ModelRow(row) => self.read_role(row, name, reads),
             Value::DelegateRow(owner) => self.read_delegate_role(owner, name, reads),
+            Value::Record(record) if record.is_incubator() && name == "object" => {
+                Ok(Incubator::from_record(record)
+                    .expect("incubator")
+                    .object(self.model)?
+                    .map_or(Value::Null, Value::Object))
+            }
             Value::Record(record) => Ok(self
                 .model
                 .record_entries(&record)?
@@ -286,6 +292,7 @@ impl Transaction<'_> {
                 || self.scoped_key(object, name).is_ok()
                 || (self.model.workers.contains(object) && name == "sendMessage")
                 || (self.model.models.contains_key(&object) && list_model::is_method(name))
+                || (self.model.quick_kind(object,"NumberAnimation") && animations::METHODS.contains(&name))
                 || (self.model.timers.is_timer(object)
                     && matches!(name, "start" | "stop" | "restart"))
             {
@@ -344,6 +351,9 @@ impl Transaction<'_> {
                     .unwrap_or_default(),
             ));
         }
+        if self.model.is_component(owner) && name == "incubateObject" {
+            return self.incubate_method(owner, &arguments);
+        }
         if self.model.is_component(owner) && name == "createObject" {
             return self.create_method(owner, &arguments);
         }
@@ -357,6 +367,7 @@ impl Transaction<'_> {
         if self.model.models.contains_key(&owner) && list_model::is_method(name) {
             return self.model_call(owner, name, &arguments, reads);
         }
+        if self.model.quick_kind(owner,"NumberAnimation") && animations::METHODS.contains(&name) {return self.animation_method(owner,name,&arguments);}
         if self.model.timers.is_timer(owner) && matches!(name, "start" | "stop" | "restart") {
             return self.timer_method(owner, name, &arguments);
         }

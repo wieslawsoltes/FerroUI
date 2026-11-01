@@ -5,6 +5,7 @@ use std::collections::VecDeque;
 /// The undo log only touches slots affected by this write, including dependency edges.
 /// A failed handler or binding therefore cannot leave a half-applied native update.
 pub(crate) struct Transaction<'a> {
+    pub(crate) incubating: bool,
     pub(crate) current_binding: Option<SlotId>,
     pub(crate) guest_return_type: Option<String>,
     pub(crate) guest_parameters: Vec<String>,
@@ -63,6 +64,7 @@ impl Instance {
         let structure = self.checkpoint();
         let mut tx = Transaction {
             structure,
+            incubating: false,
             current_binding: None,
             guest_return_type: None,
             guest_parameters: Vec::new(),
@@ -265,15 +267,15 @@ impl Transaction<'_> {
             .pending
             .extend(self.model.timers.objects().filter(|id| id.index >= first));
         self.settle()?;
-        for index in (first..end).rev() {
-            self.dispatch(
-                self.model.nodes[index].id,
-                "Component.completed",
-                Vec::new(),
-            )?;
-            self.settle()?;
-        }
-        Ok(())
+        // Completion handlers run after construction. A new synchronous
+        // incubator requested from onCompleted can therefore finish immediately.
+        let was_incubating = std::mem::take(&mut self.incubating);
+        let result = (first..end).rev().try_for_each(|index| {
+            self.dispatch(self.model.nodes[index].id, "Component.completed", Vec::new())?;
+            self.settle()
+        });
+        self.incubating = was_incubating;
+        result
     }
 
     pub(crate) fn settle(&mut self) -> Result<(), Error> {

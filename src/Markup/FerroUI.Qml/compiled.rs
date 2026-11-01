@@ -87,6 +87,7 @@ pub enum Receiver {
     External(crate::ExternalValue),
     Callable(crate::ExternalValue),
     Array(crate::Record),
+    Incubator(crate::Record),
     ArrayConstructor,
     Object(ObjectId),
     Math,
@@ -126,6 +127,13 @@ impl Frame<'_, '_> {
         if !self.locals.contains_key(base) {
             if let Ok(key) = self.tx.scoped_key(self.owner, &format!("{base}.{name}")) {
                 return self.tx.read(key, self.reads);
+            }
+            if base == "Qt" {
+                match name {
+                    "Asynchronous" => return Ok(Value::Number(0.)),
+                    "Synchronous" => return Ok(Value::Number(1.)),
+                    _ => {}
+                }
             }
             if base == "Math" {
                 return Ok(Value::Number(match name {
@@ -196,6 +204,11 @@ impl Frame<'_, '_> {
                         engine.call_external(ctx, &callable, Value::External(base.clone()), args)
                     })
             }
+            Receiver::Incubator(handle) if name == "forceCompletion" && args.is_empty() => {
+                self.tx.force_incubator(&handle)?;
+                Ok(Value::Undefined)
+            }
+            Receiver::Incubator(_) => Err(Error::new(format!("invalid incubator method {name}"))),
             Receiver::Array(array) => self.tx.array_method(&array, name, args),
             Receiver::ArrayConstructor if name == "isArray" => Ok(Value::Bool(
                 matches!(args.first(),Some(Value::Record(r)) if r.is_array()),
@@ -243,6 +256,9 @@ pub fn receiver(value: Value) -> Result<Receiver, Error> {
         return Ok(Receiver::External(value));
     }
     if let Value::Record(r) = &value {
+        if r.is_incubator() {
+            return Ok(Receiver::Incubator(r.clone()));
+        }
         if r.is_array() {
             return Ok(Receiver::Array(r.clone()));
         }

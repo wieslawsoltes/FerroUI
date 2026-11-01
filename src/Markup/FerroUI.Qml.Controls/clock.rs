@@ -96,7 +96,7 @@ impl QmlView {
                 let elapsed = dispatcher.now().saturating_sub(start);
                 let should_yield = {
                     let model = view.0.instance.borrow();
-                    model.has_incubating_loader()
+                    model.has_incubating_work()
                         || (elapsed >= DEFERRED_BUDGET_MS && model.has_deferred_work())
                 };
                 if should_yield {

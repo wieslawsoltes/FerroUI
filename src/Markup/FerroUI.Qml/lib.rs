@@ -9,6 +9,8 @@ mod connections;
 mod deferred;
 mod dynamic;
 mod incubation;
+mod incubator;
+pub use incubator::{IncubationMode, IncubationStatus, Incubator};
 mod initial;
 mod lifetime;
 pub use compiled::{CompiledComponent, ComponentSource};
