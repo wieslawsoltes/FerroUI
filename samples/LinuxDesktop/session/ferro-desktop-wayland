@@ -2,6 +2,7 @@
 # Launch a dedicated Sway compositor and its native Ferro Desktop shell. Both are
 # children of this supervisor, so a login, logout or compositor failure has one lifetime.
 set -euo pipefail
+if [[ ${1:-} == --ferro ]]; then export FERRO_DESKTOP_COMPOSITION=ferro; shift; fi
 case ${1:-} in
     --ready)
         : "${WAYLAND_DISPLAY:?}" "${SWAYSOCK:?}" "${FERRO_DESKTOP_WAYLAND_READY:?}"
@@ -19,6 +20,10 @@ case ${1:-} in
         exec swayidle -w timeout 600 'ferro-desktop-wayland --lock' \
             before-sleep 'ferro-desktop-wayland --lock' lock 'ferro-desktop-wayland --lock' ;;
     --terminal)
+        if [[ -n ${FERRO_DESKTOP_CHILD_DISPLAY:-} ]]; then
+            export WAYLAND_DISPLAY=$FERRO_DESKTOP_CHILD_DISPLAY
+            unset DISPLAY WAYLAND_SOCKET SWAYSOCK DESKTOP_STARTUP_ID XDG_ACTIVATION_TOKEN
+        fi
         for terminal in xdg-terminal-exec foot kgx gnome-terminal konsole; do
             if command -v "$terminal" >/dev/null; then exec "$terminal"; fi
         done
@@ -34,7 +39,7 @@ case ${1:-} in
         fi
         exec dbus-run-session -- "$0" ;;
     '') ;;
-    *) echo "Usage: ferro-desktop-wayland [--nested]" >&2; exit 2 ;;
+    *) echo "Usage: ferro-desktop-wayland [--ferro] [--nested]" >&2; exit 2 ;;
 esac
 if [[ -z ${DBUS_SESSION_BUS_ADDRESS:-} ]]; then exec dbus-run-session -- "$0"; fi
 : "${XDG_RUNTIME_DIR:?A display-manager or logind session must supply XDG_RUNTIME_DIR}"
@@ -43,10 +48,12 @@ export PATH="$here:$PATH"
 export XDG_SESSION_TYPE=wayland XDG_SESSION_DESKTOP=ferro-desktop-wayland XDG_CURRENT_DESKTOP=FerroDesktop:sway
 binary=${FERRO_DESKTOP_BINARY:-ferro-desktop}
 for command in sway "$binary"; do command -v "$command" >/dev/null || { echo "Missing $command" >&2; exit 1; }; done
-config=${FERRO_DESKTOP_SWAY_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/ferro-desktop/sway.conf}
+profile=sway.conf
+if [[ ${FERRO_DESKTOP_COMPOSITION:-} == ferro ]]; then profile=ferro-composition.conf; fi
+config=${FERRO_DESKTOP_SWAY_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/ferro-desktop/$profile}
 if [[ ! -r $config && -z ${FERRO_DESKTOP_SWAY_CONFIG:-} ]]; then
-    config=$here/../share/ferro-desktop/sway.conf
-    [[ -r $config ]] || config=$here/sway.conf
+    config=$here/../share/ferro-desktop/$profile
+    [[ -r $config ]] || config=$here/$profile
 fi
 [[ -r $config ]] || { echo "Cannot read Sway configuration: $config" >&2; exit 1; }
 export FERRO_DESKTOP_SWAY_CONFIG
@@ -56,6 +63,11 @@ FERRO_DESKTOP_SWAY_CONFIG=$(realpath -- "$config")
 unset SWAYSOCK I3SOCK
 if [[ -z ${FERRO_DESKTOP_NESTED:-} ]]; then unset DISPLAY WAYLAND_DISPLAY WAYLAND_SOCKET; fi
 state=$(mktemp -d -- "$XDG_RUNTIME_DIR/ferro-wayland.XXXXXXXX")
+shell_args=()
+if [[ ${FERRO_DESKTOP_COMPOSITION:-} == ferro ]]; then
+    export FERRO_DESKTOP_CHILD_DISPLAY=${state##*/}-clients FERRO_DESKTOP_XWAYLAND=0
+    shell_args=(--compositor=ferro "--socket=$FERRO_DESKTOP_CHILD_DISPLAY")
+fi
 compositor= shell=
 cleanup() {
     for pid in "$shell" "$compositor"; do [[ -z $pid ]] || kill "$pid" 2>/dev/null || :; done
@@ -95,10 +107,19 @@ compositor=$!
     if command -v dbus-update-activation-environment >/dev/null; then
         sync_args=()
         if [[ -z ${FERRO_DESKTOP_NESTED:-} && -S $XDG_RUNTIME_DIR/systemd/private ]]; then sync_args+=(--systemd); fi
-        dbus-update-activation-environment "${sync_args[@]}" WAYLAND_DISPLAY SWAYSOCK DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_SESSION_DESKTOP || :
+        activation_display=$WAYLAND_DISPLAY
+        activation_sway=$SWAYSOCK
+        if [[ -n ${FERRO_DESKTOP_CHILD_DISPLAY:-} ]]; then
+            # D-Bus-activated GUI applications belong on the same child display
+            # as applications spawned by the launcher. Lock and output helpers
+            # are started by Sway with its original connection environment.
+            activation_display=$FERRO_DESKTOP_CHILD_DISPLAY
+            activation_sway=
+        fi
+        dbus-update-activation-environment "${sync_args[@]}" "WAYLAND_DISPLAY=$activation_display" "SWAYSOCK=$activation_sway" DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_SESSION_DESKTOP || :
     fi
     [[ -n $DISPLAY ]] || unset DISPLAY
-    exec "$binary" --session --platform=wayland
+    exec "$binary" --session --platform=wayland "${shell_args[@]}"
 ) &
 shell=$!
 wait -n "$compositor" "$shell"

@@ -13,3 +13,5 @@ install -Dm755 "$here/ferro-desktop-wayland" "${DESTDIR:-}$prefix/bin/ferro-desk
 install -Dm644 "$here/sway.conf" "${DESTDIR:-}$prefix/share/ferro-desktop/sway.conf"
 install -Dm644 "$here/ferrodesktop-portals.conf" "${DESTDIR:-}$prefix/share/xdg-desktop-portal/ferrodesktop-portals.conf"
 install -Dm644 "$here/ferro-desktop-wayland.desktop" "${DESTDIR:-}${WAYLAND_SESSIONS_DIR:-/usr/share/wayland-sessions}/ferro-desktop-wayland.desktop"
+install -Dm644 "$here/ferro-composition.conf" "${DESTDIR:-}$prefix/share/ferro-desktop/ferro-composition.conf"
+install -Dm644 "$here/ferro-desktop-composed.desktop" "${DESTDIR:-}${WAYLAND_SESSIONS_DIR:-/usr/share/wayland-sessions}/ferro-desktop-composed.desktop"
