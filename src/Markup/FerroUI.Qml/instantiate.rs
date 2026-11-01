@@ -1231,27 +1231,29 @@ impl Instance {
 impl Instance {
     pub(crate) fn allocate_document(
         &mut self,
-        doc: &Document,
+        shape: &Object,
+        singletons: &[Object],
+        imports: &[Import],
         registry: &TypeRegistry,
         unit: Rc<engine::Unit>,
     ) -> Result<BTreeSet<SlotId>, Error> {
         let mut builder = Builder {
             prepared: Default::default(),
             context: None,
-            scopes: enums::Scopes::named(None, &doc.root)?,
+            scopes: enums::Scopes::named(None, shape)?,
             instance: self,
             registry,
-            imports: &doc.imports,
+            imports,
             assigned: Default::default(),
             aliases: vec![],
             implicit: vec![],
             binding_targets: vec![],
             read_candidates: vec![],
         };
-        let root = builder.document_object(&doc.root, &unit)?;
+        let root = builder.document_object(shape, &unit)?;
         let mut fresh = vec![root];
         let mut aliases = BTreeMap::new();
-        for definition in &doc.singletons {
+        for definition in singletons {
             let (name, scope) = definition
                 .members
                 .iter()

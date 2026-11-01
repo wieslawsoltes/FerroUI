@@ -13,22 +13,16 @@ pub(crate) struct Roots {
     pub units: BTreeMap<ObjectId, Rc<Unit>>,
     pub singletons: BTreeMap<u32, ObjectId>,
     documents: BTreeSet<ObjectId>,
+    // If a guest rejected rollback too, retry installing the authoritative
+    // catalog on the next scripted load, even if that root adds no new files.
+    refresh_catalog: bool,
     types: BTreeMap<String, u32>,
 }
 
 impl Instance {
     #[cfg(feature = "diagnostics")]
     pub(crate) fn declaration_key(&self, scope: u32) -> Option<&str> {
-        self.debug_type_keys
-            .get(scope as usize)
-            .map(String::as_str)
-            .or_else(|| {
-                self.roots
-                    .types
-                    .iter()
-                    .find(|(_, index)| **index == scope)
-                    .map(|(key, _)| key.as_str())
-            })
+        self.debug_type_keys.get(scope as usize).map(String::as_str)
     }
     pub(crate) fn unit(&self, owner: ObjectId) -> Option<&Unit> {
         let document = self.node(owner)?.document?;
@@ -106,10 +100,13 @@ impl Engine {
     ) -> Result<ObjectId, Error> {
         let first_object = self.model.nodes.len();
         let first_type = self.model.roots.types.len();
-        let resources = self.model.javascript.resources.clone();
+        let doc = source.document();
+        // Keep only the actual additions and preload promotions for rollback.
+        // Workers retaining an older catalog are isolated by Arc::make_mut.
+        let mut edits = Vec::new();
+        let mut notified_guest = false;
         let result = self.model.transaction(|tx| {
             let registry = tx.model.dynamic.registry.clone().expect("type registry");
-            let mut doc = source.document().clone();
             registry.validate_imports(&doc.imports)?;
             if let Some(p) = doc.unsupported_pragma(false) {
                 return Err(Error::new(format!(
@@ -121,33 +118,42 @@ impl Engine {
             let first = tx.model.slots.len();
             // Linker ordinals belong to one document. Intern their stable type keys
             // before objects, method signatures or property shadows enter shared storage.
-            let mut intern = |key| {
+            let mut intern = |key: &str| {
+                if let Some(&index) = tx.model.roots.types.get(key) {
+                    return index;
+                }
                 let index = tx.model.roots.types.len() as u32;
-                *tx.model.roots.types.entry(key).or_insert(index)
+                tx.model.roots.types.insert(key.to_owned(), index);
+                #[cfg(feature = "diagnostics")]
+                tx.model.debug_type_keys.push(key.to_owned());
+                index
             };
-            let mapped = std::mem::take(&mut doc.type_keys)
-                .into_iter()
-                .map(&mut intern)
+            let mapped = doc
+                .type_keys
+                .iter()
+                .map(|key| intern(key))
                 .collect::<Vec<_>>();
             let mut scope = |n: u32| {
                 mapped
                     .get(n as usize)
                     .copied()
-                    .unwrap_or_else(|| intern(format!("$unit:{}:{n}", root.serial)))
+                    .unwrap_or_else(|| intern(&format!("$unit:{}:{n}", root.serial)))
             };
-            for object in std::iter::once(&mut doc.root)
-                .chain(&mut doc.singletons)
-                .chain(doc.components.values_mut())
-            {
-                relocate_object(object, &mut scope);
+            let mut shape = doc.root.clone();
+            relocate_object(&mut shape, &mut scope);
+            let mut singletons = doc.singletons.clone();
+            for singleton in &mut singletons {
+                relocate_object(singleton, &mut scope);
             }
             let catalog = doc
                 .components
                 .iter()
-                .map(|(url, shape)| {
+                .map(|(url, component)| {
+                    let mut shape = component.clone();
+                    relocate_object(&mut shape, &mut scope);
                     Ok((
                         url.clone(),
-                        dynamic::Template::from_object(shape.clone(), &doc.imports)?,
+                        dynamic::Template::from_object(shape, &doc.imports)?,
                     ))
                 })
                 .collect::<Result<_, Error>>()?;
@@ -163,29 +169,39 @@ impl Engine {
                 .revision
                 .checked_add(1)
                 .ok_or_else(|| Error::new("tree revision exhausted"))?;
-            let assigned = tx.model.allocate_document(&doc, &registry, unit)?;
+            let assigned =
+                tx.model
+                    .allocate_document(&shape, &singletons, &doc.imports, &registry, unit)?;
             let initial = initial
                 .into_iter()
                 .map(|(k, v)| (k, InitialProperty::Value(v)))
                 .collect();
             tx.apply_initial(root, first, assigned, initial)?;
-            if !doc.scripts.is_empty() {
-                let all = std::sync::Arc::make_mut(&mut tx.model.javascript.resources);
-                for (url, mut resource) in doc.scripts {
-                    if let Some(old) = all.get(&url) {
-                        let preload = resource.preload || old.preload;
-                        resource.preload = old.preload;
-                        if *old != resource {
-                            return Err(Error::new(format!("conflicting script resource '{url}'")));
-                        }
-                        resource.preload = preload;
+            for (url, resource) in &doc.scripts {
+                let previous = tx.model.javascript.resources.get(url);
+                match previous {
+                    Some(old) if !same_script(old, resource) => {
+                        return Err(Error::new(format!("conflicting script resource '{url}'")));
                     }
-                    all.insert(url, resource);
+                    Some(old) if old.preload || !resource.preload => continue,
+                    _ => (),
                 }
+                let resources = std::sync::Arc::make_mut(&mut tx.model.javascript.resources);
+                if let Some(existing) = resources.get_mut(url) {
+                    existing.preload = true;
+                    edits.push((url, CatalogEdit::Promoted));
+                } else {
+                    resources.insert(url.clone(), resource.clone());
+                    edits.push((url, CatalogEdit::Inserted));
+                }
+            }
+            if !edits.is_empty() || (tx.model.roots.refresh_catalog && !doc.scripts.is_empty()) {
                 let guest = tx.script_engine()?;
+                notified_guest = true;
                 tx.with_receiver_context(root, &mut BTreeSet::new(), |ctx| {
                     guest.prepare_script_resources(ctx)
                 })?;
+                tx.model.roots.refresh_catalog = false;
             }
             tx.initialize_range(root.index, first)?;
             tx.model.roots.documents.insert(root);
@@ -208,15 +224,30 @@ impl Engine {
                 .roots
                 .types
                 .retain(|_, index| (*index as usize) < first_type);
-            if self.model.javascript.resources != resources {
-                self.model.javascript.resources = resources;
+            #[cfg(feature = "diagnostics")]
+            self.model.debug_type_keys.truncate(first_type);
+            if !edits.is_empty() {
+                let resources = std::sync::Arc::make_mut(&mut self.model.javascript.resources);
+                for (url, edit) in edits {
+                    match edit {
+                        CatalogEdit::Inserted => {
+                            resources.remove(url);
+                        }
+                        CatalogEdit::Promoted => {
+                            resources.get_mut(url).expect("promoted script").preload = false;
+                        }
+                    }
+                }
+            }
+            if notified_guest {
                 let shell = self.model.root();
-                let _ = self.model.transaction(|tx| {
+                let restored = self.model.transaction(|tx| {
                     let guest = tx.script_engine()?;
                     tx.with_receiver_context(shell, &mut BTreeSet::new(), |ctx| {
                         guest.prepare_script_resources(ctx)
                     })
                 });
+                self.model.roots.refresh_catalog = restored.is_err();
             }
         }
         result
@@ -285,6 +316,35 @@ impl crate::transaction::Transaction<'_> {
             self.destroy_subtrees(&roots)?;
         }
     }
+}
+
+enum CatalogEdit {
+    Inserted,
+    Promoted,
+}
+
+// Preloading is a usage of one immutable resource. Compare every part of its
+// definition without copying the executable or the original source.
+fn same_script(left: &ir::ScriptResource, right: &ir::ScriptResource) -> bool {
+    let ir::ScriptResource {
+        executable,
+        import_hook,
+        preload: _,
+        imports,
+        source,
+        kind,
+        dependencies,
+        exports,
+        writable_exports,
+    } = left;
+    executable == &right.executable
+        && import_hook == &right.import_hook
+        && imports == &right.imports
+        && source == &right.source
+        && kind == &right.kind
+        && dependencies == &right.dependencies
+        && exports == &right.exports
+        && writable_exports == &right.writable_exports
 }
 
 fn relocate_object(object: &mut ir::Object, scope: &mut impl FnMut(u32) -> u32) {

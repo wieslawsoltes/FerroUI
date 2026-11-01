@@ -193,7 +193,7 @@ impl Debugger {
                 state.pause.clone().filter(|_| stop),
             )
         };
-        let before = Instant::now();
+        let before = (trace.is_some() || pause.is_some()).then(Instant::now);
         if let Some(trace) = trace {
             trace(&Event {
                 site: &site,
@@ -221,7 +221,9 @@ impl Debugger {
             };
         }
         let mut state = self.0.borrow_mut();
-        state.hook_time += before.elapsed();
+        if let Some(before) = before {
+            state.hook_time += before.elapsed();
+        }
         Call {
             debugger: self.clone(),
             receiver,
@@ -260,7 +262,11 @@ impl Call {
             if let Some(parent) = state.child_times.last_mut() {
                 *parent += elapsed;
             }
-            let record = state.profile.entry(self.site.clone()).or_default();
+            let record = if let Some(record) = state.profile.get_mut(&self.site) {
+                record
+            } else {
+                state.profile.entry(self.site.clone()).or_default()
+            };
             record.calls += 1;
             record.failures += u64::from(result.is_err());
             record.longest = record.longest.max(elapsed);

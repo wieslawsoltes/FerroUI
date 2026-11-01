@@ -109,4 +109,15 @@ fn main() {
         app.get(id, "p511").unwrap(),
         Value::Number((tick + 511) as f64)
     );
+
+    #[cfg(feature = "diagnostics")]
+    {
+        let profiler = ferroui_qml::diagnostics::Debugger::default();
+        app.set_debugger(Some(profiler.clone()));
+        measure("update 512 bindings with the profiler attached", 32, || {
+            tick += 1;
+            app.set(id, "tick", Value::Number(tick as f64)).unwrap();
+        });
+        assert_eq!(profiler.profile().len(), 512);
+    }
 }
