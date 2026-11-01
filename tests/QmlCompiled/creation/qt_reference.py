@@ -14,6 +14,13 @@ def main():
         assert root is not None, [error.toString() for error in component.errors()]
         return component, root
 
+    component, root = load("../geometry/Main.qml")
+    assert root.property("extent").width() == -1 and root.property("extent").height() == -1
+    assert root.edit() == 36.25
+    assert root.property("copy").x() == 3.25 and root.property("copy").y() == 2
+    assert root.property("frame").width() == 8 and root.property("edge") == 22
+    assert root.property("grouped").width() == 3.25 and root.property("grouped").height() == 12
+    assert root.show() == "QRectF(2, 4, 8, 8)"
     component, root = load("Main.qml")
     root.make(4)
     root.make(7)

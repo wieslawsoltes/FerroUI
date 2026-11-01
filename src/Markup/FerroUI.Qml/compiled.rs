@@ -88,6 +88,7 @@ pub enum Receiver {
     Callable(crate::ExternalValue),
     Array(crate::Record),
     Incubator(crate::Record),
+    Geometry(Value),
     ArrayConstructor,
     Object(ObjectId),
     Math,
@@ -127,6 +128,18 @@ impl Frame<'_, '_> {
         if !self.locals.contains_key(base) {
             if let Ok(key) = self.tx.scoped_key(self.owner, &format!("{base}.{name}")) {
                 return self.tx.read(key, self.reads);
+            }
+            if self.tx.model.lexical_id(self.owner, base).is_none() {
+                if let Ok(key) = self.tx.scoped_key(self.owner, base) {
+                    if matches!(
+                        self.tx.model.properties[key].ty.as_str(),
+                        "point" | "size" | "rect"
+                    ) {
+                        if let Value::Geometry(shape) = self.tx.read(key, self.reads)? {
+                            return Ok(shape.field(name).map_or(Value::Undefined, Value::Number));
+                        }
+                    }
+                }
             }
             if base == "Qt" {
                 match name {
@@ -209,12 +222,24 @@ impl Frame<'_, '_> {
                 Ok(Value::Undefined)
             }
             Receiver::Incubator(_) => Err(Error::new(format!("invalid incubator method {name}"))),
+            Receiver::Geometry(value) if name == "toString" && args.is_empty() => {
+                self.tx.model.value_string(&value).map(Value::String)
+            }
+            Receiver::Geometry(_) => Err(Error::new("unsupported geometry method")),
             Receiver::Array(array) => self.tx.array_method(&array, name, args),
             Receiver::ArrayConstructor if name == "isArray" => Ok(Value::Bool(
                 matches!(args.first(),Some(Value::Record(r)) if r.is_array()),
             )),
             Receiver::ArrayConstructor => Err(Error::new(format!("unsupported Array.{name}"))),
             Receiver::Object(id) => self.tx.invoke(id, name, args, self.reads),
+            Receiver::Qt if matches!(name, "point" | "rect" | "size") => {
+                let numbers = args
+                    .iter()
+                    .map(Value::number)
+                    .collect::<Result<Vec<_>, _>>()?;
+                let shape = crate::Geometry::from_components(name, &numbers)?;
+                Ok(self.tx.geometry_object(shape, None))
+            }
             Receiver::Qt if name == "callLater" => {
                 let mut args = args.into_iter();
                 match args.next() {
@@ -252,6 +277,10 @@ impl Frame<'_, '_> {
     }
 }
 pub fn receiver(value: Value) -> Result<Receiver, Error> {
+    if matches!(&value, Value::Geometry(_)) || matches!(&value,Value::Record(r) if r.is_geometry())
+    {
+        return Ok(Receiver::Geometry(value));
+    }
     if let Value::External(value) = value {
         return Ok(Receiver::External(value));
     }
@@ -376,13 +405,10 @@ impl Frame<'_, '_> {
                     .get(name)
                     .ok_or_else(|| Error::new("local is out of scope"))?
                     .clone(),
-                Location::Record(record, name) => self
-                    .tx
-                    .model
-                    .record_entries(record)?
-                    .get(name)
-                    .cloned()
-                    .unwrap_or(Value::Undefined),
+                Location::Record(record, name) => {
+                    self.tx
+                        .member(Value::Record(record.clone()), name, self.reads)?
+                }
                 Location::Property(key) => self.tx.read(*key, self.reads)?,
             };
             match op {

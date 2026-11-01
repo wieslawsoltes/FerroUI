@@ -49,6 +49,9 @@ impl Instance {
     }
 
     pub(crate) fn value_string(&self, v: &Value) -> Result<String, Error> {
+        if let Some(shape) = self.geometry_snapshot(v)? {
+            return Ok(shape.to_string());
+        }
         match v {
             Value::Record(r) if r.is_array() => self.join_array(r, ",", &mut Vec::new()),
             _ => Ok(v.js_string()),
@@ -109,6 +112,12 @@ impl Instance {
     }
 
     pub(crate) fn js_binary(&self, op: &str, mut a: Value, mut b: Value) -> Result<Value, Error> {
+        if let Some(shape) = self.geometry_snapshot(&a)? {
+            a = Value::Geometry(shape);
+        }
+        if let Some(shape) = self.geometry_snapshot(&b)? {
+            b = Value::Geometry(shape);
+        }
         let same_class = matches!((&a, &b), (Value::Record(_), Value::Record(_)));
         let equality = matches!(op, "==" | "!=");
         let nullish = matches!(a, Value::Null | Value::Undefined)

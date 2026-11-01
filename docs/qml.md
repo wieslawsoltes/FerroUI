@@ -212,6 +212,12 @@ let meter = TypeDefinition::default()
     });
 ```
 
+### Point, size and rectangle values
+
+Declare `point`, `size` and `rect` properties and construct values with `Qt.point(x, y)`, `Qt.size(width, height)` and `Qt.rect(x, y, width, height)`. QML also accepts the corresponding string initializers, including `"1,2,10x20"` for a rectangle. The default size is −1 × −1. Rectangles expose computed, read-only `left`, `right`, `top` and `bottom`.
+
+A local reference to a property can write back through its fields. Assigning into another typed property copies the coordinates. Grouped declarations can bind fields separately, so an imperative write replaces the binding on that field. A whole-property write replaces all its field bindings. Rust hosts exchange owned `Value::Geometry` values, or read and write a named field through `Instance::get` and `Instance::set`. The QML and WebScene profiles share the same reactive slots and rollback behavior. V8 uses JavaScript object identity for strict comparisons between separate geometry wrappers. Subfield aliases and separate `Binding` objects aimed at geometry paths have additional coverage pending. [Geometry fixture](../tests/QmlCompiled/geometry/Main.qml)
+
 ### Qt Quick states and animation
 
 `Item` and `StateGroup` accept named states and conditional `when` expressions. A state can extend another state. `PropertyChanges` supports target-relative and grouped ID declarations, reactive bindings, one-time evaluation with `explicit`, and restoration through `restoreEntryValues`. An active state's changes use the same property slots, type validation and rollback as ordinary bindings.

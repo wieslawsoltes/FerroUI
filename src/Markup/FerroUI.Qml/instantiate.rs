@@ -233,7 +233,16 @@ impl Instance {
     }
 
     pub(crate) fn typed(&self, ty: &str, value: Value) -> Result<Value, Error> {
+        let value = if let Some(shape) = self.geometry_snapshot(&value)? {
+            Value::Geometry(shape)
+        } else {
+            value
+        };
         match (ty, &value) {
+            (ty, Value::Geometry(shape)) if shape.type_name() == ty => (),
+            (ty, Value::String(text)) if Geometry::default_for(ty).is_some() => {
+                return Geometry::parse(ty, text).map(Value::Geometry)
+            }
             ("var" | "variant" | "alias", _) => {
                 self.validate_handles(&value)?;
             }
@@ -481,6 +490,9 @@ impl TypeRegistry {
             "int" | "real" | "double" | "float" => Value::Number(0.0),
             "string" | "url" => Value::String(String::new()),
             "color" => Value::String("#000000".into()),
+            name if Geometry::default_for(name).is_some() => {
+                Value::Geometry(Geometry::default_for(name).unwrap())
+            }
             list if list_element(list).is_some() => {
                 self.default_value(imports, list_element(list).unwrap())?;
                 Value::List(Vec::new())
@@ -886,6 +898,43 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
             && self.instance.key(owner, name).is_err()
         {
             return self.binding_input(owner, name, binding, scope);
+        }
+        if self.instance.key(owner, name).is_err() {
+            if let Some((key, field)) = self.instance.geometry_path(owner, name) {
+                let Value::Geometry(base) = self.instance.slots[key].value else {
+                    unreachable!()
+                };
+                base.with(field, 0.)?;
+                let fields = match &self.instance.slots[key].binding {
+                    Some(InstalledBinding::GeometryFields { fields, .. }) => fields.clone(),
+                    _ if self.assigned.contains(&key) => {
+                        return Err(Error::new(format!(
+                            "geometry '{}' already has an initializer",
+                            self.instance.properties[key].name
+                        )))
+                    }
+                    _ => Rc::new(Vec::new()),
+                };
+                let hidden = format!("$qml:geometry:{key}:{field}");
+                let input = self.instance.allocate_property(
+                    Property {
+                        owner,
+                        name: hidden.clone(),
+                        ty: "real".into(),
+                        readonly: false,
+                        required: false,
+                        alias: None,
+                    },
+                    Value::Number(base.field(field).unwrap()),
+                )?;
+                let mut fields = fields;
+                Rc::make_mut(&mut fields).push((field, input));
+                self.instance.slots[key].binding =
+                    Some(InstalledBinding::GeometryFields { base, fields });
+                self.instance.slots[key].dirty = true;
+                self.assigned.insert(key);
+                return self.bind(owner, &hidden, binding, scope);
+            }
         }
         let key = self.instance.key(owner, name)?;
         self.assign_once(key)?;

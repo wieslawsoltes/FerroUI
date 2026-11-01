@@ -16,12 +16,22 @@ enum Kind {
     Object,
     Array,
     Incubator,
+    Geometry(Option<(ObjectId, SlotId)>),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Record(Rc<Identity>);
 
 impl Record {
+    pub fn is_geometry(&self) -> bool {
+        matches!(self.0.kind, Kind::Geometry(_))
+    }
+    pub(crate) fn geometry_slot(&self) -> Option<(ObjectId, SlotId)> {
+        match self.0.kind {
+            Kind::Geometry(source) => source,
+            _ => None,
+        }
+    }
     pub fn is_incubator(&self) -> bool {
         self.0.kind == Kind::Incubator
     }
@@ -43,6 +53,7 @@ struct Entry {
 pub(crate) struct Heap {
     next: u64,
     collect_at: usize,
+    geometry_refs: BTreeMap<(ObjectId, SlotId), Weak<Identity>>,
     entries: BTreeMap<u64, Entry>,
 }
 
@@ -68,6 +79,29 @@ impl Heap {
         )
     }
 
+    pub(crate) fn geometry(
+        &mut self,
+        engine: u64,
+        shape: Geometry,
+        source: Option<(ObjectId, SlotId)>,
+    ) -> Record {
+        if let Some(key) = source {
+            if let Some(token) = self.geometry_refs.get(&key).and_then(Weak::upgrade) {
+                if self.entries.contains_key(&token.index) {
+                    return Record(token);
+                }
+            }
+            let record = self.insert(engine, Kind::Geometry(source), BTreeMap::new(), None);
+            self.geometry_refs.insert(key, Rc::downgrade(&record.0));
+            return record;
+        }
+        self.insert(
+            engine,
+            Kind::Geometry(None),
+            BTreeMap::from([("$qml:geometry".into(), Value::Geometry(shape))]),
+            None,
+        )
+    }
     pub(crate) fn new_incubator(&mut self, engine: u64, request: incubator::Request) -> Record {
         let fields = BTreeMap::from([
             ("status".into(), Value::Number(2.)),
@@ -111,7 +145,13 @@ impl Heap {
     }
 
     pub(crate) fn rollback(&mut self, journal: Journal) {
-        self.entries.split_off(&journal.first_new);
+        if !self.entries.split_off(&journal.first_new).is_empty() {
+            self.geometry_refs.retain(|_, token| {
+                token
+                    .upgrade()
+                    .is_some_and(|id| id.index < journal.first_new)
+            });
+        }
         for (id, request) in journal.removed_requests {
             self.entries
                 .get_mut(&id)
@@ -149,6 +189,7 @@ impl Heap {
         if self.entries.len() < self.collect_at.max(64) {
             return;
         }
+        self.geometry_refs.retain(|_, weak| weak.strong_count() > 0);
         // Rc handles also appear inside records (possibly nested in a typed
         // list). Only references outside the heap are live roots.
         let mut internal = BTreeMap::<u64, usize>::new();
@@ -239,6 +280,9 @@ impl transaction::Transaction<'_> {
         value: Value,
     ) -> Result<(), Error> {
         self.model.validate_handles(&value)?;
+        if record.is_geometry() {
+            return self.write_geometry(record, key, value);
+        }
         if record.is_incubator() && matches!(key, "status" | "object" | "forceCompletion") {
             return Err(Error::new(format!(
                 "incubator property '{key}' is readonly"

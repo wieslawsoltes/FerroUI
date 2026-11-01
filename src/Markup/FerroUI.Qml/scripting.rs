@@ -402,6 +402,9 @@ impl ScriptContext<'_, '_> {
     }
     pub fn keys(&self, base: &Value) -> Result<Vec<String>, Error> {
         self.tx.model.validate_handles(base)?;
+        if let Some(shape) = self.tx.model.geometry_snapshot(base)? {
+            return Ok(shape.fields().iter().map(|v| v.to_string()).collect());
+        }
         Ok(match base {
             Value::Object(o) => self.members(*o),
             Value::Record(r) => self.record_keys(r)?,
@@ -433,6 +436,23 @@ impl ScriptContext<'_, '_> {
             .or_else(|| node.signal(method))?;
         params.get(index)?.ty.as_deref()
     }
+    pub fn geometry_string(&mut self, value: &Value) -> Result<String, Error> {
+        if let Value::Record(record) = value {
+            if let Some((owner, key)) = record.geometry_slot() {
+                self.tx
+                    .model
+                    .node(owner)
+                    .ok_or_else(|| Error::new("expired geometry property reference"))?;
+                self.tx.read(key, self.reads)?;
+            }
+        }
+        self.tx
+            .model
+            .geometry_snapshot(value)?
+            .map(|shape| shape.to_string())
+            .ok_or_else(|| Error::new("expected a geometry value"))
+    }
+
     pub fn resources(&self) -> &BTreeMap<String, ir::ScriptResource> {
         &self.tx.model.javascript.resources
     }
@@ -632,7 +652,7 @@ impl ScriptContext<'_, '_> {
     }
 
     fn read_key(&mut self, key: SlotId) -> Result<Value, Error> {
-        let result = self.tx.read(key, self.reads);
+        let result = self.tx.script_read(key, self.reads);
         self.tx.host_result(result)
     }
 

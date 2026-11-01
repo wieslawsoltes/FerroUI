@@ -418,6 +418,9 @@ impl Transaction<'_> {
             InstalledBinding::PropertyRead(source) => return Some(*source),
             InstalledBinding::Expression(binding) => binding,
             InstalledBinding::Guarded { when, .. } => return Some(*when),
+            InstalledBinding::GeometryFields { fields, .. } => {
+                return fields.first().map(|(_, key)| *key)
+            }
             InstalledBinding::Guest { .. } | InstalledBinding::StateExpression { .. } => {
                 return None
             }
@@ -506,6 +509,12 @@ impl Transaction<'_> {
                     .ok_or_else(|| Error::new("missing dirty binding"))?;
                 match binding {
                     InstalledBinding::PropertyRead(source) => self.read(source, &mut reads)?,
+                    InstalledBinding::GeometryFields { mut base, fields } => {
+                        for &(name, input) in fields.iter() {
+                            base = base.with(name, self.read(input, &mut reads)?.number()?)?;
+                        }
+                        Value::Geometry(base)
+                    }
                     InstalledBinding::StateExpression {
                         receiver,
                         expression,
@@ -770,6 +779,17 @@ impl Transaction<'_> {
             return Ok(());
         }
         let key = self.model.write_target(key)?;
+        if let Some(InstalledBinding::GeometryFields { fields, .. }) =
+            self.model.slots[key].binding.clone()
+        {
+            for (_, input) in fields.iter() {
+                self.replace_reads(*input, BTreeSet::new());
+                let slot = self.touched(*input);
+                slot.binding = None;
+                slot.dirty = false;
+                self.pending.remove(input);
+            }
+        }
         let fallback = self.loader_dimension_assignment(key, value == Value::Undefined);
         let reset = fallback.is_some();
         let value = self

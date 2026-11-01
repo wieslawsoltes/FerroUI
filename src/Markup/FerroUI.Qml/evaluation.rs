@@ -58,13 +58,13 @@ impl Transaction<'_> {
             return Ok(Value::Object(id));
         }
         if let Ok(key) = self.scoped_key(owner, name) {
-            return self.read(key, reads);
+            return self.script_read(key, reads);
         }
         if let Some(value) = self.model.nodes[owner.index].type_scope.member(name) {
             return Ok(value);
         }
         match self.lookup_property(owner, root, name) {
-            Ok(key) => self.read(key, reads),
+            Ok(key) => self.script_read(key, reads),
             Err(error) => {
                 let receiver = [owner, root, self.model.root()]
                     .into_iter()
@@ -243,6 +243,10 @@ impl Transaction<'_> {
             Value::AnchorGroup(id) => {
                 self.read(self.model.key(id, &format!("anchors.{name}"))?, reads)
             }
+            Value::Geometry(shape) => Ok(shape.field(name).map_or(Value::Undefined, Value::Number)),
+            Value::Record(record) if record.is_geometry() => {
+                self.geometry_member(&record, name, reads)
+            }
             Value::Record(record) if record.is_incubator() && name == "object" => {
                 Ok(Incubator::from_record(record)
                     .expect("incubator")
@@ -264,7 +268,7 @@ impl Transaction<'_> {
                 .map(Value::Object)
                 .unwrap_or(Value::Null)),
             Value::Object(id) => match self.scoped_key(id, name) {
-                Ok(key) => self.read(key, reads),
+                Ok(key) => self.script_read(key, reads),
                 Err(error) => self
                     .model
                     .method(id, name)
@@ -403,7 +407,10 @@ impl Transaction<'_> {
             .parameters
             .iter()
             .map(|p| p.name.clone())
-            .zip(args)
+            .zip(args.into_iter().map(|v| match v {
+                Value::Geometry(shape) => self.geometry_object(shape, None),
+                other => other,
+            }))
             .collect();
         let previous = std::mem::take(&mut self.guest_return_type);
         let old_names = std::mem::take(&mut self.guest_parameters);

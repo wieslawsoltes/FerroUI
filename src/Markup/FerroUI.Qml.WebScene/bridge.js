@@ -20,8 +20,36 @@
     // property installs the callback; JS containers can retain and reuse it.
     const bindingCallbacks = new WeakMap();
     const methodOwners = new WeakMap();
+    const geometryKinds = new WeakMap();
+    const geometryFields = {
+        point: ["x","y"], size: ["width","height"], rect: ["x","y","width","height"]
+    };
+    function geometry(kind, values) {
+        const fields = geometryFields[kind];
+        if (!fields || values.length !== fields.length) throw new TypeError("Invalid Qt." + kind + " arguments");
+        const result = {};
+        const components = values.map(Number);
+        fields.forEach((field,i) => Object.defineProperty(result,field,{
+            enumerable: true, get: () => components[i], set: value => { components[i] = Number(value); }
+        }));
+        if (kind === "rect") {
+            for (const [field,read] of Object.entries({
+                left: () => result.x, top: () => result.y,
+                right: () => result.x + result.width, bottom: () => result.y + result.height
+            })) Object.defineProperty(result,field,{get:read,enumerable:true});
+        }
+        geometryKinds.set(result,kind);
+        Object.defineProperty(result,"toString",{value:() => {
+            const name = {point:"QPointF",size:"QSizeF",rect:"QRectF"}[kind];
+            return name + "(" + fields.map(f=>result[f]).join(", ") + ")";
+        }});
+        return Object.seal(result);
+    }
     Object.defineProperty(globalThis, "Qt", {value: Object.freeze({
         Asynchronous: 0, Synchronous: 1,
+        point(...args){return geometry("point",args);},
+        size(...args){return geometry("size",args);},
+        rect(...args){return geometry("rect",args);},
         callLater(fn, ...args) {
             if (typeof fn !== "function") throw new TypeError("Qt.callLater expects a function");
             const method = methodOwners.get(fn);
@@ -66,6 +94,8 @@
             case "boolean": return ["b",value];
             case "string": return ["s",value];
         }
+        const kind = geometryKinds.get(value);
+        if (kind) return ["geometry",kind,geometryFields[kind].map(f => encode(Number(value[f])))];
         const bound = methodOwners.get(value);
         if (bound) return ["bound", bound.id, bound.key];
         if (proxyIds.has(value)) return ["h",proxyIds.get(value)];
@@ -140,6 +170,7 @@
             case "b": case "s": return value[1];
             case "d": return Number(value[1]);
             case "a": return value[1].map(decode);
+            case "geometry": return geometry(value[1],value[2].map(decode));
             case "js":
                 if (!objects.has(value[1])) throw new ReferenceError("Released JavaScript reference");
                 return objects.get(value[1]);
@@ -174,6 +205,7 @@
         const target = array ? [] : Object.create(null);
         const result=new Proxy(target,{
             get(t,key,receiver) {
+                if(kind==="geometry" && (key==="toString" || key===Symbol.toPrimitive)) return () => rpc(["geometryString",id]);
                 if(typeof key !== "string") return Reflect.get(t,key,receiver);
                 if(array && key in Array.prototype && key !== "length") return Reflect.get(t,key,receiver);
                 return decode(rpc(["get",id,key]));

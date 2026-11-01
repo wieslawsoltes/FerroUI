@@ -19,6 +19,8 @@ pub use initial::InitialProperty;
 mod enums;
 pub use enums::Namespace;
 mod evaluation;
+mod geometry;
+pub use geometry::Geometry;
 mod instantiate;
 mod list_model;
 mod loader;
@@ -126,6 +128,10 @@ struct Property {
 #[derive(Clone)]
 enum InstalledBinding {
     Expression(Rc<Binding>),
+    GeometryFields {
+        base: Geometry,
+        fields: Rc<Vec<(&'static str, SlotId)>>,
+    },
     Guarded {
         when: SlotId,
         expression: Rc<Binding>,
@@ -306,6 +312,12 @@ impl Instance {
     }
 
     pub fn get(&self, object: ObjectId, property: &str) -> Result<Value, Error> {
+        if let Some((key, field)) = self.geometry_path(object, property) {
+            let Value::Geometry(shape) = self.slots[key].value else {
+                unreachable!()
+            };
+            return Ok(Value::Number(shape.field(field).unwrap()));
+        }
         Ok(self.slots[self.public_key(object, property)?].value.clone())
     }
 
@@ -341,6 +353,9 @@ impl Instance {
 
     /// Replaces an existing binding, even if its current value equals the assigned value.
     pub fn set(&mut self, object: ObjectId, property: &str, value: Value) -> Result<(), Error> {
+        if let Some((key, field)) = self.geometry_path(object, property) {
+            return self.transaction(|tx| tx.write_geometry_slot(key, field, value));
+        }
         let key = self.public_key(object, property)?;
         self.transaction(|tx| tx.write(key, value))
     }
@@ -363,7 +378,13 @@ impl Instance {
         name: &str,
         arguments: Vec<Value>,
     ) -> Result<Value, Error> {
-        self.transaction(|tx| tx.invoke(object, name, arguments, &mut BTreeSet::new()))
+        self.transaction(|tx| {
+            let value = tx.invoke(object, name, arguments, &mut BTreeSet::new())?;
+            Ok(match tx.model.geometry_snapshot(&value)? {
+                Some(shape) => Value::Geometry(shape),
+                None => value,
+            })
+        })
     }
 
     /// Coalesces changes by property across successful transactions. Creation can

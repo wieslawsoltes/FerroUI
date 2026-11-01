@@ -1,4 +1,11 @@
 fn main() {
+    ferroui_qml_build::compile_file("geometry/Main.qml", "geometry.rs")
+        .expect("compile geometry values");
+    #[cfg(feature = "webscene")]
+    ferroui_qml_build::Compiler::new()
+        .with_javascript()
+        .compile_file("geometry/Main.qml", "geometry_guest.rs")
+        .expect("compile guest geometry values");
     ferroui_qml_build::compile_file("nested_roles/Main.qml", "nested_roles.rs")
         .expect("compile nested role model fixture");
     ferroui_qml_build::compile_file("creation/Incubator.qml", "incubator.rs")

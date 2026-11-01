@@ -36,6 +36,15 @@ impl Realm {
                     n.to_string()
                 }
             ]),
+            Value::Geometry(shape) => json!([
+                "geometry",
+                shape.type_name(),
+                shape
+                    .components()
+                    .into_iter()
+                    .map(|n| self.encode(instance, &Value::Number(n)))
+                    .collect::<Result<Vec<_>, _>>()?
+            ]),
             Value::Method(method) => json!([
                 "bound",
                 self.tables
@@ -65,6 +74,8 @@ impl Realm {
                     id,
                     if matches!(v,Value::Record(r) if r.is_array()) {
                         "array"
+                    } else if matches!(v, Value::Record(r) if r.is_geometry()) {
+                        "geometry"
                     } else if matches!(v, Value::Record(r) if r.is_incubator()) {
                         "incubator"
                     } else {
@@ -108,6 +119,25 @@ impl Realm {
                     .map_err(|_| Error::new("invalid WebScene number"))?,
             ),
             "s" => Value::String(text(v, 1)?.into()),
+            "geometry" => {
+                let components = field(v, 2)?
+                    .as_array()
+                    .ok_or_else(|| Error::new("invalid geometry components"))?;
+                if components.len() > 4 {
+                    return Err(Error::new("invalid geometry arity"));
+                }
+                let mut numbers = Vec::with_capacity(components.len());
+                for component in components {
+                    let Value::Number(n) = self.decode(ctx, component)? else {
+                        return Err(Error::new("expected numeric geometry component"));
+                    };
+                    numbers.push(n);
+                }
+                Value::Geometry(ferroui_qml::Geometry::from_components(
+                    text(v, 1)?,
+                    &numbers,
+                )?)
+            }
             "h" => self.lookup(ctx, number(v, 1)?)?,
             "a" => Value::List(
                 field(v, 1)?
@@ -438,6 +468,7 @@ impl Realm {
                 }
                 Ok(Json::Null)
             }
+            "geometryString" => Ok(json!(ctx.geometry_string(&value)?)),
             "keys" => Ok(json!(ctx.keys(&value)?)),
             _ => Err(Error::new(format!("unknown V8 host operation '{op}'"))),
         }

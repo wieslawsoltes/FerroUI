@@ -71,6 +71,7 @@ pub enum Value {
     DelegateRow(ObjectId),
     AnchorLine(ObjectId, AnchorEdge),
     AnchorGroup(ObjectId),
+    Geometry(crate::Geometry),
     Record(crate::Record),
     Namespace(std::rc::Rc<crate::Namespace>),
     List(Vec<Value>),
@@ -85,6 +86,7 @@ impl Value {
             Self::String(value) => !value.is_empty(),
             Self::External(_)
             | Self::Method(_)
+            | Self::Geometry(_)
             | Self::AnchorGroup(_)
             | Self::AnchorLine(_, _)
             | Self::DelegateRow(_)
@@ -106,6 +108,7 @@ impl Value {
             Self::String(s) => s.trim().parse().unwrap_or(f64::NAN),
             Self::External(_)
             | Self::Method(_)
+            | Self::Geometry(_)
             | Self::AnchorGroup(_)
             | Self::AnchorLine(_, _)
             | Self::DelegateRow(_)
@@ -131,6 +134,7 @@ impl Value {
             Self::Bool(b) => b.to_string(),
             Self::Null => "null".into(),
             Self::Undefined => "undefined".into(),
+            Self::Geometry(shape) => shape.to_string(),
             Self::Method(method) => format!("function {}() {{ [native code] }}", method.name),
             Self::External(_)
             | Self::AnchorGroup(_)
