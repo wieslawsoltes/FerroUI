@@ -1,6 +1,10 @@
 //! A minimal counterpart of .NET's `System.Uri`, covering what resource and
 //! font keys need: absolute/relative detection, scheme, path, resolution of a
 //! relative reference against a base and value equality.
+//!
+//! At the edges the type converts from and to [`url::Url`]: every `Url` is an
+//! absolute [`Uri`] (`From`), and an absolute `Uri` is a `Url` when the URL
+//! parser accepts its text (`TryFrom`); a relative reference is not a `Url`.
 
 use std::fmt;
 use std::hash::{Hash, Hasher};
@@ -83,23 +87,29 @@ impl Uri {
                     // A scheme without anything after it.
                     return None;
                 }
-                let mut canonical = String::with_capacity(uri_string.len());
-                canonical.push_str(&uri_string[..length].to_ascii_lowercase());
-                let rest = &uri_string[length..];
-                // The authority (host) is case-insensitive and canonically lower case.
-                match rest.strip_prefix("://") {
-                    Some(after) => {
-                        let authority_length = after.find(['/', '?', '#']).unwrap_or(after.len());
-                        canonical.push_str("://");
-                        canonical.push_str(&after[..authority_length].to_ascii_lowercase());
-                        canonical.push_str(&after[authority_length..]);
-                    }
-                    None => canonical.push_str(rest),
-                }
-                Some(Uri { original: Rc::from(uri_string), absolute: Some(Rc::from(canonical)), scheme_length: length })
+                Some(Self::absolute_with_scheme_length(uri_string, length))
             }
             (_, None) => Some(Uri { original: Rc::from(uri_string), absolute: None, scheme_length: 0 }),
         }
+    }
+
+    /// The absolute URI of `uri_string`, whose scheme is its first
+    /// `length` bytes (followed by `:`).
+    fn absolute_with_scheme_length(uri_string: &str, length: usize) -> Uri {
+        let mut canonical = String::with_capacity(uri_string.len());
+        canonical.push_str(&uri_string[..length].to_ascii_lowercase());
+        let rest = &uri_string[length..];
+        // The authority (host) is case-insensitive and canonically lower case.
+        match rest.strip_prefix("://") {
+            Some(after) => {
+                let authority_length = after.find(['/', '?', '#']).unwrap_or(after.len());
+                canonical.push_str("://");
+                canonical.push_str(&after[..authority_length].to_ascii_lowercase());
+                canonical.push_str(&after[authority_length..]);
+            }
+            None => canonical.push_str(rest),
+        }
+        Uri { original: Rc::from(uri_string), absolute: Some(Rc::from(canonical)), scheme_length: length }
     }
 
     /// Resolves `relative` against the absolute `base` (C# `new Uri(Uri, Uri)`).
@@ -339,6 +349,67 @@ impl fmt::Debug for Uri {
     }
 }
 
+impl From<url::Url> for Uri {
+    /// The absolute URI of the text of the URL ([`url::Url::as_str`]), which
+    /// is its [`original_string`](Uri::original_string). The text is the one
+    /// [`Uri::absolute`] would parse, with two exceptions that `Uri` rejects
+    /// and a `Url` can hold: a scheme of a single letter (which `Uri` takes
+    /// for a drive letter) and a scheme with nothing after it (`foo:`).
+    fn from(value: url::Url) -> Self {
+        Uri::absolute_with_scheme_length(value.as_str(), value.scheme().len())
+    }
+}
+
+impl TryFrom<&Uri> for url::Url {
+    type Error = UriToUrlError;
+
+    /// Parses the canonical text of an absolute URI ([`Uri::absolute_uri`],
+    /// the text of `ToString`) with [`url::Url::parse`]. A relative reference
+    /// is an error: a `Url` is always absolute (resolve it with
+    /// [`Uri::ensure_absolute`] first).
+    ///
+    /// The text of the `Url` is the text of the `Uri` except where the URL
+    /// standard normalizes it: an empty path of the special schemes becomes
+    /// `/` (`http://host` is `http://host/`), dot segments are removed, the
+    /// default port of a special scheme is dropped, characters outside the
+    /// allowed set are percent-encoded and international host names of the
+    /// special schemes are written in Punycode. The schemes of the framework
+    /// (`ferres://`, `fonts:`, `resm:`) and `file://` URIs keep their text.
+    fn try_from(value: &Uri) -> Result<Self, Self::Error> {
+        let Some(text) = value.absolute.as_deref() else {
+            return Err(UriToUrlError::Relative);
+        };
+        url::Url::parse(text).map_err(UriToUrlError::Invalid)
+    }
+}
+
+/// The error of the conversion of a [`Uri`] to a [`url::Url`].
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum UriToUrlError {
+    /// The URI is a relative reference; a `Url` is always absolute.
+    Relative,
+    /// The URL parser rejects the text of the absolute URI.
+    Invalid(url::ParseError),
+}
+
+impl fmt::Display for UriToUrlError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            UriToUrlError::Relative => f.write_str("A relative URI cannot be converted to a URL."),
+            UriToUrlError::Invalid(error) => write!(f, "The URI is not a valid URL: {error}."),
+        }
+    }
+}
+
+impl std::error::Error for UriToUrlError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            UriToUrlError::Relative => None,
+            UriToUrlError::Invalid(error) => Some(error),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -376,5 +447,75 @@ mod tests {
         assert_ne!(Uri::absolute("fonts:a").unwrap(), Uri::absolute("fonts:b").unwrap());
         assert_eq!(Uri::absolute("resm:A.B#MyFont").unwrap(), Uri::absolute("resm:A.B").unwrap());
         assert_eq!(Uri::absolute("app://Host/Path").unwrap().absolute_uri(), "app://host/Path");
+    }
+
+    /// The URL of the text, through `Uri`, and the `Uri` back.
+    fn round_trip(text: &str) -> (url::Url, Uri) {
+        let uri = Uri::absolute(text).unwrap();
+        let converted = url::Url::try_from(&uri).unwrap();
+        let back = Uri::from(converted.clone());
+        (converted, back)
+    }
+
+    #[test]
+    fn converts_absolute_uris_to_and_from_urls() {
+        let resource = format!("{}://app/Assets/icon.png", crate::platform::ASSET_SCHEME);
+        for text in [
+            "https://example.com/a/b?q=1#top",
+            "http://example.com:8080/path",
+            "file:///C:/dir/file.txt",
+            "file:///home/user/a.png",
+            resource.as_str(),
+            "fonts:SystemFonts",
+            "resm:Fonts.Assets?assembly=App#Name",
+        ] {
+            let uri = Uri::absolute(text).unwrap();
+            let (converted, back) = round_trip(text);
+            // The text of the URL is the one of `ToString`, and comes back unchanged.
+            assert_eq!(converted.as_str(), uri.to_string(), "{text}");
+            assert_eq!(back.to_string(), uri.to_string(), "{text}");
+            assert_eq!(back.original_string(), text, "{text}");
+            assert_eq!(back, uri, "{text}");
+            assert_eq!(back.scheme(), converted.scheme(), "{text}");
+        }
+
+        let (converted, back) = round_trip(&resource);
+        assert_eq!(converted.host_str(), Some("app"));
+        assert_eq!(converted.path(), "/Assets/icon.png");
+        assert_eq!(back.absolute_path(), "/Assets/icon.png");
+        assert_eq!(round_trip("file:///C:/dir/file.txt").1.local_path(), "C:\\dir\\file.txt");
+        assert_eq!(round_trip("resm:Fonts.Assets?assembly=App#Name").1.query(), "?assembly=App");
+    }
+
+    #[test]
+    fn url_normalization_shows_in_the_converted_text() {
+        // The canonical text of the `Uri` (scheme and host lower case) is what is parsed.
+        assert_eq!(round_trip("HTTPS://Example.COM/Path").0.as_str(), "https://example.com/Path");
+        assert_eq!(round_trip("ferres://App/Assets").0.as_str(), "ferres://app/Assets");
+        // The URL standard gives a special scheme a path, drops its default port and dot segments.
+        assert_eq!(round_trip("http://host").1.to_string(), "http://host/");
+        assert_eq!(round_trip("http://host:80/a/../b").1.to_string(), "http://host/b");
+    }
+
+    #[test]
+    fn a_url_with_a_one_letter_scheme_is_an_absolute_uri() {
+        let uri = Uri::from(url::Url::parse("a:b").unwrap());
+        assert!(uri.is_absolute_uri());
+        assert_eq!(uri.scheme(), "a");
+        assert_eq!(uri.to_string(), "a:b");
+    }
+
+    #[test]
+    fn relative_and_invalid_uris_are_not_urls() {
+        let relative = Uri::new("/Assets/Fonts", UriKind::Relative).unwrap();
+        assert_eq!(url::Url::try_from(&relative), Err(UriToUrlError::Relative));
+        let relative = Uri::new("../Fonts/#Name", UriKind::RelativeOrAbsolute).unwrap();
+        assert_eq!(url::Url::try_from(&relative), Err(UriToUrlError::Relative));
+
+        let invalid = Uri::absolute("http://host:99999/").unwrap();
+        let error = url::Url::try_from(&invalid).unwrap_err();
+        assert_eq!(error, UriToUrlError::Invalid(url::ParseError::InvalidPort));
+        assert!(std::error::Error::source(&error).is_some());
+        assert_eq!(UriToUrlError::Relative.to_string(), "A relative URI cannot be converted to a URL.");
     }
 }

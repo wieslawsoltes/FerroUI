@@ -24,7 +24,7 @@ The types in the signatures of the API, the mechanisms of resource lifetime and 
 | .NET shape (and where the port has it) | Replacement | Phase | Behaviour to keep (a test, or a DEVIATIONS row) |
 |---|---|---|---|
 | `TimeSpan` (`ferroui-base`, `animation/time_span.rs`: signed 100 ns ticks) | `std::time::Duration`; a signed duration newtype only where a negative span is part of the contract (animation clocks that step backwards, a negative `Delay` that is rejected when the animation runs) | C2, C5 | Tick rounding of `from_seconds`, `from_milliseconds` and the other `f64` constructors; the text format of `Parse` and `ToString` in markup |
-| `DateTime`, `DateTimeOffset` (`ferroui-base`, `utilities`) | `std::time::SystemTime` and one small calendar type, or one optional integration (`time` or `jiff`); decided once, in C2 | C2, C5 | The invariant text format used by markup; `SystemTime::now()` is not available on `wasm32-unknown-unknown`, so the clock stays behind the dispatcher there |
+| `DateTime`, `DateTimeOffset` (`ferroui-base`, `utilities`) | `std::time::SystemTime` at the edges, with the port types underneath; no new crate (decided in C2: the calendar arithmetic of the port types already comes from `time`, a dependency of `ferroui-base`, and neither `time` nor `jiff` becomes a public type) | C2, C5 | The invariant text format used by markup; `SystemTime::now()` is not available on `wasm32-unknown-unknown`, so the clock stays behind the dispatcher there, and the conversions never read it |
 | `CultureInfo`, `NumberFormatInfo`, `DateTimeFormatInfo` (`ferroui-base`, `utilities/culture_info.rs`) | ICU4X: `icu_locale_core::Locale`, with `icu_decimal` and `icu_datetime` for formatting (ICU4X 2.4 is in the workspace) | C2, C5 | The culture-specific formatting the controls show (numbers, dates, the invariant culture of markup) |
 | `Uri` (`ferroui-base`, `utilities/uri.rs`) | `url::Url`, or a newtype over it where relative references are part of the contract (the resource URIs of the framework, relative `Source` values in markup) | C2, C5 | Relative and absolute forms, the resource schemes of the framework, `ToString` |
 | `Guid` (three definitions: `ferroui-splat`, `ferroui-remote-protocol`, `ferroui-microcom`) | `uuid::Uuid`, or one shared type where a layout is part of a contract (the COM `GUID` layout of `ferroui-microcom`) | C1 | Byte order of the wire and COM layouts; the text format |
@@ -40,7 +40,7 @@ The types in the signatures of the API, the mechanisms of resource lifetime and 
 
 | Need | Crate | Notes |
 |---|---|---|
-| URLs and URIs | `url` | One `Url` type at every edge; a newtype only where the framework's relative references need it |
+| URLs and URIs | `url` | One `Url` type at every edge; a newtype only where the framework's relative references need it. A workspace dependency, and a dependency of `ferroui-base` since C2 |
 | Locales, number and date formatting, segmentation | ICU4X 2.4 (`icu_locale_core`, `icu_locale`, `icu_decimal`, `icu_datetime`, `icu_calendar`, `icu_segmenter`) | Already in the workspace (#393) |
 | GUIDs and UUIDs | `uuid` | Already in `Cargo.lock`; the COM layout of `ferroui-microcom` converts to and from it |
 | Ordered maps and sets | `indexmap` | Already in `Cargo.lock`; only where the insertion order is part of the behaviour |
@@ -118,14 +118,28 @@ The phases of #423, each as small pull requests from main:
 | C0 | The inventory script and its check, this page | unchanged |
 | C1 | Duplicates and internal-only types: one `Guid` (or `uuid`), internal `Dictionary` uses to `HashMap`/`IndexMap`, internal single-implementor traits to concrete types | unchanged |
 | C2 | std types at the edges: `From`/`Into` between `TimeSpan` and `Duration`, `Uri` and `url::Url`, `CultureInfo` and the ICU4X `Locale`; new APIs take the std or ICU types | additions only |
-| C3 | Resources and errors: `IDisposable` to `Drop` and RAII guards, `...Exception` to `...Error` | 0.5 |
+| C3 | Resources and errors: `IDisposable` to `Drop` and RAII guards (the steps: [idiomatic-rust-disposal.md](idiomatic-rust-disposal.md)), `...Exception` to `...Error` | 0.5 |
 | C4 | Async: `Task`, `TaskCompletionSource` and `SynchronizationContext` to futures on the dispatcher's executor; one cancellation type | 0.5 |
 | C5 | Public signatures take and return the std and chosen-crate types; the old types remain one release as deprecated aliases or conversions; migration notes | 0.5 |
 | C6 | The check is clean, the API gate has a 0.5 baseline, the samples and application repositories are updated | |
 
-### 7.1 Status of C3
+### 7.1 C2: the conversions at the edges
+
+C2 adds conversions to the port types of `ferroui-base` and changes no signature. Each conversion has tests next to the type.
+
+| Port type | From the std or ICU type | To the std or ICU type | Rules |
+|---|---|---|---|
+| `animation::TimeSpan` | `From<Duration>` (kept) | `TryFrom<TimeSpan> for Duration`, error `NegativeTimeSpanError` | A tick is 100 ns. A `Duration` is truncated to whole ticks (149 ns is one tick) and saturates at `TimeSpan::MAX_VALUE`; a non-negative `TimeSpan` converts exactly (also `MAX_VALUE`); a negative one is an error |
+| `utilities::Uri` | `From<url::Url>` | `TryFrom<&Uri> for url::Url`, error `UriToUrlError` | The `Url` text becomes the original string of an absolute `Uri`. The canonical text of an absolute `Uri` (its `ToString`) is parsed; a relative reference is an error (`Relative`), and so is a text the URL parser rejects (`Invalid`). The schemes of the framework (`ferres://`, `fonts:`, `resm:`) and `file://` keep their text; the URL standard normalizes the special schemes (`http://host` is `http://host/`, default ports and dot segments go) |
+| `utilities::CultureInfo` | `From<&Locale> for CultureInfo` | `TryFrom<&CultureInfo> for Locale`, error `icu_locale_core::ParseError` | By name. The invariant culture is the unknown locale `und` both ways. A culture name that is not a BCP-47 tag (`es-ES_tradnl`, `x-custom`) is an error, which is why this direction is `TryFrom`: `CultureInfo::get_culture_info` takes any name |
+| `utilities::DateTime` | `TryFrom<SystemTime>`, error `SystemTimeRangeError` | `TryFrom<DateTime> for SystemTime` | A system time is a UTC instant and gives a value of kind `Utc`, rounded down to a whole tick; outside of the years 1 to 9999 it is an error. A `Utc` value converts as it is; a `Local` or `Unspecified` value is local time and is converted with the offset of `TimeZoneInfo` (as .NET's `ToUniversalTime` and `new DateTimeOffset(DateTime)` do), without clamping. Ticks are whole nanoseconds, so this direction is exact; it fails only where the platform's `SystemTime` cannot hold the instant (before 1970 on `wasm32-unknown-unknown`) |
+| `utilities::DateTimeOffset` | `TryFrom<SystemTime>`, error `SystemTimeRangeError` | `TryFrom<DateTimeOffset> for SystemTime` | The instant is kept and the offset is not: a value made from a system time has the offset zero |
+
+The decision for `DateTime` and `DateTimeOffset` (section 2.1): no new crate. `std::time::SystemTime` is the type of the edges, and the port types stay underneath for the calendar, the kinds and the .NET text formats; C5 decides which public signatures take `SystemTime`. None of the conversions reads the clock.
+
+### 7.2 Status of C3
 
 - **Errors (C3a): done.** The error types of `src/` that were named after .NET exceptions are `...Error` types that implement `std::error::Error` and `Display` (with `source()` where they wrap an error); their messages, the type names the markup compiler reports and the markup names are unchanged. The old names remain as `#[deprecated(since = "0.5.0")]` aliases (a deprecated constant for a unit struct, a deprecated function for a tuple struct), so the inventory still counts them until they are removed after 0.5. The list is the migration table of `CHANGELOG.md`; the rows are in `docs/porting/data/upstream-names.toml`.
 - **Kept, not error types:** the panic payload aliases `ferroui_base::threading::DispatcherException` and the private `Exception` of `ferroui-headless` (`Box<dyn Any + Send>`, which cannot implement `std::error::Error`); the private closure aliases `WriteNoTypeWithException` and `WriteWithTypeAndException` of the `ActionLogger` of `ferroui-splat` (functions that take an error); the factories of the derived exception classes, which are unit structs whose `new` returns the one error type (`XamlBindingsTransformException`, `XamlDataContextException`, `XamlPropertyPathException`, `XamlSelectorsTransformException` and `XamlStyleTransformException` of `ferroui-markup-xaml-loader`, whose type names select the diagnostic codes; `FerroWaylandPollException`, `FerroWaylandNetworkException`, `FerroWaylandFlushException`, `FerroWaylandReadException` and `FerroWaylandProtocolErrorException` of `ferroui-wayland`). They become constructors or kinds of their error type in a later step.
 - **Kept, name taken:** `AggregateException` of `ferroui_base::data` (the module has an `AggregateError`, the aggregate of a binding notification) and `DecyclerException` of `ferroui_base::media::fonts::tables` (the module has the enum `DecyclerError`, its kind).
-- **Resources (C3b, `IDisposable` to `Drop` and RAII guards):** open.
+- **Resources (C3b, `IDisposable` to `Drop` and RAII guards):** open; the steps are in [idiomatic-rust-disposal.md](idiomatic-rust-disposal.md).

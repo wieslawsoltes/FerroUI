@@ -1486,12 +1486,14 @@ dependencies = [
  "bitflags",
  "ferroui-build-scan",
  "ferroui-system",
+ "icu_locale_core",
  "libc",
  "paste",
  "rust_decimal",
  "rustc-hash 2.1.3",
  "smallvec",
  "time",
+ "url",
 ]
 
 [[package]]

@@ -404,11 +404,51 @@ impl TimeSpan {
 impl From<Duration> for TimeSpan {
     /// Converts a duration, truncating to whole ticks and saturating at
     /// [`TimeSpan::MAX_VALUE`].
+    ///
+    /// A tick is 100 nanoseconds, so the nanoseconds of the duration below
+    /// a whole tick are dropped (149 ns is one tick, 99 ns is zero). A
+    /// duration longer than [`TimeSpan::MAX_VALUE`] (about 29,227 years)
+    /// gives [`TimeSpan::MAX_VALUE`].
     fn from(value: Duration) -> Self {
         let ticks = value.as_nanos() / 100;
         TimeSpan { ticks: i64::try_from(ticks).unwrap_or(i64::MAX) }
     }
 }
+
+impl TryFrom<TimeSpan> for Duration {
+    type Error = NegativeTimeSpanError;
+
+    /// Converts a non-negative interval exactly: each tick is 100
+    /// nanoseconds, and every non-negative [`TimeSpan`] up to
+    /// [`TimeSpan::MAX_VALUE`] fits in a [`Duration`]. A negative interval is
+    /// an error ([`TimeSpan::to_duration`] gives `None` for it).
+    fn try_from(value: TimeSpan) -> Result<Self, Self::Error> {
+        value.to_duration().ok_or(NegativeTimeSpanError { value })
+    }
+}
+
+/// The error of the conversion of a negative [`TimeSpan`] to a
+/// [`Duration`], which cannot be negative.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct NegativeTimeSpanError {
+    value: TimeSpan,
+}
+
+impl NegativeTimeSpanError {
+    /// The interval that was not converted.
+    #[inline]
+    pub fn time_span(&self) -> TimeSpan {
+        self.value
+    }
+}
+
+impl fmt::Display for NegativeTimeSpanError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "The TimeSpan {} is negative and cannot be converted to a Duration.", self.value)
+    }
+}
+
+impl std::error::Error for NegativeTimeSpanError {}
 
 impl FromStr for TimeSpan {
     type Err = FormatError;
@@ -577,5 +617,42 @@ mod tests {
         assert_eq!(TimeSpan::from(Duration::from_millis(1500)), TimeSpan::from_seconds(1.5));
         assert_eq!(TimeSpan::from_seconds(1.5).to_duration(), Some(Duration::from_millis(1500)));
         assert_eq!(TimeSpan::from_seconds(-1.0).to_duration(), None);
+    }
+
+    #[test]
+    fn duration_conversions_round_trip_whole_ticks() {
+        // Whole ticks convert exactly, both ways.
+        for ticks in [0, 1, 9_999_999, 10_000_000, 123_456_789_012, i64::MAX] {
+            let span = TimeSpan::from_ticks(ticks);
+            let duration = Duration::try_from(span).unwrap();
+            assert_eq!(duration.as_nanos(), ticks as u128 * 100, "{ticks}");
+            assert_eq!(TimeSpan::from(duration), span, "{ticks}");
+        }
+        assert_eq!(Duration::try_from(TimeSpan::MAX_VALUE).unwrap(), Duration::new(922_337_203_685, 477_580_700));
+        assert_eq!(Duration::try_from(TimeSpan::ZERO), Ok(Duration::ZERO));
+        assert_eq!(Duration::try_from(TimeSpan::from_seconds(1.5)), Ok(Duration::from_millis(1500)));
+    }
+
+    #[test]
+    fn duration_conversions_truncate_and_saturate() {
+        // Below a whole tick, the nanoseconds of a duration are dropped.
+        assert_eq!(TimeSpan::from(Duration::from_nanos(99)).ticks(), 0);
+        assert_eq!(TimeSpan::from(Duration::from_nanos(149)).ticks(), 1);
+        assert_eq!(TimeSpan::from(Duration::from_nanos(1_999)).ticks(), 19);
+        // A duration longer than the largest interval saturates.
+        assert_eq!(TimeSpan::from(Duration::MAX), TimeSpan::MAX_VALUE);
+        assert_eq!(TimeSpan::from(Duration::new(922_337_203_685, 477_580_800)), TimeSpan::MAX_VALUE);
+    }
+
+    #[test]
+    fn negative_intervals_are_not_durations() {
+        for span in [TimeSpan::from_ticks(-1), TimeSpan::from_seconds(-2.0), TimeSpan::MIN_VALUE] {
+            let error = Duration::try_from(span).unwrap_err();
+            assert_eq!(error.time_span(), span);
+        }
+        assert_eq!(
+            Duration::try_from(TimeSpan::from_seconds(-2.0)).unwrap_err().to_string(),
+            "The TimeSpan -00:00:02 is negative and cannot be converted to a Duration."
+        );
     }
 }
