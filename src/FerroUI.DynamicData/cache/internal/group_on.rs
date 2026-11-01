@@ -192,7 +192,7 @@ where
 /// The state of a subscription to `GroupOn` (`Grouper`).
 struct Grouper<T, K, G> {
     group_selector_key: Rc<dyn Fn(&T) -> G>,
-    group_cache: Dictionary<G, Group<T, K, G>>,
+    group_cache: HashMap<G, Group<T, K, G>>,
     item_cache: Dictionary<K, ChangeWithGroup<T, K, G>>,
 }
 
@@ -202,7 +202,7 @@ type Outcome<T, K, G> = (Result<GroupChangeSet<T, K, G>, ObservableError>, Suspe
 
 impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static, G: Eq + Hash + Clone + 'static> Grouper<T, K, G> {
     fn new(group_selector_key: Rc<dyn Fn(&T) -> G>) -> Self {
-        Self { group_selector_key, group_cache: Dictionary::new(), item_cache: Dictionary::new() }
+        Self { group_selector_key, group_cache: HashMap::new(), item_cache: Dictionary::new() }
     }
 
     /// Runs `action` on the grouper, then ends the suspensions of the groups it edited (the
@@ -336,7 +336,7 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static, G: Eq + Hash + Clone + 
 /// Removes the item of `key` from the group of `group_key`, and the group when that empties it
 /// (the lambda of `_groupCache.Lookup(..).IfHasValue(..)`).
 fn remove_from_group<T: Clone + 'static, K: Eq + Hash + Clone + 'static, G: Eq + Hash + Clone + 'static>(
-    groups: &mut Dictionary<G, Group<T, K, G>>,
+    groups: &mut HashMap<G, Group<T, K, G>>,
     suspend_tracker: &mut SuspendTracker<G>,
     result: &mut Vec<Change<Group<T, K, G>, G>>,
     group_key: &G,
