@@ -13,11 +13,11 @@ use crate::server::persistent::i_w_xdg_top_level::{IWXdgShellSurface, IWXdgTopLe
 use crate::server::persistent::xdg_configure_batch::XdgConfigureBatch;
 use crate::ferro_wayland_exception::FerroWaylandError;
 use crate::window_impl::WindowImpl;
-use crate::window_impl_base::{ISinkOwner, Sink};
+use crate::window_impl_base::{get, ISinkOwner, Sink};
 use ferroui_base::input::raw::RawPointerEventType;
 use ferroui_base::input::{Key, PhysicalKey, RawInputModifiers};
 use ferroui_base::threading::Dispatcher;
-use ferroui_base::{Point, Size, Vector};
+use ferroui_base::{Point, Rect, Size, Vector};
 use ferroui_controls::WindowCloseReason;
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
@@ -236,6 +236,16 @@ impl IWXdgTopLevelEventSink for WindowImplSink {
         // Post the ack serial back to the wayland thread for next commit
         if let Some(proxy) = &*self.surface_proxy.borrow() {
             proxy.set_pending_ack_serial(batch.serial);
+        }
+
+        // Not in the reference, which waits for the next frame of the render loop: the frame of
+        // the configured size and state is rendered now, and it carries the acknowledgement of
+        // the serial, so the compositor shows the new size with a buffer of that size without
+        // a frame of delay (cooperative resize, issue 476). A configure that changes only the
+        // state of the window (activation, a maximize of the same size) is acknowledged by it
+        // too, where nothing else may have asked for a frame. The popup does the same.
+        if let Some(paint) = get(&parent.base().paint) {
+            paint(Rect::from_size(parent.base().client_size()));
         }
     }
 
