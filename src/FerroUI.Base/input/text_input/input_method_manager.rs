@@ -282,7 +282,17 @@ impl TextInputMethodManager {
 
         if let Some(im) = &im {
             match self.owner() {
-                Some(target) => im.set_options(&TextInputOptions::from_styled_element(&target)),
+                Some(target) => {
+                    let generation = self.generation.get();
+                    let options = TextInputOptions::from_styled_element(&target);
+                    let options = match self.client() {
+                        Some(client) => client.input_options(&target, options),
+                        None => options,
+                    };
+                    if !self.is_current(generation) { return; }
+                    im.set_options(&options);
+                    if !self.is_current(generation) { return; }
+                },
                 None => im.set_options(&TextInputOptions::default_options()),
             }
         }

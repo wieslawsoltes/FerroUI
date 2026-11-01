@@ -84,6 +84,8 @@ pub struct TextBox {
     presenter: RefCell<Option<Ref<TextPresenter>>>,
     scroll_viewer: RefCell<Option<Ref<ScrollViewer>>>,
     im_client: Rc<TextBoxTextInputMethodClient>,
+    password_input_privacy: RefCell<Option<Rc<dyn IDisposable>>>,
+    updating_password_privacy: Cell<bool>,
     undo_redo_helper: UndoRedoHelper<UndoRedoState>,
     /// The handle through which the undo/redo helper reaches this text box.
     undo_redo_host: RefCell<Option<Rc<dyn IUndoRedoHost<UndoRedoState>>>>,
@@ -139,6 +141,7 @@ impl FerroObjectImpl for TextBox {
     fn constructed(this: &Self) {
         // The static constructor runs before the instance constructors.
         Self::parent_constructed(this);
+        this.update_password_input_privacy();
 
         let object: &FerroObject = this;
         let accepts_return = FerroObjectExtensions::get_observable(object, Self::accepts_return_property());
@@ -236,6 +239,10 @@ impl FerroObjectImpl for TextBox {
             || property == Self::password_char_property().as_property()
             || property == Self::reveal_password_property().as_property()
         {
+            if property == Self::password_char_property().as_property() {
+                this.update_password_input_privacy();
+                ferroui_base::input::text_input::TextInputMethodClient::request_reset(&*this.im_client);
+            }
             this.update_command_states();
         } else if property == Self::caret_index_property().as_property() {
             this.on_caret_index_changed(change);
@@ -1547,6 +1554,29 @@ impl TextBox {
         }).detach();
     }
 
+    // A visual mask must also make the native input context private. Preserve
+    // the caller's underlying value source while the mask temporarily owns it.
+    fn update_password_input_privacy(&self) {
+        if self.updating_password_privacy.replace(true) { return; }
+        struct Reset<'a>(&'a Cell<bool>);
+        impl Drop for Reset<'_> { fn drop(&mut self) { self.0.set(false); } }
+        let _reset = Reset(&self.updating_password_privacy);
+        loop {
+            let masked = self.password_char() != '\0';
+            if masked == self.password_input_privacy.borrow().is_some() { break; }
+            if masked {
+                let value = self.set_value_with_priority(
+                    ferroui_base::input::text_input::TextInputOptions::is_sensitive_property(),
+                    true, BindingPriority::Animation,
+                ).expect("password input privacy requires an owned priority value");
+                *self.password_input_privacy.borrow_mut() = Some(value);
+            } else {
+                let value = self.password_input_privacy.borrow_mut().take();
+                if let Some(value) = value { value.dispose(); }
+            }
+        }
+    }
+
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
     pub fn construct() -> Self {
         Self {
@@ -1555,6 +1585,8 @@ impl TextBox {
             presenter: RefCell::new(None),
             scroll_viewer: RefCell::new(None),
             im_client: TextBoxTextInputMethodClient::new(),
+            password_input_privacy: RefCell::new(None),
+            updating_password_privacy: Cell::new(false),
             undo_redo_helper: UndoRedoHelper::unattached(),
             undo_redo_host: RefCell::new(None),
             is_undoing_redoing: Cell::new(false),
