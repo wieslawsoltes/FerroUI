@@ -111,3 +111,22 @@ under WSL, including a deterministic delayed-state regression
 (`linux-ended-control-tests.log`). The Windows verification runner can also run
 this suite and rebuild the native Linux sample with `-IncludeWsl`; these are
 control/build results and do not establish DMA-BUF presentation.
+
+The subsequent native-memory work changes shared EGL cleanup: a context whose
+initial make-current fails is destroyed immediately, a failed switch restores
+the prior context, and disposing a current context explicitly unbinds it so
+EGL cannot defer releasing its native resources. The WSL mock EGL suite and
+five factory/display-ownership contracts pass. An opt-in test also creates a
+real EGL/GLES display/context under WSL, makes it current, disposes it and
+observes `EGL_NO_CONTEXT` (`linux-native-egl-disposal.log`). It passes while
+Mesa reports that the X server has no DRI3 device. This verifies native EGL
+lifetime behavior, not accelerated rendering or DMA-BUF media import.
+
+```sh
+cargo test --locked -p ferroui-opengl --lib \
+  native_current_context_is_unbound_on_disposal -- --ignored --nocapture
+```
+
+The Windows-side ANGLE device cache does not change Linux device selection.
+The remaining positive Linux media/camera gates still require another host or
+a WSL graphics stack with the required DMA-BUF extensions.

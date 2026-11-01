@@ -23,6 +23,64 @@ mod native_frame_tests {
         assert_eq!(unsafe { ferro_windows_test_mp4_geometry() }, 0);
     }
     #[test]
+    fn angle_context_churn_keeps_namespaces_and_other_contexts_alive() {
+        let graphics =
+            ferroui_win32::open_gl::angle::D3D11AngleWin32PlatformGraphics::new(None, None);
+        let a = graphics.create_context(None);
+        let b = graphics.create_context(None);
+        let display = a.native_egl_display();
+        assert_eq!(display, b.native_egl_display());
+        assert!(!a.is_shared_with(&*b));
+        let old_id = a.shared_frame_context_id();
+        let current = a.make_current();
+        let gl = a.gl_interface();
+        let texture = gl.gen_texture();
+        gl.bind_texture(0x0de1, texture);
+        let other = b.make_current();
+        let address = b.gl_interface().get_proc_address("glIsTexture");
+        assert!(!address.is_null());
+        let is_texture: unsafe extern "system" fn(u32) -> u8 =
+            unsafe { std::mem::transmute(address) };
+        assert_eq!(
+            unsafe { is_texture(texture as u32) },
+            0,
+            "independent context must not share GL texture names"
+        );
+        other.dispose();
+        gl.delete_texture(texture);
+        current.dispose();
+        a.dispose();
+        for _ in 0..100 {
+            let c = graphics.create_context(None);
+            assert_eq!(display, c.native_egl_display());
+            assert_ne!(old_id, c.shared_frame_context_id());
+            let egl = c
+                .as_any()
+                .downcast_ref::<ferroui_opengl::egl::EglContext>()
+                .unwrap()
+                .egl_interface()
+                .clone();
+            let current = c.make_current();
+            assert_ne!(egl.get_current_context(), 0);
+            c.dispose();
+            assert_eq!(
+                egl.get_current_context(),
+                0,
+                "disposed context must not retain current native resources"
+            );
+            current.dispose();
+            let current = b.make_current();
+            assert!(!b.is_lost());
+            assert_eq!(b.gl_interface().get_error(), 0);
+            current.dispose();
+        }
+        b.dispose();
+        let c = graphics.create_context(None);
+        assert_eq!(display, c.native_egl_display());
+        c.dispose();
+        eprintln!("NATIVE_ANGLE_CONTEXT_CHURN_PASS contexts=103 namespaces=independent surviving_context=valid native_display=reused");
+    }
+    #[test]
     fn independent_d3d11_frames_and_admission() {
         assert_eq!(unsafe { ferro_windows_test_frames() }, 0);
     }
@@ -167,6 +225,17 @@ impl Drop for Device {
 #[derive(Clone)]
 pub struct NativeDevice(Arc<Device>);
 impl NativeDevice {
+    /// Native session objects, reader callbacks, synthetic streams, frame and
+    /// alias wrappers. Complements worker/texture counts after asynchronous close.
+    #[cfg(feature = "synthetic-camera")]
+    pub fn fixture_owner_stats() -> [u32; 5] {
+        extern "C" {
+            fn ferro_windows_fixture_owners(out: *mut u32);
+        }
+        let mut out = [0; 5];
+        unsafe { ferro_windows_fixture_owners(out.as_mut_ptr()) };
+        out
+    }
     /// Default-process-heap allocated/committed bytes (MAX if unavailable),
     /// then VirtualQuery private/mapped/image committed regions. Not all heaps.
     #[cfg(feature = "synthetic-camera")]

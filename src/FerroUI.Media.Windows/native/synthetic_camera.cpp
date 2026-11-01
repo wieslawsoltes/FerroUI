@@ -11,6 +11,7 @@ using Microsoft::WRL::Make;
 using Microsoft::WRL::RuntimeClass;
 using Microsoft::WRL::RuntimeClassFlags;
 static std::atomic<uint32_t> synthetic_sources{0}, synthetic_textures{0};
+static std::atomic<uint32_t> synthetic_streams{0};
 static std::atomic<uint64_t> synthetic_pattern_epoch{0};
 static const GUID texture_credit = {
     0x638caf5a,
@@ -76,6 +77,8 @@ class SyntheticStream final
   Clock::time_point next;
 
 public:
+  SyntheticStream(){++synthetic_streams;}
+  ~SyntheticStream(){--synthetic_streams;}
   HRESULT initialize(IMFMediaSource *source, ID3D11Device *d,
                      uint64_t disconnect, uint64_t palette) {
     try {

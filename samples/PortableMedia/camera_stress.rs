@@ -29,10 +29,17 @@ async fn exercise(
     let workload = std::env::args()
         .find_map(|a| a.strip_prefix("--memory-workload=").map(str::to_owned))
         .unwrap_or("full".into());
-    if !matches!(workload.as_str(), "full" | "capture" | "reset") {
-        return Err("Memory workload must be full, capture or reset".into());
+    if !matches!(
+        workload.as_str(),
+        "full" | "capture" | "capture-native" | "reset" | "idle"
+    ) {
+        return Err("Memory workload must be full, capture, capture-native, reset or idle".into());
     }
-    let resets = if workload == "capture" { 0 } else { 6 };
+    let resets = if workload == "full" || workload == "reset" {
+        6
+    } else {
+        0
+    };
     std::println!("CAMERA_STRESS_BEGIN cycles={cycles} workload={workload} resets_per_cycle={resets} warmup_cycles=5 private_growth_limit=134217728 gpu_growth_limit=134217728 handle_growth_limit=64 quiet={} png={}",crate::QUIET.load(Ordering::Relaxed),!std::env::args().any(|a|a=="--no-png-diagnostics"));
     for cycle in 0..cycles {
         let weak = window.downgrade();
@@ -47,8 +54,10 @@ async fn exercise(
             Duration::from_secs(90),
             DispatcherPriority::NORMAL,
         ));
-        window.set_width(if cycle % 2 == 0 { 800. } else { 1000. });
-        window.set_height(if cycle % 2 == 0 { 500. } else { 700. });
+        if !std::env::args().any(|a| a == "--memory-fixed-window") {
+            window.set_width(if cycle % 2 == 0 { 800. } else { 1000. });
+            window.set_height(if cycle % 2 == 0 { 500. } else { 700. });
+        }
         let root = state.root.upgrade().ok_or("No stress root")?;
         let compositor = ElementComposition::get_element_visual(&root)
             .ok_or("No stress compositor")?
@@ -63,7 +72,35 @@ async fn exercise(
             providers::camera(&*interop, budget.clone()).map_err(|e| e.to_string())?,
         );
         state.interop.replace(Some(interop));
-        if workload != "reset" {
+        if workload == "capture-native" {
+            let producer = NativeGlFrameProducer::from_interop(
+                &*state
+                    .interop
+                    .borrow()
+                    .clone()
+                    .ok_or("No native probe context")?,
+                budget.clone(),
+            )
+            .map_err(|e| e.to_string())?;
+            let device = NativeDevice::from_renderer(&producer)
+                .await
+                .map_err(|e| e.to_string())?;
+            let session =
+                NativeSession::open(&device, "ferroui:synthetic-camera", true, false, None)
+                    .map_err(|e| e.to_string())?;
+            let observed = session.clone();
+            let frame =
+                super::wait(move || observed.take_frame().map_err(|e| e.to_string())).await?;
+            drop(frame);
+            drop(session);
+            super::wait_for(Duration::from_secs(10), || {
+                Ok((NativeSession::synthetic_usage() == (0, 0, 0)
+                    && NativeDevice::fixture_owner_stats() == [0; 5])
+                    .then_some(()))
+            })
+            .await?;
+        }
+        if workload == "full" || workload == "capture" {
             super::exercise(state.clone(), budget.clone()).await?;
         }
         if workload == "full" {
@@ -87,6 +124,10 @@ async fn exercise(
                 super::delay().await?;
             }
         }
+        super::wait_for(Duration::from_secs(10), || {
+            Ok((NativeDevice::fixture_owner_stats() == [0; 5]).then_some(()))
+        })
+        .await?;
         let interop = compositor
             .try_get_composition_gpu_interop()
             .await
@@ -109,6 +150,11 @@ async fn exercise(
             let rust = crate::memory_audit::snapshot();
             let native = NativeDevice::fixture_memory_stats();
             std::println!("CAMERA_MEMORY_SAMPLE cycle={} rust_live_bytes={} rust_live_blocks={} rust_peak_bytes={} rust_requested_growth_bytes={} default_heap_allocated={} default_heap_committed={} private_committed={} mapped_committed={} image_committed={}",cycle+1,rust[0],rust[1],rust[2],rust[3],native[0],native[1],native[2],native[3],native[4]);
+            std::println!(
+                "CAMERA_NATIVE_OWNERS cycle={} owners={:?}",
+                cycle + 1,
+                NativeDevice::fixture_owner_stats()
+            );
         }
         if cycle == 4 {
             baseline = Some(sample);
@@ -134,9 +180,10 @@ pub async fn run(state: Rc<State>, window: Ref<Window>, budget: FrameBudget) {
         FAILED.store(true, Ordering::Relaxed);
         eprintln!("CAMERA_STRESS_FAILED {e}");
         eprintln!(
-            "CAMERA_STRESS_RETIREMENT_DIAGNOSTIC before={:?} photo={:?}",
+            "CAMERA_STRESS_RETIREMENT_DIAGNOSTIC before={:?} photo={:?} owners={:?}",
             NativeSession::synthetic_usage(),
-            NativeSession::fixture_photo_status()
+            NativeSession::fixture_photo_status(),
+            NativeDevice::fixture_owner_stats()
         );
         if NativeSession::synthetic_usage() == (0, 1, 0) {
             // Diagnose the failed run without turning a reset into a pass.

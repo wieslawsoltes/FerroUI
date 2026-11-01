@@ -50,6 +50,15 @@ private decoder device is created. The compositor first attempts a D3D11 device
 with BGRA and video support, retaining its ordinary graphics fallback for UI
 profiles that cannot provide it; media independently rejects that fallback.
 
+The D3D11 graphics factory reuses healthy native D3D/EGL devices on each
+adapter/render-thread pair to avoid the pinned ANGLE build retaining a new
+display container on every compositor reset. Contexts retain separate GL
+namespaces and frame-context identities. Leases terminate a shared native
+display only after all active wrappers retire; factory teardown releases its
+native devices outside thread-local destruction. Actual device health failure
+replaces the generation. The measured reset-memory improvement and remaining
+native allocation limits are recorded in WINDOWS-VERIFICATION.md.
+
 ```powershell
 cargo build -p portable-media --target x86_64-pc-windows-msvc
 cargo run -p portable-media -- tests/media/fixtures/avc-aac.mp4 --resource --smoke

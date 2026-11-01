@@ -79,6 +79,16 @@ impl Win32AngleEglInterface {
         &self.egl
     }
 
+    /// Copy statically linked entry points so native device ownership can outlive
+    /// a thread's Rc interface. No context or surface is transferred.
+    #[cfg(windows)]
+    pub(super) fn lifetime_entries(&self) -> (unsafe extern "system" fn(isize) -> u32, ReleaseDeviceAngle) {
+        let terminate = unsafe { self.egl.get_proc_address(c"eglTerminate".as_ptr()) };
+        assert!(!terminate.is_null());
+        // SAFETY: EGL's entry point has this signature and is linked into the process.
+        (unsafe { std::mem::transmute(terminate) }, self.release_device_angle.expect("eglReleaseDeviceANGLE"))
+    }
+
     /// Whether ANGLE has `eglCreateDeviceANGLE` (`EGL_ANGLE_device_creation`).
     pub fn is_create_device_angle_available(&self) -> bool {
         self.create_device_angle.is_some()

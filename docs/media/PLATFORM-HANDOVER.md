@@ -389,6 +389,19 @@ comparisons, while native heap growth remains in both capture/reset workloads;
 ETW heap-stack capture was denied by this session's Windows token. See the
 Windows verification note for measurements, replay commands and remaining limits.
 
+The next memory follow-up isolates native ANGLE display-container retention in
+a standalone executable linked to the pinned build. Healthy D3D/EGL devices are
+now reused per graphics factory/adapter/render thread, with leases preserving
+independent context disposal and GL namespaces. A TLS-cache prototype hung at
+thread exit and was replaced with factory-owned cleanup. In fresh 300-cycle /
+1,800-reset processes, default-heap allocated growth falls from 20,457,509 to
+1,872,782 bytes; private growth falls from 48,308,224 to 4,268,032 bytes. Native
+camera-owner counters retire to zero for 1,000 lifetimes. Idle resizing and
+fixed-window source runs separate a smaller native residual, which remains
+unattributed. Repeated factory replacement or real device loss can still grow
+ANGLE registry metadata. See WINDOWS-VERIFICATION.md for the probe, tests,
+commands and exact limitations; this does not establish universal leak freedom.
+
 That runner also caught an intermittent EOF restart in the shared
 `MediaPlayerElement`: its timer stopped on an old Ended snapshot before native
 Play reached Playing. Ended now receives the existing bounded command-settling

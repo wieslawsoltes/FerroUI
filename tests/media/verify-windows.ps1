@@ -92,6 +92,11 @@ function Verify-Soak([string]$Text,[int]$Cycles) {
         if ($sample.Value -notmatch "^CAMERA_STRESS_SAMPLE cycle=$cycle\s" -or $sample.Value.Trim() -notmatch 'frames=0 reads=0 quarantine=0 native=\(0, 0, 0\)$') { throw "Missing/out-of-order/nonzero retirement checkpoint: $sample" }
         $cycle++
     }
+    $owners=[regex]::Matches($Text,'(?m)^CAMERA_NATIVE_OWNERS cycle=(\d+) owners=\[0, 0, 0, 0, 0\]\s*$')
+    if ($owners.Count -ne $Cycles) { throw "Expected $Cycles zero native ownership checkpoints, got $($owners.Count)" }
+    for ($i=0; $i -lt $Cycles; $i++) {
+        if ([int]$owners[$i].Groups[1].Value -ne $i+1) { throw 'Out-of-order native ownership checkpoint' }
+    }
 }
 function Fields([string]$Line) {
     $result=[ordered]@{}
@@ -145,14 +150,16 @@ try {
             Memory-Summary $text $name $MemoryCycles
         }
     }
-    foreach ($workload in @('capture','reset')) {
+    foreach ($workload in @('capture','capture-native','reset','idle')) {
         $env:FERROUI_MEDIA_EVIDENCE=$null
         $text=Run-Step "memory-isolate-$workload" $app @('--camera','--synthetic-camera','--camera-smoke','--camera-recovery-smoke','--renderer',"--camera-stress-cycles=$MemoryCycles",'--quiet-diagnostics','--no-png-diagnostics',"--memory-workload=$workload") @("CAMERA_STRESS_PASS cycles=$MemoryCycles",'CAMERA_MEMORY_SAMPLE') ($MemoryCycles*90+60)
         Memory-Summary $text "isolate-$workload" $MemoryCycles
     }
     if ($Section -eq 'All') {
         $env:FERROUI_MEDIA_EVIDENCE=Join-Path $output 'video-images'
-        $null=Run-Step 'native-tests' 'cargo' @('test','--locked','-p','ferroui-media-windows','--features','controls,native-frame-tests,synthetic-camera','--target','x86_64-pc-windows-msvc','--lib','--','--nocapture') @('test result: ok.','NATIVE_MP4_FILE_PASS','NATIVE_ANGLE_ALIAS_PASS','NATIVE_D3D11_FRAMES_PASS') 1200
+        $null=Run-Step 'native-tests' 'cargo' @('test','--locked','-p','ferroui-media-windows','--features','controls,native-frame-tests,synthetic-camera','--target','x86_64-pc-windows-msvc','--lib','--','--nocapture') @('test result: ok.','NATIVE_MP4_FILE_PASS','NATIVE_ANGLE_ALIAS_PASS','NATIVE_D3D11_FRAMES_PASS','NATIVE_ANGLE_CONTEXT_CHURN_PASS') 1200
+        $null=Run-Step 'display-owner-tests' 'cargo' @('test','--locked','-p','ferroui-win32','--target','x86_64-pc-windows-msvc','--lib','angle_display_lifetime') @('5 passed; 0 failed') 1200
+        $null=Run-Step 'egl-tests' 'cargo' @('test','--locked','-p','ferroui-opengl','--target','x86_64-pc-windows-msvc','--lib','egl::') @('test result: ok.','externally_leased_display_does_not_terminate_another_wrappers_native_display ... ok','failed_context_initialization_releases_native_context_without_terminating_display ... ok') 1200
         $null=Run-Step 'allocator-tests' 'cargo' @('test','--locked','-p','portable-media','--features','memory-audit','--target','x86_64-pc-windows-msvc','memory_audit::tests') @('1 passed; 0 failed') 1200
         $null=Run-Step 'source-contract-tests' 'cargo' @('test','--locked','-p','ferroui-media-video','--target','x86_64-pc-windows-msvc','--lib','native_source::tests') @('test result: ok.','canceled_native_write_keeps_its_slot_and_removes_late_output ... ok','rapid_replacement_cannot_accumulate_filesystem_workers ... ok') 1200
         $null=Run-Step 'video-control-tests' 'cargo' @('test','--locked','-p','ferroui-media-video-controls','--target','x86_64-pc-windows-msvc','--lib') @('test result: ok.','ended_restart_keeps_polling_until_native_play_is_observed ... ok') 1200
@@ -182,6 +189,7 @@ try {
             $linuxRepo=(& wsl -d Ubuntu --exec wslpath -a $repo).Trim()
             $null=Run-Step 'wsl-build' 'wsl' @('-d','Ubuntu','--exec','bash','-lc','cd "$1" && CARGO_TARGET_DIR="$2" CARGO_BUILD_JOBS=2 CARGO_PROFILE_DEV_DEBUG=0 cargo build --locked -p portable-media','verify-windows',$linuxRepo,$WslTargetDirectory) @() 1800
             $null=Run-Step 'wsl-video-control-tests' 'wsl' @('-d','Ubuntu','--exec','bash','-lc','cd "$1" && CARGO_TARGET_DIR="$2" CARGO_BUILD_JOBS=2 CARGO_PROFILE_DEV_DEBUG=0 cargo test --locked -p ferroui-media-video-controls --lib','verify-windows',$linuxRepo,$WslTargetDirectory) @('test result: ok.','ended_restart_keeps_polling_until_native_play_is_observed ... ok') 1800
+            $null=Run-Step 'wsl-egl-tests' 'wsl' @('-d','Ubuntu','--exec','bash','-lc','cd "$1" && CARGO_TARGET_DIR="$2" CARGO_BUILD_JOBS=2 CARGO_PROFILE_DEV_DEBUG=0 cargo test --locked -p ferroui-opengl --lib egl::','verify-windows',$linuxRepo,$WslTargetDirectory) @('test result: ok.','failed_context_initialization_releases_native_context_without_terminating_display ... ok') 1800
         }
     }
     $report.status='passed'

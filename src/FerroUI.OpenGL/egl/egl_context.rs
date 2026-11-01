@@ -198,6 +198,9 @@ impl EglContext {
             self.context(),
         ) {
             let error = self.egl.get_error();
+            // A failed switch must restore the context that was current before
+            // we unbound it, just as disposing the successful switch does.
+            old.dispose();
             if error == EGL_CONTEXT_LOST {
                 self.notify_context_lost();
                 return Err(MakeCurrentError::ContextLost);
@@ -408,7 +411,15 @@ impl IPlatformGraphicsContext for EglContext {
             self.features.borrow_mut().remove(&key);
         }
 
-        self.egl.destroy_context(self.disp.handle(), self.context());
+        let context = self.context();
+        // EGL defers destroying a context while it remains current. Releasing
+        // the final Rust owner must also release idle native GPU resources.
+        if self.egl.get_current_context() == context
+            && self.egl.get_current_display() == self.disp.handle()
+        {
+            self.egl.make_current(self.disp.handle(), 0, 0, 0);
+        }
+        self.egl.destroy_context(self.disp.handle(), context);
         if let Some(offscreen_surface) = &self.offscreen_surface {
             offscreen_surface.dispose();
         }

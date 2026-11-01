@@ -169,13 +169,26 @@ impl EglDisplay {
             self.egl.clone(),
             share,
             ctx,
-            offscreen_surface,
+            offscreen_surface.clone(),
             self.config.version(),
             self.config.sample_count(),
             self.config.stencil_size(),
             options.dispose_callback,
             options.extra_features.unwrap_or_default(),
-        )?;
+        );
+        let rv = match rv {
+            Ok(context) => context,
+            Err(error) => {
+                // The context has not entered the display's owned list yet.
+                // In particular, another wrapper may keep the native display
+                // alive, so eglTerminate cannot be relied on for this cleanup.
+                self.egl.destroy_context(self.handle(), ctx);
+                if let Some(surface) = &offscreen_surface {
+                    surface.dispose();
+                }
+                return Err(error);
+            }
+        };
         self.contexts.borrow_mut().push(rv.clone());
         Ok(rv)
     }
@@ -252,7 +265,11 @@ impl IDisposable for EglDisplay {
         }
         self.contexts.borrow_mut().clear();
         if self.display.get() != 0 {
-            self.egl.terminate(self.display.get());
+            if let Some(lifetime) = &self.options.native_lifetime {
+                lifetime.dispose();
+            } else {
+                self.egl.terminate(self.display.get());
+            }
         }
         self.display.set(0);
         if let Some(dispose_callback) = &self.options.dispose_callback {
@@ -271,6 +288,8 @@ mod tests {
     ferroui_base::ferro_thread_local! {
         static TERMINATED: Cell<i32> = const { Cell::new(0) };
         static DESTROYED_SURFACES: Cell<i32> = const { Cell::new(0) };
+        static DESTROYED_CONTEXTS: Cell<i32> = const { Cell::new(0) };
+        static CURRENT_CONTEXT: Cell<isize> = const { Cell::new(0) };
     }
 
     unsafe extern "system" fn get_error() -> i32 {
@@ -341,6 +360,22 @@ mod tests {
 
     unsafe extern "system" fn other() {}
 
+    unsafe extern "system" fn query_api() -> i32 { EGL_NONE }
+    unsafe extern "system" fn current_display() -> isize { if CURRENT_CONTEXT.with(Cell::get) == 0 { 0 } else { 5 } }
+    unsafe extern "system" fn current_context() -> isize { CURRENT_CONTEXT.with(Cell::get) }
+    unsafe extern "system" fn current_surface(_: i32) -> isize { 77 }
+    unsafe extern "system" fn query_string(_: isize, _: i32) -> *const std::ffi::c_char { std::ptr::null() }
+    unsafe extern "system" fn create_context(_: isize, _: isize, _: isize, _: *const i32) -> isize { 88 }
+    unsafe extern "system" fn create_pbuffer(_: isize, _: isize, _: *const i32) -> isize { 77 }
+    unsafe extern "system" fn make_current(_: isize, _: isize, _: isize, context: isize) -> u32 {
+        if context == 88 { return 0; }
+        CURRENT_CONTEXT.with(|c| c.set(context));
+        1
+    }
+    unsafe extern "system" fn destroy_context(_: isize, _: isize) {
+        DESTROYED_CONTEXTS.with(|n| n.set(n.get() + 1));
+    }
+
     fn egl() -> Rc<EglInterface> {
         let loader: GetProcAddress = Rc::new(|name: &str| match name {
             "eglGetError" => get_error as *const c_void,
@@ -351,6 +386,15 @@ mod tests {
             "eglTerminate" => terminate as *const c_void,
             "eglCreateWindowSurface" => create_window_surface as *const c_void,
             "eglDestroySurface" => destroy_surface as *const c_void,
+            "eglQueryAPI" => query_api as *const c_void,
+            "eglQueryString" => query_string as *const c_void,
+            "eglGetCurrentDisplay" => current_display as *const c_void,
+            "eglGetCurrentContext" => current_context as *const c_void,
+            "eglGetCurrentSurface" => current_surface as *const c_void,
+            "eglCreateContext" => create_context as *const c_void,
+            "eglCreatePbufferSurface" => create_pbuffer as *const c_void,
+            "eglMakeCurrent" => make_current as *const c_void,
+            "eglDestroyContext" => destroy_context as *const c_void,
             name if name.ends_with("EXT") || name.ends_with("KHR") => std::ptr::null(),
             _ => other as *const c_void,
         });
@@ -363,6 +407,55 @@ mod tests {
         EglDisplayOptions { egl: Some(egl()), ..Default::default() }
     }
 
+    #[cfg(target_os = "linux")]
+    #[test]
+    #[ignore = "requires a native EGL/GLES display"]
+    fn native_current_context_is_unbound_on_disposal() {
+        let display = EglDisplay::new_default().expect("native EGL display");
+        let context = display.create_context(None).expect("native GLES context");
+        let current = context.make_current_with_surface(None).unwrap();
+        assert_eq!(display.egl_interface().get_current_context(), context.context());
+        eprintln!("NATIVE_EGL_RENDERER {:?}", crate::IGlContext::gl_interface(&*context).renderer());
+        context.dispose();
+        assert_eq!(display.egl_interface().get_current_context(), 0);
+        current.dispose();
+        display.dispose();
+        eprintln!("NATIVE_EGL_DISPOSAL_PASS current_context=unbound");
+    }
+
+    #[test]
+    fn failed_context_initialization_releases_native_context_without_terminating_display() {
+        let display = EglDisplay::new(5, options()).unwrap();
+        let contexts = DESTROYED_CONTEXTS.with(Cell::get);
+        let surfaces = DESTROYED_SURFACES.with(Cell::get);
+        let terminated = TERMINATED.with(Cell::get);
+        CURRENT_CONTEXT.with(|c| c.set(42));
+        // eglCreateContext succeeds; its first eglMakeCurrent fails. No context
+        // entered the display's owned list, and another wrapper could be active.
+        assert!(display.create_context(None).is_err());
+        assert_eq!(DESTROYED_CONTEXTS.with(Cell::get), contexts + 1);
+        assert_eq!(DESTROYED_SURFACES.with(Cell::get), surfaces + 1);
+        assert_eq!(CURRENT_CONTEXT.with(Cell::get), 42);
+        assert_eq!(TERMINATED.with(Cell::get), terminated);
+        display.dispose();
+        assert_eq!(DESTROYED_CONTEXTS.with(Cell::get), contexts + 1);
+        assert_eq!(DESTROYED_SURFACES.with(Cell::get), surfaces + 1);
+        CURRENT_CONTEXT.with(|c| c.set(0));
+    }
+
+    #[test]
+    fn externally_leased_display_does_not_terminate_another_wrappers_native_display() {
+        let released = Rc::new(Cell::new(0));
+        let r = released.clone();
+        let display = EglDisplay::new(5, EglDisplayOptions {
+            native_lifetime: Some(Disposable::create(move || r.set(r.get() + 1))), ..options()
+        }).unwrap();
+        let terminated = TERMINATED.with(Cell::get);
+        display.dispose();
+        display.dispose();
+        assert_eq!(TERMINATED.with(Cell::get), terminated);
+        assert_eq!(released.get(), 1);
+    }
     #[test]
     fn the_first_matching_configuration_is_chosen_without_a_probe() {
         let display = EglDisplay::new(5, options()).expect("a display");

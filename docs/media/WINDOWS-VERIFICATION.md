@@ -548,3 +548,115 @@ smokes; the separate six × 20-cycle attribution evidence above remains the
 longer comparison. `windows-runner strict self test/report.md` also records
 successful harness checks under PowerShell StrictMode. Physical/native driver
 acceptance and native heap call-site attribution remain open as described above.
+
+## Native display retention follow-up, 2026-11-01
+
+The next leak investigation reproduced unbounded metadata retention in the
+pinned `mozangle 0.7.1` build without FerroUI, Skia or Media Foundation. A small
+C++ executable links the exact static ANGLE artifacts and reads its display
+registry without modifying it. Creating/releasing a D3D11 device alone leaves
+the registry empty; creating an EGL device/display on every cycle grows it to
+roughly 300 entries after 300 cycles. `eglTerminate`,
+`eglReleaseDeviceANGLE` and `eglReleaseThread` do not remove those containers.
+Reinitializing the same native device/display instead keeps one registry entry.
+This establishes a concrete native retention path despite unavailable ETW heap
+tracing. It does not attribute every native allocation in the application.
+
+The D3D11 graphics factory now retains one healthy native device/display per
+actual adapter and rendering thread. Independent Rust display wrappers and GL
+contexts use leases: the last active wrapper terminates the native display,
+and the factory releases the EGL/D3D device when its lifetime ends. Contexts
+retain independent GL namespaces and fresh frame-context identities. A failed
+D3D device health check replaces that generation; outstanding leases retain
+its device until retired. The initial adapter-selection probe is not cached.
+No private ANGLE destructor or registry mutation is used by shipping code.
+
+The first prototype used a thread-local strong cache. A native regression
+exposed a driver teardown hang at Windows thread exit. The final cache belongs
+to the graphics factory, avoiding device release from TLS destructors under
+the Windows loader lock. Native devices are free-threaded; GL contexts and
+their leases remain confined to their creating thread. Mock ownership tests
+cover overlapping wrappers, repeated disposal, failed construction, unhealthy
+generation replacement, and factory cleanup after rendering-thread exit.
+
+Fresh processes repeated 300 reset cycles (1,800 compositor resets), with five
+warm-up cycles excluded from growth. Values below are bytes, not cumulative
+allocation requests:
+
+| Metric | Before, cycle 5 → 300 | Factory cache, cycle 5 → 300 |
+| --- | ---: | ---: |
+| Default heap allocated | 15,960,109 → 36,417,618 | 9,888,579 → 11,761,361 |
+| Default heap allocated growth | 20,457,509 | 1,872,782 |
+| Process private growth | 48,308,224 | 4,268,032 |
+| Rust live requested bytes growth | 128 | 128 |
+| Handles | 753 → 744 | 596 → 591 |
+
+The dominant reset-related allocated-heap growth falls approximately 91%.
+Residual growth is explicitly not declared leak-free. Additional isolation:
+
+- 1,000 native source open/frame/close cycles pass, with session owners, reader
+  callbacks, synthetic streams, frame wrappers and alias wrappers all returning
+  to zero at every checkpoint. Rust live allocations stay essentially flat.
+- A 1,000-cycle idle workload, retaining window resizing and interop sampling
+  but creating no capture session and performing no reset, reproduces much of
+  the smaller growth. Default heap allocated is 15,934,240 at cycle 500 and
+  16,014,288 at cycle 1,000, compared with 13,805,628 at cycle 5.
+- Holding window dimensions fixed during 1,000 native camera lifetimes gives
+  private bytes 86,392,832 → 87,306,240 and default heap allocated
+  11,185,170 → 12,158,838 (cycle 5 → 1,000). This smaller residual still needs
+  native allocation call-site attribution; zero wrapper counters alone do not
+  establish that every OS/driver allocation has been freed.
+
+The native context regression creates 103 contexts, checks a stable cached
+native display with fresh context identities, verifies texture namespaces are
+independent, and verifies disposing/churning one wrapper leaves another
+context usable. Reinitialization after the final wrapper retires is covered.
+Review also found an EGL constructor failure leak: after `eglCreateContext`
+succeeded but the first `eglMakeCurrent` failed, the context had not entered
+the display's disposal list. That path now destroys the native context and
+offscreen surface immediately, and a failed context switch restores the
+previously current context. A mock EGL regression injects this failure while
+another context is current, checks exact single destruction, checks restoration,
+and checks that the native display is not prematurely terminated.
+The native churn test also caught a disposed context remaining current in EGL:
+`eglDestroyContext` defers destruction while it is current. Disposal now unbinds
+that context before native destruction, allowing its idle GPU resources to
+retire immediately. The native assertion fails before the fix and passes after
+it (`windows-current-context-retention-before.log` / `-fixed.log`).
+The verification runner requires this pass marker and every ordered zero-owner
+checkpoint. Its memory isolation modes now include `capture-native` and `idle`;
+`--memory-fixed-window` suppresses resize in direct stress runs.
+
+The standalone probe is checked in as
+`tests/media/windows-angle-allocation-probe.cpp`. Run its helper from an x64
+MSVC developer shell after building the Windows sample:
+
+```powershell
+./tests/media/probe-windows-angle-allocation.ps1 `
+  -AngleSourceDirectory '<cargo registry>/mozangle-0.7.1/gfx/angle/checkout' `
+  -AngleBuildDirectory '<target>/x86_64-pc-windows-msvc/debug/build/mozangle-<hash>/out' `
+  -ZlibLibrary '<target>/x86_64-pc-windows-msvc/debug/build/libz-sys-<hash>/out/lib/z.lib' `
+  -OutputDirectory '../windows-angle-probe' -Cycles 300
+```
+
+The helper builds once, then runs D3D-only, display-only, full context,
+release-thread and reused-device modes in fresh processes. The probe's internal
+ANGLE header is solely diagnostic and is not a runtime dependency of FerroUI.
+Evidence beside this worktree includes `windows-angle-probe-repro/`,
+`windows-memory-reset-300-baseline.log`, `windows-memory-reset-300-factory.log`,
+`windows-memory-native-source-1000.log`, `windows-memory-idle-1000.log` and
+`windows-memory-native-fixed-1000.log`. The 1,000-source resizing run used the
+initial cache prototype; the fixed-window and final reset runs use the
+factory-owned implementation.
+An additional fixed-window idle control has exactly 11,085,096 allocated
+default-heap bytes, 2,913,987 live Rust bytes and 596 handles at both cycles 5
+and 1,000; private bytes decrease by 364,544. This isolates the remaining
+fixed-window camera growth from the idle interop/metrics harness
+(`windows-memory-idle-fixed-1000.log`).
+
+The native cache deliberately lives until its graphics factory retires. The
+number of adapter/render-thread pairs therefore matters for applications that
+create many rendering threads. Repeated graphics-factory replacement or real
+device-removal events can still add ANGLE registry metadata; removing those
+containers needs an upstream lifetime fix. Physical driver loss, a physical
+camera and the remaining release gates above are still unverified.

@@ -34,7 +34,7 @@ struct Failure {HRESULT hr;};
 static void check(HRESULT hr){if(FAILED(hr))throw Failure{hr};}
 static std::atomic<int> active_sessions{0};
 #ifdef FERROUI_SYNTHETIC_CAMERA
-static std::atomic<uint32_t> fixture_frames{0},fixture_aliases{0};
+static std::atomic<uint32_t> fixture_frames{0},fixture_aliases{0},fixture_owners{0},fixture_callbacks{0};
 struct FixtureFrame {
     FixtureFrame(){++fixture_frames;}FixtureFrame(const FixtureFrame&){++fixture_frames;}
     ~FixtureFrame(){--fixture_frames;}
@@ -116,7 +116,16 @@ struct Session;
 class ReaderCallback final:public IMFSourceReaderCallback {
     std::atomic<ULONG> refs{1};std::weak_ptr<Session> session;
 public:
-    explicit ReaderCallback(std::weak_ptr<Session> s):session(std::move(s)){}
+    explicit ReaderCallback(std::weak_ptr<Session> s):session(std::move(s)){
+#ifdef FERROUI_SYNTHETIC_CAMERA
+        ++fixture_callbacks;
+#endif
+    }
+    ~ReaderCallback(){
+#ifdef FERROUI_SYNTHETIC_CAMERA
+        --fixture_callbacks;
+#endif
+    }
     STDMETHODIMP QueryInterface(REFIID id,void **out)override {if(!out)return E_POINTER;*out=nullptr;if(id==__uuidof(IUnknown)||id==__uuidof(IMFSourceReaderCallback)){*out=(IMFSourceReaderCallback*)this;AddRef();return S_OK;}return E_NOINTERFACE;}
     STDMETHODIMP_(ULONG) AddRef()override{return ++refs;}
     STDMETHODIMP_(ULONG) Release()override{ULONG n=--refs;if(!n)delete this;return n;}
@@ -133,6 +142,9 @@ static int native_error_kind(HRESULT hr){
     return 0;
 }
 struct Session : std::enable_shared_from_this<Session> {
+#ifdef FERROUI_SYNTHETIC_CAMERA
+    Session(){++fixture_owners;}~Session(){--fixture_owners;}
+#endif
     std::mutex lock;std::condition_variable changed;std::atomic<bool> closed{false};
     FerroWindowsState state{};
     std::wstring source;bool camera=false,resource_file=false;
@@ -170,6 +182,11 @@ struct Session : std::enable_shared_from_this<Session> {
     }
 };
 struct FerroWindowsSession {std::shared_ptr<Session> value;};
+#ifdef FERROUI_SYNTHETIC_CAMERA
+extern "C" void ferro_windows_fixture_owners(uint32_t* out){
+    out[0]=fixture_owners.load();out[1]=fixture_callbacks.load();out[2]=synthetic_streams.load();out[3]=fixture_frames.load();out[4]=fixture_aliases.load();
+}
+#endif
 STDMETHODIMP ReaderCallback::OnReadSample(HRESULT status,DWORD stream,DWORD flags,LONGLONG pts,IMFSample *sample){
     if(auto s=session.lock()){
         std::lock_guard<std::mutex> guard(s->lock);if(s->closed.load())return S_OK;

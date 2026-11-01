@@ -1,5 +1,6 @@
 //! The platform graphics of ANGLE on Direct3D 11: every context has a
-//! display, and a device of Direct3D, of its own.
+//! independent display wrapper and GL object namespace. Healthy native devices
+//! are reused by this factory on the same rendering thread.
 
 use super::angle_d3d_texture_feature::AngleD3DTextureFeature;
 use super::angle_external_objects_feature::AngleExternalObjectsFeature;
@@ -16,6 +17,8 @@ use ferroui_opengl::{
 use std::any::TypeId;
 use std::collections::HashMap;
 use std::rc::Rc;
+use std::sync::Arc;
+use super::angle_display_lifetime::DisplayCache;
 
 /// The display of ANGLE of a context, with the context as its shared
 /// handle: a feature of every context of these graphics
@@ -39,6 +42,7 @@ pub(crate) struct AngleContextDisplay {
 /// start; what a context is, is the same.
 #[derive(Clone, Debug)]
 pub struct D3D11AngleWin32PlatformGraphics {
+    displays: Arc<DisplayCache>,
     gl_versions: Option<Vec<GlVersion>>,
     /// The identifier of the adapter the probe chose; `None` for the first
     /// adapter of the system.
@@ -47,7 +51,7 @@ pub struct D3D11AngleWin32PlatformGraphics {
 
 impl D3D11AngleWin32PlatformGraphics {
     pub fn new(gl_versions: Option<Vec<GlVersion>>, adapter_luid: Option<u64>) -> D3D11AngleWin32PlatformGraphics {
-        D3D11AngleWin32PlatformGraphics { gl_versions, adapter_luid }
+        D3D11AngleWin32PlatformGraphics { displays: Arc::default(), gl_versions, adapter_luid }
     }
 
     /// The identifier of the adapter the devices are created on, when one
@@ -60,7 +64,7 @@ impl D3D11AngleWin32PlatformGraphics {
     fn create_display(&self) -> Result<AngleWin32EglDisplay, OpenGlException> {
         let egl = Rc::new(Win32AngleEglInterface::new()?);
         let (display, _) =
-            AngleWin32EglDisplay::create_d3d11_display(&egl, self.gl_versions.clone(), &D3D11Adapter::Chosen(self.adapter_luid))?;
+            AngleWin32EglDisplay::create_d3d11_display_cached(&egl, self.gl_versions.clone(), &D3D11Adapter::Chosen(self.adapter_luid), Some(&self.displays))?;
         Ok(display)
     }
 

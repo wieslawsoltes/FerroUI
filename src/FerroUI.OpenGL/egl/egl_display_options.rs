@@ -17,6 +17,10 @@ pub struct EglDisplayOptions {
     pub allow_pbuffer_only_configs: bool,
     pub context_loss_is_display_loss: bool,
     pub device_lost_check_callback: Option<Rc<dyn Fn() -> bool>>,
+    /// A native display shared by independent wrappers terminates through this
+    /// lease instead of each wrapper calling eglTerminate. Its owner must keep
+    /// the display alive until every lease is released. Default displays own it.
+    pub native_lifetime: Option<Rc<dyn IDisposable>>,
     pub dispose_callback: Option<Rc<dyn Fn()>>,
     pub gl_versions: Option<Vec<GlVersion>>,
     pub probe_config: Option<EglConfigProbeCallback>,
