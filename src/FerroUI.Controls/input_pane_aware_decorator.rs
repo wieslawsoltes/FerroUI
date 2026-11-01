@@ -5,7 +5,7 @@ use ferroui_base::animation::{DoubleTransition, ITransition, TimeSpan, Transitio
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{Layoutable, LayoutableImpl, LayoutableImplExt};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate, DirectProperty, FerroObjectImpl,
     FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Matrix, Point, Rect, Ref, Size,
@@ -23,7 +23,7 @@ pub struct InputPaneAwareDecorator {
     behavior: Cell<InputPaneAwareBehavior>,
     input_pane: RefCell<Option<Rc<dyn IInputPane>>>,
     /// The subscription to the state changed event of the input pane.
-    input_pane_state_changed: RefCell<Option<Rc<dyn IDisposable>>>,
+    input_pane_state_changed: RefCell<Option<Subscription>>,
     first_layout_done: Cell<bool>,
 }
 
@@ -88,7 +88,7 @@ impl VisualImpl for InputPaneAwareDecorator {
                     this.input_pane_aware_view_state_changed(e);
                 }
             }));
-            *this.input_pane_state_changed.borrow_mut() = Some(subscription);
+            *this.input_pane_state_changed.borrow_mut() = Some(Subscription::new(subscription));
         }
         *this.input_pane.borrow_mut() = input_pane;
         this.ensure_input_pane_padding_applied();

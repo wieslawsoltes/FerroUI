@@ -34,7 +34,7 @@ use ferroui_base::interactivity::{
 };
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::IBrush;
-use ferroui_base::reactive::{Disposable, IDisposable, ObservableExt};
+use ferroui_base::reactive::{Disposable, IDisposable, ObservableExt, Subscription};
 use ferroui_base::threading::{
     CancellationToken, CancellationTokenSource, Dispatcher, DispatcherPriority, DispatcherTimer,
     FerroSynchronizationContext, OperationCanceledError,
@@ -265,7 +265,7 @@ pub struct AutoCompleteBox {
 
     /// The text box template part.
     text_box: RefCell<Option<Ref<TextBox>>>,
-    text_box_subscriptions: RefCell<Option<Rc<dyn IDisposable>>>,
+    text_box_subscriptions: RefCell<Option<Subscription>>,
 
     /// The selection adapter, with the subscriptions to its events.
     adapter: RefCell<Option<Rc<dyn ISelectionAdapter>>>,
@@ -1347,7 +1347,7 @@ impl AutoCompleteBox {
                         this.on_text_box_text_changed();
                     }
                 });
-            *self.text_box_subscriptions.borrow_mut() = Some(subscription);
+            *self.text_box_subscriptions.borrow_mut() = Some(Subscription::new(subscription));
 
             if let Some(text) = self.text() {
                 self.update_text_value(Some(text), None);

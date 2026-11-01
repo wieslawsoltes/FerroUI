@@ -4,7 +4,7 @@
 use super::{TextHighlightError, TextHighlightRange, TextRangeCollection};
 use ferroui_base::media::{IBrush, subscribe_invalidated};
 use ferroui_base::metadata::IAddChild;
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     FerroObject, FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs,
@@ -24,7 +24,7 @@ use std::rc::Rc;
 pub struct TextHighlighter {
     base: FerroObject,
     ranges: TextRangeCollection,
-    range_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    range_subscription: RefCell<Option<Subscription>>,
     brush_subscriptions: RefCell<Vec<Rc<dyn IDisposable>>>,
     invalidated: Rc<HandlerList<dyn Fn()>>,
 }
@@ -43,11 +43,11 @@ impl FerroObjectImpl for TextHighlighter {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         let weak = this.to_ref().downgrade();
-        *this.range_subscription.borrow_mut() = Some(this.ranges.collection_changed(move |_| {
+        *this.range_subscription.borrow_mut() = Some(Subscription::new(this.ranges.collection_changed(move |_| {
             if let Some(this) = weak.upgrade() {
                 this.invalidate();
             }
-        }));
+        })));
         this.refresh_brush_subscriptions();
     }
 

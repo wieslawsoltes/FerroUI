@@ -26,7 +26,7 @@ use ferroui_base::media::{
     FontStyle, FontWeight, IBrush, TextAlignment, TextDecorationCollection, TextLineBounds,
     TextTrimming, TextWrapping,
 };
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, instantiate, DirectProperty, ElementRef, FerroObject, FerroObjectImpl,
@@ -59,8 +59,8 @@ pub struct RichTextSelectionChangedEventArgs {
 pub struct RichTextBlock {
     base: Control,
     document: RefCell<RichTextDocument>,
-    document_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    font_features_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    document_subscription: RefCell<Option<Subscription>>,
+    font_features_subscription: RefCell<Option<Subscription>>,
     source: RefCell<Option<Rc<RichTextSource>>>,
     /// The source before the last invalidation, whose unchanged paragraphs the next source
     /// takes over (F1).
@@ -981,7 +981,7 @@ impl RichTextBlock {
                 }
             })
         });
-        *self.font_features_subscription.borrow_mut() = subscription;
+        *self.font_features_subscription.borrow_mut() = subscription.map(Subscription::new);
     }
 
     /// The shared document of the view (the property `RichDocument`, D3).
@@ -1087,7 +1087,7 @@ impl RichTextBlock {
         if let Some(old) = self
             .document_subscription
             .borrow_mut()
-            .replace(subscription)
+            .replace(Subscription::new(subscription))
         {
             old.dispose();
         }

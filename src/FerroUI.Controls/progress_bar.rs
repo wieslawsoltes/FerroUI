@@ -5,14 +5,13 @@ use ferroui_base::data::BindingMode;
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{LayoutableImpl, LayoutableImplExt, Orientation};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, instantiate, DirectProperty, FerroObject, FerroObjectExtensions,
     FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref, Size, StaticType,
     StyledElementImpl, StyledProperty, StyledPropertyMetadata, Visual, VisualImpl,
 };
 use std::cell::{Cell, RefCell};
-use std::rc::Rc;
 
 const PC_VERTICAL: &str = ":vertical";
 const PC_HORIZONTAL: &str = ":horizontal";
@@ -265,7 +264,7 @@ pub struct ProgressBar {
     base: RangeBase,
     percentage: Cell<f64>,
     indicator: RefCell<Option<Ref<Border>>>,
-    track_size_changed_listener: RefCell<Option<Rc<dyn IDisposable>>>,
+    track_size_changed_listener: RefCell<Option<Subscription>>,
     template_settings: Ref<ProgressBarTemplateSettings>,
 }
 
@@ -350,7 +349,7 @@ impl TemplatedControlImpl for ProgressBar {
                 }
             })
         });
-        *this.track_size_changed_listener.borrow_mut() = listener;
+        *this.track_size_changed_listener.borrow_mut() = listener.map(Subscription::new);
 
         this.update_indicator();
     }

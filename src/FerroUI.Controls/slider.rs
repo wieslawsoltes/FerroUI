@@ -10,7 +10,7 @@ use ferroui_base::input::{
 };
 use ferroui_base::interactivity::{InteractiveImpl, RoutingStrategies};
 use ferroui_base::layout::{LayoutableImpl, Orientation};
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::utilities::MathUtilities;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, instantiate, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
@@ -18,7 +18,6 @@ use ferroui_base::{
     VisualImpl,
 };
 use std::cell::{Cell, RefCell};
-use std::rc::Rc;
 
 const PC_VERTICAL: &str = ":vertical";
 const PC_HORIZONTAL: &str = ":horizontal";
@@ -54,11 +53,11 @@ pub struct Slider {
     track: RefCell<Option<Ref<Track>>>,
     decrease_button: RefCell<Option<Ref<Button>>>,
     increase_button: RefCell<Option<Ref<Button>>>,
-    decrease_button_press_dispose: RefCell<Option<Rc<dyn IDisposable>>>,
-    decrease_button_release_dispose: RefCell<Option<Rc<dyn IDisposable>>>,
-    increase_button_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    increase_button_release_dispose: RefCell<Option<Rc<dyn IDisposable>>>,
-    pointer_moved_dispose: RefCell<Option<Rc<dyn IDisposable>>>,
+    decrease_button_press_dispose: RefCell<Option<Subscription>>,
+    decrease_button_release_dispose: RefCell<Option<Subscription>>,
+    increase_button_subscription: RefCell<Option<Subscription>>,
+    increase_button_release_dispose: RefCell<Option<Subscription>>,
+    pointer_moved_dispose: RefCell<Option<Subscription>>,
 }
 
 ferro_class! {
@@ -152,14 +151,14 @@ impl TemplatedControlImpl for Slider {
 
             if let Some(decrease_button) = &decrease_button {
                 let (press, release) = subscribe(decrease_button);
-                *this.decrease_button_press_dispose.borrow_mut() = Some(press);
-                *this.decrease_button_release_dispose.borrow_mut() = Some(release);
+                *this.decrease_button_press_dispose.borrow_mut() = Some(Subscription::new(press));
+                *this.decrease_button_release_dispose.borrow_mut() = Some(Subscription::new(release));
             }
 
             if let Some(increase_button) = &increase_button {
                 let (press, release) = subscribe(increase_button);
-                *this.increase_button_subscription.borrow_mut() = Some(press);
-                *this.increase_button_release_dispose.borrow_mut() = Some(release);
+                *this.increase_button_subscription.borrow_mut() = Some(Subscription::new(press));
+                *this.increase_button_release_dispose.borrow_mut() = Some(Subscription::new(release));
             }
         }
 
@@ -173,7 +172,7 @@ impl TemplatedControlImpl for Slider {
             RoutingStrategies::TUNNEL,
             false,
         );
-        *this.pointer_moved_dispose.borrow_mut() = Some(pointer_moved);
+        *this.pointer_moved_dispose.borrow_mut() = Some(Subscription::new(pointer_moved));
     }
 }
 

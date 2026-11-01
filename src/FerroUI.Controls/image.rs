@@ -6,7 +6,7 @@ use ferroui_base::media::imaging::BitmapBlendingMode;
 use ferroui_base::media::{
     DrawingContext, DrawingImage, IImage, MediaExtensions, RenderOptions, Stretch, StretchDirection,
 };
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::Subscription;
 use ferroui_base::rendering::composition::{AlphaMask, CompositionBrush};
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, instantiate, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
@@ -22,7 +22,7 @@ pub struct Image {
     base: Control,
     current_drawing_bounds: Cell<Rect>,
     subscribed_to_drawing_image_source: Cell<bool>,
-    source_invalidated_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    source_invalidated_subscription: RefCell<Option<Subscription>>,
     /// The alpha mask of [`get_alpha_mask`](Image::get_alpha_mask), created
     /// on the first request.
     alpha_mask: std::cell::OnceCell<Box<AlphaMask>>,
@@ -287,7 +287,7 @@ impl Image {
             }
         });
 
-        let previous = self.source_invalidated_subscription.replace(Some(subscription));
+        let previous = self.source_invalidated_subscription.replace(Some(Subscription::new(subscription)));
         if let Some(previous) = previous {
             previous.dispose();
         }

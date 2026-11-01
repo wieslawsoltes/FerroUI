@@ -8,7 +8,7 @@ use crate::{Border, Button, Control, Window, WindowState};
 use ferroui_base::controls::NameScopeRef;
 use ferroui_base::interactivity::{RoutedEventArgs, RoutedEventHandlerToken};
 use ferroui_base::layout::LayoutHelper;
-use ferroui_base::reactive::{CompositeDisposable, Disposable, IDisposable, ObservableExt};
+use ferroui_base::reactive::{CompositeDisposable, Disposable, IDisposable, ObservableExt, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, instantiate, AttachedProperty, DirectProperty, FerroObject,
@@ -39,7 +39,7 @@ pub struct WindowDrawnDecorations {
     full_screen_button: CaptionButton,
     popover_close_button: CaptionButton,
     popover_full_screen_button: CaptionButton,
-    window_subscriptions: RefCell<Option<Rc<dyn IDisposable>>>,
+    window_subscriptions: RefCell<Option<Subscription>>,
     host_window: RefCell<Option<WeakRef<Window>>>,
     title_bar_height_override: Cell<f64>,
     frame_thickness_override: Cell<Option<Thickness>>,
@@ -599,7 +599,7 @@ impl WindowDrawnDecorations {
             }),
         ];
         let subscriptions: Rc<dyn IDisposable> = Rc::new(CompositeDisposable::from_disposables(subscriptions));
-        *self.window_subscriptions.borrow_mut() = Some(subscriptions);
+        *self.window_subscriptions.borrow_mut() = Some(Subscription::new(subscriptions));
 
         self.update_title_bar_decorations_pseudo_classes();
         self.update_maximize_button_state();

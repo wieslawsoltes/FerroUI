@@ -6,7 +6,7 @@ use crate::embedding::EmbeddableControlRoot;
 use crate::platform::ITopLevelImpl;
 use crate::Control;
 use ferroui_base::input::{InputElement, KeyboardDevice};
-use ferroui_base::reactive::{Disposable, IDisposable};
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{ferro_class, instantiate, FerroObjectImpl, FerroObjectImplExt, Point, Ref, Visual, WeakRef};
 use std::cell::RefCell;
@@ -20,9 +20,9 @@ pub struct EmbeddableControlRootAutomationPeer {
     // like the owner.
     focus: RefCell<Option<WeakRef<Control>>>,
     focus_changed: HandlerList<dyn Fn()>,
-    keyboard_device_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    opened_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
-    closed_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    keyboard_device_subscription: RefCell<Option<Subscription>>,
+    opened_subscription: RefCell<Option<Subscription>>,
+    closed_subscription: RefCell<Option<Subscription>>,
 }
 
 ferro_class!(EmbeddableControlRootAutomationPeer: ContentControlAutomationPeer);
@@ -47,7 +47,7 @@ impl FerroObjectImpl for EmbeddableControlRootAutomationPeer {
                     this.on_opened();
                 }
             });
-            *this.opened_subscription.borrow_mut() = Some(subscription);
+            *this.opened_subscription.borrow_mut() = Some(Subscription::new(subscription));
         }
 
         let weak = this.to_ref().downgrade();
@@ -56,7 +56,7 @@ impl FerroObjectImpl for EmbeddableControlRootAutomationPeer {
                 this.on_closed();
             }
         });
-        *this.closed_subscription.borrow_mut() = Some(subscription);
+        *this.closed_subscription.borrow_mut() = Some(Subscription::new(subscription));
     }
 }
 
@@ -165,7 +165,7 @@ impl EmbeddableControlRootAutomationPeer {
                     this.keyboard_device_property_changed(property_name);
                 }
             });
-            *self.keyboard_device_subscription.borrow_mut() = Some(subscription);
+            *self.keyboard_device_subscription.borrow_mut() = Some(Subscription::new(subscription));
             self.on_focus_changed(keyboard_device.focused_element());
         }
     }

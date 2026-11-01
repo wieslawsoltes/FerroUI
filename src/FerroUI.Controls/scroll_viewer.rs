@@ -17,7 +17,7 @@ use ferroui_base::interactivity::{
 };
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::media::FlowDirection;
-use ferroui_base::reactive::{CompositeDisposable, IDisposable, ObservableExt};
+use ferroui_base::reactive::{CompositeDisposable, IDisposable, ObservableExt, Subscription};
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, ferro_routed_event, instantiate, AttachedProperty, DirectProperty,
     FerroObject, FerroObjectExtensions, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
@@ -32,7 +32,7 @@ use std::rc::Rc;
 #[repr(C)]
 pub struct ScrollViewer {
     base: ContentControl,
-    child_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    child_subscription: RefCell<Option<Subscription>>,
     /// The logically scrolling child and the subscription to its scroll
     /// invalidated event.
     logical_scrollable: RefCell<Option<(Ref<Control>, Rc<dyn IDisposable>)>>,
@@ -45,7 +45,7 @@ pub struct ScrollViewer {
     large_change: Cell<Size>,
     small_change: Cell<Size>,
     is_expanded: Cell<bool>,
-    scroll_bar_expand_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    scroll_bar_expand_subscription: RefCell<Option<Subscription>>,
     horizontal_scroll_bar: RefCell<Option<Ref<ScrollBar>>>,
     vertical_scroll_bar: RefCell<Option<Ref<ScrollBar>>>,
     /// The zoom factor of the content (WinUI `ZoomFactor`, not upstream).
@@ -230,7 +230,7 @@ impl TemplatedControlImpl for ScrollViewer {
         }
 
         let subscription = this.subscribe_to_scroll_bars(e);
-        *this.scroll_bar_expand_subscription.borrow_mut() = subscription;
+        *this.scroll_bar_expand_subscription.borrow_mut() = subscription.map(Subscription::new);
     }
 }
 
@@ -251,7 +251,7 @@ impl ContentControlImpl for ScrollViewer {
                                 this.child_changed(child);
                             }
                         });
-                *this.child_subscription.borrow_mut() = Some(subscription);
+                *this.child_subscription.borrow_mut() = Some(Subscription::new(subscription));
             }
             return true;
         }
