@@ -422,19 +422,19 @@ impl<'a> Builder<'a> {
     }
 }
 
-impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
-    fn canonical_type(&self, imports: &[Import], ty: &str) -> Result<String, Error> {
+impl TypeRegistry {
+    pub(super) fn canonical_type(&self, imports: &[Import], ty: &str) -> Result<String, Error> {
         if let Some(element) = list_element(ty) {
             return Ok(format!("list<{}>", self.canonical_type(imports, element)?));
         }
         if is_object_type(ty) && !ty.starts_with("Qml$Type") {
-            let (module, name, _) = self.registry.resolve(imports, ty)?;
+            let (module, name, _) = self.resolve(imports, ty)?;
             return Ok(format!("{module}.{name}"));
         }
         Ok(ty.into())
     }
 
-    fn parameters(
+    pub(super) fn parameters(
         &self,
         imports: &[Import],
         params: &[Parameter],
@@ -454,7 +454,7 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
             .collect()
     }
 
-    fn default_value(&self, imports: &[Import], ty: &str) -> Result<Value, Error> {
+    pub(super) fn default_value(&self, imports: &[Import], ty: &str) -> Result<Value, Error> {
         Ok(match ty {
             "alias" | "var" | "variant" => Value::Undefined,
             "bool" => Value::Bool(false),
@@ -467,14 +467,16 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
             }
             name if is_object_type(name) => {
                 if !name.starts_with("Qml$Type") {
-                    self.registry.resolve(imports, name)?;
+                    self.resolve(imports, name)?;
                 }
                 Value::Null
             }
             _ => return Err(Error::new(format!("unsupported property type '{ty}'"))),
         })
     }
+}
 
+impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
     fn object(&mut self, source: &Object, parent: Option<ObjectId>) -> Result<ObjectId, Error> {
         let imports = source.type_imports.as_deref().unwrap_or(self.imports);
         let (mut shell, module, name, definition) = if let Some(shell) =
@@ -497,18 +499,32 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
             }
             let (module, name, definition) = self.registry.resolve(imports, &source.type_name)?;
             let scope = self.scopes.imports(imports, self.registry);
-            (
-                incubation::PreparedNode::new(source, module, name, definition, scope),
-                module,
-                name,
-                definition,
-            )
+            let mut shell = incubation::PreparedNode::new(source, module, name, definition, scope);
+            for member in &source.members {
+                shell.declare(self.registry, imports, member)?;
+            }
+            (shell, module, name, definition)
         };
         let id = self.instance.next_object();
         self.instance.dynamic.serial += 1;
         let offset = self.instance.slots.len();
         for slot in shell.node.properties.values_mut() {
             *slot += offset;
+        }
+        self.aliases.extend(
+            shell
+                .aliases
+                .into_iter()
+                .map(|(key, expr, scope)| (offset + key, expr, scope)),
+        );
+        if let Some(name) = shell.id {
+            if self
+                .instance
+                .insert_scoped_id(self.context, name.clone(), id)
+                .is_some()
+            {
+                return Err(Error::new(format!("duplicate id '{name}'")));
+            }
         }
         shell.node.context = self.context;
         shell.node.parent = parent;
@@ -520,16 +536,16 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
         if let Some(parent) = parent {
             self.instance.nodes[parent.index].children.push(id);
         }
-        for (name, ty, readonly, slot) in shell.defaults {
+        for property in shell.properties {
             self.instance.properties.push(Property {
                 owner: id,
-                name,
-                ty,
-                readonly,
-                required: false,
+                name: property.name,
+                ty: property.ty,
+                readonly: property.readonly,
+                required: property.required,
                 alias: None,
             });
-            self.instance.slots.push(slot);
+            self.instance.slots.push(property.slot);
         }
         if (module == "QtQuick" && name == "Loader")
             || definition
@@ -587,100 +603,6 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
         }
         if module == "QtQml" && name == "Timer" {
             self.instance.timers.register(id);
-        }
-        let mut has_id = false;
-        for member in &source.members {
-            match &member.kind {
-                MemberKind::Id(name) => {
-                    if has_id
-                        || self
-                            .instance
-                            .insert_scoped_id(self.context, name.clone(), id)
-                            .is_some()
-                    {
-                        return Err(Error::new(format!("duplicate id '{name}'")));
-                    }
-                    has_id = true;
-                }
-                MemberKind::Property {
-                    name,
-                    ty,
-                    modifiers,
-                    value,
-                } => {
-                    if modifiers.override_ {
-                        return Err(Error::new(format!(
-                            "no virtual source property '{name}' to override"
-                        )));
-                    }
-                    if modifiers.readonly && value.is_none() {
-                        return Err(Error::new(format!(
-                            "readonly property '{name}' requires an initializer"
-                        )));
-                    }
-                    let value_type = self.canonical_type(imports, ty)?;
-                    let default_value = self.default_value(imports, ty)?;
-                    let key = self.instance.allocate_property(
-                        Property {
-                            owner: id,
-                            name: name.clone(),
-                            ty: value_type,
-                            readonly: modifiers.readonly,
-                            required: modifiers.required,
-                            alias: None,
-                        },
-                        default_value,
-                    )?;
-                    if ty == "alias" {
-                        let Some(Binding::Expr(expr)) = value else {
-                            return Err(Error::new("alias requires an id or id.property"));
-                        };
-                        self.aliases.push((key, expr.clone(), member.scope));
-                    }
-                    if modifiers.default {
-                        self.instance.nodes[id.index].default_property = Some(name.clone());
-                    }
-                }
-                MemberKind::Signal { name, parameters } => {
-                    let signature = self.parameters(imports, parameters)?;
-                    if self.instance.nodes[id.index]
-                        .signals
-                        .insert(name.clone(), signature)
-                        .is_some()
-                    {
-                        return Err(Error::new(format!("duplicate signal '{name}'")));
-                    }
-                }
-                MemberKind::Function {
-                    name,
-                    parameters,
-                    return_type,
-                    body,
-                } => {
-                    let proc = Procedure {
-                        scope: member.scope,
-                        parameters: self.parameters(imports, parameters)?,
-                        result: return_type
-                            .as_deref()
-                            .map(|s| self.canonical_type(imports, s))
-                            .transpose()?,
-                        body: body.clone(),
-                    };
-                    if self.instance.nodes[id.index]
-                        .methods
-                        .insert(name.clone(), Rc::new(proc))
-                        .is_some()
-                    {
-                        return Err(Error::new(format!("duplicate method '{name}'")));
-                    }
-                }
-                MemberKind::Component { name, .. } => {
-                    return Err(Error::new(format!(
-                        "inline component '{name}' must be linked before construction"
-                    )))
-                }
-                _ => (),
-            }
         }
         let mut implicit = Vec::new();
         for member in &source.members {
