@@ -7,7 +7,7 @@ use super::{
     ControlAutomationPeerImpl,
 };
 use crate::automation::provider::{IRangeValueProvider, ProviderAdapter};
-use crate::automation::{AutomationElementIdentifiers, ElementNotEnabledException, RangeValuePatternIdentifiers};
+use crate::automation::{AutomationElementIdentifiers, ElementNotEnabledError, RangeValuePatternIdentifiers};
 use crate::ProgressRing;
 use ferroui_base::data::core::ValueType;
 use ferroui_base::{
@@ -164,7 +164,7 @@ impl IRangeValueProvider for ProviderAdapter<ProgressRingAutomationPeer> {
     }
 
     /// WinUI's provider is read-only and still sets the value (ProgressRingAutomationPeer::SetValue).
-    fn set_value(&self, value: f64) -> Result<(), ElementNotEnabledException> {
+    fn set_value(&self, value: f64) -> Result<(), ElementNotEnabledError> {
         self.0.owner().set_range_value(value);
         Ok(())
     }

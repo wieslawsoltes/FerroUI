@@ -1,6 +1,6 @@
 use super::{VulkanCommandBufferPool, VulkanMemoryHelper};
 use crate::{
-    IVulkanPlatformGraphicsContext, VulkanException, VulkanExceptionExtensions, VulkanImageInfo,
+    IVulkanPlatformGraphicsContext, VulkanError, VulkanExceptionExtensions, VulkanImageInfo,
     VulkanResultExtensions,
 };
 use ash::vk;
@@ -10,7 +10,7 @@ use std::rc::Rc;
 
 /// How the memory of an image is obtained: the image, the size and the
 /// allowed memory types the device asks for.
-pub(crate) type CreateMemory<'a> = &'a dyn Fn(vk::Image, u64, u32) -> Result<vk::DeviceMemory, VulkanException>;
+pub(crate) type CreateMemory<'a> = &'a dyn Fn(vk::Image, u64, u32) -> Result<vk::DeviceMemory, VulkanError>;
 
 /// An image of the device of a context with its memory and its view.
 pub(crate) struct VulkanImageBase {
@@ -134,7 +134,7 @@ impl VulkanImageBase {
     }
 
     /// Device-local memory of the device for an image.
-    pub fn create_memory(&self, _image: vk::Image, size: u64, memory_type_bits: u32) -> Result<vk::DeviceMemory, VulkanException> {
+    pub fn create_memory(&self, _image: vk::Image, size: u64, memory_type_bits: u32) -> Result<vk::DeviceMemory, VulkanError> {
         let memory_allocate_info = vk::MemoryAllocateInfo::default().allocation_size(size).memory_type_index(
             VulkanMemoryHelper::find_suitable_memory_type_index(
                 &*self.context,
@@ -157,7 +157,7 @@ impl VulkanImageBase {
         &self,
         external_memory: Option<&mut vk::ExternalMemoryImageCreateInfo<'_>>,
         create_memory: Option<CreateMemory<'_>>,
-    ) -> Result<(), VulkanException> {
+    ) -> Result<(), VulkanError> {
         if self.handle() != vk::Image::null() {
             return Ok(());
         }
@@ -230,7 +230,7 @@ impl VulkanImageBase {
         &self,
         destination_layout: vk::ImageLayout,
         destination_access_flags: vk::AccessFlags,
-    ) -> Result<(), VulkanException> {
+    ) -> Result<(), VulkanError> {
         let command_buffer = self.command_buffer_pool.create_command_buffer()?;
         command_buffer.begin_recording()?;
 
@@ -261,7 +261,7 @@ impl VulkanImageBase {
         &self,
         destination_layout: u32,
         destination_access_flags: u32,
-    ) -> Result<(), VulkanException> {
+    ) -> Result<(), VulkanError> {
         self.transition_layout(
             vk::ImageLayout::from_raw(destination_layout as i32),
             vk::AccessFlags::from_raw(destination_access_flags),
@@ -312,7 +312,7 @@ impl VulkanImage {
         format: vk::Format,
         size: PixelSize,
         mip_levels: u32,
-    ) -> Result<Self, VulkanException> {
+    ) -> Result<Self, VulkanError> {
         let base = VulkanImageBase::new(context, command_buffer_pool, format, size, mip_levels);
         base.initialize(None, None)?;
         base.transition_layout(vk::ImageLayout::COLOR_ATTACHMENT_OPTIMAL, vk::AccessFlags::NONE_KHR)?;

@@ -11,7 +11,7 @@ use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_opengl::egl::{EglContext, EglContextFeature, EglContextFeatureFactory, EglContextOptions};
 use ferroui_opengl::{
     GlProfileType, GlVersion, IGlContext, IGlContextExternalObjectsFeature, IGlPlatformSurfaceRenderTargetFactory,
-    IPlatformGraphicsOpenGlContextFactory, OpenGlException,
+    IPlatformGraphicsOpenGlContextFactory, OpenGlError,
 };
 use std::any::TypeId;
 use std::collections::HashMap;
@@ -57,7 +57,7 @@ impl D3D11AngleWin32PlatformGraphics {
     }
 
     #[cfg(windows)]
-    fn create_display(&self) -> Result<AngleWin32EglDisplay, OpenGlException> {
+    fn create_display(&self) -> Result<AngleWin32EglDisplay, OpenGlError> {
         let egl = Rc::new(Win32AngleEglInterface::new()?);
         let (display, _) =
             AngleWin32EglDisplay::create_d3d11_display(&egl, self.gl_versions.clone(), &D3D11Adapter::Chosen(self.adapter_luid))?;
@@ -65,8 +65,8 @@ impl D3D11AngleWin32PlatformGraphics {
     }
 
     #[cfg(not(windows))]
-    fn create_display(&self) -> Result<AngleWin32EglDisplay, OpenGlException> {
-        Err(OpenGlException::new("Direct3D 11 exists on Windows only"))
+    fn create_display(&self) -> Result<AngleWin32EglDisplay, OpenGlError> {
+        Err(OpenGlError::new("Direct3D 11 exists on Windows only"))
     }
 
     /// The context of a display, which the context disposes with itself,
@@ -78,7 +78,7 @@ impl D3D11AngleWin32PlatformGraphics {
     /// Panics when the feature of the external objects cannot be created
     /// (the exception the reference throws from the creation of the
     /// context).
-    pub(super) fn create_context_for_display(display: AngleWin32EglDisplay) -> Result<Rc<EglContext>, OpenGlException> {
+    pub(super) fn create_context_for_display(display: AngleWin32EglDisplay) -> Result<Rc<EglContext>, OpenGlError> {
         let angle = Rc::new(display);
         let egl_display = angle.display().clone();
         let dispose_display = egl_display.clone();
@@ -148,7 +148,7 @@ impl D3D11AngleWin32PlatformGraphics {
         gl_versions: Option<Vec<GlVersion>>,
         selection_callback: Option<GraphicsAdapterSelectionCallback>,
     ) -> Option<D3D11AngleWin32PlatformGraphics> {
-        let result = (|| -> Result<Option<u64>, OpenGlException> {
+        let result = (|| -> Result<Option<u64>, OpenGlError> {
             let (display, adapter_luid) =
                 AngleWin32EglDisplay::create_d3d11_display(egl, gl_versions.clone(), &D3D11Adapter::Select(selection_callback))?;
             let probe = probe_display(&display);
@@ -170,14 +170,14 @@ impl D3D11AngleWin32PlatformGraphics {
 
 /// Creates a context of the display, makes it current once and disposes
 /// it: what the reference does to learn that the display works.
-pub(super) fn probe_display(display: &AngleWin32EglDisplay) -> Result<(), OpenGlException> {
+pub(super) fn probe_display(display: &AngleWin32EglDisplay) -> Result<(), OpenGlError> {
     let ctx = display.create_context(Some(EglContextOptions::default()))?;
     let result = match ctx.make_current_with_surface(None) {
         Ok(current) => {
             current.dispose();
             Ok(())
         }
-        Err(error) => Err(OpenGlException::new(error.to_string())),
+        Err(error) => Err(OpenGlError::new(error.to_string())),
     };
     IPlatformGraphicsContext::dispose(&*ctx);
     result
@@ -218,7 +218,7 @@ impl IPlatformGraphicsOpenGlContextFactory for D3D11AngleWin32PlatformGraphics {
     /// cannot be created (the exceptions of the reference).
     fn create_context(&self, versions: Option<&[GlVersion]>) -> Rc<dyn IGlContext> {
         if !versions_can_be_met(versions) {
-            panic!("{}", OpenGlException::new("Unable to create context with requested version"));
+            panic!("{}", OpenGlError::new("Unable to create context with requested version"));
         }
 
         match self.create_display().and_then(Self::create_context_for_display) {

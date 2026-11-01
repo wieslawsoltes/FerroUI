@@ -1,6 +1,6 @@
 //! `Timeout` (`Linq/Observable/Timeout.cs`): when the source does not produce in time, the
 //! subscription switches to another sequence (by default one that fails with a
-//! [`TimeoutException`]). The time is a duration restarted by each value (`Timeout<TSource>.Relative`),
+//! [`TimeoutError`]). The time is a duration restarted by each value (`Timeout<TSource>.Relative`),
 //! an absolute time (`Timeout<TSource>.Absolute`), or the first value or end of a sequence given for
 //! the subscription and for each value (`Timeout<TSource, TTimeout>`).
 
@@ -17,20 +17,29 @@ use std::time::{Duration, SystemTime};
 /// The error of a sequence that timed out (`System.TimeoutException`), which the overloads of
 /// `Timeout` without another sequence end with.
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
-pub struct TimeoutException;
+pub struct TimeoutError;
 
-impl fmt::Display for TimeoutException {
+/// The name of [`TimeoutError`] before 0.5.
+#[deprecated(since = "0.5.0", note = "use `TimeoutError`")]
+pub type TimeoutException = TimeoutError;
+
+/// The value of the unit struct [`TimeoutError`] under its name before 0.5.
+#[deprecated(since = "0.5.0", note = "use `TimeoutError`")]
+#[allow(non_upper_case_globals)]
+pub const TimeoutException: TimeoutError = TimeoutError;
+
+impl fmt::Display for TimeoutError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("The operation has timed out.")
     }
 }
 
-impl std::error::Error for TimeoutException {}
+impl std::error::Error for TimeoutError {}
 
 /// The sequence the overloads without another sequence switch to
 /// (`Observable.Throw<TSource>(new TimeoutException())`).
 pub(crate) fn timeout_error<T: 'static>() -> Rc<dyn IObservable<T>> {
-    crate::linq::Observable::throw(Rc::new(TimeoutException))
+    crate::linq::Observable::throw(Rc::new(TimeoutError))
 }
 
 /// The index of a sink that has switched to the other sequence or ended (`long.MaxValue`).
@@ -473,7 +482,7 @@ pub(crate) fn timeout_by<T: 'static, U: 'static>(
 /// The methods of `Timeout` (provided methods of [`ObservableExt`](super::ObservableExt)).
 macro_rules! timeout_methods {
     () => {
-        /// Ends with a `TimeoutException` when `due_time`
+        /// Ends with a `TimeoutError` when `due_time`
         /// passes without a value (from the subscription, then from each value), on the scheduler
         /// of time-based operations (`Timeout(TimeSpan)`).
         fn timeout(&self, due_time: std::time::Duration) -> std::rc::Rc<dyn ferroui_system::IObservable<T>> {
@@ -520,7 +529,7 @@ macro_rules! timeout_methods {
             crate::linq::timeout::timeout_relative(self.observable(), due_time, other, scheduler)
         }
 
-        /// Ends with a `TimeoutException` at `due_time`
+        /// Ends with a `TimeoutError` at `due_time`
         /// unless the sequence ended before, on the scheduler of time-based operations
         /// (`Timeout(DateTimeOffset)`).
         fn timeout_at(&self, due_time: std::time::SystemTime) -> std::rc::Rc<dyn ferroui_system::IObservable<T>> {
@@ -567,7 +576,7 @@ macro_rules! timeout_methods {
             crate::linq::timeout::timeout_absolute(self.observable(), due_time, other, scheduler)
         }
 
-        /// Ends with a `TimeoutException` when the
+        /// Ends with a `TimeoutError` when the
         /// sequence `timeout_duration_selector` gives for the latest value produces or ends first
         /// (`Timeout(Func<TSource, IObservable<TTimeout>>)`).
         fn timeout_by<U: 'static>(
@@ -629,7 +638,7 @@ macro_rules! timeout_methods {
             )
         }
 
-        /// Ends with a `TimeoutException` when
+        /// Ends with a `TimeoutError` when
         /// `first_timeout` produces or ends before the first value, then when the sequence
         /// `timeout_duration_selector` gives for the latest value does
         /// (`Timeout(IObservable<TTimeout>, Func<TSource, IObservable<TTimeout>>)`).

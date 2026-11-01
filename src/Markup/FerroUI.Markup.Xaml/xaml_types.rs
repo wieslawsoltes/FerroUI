@@ -1,7 +1,7 @@
 //! Port of `XamlTypes.cs`: the services markup extensions and converters
 //! ask the service provider for.
 
-use crate::XamlLoadException;
+use crate::XamlLoadError;
 use ferroui_base::data::core::expression_nodes::CastTarget;
 use ferroui_base::utilities::Uri;
 use ferroui_base::{ferro_markup_type, BoxedValue};
@@ -42,7 +42,7 @@ pub trait IUriContext {
 pub trait IXamlTypeResolver {
     /// Resolves `qualified_type_name` (`prefix:Name` or `Name`) to a type: a
     /// class of the object model or a value type.
-    fn resolve(&self, qualified_type_name: &str) -> Result<CastTarget, XamlLoadException>;
+    fn resolve(&self, qualified_type_name: &str) -> Result<CastTarget, XamlLoadError>;
 }
 
 macro_rules! identity_eq {

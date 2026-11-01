@@ -3,7 +3,7 @@
 use super::sort_extensions::{binary_search_range, get_insert_position_linear};
 use super::{KeyComparer, KeyValueCollection};
 use crate::cache::{Change, ChangeReason, ChangeSet, SortReason};
-use crate::list::SortException;
+use crate::list::SortError;
 use std::collections::HashSet;
 use std::hash::Hash;
 
@@ -14,7 +14,7 @@ pub(crate) fn calculate<T: Clone + 'static, K: Eq + Hash + Clone + 'static>(
     current_items: &KeyValueCollection<T, K>,
     previous_items: &KeyValueCollection<T, K>,
     source_updates: Option<&ChangeSet<T, K>>,
-) -> Result<Vec<Change<T, K>>, SortException> {
+) -> Result<Vec<Change<T, K>>, SortError> {
     if current_items.sort_reason() == SortReason::ComparerChanged || current_items.sort_reason() == SortReason::InitialLoad {
         // Clear the collection and rebuild it.
         let removed = previous_items.iter().enumerate().map(|(index, (key, value))| Change::with_index(ChangeReason::Remove, key.clone(), value.clone(), Some(index)));
@@ -88,7 +88,7 @@ pub(crate) fn calculate<T: Clone + 'static, K: Eq + Hash + Clone + 'static>(
                     continue;
                 }
                 let Some(desired_index) = desired_index else {
-                    return Err(SortException::new("Cannot determine current index"));
+                    return Err(SortError::new("Cannot determine current index"));
                 };
                 let previous_index = previous_index.expect("a moved pair is in the previous items");
                 previous_list.remove(previous_index);

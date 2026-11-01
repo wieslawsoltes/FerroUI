@@ -1,4 +1,4 @@
-use crate::OpenGlException;
+use crate::OpenGlError;
 use ferroui_base::platform::{
     IPlatformHandle, PlatformGraphicsDrmFormat, PlatformGraphicsExternalImageFormat,
     PlatformGraphicsExternalImageProperties,
@@ -36,17 +36,17 @@ pub trait IGlContextExternalObjectsFeature {
         type_: &str,
         size: PixelSize,
         format: PlatformGraphicsExternalImageFormat,
-    ) -> Result<Rc<dyn IGlExportableExternalImageTexture>, OpenGlException>;
+    ) -> Result<Rc<dyn IGlExportableExternalImageTexture>, OpenGlError>;
 
-    fn create_semaphore(&self, type_: &str) -> Result<Rc<dyn IGlExportableExternalImageTexture>, OpenGlException>;
+    fn create_semaphore(&self, type_: &str) -> Result<Rc<dyn IGlExportableExternalImageTexture>, OpenGlError>;
 
     fn import_image(
         &self,
         handle: Rc<dyn IPlatformHandle>,
         properties: PlatformGraphicsExternalImageProperties,
-    ) -> Result<Rc<dyn IGlExternalImageTexture>, OpenGlException>;
+    ) -> Result<Rc<dyn IGlExternalImageTexture>, OpenGlError>;
 
-    fn import_semaphore(&self, handle: Rc<dyn IPlatformHandle>) -> Result<Rc<dyn IGlExternalSemaphore>, OpenGlException>;
+    fn import_semaphore(&self, handle: Rc<dyn IPlatformHandle>) -> Result<Rc<dyn IGlExternalSemaphore>, OpenGlError>;
 
     fn get_synchronization_capabilities(
         &self,

@@ -8,7 +8,7 @@ use super::test_support::*;
 use crate::data::Binding;
 use ferroui_base::data::core::Value;
 use ferroui_base::data::model::{Event, INotifyDataErrorInfo, Model};
-use ferroui_base::data::{BindingError, BindingMode, BindingValueType, DataValidationException};
+use ferroui_base::data::{BindingError, BindingMode, BindingValueType, DataValidationError};
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
@@ -238,7 +238,7 @@ impl Target {
     }
 
     fn is_data_validation_error(&self) -> bool {
-        self.error().is_some_and(|e| e.inner().is::<DataValidationException>())
+        self.error().is_some_and(|e| e.inner().is::<DataValidationError>())
     }
 
     fn error_message(&self) -> Option<String> {

@@ -52,6 +52,8 @@ pub use log_host::{IEnableLogger, LogHost};
 pub use log_level::LogLevel;
 pub use log_manager::{FuncLogManager, ILogManager, LogManagerExt};
 pub use logger::ILogger;
+pub use logging_exception::LoggingError;
+#[allow(deprecated)]
 pub use logging_exception::LoggingException;
 pub use memoizing_mru_cache::{AggregateReleaseError, MemoizingMRUCache};
 pub use modules::{SplatLogManagerModule, SplatLoggerModule};

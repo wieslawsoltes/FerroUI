@@ -9,7 +9,7 @@
 //! the client of the library uses) are not ported: the slices of
 //! [`copy`](VncPixelFormat::copy) take their place.
 
-use super::{VncException, VncFailureReason, VncFramebuffer, VncRectangle, VncUtility};
+use super::{VncError, VncFailureReason, VncFramebuffer, VncRectangle, VncUtility};
 use std::fmt;
 
 /// Describes the low-level arrangement of a framebuffer pixel.
@@ -422,7 +422,7 @@ impl VncPixelFormat {
     ///
     /// Fails when the format is not one the original accepts (its
     /// `ArgumentException` and `ArgumentOutOfRangeException`).
-    pub(crate) fn decode(buffer: &[u8], offset: usize) -> Result<VncPixelFormat, VncException> {
+    pub(crate) fn decode(buffer: &[u8], offset: usize) -> Result<VncPixelFormat, VncError> {
         let bits_per_pixel = i32::from(buffer[offset]);
         let depth = i32::from(buffer[offset + 1]);
         let is_little_endian = buffer[offset + 2] == 0;
@@ -450,7 +450,7 @@ impl VncPixelFormat {
             is_palettized,
         )
         .map_err(|parameter| {
-            VncException::new(
+            VncError::new(
                 format!("Specified argument was out of the range of valid values. (Parameter '{parameter}')"),
                 VncFailureReason::UnsupportedPixelFormat,
                 None,
@@ -473,9 +473,9 @@ impl VncPixelFormat {
         buffer[offset + 12] = self.blue_shift as u8;
     }
 
-    fn bits_from_max(max: i32) -> Result<i32, VncException> {
+    fn bits_from_max(max: i32) -> Result<i32, VncError> {
         if max == 0 || (max & (max + 1)) != 0 {
-            return Err(VncException::new(
+            return Err(VncError::new(
                 "Value does not fall within the expected range.",
                 VncFailureReason::UnsupportedPixelFormat,
                 None,

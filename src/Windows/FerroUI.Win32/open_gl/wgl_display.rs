@@ -106,7 +106,7 @@ mod imp {
     };
     use crate::interop::unmanaged_methods::PixelFormatDescriptor;
     use ferroui_base::reactive::IDisposable;
-    use ferroui_opengl::{GlProfileType, GlVersion, OpenGlException};
+    use ferroui_opengl::{GlProfileType, GlVersion, OpenGlError};
     use std::ffi::{c_char, c_void};
     use std::rc::Rc;
     use std::sync::OnceLock;
@@ -317,11 +317,11 @@ mod imp {
         pub fn create_context(
             versions: &[GlVersion],
             share: Option<&Rc<WglContext>>,
-        ) -> Result<Option<Rc<WglContext>>, OpenGlException> {
+        ) -> Result<Option<Rc<WglContext>>, OpenGlError> {
             let state = match Self::initialize() {
                 Initialized::Ready(state) => state,
                 Initialized::NoBootstrapContext => return Ok(None),
-                Initialized::Failed(message) => return Err(OpenGlException::new(message.clone())),
+                Initialized::Failed(message) => return Err(OpenGlError::new(message.clone())),
             };
 
             let restore = WglRestoreContext::new(state.bootstrap_dc, state.bootstrap_context)?;
@@ -334,7 +334,7 @@ mod imp {
             state: &State,
             versions: &[GlVersion],
             share: Option<&Rc<WglContext>>,
-        ) -> Result<Option<Rc<WglContext>>, OpenGlException> {
+        ) -> Result<Option<Rc<WglContext>>, OpenGlError> {
             let window = WglGdiResourceManager::create_offscreen_window();
             // As for the bootstrap window: no window, no context.
             if window == 0 {

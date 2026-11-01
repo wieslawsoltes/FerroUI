@@ -3,7 +3,7 @@ use super::EglContext;
 use crate::features::ExternalObjectsOpenGlExtensionFeature;
 use crate::{
     IGlContext, IGlContextExternalObjectsFeature, IGlExportableExternalImageTexture, IGlExternalImageTexture,
-    IGlExternalSemaphore, OpenGlException,
+    IGlExternalSemaphore, OpenGlError,
 };
 use ferroui_base::platform::{
     IPlatformHandle, KnownPlatformGraphicsExternalImageHandleTypes, PlatformGraphicsDrmFormat,
@@ -63,8 +63,8 @@ impl EglExternalObjectsFeature {
 
     /// The failure of an import of a handle whose type nothing imports
     /// (`ArgumentException(handle.HandleDescriptor + " is not supported")`).
-    pub(super) fn not_supported(handle: &dyn IPlatformHandle) -> OpenGlException {
-        OpenGlException::new(format!("{} is not supported", handle.handle_descriptor().unwrap_or("")))
+    pub(super) fn not_supported(handle: &dyn IPlatformHandle) -> OpenGlError {
+        OpenGlError::new(format!("{} is not supported", handle.handle_descriptor().unwrap_or("")))
     }
 }
 
@@ -115,19 +115,19 @@ impl IGlContextExternalObjectsFeature for EglExternalObjectsFeature {
         type_: &str,
         size: PixelSize,
         format: PlatformGraphicsExternalImageFormat,
-    ) -> Result<Rc<dyn IGlExportableExternalImageTexture>, OpenGlException> {
+    ) -> Result<Rc<dyn IGlExportableExternalImageTexture>, OpenGlError> {
         match &self.gl_external_objects {
             Some(gl_external_objects) if !Self::is_dma_buf(Some(type_)) => {
                 gl_external_objects.create_image(type_, size, format)
             }
-            _ => Err(OpenGlException::new("Specified method is not supported.")),
+            _ => Err(OpenGlError::new("Specified method is not supported.")),
         }
     }
 
-    fn create_semaphore(&self, type_: &str) -> Result<Rc<dyn IGlExportableExternalImageTexture>, OpenGlException> {
+    fn create_semaphore(&self, type_: &str) -> Result<Rc<dyn IGlExportableExternalImageTexture>, OpenGlError> {
         match &self.gl_external_objects {
             Some(gl_external_objects) => gl_external_objects.create_semaphore(type_),
-            None => Err(OpenGlException::new("Specified method is not supported.")),
+            None => Err(OpenGlError::new("Specified method is not supported.")),
         }
     }
 
@@ -135,7 +135,7 @@ impl IGlContextExternalObjectsFeature for EglExternalObjectsFeature {
         &self,
         handle: Rc<dyn IPlatformHandle>,
         properties: PlatformGraphicsExternalImageProperties,
-    ) -> Result<Rc<dyn IGlExternalImageTexture>, OpenGlException> {
+    ) -> Result<Rc<dyn IGlExternalImageTexture>, OpenGlError> {
         if Self::is_dma_buf(handle.handle_descriptor()) {
             return self.import_dma_buf_image(handle, properties);
         }
@@ -145,7 +145,7 @@ impl IGlContextExternalObjectsFeature for EglExternalObjectsFeature {
         }
     }
 
-    fn import_semaphore(&self, handle: Rc<dyn IPlatformHandle>) -> Result<Rc<dyn IGlExternalSemaphore>, OpenGlException> {
+    fn import_semaphore(&self, handle: Rc<dyn IPlatformHandle>) -> Result<Rc<dyn IGlExternalSemaphore>, OpenGlError> {
         match &self.gl_external_objects {
             Some(gl_external_objects) => gl_external_objects.import_semaphore(handle),
             None => Err(Self::not_supported(&*handle)),

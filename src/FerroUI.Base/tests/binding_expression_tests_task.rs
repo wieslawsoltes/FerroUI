@@ -11,7 +11,7 @@ use crate::data::core::parsers::{BindingExpressionGrammar, ExpressionNodeFactory
 use crate::data::core::plugins::{PropertyInfoAccessorFactory, TaskValue, TaskValueSource};
 use crate::data::core::{BindingExpression, BindingExpressionOptions, ClrPropertyInfo, Maybe, TargetTypeConverter, Value};
 use crate::data::model::{Event, INotifyPropertyChanged, Model};
-use crate::data::{BindingChainException, BindingError, BindingErrorType, CompiledBindingPathBuilder};
+use crate::data::{BindingChainError, BindingError, BindingErrorType, CompiledBindingPathBuilder};
 use crate::threading::Dispatcher;
 use crate::{ferro_model, Ref};
 
@@ -121,7 +121,7 @@ fn execute_posted_callbacks() {
 }
 
 #[track_caller]
-fn assert_binding_error(target: &TargetClass, expected: BindingChainException, expected_type: BindingErrorType) {
+fn assert_binding_error(target: &TargetClass, expected: BindingChainError, expected_type: BindingErrorType) {
     let (error_type, error) =
         target.binding_notification(TargetClass::string_property()).expect("a binding notification");
     assert_eq!(expected_type, error_type);
@@ -198,7 +198,7 @@ fn should_update_data_validation_on_task_exception(f: Flavor) {
 
     assert_binding_error(
         &target,
-        BindingChainException::with_expression("Specified method is not supported.", "Foo^", "^"),
+        BindingChainError::with_expression("Specified method is not supported.", "Foo^", "^"),
         BindingErrorType::Error,
     );
 }
@@ -213,7 +213,7 @@ fn should_update_data_validation_on_faulted_task(f: Flavor) {
 
     assert_binding_error(
         &target,
-        BindingChainException::with_expression("Specified method is not supported.", "Foo^", "^"),
+        BindingChainError::with_expression("Specified method is not supported.", "Foo^", "^"),
         BindingErrorType::Error,
     );
 }

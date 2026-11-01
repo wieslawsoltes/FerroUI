@@ -2,7 +2,7 @@
 //! `TypeConverter` and `ITypeDescriptorContext`, which the converters of
 //! the markup runtime derive from and receive.
 
-use crate::XamlLoadException;
+use crate::XamlLoadError;
 use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::metadata::IServiceProvider;
 use ferroui_base::utilities::CultureInfo;
@@ -53,10 +53,10 @@ pub(crate) fn service_provider_of(context: Option<&Rc<dyn ITypeDescriptorContext
 }
 
 /// The text a converter was given, or the error of the cast to text.
-pub(crate) fn text_of(value: Option<&BoxedValue>) -> Result<&str, XamlLoadException> {
+pub(crate) fn text_of(value: Option<&BoxedValue>) -> Result<&str, XamlLoadError> {
     let text = value.and_then(|v| v.downcast_ref::<String>().map(String::as_str).or_else(|| v.downcast_ref::<&'static str>().copied()));
     text.ok_or_else(|| {
-        XamlLoadException::with_message(format!(
+        XamlLoadError::with_message(format!(
             "Unable to cast object of type '{}' to type 'String'.",
             value.map_or("null", |v| (**v).type_name())
         ))
@@ -81,8 +81,8 @@ pub trait TypeConverter {
         _context: Option<&Rc<dyn ITypeDescriptorContext>>,
         _culture: Option<&CultureInfo>,
         value: Option<&BoxedValue>,
-    ) -> Result<Option<BoxedValue>, XamlLoadException> {
-        Err(XamlLoadException::with_message(format!(
+    ) -> Result<Option<BoxedValue>, XamlLoadError> {
+        Err(XamlLoadError::with_message(format!(
             "TypeConverter cannot convert from {}.",
             value.map_or("(null)", |v| (**v).type_name())
         )))
@@ -101,7 +101,7 @@ pub trait TypeConverter {
         _culture: Option<&CultureInfo>,
         value: Option<&BoxedValue>,
         destination_type: ValueType,
-    ) -> Result<Option<BoxedValue>, XamlLoadException> {
+    ) -> Result<Option<BoxedValue>, XamlLoadError> {
         if destination_type.is_string() {
             let text = match value {
                 Some(value) => ValueTypes::try_to_string(&**value).unwrap_or_else(|| (**value).type_name().to_string()),
@@ -109,7 +109,7 @@ pub trait TypeConverter {
             };
             return Ok(Some(Rc::new(text)));
         }
-        Err(XamlLoadException::with_message(format!(
+        Err(XamlLoadError::with_message(format!(
             "'TypeConverter' is unable to convert '{}' to '{}'.",
             value.map_or("(null)", |v| (**v).type_name()),
             destination_type

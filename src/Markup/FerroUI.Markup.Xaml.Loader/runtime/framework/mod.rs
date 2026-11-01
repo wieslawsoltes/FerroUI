@@ -32,8 +32,10 @@ use crate::runtime::RuntimeCompileTimeValueParser;
 
 pub use methods::{
     DeferredTransformationFactoryMethod, DocumentBody, DocumentBuildMethod, DocumentPopulateMethod,
-    FrameworkMethodEvaluator, RuntimeDocumentTypeBuilderProvider, XamlMemberException,
+    FrameworkMethodEvaluator, RuntimeDocumentTypeBuilderProvider, XamlMemberError,
 };
+#[allow(deprecated)]
+pub use methods::XamlMemberException;
 pub(crate) use methods::load_exception;
 pub use crate::back_end::adapt_type_mappings;
 pub use nodes::{provide_value_target_property, FrameworkNodeEvaluator};

@@ -8,7 +8,7 @@ use ferroui_controls::automation::peers::{
     ControlAutomationPeer, ControlAutomationPeerImpl,
 };
 use ferroui_controls::automation::provider::IInvokeProvider;
-use ferroui_controls::automation::ElementNotEnabledException;
+use ferroui_controls::automation::ElementNotEnabledError;
 use std::rc::Rc;
 #[repr(C)]
 pub(crate) struct DockTargetAutomationPeer {
@@ -75,7 +75,7 @@ impl IInvokeProvider for InvokeProvider {
     fn peer(&self) -> Ref<AutomationPeer> {
         self.0.clone().upcast()
     }
-    fn invoke(&self) -> Result<(), ElementNotEnabledException> {
+    fn invoke(&self) -> Result<(), ElementNotEnabledError> {
         self.0.owner().focus();
         Ok(())
     }

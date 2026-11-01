@@ -5,7 +5,7 @@
 use super::{IReactiveProperty, SingletonDataErrorsChangedEventArgs, SingletonPropertyChangedEventArgs};
 use crate::internal::subjects::SchedulingObserver;
 use crate::internal::SchedulerExtensions;
-use crate::internal::PanicException;
+use crate::internal::PanicError;
 use crate::{IHandleObservableErrors, IReactiveObject, ReactiveObject, RxSchedulers};
 use ferroui_reactive::concurrency::IScheduler;
 use ferroui_reactive::disposables::{CompositeDisposable, Disposable, ICancelable, SerialDisposable};
@@ -904,7 +904,7 @@ impl<TIn: 'static, TOut: Clone + 'static> AsyncProjectSink<TIn, TOut> {
 impl<TIn: 'static, TOut: Clone + 'static> IObserver<TIn> for AsyncProjectSink<TIn, TOut> {
     fn on_next(&self, value: TIn) {
         // Upstream catches the exception of the selector; the port catches its panic.
-        let task = match PanicException::catch(|| (self.selector)(value)) {
+        let task = match PanicError::catch(|| (self.selector)(value)) {
             Ok(task) => task,
             Err((error, _payload)) => {
                 self.fail(error);

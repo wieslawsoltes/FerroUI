@@ -1,6 +1,6 @@
 //! `LogHost`, `IEnableLogger` and `LogHostExtensions`.
 
-use super::{IFullLogger, ILogManager, LoggingException, StaticFullLogger};
+use super::{IFullLogger, ILogManager, LoggingError, StaticFullLogger};
 use crate::service_location::{AppLocator, ReadonlyDependencyResolverExt};
 use std::rc::Rc;
 
@@ -11,10 +11,10 @@ pub struct LogHost;
 impl LogHost {
     /// A static logger for `LogHost` (`LogHost.Default`).
     ///
-    /// Panics with a [`LoggingException`] when the current resolver has no log manager.
+    /// Panics with a [`LoggingError`] when the current resolver has no log manager.
     pub fn default_logger() -> StaticFullLogger {
         let Some(factory) = AppLocator::current().get_service::<dyn ILogManager>() else {
-            std::panic::panic_any(LoggingException::with_message(
+            std::panic::panic_any(LoggingError::with_message(
                 "ILogManager is null. This should never happen, your dependency resolver is broken",
             ));
         };

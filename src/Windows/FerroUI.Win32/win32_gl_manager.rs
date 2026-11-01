@@ -495,7 +495,7 @@ mod tests {
     /// Platform graphics of Vulkan over a device factory that is never
     /// asked: the loop only hands them on.
     fn vulkan() -> Option<Arc<VulkanPlatformGraphics>> {
-        use ferroui_vulkan::{IVulkanDevice, IVulkanDeviceFactory, VulkanException, VulkanPlatformSpecificOptions};
+        use ferroui_vulkan::{IVulkanDevice, IVulkanDeviceFactory, VulkanError, VulkanPlatformSpecificOptions};
 
         struct NoDevices;
 
@@ -511,7 +511,7 @@ mod tests {
             fn create_device(
                 &self,
                 _platform_options: &VulkanPlatformSpecificOptions,
-            ) -> Result<Arc<dyn IVulkanDevice>, VulkanException> {
+            ) -> Result<Arc<dyn IVulkanDevice>, VulkanError> {
                 panic!("the loop creates no device")
             }
         }

@@ -131,7 +131,9 @@ pub(crate) mod to_lookup;
 pub(crate) mod where_;
 
 pub use aggregate::SequenceError;
-pub use cast::{AnyObject, InvalidCastException};
+pub use cast::{AnyObject, InvalidCastError};
+#[allow(deprecated)]
+pub use cast::InvalidCastException;
 pub use creation::Observable;
 pub use dematerialize::NotificationValue;
 pub use element_at::ArgumentOutOfRangeError;
@@ -144,6 +146,8 @@ pub use push_to_pull_adapter::{PullEnumerable, PullEnumerator};
 pub use task_observable::TaskObservableExt;
 pub use to_async::{ToAsyncFunction, TryToAsyncFunction};
 pub use numeric::{Averageable, Extremum, Summable};
+pub use timeout::TimeoutError;
+#[allow(deprecated)]
 pub use timeout::TimeoutException;
 pub use to_list_observable::ListObservable;
 pub use to_lookup::{Grouping, Lookup};

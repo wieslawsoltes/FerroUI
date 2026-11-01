@@ -2,7 +2,7 @@
 
 use super::type_converter::{service_provider_of, text_of, type_converter_markup};
 use super::{ITypeDescriptorContext, TypeConverter};
-use crate::{ServiceProviderExtensions, XamlLoadException};
+use crate::{ServiceProviderExtensions, XamlLoadError};
 use ferroui_base::data::core::ValueType;
 use ferroui_base::media::imaging::Bitmap;
 use ferroui_base::media::IImage;
@@ -16,9 +16,9 @@ use std::rc::Rc;
 pub struct BitmapTypeConverter;
 
 /// `s.StartsWith("/") ? new Uri(s, Relative) : new Uri(s, RelativeOrAbsolute)`.
-pub(crate) fn asset_uri(s: &str) -> Result<Uri, XamlLoadException> {
+pub(crate) fn asset_uri(s: &str) -> Result<Uri, XamlLoadError> {
     let kind = if s.starts_with('/') { UriKind::Relative } else { UriKind::RelativeOrAbsolute };
-    Uri::new(s, kind).map_err(|e| XamlLoadException::with_inner(e.to_string(), e))
+    Uri::new(s, kind).map_err(|e| XamlLoadError::with_inner(e.to_string(), e))
 }
 
 /// The path of an absolute file URI, `None` for every other URI.
@@ -26,12 +26,12 @@ pub(crate) fn local_file_path(uri: &Uri) -> Option<String> {
     (uri.is_absolute_uri() && uri.scheme() == "file").then(|| UriExtensions::get_unescape_absolute_path(uri))
 }
 
-fn io_error(e: std::io::Error) -> XamlLoadException {
-    XamlLoadException::with_inner(e.to_string(), e)
+fn io_error(e: std::io::Error) -> XamlLoadError {
+    XamlLoadError::with_inner(e.to_string(), e)
 }
 
 impl BitmapTypeConverter {
-    pub(crate) fn load(context: Option<&Rc<dyn ITypeDescriptorContext>>, s: &str) -> Result<Bitmap, XamlLoadException> {
+    pub(crate) fn load(context: Option<&Rc<dyn ITypeDescriptorContext>>, s: &str) -> Result<Bitmap, XamlLoadError> {
         let uri = asset_uri(s)?;
 
         if let Some(path) = local_file_path(&uri) {
@@ -59,7 +59,7 @@ impl TypeConverter for BitmapTypeConverter {
         context: Option<&Rc<dyn ITypeDescriptorContext>>,
         _culture: Option<&CultureInfo>,
         value: Option<&BoxedValue>,
-    ) -> Result<Option<BoxedValue>, XamlLoadException> {
+    ) -> Result<Option<BoxedValue>, XamlLoadError> {
         let bitmap: Rc<Bitmap> = Rc::new(Self::load(context, text_of(value)?)?);
         Ok(Some(Rc::new(bitmap)))
     }

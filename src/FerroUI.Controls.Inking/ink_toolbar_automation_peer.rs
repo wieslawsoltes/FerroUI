@@ -16,7 +16,7 @@ use ferroui_controls::automation::provider::{
     IToggleProvider, IValueProvider, ProviderError,
 };
 use ferroui_controls::automation::{
-    AutomationProperties, ElementNotEnabledException, ExpandCollapsePatternIdentifiers,
+    AutomationProperties, ElementNotEnabledError, ExpandCollapsePatternIdentifiers,
     ExpandCollapseState, ValuePatternIdentifiers,
 };
 use ferroui_controls::primitives::{RangeBase, ToggleButton};
@@ -97,12 +97,12 @@ fn is_radio_item(owner: &InkToolbarFlyoutItem) -> bool {
 // The existing framework selection-provider contract has a single error type.
 // Preserve rejection without panicking; native UIA_E_INVALIDOPERATION remains
 // distinguishable by the message, not by a separate HRESULT category.
-fn invalid_selection() -> ElementNotEnabledException {
-    ElementNotEnabledException::with_message("The requested selection operation is not supported.")
+fn invalid_selection() -> ElementNotEnabledError {
+    ElementNotEnabledError::with_message("The requested selection operation is not supported.")
 }
-fn expand(owner: &Button) -> Result<(), ElementNotEnabledException> {
+fn expand(owner: &Button) -> Result<(), ElementNotEnabledError> {
     if !owner.is_effectively_enabled() {
-        return Err(ElementNotEnabledException::new());
+        return Err(ElementNotEnabledError::new());
     }
     // Native peers route through OpenL3/ExecuteToolAction(false), which selects
     // the owner before considering configuration availability. Reuse the same
@@ -124,9 +124,9 @@ fn expand(owner: &Button) -> Result<(), ElementNotEnabledException> {
     }
     Ok(())
 }
-fn collapse(owner: &Button) -> Result<(), ElementNotEnabledException> {
+fn collapse(owner: &Button) -> Result<(), ElementNotEnabledError> {
     if !owner.is_effectively_enabled() {
-        return Err(ElementNotEnabledException::new());
+        return Err(ElementNotEnabledError::new());
     }
     if let Some(flyout) = owner.flyout() {
         flyout.hide();
@@ -304,10 +304,10 @@ impl IExpandCollapseProvider for Provider<InkToolbarToolButtonAutomationPeer> {
     fn shows_menu(&self) -> bool {
         true
     }
-    fn expand(&self) -> Result<(), ElementNotEnabledException> {
+    fn expand(&self) -> Result<(), ElementNotEnabledError> {
         expand(&self.0.owner_button())
     }
-    fn collapse(&self) -> Result<(), ElementNotEnabledException> {
+    fn collapse(&self) -> Result<(), ElementNotEnabledError> {
         collapse(&self.0.owner_button())
     }
 }
@@ -321,10 +321,10 @@ impl ISelectionItemProvider for Provider<InkToolbarToolButtonAutomationPeer> {
     fn selection_container(&self) -> Option<Rc<dyn ISelectionProvider>> {
         self.0.selection_container()
     }
-    fn add_to_selection(&self) -> Result<(), ElementNotEnabledException> {
+    fn add_to_selection(&self) -> Result<(), ElementNotEnabledError> {
         let owner = self.0.owner_button();
         if !owner.is_effectively_enabled() {
-            return Err(ElementNotEnabledException::new());
+            return Err(ElementNotEnabledError::new());
         }
         if self.is_selected() {
             Ok(())
@@ -332,10 +332,10 @@ impl ISelectionItemProvider for Provider<InkToolbarToolButtonAutomationPeer> {
             Err(invalid_selection())
         }
     }
-    fn remove_from_selection(&self) -> Result<(), ElementNotEnabledException> {
+    fn remove_from_selection(&self) -> Result<(), ElementNotEnabledError> {
         let owner = self.0.owner_button();
         if !owner.is_effectively_enabled() {
-            return Err(ElementNotEnabledException::new());
+            return Err(ElementNotEnabledError::new());
         }
         if self.is_selected() {
             Err(invalid_selection())
@@ -343,10 +343,10 @@ impl ISelectionItemProvider for Provider<InkToolbarToolButtonAutomationPeer> {
             Ok(())
         }
     }
-    fn select(&self) -> Result<(), ElementNotEnabledException> {
+    fn select(&self) -> Result<(), ElementNotEnabledError> {
         let owner = self.0.owner_button();
         if !owner.is_effectively_enabled() {
-            return Err(ElementNotEnabledException::new());
+            return Err(ElementNotEnabledError::new());
         }
         owner
             .cast::<InkToolbarToolButton>()
@@ -447,7 +447,7 @@ impl IExpandCollapseProvider for Provider<InkToolbarMenuButtonAutomationPeer> {
     fn shows_menu(&self) -> bool {
         true
     }
-    fn expand(&self) -> Result<(), ElementNotEnabledException> {
+    fn expand(&self) -> Result<(), ElementNotEnabledError> {
         let owner = self.0.owner_button();
         if menu_has_dropdown(&owner) {
             expand(&owner)
@@ -455,7 +455,7 @@ impl IExpandCollapseProvider for Provider<InkToolbarMenuButtonAutomationPeer> {
             Ok(())
         }
     }
-    fn collapse(&self) -> Result<(), ElementNotEnabledException> {
+    fn collapse(&self) -> Result<(), ElementNotEnabledError> {
         collapse(&self.0.owner_button())
     }
 }
@@ -504,10 +504,10 @@ impl InkToolbarFlyoutItemAutomationPeer {
     }
     fn ensure_selection_enabled(
         &self,
-    ) -> Result<Ref<InkToolbarFlyoutItem>, ElementNotEnabledException> {
+    ) -> Result<Ref<InkToolbarFlyoutItem>, ElementNotEnabledError> {
         let owner = self.owner_item();
         if !owner.is_effectively_enabled() {
-            return Err(ElementNotEnabledException::new());
+            return Err(ElementNotEnabledError::new());
         }
         if !is_radio_item(&owner) {
             return Err(invalid_selection());
@@ -519,10 +519,10 @@ impl IInvokeProvider for Provider<InkToolbarFlyoutItemAutomationPeer> {
     fn peer(&self) -> Ref<AutomationPeer> {
         self.0.clone().upcast()
     }
-    fn invoke(&self) -> Result<(), ElementNotEnabledException> {
+    fn invoke(&self) -> Result<(), ElementNotEnabledError> {
         let owner = self.0.owner_item();
         if !owner.is_effectively_enabled() {
-            return Err(ElementNotEnabledException::new());
+            return Err(ElementNotEnabledError::new());
         }
         owner.on_click();
         Ok(())
@@ -539,7 +539,7 @@ impl ISelectionItemProvider for Provider<InkToolbarFlyoutItemAutomationPeer> {
     fn selection_container(&self) -> Option<Rc<dyn ISelectionProvider>> {
         None
     }
-    fn add_to_selection(&self) -> Result<(), ElementNotEnabledException> {
+    fn add_to_selection(&self) -> Result<(), ElementNotEnabledError> {
         let owner = self.0.ensure_selection_enabled()?;
         if owner.is_checked() == Some(true) {
             return Ok(());
@@ -563,7 +563,7 @@ impl ISelectionItemProvider for Provider<InkToolbarFlyoutItemAutomationPeer> {
         owner.on_click();
         Ok(())
     }
-    fn remove_from_selection(&self) -> Result<(), ElementNotEnabledException> {
+    fn remove_from_selection(&self) -> Result<(), ElementNotEnabledError> {
         let owner = self.0.ensure_selection_enabled()?;
         if owner.is_checked() == Some(true) {
             if owner.kind() == InkToolbarFlyoutItemKind::Radio {
@@ -573,7 +573,7 @@ impl ISelectionItemProvider for Provider<InkToolbarFlyoutItemAutomationPeer> {
         }
         Ok(())
     }
-    fn select(&self) -> Result<(), ElementNotEnabledException> {
+    fn select(&self) -> Result<(), ElementNotEnabledError> {
         let owner = self.0.ensure_selection_enabled()?;
         if owner.is_checked() != Some(true) {
             owner.on_click();
@@ -643,7 +643,7 @@ impl IValueProvider for Provider<InkToolbarStrokeWidthSliderAutomationPeer> {
     fn set_value(&self, value: Option<&str>) -> Result<(), ProviderError> {
         let owner = self.0.owner_slider();
         if !owner.is_effectively_enabled() {
-            return Err(Box::new(ElementNotEnabledException::new()));
+            return Err(Box::new(ElementNotEnabledError::new()));
         }
         let value = value.unwrap_or("").parse::<f64>()?;
         if !value.is_finite() {

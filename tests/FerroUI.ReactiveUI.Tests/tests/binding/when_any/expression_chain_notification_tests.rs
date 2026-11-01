@@ -9,7 +9,7 @@
 
 use crate::tests::binding::test_models::{ObservedValueFixture, RecordingObserver};
 use ferroui_reactive::disposables::Disposable;
-use ferroui_reactive_testing::{new_error, TestException};
+use ferroui_reactive_testing::{new_error, TestError};
 use ferroui_reactiveui::*;
 use ferroui_splat::AppLocator;
 use ferroui_system::component_model::PropertyOwner;
@@ -35,7 +35,7 @@ fn link_error_is_forwarded_downstream() {
 
     let error = context.recorder.error.borrow().clone();
     let error = error.expect("the error of the step reached the chain");
-    assert!(error.is::<TestException>());
+    assert!(error.is::<TestError>());
     assert_eq!(error.to_string(), "link failed");
 }
 

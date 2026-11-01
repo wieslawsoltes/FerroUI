@@ -14,7 +14,7 @@ use ferroui_controls::{
     Button, ContentControlImpl, Control, ControlImpl, Frame, FramePage, FramePageImpl,
     TextBlock,
 };
-use ferroui_markup_xaml::XamlLoadException;
+use ferroui_markup_xaml::XamlLoadError;
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use std::rc::Rc;
 
@@ -42,7 +42,7 @@ macro_rules! sample_page {
 sample_page!(FirstSamplePage, "Pages/NavigationSample1.xaml");
 sample_page!(SecondSamplePage, "Pages/NavigationSample2.xaml");
 
-pub(crate) fn wire(root: &Ref<Control>) -> Result<(), XamlLoadException> {
+pub(crate) fn wire(root: &Ref<Control>) -> Result<(), XamlLoadError> {
     let Some(frame) = root
         .find_control::<Control>("ContentFrame")
         .and_then(|control| control.cast::<Frame>())
@@ -102,6 +102,6 @@ pub(crate) fn wire(root: &Ref<Control>) -> Result<(), XamlLoadException> {
     Ok(())
 }
 
-fn load_error(error: NavigationError) -> XamlLoadException {
-    XamlLoadException::with_inner("Could not initialize the navigation example.", error)
+fn load_error(error: NavigationError) -> XamlLoadError {
+    XamlLoadError::with_inner("Could not initialize the navigation example.", error)
 }

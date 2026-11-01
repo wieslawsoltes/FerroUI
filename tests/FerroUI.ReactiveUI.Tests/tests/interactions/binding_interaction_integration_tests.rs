@@ -48,5 +48,5 @@ fn handle_no_handler_throws() {
 
     let error = block_on(interaction.handle(REQUEST.to_owned())).expect_err("no handler handles the question");
 
-    assert!(error.downcast_ref::<UnhandledInteractionException<String, bool>>().is_some());
+    assert!(error.downcast_ref::<UnhandledInteractionError<String, bool>>().is_some());
 }

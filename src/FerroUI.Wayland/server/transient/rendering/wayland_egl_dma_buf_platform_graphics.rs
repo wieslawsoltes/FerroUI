@@ -16,7 +16,7 @@ use ferroui_base::platform::IPlatformGraphicsContext;
 use ferroui_base::reactive::IDisposable;
 use ferroui_opengl::egl::egl_consts::{EGL_EXTENSIONS, EGL_PLATFORM_GBM_KHR};
 use ferroui_opengl::egl::{EglDisplay, EglDisplayCreationOptions, EglDisplayOptions};
-use ferroui_opengl::{GlVersion, OpenGlException};
+use ferroui_opengl::{GlVersion, OpenGlError};
 use std::any::Any;
 use std::cell::Cell;
 use std::ffi::{c_void, CStr, CString};
@@ -77,7 +77,7 @@ impl WaylandEglDmaBufPlatformGraphics {
         connection: &mut WaylandConnection,
         state: &mut WaylandWorkerState,
         gl_profiles: &[GlVersion],
-    ) -> Result<Option<Rc<Self>>, OpenGlException> {
+    ) -> Result<Option<Rc<Self>>, OpenGlError> {
         let Some(dmabuf) = state.globals.as_ref().and_then(|globals| globals.linux_dmabuf.clone()) else {
             Self::warn("zwp_linux_dmabuf_v1 not available");
             return Ok(None);
@@ -94,14 +94,14 @@ impl WaylandEglDmaBufPlatformGraphics {
         };
         // The feedback is read once; the reference leaves the object to the collector.
         feedback.destroy();
-        roundtrip.map_err(|error| OpenGlException::new(error.to_string()))?;
+        roundtrip.map_err(|error| OpenGlError::new(error.to_string()))?;
 
         if !is_complete {
             Self::warn("Dmabuf feedback not received from compositor");
             return Ok(None);
         }
 
-        let native = DrmGbmUnsafeNativeMethods::get().map_err(|error| OpenGlException::new(error.to_string()))?;
+        let native = DrmGbmUnsafeNativeMethods::get().map_err(|error| OpenGlError::new(error.to_string()))?;
 
         // Find the DRM render node matching the compositor's main device
         let Some(render_node_path) = Self::find_render_node(native, main_device) else {
@@ -114,7 +114,7 @@ impl WaylandEglDmaBufPlatformGraphics {
         // Open the DRM render node and create GBM device
         let drm_fd = DrmGbmUnsafeNativeMethods::open(&render_node_path, DrmGbmUnsafeNativeMethods::O_RDWR);
         if drm_fd < 0 {
-            return Err(OpenGlException::new(format!(
+            return Err(OpenGlError::new(format!(
                 "Failed to open DRM render node: {}",
                 render_node_path.to_string_lossy()
             )));
@@ -122,12 +122,12 @@ impl WaylandEglDmaBufPlatformGraphics {
 
         let mut gbm_device: *mut c_void = std::ptr::null_mut();
         let mut display: Option<Rc<WaylandEglDisplay>> = None;
-        let created = (|| -> Result<Rc<Self>, OpenGlException> {
+        let created = (|| -> Result<Rc<Self>, OpenGlError> {
             // SAFETY: the descriptor is open and outlives the device (both are released by the
             // dispose callback, the device first).
             gbm_device = unsafe { native.gbm_create_device(drm_fd) };
             if gbm_device.is_null() {
-                return Err(OpenGlException::new("Failed to create GBM device"));
+                return Err(OpenGlError::new("Failed to create GBM device"));
             }
 
             // Capture for the dispose callback, which runs once.
@@ -165,9 +165,9 @@ impl WaylandEglDmaBufPlatformGraphics {
 
             let extensions = egl_display.egl_interface().query_string(egl_display.handle(), EGL_EXTENSIONS).unwrap_or_default();
             let extensions: Vec<&str> = extensions.split(' ').collect();
-            let check_extension = |ext: &str| -> Result<(), OpenGlException> {
+            let check_extension = |ext: &str| -> Result<(), OpenGlError> {
                 if !extensions.contains(&ext) {
-                    return Err(OpenGlException::new(format!("Required EGL extension {ext} is not supported")));
+                    return Err(OpenGlError::new(format!("Required EGL extension {ext} is not supported")));
                 }
                 Ok(())
             };

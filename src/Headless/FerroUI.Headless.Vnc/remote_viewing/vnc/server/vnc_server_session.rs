@@ -7,7 +7,7 @@
 //! monitors of the original are a reentrant lock where the session takes
 //! one again while it holds it (`FramebufferUpdateRequestLock`, `SyncRoot`
 //! of the stream); its other fields have locks of their own. Exceptions
-//! are errors ([`VncException`]) where the protocol fails and panics where
+//! are errors ([`VncError`]) where the protocol fails and panics where
 //! the original throws on a misuse; a panic of an event handler or of the
 //! framebuffer source ends the session as an exception of them does in the
 //! original.
@@ -30,7 +30,7 @@ use crate::remote_viewing::vnc::{
     AuthenticationMethod, ExtendedDesktopSizeReason, ExtendedDesktopSizeStatus,
     IVncFramebufferSource, IVncPasswordChallenge, KeyChangedEventArgs, KeySym,
     PointerChangedEventArgs, RemoteClipboardChangedEventArgs, TransportWriter, Version,
-    VncEncoding, VncException, VncFailureReason, VncFramebuffer, VncPasswordChallenge,
+    VncEncoding, VncError, VncFailureReason, VncFramebuffer, VncPasswordChallenge,
     VncPixelFormat, VncRectangle, VncStream, VncTransport, VncUtility,
 };
 use std::any::Any;
@@ -708,7 +708,7 @@ impl VncServerSession {
     /// The session starts a main thread which reads and processes messages.
     /// You don't normally need to call this method yourself; but it can be
     /// useful when writing unit tests.
-    pub fn handle_message(&self) -> Result<(), VncException> {
+    pub fn handle_message(&self) -> Result<(), VncError> {
         let command = VncMessageType(self.c.receive_byte()?);
 
         {
@@ -758,7 +758,7 @@ impl VncServerSession {
     /// Negotiates the desktop: the client says whether it shares the
     /// desktop, the server sends the size, the pixel format and the name of
     /// the framebuffer.
-    pub fn negotiate_desktop(&self) -> Result<(), VncException> {
+    pub fn negotiate_desktop(&self) -> Result<(), VncError> {
         self.log(|logger| logger.log_information("Negotiating desktop settings"));
 
         let share_desktop_setting = self.c.receive_byte()?;
@@ -807,7 +807,7 @@ impl VncServerSession {
     pub(crate) fn negotiate_version(
         &self,
         methods: &mut Vec<AuthenticationMethod>,
-    ) -> Result<bool, VncException> {
+    ) -> Result<bool, VncError> {
         self.log(|logger| logger.log_information("Negotiating the version."));
 
         self.c.send_version(Version::new(3, 8));
@@ -856,7 +856,7 @@ impl VncServerSession {
     pub(crate) fn negotiate_security(
         &self,
         methods: &[AuthenticationMethod],
-    ) -> Result<bool, VncException> {
+    ) -> Result<bool, VncError> {
         self.log(|logger| logger.log_information("Negotiating security"));
 
         self.c.send_byte(methods.len() as u8);
@@ -919,7 +919,7 @@ impl VncServerSession {
         Ok(true)
     }
 
-    pub(crate) fn handle_set_encodings(&self) -> Result<(), VncException> {
+    pub(crate) fn handle_set_encodings(&self) -> Result<(), VncError> {
         self.c.receive(1)?;
 
         let encoding_count = self.c.receive_uint16_be()?;
@@ -1083,7 +1083,7 @@ impl VncServerSession {
         let requester = Arc::new(PeriodicThread::new());
         *lock(&self.requester) = Some(requester.clone());
 
-        let result = catch_unwind(AssertUnwindSafe(|| -> Result<(), VncException> {
+        let result = catch_unwind(AssertUnwindSafe(|| -> Result<(), VncError> {
             self.init_framebuffer_encoder();
 
             let mut methods = Vec::new();
@@ -1145,7 +1145,7 @@ impl VncServerSession {
         }
     }
 
-    fn handle_set_pixel_format(&self) -> Result<(), VncException> {
+    fn handle_set_pixel_format(&self) -> Result<(), VncError> {
         self.c.receive(3)?;
 
         let pixel_format = self.c.receive(VncPixelFormat::SIZE)?;
@@ -1193,7 +1193,7 @@ impl VncServerSession {
         })
     }
 
-    fn handle_framebuffer_update_request(&self) -> Result<(), VncException> {
+    fn handle_framebuffer_update_request(&self) -> Result<(), VncError> {
         let incremental = self.c.receive_byte()? != 0;
         let region = self.c.receive_rectangle()?;
 
@@ -1239,7 +1239,7 @@ impl VncServerSession {
         Ok(())
     }
 
-    fn handle_key_event(&self) -> Result<(), VncException> {
+    fn handle_key_event(&self) -> Result<(), VncError> {
         let pressed = self.c.receive_byte()? != 0;
         self.c.receive(2)?;
         let keysym = KeySym(self.c.receive_uint32_be()?);
@@ -1248,7 +1248,7 @@ impl VncServerSession {
         Ok(())
     }
 
-    fn handle_pointer_event(&self) -> Result<(), VncException> {
+    fn handle_pointer_event(&self) -> Result<(), VncError> {
         let pressed_buttons = i32::from(self.c.receive_byte()?);
         let x = i32::from(self.c.receive_uint16_be()?);
         let y = i32::from(self.c.receive_uint16_be()?);
@@ -1257,7 +1257,7 @@ impl VncServerSession {
         Ok(())
     }
 
-    fn handle_receive_clipboard_data(&self) -> Result<(), VncException> {
+    fn handle_receive_clipboard_data(&self) -> Result<(), VncError> {
         self.c.receive(3)?; // padding
 
         let clipboard = self.c.receive_string(0xffffff)?;
@@ -1266,7 +1266,7 @@ impl VncServerSession {
         Ok(())
     }
 
-    fn handle_set_desktop_size(&self) -> Result<(), VncException> {
+    fn handle_set_desktop_size(&self) -> Result<(), VncError> {
         let message = self.c.receive(7)?;
         let width = VncUtility::decode_uint16_be(&message, 1);
         let height = VncUtility::decode_uint16_be(&message, 3);

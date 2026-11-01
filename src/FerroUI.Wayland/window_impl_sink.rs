@@ -11,7 +11,7 @@ use crate::server::persistent::i_w_surface_event_sink::{
 };
 use crate::server::persistent::i_w_xdg_top_level::{IWXdgShellSurface, IWXdgTopLevel, WXdgTopLevelProxy};
 use crate::server::persistent::xdg_configure_batch::XdgConfigureBatch;
-use crate::ferro_wayland_exception::FerroWaylandException;
+use crate::ferro_wayland_exception::FerroWaylandError;
 use crate::window_impl::WindowImpl;
 use crate::window_impl_base::{ISinkOwner, Sink};
 use ferroui_base::input::raw::RawPointerEventType;
@@ -52,7 +52,7 @@ impl WindowImplSink {
 
         let initial_batch = match handle.basic_init_completed.map(|completed| completed.recv()) {
             Some(Ok(batch)) => batch,
-            _ => FerroWaylandException::new("The Wayland worker did not configure the window: it is gone").throw(),
+            _ => FerroWaylandError::new("The Wayland worker did not configure the window: it is gone").throw(),
         };
         *sink.initial_batch.borrow_mut() = Some(initial_batch.clone());
         parent.apply_configure_batch(&initial_batch);

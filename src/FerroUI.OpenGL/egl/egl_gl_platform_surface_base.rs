@@ -7,7 +7,7 @@ use ferroui_base::platform::{
     IPlatformGraphicsContext, PlatformRenderTargetState, RenderTargetError, RenderTargetSceneInfo,
 };
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::{PixelSize, RenderTargetCorruptedException};
+use ferroui_base::{PixelSize, RenderTargetCorruptedError};
 use std::rc::Rc;
 
 /// A surface that is rendered to through EGL.
@@ -145,7 +145,7 @@ pub trait EglPlatformSurfaceRenderTarget {
         scene_info: &RenderTargetSceneInfo,
     ) -> Result<Rc<dyn IGlPlatformSurfaceRenderingSession>, RenderTargetError> {
         if IPlatformGraphicsContext::is_lost(&**self.base().context()) {
-            return Err(RenderTargetCorruptedException::new().into());
+            return Err(RenderTargetCorruptedError::new().into());
         }
 
         self.try_begin_draw_core(scene_info)

@@ -1,4 +1,4 @@
-//! `UnhandledErrorException` (`ReactiveUI.Core/UnhandledErrorException.cs`).
+//! `UnhandledError` (`ReactiveUI.Core/UnhandledErrorException.cs`).
 
 use std::error::Error;
 use std::fmt;
@@ -13,18 +13,22 @@ use std::fmt;
 /// the payload of a panic (`std::panic::panic_any`), which has to be `Send`, and the errors of the
 /// reactive libraries (`Rc<dyn Error>`) are not.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct UnhandledErrorException {
+pub struct UnhandledError {
     message: String,
     inner_exception: Option<String>,
 }
 
-impl Default for UnhandledErrorException {
+/// The name of [`UnhandledError`] before 0.5.
+#[deprecated(since = "0.5.0", note = "use `UnhandledError`")]
+pub type UnhandledErrorException = UnhandledError;
+
+impl Default for UnhandledError {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl UnhandledErrorException {
+impl UnhandledError {
     /// The exception with the default message of .NET (`UnhandledErrorException()`).
     pub fn new() -> Self {
         Self { message: "Exception of type 'ReactiveUI.UnhandledErrorException' was thrown.".to_owned(), inner_exception: None }
@@ -52,7 +56,7 @@ impl UnhandledErrorException {
     }
 }
 
-impl fmt::Display for UnhandledErrorException {
+impl fmt::Display for UnhandledError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match &self.inner_exception {
             Some(inner) => write!(f, "{} ({inner})", self.message),
@@ -61,4 +65,4 @@ impl fmt::Display for UnhandledErrorException {
     }
 }
 
-impl Error for UnhandledErrorException {}
+impl Error for UnhandledError {}

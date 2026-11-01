@@ -11,7 +11,7 @@ use crate::automation::provider::{
     IExpandCollapseProvider, ISelectionItemProvider, ISelectionProvider, ProviderAdapter,
 };
 use crate::automation::{
-    ElementNotEnabledException, ExpandCollapsePatternIdentifiers, ExpandCollapseState,
+    ElementNotEnabledError, ExpandCollapsePatternIdentifiers, ExpandCollapseState,
     SelectionItemPatternIdentifiers,
 };
 use ferroui_base::data::core::{ValueType, ValueTypes};
@@ -144,7 +144,7 @@ impl NavigationViewItemAutomationPeer {
                 .get_provider::<dyn ISelectionProvider>()
         })
     }
-    fn change_selection(&self, value: bool) -> Result<(), ElementNotEnabledException> {
+    fn change_selection(&self, value: bool) -> Result<(), ElementNotEnabledError> {
         self.ensure_enabled()?;
         let owner = self.owner();
         if value {
@@ -173,13 +173,13 @@ impl ISelectionItemProvider for ProviderAdapter<NavigationViewItemAutomationPeer
     fn selection_container(&self) -> Option<Rc<dyn ISelectionProvider>> {
         self.0.selection_container()
     }
-    fn add_to_selection(&self) -> Result<(), ElementNotEnabledException> {
+    fn add_to_selection(&self) -> Result<(), ElementNotEnabledError> {
         self.0.change_selection(true)
     }
-    fn remove_from_selection(&self) -> Result<(), ElementNotEnabledException> {
+    fn remove_from_selection(&self) -> Result<(), ElementNotEnabledError> {
         self.0.change_selection(false)
     }
-    fn select(&self) -> Result<(), ElementNotEnabledException> {
+    fn select(&self) -> Result<(), ElementNotEnabledError> {
         self.0.change_selection(true)
     }
 }
@@ -193,7 +193,7 @@ impl IExpandCollapseProvider for ProviderAdapter<NavigationViewItemAutomationPee
     fn shows_menu(&self) -> bool {
         self.0.owner().in_flyout()
     }
-    fn expand(&self) -> Result<(), ElementNotEnabledException> {
+    fn expand(&self) -> Result<(), ElementNotEnabledError> {
         self.0.ensure_enabled()?;
         let owner = self.0.owner();
         if let Some(navigation_view) = self.0.navigation_view() {
@@ -207,7 +207,7 @@ impl IExpandCollapseProvider for ProviderAdapter<NavigationViewItemAutomationPee
         }
         Ok(())
     }
-    fn collapse(&self) -> Result<(), ElementNotEnabledException> {
+    fn collapse(&self) -> Result<(), ElementNotEnabledError> {
         self.0.ensure_enabled()?;
         let owner = self.0.owner();
         if let Some(navigation_view) = self.0.navigation_view() {

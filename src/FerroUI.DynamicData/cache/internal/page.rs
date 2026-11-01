@@ -3,7 +3,7 @@
 use super::sort::where_some;
 use super::{filtered_index_calculator, KeyValueCollection};
 use crate::cache::{ChangeSet, PageRequest, PageResponse, PagedChangeSet, SortReason, SortedChangeSet};
-use crate::list::SortException;
+use crate::list::SortError;
 use ferroui_reactive::{Observable, ObservableExt};
 use ferroui_system::{IObservable, IObserver};
 use std::cell::RefCell;
@@ -22,9 +22,9 @@ pub(crate) fn page<T: Clone + 'static, K: Eq + Hash + Clone + 'static>(
     Observable::create(move |observer: Rc<dyn IObserver<PagedChangeSet<T, K>>>| {
         let paginator = Rc::new(RefCell::new(Paginator::new()));
         let request_paginator = paginator.clone();
-        let request = page_requests.try_select(move |parameters: PageRequest| request_paginator.borrow_mut().paginate_request(parameters).map_err(SortException::into_error));
+        let request = page_requests.try_select(move |parameters: PageRequest| request_paginator.borrow_mut().paginate_request(parameters).map_err(SortError::into_error));
         let data_paginator = paginator.clone();
-        let data_change = source.try_select(move |updates: SortedChangeSet<T, K>| data_paginator.borrow_mut().update(&updates).map_err(SortException::into_error));
+        let data_change = source.try_select(move |updates: SortedChangeSet<T, K>| data_paginator.borrow_mut().update(&updates).map_err(SortError::into_error));
         where_some(Observable::merge_all(vec![request, data_change])).subscribe(observer)
     })
 }
@@ -43,7 +43,7 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> Paginator<T, K> {
     }
 
     /// The page of a new request; nothing for an empty page or the request of now (`Paginate(IPageRequest)`).
-    fn paginate_request(&mut self, parameters: PageRequest) -> Result<Option<PagedChangeSet<T, K>>, SortException> {
+    fn paginate_request(&mut self, parameters: PageRequest) -> Result<Option<PagedChangeSet<T, K>>, SortError> {
         if parameters.size() < 1 {
             return Ok(None);
         }
@@ -55,7 +55,7 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> Paginator<T, K> {
     }
 
     /// The page after a change of the data (`Update`).
-    fn update(&mut self, updates: &SortedChangeSet<T, K>) -> Result<Option<PagedChangeSet<T, K>>, SortException> {
+    fn update(&mut self, updates: &SortedChangeSet<T, K>) -> Result<Option<PagedChangeSet<T, K>>, SortError> {
         self.is_loaded = true;
         self.all = updates.sorted_items().clone();
         self.paginate(Some(updates))
@@ -73,7 +73,7 @@ impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static> Paginator<T, K> {
         pages + 1
     }
 
-    fn paginate(&mut self, updates: Option<&SortedChangeSet<T, K>>) -> Result<Option<PagedChangeSet<T, K>>, SortException> {
+    fn paginate(&mut self, updates: Option<&SortedChangeSet<T, K>>) -> Result<Option<PagedChangeSet<T, K>>, SortError> {
         if !self.is_loaded {
             return Ok(None);
         }

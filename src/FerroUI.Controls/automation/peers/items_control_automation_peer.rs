@@ -2,7 +2,7 @@ use super::{
     AutomationControlType, AutomationPeer, AutomationPeerImpl, ControlAutomationPeer, ControlAutomationPeerImpl,
 };
 use crate::automation::provider::{IScrollProvider, ProviderAdapter, ScrollAmount};
-use crate::automation::ElementNotEnabledException;
+use crate::automation::ElementNotEnabledError;
 use crate::{Control, ItemsControl, ListBox};
 use ferroui_base::{ferro_class, instantiate, FerroObjectImpl, Ref};
 use std::cell::{Cell, RefCell};
@@ -85,7 +85,7 @@ impl IScrollProvider for ProviderAdapter<ItemsControlAutomationPeer> {
         &self,
         horizontal_amount: ScrollAmount,
         vertical_amount: ScrollAmount,
-    ) -> Result<(), ElementNotEnabledException> {
+    ) -> Result<(), ElementNotEnabledError> {
         self.0.scroll(horizontal_amount, vertical_amount)
     }
 
@@ -93,7 +93,7 @@ impl IScrollProvider for ProviderAdapter<ItemsControlAutomationPeer> {
         &self,
         horizontal_percent: f64,
         vertical_percent: f64,
-    ) -> Result<(), ElementNotEnabledException> {
+    ) -> Result<(), ElementNotEnabledError> {
         self.0.set_scroll_percent(horizontal_percent, vertical_percent)
     }
 }
@@ -165,7 +165,7 @@ impl ItemsControlAutomationPeer {
         &self,
         horizontal_amount: ScrollAmount,
         vertical_amount: ScrollAmount,
-    ) -> Result<(), ElementNotEnabledException> {
+    ) -> Result<(), ElementNotEnabledError> {
         match self.found_scroller() {
             Some(scroller) => scroller.scroll(horizontal_amount, vertical_amount),
             None => Ok(()),
@@ -179,7 +179,7 @@ impl ItemsControlAutomationPeer {
         &self,
         horizontal_percent: f64,
         vertical_percent: f64,
-    ) -> Result<(), ElementNotEnabledException> {
+    ) -> Result<(), ElementNotEnabledError> {
         match self.found_scroller() {
             Some(scroller) => scroller.set_scroll_percent(horizontal_percent, vertical_percent),
             None => Ok(()),

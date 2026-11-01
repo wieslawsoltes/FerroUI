@@ -312,7 +312,7 @@ pub struct CompiledDocumentBuildMethod {
 
 impl CompiledDocumentBuildMethod {
     /// The absolute Rust path of the build function of the document
-    /// (`fn(Option<Rc<dyn IServiceProvider>>) -> Result<Ref<T>, XamlLoadException>`).
+    /// (`fn(Option<Rc<dyn IServiceProvider>>) -> Result<Ref<T>, XamlLoadError>`).
     pub fn rust_path(&self) -> &str {
         &self.rust_path
     }

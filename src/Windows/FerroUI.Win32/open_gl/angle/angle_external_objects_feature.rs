@@ -18,7 +18,7 @@ use ferroui_microcom::{ComPtr, HResult, Interface};
 use ferroui_opengl::egl::EglContext;
 use ferroui_opengl::{
     IGlContextExternalObjectsFeature, IGlExportableExternalImageTexture, IGlExternalImageTexture, IGlExternalSemaphore,
-    OpenGlException,
+    OpenGlError,
 };
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
@@ -53,18 +53,18 @@ pub(crate) struct AngleExternalObjectsFeature {
     device_luid: Vec<u8>,
 }
 
-fn failure(what: &str) -> impl Fn(HResult) -> OpenGlException + '_ {
-    move |error| OpenGlException::new(format!("{what}: {error}"))
+fn failure(what: &str) -> impl Fn(HResult) -> OpenGlError + '_ {
+    move |error| OpenGlError::new(format!("{what}: {error}"))
 }
 
 impl AngleExternalObjectsFeature {
-    pub fn new(context: &Rc<EglContext>, angle: &AngleWin32EglDisplay) -> Result<AngleExternalObjectsFeature, OpenGlException> {
+    pub fn new(context: &Rc<EglContext>, angle: &AngleWin32EglDisplay) -> Result<AngleExternalObjectsFeature, OpenGlError> {
         let device = angle.get_direct3d_device()?;
         // SAFETY: the display answers with a pointer to its device of
         // Direct3D 11, which it owns; the feature takes a reference of its
         // own.
         let device = unsafe { ComPtr::<ID3D11Device>::from_raw_add_ref(device as *mut ID3D11Device) }
-            .ok_or_else(|| OpenGlException::new("The display has no Direct3D 11 device"))?;
+            .ok_or_else(|| OpenGlError::new("The display has no Direct3D 11 device"))?;
         let device1 = device.cast::<ID3D11Device1>().map_err(failure("ID3D11Device1"))?;
         let dxgi_device = device.cast::<IDXGIDevice>().map_err(failure("IDXGIDevice"))?;
         let adapter = dxgi_device
@@ -80,8 +80,8 @@ impl AngleExternalObjectsFeature {
         })
     }
 
-    fn context(&self) -> Result<Rc<EglContext>, OpenGlException> {
-        self.context.upgrade().ok_or_else(|| OpenGlException::new("The context of the feature was disposed"))
+    fn context(&self) -> Result<Rc<EglContext>, OpenGlError> {
+        self.context.upgrade().ok_or_else(|| OpenGlError::new("The context of the feature was disposed"))
     }
 
     /// Releases the device.
@@ -116,14 +116,14 @@ impl IGlContextExternalObjectsFeature for AngleExternalObjectsFeature {
         _type: &str,
         size: PixelSize,
         format: PlatformGraphicsExternalImageFormat,
-    ) -> Result<Rc<dyn IGlExportableExternalImageTexture>, OpenGlException> {
+    ) -> Result<Rc<dyn IGlExportableExternalImageTexture>, OpenGlError> {
         if format != PlatformGraphicsExternalImageFormat::R8G8B8A8UNorm {
-            return Err(OpenGlException::new("Unsupported external memory format"));
+            return Err(OpenGlError::new("Unsupported external memory format"));
         }
 
         let context = self.context()?;
         let devices = self.devices.borrow();
-        let devices = devices.as_ref().ok_or_else(|| OpenGlException::new("The feature was disposed"))?;
+        let devices = devices.as_ref().ok_or_else(|| OpenGlError::new("The feature was disposed"))?;
         let current = IPlatformGraphicsContext::ensure_current(&*context);
 
         let mut desc = D3D11_TEXTURE2D_DESC {
@@ -150,24 +150,24 @@ impl IGlContextExternalObjectsFeature for AngleExternalObjectsFeature {
         Ok(texture)
     }
 
-    fn create_semaphore(&self, _type: &str) -> Result<Rc<dyn IGlExportableExternalImageTexture>, OpenGlException> {
-        Err(OpenGlException::new("Specified method is not supported."))
+    fn create_semaphore(&self, _type: &str) -> Result<Rc<dyn IGlExportableExternalImageTexture>, OpenGlError> {
+        Err(OpenGlError::new("Specified method is not supported."))
     }
 
     fn import_image(
         &self,
         handle: Rc<dyn IPlatformHandle>,
         properties: PlatformGraphicsExternalImageProperties,
-    ) -> Result<Rc<dyn IGlExternalImageTexture>, OpenGlException> {
+    ) -> Result<Rc<dyn IGlExternalImageTexture>, OpenGlError> {
         let descriptor = handle.handle_descriptor();
         let descriptor = descriptor.as_deref().unwrap_or_default();
         if !SUPPORTED_IMAGE_TYPES.contains(&descriptor) {
-            return Err(OpenGlException::new("Unsupported external memory type"));
+            return Err(OpenGlError::new("Unsupported external memory type"));
         }
 
         let context = self.context()?;
         let devices = self.devices.borrow();
-        let devices = devices.as_ref().ok_or_else(|| OpenGlException::new("The feature was disposed"))?;
+        let devices = devices.as_ref().ok_or_else(|| OpenGlError::new("The feature was disposed"))?;
         let current = IPlatformGraphicsContext::ensure_current(&*context);
 
         let mut guid = ID3D11Texture2D::IID;
@@ -190,8 +190,8 @@ impl IGlContextExternalObjectsFeature for AngleExternalObjectsFeature {
         Ok(texture)
     }
 
-    fn import_semaphore(&self, _handle: Rc<dyn IPlatformHandle>) -> Result<Rc<dyn IGlExternalSemaphore>, OpenGlException> {
-        Err(OpenGlException::new("Specified method is not supported."))
+    fn import_semaphore(&self, _handle: Rc<dyn IPlatformHandle>) -> Result<Rc<dyn IGlExternalSemaphore>, OpenGlError> {
+        Err(OpenGlError::new("Specified method is not supported."))
     }
 
     fn get_synchronization_capabilities(&self, image_handle_type: &str) -> CompositionGpuImportedImageSynchronizationCapabilities {

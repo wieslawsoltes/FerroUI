@@ -41,7 +41,7 @@ mod imp {
     use ferroui_base::platform::surfaces::{IPlatformRenderSurface, IPlatformRenderSurfaceRenderTarget};
     use ferroui_base::platform::{IPlatformGraphicsContext, PlatformRenderTargetState, PlatformThemeVariant, RenderTargetSceneInfo};
     use ferroui_base::rendering::composition::CompositionTransparencyLevel;
-    use ferroui_base::{PixelPoint, PixelSize, RenderTargetCorruptedException};
+    use ferroui_base::{PixelPoint, PixelSize, RenderTargetCorruptedError};
     use ferroui_microcom::{ComPtr, Guid, HResult, IUnknown, Interface};
     use ferroui_opengl::egl::IEglWindowGlPlatformSurfaceInfo;
     use std::any::{Any, TypeId};
@@ -265,9 +265,9 @@ mod imp {
         fn begin_draw_scene(
             &self,
             scene_info: &RenderTargetSceneInfo,
-        ) -> Result<Rc<dyn IDirect3D11TextureRenderTargetRenderSession>, RenderTargetCorruptedException> {
+        ) -> Result<Rc<dyn IDirect3D11TextureRenderTargetRenderSession>, RenderTargetCorruptedError> {
             if self.current_state().is_corrupted {
-                return Err(RenderTargetCorruptedException::new());
+                return Err(RenderTargetCorruptedError::new());
             }
             // The lock is left when the transaction is dropped: at the end
             // of the session, or here when the frame cannot be begun.
@@ -277,7 +277,7 @@ mod imp {
             // is not the corrupted render target in the reference; the
             // contract of the port has the one error, with the failure of
             // the system as its cause.
-            let failed = |error: HResult| RenderTargetCorruptedException::new_with_inner_exception(Rc::new(error));
+            let failed = |error: HResult| RenderTargetCorruptedError::new_with_inner_exception(Rc::new(error));
 
             let is_transparency = scene_info.transparency_level != CompositionTransparencyLevel::None;
 
@@ -349,7 +349,7 @@ mod imp {
     }
 
     impl IDirect3D11TextureRenderTarget for WinUiCompositedWindowRenderTarget {
-        fn begin_draw(&self) -> Result<Rc<dyn IDirect3D11TextureRenderTargetRenderSession>, RenderTargetCorruptedException> {
+        fn begin_draw(&self) -> Result<Rc<dyn IDirect3D11TextureRenderTargetRenderSession>, RenderTargetCorruptedError> {
             let info = self.window.window_info();
             let fallback_scene_info = RenderTargetSceneInfo::new(info.size(), info.scaling(), CompositionTransparencyLevel::None);
             self.begin_draw_scene(&fallback_scene_info)
@@ -364,7 +364,7 @@ mod imp {
         fn begin_draw(
             &self,
             scene_info: &RenderTargetSceneInfo,
-        ) -> Result<Rc<dyn IDirect3D11TextureRenderTargetRenderSession>, RenderTargetCorruptedException> {
+        ) -> Result<Rc<dyn IDirect3D11TextureRenderTargetRenderSession>, RenderTargetCorruptedError> {
             self.begin_draw_scene(scene_info)
         }
 

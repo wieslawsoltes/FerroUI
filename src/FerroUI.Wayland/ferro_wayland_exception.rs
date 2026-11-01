@@ -8,15 +8,19 @@ use std::fmt;
 /// the error value of the calls that can fail, and the payload of the panic
 /// that takes the place of an exception nobody catches.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct FerroWaylandException {
-    kind: FerroWaylandExceptionKind,
+pub struct FerroWaylandError {
+    kind: FerroWaylandErrorKind,
     message: String,
     inner: Option<String>,
 }
 
+/// The name of [`FerroWaylandError`] before 0.5.
+#[deprecated(since = "0.5.0", note = "use `FerroWaylandError`")]
+pub type FerroWaylandException = FerroWaylandError;
+
 /// Which class of the reference an error is.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub enum FerroWaylandExceptionKind {
+pub enum FerroWaylandErrorKind {
     /// The base class.
     General,
     /// `poll` failed.
@@ -31,21 +35,25 @@ pub enum FerroWaylandExceptionKind {
     ProtocolError { error_code: u32, error_message: Option<String> },
 }
 
-impl FerroWaylandException {
+/// The name of [`FerroWaylandErrorKind`] before 0.5.
+#[deprecated(since = "0.5.0", note = "use `FerroWaylandErrorKind`")]
+pub type FerroWaylandExceptionKind = FerroWaylandErrorKind;
+
+impl FerroWaylandError {
     pub fn new(message: impl Into<String>) -> Self {
-        Self { kind: FerroWaylandExceptionKind::General, message: message.into(), inner: None }
+        Self { kind: FerroWaylandErrorKind::General, message: message.into(), inner: None }
     }
 
     /// An error with the error that caused it.
     pub fn with_inner(message: impl Into<String>, inner: impl fmt::Display) -> Self {
-        Self { kind: FerroWaylandExceptionKind::General, message: message.into(), inner: Some(inner.to_string()) }
+        Self { kind: FerroWaylandErrorKind::General, message: message.into(), inner: Some(inner.to_string()) }
     }
 
-    fn of_kind(kind: FerroWaylandExceptionKind, message: impl Into<String>) -> Self {
+    fn of_kind(kind: FerroWaylandErrorKind, message: impl Into<String>) -> Self {
         Self { kind, message: message.into(), inner: None }
     }
 
-    pub fn kind(&self) -> &FerroWaylandExceptionKind {
+    pub fn kind(&self) -> &FerroWaylandErrorKind {
         &self.kind
     }
 
@@ -63,7 +71,7 @@ impl FerroWaylandException {
     pub fn is_network(&self) -> bool {
         matches!(
             self.kind,
-            FerroWaylandExceptionKind::Network | FerroWaylandExceptionKind::Flush | FerroWaylandExceptionKind::Read
+            FerroWaylandErrorKind::Network | FerroWaylandErrorKind::Flush | FerroWaylandErrorKind::Read
         )
     }
 
@@ -73,7 +81,7 @@ impl FerroWaylandException {
     }
 }
 
-impl fmt::Display for FerroWaylandException {
+impl fmt::Display for FerroWaylandError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(&self.message)?;
         if let Some(inner) = &self.inner {
@@ -83,15 +91,15 @@ impl fmt::Display for FerroWaylandException {
     }
 }
 
-impl std::error::Error for FerroWaylandException {}
+impl std::error::Error for FerroWaylandError {}
 
 /// `poll` failed.
 pub struct FerroWaylandPollException;
 
 impl FerroWaylandPollException {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new() -> FerroWaylandException {
-        FerroWaylandException::of_kind(FerroWaylandExceptionKind::Poll, "poll failed")
+    pub fn new() -> FerroWaylandError {
+        FerroWaylandError::of_kind(FerroWaylandErrorKind::Poll, "poll failed")
     }
 }
 
@@ -100,8 +108,8 @@ pub struct FerroWaylandNetworkException;
 
 impl FerroWaylandNetworkException {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(message: impl Into<String>) -> FerroWaylandException {
-        FerroWaylandException::of_kind(FerroWaylandExceptionKind::Network, message)
+    pub fn new(message: impl Into<String>) -> FerroWaylandError {
+        FerroWaylandError::of_kind(FerroWaylandErrorKind::Network, message)
     }
 }
 
@@ -110,12 +118,12 @@ pub struct FerroWaylandFlushException;
 
 impl FerroWaylandFlushException {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(message: impl Into<String>) -> FerroWaylandException {
-        FerroWaylandException::of_kind(FerroWaylandExceptionKind::Flush, message)
+    pub fn new(message: impl Into<String>) -> FerroWaylandError {
+        FerroWaylandError::of_kind(FerroWaylandErrorKind::Flush, message)
     }
 
     /// The error for an error number of the C library.
-    pub fn from_errno(errno: i32) -> FerroWaylandException {
+    pub fn from_errno(errno: i32) -> FerroWaylandError {
         Self::new(format!("wl_display_flush failed, errno: {errno}"))
     }
 }
@@ -125,12 +133,12 @@ pub struct FerroWaylandReadException;
 
 impl FerroWaylandReadException {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(message: impl Into<String>) -> FerroWaylandException {
-        FerroWaylandException::of_kind(FerroWaylandExceptionKind::Read, message)
+    pub fn new(message: impl Into<String>) -> FerroWaylandError {
+        FerroWaylandError::of_kind(FerroWaylandErrorKind::Read, message)
     }
 
     /// The error for an error number of the C library.
-    pub fn from_errno(errno: i32) -> FerroWaylandException {
+    pub fn from_errno(errno: i32) -> FerroWaylandError {
         Self::new(format!("wl_display_read_events failed, errno: {errno}"))
     }
 }
@@ -140,18 +148,18 @@ pub struct FerroWaylandProtocolErrorException;
 
 impl FerroWaylandProtocolErrorException {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new() -> FerroWaylandException {
-        FerroWaylandException::of_kind(
-            FerroWaylandExceptionKind::ProtocolError { error_code: 0, error_message: None },
+    pub fn new() -> FerroWaylandError {
+        FerroWaylandError::of_kind(
+            FerroWaylandErrorKind::ProtocolError { error_code: 0, error_message: None },
             "protocol error",
         )
     }
 
     /// The error with the code and the message of the compositor.
-    pub fn with_code(error_code: u32, error_message: impl Into<String>) -> FerroWaylandException {
+    pub fn with_code(error_code: u32, error_message: impl Into<String>) -> FerroWaylandError {
         let error_message = error_message.into();
-        FerroWaylandException::of_kind(
-            FerroWaylandExceptionKind::ProtocolError { error_code, error_message: Some(error_message.clone()) },
+        FerroWaylandError::of_kind(
+            FerroWaylandErrorKind::ProtocolError { error_code, error_message: Some(error_message.clone()) },
             format!("protocol error: {error_code} {error_message}"),
         )
     }
@@ -176,13 +184,13 @@ mod tests {
         assert_eq!(error.message(), "protocol error: 3 bad surface");
         assert_eq!(
             error.kind(),
-            &FerroWaylandExceptionKind::ProtocolError { error_code: 3, error_message: Some("bad surface".to_string()) }
+            &FerroWaylandErrorKind::ProtocolError { error_code: 3, error_message: Some("bad surface".to_string()) }
         );
     }
 
     #[test]
     fn an_error_shows_what_caused_it() {
-        let error = FerroWaylandException::with_inner("Unable to connect to Wayland display", "no socket");
+        let error = FerroWaylandError::with_inner("Unable to connect to Wayland display", "no socket");
         assert_eq!(error.to_string(), "Unable to connect to Wayland display ---> no socket");
         assert_eq!(error.inner(), Some("no socket"));
     }

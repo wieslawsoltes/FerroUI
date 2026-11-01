@@ -6,7 +6,7 @@ use crate::automation::provider::{
     IExpandCollapseProvider, IInvokeProvider, IToggleProvider, ProviderAdapter, ToggleState,
 };
 use crate::automation::{
-    ElementNotEnabledException, ExpandCollapsePatternIdentifiers, ExpandCollapseState, TogglePatternIdentifiers,
+    ElementNotEnabledError, ExpandCollapsePatternIdentifiers, ExpandCollapseState, TogglePatternIdentifiers,
 };
 use crate::i_menu_element::as_menu_element;
 use crate::primitives::AccessText;
@@ -133,11 +133,11 @@ impl IExpandCollapseProvider for ProviderAdapter<MenuItemAutomationPeer> {
         self.0.shows_menu()
     }
 
-    fn expand(&self) -> Result<(), ElementNotEnabledException> {
+    fn expand(&self) -> Result<(), ElementNotEnabledError> {
         self.0.expand()
     }
 
-    fn collapse(&self) -> Result<(), ElementNotEnabledException> {
+    fn collapse(&self) -> Result<(), ElementNotEnabledError> {
         self.0.collapse()
     }
 }
@@ -147,7 +147,7 @@ impl IInvokeProvider for ProviderAdapter<MenuItemAutomationPeer> {
         self.0.clone().upcast()
     }
 
-    fn invoke(&self) -> Result<(), ElementNotEnabledException> {
+    fn invoke(&self) -> Result<(), ElementNotEnabledError> {
         self.0.invoke()
     }
 }
@@ -161,7 +161,7 @@ impl IToggleProvider for ProviderAdapter<MenuItemAutomationPeer> {
         self.0.toggle_state()
     }
 
-    fn toggle(&self) -> Result<(), ElementNotEnabledException> {
+    fn toggle(&self) -> Result<(), ElementNotEnabledError> {
         self.0.toggle()
     }
 }
@@ -214,13 +214,13 @@ impl MenuItemAutomationPeer {
 
     /// Sends a request to activate the menu item (the invoke provider
     /// contract).
-    pub fn invoke(&self) -> Result<(), ElementNotEnabledException> {
+    pub fn invoke(&self) -> Result<(), ElementNotEnabledError> {
         self.ensure_enabled()?;
 
         let owner = self.owner();
         let (command, command_parameter) = (owner.command(), owner.command_parameter());
         if command.is_some_and(|command| !command.can_execute(command_parameter.as_ref())) {
-            return Err(ElementNotEnabledException::new());
+            return Err(ElementNotEnabledError::new());
         }
 
         // This feels like a bit of a hack: ideally we'd add a new method to the menu item or
@@ -242,7 +242,7 @@ impl MenuItemAutomationPeer {
     /// # Panics
     ///
     /// Panics if the item has no submenu.
-    pub fn expand(&self) -> Result<(), ElementNotEnabledException> {
+    pub fn expand(&self) -> Result<(), ElementNotEnabledError> {
         self.ensure_enabled()?;
         let owner = self.owner();
         if !owner.has_sub_menu() {
@@ -258,7 +258,7 @@ impl MenuItemAutomationPeer {
     /// # Panics
     ///
     /// Panics if the item has no submenu.
-    pub fn collapse(&self) -> Result<(), ElementNotEnabledException> {
+    pub fn collapse(&self) -> Result<(), ElementNotEnabledError> {
         self.ensure_enabled()?;
         let owner = self.owner();
         if !owner.has_sub_menu() {
@@ -283,7 +283,7 @@ impl MenuItemAutomationPeer {
         Ok(())
     }
 
-    fn toggle(&self) -> Result<(), ElementNotEnabledException> {
+    fn toggle(&self) -> Result<(), ElementNotEnabledError> {
         self.ensure_enabled()?;
 
         let owner = self.owner();

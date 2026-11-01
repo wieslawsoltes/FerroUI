@@ -2,7 +2,7 @@ use crate::entry_points::{gl_entry_points, GetProcAddress};
 use crate::gl_consts::*;
 use crate::{
     IGlContext, IGlContextExternalObjectsFeature, IGlExportableExternalImageTexture, IGlExternalImageTexture,
-    IGlExternalSemaphore, OpenGlException,
+    IGlExternalSemaphore, OpenGlError,
 };
 use ferroui_base::logging::{LogEventLevel, Logger};
 use ferroui_base::platform::{
@@ -127,7 +127,7 @@ impl ExternalObjectsOpenGlExtensionFeature {
         None
     }
 
-    fn new(context: &Rc<dyn IGlContext>, extensions: &[String]) -> Result<Self, OpenGlException> {
+    fn new(context: &Rc<dyn IGlContext>, extensions: &[String]) -> Result<Self, OpenGlError> {
         let has = |extension: &str| extensions.iter().any(|e| e == extension);
         let gl = context.gl_interface();
         let get_proc_address: GetProcAddress = {
@@ -135,7 +135,7 @@ impl ExternalObjectsOpenGlExtensionFeature {
             Rc::new(move |name: &str| gl.get_proc_address(name))
         };
         let ext = ExternalObjectsInterface::try_new(&get_proc_address)
-            .map_err(|name| OpenGlException::new(format!("Unable to find an entry point named '{name}'.")))?;
+            .map_err(|name| OpenGlError::new(format!("Unable to find an entry point named '{name}'.")))?;
 
         let mut device_uuid = None;
         if ext.is_get_unsigned_bytei_v_ext_available() {
@@ -204,26 +204,26 @@ impl IGlContextExternalObjectsFeature for ExternalObjectsOpenGlExtensionFeature 
         _type: &str,
         _size: PixelSize,
         _format: PlatformGraphicsExternalImageFormat,
-    ) -> Result<Rc<dyn IGlExportableExternalImageTexture>, OpenGlException> {
-        Err(OpenGlException::new("Specified method is not supported."))
+    ) -> Result<Rc<dyn IGlExportableExternalImageTexture>, OpenGlError> {
+        Err(OpenGlError::new("Specified method is not supported."))
     }
 
-    fn create_semaphore(&self, _type: &str) -> Result<Rc<dyn IGlExportableExternalImageTexture>, OpenGlException> {
-        Err(OpenGlException::new("Specified method is not supported."))
+    fn create_semaphore(&self, _type: &str) -> Result<Rc<dyn IGlExportableExternalImageTexture>, OpenGlError> {
+        Err(OpenGlError::new("Specified method is not supported."))
     }
 
     fn import_image(
         &self,
         handle: Rc<dyn IPlatformHandle>,
         properties: PlatformGraphicsExternalImageProperties,
-    ) -> Result<Rc<dyn IGlExternalImageTexture>, OpenGlException> {
+    ) -> Result<Rc<dyn IGlExternalImageTexture>, OpenGlError> {
         let handle_descriptor = match handle.handle_descriptor() {
             Some(descriptor) if !descriptor.is_empty() => descriptor.to_string(),
-            _ => return Err(OpenGlException::new("The handle must have a descriptor")),
+            _ => return Err(OpenGlError::new("The handle must have a descriptor")),
         };
 
         if !self.image_types.contains(&handle_descriptor) {
-            return Err(OpenGlException::new(format!("{handle_descriptor} is not supported")));
+            return Err(OpenGlError::new(format!("{handle_descriptor} is not supported")));
         }
 
         if handle_descriptor == KnownPlatformGraphicsExternalImageHandleTypes::VULKAN_OPAQUE_POSIX_FILE_DESCRIPTOR {
@@ -243,7 +243,7 @@ impl IGlContextExternalObjectsFeature for ExternalObjectsOpenGlExtensionFeature 
 
             let err = gl.get_error();
             if err != 0 {
-                return Err(OpenGlException::get_formatted_exception_for_code("glImportMemoryFdEXT", err));
+                return Err(OpenGlError::get_formatted_exception_for_code("glImportMemoryFdEXT", err));
             }
             let old_texture = gl.get_integerv(GL_TEXTURE_BINDING_2D);
 
@@ -262,7 +262,7 @@ impl IGlContextExternalObjectsFeature for ExternalObjectsOpenGlExtensionFeature 
 
             gl.bind_texture(GL_TEXTURE_2D, old_texture);
             if err != 0 {
-                return Err(OpenGlException::get_formatted_exception_for_code("glTexStorageMem2DEXT", err));
+                return Err(OpenGlError::get_formatted_exception_for_code("glTexStorageMem2DEXT", err));
             }
 
             return Ok(Rc::new(ExternalImageTexture {
@@ -274,17 +274,17 @@ impl IGlContextExternalObjectsFeature for ExternalObjectsOpenGlExtensionFeature 
             }));
         }
 
-        Err(OpenGlException::new(format!("{handle_descriptor} is not supported")))
+        Err(OpenGlError::new(format!("{handle_descriptor} is not supported")))
     }
 
-    fn import_semaphore(&self, handle: Rc<dyn IPlatformHandle>) -> Result<Rc<dyn IGlExternalSemaphore>, OpenGlException> {
+    fn import_semaphore(&self, handle: Rc<dyn IPlatformHandle>) -> Result<Rc<dyn IGlExternalSemaphore>, OpenGlError> {
         let handle_descriptor = match handle.handle_descriptor() {
             Some(descriptor) if !descriptor.is_empty() => descriptor.to_string(),
-            _ => return Err(OpenGlException::new("The handle must have a descriptor")),
+            _ => return Err(OpenGlError::new("The handle must have a descriptor")),
         };
 
         if !self.semaphore_types.contains(&handle_descriptor) {
-            return Err(OpenGlException::new(format!("{handle_descriptor} is not supported")));
+            return Err(OpenGlError::new(format!("{handle_descriptor} is not supported")));
         }
 
         if handle_descriptor == KnownPlatformGraphicsExternalSemaphoreHandleTypes::VULKAN_OPAQUE_POSIX_FILE_DESCRIPTOR {
@@ -299,7 +299,7 @@ impl IGlContextExternalObjectsFeature for ExternalObjectsOpenGlExtensionFeature 
             }));
         }
 
-        Err(OpenGlException::new(format!("{handle_descriptor} is not supported")))
+        Err(OpenGlError::new(format!("{handle_descriptor} is not supported")))
     }
 
     fn get_synchronization_capabilities(

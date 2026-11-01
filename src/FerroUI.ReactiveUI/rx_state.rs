@@ -1,6 +1,6 @@
 //! `RxState` (`ReactiveUI.Shared/RxState.cs`).
 
-use crate::{RxSchedulers, UnhandledErrorException};
+use crate::{RxSchedulers, UnhandledError};
 use ferroui_reactive::concurrency::SchedulerExt;
 use ferroui_reactive::Observer;
 use ferroui_system::{IObserver, ObservableError};
@@ -29,7 +29,7 @@ impl RxState {
     ///
     /// Unless [`initialize_exception_handler`](Self::initialize_exception_handler) set another
     /// one first, it schedules on [`RxSchedulers::main_thread_scheduler`] a panic with an
-    /// [`UnhandledErrorException`] that names the error, where upstream throws that exception.
+    /// [`UnhandledError`] that names the error, where upstream throws that exception.
     pub fn default_exception_handler() -> Rc<dyn IObserver<ObservableError>> {
         if let Some(handler) = DEFAULT_EXCEPTION_HANDLER.with(|slot| slot.borrow().clone()) {
             return handler;
@@ -60,7 +60,7 @@ impl RxState {
         let handler = Observer::create(|exception: ObservableError| {
             // Upstream breaks into an attached debugger first (`Debugger.Break`); there is no
             // such call here.
-            let unhandled = UnhandledErrorException::with_inner(UNHANDLED_ERROR_MESSAGE, &*exception);
+            let unhandled = UnhandledError::with_inner(UNHANDLED_ERROR_MESSAGE, &*exception);
             let _ = RxSchedulers::main_thread_scheduler().schedule_action(move || {
                 std::panic::panic_any(unhandled);
             });

@@ -4,8 +4,8 @@ use std::fmt;
 
 use super::encoding_id_extensions::Encoding;
 use super::font_version::FontVersion;
-use super::invalid_font_table_exception::InvalidFontTableException;
-use super::missing_font_table_exception::MissingFontTableException;
+use super::invalid_font_table_exception::InvalidFontTableError;
+use super::missing_font_table_exception::MissingFontTableError;
 
 /// The failures the table readers report instead of the exceptions the
 /// reference implementation throws while parsing font data.
@@ -28,9 +28,9 @@ pub enum FontTableError {
     /// Any other invalid state (reference: `InvalidOperationException`).
     InvalidOperation(String),
     /// Invalid data in a table.
-    InvalidFontTable(InvalidFontTableException),
+    InvalidFontTable(InvalidFontTableError),
     /// A required table is missing.
-    MissingFontTable(MissingFontTableException),
+    MissingFontTable(MissingFontTableError),
 }
 
 impl FontTableError {
@@ -76,14 +76,14 @@ impl fmt::Display for FontTableError {
 
 impl std::error::Error for FontTableError {}
 
-impl From<InvalidFontTableException> for FontTableError {
-    fn from(error: InvalidFontTableException) -> Self {
+impl From<InvalidFontTableError> for FontTableError {
+    fn from(error: InvalidFontTableError) -> Self {
         FontTableError::InvalidFontTable(error)
     }
 }
 
-impl From<MissingFontTableException> for FontTableError {
-    fn from(error: MissingFontTableException) -> Self {
+impl From<MissingFontTableError> for FontTableError {
+    fn from(error: MissingFontTableError) -> Self {
         FontTableError::MissingFontTable(error)
     }
 }

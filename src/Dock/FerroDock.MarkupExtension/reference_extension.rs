@@ -5,7 +5,7 @@ use ferroui_base::{
     metadata::IServiceProvider,
     BoxedValue,
 };
-use ferroui_markup_xaml::{MarkupExtension, ServiceProviderExtensions, XamlLoadException};
+use ferroui_markup_xaml::{MarkupExtension, ServiceProviderExtensions, XamlLoadError};
 use std::{cell::RefCell, rc::Rc};
 
 /// Resolves Name synchronously in the calling document's native name scope.
@@ -63,7 +63,7 @@ impl MarkupExtension for ReferenceExtension {
     fn provide_value(
         &self,
         service_provider: &Rc<dyn IServiceProvider>,
-    ) -> Result<Option<BoxedValue>, XamlLoadException> {
+    ) -> Result<Option<BoxedValue>, XamlLoadError> {
         Ok(Self::provide_value(self, service_provider))
     }
 }

@@ -7,14 +7,18 @@ use std::fmt;
 
 /// The error of a problem with the VNC client-server communication.
 #[derive(Debug)]
-pub struct VncException {
+pub struct VncError {
     message: String,
     reason: VncFailureReason,
     inner_exception: Option<Box<dyn Error + Send + Sync>>,
 }
 
-impl VncException {
-    /// Initializes a new instance of the [`VncException`] class, with a
+/// The name of [`VncError`] before 0.5.
+#[deprecated(since = "0.5.0", note = "use `VncError`")]
+pub type VncException = VncError;
+
+impl VncError {
+    /// Initializes a new instance of the [`VncError`] class, with a
     /// `reason` and optionally the error that caused it.
     pub fn new(
         message: impl Into<String>,
@@ -39,20 +43,20 @@ impl VncException {
     }
 }
 
-impl Default for VncException {
+impl Default for VncError {
     /// The exception without a reason: "VNC error.".
     fn default() -> Self {
         Self::new("VNC error.", VncFailureReason::Unknown, None)
     }
 }
 
-impl fmt::Display for VncException {
+impl fmt::Display for VncError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(&self.message)
     }
 }
 
-impl Error for VncException {
+impl Error for VncError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         self.inner_exception
             .as_deref()

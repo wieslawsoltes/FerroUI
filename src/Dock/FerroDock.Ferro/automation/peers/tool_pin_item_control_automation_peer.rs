@@ -18,7 +18,7 @@ use ferroui_controls::automation::{
         ControlAutomationPeer, ControlAutomationPeerImpl,
     },
     provider::{IInvokeProvider, ISelectionItemProvider, ISelectionProvider},
-    ElementNotEnabledException,
+    ElementNotEnabledError,
 };
 use std::rc::Rc;
 #[repr(C)]
@@ -168,7 +168,7 @@ impl IInvokeProvider for Provider {
     fn peer(&self) -> Ref<AutomationPeer> {
         self.0.clone().upcast()
     }
-    fn invoke(&self) -> Result<(), ElementNotEnabledException> {
+    fn invoke(&self) -> Result<(), ElementNotEnabledError> {
         self.0.invoke();
         Ok(())
     }
@@ -183,15 +183,15 @@ impl ISelectionItemProvider for Provider {
     fn selection_container(&self) -> Option<Rc<dyn ISelectionProvider>> {
         self.0.selection_container()
     }
-    fn add_to_selection(&self) -> Result<(), ElementNotEnabledException> {
+    fn add_to_selection(&self) -> Result<(), ElementNotEnabledError> {
         self.0.invoke();
         Ok(())
     }
-    fn remove_from_selection(&self) -> Result<(), ElementNotEnabledException> {
+    fn remove_from_selection(&self) -> Result<(), ElementNotEnabledError> {
         self.0.remove_from_selection();
         Ok(())
     }
-    fn select(&self) -> Result<(), ElementNotEnabledException> {
+    fn select(&self) -> Result<(), ElementNotEnabledError> {
         self.0.invoke();
         Ok(())
     }

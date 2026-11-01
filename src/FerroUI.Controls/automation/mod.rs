@@ -29,6 +29,8 @@ pub use automation_live_setting::AutomationLiveSetting;
 pub use automation_properties::{AccessibilityView, AutomationProperties};
 pub use automation_property::AutomationProperty;
 pub use automation_property_changed_event_args::AutomationPropertyChangedEventArgs;
+pub use element_not_enabled_exception::ElementNotEnabledError;
+#[allow(deprecated)]
 pub use element_not_enabled_exception::ElementNotEnabledException;
 pub use expand_collapse_pattern_identifiers::ExpandCollapsePatternIdentifiers;
 pub use expand_collapse_state::ExpandCollapseState;

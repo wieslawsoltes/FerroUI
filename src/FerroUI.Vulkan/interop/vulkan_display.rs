@@ -3,7 +3,7 @@ use super::{
     VulkanSemaphorePair,
 };
 use crate::{
-    IVulkanKhrSurfacePlatformSurface, IVulkanPlatformGraphicsContext, VulkanException, VulkanExceptionExtensions,
+    IVulkanKhrSurfacePlatformSurface, IVulkanPlatformGraphicsContext, VulkanError, VulkanExceptionExtensions,
     VulkanResultExtensions,
 };
 use ash::vk;
@@ -113,8 +113,8 @@ impl SwapchainState {
     pub fn needs_recreation(
         self,
         size_differs: bool,
-        parameters_changed: impl FnOnce() -> Result<bool, VulkanException>,
-    ) -> Result<bool, VulkanException> {
+        parameters_changed: impl FnOnce() -> Result<bool, VulkanError>,
+    ) -> Result<bool, VulkanError> {
         Ok(match self {
             _ if size_differs => true,
             Self::OutOfDate => true,
@@ -207,7 +207,7 @@ impl VulkanDisplay {
         swapchain: vk::SwapchainKHR,
         parameters: SwapchainParameters,
         platform_surface: Rc<dyn IVulkanKhrSurfacePlatformSurface>,
-    ) -> Result<Self, VulkanException> {
+    ) -> Result<Self, VulkanError> {
         let semaphore_pair = VulkanSemaphorePair::new(context.clone())?;
         let command_buffer_pool = VulkanCommandBufferPool::new(context.clone(), false)?;
         let display = Self {
@@ -239,7 +239,7 @@ impl VulkanDisplay {
     }
 
     /// The format of the surface, asked once.
-    pub fn surface_format(&self) -> Result<vk::SurfaceFormatKHR, VulkanException> {
+    pub fn surface_format(&self) -> Result<vk::SurfaceFormatKHR, VulkanError> {
         if self.surface_format.get().format == vk::Format::UNDEFINED {
             if let Some(surface) = self.surface.borrow().as_ref() {
                 self.surface_format.set(surface.get_surface_format()?);
@@ -252,7 +252,7 @@ impl VulkanDisplay {
         context: &Rc<dyn IVulkanPlatformGraphicsContext>,
         surface: &VulkanKhrSurface,
         old_display: Option<&VulkanDisplay>,
-    ) -> Result<(vk::SwapchainKHR, SwapchainParameters), VulkanException> {
+    ) -> Result<(vk::SwapchainKHR, SwapchainParameters), VulkanError> {
         while !surface.can_surface_present()? {
             thread::sleep(Duration::from_millis(16));
         }
@@ -296,7 +296,7 @@ impl VulkanDisplay {
 
     /// Whether the surface now asks for other parameters of a swap chain
     /// than the current one was created with (the present mode aside).
-    fn parameters_changed(&self) -> Result<bool, VulkanException> {
+    fn parameters_changed(&self) -> Result<bool, VulkanError> {
         let surface = self.surface.borrow();
         let Some(surface) = surface.as_ref() else { return Ok(true) };
         let capabilities = self
@@ -319,7 +319,7 @@ impl VulkanDisplay {
     pub fn create_display(
         context: &Rc<dyn IVulkanPlatformGraphicsContext>,
         surface: Rc<dyn IVulkanKhrSurfacePlatformSurface>,
-    ) -> Result<VulkanDisplay, VulkanException> {
+    ) -> Result<VulkanDisplay, VulkanError> {
         let khr_surface = VulkanKhrSurface::new(context.clone(), surface.clone());
         let (swapchain, parameters) = Self::create_swapchain(context, &khr_surface, None)?;
         VulkanDisplay::new(context.clone(), khr_surface, swapchain, parameters, surface)
@@ -332,7 +332,7 @@ impl VulkanDisplay {
         }
     }
 
-    fn create_swapchain_images(&self) -> Result<(), VulkanException> {
+    fn create_swapchain_images(&self) -> Result<(), VulkanError> {
         self.destroy_current_image_views();
         let extent = self.swapchain_extent.get();
         self.size.set(PixelSize::new(extent.width as i32, extent.height as i32));
@@ -355,7 +355,7 @@ impl VulkanDisplay {
         &self,
         swapchain_image: vk::Image,
         format: vk::Format,
-    ) -> Result<vk::ImageView, VulkanException> {
+    ) -> Result<vk::ImageView, VulkanError> {
         let image_view_create_info = vk::ImageViewCreateInfo::default()
             .subresource_range(vk::ImageSubresourceRange {
                 aspect_mask: vk::ImageAspectFlags::COLOR,
@@ -372,7 +372,7 @@ impl VulkanDisplay {
             .throw_on_error("vkCreateImageView")
     }
 
-    fn recreate_swapchain(&self) -> Result<(), VulkanException> {
+    fn recreate_swapchain(&self) -> Result<(), VulkanError> {
         if self.surface.borrow().is_none() {
             return self.recreate_surface();
         }
@@ -389,7 +389,7 @@ impl VulkanDisplay {
         self.create_swapchain_images()
     }
 
-    fn recreate_surface(&self) -> Result<(), VulkanException> {
+    fn recreate_surface(&self) -> Result<(), VulkanError> {
         if let Some(surface) = self.surface.borrow_mut().take() {
             surface.dispose();
         }
@@ -402,7 +402,7 @@ impl VulkanDisplay {
     /// Recreates the swap chain when the size of the surface is not the
     /// size of the swap chain anymore, or when a result of the last frame
     /// asked for it (`SwapchainState`), and tells that it did.
-    pub fn ensure_swapchain_available(&self) -> Result<bool, VulkanException> {
+    pub fn ensure_swapchain_available(&self) -> Result<bool, VulkanError> {
         let surface_size = self.surface.borrow().as_ref().map(|surface| surface.size());
         let state = self.state.replace(SwapchainState::Current);
         if state.needs_recreation(Some(self.size.get()) != surface_size, || self.parameters_changed())? {
@@ -414,7 +414,7 @@ impl VulkanDisplay {
 
     /// Acquires the next image of the swap chain and starts the commands
     /// that fill it.
-    pub fn start_presentation(&self) -> Result<Rc<VulkanCommandBuffer>, VulkanException> {
+    pub fn start_presentation(&self) -> Result<Rc<VulkanCommandBuffer>, VulkanError> {
         self.next_image.set(0);
         loop {
             let (acquire_result, next_image) = self.context.device_api().acquire_next_image_khr(
@@ -514,7 +514,7 @@ impl VulkanDisplay {
     }
 
     /// Submits the commands and presents the acquired image.
-    pub fn end_presentation(&self, command_buffer: &VulkanCommandBuffer) -> Result<(), VulkanException> {
+    pub fn end_presentation(&self, command_buffer: &VulkanCommandBuffer) -> Result<(), VulkanError> {
         VulkanMemoryHelper::transition_layout(
             &*self.context,
             command_buffer,
@@ -693,7 +693,7 @@ mod tests {
     #[test]
     fn a_suboptimal_swap_chain_is_recreated_only_when_the_surface_asks_for_other_parameters() {
         use SwapchainState::*;
-        let never = || -> Result<bool, VulkanException> { panic!("the parameters are not asked for") };
+        let never = || -> Result<bool, VulkanError> { panic!("the parameters are not asked for") };
         assert!(!Current.needs_recreation(false, never).unwrap());
         assert!(Current.needs_recreation(true, never).unwrap());
         assert!(OutOfDate.needs_recreation(false, never).unwrap());

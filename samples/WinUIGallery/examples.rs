@@ -9,7 +9,7 @@ use ferroui_controls::{
     Border, Button, ComboBox, Control, NumberBox, RadioButtons, Slider, SplitButton,
     TextBlock, TextBox, ToggleSplitButton,
 };
-use ferroui_markup_xaml::XamlLoadException;
+use ferroui_markup_xaml::XamlLoadError;
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use std::cell::Cell;
 use std::rc::Rc;
@@ -115,7 +115,7 @@ pub fn find(page_id: &str) -> Option<&'static PageAdaptation> {
 
 /// Creates real framework controls from the reviewed markup, then wires each
 /// behavior in Rust. No alternate drawing or input system is used.
-pub fn create(sample: &PageAdaptation) -> Result<Ref<Control>, XamlLoadException> {
+pub fn create(sample: &PageAdaptation) -> Result<Ref<Control>, XamlLoadError> {
     crate::assets::register();
     ferroui_controls_color_picker::register_types();
     let root = FerroRuntimeXamlLoader::parse_as::<Ref<Control>>(sample.xaml, None)?;

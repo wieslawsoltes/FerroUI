@@ -12,7 +12,7 @@ use ferroui_base::reactive::IDisposable;
 use ferroui_base::PixelSize;
 use ferroui_vulkan::{
     try_get_vulkan_khr_surface, try_get_vulkan_render_target_surface, IVulkanContextExternalObjectsFeature,
-    IVulkanKhrSurfacePlatformSurfaceFactory, IVulkanPlatformGraphicsContext, VulkanException,
+    IVulkanKhrSurfacePlatformSurfaceFactory, IVulkanPlatformGraphicsContext, VulkanError,
 };
 use skia_safe::gpu::vk::{BackendContext, GetProcOf, Version};
 use skia_safe::gpu::{direct_contexts, ContextOptions};
@@ -100,7 +100,7 @@ impl VulkanSkiaGpu {
             let gr_context = direct_contexts::make_vulkan(&ctx, &options).map(GaneshGrContext::new);
             current.dispose();
             let gr_context = gr_context.unwrap_or_else(|| {
-                panic!("{}", VulkanException::new("Unable to create GrContext from IVulkanDevice"))
+                panic!("{}", VulkanError::new("Unable to create GrContext from IVulkanDevice"))
             });
             if let Some(max_resource_bytes) = max_resource_bytes {
                 gr_context.set_resource_cache_limit(max_resource_bytes);

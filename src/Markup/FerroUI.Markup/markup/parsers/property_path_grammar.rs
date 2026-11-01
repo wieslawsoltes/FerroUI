@@ -1,6 +1,6 @@
 //! The grammar of property paths (`(ns:Type.Property).Child :> Type . Sub`).
 
-use ferroui_base::data::core::ExpressionParseException;
+use ferroui_base::data::core::ExpressionParseError;
 use ferroui_base::utilities::CharacterReader;
 
 /// A syntax element of a parsed property path.
@@ -33,13 +33,13 @@ pub struct PropertyPathGrammar;
 
 impl PropertyPathGrammar {
     /// Parses `s` into a list of syntax elements.
-    pub fn parse(s: &str) -> Result<Vec<PropertyPathSyntax>, ExpressionParseException> {
+    pub fn parse(s: &str) -> Result<Vec<PropertyPathSyntax>, ExpressionParseError> {
         let mut r = CharacterReader::new(s);
         parse(&mut r)
     }
 }
 
-type ParseResult<T> = Result<T, ExpressionParseException>;
+type ParseResult<T> = Result<T, ExpressionParseError>;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum State {
@@ -104,17 +104,17 @@ fn parse_type_qualified_property(
     let (ns, name) = parse_xaml_identifier(r)?;
 
     if !r.take_if('.') {
-        return Err(ExpressionParseException::new(r.position(), ERROR));
+        return Err(ExpressionParseError::new(r.position(), ERROR));
     }
 
     let property_name = r.parse_identifier();
     if property_name.is_empty() {
-        return Err(ExpressionParseException::new(r.position(), ERROR));
+        return Err(ExpressionParseError::new(r.position(), ERROR));
     }
 
     r.skip_whitespace();
     if !r.take_if(')') {
-        return Err(ExpressionParseException::new(
+        return Err(ExpressionParseError::new(
             r.position(),
             format!(
                 "Expected ')' after qualified property name {}:{}.{}",
@@ -139,7 +139,7 @@ fn parse_type_qualified_property(
 fn parse_xaml_identifier(r: &mut CharacterReader<'_>) -> ParseResult<(Option<String>, String)> {
     let ident = r.parse_identifier();
     if ident.is_empty() {
-        return Err(ExpressionParseException::new(
+        return Err(ExpressionParseError::new(
             r.position(),
             "Expected identifier",
         ));
@@ -147,7 +147,7 @@ fn parse_xaml_identifier(r: &mut CharacterReader<'_>) -> ParseResult<(Option<Str
     if r.take_if(':') {
         let part2 = r.parse_identifier();
         if part2.is_empty() {
-            return Err(ExpressionParseException::new(
+            return Err(ExpressionParseError::new(
                 r.position(),
                 format!("Expected the rest of the identifier after {ident}:"),
             ));
@@ -162,7 +162,7 @@ fn parse_property(r: &mut CharacterReader<'_>) -> ParseResult<(State, PropertyPa
     r.skip_whitespace();
     let prop = r.parse_identifier();
     if prop.is_empty() {
-        return Err(ExpressionParseException::new(
+        return Err(ExpressionParseError::new(
             r.position(),
             "Unable to parse property name",
         ));
@@ -202,7 +202,7 @@ fn parse_after_property(
         return Ok((State::Next, Some(PropertyPathSyntax::ChildTraversal)));
     }
 
-    Err(ExpressionParseException::new(
+    Err(ExpressionParseError::new(
         r.position(),
         format!("Unexpected character {c} after property name"),
     ))

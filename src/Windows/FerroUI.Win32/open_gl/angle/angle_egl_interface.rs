@@ -14,7 +14,7 @@
 //! tests run it against one of their own on every host.
 
 use ferroui_opengl::egl::EglInterface;
-use ferroui_opengl::{GetProcAddress, OpenGlException};
+use ferroui_opengl::{GetProcAddress, OpenGlError};
 use std::ffi::c_void;
 use std::rc::Rc;
 
@@ -39,7 +39,7 @@ impl Win32AngleEglInterface {
     /// (the reference throws, and reports ANGLE as not loadable; the ANGLE
     /// of this build is linked in, so its entry points are known when the
     /// application is built).
-    pub fn new() -> Result<Win32AngleEglInterface, OpenGlException> {
+    pub fn new() -> Result<Win32AngleEglInterface, OpenGlError> {
         let get_proc_address = load_angle()?;
         // SAFETY: the loader of ANGLE returns, for a name, null or the
         // address of the entry point of that name, and the entry points are
@@ -117,11 +117,11 @@ impl Win32AngleEglInterface {
 
 /// The loader of the ANGLE that is linked into the application.
 #[cfg(all(windows, feature = "angle"))]
-fn load_angle() -> Result<GetProcAddress, OpenGlException> {
+fn load_angle() -> Result<GetProcAddress, OpenGlError> {
     let disp = mozangle::egl::get_proc_address("eglGetPlatformDisplayEXT");
 
     if disp.is_null() {
-        return Err(OpenGlException::new("libegl.dll doesn't have eglGetPlatformDisplayEXT entry point"));
+        return Err(OpenGlError::new("libegl.dll doesn't have eglGetPlatformDisplayEXT entry point"));
     }
 
     Ok(Rc::new(|name: &str| mozangle::egl::get_proc_address(name)))
@@ -129,8 +129,8 @@ fn load_angle() -> Result<GetProcAddress, OpenGlException> {
 
 /// Without the feature `angle` the application has no ANGLE.
 #[cfg(not(all(windows, feature = "angle")))]
-fn load_angle() -> Result<GetProcAddress, OpenGlException> {
-    Err(OpenGlException::new(
+fn load_angle() -> Result<GetProcAddress, OpenGlError> {
+    Err(OpenGlError::new(
         "ANGLE is not part of this build: the rendering mode AngleEgl needs the feature `angle` of ferroui-win32 \
          (docs/porting/win32-platform.md, section 6.2)",
     ))
