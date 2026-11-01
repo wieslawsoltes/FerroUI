@@ -6,7 +6,6 @@ use crate::{
     FerroPropertyChangedEventArgs, Nullable, Ref, StyledProperty,
 };
 use std::cell::RefCell;
-use std::rc::Rc;
 use std::sync::Arc;
 
 /// Specifies the different methods by which two geometries can be combined.
@@ -211,6 +210,7 @@ impl CombinedGeometry {
 mod tests {
     use super::*;
     use std::cell::Cell;
+    use std::rc::Rc;
     use crate::media::{GeometryGroup, PathGeometry};
 
     #[test]

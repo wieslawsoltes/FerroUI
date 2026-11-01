@@ -6,7 +6,6 @@ use crate::{
     Point, Ref, StyledProperty,
 };
 use std::cell::RefCell;
-use std::rc::Rc;
 use std::sync::Arc;
 
 /// Represents the geometry of a polyline or polygon.
