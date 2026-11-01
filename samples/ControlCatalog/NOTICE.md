@@ -22,6 +22,10 @@ This sample is a port of the ControlCatalog sample of the upstream project
   outline of Segoe Fluent Icons or of another font is in it; only the code points are those of
   Segoe Fluent Icons.
 
+- The fonts under `Assets/FallbackFonts/` are subsets of open fonts, written by
+  `scripts/fonts/catalog_fallback_fonts.py`: the font fallbacks of the browser host, which has no
+  system fonts (`App::font_fallbacks` in `app.rs`). Their licences are below.
+
 ## Assets with a licence of their own
 
 The upstream repository ships these files without separate licence files; the licences below are
@@ -129,11 +133,22 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 
 ### WenQuanYi Micro Hei
 
-`Assets/Fonts/WenQuanYiMicroHei-01.ttf`. The font states "Licensed under the Apache License,
+`Assets/Fonts/WenQuanYiMicroHei-01.ttf`, and its subset `Assets/FallbackFonts/WenQuanYiMicroHei-Catalog.ttf`. The font states "Licensed under the Apache License,
 Version 2.0" (http://www.apache.org/licenses/LICENSE-2.0) in its name table; it derives from
 Droid Sans Fallback (Copyright Google, Apache License 2.0) and is published by the WenQuanYi
 project (Copyright WenQuanYi Board of Trustees) under the Apache License 2.0 or the GPL version 3
 with the font embedding exception.
+
+### Noto fonts
+
+`Assets/FallbackFonts/NotoColorEmoji-Catalog.ttf` (a subset of Noto Color Emoji, COLRv1:
+Copyright 2022 Google Inc., https://github.com/googlefonts/noto-emoji),
+`Assets/FallbackFonts/NotoSansArabic-Catalog.ttf` (a subset of Noto Sans Arabic: Copyright 2022
+The Noto Project Authors, https://github.com/notofonts/arabic) and
+`Assets/FallbackFonts/FerroUICatalogSymbolsFallback.ttf` (glyphs of Noto Sans Math, Noto Sans
+Symbols and Noto Sans Symbols 2: Copyright 2022 The Noto Project Authors,
+https://github.com/notofonts) are licensed under the SIL Open Font License, Version 1.1, whose
+text is above (section Source Sans Pro). The Noto fonts declare no Reserved Font Name.
 
 ## Images
 
