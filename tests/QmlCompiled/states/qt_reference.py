@@ -1,6 +1,6 @@
 """Compare the shared state fixture with the released Qt Quick engine."""
 from pathlib import Path
-from PySide6.QtCore import QEventLoop, QTimer, QUrl, qVersion
+from PySide6.QtCore import QEventLoop, QObject, QTimer, QUrl, qVersion
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlComponent, QQmlEngine
 
@@ -23,3 +23,20 @@ root.close()
 settle()
 assert root.property("width") == 20 and root.property("value") == 50
 print("Qt 6.12.0 State, PropertyChanges and reversible Transition reference passed")
+
+# Scrub Qt's animation tree with a public AnimationController. This exercises
+# the same exact timestamps as the Rust owner clock without wall-clock sampling.
+controller_type = QQmlComponent(engine)
+controller_type.setData(b"import QtQuick\nAnimationController {}", QUrl())
+controller = controller_type.create()
+group = root.findChild(QObject, "group-under-test")
+assert group is not None and controller.setProperty("animation", group)
+for elapsed, gauge, color, latched in [
+    (50, 5, "#000000", False), (150, 10, "#7f7f7f", False),
+    (275, 10, "#ffffff", False), (350, 15, "#ffffff", True), (400, 20, "#ffffff", True),
+]:
+    controller.setProperty("progress", elapsed / 400)
+    assert root.property("gauge") == gauge
+    assert root.property("accent").name() == color
+    assert root.property("latched") == latched
+print("Qt 6.12.0 nested animation groups, color channels and discrete actions matched at five exact times")

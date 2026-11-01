@@ -695,12 +695,18 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
                         }
                         continue;
                     }
-                    if self.instance.quick_kind(child, "NumberAnimation") {
-                        let target = self.instance.key(child, "target")?;
+                    if self.instance.is_animation(child) {
+                        let (target_name, property_name) =
+                            if self.instance.key(child, "$qml:onTarget").is_ok() {
+                                ("$qml:onTarget", "$qml:onProperty")
+                            } else {
+                                ("target", "property")
+                            };
+                        let target = self.instance.key(child, target_name)?;
                         self.instance.slots[target].value = Value::Object(id);
                         self.bind(
                             child,
-                            "property",
+                            property_name,
                             &Binding::Expr(Expr::String(name.clone())),
                             member.scope,
                         )?;

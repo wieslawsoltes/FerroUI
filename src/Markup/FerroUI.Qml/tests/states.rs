@@ -220,3 +220,76 @@ fn reversible_transition_reverses_asymmetric_easing() {
     m.advance_time(Duration::from_millis(50)).unwrap();
     assert_eq!(m.get(r, "x").unwrap(), Value::Number(25.));
 }
+
+#[test]
+fn nested_behavior_waits_then_retargets_color_and_preserves_alpha() {
+    use std::time::Duration;
+    let mut m = model(
+        r##"
+        property color goal: "#40100000"; property color accent: goal
+        Behavior on accent { SequentialAnimation {
+            PauseAnimation { duration: 40 }
+            ColorAnimation { duration: 60 }
+        } }
+    "##,
+    );
+    let r = m.root();
+    m.set(r, "goal", Value::String("#c0306080".into())).unwrap();
+    m.advance_time(Duration::from_millis(30)).unwrap();
+    assert_eq!(
+        m.get(r, "accent").unwrap(),
+        Value::String("#40100000".into())
+    );
+    m.advance_time(Duration::from_millis(40)).unwrap();
+    assert_eq!(
+        m.get(r, "accent").unwrap(),
+        Value::String("#80203040".into())
+    );
+    m.set(r, "goal", Value::String("red".into())).unwrap();
+    m.advance_time(Duration::from_millis(100)).unwrap();
+    assert_eq!(m.get(r, "accent").unwrap(), Value::String("red".into()));
+}
+
+#[test]
+fn nested_reversible_color_transition_waits_and_finishes_from_its_current_sample() {
+    use std::time::Duration;
+    let mut m = model(
+        r##"
+        property color accent: "#000000"
+        states: State { name:"bright"; PropertyChanges { root.accent:"#ffffff" } }
+        transitions: Transition { from:""; to:"bright"; reversible:true
+            SequentialAnimation { PauseAnimation {duration:20}; ColorAnimation { properties:"accent"; duration:80 } }
+        }
+    "##,
+    );
+    let r = m.root();
+    m.set(r, "state", Value::String("bright".into())).unwrap();
+    m.advance_time(Duration::from_millis(60)).unwrap();
+    assert_eq!(m.get(r, "accent").unwrap(), Value::String("#7f7f7f".into()));
+    m.set(r, "state", Value::String(String::new())).unwrap();
+    m.advance_time(Duration::from_millis(40)).unwrap();
+    assert_eq!(m.get(r, "accent").unwrap(), Value::String("#3f3f3f".into()));
+    m.advance_time(Duration::from_millis(60)).unwrap();
+    assert_eq!(m.get(r, "accent").unwrap(), Value::String("#000000".into()));
+}
+
+#[test]
+fn pause_only_and_nested_loops_complete_without_flattening_repetitions() {
+    use std::time::Duration;
+    let mut m = model(
+        r#"
+        property int done:0
+        SequentialAnimation { id: waitGroup; loops:2; onFinished: root.done++
+            PauseAnimation { duration:30; loops:3 }
+        }
+    "#,
+    );
+    let r = m.root();
+    let id = m.id("waitGroup").unwrap();
+    m.call(id, "start", vec![]).unwrap();
+    m.advance_time(Duration::from_millis(179)).unwrap();
+    assert_eq!(m.get(r, "done").unwrap(), Value::Number(0.));
+    m.advance_time(Duration::from_millis(1)).unwrap();
+    assert_eq!(m.get(r, "done").unwrap(), Value::Number(1.));
+    assert!(!m.has_timers());
+}

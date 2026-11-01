@@ -295,8 +295,7 @@ impl Transaction<'_> {
                 || self.scoped_key(object, name).is_ok()
                 || (self.model.workers.contains(object) && name == "sendMessage")
                 || (self.model.models.contains_key(&object) && list_model::is_method(name))
-                || (self.model.quick_kind(object, "NumberAnimation")
-                    && animations::METHODS.contains(&name))
+                || (self.model.is_animation(object) && animations::METHODS.contains(&name))
                 || (self.model.timers.is_timer(object)
                     && matches!(name, "start" | "stop" | "restart"))
             {
@@ -371,7 +370,7 @@ impl Transaction<'_> {
         if self.model.models.contains_key(&owner) && list_model::is_method(name) {
             return self.model_call(owner, name, &arguments, reads);
         }
-        if self.model.quick_kind(owner, "NumberAnimation") && animations::METHODS.contains(&name) {
+        if self.model.is_animation(owner) && animations::METHODS.contains(&name) {
             return self.animation_method(owner, name, &arguments);
         }
         if self.model.timers.is_timer(owner) && matches!(name, "start" | "stop" | "restart") {

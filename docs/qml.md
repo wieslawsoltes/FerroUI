@@ -212,13 +212,13 @@ let meter = TypeDefinition::default()
     });
 ```
 
-### Qt Quick states and numeric animation
+### Qt Quick states and animation
 
 `Item` and `StateGroup` accept named states and conditional `when` expressions. A state can extend another state. `PropertyChanges` supports target-relative and grouped ID declarations, reactive bindings, one-time evaluation with `explicit`, and restoration through `restoreEntryValues`. An active state's changes use the same property slots, type validation and rollback as ordinary bindings.
 
 `Transition` selects numeric animations by source and destination state and by target property. It supports wildcard and comma-separated names and reversible matches. An applicable transition takes precedence over `Behavior on property`. A behavior retargets from the current displayed value. `NumberAnimation` also runs independently or as a property value source. It supports finite and infinite loops, playback controls and linear and polynomial easing through quintic curves.
 
-A mounted view samples the tracks on its dispatcher clock. A headless caller can advance the same timeline exactly with `Instance::advance_time`. Unsupported animation types include color, spring, path, sequential and parallel groups. State script and reparent operations and the remaining Qt easing curves need separate implementations. [State and transition fixture](../tests/QmlCompiled/states/Main.qml)
+A mounted view samples the tracks on its dispatcher clock. A headless caller can advance the same timeline exactly with `Instance::advance_time`. `SequentialAnimation` and `ParallelAnimation` combine numeric and color tracks, timed pauses and discrete `PropertyAction` writes. Nested loops use modular time. The Qt 6.12 oracle scrubs the shared group at five exact timestamps using `AnimationController`. Color samples use eight-bit sRGB channels and preserve alpha. Spring and path animations require separate implementations. State script and reparent operations and the remaining Qt easing curves need separate implementations. [State and transition fixture](../tests/QmlCompiled/states/Main.qml)
 
 ### Dynamic trees and background scripts
 

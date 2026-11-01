@@ -3,6 +3,8 @@
 use super::*;
 use crate::transaction::Transaction;
 use std::time::Duration;
+mod timeline;
+use timeline::Timeline;
 
 pub(crate) fn register(registry: &mut TypeRegistry) -> Result<(), Error> {
     let object = || TypeDefinition::default().inherits("QtQml", "QtObject");
@@ -23,26 +25,55 @@ pub(crate) fn register(registry: &mut TypeRegistry) -> Result<(), Error> {
     )?;
     registry.register(
         "QtQuick",
-        "NumberAnimation",
+        "Animation",
         object()
+            .property("loops", "int", Value::Number(1.))
+            .property("running", "bool", Value::Bool(false))
+            .property("paused", "bool", Value::Bool(false))
+            .readonly_property("$qml:clock", "real", Value::Number(0.))
+            .signal("finished", vec![])
+            .enumeration("Loops", &[("Infinite", -1)])?,
+    )?;
+    let animation = || TypeDefinition::default().inherits("QtQuick", "Animation");
+    let targeted = || {
+        animation()
             .property("target", "QtObject", Value::Null)
             .property("targets", "list<QtObject>", Value::List(vec![]))
             .property("property", "string", Value::String(String::new()))
             .property("properties", "string", Value::String(String::new()))
-            .property("from", "real", Value::Undefined)
-            .property("to", "real", Value::Undefined)
-            .property("duration", "int", Value::Number(250.))
-            .property("loops", "int", Value::Number(1.))
-            .property("paused", "bool", Value::Bool(false))
-            .property("running", "bool", Value::Bool(false))
-            .property("easing.type", "int", Value::Number(0.))
-            .signal("finished", vec![]),
+    };
+    for (name, ty) in [("NumberAnimation", "real"), ("ColorAnimation", "color")] {
+        registry.register(
+            "QtQuick",
+            name,
+            targeted()
+                .property("from", ty, Value::Undefined)
+                .property("to", ty, Value::Undefined)
+                .property("duration", "int", Value::Number(250.))
+                .property("easing.type", "int", Value::Number(0.)),
+        )?;
+    }
+    registry.register(
+        "QtQuick",
+        "PauseAnimation",
+        animation().property("duration", "int", Value::Number(250.)),
     )?;
     registry.register(
         "QtQuick",
-        "Animation",
-        object().enumeration("Loops", &[("Infinite", -1)])?,
+        "PropertyAction",
+        targeted().property("value", "var", Value::Undefined),
     )?;
+    for group in ["SequentialAnimation", "ParallelAnimation"] {
+        registry.register(
+            "QtQuick",
+            group,
+            animation()
+                .readonly_property("$qml:onTarget", "QtObject", Value::Null)
+                .readonly_property("$qml:onProperty", "string", Value::String(String::new()))
+                .property("animations", "list<Animation>", Value::List(vec![]))
+                .default_property("animations"),
+        )?;
+    }
     registry.register(
         "QtQuick",
         "Easing",
@@ -79,10 +110,8 @@ pub(crate) struct Track {
     duration: Duration,
     paused_at: Option<Duration>,
     loops: i32,
-    easing: u8,
-    reversed: bool,
-    from: f64,
-    to: f64,
+    timeline: Rc<Timeline>,
+    requested: Value,
 }
 
 impl Track {
@@ -167,10 +196,12 @@ impl Instance {
     }
 
     pub(crate) fn standalone_animation(&self, id: ObjectId) -> bool {
-        self.quick_kind(id, "NumberAnimation")
-            && !self
-                .parent(id)
-                .is_some_and(|p| self.quick_kind(p, "Transition") || self.quick_kind(p, "Behavior"))
+        self.is_animation(id)
+            && !self.parent(id).is_some_and(|p| {
+                self.quick_kind(p, "Transition")
+                    || self.quick_kind(p, "Behavior")
+                    || self.is_animation(p)
+            })
     }
 }
 
@@ -278,9 +309,9 @@ impl Transaction<'_> {
         if let Some((score, tr)) = best {
             let reversed = score % 2 == 0;
             for driver in self.model.state_objects(tr, "animations") {
-                if self.model.quick_kind(driver, "NumberAnimation") {
+                if self.model.is_animation(driver) {
                     for &target in targets {
-                        if self.model.animation_matches(driver, target) {
+                        if self.model.accepts_channel(driver, target) {
                             self.animations
                                 .transitions
                                 .insert(target, (driver, tr, reversed));
@@ -336,70 +367,62 @@ impl Transaction<'_> {
         driver: ObjectId,
         transition: Option<ObjectId>,
         reversed: bool,
-        destination: f64,
+        destination: &Value,
     ) -> bool {
-        let Value::Number(current) = self.model.slots[key].value else {
-            return false;
-        };
-        let (start, end) = if reversed {
-            ("to", "from")
-        } else {
-            ("from", "to")
-        };
-        let from = self.model.numeric(driver, start).unwrap_or(current);
-        let to = self.model.numeric(driver, end).unwrap_or(destination);
-        let ms = self
-            .model
-            .numeric(driver, "duration")
-            .unwrap_or(250.)
-            .clamp(0., i32::MAX as f64) as u64;
-        let loops = self.model.numeric(driver, "loops").unwrap_or(1.) as i32;
-        if from == to || ms == 0 || loops == 0 {
-            self.remove_track(key);
-            return false;
-        }
-        if self
-            .model
-            .timers
-            .tracks
-            .get(&key)
-            .is_some_and(|t| t.driver == driver && t.transition == transition && t.to == to)
-        {
+        if self.model.timers.tracks.get(&key).is_some_and(|t| {
+            t.driver == driver && t.transition == transition && t.requested.unchanged(destination)
+        }) {
             return true;
         }
+        let timeline = match self.model.timeline(driver, key, destination, reversed) {
+            Ok(timeline) => Rc::new(timeline),
+            Err(error) => {
+                self.failed_host_call.get_or_insert(error);
+                return true;
+            }
+        };
+        let duration = timeline.duration;
+        let loops = self.model.numeric(driver, "loops").unwrap_or(1.) as i32;
         self.remove_track(key);
+        if loops == 0 {
+            return true;
+        }
+        if duration.is_zero() {
+            if let Some(value) = timeline.end.as_ref() {
+                self.sample_value(key, value.clone());
+            }
+            return true;
+        }
+        let initial = timeline.sample(Duration::ZERO);
         let track = Track {
             driver,
             transition,
             start: self.model.timers.now,
-            duration: Duration::from_millis(ms),
+            duration,
+            loops,
+            timeline,
+            requested: destination.clone(),
             paused_at: (self.model.standalone_animation(driver)
                 && self.model.get(driver, "paused") == Ok(Value::Bool(true)))
             .then_some(self.model.timers.now),
-            reversed,
-            loops,
-            easing: self.model.numeric(driver, "easing.type").unwrap_or(0.) as u8,
-            from,
-            to,
         };
         self.track(key, Some(track));
         self.running(driver, true);
         if let Some(tr) = transition {
             self.running(tr, true);
         }
-        if current != from {
-            self.sample_number(key, from);
+        if let Some(value) = initial {
+            self.sample_value(key, value);
         }
         true
     }
 
-    fn sample_number(&mut self, key: SlotId, value: f64) {
-        let value = if self.model.properties[key].ty == "int" {
-            value.round()
-        } else {
-            value
+    fn sample_value(&mut self, key: SlotId, value: Value) {
+        let value = match value {
+            Value::Number(n) if self.model.properties[key].ty == "int" => Value::Number(n.round()),
+            value => value,
         };
-        self.set_value_raw(key, Value::Number(value));
+        self.set_value_raw(key, value);
     }
 
     pub(crate) fn intercept_animation(&mut self, key: SlotId, value: &Value) -> bool {
@@ -410,20 +433,22 @@ impl Transaction<'_> {
             self.hold(key, Some((*transition, value.clone())));
             return true;
         }
-        let Value::Number(to) = *value else {
-            return false;
-        };
         if let Some(&(driver, tr, reversed)) = self.animations.transitions.get(&key) {
-            return self.animate(key, driver, Some(tr), reversed, to);
+            return self.animate(key, driver, Some(tr), reversed, value);
         }
         if let Some(&behavior) = self.model.dynamic.behaviors.get(&key) {
             if self.model.get(behavior, "enabled") == Ok(Value::Bool(true)) {
                 if let Ok(Value::Object(driver)) = self.model.get(behavior, "animation") {
-                    if self.model.quick_kind(driver, "NumberAnimation") {
+                    if self.model.accepts_channel(driver, key) {
+                        if self.model.slots[key].value.unchanged(value)
+                            && !self.model.timers.tracks.contains_key(&key)
+                        {
+                            return false;
+                        }
                         if let Ok(goal) = self.model.key(behavior, "targetValue") {
                             self.set_value_raw(goal, value.clone());
                         }
-                        return self.animate(key, driver, None, false, to);
+                        return self.animate(key, driver, None, false, value);
                     }
                 }
             }
@@ -470,33 +495,14 @@ impl Transaction<'_> {
             }
             return Ok(true);
         }
-        let mut targets = self.model.state_objects(id, "targets");
-        if let Value::Object(t) = self.model.get(id, "target")? {
-            targets.push(t);
+        let mut targets = BTreeSet::new();
+        self.model.playback_targets(id, &mut targets)?;
+        if targets.is_empty() {
+            targets.insert(self.model.key(id, "$qml:clock")?);
         }
-        let mut props = BTreeSet::new();
-        for name in ["properties", "property"] {
-            if let Value::String(list) = self.model.get(id, name)? {
-                props.extend(
-                    list.split(',')
-                        .map(str::trim)
-                        .filter(|p| !p.is_empty())
-                        .map(str::to_owned),
-                );
-            }
-        }
-        for target in targets {
-            for prop in &props {
-                let key = self.model.write_target(self.model.key(target, prop)?)?;
-                let to = self
-                    .model
-                    .numeric(id, "to")
-                    .or_else(|| self.model.numeric(target, prop))
-                    .ok_or_else(|| Error::new("NumberAnimation requires a numeric property"))?;
-                if !self.animate(key, id, None, false, to) {
-                    self.sample_number(key, to);
-                }
-            }
+        for key in targets {
+            let goal = self.model.slots[key].value.clone();
+            self.animate(key, id, None, false, &goal);
         }
         if !self.model.timers.tracks.values().any(|t| t.driver == id) {
             self.running(id, false);
@@ -517,25 +523,22 @@ impl Transaction<'_> {
             let cycles = elapsed.as_nanos() / track.duration.as_nanos();
             if track.loops >= 0 && cycles >= track.loops as u128 {
                 self.remove_track(key);
-                self.sample_number(key, track.to);
+                if let Some(value) = track.timeline.end.as_ref() {
+                    self.sample_value(key, value.clone());
+                }
                 if self.model.standalone_animation(track.driver)
                     && self.model.get(track.driver, "running")? == Value::Bool(false)
                 {
                     self.dispatch(track.driver, "finished", vec![])?;
                 }
             } else {
-                let t = (elapsed.as_nanos() % track.duration.as_nanos()) as f64
-                    / track.duration.as_nanos() as f64;
-                self.sample_number(
-                    key,
-                    track.from
-                        + (track.to - track.from)
-                            * if track.reversed {
-                                1.0 - easing(track.easing, 1.0 - t)
-                            } else {
-                                easing(track.easing, t)
-                            },
-                );
+                let within = elapsed.as_nanos() % track.duration.as_nanos();
+                if let Some(value) = track
+                    .timeline
+                    .sample(Duration::from_nanos(within.min(u128::from(u64::MAX)) as u64))
+                {
+                    self.sample_value(key, value);
+                }
             }
         }
         Ok(())
@@ -549,7 +552,7 @@ impl Transaction<'_> {
     ) -> Result<Value, Error> {
         if self.in_binding() || !args.is_empty() || !self.model.standalone_animation(driver) {
             return Err(Error::new(
-                "animation controls require a standalone NumberAnimation and no arguments",
+                "animation controls require a standalone animation and no arguments",
             ));
         }
         let running = self.model.key(driver, "running")?;
@@ -560,12 +563,15 @@ impl Transaction<'_> {
                 .timers
                 .tracks
                 .iter()
-                .filter_map(|(&key, t)| (t.driver == driver).then_some((key, t.to)))
+                .filter(|(_, t)| t.driver == driver)
+                .map(|(&key, t)| (key, t.timeline.end.as_ref().cloned()))
                 .collect();
             for (key, goal) in tracks {
                 self.remove_track(key);
                 if name == "complete" {
-                    self.sample_number(key, goal);
+                    if let Some(value) = goal {
+                        self.sample_value(key, value);
+                    }
                 }
             }
         }

@@ -17,6 +17,19 @@ fn exercise(mut m: Instance) {
     m.advance_time(Duration::from_millis(100)).unwrap();
     assert_eq!(m.get(root, "width").unwrap(), Value::Number(20.));
     assert_eq!(m.get(root, "value").unwrap(), Value::Number(50.));
+    m.call(root, "play", vec![]).unwrap();
+    for (ms, gauge, accent, latched) in [
+        (50, 5., "#000000", false),
+        (100, 10., "#7f7f7f", false),
+        (125, 10., "#ffffff", false),
+        (75, 15., "#ffffff", true),
+        (50, 20., "#ffffff", true),
+    ] {
+        m.advance_time(Duration::from_millis(ms)).unwrap();
+        assert_eq!(m.get(root, "gauge").unwrap(), Value::Number(gauge));
+        assert_eq!(m.get(root, "accent").unwrap(), Value::String(accent.into()));
+        assert_eq!(m.get(root, "latched").unwrap(), Value::Bool(latched));
+    }
 }
 fn path() -> std::path::PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("states/Main.qml")
