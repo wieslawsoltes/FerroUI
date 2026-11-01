@@ -116,9 +116,11 @@
 
         let instances = libraries;
         if (definition.kind === "script") {
-            const key = JSON.stringify(graph.context);
-            if (!components.has(key)) components.set(key, new Map());
-            instances = components.get(key);
+            const [origin, id] = graph.context;
+            if (!components.has(id)) components.set(id, new Map());
+            const origins = components.get(id);
+            if (!origins.has(origin)) origins.set(origin, new Map());
+            instances = origins.get(origin);
         }
         if (instances.has(url)) {
             const result = instances.get(url);
@@ -154,6 +156,7 @@
 
     return {
         prepare, context,
+        forgetHost(id) { components.delete(String(id)); },
         has: (graph, name) => owns(graph.names, name),
         get(graph, name, scope) {
             if (!owns(graph.names, name)) throw new ReferenceError("Unknown QML script import " + name);

@@ -144,6 +144,12 @@ impl Instance {
                     .retain(|id| id.index < c.nodes);
             }
         }
+        if self.nodes.len() > c.nodes {
+            if let Some(engine) = &self.javascript.engine {
+                let abandoned = self.nodes[c.nodes..].iter().map(|node| node.id).collect();
+                engine.release_objects(self.script_instance(), &abandoned);
+            }
+        }
         self.nodes.truncate(c.nodes);
         self.properties.truncate(c.slots);
         self.slots.truncate(c.slots);

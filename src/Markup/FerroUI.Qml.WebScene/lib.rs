@@ -27,6 +27,8 @@ struct Tables {
     scopes: BTreeMap<(ScriptScope, String, BTreeMap<String, String>), u64>,
     scope_values: BTreeMap<u64, (ScriptInstance, ScriptScope)>,
     scope_names: BTreeMap<u64, Rc<Vec<String>>>,
+    retired_scopes: Vec<u64>,
+    retired_hosts: Vec<u64>,
     objects: BTreeMap<ObjectId, u64>,
     dynamic: leases::HostLeases,
     values: BTreeMap<u64, (ScriptInstance, Value)>,
@@ -278,6 +280,26 @@ impl ScriptEngine for WebSceneEngine {
             .get(&value.instance())
             .is_some_and(|realm| realm.handle(value).is_ok())
     }
+    fn release_objects(&self, instance: ScriptInstance, dead: &std::collections::BTreeSet<ObjectId>) {
+        let realms = self.realms.borrow();
+        let Some(realm) = realms.get(&instance) else { return; };
+        let mut tables = realm.tables.borrow_mut();
+        let Tables { scopes, scope_values, scope_names, retired_scopes, .. } = &mut *tables;
+        scopes.retain(|(scope, _, _), id| {
+            if dead.contains(&scope.owner()) || dead.contains(&scope.root()) {
+                scope_values.remove(id);
+                scope_names.remove(id);
+                retired_scopes.push(*id);
+                false
+            } else { true }
+        });
+        for object in dead {
+            if let Some(id) = tables.objects.remove(object) {
+                tables.values.remove(&id);
+                tables.retired_hosts.push(id);
+            }
+        }
+    }
     fn release_instance(&self, id: ScriptInstance) {
         self.realms.borrow_mut().remove(&id);
     }
@@ -362,6 +384,13 @@ impl Realm {
                 self.handles.borrow_mut().remove(id);
             }
             command["release"] = json!(released);
+            let mut tables = self.tables.borrow_mut();
+            if !tables.retired_scopes.is_empty() {
+                command["dropScopes"] = json!(std::mem::take(&mut tables.retired_scopes));
+            }
+            if !tables.retired_hosts.is_empty() {
+                command["dropHosts"] = json!(std::mem::take(&mut tables.retired_hosts));
+            }
         }
         let result = (|| {
             if outer.is_some() {

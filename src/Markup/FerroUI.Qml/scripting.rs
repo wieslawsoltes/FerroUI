@@ -90,6 +90,8 @@ pub trait ScriptEngine {
         Ok(())
     }
     fn end_transaction(&self, _instance: ScriptInstance, _committed: bool) {}
+    /// Release projected QML identities on committed destruction or failed construction.
+    fn release_objects(&self, _instance: ScriptInstance, _objects: &BTreeSet<ObjectId>) {}
     fn release_instance(&self, _instance: ScriptInstance) {}
     /// Permanently expired callbacks may be discarded after their worker realm restarts.
     fn is_reference_live(&self, _value: &ExternalValue) -> bool {
@@ -158,6 +160,11 @@ pub struct ScriptScope {
     root: ObjectId,
     declaration: Option<u32>,
     ids: Rc<BTreeMap<String, String>>,
+}
+
+impl ScriptScope {
+    pub fn owner(&self) -> ObjectId { self.owner }
+    pub fn root(&self) -> ObjectId { self.root }
 }
 
 pub struct ScriptContext<'a, 'model> {

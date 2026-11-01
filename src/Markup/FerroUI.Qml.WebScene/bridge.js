@@ -207,7 +207,11 @@
     }
     function release(command) {
         for (const id of command.dropScopes || []) scopes.delete(id);
-        for (const id of command.dropHosts || []) proxies.delete(id);
+        for (const id of command.dropHosts || []) {
+            proxies.delete(id);
+            boundMethods.delete(id);
+            modules.forgetHost(id);
+        }
         for (const id of command.release || []) {
             const value = objects.get(id);
             if (typeof value === "bigint" || typeof value === "symbol") atoms.delete(value);
