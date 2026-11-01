@@ -251,6 +251,15 @@ define_class!(
                     layout_pixel_size(bounds.size.width, bounds.size.height, scaling),
                     scaling,
                 ));
+                // Cooperative resize: the frame of the new layout is rendered here, on the main
+                // thread, and presented with the transaction that gives the view its new bounds (a
+                // rotation, a size class or split view change), instead of at the next tick of the
+                // display link, which would show the old drawable stretched to the new bounds first.
+                let paint = top_level_impl.paint.borrow().clone();
+                if let Some(paint) = paint {
+                    let size = top_level_impl.client_size();
+                    paint(Rect::new(0.0, 0.0, size.width, size.height));
+                }
             }
 
             // SAFETY: the method of the superclass this one overrides.
