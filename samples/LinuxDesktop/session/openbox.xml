@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openbox_config xmlns="http://openbox.org/3.4/rc">
+  <focus><focusNew>yes</focusNew><followMouse>no</followMouse></focus>
+  <desktops>
+    <number>4</number><firstdesk>1</firstdesk>
+    <names><name>Studio</name><name>Build</name><name>Research</name><name>Personal</name></names>
+  </desktops>
+  <keyboard>
+    <keybind key="W-d"><action name="ToggleShowDesktop"/></keybind>
+    <keybind key="W-space"><action name="ToggleShowDesktop"/></keybind>
+    <keybind key="W-1"><action name="GoToDesktop"><to>1</to></action></keybind>
+    <keybind key="W-2"><action name="GoToDesktop"><to>2</to></action></keybind>
+    <keybind key="W-3"><action name="GoToDesktop"><to>3</to></action></keybind>
+    <keybind key="W-4"><action name="GoToDesktop"><to>4</to></action></keybind>
+    <keybind key="W-S-1"><action name="SendToDesktop"><to>1</to></action></keybind>
+    <keybind key="W-S-2"><action name="SendToDesktop"><to>2</to></action></keybind>
+    <keybind key="W-S-3"><action name="SendToDesktop"><to>3</to></action></keybind>
+    <keybind key="W-S-4"><action name="SendToDesktop"><to>4</to></action></keybind>
+    <keybind key="A-Tab"><action name="NextWindow"/></keybind>
+    <keybind key="A-S-Tab"><action name="PreviousWindow"/></keybind>
+    <keybind key="A-F4"><action name="Close"/></keybind>
+    <keybind key="W-Up"><action name="ToggleMaximize"/></keybind>
+    <keybind key="W-Down"><action name="Iconify"/></keybind>
+    <keybind key="C-A-Delete"><action name="Exit"><prompt>yes</prompt></action></keybind>
+  </keyboard>
+  <mouse>
+    <context name="Client Desktop"><mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/></mousebind></context>
+    <context name="Titlebar">
+      <mousebind button="Left" action="Press"><action name="Focus"/><action name="Raise"/></mousebind>
+      <mousebind button="Left" action="Drag"><action name="Move"/></mousebind>
+      <mousebind button="Left" action="DoubleClick"><action name="ToggleMaximize"/></mousebind>
+      <mousebind button="Right" action="Click"><action name="ShowMenu"><menu>client-menu</menu></action></mousebind>
+    </context>
+    <context name="Frame">
+      <mousebind button="A-Left" action="Drag"><action name="Move"/></mousebind>
+      <mousebind button="A-Right" action="Drag"><action name="Resize"/></mousebind>
+    </context>
+    <context name="Top Right Bottom Left TLCorner TRCorner BLCorner BRCorner"><mousebind button="Left" action="Drag"><action name="Resize"/></mousebind></context>
+    <context name="Maximize"><mousebind button="Left" action="Click"><action name="ToggleMaximize"/></mousebind></context>
+    <context name="Iconify"><mousebind button="Left" action="Click"><action name="Iconify"/></mousebind></context>
+    <context name="Close"><mousebind button="Left" action="Click"><action name="Close"/></mousebind></context>
+  </mouse>
+</openbox_config>
