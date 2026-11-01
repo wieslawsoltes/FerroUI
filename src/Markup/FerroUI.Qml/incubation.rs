@@ -151,6 +151,8 @@ impl PreparedNode {
                 body,
             } => {
                 let procedure = Procedure {
+                    #[cfg(feature = "diagnostics")]
+                    location: (diagnostics::Kind::Method, name.clone(), member.span),
                     scope: member.scope,
                     parameters: registry.parameters(imports, parameters)?,
                     result: return_type
@@ -250,6 +252,10 @@ impl PreparedNode {
         }
         property.slot.scope = member.scope;
         property.slot.assigned = true;
+        #[cfg(feature = "diagnostics")]
+        {
+            property.slot.span = Some(member.span);
+        }
         if let Some(value) = property.slot.install_expression(binding) {
             property.slot.value = value;
         }
@@ -315,6 +321,8 @@ impl Node {
             .insert(
                 signal,
                 Rc::new(Procedure {
+                    #[cfg(feature = "diagnostics")]
+                    location: (diagnostics::Kind::Handler, name.to_owned(), member.span),
                     scope: member.scope,
                     parameters,
                     result: None,

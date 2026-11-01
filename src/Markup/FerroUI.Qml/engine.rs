@@ -17,6 +17,19 @@ pub(crate) struct Roots {
 }
 
 impl Instance {
+    #[cfg(feature = "diagnostics")]
+    pub(crate) fn declaration_key(&self, scope: u32) -> Option<&str> {
+        self.debug_type_keys
+            .get(scope as usize)
+            .map(String::as_str)
+            .or_else(|| {
+                self.roots
+                    .types
+                    .iter()
+                    .find(|(_, index)| **index == scope)
+                    .map(|(key, _)| key.as_str())
+            })
+    }
     pub(crate) fn unit(&self, owner: ObjectId) -> Option<&Unit> {
         let document = self.node(owner)?.document?;
         self.roots.units.get(&document).map(Rc::as_ref)
@@ -237,6 +250,12 @@ impl Engine {
             tx.destroy_documents(&documents)?;
             tx.destroy_documents(&singletons)
         })?;
+        #[cfg(feature = "diagnostics")]
+        let next = {
+            let mut next = next;
+            next.model.diagnostics.clone_from(&self.model.diagnostics);
+            next
+        };
         *self = next;
         Ok(())
     }

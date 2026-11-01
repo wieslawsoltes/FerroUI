@@ -15,6 +15,7 @@ categories.workspace = true
 path = "lib.rs"
 
 [features]
+diagnostics = []
 javascript = ["ferroui-qml-compiler/javascript"]
 
 http = ["dep:ureq"]

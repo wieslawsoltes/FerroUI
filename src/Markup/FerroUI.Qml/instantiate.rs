@@ -21,6 +21,8 @@ struct Builder<'a, I = Box<Instance>> {
 impl Slot {
     pub(super) fn initial(value: Value) -> Self {
         Self {
+            #[cfg(feature = "diagnostics")]
+            span: None,
             scope: None,
             delegate_local: false,
             overlay: None,
@@ -61,7 +63,7 @@ impl Instance {
         registry: &TypeRegistry,
         initial: BTreeMap<String, Value>,
     ) -> Result<Self, Error> {
-        Self::construct(None, source, registry, initial, None)
+        Self::construct(None, source, registry, initial, None, |_| {})
     }
 
     /// Load an in-memory document with the type name normally supplied by its
@@ -72,7 +74,7 @@ impl Instance {
         registry: &TypeRegistry,
         initial: BTreeMap<String, Value>,
     ) -> Result<Self, Error> {
-        Self::construct(Some(name), source, registry, initial, None)
+        Self::construct(Some(name), source, registry, initial, None, |_| {})
     }
 
     /// Attach a JavaScript runtime before initial bindings and completion handlers execute.
@@ -82,17 +84,19 @@ impl Instance {
         initial: BTreeMap<String, Value>,
         engine: Rc<dyn ScriptEngine>,
     ) -> Result<Self, Error> {
-        Self::construct(None, source, registry, initial, Some(engine))
+        Self::construct(None, source, registry, initial, Some(engine), |_| {})
     }
 
-    fn construct(
+    pub(crate) fn construct(
         name: Option<&str>,
         source: &impl ComponentSource,
         registry: &TypeRegistry,
         initial: BTreeMap<String, Value>,
         engine: Option<Rc<dyn ScriptEngine>>,
+        configure: impl FnOnce(&mut Instance),
     ) -> Result<Self, Error> {
         let mut builder = Builder::prepare(name, source, registry)?;
+        configure(&mut builder.instance);
         if engine.is_some() {
             builder.instance.javascript.resources = source.document().scripts.clone().into();
         }
@@ -388,6 +392,10 @@ impl<'a> Builder<'a> {
             context: None,
             scopes: enums::Scopes::named(name, &document.root)?,
             instance: Box::new(Instance {
+                #[cfg(feature = "diagnostics")]
+                diagnostics: None,
+                #[cfg(feature = "diagnostics")]
+                debug_type_keys: document.type_keys.clone(),
                 roots: Default::default(),
                 dynamic: dynamic::Components {
                     registry: Some(Rc::new(registry.clone())),
@@ -696,12 +704,7 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
                     }
                 }
                 MemberKind::Child(child) if is_repeater => {
-                    self.bind(
-                        id,
-                        "delegate",
-                        &Binding::Object(child.clone()),
-                        member.scope,
-                    )?;
+                    self.bind(id, "delegate", &Binding::Object(child.clone()), member)?;
                 }
                 MemberKind::Child(child) if model => {
                     let child_imports = child.type_imports.as_deref().unwrap_or(imports);
@@ -744,7 +747,7 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
                             child,
                             property_name,
                             &Binding::Expr(Expr::String(name.clone())),
-                            member.scope,
+                            member,
                         )?;
                         let running = self.instance.key(child, "running")?;
                         if !self.assigned.contains(&running) {
@@ -762,13 +765,13 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
                         child,
                         "target",
                         &Binding::Expr(Expr::Name("parent".into())),
-                        member.scope,
+                        member,
                     )?;
                     self.bind(
                         child,
                         "property",
                         &Binding::Expr(Expr::String(name.clone())),
-                        member.scope,
+                        member,
                     )?;
                 }
                 MemberKind::Binding { name, .. } if definition.readonly.contains(name) => {
@@ -776,13 +779,13 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
                         "cannot initialize readonly native property '{name}'"
                     )))
                 }
-                MemberKind::Binding { name, value } => self.bind(id, name, value, member.scope)?,
+                MemberKind::Binding { name, value } => self.bind(id, name, value, member)?,
                 MemberKind::Group { name, members } => self.group(id, name, members)?,
                 MemberKind::Property {
                     name,
                     value: Some(value),
                     ..
-                } => self.bind(id, name, value, member.scope)?,
+                } => self.bind(id, name, value, member)?,
                 MemberKind::Handler { name, .. }
                     if connections && !name.starts_with("Component.on") => {}
                 MemberKind::Handler {
@@ -903,7 +906,7 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
         for member in members {
             match &member.kind {
                 MemberKind::Binding { name, value } => {
-                    self.bind(owner, &format!("{prefix}.{name}"), value, member.scope)?
+                    self.bind(owner, &format!("{prefix}.{name}"), value, member)?
                 }
                 MemberKind::Group { name, members } => {
                     self.group(owner, &format!("{prefix}.{name}"), members)?
@@ -929,8 +932,9 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
         owner: ObjectId,
         name: &str,
         binding: &Binding,
-        scope: Option<u32>,
+        member: &Member,
     ) -> Result<(), Error> {
+        let scope = member.scope;
         if self.instance.nodes[owner.index].module == "QtQuick"
             && self.instance.nodes[owner.index].name == "PropertyChanges"
             && self.instance.key(owner, name).is_err()
@@ -977,12 +981,16 @@ impl<I: std::ops::DerefMut<Target = Instance>> Builder<'_, I> {
                     Some(InstalledBinding::GeometryFields { base, fields });
                 self.instance.slots[key].dirty = true;
                 self.assigned.insert(key);
-                return self.bind(owner, &hidden, binding, scope);
+                return self.bind(owner, &hidden, binding, member);
             }
         }
         let key = self.instance.key(owner, name)?;
         self.assign_once(key)?;
         self.instance.slots[key].scope = scope;
+        #[cfg(feature = "diagnostics")]
+        {
+            self.instance.slots[key].span = Some(member.span);
+        }
         let value = match binding {
             Binding::Object(child) => {
                 let ty = &self.instance.properties[key].ty;

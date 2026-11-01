@@ -504,6 +504,24 @@ impl Transaction<'_> {
     }
 
     fn evaluate_one(&mut self, key: SlotId) -> Result<(), Error> {
+        #[cfg(feature = "diagnostics")]
+        if let Some(debugger) = self.model.diagnostics.clone() {
+            let property = &self.model.properties[key];
+            let site = diagnostics::Site::new(
+                self.model,
+                property.owner,
+                self.model.slots[key].scope,
+                diagnostics::Kind::Binding,
+                &property.name,
+                self.model.slots[key].span,
+            );
+            let call = debugger.enter(self.model, property.owner, site, &[], &[]);
+            return call.execute(|| self.evaluate_binding(key));
+        }
+        self.evaluate_binding(key)
+    }
+
+    fn evaluate_binding(&mut self, key: SlotId) -> Result<(), Error> {
         let owner = self.model.properties[key].owner;
         let mut reads = BTreeSet::new();
         let input = match &self.model.slots[key].overlay {

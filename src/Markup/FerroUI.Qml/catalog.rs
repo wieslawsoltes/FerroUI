@@ -96,7 +96,7 @@ fn display_url(url: &str) -> String {
 }
 
 impl Node {
-    fn scoped_url(&self, scope: Option<u32>) -> Option<&str> {
+    pub(crate) fn scoped_url(&self, scope: Option<u32>) -> Option<&str> {
         let layer = |scope| self.source_layers.iter().find(|layer| layer.scope == scope);
         layer(scope)
             .or_else(|| layer(None))

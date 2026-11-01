@@ -49,6 +49,8 @@ impl Instance {
                 } if legacy => (
                     name,
                     Rc::new(Procedure {
+                        #[cfg(feature = "diagnostics")]
+                        location: (diagnostics::Kind::Handler, name.clone(), member.span),
                         scope: member.scope,
                         parameters: parameters
                             .iter()

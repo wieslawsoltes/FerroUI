@@ -87,6 +87,9 @@ mod tests {
     }
 }
 
+#[cfg(all(test, feature = "diagnostics"))]
+mod diagnostics;
+
 #[cfg(test)]
 mod engine_roots;
 

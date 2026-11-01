@@ -8,6 +8,8 @@ mod catalog;
 pub mod compiled;
 mod connections;
 mod deferred;
+#[cfg(feature = "diagnostics")]
+pub mod diagnostics;
 mod dynamic;
 mod incubation;
 mod incubator;
@@ -61,6 +63,8 @@ type Locals = BTreeMap<String, Value>;
 
 #[derive(Clone)]
 struct Procedure {
+    #[cfg(feature = "diagnostics")]
+    location: (diagnostics::Kind, String, ir::SourceSpan),
     scope: Option<u32>,
     parameters: Vec<Parameter>,
     result: Option<String>,
@@ -163,6 +167,8 @@ enum InstalledBinding {
 
 #[derive(Clone)]
 struct Slot {
+    #[cfg(feature = "diagnostics")]
+    span: Option<ir::SourceSpan>,
     delegate_local: bool,
     scope: Option<u32>,
     overlay: Option<Box<binding_object::Overlay>>,
@@ -194,6 +200,10 @@ pub struct SignalEmission {
 }
 
 pub struct Instance {
+    #[cfg(feature = "diagnostics")]
+    diagnostics: Option<diagnostics::Debugger>,
+    #[cfg(feature = "diagnostics")]
+    debug_type_keys: Vec<String>,
     roots: engine::Roots,
     dynamic: dynamic::Components,
     javascript: scripting::ScriptState,

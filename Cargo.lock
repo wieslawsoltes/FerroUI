@@ -2376,6 +2376,7 @@ dependencies = [
 name = "ferroui-qml-build"
 version = "0.5.0-preview.1"
 dependencies = [
+ "ferroui-qml",
  "ferroui-qml-compiler",
  "percent-encoding",
  "prettyplease",

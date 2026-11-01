@@ -10,6 +10,7 @@ publish = false
 path = "lib.rs"
 
 [features]
+diagnostics = ["ferroui-qml/diagnostics"]
 webscene = ["dep:ferroui-qml-webscene", "ferroui-qml-build/javascript"]
 
 [dependencies]

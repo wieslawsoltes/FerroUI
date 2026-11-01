@@ -412,6 +412,24 @@ impl Transaction<'_> {
         args: Vec<Value>,
         reads: &mut BTreeSet<SlotId>,
     ) -> Result<Value, Error> {
+        #[cfg(feature = "diagnostics")]
+        if let Some(debugger) = self.model.diagnostics.clone() {
+            let (kind, name, span) = &proc.location;
+            let site =
+                diagnostics::Site::new(self.model, owner, proc.scope, *kind, name, Some(*span));
+            let call = debugger.enter(self.model, owner, site, &proc.parameters, &args);
+            return call.execute(|| self.run_body(owner, proc, args, reads));
+        }
+        self.run_body(owner, proc, args, reads)
+    }
+
+    fn run_body(
+        &mut self,
+        owner: ObjectId,
+        proc: &Procedure,
+        args: Vec<Value>,
+        reads: &mut BTreeSet<SlotId>,
+    ) -> Result<Value, Error> {
         let mut locals = proc
             .parameters
             .iter()

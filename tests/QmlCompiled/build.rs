@@ -1,4 +1,7 @@
 fn main() {
+    #[cfg(feature = "diagnostics")]
+    ferroui_qml_build::compile_file("diagnostics/Probe.qml", "debug_probe.rs")
+        .expect("compile debugger fixture");
     ferroui_qml_build::compile_file("geometry/Main.qml", "geometry.rs")
         .expect("compile geometry values");
     #[cfg(feature = "webscene")]
