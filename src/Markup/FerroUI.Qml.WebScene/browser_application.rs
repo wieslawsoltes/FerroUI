@@ -52,7 +52,7 @@ impl BrowserApplication {
     /// Wrap an initialized instance inside its dedicated application worker.
     pub fn new(mut model: ferroui_qml::Instance, timeout: Duration) -> Result<Self, Error> {
         process::available()?;
-        let wake: Arc<dyn Fn() + Send + Sync> = Arc::new(|| wake());
+        let wake: Arc<dyn Fn() + Send + Sync> = Arc::new(wake);
         model.set_worker_waker(Some(wake.clone()));
         model.set_component_waker(Some(wake));
         Ok(Self {
