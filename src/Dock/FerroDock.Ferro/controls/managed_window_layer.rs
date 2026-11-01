@@ -24,12 +24,10 @@ use ferroui_controls::{
     },
     Canvas, Control, ControlImpl,
 };
-use ferroui_system::collections::{
-    generic::Dictionary,
-    specialized::{NotifyCollectionChangedAction, NotifyCollectionChangedEventArgs},
-};
+use ferroui_system::collections::specialized::{NotifyCollectionChangedAction, NotifyCollectionChangedEventArgs};
 use std::{
     cell::{Cell, RefCell},
+    collections::HashMap,
     rc::Rc,
 };
 struct Subscription(Box<dyn Fn()>);
@@ -54,8 +52,8 @@ impl OffsetProbeDockable {
 #[repr(C)]
 pub struct ManagedWindowLayer {
     base: TemplatedControl,
-    overlays: RefCell<Dictionary<String, Ref<Control>>>,
-    window_subscriptions: RefCell<Dictionary<Rc<dyn IDockable>, u64>>,
+    overlays: RefCell<HashMap<String, Ref<Control>>>,
+    window_subscriptions: RefCell<HashMap<Rc<dyn IDockable>, u64>>,
     dock_subscription: RefCell<Option<Subscription>>,
     dockables_subscription: RefCell<Option<Subscription>>,
     overlay_canvas: RefCell<Option<Ref<Canvas>>>,
@@ -101,8 +99,8 @@ impl ManagedWindowLayer {
     pub fn construct() -> Self {
         Self {
             base: TemplatedControl::construct(),
-            overlays: RefCell::new(Dictionary::new()),
-            window_subscriptions: RefCell::new(Dictionary::new()),
+            overlays: RefCell::new(HashMap::new()),
+            window_subscriptions: RefCell::new(HashMap::new()),
             dock_subscription: RefCell::new(None),
             dockables_subscription: RefCell::new(None),
             overlay_canvas: RefCell::new(None),

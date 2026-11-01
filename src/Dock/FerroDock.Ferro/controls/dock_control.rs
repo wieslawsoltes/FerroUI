@@ -60,7 +60,7 @@ use ferroui_system::{collections::generic::Dictionary, IDisposable};
 use std::{
     any::TypeId,
     cell::{Cell, RefCell},
-    collections::HashMap,
+    collections::{HashMap, HashSet},
     rc::{Rc, Weak},
 };
 
@@ -1122,7 +1122,7 @@ impl DockControl {
             return empty();
         };
         let mut dockables = Vec::new();
-        let mut visited = Dictionary::new();
+        let mut visited = HashSet::new();
         collect_dockables(Some(root.clone()), &mut dockables, &mut visited);
         let mut items = Vec::new();
         for dockable in dockables {
@@ -1666,12 +1666,12 @@ pub(crate) fn matches_selector_gesture(e: &KeyEventArgs, gesture: &KeyGesture) -
 pub(crate) fn collect_dockables(
     item: Option<Rc<dyn IDockable>>,
     dockables: &mut Vec<Rc<dyn IDockable>>,
-    visited: &mut Dictionary<Option<Rc<dyn IDockable>>, ()>,
+    visited: &mut HashSet<Option<Rc<dyn IDockable>>>,
 ) {
-    if visited.contains_key(&item) {
+    if visited.contains(&item) {
         return;
     }
-    visited.insert(item.clone(), ());
+    visited.insert(item.clone());
     let Some(item) = item else { return };
     if item.clone().as_document().is_some() || item.clone().as_tool().is_some() {
         dockables.push(item.clone());
@@ -1726,7 +1726,7 @@ pub(crate) fn collect_dockables(
 pub(crate) fn add_dockables(
     source: Option<ListHandle<Option<Rc<dyn IDockable>>>>,
     dockables: &mut Vec<Rc<dyn IDockable>>,
-    visited: &mut Dictionary<Option<Rc<dyn IDockable>>, ()>,
+    visited: &mut HashSet<Option<Rc<dyn IDockable>>>,
 ) {
     if let Some(source) = source {
         for item in source.iter() {

@@ -7,6 +7,7 @@ use ferroui_reactive::{Observable, ObservableExt};
 use ferroui_system::collections::generic::Dictionary;
 use ferroui_system::{IObservable, IObserver, ObservableError};
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::hash::Hash;
 use std::rc::Rc;
 
@@ -42,13 +43,13 @@ type GroupCache<T, K> = Rc<RefCell<Cache<T, K>>>;
 /// The state of a subscription to `GroupOnImmutable` (`Grouper`).
 struct Grouper<T, K, G> {
     group_selector_key: Rc<dyn Fn(&T) -> G>,
-    all_groupings: Dictionary<G, GroupCache<T, K>>,
+    all_groupings: HashMap<G, GroupCache<T, K>>,
     item_cache: Dictionary<K, ChangeWithGroup<T, K, G>>,
 }
 
 impl<T: Clone + 'static, K: Eq + Hash + Clone + 'static, G: Eq + Hash + Clone + 'static> Grouper<T, K, G> {
     fn new(group_selector_key: Rc<dyn Fn(&T) -> G>) -> Self {
-        Self { group_selector_key, all_groupings: Dictionary::new(), item_cache: Dictionary::new() }
+        Self { group_selector_key, all_groupings: HashMap::new(), item_cache: Dictionary::new() }
     }
 
     /// Evaluates the group of every item again (`Regroup`).
