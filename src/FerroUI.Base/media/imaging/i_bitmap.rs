@@ -1,6 +1,5 @@
 use crate::media::imaging::BitmapEncoderOptions;
 use crate::media::IImage;
-use crate::platform::IBitmapImpl;
 use crate::utilities::RefCounted;
 use crate::{PixelSize, Vector};
 use std::io::Write;

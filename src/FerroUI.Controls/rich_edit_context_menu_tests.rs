@@ -4,12 +4,11 @@ use crate::platform::{
 use crate::primitives::popup_positioning::{
     IPopupPositioner, PopupGravity, PopupPositionerParameters,
 };
-use crate::primitives::FlyoutBaseImplExt;
 use crate::testing::{
     MockWindowingPlatform, TestServices, UnitTestApplication, UnitTestApplicationScope,
 };
 use crate::{
-    Border, ContextMenu, ContextMenuEventArgs, Control, Flyout, FlyoutShowMode, MenuBaseImplExt,
+    Border, ContextMenu, ContextMenuEventArgs, Control, Flyout, FlyoutShowMode,
     PlacementMode, RichEditBox, StackPanel, Window,
 };
 use ferroui_base::animation::TimeSpan;
@@ -22,7 +21,7 @@ use ferroui_base::input::{
     MouseButton, Pointer, PointerPointProperties, PointerPressedEventArgs,
     PointerReleasedEventArgs, PointerType, PointerUpdateKind, RawInputModifiers,
 };
-use ferroui_base::interactivity::{IRoutedEventArgs, RoutingStrategies};
+use ferroui_base::interactivity::IRoutedEventArgs;
 use ferroui_base::media::text_formatting::testing::{
     TextTestScope, DESIGN_EM_HEIGHT, GLYPH_ADVANCE,
 };

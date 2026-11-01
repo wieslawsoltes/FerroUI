@@ -5,7 +5,7 @@ use super::{
 use crate::platform::surfaces::IPlatformRenderSurface;
 use crate::platform::{IBitmapImpl, IPlatformGraphics, IRenderTarget, LtrbRect};
 use crate::rendering::composition::transport::{
-    BatchMarker, BatchObject, BatchStreamData, BatchStreamReader, CommittedBatch, CompositionBatch, ServerJob,
+    BatchMarker, BatchObject, BatchStreamData, BatchStreamReader, CommittedBatch, CompositionBatch,
 };
 use crate::rendering::composition::CompositionOptions;
 use crate::rendering::PlatformRenderInterfaceContextManager;

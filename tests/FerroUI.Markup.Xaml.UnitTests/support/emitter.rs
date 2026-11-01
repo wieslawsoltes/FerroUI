@@ -14,7 +14,7 @@ use ferroui_base::styling::DuplicateSetterError;
 use ferroui_base::utilities::CultureInfo;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_markup_type, ferro_properties, instantiate, BoxedValue, FerroObjectImpl, FerroProperty,
-    InitializationError, ObjectType, Ref, StyledElementImpl, StyledElementImplExt, StyledProperty, TypeInfo, VisualImpl,
+    InitializationError, Ref, StyledElementImpl, StyledElementImplExt, StyledProperty, TypeInfo, VisualImpl,
 };
 use ferroui_controls::{Control, ControlImpl};
 use ferroui_markup_xaml::converters::{ITypeDescriptorContext, TypeConverter};

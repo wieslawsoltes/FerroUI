@@ -19,7 +19,7 @@ use ferroui_base::platform::{
 };
 use ferroui_base::{FerroLocator, LocatorExtensions, Matrix, PixelSize, Point, Rect, RoundedRect, Size, Vector};
 use std::any::{Any, TypeId};
-use std::cell::{Cell, RefCell};
+use std::cell::RefCell;
 use std::io::{Read, Write};
 use std::rc::{Rc, Weak};
 use std::sync::Arc;

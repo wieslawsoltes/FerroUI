@@ -24,7 +24,7 @@ use crate::rendering::composition::system_backdrops::{
     SystemBackdropTheme,
 };
 use crate::rendering::composition::{
-    CompositionBrush, CompositionEffectBrush, CompositionEffectFactoryError, CompositionEffectFactoryLoadStatus,
+    CompositionBrush, CompositionEffectBrush, CompositionEffectFactoryLoadStatus,
     CompositionEffectSourceParameter, CompositionVisual, Compositor, ElementComposition,
     LoadedImageSurface,
 };

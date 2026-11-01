@@ -10,7 +10,6 @@
 use crate::page::{ContentPage, NavigationPage, Page};
 use crate::platform::INativeControlHostImpl;
 use crate::presenters::ContentPresenter;
-use crate::primitives::TemplatedControlImpl;
 use crate::storage_misc_tests::{TestAttachment, TestNativeControlHostImpl};
 use crate::templates::{FuncControlTemplate, FuncTemplateNameScopeExtensions, IControlTemplate};
 use crate::testing::{MockWindowingPlatform, TestServices, UnitTestApplication};

@@ -1,5 +1,5 @@
 use crate::documents::CharacterFormat;
-use crate::flyouts::{Flyout, FlyoutBaseImplExt, FlyoutShowMode};
+use crate::flyouts::{Flyout, FlyoutShowMode};
 use crate::platform::{IPopupImpl, ITopLevelImpl};
 use crate::testing::{
     MockWindowingPlatform, TestServices, UnitTestApplication, UnitTestApplicationScope,
