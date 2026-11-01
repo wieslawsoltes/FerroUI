@@ -156,6 +156,11 @@ impl TextureRenderer for MetalTextureRenderer {
         inputs: Vec<FrameLease>,
         completion: GpuCompletion,
     ) -> MediaFuture<FrameLease> {
+        if self.budget.quarantined_reads() > 0 {
+            return Box::pin(async {
+                Err(unsupported("Renderer GPU completion is indeterminate"))
+            });
+        }
         let source = self.source;
         let sequence = self
             .sequence

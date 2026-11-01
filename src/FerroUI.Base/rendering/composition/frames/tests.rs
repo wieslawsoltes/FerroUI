@@ -323,3 +323,112 @@ fn repeated_gpu_reads_of_one_frame_are_bounded_and_quarantine_is_inspectable() {
     second.retain(frame).unwrap();
     second.complete();
 }
+
+#[test]
+fn mailbox_notifications_allow_reentrant_reads_and_clear_without_retaining_frames() {
+    let budget = FrameBudget::new(Default::default());
+    let source = Arc::new(FrameMailbox::new(1, 1));
+    let weak = Arc::downgrade(&source);
+    let calls = Arc::new(AtomicUsize::new(0));
+    let observed = calls.clone();
+    let _subscription = source.subscribe(move || {
+        let source = weak.upgrade().unwrap();
+        observed.fetch_add(1, Ordering::SeqCst);
+        if source.latest().is_some() {
+            source.clear();
+        }
+    });
+    source
+        .publish(budget.lease(metadata(1), ()).unwrap())
+        .unwrap();
+    assert_eq!(calls.load(Ordering::SeqCst), 2);
+    assert!(source.latest().is_none());
+    assert_eq!(budget.usage().frames, 0);
+}
+
+#[test]
+fn disposed_mailbox_subscription_does_not_receive_later_worker_publications() {
+    use std::sync::Barrier;
+    let budget = FrameBudget::new(Default::default());
+    let source = Arc::new(FrameMailbox::new(1, 1));
+    let entered = Arc::new(Barrier::new(2));
+    let finish = Arc::new(Barrier::new(2));
+    let calls = Arc::new(AtomicUsize::new(0));
+    let (worker_entered, worker_finish, observed) =
+        (entered.clone(), finish.clone(), calls.clone());
+    let subscription = source.subscribe(move || {
+        observed.fetch_add(1, Ordering::SeqCst);
+        worker_entered.wait();
+        worker_finish.wait();
+    });
+    let producer = source.clone();
+    let allocations = budget.clone();
+    let worker = std::thread::spawn(move || {
+        producer
+            .publish(allocations.lease(metadata(1), ()).unwrap())
+            .unwrap();
+        producer
+            .publish(allocations.lease(metadata(2), ()).unwrap())
+            .unwrap();
+    });
+    entered.wait();
+    subscription.dispose(); // An already-running callback can finish.
+    finish.wait();
+    worker.join().unwrap();
+    assert_eq!(calls.load(Ordering::SeqCst), 1);
+    assert_eq!(source.latest().unwrap().metadata().identity.sequence, 2);
+    source.clear();
+    assert_eq!(budget.usage().frames, 0);
+}
+
+#[test]
+fn mailbox_generation_and_clear_notify_after_state_change_but_rejection_does_not() {
+    let budget = FrameBudget::new(Default::default());
+    let source = Arc::new(FrameMailbox::new(1, 1));
+    let weak = Arc::downgrade(&source);
+    let observations = Arc::new(std::sync::Mutex::new(Vec::new()));
+    let values = observations.clone();
+    let _subscription = source.subscribe(move || {
+        values.lock().unwrap().push(
+            weak.upgrade()
+                .unwrap()
+                .latest()
+                .map(|f| f.metadata().identity),
+        );
+    });
+    source
+        .publish(budget.lease(metadata(1), ()).unwrap())
+        .unwrap();
+    source.replace_generation(2).unwrap();
+    assert_eq!(
+        source.publish(budget.lease(metadata(2), ()).unwrap()),
+        Err(FrameError::StaleGeneration)
+    );
+    let mut next = metadata(1);
+    next.identity.generation = 2;
+    source.publish(budget.lease(next, ()).unwrap()).unwrap();
+    source.clear();
+    let values = observations.lock().unwrap();
+    assert_eq!(values.len(), 4);
+    assert_eq!(values[0].unwrap().generation, 1);
+    assert_eq!(values[1], None);
+    assert_eq!(values[2].unwrap().generation, 2);
+    assert_eq!(values[3], None);
+    assert_eq!(budget.usage().frames, 0);
+}
+
+#[test]
+fn disposing_a_mailbox_subscription_releases_its_callback_even_if_token_is_kept() {
+    let source = FrameMailbox::new(1, 1);
+    let drops = Arc::new(AtomicUsize::new(0));
+    let resource = Resource(drops.clone());
+    let subscription = source.subscribe(move || {
+        let _keep = &resource;
+    });
+    assert_eq!(drops.load(Ordering::SeqCst), 0);
+    subscription.dispose();
+    assert_eq!(drops.load(Ordering::SeqCst), 1);
+    source.clear();
+    drop(subscription);
+    assert_eq!(drops.load(Ordering::SeqCst), 1);
+}

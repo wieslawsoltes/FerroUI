@@ -2,8 +2,8 @@ use super::{FrameError, FrameMetadata};
 use std::{
     any::Any,
     sync::{
-        atomic::{AtomicU64, Ordering},
-        Arc, Mutex,
+        atomic::{AtomicBool, AtomicU64, Ordering},
+        Arc, Mutex, Weak,
     },
 };
 
@@ -347,6 +347,28 @@ pub struct FrameMailbox {
     generation: AtomicU64,
     publication_epoch: Arc<AtomicU64>,
     latest: Mutex<Option<FrameLease>>,
+    listeners: Mutex<Vec<Weak<MailboxListener>>>,
+}
+struct MailboxListener {
+    active: AtomicBool,
+    callback: Mutex<Option<Arc<dyn Fn() + Send + Sync>>>,
+}
+/// Disposable change notification. Callbacks run on the publishing thread,
+/// outside mailbox locks, and must only schedule/coalesce consumer work. They
+/// retain no frame. Disposal prevents new callbacks; one already running may
+/// finish. The consumer owns any UI-thread dispatch and teardown.
+pub struct FrameMailboxSubscription(Arc<MailboxListener>);
+impl FrameMailboxSubscription {
+    pub fn dispose(&self) {
+        self.0.active.store(false, Ordering::Release);
+        let callback = self.0.callback.lock().unwrap().take();
+        drop(callback);
+    }
+}
+impl Drop for FrameMailboxSubscription {
+    fn drop(&mut self) {
+        self.dispose();
+    }
 }
 impl Drop for FrameMailbox {
     fn drop(&mut self) {
@@ -362,10 +384,51 @@ impl FrameMailbox {
             generation: AtomicU64::new(generation),
             publication_epoch: Arc::new(AtomicU64::new(1)),
             latest: Mutex::new(None),
+            listeners: Mutex::new(Vec::new()),
         }
     }
     pub fn latest(&self) -> Option<FrameLease> {
         self.latest.lock().unwrap().clone()
+    }
+    pub fn subscribe(
+        &self,
+        callback: impl Fn() + Send + Sync + 'static,
+    ) -> FrameMailboxSubscription {
+        let listener = Arc::new(MailboxListener {
+            active: AtomicBool::new(true),
+            callback: Mutex::new(Some(Arc::new(callback))),
+        });
+        let mut listeners = self.listeners.lock().unwrap();
+        listeners.retain(|weak| {
+            weak.upgrade()
+                .is_some_and(|l| l.active.load(Ordering::Acquire))
+        });
+        listeners.push(Arc::downgrade(&listener));
+        FrameMailboxSubscription(listener)
+    }
+    fn notify(&self) {
+        let snapshot = {
+            let mut listeners = self.listeners.lock().unwrap();
+            let mut snapshot = Vec::with_capacity(listeners.len());
+            listeners.retain(|weak| {
+                if let Some(listener) = weak.upgrade().filter(|l| l.active.load(Ordering::Acquire))
+                {
+                    snapshot.push(listener);
+                    true
+                } else {
+                    false
+                }
+            });
+            snapshot
+        };
+        for listener in snapshot {
+            let callback = listener.callback.lock().unwrap().clone();
+            if listener.active.load(Ordering::Acquire) {
+                if let Some(callback) = callback {
+                    callback();
+                }
+            }
+        }
     }
     /// Publishes producer-ready immutable storage. A GPU producer must await
     /// its write completion before calling this; render submission alone is
@@ -390,6 +453,7 @@ impl FrameMailbox {
         let previous = latest.replace(frame);
         drop(latest);
         drop(previous);
+        self.notify();
         Ok(())
     }
     pub fn replace_generation(&self, generation: u64) -> Result<(), FrameError> {
@@ -402,6 +466,7 @@ impl FrameMailbox {
         let previous = latest.take();
         drop(latest);
         drop(previous);
+        self.notify();
         Ok(())
     }
     fn invalidate_publications(&self) {
@@ -417,5 +482,6 @@ impl FrameMailbox {
         let previous = latest.take();
         drop(latest);
         drop(previous);
+        self.notify();
     }
 }

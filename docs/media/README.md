@@ -83,7 +83,10 @@ imports reject a retired renderer generation even when its adapter identity matc
 `RendererHost` uses normal composition, routed input and styling. It schedules
 client-owned rendering on invalidation or continuously, maps logical pointer
 coordinates to the active pixel viewport, and retires output on hide/detach.
-Rebinding inputs and resizing advance publication generations. Input mailboxes
+Clean static hosts stop their timer; disposable source notifications wake the
+owning UI dispatcher. Active work coalesces to the render timer, and ancestor
+visibility/scaling changes invalidate or suspend it. Rebinding inputs and
+resizing advance publication generations. Input mailboxes
 borrow existing frames; they never open another player or camera. Metal and
 native GL adapters allocate bounded premultiplied output on the active device,
 retain all inputs until actual completion and reject incompatible devices.

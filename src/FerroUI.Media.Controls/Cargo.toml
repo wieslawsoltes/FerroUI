@@ -19,5 +19,7 @@ ferroui-controls.workspace = true
 ferroui-media.workspace = true
 [build-dependencies]
 ferroui-build-scan.workspace = true
+[dev-dependencies]
+ferroui-controls = {workspace=true,features=["testing"]}
 [package.metadata.release]
 group = "controls"

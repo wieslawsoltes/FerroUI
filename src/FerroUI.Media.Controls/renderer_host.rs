@@ -8,8 +8,10 @@ use ferroui_base::{
     media::{Brushes, Stretch},
     reactive::IDisposable,
     threading::{Dispatcher, DispatcherPriority, DispatcherTimer},
+    utilities::ThreadBound,
     FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Point, Ref,
-    StyledElementImpl, StyledProperty, VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs,
+    StyledElementImpl, StyledProperty, Visual, VisualImpl, VisualImplExt,
+    VisualTreeAttachmentEventArgs, WeakRef,
 };
 use ferroui_controls::{ControlImpl, Panel, PanelImpl, TopLevel};
 use ferroui_media::{
@@ -19,9 +21,51 @@ use ferroui_media::{
 use std::{
     cell::{Cell, RefCell},
     rc::Rc,
-    sync::Arc,
+    sync::{
+        atomic::{AtomicBool, AtomicU64, Ordering},
+        Arc,
+    },
     time::Duration,
 };
+
+// Producer callbacks only signal this object. UI ownership is cleared explicitly
+// on the UI thread before subscriptions are disposed; a producer finishing its
+// callback on another thread therefore cannot leak a live UI weak reference.
+struct RendererWake {
+    dispatcher: Arc<Dispatcher>,
+    owner: ThreadBound<RefCell<Option<WeakRef<RendererHost>>>>,
+    enabled: AtomicBool,
+    running: AtomicBool,
+    queued: AtomicBool,
+    serial: AtomicU64,
+}
+impl RendererWake {
+    fn signal(self: &Arc<Self>) {
+        self.serial.fetch_add(1, Ordering::AcqRel);
+        if !self.enabled.load(Ordering::Acquire)
+            || self.running.load(Ordering::Acquire)
+            || self.queued.swap(true, Ordering::AcqRel)
+        {
+            return;
+        }
+        let wake = self.clone();
+        self.dispatcher.post(
+            move || {
+                wake.queued.store(false, Ordering::Release);
+                let owner = wake.owner.get().borrow().clone();
+                if let Some(view) = owner.and_then(|weak| weak.upgrade()) {
+                    view.start();
+                }
+            },
+            DispatcherPriority::RENDER,
+        );
+    }
+    fn cancel(&self) {
+        self.enabled.store(false, Ordering::Release);
+        self.running.store(false, Ordering::Release);
+        self.owner.get().borrow_mut().take();
+    }
+}
 
 /// A normal composition control which schedules a client-owned renderer. Input
 /// mailboxes borrow already-acquired frames; this control never opens a source.
@@ -33,6 +77,10 @@ pub struct RendererHost {
     inputs: RefCell<Vec<Arc<FrameMailbox>>>,
     last_inputs: RefCell<Option<Vec<FrameIdentity>>>,
     timer: RefCell<Option<Rc<dyn IDisposable>>>,
+    wake: RefCell<Option<Arc<RendererWake>>>,
+    source_subscriptions: RefCell<Vec<FrameMailboxSubscription>>,
+    visibility_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    scaling_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
     errors: MediaEvent<MediaError>,
     presenter_errors: RefCell<Option<MediaSubscription>>,
     failed: Cell<bool>,
@@ -44,7 +92,9 @@ ferro_class_info!(RendererHost {
 });
 ferro_impl_classes!(RendererHost:StyledElementImpl,LayoutableImpl,InteractiveImpl,InputElementImpl,PanelImpl);
 impl ControlImpl for RendererHost {
-    fn on_create_automation_peer(this: &Self) -> Ref<ferroui_controls::automation::peers::AutomationPeer> {
+    fn on_create_automation_peer(
+        this: &Self,
+    ) -> Ref<ferroui_controls::automation::peers::AutomationPeer> {
         ferroui_controls::automation::peers::ControlAutomationPeer::new(this).upcast()
     }
 }
@@ -64,6 +114,7 @@ impl FerroObjectImpl for RendererHost {
                     if let Some(host) = view.host.borrow().as_ref() {
                         host.set_active(false);
                     }
+                    view.update_wakeup();
                     view.errors.emit(error);
                 }
             })));
@@ -72,6 +123,18 @@ impl FerroObjectImpl for RendererHost {
         this.set_clip_to_bounds(true);
         this.set_background(Some(Brushes::transparent()));
         this.set_focusable(true);
+        let weak = this.to_ref().downgrade();
+        this.visibility_subscription
+            .replace(Some(this.is_effectively_visible_changed(move || {
+                if let Some(view) = weak.upgrade() {
+                    view.update_wakeup();
+                    if view.is_effectively_visible() {
+                        view.start();
+                    } else {
+                        view.tick();
+                    }
+                }
+            })));
     }
     fn on_property_changed(this: &Self, args: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, args);
@@ -79,6 +142,9 @@ impl FerroObjectImpl for RendererHost {
             if let Some(host) = this.host.borrow().as_ref() {
                 host.set_schedule(this.schedule());
             }
+            this.start();
+        } else if args.property() == Visual::bounds_property().as_property() {
+            this.invalidate_renderer();
         }
     }
 }
@@ -94,11 +160,9 @@ impl VisualImpl for RendererHost {
 }
 impl Drop for RendererHost {
     fn drop(&mut self) {
-        if let Some(timer) = self.timer.get_mut().take() {
-            timer.dispose();
-        }
-        if let Some(host) = self.host.get_mut().take() {
-            host.set_active(false);
+        self.stop();
+        if let Some(subscription) = self.visibility_subscription.get_mut().take() {
+            subscription.dispose();
         }
     }
 }
@@ -111,6 +175,10 @@ impl RendererHost {
             inputs: RefCell::new(Vec::new()),
             last_inputs: RefCell::new(None),
             timer: RefCell::new(None),
+            wake: RefCell::new(None),
+            source_subscriptions: RefCell::new(Vec::new()),
+            visibility_subscription: RefCell::new(None),
+            scaling_subscription: RefCell::new(None),
             errors: MediaEvent::default(),
             presenter_errors: RefCell::new(None),
             failed: Cell::new(false),
@@ -156,6 +224,7 @@ impl RendererHost {
         self.host.borrow().as_ref().map(|h| h.output())
     }
     pub fn set_inputs(&self, inputs: Vec<Arc<FrameMailbox>>) {
+        self.stop();
         self.inputs.replace(inputs);
         if let Some(host) = self.host.borrow().as_ref() {
             host.clear_output();
@@ -168,6 +237,7 @@ impl RendererHost {
         if let Some(host) = self.host.borrow().as_ref() {
             host.invalidate();
         }
+        self.start();
     }
     /// Map local pointer coordinates after normal control transforms. The
     /// caller subscribes to ordinary routed input and owns hit testing.
@@ -180,6 +250,13 @@ impl RendererHost {
             .map(|(x, y)| Point::new(x, y))
     }
     fn stop(&self) {
+        if let Some(wake) = self.wake.borrow_mut().take() {
+            wake.cancel();
+        }
+        self.source_subscriptions.borrow_mut().clear();
+        if let Some(subscription) = self.scaling_subscription.borrow_mut().take() {
+            subscription.dispose();
+        }
         self.generation.set(
             self.generation
                 .get()
@@ -195,22 +272,98 @@ impl RendererHost {
         self.last_inputs.borrow_mut().take();
     }
     fn start(&self) {
-        if self.timer.borrow().is_some() || self.host.borrow().is_none() {
+        if self.host.borrow().is_none() || !self.is_attached_to_visual_tree() {
             return;
         }
+        if self.wake.borrow().is_none() {
+            let wake = Arc::new(RendererWake {
+                dispatcher: Dispatcher::ui_thread(),
+                owner: ThreadBound::new(RefCell::new(Some(self.to_ref().downgrade()))),
+                enabled: AtomicBool::new(true),
+                running: AtomicBool::new(false),
+                queued: AtomicBool::new(false),
+                serial: AtomicU64::new(0),
+            });
+            let subscriptions = self
+                .inputs
+                .borrow()
+                .iter()
+                .map(|source| {
+                    let wake = wake.clone();
+                    source.subscribe(move || wake.signal())
+                })
+                .collect();
+            self.source_subscriptions.replace(subscriptions);
+            self.wake.replace(Some(wake));
+            if let Some(top) = TopLevel::get_top_level(Some(self)) {
+                let weak = self.to_ref().downgrade();
+                self.scaling_subscription
+                    .replace(Some(top.scaling_changed(move || {
+                        if let Some(view) = weak.upgrade() {
+                            view.invalidate_renderer();
+                        }
+                    })));
+            }
+        }
+        self.update_wakeup();
+        if self.failed.get() || !self.is_effectively_visible() || self.timer.borrow().is_some() {
+            return;
+        }
+        let wake = self.wake.borrow().as_ref().unwrap().clone();
+        wake.running.store(true, Ordering::Release);
         let weak = self.to_ref().downgrade();
         self.timer.replace(Some(DispatcherTimer::run(
             move || {
                 let Some(view) = weak.upgrade() else {
                     return false;
                 };
+                let before = wake.serial.load(Ordering::Acquire);
                 view.tick();
-                true
+                let keep = view.wants_timer();
+                if !keep {
+                    view.timer.borrow_mut().take();
+                    wake.running.store(false, Ordering::Release);
+                    // A producer racing the final tick either observes stopped
+                    // or changes this serial, so its publication cannot be lost.
+                    if wake.serial.load(Ordering::Acquire) != before {
+                        wake.signal();
+                    }
+                }
+                keep
             },
             Duration::from_millis(16),
             DispatcherPriority::RENDER,
         )));
         self.tick();
+    }
+    fn update_wakeup(&self) {
+        let enabled = self.is_attached_to_visual_tree()
+            && self.is_effectively_visible()
+            && !self.failed.get();
+        if let Some(wake) = self.wake.borrow().as_ref() {
+            wake.enabled.store(enabled, Ordering::Release);
+        }
+        if !enabled {
+            if let Some(timer) = self.timer.borrow_mut().take() {
+                timer.dispose();
+            }
+            if let Some(wake) = self.wake.borrow().as_ref() {
+                wake.running.store(false, Ordering::Release);
+            }
+        }
+    }
+    fn wants_timer(&self) -> bool {
+        !self.failed.get()
+            && self.is_attached_to_visual_tree()
+            && self.is_effectively_visible()
+            && self
+                .inputs
+                .borrow()
+                .iter()
+                .all(|source| source.latest().is_some())
+            && self.host.borrow().as_ref().is_some_and(|host| {
+                self.schedule() == RenderSchedule::Continuous || host.has_pending_work()
+            })
     }
     fn tick(&self) {
         if self.failed.get() {
@@ -231,6 +384,9 @@ impl RendererHost {
             .map(|t| t.render_scaling())
             .unwrap_or(1.);
         if let Err(error) = host.resize(bounds.width, bounds.height, scale, 8192) {
+            self.failed.set(true);
+            host.set_active(false);
+            self.update_wakeup();
             self.errors.emit(&error);
             return;
         }
@@ -266,6 +422,7 @@ impl RendererHost {
                             if let Some(host) = view.host.borrow().as_ref() {
                                 host.set_active(false);
                             }
+                            view.update_wakeup();
                             view.errors.emit(&error);
                         }
                     }
@@ -273,10 +430,195 @@ impl RendererHost {
                         presenter.present_latest();
                     }
                 }
+                // Input replacement, resize or invalidation may have arrived
+                // while this render was busy, including an older control epoch.
+                if let Some(view) = weak.upgrade() {
+                    view.start();
+                }
             });
         }
         if let Some(view) = self.presenter.borrow().as_ref() {
             view.present_latest();
         }
+    }
+}
+
+#[cfg(test)]
+mod scheduling_tests {
+    use super::*;
+    use ferroui_controls::{
+        testing::{TestServices, UnitTestApplication},
+        Control, Window,
+    };
+    struct Renderer {
+        calls: Cell<u64>,
+        budget: FrameBudget,
+    }
+    fn metadata(source: u64, generation: u64, sequence: u64, w: u32, h: u32) -> FrameMetadata {
+        let bytes = u64::from(w) * u64::from(h) * 4;
+        FrameMetadata {
+            identity: FrameIdentity {
+                source,
+                generation,
+                sequence,
+            },
+            width: w,
+            height: h,
+            visible: FrameRegion {
+                x: 0,
+                y: 0,
+                width: w,
+                height: h,
+            },
+            format: FrameFormat::Rgba8,
+            color: FrameColor::Srgb,
+            alpha: FrameAlpha::Opaque,
+            rotation: FrameRotation::None,
+            mirrored: false,
+            top_left_origin: true,
+            timestamp: Duration::ZERO,
+            device: Some(DeviceIdentity::Context(1)),
+            device_generation: 1,
+            planes: vec![FramePlane {
+                offset: 0,
+                stride: u64::from(w) * 4,
+                length: bytes,
+            }],
+            retained_bytes: bytes,
+        }
+    }
+    impl TextureRenderer for Renderer {
+        fn render(
+            &self,
+            viewport: ferroui_media::RendererViewport,
+            _: Vec<FrameLease>,
+            completion: GpuCompletion,
+        ) -> ferroui_media::MediaFuture<FrameLease> {
+            self.calls.set(self.calls.get() + 1);
+            let frame = self
+                .budget
+                .lease(
+                    metadata(
+                        9,
+                        viewport.generation,
+                        self.calls.get(),
+                        viewport.width,
+                        viewport.height,
+                    ),
+                    (),
+                )
+                .unwrap();
+            completion.retain(frame.clone()).unwrap();
+            completion.complete(); // This mock records no GPU work.
+            Box::pin(async move { Ok(frame) })
+        }
+    }
+    fn settle() {
+        for _ in 0..6 {
+            Dispatcher::ui_thread().run_jobs(None);
+            for timer in Dispatcher::timers_for_unit_tests() {
+                Dispatcher::force_fire_timer_for_unit_tests(&timer);
+            }
+        }
+        Dispatcher::ui_thread().run_jobs(None);
+    }
+    #[test]
+    fn static_host_sleeps_and_worker_frame_changes_wake_the_owning_dispatcher() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let source = Arc::new(FrameMailbox::new(1, 1));
+        let input = FrameBudget::new(Default::default());
+        source
+            .publish(input.lease(metadata(1, 1, 1, 2, 2), ()).unwrap())
+            .unwrap();
+        let renderer = Rc::new(Renderer {
+            calls: Cell::new(0),
+            budget: FrameBudget::new(Default::default()),
+        });
+        let view = RendererHost::new();
+        view.set_width(4.);
+        view.set_height(4.);
+        view.set_renderer(Some(renderer.clone()), 9, None);
+        view.set_inputs(vec![source.clone()]);
+        let window = Window::new();
+        window.set_content(Some(Control::boxed(view.clone())));
+        window.show();
+        settle();
+        assert_eq!(renderer.calls.get(), 1);
+        assert!(
+            view.timer.borrow().is_none(),
+            "static output must stop its polling timer"
+        );
+        let producer = source.clone();
+        let budget = input.clone();
+        std::thread::spawn(move || {
+            producer
+                .publish(budget.lease(metadata(1, 1, 2, 2, 2), ()).unwrap())
+                .unwrap()
+        })
+        .join()
+        .unwrap();
+        settle();
+        assert_eq!(renderer.calls.get(), 2);
+        assert!(view.timer.borrow().is_none());
+        source.clear();
+        settle();
+        assert!(view.output().unwrap().latest().is_none());
+        assert!(view.timer.borrow().is_none());
+        window.close();
+        settle();
+        source
+            .publish(input.lease(metadata(1, 1, 3, 2, 2), ()).unwrap())
+            .unwrap();
+        settle();
+        assert_eq!(
+            renderer.calls.get(),
+            2,
+            "detached subscriptions must not restart the host"
+        );
+        source.clear();
+    }
+    #[test]
+    fn ancestor_visibility_stops_continuous_work_and_reshow_uses_latest_input() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let source = Arc::new(FrameMailbox::new(1, 1));
+        let input = FrameBudget::new(Default::default());
+        source
+            .publish(input.lease(metadata(1, 1, 1, 2, 2), ()).unwrap())
+            .unwrap();
+        let renderer = Rc::new(Renderer {
+            calls: Cell::new(0),
+            budget: FrameBudget::new(Default::default()),
+        });
+        let view = RendererHost::new();
+        view.set_width(4.);
+        view.set_height(4.);
+        view.set_schedule(RenderSchedule::Continuous);
+        view.set_renderer(Some(renderer.clone()), 9, None);
+        view.set_inputs(vec![source.clone()]);
+        let parent = Panel::new();
+        parent.children().add(&view);
+        let window = Window::new();
+        window.set_content(Some(Control::boxed(parent.clone())));
+        window.show();
+        settle();
+        assert!(renderer.calls.get() > 1);
+        assert!(view.timer.borrow().is_some());
+        parent.set_is_visible(false);
+        settle();
+        let paused = renderer.calls.get();
+        assert!(view.timer.borrow().is_none());
+        assert!(view.output().unwrap().latest().is_none());
+        source
+            .publish(input.lease(metadata(1, 1, 2, 2, 2), ()).unwrap())
+            .unwrap();
+        settle();
+        assert_eq!(renderer.calls.get(), paused);
+        view.set_schedule(RenderSchedule::OnInvalidation);
+        parent.set_is_visible(true);
+        settle();
+        assert_eq!(renderer.calls.get(), paused + 1);
+        assert!(view.timer.borrow().is_none());
+        window.close();
+        settle();
     }
 }

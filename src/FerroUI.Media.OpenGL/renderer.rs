@@ -75,6 +75,11 @@ impl TextureRenderer for GlTextureRenderer {
         inputs: Vec<FrameLease>,
         completion: GpuCompletion,
     ) -> MediaFuture<FrameLease> {
+        if self.producer.budget().quarantined_reads() > 0 {
+            return Box::pin(async {
+                Err(unsupported("Renderer GPU completion is indeterminate"))
+            });
+        }
         let bytes = viewport.width as u64 * viewport.height as u64 * 4;
         let metadata = FrameMetadata {
             identity: FrameIdentity {

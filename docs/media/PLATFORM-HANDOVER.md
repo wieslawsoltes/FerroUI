@@ -212,6 +212,7 @@ They are functional evidence, not a frozen performance acceptance profile.
 | Check | Result and limit |
 | --- | --- |
 | Windows/Linux provider adapters | Rust cross-checks passed with the native bridge deliberately skipped; C/C++ compilation, linking, codec/driver behavior and native samples remain unverified |
+| Renderer scheduling | Four mailbox notification/lifetime tests and two UI scheduling tests cover worker dispatch, disposal, static idle, ancestor visibility and continuous work. macOS/iOS native playback/Metal projection and Android 16 KiB playback/GLES projection and teardown passed again. Android camera + QR + JPEG also continued through rotation and released hardware/output after Stop. |
 | Native alias contracts | Three GL producer/retirement unit tests passed, including retention through consumer completion, queued native cleanup and lost-context quarantine; this does not prove a native DMA-BUF/DXGI import |
 | Android renderer accessibility | Updated APK's native automation tree reports RendererHost focusable; camera stop again released hardware and renderer storage. Full keyboard/screen-reader acceptance remains open. |
 | Browser regression after renderer changes | Actual Chrome suite passed shared WebGL, native video, synthetic capture/JPEG, canceled acquisition, software rejection, autoplay/audio and CORS cases again |
@@ -255,7 +256,11 @@ files or automatically available on another machine. Important names include
 `android-frame-orientation-contracts.log`, `native-alias-contracts.log`,
 `windows-rust-bindings-check.log`, `linux-rust-bindings-check.log`,
 `windows-sample-bindings-check.log`, `desktop-gl-scene-bindings-check.log`,
-`desktop-provider-routing-smoke.log` and `ios-final-renderer-smoke.log`. Re-run applicable gates on the receiving host.
+`desktop-provider-routing-smoke.log`, `ios-final-renderer-smoke.log`,
+`frame-notification-contracts.log`, `renderer-notification-ui-tests.log`,
+`renderer-notification-macos-smoke.log`, `renderer-notification-ios-smoke.log`,
+`renderer-notification-android-smoke.log`, `renderer-notification-camera-qr.log`
+and `renderer-notification-browser-regression.log`. Re-run applicable gates on the receiving host.
 
 Useful commands, from the repository root:
 

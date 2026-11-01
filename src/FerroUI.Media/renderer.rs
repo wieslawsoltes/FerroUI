@@ -130,6 +130,15 @@ impl TextureRendererHost {
     pub fn viewport(&self) -> RendererViewport {
         self.0.viewport.get()
     }
+    /// Whether admitted work or an invalidation still needs a scheduling tick.
+    /// Clean static hosts can sleep until a source/layout notification arrives.
+    pub fn has_pending_work(&self) -> bool {
+        let viewport = self.0.viewport.get();
+        self.0.active.get()
+            && viewport.width > 0
+            && viewport.height > 0
+            && (self.0.busy.get() || self.0.dirty.get())
+    }
     pub fn set_schedule(&self, schedule: RenderSchedule) {
         self.0.schedule.set(schedule);
         self.invalidate();
