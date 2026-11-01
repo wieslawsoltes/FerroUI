@@ -368,14 +368,27 @@ impl TopLevelImpl {
         view.surface_redraw_needed();
     }
 
-    /// `drawing_finished` is the `java.lang.Runnable` the system waits for.
+    /// `drawing_finished` is the `java.lang.Runnable` the system waits for: until it runs, the
+    /// system keeps showing the surface as it was (the frame of the old size, after a resize).
+    ///
+    /// Upstream runs it from `Compositor.RequestCompositionUpdate`, which calls its action before
+    /// the next batch is committed, so the system was told the drawing was finished before the
+    /// frame of the new size was rendered, and showed the old frame stretched or cropped to the new
+    /// size. Here it runs when the batch of the next commit (the one with the new layout, which
+    /// `surfaceChanged` ran) has been rendered, on the thread that rendered it; the render loop is
+    /// asked for that frame out of turn instead of at its next vsync. The thread of the user
+    /// interface does not wait.
     pub(crate) fn on_surface_redraw_needed_async(&self, drawing_finished: JavaObject) {
         let Some(view) = self.internal_view() else {
             crate::interop::java::call_void(&drawing_finished, "run", "()V", &[]);
             return;
         };
-        self.required_compositor()
-            .request_composition_update(move || crate::interop::java::call_void(&drawing_finished, "run", "()V", &[]));
+        let compositor = self.required_compositor();
+        compositor
+            .request_commit_async()
+            .rendered()
+            .on_completed(move || crate::interop::java::call_void(&drawing_finished, "run", "()V", &[]));
+        compositor.render_loop().request_frame_out_of_turn();
         view.surface_redraw_needed_async();
     }
 
