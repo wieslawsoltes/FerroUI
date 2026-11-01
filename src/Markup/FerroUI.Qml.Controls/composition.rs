@@ -2,7 +2,7 @@
 //! belong to a component without becoming a FerroUI visual, and an object-valued
 //! property does not automatically place its value in the parent's child list.
 use super::*;
-use std::collections::BTreeSet;
+use std::collections::{BTreeSet, HashSet};
 
 pub(super) struct Plan {
     children: Vec<(Controls, Vec<Ref<Control>>)>,
@@ -93,12 +93,24 @@ pub(super) fn plan(instance: &Instance, nodes: &tree::Peers) -> Result<Plan, Err
     })
 }
 
-pub(super) fn apply(plan: Plan) {
+pub(super) fn apply(mut plan: Plan) {
+    // A structural change in one delegate need not edit every sibling collection.
+    plan.children.retain(|(collection, children)| {
+        collection.count() != children.len()
+            || children
+                .iter()
+                .enumerate()
+                .any(|(i, child)| collection.get(i) != *child)
+    });
     // Remove transferred children from all old parents before inserting into new ones.
     for (collection, children) in &plan.children {
+        let retained: HashSet<_> = children.iter().collect();
+        let mut index = 0;
         for child in collection.to_vec() {
-            if !children.contains(&child) {
-                collection.remove(&child);
+            if retained.contains(&child) {
+                index += 1;
+            } else {
+                collection.remove_at(index);
             }
         }
     }
