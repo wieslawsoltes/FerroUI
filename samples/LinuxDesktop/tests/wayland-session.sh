@@ -10,12 +10,14 @@ if [[ ${1:-} != --private ]]; then
     binary=$(realpath "$1")
     [[ -x $binary ]] || { echo "Missing executable: $binary" >&2; exit 2; }
     mkdir -p "$2"; output=$(realpath "$2")
-    scratch=$(mktemp -d); trap 'rm -rf -- "$scratch"' EXIT
+    source "$here/wayland-runtime.sh"
+    scratch=$(mktemp -d); trap 'remove_wayland_runtime "$scratch"' EXIT
     # Sway deliberately refuses uid 0. Stage only the executable and session/test files
     # when run from a root-only checkout. Never start a compositor or GTK as root.
     if (( EUID == 0 )); then
         mkdir -p "$scratch"/{tests,session,res}
         install -m755 "$script" "$scratch/tests/wayland-session.sh"
+        install -m644 "$here/wayland-runtime.sh" "$scratch/tests/"
         if [[ $mode == native ]]; then
             install -m644 "$here/wayland-appearances.sh" "$here/wayland-notifications.sh" "$scratch/tests/"
         fi

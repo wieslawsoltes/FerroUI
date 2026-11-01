@@ -6,7 +6,8 @@ if [[ ${1:-} != --private ]]; then
     [[ $# == 2 ]] || { echo "Usage: $0 /path/to/ferro-desktop output-dir" >&2; exit 2; }
     binary=$(realpath "$1"); [[ -x $binary ]]
     mkdir -p "$2"; output=$(realpath "$2")
-    scratch=$(mktemp -d); trap 'rm -rf -- "$scratch"' EXIT
+    source "$(dirname -- "$0")/wayland-runtime.sh"
+    scratch=$(mktemp -d); trap 'remove_wayland_runtime "$scratch"' EXIT
     mkdir -m700 "$scratch"/{runtime,home,config,cache}
     env -u DISPLAY -u WAYLAND_DISPLAY -u WAYLAND_SOCKET -u SWAYSOCK -u DBUS_SESSION_BUS_ADDRESS \
         HOME="$scratch/home" XDG_RUNTIME_DIR="$scratch/runtime" XDG_CONFIG_HOME="$scratch/config" \

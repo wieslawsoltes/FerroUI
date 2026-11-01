@@ -111,6 +111,9 @@ pub fn send(command: Command) -> io::Result<()> {
         if xlib::x_send_event(display, owner, false, 0, &mut event) == 0 {
             return Err(io::Error::other("Could not send the desktop command"));
         }
+        // The shortcut helper exits immediately. Complete the send while the
+        // selected owner is protected, before disconnecting from the server.
+        xlib::x_sync(display, false);
         Ok(())
     })
 }
