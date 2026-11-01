@@ -22,6 +22,7 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
     let pages = memo(move |_| matches.with(|items| items.len().div_ceil(PAGE_SIZE).max(1)));
     let field = NodeRef::<ferroui_controls::TextBox>::new();
     let enter = shell.clone();
+    let shell_focus = shell.clone();
     let result_shell = shell.clone();
     let catalogue_status = shell.catalog.unavailable_reason().map(str::to_owned);
     let launching = shell.launching;
@@ -99,6 +100,9 @@ pub(super) fn view(shell: &Rc<Shell>) -> Element {
         .text(query.two_way())
         .on_changed(ferroui_controls::TextBox::text_property(), move |_| {
             page.set_if_changed(0);
+        })
+        .with(move |input| {
+            shell_focus.search_box.replace(Some(input.downgrade()));
         })
         .node_ref(field)
         .on_loaded(move |_| {

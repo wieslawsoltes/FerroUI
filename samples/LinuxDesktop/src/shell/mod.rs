@@ -44,14 +44,37 @@ struct Shell {
     launching: Signal<bool>,
     owner: Owner,
     desktop_focus: NodeRef<ferroui_controls::Button>,
+    // First use mounts the launcher. Keep its template, layout and search input until the theme changes.
+    cached_launcher: Signal<Option<Appearance>>,
+    search_box: std::cell::RefCell<Option<ferroui_base::WeakRef<ferroui_controls::TextBox>>>,
 }
 
 impl Shell {
     fn open(&self, target: Scene) {
         self.status.set_if_changed(String::new());
-        self.scene.set_if_changed(target);
+        self.show(target);
         if let Some(session) = &self.session {
             session.reveal_desktop();
+        }
+    }
+
+    fn show(&self, target: Scene) {
+        if target == Scene::Applications {
+            batch(|| {
+                self.cached_launcher
+                    .set_if_changed(Some(self.appearance.get_untracked()));
+                self.scene.set_if_changed(target);
+            });
+            if let Some(input) = self
+                .search_box
+                .borrow()
+                .as_ref()
+                .and_then(|input| input.upgrade())
+            {
+                input.focus();
+            }
+        } else {
+            self.scene.set_if_changed(target);
         }
     }
 
@@ -59,7 +82,13 @@ impl Shell {
         let result = self.themes.select(appearance);
         let applied = self.themes.current();
         let decorations = apply_session_appearance(self.session.as_deref(), applied);
-        self.appearance.set_if_changed(applied);
+        if self.appearance.get_untracked() != applied {
+            batch(|| {
+                self.appearance.set(applied);
+                self.cached_launcher
+                    .set((self.scene.get_untracked() == Scene::Applications).then_some(applied));
+            });
+        }
         self.status.set(
             [
                 result
@@ -206,6 +235,10 @@ pub fn view(
         launching: signal(false),
         owner: Owner::current().expect("desktop view must be mounted in a FerroUI owner"),
         desktop_focus: NodeRef::new(),
+        cached_launcher: signal(
+            (initial == Scene::Applications).then_some(appearance.get_untracked()),
+        ),
+        search_box: Default::default(),
     });
 
     if let Some(session) = &state.session {
@@ -232,7 +265,7 @@ pub fn view(
         session.on_reveal(move || {
             if let Some(state) = weak.upgrade().filter(|s| s.owner.is_alive()) {
                 if state.scene.get_untracked() == Scene::Desktop {
-                    state.scene.set(Scene::Applications);
+                    state.show(Scene::Applications);
                 }
             }
         });
@@ -241,7 +274,9 @@ pub fn view(
     let current = state.scene;
     let clock = clock();
     let root_state = state.clone();
+    let launcher_state = state.clone();
     let overlays = state.clone();
+    let dismiss = state.clone();
     grid()
         .name("DesktopShell")
         .clip_to_bounds(true)
@@ -296,31 +331,36 @@ pub fn view(
         .child(dynamic(move || {
             desktop::surface(&state, clock, appearance.get())
         }))
-        .child(dynamic(move || match (current.get(), appearance.get()) {
-            (Scene::Desktop, _) => Element::Empty,
-            (scene, _) => {
-                let shell = overlays.clone();
-                let content = match scene {
-                    Scene::Applications => launcher::view(&shell),
-                    Scene::Appearance => desktop::picker(&shell),
-                    _ => workspaces::view(&shell),
-                };
-                grid()
-                    .keyboard_navigation_tab_navigation(
-                        ferroui_base::input::KeyboardNavigationMode::Cycle,
-                    )
-                    .child(
-                        border()
-                            .background("#65081420")
-                            .on_pointer_pressed(move |e| {
-                                shell.dismiss();
-                                e.set_handled(true);
-                            }),
-                    )
-                    .child(content)
-                    .into()
-            }
-        }))
+        .child(
+            grid()
+                .is_visible(move || current.get() != Scene::Desktop)
+                .keyboard_navigation_tab_navigation(
+                    ferroui_base::input::KeyboardNavigationMode::Cycle,
+                )
+                .child(
+                    border()
+                        .background("#65081420")
+                        .on_pointer_pressed(move |e| {
+                            dismiss.dismiss();
+                            e.set_handled(true);
+                        }),
+                )
+                .child(
+                    grid()
+                        .is_visible(move || current.get() == Scene::Applications)
+                        .child(dynamic(move || {
+                            match launcher_state.cached_launcher.get() {
+                                Some(_) => launcher::view(&launcher_state),
+                                None => Element::Empty,
+                            }
+                        })),
+                )
+                .child(dynamic(move || match (current.get(), appearance.get()) {
+                    (Scene::Appearance, _) => desktop::picker(&overlays),
+                    (Scene::Workspaces, _) => workspaces::view(&overlays),
+                    _ => Element::Empty,
+                })),
+        )
         .into()
 }
 
