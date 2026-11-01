@@ -62,6 +62,8 @@ sudo samples/LinuxDesktop/session/install.sh target/release/ferro-desktop target
 
 Open Start and search for **FerroUI WinUI Gallery**. The desktop entry selects the catalog’s WinUI theme and native Wayland shared-memory presentation. The shell passes its child display to the launched process and composes the catalog’s buffers with Graphite. Controls inside that window belong to the catalog.
 
+![The WinUI Control Gallery running on the private Wayland display inside the FerroUI desktop](screenshots/compositor-winui-gallery.webp)
+
 To reproduce the gallery capture, point the compositor test at both built executables. The test drives the production launcher, verifies the private socket and checks the stable external catalog on the parent output.
 
 ```sh

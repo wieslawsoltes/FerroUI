@@ -7,7 +7,7 @@ install_gallery_probe() {
 #!/bin/sh
 printf '%s\n' "$$" >"$FERRO_TEST_CATALOG_OUT/catalog.pid"
 printf '%s\n' "$WAYLAND_DISPLAY" "$FERROUI_CATALOG_THEME" "$FERROUI_CATALOG_WAYLAND" >"$FERRO_TEST_CATALOG_OUT/catalog-launch.txt"
-export WAYLAND_DEBUG=client FERROUI_CATALOG_THEME_VARIANT=light FERROUI_SMOKE_WINDOW_SIZE=965x615 FERROUI_SMOKE_EXIT_MS=35000
+export WAYLAND_DEBUG=client FERROUI_CATALOG_THEME_VARIANT=light FERROUI_SMOKE_EXIT_MS=35000
 exec "$FERRO_TEST_CATALOG" >"$FERRO_TEST_CATALOG_OUT/catalog-protocol.log" 2>&1
 WRAPPER
     chmod 755 "$scratch/gallery-bin/control-catalog-desktop"
@@ -24,7 +24,7 @@ stop_gallery_probe() {
 }
 
 test_composed_gallery() {
-    local attempt delta colors stable=0
+    local attempt delta pid stable=0
     grim -s 1 -o HEADLESS-1 "$scratch/gallery-before.png"
     "$binary" --platform=wayland --show=applications
     # Wait for the WinUI launcher search field to be painted on the monitor.
@@ -41,28 +41,42 @@ test_composed_gallery() {
     wait_for grep -q '\.get_toplevel(' "$output/catalog-protocol.log"
     wait_for grep -q '\.set_title("FerroUI Control Gallery")' "$output/catalog-protocol.log"
     wait_for grep -q '\.attach(wl_buffer' "$output/catalog-protocol.log"
+    read -r pid <"$output/catalog.pid"
     # Both the visible output and the parent compositor tree matter. The
     # gallery supplies its own wl_buffer while Sway sees only the FerroUI host.
     for ((attempt=0;attempt<80;attempt++)); do
         grim -s 1 -o HEADLESS-1 "$scratch/gallery-frame.png"
         delta=$(compare -fuzz 4% -metric AE "$scratch/gallery-before.png" "$scratch/gallery-frame.png" null: 2>&1) || [[ $? == 1 ]]
-        colors=$(convert "$scratch/gallery-frame.png" -crop 780x420+65+90 +repage -format '%k' info:)
-        if (( colors>200 )) && awk -v n="$delta" 'BEGIN {exit !(n>150000)}' && [[ -f $scratch/gallery-last.png ]]; then
-            delta=$(compare -fuzz 1% -metric AE "$scratch/gallery-last.png" "$scratch/gallery-frame.png" null: 2>&1) || [[ $? == 1 ]]
-            if awk -v n="$delta" 'BEGIN {exit !(n<1200)}'; then
-                stable=$((stable+1))
-                if (( stable >= 2 )); then break; fi
-            else
-                stable=0
-            fi
+        [[ $(readlink "/proc/$pid/exe" || :) == "$FERRO_TEST_CATALOG" ]] || fail 'Catalog exited before a rendered frame'
+        # The light gallery contains text and large neutral content surfaces.
+        # The saturated blue wallpaper has no such interior, and the launcher
+        # card only occupies a small fraction of this crop. Its gallery hero
+        # animates continuously, so content must persist across two frames.
+        if awk -v n="$delta" 'BEGIN {exit !(n>150000)}' && /usr/bin/python3 - "$scratch/gallery-frame.png" <<'PIXELS'
+import sys
+from PIL import Image
+crop = Image.open(sys.argv[1]).convert("RGB").crop((75, 95, 1050, 675))
+light = ink = 0
+for (r, g, b) in crop.resize((195, 116)).getdata():
+    if max(r, g, b) - min(r, g, b) < 23:
+        light += min(r, g, b) >= 213
+        ink += max(r, g, b) <= 125
+sys.exit(0 if light > 5800 and ink > 60 else 1)
+PIXELS
+        then
+            stable=$((stable+1))
+            (( stable<2 )) || break
+        else
+            stable=0
         fi
-        mv "$scratch/gallery-frame.png" "$scratch/gallery-last.png"; sleep .12
+        sleep .12
     done
-    (( stable>=2 )) && only_host || fail "Could not verify a stable ControlCatalog window inside FerroUI"
+    if (( stable<2 )) || ! only_host; then
+        cp "$scratch/gallery-frame.png" "$output/catalog-failed.png"
+        fail "Could not verify the ControlCatalog content inside FerroUI"
+    fi
     cp "$scratch/gallery-frame.png" "$output/winui-control-catalog.png"
     # Keep the following GTK/Qt checks independent of the optional gallery.
-    local pid
-    read -r pid <"$output/catalog.pid"
     stop_gallery_probe
     for ((attempt=0;attempt<80;attempt++)); do
         [[ $(readlink "/proc/$pid/exe" || :) != "$FERRO_TEST_CATALOG" ]] && break
