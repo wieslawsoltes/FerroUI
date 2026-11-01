@@ -38,10 +38,10 @@ fn ranges_from_compiled_rust() {
 #[cfg(feature = "webscene")]
 #[test]
 fn ranges_with_webscene() {
-    use std::{path::Path, rc::Rc};
+    use std::rc::Rc;
     let unit = ferroui_qml_build::Compiler::new()
         .with_javascript()
-        .load(Path::new(env!("CARGO_MANIFEST_DIR")).join("ranges/Main.qml"))
+        .load(crate::fixtures::controls("ranges/Main.qml"))
         .unwrap();
     exercise(
         Instance::with_engine(

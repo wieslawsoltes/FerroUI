@@ -4,6 +4,8 @@ mod anchors;
 mod buttons;
 #[cfg(test)]
 mod delegates;
+#[cfg(all(test, feature = "webscene"))]
+mod fixtures;
 #[cfg(test)]
 mod geometry;
 #[cfg(test)]

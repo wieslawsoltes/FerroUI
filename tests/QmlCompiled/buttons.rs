@@ -62,8 +62,8 @@ fn buttons_from_compiled_rust() {
 #[cfg(feature = "webscene")]
 #[test]
 fn buttons_with_webscene() {
-    use std::{path::Path, rc::Rc};
-    let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("buttons/Main.qml");
+    use std::rc::Rc;
+    let path = crate::fixtures::controls("buttons/Main.qml");
     let source = ferroui_qml_build::Compiler::new()
         .with_javascript()
         .load(path)

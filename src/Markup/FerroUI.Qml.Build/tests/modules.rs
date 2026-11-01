@@ -32,16 +32,15 @@ fn qualified_reexports_use_the_requested_version_and_internal_type() {
 
 #[test]
 fn type_keys_are_identical_in_cargo_and_standalone_processes() {
-    use std::{path::Path, process::Command};
-    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../tests/QmlCompiled");
+    use std::process::Command;
+    let root = Path::new(env!("CARGO_MANIFEST_DIR"));
+    let fixture = root.join("tests/module-data");
     let compile = |inside_cargo: bool| {
         let mut command = Command::new(env!("CARGO_BIN_EXE_ferroui-qmlc"));
-        command
-            .current_dir(&root)
-            .args(["-I", "singletons/imports", "singletons/Main.qml"]);
+        command.current_dir(&fixture).arg("type-key.qml");
         if inside_cargo {
             command
-                .env("CARGO_PKG_NAME", "qml-compiled-tests")
+                .env("CARGO_PKG_NAME", env!("CARGO_PKG_NAME"))
                 .env("CARGO_MANIFEST_DIR", root.canonicalize().unwrap());
         } else {
             command
@@ -54,7 +53,9 @@ fn type_keys_are_identical_in_cargo_and_standalone_processes() {
             "{}",
             String::from_utf8_lossy(&result.stderr)
         );
-        result.stdout
+        String::from_utf8(result.stdout).unwrap()
     };
-    assert_eq!(compile(true), compile(false));
+    let standalone = compile(false);
+    assert!(standalone.contains("tests/module-data/type-key.qml#Entry"));
+    assert_eq!(compile(true), standalone);
 }

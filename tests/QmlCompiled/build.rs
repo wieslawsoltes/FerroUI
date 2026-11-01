@@ -1,3 +1,5 @@
+mod fixtures;
+
 fn main() {
     ferroui_qml_build::compile_file("states/PropertyTracks.qml", "property_tracks.rs")
         .expect("compile property animation fixture");
@@ -42,25 +44,25 @@ fn main() {
         .with_javascript()
         .compile_file("states/Main.qml", "states_guest.rs")
         .expect("compile states and transitions for V8");
-    ferroui_qml_build::compile_file("anchors/Mirrored.qml", "mirrored.rs")
+    ferroui_qml_build::compile_file(fixtures::controls("anchors/Mirrored.qml"), "mirrored.rs")
         .expect("compile mirrored anchor fixture");
-    ferroui_qml_build::compile_file("anchors/Main.qml", "anchors.rs")
+    ferroui_qml_build::compile_file(fixtures::controls("anchors/Main.qml"), "anchors.rs")
         .expect("compile native anchor lines fixture");
     ferroui_qml_build::compile_file("pragmas/Scopes.qml", "bound_contexts.rs")
         .expect("compile bound contexts");
     ferroui_qml_build::compile_file("pragmas/Main.qml", "pragmas.rs")
         .expect("compile semantic pragmas");
-    ferroui_qml_build::compile_file("ranges/Main.qml", "ranges.rs")
+    ferroui_qml_build::compile_file(fixtures::controls("ranges/Main.qml"), "ranges.rs")
         .expect("compile range controls");
-    ferroui_qml_build::compile_file("buttons/Main.qml", "buttons.rs")
+    ferroui_qml_build::compile_file(fixtures::controls("buttons/Main.qml"), "buttons.rs")
         .expect("compile grouped controls");
     ferroui_qml_build::compile_file("views/ArraySections.qml", "array_sections.rs")
         .expect("compile sections on JavaScript object arrays");
     ferroui_qml_build::compile_file("views/Reuse.qml", "reuse.rs")
         .expect("compile delegate reuse fixture");
-    ferroui_qml_build::compile_file("views/Decorated.qml", "decorated.rs")
+    ferroui_qml_build::compile_file(fixtures::runtime("views/Decorated.qml"), "decorated.rs")
         .expect("compile decorated list fixture");
-    ferroui_qml_build::compile_file("views/Main.qml", "views.rs")
+    ferroui_qml_build::compile_file(fixtures::runtime("views/Main.qml"), "views.rs")
         .expect("compile virtualized list fixture");
     ferroui_qml_build::compile_file("delegates/Main.qml", "delegates.rs")
         .expect("compile the delegate fixture");

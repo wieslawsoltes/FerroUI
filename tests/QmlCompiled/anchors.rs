@@ -46,7 +46,7 @@ fn generated_rust_transports_anchor_lines() {
 fn webscene_can_read_and_reassign_anchor_groups() {
     let src = ferroui_qml_build::Compiler::new()
         .with_javascript()
-        .load(std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("anchors/Main.qml"))
+        .load(crate::fixtures::controls("anchors/Main.qml"))
         .unwrap();
     let engine = std::rc::Rc::new(ferroui_qml_webscene::WebSceneEngine::from_env().unwrap());
     check(Instance::with_engine(&src.document, &types(), Default::default(), engine).unwrap());
@@ -79,7 +79,7 @@ fn native_mirroring_inherits_and_can_reset_an_explicit_override() {
 fn guest_mirroring_reads_and_writes_the_attached_properties() {
     let doc = ferroui_qml_build::Compiler::new()
         .with_javascript()
-        .load("anchors/Mirrored.qml")
+        .load(crate::fixtures::controls("anchors/Mirrored.qml"))
         .unwrap()
         .document;
     let guest = std::rc::Rc::new(ferroui_qml_webscene::WebSceneEngine::from_env().unwrap());

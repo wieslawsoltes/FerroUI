@@ -24,7 +24,7 @@ fn view(source: &str) -> Instance {
 
 #[test]
 fn million_row_view_realizes_only_viewport_and_current_delegate() {
-    let mut ui = view(include_str!("../../../../tests/QmlCompiled/views/Main.qml"));
+    let mut ui = view(include_str!("fixtures/views/Main.qml"));
     let root = ui.root();
     ui.call(root, "scrollMiddle", vec![]).unwrap();
     assert_eq!(
@@ -121,9 +121,7 @@ fn delegate_access_modes_control_required_and_implicit_writes() {
 
 #[test]
 fn reversed_sections_measure_decoration_and_react_to_model_edits() {
-    let mut ui = view(include_str!(
-        "../../../../tests/QmlCompiled/views/Decorated.qml"
-    ));
+    let mut ui = view(include_str!("fixtures/views/Decorated.qml"));
     let root = ui.root();
     let report = |ui: &mut Instance| ui.call(root, "report", vec![]).unwrap();
     assert_eq!(

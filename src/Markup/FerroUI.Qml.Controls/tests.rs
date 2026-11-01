@@ -537,9 +537,7 @@ fn mirrored_positioners_keep_declaration_order_and_wrap_each_line() {
     use ferroui_base::layout::ILayoutManager;
     use ferroui_controls::Window;
     let _scope = UnitTestApplication::start(TestServices::styled_window());
-    let view = mount(include_str!(
-        "../../../tests/QmlCompiled/anchors/Positioners.qml"
-    ));
+    let view = mount(include_str!("tests/fixtures/anchors/Positioners.qml"));
     let window = Window::new();
     window.set_content(Some(Control::boxed(view.root())));
     window.show();
@@ -565,9 +563,7 @@ fn mirrored_positioners_keep_declaration_order_and_wrap_each_line() {
 fn baseline_and_mirrored_anchor_geometry_match_qt() {
     use ferroui_base::{Rect, Size};
     let _scope = UnitTestApplication::start(TestServices::new());
-    let view = mount(include_str!(
-        "../../../tests/QmlCompiled/anchors/Mirrored.qml"
-    ));
+    let view = mount(include_str!("tests/fixtures/anchors/Mirrored.qml"));
     let root = view.root();
     let frames = || {
         root.measure(Size::new(101., 60.));
@@ -596,7 +592,7 @@ fn sibling_anchor_order_margins_and_failed_cycles_are_transactional() {
     use ferroui_base::{Rect, Size};
     use ferroui_qml::AnchorEdge;
     let _scope = UnitTestApplication::start(TestServices::new());
-    let view = mount(include_str!("../../../tests/QmlCompiled/anchors/Main.qml"));
+    let view = mount(include_str!("tests/fixtures/anchors/Main.qml"));
     let root = view.root();
     let follower = view.id("follower").unwrap();
     let marker = view.id("marker").unwrap();
@@ -789,7 +785,7 @@ fn native_toggles_share_qml_groups_and_accessible_activation() {
         CheckBox, RadioButton, ToggleSwitch,
     };
     let _scope = UnitTestApplication::start(TestServices::new());
-    let view = mount(include_str!("../../../tests/QmlCompiled/buttons/Main.qml"));
+    let view = mount(include_str!("tests/fixtures/buttons/Main.qml"));
     let root = view.root_id();
     let report = || view.call(root, "report", vec![]).unwrap();
     let call = |name| view.call(root, name, vec![]).unwrap();
@@ -854,7 +850,7 @@ fn native_ranges_preserve_descending_bounds_and_propagate_user_input() {
     use ferroui_base::{layout::Orientation, utilities::Decimal};
     use ferroui_controls::{NumericUpDown, ProgressBar, Slider};
     let _scope = UnitTestApplication::start(TestServices::new());
-    let view = mount(include_str!("../../../tests/QmlCompiled/ranges/Main.qml"));
+    let view = mount(include_str!("tests/fixtures/ranges/Main.qml"));
     let level = view
         .control(view.id("level").unwrap())
         .unwrap()

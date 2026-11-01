@@ -20,7 +20,10 @@ def main():
             raise RuntimeError("\n".join(e.toString() for e in component.errors()))
         return component, root
 
-    folder = Path(__file__).parent
+    folder = Path(__file__).resolve().parent
+    markup = folder.parents[2] / "src" / "Markup"
+    runtime_fixtures = markup / "FerroUI.Qml" / "tests" / "fixtures"
+    controls_fixtures = markup / "FerroUI.Qml.Controls" / "tests" / "fixtures"
     component, root = load(folder / "Main.qml")
     assert root.report() == "0/0/0/0/0"
     root.inlineOn()
@@ -60,7 +63,7 @@ def main():
     root.eraseRow()
     assert root.savedAt(0) and root.summary() == "5/2/1/0=updated/-"
     print("Qt 6.12.0 multi-target Binding, Repeater order and delegate identity passed")
-    component, root = load(folder.parent / "anchors/Main.qml")
+    component, root = load(controls_fixtures / "anchors/Main.qml")
     assert root.geometry() == "63/42/132/52/124/23", root.geometry()
     root.moveMarker()
     assert root.geometry() == "83/52/112/42/134/33", root.geometry()
@@ -68,7 +71,7 @@ def main():
     assert root.geometry() == "3/52/192/42/94/33", root.geometry()
     print("Qt 6.12.0 sibling anchor geometry passed")
 
-    component, root = load(folder.parent / "anchors/Mirrored.qml")
+    component, root = load(controls_fixtures / "anchors/Mirrored.qml")
     assert root.frames() == "-2/19/7/92/42", root.frames()
     assert root.inherited() == "true/false/true", root.inherited()
     root.inheritLocal()
@@ -78,7 +81,7 @@ def main():
     root.change()
     assert root.frames() == "32/21/2/92/50", root.frames()
     print("Qt 6.12.0 baseline anchors and inherited mirroring passed")
-    component, root = load(folder.parent / "anchors/Positioners.qml")
+    component, root = load(controls_fixtures / "anchors/Positioners.qml")
     assert root.positions() == "70/48/30/18/10", root.positions()
     root.reverseDirections()
     for item in root.children():
@@ -99,7 +102,7 @@ def main():
     print("Qt 6.12.0 nested role identity, replacement and delegates passed")
 
     from PySide6.QtQuick import QQuickWindow
-    component, root = load(folder.parent / "views/Main.qml")
+    component, root = load(runtime_fixtures / "views/Main.qml")
     window = QQuickWindow()
     window.resize(100, 60)
     root.setParentItem(window.contentItem())
@@ -112,7 +115,7 @@ def main():
     window.hide()
     root.setParentItem(None)
     print("Qt 6.12.0 ListView scrolling, model edits and selection passed")
-    component, root = load(folder.parent / "views/Decorated.qml")
+    component, root = load(runtime_fixtures / "views/Decorated.qml")
     window.resize(160, 160)
     root.setParentItem(window.contentItem())
     window.show()
@@ -136,7 +139,7 @@ def main():
     window.hide()
     root.setParentItem(None)
     print("Qt 6.12.0 delegate pooling and reuse lifecycle passed")
-    component, root = load(folder.parent / "buttons/Main.qml")
+    component, root = load(controls_fixtures / "buttons/Main.qml")
     assert root.report() == "2/false/0/false/false/false/0/0/", root.report()
     root.choose()
     root.choose()
@@ -148,7 +151,7 @@ def main():
     root.groupAll()
     assert root.report() == "2/false/2/true/true/true/2/1/TCGCGKKS", root.report()
     print("Qt 6.12.0 grouped buttons, tri-state checkboxes and switch activation passed")
-    component, root = load(folder.parent / "ranges/Main.qml")
+    component, root = load(controls_fixtures / "ranges/Main.qml")
     assert root.report() == "6/0.4/0.6/0.4/6/6/4/0/0", root.report()
     root.step()
     assert root.report() == "9/0.1/0.9/0.1/3/3/4/0/0", root.report()

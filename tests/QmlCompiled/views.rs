@@ -23,8 +23,8 @@ fn virtualized_view_from_generated_rust() {
 #[cfg(feature = "webscene")]
 #[test]
 fn virtualized_view_with_webscene() {
-    use std::{path::Path, rc::Rc};
-    let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("views/Main.qml");
+    use std::rc::Rc;
+    let path = crate::fixtures::runtime("views/Main.qml");
     let source = ferroui_qml_build::Compiler::new()
         .with_javascript()
         .load(path)
@@ -65,8 +65,8 @@ mod decorated {
     #[cfg(feature = "webscene")]
     #[test]
     fn decorated_sections_with_webscene() {
-        use std::{path::Path, rc::Rc};
-        let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("views/Decorated.qml");
+        use std::rc::Rc;
+        let path = crate::fixtures::runtime("views/Decorated.qml");
         let unit = ferroui_qml_build::Compiler::new()
             .with_javascript()
             .load(path)
