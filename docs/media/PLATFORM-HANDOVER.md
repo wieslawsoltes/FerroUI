@@ -165,6 +165,19 @@ letterboxing and premultiplied alpha. These pass on this Windows host; physical
 camera/driver and Linux DMA-BUF gates remain open. Exact commands and the
 preserved retirement-timeout investigation are in the verification note.
 
+Sustained receiving-host recovery also exposed a shared compositor ownership
+leak: dropping a `LockBound` interop/feature on the UI thread retained the entire
+old render context. The holder now queues owned values back to the render
+thread and wakes its loop; only that thread runs their destructors. Values
+abandoned after that thread stops remain retained safely. Direct UI/third-thread
+drop probes, the stronger interop teardown test, all 561 Windows composition
+tests and 15 WSL render-thread tests pass; nine context-retirement-manager tests
+also pass. A native eight-cycle/48-reset pilot stays near 161 MB private memory,
+74 MB local GPU usage and 777 handles, instead of adding roughly 180 MB and 775
+handles per cycle. The longer native stress and metadata/pixel work have their
+own receiving-host verification evidence; frame-budget zero alone is not proof
+that native devices were released.
+
 Provider source is now present in `FerroUI.Media.Windows`,
 `FerroUI.Media.Video.Windows` and `FerroUI.Media.Camera.Windows`. The
 `PortableMedia` desktop harness selects these providers on Windows. Native

@@ -733,6 +733,8 @@ fn the_first_request_for_the_gpu_interop_of_a_confined_compositor_is_answered() 
     wait_until("the task of the compositor has left the loop", || render_loop.task_count() == 0);
     drop(render_thread);
     // Nothing else of the render thread was touched by this thread.
+    assert!(log.saw("the backend context is dropped"));
+    assert!(log.saw("the graphics context is dropped"));
     for violation in log.violations() {
         assert!(
             violation.starts_with("the backend context is asked for a feature on")
@@ -740,6 +742,43 @@ fn the_first_request_for_the_gpu_interop_of_a_confined_compositor_is_answered() 
             "{violation}"
         );
     }
+}
+
+#[test]
+fn confined_values_dropped_elsewhere_are_released_by_the_render_thread() {
+    struct Probe { owner: ThreadId, dropped: Arc<AtomicUsize> }
+    impl Drop for Probe {
+        fn drop(&mut self) {
+            assert_eq!(thread::current().id(), self.owner);
+            self.dropped.fetch_add(1, Ordering::SeqCst);
+        }
+    }
+    let _dispatcher_scope = Dispatcher::unit_test_scope();
+    let (_locator_scope, render_interface) = MockPlatformRenderInterface::install();
+    let fixture = ConfinedCompositor::new(&render_interface);
+    let render_thread = RenderThread::start(&fixture.render_loop);
+    let (target, root) = fixture.show();
+    let dropped = Arc::new(AtomicUsize::new(0));
+    for third_thread in [false, true] {
+        let locked = fixture.compositor.locked_server();
+        let observed = dropped.clone();
+        let task = fixture.compositor.invoke_server_job_async(move |server| {
+            Ok(super::server::LockBound::new(&locked, server, Probe {
+                owner: thread::current().id(), dropped: observed,
+            }))
+        }, false);
+        wait_until("the confined value is created", || task.is_completed());
+        let value = task.take_result().unwrap().unwrap();
+        if third_thread { thread::spawn(move || drop(value)).join().unwrap(); }
+        else { drop(value); }
+        let expected = if third_thread {2} else {1};
+        wait_until("the owner thread releases the value", || dropped.load(Ordering::SeqCst) == expected);
+    }
+    fixture.dispose(target, root);
+    let (render_loop, log) = fixture.drop_compositor();
+    wait_until("the owner task exits", || render_loop.task_count() == 0);
+    drop(render_thread);
+    assert!(log.violations().is_empty());
 }
 
 /// The compositor of the reference catches the two exceptions a render

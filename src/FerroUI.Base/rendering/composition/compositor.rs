@@ -266,6 +266,10 @@ impl Compositor {
         // never renders (`UseUiThreadForSynchronousCommits: false`,
         // `Loop.RunsInBackground: true`).
         let confined = !use_ui_thread_for_synchronous_commits && render_loop.runs_in_background();
+        let release_loop = Arc::downgrade(&render_loop);
+        server.set_release_wakeup(Arc::new(move || {
+            if let Some(render_loop) = release_loop.upgrade() { render_loop.wakeup(); }
+        }));
         let task = Arc::new_cyclic(|this| RenderThreadLoopTask {
             this: this.clone(),
             server: server.clone(),
@@ -504,7 +508,7 @@ impl Compositor {
     /// that this thread asks for and jobs of the render thread use (see
     /// [`LockBound`](super::server::LockBound)). `server` is what
     /// [`with_server`](Self::with_server) or a job hands out.
-    pub(crate) fn bind_to_lock<T>(&self, server: &ServerCompositor, value: T) -> super::server::LockBound<T> {
+    pub(crate) fn bind_to_lock<T: 'static>(&self, server: &ServerCompositor, value: T) -> super::server::LockBound<T> {
         super::server::LockBound::new(&self.server, server, value)
     }
 
