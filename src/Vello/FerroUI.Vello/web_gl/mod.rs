@@ -22,6 +22,7 @@
 
 use crate::drawing_context_impl::{CreateInfo, DrawingContextImpl};
 use crate::helpers::pixel_format_helper::scene_size;
+use crate::scene::image_textures::{release_unused_textures, rgba_bytes};
 use crate::scene::VelloWebGlSceneSink;
 use crate::vello_options::VelloRenderingMode;
 use crate::vello_platform::VelloPlatform;
@@ -44,12 +45,6 @@ use vello_gpu::{RenderSettings, RenderSize, Resources, Scene, TextureId, WebGlRe
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext, WebGlTexture};
 
-/// The number of renders the texture of an image that is no longer drawn is
-/// kept for: an image that is drawn every frame is uploaded once, and one
-/// that left the scene is released soon after. The number of the hybrid
-/// sink over `wgpu`.
-const IMAGE_TEXTURE_LIFETIME: u64 = 16;
-
 /// A feature of a platform graphics context that is the WebGL2 context of a
 /// canvas: the canvas.
 ///
@@ -65,10 +60,11 @@ pub trait IWebGlCanvasFeature {
     fn canvas(&self) -> JsValue;
 }
 
-/// The texture of an image and the render it was last drawn in.
+/// The texture of an image, the render it was last drawn in and its bytes.
 struct ImageTexture {
     texture: WebGlTexture,
     last_used: u64,
+    bytes: u64,
 }
 
 /// What the renderer keeps on the context between frames.
@@ -219,7 +215,7 @@ impl VelloWebGlGpu {
         for (id, image) in images {
             if !state.images.contains_key(id) {
                 let texture = self.create_image_texture(image)?;
-                state.images.insert(*id, ImageTexture { texture, last_used: 0 });
+                state.images.insert(*id, ImageTexture { texture, last_used: 0, bytes: rgba_bytes(image.width, image.height) });
             }
             let texture = state.images.get_mut(id).expect("the texture was just inserted");
             texture.last_used = render_count;
@@ -235,13 +231,12 @@ impl VelloWebGlGpu {
         );
 
         let gl = &self.gl;
-        state.images.retain(|_, image| {
-            let keep = render_count - image.last_used < IMAGE_TEXTURE_LIFETIME;
-            if !keep {
-                gl.delete_texture(Some(&image.texture));
-            }
-            keep
-        });
+        release_unused_textures(
+            &mut state.images,
+            render_count,
+            |image| (image.last_used, image.bytes),
+            |image| gl.delete_texture(Some(&image.texture)),
+        );
 
         result.map_err(|error| error.to_string())
     }

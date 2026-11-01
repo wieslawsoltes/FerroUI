@@ -24,7 +24,7 @@ harness = false
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 sha2 = "0.11"
-ferroui-designer-core = { version = "=0.4.0", path = "../FerroUI.Designer.Core" }
+ferroui-designer-core = { workspace = true }
 
 [package.metadata.release]
 group = "tools"

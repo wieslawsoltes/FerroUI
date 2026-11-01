@@ -197,6 +197,22 @@ def check(packages):
                     f"pinned to \"={version}\" (`workspace = true`, or a path alone for a development "
                     "dependency that is left out of the package)"
                 )
+
+    # A crate that is not published has no package, but a version requirement on a crate of the
+    # workspace still has to match: a pin of its own (`version = "=0.4.0"` beside the path) is not
+    # moved by set-version, and the workspace does not resolve after it.
+    for package in packages:
+        if is_published(package):
+            continue
+        for dependency in package["dependencies"]:
+            if dependency["name"] not in names or not dependency.get("path"):
+                continue
+            if dependency["req"] not in ("*", f"={version}"):
+                problems.append(
+                    f"{package['name']}: the {dependency['kind'] or 'normal'} dependency {dependency['name']} "
+                    f"has the requirement {dependency['req']!r}; a crate of the workspace is pinned to "
+                    f"\"={version}\" (`workspace = true`) or named by its path alone"
+                )
     return problems
 
 

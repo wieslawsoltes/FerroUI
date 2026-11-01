@@ -1,6 +1,6 @@
 //! `AnimalOwner` (`Domain/AnimalOwner.cs`).
 
-use super::{Animal, Guid};
+use super::{new_guid, Animal, Guid};
 use ferroui_dynamic_data::binding::AbstractNotifyPropertyChanged;
 use ferroui_dynamic_data::cache::{ObservableCache, ObservableCacheEx};
 use ferroui_dynamic_data::list::{IObservableList, ObservableListEx, SourceList};
@@ -37,7 +37,7 @@ impl AnimalOwner {
     pub fn with_id(name: impl Into<String>, id: Option<Guid>, include: bool) -> Rc<Self> {
         Rc::new(Self {
             notify: AbstractNotifyPropertyChanged::new(),
-            id: id.unwrap_or_else(Guid::new_guid),
+            id: id.unwrap_or_else(new_guid),
             name: name.into(),
             animals: SourceList::new(),
             include_in_results: Cell::new(include),
@@ -123,7 +123,7 @@ impl Hash for AnimalOwner {
 impl fmt::Display for AnimalOwner {
     /// `ToString`: `{Name} [{Animals.Count} Animals] ({Id:B})`.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} [{} Animals] ({})", self.name, self.animals.count(), self.id.to_string_b())
+        write!(f, "{} [{} Animals] ({})", self.name, self.animals.count(), self.id.braced())
     }
 }
 

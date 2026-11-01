@@ -1235,3 +1235,168 @@ mod external_objects {
         unsafe { send(texture, sel(b"release\0")) };
     }
 }
+
+/// The lights and the pixel operations of the compositor drawn by Graphite
+/// on a Metal device match the raster backend, which the tests of
+/// `composition_effect_tests.rs` compare with the exact light and the CPU
+/// reference: the same SkSL programs, so the results differ by the
+/// rounding of the GPU only (2 levels: a blend and a layer composition each
+/// round once; 3 for vivid light, see below).
+#[test]
+fn graphite_evaluates_the_lights_and_the_pixel_operations_as_the_raster_backend() {
+    use crate::composition_effect_tests::{gpu_scenes, render, HEIGHT, WIDTH};
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device available");
+        return;
+    };
+    let render_interface = PlatformRenderInterface::default();
+    let context = render_interface.create_backend_context(Some(device.clone()));
+    for (name, draw) in gpu_scenes() {
+        let layer = context.create_offscreen_render_target(PixelSize::new(WIDTH, HEIGHT), Vector::new(1.0, 1.0), true);
+        let mut drawing_context = layer.create_drawing_context();
+        drawing_context.clear(Colors::TRANSPARENT);
+        draw(&mut *drawing_context);
+        drawing_context.dispose();
+        let target = layer.as_any().downcast_ref::<SurfaceRenderTarget>().unwrap();
+        let snapshot = target.create_non_affined_snapshot();
+        let snapshot = snapshot.as_any().downcast_ref::<ImmutableBitmap>().unwrap();
+        let image = snapshot.image();
+        let pixmap = image.peek_pixels().expect("the snapshot is a raster image");
+        let bgra = pixmap.color_type() == ColorType::BGRA8888;
+        let row_bytes = pixmap.row_bytes();
+        let bytes = pixmap.bytes().expect("the pixels");
+        let raster = render(ferroui_base::Matrix::IDENTITY, |context| draw(context));
+        let mut largest = 0;
+        for y in 0..HEIGHT as usize {
+            for x in 0..WIDTH as usize {
+                let at = y * row_bytes + x * 4;
+                let gpu = if bgra {
+                    [bytes[at + 2], bytes[at + 1], bytes[at], bytes[at + 3]]
+                } else {
+                    [bytes[at], bytes[at + 1], bytes[at + 2], bytes[at + 3]]
+                };
+                let reference = &raster[(y * WIDTH as usize + x) * 4..(y * WIDTH as usize + x) * 4 + 4];
+                // The anti-aliased edge of a rotated area: the coverage of
+                // the two rasterizers differs, not the light.
+                let partial = |alpha: u8| alpha != 0 && alpha != 255;
+                if name.contains("rotated") && (partial(reference[3]) || partial(gpu[3])) {
+                    continue;
+                }
+                for channel in 0..4 {
+                    largest = largest.max((i32::from(gpu[channel]) - i32::from(reference[channel])).abs());
+                }
+            }
+        }
+        // Vivid light divides by `1 - s` and `s`: the colours a blender is
+        // given are half precision on Metal, and the division magnifies
+        // their rounding by a level.
+        let tolerance = if name == "vivid light" { 3 } else { 2 };
+        assert!(largest <= tolerance, "{name}: Graphite is within {tolerance} levels of the raster backend: {largest}");
+        layer.dispose();
+    }
+    context.dispose();
+}
+
+/// The clips of rounded rectangles a GPU clip stack cannot apply
+/// analytically are coverage shaders on Graphite: never a clip the GPU would
+/// rasterize on the CPU, over frames in which the card moves (rotated
+/// cards, complex radii, and nested clips sharing an edge, which Ganesh
+/// merges into a mask), and within 16 levels of the exact coverage (as on
+/// the raster backend, `coverage_clip_tests.rs`).
+#[test]
+fn graphite_clips_rotated_rounded_rectangles_with_coverage_shaders() {
+    use crate::coverage_clip_tests::{clip_scenes, compare_alphas, NestedClips, SIZE};
+    use crate::drawing_context_impl::rounded_clip_counts;
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device available");
+        return;
+    };
+    let render_interface = PlatformRenderInterface::default();
+    let context = render_interface.create_backend_context(Some(device.clone()));
+    let (shaders_before, masks_before) = rounded_clip_counts();
+    let scenes = clip_scenes();
+    for scene in &scenes {
+        let exact = scene.exact();
+        // The frames of a scroll: the card moves by fractions of a pixel.
+        for frame in 0..3 {
+            let mut moved = *scene;
+            moved.transform = scene.transform * ferroui_base::Matrix::create_translation(0.0, -0.25 * frame as f64);
+            let layer = context.create_offscreen_render_target(PixelSize::new(SIZE, SIZE), Vector::new(1.0, 1.0), true);
+            let mut drawing_context = layer.create_drawing_context();
+            drawing_context.clear(Colors::TRANSPARENT);
+            moved.draw(&mut *drawing_context);
+            drawing_context.dispose();
+            if frame == 0 {
+                let target = layer.as_any().downcast_ref::<SurfaceRenderTarget>().unwrap();
+                let snapshot = target.create_non_affined_snapshot();
+                let snapshot = snapshot.as_any().downcast_ref::<ImmutableBitmap>().unwrap();
+                let mut alphas = vec![0u8; (SIZE * SIZE) as usize];
+                for y in 0..SIZE {
+                    for x in 0..SIZE {
+                        alphas[(y * SIZE + x) as usize] = pixel(snapshot, x, y).3;
+                    }
+                }
+                let (largest, _, _) = compare_alphas(&exact, &alphas);
+                assert!(largest <= 16, "{}: within 16 levels of the exact coverage: {largest}", scene.name);
+            }
+            layer.dispose();
+        }
+    }
+    // The nested clips of a scroll, moving by fractions of a pixel.
+    for frame in 0..3 {
+        let scene = NestedClips { transform: ferroui_base::Matrix::create_translation(3.25, 4.5 - 0.25 * frame as f64) };
+        let layer = context.create_offscreen_render_target(PixelSize::new(SIZE, SIZE), Vector::new(1.0, 1.0), true);
+        let mut drawing_context = layer.create_drawing_context();
+        drawing_context.clear(Colors::TRANSPARENT);
+        scene.draw(&mut *drawing_context);
+        drawing_context.dispose();
+        if frame == 0 {
+            let target = layer.as_any().downcast_ref::<SurfaceRenderTarget>().unwrap();
+            let snapshot = target.create_non_affined_snapshot();
+            let snapshot = snapshot.as_any().downcast_ref::<ImmutableBitmap>().unwrap();
+            let mut alphas = vec![0u8; (SIZE * SIZE) as usize];
+            for y in 0..SIZE {
+                for x in 0..SIZE {
+                    alphas[(y * SIZE + x) as usize] = pixel(snapshot, x, y).3;
+                }
+            }
+            let (largest, _, _) = compare_alphas(&scene.exact(), &alphas);
+            assert!(largest <= 16, "nested clips: within 16 levels of the exact coverage: {largest}");
+        }
+        layer.dispose();
+    }
+    let (shaders, masks) = rounded_clip_counts();
+    // Every scene is rotated, skewed or has complex radii: a coverage shader
+    // each frame; of the nested clips, the inner one.
+    assert_eq!(shaders_before + 3 * scenes.len() as u64 + 3, shaders);
+    assert_eq!(masks_before, masks, "no clip was left to the GPU's clip stack");
+    context.dispose();
+}
+
+/// The prewarm of the runtime effects on Graphite: every program compiles
+/// and is drawn once, and nothing is left drawn.
+#[test]
+fn graphite_prewarms_the_runtime_effects_without_drawing_anything() {
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device available");
+        return;
+    };
+    let render_interface = PlatformRenderInterface::default();
+    let context = render_interface.create_backend_context(Some(device.clone()));
+    let layer = context.create_offscreen_render_target(PixelSize::new(16, 16), Vector::new(1.0, 1.0), true);
+    let mut drawing_context = layer.create_drawing_context();
+    drawing_context.clear(Colors::TRANSPARENT);
+    let skia = drawing_context.as_any_mut().downcast_mut::<DrawingContextImpl>().unwrap();
+    assert_eq!(7, skia.prewarm_runtime_effects());
+    drawing_context.dispose();
+    let target = layer.as_any().downcast_ref::<SurfaceRenderTarget>().unwrap();
+    let snapshot = target.create_non_affined_snapshot();
+    let snapshot = snapshot.as_any().downcast_ref::<ImmutableBitmap>().unwrap();
+    for y in 0..16 {
+        for x in 0..16 {
+            assert_eq!(0, pixel(snapshot, x, y).3, "({x}, {y}) is left as it was");
+        }
+    }
+    layer.dispose();
+    context.dispose();
+}

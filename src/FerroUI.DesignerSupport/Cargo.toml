@@ -26,6 +26,8 @@ ferroui-controls.workspace = true
 # The contract of the run-time XAML loader, which the host registers.
 ferroui-markup-xaml.workspace = true
 ferroui-remote-protocol.workspace = true
+# The random identifier of the default session (`Guid.NewGuid`).
+uuid = { workspace = true, features = ["v4"] }
 # The errors of a document, for their class names, lines and positions.
 xamlx.workspace = true
 
