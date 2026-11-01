@@ -19,8 +19,13 @@ pub struct LspServer {
 }
 impl Default for LspServer {
     fn default() -> Self {
+        Self::with_service(LanguageService::default())
+    }
+}
+impl LspServer {
+    fn with_service(service: LanguageService) -> Self {
         Self {
-            service: LanguageService::default(),
+            service,
             #[cfg(feature = "qml")]
             qml: None,
             initialized: false,
@@ -29,14 +34,13 @@ impl Default for LspServer {
             cancelled: Arc::new(Mutex::new(BTreeSet::new())),
         }
     }
-}
-impl LspServer {
+
     /// Serve QML documents using the registered Qt Quick and Controls metadata.
     #[cfg(feature = "qml")]
     pub fn for_qml() -> Result<Self> {
         Ok(Self {
             qml: Some(crate::qml::QmlService::new()?),
-            ..Self::default()
+            ..Self::with_service(LanguageService::new(crate::Schema::default()))
         })
     }
     pub fn handle(&mut self, message: Value) -> Vec<Value> {

@@ -236,3 +236,37 @@ fn workspace_file_navigation_prefers_an_unsaved_buffer() {
     std::fs::remove_file(badge.to_file_path().unwrap()).unwrap();
     std::fs::remove_dir(&dir).unwrap();
 }
+
+#[test]
+fn inherited_member_navigation_and_completion_use_the_defining_file() {
+    let mut client = Client::new();
+    client.open(
+        "file:///projects/Badge.qml",
+        "import QtQuick\nRectangle { property int votes: 1 }",
+    );
+    let main = "import QtQuick\nBadge { id: badge; votes: 2; property int tally: badge.votes }";
+    client.open(URI, main);
+    for at in [main.find("votes:").unwrap(), main.rfind("votes").unwrap()] {
+        let result = client.at("textDocument/definition", main, at + 1);
+        assert_eq!(result["uri"], "file:///projects/Badge.qml");
+        assert_eq!(result["range"]["start"], json!({"line":1,"character":25}));
+    }
+    let broken = main.replace("badge.votes", "badge.");
+    client.change(2, json!([{"text":broken}]));
+    let items = client.at(
+        "textDocument/completion",
+        &broken,
+        broken.rfind("badge.").unwrap() + 6,
+    );
+    for label in ["votes", "width", "color"] {
+        assert!(
+            items
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|i| i["label"] == label),
+            "{label}"
+        );
+    }
+    client.finish();
+}

@@ -47,7 +47,7 @@ impl Model {
     pub fn owner(&self, at: usize) -> Option<usize> {
         self.nodes
             .iter()
-            .rposition(|n| n.span.start <= at && at <= n.span.end)
+            .rposition(|n| n.span.start <= at && at < n.span.end)
     }
 
     pub fn id(&self, owner: usize, name: &str) -> Option<usize> {
@@ -64,40 +64,51 @@ impl Model {
         }
     }
 
-    pub fn target(&self, owner: usize, name: &str, at: usize) -> Option<(&str, SourceSpan)> {
+    /// Resolve the token to a QML receiver. Declarations and assignment names
+    /// have an explicit receiver; free script identifiers may also use the root.
+    pub fn target(&self, owner: usize, name: &str, at: usize) -> Option<Target> {
         let node = &self.nodes[owner];
-        let mut target = owner;
-        if let Some(read) = node
-            .reads
-            .iter()
-            .find(|r| r.span.start <= at && at < r.span.end && r.name == name)
+        let contains = |s: SourceSpan| s.start <= at && at < s.end;
+        if node
+            .id
+            .as_ref()
+            .is_some_and(|(id, s)| id == name && contains(*s))
         {
-            if let Some(receiver) = &read.receiver {
-                target = self.receiver(owner, receiver)?;
-            } else if let Some(id) = self.id(owner, name) {
-                return self.nodes[id]
-                    .id
-                    .as_ref()
-                    .map(|(_, s)| (self.nodes[id].ty.as_str(), *s));
-            } else if !node.declarations.contains_key(name) {
-                target = node.scope;
-            }
-        } else {
-            if let Some((id, s)) = &node.id {
-                if id == name && s.start <= at && at < s.end {
-                    return Some((&node.ty, *s));
-                }
-            }
-            let (_, s) = node.declarations.get(name)?;
-            if !(s.start <= at && at < s.end) {
-                return None;
-            }
+            return Some(Target::Id(owner));
         }
-        self.nodes[target]
+        if node
             .declarations
             .get(name)
-            .map(|(detail, s)| (detail.as_str(), *s))
+            .is_some_and(|(_, s)| contains(*s))
+        {
+            return Some(Target::Member {
+                owner,
+                lexical: false,
+            });
+        }
+        let read = node
+            .reads
+            .iter()
+            .find(|r| contains(r.span) && r.name == name)?;
+        if let Some(receiver) = &read.receiver {
+            Some(Target::Member {
+                owner: self.receiver(owner, receiver)?,
+                lexical: false,
+            })
+        } else if let Some(id) = self.id(owner, name) {
+            Some(Target::Id(id))
+        } else {
+            Some(Target::Member {
+                owner,
+                lexical: true,
+            })
+        }
     }
+}
+
+pub(super) enum Target {
+    Id(usize),
+    Member { owner: usize, lexical: bool },
 }
 
 fn object(
@@ -189,7 +200,16 @@ fn members(source: &str, list: &[Member], owner: usize, nodes: &mut Vec<Node>) -
             M::Signal { name, .. } => (name, "signal", 24),
             M::Function { name, .. } => (name, "function", 6),
             M::Handler { name, .. } => (name, "handler", 24),
-            M::Binding { name, .. } => (name, "binding", 7),
+            M::Binding { name, .. } => {
+                if !name.contains('.') {
+                    nodes[owner].reads.push(ScriptReference {
+                        span: selection,
+                        name: name.clone(),
+                        receiver: Some("this".into()),
+                    });
+                }
+                (name, "binding", 7)
+            }
             M::Enum { name, .. } => (name, "enum", 10),
             M::Component { name, object: obj } => {
                 children.push(object(source, obj, None, None, nodes));

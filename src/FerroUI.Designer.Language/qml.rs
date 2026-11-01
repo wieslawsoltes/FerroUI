@@ -8,7 +8,8 @@ use ferroui_qml::TypeRegistry;
 use ferroui_qml_compiler::{parse_external, Diagnostic, SourceSpan};
 use model::{Model, Symbol};
 use serde_json::{json, Value};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
+use std::rc::Rc;
 use url::Url;
 
 pub(crate) fn capabilities() -> Value {
@@ -73,7 +74,7 @@ impl Buffer {
 }
 
 pub(crate) struct QmlService {
-    docs: BTreeMap<String, Buffer>,
+    docs: BTreeMap<String, Rc<Buffer>>,
     types: TypeRegistry,
     pub workspace: workspace::Workspace,
 }
@@ -98,7 +99,7 @@ impl QmlService {
                 require(source.len() <= 16 * 1024 * 1024, "Document exceeds 16 MiB")?;
                 let buffer = Buffer::new(LineIndex::new(source), integer(doc, "version")?);
                 out.push(buffer.publish(uri)?);
-                self.docs.insert(uri.into(), buffer);
+                self.docs.insert(uri.into(), Rc::new(buffer));
             }
             "textDocument/didChange" => {
                 let uri = uri(p)?;
@@ -111,7 +112,7 @@ impl QmlService {
                 }
                 let buffer = Buffer::new(index, version);
                 out.push(buffer.publish(uri)?);
-                self.docs.insert(uri.into(), buffer);
+                self.docs.insert(uri.into(), Rc::new(buffer));
             }
             "textDocument/didClose" => {
                 let uri = uri(p)?;
@@ -148,10 +149,11 @@ impl QmlService {
     fn buffer(&self, uri: &str) -> Result<&Buffer> {
         self.docs
             .get(uri)
+            .map(Rc::as_ref)
             .ok_or_else(|| LanguageError("Document is not open".into()))
     }
 
-    fn component(&self, uri: &str, model: &Model, name: &str) -> Result<Option<(String, Range)>> {
+    fn component(&self, uri: &str, model: &Model, name: &str) -> Option<(String, Rc<Buffer>)> {
         let (alias, ty) = name
             .split_once('.')
             .map_or((None, name), |(ns, ty)| (Some(ns), ty));
@@ -159,25 +161,80 @@ impl QmlService {
             let Ok(url) = dir.join(&format!("{ty}.qml")) else {
                 continue;
             };
-            let disk;
-            let doc = if let Some(doc) = self.docs.get(url.as_str()) {
-                doc
-            } else {
-                let Some(source) = self.workspace.read(&url) else {
-                    continue;
-                };
-                disk = Buffer::new(LineIndex::new(&source), -1);
-                &disk
-            };
-            // An invalid unsaved component shadows older files of the same name.
-            return doc
-                .model
-                .as_ref()
-                .ok()
-                .map(|m| Ok((url.to_string(), doc.range(m.outline.selection)?)))
-                .transpose();
+            if let Some(doc) = self.docs.get(url.as_str()) {
+                return Some((url.into(), doc.clone()));
+            }
+            if let Some(source) = self.workspace.read(&url) {
+                return Some((
+                    url.into(),
+                    Rc::new(Buffer::new(LineIndex::new(&source), -1)),
+                ));
+            }
         }
-        Ok(None)
+        None
+    }
+
+    /// Walk source inheritance once per query, stopping on cycles or an invalid
+    /// editor buffer. Derived declarations take precedence over their bases.
+    fn members(
+        &self,
+        uri: &str,
+        buffer: &Buffer,
+        model: &Model,
+        index: usize,
+    ) -> Result<BTreeMap<String, MemberInfo>> {
+        let mut result = BTreeMap::new();
+        let mut visited = BTreeSet::new();
+        let mut from = uri.to_owned();
+        let mut next = Some((buffer, model, index));
+        let mut base;
+        while let Some((buffer, model, index)) = next.take() {
+            let node = &model.nodes[index];
+            for (name, (detail, span)) in &node.declarations {
+                result.entry(name.clone()).or_insert(MemberInfo {
+                    detail: detail.clone(),
+                    kind: kind(detail),
+                    location: if buffer.model.is_ok() {
+                        Some((from.clone(), buffer.range(*span)?))
+                    } else {
+                        None
+                    },
+                });
+            }
+            if visited.len() >= 64 {
+                break;
+            }
+            if let Some((path, doc)) = self.component(&from, model, &node.ty) {
+                if !visited.insert(path.clone()) {
+                    break;
+                }
+                base = doc;
+                from = path;
+                next = base.model.as_ref().ok().map(|m| (base.as_ref(), m, 0));
+                continue;
+            }
+            if let Ok((_, _, def)) = self.types.resolve(&model.imports, &node.ty) {
+                let mut insert = |name: &str, k, detail: &str| {
+                    result.entry(name.to_owned()).or_insert_with(|| MemberInfo {
+                        detail: detail.into(),
+                        kind: k,
+                        location: None,
+                    });
+                };
+                for (name, ty) in def.property_types() {
+                    if !name.contains('.') && !name.starts_with('$') {
+                        insert(name, 10, ty.trim_start_matches("$qml:"));
+                    }
+                }
+                for name in def.signals() {
+                    insert(name, 23, "signal");
+                }
+                for name in def.methods() {
+                    insert(name, 2, "method");
+                }
+            }
+        }
+        Ok(result)
     }
 
     fn lookup(&self, uri: &str, buffer: &Buffer, at: usize, hover: bool) -> Result<Value> {
@@ -197,8 +254,15 @@ impl QmlService {
                 .filter(|(d, _)| d == "component")
             {
                 Some((uri.to_owned(), buffer.range(*span)?, node.ty.clone()))
-            } else if let Some((path, range)) = self.component(uri, model, &node.ty)? {
-                Some((path, range, node.ty.clone()))
+            } else if let Some((path, base)) = self.component(uri, model, &node.ty) {
+                let Ok(base_model) = &base.model else {
+                    return Ok(Value::Null);
+                };
+                Some((
+                    path,
+                    base.range(base_model.outline.selection)?,
+                    node.ty.clone(),
+                ))
             } else {
                 return Ok(if hover {
                     self.types.resolve(&model.imports, &node.ty).ok().map_or(Value::Null, |(module, ty, _)| {
@@ -209,14 +273,42 @@ impl QmlService {
                 });
             }
         } else {
-            model
-                .target(owner, name, at)
-                .map(|(detail, span)| {
-                    buffer
-                        .range(span)
-                        .map(|r| (uri.to_owned(), r, format!("{detail} {name}")))
-                })
-                .transpose()?
+            let Some(target) = model.target(owner, name, at) else {
+                return Ok(Value::Null);
+            };
+            match target {
+                model::Target::Id(index) => {
+                    let id = &model.nodes[index];
+                    id.id
+                        .as_ref()
+                        .map(|(_, s)| {
+                            buffer
+                                .range(*s)
+                                .map(|r| (uri.to_owned(), r, format!("{} {name}", id.ty)))
+                        })
+                        .transpose()?
+                }
+                model::Target::Member {
+                    owner: index,
+                    lexical,
+                } => {
+                    let mut info = self.members(uri, buffer, model, index)?.remove(name);
+                    let scope = model.nodes[index].scope;
+                    if info.is_none() && lexical && index != scope {
+                        info = self.members(uri, buffer, model, scope)?.remove(name);
+                    }
+                    let Some(info) = info else {
+                        return Ok(Value::Null);
+                    };
+                    let detail = format!("{} {name}", info.detail);
+                    if hover {
+                        return Ok(
+                            json!({"contents":{"kind":"plaintext","value":detail},"range":buffer.range(selection)?}),
+                        );
+                    }
+                    info.location.map(|(uri, r)| (uri, r, detail))
+                }
+            }
         };
         let Some((uri, range, detail)) = result else {
             return Ok(Value::Null);
@@ -284,21 +376,8 @@ impl QmlService {
         }
         if let Some(index) = native_owner {
             let node = &model.nodes[index];
-            if let Ok((_, _, def)) = self.types.resolve(&model.imports, &node.ty) {
-                for (name, ty) in def.property_types() {
-                    if !name.contains('.') && !name.starts_with('$') {
-                        item(&mut items, name, 10, ty.trim_start_matches("$qml:"));
-                    }
-                }
-                for name in def.signals() {
-                    item(&mut items, name, 23, "signal");
-                }
-                for name in def.methods() {
-                    item(&mut items, name, 2, "method");
-                }
-            }
-            for (name, (detail, _)) in &node.declarations {
-                item(&mut items, name, kind(detail), detail);
+            for (name, info) in self.members(uri, buffer, model, index)? {
+                item(&mut items, &name, info.kind, &info.detail);
             }
             if qualifier.is_none() {
                 for id in model.nodes.iter().filter(|n| n.scope == node.scope) {
@@ -340,6 +419,12 @@ impl QmlService {
         }
         Ok(json!(items.into_values().collect::<Vec<_>>()))
     }
+}
+
+struct MemberInfo {
+    detail: String,
+    kind: u32,
+    location: Option<(String, Range)>,
 }
 
 fn kind(detail: &str) -> u32 {
