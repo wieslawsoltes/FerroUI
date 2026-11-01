@@ -228,8 +228,8 @@ They are functional evidence, not a frozen performance acceptance profile.
 | Camera consent and pending photos | Android system prompt appeared only after explicit Start. Choosing denial returned Denied, with camera-service clients empty. Shared camera contracts prioritize Stop cancellation over late native successes/errors and preserve independently owned completed output. The Android native pending-photo case now reports Cancelled, with source frames/GPU reads/quarantined reads all zero and no camera-service clients. A final live reset run also checked camera storage retirement to zero. |
 | Native alias contracts | Three GL producer/retirement unit tests passed, including retention through consumer completion, queued native cleanup and lost-context quarantine; this does not prove a native DMA-BUF/DXGI import |
 | Android renderer accessibility | Updated APK's native automation tree reports RendererHost focusable; camera stop again released hardware and renderer storage. Full keyboard/screen-reader acceptance remains open. |
-| Browser regression after renderer changes | Actual Chrome suite passed shared WebGL, native video, synthetic capture/JPEG, canceled acquisition, software rejection, autoplay/audio and CORS cases again |
-| Targeted Rust contracts | 62 tests across frame/admission/retirement, queued-handle ownership, existing surface jobs, player ordering/lifetime, camera contracts, QR scheduling/adapter, geometry, renderer host and native fixtures; runs are recorded separately |
+| Browser regression after shared lifecycle/control changes | Final actual Chrome/Metal ANGLE suite passed shared WebGL, native video, synthetic capture/JPEG, canceled acquisition, software rejection, autoplay/audio and CORS cases. Framework CPU preview attempts/bytes stayed zero on admitted routes. |
+| Targeted Rust contracts | Recorded suites cover frame/admission/retirement, queued-handle ownership, existing surface jobs, player ordering/lifetime/rebinding, camera/photo cancellation, QR scheduling/allocation audit, geometry, renderer host, declarative source selection and native fixtures. Counts and revisions are recorded per run; earlier totals are not substituted for final-profile acceptance. |
 | Independent Metal producer | Real GPU rendering and completion delay, direct sampling, opaque/premultiplied/Rec.709 pixels, stale-generation rejection, native texture ownership and counted diagnostic reads |
 | Native macOS playback | Synthetic AVC/AAC resource → shared Metal frame → pause → achieved seek → resume → Stop/frame zero → clear; zero preview CPU transfers and zero retained frames after cleanup |
 | Native camera discovery | Zero devices on this Mac; permission stayed NotDetermined; no acquisition |
@@ -304,7 +304,8 @@ and `camera-late-photo-cancellation-contracts.log`, `camera-late-photo-cancellat
 `context-retirement-ios-final.log`, `qr-input-copy-audit-before.log`,
 `qr-input-copy-audit-final.log`, `qr-input-copy-contracts.log`,
 `source-binding-controls-contracts-final-3.log`, `source-binding-macos-final-2.log`,
-`source-binding-ios-build-final-2.log` and `source-binding-android-build-final-2.log`.
+`source-binding-ios-build-final-2.log`, `source-binding-android-build-final-2.log`,
+`media-final-browser-build.log` and `media-final-browser-regression.log`.
 Re-run applicable gates on the receiving host.
 
 Useful commands, from the repository root:
