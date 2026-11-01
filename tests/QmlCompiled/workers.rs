@@ -29,6 +29,13 @@ fn construct(source: &impl ComponentSource) -> Instance {
 fn exercise(source: &impl ComponentSource) {
     let mut app = construct(source);
     let root = app.root();
+    let Value::Object(pane) = app.get(root, "pane").unwrap() else {
+        panic!()
+    };
+    app.call(pane, "start", vec![]).unwrap();
+    until(&mut app, |app| {
+        app.get(pane, "result").unwrap() == Value::Number(21.)
+    });
     assert!(app.has_worker_scripts());
     assert!(app.call(root, "abortSend", vec![]).is_err());
     app.call(root, "start", vec![]).unwrap();
@@ -62,6 +69,7 @@ fn source_and_compiled_workers_copy_data_preserve_fifo_and_replace_their_realm()
     let doc = Compiler::new()
         .with_javascript()
         .worker_script_entry("loose.js")
+        .worker_script_entry("nested/nested-only.js")
         .load(Path::new(env!("CARGO_MANIFEST_DIR")).join("workers/Main.qml"))
         .unwrap();
     exercise(&doc.document);

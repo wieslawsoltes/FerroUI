@@ -459,9 +459,13 @@ impl<I: std::ops::DerefMut<Target=Instance>> Builder<'_,I> {
             self.instance.slots[target].value = parent.map(Value::Object).unwrap_or(Value::Null);
         }
         if module == "QtQml.WorkerScript" && name == "WorkerScript" {
-            self.instance
-                .workers
-                .register(id, "https://qml.invalid/components/project/main.qml");
+            self.instance.workers.register(
+                id,
+                source
+                    .source_url
+                    .as_deref()
+                    .unwrap_or("https://qml.invalid/components/project/main.qml"),
+            );
         }
         if module == "QtQml" && name == "Timer" {
             self.instance.timers.register(id);

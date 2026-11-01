@@ -1,9 +1,13 @@
 import QtQml
 import QtQml.WorkerScript
+import "nested" as Nested
 QtObject {
     id: app
     property string answer: ""
     property ListModel rows: ListModel { ListElement { number: 7 } }
+    readonly property int nestedValue: pane.result
+    function startNested() { pane.start() }
+    property Nested.Pane pane: Nested.Pane { }
     property int replies: 0
     property int localValue: 0
     property WorkerScript actor: WorkerScript {

@@ -12,10 +12,15 @@ def main():
     root = component.create()
     if root is None:
         raise RuntimeError("\n".join(issue.toString() for issue in component.errors()))
+    root.startNested()
     root.start()
     deadline = monotonic() + 8
     while root.property("answer") != "1:2/3" or root.property("localValue") != 3:
         assert monotonic() < deadline, "worker delivery timed out"
+        loop.processEvents()
+        sleep(0.001)
+    while root.property("nestedValue") != 21:
+        assert monotonic() < deadline, "relative nested worker did not respond"
         loop.processEvents()
         sleep(0.001)
     assert root.property("replies") == 1

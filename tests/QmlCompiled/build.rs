@@ -13,6 +13,7 @@ fn main() {
     ferroui_qml_build::Compiler::new()
         .with_javascript()
         .worker_script_entry("loose.js")
+        .worker_script_entry("nested/nested-only.js")
         .compile_file("workers/Main.qml", "workers.rs")
         .expect("compile WorkerScript fixture");
 
